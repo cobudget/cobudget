@@ -2,42 +2,7 @@ import { ApolloServer, gql } from 'apollo-server';
 import uuidv4 from 'uuid/v4';
 import _ from 'lodash';
 
-const schema = gql`
-  type Query {
-    user(id: ID!): User
-    currentUser: User
-    events: [Event!]
-    event(slug: String!): Event
-  }
-
-  type Mutation {
-    createEvent(slug: String!, title: String!, description: String): Event!
-  }
-
-  type User {
-    id: ID!
-    name: String!
-    email: String!
-    memberships: [Membership!]
-  }
-
-  # type Email {}
-
-  type Membership {
-    id: ID!
-    user: User!
-    event: Event!
-    isAdmin: Boolean!
-  }
-
-  type Event {
-    id: ID!
-    slug: String!
-    title: String!
-    description: String
-    members: [Membership!]
-  }
-`;
+import schema from './schema';
 
 let users = {
   1: {
