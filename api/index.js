@@ -1,12 +1,13 @@
 import { ApolloServer, gql } from 'apollo-server';
 import uuidv4 from 'uuid/v4';
+import _ from 'lodash';
 
 const schema = gql`
   type Query {
     user(id: ID!): User
     currentUser: User
     events: [Event!]
-    event(slug: String!): Event!
+    event(slug: String!): Event
   }
 
   type Mutation {
@@ -69,14 +70,14 @@ let memberships = {
 };
 
 let events = {
-  borderland2020: {
+  1: {
     id: '1',
     slug: 'borderland2020',
     title: 'Borderland 2020',
     description: 'where dreams meet reality',
     membershipIds: ['1']
   },
-  'sthlm-micro-burn': {
+  2: {
     id: '2',
     slug: 'sthlm-micro-burn',
     title: 'Sthlm Micro Burn 2020',
@@ -95,8 +96,8 @@ const resolvers = {
     events: () => {
       return Object.values(events);
     },
-    event: (parent, { slug }) => {
-      return events[slug];
+    event: (parent, { slug }, context) => {
+      return _.find(events, { slug: slug });
     }
   },
   Mutation: {
@@ -151,7 +152,8 @@ const server = new ApolloServer({
   resolvers,
   context: {
     currentUser: users[1]
-  }
+  },
+  introspection: true
 });
 
 server.listen().then(({ url }) => {
