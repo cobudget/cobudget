@@ -3,13 +3,24 @@ import { gql } from 'apollo-server';
 const schema = gql`
   type Query {
     user(id: ID!): User
+    users: [User!]
     currentUser: User
     events: [Event!]
     event(slug: String!): Event
+    dream(slug: String!): Dream
   }
 
   type Mutation {
     createEvent(slug: String!, title: String!, description: String): Event!
+    createDream(
+      eventSlug: String!
+      title: String!
+      description: String
+      budget: String
+      minGrant: Int
+    ): Dream
+    createUser(name: String, email: String): User # hack
+    dropStuff: Boolean
   }
 
   type User {
@@ -43,7 +54,7 @@ const schema = gql`
     title: String!
     description: String
     images: [String!]
-    team: [Membership!]!
+    team: [User!]!
     budget: String
     minGrant: Int
   }
