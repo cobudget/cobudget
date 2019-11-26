@@ -1,51 +1,71 @@
-let users = {
-  1: {
-    id: '1',
-    name: 'Gustav Larsson',
-    email: 'gustav.larsson@gmail.com',
-    membershipIds: [1]
-  },
-  2: {
-    id: '2',
-    name: 'Dave Davids',
-    email: 'dave.davids@gmail.com',
-    membershipIds: [2]
-  }
-};
+import mongoose, { Schema } from 'mongoose';
 
-let memberships = {
-  1: {
-    id: '1',
-    userId: '1',
-    eventId: '1',
-    isAdmin: true
-  },
-  2: {
-    id: '2',
-    userId: '2',
-    eventId: '2',
-    isAdmin: true
-  }
-};
+export const User = mongoose.model(
+  'User',
+  new Schema({
+    name: {
+      type: String,
+      required: true
+    },
+    email: String
+    // created_at: {
+    //   type: Date,
+    //   default: Date.now,
+    // },
+  })
+);
 
-let events = {
-  1: {
-    id: '1',
-    slug: 'borderland2020',
-    title: 'Borderland 2020',
-    description: 'where dreams meet reality',
-    membershipIds: ['1']
-  },
-  2: {
-    id: '2',
-    slug: 'sthlm-micro-burn',
-    title: 'Sthlm Micro Burn 2020',
-    membershipIds: ['2']
-  }
-};
+export const Membership = mongoose.model(
+  'Membership',
+  new Schema({
+    userId: {
+      type: Schema.Types.ObjectId,
+      index: true,
+      required: true
+    },
+    eventId: {
+      type: Schema.Types.ObjectId,
+      index: true,
+      required: true
+    },
+    isAdmin: { type: Boolean, required: true, default: false }
+    // guide
+    // joined?
+    // ticket?
+  })
+);
+
+export const Event = mongoose.model(
+  'Event',
+  new Schema({
+    slug: {
+      type: String,
+      required: true,
+      index: true,
+      unique: true,
+      dropDups: true
+    },
+    title: { type: String, required: true },
+    description: String
+  })
+);
+
+export const Dream = mongoose.model(
+  'Dream',
+  new Schema({
+    eventId: { type: Schema.Types.ObjectId, required: true, index: true },
+    slug: { type: String, required: true, index: true },
+    title: { type: String, required: true },
+    description: String,
+    teamIds: [Schema.Types.ObjectId],
+    budget: String,
+    minGrant: Number
+  })
+);
 
 export default {
-  users,
-  memberships,
-  events
+  User,
+  Membership,
+  Event,
+  Dream
 };
