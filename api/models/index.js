@@ -3,11 +3,13 @@ import mongoose, { Schema } from 'mongoose';
 export const User = mongoose.model(
   'User',
   new Schema({
-    name: {
+    name: String,
+    email: {
       type: String,
-      required: true
-    },
-    email: String
+      required: true,
+      index: true,
+      unique: true
+    }
     // created_at: {
     //   type: Date,
     //   default: Date.now,
@@ -42,8 +44,7 @@ export const Event = mongoose.model(
       type: String,
       required: true,
       index: true,
-      unique: true,
-      dropDups: true
+      unique: true
     },
     title: { type: String, required: true },
     description: String
@@ -58,8 +59,8 @@ export const Dream = mongoose.model(
     title: { type: String, required: true },
     description: String,
     teamIds: [Schema.Types.ObjectId],
-    budget: String,
-    minGrant: Number
+    budgetDescription: String,
+    minFunding: Number
   })
 );
 
