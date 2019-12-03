@@ -5,23 +5,21 @@ import schema from './schema';
 import resolvers from './resolvers';
 import models from './models';
 
-mongoose.connect('mongodb://localhost/dreams');
 
-// currentUser hack :-)
-models.User.findOne({ name: 'David' })
-  .exec()
-  .then(currentUser => {
-    const server = new ApolloServer({
-      typeDefs: schema,
-      resolvers,
-      context: {
-        models,
-        currentUser
-      },
-      introspection: true
-    });
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
-    server.listen().then(({ url }) => {
-      console.log(`🚀  Server ready at ${url}`);
-    });
-  });
+const server = new ApolloServer({
+  typeDefs: schema,
+  resolvers,
+  context: async () => ({
+    models,
+    currentUser: await models.User.findOne({ email: 'gustav@gmail.com' })
+  }),
+  playground: true,
+  introspection: true,
+  cors: true
+});
+
+server.listen().then(({ url }) => {
+  console.log(`🚀  Server ready at ${url}`);
+});
