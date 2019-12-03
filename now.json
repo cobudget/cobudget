@@ -8,5 +8,9 @@
   "routes": [
     { "src": "/api", "dest": "api/index.js" },
     { "src": "/(.*)", "dest": "ui/$1" }
-  ]
+  ],
+  "regions": ["bru1"],
+  "env": {
+    "MONGODB_URI": "@dreamsmongodbatlasuri"
+  }
 }
