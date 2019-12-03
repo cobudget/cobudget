@@ -11,7 +11,7 @@
   ],
   "regions": ["bru1"],
   "env": {
-    "MONGODB_URI": "@mongodbatlas-uri"
+    "MONGO_URL": "@mongodbatlas-uri"
   },
   "scope": "participio"
 }

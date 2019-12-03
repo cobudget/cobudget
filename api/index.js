@@ -5,7 +5,7 @@ import schema from './schema';
 import resolvers from './resolvers';
 import models from './models';
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true });
 
 const server = new ApolloServer({
   typeDefs: schema,
