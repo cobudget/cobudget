@@ -5,7 +5,6 @@ import schema from './schema';
 import resolvers from './resolvers';
 import models from './models';
 
-
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 
 const server = new ApolloServer({
@@ -13,7 +12,9 @@ const server = new ApolloServer({
   resolvers,
   context: async () => ({
     models,
-    currentUser: await models.User.findOne({ email: 'gustav@gmail.com' })
+    currentUser: await models.User.findOne({
+      email: 'gustav.larsson@gmail.com'
+    })
   }),
   playground: true,
   introspection: true,

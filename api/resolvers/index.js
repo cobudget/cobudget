@@ -12,8 +12,8 @@ const resolvers = {
     event: async (parent, { slug }, { models: { Event } }) => {
       return Event.findOne({ slug });
     },
-    dream: async (parent, { slug }, { models: { Dream } }) => {
-      return Dream.findOne({ slug });
+    dream: async (parent, { slug, eventId }, { models: { Dream } }) => {
+      return Dream.findOne({ slug, eventId });
     }
   },
   Mutation: {
@@ -51,7 +51,7 @@ const resolvers = {
       return new Dream({
         eventId,
         title,
-        slug: slugify(title),
+        slug: slugify(title).toLowerCase(),
         description,
         teamIds: [currentUser.id],
         budgetDescription,
@@ -61,9 +61,14 @@ const resolvers = {
     createUser: async (parent, { name, email }, { models: { User } }) => {
       return new User({ name, email }).save();
     },
-    dropStuff: async (parent, args, { models: { Event, Membership } }) => {
+    dropStuff: async (
+      parent,
+      args,
+      { models: { Event, Membership, Dream } }
+    ) => {
       await Event.collection.drop();
       await Membership.collection.drop();
+      await Dream.collection.drop();
       return true;
     }
   },
