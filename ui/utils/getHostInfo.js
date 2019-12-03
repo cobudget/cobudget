@@ -1,8 +1,15 @@
 export default function getHostInfo(req) {
   let host, protocol, subdomain;
 
-  host = req.headers["x-forwarded-host"];
-  protocol = req.headers["x-forwarded-proto"];
+  if (req) {
+    host = req.headers["x-forwarded-host"];
+    protocol = req.headers["x-forwarded-proto"];
+  }
+
+  if (typeof window !== "undefined") {
+    host = window.location.host;
+    protocol = window.location.protocol.slice(0, -1); // location.protocol includes a trailing `:` that we remove :)
+  }
 
   if (host) {
     const hostParts = host.split(".");
