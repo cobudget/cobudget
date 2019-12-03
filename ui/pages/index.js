@@ -1,9 +1,19 @@
 import React from "react";
-import Head from "next/head";
 import { useQuery } from "@apollo/react-hooks";
 
 import gql from "graphql-tag";
-import getSubdomain from "../utils/getSubdomain";
+import getHostInfo from "../utils/getHostInfo";
+import Event from "../components/Event";
+
+const EVENTS_QUERY = gql`
+  query Events {
+    events {
+      slug
+      title
+      description
+    }
+  }
+`;
 
 const EVENT_QUERY = gql`
   query Event($slug: String!) {
@@ -15,29 +25,43 @@ const EVENT_QUERY = gql`
   }
 `;
 
-function Home({ subdomain }) {
-  if (!subdomain) return <div>main page!</div>;
+function Home({ subdomain, host, protocol }) {
+  if (!subdomain) {
+    const { data, loading, error } = useQuery(EVENTS_QUERY);
+
+    return (
+      <div>
+        <h1>Events</h1>
+        <ul>
+          {data &&
+            data.events.map(event => (
+              <a href={`${protocol}://${event.slug}.${host}`} key={event.slug}>
+                <li>{event.title}</li>
+              </a>
+            ))}
+        </ul>
+      </div>
+    );
+  }
+
   const { data, loading, error } = useQuery(EVENT_QUERY, {
     variables: { slug: subdomain }
   });
 
-  if (error) {
-    return <p>Error: {JSON.stringify(error)}</p>;
-  }
-  return (
-    <div>
-      <Head>
-        <title>Dreams</title>
-      </Head>
-      <div>event title: {data && data.event && data.event.title}</div>
-      <div>subdomain: {subdomain}</div>
-    </div>
-  );
+  if (!(data && data.event))
+    return <div>did not find event with slug: {subdomain}, create event?</div>;
+
+  return <Event event={data.event} />;
 }
 
 Home.getInitialProps = async ({ req }) => {
-  const subdomain = getSubdomain(req);
-  return { subdomain };
+  const { subdomain, host, protocol } = getHostInfo(req);
+
+  return {
+    subdomain,
+    host,
+    protocol
+  };
 };
 
 export default Home;
