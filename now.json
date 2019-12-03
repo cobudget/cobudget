@@ -6,8 +6,8 @@
     { "src": "api/index.js", "use": "@now/node" }
   ],
   "routes": [
-    { "src": "/api", "dest": "api/index.js" },
-    { "src": "/(.*)", "dest": "ui/$1", "continue": true }
+    { "src": "/api", "dest": "/api/index.js" },
+    { "src": "/(.*)", "dest": "/ui/$1", "continue": true }
   ],
   "regions": ["bru1"],
   "env": {
