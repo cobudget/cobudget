@@ -8,10 +8,11 @@ export default function getSubdomain(req) {
     host = window.location.host;
   }
   if (host) {
-    sub = host.split("localhost:5000")[0];
-    if (sub) {
-      return sub.split(".")[0];
+    const hostParts = host.split(".");
+    if (hostParts.length === (host.includes("localhost:") ? 2 : 3)) {
+      return hostParts[0];
+    } else {
+      return null;
     }
-    // add logic to determine if it is actually a subdomain or not here
   }
 }

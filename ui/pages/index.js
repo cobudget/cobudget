@@ -16,6 +16,7 @@ const EVENT_QUERY = gql`
 `;
 
 function Home({ subdomain }) {
+  if (!subdomain) return <div>main page!</div>;
   const { data, loading, error } = useQuery(EVENT_QUERY, {
     variables: { slug: subdomain }
   });
