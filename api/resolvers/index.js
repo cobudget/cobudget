@@ -6,12 +6,6 @@ const resolvers = {
     currentUser: (parent, args, { currentUser }) => {
       return currentUser;
     },
-    user: async (parent, { id }, { models: { User } }) => {
-      return User.findOne({ id });
-    },
-    users: async (parent, { id }, { models: { User } }) => {
-      return User.find();
-    },
     events: async (parent, args, { models: { Event } }) => {
       return Event.find();
     },
@@ -30,11 +24,7 @@ const resolvers = {
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
 
-      const event = await new Event({
-        slug,
-        title,
-        description
-      });
+      const event = await new Event({ slug, title, description });
 
       await new Membership({
         userId: currentUser._id,
@@ -46,29 +36,26 @@ const resolvers = {
     },
     createDream: async (
       parent,
-      { eventSlug, title, description, budget, minGrant },
-      { currentUser, models: { Event, Dream, Membership } }
+      { eventId, title, description, budgetDescription, minFunding },
+      { currentUser, models: { Membership, Dream } }
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
 
-      const event = await Event.findOne({ slug: eventSlug });
-
-      // Check if currentUser is a member of this event. (improvement: add these functions to the currentUser object)
       const member = await Membership.findOne({
         userId: currentUser.id,
-        eventId: event.id
+        eventId
       });
 
       if (!member) throw new Error('You are not a member of this event');
 
       return new Dream({
-        eventId: event.id,
-        slug: slugify(title),
+        eventId,
         title,
+        slug: slugify(title),
         description,
-        budget,
         teamIds: [currentUser.id],
-        minGrant
+        budgetDescription,
+        minFunding
       }).save();
     },
     createUser: async (parent, { name, email }, { models: { User } }) => {
@@ -81,12 +68,8 @@ const resolvers = {
     }
   },
   User: {
-    memberships: async (
-      user,
-      args,
-      { currentUser, models: { Membership } }
-    ) => {
-      return Membership.find({ userId: currentUser.id });
+    memberships: async (user, args, { models: { Membership } }) => {
+      return Membership.find({ userId: user.id });
     }
   },
   Membership: {
@@ -98,7 +81,7 @@ const resolvers = {
     }
   },
   Event: {
-    members: async (event, args, { models: { Membership } }) => {
+    memberships: async (event, args, { models: { Membership } }) => {
       return Membership.find({ eventId: event.id });
     },
     dreams: async (event, args, { models: { Dream } }) => {
@@ -108,6 +91,9 @@ const resolvers = {
   Dream: {
     team: async (dream, args, { models: { User } }) => {
       return User.find({ _id: { $in: dream.teamIds } });
+    },
+    event: async (dream, args, { models: { Event } }) => {
+      return Event.find({ _id: dream.eventId });
     }
   }
 };

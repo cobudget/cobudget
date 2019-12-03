@@ -19,7 +19,7 @@ const schema = gql`
     ): Dream
     # sendMagicLink: Boolean
     createUser(name: String, email: String): User # hack
-    # dropStuff: Boolean
+    dropStuff: Boolean
   }
 
   type Event {
