@@ -15,7 +15,7 @@ const server = new ApolloServer({
     return {
       models,
       currentUser: await models.User.findOne({
-        email: 'gustav.larsson@gmail.com'
+        email: 'test@gmail.com'
       })
     };
   },
