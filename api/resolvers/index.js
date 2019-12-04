@@ -1,5 +1,5 @@
 import slugify from 'slugify';
-
+import { generateLoginJWT, sendMagicLinkEmail } from '../utils/auth';
 const resolvers = {
   Query: {
     currentUser: (parent, args, { currentUser }) => {
@@ -60,6 +60,15 @@ const resolvers = {
     },
     createUser: async (parent, { name, email }, { models: { User } }) => {
       return new User({ name, email }).save();
+    },
+    login: async (parent, { email }, { models: { User } }) => {
+      const user = await User.findOne({ email });
+      if (user) {
+        const token = await generateLoginJWT(user);
+        await sendMagicLinkEmail(user, token);
+        return true;
+      }
+      return false;
     }
     // dropStuff: async (
     //   parent,

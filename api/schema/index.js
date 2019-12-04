@@ -20,6 +20,7 @@ const schema = gql`
     # sendMagicLink: Boolean
     createUser(name: String, email: String): User # hack
     # dropStuff: Boolean
+    login(email: String!): Boolean
   }
 
   type Event {
