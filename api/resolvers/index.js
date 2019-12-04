@@ -60,17 +60,17 @@ const resolvers = {
     },
     createUser: async (parent, { name, email }, { models: { User } }) => {
       return new User({ name, email }).save();
-    },
-    dropStuff: async (
-      parent,
-      args,
-      { models: { Event, Membership, Dream } }
-    ) => {
-      await Event.collection.drop();
-      await Membership.collection.drop();
-      await Dream.collection.drop();
-      return true;
     }
+    // dropStuff: async (
+    //   parent,
+    //   args,
+    //   { models: { Event, Membership, Dream } }
+    // ) => {
+    //   await Event.collection.drop();
+    //   await Membership.collection.drop();
+    //   await Dream.collection.drop();
+    //   return true;
+    // }
   },
   User: {
     memberships: async (user, args, { models: { Membership } }) => {
