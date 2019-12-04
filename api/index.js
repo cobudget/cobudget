@@ -1,26 +1,32 @@
-import { ApolloServer } from 'apollo-server';
-import mongoose from 'mongoose';
+import { ApolloServer } from 'apollo-server-micro';
+import cors from 'micro-cors';
 import 'dotenv/config';
 import schema from './schema';
 import resolvers from './resolvers';
-import models from './models';
-
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true });
+import { getModels } from './database/models';
+import { getConnection } from './database/connection';
 
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
-  context: async () => ({
-    models,
-    currentUser: await models.User.findOne({
-      email: 'gustav.larsson@gmail.com'
-    })
-  }),
+  context: async () => {
+    const db = await getConnection();
+    const models = getModels(db);
+    return {
+      models,
+      currentUser: await models.User.findOne({
+        email: 'gustav.larsson@gmail.com'
+      })
+    };
+  },
   playground: true,
-  introspection: true,
-  cors: true
+  introspection: true
 });
 
-server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
+export default cors()((req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.end();
+    return;
+  }
+  return server.createHandler({ path: '/api' })(req, res);
 });

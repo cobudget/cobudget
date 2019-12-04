@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import slugify from 'slugify';
 
 const resolvers = {
@@ -26,13 +25,14 @@ const resolvers = {
 
       const event = await new Event({ slug, title, description });
 
-      await new Membership({
-        userId: currentUser._id,
-        eventId: event._id,
+      const membership = await new Membership({
+        userId: currentUser.id,
+        eventId: event.id,
         isAdmin: true
-      }).save();
+      });
 
-      return event.save();
+      const [savedEvent] = await Promise.all([event.save(), membership.save()]);
+      return savedEvent;
     },
     createDream: async (
       parent,

@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 
 // User
 const UserSchema = new Schema({
@@ -13,8 +13,6 @@ const UserSchema = new Schema({
   //   default: Date.now,
   // },
 });
-
-export const User = mongoose.model('User', UserSchema);
 
 // Membership
 const MembershipSchema = new Schema({
@@ -34,8 +32,6 @@ const MembershipSchema = new Schema({
   // ticket?
 }).index({ userId: 1, eventId: 1 }, { unique: true });
 
-export const Membership = mongoose.model('Membership', MembershipSchema);
-
 // Event
 const EventSchema = new Schema({
   slug: {
@@ -48,8 +44,6 @@ const EventSchema = new Schema({
   description: String
 });
 
-export const Event = mongoose.model('Event', EventSchema);
-
 // Dream
 const DreamSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true },
@@ -61,11 +55,11 @@ const DreamSchema = new Schema({
   minFunding: Number
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
-export const Dream = mongoose.model('Dream', DreamSchema);
-
-export default {
-  User,
-  Membership,
-  Event,
-  Dream
+export const getModels = db => {
+  return {
+    User: db.model('User', UserSchema),
+    Membership: db.model('Membership', MembershipSchema),
+    Event: db.model('Event', EventSchema),
+    Dream: db.model('Dream', DreamSchema)
+  };
 };
