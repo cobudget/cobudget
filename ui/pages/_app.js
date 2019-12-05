@@ -2,7 +2,6 @@ import React from "react";
 import App from "next/app";
 import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-
 import getHostInfo from "../utils/getHostInfo";
 import withData from "../utils/apolloClient";
 
@@ -21,13 +20,35 @@ const EVENT_QUERY = gql`
   }
 `;
 
+const CURRENT_USER_QUERY = gql`
+  {
+    currentUser {
+      name
+      email
+    }
+  }
+`;
+
 class MyApp extends App {
   render() {
-    const { Component, pageProps, apollo, hostInfo, event } = this.props;
+    const {
+      Component,
+      pageProps,
+      apollo,
+      hostInfo,
+      event,
+      currentUser
+    } = this.props;
 
     return (
       <ApolloProvider client={apollo}>
-        <Component {...pageProps} hostInfo={hostInfo} event={event} />
+        <Component
+          {...pageProps}
+          hostInfo={hostInfo}
+          event={event}
+          currentUser={currentUser}
+          apollo={apollo}
+        />
       </ApolloProvider>
     );
   }
@@ -36,6 +57,12 @@ class MyApp extends App {
 MyApp.getInitialProps = async appContext => {
   // calls page's `getInitialProps` and fills `appProps.pageProps`
   const appProps = await App.getInitialProps(appContext);
+
+  const {
+    data: { currentUser }
+  } = await appContext.ctx.apolloClient.query({
+    query: CURRENT_USER_QUERY
+  });
 
   const hostInfo = getHostInfo(appContext.ctx.req);
 
@@ -46,11 +73,10 @@ MyApp.getInitialProps = async appContext => {
       query: EVENT_QUERY,
       variables: { slug: hostInfo.subdomain }
     });
-    event = data.event;
-    // redirect to root if not found?
+    ({ event } = data);
   }
 
-  return { ...appProps, hostInfo, event };
+  return { ...appProps, hostInfo, event, currentUser };
 };
 // Wraps all components in the tree with the data provider
 export default withData(MyApp);
