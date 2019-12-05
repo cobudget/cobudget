@@ -4,22 +4,30 @@ import gql from "graphql-tag";
 import Router from "next/router";
 
 const CREATE_DREAM = gql`
-  mutation CreateDream($eventId: ID!, $title: String!, $description: String) {
-    createDream(eventId: $eventId, title: $title, description: $description) {
+  mutation CreateDream(
+    $eventSlug: String!
+    $title: String!
+    $description: String
+  ) {
+    createDream(
+      eventSlug: $eventSlug
+      title: $title
+      description: $description
+    ) {
       slug
       title
       description
     }
   }
 `;
-export default ({ eventId }) => {
+export default ({ eventSlug }) => {
   const [createDream, { data, error }] = useMutation(CREATE_DREAM);
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmit = values => {
-    createDream({ variables: { eventId, ...values } })
+    createDream({ variables: { eventSlug, ...values } })
       .then(({ data }) => {
-        Router.push(`/${data.createDream.slug}`);
+        Router.push(`/${eventSlug}/${data.createDream.slug}`);
       })
       .catch(err => {
         console.log({ err });

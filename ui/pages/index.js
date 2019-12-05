@@ -1,49 +1,38 @@
 import React from "react";
 import { useQuery } from "@apollo/react-hooks";
-
+import Link from "next/link";
 import gql from "graphql-tag";
-import Event from "../components/Event";
+import Layout from "../components/Layout";
 
 const EVENTS_QUERY = gql`
   query Events {
     events {
+      id
       slug
       title
-      description
     }
   }
 `;
 
-function Home({ hostInfo, event }) {
-  if (!hostInfo.subdomain) {
-    const { data, loading, error } = useQuery(EVENTS_QUERY);
-
-    return (
+function Home({ currentUser }) {
+  const { data, loading, error } = useQuery(EVENTS_QUERY);
+  return (
+    <Layout currentUser={currentUser}>
       <div>
         <h1>Events</h1>
         <ul>
           {data &&
             data.events.map(event => (
-              <a
-                href={`${hostInfo.protocol}://${event.slug}.${hostInfo.host}`}
-                key={event.slug}
-              >
-                <li>{event.title}</li>
-              </a>
+              <Link href="/[event]" as={`/${event.slug}`} key={event.slug}>
+                <a>
+                  <li>{event.title}</li>
+                </a>
+              </Link>
             ))}
         </ul>
       </div>
-    );
-  }
-
-  if (!event)
-    return (
-      <div>
-        did not find event with slug: {hostInfo.subdomain}, create event?
-      </div>
-    );
-
-  return <Event event={event} />;
+    </Layout>
+  );
 }
 
 export default Home;

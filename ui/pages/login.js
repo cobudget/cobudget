@@ -34,15 +34,15 @@ export default ({ apollo, currentUser }) => {
 
   if (currentUser) {
     return (
-      <div>
+      <Layout currentUser={currentUser}>
         You are logged in as {currentUser.email}.{" "}
         <button onClick={logOut}>Log out</button>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div>
+    <Layout>
       <h1>Sign in or up with magic link</h1>
 
       {data && data.sendMagicLink ? (
@@ -70,6 +70,6 @@ export default ({ apollo, currentUser }) => {
           <button type="submit">Send</button>
         </form>
       )}
-    </div>
+    </Layout>
   );
 };
