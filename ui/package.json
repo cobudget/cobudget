@@ -22,6 +22,10 @@
     "next-with-apollo": "^4.3.0",
     "react": "16.12.0",
     "react-dom": "16.12.0",
-    "react-hook-form": "^3.28.11"
+    "react-hook-form": "^3.28.11",
+    "styled-components": "^4.4.1"
+  },
+  "devDependencies": {
+    "babel-plugin-styled-components": "^1.10.6"
   }
 }
