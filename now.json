@@ -11,7 +11,8 @@
   ],
   "regions": ["bru1"],
   "env": {
-    "MONGO_URL": "@mongodbatlas-uri"
+    "MONGO_URL": "@mongodbatlas-uri",
+    "MAILGUN_API_KEY": "@mailgun-api-key"
   },
   "scope": "participio"
 }
