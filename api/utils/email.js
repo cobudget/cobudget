@@ -23,8 +23,7 @@ export const sendMagicLinkEmail = async (user, token) => {
         return true;
       })
       .catch(error => {
-        console.error('Failed to send magic link with Mailgun', error);
-        return false;
+        throw new Error('Failed to send magic link');
       });
   } else {
     const url = `http://localhost:3000/login?token=${token}`;
