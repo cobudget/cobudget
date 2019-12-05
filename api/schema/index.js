@@ -5,13 +5,13 @@ const schema = gql`
     currentUser: User
     events: [Event!]
     event(slug: String!): Event
-    dream(eventId: ID!, slug: String!): Dream
+    dream(eventSlug: String!, slug: String!): Dream
   }
 
   type Mutation {
     createEvent(slug: String!, title: String!, description: String): Event!
     createDream(
-      eventId: ID!
+      eventSlug: String!
       title: String!
       description: String
       budgetDescription: String

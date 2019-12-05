@@ -13,8 +13,13 @@ const resolvers = {
     event: async (parent, { slug }, { models: { Event } }) => {
       return Event.findOne({ slug });
     },
-    dream: async (parent, { slug, eventId }, { models: { Dream } }) => {
-      return Dream.findOne({ slug, eventId });
+    dream: async (
+      parent,
+      { slug, eventSlug },
+      { models: { Dream, Event } }
+    ) => {
+      const event = await Event.findOne({ slug: eventSlug }); //only fetch id?
+      return Dream.findOne({ slug, eventId: event.id });
     }
   },
   Mutation: {
@@ -38,20 +43,21 @@ const resolvers = {
     },
     createDream: async (
       parent,
-      { eventId, title, description, budgetDescription, minFunding },
-      { currentUser, models: { Membership, Dream } }
+      { eventSlug, title, description, budgetDescription, minFunding },
+      { currentUser, models: { Membership, Dream, Event } }
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
 
+      const event = await Event.findOne({ slug: eventSlug });
       const member = await Membership.findOne({
         userId: currentUser.id,
-        eventId
+        eventId: event.id
       });
 
       if (!member) throw new Error('You are not a member of this event');
 
       return new Dream({
-        eventId,
+        eventId: event.id,
         title,
         slug: slugify(title).toLowerCase(),
         description,
@@ -106,7 +112,7 @@ const resolvers = {
       return User.find({ _id: { $in: dream.teamIds } });
     },
     event: async (dream, args, { models: { Event } }) => {
-      return Event.find({ _id: dream.eventId });
+      return Event.findOne({ _id: dream.eventId });
     }
   }
 };
