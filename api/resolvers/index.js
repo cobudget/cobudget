@@ -60,7 +60,11 @@ const resolvers = {
         minFunding
       }).save();
     },
-    signInOrUp: async (parent, { email: inputEmail }, { models: { User } }) => {
+    sendMagicLink: async (
+      parent,
+      { email: inputEmail },
+      { models: { User } }
+    ) => {
       const email = inputEmail.toLowerCase();
       const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
