@@ -1,4 +1,4 @@
-import slugify from 'slugify';
+import urlSlug from 'url-slug';
 import { generateLoginJWT } from '../utils/auth';
 import { sendMagicLinkEmail } from '../utils/email';
 
@@ -59,7 +59,7 @@ const resolvers = {
       return new Dream({
         eventId: event.id,
         title,
-        slug: slugify(title).toLowerCase(),
+        slug: urlSlug(title),
         description,
         teamIds: [currentUser.id],
         budgetDescription,
