@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import useForm from "react-hook-form";
-
+import Layout from "../components/Layout";
 import cookie from "js-cookie";
 import Router, { useRouter } from "next/router";
 

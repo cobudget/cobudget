@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useQuery } from "@apollo/react-hooks";
 import { isMemberOfEvent } from "../utils/helpers";
 import { EVENT_QUERY } from "../pages/[event]/";
-import Dropdown from "./Dropdown";
+//import Dropdown from "./Dropdown";
 const GlobalStyle = createGlobalStyle`
   html {
     box-sizing: border-box;
