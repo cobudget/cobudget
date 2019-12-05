@@ -11,7 +11,8 @@ export const getConnection = async () => {
       bufferMaxEntries: 0, // and MongoDB driver buffering
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true
+      useCreateIndex: true,
+      useFindAndModify: false
     });
   }
   return connection;

@@ -1,5 +1,5 @@
 import slugify from 'slugify';
-import { generateLoginJWT, sendMagicLinkEmail } from '../utils/auth';
+import { generateLoginJWT } from '../utils/auth';
 import { sendMagicLinkEmail } from '../utils/email';
 
 const resolvers = {
@@ -60,26 +60,21 @@ const resolvers = {
         minFunding
       }).save();
     },
-    createUser: async (parent, { name, email }, { models: { User } }) => {
-      return new User({ name, email }).save();
-    },
-    login: async (parent, { email }, { models: { User } }) => {
-      const user = await User.findOne({ email });
-      if (!user) throw new Error('No user with this email');
+    signInOrUp: async (parent, { email: inputEmail }, { models: { User } }) => {
+      const email = inputEmail.toLowerCase();
+      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+      if (!emailRegex.test(email)) throw new Error('Not a valid email address');
+
+      let user = await User.findOne({ email });
+
+      if (!user) {
+        user = await new User({ email }).save();
+      }
 
       const token = await generateLoginJWT(user);
       return await sendMagicLinkEmail(user, token);
     }
-    // dropStuff: async (
-    //   parent,
-    //   args,
-    //   { models: { Event, Membership, Dream } }
-    // ) => {
-    //   await Event.collection.drop();
-    //   await Membership.collection.drop();
-    //   await Dream.collection.drop();
-    //   return true;
-    // }
   },
   User: {
     memberships: async (user, args, { models: { Membership } }) => {

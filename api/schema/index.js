@@ -17,10 +17,7 @@ const schema = gql`
       budgetDescription: String
       minFunding: Int
     ): Dream
-    # sendMagicLink: Boolean
-    createUser(name: String, email: String): User # hack
-    # dropStuff: Boolean
-    login(email: String!): Boolean
+    signIn(email: String!): Boolean
   }
 
   type Event {
