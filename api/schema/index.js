@@ -22,8 +22,8 @@ const schema = gql`
       slug: String!
       description: String
       budgetDescription: String
-      minFunding: Int
-      maxFunding: Int
+      minGoal: Int
+      maxGoal: Int
       images: [ImageInput]
     ): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
@@ -43,7 +43,7 @@ const schema = gql`
     # visibility: Visibility
     # registrationPolicy: RegistrationPolicy
     # grantingPeriods: [GrantingPeriod]
-    # currency: Currency! # scalar? # can't change after first submission closes
+    currency: String! # scalar? # can't change after first submission closes
     # useGrantlings: Boolean! # can't change after first submission close
     # membershipContribution: Int
     # grantlingValue: Int # can't change after first submission close?

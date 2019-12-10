@@ -2,9 +2,9 @@ import useForm from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Router from "next/router";
-import styled from "styled-components";
 import urlSlug from "url-slug";
 import Form from "./styled/Form";
+import ImageUpload from "./ImageUpload";
 
 const CREATE_DREAM = gql`
   mutation CreateDream(
@@ -13,6 +13,8 @@ const CREATE_DREAM = gql`
     $slug: String!
     $description: String
     $images: [ImageInput]
+    $minGoal: Int
+    $maxGoal: Int
   ) {
     createDream(
       eventId: $eventId
@@ -20,6 +22,8 @@ const CREATE_DREAM = gql`
       slug: $slug
       description: $description
       images: $images
+      minGoal: $minGoal
+      maxGoal: $maxGoal
     ) {
       slug
       title
@@ -27,31 +31,23 @@ const CREATE_DREAM = gql`
     }
   }
 `;
-export default ({ eventId }) => {
+
+export default ({ event }) => {
   const [createDream, { data, error }] = useMutation(CREATE_DREAM);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = React.useState("");
-  const [image, setImage] = React.useState(null);
-
-  const uploadFile = async e => {
-    console.log("Uploading..");
-    const files = e.target.files;
-    const data = new FormData();
-    data.append("file", files[0]);
-    data.append("upload_preset", "dreams");
-
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dreamswtf/image/upload",
-      { method: "POST", body: data }
-    );
-    const file = await res.json();
-    console.log({ file });
-    setImage({ small: file.secure_url, large: file.eager[0].secure_url });
-  };
+  const [images, setImages] = React.useState([]);
 
   const onSubmit = values => {
-    console.log({ values });
-    createDream({ variables: { eventId, ...values, images: [image] } })
+    createDream({
+      variables: {
+        eventId: event.id,
+        ...values,
+        minGoal: values.minGoal === "" ? null : Number(values.minGoal),
+        maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
+        images
+      }
+    })
       .then(({ data }) => {
         Router.push(`/${data.createDream.slug}`);
       })
@@ -63,43 +59,57 @@ export default ({ eventId }) => {
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
-      <label>Title</label>
-      <input
-        name="title"
-        ref={register({
-          required: "Required"
-        })}
-        onChange={e => setSlugValue(urlSlug(e.target.value))}
-      />
-      <label>Slug</label>
-      <input
-        name="slug"
-        ref={register({
-          required: "Required"
-        })}
-        value={slugValue}
-        onChange={e => setSlugValue(e.target.value)}
-        onBlur={e => setSlugValue(urlSlug(e.target.value))}
-      />
-      {errors.title && errors.title.message}
-      <label>Description</label>
-      <textarea name="description" ref={register} />
-      {errors.description && errors.description.message}
-      <label htmlFor="file">Images</label>
-      <input
-        type="file"
-        name="file"
-        placeholder="Upload image"
-        required
-        onChange={uploadFile}
-      />
-      {image && <img width="370" src={image.small} alt="Upload preview" />}
-      {/* <label>Min funding goal</label>
-      <input name="minGoal" ref={register} placeholder="0 EUR" />
-      <label>Max funding goal</label>
-      <input name="maxGoal" ref={register} placeholder="0 EUR" /> */}
-      <label>Budget</label>
-      <textarea name="budgetDescription" ref={register} />
+      <label>
+        Title <span>{errors.title && errors.title.message}</span>
+        <input
+          name="title"
+          ref={register({
+            required: "Required"
+          })}
+          onChange={e => setSlugValue(urlSlug(e.target.value))}
+        />
+      </label>
+      <label>
+        Slug <span>{errors.slug && errors.slug.message}</span>
+        <input
+          name="slug"
+          ref={register({
+            required: "Required"
+          })}
+          value={slugValue}
+          onChange={e => setSlugValue(e.target.value)}
+          onBlur={e => setSlugValue(urlSlug(e.target.value))}
+        />
+      </label>
+
+      <label>Images</label>
+      <ImageUpload images={images} setImages={setImages} />
+
+      <label>
+        Description
+        <textarea name="description" ref={register} rows={10} />
+      </label>
+
+      <div className="two-cols">
+        <label>
+          Min funding goal
+          <input
+            name="minGoal"
+            type="number"
+            ref={register({ min: 0 })}
+            placeholder={`0 ${event.currency}`}
+          />
+        </label>
+        <label>
+          Max funding goal
+          <input
+            name="maxGoal"
+            type="number"
+            ref={register({ min: 0 })}
+            placeholder={`0 ${event.currency}`}
+          />
+        </label>
+      </div>
       <button type="submit">Submit</button>
     </Form>
   );

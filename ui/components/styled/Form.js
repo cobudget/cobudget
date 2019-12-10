@@ -20,8 +20,28 @@ const Form = styled.form`
 
   label {
     font-size: 18px;
+    span {
+      color: red;
+    }
   }
-  .error {
+
+  button[type="submit"] {
+    background: #10b92b;
+    color: white;
+    outline: none;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    border-color: transparent;
+    font-family: "Inter-SemiBold";
+    padding: 13px 43px;
+    box-shadow: 0 3px 8px rgba(44, 188, 99, 0.4);
+  }
+
+  .two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
   }
 `;
 

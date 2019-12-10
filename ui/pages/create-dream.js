@@ -6,7 +6,7 @@ export default ({ currentUser, event }) => {
       <Card>
         <div>
           <h1>Create dream</h1>
-          <CreateDream eventId={event.id} />
+          <CreateDream event={event} />
         </div>
       </Card>
     </>

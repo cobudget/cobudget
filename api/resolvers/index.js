@@ -65,6 +65,8 @@ const resolvers = {
       });
 
       if (!member) throw new Error('You are not a member of this event');
+      if (maxGoal <= minGoal || (maxGoal && minGoal == null))
+        throw new Error('max goal needs to be larger than min goal');
 
       return new Dream({
         eventId,

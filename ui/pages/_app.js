@@ -13,6 +13,7 @@ const TOP_LEVEL_QUERY = gql`
       slug
       description
       title
+      currency
     }
     currentUser {
       id
