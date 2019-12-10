@@ -24,7 +24,7 @@ const schema = gql`
       budgetDescription: String
       minFunding: Int
       maxFunding: Int
-      images: [String]
+      images: [ImageInput]
     ): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
   }
@@ -80,9 +80,9 @@ const schema = gql`
     slug: String!
     title: String!
     description: String
-    images: [String!]
+    images: [Image!]
     members: [Member]!
-    minGoal: Int #real currency
+    minGoal: Int
     maxGoal: Int
     budgetDescription: String
     # isApprovedForGranting: Boolean # should this be per granting period?
@@ -91,6 +91,16 @@ const schema = gql`
     # raisedFlags: [Flag]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Image {
+    small: String!
+    large: String!
+  }
+
+  input ImageInput {
+    small: String
+    large: String
   }
 
   # enum Visibility {
