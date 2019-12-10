@@ -2,22 +2,31 @@ import { gql } from 'apollo-server-micro';
 
 const schema = gql`
   type Query {
-    currentUser: User
+    currentUser: Member
     events: [Event!]
     event(slug: String!): Event
-    dream(eventSlug: String!, slug: String!): Dream
+    dream(eventId: ID!, slug: String!): Dream
+    dreams(eventId: ID!): [Dream]
   }
 
   type Mutation {
-    createEvent(slug: String!, title: String!, description: String): Event!
-    createDream(
-      eventSlug: String!
+    createEvent(
+      adminEmail: String!
+      slug: String!
       title: String!
+      description: String
+    ): Event!
+    createDream(
+      eventId: ID!
+      title: String!
+      slug: String!
       description: String
       budgetDescription: String
       minFunding: Int
+      maxFunding: Int
+      images: [String]
     ): Dream
-    sendMagicLink(email: String!): Boolean
+    sendMagicLink(email: String!, eventId: ID!): Boolean
   }
 
   type Event {
@@ -26,7 +35,7 @@ const schema = gql`
     title: String!
     description: String
     # logo: String
-    memberships: [Membership!]
+    members: [Member!]!
     dreams: [Dream!]
     # flags: [Flag!]
     # questions: [Question!]
@@ -43,18 +52,21 @@ const schema = gql`
     # grantlingValue: Int
   }
 
-  type User {
-    id: ID!
-    email: String! # emailVerified create Email type for keeping track of email verification etc?
-    memberships: [Membership]
-    name: String
-    avatar: String
-  }
+  # type User {
+  #   id: ID!
+  #   email: String! # emailVerified create Email type for keeping track of email verification etc?
+  #   memberships: [Member]
+  #   name: String
+  #   avatar: String
+  # }
 
-  type Membership {
+  type Member {
     id: ID!
     event: Event!
-    user: User!
+    email: String!
+    name: String
+    avatar: String
+    # user: User!
     # isActive: Boolean!
     # isApproved: Boolean!
     isAdmin: Boolean!
@@ -64,14 +76,14 @@ const schema = gql`
 
   type Dream {
     id: ID!
+    event: Event!
     slug: String!
     title: String!
     description: String
-    event: Event
-    images: [String]
-    team: [User]!
-    minFunding: Int #real currency
-    maxFunding: Int
+    images: [String!]
+    members: [Member]!
+    minGoal: Int #real currency
+    maxGoal: Int
     budgetDescription: String
     # isApprovedForGranting: Boolean # should this be per granting period?
     # answers: [QuestionAnswer]

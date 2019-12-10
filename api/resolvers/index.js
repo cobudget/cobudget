@@ -13,103 +13,112 @@ const resolvers = {
     event: async (parent, { slug }, { models: { Event } }) => {
       return Event.findOne({ slug });
     },
-    dream: async (
-      parent,
-      { slug, eventSlug },
-      { models: { Dream, Event } }
-    ) => {
-      const event = await Event.findOne({ slug: eventSlug }); //only fetch id?
-      return Dream.findOne({ slug, eventId: event.id });
+    dream: async (parent, { eventId, slug }, { models: { Dream } }) => {
+      return Dream.findOne({ eventId, slug });
+    },
+    dreams: async (parent, { eventId }, { models: { Dream } }) => {
+      return Dream.find({ eventId });
     }
   },
   Mutation: {
     createEvent: async (
       parent,
-      { slug, title, description },
-      { currentUser, models: { Event, Membership } }
+      { adminEmail, slug, title, description },
+      { models: { Event, Member } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in');
-
+      // if (!currentUser) throw new Error('You need to be logged in');
+      // check slug..
       const event = await new Event({ slug, title, description });
 
-      const membership = await new Membership({
-        userId: currentUser.id,
+      const member = await new Member({
+        email: adminEmail,
         eventId: event.id,
         isAdmin: true
       });
 
-      const [savedEvent] = await Promise.all([event.save(), membership.save()]);
+      const token = await generateLoginJWT(member);
+      await sendMagicLinkEmail(member, token, event);
+
+      const [savedEvent] = await Promise.all([event.save(), member.save()]);
+
       return savedEvent;
     },
     createDream: async (
       parent,
-      { eventSlug, title, description, budgetDescription, minFunding },
-      { currentUser, models: { Membership, Dream, Event } }
+      {
+        eventId,
+        title,
+        slug,
+        description,
+        budgetDescription,
+        minGoal,
+        maxGoal,
+        images
+      },
+      { currentUser, models: { Member, Dream } }
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
 
-      const event = await Event.findOne({ slug: eventSlug });
-      const member = await Membership.findOne({
-        userId: currentUser.id,
-        eventId: event.id
+      const member = await Member.findOne({
+        _id: currentUser.id,
+        eventId
       });
 
       if (!member) throw new Error('You are not a member of this event');
 
       return new Dream({
-        eventId: event.id,
+        eventId,
         title,
-        slug: urlSlug(title),
+        slug: urlSlug(slug),
         description,
-        teamIds: [currentUser.id],
+        members: [currentUser.id],
         budgetDescription,
-        minFunding
+        minGoal,
+        maxGoal,
+        images
       }).save();
     },
     sendMagicLink: async (
       parent,
-      { email: inputEmail },
-      { models: { User } }
+      { email: inputEmail, eventId },
+      { models: { Member, Event } }
     ) => {
       const email = inputEmail.toLowerCase();
       const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
       if (!emailRegex.test(email)) throw new Error('Not a valid email address');
 
-      let user = await User.findOne({ email });
+      const event = await Event.findOne({ _id: eventId });
+      if (!event) throw new Error('Did not find event');
 
-      if (!user) {
-        user = await new User({ email }).save();
+      let member = await Member.findOne({ email, eventId });
+
+      if (!member) {
+        // if(event.registrationPolicy !== 'OPEN') throw new Error('Not open for registrations')
+        member = await new member({ email, eventId }).save();
       }
 
-      const token = await generateLoginJWT(user);
-      return await sendMagicLinkEmail(user, token);
+      const token = await generateLoginJWT(member);
+      console.log({ token });
+      return await sendMagicLinkEmail(member, token, event);
     }
   },
-  User: {
-    memberships: async (user, args, { models: { Membership } }) => {
-      return Membership.find({ userId: user.id });
-    }
-  },
-  Membership: {
-    user: async (membership, args, { models: { User } }) => {
-      return User.findOne({ _id: membership.userId });
-    },
-    event: async (membership, args, { models: { Event } }) => {
-      return Event.findOne({ _id: membership.eventId });
+  Member: {
+    event: async (member, args, { models: { Event } }) => {
+      return Event.findOne({ _id: member.eventId });
     }
   },
   Event: {
-    memberships: async (event, args, { models: { Membership } }) => {
-      return Membership.find({ eventId: event.id });
+    members: async (event, args, { models: { Member } }) => {
+      return Member.find({ eventId: event.id });
     },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     }
   },
   Dream: {
-    team: async (dream, args, { models: { User } }) => {
-      return User.find({ _id: { $in: dream.teamIds } });
+    members: async (dream, args, { models: { Member } }) => {
+      return Member.find({ _id: { $in: dream.members } });
     },
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
