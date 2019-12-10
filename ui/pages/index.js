@@ -39,8 +39,8 @@ const Grid = styled.div`
   }
 `;
 
-export default ({ currentUser, event }) => {
-  if (!event) return <LandingPage />;
+export default ({ currentUser, event, hostInfo }) => {
+  if (!event) return <LandingPage hostInfo={hostInfo} />;
 
   const { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,

@@ -28,7 +28,14 @@ const TOP_LEVEL_QUERY = gql`
 
 class MyApp extends App {
   render() {
-    const { Component, pageProps, apollo, currentUser, event } = this.props;
+    const {
+      Component,
+      pageProps,
+      apollo,
+      currentUser,
+      event,
+      hostInfo
+    } = this.props;
 
     return (
       <ApolloProvider client={apollo}>
@@ -36,8 +43,8 @@ class MyApp extends App {
           <Component
             {...pageProps}
             currentUser={currentUser}
-            apollo={apollo}
             event={event}
+            hostInfo={hostInfo}
           />
         </Layout>
       </ApolloProvider>
@@ -51,19 +58,19 @@ MyApp.getInitialProps = async appContext => {
 
   let currentUser, event;
 
-  const { subdomain } = getHostInfo(appContext.ctx.req);
+  const hostInfo = getHostInfo(appContext.ctx.req);
 
-  if (subdomain) {
+  if (hostInfo.subdomain) {
     const { data } = await appContext.ctx.apolloClient.query({
       query: TOP_LEVEL_QUERY,
       variables: {
-        slug: subdomain
+        slug: hostInfo.subdomain
       }
     });
     ({ currentUser, event } = data);
   }
 
-  return { ...appProps, currentUser, event };
+  return { ...appProps, currentUser, event, hostInfo };
 };
 // Wraps all components in the tree with the data provider
 export default withData(MyApp);

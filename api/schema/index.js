@@ -14,6 +14,7 @@ const schema = gql`
       adminEmail: String!
       slug: String!
       title: String!
+      currency: String!
       description: String
     ): Event!
     createDream(

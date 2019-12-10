@@ -45,7 +45,7 @@ const LinkButton = styled.a`
 const LogoSection = styled.div`
   display: flex;
   align-items: center;
-  .event-title {
+  a {
     color: rgba(0, 0, 0, 0.8);
     font-size: 24px;
     text-decoration: none;
@@ -61,17 +61,9 @@ export default ({ event, currentUser, apollo }) => {
   return (
     <Header>
       <LogoSection>
-        {event ? (
-          <Link href="/">
-            <a className="event-title">{event.title}</a>
-          </Link>
-        ) : (
-          <Link href="/">
-            <a>
-              <Logo src="/dreams-logo.gif" />
-            </a>
-          </Link>
-        )}
+        <Link href="/">
+          <a>{event ? event.title : "Dreams"}</a>
+        </Link>
       </LogoSection>
 
       <Nav>
@@ -80,8 +72,8 @@ export default ({ event, currentUser, apollo }) => {
             <LinkButton>Create dream</LinkButton>
           </Link>
         )}
-        {event &&
-          (currentUser ? (
+        {event ? (
+          currentUser ? (
             <ProfileDropdown currentUser={currentUser}>
               {/* <li>Profile</li> */}
               <li onClick={logOut}>Sign out</li>
@@ -90,7 +82,12 @@ export default ({ event, currentUser, apollo }) => {
             <Link href="/login">
               <LinkButton>Login -></LinkButton>
             </Link>
-          ))}
+          )
+        ) : (
+          <Link href="/create-event">
+            <LinkButton>Create event</LinkButton>
+          </Link>
+        )}
       </Nav>
     </Header>
   );

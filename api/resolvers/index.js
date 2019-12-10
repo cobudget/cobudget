@@ -23,12 +23,12 @@ const resolvers = {
   Mutation: {
     createEvent: async (
       parent,
-      { adminEmail, slug, title, description },
+      { adminEmail, slug, title, description, currency },
       { models: { Event, Member } }
     ) => {
       // if (!currentUser) throw new Error('You need to be logged in');
       // check slug..
-      const event = await new Event({ slug, title, description });
+      const event = await new Event({ slug, title, description, currency });
 
       const member = await new Member({
         email: adminEmail,
@@ -36,10 +36,10 @@ const resolvers = {
         isAdmin: true
       });
 
+      const [savedEvent] = await Promise.all([event.save(), member.save()]);
+
       const token = await generateLoginJWT(member);
       await sendMagicLinkEmail(member, token, event);
-
-      const [savedEvent] = await Promise.all([event.save(), member.save()]);
 
       return savedEvent;
     },
