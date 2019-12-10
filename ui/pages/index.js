@@ -13,7 +13,10 @@ export const DREAMS_QUERY = gql`
       slug
       description
       title
-      images
+      images {
+        small
+        large
+      }
     }
   }
 `;
@@ -21,6 +24,13 @@ export const DREAMS_QUERY = gql`
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+
+  @media (max-width: 990px) {
+    grid-template-columns: 1fr 1fr;
+  }
+  @media (max-width: 660px) {
+    grid-template-columns: 1fr;
+  }
   grid-gap: 20px;
   a {
     text-decoration: none;
@@ -33,13 +43,14 @@ export default ({ currentUser, event }) => {
   if (!event) return <LandingPage />;
 
   const { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
-    DREAMSA_QUERY,
+    DREAMS_QUERY,
     {
       variables: { eventId: event.id }
     }
   );
-  if (dreams.length === 0) return <div>no dreams!</div>;
-  console.log({ dreams });
+
+  if (!loading && dreams.length === 0) return <div>no dreams!</div>;
+
   return (
     <>
       <Grid>

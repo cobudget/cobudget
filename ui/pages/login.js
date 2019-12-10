@@ -1,7 +1,8 @@
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import useForm from "react-hook-form";
-import Layout from "../components/Layout";
+import Card from "../components/styled/Card";
+import Form from "../components/styled/Form";
 import cookie from "js-cookie";
 import Router, { useRouter } from "next/router";
 
@@ -35,26 +36,26 @@ export default ({ apollo, currentUser, event }) => {
 
   if (currentUser) {
     return (
-      <>
+      <Card>
         You are logged in as {currentUser.email}.{" "}
         <button onClick={logOut}>Log out</button>
-      </>
+      </Card>
     );
   }
 
   return (
-    <>
-      <h1>Sign in or up with magic link</h1>
+    <Card>
+      <h1>Log in or sign up with magic link</h1>
 
       {data && data.sendMagicLink ? (
         <div>Magic link sent! Check your inbox!</div>
       ) : (
-        <form
+        <Form
           onSubmit={handleSubmit(({ email }) => {
             sendMagicLink({ variables: { email, eventId: event.id } });
           })}
         >
-          <label>Email</label>
+          <label htmlFor="email">Email</label>
           <input
             name="email"
             disabled={loading}
@@ -69,8 +70,8 @@ export default ({ apollo, currentUser, event }) => {
           {errors.email && email.title.message}
 
           <button type="submit">Send</button>
-        </form>
+        </Form>
       )}
-    </>
+    </Card>
   );
 };
