@@ -3,18 +3,23 @@ import App from "next/app";
 import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import withData from "../utils/apolloClient";
+import getHostInfo from "../utils/getHostInfo";
+import Layout from "../components/Layout";
 
-const CURRENT_USER_QUERY = gql`
-  {
+const TOP_LEVEL_QUERY = gql`
+  query EventAndMember($slug: String!) {
+    event(slug: $slug) {
+      id
+      slug
+      description
+      title
+    }
     currentUser {
+      id
       name
       email
-      memberships {
-        event {
-          id
-          title
-          slug
-        }
+      event {
+        id
       }
     }
   }
@@ -22,12 +27,18 @@ const CURRENT_USER_QUERY = gql`
 
 class MyApp extends App {
   render() {
-    const { Component, pageProps, apollo, currentUser } = this.props;
-
+    const { Component, pageProps, apollo, currentUser, event } = this.props;
 
     return (
       <ApolloProvider client={apollo}>
-        <Component {...pageProps} currentUser={currentUser} apollo={apollo} />
+        <Layout currentUser={currentUser} event={event} apollo={apollo}>
+          <Component
+            {...pageProps}
+            currentUser={currentUser}
+            apollo={apollo}
+            event={event}
+          />
+        </Layout>
       </ApolloProvider>
     );
   }
@@ -37,13 +48,21 @@ MyApp.getInitialProps = async appContext => {
   // calls page's `getInitialProps` and fills `appProps.pageProps`
   const appProps = await App.getInitialProps(appContext);
 
-  const {
-    data: { currentUser }
-  } = await appContext.ctx.apolloClient.query({
-    query: CURRENT_USER_QUERY
-  });
+  let currentUser, event;
 
-  return { ...appProps, currentUser };
+  const { subdomain } = getHostInfo(appContext.ctx.req);
+
+  if (subdomain) {
+    const { data } = await appContext.ctx.apolloClient.query({
+      query: TOP_LEVEL_QUERY,
+      variables: {
+        slug: subdomain
+      }
+    });
+    ({ currentUser, event } = data);
+  }
+
+  return { ...appProps, currentUser, event };
 };
 // Wraps all components in the tree with the data provider
 export default withData(MyApp);

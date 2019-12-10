@@ -6,12 +6,13 @@ import cookie from "js-cookie";
 import Router, { useRouter } from "next/router";
 
 const SEND_MAGIC_LINK_MUTATION = gql`
-  mutation SendMagicLink($email: String!) {
-    sendMagicLink(email: $email)
+  mutation SendMagicLink($email: String!, $eventId: ID!) {
+    sendMagicLink(email: $email, eventId: $eventId)
   }
 `;
 
-export default ({ apollo, currentUser }) => {
+export default ({ apollo, currentUser, event }) => {
+  if (!event) return <div>redirect!</div>;
   const router = useRouter();
   const [sendMagicLink, { data, loading }] = useMutation(
     SEND_MAGIC_LINK_MUTATION
@@ -34,15 +35,15 @@ export default ({ apollo, currentUser }) => {
 
   if (currentUser) {
     return (
-      <Layout currentUser={currentUser}>
+      <>
         You are logged in as {currentUser.email}.{" "}
         <button onClick={logOut}>Log out</button>
-      </Layout>
+      </>
     );
   }
 
   return (
-    <Layout>
+    <>
       <h1>Sign in or up with magic link</h1>
 
       {data && data.sendMagicLink ? (
@@ -50,7 +51,7 @@ export default ({ apollo, currentUser }) => {
       ) : (
         <form
           onSubmit={handleSubmit(({ email }) => {
-            sendMagicLink({ variables: { email } });
+            sendMagicLink({ variables: { email, eventId: event.id } });
           })}
         >
           <label>Email</label>
@@ -70,6 +71,6 @@ export default ({ apollo, currentUser }) => {
           <button type="submit">Send</button>
         </form>
       )}
-    </Layout>
+    </>
   );
 };
