@@ -68,6 +68,7 @@ const DreamSchema = new Schema({
   budgetDescription: String,
   minGoal: Number,
   maxGoal: Number,
+  images: [new Schema({ small: String, large: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
 export const getModels = db => {
