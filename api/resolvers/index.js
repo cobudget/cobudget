@@ -65,7 +65,9 @@ const resolvers = {
       });
 
       if (!member) throw new Error('You are not a member of this event');
-      if (maxGoal <= minGoal || (maxGoal && minGoal == null))
+
+      // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
+      if (maxGoal && (maxGoal <= minGoal || minGoal == null))
         throw new Error('max goal needs to be larger than min goal');
 
       return new Dream({
@@ -101,7 +103,6 @@ const resolvers = {
       }
 
       const token = await generateLoginJWT(member);
-      console.log({ token });
       return await sendMagicLinkEmail(member, token, event);
     }
   },
