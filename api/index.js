@@ -25,7 +25,7 @@ const server = new ApolloServer({
         token = jwt.verify(token, process.env.JWT_SECRET);
         currentUser = await models.Member.findOneAndUpdate(
           { _id: token.sub },
-          { verified: true }
+          { verifiedEmail: true }
         );
       } catch (error) {
         // throw new AuthenticationError(
