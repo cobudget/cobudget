@@ -14,20 +14,10 @@ const Header = styled.div`
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-  /* a {
-    margin-left: 20px;
-  }
-  div {
-    margin-left: 20px;
-  } */
+
   > div {
     margin-left: 20px;
   }
-`;
-
-const Logo = styled.img`
-  width: 180px;
-  height: 41px;
 `;
 
 const LinkButton = styled.a`
@@ -79,7 +69,7 @@ export default ({ event, currentUser, apollo }) => {
             </ProfileDropdown>
           ) : (
             <Link href="/login">
-              <LinkButton>Login -></LinkButton>
+              <LinkButton>Login</LinkButton>
             </Link>
           )
         ) : (
