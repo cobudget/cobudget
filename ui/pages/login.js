@@ -3,8 +3,6 @@ import { useMutation } from "@apollo/react-hooks";
 import useForm from "react-hook-form";
 import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
-import cookie from "js-cookie";
-import Router, { useRouter } from "next/router";
 
 const SEND_MAGIC_LINK_MUTATION = gql`
   mutation SendMagicLink($email: String!, $eventId: ID!) {
@@ -12,35 +10,15 @@ const SEND_MAGIC_LINK_MUTATION = gql`
   }
 `;
 
-export default ({ apollo, currentUser, event }) => {
+export default ({ currentUser, event }) => {
   if (!event) return <div>redirect!</div>;
-  const router = useRouter();
   const [sendMagicLink, { data, loading }] = useMutation(
     SEND_MAGIC_LINK_MUTATION
   );
   const { handleSubmit, register, errors } = useForm();
 
-  React.useEffect(() => {
-    if (router.query.token) {
-      cookie.set("token", router.query.token, { expires: 30 });
-      apollo.resetStore();
-      Router.push("/");
-    }
-  }, [router.query]);
-
-  const logOut = () => {
-    cookie.remove("token");
-    apollo.resetStore();
-    Router.push("/");
-  };
-
   if (currentUser) {
-    return (
-      <Card>
-        You are logged in as {currentUser.email}.{" "}
-        <button onClick={logOut}>Log out</button>
-      </Card>
-    );
+    return <Card>You are logged in as {currentUser.email}.</Card>;
   }
 
   return (

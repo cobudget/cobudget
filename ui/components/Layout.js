@@ -1,6 +1,8 @@
 import styled, { createGlobalStyle } from "styled-components";
 import Head from "next/head";
 import Header from "./Header";
+import Router, { useRouter } from "next/router";
+import cookie from "js-cookie";
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -54,6 +56,17 @@ const InnerContainer = styled.div`
 `;
 
 export default ({ children, currentUser, event, title, apollo }) => {
+  const router = useRouter();
+
+  // check for token in query to set it and remove it from url
+  React.useEffect(() => {
+    if (router.query.token) {
+      cookie.set("token", router.query.token, { expires: 30 });
+      apollo.resetStore();
+      Router.push("/");
+    }
+  }, [router.query]);
+
   return (
     <Wrapper>
       <Head>
