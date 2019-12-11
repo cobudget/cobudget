@@ -98,5 +98,3 @@ export default ({ dream }) => {
     </DreamCard>
   );
 };
-
-// When opening dream, have it open as an overlay, unless you serverside render.. This would be very neat. Allows easier browsing..

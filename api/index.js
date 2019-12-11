@@ -28,9 +28,10 @@ const server = new ApolloServer({
           { verified: true }
         );
       } catch (error) {
-        throw new AuthenticationError(
-          'Authentication token is invalid, please log in.'
-        );
+        // throw new AuthenticationError(
+        //   'Authentication token is invalid, please log in.'
+        // );
+        console.error('Authentication token is invalid');
       }
     }
 

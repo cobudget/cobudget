@@ -82,6 +82,29 @@ const resolvers = {
         images
       }).save();
     },
+    editDream: async (
+      parent,
+      { dreamId, title, slug, description, minGoal, maxGoal, images },
+      { currentUser, models: { Dream } }
+    ) => {
+      if (!currentUser) throw new Error('You need to be logged in');
+
+      const dream = await Dream.findOne({
+        _id: dreamId
+      });
+
+      if (!dream.members.includes(currentUser.id))
+        throw new Error('You are not a member of this dream');
+
+      dream.title = title;
+      dream.slug = slug;
+      dream.description = description;
+      dream.minGoal = minGoal;
+      dream.maxGoal = maxGoal;
+      dream.images = images;
+
+      return await dream.save();
+    },
     sendMagicLink: async (
       parent,
       { email: inputEmail, eventId },

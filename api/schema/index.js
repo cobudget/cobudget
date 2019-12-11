@@ -22,7 +22,15 @@ const schema = gql`
       title: String!
       slug: String!
       description: String
-      budgetDescription: String
+      minGoal: Int
+      maxGoal: Int
+      images: [ImageInput]
+    ): Dream
+    editDream(
+      dreamId: ID!
+      title: String
+      slug: String
+      description: String
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]

@@ -82,11 +82,11 @@ export default ({ images, setImages }) => {
         images.map((image, i) => (
           <div className="image" key={image.small}>
             <a href={image.large} target="_blank">
-              <img src={image.small} alt="Upload preview" />
+              <img src={image.small} alt="Preview" />
             </a>
             <button onClick={() => removeImage(i)}>x</button>
           </div>
-        ))}{" "}
+        ))}
       {uploadingImage ? (
         <label>uploading...</label>
       ) : (
