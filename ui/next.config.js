@@ -1,5 +1,4 @@
 // https://github.com/zeit/next.js/blob/canary/examples/with-env-from-next-config-js/next.config.js
-const withFonts = require("next-fonts");
 
 const {
   PHASE_DEVELOPMENT_SERVER,
@@ -12,7 +11,7 @@ module.exports = phase => {
   const env = {
     GRAPHQL_URL: isDev ? "http://localhost:3000/api" : "https://dreams.wtf/api"
   };
-  return withFonts({
+  return {
     env
-  });
+  };
 };

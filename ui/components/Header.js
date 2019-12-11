@@ -36,9 +36,8 @@ const LinkButton = styled.a`
   color: #3d4045; /* add this in theming */
   background: white;
   border-radius: 6px;
-  font-weight: 400;
   cursor: pointer;
-  font-family: "Inter-SemiBold";
+  font-weight: 600;
   line-height: 1;
 `;
 
