@@ -17,8 +17,10 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 
 - [Install and run](https://docs.mongodb.com/manual/administration/install-community/) MongoDB
 - [Install Node.js](https://nodejs.org/en/) version >= 10.
-- Install Now CLI: `npm i -g now`
-- Copy or rename `.env.default` to `.env`
+- Install Now CLI
+  `npm i -g now`
+- Copy `.env.default` to `.env`:
+  `cp .env.default .env`
 
 ### Running the project
 
