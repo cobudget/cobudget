@@ -1,6 +1,7 @@
 import styled, { createGlobalStyle } from "styled-components";
 import Head from "next/head";
 import Header from "./Header";
+import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
 
@@ -56,7 +57,7 @@ const InnerContainer = styled.div`
   padding-bottom: 50px;
 `;
 
-export default ({ children, currentUser, event, title, apollo }) => {
+export default ({ children, currentUser, event, title, apollo, openModal }) => {
   const router = useRouter();
 
   // check for token in query to set it and remove it from url
@@ -64,10 +65,18 @@ export default ({ children, currentUser, event, title, apollo }) => {
     if (router.query.token) {
       cookie.set("token", router.query.token, { expires: 30 });
       apollo.resetStore();
-      Router.push("/");
+      Router.push("/"); // change this to just be replace current route?
+      // trigger alert or something on invalid token
     }
   }, [router.query]);
 
+  React.useEffect(() => {
+    // this will be first time user logs in
+    if (currentUser && !currentUser.name) {
+      // pop modal to set user name and maybe go through a dreams walk through? :)
+      openModal(modals.FINISH_SIGN_UP);
+    }
+  }, [currentUser]);
   return (
     <Wrapper>
       <Head>

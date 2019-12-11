@@ -127,6 +127,27 @@ const resolvers = {
 
       const token = await generateLoginJWT(member);
       return await sendMagicLinkEmail(member, token, event);
+    },
+    updateCurrentUser: async (
+      parent,
+      { name, avatar },
+      { currentUser, models: { Member } }
+    ) => {
+      if (!currentUser) throw new Error('You need to be logged in..');
+
+
+      const member = await Member.findOne({ _id: currentUser.id });
+
+      if (!member.name) {
+        // if event is `REQUEST_TO_JOIN`, then you can send ping to admins or guides here
+        // if event is unapproved... meaning, person never signed in, we can confirm event here.
+        // until this happens other can register this event.
+      }
+
+      if (name) member.name = name;
+      if (avatar) member.avatar = avatar;
+
+      return member.save();
     }
   },
   Member: {

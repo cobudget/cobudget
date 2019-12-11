@@ -25,7 +25,7 @@ const Avatar = ({ user, onClick }) => {
       </Circle>
     );
   }
-  const bgColor = stringToHslColor(user.email);
+  const bgColor = stringToHslColor(user.name ? user.name : user.email);
   const letter = user.name ? user.name.charAt(0) : user.email.charAt(0); // TODO: handle without name and email?
 
   return (

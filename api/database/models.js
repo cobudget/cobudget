@@ -30,7 +30,7 @@ const MemberSchema = new Schema({
     index: true,
     required: true
   },
-  verified: {
+  verifiedEmail: {
     type: Boolean,
     default: false
   },

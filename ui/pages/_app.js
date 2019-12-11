@@ -3,8 +3,11 @@ import App from "next/app";
 import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import withData from "../utils/apolloClient";
-import getHostInfo from "../utils/getHostInfo";
+import getHostInfoFromReq from "../utils/getHostInfo";
+import { useQuery } from "@apollo/react-hooks";
+
 import Layout from "../components/Layout";
+import Modal from "../components/Modal";
 
 const TOP_LEVEL_QUERY = gql`
   query EventAndMember($slug: String!) {
@@ -25,52 +28,90 @@ const TOP_LEVEL_QUERY = gql`
     }
   }
 `;
-
-class MyApp extends App {
-  render() {
-    const {
-      Component,
-      pageProps,
-      apollo,
-      currentUser,
-      event,
-      hostInfo
-    } = this.props;
-
-    return (
-      <ApolloProvider client={apollo}>
-        <Layout currentUser={currentUser} event={event} apollo={apollo}>
-          <Component
-            {...pageProps}
-            currentUser={currentUser}
-            event={event}
-            hostInfo={hostInfo}
-          />
-        </Layout>
-      </ApolloProvider>
-    );
-  }
-}
-
-MyApp.getInitialProps = async appContext => {
-  // calls page's `getInitialProps` and fills `appProps.pageProps`
-  const appProps = await App.getInitialProps(appContext);
-
+const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   let currentUser, event;
 
-  const hostInfo = getHostInfo(appContext.ctx.req);
-
   if (hostInfo.subdomain) {
-    const { data } = await appContext.ctx.apolloClient.query({
-      query: TOP_LEVEL_QUERY,
-      variables: {
-        slug: hostInfo.subdomain
-      }
+    const { data } = useQuery(TOP_LEVEL_QUERY, {
+      variables: { slug: hostInfo.subdomain },
+      client: apollo
     });
-    ({ currentUser, event } = data);
+    currentUser = data && data.currentUser;
+    event = data && data.event;
   }
 
-  return { ...appProps, currentUser, event, hostInfo };
+  const [modal, setModal] = React.useState(null);
+
+  const openModal = name => {
+    if (modal !== name) setModal(name);
+  };
+
+  const closeModal = () => {
+    setModal(null);
+  };
+
+  return (
+    <ApolloProvider client={apollo}>
+      <Modal active={modal} closeModal={closeModal} />
+      <Layout
+        currentUser={currentUser}
+        event={event}
+        apollo={apollo}
+        openModal={openModal}
+      >
+        <Component
+          {...pageProps}
+          currentUser={currentUser}
+          event={event}
+          hostInfo={hostInfo}
+        />
+      </Layout>
+    </ApolloProvider>
+  );
 };
-// Wraps all components in the tree with the data provider
+
+MyApp.getInitialProps = async ({ Component, ctx }) => {
+  let pageProps = {};
+
+  if (Component.getInitialProps) {
+    pageProps = await Component.getInitialProps(ctx);
+  }
+
+  const hostInfo = getHostInfoFromReq(ctx.req);
+
+  return { pageProps, hostInfo };
+};
+
 export default withData(MyApp);
+
+// MyApp.getInitialProps = async ({ Component, ctx }) => {
+//   let pageProps = {};
+
+//   if (Component.getInitialProps) {
+//     pageProps = await Component.getInitialProps(ctx);
+//   }
+//   return { pageProps };
+// };
+
+// MyApp.getInitialProps = async appContext => {
+//   // calls page's `getInitialProps` and fills `appProps.pageProps`
+//   const appProps = await App.getInitialProps(appContext);
+
+//   let currentUser, event;
+
+//   const hostInfo = getHostInfo(appContext.ctx.req);
+
+//   if (hostInfo.subdomain) {
+//     const { data } = await appContext.ctx.apolloClient.query({
+//       query: TOP_LEVEL_QUERY,
+//       variables: {
+//         slug: hostInfo.subdomain
+//       }
+//     });
+//     ({ currentUser, event } = data);
+//   }
+
+//   return { ...appProps, currentUser, event, hostInfo };
+// };
+// // Wraps all components in the tree with the data provider
+// export default withData(MyApp);

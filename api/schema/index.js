@@ -36,6 +36,7 @@ const schema = gql`
       images: [ImageInput]
     ): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
+    updateCurrentUser(name: String, avatar: String): Member
   }
 
   type Event {
@@ -79,6 +80,7 @@ const schema = gql`
     # isActive: Boolean!
     # isApproved: Boolean!
     isAdmin: Boolean!
+    verifiedEmail: Boolean!
     # isGuide: Boolean!
     # favorites: [Dream]
   }
