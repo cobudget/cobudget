@@ -11,6 +11,10 @@ const DreamCard = styled(Card)`
   h3 {
     font-family: "Inter-SemiBold";
     margin-bottom: 5px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
   }
   p {
     color: #333;
@@ -72,6 +76,8 @@ const ImgPlaceholder = styled.div`
   background: ${props => props.color};
   flex: 0 0 200px !important;
 `;
+const truncate = (string, n) =>
+  string.length > n ? string.substr(0, n - 1) + "..." : string;
 
 export default ({ dream }) => {
   return (
@@ -85,7 +91,7 @@ export default ({ dream }) => {
         <div>
           <h3>{dream.title}</h3>
 
-          <p>{dream.description}</p>
+          <p>{truncate(dream.description, 220)}</p>
         </div>
         <FundingStats percentage={42} />
       </div>
