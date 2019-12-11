@@ -34,6 +34,10 @@ const DreamCard = styled(Card)`
     object-fit: cover;
     object-position: center;
   }
+  transition: box-shadow 75ms ease-in-out;
+  &:hover {
+    box-shadow: 0 12px 20px 0 #e0e5ea;
+  }
 `;
 
 const StyledProgressBar = styled.div`

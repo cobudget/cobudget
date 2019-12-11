@@ -51,8 +51,9 @@ const Wrapper = styled.div`
 `;
 
 const InnerContainer = styled.div`
-  flex: 0 1 1150px;
+  flex: 0 1 1160px;
   margin: 0 20px;
+  padding-bottom: 50px;
 `;
 
 export default ({ children, currentUser, event, title, apollo }) => {

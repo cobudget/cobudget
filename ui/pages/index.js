@@ -31,7 +31,7 @@ const Grid = styled.div`
   @media (max-width: 660px) {
     grid-template-columns: minmax(0, 1fr);
   }
-  grid-gap: 20px;
+  grid-gap: 25px;
   a {
     text-decoration: none;
     color: #000;
@@ -52,16 +52,14 @@ export default ({ currentUser, event, hostInfo }) => {
   if (!loading && dreams.length === 0) return <div>no dreams!</div>;
 
   return (
-    <>
-      <Grid>
-        {dreams.map(dream => (
-          <Link href="/[dream]" as={`/${dream.slug}`} key={dream.slug}>
-            <a>
-              <DreamCard dream={dream} />
-            </a>
-          </Link>
-        ))}
-      </Grid>
-    </>
+    <Grid>
+      {dreams.map(dream => (
+        <Link href="/[dream]" as={`/${dream.slug}`} key={dream.slug}>
+          <a>
+            <DreamCard dream={dream} />
+          </a>
+        </Link>
+      ))}
+    </Grid>
   );
 };
