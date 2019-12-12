@@ -36,11 +36,18 @@ const Form = styled.form`
     font-family: "Inter-SemiBold";
     padding: 13px 43px;
     box-shadow: 0 3px 8px rgba(44, 188, 99, 0.4);
+    margin: 10px 0;
   }
 
   .two-cols {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
+  }
+
+  .two-cols-3-1 {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
     grid-gap: 20px;
   }
 `;

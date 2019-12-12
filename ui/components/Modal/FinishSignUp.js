@@ -25,7 +25,6 @@ const CardContainer = styled.div`
   max-width: 520px;
   background: white;
   border-radius: 8px;
-  min-height: 300px;
   padding: 30px;
 
   h2 {
@@ -74,7 +73,7 @@ const FinishSignUp = ({ closeModal }) => {
     <>
       <Container>
         <CardContainer>
-          <h2>Welcome!</h2>
+          <h2>Welcome to Dreams!</h2>
           <h2>Please choose your display name</h2>
 
           <Form
@@ -90,17 +89,17 @@ const FinishSignUp = ({ closeModal }) => {
                 });
             })}
           >
-            <label>
-              Display name <span>{errors.name && errors.name.message}</span>
+            {errors.name && errors.name.message}
+            <div className="two-cols-3-1">
               <input
                 name="name"
-                placeholder="Your chosen display name"
+                placeholder="Good stuff"
                 ref={register({
                   required: "Required"
                 })}
               />
-            </label>
-            <button type="submit">Submit</button>
+              <button type="submit">Submit</button>
+            </div>
           </Form>
         </CardContainer>
       </Container>
