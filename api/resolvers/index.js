@@ -23,12 +23,17 @@ const resolvers = {
   Mutation: {
     createEvent: async (
       parent,
-      { adminEmail, slug, title, description, currency },
+      { adminEmail, slug, title, description, currency, registrationPolicy },
       { models: { Event, Member } }
     ) => {
-      // if (!currentMember) throw new Error('You need to be logged in');
       // check slug..
-      const event = await new Event({ slug, title, description, currency });
+      const event = await new Event({
+        slug,
+        title,
+        description,
+        currency,
+        registrationPolicy
+      });
 
       const member = await new Member({
         email: adminEmail,

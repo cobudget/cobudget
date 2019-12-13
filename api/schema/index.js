@@ -16,6 +16,7 @@ const schema = gql`
       title: String!
       currency: String!
       description: String
+      registrationPolicy: RegistrationPolicy!
     ): Event!
     createDream(
       eventId: ID!
@@ -51,7 +52,7 @@ const schema = gql`
     # questions: [Question!]
     # reactions: [Emoji] #requried or not? ui implications?
     # visibility: Visibility
-    # registrationPolicy: RegistrationPolicy
+    registrationPolicy: RegistrationPolicy!
     # grantingPeriods: [GrantingPeriod]
     currency: String! # scalar? # can't change after first submission closes
     # useGrantlings: Boolean! # can't change after first submission close
@@ -60,6 +61,12 @@ const schema = gql`
     # totalBudget: Int
     # amountLeft: Int
     # grantlingValue: Int
+  }
+
+  enum RegistrationPolicy {
+    OPEN
+    REQUEST_TO_JOIN
+    INVITE_ONLY
   }
 
   # type User {
@@ -118,12 +125,6 @@ const schema = gql`
   #   PUBLIC
   #   PRIVATE # only for paid
   #   HIDDEN # only for paid
-  # }
-
-  # enum RegistrationPolicy {
-  #   OPEN
-  #   REQUEST_TO_JOIN
-  #   INVITE_ONLY
   # }
 
   # type GrantingPeriod {
