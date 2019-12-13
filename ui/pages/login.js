@@ -6,8 +6,11 @@ import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
 
 const SmallCard = styled(Card)`
-  max-width: 600px;
+  max-width: 550px;
   margin: 50px auto;
+  h1 {
+    text-align: center;
+  }
 `;
 
 const SEND_MAGIC_LINK_MUTATION = gql`
@@ -39,7 +42,7 @@ export default ({ currentUser, event }) => {
             sendMagicLink({ variables: { email, eventId: event.id } });
           })}
         >
-          <div className="two-cols-4-1">
+          <div className="two-cols-3-1">
             <input
               name="email"
               disabled={loading}
