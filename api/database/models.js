@@ -56,7 +56,13 @@ const EventSchema = new Schema({
   },
   title: { type: String, required: true },
   description: String,
-  currency: String
+  currency: String,
+  registrationPolicy: {
+    type: String,
+    enum: ['OPEN', 'REQUEST_TO_JOIN', 'INVITE_ONLY'],
+    default: 'OPEN',
+    required: true
+  }
 });
 
 // Dream
