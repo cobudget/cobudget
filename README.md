@@ -30,3 +30,7 @@ now dev
 
 This will build and serve both the API and the UI with one command, and provide hot reloading.
 `now dev` simulates the serverless deployment platform [Now](https://zeit.co/) where the project is deployed.
+
+## License
+
+Copyright 2019 Gustav Larsson, released under the AGPLv3+ which is included in the file [LICENSE](LICENSE) in the git repository
