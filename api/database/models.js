@@ -37,6 +37,7 @@ const MemberSchema = new Schema({
   name: String,
   avatar: String,
   isAdmin: { type: Boolean, required: true, default: false },
+  isApproved: { type: Boolean, required: true, default: false },
   createdAt: {
     type: Date,
     default: Date.now

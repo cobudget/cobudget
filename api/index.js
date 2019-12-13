@@ -23,10 +23,7 @@ const server = new ApolloServer({
     if (token) {
       try {
         token = jwt.verify(token, process.env.JWT_SECRET);
-        currentMember = await models.Member.findOneAndUpdate(
-          { _id: token.sub },
-          { verifiedEmail: true }
-        );
+        currentMember = await models.Member.findOne({ _id: token.sub });
       } catch (error) {
         // throw new AuthenticationError(
         //   'Authentication token is invalid, please log in.'

@@ -85,8 +85,8 @@ const schema = gql`
     avatar: String
     # user: User!
     # isActive: Boolean!
-    # isApproved: Boolean!
     isAdmin: Boolean!
+    isApproved: Boolean!
     verifiedEmail: Boolean!
     # isGuide: Boolean!
     # favorites: [Dream]

@@ -38,7 +38,8 @@ const resolvers = {
       const member = await new Member({
         email: adminEmail,
         eventId: event.id,
-        isAdmin: true
+        isAdmin: true,
+        isApproved: true
       });
 
       const [savedEvent] = await Promise.all([event.save(), member.save()]);
@@ -126,8 +127,22 @@ const resolvers = {
       let member = await Member.findOne({ email, eventId });
 
       if (!member) {
-        // if(event.registrationPolicy !== 'OPEN') throw new Error('Not open for registrations')
-        member = await new member({ email, eventId }).save();
+        let isApproved;
+
+        switch (event.registrationPolicy) {
+          case 'OPEN':
+            isApproved = true;
+            break;
+          case 'REQUEST_TO_JOIN':
+            isApproved = false;
+            break;
+          case 'INVITE_ONLY':
+            throw new Error('This event is invite only');
+          default:
+            throw new Error('Event has no registration policy');
+        }
+
+        member = await new Member({ email, eventId, isApproved }).save();
       }
 
       const token = await generateLoginJWT(member);
@@ -142,8 +157,15 @@ const resolvers = {
 
       const member = await Member.findOne({ _id: currentMember.id });
 
+      // first time a member signs in
       if (!member.name) {
-        // if event is `REQUEST_TO_JOIN`, then you can send ping to admins or guides here
+        member.verifiedEmail = true;
+
+        if (!member.isApproved) {
+          // ping admins that there is a request to join
+          // await pingAdminRequestToJoin
+        }
+
         // if event is unapproved... meaning, person never signed in, we can confirm event here.
         // until this happens other can register this event.
       }
