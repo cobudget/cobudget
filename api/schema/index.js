@@ -7,6 +7,7 @@ const schema = gql`
     event(slug: String!): Event
     dream(eventId: ID!, slug: String!): Dream
     dreams(eventId: ID!): [Dream]
+    members: [Member]
   }
 
   type Mutation {
@@ -38,6 +39,7 @@ const schema = gql`
     ): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateCurrentMember(name: String, avatar: String): Member
+    inviteMembers(emails: String!): [Member]
   }
 
   type Event {
@@ -68,14 +70,6 @@ const schema = gql`
     REQUEST_TO_JOIN
     INVITE_ONLY
   }
-
-  # type User {
-  #   id: ID!
-  #   email: String! # emailVerified create Email type for keeping track of email verification etc?
-  #   memberships: [Member]
-  #   name: String
-  #   avatar: String
-  # }
 
   type Member {
     id: ID!

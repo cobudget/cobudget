@@ -21,7 +21,9 @@ const TOP_LEVEL_QUERY = gql`
     currentMember {
       id
       name
+      avatar
       email
+      isAdmin
       event {
         id
       }
@@ -36,8 +38,10 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
       variables: { slug: hostInfo.subdomain },
       client: apollo
     });
-    currentMember = data && data.currentMember;
-    event = data && data.event;
+    if (data) {
+      currentMember = data.currentMember;
+      event = data.event;
+    }
   }
 
   const [modal, setModal] = React.useState(null);

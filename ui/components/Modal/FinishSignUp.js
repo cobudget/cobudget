@@ -6,7 +6,7 @@ import Form from "../styled/Form";
 
 const UPDATE_CURRENT_USER = gql`
   mutation UpdatecurrentMember($name: String, $avatar: String) {
-    updatecurrentMember(name: $name, avatar: $avatar) {
+    updateCurrentMember(name: $name, avatar: $avatar) {
       id
       name
       avatar

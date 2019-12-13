@@ -1,7 +1,8 @@
 import styled from "styled-components";
 const Form = styled.form`
   input,
-  textarea {
+  textarea,
+  select {
     width: 100%;
     margin: 10px 0;
     display: block;
@@ -20,6 +21,8 @@ const Form = styled.form`
 
   label {
     font-size: 18px;
+    margin-top: 15px;
+    display: block;
     span {
       color: red;
     }

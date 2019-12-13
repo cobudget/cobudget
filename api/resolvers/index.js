@@ -18,6 +18,12 @@ const resolvers = {
     },
     dreams: async (parent, { eventId }, { models: { Dream } }) => {
       return Dream.find({ eventId });
+    },
+    members: async (parent, args, { currentMember, models: { Member } }) => {
+      if (!currentMember) throw new Error('Need to be logged in');
+      if (!currentMember.isAdmin) throw new Error('You need to be admin');
+      // eventId === currentMember.eventId throw error.. wrong page..
+      return Member.find({ eventId: currentMember.eventId });
     }
   },
   Mutation: {
@@ -174,6 +180,30 @@ const resolvers = {
       if (avatar) member.avatar = avatar;
 
       return member.save();
+    },
+    inviteMembers: async (
+      parent,
+      { emails },
+      { currentMember, models: { Member } }
+    ) => {
+      if (!currentMember) throw new Error('You need to be logged in');
+      if (!currentMember.isAdmin)
+        throw new Error('You need to be admin to invite new members');
+
+      const emailArray = emails.split(',');
+      // validate email structure?
+      // if email already exists?
+
+
+      const memberObjs = emailArray.map(email => ({
+        email: email.trim(),
+        eventId: currentMember.eventId,
+        isApproved: true
+      }));
+
+      const members = await Member.insertMany(memberObjs); //save??
+
+      return members;
     }
   },
   Member: {
