@@ -13,7 +13,7 @@ const server = new ApolloServer({
   context: async ({ req }) => {
     const db = await getConnection();
     const models = getModels(db);
-    let currentUser = null;
+    let currentMember = null;
 
     let token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
@@ -23,7 +23,7 @@ const server = new ApolloServer({
     if (token) {
       try {
         token = jwt.verify(token, process.env.JWT_SECRET);
-        currentUser = await models.Member.findOneAndUpdate(
+        currentMember = await models.Member.findOneAndUpdate(
           { _id: token.sub },
           { verifiedEmail: true }
         );
@@ -37,7 +37,7 @@ const server = new ApolloServer({
 
     return {
       models,
-      currentUser
+      currentMember
     };
   },
   playground: true,

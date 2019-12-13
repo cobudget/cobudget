@@ -18,7 +18,7 @@ const TOP_LEVEL_QUERY = gql`
       title
       currency
     }
-    currentUser {
+    currentMember {
       id
       name
       email
@@ -29,14 +29,14 @@ const TOP_LEVEL_QUERY = gql`
   }
 `;
 const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
-  let currentUser, event;
+  let currentMember, event;
 
   if (hostInfo.subdomain) {
     const { data } = useQuery(TOP_LEVEL_QUERY, {
       variables: { slug: hostInfo.subdomain },
       client: apollo
     });
-    currentUser = data && data.currentUser;
+    currentMember = data && data.currentMember;
     event = data && data.event;
   }
 
@@ -54,14 +54,14 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
     <ApolloProvider client={apollo}>
       <Modal active={modal} closeModal={closeModal} />
       <Layout
-        currentUser={currentUser}
+        currentMember={currentMember}
         event={event}
         apollo={apollo}
         openModal={openModal}
       >
         <Component
           {...pageProps}
-          currentUser={currentUser}
+          currentMember={currentMember}
           event={event}
           hostInfo={hostInfo}
         />
@@ -83,35 +83,3 @@ MyApp.getInitialProps = async ({ Component, ctx }) => {
 };
 
 export default withData(MyApp);
-
-// MyApp.getInitialProps = async ({ Component, ctx }) => {
-//   let pageProps = {};
-
-//   if (Component.getInitialProps) {
-//     pageProps = await Component.getInitialProps(ctx);
-//   }
-//   return { pageProps };
-// };
-
-// MyApp.getInitialProps = async appContext => {
-//   // calls page's `getInitialProps` and fills `appProps.pageProps`
-//   const appProps = await App.getInitialProps(appContext);
-
-//   let currentUser, event;
-
-//   const hostInfo = getHostInfo(appContext.ctx.req);
-
-//   if (hostInfo.subdomain) {
-//     const { data } = await appContext.ctx.apolloClient.query({
-//       query: TOP_LEVEL_QUERY,
-//       variables: {
-//         slug: hostInfo.subdomain
-//       }
-//     });
-//     ({ currentUser, event } = data);
-//   }
-
-//   return { ...appProps, currentUser, event, hostInfo };
-// };
-// // Wraps all components in the tree with the data provider
-// export default withData(MyApp);

@@ -13,6 +13,8 @@ export const DREAMS_QUERY = gql`
       slug
       description
       title
+      minGoal
+      maxGoal
       images {
         small
         large
@@ -39,7 +41,7 @@ const Grid = styled.div`
   }
 `;
 
-export default ({ currentUser, event, hostInfo }) => {
+export default ({ currentMember, event, hostInfo }) => {
   if (!event) return <LandingPage hostInfo={hostInfo} />;
 
   const { data: { dreams } = { dreams: [] }, loading, error } = useQuery(

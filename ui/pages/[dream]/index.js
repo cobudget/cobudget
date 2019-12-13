@@ -56,7 +56,7 @@ const ImgPlaceholder = styled.div`
   height: 250px;
 `;
 
-const Dream = ({ event, currentUser }) => {
+const Dream = ({ event, currentMember }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -94,7 +94,7 @@ const Dream = ({ event, currentUser }) => {
                     Max goal: {dream.maxGoal} {event.currency}
                   </h3>
                 )}
-                {isMemberOfDream(currentUser, dream) && (
+                {isMemberOfDream(currentMember, dream) && (
                   <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
                     <a>Edit dream</a>
                   </Link>

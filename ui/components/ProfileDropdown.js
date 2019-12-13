@@ -56,7 +56,7 @@ const Container = styled.div`
   position: relative;
 `;
 
-const ProfileDropdown = ({ currentUser, children }) => {
+const ProfileDropdown = ({ currentMember, children }) => {
   const [dropdownExpanded, setDropdownExpanded] = React.useState(false);
 
   const inputRef = React.useRef(null);
@@ -81,7 +81,7 @@ const ProfileDropdown = ({ currentUser, children }) => {
 
   return (
     <Container ref={inputRef}>
-      <Avatar onClick={toggleDropdown} user={currentUser} />
+      <Avatar onClick={toggleDropdown} user={currentMember} />
       {dropdownExpanded && (
         <Dropdown>
           <List>{children}</List>

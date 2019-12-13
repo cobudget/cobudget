@@ -4,8 +4,8 @@ import { sendMagicLinkEmail } from '../utils/email';
 
 const resolvers = {
   Query: {
-    currentUser: (parent, args, { currentUser }) => {
-      return currentUser;
+    currentMember: (parent, args, { currentMember }) => {
+      return currentMember;
     },
     events: async (parent, args, { models: { Event } }) => {
       return Event.find();
@@ -26,7 +26,7 @@ const resolvers = {
       { adminEmail, slug, title, description, currency },
       { models: { Event, Member } }
     ) => {
-      // if (!currentUser) throw new Error('You need to be logged in');
+      // if (!currentMember) throw new Error('You need to be logged in');
       // check slug..
       const event = await new Event({ slug, title, description, currency });
 
@@ -55,12 +55,12 @@ const resolvers = {
         maxGoal,
         images
       },
-      { currentUser, models: { Member, Dream } }
+      { currentMember, models: { Member, Dream } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in');
+      if (!currentMember) throw new Error('You need to be logged in');
 
       const member = await Member.findOne({
-        _id: currentUser.id,
+        _id: currentMember.id,
         eventId
       });
 
@@ -75,7 +75,7 @@ const resolvers = {
         title,
         slug: urlSlug(slug),
         description,
-        members: [currentUser.id],
+        members: [currentMember.id],
         budgetDescription,
         minGoal,
         maxGoal,
@@ -85,15 +85,15 @@ const resolvers = {
     editDream: async (
       parent,
       { dreamId, title, slug, description, minGoal, maxGoal, images },
-      { currentUser, models: { Dream } }
+      { currentMember, models: { Dream } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in');
+      if (!currentMember) throw new Error('You need to be logged in');
 
       const dream = await Dream.findOne({
         _id: dreamId
       });
 
-      if (!dream.members.includes(currentUser.id))
+      if (!dream.members.includes(currentMember.id))
         throw new Error('You are not a member of this dream');
 
       dream.title = title;
@@ -128,15 +128,14 @@ const resolvers = {
       const token = await generateLoginJWT(member);
       return await sendMagicLinkEmail(member, token, event);
     },
-    updateCurrentUser: async (
+    updateCurrentMember: async (
       parent,
       { name, avatar },
-      { currentUser, models: { Member } }
+      { currentMember, models: { Member } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in..');
+      if (!currentMember) throw new Error('You need to be logged in..');
 
-
-      const member = await Member.findOne({ _id: currentUser.id });
+      const member = await Member.findOne({ _id: currentMember.id });
 
       if (!member.name) {
         // if event is `REQUEST_TO_JOIN`, then you can send ping to admins or guides here

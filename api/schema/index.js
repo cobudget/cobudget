@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-micro';
 
 const schema = gql`
   type Query {
-    currentUser: Member
+    currentMember: Member
     events: [Event!]
     event(slug: String!): Event
     dream(eventId: ID!, slug: String!): Dream
@@ -36,7 +36,7 @@ const schema = gql`
       images: [ImageInput]
     ): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
-    updateCurrentUser(name: String, avatar: String): Member
+    updateCurrentMember(name: String, avatar: String): Member
   }
 
   type Event {

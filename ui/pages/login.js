@@ -19,15 +19,15 @@ const SEND_MAGIC_LINK_MUTATION = gql`
   }
 `;
 
-export default ({ currentUser, event }) => {
+export default ({ currentMember, event }) => {
   if (!event) return <div>redirect!</div>;
   const [sendMagicLink, { data, loading }] = useMutation(
     SEND_MAGIC_LINK_MUTATION
   );
   const { handleSubmit, register, errors } = useForm();
 
-  if (currentUser) {
-    return <Card>You are logged in as {currentUser.email}.</Card>;
+  if (currentMember) {
+    return <Card>You are logged in as {currentMember.email}.</Card>;
   }
 
   return (

@@ -41,7 +41,7 @@ const LogoSection = styled.div`
   }
 `;
 
-export default ({ event, currentUser, apollo }) => {
+export default ({ event, currentMember, apollo }) => {
   const logOut = () => {
     cookie.remove("token");
     apollo.resetStore();
@@ -56,14 +56,14 @@ export default ({ event, currentUser, apollo }) => {
       </LogoSection>
 
       <Nav>
-        {event && currentUser && currentUser.event.id === event.id && (
+        {event && currentMember && currentMember.event.id === event.id && (
           <Link href="/create-dream">
             <LinkButton>Create dream</LinkButton>
           </Link>
         )}
         {event ? (
-          currentUser ? (
-            <ProfileDropdown currentUser={currentUser}>
+          currentMember ? (
+            <ProfileDropdown currentMember={currentMember}>
               {/* <li>Profile</li> */}
               <li onClick={logOut}>Sign out</li>
             </ProfileDropdown>

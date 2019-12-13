@@ -1,13 +1,13 @@
-export const isMemberOfEvent = (currentUser, event) => {
-  if (!currentUser || !event) return false;
-  return currentUser.memberships.reduce((res, membership) => {
-    if (membership.event.slug === event.slug) return true;
-  }, false);
-};
+// export const isMemberOfEvent = (currentMember, event) => {
+//   if (!currentMember || !event) return false;
+//   return currentMember.memberships.reduce((res, membership) => {
+//     if (membership.event.slug === event.slug) return true;
+//   }, false);
+// };
 
-export const isMemberOfDream = (currentUser, dream) => {
-  if (!currentUser || !dream) return false;
+export const isMemberOfDream = (currentMember, dream) => {
+  if (!currentMember || !dream) return false;
   return dream.members.reduce((res, member) => {
-    if (member.id === currentUser.id) return true;
+    if (member.id === currentMember.id) return true;
   }, false);
 };
