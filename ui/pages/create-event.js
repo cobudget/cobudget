@@ -12,12 +12,14 @@ const CREATE_EVENT = gql`
     $title: String!
     $slug: String!
     $currency: String!
+    $registrationPolicy: RegistrationPolicy!
   ) {
     createEvent(
       adminEmail: $adminEmail
       title: $title
       slug: $slug
       currency: $currency
+      registrationPolicy: $registrationPolicy
     ) {
       slug
       title
@@ -32,12 +34,8 @@ export default ({ event }) => {
   const [slugValue, setSlugValue] = React.useState("");
   const [created, setCreated] = React.useState(false);
 
-  const onSubmit = values => {
-    createEvent({
-      variables: {
-        ...values
-      }
-    })
+  const onSubmit = variables => {
+    createEvent({ variables })
       .then(({ data }) => {
         console.log("event created!");
         setCreated(true);
@@ -83,12 +81,28 @@ export default ({ event }) => {
         </label>
         <label>
           Currency <span>{errors.currency && errors.currency.message}</span>
-          <input
+          <select
             name="currency"
             ref={register({
               required: "Required"
             })}
-          />
+          >
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="SEK">SEK</option>
+            <option value="DKK">DKK</option>
+          </select>
+        </label>
+        <label>
+          Registration policy{" "}
+          <span>
+            {errors.registrationPolicy && errors.registrationPolicy.message}
+          </span>
+          <select name="registrationPolicy" ref={register}>
+            <option value="OPEN">Open</option>
+            <option value="REQUEST_TO_JOIN">Request to join</option>
+            <option value="INVITE_ONLY">Invite only</option>
+          </select>
         </label>
         <label>
           Your email (admin)
