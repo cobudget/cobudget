@@ -6,10 +6,6 @@ import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
 
 const GlobalStyle = createGlobalStyle`
-  @font-face {
-      font-family: 'Inter-Bold';
-      src: url('/fonts/Inter-SemiBold.woff') format('woff');
-  }
   html {
     box-sizing: border-box;
     font-size: 16px;

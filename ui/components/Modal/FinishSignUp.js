@@ -5,8 +5,8 @@ import { useMutation } from "@apollo/react-hooks";
 import Form from "../styled/Form";
 
 const UPDATE_CURRENT_USER = gql`
-  mutation UpdatecurrentMember($name: String, $avatar: String) {
-    updateCurrentMember(name: $name, avatar: $avatar) {
+  mutation updateProfile($name: String, $avatar: String) {
+    updateProfile(name: $name, avatar: $avatar) {
       id
       name
       avatar

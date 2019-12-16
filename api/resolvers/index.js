@@ -154,7 +154,7 @@ const resolvers = {
       const token = await generateLoginJWT(member);
       return await sendMagicLinkEmail(member, token, event);
     },
-    updateCurrentMember: async (
+    updateProfile: async (
       parent,
       { name, avatar },
       { currentMember, models: { Member } }
@@ -186,8 +186,7 @@ const resolvers = {
       { emails },
       { currentMember, models: { Member } }
     ) => {
-      if (!currentMember) throw new Error('You need to be logged in');
-      if (!currentMember.isAdmin)
+      if (!currentMember || !currentMember.isAdmin)
         throw new Error('You need to be admin to invite new members');
 
       const emailArray = emails.split(',');
@@ -204,6 +203,29 @@ const resolvers = {
       const members = await Member.insertMany(memberObjs); //save??
 
       return members;
+    },
+    updateMember: async (
+      parent,
+      { memberId, isApproved, isAdmin },
+      { currentMember, models: { Member } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to update member');
+
+      const member = await Member.findOne({
+        _id: memberId,
+        eventId: currentMember.eventId
+      });
+
+      if (!member) throw new Error('No member to update found');
+
+      if (typeof isApproved !== 'undefined') {
+        member.isApproved = isApproved;
+      } // send notification on approving?
+      if (typeof isAdmin !== 'undefined') {
+        member.isAdmin = isAdmin;
+      }
+      return member.save();
     }
   },
   Member: {

@@ -9,6 +9,7 @@ const DreamCard = styled(Card)`
   width: 100%;
   padding: 0px;
   h3 {
+    font-weight: 500;
     margin-bottom: 5px;
     text-overflow: ellipsis;
     white-space: nowrap;
