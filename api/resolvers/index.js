@@ -183,15 +183,15 @@ const resolvers = {
     inviteMembers: async (
       parent,
       { emails },
-      { currentMember, models: { Member } }
+      { currentMember, models: { Member, Event } }
     ) => {
       if (!currentMember || !currentMember.isAdmin)
         throw new Error('You need to be admin to invite new members');
 
       const emailArray = emails.split(',');
-      // validate email structure?
-      // if email already exists?
 
+      if (emailArray.length > 1000)
+        throw new Error('You can only invite 1000 people at a time.');
 
       const memberObjs = emailArray.map(email => ({
         email: email.trim(),
@@ -199,7 +199,19 @@ const resolvers = {
         isApproved: true
       }));
 
-      const members = await Member.insertMany(memberObjs); //save??
+      let members = [];
+
+      for (memberObj of memberObjs) {
+        try {
+          members.push(await new Member(memberObj).save());
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      if (members.length > 0) await sendInviteEmails(members, event);
 
       return members;
     },
