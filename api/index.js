@@ -1,11 +1,10 @@
-import { ApolloServer, AuthenticationError } from 'apollo-server-micro';
-import cors from 'micro-cors';
-import 'dotenv/config';
-import jwt from 'jsonwebtoken';
-import schema from './schema';
-import resolvers from './resolvers';
-import { getModels } from './database/models';
-import { getConnection } from './database/connection';
+import { ApolloServer } from 'apollo-server-micro';
+const cors = require('micro-cors')();
+const jwt = require('jsonwebtoken');
+const schema = require('./schema');
+const resolvers = require('./resolvers');
+const { getModels } = require('./database/models');
+const { getConnection } = require('./database/connection');
 
 const server = new ApolloServer({
   typeDefs: schema,
@@ -41,7 +40,7 @@ const server = new ApolloServer({
   introspection: true
 });
 
-export default cors()((req, res) => {
+module.exports = cors((req, res) => {
   if (req.method === 'OPTIONS') {
     res.end();
     return;

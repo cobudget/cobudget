@@ -1,6 +1,6 @@
-import urlSlug from 'url-slug';
-import { generateLoginJWT } from '../utils/auth';
-import { sendMagicLinkEmail } from '../utils/email';
+const urlSlug = require('url-slug');
+const { generateLoginJWT } = require('../utils/auth');
+const { sendMagicLinkEmail, sendInviteEmails } = require('../utils/email');
 
 const resolvers = {
   Query: {
@@ -251,4 +251,4 @@ const resolvers = {
   }
 };
 
-export default resolvers;
+module.exports = resolvers;

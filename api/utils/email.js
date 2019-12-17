@@ -1,11 +1,14 @@
+const { generateLoginJWT } = require('./auth');
 const mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: 'dreams.wtf',
   host: 'api.eu.mailgun.net'
 });
 
-export const sendMagicLinkEmail = async (member, token, event) => {
+const sendMagicLinkEmail = async (member, event) => {
   // send magic link in production, log it in development
+  const token = await generateLoginJWT(member);
+
   if (process.env.NODE_ENV === 'production') {
     const url = `https://${event.slug}.dreams.wtf/?token=${token}`;
     var data = {
@@ -31,3 +34,4 @@ export const sendMagicLinkEmail = async (member, token, event) => {
     return true;
   }
 };
+module.exports = { sendMagicLinkEmail, sendInviteEmails };

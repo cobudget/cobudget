@@ -1,10 +1,10 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const uri = process.env.MONGO_URL;
 
 let connection = null;
 
-export const getConnection = async () => {
+const getConnection = async () => {
   if (connection == null) {
     connection = await mongoose.createConnection(uri, {
       bufferCommands: false, // Disable mongoose buffering
@@ -17,3 +17,5 @@ export const getConnection = async () => {
   }
   return connection;
 };
+
+module.exports = { getConnection };

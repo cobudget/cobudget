@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 // // User
 // const UserSchema = new Schema({
@@ -79,10 +79,12 @@ const DreamSchema = new Schema({
   images: [new Schema({ small: String, large: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
-export const getModels = db => {
+const getModels = db => {
   return {
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
     Dream: db.model('Dream', DreamSchema)
   };
 };
+
+module.exports = { getModels };

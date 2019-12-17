@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
 const jwtSecretKey = process.env.JWT_SECRET;
 
@@ -9,7 +9,7 @@ const jwtOptions = {
   expiresIn: '30d'
 };
 
-export const generateLoginJWT = user => {
+const generateLoginJWT = user => {
   return new Promise((resolve, reject) => {
     return jwt.sign(
       { sub: user.id },
@@ -25,3 +25,5 @@ export const generateLoginJWT = user => {
     );
   });
 };
+
+module.exports = { generateLoginJWT };

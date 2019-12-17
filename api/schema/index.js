@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server-micro';
+const { gql } = require('apollo-server-micro');
 
 const schema = gql`
   type Query {
@@ -189,4 +189,4 @@ const schema = gql`
   # type Image {}
 `;
 
-export default schema;
+module.exports = schema;
