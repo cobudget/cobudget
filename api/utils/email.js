@@ -34,4 +34,40 @@ const sendMagicLinkEmail = async (member, event) => {
     return true;
   }
 };
+
+const sendInviteEmails = async (members, event) => {
+  const emails = members.map(member => member.email);
+
+  const recipientVars = await members.reduce(async (obj, member) => {
+    return {
+      ...(await obj),
+      [member.email]: { token: await generateLoginJWT(member) }
+    };
+  }, {});
+
+  if (process.env.NODE_ENV === 'production') {
+    var data = {
+      from: 'Dreams <wizard@dreams.wtf>',
+      to: emails,
+      subject: `You are invited to Dreams for ${event.title}`,
+      'recipient-variables': recipientVars,
+      text: `Here is your log in link: https://${event.slug}.dreams.wtf/?token=%recipient.token%`
+    };
+    return mailgun
+      .messages()
+      .send(data)
+      .then(() => {
+        console.log('Successfully sent invites');
+        return true;
+      })
+      .catch(error => {
+        console.log({ error });
+        throw new Error(error.message);
+      });
+  } else {
+    console.log('In development, not sending invite emails.');
+    console.log(recipientVars);
+  }
+};
+
 module.exports = { sendMagicLinkEmail, sendInviteEmails };

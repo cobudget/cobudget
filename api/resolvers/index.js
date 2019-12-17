@@ -151,8 +151,7 @@ const resolvers = {
         member = await new Member({ email, eventId, isApproved }).save();
       }
 
-      const token = await generateLoginJWT(member);
-      return await sendMagicLinkEmail(member, token, event);
+      return await sendMagicLinkEmail(member, event);
     },
     updateProfile: async (
       parent,
