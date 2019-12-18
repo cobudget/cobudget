@@ -1,29 +1,35 @@
 import Document from "next/document";
-import { ServerStyleSheet } from "styled-components";
+import { ServerStyleSheet as StyledComponentSheet } from "styled-components";
+import { ServerStyleSheets as MaterialUiServerStyleSheet } from "@material-ui/styles";
 
 export default class MyDocument extends Document {
   static async getInitialProps(ctx) {
-    const sheet = new ServerStyleSheet();
+    const styledComponentSheet = new StyledComponentSheet();
+    const materialUiSheet = new MaterialUiServerStyleSheet();
     const originalRenderPage = ctx.renderPage;
 
     try {
       ctx.renderPage = () =>
         originalRenderPage({
-          enhanceApp: App => props => sheet.collectStyles(<App {...props} />)
+          enhanceApp: App => props =>
+            styledComponentSheet.collectStyles(
+              materialUiSheet.collect(<App {...props} />)
+            )
         });
 
       const initialProps = await Document.getInitialProps(ctx);
       return {
         ...initialProps,
-        styles: (
-          <>
+        styles: [
+          <React.Fragment key="styles">
             {initialProps.styles}
-            {sheet.getStyleElement()}
-          </>
-        )
+            {materialUiSheet.getStyleElement()}
+            {styledComponentSheet.getStyleElement()}
+          </React.Fragment>
+        ]
       };
     } finally {
-      sheet.seal();
+      styledComponentSheet.seal();
     }
   }
 }

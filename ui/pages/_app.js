@@ -5,6 +5,11 @@ import gql from "graphql-tag";
 import withData from "../utils/apolloClient";
 import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
+import {
+  createMuiTheme,
+  makeStyles,
+  ThemeProvider
+} from "@material-ui/core/styles";
 
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
@@ -30,8 +35,33 @@ const TOP_LEVEL_QUERY = gql`
     }
   }
 `;
+
+const theme = createMuiTheme({
+  typography: {
+    fontFamily: [
+      "-apple-system",
+      "BlinkMacSystemFont",
+      '"Segoe UI"',
+      "Roboto",
+      '"Helvetica Neue"',
+      "Arial",
+      "sans-serif",
+      '"Apple Color Emoji"',
+      '"Segoe UI Emoji"',
+      '"Segoe UI Symbol"'
+    ].join(","),
+    fontSize: 16
+  }
+});
+
 const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   let currentMember, event;
+
+  React.useEffect(() => {
+    const jssStyles = document.querySelector("#jss-server-side");
+    if (jssStyles && jssStyles.parentNode)
+      jssStyles.parentNode.removeChild(jssStyles);
+  });
 
   if (hostInfo.subdomain) {
     const { data } = useQuery(TOP_LEVEL_QUERY, {
@@ -55,22 +85,24 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   };
 
   return (
-    <ApolloProvider client={apollo}>
-      <Modal active={modal} closeModal={closeModal} />
-      <Layout
-        currentMember={currentMember}
-        event={event}
-        apollo={apollo}
-        openModal={openModal}
-      >
-        <Component
-          {...pageProps}
+    <ThemeProvider theme={theme}>
+      <ApolloProvider client={apollo}>
+        <Modal active={modal} closeModal={closeModal} />
+        <Layout
           currentMember={currentMember}
           event={event}
-          hostInfo={hostInfo}
-        />
-      </Layout>
-    </ApolloProvider>
+          apollo={apollo}
+          openModal={openModal}
+        >
+          <Component
+            {...pageProps}
+            currentMember={currentMember}
+            event={event}
+            hostInfo={hostInfo}
+          />
+        </Layout>
+      </ApolloProvider>
+    </ThemeProvider>
   );
 };
 
