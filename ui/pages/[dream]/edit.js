@@ -1,7 +1,8 @@
 import { useQuery } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
+import { Box } from "@material-ui/core";
 
-import EditOrCreateDream from "../../components/EditOrCreateDream";
+import EditOrCreateDreamForm from "../../components/EditOrCreateDreamForm";
 import Card from "../../components/styled/Card";
 
 import { DREAM_QUERY } from "./";
@@ -15,8 +16,10 @@ export default ({ event }) => {
 
   return (
     <Card>
-      <h1>Edit dream</h1>
-      {dream && <EditOrCreateDream dream={dream} event={event} editing />}
+      <Box p={3}>
+        <h1>Edit dream</h1>
+        {dream && <EditOrCreateDreamForm dream={dream} event={event} editing />}
+      </Box>
     </Card>
   );
 };

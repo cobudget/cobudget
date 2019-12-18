@@ -2,6 +2,7 @@ import useForm from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import urlSlug from "url-slug";
+import { Box } from "@material-ui/core";
 
 import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
@@ -49,77 +50,81 @@ export default ({ event }) => {
   if (created)
     return (
       <Card>
-        Event was created. Check your email for a magic link to sign in.
+        <Box p={3}>
+          Event was created. Check your email for a magic link to sign in.
+        </Box>
       </Card>
     );
 
   return (
     <Card>
-      <h1>Create event</h1>
-      <Form onSubmit={handleSubmit(onSubmit)}>
-        <label>
-          Title <span>{errors.title && errors.title.message}</span>
-          <input
-            name="title"
-            ref={register({
-              required: "Required"
-            })}
-            onChange={e => setSlugValue(urlSlug(e.target.value))}
-          />
-        </label>
-        <label>
-          Slug <span>{errors.slug && errors.slug.message}</span>
-          <input
-            name="slug"
-            ref={register({
-              required: "Required"
-            })}
-            value={slugValue}
-            onChange={e => setSlugValue(e.target.value)}
-            onBlur={e => setSlugValue(urlSlug(e.target.value))}
-          />
-        </label>
-        <label>
-          Currency <span>{errors.currency && errors.currency.message}</span>
-          <select
-            name="currency"
-            ref={register({
-              required: "Required"
-            })}
-          >
-            <option value="EUR">EUR</option>
-            <option value="USD">USD</option>
-            <option value="SEK">SEK</option>
-            <option value="DKK">DKK</option>
-          </select>
-        </label>
-        <label>
-          Registration policy{" "}
-          <span>
-            {errors.registrationPolicy && errors.registrationPolicy.message}
-          </span>
-          <select name="registrationPolicy" ref={register}>
-            <option value="OPEN">Open</option>
-            <option value="REQUEST_TO_JOIN">Request to join</option>
-            <option value="INVITE_ONLY">Invite only</option>
-          </select>
-        </label>
-        <label>
-          Your email (admin)
-          <span>{errors.adminEmail && errors.adminEmail.message}</span>
-          <input
-            name="adminEmail"
-            ref={register({
-              required: "Required",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                message: "invalid email address"
-              }
-            })}
-          />
-        </label>
-        <button type="submit">Submit</button>
-      </Form>
+      <Box p={3}>
+        <h1>Create event</h1>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <label>
+            Title <span>{errors.title && errors.title.message}</span>
+            <input
+              name="title"
+              ref={register({
+                required: "Required"
+              })}
+              onChange={e => setSlugValue(urlSlug(e.target.value))}
+            />
+          </label>
+          <label>
+            Slug <span>{errors.slug && errors.slug.message}</span>
+            <input
+              name="slug"
+              ref={register({
+                required: "Required"
+              })}
+              value={slugValue}
+              onChange={e => setSlugValue(e.target.value)}
+              onBlur={e => setSlugValue(urlSlug(e.target.value))}
+            />
+          </label>
+          <label>
+            Currency <span>{errors.currency && errors.currency.message}</span>
+            <select
+              name="currency"
+              ref={register({
+                required: "Required"
+              })}
+            >
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+              <option value="SEK">SEK</option>
+              <option value="DKK">DKK</option>
+            </select>
+          </label>
+          <label>
+            Registration policy{" "}
+            <span>
+              {errors.registrationPolicy && errors.registrationPolicy.message}
+            </span>
+            <select name="registrationPolicy" ref={register}>
+              <option value="OPEN">Open</option>
+              <option value="REQUEST_TO_JOIN">Request to join</option>
+              <option value="INVITE_ONLY">Invite only</option>
+            </select>
+          </label>
+          <label>
+            Your email (admin)
+            <span>{errors.adminEmail && errors.adminEmail.message}</span>
+            <input
+              name="adminEmail"
+              ref={register({
+                required: "Required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                  message: "invalid email address"
+                }
+              })}
+            />
+          </label>
+          <button type="submit">Submit</button>
+        </Form>
+      </Box>
     </Card>
   );
 };

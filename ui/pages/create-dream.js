@@ -1,10 +1,16 @@
+import { Box } from "@material-ui/core";
 import Card from "../components/styled/Card";
-import EditOrCreateDream from "../components/EditOrCreateDream";
+import EditOrCreateDreamForm from "../components/EditOrCreateDreamForm";
+
 export default ({ event }) => {
+  if (!event) return null;
+
   return (
     <Card>
-      <h1>Create dream</h1>
-      <EditOrCreateDream event={event} />
+      <Box p={3}>
+        <h1>Create dream</h1>
+        <EditOrCreateDreamForm event={event} />
+      </Box>
     </Card>
   );
 };

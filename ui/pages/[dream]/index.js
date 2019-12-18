@@ -9,7 +9,6 @@ import { isMemberOfDream } from "../../utils/helpers";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
-  padding: 0px;
   > div {
     padding: 25px;
   }

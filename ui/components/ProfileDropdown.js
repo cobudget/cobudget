@@ -7,6 +7,7 @@ const Dropdown = styled.div`
   width: 100px;
   right: 0px;
   top: 48px;
+  z-index: 100;
   position: absolute;
   background: white;
   border-radius: 8px;
@@ -19,6 +20,9 @@ const List = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  li.no-padding {
+    padding: 0;
+  }
   li {
     font-size: 14px;
     line-height: 18px;

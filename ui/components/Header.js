@@ -65,6 +65,13 @@ export default ({ event, currentMember, apollo }) => {
           currentMember ? (
             <ProfileDropdown currentMember={currentMember}>
               {/* <li>Profile</li> */}
+              {currentMember.isAdmin && (
+                <li className="no-padding">
+                  <Link href="/admin">
+                    <a>Admin</a>
+                  </Link>
+                </li>
+              )}
               <li onClick={logOut}>Sign out</li>
             </ProfileDropdown>
           ) : (
