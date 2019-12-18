@@ -22,6 +22,7 @@ const TOP_LEVEL_QUERY = gql`
       description
       title
       currency
+      registrationPolicy
     }
     currentMember {
       id
