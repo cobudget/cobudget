@@ -1,6 +1,10 @@
 const urlSlug = require('url-slug');
 const { generateLoginJWT } = require('../utils/auth');
-const { sendMagicLinkEmail, sendInviteEmails } = require('../utils/email');
+const {
+  sendMagicLinkEmail,
+  sendInviteEmails,
+  sendRequestToJoinNotifications
+} = require('../utils/email');
 
 const resolvers = {
   Query: {
@@ -168,7 +172,12 @@ const resolvers = {
 
         if (!member.isApproved) {
           // ping admins that there is a request to join
-          // await pingAdminRequestToJoin
+          const event = await Event.findOne({ _id: currentMember.eventId });
+          const admins = await Member.find({
+            eventId: currentMember.eventId,
+            isAdmin: true
+          });
+          await sendRequestToJoinNotifications(member, event, admins);
         }
 
         // if event is unapproved... meaning, person never signed in, we can confirm event here.

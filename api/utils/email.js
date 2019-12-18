@@ -70,4 +70,33 @@ const sendInviteEmails = async (members, event) => {
   }
 };
 
-module.exports = { sendMagicLinkEmail, sendInviteEmails };
+const sendRequestToJoinNotifications = async (member, event, admins) => {
+  if (process.env.NODE_ENV === 'production') {
+    const emails = admins.map(admin => admin.email);
+    var data = {
+      from: 'Dreams <wizard@dreams.wtf>',
+      to: emails,
+      subject: `Request to join ${event.title}`,
+      text: `${member.email} is requesting to join ${event.title}. Go here to approve: https://${event.slug}.dreams.wtf/admin`
+    };
+    return mailgun
+      .messages()
+      .send(data)
+      .then(() => {
+        console.log('Successfully sent request to join');
+        return true;
+      })
+      .catch(error => {
+        console.log({ error });
+        throw new Error(error.message);
+      });
+  } else {
+    console.log('in development, not sending request to join notifications');
+  }
+};
+
+module.exports = {
+  sendMagicLinkEmail,
+  sendInviteEmails,
+  sendRequestToJoinNotifications
+};
