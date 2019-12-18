@@ -19,6 +19,12 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
+    editEvent(
+      slug: String
+      title: String
+      currency: String
+      registrationPolicy: RegistrationPolicy
+    ): Event!
     createDream(
       eventId: ID!
       title: String!

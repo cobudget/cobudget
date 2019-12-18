@@ -59,6 +59,23 @@ const resolvers = {
 
       return savedEvent;
     },
+    editEvent: async (
+      parent,
+      { slug, title, currency, registrationPolicy },
+      { currentMember, models: { Event } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to edit event');
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      if (slug) event.slug = urlSlug(slug);
+      if (title) event.title = title;
+      if (currency) event.currency = currency;
+      if (registrationPolicy) event.registrationPolicy = registrationPolicy;
+
+      return event.save();
+    },
     createDream: async (
       parent,
       {
