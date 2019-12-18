@@ -7,7 +7,6 @@ const DreamCard = styled(Card)`
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0px;
   h3 {
     font-weight: 500;
     margin-bottom: 5px;
