@@ -88,23 +88,20 @@ const resolvers = {
         maxGoal,
         images
       },
-      { currentMember, models: { Member, Dream } }
+      { currentMember, models: { Dream } }
     ) => {
-      if (!currentMember) throw new Error('You need to be logged in');
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
 
-      const member = await Member.findOne({
-        _id: currentMember.id,
-        eventId
-      });
-
-      if (!member) throw new Error('You are not a member of this event');
+      if (currentMember.eventId !== eventId)
+        throw new Error('You are not a member of this event');
 
       // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       if (maxGoal && (maxGoal <= minGoal || minGoal == null))
         throw new Error('max goal needs to be larger than min goal');
 
       return new Dream({
-        eventId,
+        eventId: currentMember.eventId,
         title,
         slug: urlSlug(slug),
         description,
