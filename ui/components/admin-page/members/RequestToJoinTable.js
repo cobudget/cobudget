@@ -9,7 +9,7 @@ import {
   TableRow
 } from "@material-ui/core";
 
-export default ({ requestsToJoin }) => {
+export default ({ requestsToJoin, updateMember, deleteMember }) => {
   return (
     <>
       {requestsToJoin.length > 0 ? (
