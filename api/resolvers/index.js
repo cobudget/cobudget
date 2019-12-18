@@ -174,7 +174,7 @@ const resolvers = {
     updateProfile: async (
       parent,
       { name, avatar },
-      { currentMember, models: { Member } }
+      { currentMember, models: { Member, Event } }
     ) => {
       if (!currentMember) throw new Error('You need to be logged in..');
 
@@ -193,9 +193,6 @@ const resolvers = {
           });
           await sendRequestToJoinNotifications(member, event, admins);
         }
-
-        // if event is unapproved... meaning, person never signed in, we can confirm event here.
-        // until this happens other can register this event.
       }
 
       if (name) member.name = name;
