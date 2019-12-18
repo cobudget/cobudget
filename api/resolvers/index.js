@@ -263,6 +263,19 @@ const resolvers = {
         member.isAdmin = isAdmin;
       }
       return member.save();
+    },
+    deleteMember: async (
+      parent,
+      { memberId },
+      { currentMember, models: { Member } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to delete member');
+      const member = await Member.findOneAndDelete({
+        _id: memberId,
+        eventId: currentMember.eventId
+      });
+      return member;
     }
   },
   Member: {

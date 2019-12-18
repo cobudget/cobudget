@@ -47,6 +47,7 @@ const schema = gql`
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
     updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
+    deleteMember(memberId: ID!): Member
   }
 
   type Event {
