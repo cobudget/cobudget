@@ -143,7 +143,7 @@ const schema = gql`
   # enum DistributeGrantStrategy {
   #   DISTRIBUTE_EQUALLY # is this possible?
   #   DISTRIBUTE_TO_ACTIVE_USERS
-  #   COMITTEE
+  #   COMMITTEE
   # }
 
   # type Emoji {
