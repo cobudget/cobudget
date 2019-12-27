@@ -73,7 +73,7 @@ export default ({}) => {
   const [updateMember] = useMutation(UPDATE_MEMBER);
   const [deleteMember] = useMutation(DELETE_MEMBER, {
     update(cache, { data: { deleteMember } }) {
-      const { members } = cache.readQuery({ query: MEMBERS });
+      const { members } = cache.readQuery({ query: MEMBERS_QUERY });
       cache.writeQuery({
         query: MEMBERS_QUERY,
         data: {
