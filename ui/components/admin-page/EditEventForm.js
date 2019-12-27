@@ -10,7 +10,7 @@ import {
   Select,
   Button
 } from "@material-ui/core";
-import urlSlug from "url-slug";
+import slugify from "../../utils/slugify";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
@@ -109,7 +109,7 @@ export default ({ event }) => {
                   <InputAdornment position="end">.dreams.wtf</InputAdornment>
                 ),
                 onBlur: e => {
-                  setValue("slug", urlSlug(e.target.value));
+                  setValue("slug", slugify(e.target.value));
                 }
               }}
               variant="outlined"

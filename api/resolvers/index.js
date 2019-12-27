@@ -1,4 +1,4 @@
-const urlSlug = require('url-slug');
+const slugify = require('../utils/slugify');
 const { generateLoginJWT } = require('../utils/auth');
 const {
   sendMagicLinkEmail,
@@ -69,7 +69,7 @@ const resolvers = {
 
       const event = await Event.findOne({ _id: currentMember.eventId });
 
-      if (slug) event.slug = urlSlug(slug);
+      if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
       if (currency) event.currency = currency;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
@@ -103,7 +103,7 @@ const resolvers = {
       return new Dream({
         eventId: currentMember.eventId,
         title,
-        slug: urlSlug(slug),
+        slug: slugify(slug),
         description,
         members: [currentMember.id],
         budgetDescription,

@@ -5,7 +5,7 @@ import Router from "next/router";
 
 import ImageUpload from "./ImageUpload";
 import Form from "./styled/Form";
-import urlSlug from "url-slug";
+import slugify from "../utils/slugify";
 
 const CREATE_DREAM = gql`
   mutation CreateDream(
@@ -138,7 +138,7 @@ export default ({ dream = {}, event, editing }) => {
             required: "Required"
           })}
           onChange={e => {
-            if (!editing) setSlugValue(urlSlug(e.target.value));
+            if (!editing) setSlugValue(slugify(e.target.value));
           }}
           defaultValue={title}
         />
@@ -152,7 +152,7 @@ export default ({ dream = {}, event, editing }) => {
           })}
           value={slugValue}
           onChange={e => setSlugValue(e.target.value)}
-          onBlur={e => setSlugValue(urlSlug(e.target.value))}
+          onBlur={e => setSlugValue(slugify(e.target.value))}
         />
       </label>
 

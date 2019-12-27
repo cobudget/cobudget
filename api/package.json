@@ -17,7 +17,6 @@
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "micro-cors": "^0.1.1",
-    "mongoose": "^5.7.12",
-    "url-slug": "^2.2.0"
+    "mongoose": "^5.7.12"
   }
 }
