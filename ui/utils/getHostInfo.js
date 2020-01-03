@@ -2,8 +2,8 @@ export default function getHostInfo(req) {
   let host, protocol, subdomain;
 
   if (req) {
-    host = req.headers["x-forwarded-host"];
-    protocol = req.headers["x-forwarded-proto"];
+    host = req.headers["x-forwarded-host"] || req.headers["host"];
+    protocol = req.headers["x-forwarded-proto"] || "http";
   }
 
   if (typeof window !== "undefined") {
