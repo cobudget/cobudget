@@ -5,6 +5,8 @@ const {
   sendInviteEmails,
   sendRequestToJoinNotifications
 } = require('../utils/email');
+const { GraphQLScalarType } = require('graphql');
+const { Kind } = require('graphql/language');
 
 const resolvers = {
   Query: {
@@ -132,6 +134,30 @@ const resolvers = {
       dream.minGoal = minGoal;
       dream.maxGoal = maxGoal;
       dream.images = images;
+
+      return await dream.save();
+    },
+    addDreamComment: async (
+      parent,
+      { comment, dreamId },
+      { currentMember, models: { Dream, Comment, Date } }
+    ) => {
+      if (!currentMember) throw new Error('You need to be logged in');
+
+      const dream = await Dream.findOne({
+        _id: dreamId
+      });
+
+      if (!dream.members.includes(currentMember.id))
+        throw new Error('You are not a member of this dream');
+
+      dream.comments.push(
+        new Comment({
+          dream,
+          by: currentMember,
+          content: comment
+        })
+      );
 
       return await dream.save();
     },
@@ -292,7 +318,28 @@ const resolvers = {
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
     }
-  }
+  },
+  Comment: {
+    by: async (comment, args, { models: { Member } }) => {
+      return Member.findOne({ _id: comment.by });
+    }
+  },
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    description: 'Date custom scalar type',
+    parseValue(value) {
+      return new Date(value); // value from the client
+    },
+    serialize(value) {
+      return value.getTime(); // value sent to the client
+    },
+    parseLiteral(ast) {
+      if (ast.kind === Kind.INT) {
+        return parseInt(ast.value, 10); // ast value is always in string format
+      }
+      return null;
+    }
+  })
 };
 
 module.exports = resolvers;

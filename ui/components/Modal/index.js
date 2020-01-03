@@ -1,12 +1,15 @@
-import styled from "styled-components";
-import FinishSignUp from "./FinishSignUp";
+import styled from 'styled-components';
+import FinishSignUp from './FinishSignUp';
+import AddComment from './AddComment';
 
 export const modals = {
-  FINISH_SIGN_UP: "FINISH_SIGN_UP"
+  FINISH_SIGN_UP: 'FINISH_SIGN_UP',
+  ADD_COMMENT: 'ADD_COMMENT',
 };
 
 const modalComponents = {
-  FINISH_SIGN_UP: FinishSignUp
+  FINISH_SIGN_UP: FinishSignUp,
+  ADD_COMMENT: AddComment,
 };
 
 const Overlay = styled.div`
@@ -22,7 +25,7 @@ const Overlay = styled.div`
   z-index: 100;
 `;
 
-export default ({ active, closeModal }) => {
+export default ({ active, closeModal, event }) => {
   const ModalComponent = modalComponents[active];
 
   return (
@@ -35,8 +38,8 @@ export default ({ active, closeModal }) => {
           }
         }}
       >
-        <div onClick={e => e.stopPropagation()}>
-          <ModalComponent closeModal={closeModal} />
+        <div onClick={(e) => e.stopPropagation()}>
+          <ModalComponent closeModal={closeModal} event={event} />
         </div>
       </Overlay>
     )

@@ -66,6 +66,16 @@ const EventSchema = new Schema({
   }
 });
 
+const CommentSchema = new Schema({
+  dream: Schema.Types.ObjectId,
+  by: Schema.Types.ObjectId,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  content: String
+});
+
 // Dream
 const DreamSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true },
@@ -76,14 +86,16 @@ const DreamSchema = new Schema({
   budgetDescription: String,
   minGoal: Number,
   maxGoal: Number,
-  images: [new Schema({ small: String, large: String })]
+  images: [new Schema({ small: String, large: String })],
+  comments: [CommentSchema]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
 const getModels = db => {
   return {
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
-    Dream: db.model('Dream', DreamSchema)
+    Dream: db.model('Dream', DreamSchema),
+    Comment: db.model('Comment', CommentSchema)
   };
 };
 

@@ -43,12 +43,15 @@ const schema = gql`
       maxGoal: Int
       images: [ImageInput]
     ): Dream
+    addDreamComment(comment: String!, dreamId: ID!): Dream
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
     updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
     deleteMember(memberId: ID!): Member
   }
+
+  scalar Date
 
   type Event {
     id: ID!
@@ -106,6 +109,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     budgetDescription: String
+    comments: [Comment]
     # isApprovedForGranting: Boolean # should this be per granting period?
     # answers: [QuestionAnswer]
     # funding: Int!
@@ -157,11 +161,12 @@ const schema = gql`
   #   # createdAt
   # }
 
-  # type Comment {
-  #   dream: Dream!
-  #   by: Member!
-  #   createdAt: Date!
-  # }
+  type Comment {
+    dream: Dream!
+    by: Member!
+    createdAt: Date
+    content: String!
+  }
 
   # type Flag {
   #   title: String!
