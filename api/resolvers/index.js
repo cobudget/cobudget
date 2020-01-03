@@ -93,7 +93,7 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
-      if (currentMember.eventId !== eventId)
+      if (currentMember.eventId.toString() !== eventId)
         throw new Error('You are not a member of this event');
 
       // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
