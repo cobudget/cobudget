@@ -2,6 +2,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import Router from "next/router";
 import cookie from "js-cookie";
+import { Button } from "@material-ui/core";
 
 import ProfileDropdown from "./ProfileDropdown";
 
@@ -9,6 +10,16 @@ const Header = styled.div`
   padding: 20px 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
+
+  a.logo {
+    text-decoration: none;
+    color: rgba(0, 0, 0, 0.8);
+    h1 {
+      font-size: 24px;
+      margin: 0;
+    }
+  }
 `;
 
 const Nav = styled.nav`
@@ -20,27 +31,6 @@ const Nav = styled.nav`
   }
 `;
 
-const LinkButton = styled.a`
-  padding: 11px 16px;
-  box-shadow: 0 3px 8px #dbe0e6;
-  color: #3d4045; /* add this in theming */
-  background: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  line-height: 1;
-`;
-
-const LogoSection = styled.div`
-  display: flex;
-  align-items: center;
-  a {
-    color: rgba(0, 0, 0, 0.8);
-    font-size: 24px;
-    text-decoration: none;
-  }
-`;
-
 export default ({ event, currentMember, apollo }) => {
   const logOut = () => {
     cookie.remove("token");
@@ -49,39 +39,35 @@ export default ({ event, currentMember, apollo }) => {
   };
   return (
     <Header>
-      <LogoSection>
-        <Link href="/">
-          <a>{event ? event.title : "Dreams"}</a>
-        </Link>
-      </LogoSection>
+      <Link href="/">
+        <a className="logo">
+          <h1>{event ? event.title : "Dreams"}</h1>
+        </a>
+      </Link>
 
       <Nav>
         {event && currentMember && currentMember.event.id === event.id && (
           <Link href="/create-dream">
-            <LinkButton>Create dream</LinkButton>
+            <Button component="a" variant="contained">
+              Create dream
+            </Button>
           </Link>
         )}
         {event ? (
           currentMember ? (
-            <ProfileDropdown currentMember={currentMember}>
-              {/* <li>Profile</li> */}
-              {currentMember.isAdmin && (
-                <li className="no-padding">
-                  <Link href="/admin">
-                    <a>Admin</a>
-                  </Link>
-                </li>
-              )}
-              <li onClick={logOut}>Sign out</li>
-            </ProfileDropdown>
+            <ProfileDropdown currentMember={currentMember} logOut={logOut} />
           ) : (
             <Link href="/login">
-              <LinkButton>Login</LinkButton>
+              <Button component="a" variant="contained">
+                Login
+              </Button>
             </Link>
           )
         ) : (
           <Link href="/create-event">
-            <LinkButton>Create event</LinkButton>
+            <Button component="a" variant="contained">
+              Create event
+            </Button>
           </Link>
         )}
       </Nav>

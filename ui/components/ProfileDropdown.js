@@ -1,97 +1,112 @@
 import React from "react";
-import styled from "styled-components";
+import Router from "next/router";
+import {
+  Avatar,
+  MenuItem,
+  Popper,
+  Grow,
+  ClickAwayListener,
+  MenuList
+} from "@material-ui/core";
 
-import Avatar from "./Avatar";
+import Card from "./styled/Card";
+import stringToHslColor from "../utils/stringToHslColor";
 
-const Dropdown = styled.div`
-  width: 100px;
-  right: 0px;
-  top: 48px;
-  z-index: 100;
-  position: absolute;
-  background: white;
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 1px 6px 0 rgba(100, 105, 110, 0.3);
-`;
+const ProfileDropdown = ({ currentMember, logOut }) => {
+  const [open, setOpen] = React.useState(false);
+  const anchorRef = React.useRef(null);
 
-const List = styled.ul`
-  background: white;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  li.no-padding {
-    padding: 0;
-  }
-  li {
-    font-size: 14px;
-    line-height: 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    user-select: none;
-    color: #3d4045;
-    display: block;
-    padding: 6px 8px;
-    text-decoration: none;
-
-    a {
-      color: #3d4045;
-      display: block;
-      padding: 6px 8px;
-      text-decoration: none;
-    }
-
-    &:hover {
-      background: #f4f5f6;
-    }
-
-    &:last-child {
-      border-bottom: 0;
-      color: #9aa1aa;
-      a {
-        color: #9aa1aa;
-      }
-    }
-  }
-`;
-
-const Container = styled.div`
-  position: relative;
-`;
-
-const ProfileDropdown = ({ currentMember, children }) => {
-  const [dropdownExpanded, setDropdownExpanded] = React.useState(false);
-
-  const inputRef = React.useRef(null);
-
-  const toggleDropdown = () => {
-    setDropdownExpanded(!dropdownExpanded);
+  const handleToggle = () => {
+    setOpen(prevOpen => !prevOpen);
   };
 
-  const handleClick = e => {
-    if (dropdownExpanded) {
-      if (inputRef.current && !inputRef.current.contains(e.target))
-        toggleDropdown();
+  const handleClose = event => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
     }
+
+    setOpen(false);
   };
 
-  React.useEffect(() => {
-    document.addEventListener("mousedown", handleClick, false);
-    return () => {
-      document.removeEventListener("mousedown", handleClick, false);
-    };
-  });
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
 
   return (
-    <Container ref={inputRef}>
-      <Avatar onClick={toggleDropdown} user={currentMember} />
-      {dropdownExpanded && (
-        <Dropdown>
-          <List>{children}</List>
-        </Dropdown>
-      )}
-    </Container>
+    <div>
+      <Avatar
+        ref={anchorRef}
+        aria-controls={open ? "profile-dropdown" : undefined}
+        aria-haspopup="true"
+        onClick={handleToggle}
+        alt={currentMember.name && currentMember.name}
+        src={currentMember.avatar && currentMember.avatar}
+        style={{
+          backgroundColor: stringToHslColor(
+            currentMember.name ? currentMember.name : currentMember.email
+          ),
+          fontWeight: 500,
+          cursor: "pointer"
+        }}
+      >
+        {currentMember.name
+          ? currentMember.name.charAt(0)
+          : currentMember.emal.charAt(0)}
+      </Avatar>
+
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        role={undefined}
+        transition
+        disablePortal
+        placement="bottom-end"
+        style={{ zIndex: 1 }}
+      >
+        {({ TransitionProps }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin: "right top",
+              marginTop: 10
+            }}
+          >
+            <Card>
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList
+                  autoFocusItem={open}
+                  id="profile-dropdown"
+                  onKeyDown={handleListKeyDown}
+                >
+                  {currentMember.isAdmin && (
+                    <MenuItem
+                      onClick={e => {
+                        Router.push("/admin");
+                        handleClose(e);
+                      }}
+                    >
+                      Admin
+                    </MenuItem>
+                  )}
+                  {/* <MenuItem onClick={handleClose}>Edit profile</MenuItem> */}
+                  <MenuItem
+                    onClick={e => {
+                      logOut();
+                      handleClose(e);
+                    }}
+                  >
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </ClickAwayListener>
+            </Card>
+          </Grow>
+        )}
+      </Popper>
+    </div>
   );
 };
 
