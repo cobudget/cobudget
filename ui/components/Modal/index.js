@@ -1,44 +1,52 @@
-import styled from "styled-components";
+import { Modal } from "@material-ui/core";
+import EditProfile from "./EditProfile";
 import FinishSignUp from "./FinishSignUp";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles(theme => ({
+  modal: {
+    display: "flex",
+    padding: theme.spacing(1),
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  innerModal: {
+    outline: "none"
+  }
+}));
 
 export const modals = {
-  FINISH_SIGN_UP: "FINISH_SIGN_UP"
+  FINISH_SIGN_UP: "FINISH_SIGN_UP",
+  EDIT_PROFILE: "EDIT_PROFILE"
 };
 
 const modalComponents = {
-  FINISH_SIGN_UP: FinishSignUp
+  FINISH_SIGN_UP: FinishSignUp,
+  EDIT_PROFILE: EditProfile
 };
 
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: grid;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-`;
-
-export default ({ active, closeModal }) => {
+export default ({ active, closeModal, currentMember }) => {
+  const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
   return (
-    active && (
-      <Overlay
-        onClick={() => {
-          // can't close finish sign up modal by clicking on overlay :)
-          if (active !== modals.FINISH_SIGN_UP) {
-            closeModal();
-          }
-        }}
-      >
-        <div onClick={e => e.stopPropagation()}>
-          <ModalComponent closeModal={closeModal} />
-        </div>
-      </Overlay>
-    )
+    <Modal
+      open={Boolean(active)}
+      onClose={() => {
+        if (active !== modals.FINISH_SIGN_UP) {
+          closeModal();
+        }
+      }}
+      className={classes.modal}
+    >
+      <div className={classes.innerModal}>
+        {active && (
+          <ModalComponent
+            closeModal={closeModal}
+            currentMember={currentMember}
+          />
+        )}
+      </div>
+    </Modal>
   );
 };

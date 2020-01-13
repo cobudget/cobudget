@@ -76,6 +76,13 @@ export default ({
       openModal(modals.FINISH_SIGN_UP);
     }
   }, [currentMember]);
+
+  const logOut = () => {
+    cookie.remove("token");
+    apollo.resetStore();
+    Router.push("/");
+  };
+
   return (
     <Box display="flex" justifyContent="center">
       <Head>
@@ -92,7 +99,12 @@ export default ({
         />
       </Head>
       <Container>
-        <Header event={event} currentMember={currentMember} apollo={apollo} />
+        <Header
+          event={event}
+          currentMember={currentMember}
+          openModal={openModal}
+          logOut={logOut}
+        />
         {children}
       </Container>
       <GlobalStyle />

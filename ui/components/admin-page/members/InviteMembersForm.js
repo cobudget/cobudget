@@ -35,11 +35,7 @@ export default ({ handleClose }) => {
   });
 
   return (
-    <Card
-      style={{
-        boxShadow: "none"
-      }}
-    >
+    <Card>
       <Box p={3}>
         <Typography variant="h5">Invite members</Typography>
         <form

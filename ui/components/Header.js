@@ -31,12 +31,7 @@ const Nav = styled.nav`
   }
 `;
 
-export default ({ event, currentMember, apollo }) => {
-  const logOut = () => {
-    cookie.remove("token");
-    apollo.resetStore();
-    Router.push("/");
-  };
+export default ({ event, currentMember, openModal, logOut }) => {
   return (
     <Header>
       <Link href="/">
@@ -55,7 +50,11 @@ export default ({ event, currentMember, apollo }) => {
         )}
         {event ? (
           currentMember ? (
-            <ProfileDropdown currentMember={currentMember} logOut={logOut} />
+            <ProfileDropdown
+              currentMember={currentMember}
+              logOut={logOut}
+              openModal={openModal}
+            />
           ) : (
             <Link href="/login">
               <Button component="a" variant="contained">

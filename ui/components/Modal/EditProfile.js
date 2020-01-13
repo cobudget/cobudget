@@ -4,8 +4,9 @@ import { useMutation } from "@apollo/react-hooks";
 
 import { Box, TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
+import Avatar from "../Avatar";
 
-const UPDATE_CURRENT_USER = gql`
+const UPDATE_CURRENT_MEMBER = gql`
   mutation updateProfile($name: String, $avatar: String) {
     updateProfile(name: $name, avatar: $avatar) {
       id
@@ -16,21 +17,14 @@ const UPDATE_CURRENT_USER = gql`
   }
 `;
 
-const FinishSignUp = ({ closeModal }) => {
-  const [updateUser] = useMutation(UPDATE_CURRENT_USER);
+const EditProfile = ({ closeModal, currentMember }) => {
+  const [updateUser] = useMutation(UPDATE_CURRENT_MEMBER);
   const { handleSubmit, register, errors } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1>Finish sign up!</h1>
-        <h2>Please choose your display name</h2>
-        {/* 
-          <p>
-            If event.RegistrationPolicy === request to join. Set your name, and
-            you will then be on the list of requested to join
-          </p> */}
-
+        <h1>Edit profile</h1>
         <form
           onSubmit={handleSubmit(variables => {
             updateUser({ variables })
@@ -49,6 +43,7 @@ const FinishSignUp = ({ closeModal }) => {
               name="name"
               label="Display name"
               variant="outlined"
+              defaultValue={currentMember.name}
               error={errors.name}
               helperText={errors.name && errors.name.message}
               fullWidth
@@ -57,6 +52,7 @@ const FinishSignUp = ({ closeModal }) => {
               })}
             />
           </Box>
+
           <Button
             type="submit"
             size="large"
@@ -71,4 +67,4 @@ const FinishSignUp = ({ closeModal }) => {
   );
 };
 
-export default FinishSignUp;
+export default EditProfile;

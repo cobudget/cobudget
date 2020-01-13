@@ -10,10 +10,12 @@ import {
 } from "@material-ui/core";
 
 import Card from "./styled/Card";
+import { modals } from "./Modal/index";
 import stringToHslColor from "../utils/stringToHslColor";
 
-const ProfileDropdown = ({ currentMember, logOut }) => {
+const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
   const [open, setOpen] = React.useState(false);
+
   const anchorRef = React.useRef(null);
 
   const handleToggle = () => {
@@ -54,7 +56,7 @@ const ProfileDropdown = ({ currentMember, logOut }) => {
       >
         {currentMember.name
           ? currentMember.name.charAt(0)
-          : currentMember.emal.charAt(0)}
+          : currentMember.email.charAt(0).toUpperCase()}
       </Avatar>
 
       <Popper
@@ -91,7 +93,15 @@ const ProfileDropdown = ({ currentMember, logOut }) => {
                       Admin
                     </MenuItem>
                   )}
-                  {/* <MenuItem onClick={handleClose}>Edit profile</MenuItem> */}
+                  <MenuItem
+                    onClick={e => {
+                      openModal(modals.EDIT_PROFILE);
+                      handleClose(e);
+                    }}
+                  >
+                    Edit profile
+                  </MenuItem>
+
                   <MenuItem
                     onClick={e => {
                       logOut();

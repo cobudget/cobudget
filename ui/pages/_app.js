@@ -124,7 +124,11 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   return (
     <ThemeProvider theme={theme}>
       <ApolloProvider client={apollo}>
-        <Modal active={modal} closeModal={closeModal} />
+        <Modal
+          active={modal}
+          closeModal={closeModal}
+          currentMember={currentMember}
+        />
         <Layout
           currentMember={currentMember}
           event={event}
