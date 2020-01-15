@@ -11,6 +11,9 @@
   "prettier": {
     "singleQuote": true
   },
+  "engines": {
+    "node": "12.x"
+  },
   "dependencies": {
     "apollo-server-micro": "^2.9.12",
     "graphql": "^14.5.8",
