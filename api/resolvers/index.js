@@ -127,7 +127,7 @@ const resolvers = {
         throw new Error('You are not a member of this dream');
 
       dream.title = title;
-      dream.slug = urlSlug(slug);
+      dream.slug = slugify(slug);
       dream.description = description;
       dream.minGoal = minGoal;
       dream.maxGoal = maxGoal;
