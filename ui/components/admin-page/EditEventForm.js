@@ -18,18 +18,27 @@ const EDIT_EVENT = gql`
     $title: String
     $currency: String
     $registrationPolicy: RegistrationPolicy
+    $totalBudget: Int
+    $grantValue: Int
+    $grantsPerMember: Int
   ) {
     editEvent(
       slug: $slug
       title: $title
       currency: $currency
       registrationPolicy: $registrationPolicy
+      totalBudget: $totalBudget
+      grantValue: $grantValue
+      grantsPerMember: $grantsPerMember
     ) {
       id
       title
       slug
       currency
       registrationPolicy
+      totalBudget
+      grantValue
+      grantsPerMember
     }
   }
 `;
@@ -77,7 +86,14 @@ export default ({ event }) => {
       <h2>Edit event</h2>
       <form
         onSubmit={handleSubmit(variables => {
-          editEvent({ variables })
+          editEvent({
+            variables: {
+              ...variables,
+              totalBudget: Number(variables.totalBudget),
+              grantValue: Number(variables.grantValue),
+              grantsPerMember: Number(variables.grantsPerMember)
+            }
+          })
             .then(data => {
               // Add "Snackbar" success message from material UI
             })
@@ -128,6 +144,55 @@ export default ({ event }) => {
               <option value="SEK">SEK</option>
               <option value="DKK">DKK</option>
             </SelectInput>
+          </Box>
+          <Box m="15px 0">
+            <TextField
+              name="totalBudget"
+              label="Total budget"
+              defaultValue={event.totalBudget}
+              fullWidth
+              inputRef={register}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {event.currency}
+                  </InputAdornment>
+                ),
+                type: "number"
+              }}
+              variant="outlined"
+            />
+          </Box>
+          <Box m="15px 0">
+            <TextField
+              name="grantValue"
+              label="Grant value"
+              defaultValue={event.grantValue}
+              fullWidth
+              inputRef={register}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {event.currency}
+                  </InputAdornment>
+                ),
+                type: "number"
+              }}
+              variant="outlined"
+            />
+          </Box>
+          <Box m="15px 0">
+            <TextField
+              name="grantsPerMember"
+              label="Grants per member"
+              defaultValue={event.grantsPerMember}
+              fullWidth
+              inputRef={register}
+              InputProps={{
+                type: "number"
+              }}
+              variant="outlined"
+            />
           </Box>
           <Box m="15px 0">
             <SelectInput

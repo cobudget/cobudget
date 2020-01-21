@@ -61,7 +61,15 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      { slug, title, currency, registrationPolicy },
+      {
+        slug,
+        title,
+        currency,
+        registrationPolicy,
+        totalBudget,
+        grantValue,
+        grantsPerMember
+      },
       { currentMember, models: { Event } }
     ) => {
       if (!currentMember || !currentMember.isAdmin)
@@ -73,6 +81,9 @@ const resolvers = {
       if (title) event.title = title;
       if (currency) event.currency = currency;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
+      if (totalBudget) event.totalBudget = totalBudget;
+      if (grantValue) event.grantValue = grantValue; // cant delete grantValue right now..
+      if (grantsPerMember) event.grantsPerMember = grantsPerMember;
 
       return event.save();
     },

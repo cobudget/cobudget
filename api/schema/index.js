@@ -24,6 +24,9 @@ const schema = gql`
       title: String
       currency: String
       registrationPolicy: RegistrationPolicy
+      totalBudget: Int
+      grantValue: Int
+      grantsPerMember: Int
     ): Event!
     createDream(
       eventId: ID!
@@ -66,11 +69,9 @@ const schema = gql`
     # grantingPeriods: [GrantingPeriod]
     currency: String! # scalar? # can't change after first submission closes
     # useGrantlings: Boolean! # can't change after first submission close
-    # membershipContribution: Int
-    # grantlingValue: Int # can't change after first submission close?
-    # totalBudget: Int
-    # amountLeft: Int
-    # grantlingValue: Int
+    totalBudget: Int
+    grantValue: Int
+    grantsPerMember: Int
   }
 
   enum RegistrationPolicy {

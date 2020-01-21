@@ -63,6 +63,12 @@ const EventSchema = new Schema({
     enum: ['OPEN', 'REQUEST_TO_JOIN', 'INVITE_ONLY'],
     default: 'OPEN',
     required: true
+  },
+  totalBudget: Number,
+  grantValue: Number,
+  grantsPerMember: {
+    type: Number,
+    default: 10
   }
 });
 

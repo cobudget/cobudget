@@ -18,6 +18,9 @@ const TOP_LEVEL_QUERY = gql`
       title
       currency
       registrationPolicy
+      totalBudget
+      grantValue
+      grantsPerMember
     }
     currentMember {
       id
