@@ -13,8 +13,9 @@ export const DREAMS_QUERY = gql`
       slug
       description
       title
-      minGoal
-      maxGoal
+      minGoalGrants
+      maxGoalGrants
+      currentNumberOfGrants
       images {
         small
         large
