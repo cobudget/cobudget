@@ -51,6 +51,8 @@ const schema = gql`
     inviteMembers(emails: String!): [Member]
     updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
     deleteMember(memberId: ID!): Member
+
+    grant(dreamId: ID!, value: Int!): Grant
   }
 
   type Event {
@@ -104,8 +106,11 @@ const schema = gql`
     description: String
     images: [Image!]
     members: [Member]!
+    minGoalGrants: Int
+    maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
+    currentNumberOfGrants: Int
     budgetDescription: String
     # isApprovedForGranting: Boolean # should this be per granting period?
     # answers: [QuestionAnswer]
@@ -113,6 +118,14 @@ const schema = gql`
     # raisedFlags: [Flag]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Grant {
+    id: ID!
+    dream: Dream!
+    value: Int!
+    # user: Member!
+    # type of grant: "prefund", "user", etc..
   }
 
   type Image {
@@ -177,11 +190,6 @@ const schema = gql`
   # type Favorite {
   #   dream: Dream!
   #   by: Member!
-  # }
-
-  # type Grant {
-  #   dream: Dream!
-  #   amount: Int!
   # }
 
   # type QuestionAnswer {

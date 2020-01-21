@@ -281,6 +281,30 @@ const resolvers = {
         eventId: currentMember.eventId
       });
       return member;
+    },
+    grant: async (
+      parent,
+      { dreamId, value },
+      { currentMember, models: { Grant } }
+    ) => {
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error(
+          'You need to be a logged in approved member to grant things'
+        );
+
+      //TOOD:
+      // check dream granting toggle
+      // check granting is closed/open?
+      // check dream is not already fully funded
+      // check user has grants to spend
+      // check total budget is not exceeded
+
+      return new Grant({
+        eventId: currentMember.eventId,
+        dreamId,
+        value,
+        memberId: currentMember.id
+      }).save();
     }
   },
   Member: {
@@ -302,6 +326,32 @@ const resolvers = {
     },
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
+    },
+    minGoalGrants: async (dream, args, { models: { Event } }) => {
+      const { grantValue } = await Event.findOne({ _id: dream.eventId });
+      if (dream.minGoal === null || !grantValue) {
+        return null;
+      }
+      return Math.ceil(dream.minGoal / grantValue);
+    },
+    maxGoalGrants: async (dream, args, { models: { Event } }) => {
+      const { grantValue } = await Event.findOne({ _id: dream.eventId });
+      if (dream.maxGoal === null || !grantValue) {
+        return null;
+      }
+      return Math.ceil(dream.maxGoal / grantValue);
+    },
+    currentNumberOfGrants: async (dream, args, { models: { Grant } }) => {
+      const grants = await Grant.find({ dreamId: dream.id });
+      return grants.reduce(
+        (prevValue, currentValue) => prevValue + currentValue.value,
+        0
+      );
+    }
+  },
+  Grant: {
+    dream: async (grant, args, { models: { Dream } }) => {
+      return Dream.findOne({ _id: grant.dreamId });
     }
   }
 };

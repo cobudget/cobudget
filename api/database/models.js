@@ -85,11 +85,19 @@ const DreamSchema = new Schema({
   images: [new Schema({ small: String, large: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
+const GrantSchema = new Schema({
+  eventId: { type: Schema.Types.ObjectId, required: true, index: true },
+  dreamId: { type: Schema.Types.ObjectId, required: true, index: true },
+  memberId: { type: Schema.Types.ObjectId, required: true },
+  value: { type: Number, required: true }
+});
+
 const getModels = db => {
   return {
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
-    Dream: db.model('Dream', DreamSchema)
+    Dream: db.model('Dream', DreamSchema),
+    Grant: db.model('Grant', GrantSchema)
   };
 };
 
