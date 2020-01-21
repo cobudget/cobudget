@@ -5,6 +5,7 @@ import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
 import { Box } from "@material-ui/core";
+import DevelopmentNotice from "./DevelopmentNotice";
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -108,6 +109,7 @@ export default ({
         {children}
       </Container>
       <GlobalStyle />
+      {process.env.IS_PROD && <DevelopmentNotice />}
     </Box>
   );
 };
