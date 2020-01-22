@@ -6,6 +6,9 @@ import Link from "next/link";
 import Card from "../../components/styled/Card";
 import stringToHslColor from "../../utils/stringToHslColor";
 import { isMemberOfDream } from "../../utils/helpers";
+import { Button, Box } from "@material-ui/core";
+import ProgressBar from "../../components/ProgressBar";
+import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
@@ -17,15 +20,39 @@ const DreamCard = styled(Card)`
   }
   .flex {
     display: flex;
+    position: relative;
   }
   .main {
     flex: 0 1 70%;
   }
   .sidebar {
     flex: 0 1 30%;
+    position: relative;
+    top: -75px;
     /* background: #f1f2f3;
     border-radius: 8px;
     padding: 15px; */
+  }
+`;
+
+const StyledGrantStats = styled.div`
+  display: flex;
+  justify-content: space-between;
+  div {
+    padding: 0 8px;
+    text-align: center;
+
+    .label {
+      display: block;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+    .number {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 24px;
+      font-weight: 500;
+    }
   }
 `;
 
@@ -38,6 +65,9 @@ export const DREAM_QUERY = gql`
       title
       minGoal
       maxGoal
+      minGoalGrants
+      maxGoalGrants
+      currentNumberOfGrants
       members {
         id
       }
@@ -66,6 +96,8 @@ const Dream = ({ event, currentMember }) => {
     }
   );
 
+  const [grantModalOpen, setGrantModalOpen] = React.useState(false);
+
   return (
     <DreamCard>
       {dream &&
@@ -75,27 +107,71 @@ const Dream = ({ event, currentMember }) => {
           <ImgPlaceholder color={stringToHslColor(dream.title)} />
         ))}
       <div>
-        <h1>{dream && dream.title}</h1>
         <div className="flex">
           <div className="main">
+            <h1>{dream && dream.title}</h1>
             <p>{dream && dream.description}</p>
+            <h2>Budget</h2>
+            <h2>Comments</h2>
           </div>
           <div className="sidebar">
             {dream && (
               <>
-                {dream.minGoal && (
-                  <h3>
-                    Min goal: {dream.minGoal} {event.currency}
-                  </h3>
-                )}
-                {dream.maxGoal && (
-                  <h3>
-                    Max goal: {dream.maxGoal} {event.currency}
-                  </h3>
-                )}
+                <Card>
+                  <Box p={2}>
+                    <StyledGrantStats>
+                      <div>
+                        <span className="number">
+                          {dream.currentNumberOfGrants}
+                        </span>
+                        <span className="label">Funded</span>
+                      </div>
+                      <div>
+                        <span className="number">{dream.minGoalGrants}</span>
+
+                        <span className="label">Min. goal</span>
+                      </div>
+                      <div>
+                        <span className="number">{dream.maxGoalGrants}</span>
+
+                        <span className="label">Max. goal</span>
+                      </div>
+                    </StyledGrantStats>
+
+                    <Box m="16px 0px">
+                      <ProgressBar
+                        currentNumberOfGrants={dream.currentNumberOfGrants}
+                        minGoalGrants={dream.minGoalGrants}
+                        maxGoalGrants={dream.maxGoalGrants}
+                        height={10}
+                      />
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      size="large"
+                      onClick={() => setGrantModalOpen(true)}
+                    >
+                      Donate to dream
+                    </Button>
+                    <GiveGrantlingsModal
+                      open={grantModalOpen}
+                      handleClose={() => setGrantModalOpen(false)}
+                      dream={dream}
+                      event={event}
+                    />
+                  </Box>
+                </Card>
+                <h3>Dreamers</h3>
+
+                <h3>Tags</h3>
+
+                <h3>Actions</h3>
                 {isMemberOfDream(currentMember, dream) && (
                   <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
-                    <a>Edit dream</a>
+                    <Button component="a">Edit dream</Button>
                   </Link>
                 )}
               </>
