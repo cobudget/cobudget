@@ -65,6 +65,9 @@ const EDIT_DREAM = gql`
       title
       minGoal
       maxGoal
+      minGoalGrants
+      maxGoalGrants
+      currentNumberOfGrants
       images {
         small
         large

@@ -6,7 +6,10 @@ import Link from "next/link";
 import Card from "../../components/styled/Card";
 import stringToHslColor from "../../utils/stringToHslColor";
 import { isMemberOfDream } from "../../utils/helpers";
-import { Button, Box } from "@material-ui/core";
+import { Button, Box, Tooltip, Chip } from "@material-ui/core";
+import AvatarGroup from "@material-ui/lab/AvatarGroup";
+
+import Avatar from "../../components/Avatar";
 import ProgressBar from "../../components/ProgressBar";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
 
@@ -24,11 +27,18 @@ const DreamCard = styled(Card)`
   }
   .main {
     flex: 0 1 70%;
+    padding-right: 20px;
   }
   .sidebar {
     flex: 0 1 30%;
     position: relative;
     top: -75px;
+
+    h3 {
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #000;
+    }
     /* background: #f1f2f3;
     border-radius: 8px;
     padding: 15px; */
@@ -70,6 +80,7 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       members {
         id
+        name
       }
       images {
         small
@@ -164,16 +175,29 @@ const Dream = ({ event, currentMember }) => {
                     />
                   </Box>
                 </Card>
-                <h3>Dreamers</h3>
+                <Box m="16px 0">
+                  <h3>Dreamers</h3>
+                  <AvatarGroup>
+                    {dream.members.map(member => (
+                      <Tooltip key={member.id} title={member.name}>
+                        <Avatar user={member} />
+                      </Tooltip>
+                    ))}
+                  </AvatarGroup>
+                </Box>
+                <Box m="16px 0">
+                  <h3>Tags</h3>
+                  <Chip label="Dummy tag" />
+                </Box>
 
-                <h3>Tags</h3>
-
-                <h3>Actions</h3>
-                {isMemberOfDream(currentMember, dream) && (
-                  <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
-                    <Button component="a">Edit dream</Button>
-                  </Link>
-                )}
+                <Box m="16px 0">
+                  <h3>Actions</h3>
+                  {isMemberOfDream(currentMember, dream) && (
+                    <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
+                      <Button component="a">Edit dream</Button>
+                    </Link>
+                  )}
+                </Box>
               </>
             )}
           </div>
