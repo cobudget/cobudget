@@ -91,9 +91,18 @@ export const DREAM_QUERY = gql`
 `;
 
 const ImgPlaceholder = styled.div`
-  background: ${props => props.color};
+  background: ${props => props.bgColor};
   flex: 0 0 200px !important;
-  height: 250px;
+  height: 350px;
+`;
+
+const CoverImg = styled.img`
+  width: 100%;
+  background: ${props => props.bgColor};
+
+  height: 350px;
+  object-fit: cover;
+  object-position: center center;
 `;
 
 const Dream = ({ event, currentMember }) => {
@@ -113,9 +122,12 @@ const Dream = ({ event, currentMember }) => {
     <DreamCard>
       {dream &&
         (dream.images.length > 0 ? (
-          <img src={dream.images[0].large} />
+          <CoverImg
+            src={dream.images[0].large}
+            bgColor={stringToHslColor(dream.title)}
+          />
         ) : (
-          <ImgPlaceholder color={stringToHslColor(dream.title)} />
+          <ImgPlaceholder bgColor={stringToHslColor(dream.title)} />
         ))}
       <div>
         <div className="flex">
