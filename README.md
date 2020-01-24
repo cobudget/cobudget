@@ -17,7 +17,9 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 
 - [Install and run](https://docs.mongodb.com/manual/administration/install-community/) MongoDB
 - [Install Node.js](https://nodejs.org/en/) version >= 12.
-- Install Now CLI: `npm i -g now`
+  - Or run `nvm use` in this directory
+- Install dependencies: `npm i`
+  - This also installs dependencies in `/ui` and `/api`
 - Copy `.env.default` to `.env`
 
 ### Running the project
@@ -25,8 +27,10 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 Run the project from the root with
 
 ```
-now dev
+npm start
 ```
+
+> This calls `now dev`.
 
 This will build and serve both the API and the UI with one command, and provide hot reloading.
 `now dev` simulates the serverless deployment platform [Now](https://zeit.co/) where the project is deployed.
