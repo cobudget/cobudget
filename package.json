@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "postinstall": "cd ui && npm i && cd ../api && npm i",
     "start": "now dev"
   },
   "devDependencies": {
