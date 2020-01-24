@@ -17,6 +17,7 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 
 - [Install and run](https://docs.mongodb.com/manual/administration/install-community/) MongoDB
 - [Install Node.js](https://nodejs.org/en/) version >= 12.
+  - Or run `nvm use` in this directory
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
 - Copy `.env.default` to `.env`
