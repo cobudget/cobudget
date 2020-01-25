@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "run-s db:up start",
+    "dev": "run-p db:up start",
     "start": "now dev",
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
