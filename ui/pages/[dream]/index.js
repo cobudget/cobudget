@@ -105,6 +105,14 @@ const CoverImg = styled.img`
   object-position: center center;
 `;
 
+const ImgItem = styled.img`
+  width: auto;
+  height: 150px;
+  padding: 5px;
+  object-fit: cover;
+  object-position: center center;
+`;
+
 const Dream = ({ event, currentMember }) => {
   if (!event) return null;
   const router = useRouter();
@@ -117,6 +125,17 @@ const Dream = ({ event, currentMember }) => {
   );
 
   const [grantModalOpen, setGrantModalOpen] = React.useState(false);
+
+  const imgList = [];
+  if (dream) {
+    for (let i = 0; i < dream.images.length; i++) {
+      imgList.push(<ImgItem
+        src={dream.images[i].large}
+        bgColor={stringToHslColor(dream.title)}
+        key={i}
+      />)
+    }    
+  }
 
   return (
     <DreamCard>
@@ -133,6 +152,14 @@ const Dream = ({ event, currentMember }) => {
         <div className="flex">
           <div className="main">
             <h1>{dream && dream.title}</h1>
+
+            {dream &&
+              (dream.images.length > 0 ? (
+                imgList
+              ) : (
+                null
+              ))}
+
             <p>{dream && dream.description}</p>
             <h2>Budget</h2>
             <h2>Comments</h2>
