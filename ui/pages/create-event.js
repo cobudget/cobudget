@@ -51,7 +51,10 @@ export default ({ event }) => {
     return (
       <Card>
         <Box p={3}>
-          Event was created. Check your email for a magic link to sign in.
+          Event was created.{" "}
+          {process.env.IS_PROD
+            ? "Check your email for a magic link to sign in."
+            : "Check your console for a magic link to sign in (in development)."}
         </Box>
       </Card>
     );
