@@ -54,8 +54,7 @@ const resolvers = {
 
       const [savedEvent] = await Promise.all([event.save(), member.save()]);
 
-      const token = await generateLoginJWT(member);
-      await sendMagicLinkEmail(member, token, event);
+      await sendMagicLinkEmail(member, event);
 
       return savedEvent;
     },
