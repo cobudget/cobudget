@@ -136,6 +136,9 @@ const Dream = ({ event, currentMember }) => {
           <div className="main">
             <h1>{dream && dream.title}</h1>
 
+            <p>{dream && dream.summary}</p>
+            <br></br>
+
             {dream && <Gallery images={dream.images} size={100} />}
 
             <br />
