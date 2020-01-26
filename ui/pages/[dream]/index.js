@@ -10,12 +10,9 @@ import { Button, Box, Tooltip, Chip } from "@material-ui/core";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
 
 import Avatar from "../../components/Avatar";
-import ProgressBar from "../../components/ProgressBar";
+import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
-
-import Modal from '@material-ui/core/Modal';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
+import ProgressBar from "../../components/ProgressBar";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
@@ -109,56 +106,6 @@ const CoverImg = styled.img`
   object-position: center center;
 `;
 
-const ImgItem = styled.img`
-  width: auto;
-  height: 150px;
-  padding: 5px;
-`;
-
-const ImgItemModal = styled.img`
-  width: 90%;
-  height: auto;
-  outline: 0;
-`;
-
-const Image = ({image}) => {
-  const [open, setOpen] = React.useState(false);
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-  return (
-    <>
-    <ImgItem
-      src={image.small}
-      onClick={handleOpen}
-    />
-    <Modal
-      aria-labelledby="transition-modal-title"
-      aria-describedby="transition-modal-description"
-      open={open}
-      onClose={handleClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{
-        timeout: 500,
-      }}
-    >
-      <Fade in={open}>
-        <ImgItemModal
-          src={image.large}
-          onClick={handleClose}
-        />
-      </Fade>
-    </Modal>
-    </>
-  )
-}
-
 const Dream = ({ event, currentMember }) => {
   if (!event) return null;
   const router = useRouter();
@@ -188,8 +135,9 @@ const Dream = ({ event, currentMember }) => {
           <div className="main">
             <h1>{dream && dream.title}</h1>
 
-            {dream &&
-              (dream.images.map((image, i) => <Image key={i} image={image}/>))}
+            {dream && <Gallery images={dream.images} size={100} />}
+
+            <br />
 
             <p>{dream && dream.description}</p>
             <h2>Budget</h2>
