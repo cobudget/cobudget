@@ -39,7 +39,7 @@ const Image = styled.img`
 export default ({ images, size }) => (
   <Gallery>
     {images.map(image => (
-      <GalleryItem image={image} size={size} />
+      <GalleryItem key={image.small} image={image} size={size} />
     ))}
   </Gallery>
 );
@@ -56,7 +56,6 @@ function GalleryItem({ image, size }) {
     <>
       <Thumb
         href={image.large}
-        key={image.small}
         onClick={open}
         size={size}
         src={image.small}
