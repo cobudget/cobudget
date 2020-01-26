@@ -10,8 +10,9 @@ import { Button, Box, Tooltip, Chip } from "@material-ui/core";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
 
 import Avatar from "../../components/Avatar";
-import ProgressBar from "../../components/ProgressBar";
+import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
+import ProgressBar from "../../components/ProgressBar";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
@@ -134,6 +135,11 @@ const Dream = ({ event, currentMember }) => {
         <div className="flex">
           <div className="main">
             <h1>{dream && dream.title}</h1>
+
+            {dream && <Gallery images={dream.images} size={100} />}
+
+            <br />
+
             <p>{dream && dream.description}</p>
             <h2>Budget</h2>
             <h2>Comments</h2>
