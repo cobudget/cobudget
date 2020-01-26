@@ -33,7 +33,7 @@ const resolvers = {
   Mutation: {
     createEvent: async (
       parent,
-      { adminEmail, slug, title, description, currency, registrationPolicy },
+      { adminEmail, slug, title, description, summary, currency, registrationPolicy },
       { models: { Event, Member } }
     ) => {
       // check slug..
@@ -41,6 +41,7 @@ const resolvers = {
         slug,
         title,
         description,
+        summary,
         currency,
         registrationPolicy
       });
@@ -93,6 +94,7 @@ const resolvers = {
         title,
         slug,
         description,
+        summary,
         budgetDescription,
         minGoal,
         maxGoal,
@@ -115,6 +117,7 @@ const resolvers = {
         title,
         slug: slugify(slug),
         description,
+        summary,
         members: [currentMember.id],
         budgetDescription,
         minGoal,
@@ -124,7 +127,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, slug, description, minGoal, maxGoal, images },
+      { dreamId, title, slug, description, summary, minGoal, maxGoal, images },
       { currentMember, models: { Dream } }
     ) => {
       if (!currentMember) throw new Error('You need to be logged in');
@@ -139,6 +142,7 @@ const resolvers = {
       dream.title = title;
       dream.slug = slugify(slug);
       dream.description = description;
+      dream.summary = summary;
       dream.minGoal = minGoal;
       dream.maxGoal = maxGoal;
       dream.images = images;

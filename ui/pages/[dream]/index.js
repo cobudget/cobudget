@@ -72,6 +72,7 @@ export const DREAM_QUERY = gql`
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal

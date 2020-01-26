@@ -78,6 +78,7 @@ const DreamSchema = new Schema({
   slug: { type: String, required: true },
   title: { type: String, required: true },
   description: String,
+  summary: String,
   members: [Schema.Types.ObjectId],
   budgetDescription: String,
   minGoal: Number,

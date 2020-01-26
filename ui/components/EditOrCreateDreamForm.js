@@ -13,6 +13,7 @@ const CREATE_DREAM = gql`
     $title: String!
     $slug: String!
     $description: String
+    $summary: String
     $images: [ImageInput]
     $minGoal: Int
     $maxGoal: Int
@@ -22,6 +23,7 @@ const CREATE_DREAM = gql`
       title: $title
       slug: $slug
       description: $description
+      summary: $summary
       images: $images
       minGoal: $minGoal
       maxGoal: $maxGoal
@@ -29,6 +31,7 @@ const CREATE_DREAM = gql`
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal
@@ -46,6 +49,7 @@ const EDIT_DREAM = gql`
     $title: String!
     $slug: String!
     $description: String
+    $summary: String
     $images: [ImageInput]
     $minGoal: Int
     $maxGoal: Int
@@ -55,6 +59,7 @@ const EDIT_DREAM = gql`
       title: $title
       slug: $slug
       description: $description
+      summary: $summary
       images: $images
       minGoal: $minGoal
       maxGoal: $maxGoal
@@ -62,6 +67,7 @@ const EDIT_DREAM = gql`
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal
@@ -85,6 +91,7 @@ export default ({ dream = {}, event, editing }) => {
     title = "",
     slug = "",
     description = "",
+    summary = "",
     minGoal = "",
     maxGoal = ""
   } = dream;
@@ -161,6 +168,16 @@ export default ({ dream = {}, event, editing }) => {
 
       <label>Images</label>
       <ImageUpload images={images} setImages={setImages} />
+
+      <label>
+        Summary (max. 200 characters)
+        <textarea
+          name="summary"
+          ref={register}
+          rows={10}
+          defaultValue={summary}
+        />
+      </label>
 
       <label>
         Description
