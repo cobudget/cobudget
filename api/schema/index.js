@@ -33,6 +33,7 @@ const schema = gql`
       title: String!
       slug: String!
       description: String
+      summary: String
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
@@ -42,6 +43,7 @@ const schema = gql`
       title: String
       slug: String
       description: String
+      summary: String
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
@@ -104,6 +106,7 @@ const schema = gql`
     slug: String!
     title: String!
     description: String
+    summary: String
     images: [Image!]
     members: [Member]!
     minGoalGrants: Int

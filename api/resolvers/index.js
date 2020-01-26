@@ -33,7 +33,7 @@ const resolvers = {
   Mutation: {
     createEvent: async (
       parent,
-      { adminEmail, slug, title, description, currency, registrationPolicy },
+      { adminEmail, slug, title, description, summary, currency, registrationPolicy },
       { models: { Event, Member } }
     ) => {
       // check slug..
@@ -41,6 +41,7 @@ const resolvers = {
         slug,
         title,
         description,
+        summary,
         currency,
         registrationPolicy
       });
@@ -93,6 +94,7 @@ const resolvers = {
         title,
         slug,
         description,
+        summary,
         budgetDescription,
         minGoal,
         maxGoal,
@@ -110,11 +112,15 @@ const resolvers = {
       if (maxGoal && (maxGoal <= minGoal || minGoal == null))
         throw new Error('max goal needs to be larger than min goal');
 
+      if (summary.length > 200)
+        throw new Error('Summary needs to be max. 200 characters.');
+
       return new Dream({
         eventId: currentMember.eventId,
         title,
         slug: slugify(slug),
         description,
+        summary,
         members: [currentMember.id],
         budgetDescription,
         minGoal,
@@ -124,7 +130,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, slug, description, minGoal, maxGoal, images },
+      { dreamId, title, slug, description, summary, minGoal, maxGoal, images },
       { currentMember, models: { Dream } }
     ) => {
       if (!currentMember) throw new Error('You need to be logged in');
@@ -136,9 +142,13 @@ const resolvers = {
       if (!dream.members.includes(currentMember.id))
         throw new Error('You are not a member of this dream');
 
+      if (summary.length > 200)
+        throw new Error('Summary needs to be max. 200 characters.');
+
       dream.title = title;
       dream.slug = slugify(slug);
       dream.description = description;
+      dream.summary = summary;
       dream.minGoal = minGoal;
       dream.maxGoal = maxGoal;
       dream.images = images;

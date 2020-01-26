@@ -73,6 +73,7 @@ export const DREAM_QUERY = gql`
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal
@@ -134,6 +135,9 @@ const Dream = ({ event, currentMember }) => {
         <div className="flex">
           <div className="main">
             <h1>{dream && dream.title}</h1>
+
+            <p>{dream && dream.summary}</p>
+            <br></br>
 
             {dream && <Gallery images={dream.images} size={100} />}
 
