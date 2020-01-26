@@ -173,8 +173,9 @@ export default ({ dream = {}, event, editing }) => {
         Summary (max. 200 characters)
         <textarea
           name="summary"
+          maxLength="200"
           ref={register}
-          rows={10}
+          rows={2}
           defaultValue={summary}
         />
       </label>

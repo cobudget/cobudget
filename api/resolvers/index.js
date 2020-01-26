@@ -112,6 +112,9 @@ const resolvers = {
       if (maxGoal && (maxGoal <= minGoal || minGoal == null))
         throw new Error('max goal needs to be larger than min goal');
 
+      if (summary.length > 200)
+        throw new Error('Summary needs to be max. 200 characters.');
+
       return new Dream({
         eventId: currentMember.eventId,
         title,
@@ -138,6 +141,9 @@ const resolvers = {
 
       if (!dream.members.includes(currentMember.id))
         throw new Error('You are not a member of this dream');
+
+      if (summary.length > 200)
+        throw new Error('Summary needs to be max. 200 characters.');
 
       dream.title = title;
       dream.slug = slugify(slug);
