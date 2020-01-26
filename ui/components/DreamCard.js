@@ -58,7 +58,7 @@ export default ({ dream }) => {
         <div>
           <h3>{dream.title}</h3>
 
-          <p>{dream.summary ? truncate(dream.summary, 200) : ''}</p>
+          <p>{dream.summary}</p>
         </div>
 
         <FundingStats
