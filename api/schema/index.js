@@ -65,6 +65,7 @@ const schema = gql`
     description: String
     # logo: String
     members: [Member!]!
+    numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
     # questions: [Question!]
@@ -102,6 +103,7 @@ const schema = gql`
     isApproved: Boolean!
     verifiedEmail: Boolean!
     createdAt: Date
+    availableGrants: Int
     # isGuide: Boolean!
     # favorites: [Dream]
   }

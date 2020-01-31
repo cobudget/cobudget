@@ -286,19 +286,61 @@ const resolvers = {
     grant: async (
       parent,
       { dreamId, value },
-      { currentMember, models: { Grant } }
+      { currentMember, models: { Grant, Event, Dream } }
     ) => {
       if (!currentMember || !currentMember.isApproved)
         throw new Error(
           'You need to be a logged in approved member to grant things'
         );
 
-      //TOOD:
-      // check dream granting toggle
-      // check granting is closed/open?
-      // check dream is not already fully funded
-      // check user has grants to spend
-      // check total budget is not exceeded
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      // Check that granting is open
+      if (!event.grantingOpen) throw new Error('Granting is not open!');
+
+      // Check that the max goal of the dream is not exceeded
+      const [
+        { grantsForDream } = { grantsForDream: 0 }
+      ] = await Grant.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
+      ]);
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      // TODO: Create virtual on dream model instead?
+      const maxGoalGrants = Math.ceil(
+        Math.max(dream.maxGoal, dream.minGoal) / event.grantValue
+      );
+
+      if (grantsForDream + value > maxGoalGrants)
+        throw new Error("You can't overfund this dream.");
+
+      // Check that user has not spent more grants than he has
+      const [
+        { grantsFromUser } = { grantsFromUser: 0 }
+      ] = await Grant.aggregate([
+        { $match: { memberId: mongoose.Types.ObjectId(currentMember.id) } },
+        { $group: { _id: null, grantsFromUser: { $sum: '$value' } } } // is this _id: null needed?
+      ]);
+
+      if (grantsFromUser + value > event.grantsPerMember)
+        throw new Error('You are trying to spend too many grants.');
+
+      // Check that total budget of event will not be exceeded
+      const [
+        { grantsFromEverybody } = { grantsFromEverybody: 0 }
+      ] = await Grant.aggregate([
+        { $match: { eventId: mongoose.Types.ObjectId(currentMember.eventId) } },
+        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } } // is this _id: null needed?
+      ]);
+
+      const totalGrantsToSpend = Math.floor(
+        event.totalBudget / event.grantValue
+      );
+
+      if (grantsFromEverybody + value > totalGrantsToSpend)
+        throw new Error('Total budget of event is exeeced with this grant');
 
       return new Grant({
         eventId: currentMember.eventId,
@@ -348,6 +390,22 @@ const resolvers = {
   Member: {
     event: async (member, args, { models: { Event } }) => {
       return Event.findOne({ _id: member.eventId });
+    },
+    availableGrants: async (member, args, { models: { Grant, Event } }) => {
+      const { grantsPerMember, grantingOpen } = await Event.findOne({
+        _id: member.eventId
+      });
+
+      const [
+        { grantsFromMember } = { grantsFromMember: 0 }
+      ] = await Grant.aggregate([
+        { $match: { memberId: mongoose.Types.ObjectId(member.id) } },
+        { $group: { _id: null, grantsFromMember: { $sum: '$value' } } }
+      ]);
+
+      if (!grantingOpen) return 0;
+
+      return grantsPerMember - grantsFromMember;
     }
   },
   Event: {
@@ -356,6 +414,9 @@ const resolvers = {
     },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
+    },
+    numberOfApprovedMembers: async (event, args, { models: { Member } }) => {
+      return Member.countDocuments({ eventId: event.id, isApproved: true });
     }
   },
   Dream: {
@@ -380,11 +441,13 @@ const resolvers = {
       return Math.ceil(dream.maxGoal / grantValue);
     },
     currentNumberOfGrants: async (dream, args, { models: { Grant } }) => {
-      const grants = await Grant.find({ dreamId: dream.id });
-      return grants.reduce(
-        (prevValue, currentValue) => prevValue + currentValue.value,
-        0
-      );
+      const [
+        { grantsForDream } = { grantsForDream: 0 }
+      ] = await Grant.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dream.id) } },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
+      ]);
+      return grantsForDream;
     }
   },
   Grant: {
