@@ -21,7 +21,12 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudget
       grantValue
       grantsPerMember
+      grantingOpened
+      grantingClosed
+      grantingOpen
+      numberOfApprovedMembers
     }
+
     currentMember {
       id
       name
