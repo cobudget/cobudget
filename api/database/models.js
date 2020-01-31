@@ -69,7 +69,14 @@ const EventSchema = new Schema({
   grantsPerMember: {
     type: Number,
     default: 10
-  }
+  },
+  grantingOpened: Date,
+  grantingClosed: Date
+});
+
+EventSchema.virtual('grantingOpen').get(function() {
+  if (this.grantingOpened && !this.grantingClosed) return true;
+  return false;
 });
 
 // Dream
