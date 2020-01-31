@@ -46,6 +46,7 @@ const schema = gql`
       maxGoal: Int
       images: [ImageInput]
     ): Dream
+
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
@@ -53,6 +54,8 @@ const schema = gql`
     deleteMember(memberId: ID!): Member
 
     grant(dreamId: ID!, value: Int!): Grant
+    openGranting(eventId: ID!): Event
+    closeGranting(eventId: ID!): Event
   }
 
   type Event {
@@ -74,7 +77,12 @@ const schema = gql`
     totalBudget: Int
     grantValue: Int
     grantsPerMember: Int
+    grantingOpened: Date
+    grantingClosed: Date
+    grantingOpen: Boolean
   }
+
+  scalar Date
 
   enum RegistrationPolicy {
     OPEN
@@ -93,7 +101,7 @@ const schema = gql`
     isAdmin: Boolean!
     isApproved: Boolean!
     verifiedEmail: Boolean!
-    createdAt: String
+    createdAt: Date
     # isGuide: Boolean!
     # favorites: [Dream]
   }

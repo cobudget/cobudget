@@ -1,10 +1,12 @@
 const slugify = require('../utils/slugify');
-const { generateLoginJWT } = require('../utils/auth');
 const {
   sendMagicLinkEmail,
   sendInviteEmails,
   sendRequestToJoinNotifications
 } = require('../utils/email');
+const { GraphQLScalarType } = require('graphql');
+const { Kind } = require('graphql/language');
+const mongoose = require('mongoose');
 
 const resolvers = {
   Query: {
@@ -304,6 +306,43 @@ const resolvers = {
         value,
         memberId: currentMember.id
       }).save();
+    },
+    openGranting: async (
+      parent,
+      { eventId },
+      { currentMember, models: { Event } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to open granting');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      // TODO: check that grant value, total budget, grants per member are set
+      // and maybe somewhat reasonable?
+
+      event.grantingOpened = Date.now();
+      event.grantingClosed = null;
+
+      return event.save();
+    },
+    closeGranting: async (
+      parent,
+      { eventId },
+      { currentMember, models: { Event } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to open granting');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      if (!event.grantingOpened)
+        throw new Error(
+          'You cant close granting when it is not already opened'
+        );
+
+      event.grantingClosed = Date.now();
+
+      return event.save();
     }
   },
   Member: {
@@ -352,7 +391,23 @@ const resolvers = {
     dream: async (grant, args, { models: { Dream } }) => {
       return Dream.findOne({ _id: grant.dreamId });
     }
-  }
+  },
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    description: 'Date custom scalar type',
+    parseValue(value) {
+      return new Date(value); // value from the client
+    },
+    serialize(value) {
+      return value.getTime(); // value sent to the client
+    },
+    parseLiteral(ast) {
+      if (ast.kind === Kind.INT) {
+        return parseInt(ast.value, 10); // ast value is always in string format
+      }
+      return null;
+    }
+  })
 };
 
 module.exports = resolvers;
