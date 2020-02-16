@@ -503,7 +503,9 @@ const resolvers = {
       return Event.findOne({ _id: member.eventId });
     },
     availableGrants: async (member, args, { models: { Grant, Event } }) => {
-      const { grantsPerMember, grantingOpen } = await Event.findOne({
+      if (!member.isApproved) return 0;
+
+      const event = await Event.findOne({
         _id: member.eventId
       });
 
@@ -514,9 +516,9 @@ const resolvers = {
         { $group: { _id: null, grantsFromMember: { $sum: '$value' } } }
       ]);
 
-      if (!grantingOpen) return 0;
+      if (!event.grantingOpen) return 0;
 
-      return grantsPerMember - grantsFromMember;
+      return event.grantsPerMember - grantsFromMember;
     },
     givenGrants: async (member, args, { models: { Grant } }) => {
       return Grant.find({ memberId: member.id });
