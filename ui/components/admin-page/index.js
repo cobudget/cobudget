@@ -10,7 +10,7 @@ function TabPanel({ children, activeTab, index }) {
 }
 
 export default ({ event }) => {
-  const [activeTab, setActiveTab] = React.useState(2);
+  const [activeTab, setActiveTab] = React.useState(0);
 
   return (
     <Card>
@@ -33,9 +33,7 @@ export default ({ event }) => {
         </Box>
       </TabPanel>
       <TabPanel activeTab={activeTab} index={2}>
-        <Box p={3}>
-          <Granting event={event} />
-        </Box>
+        <Granting event={event} />
       </TabPanel>
     </Card>
   );

@@ -21,8 +21,10 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudget
       grantValue
       grantsPerMember
-      grantingOpened
-      grantingClosed
+      dreamCreationCloses
+      dreamCreationOpen
+      grantingOpens
+      grantingCloses
       grantingOpen
       numberOfApprovedMembers
     }
@@ -69,7 +71,7 @@ const theme = createMuiTheme({
       '"Segoe UI Emoji"',
       '"Segoe UI Symbol"'
     ].join(","),
-    fontSize: 16
+    fontSize: 14
   },
   shadows: [
     "none",
