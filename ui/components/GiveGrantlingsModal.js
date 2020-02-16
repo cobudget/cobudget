@@ -21,8 +21,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const GIVE_GRANT = gql`
-  mutation Grant($dreamId: ID!, $value: Int!) {
-    grant(dreamId: $dreamId, value: $value) {
+  mutation GiveGrant($dreamId: ID!, $value: Int!) {
+    giveGrant(dreamId: $dreamId, value: $value) {
       value
     }
   }
@@ -39,7 +39,7 @@ const GiveGrantlingsModal = ({
   const router = useRouter();
 
   const [giveGrant] = useMutation(GIVE_GRANT, {
-    update(cache, { data: { grant } }) {
+    update(cache, { data: { giveGrant } }) {
       const { dream } = cache.readQuery({
         query: DREAM_QUERY,
         variables: { slug: router.query.dream, eventId: event.id }
@@ -50,7 +50,7 @@ const GiveGrantlingsModal = ({
         data: {
           dream: {
             ...dream,
-            currentNumberOfGrants: dream.currentNumberOfGrants + grant.value
+            currentNumberOfGrants: dream.currentNumberOfGrants + giveGrant.value
           }
         }
       });
@@ -67,7 +67,7 @@ const GiveGrantlingsModal = ({
           currentMember: {
             ...topLevelQueryData.currentMember,
             availableGrants:
-              topLevelQueryData.currentMember.availableGrants - grant.value
+              topLevelQueryData.currentMember.availableGrants - giveGrant.value
           }
         }
       });

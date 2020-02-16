@@ -306,7 +306,7 @@ const resolvers = {
       dream.approved = approved;
       return dream.save();
     },
-    grant: async (
+    giveGrant: async (
       parent,
       { dreamId, value },
       { currentMember, models: { Grant, Event, Dream } }

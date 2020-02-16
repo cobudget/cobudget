@@ -24,6 +24,7 @@ const schema = gql`
       title: String
       registrationPolicy: RegistrationPolicy
     ): Event!
+
     createDream(
       eventId: ID!
       title: String!
@@ -52,8 +53,6 @@ const schema = gql`
     deleteMember(memberId: ID!): Member
 
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
-
-    grant(dreamId: ID!, value: Int!): Grant
     updateGrantingSettings(
       currency: String
       grantsPerMember: Int
@@ -63,6 +62,7 @@ const schema = gql`
       grantingCloses: Date
       dreamCreationCloses: Date
     ): Event
+    giveGrant(dreamId: ID!, value: Int!): Grant
     deleteGrant(grantId: ID!): Grant
   }
 
