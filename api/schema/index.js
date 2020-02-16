@@ -63,6 +63,7 @@ const schema = gql`
       grantingCloses: Date
       dreamCreationCloses: Date
     ): Event
+    deleteGrant(grantId: ID!): Grant
   }
 
   type Event {

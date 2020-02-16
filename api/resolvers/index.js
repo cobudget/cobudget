@@ -375,6 +375,28 @@ const resolvers = {
         memberId: currentMember.id
       }).save();
     },
+    deleteGrant: async (
+      parent,
+      { grantId },
+      { currentMember, models: { Grant, Event, Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error(
+          'You need to be a logged in approved member to remove a grant'
+        );
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      // Check that granting is open
+      if (!event.grantingOpen)
+        throw new Error("Can't remove grant when granting is closed");
+
+      const grant = await Grant.findOneAndDelete({
+        _id: grantId,
+        memberId: currentMember.id
+      });
+      return grant;
+    },
     updateGrantingSettings: async (
       parent,
       {
