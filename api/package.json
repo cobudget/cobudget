@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "apollo-server-micro": "^2.9.12",
+    "dayjs": "^1.8.20",
     "graphql": "^14.5.8",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",

@@ -78,8 +78,10 @@ const schema = gql`
     totalBudget: Int
     grantValue: Int
     grantsPerMember: Int
-    grantingOpened: Date
-    grantingClosed: Date
+    dreamCreationCloses: Date
+    dreamCreationOpen: Boolean
+    grantingOpens: Date
+    grantingCloses: Date
     grantingOpen: Boolean
   }
 
