@@ -1,8 +1,6 @@
 import Link from "next/link";
 import styled from "styled-components";
-import Router from "next/router";
-import cookie from "js-cookie";
-import { Button } from "@material-ui/core";
+import { Button, Box } from "@material-ui/core";
 
 import ProfileDropdown from "./ProfileDropdown";
 
@@ -41,6 +39,13 @@ export default ({ event, currentMember, openModal, logOut }) => {
       </Link>
 
       <Nav>
+        {event && currentMember && currentMember.isAdmin && (
+          <Box m="0 10px">
+            <Link href="/admin">
+              <Button component="a">Admin</Button>
+            </Link>
+          </Box>
+        )}
         {event &&
           event.dreamCreationOpen &&
           currentMember &&

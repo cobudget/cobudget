@@ -1,12 +1,13 @@
 import React from "react";
-import Router from "next/router";
 import {
   Avatar,
   MenuItem,
   Popper,
   Grow,
   ClickAwayListener,
-  MenuList
+  MenuList,
+  Typography,
+  Badge
 } from "@material-ui/core";
 
 import Card from "./styled/Card";
@@ -39,25 +40,35 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
 
   return (
     <div>
-      <Avatar
-        ref={anchorRef}
-        aria-controls={open ? "profile-dropdown" : undefined}
-        aria-haspopup="true"
-        onClick={handleToggle}
-        alt={currentMember.name && currentMember.name}
-        src={currentMember.avatar && currentMember.avatar}
-        style={{
-          backgroundColor: stringToHslColor(
-            currentMember.name ? currentMember.name : currentMember.email
-          ),
-          fontWeight: 500,
-          cursor: "pointer"
+      <Badge
+        overlap="circle"
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
         }}
+        badgeContent={currentMember.availableGrants}
+        color="primary"
       >
-        {currentMember.name
-          ? currentMember.name.charAt(0)
-          : currentMember.email.charAt(0).toUpperCase()}
-      </Avatar>
+        <Avatar
+          ref={anchorRef}
+          aria-controls={open ? "profile-dropdown" : undefined}
+          aria-haspopup="true"
+          onClick={handleToggle}
+          alt={currentMember.name && currentMember.name}
+          src={currentMember.avatar && currentMember.avatar}
+          style={{
+            backgroundColor: stringToHslColor(
+              currentMember.name ? currentMember.name : currentMember.email
+            ),
+            fontWeight: 500,
+            cursor: "pointer"
+          }}
+        >
+          {currentMember.name
+            ? currentMember.name.charAt(0)
+            : currentMember.email.charAt(0).toUpperCase()}
+        </Avatar>
+      </Badge>
 
       <Popper
         open={open}
@@ -78,39 +89,37 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
           >
             <Card>
               <ClickAwayListener onClickAway={handleClose}>
-                <MenuList
-                  autoFocusItem={open}
-                  id="profile-dropdown"
-                  onKeyDown={handleListKeyDown}
-                >
-                  {currentMember.isAdmin && (
+                <div>
+                  <MenuList
+                    autoFocusItem={open}
+                    id="profile-dropdown"
+                    onKeyDown={handleListKeyDown}
+                  >
+                    {Boolean(currentMember.availableGrants) && (
+                      <MenuItem disabled>
+                        You have {currentMember.availableGrants} grantlets to
+                        give
+                      </MenuItem>
+                    )}
                     <MenuItem
                       onClick={e => {
-                        Router.push("/admin");
+                        openModal(modals.EDIT_PROFILE);
                         handleClose(e);
                       }}
                     >
-                      Admin
+                      Edit profile
                     </MenuItem>
-                  )}
-                  <MenuItem
-                    onClick={e => {
-                      openModal(modals.EDIT_PROFILE);
-                      handleClose(e);
-                    }}
-                  >
-                    Edit profile
-                  </MenuItem>
 
-                  <MenuItem
-                    onClick={e => {
-                      logOut();
-                      handleClose(e);
-                    }}
-                  >
-                    Logout
-                  </MenuItem>
-                </MenuList>
+                    <MenuItem
+                      onClick={e => {
+                        logOut();
+                        handleClose(e);
+                      }}
+                    >
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </div>
               </ClickAwayListener>
             </Card>
           </Grow>
