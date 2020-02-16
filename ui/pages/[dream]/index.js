@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import Link from "next/link";
@@ -80,6 +80,7 @@ export const DREAM_QUERY = gql`
       minGoalGrants
       maxGoalGrants
       currentNumberOfGrants
+      approved
       members {
         id
         name
@@ -88,6 +89,15 @@ export const DREAM_QUERY = gql`
         small
         large
       }
+    }
+  }
+`;
+
+const APPROVE_FOR_GRANTING_MUTATION = gql`
+  mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
+    approveForGranting(dreamId: $dreamId, approved: $approved) {
+      id
+      approved
     }
   }
 `;
@@ -117,6 +127,8 @@ const Dream = ({ event, currentMember }) => {
       variables: { slug: router.query.dream, eventId: event.id }
     }
   );
+
+  const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
 
   const [grantModalOpen, setGrantModalOpen] = React.useState(false);
 
@@ -179,37 +191,41 @@ const Dream = ({ event, currentMember }) => {
                         height={10}
                       />
                     </Box>
-                    {currentMember && currentMember.availableGrants > 0 && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          fullWidth
-                          size="large"
-                          onClick={() => setGrantModalOpen(true)}
-                        >
-                          Donate to dream
-                        </Button>
-                        <GiveGrantlingsModal
-                          open={grantModalOpen}
-                          handleClose={() => setGrantModalOpen(false)}
-                          dream={dream}
-                          event={event}
-                          currentMember={currentMember}
-                        />
-                      </>
-                    )}
+                    {dream.approved &&
+                      currentMember &&
+                      currentMember.availableGrants > 0 && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            size="large"
+                            onClick={() => setGrantModalOpen(true)}
+                          >
+                            Donate to dream
+                          </Button>
+                          <GiveGrantlingsModal
+                            open={grantModalOpen}
+                            handleClose={() => setGrantModalOpen(false)}
+                            dream={dream}
+                            event={event}
+                            currentMember={currentMember}
+                          />
+                        </>
+                      )}
                   </Box>
                 </Card>
                 <Box m="16px 0">
                   <h3>Dreamers</h3>
-                  <AvatarGroup>
-                    {dream.members.map(member => (
-                      <Tooltip key={member.id} title={member.name}>
-                        <Avatar user={member} />
-                      </Tooltip>
-                    ))}
-                  </AvatarGroup>
+                  <Box p="0 8px">
+                    <AvatarGroup>
+                      {dream.members.map(member => (
+                        <Tooltip key={member.id} title={member.name}>
+                          <Avatar user={member} />
+                        </Tooltip>
+                      ))}
+                    </AvatarGroup>
+                  </Box>
                 </Box>
                 <Box m="16px 0">
                   <h3>Tags</h3>
@@ -222,6 +238,35 @@ const Dream = ({ event, currentMember }) => {
                     <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
                       <Button component="a">Edit dream</Button>
                     </Link>
+                  )}
+                  <br />
+                  {currentMember && currentMember.isAdmin && (
+                    <>
+                      {dream.approved ? (
+                        <Button
+                          color="secondary"
+                          onClick={() =>
+                            approveForGranting({
+                              variables: { dreamId: dream.id, approved: false }
+                            })
+                          }
+                        >
+                          Unapprove for granting
+                        </Button>
+                      ) : (
+                        <Button
+                          color="primary"
+                          variant="contained"
+                          onClick={() =>
+                            approveForGranting({
+                              variables: { dreamId: dream.id, approved: true }
+                            })
+                          }
+                        >
+                          Approve for granting
+                        </Button>
+                      )}
+                    </>
                   )}
                 </Box>
               </>

@@ -36,7 +36,15 @@ const resolvers = {
   Mutation: {
     createEvent: async (
       parent,
-      { adminEmail, slug, title, description, summary, currency, registrationPolicy },
+      {
+        adminEmail,
+        slug,
+        title,
+        description,
+        summary,
+        currency,
+        registrationPolicy
+      },
       { models: { Event, Member } }
     ) => {
       // check slug..
@@ -287,6 +295,17 @@ const resolvers = {
       });
       return member;
     },
+    approveForGranting: async (
+      parent,
+      { dreamId, approved },
+      { currentMember, models: { Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to approve for granting');
+      const dream = await Dream.findOne({ _id: dreamId });
+      dream.approved = approved;
+      return dream.save();
+    },
     grant: async (
       parent,
       { dreamId, value },
@@ -300,7 +319,12 @@ const resolvers = {
       const event = await Event.findOne({ _id: currentMember.eventId });
 
       // Check that granting is open
-      if (!event.grantingOpen) throw new Error('Granting is not open!');
+      if (!event.grantingOpen) throw new Error('Granting is not open');
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      if (!dream.approved)
+        throw new Error('Dream is not approved for granting');
 
       // Check that the max goal of the dream is not exceeded
       const [
@@ -309,8 +333,6 @@ const resolvers = {
         { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
         { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
       ]);
-
-      const dream = await Dream.findOne({ _id: dreamId });
 
       // TODO: Create virtual on dream model instead?
       const maxGoalGrants = Math.ceil(

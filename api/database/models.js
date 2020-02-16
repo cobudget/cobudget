@@ -109,7 +109,8 @@ const DreamSchema = new Schema({
   budgetDescription: String,
   minGoal: Number,
   maxGoal: Number,
-  images: [new Schema({ small: String, large: String })]
+  images: [new Schema({ small: String, large: String })],
+  approved: { type: Boolean, default: false }
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
 const GrantSchema = new Schema({

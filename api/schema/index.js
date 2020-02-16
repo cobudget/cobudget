@@ -51,9 +51,9 @@ const schema = gql`
     updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
     deleteMember(memberId: ID!): Member
 
+    approveForGranting(dreamId: ID!, approved: Boolean!): Dream
+
     grant(dreamId: ID!, value: Int!): Grant
-    openGranting(eventId: ID!): Event
-    closeGranting(eventId: ID!): Event
     updateGrantingSettings(
       currency: String
       grantsPerMember: Int
@@ -132,7 +132,7 @@ const schema = gql`
     maxGoal: Int
     currentNumberOfGrants: Int
     budgetDescription: String
-    # isApprovedForGranting: Boolean # should this be per granting period?
+    approved: Boolean
     # answers: [QuestionAnswer]
     # funding: Int!
     # raisedFlags: [Flag]
