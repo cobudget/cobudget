@@ -517,6 +517,9 @@ const resolvers = {
       if (!grantingOpen) return 0;
 
       return grantsPerMember - grantsFromMember;
+    },
+    givenGrants: async (member, args, { models: { Grant } }) => {
+      return Grant.find({ memberId: member.id });
     }
   },
   Event: {

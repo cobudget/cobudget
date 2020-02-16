@@ -114,6 +114,7 @@ const schema = gql`
     verifiedEmail: Boolean!
     createdAt: Date
     availableGrants: Int
+    givenGrants: [Grant]
     # isGuide: Boolean!
     # favorites: [Dream]
   }
