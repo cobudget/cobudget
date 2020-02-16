@@ -179,22 +179,26 @@ const Dream = ({ event, currentMember }) => {
                         height={10}
                       />
                     </Box>
-
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                      size="large"
-                      onClick={() => setGrantModalOpen(true)}
-                    >
-                      Donate to dream
-                    </Button>
-                    <GiveGrantlingsModal
-                      open={grantModalOpen}
-                      handleClose={() => setGrantModalOpen(false)}
-                      dream={dream}
-                      event={event}
-                    />
+                    {currentMember && currentMember.availableGrants > 0 && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                          size="large"
+                          onClick={() => setGrantModalOpen(true)}
+                        >
+                          Donate to dream
+                        </Button>
+                        <GiveGrantlingsModal
+                          open={grantModalOpen}
+                          handleClose={() => setGrantModalOpen(false)}
+                          dream={dream}
+                          event={event}
+                          currentMember={currentMember}
+                        />
+                      </>
+                    )}
                   </Box>
                 </Card>
                 <Box m="16px 0">

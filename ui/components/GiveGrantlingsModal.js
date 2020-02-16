@@ -7,7 +7,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import Card from "./styled/Card";
 import { DREAM_QUERY } from "../pages/[dream]";
-
+import { TOP_LEVEL_QUERY } from "../pages/_app";
 const useStyles = makeStyles(theme => ({
   modal: {
     display: "flex",
@@ -54,11 +54,27 @@ const GiveGrantlingsModal = ({
           }
         }
       });
+
+      const topLevelQueryData = cache.readQuery({
+        query: TOP_LEVEL_QUERY,
+        variables: { slug: event.slug }
+      });
+
+      cache.writeQuery({
+        query: TOP_LEVEL_QUERY,
+        data: {
+          ...topLevelQueryData,
+          currentMember: {
+            ...topLevelQueryData.currentMember,
+            availableGrants:
+              topLevelQueryData.currentMember.availableGrants - grant.value
+          }
+        }
+      });
     }
   });
   const { handleSubmit, register, errors } = useForm();
 
-  // TODO: show available grantlings in modal
   // TODO: show how many I have given
   // TODO: allow me to remove given grantlings
 
@@ -73,7 +89,7 @@ const GiveGrantlingsModal = ({
       <Card className={classes.innerModal}>
         <Box p={3}>
           <h1>Give grantlings to dream!</h1>
-
+          <p>Available grants: {currentMember.availableGrants}</p>
           <form
             onSubmit={handleSubmit(variables => {
               giveGrant({
@@ -100,7 +116,7 @@ const GiveGrantlingsModal = ({
                 inputProps={{
                   type: "number",
                   min: "1",
-                  max: "5"
+                  max: `${currentMember.availableGrants}`
                 }}
                 variant="outlined"
               />

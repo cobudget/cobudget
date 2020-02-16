@@ -1,10 +1,13 @@
 const slugify = require('../utils/slugify');
-const { generateLoginJWT } = require('../utils/auth');
 const {
   sendMagicLinkEmail,
   sendInviteEmails,
   sendRequestToJoinNotifications
 } = require('../utils/email');
+const { GraphQLScalarType } = require('graphql');
+const { Kind } = require('graphql/language');
+const mongoose = require('mongoose');
+const dayjs = require('dayjs');
 
 const resolvers = {
   Query: {
@@ -61,15 +64,7 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      {
-        slug,
-        title,
-        currency,
-        registrationPolicy,
-        totalBudget,
-        grantValue,
-        grantsPerMember
-      },
+      { slug, title, registrationPolicy },
       { currentMember, models: { Event } }
     ) => {
       if (!currentMember || !currentMember.isAdmin)
@@ -79,11 +74,7 @@ const resolvers = {
 
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
-      if (currency) event.currency = currency;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
-      if (totalBudget) event.totalBudget = totalBudget;
-      if (grantValue) event.grantValue = grantValue; // cant delete grantValue right now..
-      if (grantsPerMember) event.grantsPerMember = grantsPerMember;
 
       return event.save();
     },
@@ -107,6 +98,11 @@ const resolvers = {
 
       if (currentMember.eventId.toString() !== eventId)
         throw new Error('You are not a member of this event');
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      if (!event.dreamCreationOpen)
+        throw new Error('Dream creation has closed');
 
       // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       if (maxGoal && (maxGoal <= minGoal || minGoal == null))
@@ -294,19 +290,61 @@ const resolvers = {
     grant: async (
       parent,
       { dreamId, value },
-      { currentMember, models: { Grant } }
+      { currentMember, models: { Grant, Event, Dream } }
     ) => {
       if (!currentMember || !currentMember.isApproved)
         throw new Error(
           'You need to be a logged in approved member to grant things'
         );
 
-      //TOOD:
-      // check dream granting toggle
-      // check granting is closed/open?
-      // check dream is not already fully funded
-      // check user has grants to spend
-      // check total budget is not exceeded
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      // Check that granting is open
+      if (!event.grantingOpen) throw new Error('Granting is not open!');
+
+      // Check that the max goal of the dream is not exceeded
+      const [
+        { grantsForDream } = { grantsForDream: 0 }
+      ] = await Grant.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
+      ]);
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      // TODO: Create virtual on dream model instead?
+      const maxGoalGrants = Math.ceil(
+        Math.max(dream.maxGoal, dream.minGoal) / event.grantValue
+      );
+
+      if (grantsForDream + value > maxGoalGrants)
+        throw new Error("You can't overfund this dream.");
+
+      // Check that user has not spent more grants than he has
+      const [
+        { grantsFromUser } = { grantsFromUser: 0 }
+      ] = await Grant.aggregate([
+        { $match: { memberId: mongoose.Types.ObjectId(currentMember.id) } },
+        { $group: { _id: null, grantsFromUser: { $sum: '$value' } } } // is this _id: null needed?
+      ]);
+
+      if (grantsFromUser + value > event.grantsPerMember)
+        throw new Error('You are trying to spend too many grants.');
+
+      // Check that total budget of event will not be exceeded
+      const [
+        { grantsFromEverybody } = { grantsFromEverybody: 0 }
+      ] = await Grant.aggregate([
+        { $match: { eventId: mongoose.Types.ObjectId(currentMember.eventId) } },
+        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } } // is this _id: null needed?
+      ]);
+
+      const totalGrantsToSpend = Math.floor(
+        event.totalBudget / event.grantValue
+      );
+
+      if (grantsFromEverybody + value > totalGrantsToSpend)
+        throw new Error('Total budget of event is exeeced with this grant');
 
       return new Grant({
         eventId: currentMember.eventId,
@@ -314,11 +352,127 @@ const resolvers = {
         value,
         memberId: currentMember.id
       }).save();
+    },
+    updateGrantingSettings: async (
+      parent,
+      {
+        currency,
+        grantsPerMember,
+        totalBudget,
+        grantValue,
+        dreamCreationCloses,
+        grantingOpens,
+        grantingCloses
+      },
+      { currentMember, models: { Event } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to update granting settings');
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
+      const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
+        dayjs()
+      );
+
+      if (currency) {
+        // granting can't have started to change currency
+        if (dreamCreationHasClosed) {
+          throw new Error(
+            'You cant change currency after dream creation closes'
+          );
+        }
+        event.currency = currency;
+        event.totalBudget = undefined;
+        event.grantValue = undefined;
+      }
+
+      if (grantsPerMember) {
+        // granting can't have started to change currency
+        if (grantingHasStarted) {
+          throw new Error('You cant change currency once granting has started');
+        }
+
+        event.grantsPerMember = grantsPerMember;
+        event.grantValue = undefined;
+      }
+
+      if (totalBudget) {
+        // can only increase total budget after granting has started
+        if (grantingHasStarted && totalBudget < event.totalBudget) {
+          throw new Error(
+            "You can't decrease total budget once granting has started"
+          );
+        }
+        event.totalBudget = totalBudget;
+      }
+
+      if (grantValue) {
+        // granting can't have started to change grant value
+        if (grantingHasStarted) {
+          throw new Error('You cant change currency once granting has started');
+        }
+        event.grantValue = grantValue;
+      }
+
+      if (dreamCreationCloses) {
+        event.dreamCreationCloses = dreamCreationCloses;
+      }
+
+      if (grantingOpens) {
+        if (
+          !event.totalBudget ||
+          !event.grantValue ||
+          !event.dreamCreationCloses
+        ) {
+          throw new Error(
+            "You can't set granting opening date before setting total budget, grant value & dream creation close date"
+          );
+        }
+
+        if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
+          throw new Error(
+            'Granting opens date needs to be after dream creation closing date'
+          );
+        }
+
+        event.grantingOpens = grantingOpens;
+      }
+
+      if (grantingCloses) {
+        if (
+          !event.grantingOpens ||
+          dayjs(grantingCloses).isBefore(dayjs(event.grantingOpens))
+        ) {
+          throw new Error(
+            "You can't set granting close date before opening date"
+          );
+        }
+        event.grantingCloses = grantingCloses;
+      }
+
+      return event.save();
     }
   },
   Member: {
     event: async (member, args, { models: { Event } }) => {
       return Event.findOne({ _id: member.eventId });
+    },
+    availableGrants: async (member, args, { models: { Grant, Event } }) => {
+      const { grantsPerMember, grantingOpen } = await Event.findOne({
+        _id: member.eventId
+      });
+
+      const [
+        { grantsFromMember } = { grantsFromMember: 0 }
+      ] = await Grant.aggregate([
+        { $match: { memberId: mongoose.Types.ObjectId(member.id) } },
+        { $group: { _id: null, grantsFromMember: { $sum: '$value' } } }
+      ]);
+
+      if (!grantingOpen) return 0;
+
+      return grantsPerMember - grantsFromMember;
     }
   },
   Event: {
@@ -327,6 +481,9 @@ const resolvers = {
     },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
+    },
+    numberOfApprovedMembers: async (event, args, { models: { Member } }) => {
+      return Member.countDocuments({ eventId: event.id, isApproved: true });
     }
   },
   Dream: {
@@ -351,18 +508,36 @@ const resolvers = {
       return Math.ceil(dream.maxGoal / grantValue);
     },
     currentNumberOfGrants: async (dream, args, { models: { Grant } }) => {
-      const grants = await Grant.find({ dreamId: dream.id });
-      return grants.reduce(
-        (prevValue, currentValue) => prevValue + currentValue.value,
-        0
-      );
+      const [
+        { grantsForDream } = { grantsForDream: 0 }
+      ] = await Grant.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dream.id) } },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
+      ]);
+      return grantsForDream;
     }
   },
   Grant: {
     dream: async (grant, args, { models: { Dream } }) => {
       return Dream.findOne({ _id: grant.dreamId });
     }
-  }
+  },
+  Date: new GraphQLScalarType({
+    name: 'Date',
+    description: 'Date custom scalar type',
+    parseValue(value) {
+      return new Date(value); // value from the client
+    },
+    serialize(value) {
+      return value.getTime(); // value sent to the client
+    },
+    parseLiteral(ast) {
+      if (ast.kind === Kind.INT) {
+        return parseInt(ast.value, 10); // ast value is always in string format
+      }
+      return null;
+    }
+  })
 };
 
 module.exports = resolvers;

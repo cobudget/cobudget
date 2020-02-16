@@ -1,5 +1,5 @@
 const { Schema } = require('mongoose');
-
+const dayjs = require('dayjs');
 // // User
 // const UserSchema = new Schema({
 //   name: String,
@@ -69,7 +69,33 @@ const EventSchema = new Schema({
   grantsPerMember: {
     type: Number,
     default: 10
+  },
+  dreamCreationCloses: Date,
+  grantingOpens: Date,
+  grantingCloses: Date
+});
+
+EventSchema.virtual('grantingOpen').get(function() {
+  if (!this.grantingOpens) return false;
+
+  const now = dayjs();
+  const grantingOpens = dayjs(this.grantingOpens);
+
+  if (this.grantingCloses) {
+    const grantingCloses = dayjs(this.grantingCloses);
+    return grantingOpens.isBefore(now) && now.isBefore(grantingCloses);
+  } else {
+    return grantingOpens.isBefore(now);
   }
+});
+
+EventSchema.virtual('dreamCreationOpen').get(function() {
+  if (!this.dreamCreationCloses) return true;
+
+  const now = dayjs();
+  const dreamCreationCloses = dayjs(this.dreamCreationCloses);
+
+  return now.isBefore(dreamCreationCloses);
 });
 
 // Dream

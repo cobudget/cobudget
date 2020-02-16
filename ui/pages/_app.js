@@ -9,7 +9,7 @@ import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
-const TOP_LEVEL_QUERY = gql`
+export const TOP_LEVEL_QUERY = gql`
   query EventAndMember($slug: String!) {
     event(slug: $slug) {
       id
@@ -21,13 +21,21 @@ const TOP_LEVEL_QUERY = gql`
       totalBudget
       grantValue
       grantsPerMember
+      dreamCreationCloses
+      dreamCreationOpen
+      grantingOpens
+      grantingCloses
+      grantingOpen
+      numberOfApprovedMembers
     }
+
     currentMember {
       id
       name
       avatar
       email
       isAdmin
+      availableGrants
       event {
         id
       }
@@ -63,7 +71,7 @@ const theme = createMuiTheme({
       '"Segoe UI Emoji"',
       '"Segoe UI Symbol"'
     ].join(","),
-    fontSize: 16
+    fontSize: 14
   },
   shadows: [
     "none",

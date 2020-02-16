@@ -41,13 +41,16 @@ export default ({ event, currentMember, openModal, logOut }) => {
       </Link>
 
       <Nav>
-        {event && currentMember && currentMember.event.id === event.id && (
-          <Link href="/create-dream">
-            <Button component="a" variant="contained">
-              Create dream
-            </Button>
-          </Link>
-        )}
+        {event &&
+          event.dreamCreationOpen &&
+          currentMember &&
+          currentMember.event.id === event.id && (
+            <Link href="/create-dream">
+              <Button component="a" variant="contained">
+                Create dream
+              </Button>
+            </Link>
+          )}
         {event ? (
           currentMember ? (
             <ProfileDropdown

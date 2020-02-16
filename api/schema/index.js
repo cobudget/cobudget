@@ -22,11 +22,7 @@ const schema = gql`
     editEvent(
       slug: String
       title: String
-      currency: String
       registrationPolicy: RegistrationPolicy
-      totalBudget: Int
-      grantValue: Int
-      grantsPerMember: Int
     ): Event!
     createDream(
       eventId: ID!
@@ -48,6 +44,7 @@ const schema = gql`
       maxGoal: Int
       images: [ImageInput]
     ): Dream
+
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
@@ -55,6 +52,17 @@ const schema = gql`
     deleteMember(memberId: ID!): Member
 
     grant(dreamId: ID!, value: Int!): Grant
+    openGranting(eventId: ID!): Event
+    closeGranting(eventId: ID!): Event
+    updateGrantingSettings(
+      currency: String
+      grantsPerMember: Int
+      totalBudget: Int
+      grantValue: Int
+      grantingOpens: Date
+      grantingCloses: Date
+      dreamCreationCloses: Date
+    ): Event
   }
 
   type Event {
@@ -64,6 +72,7 @@ const schema = gql`
     description: String
     # logo: String
     members: [Member!]!
+    numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
     # questions: [Question!]
@@ -76,7 +85,14 @@ const schema = gql`
     totalBudget: Int
     grantValue: Int
     grantsPerMember: Int
+    dreamCreationCloses: Date
+    dreamCreationOpen: Boolean
+    grantingOpens: Date
+    grantingCloses: Date
+    grantingOpen: Boolean
   }
+
+  scalar Date
 
   enum RegistrationPolicy {
     OPEN
@@ -95,7 +111,8 @@ const schema = gql`
     isAdmin: Boolean!
     isApproved: Boolean!
     verifiedEmail: Boolean!
-    createdAt: String
+    createdAt: Date
+    availableGrants: Int
     # isGuide: Boolean!
     # favorites: [Dream]
   }

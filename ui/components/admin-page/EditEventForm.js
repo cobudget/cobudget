@@ -10,71 +10,28 @@ import {
   Select,
   Button
 } from "@material-ui/core";
+import SelectInput from "../SelectInput";
+
 import slugify from "../../utils/slugify";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
     $slug: String
     $title: String
-    $currency: String
     $registrationPolicy: RegistrationPolicy
-    $totalBudget: Int
-    $grantValue: Int
-    $grantsPerMember: Int
   ) {
     editEvent(
       slug: $slug
       title: $title
-      currency: $currency
       registrationPolicy: $registrationPolicy
-      totalBudget: $totalBudget
-      grantValue: $grantValue
-      grantsPerMember: $grantsPerMember
     ) {
       id
       title
       slug
-      currency
       registrationPolicy
-      totalBudget
-      grantValue
-      grantsPerMember
     }
   }
 `;
-
-const SelectInput = ({
-  label,
-  defaultValue,
-  children,
-  inputRef,
-  name,
-  fullWidth
-}) => {
-  const inputLabel = React.useRef(null);
-  const [labelWidth, setLabelWidth] = React.useState(0);
-  React.useEffect(() => {
-    setLabelWidth(inputLabel.current.offsetWidth);
-  }, []);
-  return (
-    <FormControl variant="outlined" fullWidth={fullWidth}>
-      <InputLabel ref={inputLabel} id={`${label}-label`}>
-        {label}
-      </InputLabel>
-      <Select
-        native
-        name={name}
-        labelId={`${label}-label`}
-        id={label}
-        defaultValue={defaultValue}
-        labelWidth={labelWidth}
-        inputRef={inputRef}
-      >
-        {children}
-      </Select>
-    </FormControl>
-  );
-};
 
 export default ({ event }) => {
   const [editEvent] = useMutation(EDIT_EVENT);
@@ -127,69 +84,6 @@ export default ({ event }) => {
                 onBlur: e => {
                   setValue("slug", slugify(e.target.value));
                 }
-              }}
-              variant="outlined"
-            />
-          </Box>
-          <Box m="15px 0">
-            <SelectInput
-              name="currency"
-              label="Currency"
-              defaultValue={event.currency}
-              inputRef={register}
-              fullWidth
-            >
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
-            </SelectInput>
-          </Box>
-          <Box m="15px 0">
-            <TextField
-              name="totalBudget"
-              label="Total budget"
-              defaultValue={event.totalBudget}
-              fullWidth
-              inputRef={register}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {event.currency}
-                  </InputAdornment>
-                ),
-                type: "number"
-              }}
-              variant="outlined"
-            />
-          </Box>
-          <Box m="15px 0">
-            <TextField
-              name="grantValue"
-              label="Grant value"
-              defaultValue={event.grantValue}
-              fullWidth
-              inputRef={register}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {event.currency}
-                  </InputAdornment>
-                ),
-                type: "number"
-              }}
-              variant="outlined"
-            />
-          </Box>
-          <Box m="15px 0">
-            <TextField
-              name="grantsPerMember"
-              label="Grants per member"
-              defaultValue={event.grantsPerMember}
-              fullWidth
-              inputRef={register}
-              InputProps={{
-                type: "number"
               }}
               variant="outlined"
             />
