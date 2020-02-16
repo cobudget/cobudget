@@ -7,6 +7,7 @@ const {
 const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
+const dayjs = require('dayjs');
 
 const resolvers = {
   Query: {
@@ -62,15 +63,7 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      {
-        slug,
-        title,
-        currency,
-        registrationPolicy,
-        totalBudget,
-        grantValue,
-        grantsPerMember
-      },
+      { slug, title, registrationPolicy },
       { currentMember, models: { Event } }
     ) => {
       if (!currentMember || !currentMember.isAdmin)
@@ -80,11 +73,7 @@ const resolvers = {
 
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
-      if (currency) event.currency = currency;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
-      if (totalBudget) event.totalBudget = totalBudget;
-      if (grantValue) event.grantValue = grantValue; // cant delete grantValue right now..
-      if (grantsPerMember) event.grantsPerMember = grantsPerMember;
 
       return event.save();
     },
@@ -107,6 +96,11 @@ const resolvers = {
 
       if (currentMember.eventId.toString() !== eventId)
         throw new Error('You are not a member of this event');
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      if (!event.dreamCreationOpen)
+        throw new Error('Dream creation has closed');
 
       // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       if (maxGoal && (maxGoal <= minGoal || minGoal == null))
@@ -349,40 +343,103 @@ const resolvers = {
         memberId: currentMember.id
       }).save();
     },
-    openGranting: async (
+    updateGrantingSettings: async (
       parent,
-      { eventId },
+      {
+        currency,
+        grantsPerMember,
+        totalBudget,
+        grantValue,
+        dreamCreationCloses,
+        grantingOpens,
+        grantingCloses
+      },
       { currentMember, models: { Event } }
     ) => {
       if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be admin to open granting');
+        throw new Error('You need to be admin to update granting settings');
+      const event = await Event.findOne({ _id: currentMember.eventId });
 
-      const event = await Event.findOne({ _id: eventId });
+      const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
+      const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
+        dayjs()
+      );
 
-      // TODO: check that grant value, total budget, grants per member are set
-      // and maybe somewhat reasonable?
+      if (currency) {
+        // granting can't have started to change currency
+        if (dreamCreationHasClosed) {
+          throw new Error(
+            'You cant change currency after dream creation closes'
+          );
+        }
+        event.currency = currency;
+        event.totalBudget = undefined;
+        event.grantValue = undefined;
+      }
 
-      event.grantingOpened = Date.now();
-      event.grantingClosed = null;
+      if (grantsPerMember) {
+        // granting can't have started to change currency
+        if (grantingHasStarted) {
+          throw new Error('You cant change currency once granting has started');
+        }
 
-      return event.save();
-    },
-    closeGranting: async (
-      parent,
-      { eventId },
-      { currentMember, models: { Event } }
-    ) => {
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be admin to open granting');
+        event.grantsPerMember = grantsPerMember;
+        event.grantValue = undefined;
+      }
 
-      const event = await Event.findOne({ _id: eventId });
+      if (totalBudget) {
+        // can only increase total budget after granting has started
+        if (grantingHasStarted && totalBudget < event.totalBudget) {
+          throw new Error(
+            "You can't decrease total budget once granting has started"
+          );
+        }
+        event.totalBudget = totalBudget;
+      }
 
-      if (!event.grantingOpened)
-        throw new Error(
-          'You cant close granting when it is not already opened'
-        );
+      if (grantValue) {
+        // granting can't have started to change grant value
+        if (grantingHasStarted) {
+          throw new Error('You cant change currency once granting has started');
+        }
+        event.grantValue = grantValue;
+      }
 
-      event.grantingClosed = Date.now();
+      if (dreamCreationCloses) {
+        event.dreamCreationCloses = dreamCreationCloses;
+      }
+
+      if (grantingOpens) {
+        if (
+          !event.totalBudget ||
+          !event.grantValue ||
+          !event.dreamCreationCloses
+        ) {
+          throw new Error(
+            "You can't set granting opening date before setting total budget, grant value & dream creation close date"
+          );
+        }
+
+        if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
+          throw new Error(
+            'Granting opens date needs to be after dream creation closing date'
+          );
+        }
+
+        event.grantingOpens = grantingOpens;
+      }
+
+      if (grantingCloses) {
+        if (
+          !event.grantingOpens ||
+          dayjs(grantingCloses).isBefore(dayjs(event.grantingOpens))
+        ) {
+          throw new Error(
+            "You can't set granting close date before opening date"
+          );
+        }
+        event.grantingCloses = grantingCloses;
+      }
 
       return event.save();
     }

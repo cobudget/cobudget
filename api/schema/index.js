@@ -22,11 +22,7 @@ const schema = gql`
     editEvent(
       slug: String
       title: String
-      currency: String
       registrationPolicy: RegistrationPolicy
-      totalBudget: Int
-      grantValue: Int
-      grantsPerMember: Int
     ): Event!
     createDream(
       eventId: ID!
@@ -56,6 +52,15 @@ const schema = gql`
     grant(dreamId: ID!, value: Int!): Grant
     openGranting(eventId: ID!): Event
     closeGranting(eventId: ID!): Event
+    updateGrantingSettings(
+      currency: String
+      grantsPerMember: Int
+      totalBudget: Int
+      grantValue: Int
+      grantingOpens: Date
+      grantingCloses: Date
+      dreamCreationCloses: Date
+    ): Event
   }
 
   type Event {
