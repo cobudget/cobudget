@@ -1,20 +1,17 @@
 import {
   List,
-  ListItem,
-  Divider,
-  ListItemText,
   Typography,
-  ListItemSecondaryAction,
-  IconButton,
-  Button,
   Modal,
-  Box
+  Box,
+  ListItem,
+  ListItemText,
+  Divider
 } from "@material-ui/core";
-import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import dayjs from "dayjs";
 
+import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
 import SetGrantsPerMember from "./SetGrantsPerMember";
 import SetTotalBudget from "./SetTotalBudget";
@@ -80,37 +77,6 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     }
   }
 `;
-
-const SettingsListItem = ({
-  primary,
-  secondary,
-  value,
-  openModal,
-  disabled
-}) => {
-  return (
-    <ListItem>
-      <ListItemText primary={primary} secondary={secondary} />
-      <ListItemSecondaryAction>
-        {value ? (
-          <IconButton onClick={openModal} disabled={disabled}>
-            <EditIcon />
-          </IconButton>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={openModal}
-            disabled={disabled}
-          >
-            Set
-          </Button>
-        )}
-      </ListItemSecondaryAction>
-    </ListItem>
-  );
-};
 
 export default ({ event }) => {
   const [open, setOpen] = React.useState(null);

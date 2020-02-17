@@ -65,6 +65,7 @@ const schema = gql`
     giveGrant(dreamId: ID!, value: Int!): Grant
     deleteGrant(grantId: ID!): Grant
     reclaimGrants(dreamId: ID!): Dream
+    preOrPostFund(dreamId: ID!, value: Int!): Grant
   }
 
   type Event {
@@ -150,8 +151,14 @@ const schema = gql`
     dream: Dream!
     value: Int!
     reclaimed: Boolean!
+    type: GrantType!
     # user: Member!
-    # type of grant: "prefund", "user", etc..
+  }
+
+  enum GrantType {
+    PRE_FUND
+    USER
+    POST_FUND
   }
 
   type Image {

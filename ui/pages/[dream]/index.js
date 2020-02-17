@@ -12,6 +12,8 @@ import AvatarGroup from "@material-ui/lab/AvatarGroup";
 import Avatar from "../../components/Avatar";
 import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
+import PreOrPostFundModal from "../../components/PreOrPostFundModal";
+
 import ProgressBar from "../../components/ProgressBar";
 
 // confusing naming, conflicting with other component.
@@ -141,6 +143,7 @@ const Dream = ({ event, currentMember }) => {
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
 
   const [grantModalOpen, setGrantModalOpen] = React.useState(false);
+  const [prePostFundModalOpen, setPrePostFundModalOpen] = React.useState(false);
 
   return (
     <DreamCard>
@@ -288,6 +291,20 @@ const Dream = ({ event, currentMember }) => {
                       >
                         Reclaim grants
                       </Button>
+                      <br />
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={() => setPrePostFundModalOpen(true)}
+                      >
+                        Post-fund
+                      </Button>
+                      <PreOrPostFundModal
+                        open={prePostFundModalOpen}
+                        handleClose={() => setPrePostFundModalOpen(false)}
+                        dream={dream}
+                        event={event}
+                      />
                     </>
                   )}
                 </Box>

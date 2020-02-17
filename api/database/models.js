@@ -125,6 +125,12 @@ const GrantSchema = new Schema({
   memberId: { type: Schema.Types.ObjectId, required: true },
   value: { type: Number, required: true },
   reclaimed: { type: Boolean, default: false },
+  type: {
+    type: String,
+    enum: ['PRE_FUND', 'USER', 'POST_FUND'],
+    default: 'USER',
+    required: true
+  }
 });
 
 const getModels = db => {
