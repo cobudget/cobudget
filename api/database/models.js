@@ -75,7 +75,7 @@ const EventSchema = new Schema({
   grantingCloses: Date
 });
 
-EventSchema.virtual('grantingOpen').get(function() {
+EventSchema.virtual('grantingIsOpen').get(function() {
   if (!this.grantingOpens) return false;
 
   const now = dayjs();
@@ -89,7 +89,13 @@ EventSchema.virtual('grantingOpen').get(function() {
   }
 });
 
-EventSchema.virtual('dreamCreationOpen').get(function() {
+EventSchema.virtual('grantingHasClosed').get(function() {
+  if (!this.grantingCloses) return false;
+
+  return dayjs().isBefore(dayjs(this.grantingCloses));
+});
+
+EventSchema.virtual('dreamCreationIsOpen').get(function() {
   if (!this.dreamCreationCloses) return true;
 
   const now = dayjs();
@@ -117,7 +123,8 @@ const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
   dreamId: { type: Schema.Types.ObjectId, required: true, index: true },
   memberId: { type: Schema.Types.ObjectId, required: true },
-  value: { type: Number, required: true }
+  value: { type: Number, required: true },
+  reclaimed: { type: Boolean, default: false },
 });
 
 const getModels = db => {

@@ -74,9 +74,9 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantValue
       grantingOpens
       grantingCloses
-      grantingOpen
+      grantingIsOpen
       dreamCreationCloses
-      dreamCreationOpen
+      dreamCreationIsOpen
     }
   }
 `;
@@ -132,6 +132,43 @@ export default ({ event }) => {
   return (
     <>
       <Box p={2}>
+        <Typography variant="h5">Granting status</Typography>
+      </Box>
+
+      <List>
+        <Divider />
+        <ListItem>
+          <ListItemText
+            primary="Granting is"
+            secondary={event.grantingIsOpen ? "OPEN" : "CLOSED"}
+          />
+        </ListItem>
+        <Divider />
+        <ListItem>
+          <ListItemText
+            primary="Unallocated grants in budget"
+            secondary={`${event.remainingGrants} grants`}
+          />
+        </ListItem>
+        <Divider />
+        <ListItem>
+          <ListItemText
+            primary="Total grants in budget"
+            secondary={`${event.totalBudgetGrants} grants`}
+          />
+        </ListItem>
+        <Divider />
+        <ListItem>
+          <ListItemText
+            primary="Grants given"
+            secondary={`${event.totalBudgetGrants -
+              event.remainingGrants} grants`}
+          />
+        </ListItem>
+        <Divider />
+      </List>
+
+      <Box p={2}>
         <Typography variant="h5">Grant settings</Typography>
       </Box>
       <Modal
@@ -152,7 +189,7 @@ export default ({ event }) => {
           primary="Currency"
           secondary={event.currency}
           value={event.currency}
-          disabled={!event.dreamCreationOpen}
+          disabled={!event.dreamCreationIsOpen}
           openModal={() => handleOpen("SET_CURRENCY")}
         />
 

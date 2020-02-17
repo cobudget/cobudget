@@ -64,6 +64,7 @@ const schema = gql`
     ): Event
     giveGrant(dreamId: ID!, value: Int!): Grant
     deleteGrant(grantId: ID!): Grant
+    reclaimGrants(dreamId: ID!): Dream
   }
 
   type Event {
@@ -84,13 +85,15 @@ const schema = gql`
     currency: String! # scalar? # can't change after first submission closes
     # useGrantlings: Boolean! # can't change after first submission close
     totalBudget: Int
+    totalBudgetGrants: Int
+    remainingGrants: Int
     grantValue: Int
     grantsPerMember: Int
     dreamCreationCloses: Date
-    dreamCreationOpen: Boolean
+    dreamCreationIsOpen: Boolean
     grantingOpens: Date
     grantingCloses: Date
-    grantingOpen: Boolean
+    grantingIsOpen: Boolean
   }
 
   scalar Date
@@ -146,6 +149,7 @@ const schema = gql`
     id: ID!
     dream: Dream!
     value: Int!
+    reclaimed: Boolean!
     # user: Member!
     # type of grant: "prefund", "user", etc..
   }

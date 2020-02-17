@@ -47,7 +47,7 @@ export default ({ event, currentMember, openModal, logOut }) => {
           </Box>
         )}
         {event &&
-          event.dreamCreationOpen &&
+          event.dreamCreationIsOpen &&
           currentMember &&
           currentMember.event.id === event.id && (
             <Link href="/create-dream">

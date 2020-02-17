@@ -109,7 +109,7 @@ const resolvers = {
 
       const event = await Event.findOne({ _id: currentMember.eventId });
 
-      if (!event.dreamCreationOpen)
+      if (!event.dreamCreationIsOpen)
         throw new Error('Dream creation has closed');
 
       // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
@@ -319,7 +319,7 @@ const resolvers = {
       const event = await Event.findOne({ _id: currentMember.eventId });
 
       // Check that granting is open
-      if (!event.grantingOpen) throw new Error('Granting is not open');
+      if (!event.grantingIsOpen) throw new Error('Granting is not open');
 
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -357,8 +357,13 @@ const resolvers = {
       const [
         { grantsFromEverybody } = { grantsFromEverybody: 0 }
       ] = await Grant.aggregate([
-        { $match: { eventId: mongoose.Types.ObjectId(currentMember.eventId) } },
-        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } } // is this _id: null needed?
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(currentMember.eventId),
+            reclaimed: false
+          }
+        },
+        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } }
       ]);
 
       const totalGrantsToSpend = Math.floor(
@@ -388,7 +393,7 @@ const resolvers = {
       const event = await Event.findOne({ _id: currentMember.eventId });
 
       // Check that granting is open
-      if (!event.grantingOpen)
+      if (!event.grantingIsOpen)
         throw new Error("Can't remove grant when granting is closed");
 
       const grant = await Grant.findOneAndDelete({
@@ -396,6 +401,46 @@ const resolvers = {
         memberId: currentMember.id
       });
       return grant;
+    },
+    reclaimGrants: async (
+      parent,
+      { dreamId },
+      { currentMember, models: { Grant, Event, Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be admin to reclaim grants');
+
+      const event = await Event.findOne({ _id: currentMember.eventId });
+
+      // Granting needs to be closed before you can reclaim grants
+      if (!event.grantingHasClosed)
+        throw new Error("You can't reclaim grants before granting has closed");
+
+      // If dream has reached minimum funding, you can't reclaim its grants
+      const [
+        { grantsForDream } = { grantsForDream: 0 }
+      ] = await Grant.aggregate([
+        {
+          $match: {
+            dreamId: mongoose.Types.ObjectId(dreamId),
+            reclaimed: false
+          }
+        },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
+      ]);
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const minGoalGrants = Math.ceil(dream.minGoal / event.grantValue);
+
+      if (grantsForDream >= minGoalGrants)
+        throw new Error(
+          "You can't reclaim grants if it has reached minimum funding"
+        );
+
+      await Grant.updateMany({ dreamId }, { reclaimed: true });
+
+      return dream;
     },
     updateGrantingSettings: async (
       parent,
@@ -412,6 +457,7 @@ const resolvers = {
     ) => {
       if (!currentMember || !currentMember.isAdmin)
         throw new Error('You need to be admin to update granting settings');
+
       const event = await Event.findOne({ _id: currentMember.eventId });
 
       const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
@@ -516,7 +562,7 @@ const resolvers = {
         { $group: { _id: null, grantsFromMember: { $sum: '$value' } } }
       ]);
 
-      if (!event.grantingOpen) return 0;
+      if (!event.grantingIsOpen) return 0;
 
       return event.grantsPerMember - grantsFromMember;
     },
@@ -533,6 +579,25 @@ const resolvers = {
     },
     numberOfApprovedMembers: async (event, args, { models: { Member } }) => {
       return Member.countDocuments({ eventId: event.id, isApproved: true });
+    },
+    totalBudgetGrants: async event => {
+      return Math.floor(event.totalBudget / event.grantValue);
+    },
+    remainingGrants: async (event, args, { models: { Grant } }) => {
+      const [
+        { grantsFromEverybody } = { grantsFromEverybody: 0 }
+      ] = await Grant.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+            reclaimed: false
+          }
+        },
+        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } }
+      ]);
+      return (
+        Math.floor(event.totalBudget / event.grantValue) - grantsFromEverybody
+      );
     }
   },
   Dream: {
@@ -560,7 +625,12 @@ const resolvers = {
       const [
         { grantsForDream } = { grantsForDream: 0 }
       ] = await Grant.aggregate([
-        { $match: { dreamId: mongoose.Types.ObjectId(dream.id) } },
+        {
+          $match: {
+            dreamId: mongoose.Types.ObjectId(dream.id),
+            reclaimed: false
+          }
+        },
         { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
       ]);
       return grantsForDream;

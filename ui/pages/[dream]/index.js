@@ -102,6 +102,15 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
   }
 `;
 
+const RECLAIM_GRANTS_MUTATION = gql`
+  mutation ReclaimGrants($dreamId: ID!) {
+    reclaimGrants(dreamId: $dreamId) {
+      id
+      currentNumberOfGrants
+    }
+  }
+`;
+
 const ImgPlaceholder = styled.div`
   background: ${props => props.bgColor};
   flex: 0 0 200px !important;
@@ -129,6 +138,7 @@ const Dream = ({ event, currentMember }) => {
   );
 
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
+  const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
 
   const [grantModalOpen, setGrantModalOpen] = React.useState(false);
 
@@ -227,10 +237,10 @@ const Dream = ({ event, currentMember }) => {
                     </AvatarGroup>
                   </Box>
                 </Box>
-                <Box m="16px 0">
+                {/* <Box m="16px 0">
                   <h3>Tags</h3>
                   <Chip label="Dummy tag" />
-                </Box>
+                </Box> */}
 
                 <Box m="16px 0">
                   <h3>Actions</h3>
@@ -248,7 +258,7 @@ const Dream = ({ event, currentMember }) => {
                           onClick={() =>
                             approveForGranting({
                               variables: { dreamId: dream.id, approved: false }
-                            })
+                            }).catch(err => alert(err.message))
                           }
                         >
                           Unapprove for granting
@@ -260,12 +270,24 @@ const Dream = ({ event, currentMember }) => {
                           onClick={() =>
                             approveForGranting({
                               variables: { dreamId: dream.id, approved: true }
-                            })
+                            }).catch(err => alert(err.message))
                           }
                         >
                           Approve for granting
                         </Button>
                       )}
+                      <br />
+                      <Button
+                        color="primary"
+                        variant="contained"
+                        onClick={() =>
+                          reclaimGrants({
+                            variables: { dreamId: dream.id }
+                          }).catch(err => alert(err.message))
+                        }
+                      >
+                        Reclaim grants
+                      </Button>
                     </>
                   )}
                 </Box>

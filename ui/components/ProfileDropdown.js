@@ -9,6 +9,7 @@ import {
   Typography,
   Badge
 } from "@material-ui/core";
+import Router from "next/router";
 
 import Card from "./styled/Card";
 import { modals } from "./Modal/index";
@@ -101,6 +102,14 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
                         give
                       </MenuItem>
                     )}
+                    <MenuItem
+                      onClick={e => {
+                        Router.push("/profile");
+                        handleClose(e);
+                      }}
+                    >
+                      Me
+                    </MenuItem>
                     <MenuItem
                       onClick={e => {
                         openModal(modals.EDIT_PROFILE);

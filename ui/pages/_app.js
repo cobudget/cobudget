@@ -22,10 +22,12 @@ export const TOP_LEVEL_QUERY = gql`
       grantValue
       grantsPerMember
       dreamCreationCloses
-      dreamCreationOpen
+      dreamCreationIsOpen
       grantingOpens
       grantingCloses
-      grantingOpen
+      grantingIsOpen
+      totalBudgetGrants
+      remainingGrants
       numberOfApprovedMembers
     }
 
