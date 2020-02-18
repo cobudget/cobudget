@@ -1,7 +1,13 @@
 import useForm from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
+import {
+  Box,
+  Button,
+  TextField,
+  InputAdornment,
+  Typography
+} from "@material-ui/core";
 
 import Card from "../../styled/Card";
 import thousandSeparator from "../../../utils/thousandSeparator";
@@ -10,20 +16,91 @@ import { UPDATE_GRANTING_SETTINGS } from "./";
 const SetGrantValue = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
+  const [prefunding, setPrefunding] = React.useState(0);
+  const [numberOfMembers, setNumberOfMembers] = React.useState(
+    event.numberOfApprovedMembers
+  );
+  const [maxParticipationRate, setMaxParticipationRate] = React.useState(100);
+
   const recommendedGrantValue =
-    event.totalBudget / (event.numberOfApprovedMembers * event.grantsPerMember);
+    (event.totalBudget - prefunding) /
+    (numberOfMembers * event.grantsPerMember * (maxParticipationRate / 100));
+
   return (
     <Card>
       <Box p={3}>
         <h1>Set grant value</h1>
-
-        <p>
-          Recommended grant value calculated on{" "}
-          {thousandSeparator(event.totalBudget)} {event.currency} in total
-          budget, divided by {event.numberOfApprovedMembers} members and{" "}
-          {event.grantsPerMember} grants per member:{" "}
-          {recommendedGrantValue.toFixed(2)} {event.currency}
-        </p>
+        <Box my={1}>
+          <TextField
+            label="Grants per member"
+            value={event.grantsPerMember}
+            disabled
+            fullWidth
+          />
+        </Box>
+        <Box my={1}>
+          <TextField
+            label="Total budget"
+            value={event.totalBudget}
+            disabled
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">{event.currency}</InputAdornment>
+              ),
+              type: "number"
+            }}
+          />
+        </Box>
+        <Box my={1}>
+          <TextField
+            label="Prefunding"
+            value={prefunding}
+            onChange={e => setPrefunding(e.target.value)}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">{event.currency}</InputAdornment>
+              ),
+              type: "number"
+            }}
+          />
+        </Box>
+        <Box my={1}>
+          <TextField
+            label="Number of members"
+            value={numberOfMembers}
+            onChange={e => setNumberOfMembers(e.target.value)}
+            fullWidth
+            InputProps={{
+              type: "number"
+            }}
+          />
+        </Box>
+        <Box my={1}>
+          <TextField
+            label="Maximum expected participation rate"
+            value={maxParticipationRate}
+            onChange={e => setMaxParticipationRate(e.target.value)}
+            fullWidth
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>
+            }}
+            inputProps={{
+              type: "number",
+              min: "1",
+              max: "100"
+            }}
+          />
+        </Box>
+        <Box my={1}>
+          <Typography>
+            Recommended grant value based on these parameters:{" "}
+            <strong>
+              {recommendedGrantValue.toFixed(2)} {event.currency}
+            </strong>
+          </Typography>
+        </Box>
         <form
           onSubmit={handleSubmit(variables => {
             updateGranting({

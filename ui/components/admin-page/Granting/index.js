@@ -31,7 +31,7 @@ const useStyles = makeStyles(theme => ({
   },
   innerModal: {
     outline: "none",
-    maxWidth: 550
+    flex: "0 1 500px"
   }
 }));
 
