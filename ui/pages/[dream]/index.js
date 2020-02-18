@@ -3,17 +3,18 @@ import { useQuery, useMutation } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 import styled from "styled-components";
 import Link from "next/link";
-import Card from "../../components/styled/Card";
+import Router from "next/router";
+import { Button, Box, Tooltip, IconButton } from "@material-ui/core";
+import AvatarGroup from "@material-ui/lab/AvatarGroup";
+import { Edit as EditIcon } from "@material-ui/icons";
+
 import stringToHslColor from "../../utils/stringToHslColor";
 import { isMemberOfDream } from "../../utils/helpers";
-import { Button, Box, Tooltip, Chip } from "@material-ui/core";
-import AvatarGroup from "@material-ui/lab/AvatarGroup";
-
+import Card from "../../components/styled/Card";
 import Avatar from "../../components/Avatar";
 import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
 import PreOrPostFundModal from "../../components/PreOrPostFundModal";
-
 import ProgressBar from "../../components/ProgressBar";
 
 // confusing naming, conflicting with other component.
@@ -159,17 +160,31 @@ const Dream = ({ event, currentMember }) => {
       <div>
         <div className="flex">
           <div className="main">
-            <h1>{dream && dream.title}</h1>
-
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              justifyContent="space-between"
+            >
+              <h1>{dream && dream.title}</h1>
+              {isMemberOfDream(currentMember, dream) && (
+                <IconButton onClick={() => Router.push(`/${dream.slug}/edit`)}>
+                  <EditIcon />
+                </IconButton>
+              )}
+            </Box>
             <p>{dream && dream.summary}</p>
             <br></br>
-
             {dream && <Gallery images={dream.images} size={100} />}
-
             <br />
-
             <p>{dream && dream.description}</p>
             <h2>Budget</h2>
+            <h3>
+              Min goal: {dream && dream.minGoal} {event.currency}
+            </h3>
+            <h3>
+              Max goal: {dream && dream.maxGoal} {event.currency}
+            </h3>
+            <h3>Budget items</h3>
             <h2>Comments</h2>
           </div>
           <div className="sidebar">
@@ -177,55 +192,63 @@ const Dream = ({ event, currentMember }) => {
               <>
                 <Card>
                   <Box p={2}>
-                    <StyledGrantStats>
-                      <div>
-                        <span className="number">
-                          {dream.currentNumberOfGrants}
-                        </span>
-                        <span className="label">Funded</span>
-                      </div>
-                      <div>
-                        <span className="number">{dream.minGoalGrants}</span>
+                    {dream.approved ? (
+                      <>
+                        <StyledGrantStats>
+                          <div>
+                            <span className="number">
+                              {dream.currentNumberOfGrants}
+                            </span>
+                            <span className="label">Funded</span>
+                          </div>
+                          <div>
+                            <span className="number">
+                              {dream.minGoalGrants}
+                            </span>
 
-                        <span className="label">Min. goal</span>
-                      </div>
-                      <div>
-                        <span className="number">{dream.maxGoalGrants}</span>
+                            <span className="label">Min. goal</span>
+                          </div>
+                          <div>
+                            <span className="number">
+                              {dream.maxGoalGrants}
+                            </span>
 
-                        <span className="label">Max. goal</span>
-                      </div>
-                    </StyledGrantStats>
+                            <span className="label">Max. goal</span>
+                          </div>
+                        </StyledGrantStats>
 
-                    <Box m="16px 0px">
-                      <ProgressBar
-                        currentNumberOfGrants={dream.currentNumberOfGrants}
-                        minGoalGrants={dream.minGoalGrants}
-                        maxGoalGrants={dream.maxGoalGrants}
-                        height={10}
-                      />
-                    </Box>
-                    {dream.approved &&
-                      currentMember &&
-                      currentMember.availableGrants > 0 && (
-                        <>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            fullWidth
-                            size="large"
-                            onClick={() => setGrantModalOpen(true)}
-                          >
-                            Donate to dream
-                          </Button>
-                          <GiveGrantlingsModal
-                            open={grantModalOpen}
-                            handleClose={() => setGrantModalOpen(false)}
-                            dream={dream}
-                            event={event}
-                            currentMember={currentMember}
+                        <Box m="16px 0px">
+                          <ProgressBar
+                            currentNumberOfGrants={dream.currentNumberOfGrants}
+                            minGoalGrants={dream.minGoalGrants}
+                            maxGoalGrants={dream.maxGoalGrants}
+                            height={10}
                           />
-                        </>
-                      )}
+                        </Box>
+                        {currentMember && currentMember.availableGrants > 0 && (
+                          <>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              fullWidth
+                              size="large"
+                              onClick={() => setGrantModalOpen(true)}
+                            >
+                              Donate to dream
+                            </Button>
+                            <GiveGrantlingsModal
+                              open={grantModalOpen}
+                              handleClose={() => setGrantModalOpen(false)}
+                              dream={dream}
+                              event={event}
+                              currentMember={currentMember}
+                            />
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <p>This dream is not approved for granting yet</p>
+                    )}
                   </Box>
                 </Card>
                 <Box m="16px 0">
@@ -245,22 +268,21 @@ const Dream = ({ event, currentMember }) => {
                   <Chip label="Dummy tag" />
                 </Box> */}
 
-                <Box m="16px 0">
-                  <h3>Actions</h3>
-                  {isMemberOfDream(currentMember, dream) && (
-                    <Link href="/[dream]/edit" as={`/${dream.slug}/edit`}>
-                      <Button component="a">Edit dream</Button>
-                    </Link>
-                  )}
-                  <br />
-                  {currentMember && currentMember.isAdmin && (
-                    <>
-                      {dream.approved ? (
+                {currentMember && currentMember.isAdmin && (
+                  <>
+                    <Box m="16px 0">
+                      <h3>Admin actions</h3>
+                      {!event.grantingHasClosed && dream.approved ? (
                         <Button
-                          color="secondary"
                           onClick={() =>
+                            confirm(
+                              "Are you sure you would like to unapprove this dream?"
+                            ) &&
                             approveForGranting({
-                              variables: { dreamId: dream.id, approved: false }
+                              variables: {
+                                dreamId: dream.id,
+                                approved: false
+                              }
                             }).catch(err => alert(err.message))
                           }
                         >
@@ -280,34 +302,37 @@ const Dream = ({ event, currentMember }) => {
                         </Button>
                       )}
                       <br />
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={() =>
-                          reclaimGrants({
-                            variables: { dreamId: dream.id }
-                          }).catch(err => alert(err.message))
-                        }
-                      >
-                        Reclaim grants
-                      </Button>
-                      <br />
-                      <Button
-                        color="primary"
-                        variant="contained"
-                        onClick={() => setPrePostFundModalOpen(true)}
-                      >
-                        Post-fund
-                      </Button>
-                      <PreOrPostFundModal
-                        open={prePostFundModalOpen}
-                        handleClose={() => setPrePostFundModalOpen(false)}
-                        dream={dream}
-                        event={event}
-                      />
-                    </>
-                  )}
-                </Box>
+                      {event.grantingHasClosed &&
+                        dream.currentNumberOfGrants > 0 && (
+                          <>
+                            <Button
+                              onClick={() =>
+                                reclaimGrants({
+                                  variables: { dreamId: dream.id }
+                                }).catch(err => alert(err.message))
+                              }
+                            >
+                              Reclaim grants
+                            </Button>
+                            <br />
+                          </>
+                        )}
+                      {dream.approved && (
+                        <>
+                          <Button onClick={() => setPrePostFundModalOpen(true)}>
+                            {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
+                          </Button>
+                          <PreOrPostFundModal
+                            open={prePostFundModalOpen}
+                            handleClose={() => setPrePostFundModalOpen(false)}
+                            dream={dream}
+                            event={event}
+                          />
+                        </>
+                      )}
+                    </Box>
+                  </>
+                )}
               </>
             )}
           </div>

@@ -23,10 +23,6 @@ const Header = styled.div`
 const Nav = styled.nav`
   display: flex;
   align-items: center;
-
-  > div {
-    margin-left: 20px;
-  }
 `;
 
 export default ({ event, currentMember, openModal, logOut }) => {
@@ -50,11 +46,13 @@ export default ({ event, currentMember, openModal, logOut }) => {
           event.dreamCreationIsOpen &&
           currentMember &&
           currentMember.event.id === event.id && (
-            <Link href="/create-dream">
-              <Button component="a" variant="contained">
-                Create dream
-              </Button>
-            </Link>
+            <Box m="0 10px">
+              <Link href="/create-dream">
+                <Button component="a" variant="contained">
+                  Create dream
+                </Button>
+              </Link>
+            </Box>
           )}
         {event ? (
           currentMember ? (

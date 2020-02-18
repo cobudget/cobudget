@@ -98,8 +98,7 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
                   >
                     {Boolean(currentMember.availableGrants) && (
                       <MenuItem disabled>
-                        You have {currentMember.availableGrants} grantlets to
-                        give
+                        You have {currentMember.availableGrants} grants to give
                       </MenuItem>
                     )}
                     <MenuItem

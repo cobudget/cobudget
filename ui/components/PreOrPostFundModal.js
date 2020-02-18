@@ -90,7 +90,7 @@ const GiveGrantlingsModal = ({ open, handleClose, dream, event }) => {
     >
       <Card className={classes.innerModal}>
         <Box p={3}>
-          <h1>Pre/post fund grants to dream</h1>
+          <h1>{event.grantingHasClosed ? "Post" : "Pre"}-fund dream</h1>
           <p>Available grants in event pool: {event.remainingGrants}</p>
           <p>Grantlings needed to reach minimum goal: {amountToReachMinGoal}</p>
           <p>Grantlings needed to reach maximum goal: {amountToReachMaxGoal}</p>
