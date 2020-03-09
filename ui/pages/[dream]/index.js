@@ -4,7 +4,20 @@ import { useRouter } from "next/router";
 import styled from "styled-components";
 import Link from "next/link";
 import Router from "next/router";
-import { Button, Box, Tooltip, IconButton } from "@material-ui/core";
+import {
+  Button,
+  Box,
+  Tooltip,
+  IconButton,
+  Typography,
+  TableHead,
+  Table,
+  TableRow,
+  TableCell,
+  TableBody,
+  TableContainer,
+  Paper
+} from "@material-ui/core";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
 import { Edit as EditIcon } from "@material-ui/icons";
 
@@ -92,6 +105,10 @@ export const DREAM_QUERY = gql`
         small
         large
       }
+      budgetItems {
+        description
+        amount
+      }
     }
   }
 `;
@@ -176,16 +193,52 @@ const Dream = ({ event, currentMember }) => {
             <br></br>
             {dream && <Gallery images={dream.images} size={100} />}
             <br />
-            <p>{dream && dream.description}</p>
-            <h2>Budget</h2>
-            <h3>
-              Min goal: {dream && dream.minGoal} {event.currency}
-            </h3>
-            <h3>
-              Max goal: {dream && dream.maxGoal} {event.currency}
-            </h3>
-            <h3>Budget items</h3>
-            <h2>Comments</h2>
+            <Typography>{dream && dream.description}</Typography>
+
+            {dream && dream.minGoal && (
+              <Box my={3}>
+                <Typography variant="h6">Funding goals</Typography>
+                <Typography>
+                  Min goal: {dream.minGoal} {event.currency}
+                </Typography>
+                {dream.maxGoal && (
+                  <Typography>
+                    Max goal: {dream.maxGoal} {event.currency}
+                  </Typography>
+                )}
+              </Box>
+            )}
+
+            {dream && dream.budgetItems.length > 0 && (
+              <>
+                <Box my={3}>
+                  <Typography variant="h6">Budget items</Typography>
+                  <TableContainer component={Paper}>
+                    <Table aria-label="Budget items">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Description</TableCell>
+                          <TableCell align="right">Amount</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {dream.budgetItems.map((budgetItem, i) => (
+                          <TableRow key={i}>
+                            <TableCell component="th" scope="row">
+                              {budgetItem.description}
+                            </TableCell>
+                            <TableCell align="right">
+                              {budgetItem.amount} {event.currency}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              </>
+            )}
+            <Typography variant="h6">Comments</Typography>
           </div>
           <div className="sidebar">
             {dream && (
