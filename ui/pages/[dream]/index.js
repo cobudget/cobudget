@@ -184,7 +184,11 @@ const Dream = ({ event, currentMember }) => {
             >
               <h1>{dream && dream.title}</h1>
               {isMemberOfDream(currentMember, dream) && (
-                <IconButton onClick={() => Router.push(`/${dream.slug}/edit`)}>
+                <IconButton
+                  onClick={() =>
+                    Router.push("/[dream]/edit", `/${dream.slug}/edit`)
+                  }
+                >
                   <EditIcon />
                 </IconButton>
               )}
