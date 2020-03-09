@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "name": "dreams",
   "builds": [
     { "src": "ui/next.config.js", "use": "@now/next" },
     { "src": "api/index.js", "use": "@now/node" }
