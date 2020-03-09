@@ -1,15 +1,7 @@
 import useForm from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import {
-  TextField,
-  Box,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  Button
-} from "@material-ui/core";
+import { TextField, Box, InputAdornment, Button } from "@material-ui/core";
 import SelectInput from "../SelectInput";
 
 import slugify from "../../utils/slugify";
@@ -60,7 +52,7 @@ export default ({ event }) => {
         })}
       >
         <Box maxWidth={500}>
-          <Box m="15px 0">
+          <Box my={2}>
             <TextField
               name="title"
               label="Title"
@@ -70,7 +62,7 @@ export default ({ event }) => {
               inputRef={register}
             />
           </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <TextField
               name="slug"
               label="Slug"
@@ -88,7 +80,7 @@ export default ({ event }) => {
               variant="outlined"
             />
           </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <SelectInput
               name="registrationPolicy"
               label="Registration policy"
@@ -101,7 +93,7 @@ export default ({ event }) => {
               <option value="INVITE_ONLY">Invite only</option>
             </SelectInput>
           </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <Button
               type="submit"
               size="large"
