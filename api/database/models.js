@@ -112,11 +112,11 @@ const DreamSchema = new Schema({
   description: String,
   summary: String,
   members: [Schema.Types.ObjectId],
-  budgetDescription: String,
   minGoal: Number,
   maxGoal: Number,
   images: [new Schema({ small: String, large: String })],
-  approved: { type: Boolean, default: false }
+  approved: { type: Boolean, default: false },
+  budgetItems: [new Schema({ description: String, amount: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
 
 const GrantSchema = new Schema({

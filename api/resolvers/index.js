@@ -97,9 +97,10 @@ const resolvers = {
         budgetDescription,
         minGoal,
         maxGoal,
-        images
+        images,
+        budgetItems
       },
-      { currentMember, models: { Dream } }
+      { currentMember, models: { Dream, Event } }
     ) => {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
@@ -129,12 +130,23 @@ const resolvers = {
         budgetDescription,
         minGoal,
         maxGoal,
-        images
+        images,
+        budgetItems
       }).save();
     },
     editDream: async (
       parent,
-      { dreamId, title, slug, description, summary, minGoal, maxGoal, images },
+      {
+        dreamId,
+        title,
+        slug,
+        description,
+        summary,
+        minGoal,
+        maxGoal,
+        images,
+        budgetItems
+      },
       { currentMember, models: { Dream } }
     ) => {
       if (!currentMember) throw new Error('You need to be logged in');
@@ -156,6 +168,7 @@ const resolvers = {
       dream.minGoal = minGoal;
       dream.maxGoal = maxGoal;
       dream.images = images;
+      dream.budgetItems = budgetItems;
 
       return await dream.save();
     },

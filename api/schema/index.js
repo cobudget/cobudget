@@ -34,6 +34,7 @@ const schema = gql`
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
+      budgetItems: [BudgetItemInput]
     ): Dream
     editDream(
       dreamId: ID!
@@ -44,6 +45,7 @@ const schema = gql`
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
+      budgetItems: [BudgetItemInput]
     ): Dream
 
     sendMagicLink(email: String!, eventId: ID!): Boolean
@@ -137,7 +139,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     currentNumberOfGrants: Int
-    budgetDescription: String
+    budgetItems: [BudgetItem!]
     approved: Boolean
     # answers: [QuestionAnswer]
     # funding: Int!
@@ -169,6 +171,16 @@ const schema = gql`
   input ImageInput {
     small: String
     large: String
+  }
+
+  type BudgetItem {
+    description: String!
+    amount: String!
+  }
+
+  input BudgetItemInput {
+    description: String!
+    amount: String!
   }
 
   # enum Visibility {
