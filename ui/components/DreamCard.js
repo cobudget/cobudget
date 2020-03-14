@@ -5,12 +5,7 @@ import ProgressBar from "./ProgressBar";
 import Link from "next/link";
 import { Box } from "@material-ui/core";
 
-import {
-  ChatBubbleOutline as CommentIcon,
-  Favorite as FavoriteIcon,
-  FavoriteBorder as FavoriteBorderIcon
-} from "@material-ui/icons";
-import CoinIcon from "./CoinIcon";
+import { CoinIcon, CommentIcon } from "./Icons";
 
 const ActionItem = styled.div`
   display: flex;
@@ -96,7 +91,7 @@ export default ({ dream }) => {
           <Box display="flex" mt={2}>
             {(dream.minGoalGrants || dream.maxGoalGrants) && (
               <ActionItem hoverColor="#10b92b">
-                <CoinIcon />
+                <CoinIcon className="w-5 h-5" />
                 <span>
                   {dream.currentNumberOfGrants}/
                   {dream.maxGoalGrants || dream.minGoalGrants}
@@ -106,7 +101,7 @@ export default ({ dream }) => {
 
             <Link href="/[dream]#comments" as={`/${dream.slug}#comments`}>
               <ActionItem hoverColor="blue">
-                <CommentIcon fontSize="small" />
+                <CommentIcon className="w-5 h-5" />
                 <span>{dream.numberOfComments} </span>
               </ActionItem>
             </Link>
