@@ -46,7 +46,7 @@ const AddComment = ({ currentMember, dreamId }) => {
         <div className="mr-4">
           <Avatar user={currentMember} />
         </div>
-        <div className="flex-grow pb-3">
+        <div className="flex-grow">
           <div className="mb-2">
             <TextField
               name="content"

@@ -258,7 +258,8 @@ const Dream = ({ event, currentMember, openModal }) => {
             {dream && (
               <>
                 <Typography variant="h6" id="comments">
-                  {dream.numberOfComments} comments
+                  {dream.numberOfComments}{" "}
+                  {dream.numberOfComments === 1 ? "comment" : "comments"}
                 </Typography>
                 <Comments
                   currentMember={currentMember}
