@@ -148,7 +148,6 @@ const getModels = db => {
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
     Dream: db.model('Dream', DreamSchema),
-    // Comment: db.model('Comment', CommentSchema),
     Grant: db.model('Grant', GrantSchema)
   };
 };
