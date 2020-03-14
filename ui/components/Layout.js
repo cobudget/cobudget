@@ -4,6 +4,8 @@ import Header from "./Header";
 import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
+import { Box } from "@material-ui/core";
+import DevelopmentNotice from "./DevelopmentNotice";
 
 const GlobalStyle = createGlobalStyle`
   html {
@@ -42,12 +44,7 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-const Wrapper = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const InnerContainer = styled.div`
+const Container = styled.div`
   flex: 0 1 1160px;
   margin: 0 20px;
   padding-bottom: 50px;
@@ -80,8 +77,15 @@ export default ({
       openModal(modals.FINISH_SIGN_UP);
     }
   }, [currentMember]);
+
+  const logOut = () => {
+    cookie.remove("token");
+    apollo.resetStore();
+    Router.push("/");
+  };
+
   return (
-    <Wrapper>
+    <Box display="flex" justifyContent="center">
       <Head>
         <title>
           {title
@@ -90,12 +94,22 @@ export default ({
             ? `${event.title} | Dreams`
             : "Dreams"}
         </title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
+        />
       </Head>
-      <InnerContainer>
-        <Header event={event} currentMember={currentMember} apollo={apollo} />
+      <Container>
+        <Header
+          event={event}
+          currentMember={currentMember}
+          openModal={openModal}
+          logOut={logOut}
+        />
         {children}
-      </InnerContainer>
+      </Container>
       <GlobalStyle />
-    </Wrapper>
+      {process.env.IS_PROD && <DevelopmentNotice />}
+    </Box>
   );
 };

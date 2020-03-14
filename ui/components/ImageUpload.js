@@ -1,15 +1,14 @@
 import styled from "styled-components";
+import { styled as muiStyled } from "@material-ui/core/styles";
+
+import { FormControl, InputLabel } from "@material-ui/core";
 
 const Images = styled.div`
-  /* width: 100%; */
-  margin: 10px 0;
+  width: 100%;
   display: block;
-  border-radius: 6px;
-  background: #f7f8f9;
+  border-radius: 4px;
   padding: 14px;
-  /* font-size: 20px; */
-  border: 3px solid #f7f8f9;
-  /* transition: border 0.2s ease-in-out, box-shadow 0.2s ease-in-out; */
+  border: 1px solid rgba(0, 0, 0, 0.25);
 
   display: flex;
   .image {
@@ -34,7 +33,8 @@ const Images = styled.div`
     top: -500px;
   }
   label {
-    border: 3px dashed lightgrey;
+    border: 2px dashed lightgrey;
+    color: grey;
     height: 140px;
     width: 140px;
     display: flex;
@@ -47,6 +47,12 @@ const Images = styled.div`
     }
   }
 `;
+
+const StyledLabel = muiStyled(InputLabel)({
+  background: "white",
+  padding: "0 10px",
+  marginLeft: -5
+});
 
 export default ({ images, setImages }) => {
   const [uploadingImage, setUploadingImage] = React.useState(false);
@@ -77,31 +83,34 @@ export default ({ images, setImages }) => {
   };
 
   return (
-    <Images>
-      {images.length > 0 &&
-        images.map((image, i) => (
-          <div className="image" key={image.small}>
-            <a href={image.large} target="_blank">
-              <img src={image.small} alt="Preview" />
-            </a>
-            <button onClick={() => removeImage(i)}>x</button>
-          </div>
-        ))}
-      {uploadingImage ? (
-        <label>uploading...</label>
-      ) : (
-        <>
-          <label>
-            Upload image
-            <input
-              type="file"
-              name="file"
-              placeholder="Upload image"
-              onChange={uploadFile}
-            />
-          </label>
-        </>
-      )}
-    </Images>
+    <FormControl variant="outlined" fullWidth>
+      <StyledLabel shrink>Images</StyledLabel>
+      <Images>
+        {images.length > 0 &&
+          images.map((image, i) => (
+            <div className="image" key={image.small}>
+              <a href={image.large} target="_blank">
+                <img src={image.small} alt="Preview" />
+              </a>
+              <button onClick={() => removeImage(i)}>x</button>
+            </div>
+          ))}
+        {uploadingImage ? (
+          <label>uploading...</label>
+        ) : (
+          <>
+            <label>
+              Upload image
+              <input
+                type="file"
+                name="file"
+                placeholder="Upload image"
+                onChange={uploadFile}
+              />
+            </label>
+          </>
+        )}
+      </Images>
+    </FormControl>
   );
 };

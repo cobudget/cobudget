@@ -1,38 +1,21 @@
-import styled from "styled-components";
+import { Avatar } from "@material-ui/core";
 import stringToHslColor from "../utils/stringToHslColor";
-const Circle = styled.div`
-  height: 40px;
-  width: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 500;
-  border-radius: 25px;
-  color: white;
-  text-transform: uppercase;
-  overflow: hidden;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-`;
 
-const Avatar = ({ user, onClick }) => {
-  if (user.avatar) {
-    return (
-      <Circle onClick={onClick}>
-        <img src={user.avatar} />
-      </Circle>
-    );
-  }
-  const bgColor = stringToHslColor(user.name ? user.name : user.email);
-  const letter = user.name ? user.name.charAt(0) : user.email.charAt(0); // TODO: handle without name and email?
-
+export default React.forwardRef((props, ref) => {
+  const { user } = props;
   return (
-    <Circle onClick={onClick} style={{ background: bgColor }}>
-      {letter}
-    </Circle>
+    <Avatar
+      ref={ref}
+      alt={user.name && user.name}
+      src={user.avatar && user.avatar}
+      {...props}
+      style={{
+        ...props.style,
+        backgroundColor: stringToHslColor(user.name ? user.name : user.email),
+        fontWeight: 500
+      }}
+    >
+      {user.name ? user.name.charAt(0) : user.email.charAt(0).toUpperCase()}
+    </Avatar>
   );
-};
-
-export default Avatar;
+});

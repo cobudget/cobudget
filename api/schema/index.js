@@ -22,36 +22,55 @@ const schema = gql`
     editEvent(
       slug: String
       title: String
-      currency: String
       registrationPolicy: RegistrationPolicy
     ): Event!
+
     createDream(
       eventId: ID!
       title: String!
       slug: String!
       description: String
+      summary: String
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
+      budgetItems: [BudgetItemInput]
     ): Dream
     editDream(
       dreamId: ID!
       title: String
       slug: String
       description: String
+      summary: String
       minGoal: Int
       maxGoal: Int
       images: [ImageInput]
+      budgetItems: [BudgetItemInput]
     ): Dream
-    addDreamComment(comment: String!, dreamId: ID!): Dream
+
+    addComment(content: String!, dreamId: ID!): Dream
+
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
     updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
     deleteMember(memberId: ID!): Member
-  }
 
-  scalar Date
+    approveForGranting(dreamId: ID!, approved: Boolean!): Dream
+    updateGrantingSettings(
+      currency: String
+      grantsPerMember: Int
+      totalBudget: Int
+      grantValue: Int
+      grantingOpens: Date
+      grantingCloses: Date
+      dreamCreationCloses: Date
+    ): Event
+    giveGrant(dreamId: ID!, value: Int!): Grant
+    deleteGrant(grantId: ID!): Grant
+    reclaimGrants(dreamId: ID!): Dream
+    preOrPostFund(dreamId: ID!, value: Int!): Grant
+  }
 
   type Event {
     id: ID!
@@ -60,6 +79,7 @@ const schema = gql`
     description: String
     # logo: String
     members: [Member!]!
+    numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
     # questions: [Question!]
@@ -69,12 +89,19 @@ const schema = gql`
     # grantingPeriods: [GrantingPeriod]
     currency: String! # scalar? # can't change after first submission closes
     # useGrantlings: Boolean! # can't change after first submission close
-    # membershipContribution: Int
-    # grantlingValue: Int # can't change after first submission close?
-    # totalBudget: Int
-    # amountLeft: Int
-    # grantlingValue: Int
+    totalBudget: Int
+    totalBudgetGrants: Int
+    remainingGrants: Int
+    grantValue: Int
+    grantsPerMember: Int
+    dreamCreationCloses: Date
+    dreamCreationIsOpen: Boolean
+    grantingOpens: Date
+    grantingCloses: Date
+    grantingIsOpen: Boolean
   }
+
+  scalar Date
 
   enum RegistrationPolicy {
     OPEN
@@ -93,7 +120,9 @@ const schema = gql`
     isAdmin: Boolean!
     isApproved: Boolean!
     verifiedEmail: Boolean!
-    createdAt: String
+    createdAt: Date
+    availableGrants: Int
+    givenGrants: [Grant]
     # isGuide: Boolean!
     # favorites: [Dream]
   }
@@ -104,18 +133,37 @@ const schema = gql`
     slug: String!
     title: String!
     description: String
+    summary: String
     images: [Image!]
     members: [Member]!
+    minGoalGrants: Int
+    maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
-    budgetDescription: String
     comments: [Comment]
-    # isApprovedForGranting: Boolean # should this be per granting period?
+    currentNumberOfGrants: Int
+    budgetItems: [BudgetItem!]
+    approved: Boolean
     # answers: [QuestionAnswer]
     # funding: Int!
     # raisedFlags: [Flag]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Grant {
+    id: ID!
+    dream: Dream!
+    value: Int!
+    reclaimed: Boolean!
+    type: GrantType!
+    # user: Member!
+  }
+
+  enum GrantType {
+    PRE_FUND
+    USER
+    POST_FUND
   }
 
   type Image {
@@ -126,6 +174,16 @@ const schema = gql`
   input ImageInput {
     small: String
     large: String
+  }
+
+  type BudgetItem {
+    description: String!
+    amount: String!
+  }
+
+  input BudgetItemInput {
+    description: String!
+    amount: String!
   }
 
   # enum Visibility {
@@ -147,7 +205,7 @@ const schema = gql`
   # enum DistributeGrantStrategy {
   #   DISTRIBUTE_EQUALLY # is this possible?
   #   DISTRIBUTE_TO_ACTIVE_USERS
-  #   COMITTEE
+  #   COMMITTEE
   # }
 
   # type Emoji {
@@ -162,9 +220,8 @@ const schema = gql`
   # }
 
   type Comment {
-    dream: Dream!
-    by: Member!
-    createdAt: Date
+    author: Member!
+    createdAt: Date!
     content: String!
   }
 
@@ -181,11 +238,6 @@ const schema = gql`
   # type Favorite {
   #   dream: Dream!
   #   by: Member!
-  # }
-
-  # type Grant {
-  #   dream: Dream!
-  #   amount: Int!
   # }
 
   # type QuestionAnswer {

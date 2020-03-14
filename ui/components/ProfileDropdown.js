@@ -1,97 +1,139 @@
 import React from "react";
-import styled from "styled-components";
+import {
+  Avatar,
+  MenuItem,
+  Popper,
+  Grow,
+  ClickAwayListener,
+  MenuList,
+  Typography,
+  Badge
+} from "@material-ui/core";
+import Router from "next/router";
 
-import Avatar from "./Avatar";
+import Card from "./styled/Card";
+import { modals } from "./Modal/index";
+import stringToHslColor from "../utils/stringToHslColor";
 
-const Dropdown = styled.div`
-  width: 100px;
-  right: 0px;
-  top: 48px;
-  z-index: 100;
-  position: absolute;
-  background: white;
-  border-radius: 8px;
-  padding: 8px;
-  box-shadow: 0 1px 6px 0 rgba(100, 105, 110, 0.3);
-`;
+const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
+  const [open, setOpen] = React.useState(false);
 
-const List = styled.ul`
-  background: white;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  li.no-padding {
-    padding: 0;
-  }
-  li {
-    font-size: 14px;
-    line-height: 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    user-select: none;
-    color: #3d4045;
-    display: block;
-    padding: 6px 8px;
-    text-decoration: none;
+  const anchorRef = React.useRef(null);
 
-    a {
-      color: #3d4045;
-      display: block;
-      padding: 6px 8px;
-      text-decoration: none;
-    }
-
-    &:hover {
-      background: #f4f5f6;
-    }
-
-    &:last-child {
-      border-bottom: 0;
-      color: #9aa1aa;
-      a {
-        color: #9aa1aa;
-      }
-    }
-  }
-`;
-
-const Container = styled.div`
-  position: relative;
-`;
-
-const ProfileDropdown = ({ currentMember, children }) => {
-  const [dropdownExpanded, setDropdownExpanded] = React.useState(false);
-
-  const inputRef = React.useRef(null);
-
-  const toggleDropdown = () => {
-    setDropdownExpanded(!dropdownExpanded);
+  const handleToggle = () => {
+    setOpen(prevOpen => !prevOpen);
   };
 
-  const handleClick = e => {
-    if (dropdownExpanded) {
-      if (inputRef.current && !inputRef.current.contains(e.target))
-        toggleDropdown();
+  const handleClose = event => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
     }
+
+    setOpen(false);
   };
 
-  React.useEffect(() => {
-    document.addEventListener("mousedown", handleClick, false);
-    return () => {
-      document.removeEventListener("mousedown", handleClick, false);
-    };
-  });
+  function handleListKeyDown(event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      setOpen(false);
+    }
+  }
 
   return (
-    <Container ref={inputRef}>
-      <Avatar onClick={toggleDropdown} user={currentMember} />
-      {dropdownExpanded && (
-        <Dropdown>
-          <List>{children}</List>
-        </Dropdown>
-      )}
-    </Container>
+    <div>
+      <Badge
+        overlap="circle"
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right"
+        }}
+        badgeContent={currentMember.availableGrants}
+        color="primary"
+      >
+        <Avatar
+          ref={anchorRef}
+          aria-controls={open ? "profile-dropdown" : undefined}
+          aria-haspopup="true"
+          onClick={handleToggle}
+          alt={currentMember.name && currentMember.name}
+          src={currentMember.avatar && currentMember.avatar}
+          style={{
+            backgroundColor: stringToHslColor(
+              currentMember.name ? currentMember.name : currentMember.email
+            ),
+            fontWeight: 500,
+            cursor: "pointer"
+          }}
+        >
+          {currentMember.name
+            ? currentMember.name.charAt(0)
+            : currentMember.email.charAt(0).toUpperCase()}
+        </Avatar>
+      </Badge>
+
+      <Popper
+        open={open}
+        anchorEl={anchorRef.current}
+        role={undefined}
+        transition
+        disablePortal
+        placement="bottom-end"
+        style={{ zIndex: 1 }}
+      >
+        {({ TransitionProps }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin: "right top",
+              marginTop: 10
+            }}
+          >
+            <Card>
+              <ClickAwayListener onClickAway={handleClose}>
+                <div>
+                  <MenuList
+                    autoFocusItem={open}
+                    id="profile-dropdown"
+                    onKeyDown={handleListKeyDown}
+                  >
+                    {Boolean(currentMember.availableGrants) && (
+                      <MenuItem disabled>
+                        You have {currentMember.availableGrants} grants to give
+                      </MenuItem>
+                    )}
+                    <MenuItem
+                      onClick={e => {
+                        Router.push("/profile");
+                        handleClose(e);
+                      }}
+                    >
+                      Me
+                    </MenuItem>
+                    <MenuItem
+                      onClick={e => {
+                        openModal(modals.EDIT_PROFILE);
+                        handleClose(e);
+                      }}
+                    >
+                      Edit profile
+                    </MenuItem>
+
+                    <MenuItem
+                      onClick={e => {
+                        logOut();
+                        handleClose(e);
+                      }}
+                    >
+                      Logout
+                    </MenuItem>
+                  </MenuList>
+                </div>
+              </ClickAwayListener>
+            </Card>
+          </Grow>
+        )}
+      </Popper>
+    </div>
   );
 };
 

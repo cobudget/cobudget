@@ -1,6 +1,7 @@
-import { ApolloServer } from 'apollo-server-micro';
+const { ApolloServer } = require('apollo-server-micro');
 const cors = require('micro-cors')();
 const jwt = require('jsonwebtoken');
+
 const schema = require('./schema');
 const resolvers = require('./resolvers');
 const { getModels } = require('./database/models');

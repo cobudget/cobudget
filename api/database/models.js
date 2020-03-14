@@ -1,5 +1,5 @@
 const { Schema } = require('mongoose');
-
+const dayjs = require('dayjs');
 // // User
 // const UserSchema = new Schema({
 //   name: String,
@@ -63,17 +63,45 @@ const EventSchema = new Schema({
     enum: ['OPEN', 'REQUEST_TO_JOIN', 'INVITE_ONLY'],
     default: 'OPEN',
     required: true
+  },
+  totalBudget: Number,
+  grantValue: Number,
+  grantsPerMember: {
+    type: Number,
+    default: 10
+  },
+  dreamCreationCloses: Date,
+  grantingOpens: Date,
+  grantingCloses: Date
+});
+
+EventSchema.virtual('grantingIsOpen').get(function() {
+  if (!this.grantingOpens) return false;
+
+  const now = dayjs();
+  const grantingOpens = dayjs(this.grantingOpens);
+
+  if (this.grantingCloses) {
+    const grantingCloses = dayjs(this.grantingCloses);
+    return grantingOpens.isBefore(now) && now.isBefore(grantingCloses);
+  } else {
+    return grantingOpens.isBefore(now);
   }
 });
 
-const CommentSchema = new Schema({
-  dream: Schema.Types.ObjectId,
-  by: Schema.Types.ObjectId,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  content: String
+EventSchema.virtual('grantingHasClosed').get(function() {
+  if (!this.grantingCloses) return false;
+
+  return dayjs().isBefore(dayjs(this.grantingCloses));
+});
+
+EventSchema.virtual('dreamCreationIsOpen').get(function() {
+  if (!this.dreamCreationCloses) return true;
+
+  const now = dayjs();
+  const dreamCreationCloses = dayjs(this.dreamCreationCloses);
+
+  return now.isBefore(dreamCreationCloses);
 });
 
 // Dream
@@ -82,20 +110,46 @@ const DreamSchema = new Schema({
   slug: { type: String, required: true },
   title: { type: String, required: true },
   description: String,
+  summary: String,
   members: [Schema.Types.ObjectId],
-  budgetDescription: String,
   minGoal: Number,
   maxGoal: Number,
   images: [new Schema({ small: String, large: String })],
-  comments: [CommentSchema]
+  comments: [
+    new Schema({
+      authorId: Schema.Types.ObjectId,
+      createdAt: {
+        type: Date,
+        default: Date.now
+      },
+      content: String
+    })
+  ],
+  approved: { type: Boolean, default: false },
+  budgetItems: [new Schema({ description: String, amount: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
+
+const GrantSchema = new Schema({
+  eventId: { type: Schema.Types.ObjectId, required: true, index: true },
+  dreamId: { type: Schema.Types.ObjectId, required: true, index: true },
+  memberId: { type: Schema.Types.ObjectId, required: true },
+  value: { type: Number, required: true },
+  reclaimed: { type: Boolean, default: false },
+  type: {
+    type: String,
+    enum: ['PRE_FUND', 'USER', 'POST_FUND'],
+    default: 'USER',
+    required: true
+  }
+});
 
 const getModels = db => {
   return {
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
     Dream: db.model('Dream', DreamSchema),
-    Comment: db.model('Comment', CommentSchema)
+    // Comment: db.model('Comment', CommentSchema),
+    Grant: db.model('Grant', GrantSchema)
   };
 };
 

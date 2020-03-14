@@ -8,6 +8,7 @@ import Card from "../../components/styled/Card";
 import { DREAM_QUERY } from "./";
 
 export default ({ event }) => {
+  if (!event) return null;
   const router = useRouter();
 
   const { data: { dream } = { dream: null } } = useQuery(DREAM_QUERY, {

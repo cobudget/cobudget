@@ -1,16 +1,24 @@
-import useForm from 'react-hook-form';
-import styled from 'styled-components';
-import gql from 'graphql-tag';
-import { useMutation } from '@apollo/react-hooks';
-import Form from '../styled/Form';
-import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/react-hooks';
-import { DREAM_QUERY } from '../../pages/[dream]/';
+import useForm from "react-hook-form";
+import styled from "styled-components";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/react-hooks";
+import Form from "../styled/Form";
+import { useRouter } from "next/router";
+import { useQuery } from "@apollo/react-hooks";
+import { DREAM_QUERY } from "../../pages/[dream]/";
 
-const ADD_DREAM_COMMENT = gql`
-  mutation addDreamComment($comment: String!, $dreamId: ID!) {
-    addDreamComment(comment: $comment, dreamId: $dreamId) {
+const ADD_COMMENT = gql`
+  mutation addComment($content: String!, $dreamId: ID!) {
+    addComment(content: $content, dreamId: $dreamId) {
       id
+      comments {
+        content
+        createdAt
+        author {
+          name
+          avatar
+        }
+      }
     }
   }
 `;
@@ -66,14 +74,17 @@ export const Button = styled.button`
 `;
 
 const AddComment = ({ closeModal, event }) => {
-  const [addDreamComment] = useMutation(ADD_DREAM_COMMENT);
+  const [addComment] = useMutation(ADD_COMMENT);
   const { handleSubmit, register, errors } = useForm();
 
   const router = useRouter();
 
-  const { data: { dream } = { dream: null }, loading, error } = useQuery(DREAM_QUERY, {
-    variables: { slug: router.query.dream, eventId: event.id },
-  });
+  const { data: { dream } = { dream: null }, loading, error } = useQuery(
+    DREAM_QUERY,
+    {
+      variables: { slug: router.query.dream, eventId: event.id }
+    }
+  );
   if (!dream) return null;
 
   return (
@@ -82,30 +93,30 @@ const AddComment = ({ closeModal, event }) => {
         <CardContainer>
           <h2>Add comment</h2>
           <Form
-            onSubmit={handleSubmit((variables) => {
+            onSubmit={handleSubmit(variables => {
               variables.dreamId = dream.id;
               console.log({ variables });
-              addDreamComment({ variables })
+              addComment({ variables })
                 .then(({ data }) => {
                   console.log({ data });
                   closeModal();
                 })
-                .catch((err) => {
+                .catch(err => {
                   console.log({ err });
                   alert(err.message);
                 });
             })}
           >
             {errors.name && errors.name.message}
-            <div className='two-cols-3-1'>
+            <div className="two-cols-3-1">
               <input
-                name='comment'
-                placeholder='Comment placeholder'
+                name="content"
+                placeholder="Comment placeholder"
                 ref={register({
-                  required: 'Required',
+                  required: "Required"
                 })}
               />
-              <button type='submit'>Submit</button>
+              <button type="submit">Submit</button>
             </div>
           </Form>
         </CardContainer>

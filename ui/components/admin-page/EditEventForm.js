@@ -1,71 +1,29 @@
 import useForm from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import {
-  TextField,
-  Box,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  Button
-} from "@material-ui/core";
-import urlSlug from "url-slug";
+import { TextField, Box, InputAdornment, Button } from "@material-ui/core";
+import SelectInput from "../SelectInput";
+
+import slugify from "../../utils/slugify";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
     $slug: String
     $title: String
-    $currency: String
     $registrationPolicy: RegistrationPolicy
   ) {
     editEvent(
       slug: $slug
       title: $title
-      currency: $currency
       registrationPolicy: $registrationPolicy
     ) {
       id
       title
       slug
-      currency
       registrationPolicy
     }
   }
 `;
-
-const SelectInput = ({
-  label,
-  defaultValue,
-  children,
-  inputRef,
-  name,
-  fullWidth
-}) => {
-  const inputLabel = React.useRef(null);
-  const [labelWidth, setLabelWidth] = React.useState(0);
-  React.useEffect(() => {
-    setLabelWidth(inputLabel.current.offsetWidth);
-  }, []);
-  return (
-    <FormControl variant="outlined" fullWidth={fullWidth}>
-      <InputLabel ref={inputLabel} id={`${label}-label`}>
-        {label}
-      </InputLabel>
-      <Select
-        native
-        name={name}
-        labelId={`${label}-label`}
-        id={label}
-        defaultValue={defaultValue}
-        labelWidth={labelWidth}
-        inputRef={inputRef}
-      >
-        {children}
-      </Select>
-    </FormControl>
-  );
-};
 
 export default ({ event }) => {
   const [editEvent] = useMutation(EDIT_EVENT);
@@ -77,7 +35,14 @@ export default ({ event }) => {
       <h2>Edit event</h2>
       <form
         onSubmit={handleSubmit(variables => {
-          editEvent({ variables })
+          editEvent({
+            variables: {
+              ...variables,
+              totalBudget: Number(variables.totalBudget),
+              grantValue: Number(variables.grantValue),
+              grantsPerMember: Number(variables.grantsPerMember)
+            }
+          })
             .then(data => {
               // Add "Snackbar" success message from material UI
             })
@@ -87,7 +52,7 @@ export default ({ event }) => {
         })}
       >
         <Box maxWidth={500}>
-          <Box m="15px 0">
+          <Box my={2}>
             <TextField
               name="title"
               label="Title"
@@ -97,7 +62,7 @@ export default ({ event }) => {
               inputRef={register}
             />
           </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <TextField
               name="slug"
               label="Slug"
@@ -109,27 +74,13 @@ export default ({ event }) => {
                   <InputAdornment position="end">.dreams.wtf</InputAdornment>
                 ),
                 onBlur: e => {
-                  setValue("slug", urlSlug(e.target.value));
+                  setValue("slug", slugify(e.target.value));
                 }
               }}
               variant="outlined"
             />
           </Box>
-          <Box m="15px 0">
-            <SelectInput
-              name="currency"
-              label="Currency"
-              defaultValue={event.currency}
-              inputRef={register}
-              fullWidth
-            >
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
-            </SelectInput>
-          </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <SelectInput
               name="registrationPolicy"
               label="Registration policy"
@@ -142,7 +93,7 @@ export default ({ event }) => {
               <option value="INVITE_ONLY">Invite only</option>
             </SelectInput>
           </Box>
-          <Box m="15px 0">
+          <Box my={2}>
             <Button
               type="submit"
               size="large"

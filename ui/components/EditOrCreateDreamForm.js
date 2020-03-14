@@ -3,9 +3,20 @@ import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import Router from "next/router";
 
+import {
+  TextField,
+  Box,
+  InputAdornment,
+  Typography,
+  Button
+} from "@material-ui/core";
+
+import { makeStyles } from "@material-ui/core/styles";
+
 import ImageUpload from "./ImageUpload";
-import Form from "./styled/Form";
-import urlSlug from "url-slug";
+import EditBudgetItems from "./EditBudgetItems";
+
+import slugify from "../utils/slugify";
 
 const CREATE_DREAM = gql`
   mutation CreateDream(
@@ -13,28 +24,37 @@ const CREATE_DREAM = gql`
     $title: String!
     $slug: String!
     $description: String
+    $summary: String
     $images: [ImageInput]
     $minGoal: Int
     $maxGoal: Int
+    $budgetItems: [BudgetItemInput]
   ) {
     createDream(
       eventId: $eventId
       title: $title
       slug: $slug
       description: $description
+      summary: $summary
       images: $images
       minGoal: $minGoal
       maxGoal: $maxGoal
+      budgetItems: $budgetItems
     ) {
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal
       images {
         small
         large
+      }
+      budgetItems {
+        description
+        amount
       }
     }
   }
@@ -46,34 +66,62 @@ const EDIT_DREAM = gql`
     $title: String!
     $slug: String!
     $description: String
+    $summary: String
     $images: [ImageInput]
     $minGoal: Int
     $maxGoal: Int
+    $budgetItems: [BudgetItemInput]
   ) {
     editDream(
       dreamId: $dreamId
       title: $title
       slug: $slug
       description: $description
+      summary: $summary
       images: $images
       minGoal: $minGoal
       maxGoal: $maxGoal
+      budgetItems: $budgetItems
     ) {
       id
       slug
       description
+      summary
       title
       minGoal
       maxGoal
+      minGoalGrants
+      maxGoalGrants
+      currentNumberOfGrants
       images {
         small
         large
+      }
+      budgetItems {
+        description
+        amount
       }
     }
   }
 `;
 
+const useStyles = makeStyles(theme => ({
+  row: {
+    margin: "16px 0",
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gridGap: theme.spacing(2)
+  },
+  [theme.breakpoints.down("xs")]: {
+    row: {
+      gridTemplateColumns: "1fr"
+    }
+  }
+}));
+
 export default ({ dream = {}, event, editing }) => {
+  const classes = useStyles();
+
   const [editDream] = useMutation(EDIT_DREAM);
   const [createDream] = useMutation(CREATE_DREAM);
   const { handleSubmit, register, errors } = useForm();
@@ -82,12 +130,25 @@ export default ({ dream = {}, event, editing }) => {
     title = "",
     slug = "",
     description = "",
+    summary = "",
     minGoal = "",
     maxGoal = ""
   } = dream;
 
   const [slugValue, setSlugValue] = React.useState(slug);
   const [images, setImages] = React.useState(dream.images ? dream.images : []);
+
+  const [budgetItems, setBudgetItems] = React.useState(
+    dream.budgetItems ? dream.budgetItems : []
+  );
+
+  const addBudgetItem = () => {
+    setBudgetItems([...budgetItems, { description: "", value: "" }]);
+  };
+
+  const removeBudgetItem = i => {
+    setBudgetItems([...budgetItems.filter((item, index) => i !== index)]);
+  };
 
   const onSubmitCreate = values => {
     createDream({
@@ -129,69 +190,122 @@ export default ({ dream = {}, event, editing }) => {
   };
 
   return (
-    <Form onSubmit={handleSubmit(editing ? onSubmitEdit : onSubmitCreate)}>
-      <label>
-        Title <span>{errors.title && errors.title.message}</span>
-        <input
+    <form onSubmit={handleSubmit(editing ? onSubmitEdit : onSubmitCreate)}>
+      <Box my={2}>
+        <TextField
           name="title"
-          ref={register({
-            required: "Required"
-          })}
-          onChange={e => {
-            if (!editing) setSlugValue(urlSlug(e.target.value));
-          }}
+          label="Title"
           defaultValue={title}
-        />
-      </label>
-      <label>
-        Slug <span>{errors.slug && errors.slug.message}</span>
-        <input
-          name="slug"
-          ref={register({
+          fullWidth
+          inputRef={register({
             required: "Required"
           })}
-          value={slugValue}
-          onChange={e => setSlugValue(e.target.value)}
-          onBlur={e => setSlugValue(urlSlug(e.target.value))}
+          InputProps={{
+            onChange: e => {
+              if (!editing) setSlugValue(slugify(e.target.value));
+            }
+          }}
+          variant="outlined"
+          error={errors.title}
+          helperText={errors.title && errors.title.message}
         />
-      </label>
+      </Box>
+      <Box my={2}>
+        <TextField
+          name="slug"
+          label="Slug"
+          value={slugValue}
+          fullWidth
+          inputRef={register({
+            required: "Required"
+          })}
+          InputProps={{
+            onChange: e => setSlugValue(e.target.value),
+            onBlur: e => setSlugValue(slugify(e.target.value))
+          }}
+          variant="outlined"
+          error={errors.slug}
+          helperText={errors.slug && errors.slug.message}
+        />
+      </Box>
 
-      <label>Images</label>
+      <Box my={2}>
+        <TextField
+          name="summary"
+          label="Summary"
+          defaultValue={summary}
+          fullWidth
+          inputRef={register({
+            required: "Required"
+          })}
+          inputProps={{ maxLength: 200 }}
+          multiline
+          variant="outlined"
+          error={errors.summary}
+          helperText={errors.summary && errors.summary.message}
+        />
+      </Box>
+
       <ImageUpload images={images} setImages={setImages} />
 
-      <label>
-        Description
-        <textarea
+      <Box my={2}>
+        <TextField
           name="description"
-          ref={register}
-          rows={10}
+          label="Description"
           defaultValue={description}
+          fullWidth
+          inputRef={register}
+          multiline
+          rows={15}
+          variant="outlined"
         />
-      </label>
+      </Box>
 
-      <div className="two-cols">
-        <label>
-          Min funding goal
-          <input
-            name="minGoal"
-            type="number"
-            ref={register({ min: 0 })}
-            placeholder={`0 ${event.currency}`}
-            defaultValue={minGoal}
-          />
-        </label>
-        <label>
-          Max funding goal
-          <input
-            name="maxGoal"
-            type="number"
-            ref={register({ min: 0 })}
-            placeholder={`0 ${event.currency}`}
-            defaultValue={maxGoal}
-          />
-        </label>
-      </div>
-      <button type="submit">Submit</button>
-    </Form>
+      <Typography variant="h6">Funding goals</Typography>
+
+      <Box my={2} className={classes.row}>
+        <TextField
+          name="minGoal"
+          label="Min funding goal"
+          fullWidth
+          defaultValue={minGoal}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">{event.currency}</InputAdornment>
+            )
+          }}
+          inputProps={{ type: "number", min: 0 }}
+          inputRef={register({ min: 0 })}
+          variant="outlined"
+        />
+        <TextField
+          name="maxGoal"
+          label="Max funding goal"
+          fullWidth
+          defaultValue={maxGoal}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">{event.currency}</InputAdornment>
+            )
+          }}
+          inputProps={{ type: "number", min: 0 }}
+          inputRef={register({ min: 0 })}
+          variant="outlined"
+        />
+      </Box>
+
+      <EditBudgetItems
+        event={event}
+        register={register}
+        errors={errors}
+        budgetItems={budgetItems}
+        addBudgetItem={addBudgetItem}
+        removeBudgetItem={removeBudgetItem}
+      />
+
+      <Button variant="contained" color="primary" size="large" type="submit">
+        Save
+      </Button>
+    </form>
   );
 };

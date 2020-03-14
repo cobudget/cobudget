@@ -1,7 +1,7 @@
 import styled from "styled-components";
-import Link from "next/link";
 import Card from "./styled/Card";
 import stringToHslColor from "../utils/stringToHslColor";
+import FundingStats from "./FundingStats";
 
 const DreamCard = styled(Card)`
   display: flex;
@@ -39,42 +39,6 @@ const DreamCard = styled(Card)`
   }
 `;
 
-const StyledProgressBar = styled.div`
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.075);
-  margin: 10px 0px;
-  .filler {
-    width: ${props => props.percentage}%;
-    height: 100%;
-    background: #10b92b;
-    border-radius: inherit;
-  }
-`;
-
-const ProgressBar = ({ percentage = 20 }) => {
-  return (
-    <StyledProgressBar percentage={percentage}>
-      <div className="filler" />
-    </StyledProgressBar>
-  );
-};
-
-const StyledFundingStats = styled.p`
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-`;
-
-const FundingStats = ({ percentage = 0 }) => {
-  return (
-    <div>
-      <ProgressBar percentage={percentage} />
-      <StyledFundingStats>{percentage}% funded</StyledFundingStats>
-    </div>
-  );
-};
-
 const ImgPlaceholder = styled.div`
   background: ${props => props.color};
   flex: 0 0 200px !important;
@@ -94,9 +58,14 @@ export default ({ dream }) => {
         <div>
           <h3>{dream.title}</h3>
 
-          <p>{truncate(dream.description, 220)}</p>
+          <p>{dream.summary}</p>
         </div>
-        <FundingStats percentage={42} />
+
+        <FundingStats
+          currentNumberOfGrants={dream.currentNumberOfGrants}
+          minGoalGrants={dream.minGoalGrants}
+          maxGoalGrants={dream.maxGoalGrants}
+        />
       </div>
     </DreamCard>
   );

@@ -49,7 +49,11 @@ export default ({ currentMember, event }) => {
         <h1>{msg}</h1>
 
         {data && data.sendMagicLink ? (
-          <div>Magic link sent! Check your inbox!</div>
+          <div>
+            {process.env.IS_PROD
+              ? "Magic link sent! Check your inbox!"
+              : "Find the magic link in console (in development)."}
+          </div>
         ) : (
           <Form
             onSubmit={handleSubmit(({ email }) => {
