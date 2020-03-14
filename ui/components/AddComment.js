@@ -2,20 +2,15 @@ import useForm from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 
-import {
-  TextField,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ListItemSecondaryAction,
-  Button
-} from "@material-ui/core";
+import { TextField, Button } from "@material-ui/core";
+
 import Avatar from "./Avatar";
 
 const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {
     addComment(content: $content, dreamId: $dreamId) {
       id
+      numberOfComments
       comments {
         content
         createdAt
@@ -45,32 +40,41 @@ const AddComment = ({ currentMember, dream }) => {
           .catch(err => alert(err.message));
       })}
     >
-      <ListItem>
-        <ListItemAvatar>
+      <div className="flex mt-6 mb-4">
+        <div className="mr-4">
           <Avatar user={currentMember} />
-        </ListItemAvatar>
-        <ListItemText>
-          <TextField
-            name="content"
-            label="Add comment"
-            variant="outlined"
-            error={Boolean(errors.content)}
-            helperText={errors.content && errors.content.message}
-            fullWidth
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            inputRef={e => {
-              register(e);
-              inputRef.current = e;
-            }}
-          />
-        </ListItemText>
-        <ListItemSecondaryAction>
-          <Button type="submit" variant="contained">
-            Submit
-          </Button>
-        </ListItemSecondaryAction>
-      </ListItem>
+        </div>
+        <div className="flex-grow pb-3">
+          <div className="mb-2">
+            <TextField
+              name="content"
+              label="Add comment"
+              variant="outlined"
+              multiline
+              error={Boolean(errors.content)}
+              helperText={errors.content && errors.content.message}
+              fullWidth
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              inputRef={e => {
+                register({ required: "Required" });
+                inputRef.current = e;
+              }}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={content.length === 0}
+              color="primary"
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+      </div>
     </form>
   );
 };

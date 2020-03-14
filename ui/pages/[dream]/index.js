@@ -193,7 +193,7 @@ const Dream = ({ event, currentMember, openModal }) => {
               alignItems="flex-start"
               justifyContent="space-between"
             >
-              <h1>{dream && dream.title}</h1>
+              <h1 className="text-3xl mb-2">{dream && dream.title}</h1>
               {isMemberOfDream(currentMember, dream) && (
                 <IconButton
                   onClick={() =>

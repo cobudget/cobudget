@@ -1,69 +1,41 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  TextField,
-  List,
-  ListItem,
-  Divider,
-  ListItemText,
-  ListItemAvatar,
-  Typography
-} from "@material-ui/core";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
 import Avatar from "./Avatar";
-import Card from "./styled/Card";
-import Link from "next/link";
-import { modals } from "./Modal";
 import AddComment from "./AddComment";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    width: "100%",
-    backgroundColor: theme.palette.background.paper
-  },
-  inline: {
-    display: "inline"
-  }
-}));
+dayjs.extend(relativeTime);
 
-const Comment = ({ author, content, avatar }) => {
+const Comment = ({ comment }) => {
   return (
-    <>
-      <ListItem alignItems="flex-start">
-        <ListItemAvatar>
-          <Avatar user={author} />
-        </ListItemAvatar>
-        <ListItemText primary={author.name} secondary={content} />
-      </ListItem>
-      <Divider variant="inset" component="li" />
-    </>
+    <div className="flex my-4">
+      <div className="mr-4">
+        <Avatar user={comment.author} />
+      </div>
+      <div className="flex-grow border-b pb-4">
+        <div className="flex justify-between mb-2 text-gray-900 font-medium text-sm">
+          <h5>{comment.author.name}</h5>
+          <span className="font-normal">
+            {dayjs(comment.createdAt).fromNow()}
+          </span>
+        </div>
+        <p className="text-gray-900">{comment.content}</p>
+      </div>
+    </div>
   );
 };
 
 const Comments = ({ currentMember, dream }) => {
-  const classes = useStyles();
-
   return (
-    <List className={classes.root}>
+    <div className="">
       {dream.comments.map((comment, index) => (
-        <Comment
-          content={comment.content}
-          author={comment.author}
-          key={index}
-        />
+        <Comment comment={comment} key={index} />
       ))}
       {currentMember && (
         <AddComment currentMember={currentMember} dream={dream} />
       )}
-      {/* <ListItem>
-          <a
-            onClick={() => {
-              openModal(modals.ADD_COMMENT);
-            }}
-          >
-            + Add comment
-          </a>
-        </ListItem> */}
-    </List>
+    </div>
   );
 };
 
