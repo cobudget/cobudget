@@ -25,7 +25,7 @@ const modalComponents = {
   EDIT_PROFILE: EditProfile
 };
 
-export default ({ active, closeModal, currentMember }) => {
+export default ({ active, closeModal, currentMember, event }) => {
   const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
@@ -44,6 +44,7 @@ export default ({ active, closeModal, currentMember }) => {
           <ModalComponent
             closeModal={closeModal}
             currentMember={currentMember}
+            event={event}
           />
         )}
       </div>

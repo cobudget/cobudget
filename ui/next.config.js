@@ -5,6 +5,8 @@ const {
   PHASE_PRODUCTION_BUILD
 } = require("next/constants");
 
+const withCSS = require("@zeit/next-css");
+
 const withBundleAnalyzer = require("@next/bundle-analyzer")({
   enabled: process.env.ANALYZE === "true"
 });
@@ -16,7 +18,9 @@ module.exports = phase => {
     GRAPHQL_URL: isDev ? "http://localhost:3000/api" : "https://dreams.wtf/api",
     IS_PROD: isProd
   };
-  return withBundleAnalyzer({
-    env
-  });
+  return withBundleAnalyzer(
+    withCSS({
+      env
+    })
+  );
 };

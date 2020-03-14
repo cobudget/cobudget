@@ -1,7 +1,27 @@
 import styled from "styled-components";
 import Card from "./styled/Card";
 import stringToHslColor from "../utils/stringToHslColor";
-import FundingStats from "./FundingStats";
+import ProgressBar from "./ProgressBar";
+import Link from "next/link";
+import { Box } from "@material-ui/core";
+
+import { CoinIcon, CommentIcon } from "./Icons";
+
+const ActionItem = styled.div`
+  display: flex;
+  font-size: 16px;
+  margin-right: 15px;
+  align-items: center;
+  color: rgba(0,0,0,0.6);
+  /* color: ${props => (props.blarb ? props.hoverColor : "rgba(0,0,0,0.6)")}; */
+  &:hover {
+    color: ${props => props.hoverColor};
+  }
+  span {
+    display: block;
+    margin-left: 5px;
+  }
+`;
 
 const DreamCard = styled(Card)`
   display: flex;
@@ -43,10 +63,9 @@ const ImgPlaceholder = styled.div`
   background: ${props => props.color};
   flex: 0 0 200px !important;
 `;
-const truncate = (string, n) =>
-  string.length > n ? string.substr(0, n - 1) + "..." : string;
 
 export default ({ dream }) => {
+  // const [favorite, setFavorite] = React.useState(false);
   return (
     <DreamCard>
       {dream.images.length ? (
@@ -60,12 +79,51 @@ export default ({ dream }) => {
 
           <p>{dream.summary}</p>
         </div>
+        <div>
+          {(dream.minGoalGrants || dream.maxGoalGrants) && (
+            <ProgressBar
+              currentNumberOfGrants={dream.currentNumberOfGrants}
+              minGoalGrants={dream.minGoalGrants}
+              maxGoalGrants={dream.maxGoalGrants}
+            />
+          )}
 
-        <FundingStats
-          currentNumberOfGrants={dream.currentNumberOfGrants}
-          minGoalGrants={dream.minGoalGrants}
-          maxGoalGrants={dream.maxGoalGrants}
-        />
+          <Box display="flex" mt={2}>
+            {(dream.minGoalGrants || dream.maxGoalGrants) && (
+              <ActionItem hoverColor="#10b92b">
+                <CoinIcon className="w-5 h-5" />
+                <span>
+                  {dream.currentNumberOfGrants}/
+                  {dream.maxGoalGrants || dream.minGoalGrants}
+                </span>
+              </ActionItem>
+            )}
+
+            <Link href="/[dream]#comments" as={`/${dream.slug}#comments`}>
+              <ActionItem hoverColor="blue">
+                <CommentIcon className="w-5 h-5" />
+                <span>{dream.numberOfComments} </span>
+              </ActionItem>
+            </Link>
+
+            {/* <ActionItem
+              hoverColor="red"
+              blarb={favorite}
+              onClick={e => {
+                e.preventDefault();
+                setFavorite(!favorite);
+              }}
+            >
+              {favorite ? (
+                <FavoriteIcon fontSize="small" />
+              ) : (
+                <>
+                  <FavoriteBorderIcon fontSize="small" />
+                </>
+              )}
+            </ActionItem> */}
+          </Box>
+        </div>
       </div>
     </DreamCard>
   );

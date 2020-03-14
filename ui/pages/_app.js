@@ -6,6 +6,8 @@ import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
+import "../styles.css";
+
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
@@ -141,6 +143,7 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
           active={modal}
           closeModal={closeModal}
           currentMember={currentMember}
+          event={event}
         />
         <Layout
           currentMember={currentMember}
@@ -153,6 +156,7 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
             currentMember={currentMember}
             event={event}
             hostInfo={hostInfo}
+            openModal={openModal}
           />
         </Layout>
       </ApolloProvider>

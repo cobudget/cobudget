@@ -29,6 +29,7 @@ import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
 import PreOrPostFundModal from "../../components/PreOrPostFundModal";
 import ProgressBar from "../../components/ProgressBar";
+import Comments from "../../components/Comments";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
@@ -105,6 +106,17 @@ export const DREAM_QUERY = gql`
         small
         large
       }
+      numberOfComments
+      comments {
+        id
+        content
+        createdAt
+        author {
+          id
+          name
+          avatar
+        }
+      }
       budgetItems {
         description
         amount
@@ -146,7 +158,7 @@ const CoverImg = styled.img`
   object-position: center center;
 `;
 
-const Dream = ({ event, currentMember }) => {
+const Dream = ({ event, currentMember, openModal }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -156,6 +168,7 @@ const Dream = ({ event, currentMember }) => {
       variables: { slug: router.query.dream, eventId: event.id }
     }
   );
+  // if (!dream) return null;
 
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
@@ -182,7 +195,7 @@ const Dream = ({ event, currentMember }) => {
               alignItems="flex-start"
               justifyContent="space-between"
             >
-              <h1>{dream && dream.title}</h1>
+              <h1 className="text-3xl mb-2">{dream && dream.title}</h1>
               {isMemberOfDream(currentMember, dream) && (
                 <IconButton
                   onClick={() =>
@@ -242,7 +255,19 @@ const Dream = ({ event, currentMember }) => {
                 </Box>
               </>
             )}
-            <Typography variant="h6">Comments</Typography>
+            {dream && (
+              <>
+                <Typography variant="h6" id="comments">
+                  {dream.numberOfComments}{" "}
+                  {dream.numberOfComments === 1 ? "comment" : "comments"}
+                </Typography>
+                <Comments
+                  currentMember={currentMember}
+                  comments={dream.comments}
+                  dreamId={dream.id}
+                />
+              </>
+            )}
           </div>
           <div className="sidebar">
             {dream && (

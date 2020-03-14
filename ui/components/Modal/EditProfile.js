@@ -44,7 +44,7 @@ const EditProfile = ({ closeModal, currentMember }) => {
               label="Display name"
               variant="outlined"
               defaultValue={currentMember.name}
-              error={errors.name}
+              error={Boolean(errors.name)}
               helperText={errors.name && errors.name.message}
               fullWidth
               inputRef={register({

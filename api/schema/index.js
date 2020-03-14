@@ -48,6 +48,9 @@ const schema = gql`
       budgetItems: [BudgetItemInput]
     ): Dream
 
+    addComment(dreamId: ID!, content: String!): Dream
+    deleteComment(dreamId: ID!, commentId: ID!): Dream
+
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
     inviteMembers(emails: String!): [Member]
@@ -138,6 +141,8 @@ const schema = gql`
     maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
+    comments: [Comment]
+    numberOfComments: Int
     currentNumberOfGrants: Int
     budgetItems: [BudgetItem!]
     approved: Boolean
@@ -216,11 +221,12 @@ const schema = gql`
   #   # createdAt
   # }
 
-  # type Comment {
-  #   dream: Dream!
-  #   by: Member!
-  #   createdAt: Date!
-  # }
+  type Comment {
+    id: ID!
+    author: Member!
+    createdAt: Date!
+    content: String!
+  }
 
   # type Flag {
   #   title: String!

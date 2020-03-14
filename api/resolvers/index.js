@@ -172,6 +172,53 @@ const resolvers = {
 
       return await dream.save();
     },
+    addComment: async (
+      parent,
+      { content, dreamId },
+      { currentMember, models: { Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      if (content.length === 0) throw new Error('You need content!');
+
+      const dream = await Dream.findOne({
+        _id: dreamId,
+        eventId: currentMember.eventId
+      });
+
+      dream.comments.push({
+        authorId: currentMember.id,
+        content
+      });
+
+      return await dream.save();
+    },
+    deleteComment: async (
+      parent,
+      { dreamId, commentId },
+      { currentMember, models: { Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      const dream = await Dream.findOne({
+        _id: dreamId,
+        eventId: currentMember.eventId
+      });
+
+      dream.comments = dream.comments.filter(comment => {
+        if (
+          comment._id.toString() === commentId &&
+          (comment.authorId.toString() === currentMember.id ||
+            currentMember.isAdmin)
+        )
+          return false;
+        return true;
+      });
+
+      return dream.save();
+    },
     sendMagicLink: async (
       parent,
       { email: inputEmail, eventId },
@@ -726,6 +773,9 @@ const resolvers = {
         { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
       ]);
       return grantsForDream;
+    },
+    numberOfComments: dream => {
+      return dream.comments.length;
     }
   },
   Grant: {
@@ -748,7 +798,12 @@ const resolvers = {
       }
       return null;
     }
-  })
+  }),
+  Comment: {
+    author: async (comment, args, { models: { Member } }) => {
+      return Member.findOne({ _id: comment.authorId });
+    }
+  }
 };
 
 module.exports = resolvers;

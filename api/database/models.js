@@ -115,6 +115,16 @@ const DreamSchema = new Schema({
   minGoal: Number,
   maxGoal: Number,
   images: [new Schema({ small: String, large: String })],
+  comments: [
+    new Schema({
+      authorId: Schema.Types.ObjectId,
+      createdAt: {
+        type: Date,
+        default: Date.now
+      },
+      content: String
+    })
+  ],
   approved: { type: Boolean, default: false },
   budgetItems: [new Schema({ description: String, amount: String })]
 }).index({ eventId: 1, slug: 1 }, { unique: true });
