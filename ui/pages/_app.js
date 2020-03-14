@@ -6,6 +6,8 @@ import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
+import "../styles.css";
+
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
