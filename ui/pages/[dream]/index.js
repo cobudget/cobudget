@@ -106,6 +106,7 @@ export const DREAM_QUERY = gql`
         small
         large
       }
+      numberOfComments
       comments {
         author {
           name
@@ -165,7 +166,7 @@ const Dream = ({ event, currentMember, openModal }) => {
       variables: { slug: router.query.dream, eventId: event.id }
     }
   );
-  if (!dream) return null;
+  // if (!dream) return null;
 
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
@@ -252,8 +253,14 @@ const Dream = ({ event, currentMember, openModal }) => {
                 </Box>
               </>
             )}
-            <Typography variant="h6">Comments</Typography>
-            <Comments currentMember={currentMember} dream={dream} />
+            {dream && (
+              <>
+                <Typography variant="h6" id="comments">
+                  {dream.numberOfComments} comments
+                </Typography>
+                <Comments currentMember={currentMember} dream={dream} />
+              </>
+            )}
           </div>
           <div className="sidebar">
             {dream && (

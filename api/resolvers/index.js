@@ -745,6 +745,9 @@ const resolvers = {
         { $group: { _id: null, grantsForDream: { $sum: '$value' } } }
       ]);
       return grantsForDream;
+    },
+    numberOfComments: dream => {
+      return dream.comments.length;
     }
   },
   Grant: {

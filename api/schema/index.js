@@ -141,6 +141,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     comments: [Comment]
+    numberOfComments: Int
     currentNumberOfGrants: Int
     budgetItems: [BudgetItem!]
     approved: Boolean
