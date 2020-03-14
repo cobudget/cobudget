@@ -48,7 +48,8 @@ const schema = gql`
       budgetItems: [BudgetItemInput]
     ): Dream
 
-    addComment(content: String!, dreamId: ID!): Dream
+    addComment(dreamId: ID!, content: String!): Dream
+    deleteComment(dreamId: ID!, commentId: ID!): Dream
 
     sendMagicLink(email: String!, eventId: ID!): Boolean
     updateProfile(name: String, avatar: String): Member
@@ -221,6 +222,7 @@ const schema = gql`
   # }
 
   type Comment {
+    id: ID!
     author: Member!
     createdAt: Date!
     content: String!

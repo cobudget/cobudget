@@ -180,6 +180,8 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
+      if (content.length === 0) throw new Error('You need content!');
+
       const dream = await Dream.findOne({
         _id: dreamId
       });
@@ -190,6 +192,31 @@ const resolvers = {
       });
 
       return await dream.save();
+    },
+    deleteComment: async (
+      parent,
+      { dreamId, commentId },
+      { currentMember, models: { Dream } }
+    ) => {
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      const dream = await Dream.findOne({
+        _id: dreamId,
+        eventId: currentMember.eventId
+      });
+
+      dream.comments = dream.comments.filter(comment => {
+        if (
+          comment._id.toString() === commentId &&
+          (comment.authorId.toString() === currentMember.id ||
+            currentMember.isAdmin)
+        )
+          return false;
+        return true;
+      });
+
+      return dream.save();
     },
     sendMagicLink: async (
       parent,

@@ -108,12 +108,14 @@ export const DREAM_QUERY = gql`
       }
       numberOfComments
       comments {
+        id
+        content
+        createdAt
         author {
+          id
           name
           avatar
         }
-        createdAt
-        content
       }
       budgetItems {
         description
@@ -258,7 +260,11 @@ const Dream = ({ event, currentMember, openModal }) => {
                 <Typography variant="h6" id="comments">
                   {dream.numberOfComments} comments
                 </Typography>
-                <Comments currentMember={currentMember} dream={dream} />
+                <Comments
+                  currentMember={currentMember}
+                  comments={dream.comments}
+                  dreamId={dream.id}
+                />
               </>
             )}
           </div>

@@ -1,39 +1,19 @@
-import React from "react";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-
-import Avatar from "./Avatar";
 import AddComment from "./AddComment";
+import Comment from "./Comment";
 
-dayjs.extend(relativeTime);
-
-const Comment = ({ comment }) => {
+const Comments = ({ currentMember, comments, dreamId }) => {
   return (
-    <div className="flex my-4">
-      <div className="mr-4">
-        <Avatar user={comment.author} />
-      </div>
-      <div className="flex-grow border-b pb-4">
-        <div className="flex justify-between mb-2 text-gray-900 font-medium text-sm">
-          <h5>{comment.author.name}</h5>
-          <span className="font-normal">
-            {dayjs(comment.createdAt).fromNow()}
-          </span>
-        </div>
-        <p className="text-gray-900">{comment.content}</p>
-      </div>
-    </div>
-  );
-};
-
-const Comments = ({ currentMember, dream }) => {
-  return (
-    <div className="">
-      {dream.comments.map((comment, index) => (
-        <Comment comment={comment} key={index} />
+    <div>
+      {comments.map((comment, index) => (
+        <Comment
+          comment={comment}
+          currentMember={currentMember}
+          dreamId={dreamId}
+          key={index}
+        />
       ))}
       {currentMember && (
-        <AddComment currentMember={currentMember} dream={dream} />
+        <AddComment currentMember={currentMember} dreamId={dreamId} />
       )}
     </div>
   );

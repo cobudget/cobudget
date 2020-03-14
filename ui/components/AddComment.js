@@ -12,9 +12,11 @@ const ADD_COMMENT = gql`
       id
       numberOfComments
       comments {
+        id
         content
         createdAt
         author {
+          id
           name
           avatar
         }
@@ -23,16 +25,16 @@ const ADD_COMMENT = gql`
   }
 `;
 
-const AddComment = ({ currentMember, dream }) => {
+const AddComment = ({ currentMember, dreamId }) => {
   const [addComment] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, errors } = useForm();
   const inputRef = React.useRef();
 
   return (
     <form
       onSubmit={handleSubmit(variables => {
-        addComment({ variables: { content, dreamId: dream.id } })
+        addComment({ variables: { content, dreamId } })
           .then(() => {
             inputRef.current.blur();
             setContent("");
