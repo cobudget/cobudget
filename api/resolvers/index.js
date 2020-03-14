@@ -183,7 +183,8 @@ const resolvers = {
       if (content.length === 0) throw new Error('You need content!');
 
       const dream = await Dream.findOne({
-        _id: dreamId
+        _id: dreamId,
+        eventId: currentMember.eventId
       });
 
       dream.comments.push({
