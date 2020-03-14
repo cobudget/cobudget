@@ -1,7 +1,6 @@
 import { Modal } from "@material-ui/core";
 import EditProfile from "./EditProfile";
 import FinishSignUp from "./FinishSignUp";
-import AddComment from "./AddComment";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
@@ -18,14 +17,12 @@ const useStyles = makeStyles(theme => ({
 
 export const modals = {
   FINISH_SIGN_UP: "FINISH_SIGN_UP",
-  EDIT_PROFILE: "EDIT_PROFILE",
-  ADD_COMMENT: "ADD_COMMENT"
+  EDIT_PROFILE: "EDIT_PROFILE"
 };
 
 const modalComponents = {
   FINISH_SIGN_UP: FinishSignUp,
-  EDIT_PROFILE: EditProfile,
-  ADD_COMMENT: AddComment
+  EDIT_PROFILE: EditProfile
 };
 
 export default ({ active, closeModal, currentMember, event }) => {

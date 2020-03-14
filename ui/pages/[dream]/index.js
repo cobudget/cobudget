@@ -29,7 +29,7 @@ import Gallery from "../../components/Gallery";
 import GiveGrantlingsModal from "../../components/GiveGrantlingsModal";
 import PreOrPostFundModal from "../../components/PreOrPostFundModal";
 import ProgressBar from "../../components/ProgressBar";
-import CommentBox from "../../components/CommentBox";
+import Comments from "../../components/Comments";
 
 // confusing naming, conflicting with other component.
 const DreamCard = styled(Card)`
@@ -253,7 +253,7 @@ const Dream = ({ event, currentMember, openModal }) => {
               </>
             )}
             <Typography variant="h6">Comments</Typography>
-            <CommentBox comments={dream.comments} openModal={openModal} />
+            <Comments currentMember={currentMember} dream={dream} />
           </div>
           <div className="sidebar">
             {dream && (
