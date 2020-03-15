@@ -1,7 +1,17 @@
 module.exports = {
   theme: {
-    extend: {},
+    extend: {
+      gridTemplateColumns: {
+        // Dream page layout
+        sidebar: "1fr 300px"
+      },
+      height: {
+        "88": "22rem"
+      }
+    }
   },
-  variants: {},
-  plugins: [],
-}
+  variants: {
+    backgroundColor: ["responsive", "hover", "focus", "even"]
+  },
+  plugins: []
+};

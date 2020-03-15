@@ -48,9 +48,28 @@ const CREATE_DREAM = gql`
       title
       minGoal
       maxGoal
+      minGoalGrants
+      maxGoalGrants
+      currentNumberOfGrants
+      approved
+      members {
+        id
+        name
+      }
       images {
         small
         large
+      }
+      numberOfComments
+      comments {
+        id
+        content
+        createdAt
+        author {
+          id
+          name
+          avatar
+        }
       }
       budgetItems {
         description
@@ -93,9 +112,25 @@ const EDIT_DREAM = gql`
       minGoalGrants
       maxGoalGrants
       currentNumberOfGrants
+      approved
+      members {
+        id
+        name
+      }
       images {
         small
         large
+      }
+      numberOfComments
+      comments {
+        id
+        content
+        createdAt
+        author {
+          id
+          name
+          avatar
+        }
       }
       budgetItems {
         description
@@ -238,7 +273,7 @@ export default ({ dream = {}, event, editing }) => {
           inputRef={register({
             required: "Required"
           })}
-          inputProps={{ maxLength: 200 }}
+          inputProps={{ maxLength: 180 }}
           multiline
           variant="outlined"
           error={errors.summary}

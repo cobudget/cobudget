@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { Box, TextField, Button, Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import Card from "./styled/Card";
 import { DREAM_QUERY } from "../pages/[dream]";
 import { TOP_LEVEL_QUERY } from "../pages/_app";
 
@@ -30,7 +29,7 @@ const PRE_OR_POST_FUND_MUTATION = gql`
   }
 `;
 
-const GiveGrantlingsModal = ({ open, handleClose, dream, event }) => {
+const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
   const classes = useStyles();
   const router = useRouter();
 
@@ -81,73 +80,67 @@ const GiveGrantlingsModal = ({ open, handleClose, dream, event }) => {
     dream.maxGoalGrants - dream.currentNumberOfGrants;
 
   return (
-    <Modal
-      // aria-labelledby="simple-modal-title"
-      // aria-describedby="simple-modal-description"
-      open={open}
-      onClose={handleClose}
-      className={classes.modal}
-    >
-      <Card className={classes.innerModal}>
-        <Box p={3}>
-          <h1>{event.grantingHasClosed ? "Post" : "Pre"}-fund dream</h1>
-          <p>Available grants in event pool: {event.remainingGrants}</p>
-          <p>Grantlings needed to reach minimum goal: {amountToReachMinGoal}</p>
-          <p>Grantlings needed to reach maximum goal: {amountToReachMaxGoal}</p>
-          {event.remainingGrants > amountToReachMinGoal ? (
-            <form
-              onSubmit={handleSubmit(variables => {
-                giveGrant({
-                  variables: {
-                    dreamId: dream.id,
-                    value: Number(variables.value)
-                  }
+    <Modal open={open} onClose={handleClose} className={classes.modal}>
+      <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
+        <h1 className="text-3xl mb-2 font-medium">
+          {event.grantingHasClosed ? "Post" : "Pre"}-fund dream
+        </h1>
+        <p>Available grants in event pool: {event.remainingGrants}</p>
+        <p>Grantlings needed to reach minimum goal: {amountToReachMinGoal}</p>
+        <p>Grantlings needed to reach maximum goal: {amountToReachMaxGoal}</p>
+        {event.remainingGrants > amountToReachMinGoal ? (
+          <form
+            onSubmit={handleSubmit(variables => {
+              giveGrant({
+                variables: {
+                  dreamId: dream.id,
+                  value: Number(variables.value)
+                }
+              })
+                .then(data => {
+                  // Add "Snackbar" success message from material UI
+                  handleClose();
                 })
-                  .then(data => {
-                    // Add "Snackbar" success message from material UI
-                    handleClose();
-                  })
-                  .catch(error => {
-                    alert(error.message);
-                  });
-              })}
-            >
-              <Box m="15px 0">
-                <TextField
-                  name="value"
-                  defaultValue={amountToReachMinGoal}
-                  inputRef={register}
-                  fullWidth
-                  inputProps={{
-                    type: "number",
-                    min: `${Math.max(amountToReachMinGoal, 1)}`,
-                    max: `${Math.min(
-                      event.remainingGrants,
-                      amountToReachMaxGoal
-                    )}`
-                  }}
-                  variant="outlined"
-                />
-              </Box>
-              <Button
-                type="submit"
-                size="large"
+                .catch(error => {
+                  alert(error.message);
+                });
+            })}
+          >
+            <div className="my-3">
+              <TextField
+                name="value"
+                defaultValue={amountToReachMinGoal}
+                inputRef={register}
                 fullWidth
-                variant="contained"
-                color="primary"
-              >
-                Allocate grantlings
-              </Button>
-            </form>
-          ) : (
-            <p>
-              There is not enough grants left to reach this dreams minimum goal.
-            </p>
-          )}
-        </Box>
-      </Card>
+                inputProps={{
+                  type: "number",
+                  min: `${Math.max(amountToReachMinGoal, 1)}`,
+                  max: `${Math.min(
+                    event.remainingGrants,
+                    amountToReachMaxGoal
+                  )}`
+                }}
+                variant="outlined"
+              />
+            </div>
+            <Button
+              type="submit"
+              size="large"
+              fullWidth
+              variant="contained"
+              color="primary"
+            >
+              Allocate grantlings
+            </Button>
+          </form>
+        ) : (
+          <p>
+            There is not enough grants left to reach this dreams minimum goal.
+          </p>
+        )}
+      </div>
     </Modal>
   );
 };
 
-export default GiveGrantlingsModal;
+export default PreOrPostFundModal;

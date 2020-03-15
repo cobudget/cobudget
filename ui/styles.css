@@ -7,3 +7,7 @@
 * {
   @apply antialiased;
 }
+
+html {
+  @apply bg-gray-100;
+}

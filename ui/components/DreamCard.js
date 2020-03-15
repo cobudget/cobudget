@@ -1,83 +1,28 @@
-import styled from "styled-components";
-import Card from "./styled/Card";
 import stringToHslColor from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
-import { Box } from "@material-ui/core";
 
 import { CoinIcon, CommentIcon } from "./Icons";
 
-const ActionItem = styled.div`
-  display: flex;
-  font-size: 16px;
-  margin-right: 15px;
-  align-items: center;
-  color: rgba(0,0,0,0.6);
-  /* color: ${props => (props.blarb ? props.hoverColor : "rgba(0,0,0,0.6)")}; */
-  &:hover {
-    color: ${props => props.hoverColor};
-  }
-  span {
-    display: block;
-    margin-left: 5px;
-  }
-`;
-
-const DreamCard = styled(Card)`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  h3 {
-    font-weight: 500;
-    margin-bottom: 5px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    display: block;
-  }
-  p {
-    color: #333;
-    line-height: 1.4;
-  }
-  > div {
-    padding: 15px;
-    padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    justify-content: space-between;
-  }
-  img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    object-position: center;
-  }
-  transition: box-shadow 75ms ease-in-out;
-  &:hover {
-    box-shadow: 0 12px 20px 0 #e0e5ea;
-  }
-`;
-
-const ImgPlaceholder = styled.div`
-  background: ${props => props.color};
-  flex: 0 0 200px !important;
-`;
-
 export default ({ dream }) => {
-  // const [favorite, setFavorite] = React.useState(false);
   return (
-    <DreamCard>
+    <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {dream.images.length ? (
-        <img src={dream.images[0].small} />
+        <img
+          src={dream.images[0].small}
+          className="w-full h-48 object-cover object-center"
+        />
       ) : (
-        <ImgPlaceholder color={stringToHslColor(dream.title)} />
+        <div
+          className="w-full h-48"
+          style={{ background: stringToHslColor(dream.title) }}
+        />
       )}
-      <div>
-        <div>
-          <h3>{dream.title}</h3>
+      <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
+        <div className="mb-2">
+          <h3 className="text-xl font-medium mb-1 truncate">{dream.title}</h3>
 
-          <p>{dream.summary}</p>
+          <p className="text-gray-800">{dream.summary}</p>
         </div>
         <div>
           {(dream.minGoalGrants || dream.maxGoalGrants) && (
@@ -88,43 +33,26 @@ export default ({ dream }) => {
             />
           )}
 
-          <Box display="flex" mt={2}>
+          <div className="flex mt-1">
             {(dream.minGoalGrants || dream.maxGoalGrants) && (
-              <ActionItem hoverColor="#10b92b">
+              <div className="mr-3 flex items-center text-gray-700 hover:text-green-700">
                 <CoinIcon className="w-5 h-5" />
-                <span>
+                <span className="block ml-1">
                   {dream.currentNumberOfGrants}/
                   {dream.maxGoalGrants || dream.minGoalGrants}
                 </span>
-              </ActionItem>
+              </div>
             )}
 
             <Link href="/[dream]#comments" as={`/${dream.slug}#comments`}>
-              <ActionItem hoverColor="blue">
+              <div className="flex items-center text-gray-700 hover:text-blue-700">
                 <CommentIcon className="w-5 h-5" />
-                <span>{dream.numberOfComments} </span>
-              </ActionItem>
+                <span className="block ml-1">{dream.numberOfComments} </span>
+              </div>
             </Link>
-
-            {/* <ActionItem
-              hoverColor="red"
-              blarb={favorite}
-              onClick={e => {
-                e.preventDefault();
-                setFavorite(!favorite);
-              }}
-            >
-              {favorite ? (
-                <FavoriteIcon fontSize="small" />
-              ) : (
-                <>
-                  <FavoriteBorderIcon fontSize="small" />
-                </>
-              )}
-            </ActionItem> */}
-          </Box>
+          </div>
         </div>
       </div>
-    </DreamCard>
+    </div>
   );
 };

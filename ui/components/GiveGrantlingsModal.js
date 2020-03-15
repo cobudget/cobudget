@@ -2,10 +2,9 @@ import useForm from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
-import { Box, TextField, Button, Modal } from "@material-ui/core";
+import { TextField, Button, Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import Card from "./styled/Card";
 import { DREAM_QUERY } from "../pages/[dream]";
 import { TOP_LEVEL_QUERY } from "../pages/_app";
 const useStyles = makeStyles(theme => ({
@@ -14,9 +13,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(1),
     alignItems: "center",
     justifyContent: "center"
-  },
-  innerModal: {
-    outline: "none"
   }
 }));
 
@@ -79,60 +75,52 @@ const GiveGrantlingsModal = ({
   // TODO: allow me to remove given grantlings
 
   return (
-    <Modal
-      // aria-labelledby="simple-modal-title"
-      // aria-describedby="simple-modal-description"
-      open={open}
-      onClose={handleClose}
-      className={classes.modal}
-    >
-      <Card className={classes.innerModal}>
-        <Box p={3}>
-          <h1>Give grantlings to dream!</h1>
-          <p>Available grants: {currentMember.availableGrants}</p>
-          <form
-            onSubmit={handleSubmit(variables => {
-              giveGrant({
-                variables: {
-                  dreamId: dream.id,
-                  value: Number(variables.value)
-                }
+    <Modal open={open} onClose={handleClose} className={classes.modal}>
+      <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
+        <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
+        <p>Available grants: {currentMember.availableGrants}</p>
+        <form
+          onSubmit={handleSubmit(variables => {
+            giveGrant({
+              variables: {
+                dreamId: dream.id,
+                value: Number(variables.value)
+              }
+            })
+              .then(data => {
+                // Add "Snackbar" success message from material UI
+                handleClose();
               })
-                .then(data => {
-                  // Add "Snackbar" success message from material UI
-                  handleClose();
-                })
-                .catch(error => {
-                  alert(error.message);
-                });
-            })}
-          >
-            <Box m="15px 0">
-              <TextField
-                name="value"
-                defaultValue="1"
-                inputRef={register}
-                fullWidth
-                inputProps={{
-                  type: "number",
-                  min: "1",
-                  max: `${currentMember.availableGrants}`
-                }}
-                variant="outlined"
-              />
-            </Box>
-            <Button
-              type="submit"
-              size="large"
+              .catch(error => {
+                alert(error.message);
+              });
+          })}
+        >
+          <div className="my-3">
+            <TextField
+              name="value"
+              defaultValue="1"
+              inputRef={register}
               fullWidth
-              variant="contained"
-              color="primary"
-            >
-              Donate grantlings
-            </Button>
-          </form>
-        </Box>
-      </Card>
+              inputProps={{
+                type: "number",
+                min: "1",
+                max: `${currentMember.availableGrants}`
+              }}
+              variant="outlined"
+            />
+          </div>
+          <Button
+            type="submit"
+            size="large"
+            fullWidth
+            variant="contained"
+            color="primary"
+          >
+            Donate grantlings
+          </Button>
+        </form>
+      </div>
     </Modal>
   );
 };
