@@ -42,7 +42,7 @@ const AddComment = ({ currentMember, dreamId }) => {
           .catch(err => alert(err.message));
       })}
     >
-      <div className="flex mt-6 mb-4">
+      <div className="flex mt-6">
         <div className="mr-4">
           <Avatar user={currentMember} />
         </div>
@@ -64,7 +64,11 @@ const AddComment = ({ currentMember, dreamId }) => {
               }}
             />
           </div>
-          <div className="flex justify-end">
+          <div
+            className={`flex justify-end ${
+              content.length ? "visible" : "invisible"
+            }`}
+          >
             <Button
               type="submit"
               variant="contained"
