@@ -1,16 +1,13 @@
-import styled, { createGlobalStyle } from "styled-components";
+import styled from "styled-components";
 import Head from "next/head";
 import Header from "./Header";
 import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
-import { Box } from "@material-ui/core";
 import DevelopmentNotice from "./DevelopmentNotice";
 
 const Container = styled.div`
   flex: 0 1 1160px;
-  margin: 0 20px;
-  padding-bottom: 50px;
 `;
 
 export default ({
@@ -48,7 +45,7 @@ export default ({
   };
 
   return (
-    <Box display="flex" justifyContent="center">
+    <div className="flex justify-center">
       <Head>
         <title>
           {title
@@ -62,7 +59,7 @@ export default ({
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <Container>
+      <Container className="mx-3 md:mx-5 pb-10">
         <Header
           event={event}
           currentMember={currentMember}
@@ -72,6 +69,6 @@ export default ({
         {children}
       </Container>
       {process.env.IS_PROD && <DevelopmentNotice />}
-    </Box>
+    </div>
   );
 };
