@@ -1,10 +1,11 @@
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 
-import { Box, Button, Modal, CircularProgress } from "@material-ui/core";
+import { Box, Button, Modal } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { makeStyles } from "@material-ui/core/styles";
 
+import HappySpinner from "../../HappySpinner";
 import InviteMembersForm from "./InviteMembersForm";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
@@ -107,7 +108,7 @@ export default ({}) => {
           justifyContent="center"
           minHeight={400}
         >
-          <CircularProgress />
+          <HappySpinner />
         </Box>
       ) : (
         <>
@@ -118,7 +119,7 @@ export default ({}) => {
           />
 
           <Box p={2} display="flex" justifyContent="space-between">
-            <h2>{approvedMembers.length} members</h2>{" "}
+            <h2 className="text-2xl">{approvedMembers.length} members</h2>{" "}
             <div>
               <Button
                 variant="contained"

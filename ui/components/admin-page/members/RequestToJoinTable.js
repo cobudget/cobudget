@@ -15,7 +15,9 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
       {requestsToJoin.length > 0 ? (
         <Box m="0 0 20px">
           <Box p={2}>
-            <h2>{requestsToJoin.length} requests to join</h2>
+            <h2 className="text-2xl">
+              {requestsToJoin.length} requests to join
+            </h2>
           </Box>
           <TableContainer>
             <Table aria-label="simple table">

@@ -32,7 +32,7 @@ export default ({ event }) => {
 
   return (
     <>
-      <h2>Edit event</h2>
+      <h2 className="text-2xl">Edit event</h2>
       <form
         onSubmit={handleSubmit(variables => {
           editEvent({

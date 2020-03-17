@@ -29,7 +29,7 @@ const SetGrantValue = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set grant value</h1>
+        <h1 className="text-3xl">Set grant value</h1>
         <Box my={1}>
           <TextField
             label="Grants per member"

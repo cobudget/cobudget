@@ -18,7 +18,7 @@ const SetGrantingCloses = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set dream creation closes date</h1>
+        <h1 className="text-3xl">Set dream creation closes date</h1>
 
         <form
           onSubmit={handleSubmit(variables => {

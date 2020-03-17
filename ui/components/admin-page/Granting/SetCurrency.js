@@ -16,7 +16,7 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set currency</h1>
+        <h1 className="text-3xl">Set currency</h1>
         <Alert severity="warning">
           Changing currency will also reset total budget and grant value. You
           can't change this after dream creation closes.

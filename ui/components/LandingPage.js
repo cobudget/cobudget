@@ -18,7 +18,7 @@ const EVENTS_QUERY = gql`
 function LandingPage({ hostInfo }) {
   const { data, loading, error } = useQuery(EVENTS_QUERY);
   return (
-    <div className="max-w-screen-sm mx-auto mt-2">
+    <div className="mx-auto mt-2 w-full sm:w-64">
       <ul className="bg-white rounded-lg shadow-md overflow-hidden">
         {data &&
           data.events.map(event => (

@@ -14,7 +14,7 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set grants per member</h1>
+        <h1 className="text-3xl">Set grants per member</h1>
         <Alert severity="warning">
           Changing grants per member will also reset grant value.
         </Alert>

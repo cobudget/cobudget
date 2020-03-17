@@ -13,7 +13,7 @@ const SetTotalBudget = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set total budget</h1>
+        <h1 className="text-3xl">Set total budget</h1>
         <form
           onSubmit={handleSubmit(variables => {
             updateGranting({

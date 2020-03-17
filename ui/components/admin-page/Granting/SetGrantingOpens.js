@@ -17,7 +17,7 @@ const SetGrantingOpens = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Set granting open date</h1>
+        <h1 className="text-3xl">Set granting open date</h1>
 
         <form
           onSubmit={handleSubmit(variables => {

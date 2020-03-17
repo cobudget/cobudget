@@ -16,11 +16,9 @@ export default ({ event }) => {
   });
 
   return (
-    <Card>
-      <Box p={3}>
-        <h1>Edit dream</h1>
-        {dream && <EditOrCreateDreamForm dream={dream} event={event} editing />}
-      </Box>
-    </Card>
+    <div className="bg-white rounded-lg shadow-md p-4 lg:p-6">
+      <h1 className="text-3xl">Edit dream</h1>
+      {dream && <EditOrCreateDreamForm dream={dream} event={event} editing />}
+    </div>
   );
 };
