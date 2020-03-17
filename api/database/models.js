@@ -70,6 +70,7 @@ const EventSchema = new Schema({
     type: Number,
     default: 10
   },
+  maxGrantsToDream: Number,
   dreamCreationCloses: Date,
   grantingOpens: Date,
   grantingCloses: Date

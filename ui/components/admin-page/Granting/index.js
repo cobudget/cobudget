@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
 import SetGrantsPerMember from "./SetGrantsPerMember";
+import SetMaxGrantsToDream from "./SetMaxGrantsToDream";
 import SetTotalBudget from "./SetTotalBudget";
 import SetGrantValue from "./SetGrantValue";
 import SetDreamCreationCloses from "./SetDreamCreationCloses";
@@ -42,6 +43,7 @@ const modals = {
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_GRANT_VALUE: SetGrantValue,
   SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
+  SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
   SET_TOTAL_BUDGET: SetTotalBudget
 };
 
@@ -49,6 +51,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
     $currency: String
     $grantsPerMember: Int
+    $maxGrantsToDream: Int
     $totalBudget: Int
     $grantValue: Int
     $grantingOpens: Date
@@ -58,6 +61,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     updateGrantingSettings(
       currency: $currency
       grantsPerMember: $grantsPerMember
+      maxGrantsToDream: $maxGrantsToDream
       totalBudget: $totalBudget
       grantValue: $grantValue
       grantingOpens: $grantingOpens
@@ -67,6 +71,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       id
       currency
       grantsPerMember
+      maxGrantsToDream
       totalBudget
       grantValue
       grantingOpens
@@ -167,6 +172,18 @@ export default ({ event }) => {
           value={event.grantsPerMember}
           disabled={grantingHasOpened}
           openModal={() => handleOpen("SET_GRANTS_PER_MEMBER")}
+        />
+
+        <Divider />
+
+        <SettingsListItem
+          primary="Max. grants to one dream per user"
+          secondary={
+            event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
+          }
+          value={event.maxGrantsToDream}
+          disabled={grantingHasOpened}
+          openModal={() => handleOpen("SET_MAX_GRANTS_TO_DREAM")}
         />
 
         <Divider />

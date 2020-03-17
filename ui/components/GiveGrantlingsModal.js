@@ -79,6 +79,11 @@ const GiveGrantlingsModal = ({
       <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
         <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
         <p>Available grants: {currentMember.availableGrants}</p>
+        {event.maxGrantsToDream && (
+          <p className="text-sm text-gray-600 my-2">
+            Max. {event.maxGrantsToDream} grants to one dream
+          </p>
+        )}
         <form
           onSubmit={handleSubmit(variables => {
             giveGrant({
@@ -105,7 +110,14 @@ const GiveGrantlingsModal = ({
               inputProps={{
                 type: "number",
                 min: "1",
-                max: `${currentMember.availableGrants}`
+                max: `${
+                  event.maxGrantsToDream
+                    ? Math.min(
+                        currentMember.availableGrants,
+                        event.maxGrantsToDream
+                      )
+                    : currentMember.availableGrants
+                }`
               }}
               variant="outlined"
             />

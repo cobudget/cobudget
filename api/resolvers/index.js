@@ -404,6 +404,13 @@ const resolvers = {
       if (grantsForDream + value > maxGoalGrants)
         throw new Error("You can't overfund this dream.");
 
+      // Check that it is not more than is allowed per dream (if this number is set)
+      if (event.maxGrantsToDream && value > event.maxGrantsToDream) {
+        throw new Error(
+          `You can give a maximum of ${event.maxGrantsToDream} grants to one dream`
+        );
+      }
+
       // Check that user has not spent more grants than he has
       const [
         { grantsFromUser } = { grantsFromUser: 0 }
@@ -581,6 +588,7 @@ const resolvers = {
       {
         currency,
         grantsPerMember,
+        maxGrantsToDream,
         totalBudget,
         grantValue,
         dreamCreationCloses,
@@ -603,7 +611,7 @@ const resolvers = {
         // granting can't have started to change currency
         if (dreamCreationHasClosed) {
           throw new Error(
-            'You cant change currency after dream creation closes'
+            "You can't change currency after dream creation closes"
           );
         }
         event.currency = currency;
@@ -612,13 +620,23 @@ const resolvers = {
       }
 
       if (grantsPerMember) {
-        // granting can't have started to change currency
+        // granting can't have started to change grants per member
         if (grantingHasStarted) {
-          throw new Error('You cant change currency once granting has started');
+          throw new Error(
+            "You can't change grants per member once granting has started"
+          );
         }
-
         event.grantsPerMember = grantsPerMember;
         event.grantValue = undefined;
+      }
+
+      if (maxGrantsToDream) {
+        if (grantingHasStarted) {
+          throw new Error(
+            "You can't change max grants to dream once granting has started"
+          );
+        }
+        event.maxGrantsToDream = maxGrantsToDream;
       }
 
       if (totalBudget) {
@@ -634,7 +652,9 @@ const resolvers = {
       if (grantValue) {
         // granting can't have started to change grant value
         if (grantingHasStarted) {
-          throw new Error('You cant change currency once granting has started');
+          throw new Error(
+            "You can't change grant value once granting has started"
+          );
         }
         event.grantValue = grantValue;
       }

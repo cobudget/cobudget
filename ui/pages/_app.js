@@ -23,6 +23,7 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudget
       grantValue
       grantsPerMember
+      maxGrantsToDream
       dreamCreationCloses
       dreamCreationIsOpen
       grantingOpens
