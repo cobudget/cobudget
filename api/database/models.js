@@ -111,7 +111,10 @@ const DreamSchema = new Schema({
   slug: { type: String, required: true },
   title: { type: String, required: true },
   description: String,
-  summary: String,
+  summary: {
+    type: String,
+    maxlength: 180
+  },
   members: [Schema.Types.ObjectId],
   minGoal: Number,
   maxGoal: Number,
