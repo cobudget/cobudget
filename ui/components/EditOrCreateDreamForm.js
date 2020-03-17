@@ -241,7 +241,7 @@ export default ({ dream = {}, event, editing }) => {
             }
           }}
           variant="outlined"
-          error={errors.title}
+          error={Boolean(errors.title)}
           helperText={errors.title && errors.title.message}
         />
       </Box>
@@ -259,7 +259,7 @@ export default ({ dream = {}, event, editing }) => {
             onBlur: e => setSlugValue(slugify(e.target.value))
           }}
           variant="outlined"
-          error={errors.slug}
+          error={Boolean(errors.slug)}
           helperText={errors.slug && errors.slug.message}
         />
       </Box>
@@ -276,7 +276,7 @@ export default ({ dream = {}, event, editing }) => {
           inputProps={{ maxLength: 180 }}
           multiline
           variant="outlined"
-          error={errors.summary}
+          error={Boolean(errors.summary)}
           helperText={errors.summary && errors.summary.message}
         />
       </Box>

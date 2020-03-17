@@ -8,11 +8,21 @@ module.exports = {
       height: {
         "88": "22rem"
       }
+    },
+    animations: {
+      spin: {
+        from: {
+          transform: "rotate(0deg)"
+        },
+        to: {
+          transform: "rotate(360deg)"
+        }
+      }
     }
   },
   variants: {
     backgroundColor: ["responsive", "hover", "focus", "even"],
     textColor: ["responsive", "hover", "focus", "group-hover"]
   },
-  plugins: []
+  plugins: [require("tailwindcss-animations")]
 };

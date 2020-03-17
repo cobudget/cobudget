@@ -59,7 +59,7 @@ export default ({
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <Container className="mx-3 md:mx-5 pb-10">
+      <Container className="mx-3 md:mx-5 pb-10 min-h-screen flex flex-col">
         <Header
           event={event}
           currentMember={currentMember}
