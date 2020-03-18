@@ -9,6 +9,7 @@ const Comments = ({ currentMember, comments, dreamId }) => {
           comment={comment}
           currentMember={currentMember}
           dreamId={dreamId}
+          showBorderBottom={Boolean(index + 1 !== comments.length)}
           key={index}
         />
       ))}

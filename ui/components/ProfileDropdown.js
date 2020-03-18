@@ -1,138 +1,87 @@
-import React from "react";
-import {
-  Avatar,
-  MenuItem,
-  Popper,
-  Grow,
-  ClickAwayListener,
-  MenuList,
-  Typography,
-  Badge
-} from "@material-ui/core";
+import React, { useEffect } from "react";
+import { Badge } from "@material-ui/core";
 import Router from "next/router";
-
-import Card from "./styled/Card";
+import Avatar from "./Avatar";
 import { modals } from "./Modal/index";
-import stringToHslColor from "../utils/stringToHslColor";
+
+const css = {
+  button:
+    "text-left block mx-2 px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200"
+};
 
 const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
   const [open, setOpen] = React.useState(false);
 
-  const anchorRef = React.useRef(null);
+  useEffect(() => {
+    const handleEscape = e => {
+      if (e.key === "Esc" || e.key === "Escape") {
+        setOpen(false);
+      }
+    };
 
-  const handleToggle = () => {
-    setOpen(prevOpen => !prevOpen);
-  };
-
-  const handleClose = event => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
-
-    setOpen(false);
-  };
-
-  function handleListKeyDown(event) {
-    if (event.key === "Tab") {
-      event.preventDefault();
-      setOpen(false);
-    }
-  }
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
-    <div>
-      <Badge
-        overlap="circle"
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right"
-        }}
-        badgeContent={currentMember.availableGrants}
-        color="primary"
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="z-20 relative block rounded-full focus:outline-none focus:shadow-outline"
       >
-        <Avatar
-          ref={anchorRef}
-          aria-controls={open ? "profile-dropdown" : undefined}
-          aria-haspopup="true"
-          onClick={handleToggle}
-          alt={currentMember.name && currentMember.name}
-          src={currentMember.avatar && currentMember.avatar}
-          style={{
-            backgroundColor: stringToHslColor(
-              currentMember.name ? currentMember.name : currentMember.email
-            ),
-            fontWeight: 500,
-            cursor: "pointer"
+        <Badge
+          overlap="circle"
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right"
           }}
+          badgeContent={currentMember.availableGrants}
+          color="primary"
         >
-          {currentMember.name
-            ? currentMember.name.charAt(0)
-            : currentMember.email.charAt(0).toUpperCase()}
-        </Avatar>
-      </Badge>
+          <Avatar user={currentMember} />
+        </Badge>
+      </button>
 
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-        placement="bottom-end"
-        style={{ zIndex: 1 }}
-      >
-        {({ TransitionProps }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin: "right top",
-              marginTop: 10
-            }}
-          >
-            <Card>
-              <ClickAwayListener onClickAway={handleClose}>
-                <div>
-                  <MenuList
-                    autoFocusItem={open}
-                    id="profile-dropdown"
-                    onKeyDown={handleListKeyDown}
-                  >
-                    {Boolean(currentMember.availableGrants) && (
-                      <MenuItem disabled>
-                        You have {currentMember.availableGrants} grants to give
-                      </MenuItem>
-                    )}
-                    <MenuItem
-                      onClick={e => {
-                        Router.push("/profile");
-                        handleClose(e);
-                      }}
-                    >
-                      Me
-                    </MenuItem>
-                    <MenuItem
-                      onClick={e => {
-                        openModal(modals.EDIT_PROFILE);
-                        handleClose(e);
-                      }}
-                    >
-                      Edit profile
-                    </MenuItem>
+      {open && (
+        <>
+          <button
+            onClick={() => setOpen(false)}
+            tabIndex="-1"
+            className="z-10 fixed inset-0 h-full w-full cursor-default"
+          ></button>
 
-                    <MenuItem
-                      onClick={e => {
-                        logOut();
-                        handleClose(e);
-                      }}
-                    >
-                      Logout
-                    </MenuItem>
-                  </MenuList>
-                </div>
-              </ClickAwayListener>
-            </Card>
-          </Grow>
-        )}
-      </Popper>
+          <div className="z-20 mt-2 py-2 absolute right-0 w-48 bg-white rounded-lg shadow-2xl flex flex-col flex-stretch">
+            {Boolean(currentMember.availableGrants) && (
+              <p className="px-3 pb-2 mb-2 text-gray-600 text-sm border-b border-gray-200">
+                You have {currentMember.availableGrants} grants left
+              </p>
+            )}
+            <button
+              onClick={() => {
+                Router.push("/profile");
+                setOpen(false);
+              }}
+              className={css.button}
+            >
+              Me
+            </button>
+            <button
+              onClick={() => {
+                openModal(modals.EDIT_PROFILE);
+                setOpen(false);
+              }}
+              className={css.button}
+            >
+              Edit profile
+            </button>
+            <button onClick={logOut} className={css.button}>
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

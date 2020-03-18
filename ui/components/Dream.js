@@ -123,14 +123,14 @@ const Dream = ({ dream, event, currentMember }) => {
 
             <div className="my-5">
               <h2 className="mb-1 text-2xl font-medium">Dreamers</h2>
-              <div className="px-2 ">
-                <AvatarGroup>
-                  {dream.members.map(member => (
-                    <Tooltip key={member.id} title={member.name}>
+              <div className="flex">
+                {dream.members.map(member => (
+                  <Tooltip key={member.id} title={member.name}>
+                    <div>
                       <Avatar user={member} />
-                    </Tooltip>
-                  ))}
-                </AvatarGroup>
+                    </div>
+                  </Tooltip>
+                ))}
               </div>
             </div>
 
@@ -158,14 +158,14 @@ const Dream = ({ dream, event, currentMember }) => {
                       </div>
                       <div>
                         <span className="block text-2xl font-medium">
-                          {dream.minGoalGrants}
+                          {dream.minGoalGrants ? dream.minGoalGrants : "-"}
                         </span>
 
                         <span className="uppercase text-sm">Min. goal</span>
                       </div>
                       <div>
                         <span className="block text-2xl font-medium">
-                          {dream.maxGoalGrants}
+                          {dream.maxGoalGrants ? dream.maxGoalGrants : "-"}
                         </span>
 
                         <span className="uppercase text-sm">Max. goal</span>

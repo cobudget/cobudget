@@ -42,6 +42,7 @@ export const RightArrowIcon = props => (
   </svg>
 );
 
+// Heroicons/emoji-happy/outline
 export const HappyEmojiIcon = props => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
     <path

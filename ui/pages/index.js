@@ -1,10 +1,9 @@
 import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
-import Head from "next/head";
-import styled from "styled-components";
 import Link from "next/link";
 import LandingPage from "../components/LandingPage";
 import DreamCard from "../components/DreamCard";
+import HappySpinner from "../components/HappySpinner";
 
 export const DREAMS_QUERY = gql`
   query Dreams($eventId: ID!) {
@@ -26,24 +25,6 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-
-  @media (max-width: 990px) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  }
-  @media (max-width: 660px) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  grid-gap: 25px;
-  a {
-    text-decoration: none;
-    color: #000;
-    display: flex;
-  }
-`;
-
 export default ({ currentMember, event, hostInfo }) => {
   if (!event) return <LandingPage hostInfo={hostInfo} />;
 
@@ -54,17 +35,32 @@ export default ({ currentMember, event, hostInfo }) => {
     }
   );
 
-  if (!loading && dreams.length === 0) return <div>no dreams!</div>;
+  if (loading)
+    return (
+      <div className="flex-grow flex justify-center items-center">
+        <HappySpinner />
+      </div>
+    );
+
+  if (dreams.length === 0)
+    return (
+      <div className="flex-grow flex flex-col justify-center items-center">
+        <span className="text-5xl">💤</span>
+        <h1 className="text-3xl text-gray-600 text-center">
+          Still in deep sleep, no dreams yet...
+        </h1>
+      </div>
+    );
 
   return (
-    <Grid>
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {dreams.map(dream => (
         <Link href="/[dream]" as={`/${dream.slug}`} key={dream.slug}>
-          <a>
+          <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
             <DreamCard dream={dream} />
           </a>
         </Link>
       ))}
-    </Grid>
+    </div>
   );
 };

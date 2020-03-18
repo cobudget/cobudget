@@ -26,14 +26,14 @@ const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
-const Comment = ({ comment, dreamId, currentMember }) => {
+const Comment = ({ comment, dreamId, currentMember, showBorderBottom }) => {
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   return (
     <div className="flex my-4">
       <div className="mr-4">
         <Avatar user={comment.author} />
       </div>
-      <div className="flex-grow border-b pb-4">
+      <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           <h5>{comment.author.name}</h5>
           <div className="flex items-center">

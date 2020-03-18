@@ -46,7 +46,7 @@ export default ({ currentMember, event }) => {
   return (
     <SmallCard>
       <Box p={3}>
-        <h1>{msg}</h1>
+        <h1 className="text-2xl mb-2">{msg}</h1>
 
         {data && data.sendMagicLink ? (
           <div>

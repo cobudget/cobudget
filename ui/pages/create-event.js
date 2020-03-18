@@ -62,7 +62,7 @@ export default ({ event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Create event</h1>
+        <h1 className="text-2xl mb-2">Create event</h1>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <label>
             Title <span>{errors.title && errors.title.message}</span>

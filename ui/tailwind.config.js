@@ -22,7 +22,7 @@ module.exports = {
   },
   variants: {
     backgroundColor: ["responsive", "hover", "focus", "even"],
-    textColor: ["responsive", "hover", "focus", "group-hover"]
+    textColor: ["responsive", "hover", "focus", "group-hover", "last"]
   },
   plugins: [require("tailwindcss-animations")]
 };
