@@ -23,7 +23,7 @@ const FinishSignUp = ({ closeModal }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Finish sign up!</h1>
+        <h1 className="text-2xl mb-2">Finish sign up!</h1>
         <h2>Please choose your display name</h2>
         {/* 
           <p>

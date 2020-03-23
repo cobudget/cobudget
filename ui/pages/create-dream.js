@@ -8,7 +8,7 @@ export default ({ event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1>Create dream</h1>
+        <h1 className="text-2xl mb-2">Create dream</h1>
         <EditOrCreateDreamForm event={event} />
       </Box>
     </Card>
