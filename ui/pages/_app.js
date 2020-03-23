@@ -40,6 +40,7 @@ export const TOP_LEVEL_QUERY = gql`
       avatar
       email
       isAdmin
+      isApproved
       availableGrants
       event {
         id
