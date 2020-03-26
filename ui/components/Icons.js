@@ -79,3 +79,28 @@ export const HeartSolidIcon = props => (
     ></path>
   </svg>
 );
+
+// Heroicons/search/outline
+export const SearchIcon = props => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    {...props}
+  >
+    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+  </svg>
+);
+
+export const ListIcon = props => (
+  <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
+    <path
+      fillRule="evenodd"
+      d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+      clipRule="evenodd"
+    ></path>
+  </svg>
+);

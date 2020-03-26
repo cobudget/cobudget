@@ -1,13 +1,15 @@
 import gql from "graphql-tag";
+import { useState } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
 import LandingPage from "../components/LandingPage";
 import DreamCard from "../components/DreamCard";
 import HappySpinner from "../components/HappySpinner";
+import Filterbar from "../components/Filterbar";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventId: ID!) {
-    dreams(eventId: $eventId) {
+  query Dreams($eventId: ID!, $textSearchTerm: String) {
+    dreams(eventId: $eventId, textSearchTerm: $textSearchTerm) {
       id
       slug
       description
@@ -29,39 +31,56 @@ export const DREAMS_QUERY = gql`
 export default ({ currentMember, event, hostInfo }) => {
   if (!event) return <LandingPage hostInfo={hostInfo} />;
 
-  const { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
+  const [filterFavorites, setFilterFavorites] = useState(false);
+  const [textSearchTerm, setTextSearchTerm] = useState("");
+  const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
+
+  let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
     {
-      variables: { eventId: event.id }
+      variables: { eventId: event.id, textSearchTerm }
     }
   );
 
-  if (loading)
-    return (
-      <div className="flex-grow flex justify-center items-center">
-        <HappySpinner />
-      </div>
-    );
-
-  if (dreams.length === 0)
-    return (
-      <div className="flex-grow flex flex-col justify-center items-center">
-        <span className="text-5xl">💤</span>
-        <h1 className="text-3xl text-gray-600 text-center">
-          Still in deep sleep, no dreams yet...
-        </h1>
-      </div>
-    );
+  if (filterFavorites) {
+    dreams = dreams.filter(dream => dream.favorite);
+  }
 
   return (
-    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-      {dreams.map(dream => (
-        <Link href="/[dream]" as={`/${dream.slug}`} key={dream.slug}>
-          <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
-            <DreamCard dream={dream} />
-          </a>
-        </Link>
-      ))}
-    </div>
+    <>
+      <Filterbar
+        filterFavorites={filterFavorites}
+        toggleFilterFavorites={toggleFilterFavorites}
+        textSearchTerm={textSearchTerm}
+        setTextSearchTerm={setTextSearchTerm}
+        currentMember={currentMember}
+      />
+
+      {loading ? (
+        <div className="flex-grow flex justify-center items-center">
+          <HappySpinner />
+        </div>
+      ) : (
+        <>
+          {dreams.length ? (
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {dreams.map(dream => (
+                <Link href="/[dream]" as={`/${dream.slug}`} key={dream.slug}>
+                  <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
+                    <DreamCard dream={dream} currentMember={currentMember} />
+                  </a>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="flex-grow flex flex-col justify-center items-center">
+              <h1 className="text-3xl text-gray-500 text-center">
+                No dreams...
+              </h1>
+            </div>
+          )}
+        </>
+      )}
+    </>
   );
 };
