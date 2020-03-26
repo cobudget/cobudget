@@ -132,7 +132,9 @@ const DreamSchema = new Schema({
   ],
   approved: { type: Boolean, default: false },
   budgetItems: [new Schema({ description: String, amount: String })]
-}).index({ eventId: 1, slug: 1 }, { unique: true });
+})
+  .index({ eventId: 1, slug: 1 }, { unique: true })
+  .index({ title: 'text', description: 'text', summary: 'text' });
 
 const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
