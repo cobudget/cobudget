@@ -23,7 +23,14 @@ const resolvers = {
     dream: async (parent, { eventId, slug }, { models: { Dream } }) => {
       return Dream.findOne({ eventId, slug });
     },
-    dreams: async (parent, { eventId }, { models: { Dream } }) => {
+    dreams: async (
+      parent,
+      { eventId, textSearchTerm = 'clown' },
+      { models: { Dream } }
+    ) => {
+      if (textSearchTerm)
+        return Dream.find({ eventId, $text: { $search: textSearchTerm } });
+
       return Dream.find({ eventId });
     },
     members: async (parent, args, { currentMember, models: { Member } }) => {
