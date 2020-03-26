@@ -17,6 +17,7 @@ export const DREAMS_QUERY = gql`
       maxGoalGrants
       currentNumberOfGrants
       numberOfComments
+      favorite
       images {
         small
         large

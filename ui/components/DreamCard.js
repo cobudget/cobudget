@@ -1,10 +1,30 @@
 import stringToHslColor from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
+import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
 
-import { CoinIcon, CommentIcon } from "./Icons";
+import {
+  CoinIcon,
+  CommentIcon,
+  HeartOutlineIcon,
+  HeartSolidIcon
+} from "./Icons";
 
-export default ({ dream }) => {
+const TOGGLE_FAVORITE_MUTATION = gql`
+  mutation ToggleFavoriteMutation($dreamId: ID!) {
+    toggleFavorite(dreamId: $dreamId) {
+      id
+      favorite
+    }
+  }
+`;
+
+export default ({ dream, currentMember }) => {
+  const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
+    variables: { dreamId: dream.id }
+  });
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {dream.images.length ? (
@@ -45,11 +65,28 @@ export default ({ dream }) => {
             )}
 
             <Link href="/[dream]#comments" as={`/${dream.slug}#comments`}>
-              <div className="flex items-center text-gray-700 hover:text-blue-700">
+              <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
                 <CommentIcon className="w-5 h-5" />
                 <span className="block ml-1">{dream.numberOfComments} </span>
               </div>
             </Link>
+            {currentMember && (
+              <button
+                className="flex items-center focus:outline-none"
+                tabIndex="-1"
+                disabled={loading}
+                onClick={e => {
+                  e.preventDefault();
+                  if (!loading) toggleFavorite();
+                }}
+              >
+                {dream.favorite ? (
+                  <HeartSolidIcon className="w-5 h-5 text-red-700" />
+                ) : (
+                  <HeartOutlineIcon className="w-5 h-5 text-gray-700 hover:text-red-700" />
+                )}
+              </button>
+            )}
           </div>
         </div>
       </div>
