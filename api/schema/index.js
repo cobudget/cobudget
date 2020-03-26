@@ -72,6 +72,7 @@ const schema = gql`
     deleteGrant(grantId: ID!): Grant
     reclaimGrants(dreamId: ID!): Dream
     preOrPostFund(dreamId: ID!, value: Int!): Grant
+    toggleFavorite(dreamId: ID!): Dream
   }
 
   type Event {
@@ -148,6 +149,7 @@ const schema = gql`
     currentNumberOfGrants: Int
     budgetItems: [BudgetItem!]
     approved: Boolean
+    favorite: Boolean
     # answers: [QuestionAnswer]
     # funding: Int!
     # raisedFlags: [Flag]
@@ -238,11 +240,6 @@ const schema = gql`
   # type FlagEvent {
   #   flag: Flag!
   #   flagger: Member!
-  # }
-
-  # type Favorite {
-  #   dream: Dream!
-  #   by: Member!
   # }
 
   # type QuestionAnswer {

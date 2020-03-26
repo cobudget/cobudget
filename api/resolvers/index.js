@@ -690,6 +690,31 @@ const resolvers = {
       }
 
       return event.save();
+    },
+    toggleFavorite: async (
+      parent,
+      { dreamId },
+      { currentMember, models: { Dream } }
+    ) => {
+      if (!currentMember)
+        throw new Error('You need to be logged in to favorite something.');
+
+      const dream = await Dream.findOne({
+        _id: dreamId,
+        eventId: currentMember.eventId
+      });
+
+      if (currentMember.favorites.includes(dreamId)) {
+        currentMember.favorites = currentMember.favorites.filter(
+          favoriteId => favoriteId != dreamId
+        );
+        await currentMember.save();
+      } else {
+        currentMember.favorites.push(dreamId);
+        await currentMember.save();
+      }
+
+      return dream;
     }
   },
   Member: {
@@ -790,6 +815,11 @@ const resolvers = {
     },
     numberOfComments: dream => {
       return dream.comments.length;
+    },
+    favorite: async (dream, args, { currentMember, models: { Favorite } }) => {
+      if (!currentMember) return false;
+
+      return currentMember.favorites.includes(dream.id);
     }
   },
   Grant: {
