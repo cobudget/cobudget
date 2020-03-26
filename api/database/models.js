@@ -41,7 +41,8 @@ const MemberSchema = new Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }]
   // guide
   // joined?
   // ticket?
@@ -110,11 +111,11 @@ const DreamSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true },
   slug: { type: String, required: true },
   title: { type: String, required: true },
-  description: String,
   summary: {
     type: String,
     maxlength: 180
   },
+  description: String,
   members: [Schema.Types.ObjectId],
   minGoal: Number,
   maxGoal: Number,
@@ -131,7 +132,9 @@ const DreamSchema = new Schema({
   ],
   approved: { type: Boolean, default: false },
   budgetItems: [new Schema({ description: String, amount: String })]
-}).index({ eventId: 1, slug: 1 }, { unique: true });
+})
+  .index({ eventId: 1, slug: 1 }, { unique: true })
+  .index({ title: 'text', description: 'text', summary: 'text' });
 
 const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
