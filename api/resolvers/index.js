@@ -25,7 +25,7 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventId, textSearchTerm = 'clown' },
+      { eventId, textSearchTerm },
       { models: { Dream } }
     ) => {
       if (textSearchTerm)
