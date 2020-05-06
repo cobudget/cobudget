@@ -3,6 +3,7 @@ const { gql } = require('apollo-server-micro');
 const schema = gql`
   type Query {
     currentMember: Member
+    currentUser: User
     events: [Event!]
     event(slug: String!): Event
     dream(eventId: ID!, slug: String!): Dream
@@ -12,7 +13,6 @@ const schema = gql`
 
   type Mutation {
     createEvent(
-      adminEmail: String!
       slug: String!
       title: String!
       currency: String!
@@ -20,6 +20,7 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy!
     ): Event!
     editEvent(
+      eventId: ID!
       slug: String
       title: String
       registrationPolicy: RegistrationPolicy
@@ -51,14 +52,20 @@ const schema = gql`
     addComment(dreamId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
 
-    sendMagicLink(email: String!, eventId: ID!): Boolean
-    updateProfile(name: String, avatar: String): Member
-    inviteMembers(emails: String!): [Member]
-    updateMember(memberId: ID!, isApproved: Boolean, isAdmin: Boolean): Member
-    deleteMember(memberId: ID!): Member
+    sendMagicLink(email: String!): Boolean
+    updateProfile(name: String, avatar: String): User
+    # inviteMembers(emails: String!): [Member]
+    updateMember(
+      eventId: ID!
+      memberId: ID!
+      isApproved: Boolean
+      isAdmin: Boolean
+    ): Member
+    deleteMember(eventId: ID!, memberId: ID!): Member
 
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
     updateGrantingSettings(
+      eventId: ID!
       currency: String
       grantsPerMember: Int
       maxGrantsToDream: Int
@@ -68,8 +75,8 @@ const schema = gql`
       grantingCloses: Date
       dreamCreationCloses: Date
     ): Event
-    giveGrant(dreamId: ID!, value: Int!): Grant
-    deleteGrant(grantId: ID!): Grant
+    giveGrant(eventId: ID!, dreamId: ID!, value: Int!): Grant
+    deleteGrant(eventId: ID!, grantId: ID!): Grant
     reclaimGrants(dreamId: ID!): Dream
     preOrPostFund(dreamId: ID!, value: Int!): Grant
     toggleFavorite(dreamId: ID!): Dream
@@ -113,17 +120,23 @@ const schema = gql`
     INVITE_ONLY
   }
 
+  type User {
+    id: ID!
+    email: String!
+    verifiedEmail: Boolean!
+    memberships: [Member!]
+    name: String
+    avatar: String
+  }
+
+  # rename to Membership
   type Member {
     id: ID!
     event: Event!
-    email: String!
-    name: String
-    avatar: String
-    # user: User!
+    user: User!
     # isActive: Boolean!
     isAdmin: Boolean!
     isApproved: Boolean!
-    verifiedEmail: Boolean!
     createdAt: Date
     availableGrants: Int
     givenGrants: [Grant]
