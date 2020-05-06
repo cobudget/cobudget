@@ -1,52 +1,52 @@
 const { Schema } = require('mongoose');
 const dayjs = require('dayjs');
-// // User
-// const UserSchema = new Schema({
-//   name: String,
-//   email: {
-//     type: String,
-//     required: true,
-//     unique: true
-//   },
-//   verified: {
-//     type: Boolean,
-//     default: false
-//   },
-//   createdAt: {
-//     type: Date,
-//     default: Date.now
-//   }
-// });
+
+// User
+const UserSchema = new Schema({
+  name: String,
+  avatar: String,
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  verifiedEmail: {
+    type: Boolean,
+    default: false,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  isOrgAdmin: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 // Member
 const MemberSchema = new Schema({
   eventId: {
     type: Schema.Types.ObjectId,
     index: true,
-    required: true
+    required: true,
   },
-  email: {
-    type: String,
-    index: true,
-    required: true
+  userId: {
+    type: Schema.Types.ObjectId,
+    index: true, // behövs den här?
+    required: true,
   },
-  verifiedEmail: {
-    type: Boolean,
-    default: false
-  },
-  name: String,
-  avatar: String,
   isAdmin: { type: Boolean, required: true, default: false },
   isApproved: { type: Boolean, required: true, default: false },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
-  favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }]
+  favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }],
   // guide
   // joined?
   // ticket?
-}).index({ email: 1, eventId: 1 }, { unique: true });
+}).index({ userId: 1, eventId: 1 }, { unique: true });
 
 // Event
 const EventSchema = new Schema({
@@ -54,7 +54,7 @@ const EventSchema = new Schema({
     type: String,
     required: true,
     index: true,
-    unique: true
+    unique: true,
   },
   title: { type: String, required: true },
   description: String,
@@ -63,21 +63,21 @@ const EventSchema = new Schema({
     type: String,
     enum: ['OPEN', 'REQUEST_TO_JOIN', 'INVITE_ONLY'],
     default: 'OPEN',
-    required: true
+    required: true,
   },
   totalBudget: Number,
   grantValue: Number,
   grantsPerMember: {
     type: Number,
-    default: 10
+    default: 10,
   },
   maxGrantsToDream: Number,
   dreamCreationCloses: Date,
   grantingOpens: Date,
-  grantingCloses: Date
+  grantingCloses: Date,
 });
 
-EventSchema.virtual('grantingIsOpen').get(function() {
+EventSchema.virtual('grantingIsOpen').get(function () {
   if (!this.grantingOpens) return false;
 
   const now = dayjs();
@@ -91,13 +91,13 @@ EventSchema.virtual('grantingIsOpen').get(function() {
   }
 });
 
-EventSchema.virtual('grantingHasClosed').get(function() {
+EventSchema.virtual('grantingHasClosed').get(function () {
   if (!this.grantingCloses) return false;
 
   return dayjs().isBefore(dayjs(this.grantingCloses));
 });
 
-EventSchema.virtual('dreamCreationIsOpen').get(function() {
+EventSchema.virtual('dreamCreationIsOpen').get(function () {
   if (!this.dreamCreationCloses) return true;
 
   const now = dayjs();
@@ -113,7 +113,7 @@ const DreamSchema = new Schema({
   title: { type: String, required: true },
   summary: {
     type: String,
-    maxlength: 180
+    maxlength: 180,
   },
   description: String,
   members: [Schema.Types.ObjectId],
@@ -125,13 +125,13 @@ const DreamSchema = new Schema({
       authorId: Schema.Types.ObjectId,
       createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now,
       },
-      content: String
-    })
+      content: String,
+    }),
   ],
   approved: { type: Boolean, default: false },
-  budgetItems: [new Schema({ description: String, amount: String })]
+  budgetItems: [new Schema({ description: String, amount: String })],
 })
   .index({ eventId: 1, slug: 1 }, { unique: true })
   .index({ title: 'text', description: 'text', summary: 'text' });
@@ -146,16 +146,17 @@ const GrantSchema = new Schema({
     type: String,
     enum: ['PRE_FUND', 'USER', 'POST_FUND'],
     default: 'USER',
-    required: true
-  }
+    required: true,
+  },
 });
 
-const getModels = db => {
+const getModels = (db) => {
   return {
+    User: db.model('User', UserSchema),
     Member: db.model('Member', MemberSchema),
     Event: db.model('Event', EventSchema),
     Dream: db.model('Dream', DreamSchema),
-    Grant: db.model('Grant', GrantSchema)
+    Grant: db.model('Grant', GrantSchema),
   };
 };
 
