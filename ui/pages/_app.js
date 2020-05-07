@@ -5,6 +5,7 @@ import withData from "../utils/apolloClient";
 import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { useRouter } from "next/router";
 
 import "../styles.css";
 
@@ -12,7 +13,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
-  query EventAndMember($slug: String!) {
+  query EventAndMember($slug: String) {
     event(slug: $slug) {
       id
       slug
@@ -33,19 +34,30 @@ export const TOP_LEVEL_QUERY = gql`
       remainingGrants
       numberOfApprovedMembers
     }
-
-    currentMember {
+    currentUser {
       id
       name
       avatar
       email
-      isAdmin
-      isApproved
-      availableGrants
-      event {
-        id
+
+      membership(slug: $slug) {
+        isAdmin
+        isApproved
+        availableGrants
       }
     }
+    # currentMember {
+    #   id
+    #   name
+    #   avatar
+    #   email
+    #   isAdmin
+    #   isApproved
+    #   availableGrants
+    #   event {
+    #     id
+    #   }
+    # }
   }
 `;
 
@@ -56,14 +68,14 @@ const theme = createMuiTheme({
         borderRadius: "6px",
         backgroundColor: "white",
         "&:hover": {
-          backgroundColor: "white"
-        }
-      }
-    }
+          backgroundColor: "white",
+        },
+      },
+    },
   },
   typography: {
     button: {
-      textTransform: "none"
+      textTransform: "none",
     },
     fontFamily: [
       "-apple-system",
@@ -75,9 +87,9 @@ const theme = createMuiTheme({
       "sans-serif",
       '"Apple Color Emoji"',
       '"Segoe UI Emoji"',
-      '"Segoe UI Symbol"'
+      '"Segoe UI Symbol"',
     ].join(","),
-    fontSize: 14
+    fontSize: 14,
   },
   shadows: [
     "none",
@@ -104,12 +116,12 @@ const theme = createMuiTheme({
     "0px 10px 13px -6px rgba(63, 75, 90,0.1),0px 21px 33px 3px rgba(63, 75, 90,0.08),0px 8px 40px 7px rgba(63, 75, 90,0.06)",
     "0px 10px 14px -6px rgba(63, 75, 90,0.1),0px 22px 35px 3px rgba(63, 75, 90,0.08),0px 8px 42px 7px rgba(63, 75, 90,0.06)",
     "0px 11px 14px -7px rgba(63, 75, 90,0.1),0px 23px 36px 3px rgba(63, 75, 90,0.08),0px 9px 44px 8px rgba(63, 75, 90,0.06)",
-    "0px 11px 15px -7px rgba(63, 75, 90,0.1),0px 24px 38px 3px rgba(63, 75, 90,0.08),0px 9px 46px 8px rgba(63, 75, 90,0.06)"
-  ]
+    "0px 11px 15px -7px rgba(63, 75, 90,0.1),0px 24px 38px 3px rgba(63, 75, 90,0.08),0px 9px 46px 8px rgba(63, 75, 90,0.06)",
+  ],
 });
 
 const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
-  let currentMember, event;
+  const router = useRouter();
 
   React.useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -117,20 +129,16 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
       jssStyles.parentNode.removeChild(jssStyles);
   });
 
-  if (hostInfo.subdomain) {
-    const { data } = useQuery(TOP_LEVEL_QUERY, {
-      variables: { slug: hostInfo.subdomain },
-      client: apollo
-    });
-    if (data) {
-      currentMember = data.currentMember;
-      event = data.event;
-    }
-  }
+  const {
+    data: { currentUser, event } = { currentUser: null, event: null },
+  } = useQuery(TOP_LEVEL_QUERY, {
+    variables: { slug: router.query.event },
+    client: apollo,
+  });
 
   const [modal, setModal] = React.useState(null);
 
-  const openModal = name => {
+  const openModal = (name) => {
     if (modal !== name) setModal(name);
   };
 
@@ -144,18 +152,18 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
         <Modal
           active={modal}
           closeModal={closeModal}
-          currentMember={currentMember}
-          event={event}
+          currentMember={currentUser}
         />
         <Layout
-          currentMember={currentMember}
-          event={event}
+          currentMember={currentUser}
           apollo={apollo}
           openModal={openModal}
+          event={event}
         >
           <Component
             {...pageProps}
-            currentMember={currentMember}
+            event={event}
+            currentMember={currentUser}
             event={event}
             hostInfo={hostInfo}
             openModal={openModal}

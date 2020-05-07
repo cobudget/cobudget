@@ -1,4 +1,4 @@
-import AdminPage from "../components/admin-page";
+import AdminPage from "../../components/admin-page";
 
 export default ({ event, currentMember }) => {
   if (!currentMember || !currentMember.isAdmin)
