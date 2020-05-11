@@ -198,6 +198,10 @@ const resolvers = {
       { content, dreamId },
       { currentUser, models: { Member, Dream } }
     ) => {
+      const dream = await Dream.findOne({
+        _id: dreamId,
+      });
+
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
@@ -208,12 +212,8 @@ const resolvers = {
 
       if (content.length === 0) throw new Error('You need content!');
 
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
-
       dream.comments.push({
-        authorId: currentMember.id,
+        authorId: currentUser.id,
         content,
       });
 
@@ -224,6 +224,10 @@ const resolvers = {
       { dreamId, commentId },
       { currentUser, models: { Member, Dream } }
     ) => {
+      const dream = await Dream.findOne({
+        _id: dreamId,
+      });
+
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
@@ -232,14 +236,10 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
-
       dream.comments = dream.comments.filter((comment) => {
         if (
           comment._id.toString() === commentId &&
-          (comment.authorId.toString() === currentMember.id ||
+          (comment.authorId.toString() === currentUser.id ||
             currentMember.isAdmin)
         )
           return false;
@@ -937,8 +937,8 @@ const resolvers = {
     },
   }),
   Comment: {
-    author: async (comment, args, { models: { Member } }) => {
-      return Member.findOne({ _id: comment.authorId });
+    author: async (comment, args, { models: { User } }) => {
+      return User.findOne({ _id: comment.authorId });
     },
   },
 };

@@ -139,7 +139,7 @@ const Dream = ({ dream, event, currentMember }) => {
               {dream.numberOfComments === 1 ? "comment" : "comments"}
             </h2>
             <Comments
-              currentMember={currentMember}
+              currentUser={currentUser}
               comments={dream.comments}
               dreamId={dream.id}
             />

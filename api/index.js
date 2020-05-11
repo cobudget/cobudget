@@ -13,7 +13,7 @@ const server = new ApolloServer({
   context: async ({ req }) => {
     const db = await getConnection();
     const models = getModels(db);
-    let currentMember = null;
+    let currentUser = null;
 
     let token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
@@ -23,7 +23,7 @@ const server = new ApolloServer({
     if (token) {
       try {
         token = jwt.verify(token, process.env.JWT_SECRET);
-        currentMember = await models.Member.findOne({ _id: token.sub });
+        currentUser = await models.User.findOne({ _id: token.sub });
       } catch (error) {
         // throw new AuthenticationError(
         //   'Authentication token is invalid, please log in.'
@@ -34,11 +34,11 @@ const server = new ApolloServer({
 
     return {
       models,
-      currentMember
+      currentUser,
     };
   },
   playground: true,
-  introspection: true
+  introspection: true,
 });
 
 module.exports = cors((req, res) => {
