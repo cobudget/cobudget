@@ -21,6 +21,7 @@ const resolvers = {
       return Event.find();
     },
     event: async (parent, { slug }, { models: { Event } }) => {
+      if (!slug) return null;
       return Event.findOne({ slug });
     },
     dream: async (parent, { eventId, slug }, { models: { Dream } }) => {
@@ -291,6 +292,9 @@ const resolvers = {
 
       // const member = await Member.findOne({ _id: currentMember.id });
 
+      if (!currentUser.name && name) {
+        currentUser.verifiedEmail = true;
+      }
       // // first time a member signs in
       // if (!member.name) {
       //   member.verifiedEmail = true;
@@ -837,6 +841,11 @@ const resolvers = {
     memberships: async (user, args, { models: { Member } }) => {
       return Member.find({ userId: user.id });
     },
+    membership: async (user, { slug }, { models: { Member, Event } }) => {
+      if (!slug) return null;
+      const event = await Event.findOne({ slug });
+      return Member.findOne({ userId: user.id, eventId: event.id });
+    },
   },
   Event: {
     members: async (event, args, { models: { Member } }) => {
@@ -907,6 +916,7 @@ const resolvers = {
       return dream.comments.length;
     },
     favorite: async (dream, args, { currentUser, models: { Member } }) => {
+      if (!currentUser) return false;
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,

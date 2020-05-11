@@ -5,7 +5,7 @@ const schema = gql`
     currentMember: Member
     currentUser: User
     events: [Event!]
-    event(slug: String!): Event
+    event(slug: String): Event
     dream(eventId: ID!, slug: String!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
     members: [Member]
@@ -124,6 +124,7 @@ const schema = gql`
     id: ID!
     email: String!
     verifiedEmail: Boolean!
+    membership(slug: String): Member
     memberships: [Member!]
     name: String
     avatar: String
