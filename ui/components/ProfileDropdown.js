@@ -6,14 +6,14 @@ import { modals } from "./Modal/index";
 
 const css = {
   button:
-    "text-left block mx-2 px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200"
+    "text-left block mx-2 px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
+const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
-    const handleEscape = e => {
+    const handleEscape = (e) => {
       if (e.key === "Esc" || e.key === "Escape") {
         setOpen(false);
       }
@@ -35,12 +35,14 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
           overlap="circle"
           anchorOrigin={{
             vertical: "bottom",
-            horizontal: "right"
+            horizontal: "right",
           }}
-          badgeContent={currentMember.availableGrants}
+          badgeContent={
+            currentUser.membership && currentUser.membership.availableGrants
+          }
           color="primary"
         >
-          <Avatar user={currentMember} />
+          <Avatar user={currentUser} />
         </Badge>
       </button>
 
@@ -53,11 +55,14 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
           ></button>
 
           <div className="z-20 mt-2 py-2 absolute right-0 w-48 bg-white rounded-lg shadow-2xl flex flex-col flex-stretch">
-            {Boolean(currentMember.availableGrants) && (
+            {Boolean(
+              currentUser.membership && currentUser.membership.availableGrants
+            ) && (
               <p className="px-3 pb-2 mb-2 text-gray-600 text-sm border-b border-gray-200">
-                You have {currentMember.availableGrants} grants left
+                You have {currentUser.membership.availableGrants} grants left
               </p>
             )}
+
             <button
               onClick={() => {
                 Router.push("/profile");
@@ -65,8 +70,9 @@ const ProfileDropdown = ({ currentMember, logOut, openModal }) => {
               }}
               className={css.button}
             >
-              Me
+              Profile
             </button>
+
             <button
               onClick={() => {
                 openModal(modals.EDIT_PROFILE);

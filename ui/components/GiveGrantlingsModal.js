@@ -5,20 +5,20 @@ import { useRouter } from "next/router";
 import { TextField, Button, Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { DREAM_QUERY } from "../pages/[dream]";
+import { DREAM_QUERY } from "../pages/[event]/[dream]";
 import { TOP_LEVEL_QUERY } from "../pages/_app";
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
     padding: theme.spacing(1),
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 }));
 
 const GIVE_GRANT = gql`
-  mutation GiveGrant($dreamId: ID!, $value: Int!) {
-    giveGrant(dreamId: $dreamId, value: $value) {
+  mutation GiveGrant($eventId: ID!, $dreamId: ID!, $value: Int!) {
+    giveGrant(eventId: $eventId, dreamId: $dreamId, value: $value) {
       value
     }
   }
@@ -29,7 +29,7 @@ const GiveGrantlingsModal = ({
   handleClose,
   dream,
   event,
-  currentMember
+  currentUser,
 }) => {
   const classes = useStyles();
   const router = useRouter();
@@ -38,7 +38,7 @@ const GiveGrantlingsModal = ({
     update(cache, { data: { giveGrant } }) {
       const { dream } = cache.readQuery({
         query: DREAM_QUERY,
-        variables: { slug: router.query.dream, eventId: event.id }
+        variables: { slug: router.query.dream, eventId: event.id },
       });
 
       cache.writeQuery({
@@ -46,57 +46,64 @@ const GiveGrantlingsModal = ({
         data: {
           dream: {
             ...dream,
-            currentNumberOfGrants: dream.currentNumberOfGrants + giveGrant.value
-          }
-        }
+            currentNumberOfGrants:
+              dream.currentNumberOfGrants + giveGrant.value,
+          },
+        },
       });
 
       const topLevelQueryData = cache.readQuery({
         query: TOP_LEVEL_QUERY,
-        variables: { slug: event.slug }
+        variables: { slug: event.slug },
       });
 
       cache.writeQuery({
         query: TOP_LEVEL_QUERY,
+        variables: { slug: event.slug },
         data: {
           ...topLevelQueryData,
-          currentMember: {
-            ...topLevelQueryData.currentMember,
-            availableGrants:
-              topLevelQueryData.currentMember.availableGrants - giveGrant.value
-          }
-        }
+          currentUser: {
+            ...topLevelQueryData.currentUser,
+            membership: {
+              ...topLevelQueryData.currentUser.membership,
+              availableGrants:
+                topLevelQueryData.currentUser.membership.availableGrants -
+                giveGrant.value,
+            },
+          },
+        },
       });
-    }
+    },
   });
   const { handleSubmit, register, errors } = useForm();
 
-  // TODO: show how many I have given
-  // TODO: allow me to remove given grantlings
+  // TODO: show how many I have given to this dream
+  // TODO: allow me to remove given grants
 
   return (
     <Modal open={open} onClose={handleClose} className={classes.modal}>
       <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
         <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
-        <p>Available grants: {currentMember.availableGrants}</p>
+        <p>Available grants: {currentUser.membership.availableGrants}</p>
         {event.maxGrantsToDream && (
           <p className="text-sm text-gray-600 my-2">
             Max. {event.maxGrantsToDream} grants to one dream
           </p>
         )}
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             giveGrant({
               variables: {
+                eventId: event.id,
                 dreamId: dream.id,
-                value: Number(variables.value)
-              }
+                value: Number(variables.value),
+              },
             })
-              .then(data => {
+              .then((data) => {
                 // Add "Snackbar" success message from material UI
                 handleClose();
               })
-              .catch(error => {
+              .catch((error) => {
                 alert(error.message);
               });
           })}
@@ -113,11 +120,11 @@ const GiveGrantlingsModal = ({
                 max: `${
                   event.maxGrantsToDream
                     ? Math.min(
-                        currentMember.availableGrants,
+                        currentUser.membership.availableGrants,
                         event.maxGrantsToDream
                       )
-                    : currentMember.availableGrants
-                }`
+                    : currentUser.membership.availableGrants
+                }`,
               }}
               variant="outlined"
             />

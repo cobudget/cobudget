@@ -32,7 +32,7 @@ const RECLAIM_GRANTS_MUTATION = gql`
   }
 `;
 
-const Dream = ({ dream, event, currentMember }) => {
+const Dream = ({ dream, event, currentUser }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
 
@@ -59,10 +59,13 @@ const Dream = ({ dream, event, currentMember }) => {
           <div>
             <div className="flex items-start justify-between">
               <h1 className="mb-2 text-4xl font-medium">{dream.title}</h1>
-              {isMemberOfDream(currentMember, dream) && (
+              {isMemberOfDream(currentUser, dream) && (
                 <IconButton
                   onClick={() =>
-                    Router.push("/[dream]/edit", `/${dream.slug}/edit`)
+                    Router.push(
+                      "/[event]/[dream]/edit",
+                      `/${event.slug}/${dream.slug}/edit`
+                    )
                   }
                 >
                   <EditIcon />
@@ -124,10 +127,10 @@ const Dream = ({ dream, event, currentMember }) => {
             <div className="my-5">
               <h2 className="mb-1 text-2xl font-medium">Dreamers</h2>
               <div className="flex">
-                {dream.members.map(member => (
-                  <Tooltip key={member.id} title={member.name}>
+                {dream.members.map((member) => (
+                  <Tooltip key={member.user.id} title={member.user.name}>
                     <div>
-                      <Avatar user={member} />
+                      <Avatar user={member.user} />
                     </div>
                   </Tooltip>
                 ))}
@@ -180,104 +183,108 @@ const Dream = ({ dream, event, currentMember }) => {
                         height={10}
                       />
                     </div>
-                    {currentMember && currentMember.availableGrants > 0 && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          fullWidth
-                          size="large"
-                          onClick={() => setGrantModalOpen(true)}
-                        >
-                          Donate to dream
-                        </Button>
-                        <GiveGrantlingsModal
-                          open={grantModalOpen}
-                          handleClose={() => setGrantModalOpen(false)}
-                          dream={dream}
-                          event={event}
-                          currentMember={currentMember}
-                        />
-                      </>
-                    )}
+                    {currentUser &&
+                      currentUser.membership &&
+                      currentUser.membership.availableGrants > 0 && (
+                        <>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            size="large"
+                            onClick={() => setGrantModalOpen(true)}
+                          >
+                            Donate to dream
+                          </Button>
+                          <GiveGrantlingsModal
+                            open={grantModalOpen}
+                            handleClose={() => setGrantModalOpen(false)}
+                            dream={dream}
+                            event={event}
+                            currentUser={currentUser}
+                          />
+                        </>
+                      )}
                   </>
                 ) : (
                   <p>This is not approved for granting yet</p>
                 )}
-                {currentMember && currentMember.isAdmin && (
-                  <div>
-                    <div className="my-2">
-                      {!event.grantingHasClosed && dream.approved ? (
-                        <Button
-                          onClick={() =>
-                            confirm(
-                              "Are you sure you would like to unapprove this dream?"
-                            ) &&
-                            approveForGranting({
-                              variables: {
-                                dreamId: dream.id,
-                                approved: false
-                              }
-                            }).catch(err => alert(err.message))
-                          }
-                          fullWidth
-                        >
-                          Unapprove for granting
-                        </Button>
-                      ) : (
-                        <Button
-                          color="primary"
-                          variant="contained"
-                          fullWidth
-                          onClick={() =>
-                            approveForGranting({
-                              variables: {
-                                dreamId: dream.id,
-                                approved: true
-                              }
-                            }).catch(err => alert(err.message))
-                          }
-                        >
-                          Approve for granting
-                        </Button>
+                {currentUser &&
+                  currentUser.membership &&
+                  currentUser.membership.isAdmin && (
+                    <div>
+                      <div className="my-2">
+                        {!event.grantingHasClosed && dream.approved ? (
+                          <Button
+                            onClick={() =>
+                              confirm(
+                                "Are you sure you would like to unapprove this dream?"
+                              ) &&
+                              approveForGranting({
+                                variables: {
+                                  dreamId: dream.id,
+                                  approved: false,
+                                },
+                              }).catch((err) => alert(err.message))
+                            }
+                            fullWidth
+                          >
+                            Unapprove for granting
+                          </Button>
+                        ) : (
+                          <Button
+                            color="primary"
+                            variant="contained"
+                            fullWidth
+                            onClick={() =>
+                              approveForGranting({
+                                variables: {
+                                  dreamId: dream.id,
+                                  approved: true,
+                                },
+                              }).catch((err) => alert(err.message))
+                            }
+                          >
+                            Approve for granting
+                          </Button>
+                        )}
+                      </div>
+                      <div className="my-2">
+                        {event.grantingHasClosed &&
+                          dream.currentNumberOfGrants > 0 && (
+                            <>
+                              <Button
+                                onClick={() =>
+                                  reclaimGrants({
+                                    variables: { dreamId: dream.id },
+                                  }).catch((err) => alert(err.message))
+                                }
+                              >
+                                Reclaim grants
+                              </Button>
+                              <br />
+                            </>
+                          )}
+                      </div>
+
+                      {dream.approved && (
+                        <>
+                          <Button
+                            fullWidth
+                            onClick={() => setPrePostFundModalOpen(true)}
+                          >
+                            {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
+                          </Button>
+                          <PreOrPostFundModal
+                            open={prePostFundModalOpen}
+                            handleClose={() => setPrePostFundModalOpen(false)}
+                            dream={dream}
+                            event={event}
+                          />
+                        </>
                       )}
                     </div>
-                    <div className="my-2">
-                      {event.grantingHasClosed &&
-                        dream.currentNumberOfGrants > 0 && (
-                          <>
-                            <Button
-                              onClick={() =>
-                                reclaimGrants({
-                                  variables: { dreamId: dream.id }
-                                }).catch(err => alert(err.message))
-                              }
-                            >
-                              Reclaim grants
-                            </Button>
-                            <br />
-                          </>
-                        )}
-                    </div>
-
-                    {dream.approved && (
-                      <>
-                        <Button
-                          fullWidth
-                          onClick={() => setPrePostFundModalOpen(true)}
-                        >
-                          {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
-                        </Button>
-                        <PreOrPostFundModal
-                          open={prePostFundModalOpen}
-                          handleClose={() => setPrePostFundModalOpen(false)}
-                          dream={dream}
-                          event={event}
-                        />
-                      </>
-                    )}
-                  </div>
-                )}
+                  )}
               </div>
             </div>
           </div>

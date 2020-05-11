@@ -5,19 +5,19 @@ import { useRouter } from "next/router";
 import { Box, TextField, Button, Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { DREAM_QUERY } from "../pages/[dream]";
+import { DREAM_QUERY } from "../pages/[event]/[dream]";
 import { TOP_LEVEL_QUERY } from "../pages/_app";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
     padding: theme.spacing(1),
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   innerModal: {
-    outline: "none"
-  }
+    outline: "none",
+  },
 }));
 
 const PRE_OR_POST_FUND_MUTATION = gql`
@@ -37,7 +37,7 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
     update(cache, { data: { preOrPostFund } }) {
       const { dream } = cache.readQuery({
         query: DREAM_QUERY,
-        variables: { slug: router.query.dream, eventId: event.id }
+        variables: { slug: router.query.dream, eventId: event.id },
       });
 
       cache.writeQuery({
@@ -46,14 +46,14 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
           dream: {
             ...dream,
             currentNumberOfGrants:
-              dream.currentNumberOfGrants + preOrPostFund.value
-          }
-        }
+              dream.currentNumberOfGrants + preOrPostFund.value,
+          },
+        },
       });
 
       const topLevelQueryData = cache.readQuery({
         query: TOP_LEVEL_QUERY,
-        variables: { slug: event.slug }
+        variables: { slug: event.slug },
       });
 
       cache.writeQuery({
@@ -63,11 +63,11 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
           event: {
             ...topLevelQueryData.event,
             remainingGrants:
-              topLevelQueryData.event.remainingGrants - preOrPostFund.value
-          }
-        }
+              topLevelQueryData.event.remainingGrants - preOrPostFund.value,
+          },
+        },
       });
-    }
+    },
   });
   const { handleSubmit, register } = useForm();
 
@@ -90,18 +90,18 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
         <p>Grantlings needed to reach maximum goal: {amountToReachMaxGoal}</p>
         {event.remainingGrants > amountToReachMinGoal ? (
           <form
-            onSubmit={handleSubmit(variables => {
+            onSubmit={handleSubmit((variables) => {
               giveGrant({
                 variables: {
                   dreamId: dream.id,
-                  value: Number(variables.value)
-                }
+                  value: Number(variables.value),
+                },
               })
-                .then(data => {
+                .then((data) => {
                   // Add "Snackbar" success message from material UI
                   handleClose();
                 })
-                .catch(error => {
+                .catch((error) => {
                   alert(error.message);
                 });
             })}
@@ -118,7 +118,7 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
                   max: `${Math.min(
                     event.remainingGrants,
                     amountToReachMaxGoal
-                  )}`
+                  )}`,
                 }}
                 variant="outlined"
               />

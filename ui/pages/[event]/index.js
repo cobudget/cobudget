@@ -28,7 +28,7 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-export default ({ currentMember, event }) => {
+export default ({ currentUser, event }) => {
   console.log({ event });
   if (!event) return null;
   const [filterFavorites, setFilterFavorites] = useState(false);
@@ -53,7 +53,7 @@ export default ({ currentMember, event }) => {
         toggleFilterFavorites={toggleFilterFavorites}
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
-        currentMember={currentMember}
+        currentMember={currentUser}
       />
 
       {loading ? (
@@ -71,7 +71,7 @@ export default ({ currentMember, event }) => {
                   key={dream.slug}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
-                    <DreamCard dream={dream} currentMember={currentMember} />
+                    <DreamCard dream={dream} currentMember={currentUser} />
                   </a>
                 </Link>
               ))}

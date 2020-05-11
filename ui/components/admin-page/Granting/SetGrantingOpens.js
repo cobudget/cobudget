@@ -9,7 +9,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetGrantingOpens = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register, errors } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(event.grantingOpens);
@@ -20,14 +24,14 @@ const SetGrantingOpens = ({ closeModal, event }) => {
         <h1 className="text-3xl">Set granting open date</h1>
 
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             console.log({ variables, selectedDate });
             updateGranting({ variables: { grantingOpens: selectedDate } })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });

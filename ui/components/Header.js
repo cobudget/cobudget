@@ -9,16 +9,19 @@ const css = {
   navItem:
     "my-1 px-3 mx-1 py-2 sm:px-3 sm:m-0 block text-gray-800 font-semibold rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
   mobileProfileItem:
-    "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline"
+    "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
 };
 
-export default ({ event, currentMember, openModal, logOut }) => {
+export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = React.useState(false);
 
   return (
     <header className=" sm:flex sm:justify-between sm:items-center sm:py-4">
       <div className="flex items-center justify-between py-4 sm:p-0">
-        <Link href="/">
+        <Link
+          href={event ? "/[event]" : "/"}
+          as={event ? `/${event.slug}` : "/"}
+        >
           <a>
             <h1 className="text-2xl text-gray-800">
               {event ? event.title : "Dreams"}
@@ -51,70 +54,92 @@ export default ({ event, currentMember, openModal, logOut }) => {
         } -ml-3 -mr-3 min-w-full sm:m-0 sm:min-w-0 sm:block border-t sm:border-0`}
       >
         <div className="py-1 sm:flex sm:p-0 sm:items-center">
-          {event ? (
+          {currentUser ? (
             <>
-              {currentMember ? (
+              {event && (
                 <>
-                  {currentMember.isAdmin && (
-                    <Link href="/admin">
-                      <a className={css.navItem}>Admin</a>
-                    </Link>
-                  )}
+                  {currentUser.membership ? (
+                    <>
+                      {currentUser.membership.isAdmin && (
+                        <Link href="/[event]/admin" as={`/${event.slug}/admin`}>
+                          <a className={css.navItem}>Admin</a>
+                        </Link>
+                      )}
 
-                  {event.dreamCreationIsOpen && currentMember.isApproved && (
-                    <Link href="/create-dream">
-                      <a className={css.navItem}>Create dream</a>
-                    </Link>
+                      {event.dreamCreationIsOpen &&
+                        currentUser.membership.isApproved && (
+                          <Link
+                            href="/[event]/create-dream"
+                            as={`/${event.slug}/create-dream`}
+                          >
+                            <a className={css.navItem}>Create dream</a>
+                          </Link>
+                        )}
+                    </>
+                  ) : (
+                    <>Join</>
                   )}
-
-                  <div className="hidden sm:block sm:ml-4">
-                    <ProfileDropdown
-                      currentMember={currentMember}
-                      logOut={logOut}
-                      openModal={openModal}
-                    />
-                  </div>
                 </>
-              ) : (
-                <Link href="/login">
-                  <a className={css.navItem}>Login</a>
+              )}
+
+              {!event && currentUser.isOrgAdmin && (
+                <Link href="/create-event">
+                  <a className={css.navItem}>Create event</a>
                 </Link>
               )}
+
+              <div className="hidden sm:block sm:ml-4">
+                <ProfileDropdown
+                  currentUser={currentUser}
+                  logOut={logOut}
+                  openModal={openModal}
+                  event={event}
+                />
+              </div>
             </>
           ) : (
-            <Link href="/create-event">
-              <a className={css.navItem}>Create event</a>
-            </Link>
+            <>
+              <Link href="/login">
+                <a className={css.navItem}>Login</a>
+              </Link>
+            </>
           )}
         </div>
 
         {/* Mobile view of profile dropdown contents above (i.e. all profile dropdown items are declared twice!)*/}
-        {currentMember && (
+        {currentUser && (
           <div className="pt-4 pb-1 sm:hidden border-t border-b mb-4 border-gray-300">
             <div className="flex items-center px-3">
               <Badge
                 overlap="circle"
                 anchorOrigin={{
                   vertical: "bottom",
-                  horizontal: "right"
+                  horizontal: "right",
                 }}
-                badgeContent={currentMember.availableGrants}
+                badgeContent={
+                  currentUser.membership &&
+                  currentUser.membership.availableGrants
+                }
                 color="primary"
               >
-                <Avatar user={currentMember} />
+                <Avatar user={currentUser} />
               </Badge>
               <div className="ml-4">
                 <span className="font-semibold text-gray-600">
-                  {currentMember.name}
+                  {currentUser.name}
                 </span>
-                <span className="block text-sm text-gray-600">
-                  You have {currentMember.availableGrants} grants left
-                </span>
+                {currentUser.membership &&
+                  Boolean(currentUser.membership.availableGrants) && (
+                    <span className="block text-sm text-gray-600">
+                      You have {currentUser.membership.availableGrants} grants
+                      left
+                    </span>
+                  )}
               </div>
             </div>
             <div className="mt-2 flex flex-col items-stretch">
               <Link href="/profile">
-                <a className={css.mobileProfileItem}>Me</a>
+                <a className={css.mobileProfileItem}>Profile</a>
               </Link>
               <button
                 onClick={() => {

@@ -152,10 +152,10 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
         <Modal
           active={modal}
           closeModal={closeModal}
-          currentMember={currentUser}
+          currentUser={currentUser}
         />
         <Layout
-          currentMember={currentUser}
+          currentUser={currentUser}
           apollo={apollo}
           openModal={openModal}
           event={event}
@@ -163,7 +163,7 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
           <Component
             {...pageProps}
             event={event}
-            currentMember={currentUser}
+            currentUser={currentUser}
             event={event}
             hostInfo={hostInfo}
             openModal={openModal}

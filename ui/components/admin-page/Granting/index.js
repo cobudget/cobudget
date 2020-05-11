@@ -5,7 +5,7 @@ import {
   Box,
   ListItem,
   ListItemText,
-  Divider
+  Divider,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
@@ -23,17 +23,17 @@ import SetGrantingOpens from "./SetGrantingOpens";
 
 import thousandSeparator from "../../../utils/thousandSeparator";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
     padding: theme.spacing(1),
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   innerModal: {
     outline: "none",
-    flex: "0 1 500px"
-  }
+    flex: "0 1 500px",
+  },
 }));
 
 const modals = {
@@ -44,11 +44,12 @@ const modals = {
   SET_GRANT_VALUE: SetGrantValue,
   SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
   SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
-  SET_TOTAL_BUDGET: SetTotalBudget
+  SET_TOTAL_BUDGET: SetTotalBudget,
 };
 
 export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
+    $eventId: ID!
     $currency: String
     $grantsPerMember: Int
     $maxGrantsToDream: Int
@@ -59,6 +60,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $dreamCreationCloses: Date
   ) {
     updateGrantingSettings(
+      eventId: $eventId
       currency: $currency
       grantsPerMember: $grantsPerMember
       maxGrantsToDream: $maxGrantsToDream
@@ -86,7 +88,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
 export default ({ event }) => {
   const [open, setOpen] = React.useState(null);
 
-  const handleOpen = modal => {
+  const handleOpen = (modal) => {
     setOpen(modal);
   };
 
@@ -132,8 +134,9 @@ export default ({ event }) => {
         <ListItem>
           <ListItemText
             primary="Grants given"
-            secondary={`${event.totalBudgetGrants -
-              event.remainingGrants} grants`}
+            secondary={`${
+              event.totalBudgetGrants - event.remainingGrants
+            } grants`}
           />
         </ListItem>
         <Divider />

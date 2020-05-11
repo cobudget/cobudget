@@ -19,8 +19,8 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       approved
       members {
-        id
         user {
+          id
           name
           email
         }
@@ -36,10 +36,8 @@ export const DREAM_QUERY = gql`
         createdAt
         author {
           id
-          user {
-            name
-            avatar
-          }
+          name
+          avatar
         }
       }
       budgetItems {
@@ -50,7 +48,7 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentMember }) => {
+export default ({ event, currentUser }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -63,7 +61,7 @@ export default ({ event, currentMember }) => {
   console.log({ dream });
 
   if (dream)
-    return <Dream dream={dream} event={event} currentMember={currentMember} />;
+    return <Dream dream={dream} event={event} currentUser={currentUser} />;
 
   if (loading)
     return (

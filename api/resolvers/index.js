@@ -44,12 +44,12 @@ const resolvers = {
     ) => {
       if (!currentUser) throw new Error('Need to be logged in');
 
-      const currentUserMembership = await Member.find({
+      const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId,
       });
 
-      if (!currentUserMembership || !currentUserMembership.isAdmin)
+      if (!currentMember || !currentMember.isAdmin)
         throw new Error('You need to be admin');
 
       return Member.find({ eventId });
@@ -91,7 +91,7 @@ const resolvers = {
     editEvent: async (
       parent,
       { eventId, slug, title, registrationPolicy },
-      { currentUser, models: { Event } }
+      { currentUser, models: { Event, Member } }
     ) => {
       const currentMember = await Member.findOne({
         userId: currentUser.id,

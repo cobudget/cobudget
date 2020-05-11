@@ -2,11 +2,10 @@ import useForm from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 
-import { Box, TextField, Button } from "@material-ui/core";
+import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
-import Avatar from "../Avatar";
 
-const UPDATE_CURRENT_MEMBER = gql`
+const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile($name: String, $avatar: String) {
     updateProfile(name: $name, avatar: $avatar) {
       id
@@ -17,41 +16,41 @@ const UPDATE_CURRENT_MEMBER = gql`
   }
 `;
 
-const EditProfile = ({ closeModal, currentMember }) => {
-  const [updateUser] = useMutation(UPDATE_CURRENT_MEMBER);
+const EditProfile = ({ closeModal, currentUser }) => {
+  const [updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const { handleSubmit, register, errors } = useForm();
 
   return (
     <Card>
-      <Box p={3}>
-        <h1>Edit profile</h1>
+      <div className="p-5">
+        <h1 className="text-2xl">Edit profile</h1>
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateUser({ variables })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
           })}
         >
-          <Box m="15px 0">
+          <div className="my-4">
             <TextField
               name="name"
               label="Display name"
               variant="outlined"
-              defaultValue={currentMember.name}
+              defaultValue={currentUser.name}
               error={Boolean(errors.name)}
               helperText={errors.name && errors.name.message}
               fullWidth
               inputRef={register({
-                required: "Required"
+                required: "Required",
               })}
             />
-          </Box>
+          </div>
 
           <Button
             type="submit"
@@ -62,7 +61,7 @@ const EditProfile = ({ closeModal, currentMember }) => {
             Save
           </Button>
         </form>
-      </Box>
+      </div>
     </Card>
   );
 };
