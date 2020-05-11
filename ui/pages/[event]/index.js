@@ -29,7 +29,6 @@ export const DREAMS_QUERY = gql`
 `;
 
 export default ({ currentUser, event }) => {
-  console.log({ event });
   if (!event) return null;
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
