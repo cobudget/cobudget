@@ -13,6 +13,7 @@ const JOIN_EVENT_MUTATION = gql`
 `;
 
 export default ({ event, currentUser }) => {
+  if (!event) return null;
   const [registerForEvent] = useMutation(JOIN_EVENT_MUTATION, {
     variables: { eventId: event.id },
     refetchQueries: [
