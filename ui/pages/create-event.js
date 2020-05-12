@@ -6,6 +6,7 @@ import slugify from "../utils/slugify";
 
 import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
+import Router from "next/router";
 
 const CREATE_EVENT = gql`
   mutation CreateEvent(
@@ -26,36 +27,20 @@ const CREATE_EVENT = gql`
   }
 `;
 
-export default ({ event }) => {
-  if (event) return <div>redirect to root?</div>;
+export default () => {
   const [createEvent, { data, error }] = useMutation(CREATE_EVENT);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = React.useState("");
-  const [created, setCreated] = React.useState(false);
 
   const onSubmit = (variables) => {
     createEvent({ variables })
       .then(({ data }) => {
-        console.log("event created!");
-        setCreated(true);
+        Router.push("/[event]", `/${data.createEvent.slug}`);
       })
       .catch((err) => {
-        console.log({ err });
         alert(err.message);
       });
   };
-
-  if (created)
-    return (
-      <Card>
-        <Box p={3}>
-          Event was created.{" "}
-          {process.env.IS_PROD
-            ? "Check your email for a magic link to sign in."
-            : "Check your console for a magic link to sign in (in development)."}
-        </Box>
-      </Card>
-    );
 
   return (
     <Card>
