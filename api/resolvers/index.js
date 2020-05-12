@@ -39,18 +39,22 @@ const resolvers = {
     },
     members: async (
       parent,
-      { eventId },
+      { eventId, searchInput },
       { currentUser, models: { Member } }
     ) => {
-      if (!currentUser) throw new Error('Need to be logged in');
+      if (!currentUser) throw new Error('You need to be logged in');
 
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be admin');
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be an approved member');
+
+      if (searchInput) {
+        return Member.find({ eventId, $text: { $search: searchInput } });
+      }
 
       return Member.find({ eventId });
     },
@@ -146,7 +150,7 @@ const resolvers = {
         slug: slugify(slug),
         description,
         summary,
-        members: [currentMember.id], // could argue for different thangs here?..
+        cocreators: [currentMember.id], // could argue for different thangs here?..
         budgetDescription,
         minGoal,
         maxGoal,
@@ -178,8 +182,8 @@ const resolvers = {
 
       // rename dream.members to co-creators
       // maybe save userIds instead of memberIds in this field?... mostly care about avatar/name etc.
-      if (!currentMember || !dream.members.includes(currentMember.id))
-        throw new Error('You are not a member of this dream.');
+      if (!currentMember || !dream.cocreators.includes(currentMember.id))
+        throw new Error('You are not a cocreator of this dream.');
 
       dream.title = title;
       dream.slug = slugify(slug);
@@ -922,8 +926,8 @@ const resolvers = {
     },
   },
   Dream: {
-    members: async (dream, args, { models: { Member } }) => {
-      return Member.find({ _id: { $in: dream.members } });
+    cocreators: async (dream, args, { models: { Member } }) => {
+      return Member.find({ _id: { $in: dream.cocreators } });
     },
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
