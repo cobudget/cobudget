@@ -2,7 +2,6 @@ import gql from "graphql-tag";
 import { useState } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
@@ -52,7 +51,7 @@ export default ({ currentUser, event }) => {
         toggleFilterFavorites={toggleFilterFavorites}
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
-        currentMember={currentUser}
+        currentUser={currentUser}
       />
 
       {loading ? (
@@ -70,7 +69,7 @@ export default ({ currentUser, event }) => {
                   key={dream.slug}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
-                    <DreamCard dream={dream} currentMember={currentUser} />
+                    <DreamCard dream={dream} currentUser={currentUser} />
                   </a>
                 </Link>
               ))}

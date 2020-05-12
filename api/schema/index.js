@@ -2,7 +2,6 @@ const { gql } = require('apollo-server-micro');
 
 const schema = gql`
   type Query {
-    currentMember: Member
     currentUser: User
     events: [Event!]
     event(slug: String): Event

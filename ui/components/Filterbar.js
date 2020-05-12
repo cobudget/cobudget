@@ -4,13 +4,13 @@ import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "./Icons";
 import debounce from "../utils/debounce";
 
 export default ({
-  currentMember,
+  currentUser,
   filterFavorites,
   toggleFilterFavorites,
   textSearchTerm,
-  setTextSearchTerm
+  setTextSearchTerm,
 }) => {
-  const debouncedSearch = debounce(text => {
+  const debouncedSearch = debounce((text) => {
     setTextSearchTerm(text);
   }, 300);
 
@@ -33,10 +33,10 @@ export default ({
           placeholder="Search..."
           className="appearance-none bg-gray-200 rounded block pl-10 pr-6 py-2 w-full placeholder-gray-600 text-gray-800 focus:bg-white focus:text-gray-800 focus:outline-none focus:shadow-outline"
           defaultValue={textSearchTerm}
-          onChange={e => debouncedSearch(e.target.value)}
+          onChange={(e) => debouncedSearch(e.target.value)}
         />
       </div>
-      {currentMember && (
+      {currentUser && currentUser.membership && (
         <Tooltip title="Show favorites">
           <button
             className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${

@@ -8,7 +8,7 @@ import {
   CoinIcon,
   CommentIcon,
   HeartOutlineIcon,
-  HeartSolidIcon
+  HeartSolidIcon,
 } from "./Icons";
 
 const TOGGLE_FAVORITE_MUTATION = gql`
@@ -20,9 +20,9 @@ const TOGGLE_FAVORITE_MUTATION = gql`
   }
 `;
 
-export default ({ dream, currentMember }) => {
+export default ({ dream, currentUser }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
-    variables: { dreamId: dream.id }
+    variables: { dreamId: dream.id },
   });
 
   return (
@@ -70,12 +70,12 @@ export default ({ dream, currentMember }) => {
                 <span className="block ml-1">{dream.numberOfComments} </span>
               </div>
             </Link>
-            {currentMember && (
+            {currentUser && currentUser.membership && (
               <button
                 className="flex items-center focus:outline-none"
                 tabIndex="-1"
                 disabled={loading}
-                onClick={e => {
+                onClick={(e) => {
                   e.preventDefault();
                   if (!loading) toggleFavorite();
                 }}
