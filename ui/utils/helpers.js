@@ -8,7 +8,7 @@
 export const isMemberOfDream = (currentUser, dream) => {
   if (!currentUser || !dream) return false;
 
-  return dream.members.reduce((res, member) => {
+  return dream.cocreators.reduce((res, member) => {
     if (member.user.id === currentUser.id) return true;
   }, false);
 };

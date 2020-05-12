@@ -18,11 +18,12 @@ export const DREAM_QUERY = gql`
       maxGoalGrants
       currentNumberOfGrants
       approved
-      members {
+      cocreators {
+        id
         user {
           id
           name
-          email
+          avatar
         }
       }
       images {
@@ -58,7 +59,6 @@ export default ({ event, currentUser }) => {
       variables: { slug: router.query.dream, eventId: event.id },
     }
   );
-  console.log({ dream });
 
   if (dream)
     return <Dream dream={dream} event={event} currentUser={currentUser} />;

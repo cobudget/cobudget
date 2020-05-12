@@ -1,5 +1,6 @@
 import useForm from "react-hook-form";
 import gql from "graphql-tag";
+import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import Router from "next/router";
 
@@ -15,6 +16,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import ImageUpload from "./ImageUpload";
 import EditBudgetItems from "./EditBudgetItems";
+import Cocreators from "./Cocreators";
 
 import slugify from "../utils/slugify";
 
@@ -52,7 +54,7 @@ const CREATE_DREAM = gql`
       maxGoalGrants
       currentNumberOfGrants
       approved
-      members {
+      cocreators {
         id
         user {
           id
@@ -116,9 +118,10 @@ const EDIT_DREAM = gql`
       maxGoalGrants
       currentNumberOfGrants
       approved
-      members {
+      cocreators {
         id
         user {
+          id
           name
         }
       }
@@ -164,6 +167,7 @@ export default ({ dream = {}, event, editing }) => {
 
   const [editDream] = useMutation(EDIT_DREAM);
   const [createDream] = useMutation(CREATE_DREAM);
+
   const { handleSubmit, register, errors } = useForm();
 
   const {
@@ -175,20 +179,28 @@ export default ({ dream = {}, event, editing }) => {
     maxGoal = "",
   } = dream;
 
-  const [slugValue, setSlugValue] = React.useState(slug);
-  const [images, setImages] = React.useState(dream.images ? dream.images : []);
+  // // //
 
-  const [budgetItems, setBudgetItems] = React.useState(
+  // ok so.. what do we do..
+
+  // seek for members to add.
+  // searching for members to add.
+
+  const [slugValue, setSlugValue] = useState(slug);
+  const [images, setImages] = useState(dream.images ? dream.images : []);
+
+  const [cocreators, setCocreators] = useState(dream.cocreators);
+  const addCocreator = (member) => setCocreators([...cocreators, member]);
+  const removeCocreator = (id) =>
+    setCocreators(cocreators.filter((member) => member.id !== id));
+
+  const [budgetItems, setBudgetItems] = useState(
     dream.budgetItems ? dream.budgetItems : []
   );
-
-  const addBudgetItem = () => {
+  const addBudgetItem = () =>
     setBudgetItems([...budgetItems, { description: "", value: "" }]);
-  };
-
-  const removeBudgetItem = (i) => {
+  const removeBudgetItem = (i) =>
     setBudgetItems([...budgetItems.filter((item, index) => i !== index)]);
-  };
 
   const onSubmitCreate = (values) => {
     createDream({
@@ -198,6 +210,7 @@ export default ({ dream = {}, event, editing }) => {
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
+        cocreators,
       },
     })
       .then(({ data }) => {
@@ -221,6 +234,7 @@ export default ({ dream = {}, event, editing }) => {
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
+        cocreators,
       },
     })
       .then(({ data }) => {
@@ -306,6 +320,14 @@ export default ({ dream = {}, event, editing }) => {
           variant="outlined"
         />
       </Box>
+
+      <h2>Co-creators</h2>
+      <Cocreators
+        addCocreator={addCocreator}
+        removeCocreator={removeCocreator}
+        cocreators={cocreators}
+        event={event}
+      />
 
       <Typography variant="h6">Funding goals</Typography>
 

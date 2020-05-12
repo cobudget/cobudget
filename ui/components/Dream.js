@@ -125,9 +125,9 @@ const Dream = ({ dream, event, currentUser }) => {
             )}
 
             <div className="my-5">
-              <h2 className="mb-1 text-2xl font-medium">Dreamers</h2>
+              <h2 className="mb-1 text-2xl font-medium">Co-creators</h2>
               <div className="flex">
-                {dream.members.map((member) => (
+                {dream.cocreators.map((member) => (
                   <Tooltip key={member.user.id} title={member.user.name}>
                     <div>
                       <Avatar user={member.user} />
