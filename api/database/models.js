@@ -117,7 +117,7 @@ const DreamSchema = new Schema({
     maxlength: 180,
   },
   description: String,
-  members: [Schema.Types.ObjectId],
+  cocreators: [Schema.Types.ObjectId],
   minGoal: Number,
   maxGoal: Number,
   images: [new Schema({ small: String, large: String })],
