@@ -39,6 +39,7 @@ export const TOP_LEVEL_QUERY = gql`
       name
       avatar
       email
+      isOrgAdmin
 
       membership(slug: $slug) {
         isAdmin

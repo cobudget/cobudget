@@ -35,6 +35,7 @@ const MemberSchema = new Schema({
     type: Schema.Types.ObjectId,
     index: true, // behövs den här?
     required: true,
+    ref: 'User',
   },
   isAdmin: { type: Boolean, required: true, default: false },
   isApproved: { type: Boolean, required: true, default: false },

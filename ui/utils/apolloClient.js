@@ -8,7 +8,7 @@ import fetch from "isomorphic-unfetch";
 
 const link = createHttpLink({
   fetch, // Switches between unfetch & node-fetch for client & server.
-  uri: process.env.GRAPHQL_URL
+  uri: process.env.GRAPHQL_URL,
 });
 
 // Export a HOC from next-with-apollo
@@ -23,8 +23,8 @@ export default withApollo(
       return {
         headers: {
           ...headers,
-          authorization: token ? `Bearer ${token}` : ""
-        }
+          authorization: token ? `Bearer ${token}` : "",
+        },
       };
     });
 
@@ -32,7 +32,7 @@ export default withApollo(
       link: authLink.concat(link),
       cache: new InMemoryCache()
         //  rehydrate the cache using the initial data passed from the server:
-        .restore(initialState || {})
+        .restore(initialState || {}),
     });
   },
   { getDataFromTree: "ssr" }

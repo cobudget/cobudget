@@ -77,7 +77,20 @@ export default ({ event, currentUser, openModal, logOut }) => {
                         )}
                     </>
                   ) : (
-                    <>Join</>
+                    <>
+                      {event.registrationPolicy !== "INVITE_ONLY" && (
+                        <Link
+                          href="/[event]/register"
+                          as={`/${event.slug}/register`}
+                        >
+                          <a className={css.navItem}>
+                            {event.registrationPolicy === "REQUEST_TO_JOIN"
+                              ? "Request to join"
+                              : "Join"}
+                          </a>
+                        </Link>
+                      )}
+                    </>
                   )}
                 </>
               )}

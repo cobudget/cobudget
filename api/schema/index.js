@@ -79,6 +79,8 @@ const schema = gql`
     reclaimGrants(dreamId: ID!): Dream
     preOrPostFund(dreamId: ID!, value: Int!): Grant
     toggleFavorite(dreamId: ID!): Dream
+
+    registerForEvent(eventId: ID!): Member
   }
 
   type Event {
@@ -127,6 +129,7 @@ const schema = gql`
     memberships: [Member!]
     name: String
     avatar: String
+    isOrgAdmin: Boolean
   }
 
   # rename to Membership

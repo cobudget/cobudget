@@ -70,14 +70,13 @@ const sendInviteEmails = async (members, event) => {
   }
 };
 
-const sendRequestToJoinNotifications = async (member, event, admins) => {
+const sendRequestToJoinNotifications = async (user, event, emails) => {
   if (process.env.NODE_ENV === 'production') {
-    const emails = admins.map((admin) => admin.email);
     var data = {
       from: 'Dreams <wizard@dreams.wtf>',
       to: emails,
       subject: `Request to join ${event.title}`,
-      text: `${member.email} is requesting to join ${event.title}. Go here to approve: https://${event.slug}.dreams.wtf/admin`,
+      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://dreams.wtf/${event.slug}/admin`,
     };
     return mailgun
       .messages()

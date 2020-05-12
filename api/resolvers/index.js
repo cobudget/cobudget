@@ -84,8 +84,6 @@ const resolvers = {
 
       const [savedEvent] = await Promise.all([event.save(), member.save()]);
 
-      // await sendMagicLinkEmail(member, event);
-
       return savedEvent;
     },
     editEvent: async (
@@ -801,6 +799,52 @@ const resolvers = {
       }
 
       return dream;
+    },
+    registerForEvent: async (
+      parent,
+      { eventId },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      if (!currentUser)
+        throw new Error('You need to be logged in to register for an event.');
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+
+      if (currentMember) throw new Error('You are already a member');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let newMember = {
+        isAdmin: false,
+        eventId,
+        userId: currentUser.id,
+      };
+
+      switch (event.registrationPolicy) {
+        case 'OPEN':
+          newMember.isApproved = true;
+          break;
+        case 'REQUEST_TO_JOIN':
+          newMember.isApproved = false;
+
+          // send request to join notification emails
+          const admins = await Member.find({
+            eventId,
+            isAdmin: true,
+          }).populate('userId');
+
+          const adminEmails = admins.map((member) => member.userId.email);
+          await sendRequestToJoinNotifications(currentUser, event, adminEmails);
+          break;
+
+        case 'INVITE_ONLY':
+          throw new Error('This event is invite only');
+      }
+
+      return new Member(newMember).save();
     },
   },
   Member: {
