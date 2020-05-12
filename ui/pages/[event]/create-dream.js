@@ -1,6 +1,6 @@
 import { Box } from "@material-ui/core";
-import Card from "../components/styled/Card";
-import EditOrCreateDreamForm from "../components/EditOrCreateDreamForm";
+import Card from "../../components/styled/Card";
+import EditOrCreateDreamForm from "../../components/EditOrCreateDreamForm";
 
 export default ({ event }) => {
   if (!event) return null;

@@ -1,22 +1,20 @@
 import useForm from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import slugify from "../utils/slugify";
 import { Box } from "@material-ui/core";
+import slugify from "../utils/slugify";
 
 import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
 
 const CREATE_EVENT = gql`
   mutation CreateEvent(
-    $adminEmail: String!
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
     createEvent(
-      adminEmail: $adminEmail
       title: $title
       slug: $slug
       currency: $currency
@@ -35,13 +33,13 @@ export default ({ event }) => {
   const [slugValue, setSlugValue] = React.useState("");
   const [created, setCreated] = React.useState(false);
 
-  const onSubmit = variables => {
+  const onSubmit = (variables) => {
     createEvent({ variables })
       .then(({ data }) => {
         console.log("event created!");
         setCreated(true);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log({ err });
         alert(err.message);
       });
@@ -69,9 +67,9 @@ export default ({ event }) => {
             <input
               name="title"
               ref={register({
-                required: "Required"
+                required: "Required",
               })}
-              onChange={e => setSlugValue(slugify(e.target.value))}
+              onChange={(e) => setSlugValue(slugify(e.target.value))}
             />
           </label>
           <label>
@@ -79,11 +77,11 @@ export default ({ event }) => {
             <input
               name="slug"
               ref={register({
-                required: "Required"
+                required: "Required",
               })}
               value={slugValue}
-              onChange={e => setSlugValue(e.target.value)}
-              onBlur={e => setSlugValue(slugify(e.target.value))}
+              onChange={(e) => setSlugValue(e.target.value)}
+              onBlur={(e) => setSlugValue(slugify(e.target.value))}
             />
           </label>
           <label>
@@ -91,7 +89,7 @@ export default ({ event }) => {
             <select
               name="currency"
               ref={register({
-                required: "Required"
+                required: "Required",
               })}
             >
               <option value="EUR">EUR</option>
@@ -110,20 +108,6 @@ export default ({ event }) => {
               <option value="REQUEST_TO_JOIN">Request to join</option>
               <option value="INVITE_ONLY">Invite only</option>
             </select>
-          </label>
-          <label>
-            Your email (admin)
-            <span>{errors.adminEmail && errors.adminEmail.message}</span>
-            <input
-              name="adminEmail"
-              ref={register({
-                required: "Required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                  message: "invalid email address"
-                }
-              })}
-            />
           </label>
           <button type="submit">Submit</button>
         </Form>

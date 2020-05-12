@@ -10,14 +10,7 @@ const Container = styled.div`
   flex: 0 1 1160px;
 `;
 
-export default ({
-  children,
-  currentMember,
-  event,
-  title,
-  apollo,
-  openModal
-}) => {
+export default ({ children, currentUser, event, title, apollo, openModal }) => {
   const router = useRouter();
 
   // check for token in query to set it and remove it from url
@@ -32,11 +25,11 @@ export default ({
 
   React.useEffect(() => {
     // this will be first time user logs in
-    if (currentMember && !currentMember.name) {
+    if (currentUser && !currentUser.name) {
       // pop modal to set user name and maybe go through a dreams walk through? :)
       openModal(modals.FINISH_SIGN_UP);
     }
-  }, [currentMember]);
+  }, [currentUser]);
 
   const logOut = () => {
     cookie.remove("token");
@@ -62,7 +55,7 @@ export default ({
       <Container className="mx-3 md:mx-5 pb-10 min-h-screen flex flex-col">
         <Header
           event={event}
-          currentMember={currentMember}
+          currentUser={currentUser}
           openModal={openModal}
           logOut={logOut}
         />

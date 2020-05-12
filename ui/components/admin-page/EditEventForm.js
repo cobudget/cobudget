@@ -8,11 +8,13 @@ import slugify from "../../utils/slugify";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
+    $eventId: ID!
     $slug: String
     $title: String
     $registrationPolicy: RegistrationPolicy
   ) {
     editEvent(
+      eventId: $eventId
       slug: $slug
       title: $title
       registrationPolicy: $registrationPolicy
@@ -34,19 +36,20 @@ export default ({ event }) => {
     <>
       <h2 className="text-2xl">Edit event</h2>
       <form
-        onSubmit={handleSubmit(variables => {
+        onSubmit={handleSubmit((variables) => {
           editEvent({
             variables: {
               ...variables,
+              eventId: event.id,
               totalBudget: Number(variables.totalBudget),
               grantValue: Number(variables.grantValue),
-              grantsPerMember: Number(variables.grantsPerMember)
-            }
+              grantsPerMember: Number(variables.grantsPerMember),
+            },
           })
-            .then(data => {
+            .then((data) => {
               // Add "Snackbar" success message from material UI
             })
-            .catch(error => {
+            .catch((error) => {
               alert(error.message);
             });
         })}
@@ -73,9 +76,9 @@ export default ({ event }) => {
                 endAdornment: (
                   <InputAdornment position="end">.dreams.wtf</InputAdornment>
                 ),
-                onBlur: e => {
+                onBlur: (e) => {
                   setValue("slug", slugify(e.target.value));
-                }
+                },
               }}
               variant="outlined"
             />

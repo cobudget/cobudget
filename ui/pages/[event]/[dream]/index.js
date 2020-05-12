@@ -2,8 +2,8 @@ import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 
-import Dream from "../../components/Dream";
-import HappySpinner from "../../components/HappySpinner";
+import Dream from "../../../components/Dream";
+import HappySpinner from "../../../components/HappySpinner";
 export const DREAM_QUERY = gql`
   query Dream($slug: String!, $eventId: ID!) {
     dream(slug: $slug, eventId: $eventId) {
@@ -19,8 +19,11 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       approved
       members {
-        id
-        name
+        user {
+          id
+          name
+          email
+        }
       }
       images {
         small
@@ -45,19 +48,20 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentMember }) => {
+export default ({ event, currentUser }) => {
   if (!event) return null;
   const router = useRouter();
 
   const { data: { dream } = { dream: null }, loading, error } = useQuery(
     DREAM_QUERY,
     {
-      variables: { slug: router.query.dream, eventId: event.id }
+      variables: { slug: router.query.dream, eventId: event.id },
     }
   );
+  console.log({ dream });
 
   if (dream)
-    return <Dream dream={dream} event={event} currentMember={currentMember} />;
+    return <Dream dream={dream} event={event} currentUser={currentUser} />;
 
   if (loading)
     return (

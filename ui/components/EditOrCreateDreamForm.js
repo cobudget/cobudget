@@ -8,7 +8,7 @@ import {
   Box,
   InputAdornment,
   Typography,
-  Button
+  Button,
 } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -54,7 +54,10 @@ const CREATE_DREAM = gql`
       approved
       members {
         id
-        name
+        user {
+          id
+          name
+        }
       }
       images {
         small
@@ -115,7 +118,9 @@ const EDIT_DREAM = gql`
       approved
       members {
         id
-        name
+        user {
+          name
+        }
       }
       images {
         small
@@ -140,18 +145,18 @@ const EDIT_DREAM = gql`
   }
 `;
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   row: {
     margin: "16px 0",
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gridGap: theme.spacing(2)
+    gridGap: theme.spacing(2),
   },
   [theme.breakpoints.down("xs")]: {
     row: {
-      gridTemplateColumns: "1fr"
-    }
-  }
+      gridTemplateColumns: "1fr",
+    },
+  },
 }));
 
 export default ({ dream = {}, event, editing }) => {
@@ -167,7 +172,7 @@ export default ({ dream = {}, event, editing }) => {
     description = "",
     summary = "",
     minGoal = "",
-    maxGoal = ""
+    maxGoal = "",
   } = dream;
 
   const [slugValue, setSlugValue] = React.useState(slug);
@@ -181,44 +186,50 @@ export default ({ dream = {}, event, editing }) => {
     setBudgetItems([...budgetItems, { description: "", value: "" }]);
   };
 
-  const removeBudgetItem = i => {
+  const removeBudgetItem = (i) => {
     setBudgetItems([...budgetItems.filter((item, index) => i !== index)]);
   };
 
-  const onSubmitCreate = values => {
+  const onSubmitCreate = (values) => {
     createDream({
       variables: {
         eventId: event.id,
         ...values,
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
-        images
-      }
+        images,
+      },
     })
       .then(({ data }) => {
-        Router.push("/[dream]", `/${data.createDream.slug}`);
+        Router.push(
+          "/[event]/[dream]",
+          `/${event.slug}/${data.createDream.slug}`
+        );
       })
-      .catch(err => {
+      .catch((err) => {
         console.log({ err });
         alert(err.message);
       });
   };
 
-  const onSubmitEdit = values => {
-    images.forEach(image => delete image.__typename); // apollo complains otherwise..
+  const onSubmitEdit = (values) => {
+    images.forEach((image) => delete image.__typename); // apollo complains otherwise..
     editDream({
       variables: {
         dreamId: dream.id,
         ...values,
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
-        images
-      }
+        images,
+      },
     })
       .then(({ data }) => {
-        Router.push("/[dream]", `/${data.editDream.slug}`);
+        Router.push(
+          "/[event]/[dream]",
+          `/${event.slug}/${data.editDream.slug}`
+        );
       })
-      .catch(err => {
+      .catch((err) => {
         console.log({ err });
         alert(err.message);
       });
@@ -233,12 +244,12 @@ export default ({ dream = {}, event, editing }) => {
           defaultValue={title}
           fullWidth
           inputRef={register({
-            required: "Required"
+            required: "Required",
           })}
           InputProps={{
-            onChange: e => {
+            onChange: (e) => {
               if (!editing) setSlugValue(slugify(e.target.value));
-            }
+            },
           }}
           variant="outlined"
           error={Boolean(errors.title)}
@@ -252,11 +263,11 @@ export default ({ dream = {}, event, editing }) => {
           value={slugValue}
           fullWidth
           inputRef={register({
-            required: "Required"
+            required: "Required",
           })}
           InputProps={{
-            onChange: e => setSlugValue(e.target.value),
-            onBlur: e => setSlugValue(slugify(e.target.value))
+            onChange: (e) => setSlugValue(e.target.value),
+            onBlur: (e) => setSlugValue(slugify(e.target.value)),
           }}
           variant="outlined"
           error={Boolean(errors.slug)}
@@ -271,7 +282,7 @@ export default ({ dream = {}, event, editing }) => {
           defaultValue={summary}
           fullWidth
           inputRef={register({
-            required: "Required"
+            required: "Required",
           })}
           inputProps={{ maxLength: 180 }}
           multiline
@@ -307,7 +318,7 @@ export default ({ dream = {}, event, editing }) => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">{event.currency}</InputAdornment>
-            )
+            ),
           }}
           inputProps={{ type: "number", min: 0 }}
           inputRef={register({ min: 0 })}
@@ -321,7 +332,7 @@ export default ({ dream = {}, event, editing }) => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">{event.currency}</InputAdornment>
-            )
+            ),
           }}
           inputProps={{ type: "number", min: 0 }}
           inputRef={register({ min: 0 })}

@@ -7,7 +7,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetCurrency = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register } = useForm();
 
   return (
@@ -16,17 +20,17 @@ const SetCurrency = ({ closeModal, event }) => {
         <h1 className="text-3xl">Set max grants to one dream</h1>
 
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({
               variables: {
-                maxGrantsToDream: Number(variables.maxGrantsToDream)
-              }
+                maxGrantsToDream: Number(variables.maxGrantsToDream),
+              },
             })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
@@ -42,7 +46,7 @@ const SetCurrency = ({ closeModal, event }) => {
               InputProps={{
                 type: "number",
                 min: 1,
-                max: event.grantsPerMember
+                max: event.grantsPerMember,
               }}
               variant="outlined"
             />

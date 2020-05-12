@@ -25,7 +25,7 @@ export default ({ event }) => {
         <Tab label="Granting" />
       </Tabs>
       <TabPanel activeTab={activeTab} index={0}>
-        <Members />
+        <Members event={event} />
       </TabPanel>
       <TabPanel activeTab={activeTab} index={1}>
         <Box p={3}>

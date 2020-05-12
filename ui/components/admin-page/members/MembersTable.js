@@ -9,7 +9,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip
+  Tooltip,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
@@ -18,7 +18,7 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
-  const handleClick = event => {
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -46,8 +46,8 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
             updateMember({
               variables: {
                 memberId: member.id,
-                isAdmin: !member.isAdmin
-              }
+                isAdmin: !member.isAdmin,
+              },
             }).then(() => {
               handleClose();
             });
@@ -60,11 +60,11 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete user with email ${member.email}?`
+                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
               )
             )
               deleteMember({
-                variables: { memberId: member.id }
+                variables: { memberId: member.id },
               });
           }}
         >
@@ -88,15 +88,15 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {approvedMembers.map(member => (
-            <TableRow key={member.email}>
+          {approvedMembers.map((member) => (
+            <TableRow key={member.id}>
               <TableCell component="th" scope="row">
-                {member.name}
+                {member.user.name}
               </TableCell>
               <TableCell>
                 <Box display="flex" alignItems="center">
-                  <Box m="0 8px 0">{member.email}</Box>
-                  {!member.verifiedEmail && (
+                  <Box m="0 8px 0">{member.user.email}</Box>
+                  {!member.user.verifiedEmail && (
                     <Tooltip
                       title="Email not verified (has not logged in)"
                       placement="right"

@@ -25,7 +25,7 @@ const ADD_COMMENT = gql`
   }
 `;
 
-const AddComment = ({ currentMember, dreamId }) => {
+const AddComment = ({ currentUser, dreamId }) => {
   const [addComment] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
@@ -33,18 +33,18 @@ const AddComment = ({ currentMember, dreamId }) => {
 
   return (
     <form
-      onSubmit={handleSubmit(variables => {
+      onSubmit={handleSubmit((variables) => {
         addComment({ variables: { content, dreamId } })
           .then(() => {
             inputRef.current.blur();
             setContent("");
           })
-          .catch(err => alert(err.message));
+          .catch((err) => alert(err.message));
       })}
     >
       <div className="flex mt-6">
         <div className="mr-4">
-          <Avatar user={currentMember} />
+          <Avatar user={currentUser} />
         </div>
         <div className="flex-grow">
           <div className="mb-2">
@@ -57,8 +57,8 @@ const AddComment = ({ currentMember, dreamId }) => {
               helperText={errors.content && errors.content.message}
               fullWidth
               value={content}
-              onChange={e => setContent(e.target.value)}
-              inputRef={e => {
+              onChange={(e) => setContent(e.target.value)}
+              inputRef={(e) => {
                 register({ required: "Required" });
                 inputRef.current = e;
               }}

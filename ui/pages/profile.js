@@ -6,14 +6,26 @@ import { TOP_LEVEL_QUERY } from "./_app";
 
 const PROFILE_QUERY = gql`
   query Profile {
-    currentMember {
+    currentUser {
       id
-      givenGrants {
+      name
+      memberships {
         id
-        value
-        dream {
+        event {
+          id
           title
           slug
+        }
+        givenGrants {
+          id
+          value
+          dream {
+            title
+            slug
+            event {
+              id
+            }
+          }
         }
       }
     }
@@ -21,73 +33,112 @@ const PROFILE_QUERY = gql`
 `;
 
 const DELETE_GRANT_MUTATION = gql`
-  mutation DeleteGrant($grantId: ID!) {
-    deleteGrant(grantId: $grantId) {
+  mutation DeleteGrant($eventId: ID!, $grantId: ID!) {
+    deleteGrant(eventId: $eventId, grantId: $grantId) {
       id
       value
+      dream {
+        event {
+          id
+        }
+      }
     }
   }
 `;
 
-export default ({ currentMember, event }) => {
+export default ({ currentUser, event }) => {
   const { data } = useQuery(PROFILE_QUERY);
 
   const [deleteGrant] = useMutation(DELETE_GRANT_MUTATION, {
     update(cache, { data: { deleteGrant } }) {
-      const { currentMember } = cache.readQuery({ query: PROFILE_QUERY });
+      const { currentUser } = cache.readQuery({ query: PROFILE_QUERY });
       cache.writeQuery({
         query: PROFILE_QUERY,
         data: {
-          currentMember: {
-            ...currentMember,
-            givenGrants: currentMember.givenGrants.filter(
-              grant => grant.id !== deleteGrant.id
-            )
-          }
-        }
+          currentUser: {
+            ...currentUser,
+            memberships: [
+              ...currentUser.memberships.map((membership) => {
+                if (membership.event.id === deleteGrant.dream.event.id) {
+                  return {
+                    ...membership,
+                    givenGrants: membership.givenGrants.filter(
+                      (grant) => grant.id !== deleteGrant.id
+                    ),
+                  };
+                }
+                return membership;
+              }),
+            ],
+          },
+        },
       });
-
-      const topLevelQueryData = cache.readQuery({
-        query: TOP_LEVEL_QUERY,
-        variables: { slug: event.slug }
-      });
-
-      cache.writeQuery({
-        query: TOP_LEVEL_QUERY,
-        data: {
-          ...topLevelQueryData,
-          currentMember: {
-            ...topLevelQueryData.currentMember,
-            availableGrants:
-              topLevelQueryData.currentMember.availableGrants +
-              deleteGrant.value
-          }
-        }
-      });
-    }
+      // const topLevelQueryData = cache.readQuery({
+      //   query: TOP_LEVEL_QUERY,
+      //   variables: { slug: event.slug },
+      // });
+      // cache.writeQuery({
+      //   query: TOP_LEVEL_QUERY,
+      //   data: {
+      //     ...topLevelQueryData,
+      //     currentMember: {
+      //       ...topLevelQueryData.currentMember,
+      //       availableGrants:
+      //         topLevelQueryData.currentMember.availableGrants +
+      //         deleteGrant.value,
+      //     },
+      //   },
+      // });
+    },
   });
 
   return (
     <div>
-      <h3>Given grants</h3>
-      <ul>
-        {data &&
-          data.currentMember.givenGrants.map(grant => (
-            <li key={grant.id}>
-              <Link href="/[dream]" as={`/${grant.dream.slug}`}>
-                <a>{grant.dream.title}</a>
-              </Link>{" "}
-              - {grant.value} grants -{" "}
-              <button
-                onClick={() =>
-                  deleteGrant({ variables: { grantId: grant.id } })
-                }
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-      </ul>
+      <h1 className="text-2xl mb-4">{data && data.currentUser.name}</h1>
+      <h2 className="mb-4">
+        Memberships ({data && data.currentUser.memberships.length}):
+      </h2>
+      {data &&
+        data.currentUser.memberships.map((membership) => (
+          <div key={membership.id} className="shadow bg-white mb-5 rounded p-5">
+            <Link href="/[event]" as={`/${membership.event.slug}`}>
+              <a>
+                <h2 className="text-xl">{membership.event.title}</h2>
+              </a>
+            </Link>
+
+            {membership.givenGrants.length > 0 && (
+              <>
+                <h3 className="text-lg mt-4">Grants given</h3>
+                <ul>
+                  {membership.givenGrants.map((grant) => (
+                    <li key={grant.id}>
+                      <Link
+                        href="/[event]/[dream]"
+                        as={`/${membership.event.slug}/${grant.dream.slug}`}
+                      >
+                        <a>{grant.dream.title}</a>
+                      </Link>{" "}
+                      - {grant.value} grants -{" "}
+                      <button
+                        onClick={() =>
+                          deleteGrant({
+                            variables: {
+                              grantId: grant.id,
+                              eventId: membership.event.id,
+                            },
+                          })
+                        }
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        ))}
     </div>
   );
 };

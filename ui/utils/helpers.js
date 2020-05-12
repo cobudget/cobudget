@@ -5,9 +5,10 @@
 //   }, false);
 // };
 
-export const isMemberOfDream = (currentMember, dream) => {
-  if (!currentMember || !dream) return false;
+export const isMemberOfDream = (currentUser, dream) => {
+  if (!currentUser || !dream) return false;
+  console.log({ currentUser, members: dream.members });
   return dream.members.reduce((res, member) => {
-    if (member.id === currentMember.id) return true;
+    if (member.user.id === currentUser.id) return true;
   }, false);
 };

@@ -7,7 +7,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetTotalBudget = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register } = useForm();
 
   return (
@@ -15,15 +19,15 @@ const SetTotalBudget = ({ closeModal, event }) => {
       <Box p={3}>
         <h1 className="text-3xl">Set total budget</h1>
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { totalBudget: Number(variables.totalBudget) }
+              variables: { totalBudget: Number(variables.totalBudget) },
             })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
@@ -42,7 +46,7 @@ const SetTotalBudget = ({ closeModal, event }) => {
                     {event.currency}
                   </InputAdornment>
                 ),
-                type: "number"
+                type: "number",
               }}
               variant="outlined"
             />

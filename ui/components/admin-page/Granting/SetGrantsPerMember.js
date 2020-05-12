@@ -8,7 +8,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetCurrency = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register } = useForm();
 
   return (
@@ -19,15 +23,15 @@ const SetCurrency = ({ closeModal, event }) => {
           Changing grants per member will also reset grant value.
         </Alert>
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { grantsPerMember: Number(variables.grantsPerMember) }
+              variables: { grantsPerMember: Number(variables.grantsPerMember) },
             })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
@@ -42,7 +46,7 @@ const SetCurrency = ({ closeModal, event }) => {
               inputRef={register}
               InputProps={{
                 type: "number",
-                min: 1
+                min: 1,
               }}
               variant="outlined"
             />

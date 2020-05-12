@@ -15,33 +15,32 @@ const SmallCard = styled(Card)`
 `;
 
 const SEND_MAGIC_LINK_MUTATION = gql`
-  mutation SendMagicLink($email: String!, $eventId: ID!) {
-    sendMagicLink(email: $email, eventId: $eventId)
+  mutation SendMagicLink($email: String!) {
+    sendMagicLink(email: $email)
   }
 `;
 
-export default ({ currentMember, event }) => {
-  if (!event) return <div>redirect!</div>;
+export default ({ currentUser, event }) => {
   const [sendMagicLink, { data, loading }] = useMutation(
     SEND_MAGIC_LINK_MUTATION
   );
   const { handleSubmit, register, errors } = useForm();
 
-  if (currentMember) {
-    return <Card>You are logged in as {currentMember.email}.</Card>;
+  if (currentUser) {
+    return <Card>You are logged in as {currentUser.email}.</Card>;
   }
   let msg;
-  switch (event.registrationPolicy) {
-    case "OPEN":
-      msg = "Log in or sign up with a magic link";
-      break;
-    case "REQUEST_TO_JOIN":
-      msg = "Log in or request to join";
-      break;
-    case "INVITE_ONLY":
-      msg = "Log in with magic link";
-      break;
-  }
+  // switch (event.registrationPolicy) {
+  //   case "OPEN":
+  //     msg = "Log in or sign up with a magic link";
+  //     break;
+  //   case "REQUEST_TO_JOIN":
+  //     msg = "Log in or request to join";
+  //     break;
+  //   case "INVITE_ONLY":
+  //     msg = "Log in with magic link";
+  //     break;
+  // }
 
   return (
     <SmallCard>
@@ -57,7 +56,7 @@ export default ({ currentMember, event }) => {
         ) : (
           <Form
             onSubmit={handleSubmit(({ email }) => {
-              sendMagicLink({ variables: { email, eventId: event.id } });
+              sendMagicLink({ variables: { email } });
             })}
           >
             <div className="two-cols-3-1">
@@ -69,8 +68,8 @@ export default ({ currentMember, event }) => {
                   required: "Required",
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                    message: "invalid email address"
-                  }
+                    message: "invalid email address",
+                  },
                 })}
               />
               <button type="submit">Send</button>

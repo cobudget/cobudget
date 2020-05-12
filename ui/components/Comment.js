@@ -26,7 +26,7 @@ const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
-const Comment = ({ comment, dreamId, currentMember, showBorderBottom }) => {
+const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   return (
     <div className="flex my-4">
@@ -43,15 +43,16 @@ const Comment = ({ comment, dreamId, currentMember, showBorderBottom }) => {
           </div>
         </div>
         <p className="text-gray-900">{comment.content}</p>
-        {currentMember &&
-          (currentMember.id === comment.author.id || currentMember.isAdmin) && (
+        {currentUser &&
+          (currentUser.id === comment.author.id ||
+            currentUser.membership.isAdmin) && (
             <button
               onClick={() => {
                 if (
                   confirm("Are you sure you would like to delete this comment?")
                 )
                   deleteComment({
-                    variables: { dreamId, commentId: comment.id }
+                    variables: { dreamId, commentId: comment.id },
                   });
               }}
               className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"

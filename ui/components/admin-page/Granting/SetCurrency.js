@@ -10,7 +10,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetCurrency = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register, errors } = useForm();
 
   return (
@@ -22,13 +26,13 @@ const SetCurrency = ({ closeModal, event }) => {
           can't change this after dream creation closes.
         </Alert>
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({ variables })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });

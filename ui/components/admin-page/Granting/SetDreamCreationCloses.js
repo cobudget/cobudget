@@ -8,7 +8,11 @@ import Card from "../../styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetGrantingCloses = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(
@@ -21,13 +25,13 @@ const SetGrantingCloses = ({ closeModal, event }) => {
         <h1 className="text-3xl">Set dream creation closes date</h1>
 
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({ variables: { dreamCreationCloses: selectedDate } })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });

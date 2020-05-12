@@ -6,7 +6,7 @@ import {
   Button,
   TextField,
   InputAdornment,
-  Typography
+  Typography,
 } from "@material-ui/core";
 
 import Card from "../../styled/Card";
@@ -14,7 +14,11 @@ import thousandSeparator from "../../../utils/thousandSeparator";
 import { UPDATE_GRANTING_SETTINGS } from "./";
 
 const SetGrantValue = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
+    variables: {
+      eventId: event.id,
+    },
+  });
   const { handleSubmit, register } = useForm();
   const [prefunding, setPrefunding] = React.useState(0);
   const [numberOfMembers, setNumberOfMembers] = React.useState(
@@ -48,7 +52,7 @@ const SetGrantValue = ({ closeModal, event }) => {
               endAdornment: (
                 <InputAdornment position="end">{event.currency}</InputAdornment>
               ),
-              type: "number"
+              type: "number",
             }}
           />
         </Box>
@@ -56,13 +60,13 @@ const SetGrantValue = ({ closeModal, event }) => {
           <TextField
             label="Prefunding"
             value={prefunding}
-            onChange={e => setPrefunding(e.target.value)}
+            onChange={(e) => setPrefunding(e.target.value)}
             fullWidth
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">{event.currency}</InputAdornment>
               ),
-              type: "number"
+              type: "number",
             }}
           />
         </Box>
@@ -70,10 +74,10 @@ const SetGrantValue = ({ closeModal, event }) => {
           <TextField
             label="Number of members"
             value={numberOfMembers}
-            onChange={e => setNumberOfMembers(e.target.value)}
+            onChange={(e) => setNumberOfMembers(e.target.value)}
             fullWidth
             InputProps={{
-              type: "number"
+              type: "number",
             }}
           />
         </Box>
@@ -81,15 +85,15 @@ const SetGrantValue = ({ closeModal, event }) => {
           <TextField
             label="Maximum expected participation rate"
             value={maxParticipationRate}
-            onChange={e => setMaxParticipationRate(e.target.value)}
+            onChange={(e) => setMaxParticipationRate(e.target.value)}
             fullWidth
             InputProps={{
-              endAdornment: <InputAdornment position="end">%</InputAdornment>
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
             }}
             inputProps={{
               type: "number",
               min: "1",
-              max: "100"
+              max: "100",
             }}
           />
         </Box>
@@ -102,15 +106,15 @@ const SetGrantValue = ({ closeModal, event }) => {
           </Typography>
         </Box>
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { grantValue: Number(variables.grantValue) }
+              variables: { grantValue: Number(variables.grantValue) },
             })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
@@ -128,7 +132,7 @@ const SetGrantValue = ({ closeModal, event }) => {
                   <InputAdornment position="end">
                     {event.currency}
                   </InputAdornment>
-                )
+                ),
               }}
               inputProps={{ type: "number", step: "1", min: "1" }}
               variant="outlined"

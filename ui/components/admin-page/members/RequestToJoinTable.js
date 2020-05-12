@@ -6,7 +6,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
 } from "@material-ui/core";
 
 export default ({ requestsToJoin, updateMember, deleteMember }) => {
@@ -29,12 +29,12 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {requestsToJoin.map(member => (
-                  <TableRow key={member.email}>
+                {requestsToJoin.map((member) => (
+                  <TableRow key={member.user.email}>
                     <TableCell component="th" scope="row">
-                      {member.name}
+                      {member.user.name}
                     </TableCell>
-                    <TableCell>{member.email}</TableCell>
+                    <TableCell>{member.user.email}</TableCell>
                     <TableCell align="right" padding="none">
                       <Box p="0 15px" display="flex" justifyContent="flex-end">
                         <Box m="0 8px 0">
@@ -44,11 +44,11 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
                             onClick={() => {
                               if (
                                 confirm(
-                                  "Are you sure you would like to DELETE this membership request?"
+                                  "Are you sure you would like to delete this membership request?"
                                 )
                               )
                                 deleteMember({
-                                  variables: { memberId: member.id }
+                                  variables: { memberId: member.id },
                                 });
                             }}
                           >
@@ -67,8 +67,8 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
                               updateMember({
                                 variables: {
                                   memberId: member.id,
-                                  isApproved: true
-                                }
+                                  isApproved: true,
+                                },
                               });
                           }}
                         >

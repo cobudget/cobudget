@@ -3,29 +3,29 @@ import EditProfile from "./EditProfile";
 import FinishSignUp from "./FinishSignUp";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
     padding: theme.spacing(1),
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   innerModal: {
-    outline: "none"
-  }
+    outline: "none",
+  },
 }));
 
 export const modals = {
   FINISH_SIGN_UP: "FINISH_SIGN_UP",
-  EDIT_PROFILE: "EDIT_PROFILE"
+  EDIT_PROFILE: "EDIT_PROFILE",
 };
 
 const modalComponents = {
   FINISH_SIGN_UP: FinishSignUp,
-  EDIT_PROFILE: EditProfile
+  EDIT_PROFILE: EditProfile,
 };
 
-export default ({ active, closeModal, currentMember, event }) => {
+export default ({ active, closeModal, currentUser }) => {
   const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
@@ -41,11 +41,7 @@ export default ({ active, closeModal, currentMember, event }) => {
     >
       <div className={classes.innerModal}>
         {active && (
-          <ModalComponent
-            closeModal={closeModal}
-            currentMember={currentMember}
-            event={event}
-          />
+          <ModalComponent closeModal={closeModal} currentUser={currentUser} />
         )}
       </div>
     </Modal>
