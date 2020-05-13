@@ -29,13 +29,14 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventId, textSearchTerm },
+      { eventId, textSearchTerm, unpublished },
       { models: { Dream } }
     ) => {
-      if (textSearchTerm)
-        return Dream.find({ eventId, $text: { $search: textSearchTerm } });
-
-      return Dream.find({ eventId });
+      return Dream.find({
+        eventId,
+        published: !unpublished,
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+      });
     },
     members: async (
       parent,
@@ -253,6 +254,27 @@ const resolvers = {
       dream.cocreators = dream.cocreators.filter(
         (id) => id.toString() !== memberId
       );
+
+      return dream.save();
+    },
+    publishDream: async (
+      parent,
+      { dreamId, unpublish },
+      { currentUser, models: { Member, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!dream.cocreators.includes(currentMember.id))
+        throw new Error(
+          'You need to be a cocreator to publish/unpublish a dream'
+        );
+
+      dream.published = !unpublish;
 
       return dream.save();
     },

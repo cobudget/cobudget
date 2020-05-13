@@ -133,6 +133,7 @@ const DreamSchema = new Schema({
   ],
   approved: { type: Boolean, default: false },
   budgetItems: [new Schema({ description: String, amount: String })],
+  published: { type: Boolean, default: false },
 })
   .index({ eventId: 1, slug: 1 }, { unique: true })
   .index({ title: 'text', description: 'text', summary: 'text' });

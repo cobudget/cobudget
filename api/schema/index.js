@@ -6,7 +6,7 @@ const schema = gql`
     events: [Event!]
     event(slug: String): Event
     dream(eventId: ID!, slug: String!): Dream
-    dreams(eventId: ID!, textSearchTerm: String): [Dream]
+    dreams(eventId: ID!, textSearchTerm: String, unpublished: Boolean): [Dream]
     members(eventId: ID!, isApproved: Boolean): [Member]
   }
 
@@ -50,6 +50,8 @@ const schema = gql`
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
+
+    publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
     addComment(dreamId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
@@ -169,6 +171,7 @@ const schema = gql`
     budgetItems: [BudgetItem!]
     approved: Boolean
     favorite: Boolean
+    published: Boolean
     # answers: [QuestionAnswer]
     # funding: Int!
     # raisedFlags: [Flag]
