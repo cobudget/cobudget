@@ -18,6 +18,7 @@ export const DREAM_QUERY = gql`
       maxGoalGrants
       currentNumberOfGrants
       approved
+      published
       cocreators {
         id
         user {

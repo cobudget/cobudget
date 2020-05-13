@@ -34,9 +34,21 @@ const RECLAIM_GRANTS_MUTATION = gql`
   }
 `;
 
+const PUBLISH_DREAM_MUTATION = gql`
+  mutation PublishDream($dreamId: ID!, $unpublish: Boolean) {
+    publishDream(dreamId: $dreamId, unpublish: $unpublish) {
+      id
+      published
+    }
+  }
+`;
+
 const Dream = ({ dream, event, currentUser }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
+  const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
 
   const [grantModalOpen, setGrantModalOpen] = useState(false);
   const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
@@ -197,7 +209,23 @@ const Dream = ({ dream, event, currentUser }) => {
                       )}
                   </>
                 ) : (
-                  <p>This is not approved for granting yet</p>
+                  <p></p>
+                )}
+                {isMemberOfDream(currentUser, dream) && (
+                  <div>
+                    <Button
+                      color={dream.published ? "default" : "primary"}
+                      variant={dream.published ? "default" : "contained"}
+                      onClick={() =>
+                        publishDream({
+                          variables: { unpublish: dream.published },
+                        })
+                      }
+                      fullWidth
+                    >
+                      {dream.published ? "Unpublish" : "Publish"}
+                    </Button>
+                  </div>
                 )}
                 {currentUser &&
                   currentUser.membership &&
