@@ -39,7 +39,7 @@ const resolvers = {
     },
     members: async (
       parent,
-      { eventId, searchInput },
+      { eventId, searchInput, isApproved },
       { currentUser, models: { Member } }
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
@@ -53,10 +53,17 @@ const resolvers = {
         throw new Error('You need to be an approved member');
 
       if (searchInput) {
-        return Member.find({ eventId, $text: { $search: searchInput } });
+        return Member.find({
+          eventId,
+          $text: { $search: searchInput },
+          ...(typeof isApproved === 'boolean' && { isApproved }),
+        });
       }
 
-      return Member.find({ eventId });
+      return Member.find({
+        eventId,
+        ...(typeof isApproved === 'boolean' && { isApproved }),
+      });
     },
   },
   Mutation: {
