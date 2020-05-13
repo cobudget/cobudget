@@ -20,7 +20,7 @@ const TOGGLE_FAVORITE_MUTATION = gql`
   }
 `;
 
-export default ({ dream, currentUser }) => {
+export default ({ dream, event, currentUser }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
@@ -64,7 +64,10 @@ export default ({ dream, currentUser }) => {
               </div>
             )}
 
-            <Link href="/[dream]#comments" as={`/${dream.slug}#comments`}>
+            <Link
+              href="/[event]/[dream]#comments"
+              as={`/${event.slug}/${dream.slug}#comments`}
+            >
               <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
                 <CommentIcon className="w-5 h-5" />
                 <span className="block ml-1">{dream.numberOfComments} </span>

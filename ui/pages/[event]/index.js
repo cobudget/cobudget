@@ -69,7 +69,11 @@ export default ({ currentUser, event }) => {
                   key={dream.slug}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
-                    <DreamCard dream={dream} currentUser={currentUser} />
+                    <DreamCard
+                      dream={dream}
+                      event={event}
+                      currentUser={currentUser}
+                    />
                   </a>
                 </Link>
               ))}
