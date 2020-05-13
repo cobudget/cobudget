@@ -197,7 +197,6 @@ export default ({ dream = {}, event, editing }) => {
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
-        cocreators,
       },
     })
       .then(({ data }) => {
@@ -221,7 +220,6 @@ export default ({ dream = {}, event, editing }) => {
         minGoal: values.minGoal === "" ? null : Number(values.minGoal),
         maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
-        cocreators,
       },
     })
       .then(({ data }) => {
