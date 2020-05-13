@@ -40,7 +40,7 @@ const Dream = ({ dream, event, currentUser }) => {
 
   const [grantModalOpen, setGrantModalOpen] = useState(false);
   const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
-  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(true);
+  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">

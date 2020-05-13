@@ -39,7 +39,7 @@ const resolvers = {
     },
     members: async (
       parent,
-      { eventId, searchInput, isApproved },
+      { eventId, isApproved },
       { currentUser, models: { Member } }
     ) => {
       if (!currentUser) throw new Error('You need to be logged in');
@@ -51,14 +51,6 @@ const resolvers = {
 
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be an approved member');
-
-      if (searchInput) {
-        return Member.find({
-          eventId,
-          $text: { $search: searchInput },
-          ...(typeof isApproved === 'boolean' && { isApproved }),
-        });
-      }
 
       return Member.find({
         eventId,

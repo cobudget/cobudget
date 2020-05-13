@@ -7,7 +7,7 @@ const schema = gql`
     event(slug: String): Event
     dream(eventId: ID!, slug: String!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
-    members(eventId: ID!, searchInput: String, isApproved: Boolean): [Member]
+    members(eventId: ID!, isApproved: Boolean): [Member]
   }
 
   type Mutation {

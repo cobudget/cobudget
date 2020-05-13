@@ -84,6 +84,8 @@ export default ({ event }) => {
     },
   });
 
+  //console.log({ members });
+
   const approvedMembers = members.filter((member) => member.isApproved);
   const requestsToJoin = members.filter(
     (member) => !member.isApproved && member.verifiedEmail

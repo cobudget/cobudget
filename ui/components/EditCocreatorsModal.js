@@ -6,16 +6,8 @@ import { AddIcon, DeleteIcon } from "./Icons";
 import { Modal } from "@material-ui/core";
 
 const SEARCH_MEMBERS_QUERY = gql`
-  query SearchMembers(
-    $eventId: ID!
-    $searchInput: String!
-    $isApproved: Boolean
-  ) {
-    members(
-      eventId: $eventId
-      searchInput: $searchInput
-      isApproved: $isApproved
-    ) {
+  query SearchMembers($eventId: ID!, $isApproved: Boolean) {
+    members(eventId: $eventId, isApproved: $isApproved) {
       id
       isApproved
       user {
@@ -97,19 +89,24 @@ const SearchMembersResult = ({
   const { data: { members } = { members: [] }, loading, error } = useQuery(
     SEARCH_MEMBERS_QUERY,
     {
-      variables: { searchInput, eventId, isApproved: true },
+      variables: { eventId, isApproved: true },
     }
   );
 
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
 
-  const membersWithoutCocreators = members.filter(
-    (member) => !cocreatorIds.includes(member.id)
-  );
+  // remove already added co-creators
+  let result = members.filter((member) => !cocreatorIds.includes(member.id));
+
+  if (searchInput) {
+    result = result.filter((member) =>
+      member.user.name.toLowerCase().includes(searchInput.toLowerCase())
+    );
+  }
 
   return (
     <div>
-      {membersWithoutCocreators.map((member) => (
+      {result.map((member) => (
         <Member
           key={member.id}
           member={member}
@@ -160,7 +157,7 @@ export default ({ open, handleClose, dream, event, cocreators }) => {
           <div>
             <input
               value={searchInput}
-              placeholder="Search members..."
+              placeholder="Filter by name..."
               className="bg-gray-200 rounded py-2 px-3 mb-4 focus:outline-none focus:shadow-outline focus:bg-white"
               onChange={(e) => setSearchInput(e.target.value)}
             />
