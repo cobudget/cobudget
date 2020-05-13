@@ -203,6 +203,67 @@ const resolvers = {
 
       return await dream.save();
     },
+    addCocreator: async (
+      parent,
+      { dreamId, memberId },
+      { currentUser, models: { Member, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      // add permissions for admins too
+      if (!dream.cocreators.includes(currentMember.id))
+        throw new Error('You need to be a cocreator to add co-creators.');
+
+      // check that added memberId is not already part of the thing
+      if (dream.cocreators.includes(memberId))
+        throw new Error('Member is already cocreator of dream');
+
+      // check that memberId is a member of event
+      const member = await Member.findOne({
+        _id: memberId,
+        eventId: dream.eventId,
+      });
+      if (!member) throw new Error('No member found with this id');
+
+      dream.cocreators.push(memberId);
+
+      return dream.save();
+    },
+    removeCocreator: async (
+      parent,
+      { dreamId, memberId },
+      { currentUser, models: { Member, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      // add permissions for admins too
+      if (!dream.cocreators.includes(currentMember.id))
+        throw new Error('You need to be a cocreator to add co-creators.');
+
+      // check that added memberId is not already part of the thing
+      if (!dream.cocreators.includes(memberId))
+        throw new Error('Member is not a co-creator of this dream.');
+
+      // can't remove last person
+      if (dream.cocreators.length === 1)
+        throw new Error("Can't remove last co-creator.");
+
+      dream.cocreators = dream.cocreators.filter(
+        (id) => id.toString() !== memberId
+      );
+
+      return dream.save();
+    },
     addComment: async (
       parent,
       { content, dreamId },
