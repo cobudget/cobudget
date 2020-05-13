@@ -121,7 +121,14 @@ const SearchMembersResult = ({
   );
 };
 
-export default ({ open, handleClose, dream, event, cocreators }) => {
+export default ({
+  open,
+  handleClose,
+  dream,
+  event,
+  cocreators,
+  currentUser,
+}) => {
   const [searchInput, setSearchInput] = useState("");
 
   const [addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION, {
@@ -144,11 +151,18 @@ export default ({ open, handleClose, dream, event, cocreators }) => {
             <Member
               key={member.id}
               member={member}
-              remove={() =>
-                removeCocreator({
-                  variables: { memberId: member.id },
-                }).catch((err) => alert(err.message))
-              }
+              remove={() => {
+                if (
+                  member.id !== currentUser.membership.id ||
+                  confirm(
+                    "Are you sure you would like to remove yourself? This can't be undone"
+                  )
+                ) {
+                  removeCocreator({
+                    variables: { memberId: member.id },
+                  }).catch((err) => alert(err.message));
+                }
+              }}
             />
           ))}
         </div>

@@ -319,8 +319,9 @@ const Dream = ({ dream, event, currentUser }) => {
                 open={cocreatorModalOpen}
                 handleClose={() => setCocreatorModalOpen(false)}
                 cocreators={dream.cocreators}
-                event={event} //only id needed
-                dream={dream} //only id needed
+                event={event}
+                dream={dream}
+                currentUser={currentUser}
               />
             </div>
           </div>

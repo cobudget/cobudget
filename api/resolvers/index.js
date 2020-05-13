@@ -240,7 +240,7 @@ const resolvers = {
 
       // add permissions for admins too
       if (!dream.cocreators.includes(currentMember.id))
-        throw new Error('You need to be a cocreator to add co-creators.');
+        throw new Error('You need to be a cocreator to remove co-creators.');
 
       // check that added memberId is not already part of the thing
       if (!dream.cocreators.includes(memberId))
