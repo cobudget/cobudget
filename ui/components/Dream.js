@@ -1,4 +1,5 @@
 import gql from "graphql-tag";
+import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import { Button, Tooltip, IconButton } from "@material-ui/core";
 import AvatarGroup from "@material-ui/lab/AvatarGroup";
@@ -13,6 +14,7 @@ import GiveGrantlingsModal from "./GiveGrantlingsModal";
 import PreOrPostFundModal from "./PreOrPostFundModal";
 import ProgressBar from "./ProgressBar";
 import Comments from "./Comments";
+import EditCocreatorsModal from "./EditCocreatorsModal";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -36,8 +38,9 @@ const Dream = ({ dream, event, currentUser }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
 
-  const [grantModalOpen, setGrantModalOpen] = React.useState(false);
-  const [prePostFundModalOpen, setPrePostFundModalOpen] = React.useState(false);
+  const [grantModalOpen, setGrantModalOpen] = useState(false);
+  const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
+  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(true);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -55,7 +58,7 @@ const Dream = ({ dream, event, currentUser }) => {
       )}
 
       <div className="p-4 lg:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-4 md:gap-6 relative">
+        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
             <div className="flex items-start justify-between">
               <h1 className="mb-2 text-4xl font-medium">{dream.title}</h1>
@@ -123,19 +126,6 @@ const Dream = ({ dream, event, currentUser }) => {
                 </div>
               </>
             )}
-
-            <div className="my-5">
-              <h2 className="mb-1 text-2xl font-medium">Co-creators</h2>
-              <div className="flex">
-                {dream.cocreators.map((member) => (
-                  <Tooltip key={member.user.id} title={member.user.name}>
-                    <div>
-                      <Avatar user={member.user} />
-                    </div>
-                  </Tooltip>
-                ))}
-              </div>
-            </div>
 
             <h2 className="mb-1 text-2xl font-medium" id="comments">
               {dream.numberOfComments}{" "}
@@ -286,6 +276,52 @@ const Dream = ({ dream, event, currentUser }) => {
                     </div>
                   )}
               </div>
+            </div>
+            <div className="mt-5">
+              <h2 className="mb-2 font-medium hidden md:block">
+                <span className="mr-2">Co-creators</span>
+                {isMemberOfDream(currentUser, dream) && (
+                  <IconButton
+                    onClick={() => setCocreatorModalOpen(true)}
+                    size="small"
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </h2>
+
+              <div className="flex items-center flex-wrap">
+                {dream.cocreators.map((member) => (
+                  // <Tooltip key={member.user.id} title={member.user.name}>
+                  <div
+                    key={member.user.id}
+                    className="flex items-center mr-2 md:mr-3"
+                  >
+                    <Avatar user={member.user} />{" "}
+                    <span className="ml-2 text-gray-700 hidden md:block">
+                      {member.user.name}
+                    </span>
+                  </div>
+                  // </Tooltip>
+                ))}
+                <div className="block md:hidden">
+                  {isMemberOfDream(currentUser, dream) && (
+                    <IconButton
+                      onClick={() => setCocreatorModalOpen(true)}
+                      size="small"
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                </div>
+              </div>
+              <EditCocreatorsModal
+                open={cocreatorModalOpen}
+                handleClose={() => setCocreatorModalOpen(false)}
+                cocreators={dream.cocreators}
+                event={event} //only id needed
+                dream={dream} //only id needed
+              />
             </div>
           </div>
         </div>

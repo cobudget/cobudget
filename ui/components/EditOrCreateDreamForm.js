@@ -16,7 +16,6 @@ import { makeStyles } from "@material-ui/core/styles";
 
 import ImageUpload from "./ImageUpload";
 import EditBudgetItems from "./EditBudgetItems";
-import Cocreators from "./Cocreators";
 
 import slugify from "../utils/slugify";
 
@@ -179,20 +178,8 @@ export default ({ dream = {}, event, editing }) => {
     maxGoal = "",
   } = dream;
 
-  // // //
-
-  // ok so.. what do we do..
-
-  // seek for members to add.
-  // searching for members to add.
-
   const [slugValue, setSlugValue] = useState(slug);
   const [images, setImages] = useState(dream.images ? dream.images : []);
-
-  const [cocreators, setCocreators] = useState(dream.cocreators);
-  const addCocreator = (member) => setCocreators([...cocreators, member]);
-  const removeCocreator = (id) =>
-    setCocreators(cocreators.filter((member) => member.id !== id));
 
   const [budgetItems, setBudgetItems] = useState(
     dream.budgetItems ? dream.budgetItems : []
@@ -320,14 +307,6 @@ export default ({ dream = {}, event, editing }) => {
           variant="outlined"
         />
       </Box>
-
-      <h2>Co-creators</h2>
-      <Cocreators
-        addCocreator={addCocreator}
-        removeCocreator={removeCocreator}
-        cocreators={cocreators}
-        event={event}
-      />
 
       <Typography variant="h6">Funding goals</Typography>
 

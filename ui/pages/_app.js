@@ -42,6 +42,7 @@ export const TOP_LEVEL_QUERY = gql`
       isOrgAdmin
 
       membership(slug: $slug) {
+        id
         isAdmin
         isApproved
         availableGrants

@@ -1,7 +1,7 @@
 // Use Heroicons if suitable icon is available. Add from here: https://heroicons.dev/
 
 // Heroicons/trash
-export const DeleteIcon = props => (
+export const DeleteIcon = (props) => (
   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
     <path
       strokeLinecap="round"
@@ -12,8 +12,19 @@ export const DeleteIcon = props => (
   </svg>
 );
 
+// Heroicons/plus
+export const AddIcon = (props) => (
+  <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
+    <path
+      d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+      clipRule="evenodd"
+      fillRule="evenodd"
+    ></path>
+  </svg>
+);
+
 // Heroicons/chat/outline
-export const CommentIcon = props => (
+export const CommentIcon = (props) => (
   <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" {...props}>
     <path
       strokeLinecap="round"
@@ -25,14 +36,14 @@ export const CommentIcon = props => (
 );
 
 // Boxicons/coin
-export const CoinIcon = props => (
+export const CoinIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
     <path d="M12,6C7.03,6,2,7.546,2,10.5v4C2,17.454,7.03,19,12,19s10-1.546,10-4.5v-4C22,7.546,16.97,6,12,6z M4,14.5v-1.197 c0.576,0.335,1.251,0.623,2,0.86v1.881C4.688,15.53,4,14.918,4,14.5z M16,14.648v1.971c-0.867,0.179-1.867,0.31-3,0.358v-2 C14.028,14.935,15.041,14.823,16,14.648z M11,16.978c-1.133-0.048-2.133-0.179-3-0.358v-1.971c0.959,0.174,1.972,0.287,3,0.33 V16.978z M18,16.044v-1.881c0.749-0.237,1.424-0.524,2-0.86V14.5C20,14.918,19.313,15.53,18,16.044z M12,13c-5.177,0-8-1.651-8-2.5 S6.823,8,12,8s8,1.651,8,2.5S17.177,13,12,13z" />
   </svg>
 );
 
 // Heroicons/arrow-narrow-right
-export const RightArrowIcon = props => (
+export const RightArrowIcon = (props) => (
   <svg viewBox="0 0 20 20" fill="currentColor" {...props}>
     <path
       fillRule="evenodd"
@@ -43,7 +54,7 @@ export const RightArrowIcon = props => (
 );
 
 // Heroicons/emoji-happy/outline
-export const HappyEmojiIcon = props => (
+export const HappyEmojiIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
     <path
       strokeLinecap="round"
@@ -55,7 +66,7 @@ export const HappyEmojiIcon = props => (
 );
 
 // Heroicons/heart/outline
-export const HeartOutlineIcon = props => (
+export const HeartOutlineIcon = (props) => (
   <svg
     fill="none"
     stroke="currentColor"
@@ -70,7 +81,7 @@ export const HeartOutlineIcon = props => (
 );
 
 // Heroicons/heart/solid
-export const HeartSolidIcon = props => (
+export const HeartSolidIcon = (props) => (
   <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
     <path
       fillRule="evenodd"
@@ -81,7 +92,7 @@ export const HeartSolidIcon = props => (
 );
 
 // Heroicons/search/outline
-export const SearchIcon = props => (
+export const SearchIcon = (props) => (
   <svg
     fill="none"
     stroke="currentColor"
@@ -95,7 +106,7 @@ export const SearchIcon = props => (
   </svg>
 );
 
-export const ListIcon = props => (
+export const ListIcon = (props) => (
   <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
     <path
       fillRule="evenodd"
