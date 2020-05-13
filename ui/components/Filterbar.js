@@ -1,12 +1,20 @@
 import { Tooltip } from "@material-ui/core";
 
-import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "./Icons";
+import {
+  HeartOutlineIcon,
+  HeartSolidIcon,
+  SearchIcon,
+  HideOutlineIcon,
+  HideSolidIcon,
+} from "./Icons";
 import debounce from "../utils/debounce";
 
 export default ({
   currentUser,
   filterFavorites,
   toggleFilterFavorites,
+  seeUnpublished,
+  toggleSeeUnpublished,
   textSearchTerm,
   setTextSearchTerm,
 }) => {
@@ -37,9 +45,9 @@ export default ({
         />
       </div>
       {currentUser && currentUser.membership && (
-        <Tooltip title="Show favorites">
+        <Tooltip title={filterFavorites ? "Show all" : "Show favorites"}>
           <button
-            className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
+            className={`mr-2 bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
               filterFavorites ? "bg-gray-300" : ""
             }`}
             onClick={toggleFilterFavorites}
@@ -48,6 +56,22 @@ export default ({
               <HeartSolidIcon className="h-5 w-5" />
             ) : (
               <HeartOutlineIcon className="h-5 w-5" />
+            )}
+          </button>
+        </Tooltip>
+      )}
+      {currentUser && currentUser.membership && currentUser.membership.isAdmin && (
+        <Tooltip title={seeUnpublished ? "Show published" : "Show unpublished"}>
+          <button
+            className={`mr-2 bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
+              seeUnpublished ? "bg-gray-300" : ""
+            }`}
+            onClick={toggleSeeUnpublished}
+          >
+            {seeUnpublished ? (
+              <HideSolidIcon className="h-5 w-5" />
+            ) : (
+              <HideOutlineIcon className="h-5 w-5" />
             )}
           </button>
         </Tooltip>

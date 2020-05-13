@@ -34,7 +34,7 @@ const resolvers = {
     ) => {
       return Dream.find({
         eventId,
-        published: !unpublished,
+        published: unpublished ? { $ne: true } : true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },
@@ -269,9 +269,12 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!dream.cocreators.includes(currentMember.id))
+      if (
+        !currentMember.isAdmin &&
+        !dream.cocreators.includes(currentMember.id)
+      )
         throw new Error(
-          'You need to be a cocreator to publish/unpublish a dream'
+          'You need to be a cocreator or admin to publish/unpublish a dream'
         );
 
       dream.published = !unpublish;
