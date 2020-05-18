@@ -223,8 +223,7 @@ const Dream = ({ dream, event, currentUser }) => {
                       )}
                   </>
                 )}
-                {(isMemberOfDream(currentUser, dream) ||
-                  (currentUser && currentUser.membership.isAdmin)) && (
+                {canEditDream && (
                   <Button
                     color={dream.published ? "default" : "primary"}
                     variant={dream.published ? "text" : "contained"}

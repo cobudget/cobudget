@@ -306,6 +306,7 @@ const resolvers = {
 
       if (
         !currentMember.isAdmin &&
+        !currentMember.isGuide &&
         !dream.cocreators.includes(currentMember.id)
       )
         throw new Error(
