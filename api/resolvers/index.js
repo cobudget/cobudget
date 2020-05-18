@@ -245,7 +245,7 @@ const resolvers = {
       });
       if (!member) throw new Error('No member found with this id');
 
-      dream.cocreators.push(memberId);
+      dream.cocreators = [...dream.cocreators, memberId];
 
       return dream.save();
     },
