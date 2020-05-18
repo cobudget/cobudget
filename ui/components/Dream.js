@@ -8,6 +8,7 @@ import Router from "next/router";
 import Label from "./Label";
 import stringToHslColor from "../utils/stringToHslColor";
 import { isMemberOfDream } from "../utils/helpers";
+import thousandSeparator from "../utils/thousandSeparator";
 import Avatar from "./Avatar";
 import Gallery from "./Gallery";
 import GiveGrantlingsModal from "./GiveGrantlingsModal";
@@ -159,32 +160,31 @@ const Dream = ({ dream, event, currentUser }) => {
             />
           </div>
           <div className="order-first md:order-last">
-            {(dream.approved ||
-              (currentUser &&
-                currentUser.membership &&
-                (currentUser.membership.isAdmin ||
-                  currentUser.membership.isGuide)) ||
-              isMemberOfDream(currentUser, dream)) && (
+            {(dream.approved || canEditDream) && (
               <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
                 {dream.approved && (
                   <>
                     <div className="grid grid-cols-3 gap-1 text-center">
                       <div>
-                        <span className="block text-2xl font-medium">
+                        <span className="block text-xl font-medium">
                           {dream.currentNumberOfGrants}
                         </span>
                         <span className="uppercase text-sm">Funded</span>
                       </div>
                       <div>
-                        <span className="block text-2xl font-medium">
-                          {dream.minGoalGrants ? dream.minGoalGrants : "-"}
+                        <span className="block text-xl font-medium">
+                          {dream.minGoalGrants
+                            ? thousandSeparator(dream.minGoalGrants)
+                            : "-"}
                         </span>
 
                         <span className="uppercase text-sm">Min. goal</span>
                       </div>
                       <div>
-                        <span className="block text-2xl font-medium">
-                          {dream.maxGoalGrants ? dream.maxGoalGrants : "-"}
+                        <span className="block text-xl font-medium">
+                          {dream.maxGoalGrants
+                            ? thousandSeparator(dream.maxGoalGrants)
+                            : "-"}
                         </span>
 
                         <span className="uppercase text-sm">Max. goal</span>
