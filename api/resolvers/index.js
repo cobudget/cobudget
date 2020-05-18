@@ -37,8 +37,8 @@ const resolvers = {
         eventId,
       });
 
-      // if admin, show all dreams
-      if (currentMember && currentMember.isAdmin) {
+      // if admin or guide, show all dreams (published or unpublished)
+      if (currentMember && (currentMember.isAdmin || currentMember.isGuide)) {
         return Dream.find({
           eventId,
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
