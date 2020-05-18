@@ -113,7 +113,7 @@ const DreamSchema = new Schema({
   title: { type: String, required: true },
   summary: {
     type: String,
-    maxlength: 180,
+    maxlength: 175,
   },
   description: String,
   cocreators: [Schema.Types.ObjectId],
