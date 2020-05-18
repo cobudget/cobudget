@@ -54,6 +54,12 @@ const Dream = ({ dream, event, currentUser }) => {
   const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
+  const canEditDream =
+    (currentUser &&
+      currentUser.membership &&
+      (currentUser.membership.isAdmin || currentUser.membership.isGuide)) ||
+    isMemberOfDream(currentUser, dream);
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {!dream.published && (
@@ -77,11 +83,7 @@ const Dream = ({ dream, event, currentUser }) => {
           <div>
             <div className="flex items-start justify-between">
               <h1 className="mb-2 text-4xl font-medium">{dream.title}</h1>
-              {((currentUser &&
-                currentUser.membership &&
-                (currentUser.membership.isAdmin ||
-                  currentUser.membership.isGuide)) ||
-                isMemberOfDream(currentUser, dream)) && (
+              {canEditDream && (
                 <IconButton
                   onClick={() =>
                     Router.push(
@@ -328,7 +330,7 @@ const Dream = ({ dream, event, currentUser }) => {
             <div className="mt-5">
               <h2 className="mb-2 font-medium hidden md:block">
                 <span className="mr-2">Co-creators</span>
-                {isMemberOfDream(currentUser, dream) && (
+                {canEditDream && (
                   <IconButton
                     onClick={() => setCocreatorModalOpen(true)}
                     size="small"
@@ -353,7 +355,7 @@ const Dream = ({ dream, event, currentUser }) => {
                   // </Tooltip>
                 ))}
                 <div className="block md:hidden">
-                  {isMemberOfDream(currentUser, dream) && (
+                  {canEditDream && (
                     <IconButton
                       onClick={() => setCocreatorModalOpen(true)}
                       size="small"

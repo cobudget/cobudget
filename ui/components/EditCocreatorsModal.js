@@ -155,7 +155,7 @@ export default ({
                 if (
                   member.id !== currentUser.membership.id ||
                   confirm(
-                    "Are you sure you would like to remove yourself? This can't be undone"
+                    "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
                   )
                 ) {
                   removeCocreator({

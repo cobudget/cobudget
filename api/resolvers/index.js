@@ -202,6 +202,8 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
+      // add guide and isAdmin to being able to edit dream..
+
       // rename dream.members to co-creators
       // maybe save userIds instead of memberIds in this field?... mostly care about avatar/name etc.
       if (
@@ -235,8 +237,11 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      // add permissions for admins too
-      if (!dream.cocreators.includes(currentMember.id))
+      if (
+        !currentMember.isAdmin &&
+        !currentMember.isGuide &&
+        !dream.cocreators.includes(currentMember.id)
+      )
         throw new Error('You need to be a cocreator to add co-creators.');
 
       // check that added memberId is not already part of the thing
@@ -266,8 +271,11 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      // add permissions for admins too
-      if (!dream.cocreators.includes(currentMember.id))
+      if (
+        !currentMember.isAdmin &&
+        !currentMember.isGuide &&
+        !dream.cocreators.includes(currentMember.id)
+      )
         throw new Error('You need to be a cocreator to remove co-creators.');
 
       // check that added memberId is not already part of the thing
