@@ -77,7 +77,11 @@ const Dream = ({ dream, event, currentUser }) => {
           <div>
             <div className="flex items-start justify-between">
               <h1 className="mb-2 text-4xl font-medium">{dream.title}</h1>
-              {isMemberOfDream(currentUser, dream) && (
+              {((currentUser &&
+                currentUser.membership &&
+                (currentUser.membership.isAdmin ||
+                  currentUser.membership.isGuide)) ||
+                isMemberOfDream(currentUser, dream)) && (
                 <IconButton
                   onClick={() =>
                     Router.push(

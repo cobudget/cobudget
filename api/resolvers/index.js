@@ -204,7 +204,12 @@ const resolvers = {
 
       // rename dream.members to co-creators
       // maybe save userIds instead of memberIds in this field?... mostly care about avatar/name etc.
-      if (!currentMember || !dream.cocreators.includes(currentMember.id))
+      if (
+        !currentMember ||
+        (!dream.cocreators.includes(currentMember.id) &&
+          !currentMember.isAdmin &&
+          !currentMember.isGuide)
+      )
         throw new Error('You are not a cocreator of this dream.');
 
       dream.title = title;
