@@ -14,15 +14,16 @@ export const MEMBERS_QUERY = gql`
   query Members($eventId: ID!) {
     members(eventId: $eventId) {
       id
+      isAdmin
+      isApproved
+      createdAt
       user {
+        id
         name
         email
         verifiedEmail
         avatar
       }
-      isAdmin
-      isApproved
-      createdAt
     }
   }
 `;
