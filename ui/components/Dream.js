@@ -158,7 +158,7 @@ const Dream = ({ dream, event, currentUser }) => {
                 currentUser.membership &&
                 currentUser.membership.isAdmin) ||
               isMemberOfDream(currentUser, dream)) && (
-              <div className="-mt-24 bg-white rounded-lg shadow-md p-5">
+              <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
                 {dream.approved && (
                   <>
                     <div className="grid grid-cols-3 gap-1 text-center">
