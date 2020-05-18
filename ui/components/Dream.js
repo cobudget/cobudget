@@ -211,23 +211,23 @@ const Dream = ({ dream, event, currentUser }) => {
                 ) : (
                   <p></p>
                 )}
-                {isMemberOfDream(currentUser, dream) ||
-                  (currentUser.membership.isAdmin && (
-                    <div>
-                      <Button
-                        color={dream.published ? "default" : "primary"}
-                        variant={dream.published ? "text" : "contained"}
-                        onClick={() =>
-                          publishDream({
-                            variables: { unpublish: dream.published },
-                          })
-                        }
-                        fullWidth
-                      >
-                        {dream.published ? "Unpublish" : "Publish"}
-                      </Button>
-                    </div>
-                  ))}
+                {(isMemberOfDream(currentUser, dream) ||
+                  currentUser.membership.isAdmin) && (
+                  <div>
+                    <Button
+                      color={dream.published ? "default" : "primary"}
+                      variant={dream.published ? "text" : "contained"}
+                      onClick={() =>
+                        publishDream({
+                          variables: { unpublish: dream.published },
+                        })
+                      }
+                      fullWidth
+                    >
+                      {dream.published ? "Unpublish" : "Publish"}
+                    </Button>
+                  </div>
+                )}
                 {currentUser &&
                   currentUser.membership &&
                   currentUser.membership.isAdmin && (
