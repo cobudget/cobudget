@@ -26,7 +26,7 @@ export default ({ dream, event, currentUser }) => {
   });
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
+    <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {dream.images.length ? (
         <img
           src={dream.images[0].small}
@@ -37,6 +37,11 @@ export default ({ dream, event, currentUser }) => {
           className="w-full h-48"
           style={{ background: stringToHslColor(dream.title) }}
         />
+      )}
+      {!dream.published && (
+        <div className="absolute right-0 bg-red-500 text-white rounded-full text-xs font-semibold shadow uppercase py-1 px-2 m-2">
+          Unpublished
+        </div>
       )}
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
