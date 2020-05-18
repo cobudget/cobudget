@@ -29,12 +29,34 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventId, textSearchTerm, unpublished },
-      { models: { Dream } }
+      { eventId, textSearchTerm },
+      { currentUser, models: { Dream, Member } }
     ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser && currentUser.id,
+        eventId,
+      });
+
+      // if admin, show all dreams
+      if (currentMember && currentMember.isAdmin) {
+        return Dream.find({
+          eventId,
+          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        });
+      }
+
+      // todo: create appropriate index for this query
+      if (currentMember) {
+        return Dream.find({
+          eventId,
+          $or: [{ published: true }, { cocreators: currentMember.id }],
+          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        });
+      }
+
       return Dream.find({
         eventId,
-        published: unpublished ? { $ne: true } : true,
+        published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },

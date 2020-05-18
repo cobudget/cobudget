@@ -7,12 +7,8 @@ import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventId: ID!, $textSearchTerm: String, $unpublished: Boolean) {
-    dreams(
-      eventId: $eventId
-      textSearchTerm: $textSearchTerm
-      unpublished: $unpublished
-    ) {
+  query Dreams($eventId: ID!, $textSearchTerm: String) {
+    dreams(eventId: $eventId, textSearchTerm: $textSearchTerm) {
       id
       slug
       description
@@ -38,16 +34,12 @@ export default ({ currentUser, event }) => {
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
-  const [seeUnpublished, setSeeUnpublished] = useState(false);
-  const toggleSeeUnpublished = () => setSeeUnpublished(!seeUnpublished);
-
   let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
     {
       variables: {
         eventId: event.id,
         textSearchTerm,
-        unpublished: seeUnpublished,
       },
     }
   );
@@ -61,8 +53,6 @@ export default ({ currentUser, event }) => {
       <Filterbar
         filterFavorites={filterFavorites}
         toggleFilterFavorites={toggleFilterFavorites}
-        seeUnpublished={seeUnpublished}
-        toggleSeeUnpublished={toggleSeeUnpublished}
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
         currentUser={currentUser}
