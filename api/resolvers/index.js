@@ -224,7 +224,7 @@ const resolvers = {
       { currentUser, models: { Member, Dream } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
-      console.log({ dream });
+
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
