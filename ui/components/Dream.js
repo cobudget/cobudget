@@ -2,10 +2,10 @@ import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import { Button, Tooltip, IconButton } from "@material-ui/core";
-import AvatarGroup from "@material-ui/lab/AvatarGroup";
 import { Edit as EditIcon } from "@material-ui/icons";
 import Router from "next/router";
 
+import Label from "./Label";
 import stringToHslColor from "../utils/stringToHslColor";
 import { isMemberOfDream } from "../utils/helpers";
 import Avatar from "./Avatar";
@@ -55,7 +55,10 @@ const Dream = ({ dream, event, currentUser }) => {
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
+      {!dream.published && (
+        <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>
+      )}
       {dream.images.length > 0 ? (
         <img
           className="h-64 md:h-88 w-full object-cover object-center"
@@ -150,9 +153,13 @@ const Dream = ({ dream, event, currentUser }) => {
             />
           </div>
           <div className="order-first md:order-last">
-            <div className="-mt-24 bg-white rounded-lg shadow-md p-5">
-              <div>
-                {dream.approved ? (
+            {(dream.approved ||
+              (currentUser &&
+                currentUser.membership &&
+                currentUser.membership.isAdmin) ||
+              isMemberOfDream(currentUser, dream)) && (
+              <div className="-mt-24 bg-white rounded-lg shadow-md p-5">
+                {dream.approved && (
                   <>
                     <div className="grid grid-cols-3 gap-1 text-center">
                       <div>
@@ -208,25 +215,21 @@ const Dream = ({ dream, event, currentUser }) => {
                         </>
                       )}
                   </>
-                ) : (
-                  <p></p>
                 )}
                 {(isMemberOfDream(currentUser, dream) ||
-                  currentUser.membership.isAdmin) && (
-                  <div>
-                    <Button
-                      color={dream.published ? "default" : "primary"}
-                      variant={dream.published ? "text" : "contained"}
-                      onClick={() =>
-                        publishDream({
-                          variables: { unpublish: dream.published },
-                        })
-                      }
-                      fullWidth
-                    >
-                      {dream.published ? "Unpublish" : "Publish"}
-                    </Button>
-                  </div>
+                  (currentUser && currentUser.membership.isAdmin)) && (
+                  <Button
+                    color={dream.published ? "default" : "primary"}
+                    variant={dream.published ? "text" : "contained"}
+                    onClick={() =>
+                      publishDream({
+                        variables: { unpublish: dream.published },
+                      })
+                    }
+                    fullWidth
+                  >
+                    {dream.published ? "Unpublish" : "Publish"}
+                  </Button>
                 )}
                 {currentUser &&
                   currentUser.membership &&
@@ -305,7 +308,8 @@ const Dream = ({ dream, event, currentUser }) => {
                     </div>
                   )}
               </div>
-            </div>
+            )}
+
             <div className="mt-5">
               <h2 className="mb-2 font-medium hidden md:block">
                 <span className="mr-2">Co-creators</span>

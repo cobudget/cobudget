@@ -10,6 +10,7 @@ import {
   HeartOutlineIcon,
   HeartSolidIcon,
 } from "./Icons";
+import Label from "./Label";
 
 const TOGGLE_FAVORITE_MUTATION = gql`
   mutation ToggleFavoriteMutation($dreamId: ID!) {
@@ -39,9 +40,7 @@ export default ({ dream, event, currentUser }) => {
         />
       )}
       {!dream.published && (
-        <div className="absolute right-0 bg-red-500 text-white rounded-full text-xs font-semibold shadow uppercase py-1 px-2 m-2">
-          Unpublished
-        </div>
+        <Label className="absolute right-0 m-2">Unpublished</Label>
       )}
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
