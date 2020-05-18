@@ -4,7 +4,7 @@ import Header from "./Header";
 import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
-import DevelopmentNotice from "./DevelopmentNotice";
+//import DevelopmentNotice from "./DevelopmentNotice";
 
 const Container = styled.div`
   flex: 0 1 1160px;
@@ -61,7 +61,7 @@ export default ({ children, currentUser, event, title, apollo, openModal }) => {
         />
         {children}
       </Container>
-      {process.env.IS_PROD && <DevelopmentNotice />}
+      {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
     </div>
   );
 };
