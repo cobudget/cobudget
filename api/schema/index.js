@@ -64,6 +64,7 @@ const schema = gql`
       memberId: ID!
       isApproved: Boolean
       isAdmin: Boolean
+      isGuide: Boolean
     ): Member
     deleteMember(eventId: ID!, memberId: ID!): Member
 
@@ -142,15 +143,19 @@ const schema = gql`
     id: ID!
     event: Event!
     user: User!
-    # isActive: Boolean!
     isAdmin: Boolean!
+    isGuide: Boolean
     isApproved: Boolean!
     createdAt: Date
     availableGrants: Int
     givenGrants: [Grant]
-    # isGuide: Boolean!
-    # favorites: [Dream]
+    # roles: [Role]
   }
+
+  # enum Role {
+  #   ADMIN
+  #   GUIDE
+  # }
 
   type Dream {
     id: ID!

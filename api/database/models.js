@@ -33,20 +33,19 @@ const MemberSchema = new Schema({
   },
   userId: {
     type: Schema.Types.ObjectId,
-    index: true, // behövs den här?
+    index: true,
     required: true,
     ref: 'User',
   },
   isAdmin: { type: Boolean, required: true, default: false },
+  isGuide: { type: Boolean, default: false },
+  //roles: [{ type: String, enum: ['ADMIN', 'GUIDE'] }],
   isApproved: { type: Boolean, required: true, default: false },
   createdAt: {
     type: Date,
     default: Date.now,
   },
   favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }],
-  // guide
-  // joined?
-  // ticket?
 }).index({ userId: 1, eventId: 1 }, { unique: true });
 
 // Event

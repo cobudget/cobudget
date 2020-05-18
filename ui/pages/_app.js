@@ -44,6 +44,7 @@ export const TOP_LEVEL_QUERY = gql`
       membership(slug: $slug) {
         id
         isAdmin
+        isGuide
         isApproved
         availableGrants
       }

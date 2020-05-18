@@ -15,6 +15,7 @@ export const MEMBERS_QUERY = gql`
     members(eventId: $eventId) {
       id
       isAdmin
+      isGuide
       isApproved
       createdAt
       user {
@@ -34,16 +35,19 @@ const UPDATE_MEMBER = gql`
     $eventId: ID!
     $isAdmin: Boolean
     $isApproved: Boolean
+    $isGuide: Boolean
   ) {
     updateMember(
       memberId: $memberId
       eventId: $eventId
       isAdmin: $isAdmin
       isApproved: $isApproved
+      isGuide: $isGuide
     ) {
       id
       isAdmin
       isApproved
+      isGuide
     }
   }
 `;

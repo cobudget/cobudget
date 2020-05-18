@@ -56,6 +56,20 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
         <MenuItem
+          onClick={() => {
+            updateMember({
+              variables: {
+                memberId: member.id,
+                isGuide: !member.isGuide,
+              },
+            }).then(() => {
+              handleClose();
+            });
+          }}
+        >
+          {member.isGuide ? "Remove guide" : "Make guide"}
+        </MenuItem>
+        <MenuItem
           color="error.main"
           onClick={() => {
             if (
@@ -107,7 +121,10 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
                 </Box>
               </TableCell>
 
-              <TableCell align="right">{member.isAdmin && "Admin"}</TableCell>
+              <TableCell align="right">
+                {member.isAdmin && <span className="mr-2">Admin</span>}
+                {member.isGuide && <span className="">Guide</span>}
+              </TableCell>
               <TableCell align="right" padding="none">
                 <ActionsDropdown
                   member={member}

@@ -156,7 +156,8 @@ const Dream = ({ dream, event, currentUser }) => {
             {(dream.approved ||
               (currentUser &&
                 currentUser.membership &&
-                currentUser.membership.isAdmin) ||
+                (currentUser.membership.isAdmin ||
+                  currentUser.membership.isGuide)) ||
               isMemberOfDream(currentUser, dream)) && (
               <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
                 {dream.approved && (
@@ -233,7 +234,8 @@ const Dream = ({ dream, event, currentUser }) => {
                 )}
                 {currentUser &&
                   currentUser.membership &&
-                  currentUser.membership.isAdmin && (
+                  (currentUser.membership.isAdmin ||
+                    currentUser.membership.isGuide) && (
                     <div>
                       <div className="my-2">
                         {!event.grantingHasClosed && dream.approved ? (
@@ -271,38 +273,47 @@ const Dream = ({ dream, event, currentUser }) => {
                           </Button>
                         )}
                       </div>
-                      <div className="my-2">
-                        {event.grantingHasClosed &&
-                          dream.currentNumberOfGrants > 0 && (
+
+                      {currentUser.membership.isAdmin && (
+                        <>
+                          <div className="my-2">
+                            {event.grantingHasClosed &&
+                              dream.currentNumberOfGrants > 0 && (
+                                <>
+                                  <Button
+                                    onClick={() =>
+                                      reclaimGrants({
+                                        variables: { dreamId: dream.id },
+                                      }).catch((err) => alert(err.message))
+                                    }
+                                  >
+                                    Reclaim grants
+                                  </Button>
+                                  <br />
+                                </>
+                              )}
+                          </div>
+
+                          {dream.approved && (
                             <>
                               <Button
-                                onClick={() =>
-                                  reclaimGrants({
-                                    variables: { dreamId: dream.id },
-                                  }).catch((err) => alert(err.message))
-                                }
+                                fullWidth
+                                onClick={() => setPrePostFundModalOpen(true)}
                               >
-                                Reclaim grants
+                                {event.grantingHasClosed
+                                  ? "Post-fund"
+                                  : "Pre-fund"}
                               </Button>
-                              <br />
+                              <PreOrPostFundModal
+                                open={prePostFundModalOpen}
+                                handleClose={() =>
+                                  setPrePostFundModalOpen(false)
+                                }
+                                dream={dream}
+                                event={event}
+                              />
                             </>
                           )}
-                      </div>
-
-                      {dream.approved && (
-                        <>
-                          <Button
-                            fullWidth
-                            onClick={() => setPrePostFundModalOpen(true)}
-                          >
-                            {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
-                          </Button>
-                          <PreOrPostFundModal
-                            open={prePostFundModalOpen}
-                            handleClose={() => setPrePostFundModalOpen(false)}
-                            dream={dream}
-                            event={event}
-                          />
                         </>
                       )}
                     </div>

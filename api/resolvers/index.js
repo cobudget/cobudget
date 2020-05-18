@@ -461,7 +461,7 @@ const resolvers = {
     // },
     updateMember: async (
       parent,
-      { eventId, memberId, isApproved, isAdmin },
+      { eventId, memberId, isApproved, isAdmin, isGuide },
       { currentUser, models: { Member } }
     ) => {
       const currentMember = await Member.findOne({
@@ -484,6 +484,9 @@ const resolvers = {
       } // send notification on approving?
       if (typeof isAdmin !== 'undefined') {
         member.isAdmin = isAdmin;
+      }
+      if (typeof isGuide !== 'undefined') {
+        member.isGuide = isGuide;
       }
       return member.save();
     },
@@ -519,8 +522,10 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be admin to approve for granting');
+      if (!currentMember || (!currentMember.isAdmin && !currentMember.isGuide))
+        throw new Error(
+          'You need to be admin or guide to approve for granting'
+        );
 
       dream.approved = approved;
       return dream.save();
