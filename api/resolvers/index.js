@@ -224,7 +224,7 @@ const resolvers = {
       { currentUser, models: { Member, Dream } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
-
+      console.log({ dream });
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
@@ -245,7 +245,7 @@ const resolvers = {
       });
       if (!member) throw new Error('No member found with this id');
 
-      dream.cocreators = [...dream.cocreators, memberId];
+      dream.cocreators.push(memberId);
 
       return dream.save();
     },
