@@ -13,5 +13,16 @@ html {
 }
 
 .expand-gradient {
-  background-image: linear-gradient(rgba(255, 0, 0, 0), rgba(255, 255, 255, 1));
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 1)
+  );
+}
+
+.markdown h1 {
+  @apply text-xl mb-2;
+}
+
+.markdown p {
+  @apply text-gray-700 mb-2;
 }

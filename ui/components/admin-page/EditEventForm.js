@@ -12,20 +12,20 @@ const EDIT_EVENT = gql`
     $slug: String
     $title: String
     $registrationPolicy: RegistrationPolicy
-    $about: String
+    $info: String
   ) {
     editEvent(
       eventId: $eventId
       slug: $slug
       title: $title
       registrationPolicy: $registrationPolicy
-      about: $about
+      info: $info
     ) {
       id
       title
       slug
       registrationPolicy
-      about
+      info
     }
   }
 `;
@@ -101,9 +101,9 @@ export default ({ event }) => {
           </Box>
           <Box my={2}>
             <TextField
-              name="about"
-              label="About page"
-              defaultValue={event.about}
+              name="info"
+              label="Info box (markdown allowed)"
+              defaultValue={event.info}
               fullWidth
               multiline
               rows={15}

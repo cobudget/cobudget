@@ -5,6 +5,10 @@ import Link from "next/link";
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
+import dynamic from "next/dynamic";
+
+// import InfoBox from "../../components/InfoBox";
+const InfoBox = dynamic(() => import("../../components/InfoBox"));
 
 export const DREAMS_QUERY = gql`
   query Dreams($eventId: ID!, $textSearchTerm: String) {
@@ -50,6 +54,8 @@ export default ({ currentUser, event }) => {
 
   return (
     <>
+      {event.info && <InfoBox markdown={event.info} />}
+
       <Filterbar
         filterFavorites={filterFavorites}
         toggleFilterFavorites={toggleFilterFavorites}
