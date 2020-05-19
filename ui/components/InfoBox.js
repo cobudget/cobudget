@@ -11,7 +11,7 @@ export default ({ markdown, close }) => {
       style={!expanded ? { maxHeight: 90 } : {}}
     >
       <button
-        className="absolute right-0 top-0 m-2 p-2 text-gray-800 rounded-full hover:bg-gray-100 focus:outline-none focus:shadow-outline"
+        className="absolute right-0 top-0 m-2 p-2 text-gray-700 rounded-full hover:bg-gray-100 focus:outline-none focus:shadow-outline"
         onClick={close}
       >
         <CloseIcon className="w-6 h-6" />

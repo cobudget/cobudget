@@ -2,14 +2,11 @@ import gql from "graphql-tag";
 import { useState } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
+import store from "store";
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
-import dynamic from "next/dynamic";
-import store from "store";
-
-// import InfoBox from "../../components/InfoBox";
-const InfoBox = dynamic(() => import("../../components/InfoBox"));
+import InfoBox from "../../components/InfoBox";
 
 export const DREAMS_QUERY = gql`
   query Dreams($eventId: ID!, $textSearchTerm: String) {
