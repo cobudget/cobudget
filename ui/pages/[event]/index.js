@@ -6,6 +6,7 @@ import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
 import dynamic from "next/dynamic";
+import store from "store";
 
 // import InfoBox from "../../components/InfoBox";
 const InfoBox = dynamic(() => import("../../components/InfoBox"));
@@ -38,6 +39,13 @@ export default ({ currentUser, event }) => {
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
+  const { infoBoxDismissed = false } = store.get(event.slug) || {};
+  const [showInfoBox, setShowInfoBox] = useState(!infoBoxDismissed);
+  const dismissInfoBox = () => {
+    store.set(event.slug, { infoBoxDismissed: true });
+    setShowInfoBox(false);
+  };
+
   let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
     {
@@ -54,7 +62,9 @@ export default ({ currentUser, event }) => {
 
   return (
     <>
-      {event.info && <InfoBox markdown={event.info} />}
+      {event.info && showInfoBox && (
+        <InfoBox markdown={event.info} close={dismissInfoBox} />
+      )}
 
       <Filterbar
         filterFavorites={filterFavorites}

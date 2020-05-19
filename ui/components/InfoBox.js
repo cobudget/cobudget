@@ -7,17 +7,20 @@ export default ({ markdown, close }) => {
 
   return (
     <div
-      className="shadow relative z-50 rounded-lg mt-2 mb-5 bg-white px-5 pt-4 pb-10 overflow-hidden markdown"
+      className="shadow relative rounded-lg mt-2 mb-5 bg-white px-5 pt-4 pb-10 overflow-hidden markdown"
       style={!expanded ? { maxHeight: 90 } : {}}
     >
-      <button className="absolute right-0 top-0 m-4" onClick={close}>
+      <button
+        className="absolute right-0 top-0 m-2 p-2 text-gray-800 rounded-full hover:bg-gray-100 focus:outline-none focus:shadow-outline"
+        onClick={close}
+      >
         <CloseIcon className="w-6 h-6" />
       </button>
 
       <ReactMarkdown source={markdown} />
 
       <div
-        className={`absolute p-2 block bottom-0 right-0 left-0 ${
+        className={`absolute p-2 pt-0 block bottom-0 right-0 left-0 ${
           !expanded ? "expand-gradient" : ""
         }`}
       >
