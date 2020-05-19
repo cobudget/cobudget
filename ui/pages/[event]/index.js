@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
 import store from "store";
@@ -36,8 +36,7 @@ export default ({ currentUser, event }) => {
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
-  const { infoBoxDismissed = false } = store.get(event.slug) || {};
-  const [showInfoBox, setShowInfoBox] = useState(!infoBoxDismissed);
+  const [showInfoBox, setShowInfoBox] = useState(true);
   const dismissInfoBox = () => {
     store.set(event.slug, { infoBoxDismissed: true });
     setShowInfoBox(false);
@@ -52,6 +51,11 @@ export default ({ currentUser, event }) => {
       },
     }
   );
+
+  useEffect(() => {
+    const { infoBoxDismissed = false } = store.get(event.slug) || {};
+    if (infoBoxDismissed) setShowInfoBox(false);
+  }, []);
 
   if (filterFavorites) {
     dreams = dreams.filter((dream) => dream.favorite);
