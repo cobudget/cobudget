@@ -12,17 +12,20 @@ const EDIT_EVENT = gql`
     $slug: String
     $title: String
     $registrationPolicy: RegistrationPolicy
+    $about: String
   ) {
     editEvent(
       eventId: $eventId
       slug: $slug
       title: $title
       registrationPolicy: $registrationPolicy
+      about: $about
     ) {
       id
       title
       slug
       registrationPolicy
+      about
     }
   }
 `;
@@ -95,6 +98,18 @@ export default ({ event }) => {
               <option value="REQUEST_TO_JOIN">Request to join</option>
               <option value="INVITE_ONLY">Invite only</option>
             </SelectInput>
+          </Box>
+          <Box my={2}>
+            <TextField
+              name="about"
+              label="About page"
+              defaultValue={event.about}
+              fullWidth
+              multiline
+              rows={15}
+              inputRef={register}
+              variant="outlined"
+            />
           </Box>
           <Box my={2}>
             <Button

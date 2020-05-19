@@ -17,7 +17,7 @@ export const TOP_LEVEL_QUERY = gql`
     event(slug: $slug) {
       id
       slug
-      description
+      about
       title
       currency
       registrationPolicy

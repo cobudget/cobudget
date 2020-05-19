@@ -58,6 +58,11 @@ export default ({ event, currentUser, openModal, logOut }) => {
             <>
               {event && (
                 <>
+                  {event.about && (
+                    <Link href="/[event]/about" as={`/${event.slug}/about`}>
+                      <a className={css.navItem}>About</a>
+                    </Link>
+                  )}
                   {currentUser.membership ? (
                     <>
                       {currentUser.membership.isAdmin && (

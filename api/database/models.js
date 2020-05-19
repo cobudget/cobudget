@@ -57,7 +57,7 @@ const EventSchema = new Schema({
     unique: true,
   },
   title: { type: String, required: true },
-  description: String,
+  about: String,
   currency: String,
   registrationPolicy: {
     type: String,

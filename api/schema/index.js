@@ -23,6 +23,7 @@ const schema = gql`
       slug: String
       title: String
       registrationPolicy: RegistrationPolicy
+      about: String
     ): Event!
 
     createDream(
@@ -93,7 +94,7 @@ const schema = gql`
     id: ID!
     slug: String!
     title: String!
-    description: String
+    about: String
     # logo: String
     members: [Member!]!
     numberOfApprovedMembers: Int
