@@ -1,6 +1,7 @@
 import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 import Dream from "../../../components/Dream";
 import HappySpinner from "../../../components/HappySpinner";
@@ -62,7 +63,16 @@ export default ({ event, currentUser }) => {
   );
 
   if (dream)
-    return <Dream dream={dream} event={event} currentUser={currentUser} />;
+    return (
+      <>
+        <Head>
+          <title>
+            {dream.title} | {event.title}
+          </title>
+        </Head>
+        <Dream dream={dream} event={event} currentUser={currentUser} />
+      </>
+    );
 
   if (loading)
     return (
