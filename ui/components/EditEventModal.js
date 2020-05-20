@@ -84,14 +84,14 @@ export default ({ event, open, handleClose }) => {
               <Box my={2}>
                 <TextField
                   name="slug"
-                  label="Slug"
+                  label="URL"
                   defaultValue={event.slug}
                   fullWidth
                   inputRef={register}
                   InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        .dreams.wtf
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        dreams.wtf/
                       </InputAdornment>
                     ),
                     onBlur: (e) => {
