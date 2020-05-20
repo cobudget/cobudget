@@ -283,7 +283,7 @@ export default ({ dream = {}, event, editing }) => {
           inputRef={register({
             required: "Required",
           })}
-          inputProps={{ maxLength: 175 }}
+          inputProps={{ maxLength: 160 }}
           multiline
           variant="outlined"
           error={Boolean(errors.summary)}
