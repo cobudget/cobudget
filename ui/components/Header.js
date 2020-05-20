@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
+import { useRouter } from "next/router";
 
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -9,15 +10,32 @@ import { CogIcon } from "components/Icons";
 import EditEventModal from "components/EditEventModal";
 
 const css = {
-  navItem:
-    "my-1 px-3 mx-1 py-2 sm:px-3 sm:m-0 block text-gray-800 font-semibold rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
   mobileProfileItem:
     "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
+};
+
+const NavItem = ({ href, as, currentPath, children, primary }) => {
+  return (
+    <Link href={href} as={as}>
+      <a
+        className={`my-1 mx-1 px-3 py-2 sm:px-3 sm:my-0 block font-medium rounded-md focus:outline-none  ${
+          (currentPath === href ? "bg-gray-200" : "") +
+          " " +
+          (primary
+            ? "bg-black text-white hover:bg-gray-900"
+            : "hover:bg-gray-200 focus:bg-gray-200 text-gray-800")
+        }`}
+      >
+        {children}
+      </a>
+    </Link>
+  );
 };
 
 export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editEventModalOpen, setEditEventModalOpen] = useState(false);
+  const router = useRouter();
   return (
     <header className=" sm:flex sm:justify-between sm:items-center sm:py-4">
       <div className="flex items-center justify-between py-4 sm:p-0">
@@ -85,53 +103,50 @@ export default ({ event, currentUser, openModal, logOut }) => {
                   )} */}
                   {currentUser.membership ? (
                     <>
+                      <NavItem
+                        href="/[event]/granting"
+                        as={`/${event.slug}/granting`}
+                        currentPath={router.pathname}
+                      >
+                        Granting
+                      </NavItem>
+
                       {currentUser.membership.isAdmin && (
                         <>
-                          <Link
+                          <NavItem
                             href="/[event]/members"
                             as={`/${event.slug}/members`}
+                            currentPath={router.pathname}
                           >
-                            <a className={css.navItem}>Members</a>
-                          </Link>
-                          {/* <Link
-                            href="/[event]/admin"
-                            as={`/${event.slug}/admin`}
-                          >
-                            <a className={css.navItem}>Admin</a>
-                          </Link> */}
+                            Members
+                          </NavItem>
                         </>
                       )}
 
-                      <Link
-                        href="/[event]/granting"
-                        as={`/${event.slug}/granting`}
-                      >
-                        <a className={css.navItem}>Granting</a>
-                      </Link>
-
                       {event.dreamCreationIsOpen &&
                         currentUser.membership.isApproved && (
-                          <Link
+                          <NavItem
                             href="/[event]/create-dream"
                             as={`/${event.slug}/create-dream`}
+                            currentPath={router.pathname}
+                            // primary
                           >
-                            <a className={css.navItem}>Create dream</a>
-                          </Link>
+                            Create dream
+                          </NavItem>
                         )}
                     </>
                   ) : (
                     <>
                       {event.registrationPolicy !== "INVITE_ONLY" && (
-                        <Link
+                        <NavItem
                           href="/[event]/register"
                           as={`/${event.slug}/register`}
+                          currentPath={router.pathname}
                         >
-                          <a className={css.navItem}>
-                            {event.registrationPolicy === "REQUEST_TO_JOIN"
-                              ? "Request to join"
-                              : "Join"}
-                          </a>
-                        </Link>
+                          {event.registrationPolicy === "REQUEST_TO_JOIN"
+                            ? "Request to join"
+                            : "Join"}
+                        </NavItem>
                       )}
                     </>
                   )}
@@ -139,9 +154,7 @@ export default ({ event, currentUser, openModal, logOut }) => {
               )}
 
               {!event && currentUser.isOrgAdmin && (
-                <Link href="/create-event">
-                  <a className={css.navItem}>Create event</a>
-                </Link>
+                <NavItem href="/create-event">Create event</NavItem>
               )}
 
               <div className="hidden sm:block sm:ml-4">
@@ -155,9 +168,7 @@ export default ({ event, currentUser, openModal, logOut }) => {
             </>
           ) : (
             <>
-              <Link href="/login">
-                <a className={css.navItem}>Login</a>
-              </Link>
+              <NavItem href="/login">Login</NavItem>
             </>
           )}
         </div>
