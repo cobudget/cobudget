@@ -81,6 +81,7 @@ const theme = createMuiTheme({
       textTransform: "none",
     },
     fontFamily: [
+      "Inter",
       "-apple-system",
       "BlinkMacSystemFont",
       '"Segoe UI"',

@@ -7,9 +7,9 @@ export default ({ event }) => {
 
   return (
     <>
-      <h1 className="text-2xl mb-3 text-gray-800">Create dream</h1>
-
       <div className="rounded-lg shadow bg-white p-5">
+        <h1 className="text-xl mb-3 text-gray-800">Create dream</h1>
+
         <EditOrCreateDreamForm event={event} />
       </div>
     </>

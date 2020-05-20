@@ -119,7 +119,7 @@ export default ({ event, currentUser }) => {
         </div>
       </Modal>
 
-      <h2 className="text-2xl mb-3 text-gray-800">Granting settings</h2>
+      <h2 className="text-xl mb-3 text-gray-800">Granting settings</h2>
       <div className="bg-white rounded-lg shadow mb-4">
         <List>
           <SettingsListItem
@@ -238,7 +238,7 @@ export default ({ event, currentUser }) => {
         </List>
       </div>
 
-      <h2 className="text-2xl mb-3 text-gray-800">Granting status</h2>
+      <h2 className="text-xl mb-3 text-gray-800">Granting status</h2>
       <div className="bg-white rounded-lg shadow mb-4">
         <List>
           <ListItem>
