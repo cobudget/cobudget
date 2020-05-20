@@ -1,9 +1,12 @@
+import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
 
-import ProfileDropdown from "./ProfileDropdown";
-import Avatar from "./Avatar";
-import { modals } from "./Modal/index";
+import ProfileDropdown from "components/ProfileDropdown";
+import Avatar from "components/Avatar";
+import { modals } from "components/Modal/index";
+import { CogIcon } from "components/Icons";
+import EditEventModal from "components/EditEventModal";
 
 const css = {
   navItem:
@@ -13,21 +16,38 @@ const css = {
 };
 
 export default ({ event, currentUser, openModal, logOut }) => {
-  const [isMenuOpen, setMenuOpen] = React.useState(false);
-
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [editEventModalOpen, setEditEventModalOpen] = useState(false);
   return (
     <header className=" sm:flex sm:justify-between sm:items-center sm:py-4">
       <div className="flex items-center justify-between py-4 sm:p-0">
-        <Link
-          href={event ? "/[event]" : "/"}
-          as={event ? `/${event.slug}` : "/"}
-        >
-          <a>
-            <h1 className="text-2xl text-gray-800">
-              {event ? event.title : "Dreams"}
-            </h1>
-          </a>
-        </Link>
+        <div className="flex items-center">
+          <Link
+            href={event ? "/[event]" : "/"}
+            as={event ? `/${event.slug}` : "/"}
+          >
+            <a>
+              <h1 className="text-2xl text-gray-800">
+                {event ? event.title : "Dreams"}
+              </h1>
+            </a>
+          </Link>
+          {currentUser &&
+            currentUser.membership &&
+            currentUser.membership.isAdmin && (
+              <>
+                <CogIcon
+                  className="ml-2 text-gray-400 hover:text-gray-800 cursor-pointer h-5 w-5"
+                  onClick={() => setEditEventModalOpen(true)}
+                />
+                <EditEventModal
+                  open={editEventModalOpen}
+                  event={event}
+                  handleClose={() => setEditEventModalOpen(false)}
+                />
+              </>
+            )}
+        </div>
 
         <div className="sm:hidden">
           <button
@@ -66,10 +86,28 @@ export default ({ event, currentUser, openModal, logOut }) => {
                   {currentUser.membership ? (
                     <>
                       {currentUser.membership.isAdmin && (
-                        <Link href="/[event]/admin" as={`/${event.slug}/admin`}>
-                          <a className={css.navItem}>Admin</a>
-                        </Link>
+                        <>
+                          <Link
+                            href="/[event]/members"
+                            as={`/${event.slug}/members`}
+                          >
+                            <a className={css.navItem}>Members</a>
+                          </Link>
+                          {/* <Link
+                            href="/[event]/admin"
+                            as={`/${event.slug}/admin`}
+                          >
+                            <a className={css.navItem}>Admin</a>
+                          </Link> */}
+                        </>
                       )}
+
+                      <Link
+                        href="/[event]/granting"
+                        as={`/${event.slug}/granting`}
+                      >
+                        <a className={css.navItem}>Granting</a>
+                      </Link>
 
                       {event.dreamCreationIsOpen &&
                         currentUser.membership.isApproved && (
