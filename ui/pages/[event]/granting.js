@@ -1,9 +1,6 @@
-import Granting from "components/admin-page/Granting";
+import Granting from "components/Granting";
 
 export default ({ event, currentUser }) => {
-  return (
-    <div className="shadow rounded-lg bg-white">
-      <Granting event={event} />
-    </div>
-  );
+  if (!(currentUser && currentUser.membership)) return null;
+  return <Granting event={event} currentUser={currentUser} />;
 };

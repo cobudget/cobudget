@@ -1,12 +1,12 @@
 import useForm from "react-hook-form";
+import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box, Button, TextField } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import Card from "../../styled/Card";
+import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
+import Card from "../styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetCurrency = ({ closeModal, event }) => {
+const SetTotalBudget = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
@@ -17,14 +17,11 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set max grants to one dream</h1>
-
+        <h1 className="text-3xl">Set total budget</h1>
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: {
-                maxGrantsToDream: Number(variables.maxGrantsToDream),
-              },
+              variables: { totalBudget: Number(variables.totalBudget) },
             })
               .then(({ data }) => {
                 // console.log({ data });
@@ -38,15 +35,18 @@ const SetCurrency = ({ closeModal, event }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="maxGrantsToDream"
-              label="Max grants to one dream per user"
-              defaultValue={event.maxGrantsToDream}
+              name="totalBudget"
+              label="Total budget"
+              defaultValue={event.totalBudget}
               fullWidth
               inputRef={register}
               InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {event.currency}
+                  </InputAdornment>
+                ),
                 type: "number",
-                min: 1,
-                max: event.grantsPerMember,
               }}
               variant="outlined"
             />
@@ -66,4 +66,4 @@ const SetCurrency = ({ closeModal, event }) => {
   );
 };
 
-export default SetCurrency;
+export default SetTotalBudget;

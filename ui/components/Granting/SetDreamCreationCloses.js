@@ -4,8 +4,8 @@ import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
 
-import Card from "../../styled/Card";
-import { UPDATE_GRANTING_SETTINGS } from "./";
+import Card from "../styled/Card";
+import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetGrantingCloses = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {

@@ -91,51 +91,53 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
 
 export default ({ approvedMembers, updateMember, deleteMember }) => {
   return (
-    <TableContainer>
-      <Table aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell align="right">Role</TableCell>
-            <TableCell align="right">Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {approvedMembers.map((member) => (
-            <TableRow key={member.id}>
-              <TableCell component="th" scope="row">
-                {member.user.name}
-              </TableCell>
-              <TableCell>
-                <Box display="flex" alignItems="center">
-                  <Box m="0 8px 0">{member.user.email}</Box>
-                  {!member.user.verifiedEmail && (
-                    <Tooltip
-                      title="Email not verified (has not logged in)"
-                      placement="right"
-                    >
-                      <HelpOutlineOutlinedIcon fontSize="small" />
-                    </Tooltip>
-                  )}
-                </Box>
-              </TableCell>
-
-              <TableCell align="right">
-                {member.isAdmin && <span className="mr-2">Admin</span>}
-                {member.isGuide && <span className="">Guide</span>}
-              </TableCell>
-              <TableCell align="right" padding="none">
-                <ActionsDropdown
-                  member={member}
-                  deleteMember={deleteMember}
-                  updateMember={updateMember}
-                />
-              </TableCell>
+    <div className="bg-white rounded-lg shadow overflow-hidden">
+      <TableContainer>
+        <Table aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell align="right">Role</TableCell>
+              <TableCell align="right">Actions</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {approvedMembers.map((member) => (
+              <TableRow key={member.id}>
+                <TableCell component="th" scope="row">
+                  {member.user.name}
+                </TableCell>
+                <TableCell>
+                  <Box display="flex" alignItems="center">
+                    <Box m="0 8px 0">{member.user.email}</Box>
+                    {!member.user.verifiedEmail && (
+                      <Tooltip
+                        title="Email not verified (has not logged in)"
+                        placement="right"
+                      >
+                        <HelpOutlineOutlinedIcon fontSize="small" />
+                      </Tooltip>
+                    )}
+                  </Box>
+                </TableCell>
+
+                <TableCell align="right">
+                  {member.isAdmin && <span className="mr-2">Admin</span>}
+                  {member.isGuide && <span className="">Guide</span>}
+                </TableCell>
+                <TableCell align="right" padding="none">
+                  <ActionsDropdown
+                    member={member}
+                    deleteMember={deleteMember}
+                    updateMember={updateMember}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
 };

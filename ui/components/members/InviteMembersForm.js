@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import useForm from "react-hook-form";
 
-import Card from "../../styled/Card";
+import Card from "../styled/Card";
 import { Box, Button, TextField, Typography } from "@material-ui/core";
 
 import { MEMBERS_QUERY } from ".";
@@ -29,9 +29,9 @@ export default ({ handleClose }) => {
       const { members } = cache.readQuery({ query: MEMBERS_QUERY });
       cache.writeQuery({
         query: MEMBERS_QUERY,
-        data: { members: members.concat(inviteMembers) }
+        data: { members: members.concat(inviteMembers) },
       });
-    }
+    },
   });
 
   return (
@@ -39,8 +39,8 @@ export default ({ handleClose }) => {
       <Box p={3}>
         <Typography variant="h5">Invite members</Typography>
         <form
-          onSubmit={handleSubmit(variables => {
-            inviteMembers({ variables }).then(data => {
+          onSubmit={handleSubmit((variables) => {
+            inviteMembers({ variables }).then((data) => {
               reset();
               handleClose();
             });
@@ -61,8 +61,8 @@ export default ({ handleClose }) => {
                 required: "Required",
                 pattern: {
                   value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                  message: "Need to be a comma separated list of emails"
-                }
+                  message: "Need to be a comma separated list of emails",
+                },
               })}
             />
           </Box>

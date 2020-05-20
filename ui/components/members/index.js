@@ -5,7 +5,7 @@ import { Box, Button, Modal } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { makeStyles } from "@material-ui/core/styles";
 
-import HappySpinner from "../../HappySpinner";
+import HappySpinner from "../HappySpinner";
 import InviteMembersForm from "./InviteMembersForm";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
@@ -106,28 +106,26 @@ export default ({ event }) => {
     setOpen(false);
   };
 
+  if (loading)
+    return (
+      <div className="flex-grow flex justify-center items-center">
+        <HappySpinner />
+      </div>
+    );
+
   return (
     <>
-      {loading ? (
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          minHeight={400}
-        >
-          <HappySpinner />
-        </Box>
-      ) : (
-        <>
-          <RequestsToJoinTable
-            requestsToJoin={requestsToJoin}
-            updateMember={updateMember}
-            deleteMember={deleteMember}
-          />
+      <RequestsToJoinTable
+        requestsToJoin={requestsToJoin}
+        updateMember={updateMember}
+        deleteMember={deleteMember}
+      />
 
-          <Box p={2} display="flex" justifyContent="space-between">
-            <h2 className="text-2xl">{approvedMembers.length} members</h2>{" "}
-            {/* <div>
+      <div className="flex justify-between">
+        <h2 className="text-2xl mb-3 text-gray-800">
+          {approvedMembers.length} members
+        </h2>{" "}
+        {/* <div>
               <Button
                 variant="contained"
                 color="primary"
@@ -146,15 +144,13 @@ export default ({ event }) => {
                 </div>
               </Modal>
             </div> */}
-          </Box>
+      </div>
 
-          <MembersTable
-            approvedMembers={approvedMembers}
-            updateMember={updateMember}
-            deleteMember={deleteMember}
-          />
-        </>
-      )}
+      <MembersTable
+        approvedMembers={approvedMembers}
+        updateMember={updateMember}
+        deleteMember={deleteMember}
+      />
     </>
   );
 };

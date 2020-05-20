@@ -9,9 +9,9 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import Card from "../../styled/Card";
-import thousandSeparator from "../../../utils/thousandSeparator";
-import { UPDATE_GRANTING_SETTINGS } from "./";
+import Card from "../styled/Card";
+import thousandSeparator from "utils/thousandSeparator";
+import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetGrantValue = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {

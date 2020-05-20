@@ -5,28 +5,27 @@ import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
 
-import Card from "../../styled/Card";
-import { UPDATE_GRANTING_SETTINGS } from "./";
+import Card from "../styled/Card";
+import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingOpens = ({ closeModal, event }) => {
+const SetGrantingCloses = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
-  const [selectedDate, handleDateChange] = React.useState(event.grantingOpens);
+  const [selectedDate, handleDateChange] = React.useState(event.grantingCloses);
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set granting open date</h1>
+        <h1 className="text-3xl">Set granting close date</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
-            console.log({ variables, selectedDate });
-            updateGranting({ variables: { grantingOpens: selectedDate } })
+            updateGranting({ variables: { grantingCloses: selectedDate } })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
@@ -40,12 +39,12 @@ const SetGrantingOpens = ({ closeModal, event }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label="Granting opens date"
+                label="Granting close date"
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}
                 inputVariant="outlined"
-                name="grantingOpens"
+                name="grantingCloses"
                 inputRef={register}
                 fullWidth
               />
@@ -66,4 +65,4 @@ const SetGrantingOpens = ({ closeModal, event }) => {
   );
 };
 
-export default SetGrantingOpens;
+export default SetGrantingCloses;

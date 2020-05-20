@@ -10,15 +10,15 @@ import {
 } from "@material-ui/core";
 
 export default ({ requestsToJoin, updateMember, deleteMember }) => {
+  if (requestsToJoin.length === 0) return null;
+
   return (
     <>
-      {requestsToJoin.length > 0 ? (
-        <Box m="0 0 20px">
-          <Box p={2}>
-            <h2 className="text-2xl">
-              {requestsToJoin.length} requests to join
-            </h2>
-          </Box>
+      <div className="mb-2">
+        <h2 className="text-2xl mb-3">
+          {requestsToJoin.length} requests to join
+        </h2>
+        <div className="bg-white rounded-lg shadow">
           <TableContainer>
             <Table aria-label="simple table">
               <TableHead>
@@ -81,8 +81,8 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
               </TableBody>
             </Table>
           </TableContainer>
-        </Box>
-      ) : null}
+        </div>
+      </div>
     </>
   );
 };

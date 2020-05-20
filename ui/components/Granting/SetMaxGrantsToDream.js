@@ -1,11 +1,10 @@
 import useForm from "react-hook-form";
-import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { Box, Button, TextField } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import Card from "../../styled/Card";
+import Card from "../styled/Card";
 
-import { UPDATE_GRANTING_SETTINGS } from "./";
+import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetCurrency = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
@@ -18,14 +17,14 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set grants per member</h1>
-        <Alert severity="warning">
-          Changing grants per member will also reset grant value.
-        </Alert>
+        <h1 className="text-3xl">Set max grants to one dream</h1>
+
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { grantsPerMember: Number(variables.grantsPerMember) },
+              variables: {
+                maxGrantsToDream: Number(variables.maxGrantsToDream),
+              },
             })
               .then(({ data }) => {
                 // console.log({ data });
@@ -39,14 +38,15 @@ const SetCurrency = ({ closeModal, event }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="grantsPerMember"
-              label="Grants per member"
-              defaultValue={event.grantsPerMember}
+              name="maxGrantsToDream"
+              label="Max grants to one dream per user"
+              defaultValue={event.maxGrantsToDream}
               fullWidth
               inputRef={register}
               InputProps={{
                 type: "number",
                 min: 1,
+                max: event.grantsPerMember,
               }}
               variant="outlined"
             />
