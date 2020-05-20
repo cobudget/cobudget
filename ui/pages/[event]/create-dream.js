@@ -6,11 +6,12 @@ export default ({ event }) => {
   if (!event) return null;
 
   return (
-    <Card>
-      <Box p={3}>
-        <h1 className="text-2xl mb-2">Create dream</h1>
+    <>
+      <h1 className="text-2xl mb-3 text-gray-800">Create dream</h1>
+
+      <div className="rounded-lg shadow bg-white p-5">
         <EditOrCreateDreamForm event={event} />
-      </Box>
-    </Card>
+      </div>
+    </>
   );
 };
