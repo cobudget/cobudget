@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import withData from "../utils/apolloClient";
@@ -126,7 +126,7 @@ const theme = createMuiTheme({
 const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   const router = useRouter();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
       jssStyles.parentNode.removeChild(jssStyles);
@@ -139,7 +139,7 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
     client: apollo,
   });
 
-  const [modal, setModal] = React.useState(null);
+  const [modal, setModal] = useState(null);
 
   const openModal = (name) => {
     if (modal !== name) setModal(name);
