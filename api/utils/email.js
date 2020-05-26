@@ -96,6 +96,6 @@ const sendRequestToJoinNotifications = async (user, event, emails) => {
 
 module.exports = {
   sendMagicLinkEmail,
-  sendInviteEmails,
+  // sendInviteEmails,
   sendRequestToJoinNotifications,
 };
