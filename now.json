@@ -14,7 +14,9 @@
   "env": {
     "MONGO_URL": "@mongodbatlas-uri",
     "MAILGUN_API_KEY": "@mailgun-api-key",
-    "JWT_SECRET": "@jwt-secret"
+    "JWT_SECRET": "@jwt-secret",
+    "PRETIX_URL": "@pretix-url",
+    "PRETIX_TOKEN": "@pretix-token"
   },
   "scope": "participio"
 }
