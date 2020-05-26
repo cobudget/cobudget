@@ -50,7 +50,3 @@ module.exports = async (req, res) => {
       }
   }
 };
-
-// ask Hugi to set CNAME of dreams.blivande.com to alias.zeit.co
-
-/// fix models.
