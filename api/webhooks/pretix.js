@@ -1,15 +1,56 @@
-module.exports = (req, res) => {
-  // example request body:
-  //   {
-  //     "notification_id": 123455,
-  //     "organizer": "acmecorp",
-  //     "event": "democon",
-  //     "code": "ABC23",
-  //     "action": "pretix.event.order.placed"
-  //   }
-  // pretix.event.order.paid
-  // todo:
-  // verify that it is real, call pretix API and use process.env.PRETIX_TOKEN as authorization
-  // check if user exists, if not create it.
-  // check if membership exists, if not create it.
+const fetch = require('node-fetch');
+const { getModels } = require('../database/models');
+const { getConnection } = require('../database/connection');
+
+// example request body:
+// {
+//   "notification_id": 123455,
+//   "organizer": "acmecorp",
+//   "event": "democon",
+//   "code": "ABC23",
+//   "action": "pretix.event.order.placed"
+// }
+
+module.exports = async (req, res) => {
+  const { body } = req;
+
+  switch (body.action) {
+    case 'pretix.event.order.paid':
+      // ask pretix API for this order
+      const pretixRes = await fetch(
+        `${process.env.PRETIX_URL}/api/v1/organizers/${body.organizer}/events/${body.event}/orders/${body.code}/`,
+        {
+          headers: {
+            Authorization: `Token ${process.env.PRETIX_TOKEN}`,
+          },
+        }
+      );
+
+      const order = await pretixRes.json();
+
+      if (order.status === 'p') {
+        const db = await getConnection();
+        const { User, Member, Event } = getModels(db);
+
+        const event = await Event.findOne({ pretixEvent: body.event });
+
+        const user = await User.findOneAndUpdate(
+          { email: order.email },
+          {},
+          { upsert: true, new: true }
+        );
+
+        const membership = await Member.findOneAndUpdate(
+          { userId: user.id, eventId: event.id },
+          { isApproved: true },
+          { upsert: true }
+        );
+        console.log({ user, membership, event });
+        res.send(200);
+      }
+  }
 };
+
+// ask Hugi to set CNAME of dreams.blivande.com to alias.zeit.co
+
+/// fix models.

@@ -75,6 +75,7 @@ const EventSchema = new Schema({
   dreamCreationCloses: Date,
   grantingOpens: Date,
   grantingCloses: Date,
+  pretixEvent: String,
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {
