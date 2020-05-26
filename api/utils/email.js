@@ -10,7 +10,7 @@ const sendMagicLinkEmail = async (user) => {
   const token = await generateLoginJWT(user);
 
   if (process.env.NODE_ENV === 'production') {
-    const url = `https://dreams.wtf/?token=${token}`;
+    const url = `${process.env.DEPLOY_URL}/?token=${token}`;
     var data = {
       from: 'Dreams <wizard@dreams.wtf>', // send from subdomain?
       to: user.email,
@@ -35,40 +35,40 @@ const sendMagicLinkEmail = async (user) => {
   }
 };
 
-const sendInviteEmails = async (members, event) => {
-  const emails = members.map((member) => member.email);
+// const sendInviteEmails = async (members, event) => {
+//   const emails = members.map((member) => member.email);
 
-  const recipientVars = await members.reduce(async (obj, member) => {
-    return {
-      ...(await obj),
-      [member.email]: { token: await generateLoginJWT(member) },
-    };
-  }, {});
+//   const recipientVars = await members.reduce(async (obj, member) => {
+//     return {
+//       ...(await obj),
+//       [member.email]: { token: await generateLoginJWT(member) },
+//     };
+//   }, {});
 
-  if (process.env.NODE_ENV === 'production') {
-    var data = {
-      from: 'Dreams <wizard@dreams.wtf>',
-      to: emails,
-      subject: `You are invited to Dreams for ${event.title}`,
-      'recipient-variables': recipientVars,
-      text: `Here is your log in link: https://${event.slug}.dreams.wtf/?token=%recipient.token%`,
-    };
-    return mailgun
-      .messages()
-      .send(data)
-      .then(() => {
-        console.log('Successfully sent invites');
-        return true;
-      })
-      .catch((error) => {
-        console.log({ error });
-        throw new Error(error.message);
-      });
-  } else {
-    console.log('In development, not sending invite emails.');
-    console.log(recipientVars);
-  }
-};
+//   if (process.env.NODE_ENV === 'production') {
+//     var data = {
+//       from: 'Dreams <wizard@dreams.wtf>',
+//       to: emails,
+//       subject: `You are invited to Dreams for ${event.title}`,
+//       'recipient-variables': recipientVars,
+//       text: `Here is your log in link: https://${event.slug}.dreams.wtf/?token=%recipient.token%`,
+//     };
+//     return mailgun
+//       .messages()
+//       .send(data)
+//       .then(() => {
+//         console.log('Successfully sent invites');
+//         return true;
+//       })
+//       .catch((error) => {
+//         console.log({ error });
+//         throw new Error(error.message);
+//       });
+//   } else {
+//     console.log('In development, not sending invite emails.');
+//     console.log(recipientVars);
+//   }
+// };
 
 const sendRequestToJoinNotifications = async (user, event, emails) => {
   if (process.env.NODE_ENV === 'production') {
@@ -76,7 +76,7 @@ const sendRequestToJoinNotifications = async (user, event, emails) => {
       from: 'Dreams <wizard@dreams.wtf>',
       to: emails,
       subject: `Request to join ${event.title}`,
-      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://dreams.wtf/${event.slug}/admin`,
+      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: ${process.env.DEPLOY_URL}/${event.slug}/admin`,
     };
     return mailgun
       .messages()

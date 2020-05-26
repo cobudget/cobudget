@@ -16,7 +16,8 @@
     "MAILGUN_API_KEY": "@mailgun-api-key",
     "JWT_SECRET": "@jwt-secret",
     "PRETIX_URL": "@pretix-url",
-    "PRETIX_TOKEN": "@pretix-token"
+    "PRETIX_TOKEN": "@pretix-token",
+    "DEPLOY_URL": "https://dreams.wtf"
   },
   "scope": "participio"
 }

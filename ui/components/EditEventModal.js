@@ -91,7 +91,7 @@ export default ({ event, open, handleClose }) => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        dreams.wtf/
+                        {process.env.DEPLOY_URL}/
                       </InputAdornment>
                     ),
                     onBlur: (e) => {
