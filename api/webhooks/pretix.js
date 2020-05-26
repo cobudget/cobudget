@@ -37,13 +37,13 @@ module.exports = async (req, res) => {
         const user = await User.findOneAndUpdate(
           { email: order.email },
           {},
-          { upsert: true, new: true }
+          { setDefaultsOnInsert: true, upsert: true, new: true }
         );
 
         const membership = await Member.findOneAndUpdate(
           { userId: user.id, eventId: event.id },
           { isApproved: true },
-          { upsert: true }
+          { setDefaultsOnInsert: true, upsert: true }
         );
         console.log({ user, membership, event });
         res.send(200);
