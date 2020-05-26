@@ -15,7 +15,7 @@ module.exports = (phase) => {
   const env = {
     GRAPHQL_URL: isDev
       ? "http://localhost:3000/api"
-      : `${process.env.DEPLOY_URL}/api"`,
+      : "https://dreams.blivande.com/api",
     IS_PROD: isProd,
   };
   return withBundleAnalyzer({
