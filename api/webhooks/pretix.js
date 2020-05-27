@@ -16,7 +16,6 @@ module.exports = async (req, res) => {
 
   switch (body.action) {
     case 'pretix.event.order.paid':
-      // ask pretix API for this order
       const pretixRes = await fetch(
         `${process.env.PRETIX_URL}/api/v1/organizers/${body.organizer}/events/${body.event}/orders/${body.code}/`,
         {
@@ -34,18 +33,23 @@ module.exports = async (req, res) => {
 
         const event = await Event.findOne({ pretixEvent: body.event });
 
-        const user = await User.findOneAndUpdate(
-          { email: order.email },
-          {},
-          { setDefaultsOnInsert: true, upsert: true, new: true }
-        );
+        const attendees = order.positions;
 
-        const membership = await Member.findOneAndUpdate(
-          { userId: user.id, eventId: event.id },
-          { isApproved: true },
-          { setDefaultsOnInsert: true, upsert: true }
-        );
-        console.log({ user, membership, event });
+        for (const attendee of attendees) {
+          const user = await User.findOneAndUpdate(
+            { email: attendee.attendee_email },
+            {},
+            { setDefaultsOnInsert: true, upsert: true, new: true }
+          );
+
+          const membership = await Member.findOneAndUpdate(
+            { userId: user.id, eventId: event.id },
+            { isApproved: true },
+            { setDefaultsOnInsert: true, upsert: true }
+          );
+          console.log({ user, membership, event });
+        }
+
         res.send(200);
       }
   }
