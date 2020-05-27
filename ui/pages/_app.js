@@ -40,13 +40,22 @@ export const TOP_LEVEL_QUERY = gql`
       avatar
       email
       isOrgAdmin
-
+      memberships {
+        id
+        event {
+          title
+          slug
+        }
+      }
       membership(slug: $slug) {
         id
         isAdmin
         isGuide
         isApproved
         availableGrants
+        event {
+          title
+        }
       }
     }
     # currentMember {

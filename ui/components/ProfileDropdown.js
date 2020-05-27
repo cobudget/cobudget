@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { Badge } from "@material-ui/core";
-import Router from "next/router";
 import Avatar from "./Avatar";
 import { modals } from "./Modal/index";
+import Link from "next/link";
 
 const css = {
   button:
-    "text-left block mx-2 px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
+    "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
 const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
@@ -55,23 +55,35 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
           ></button>
 
           <div className="z-20 mt-2 py-2 absolute right-0 w-48 bg-white rounded-lg shadow-2xl flex flex-col flex-stretch">
-            {Boolean(
-              currentUser.membership && currentUser.membership.availableGrants
-            ) && (
-              <p className="px-3 pb-2 mb-2 text-gray-600 text-sm border-b border-gray-200">
-                You have {currentUser.membership.availableGrants} grants left
-              </p>
+            <h2 className="px-4 text-xs my-1 font-semibold text-gray-500 uppercase tracking-wider">
+              Memberships
+            </h2>
+            {currentUser.membership && (
+              <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
+                {currentUser.membership.event.title}
+                {Boolean(currentUser.membership.availableGrants) && (
+                  <p className=" text-gray-800 text-sm">
+                    You have {currentUser.membership.availableGrants} grants
+                    left
+                  </p>
+                )}
+              </div>
             )}
+            {currentUser.memberships.map((membership) => {
+              if (
+                currentUser.membership &&
+                currentUser.membership.id === membership.id
+              ) {
+                return null;
+              }
+              return (
+                <Link href="/[event]" as={`/${membership.event.slug}`}>
+                  <a className={css.button}>{membership.event.title}</a>
+                </Link>
+              );
+            })}
 
-            <button
-              onClick={() => {
-                Router.push("/profile");
-                setOpen(false);
-              }}
-              className={css.button}
-            >
-              Profile
-            </button>
+            <hr className="my-2" />
 
             <button
               onClick={() => {

@@ -195,19 +195,54 @@ export default ({ event, currentUser, openModal, logOut }) => {
                 <span className="font-semibold text-gray-600">
                   {currentUser.name}
                 </span>
-                {currentUser.membership &&
+                {/* {currentUser.membership &&
                   Boolean(currentUser.membership.availableGrants) && (
                     <span className="block text-sm text-gray-600">
                       You have {currentUser.membership.availableGrants} grants
                       left
                     </span>
-                  )}
+                  )} */}
               </div>
             </div>
             <div className="mt-2 flex flex-col items-stretch">
-              <Link href="/profile">
+              {/* <Link href="/profile">
                 <a className={css.mobileProfileItem}>Profile</a>
-              </Link>
+              </Link> */}
+              <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
+                Memberships
+              </h2>
+              {currentUser.membership && (
+                <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
+                  {currentUser.membership.event.title}
+                  {Boolean(currentUser.membership.availableGrants) && (
+                    <p className=" text-gray-800 text-sm">
+                      You have {currentUser.membership.availableGrants} grants
+                      left
+                    </p>
+                  )}
+                </div>
+              )}
+              {currentUser.memberships.map((membership) => {
+                if (
+                  currentUser.membership &&
+                  currentUser.membership.id === membership.id
+                ) {
+                  return null;
+                }
+                return (
+                  <Link
+                    href="/[event]"
+                    as={`/${membership.event.slug}`}
+                    key={membership.id}
+                  >
+                    <a className={css.mobileProfileItem}>
+                      {membership.event.title}
+                    </a>
+                  </Link>
+                );
+              })}
+              <hr className="my-2" />
+
               <button
                 onClick={() => {
                   openModal(modals.EDIT_PROFILE);
