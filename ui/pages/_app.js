@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
 import getHostInfoFromReq from "../utils/getHostInfo";
@@ -133,7 +132,7 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
+const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   const router = useRouter();
 
   useEffect(() => {
@@ -145,8 +144,8 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   const {
     data: { currentUser, event } = { currentUser: null, event: null },
   } = useQuery(TOP_LEVEL_QUERY, {
-    variables: { ...(Boolean(router.query) && { slug: router.query.event }) },
-    client: apollo,
+    variables: { slug: router.query.event },
+    client: apolloClient,
   });
 
   const [modal, setModal] = useState(null);
@@ -161,42 +160,24 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
 
   return (
     <ThemeProvider theme={theme}>
-      <ApolloProvider client={apollo}>
-        <Modal
-          active={modal}
-          closeModal={closeModal}
-          currentUser={currentUser}
-        />
-        <Layout
-          currentUser={currentUser}
-          apollo={apollo}
-          openModal={openModal}
+      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
+      <Layout
+        currentUser={currentUser}
+        apollo={apolloClient}
+        openModal={openModal}
+        event={event}
+      >
+        <Component
+          {...pageProps}
           event={event}
-        >
-          <Component
-            {...pageProps}
-            event={event}
-            currentUser={currentUser}
-            event={event}
-            hostInfo={hostInfo}
-            openModal={openModal}
-          />
-        </Layout>
-      </ApolloProvider>
+          currentUser={currentUser}
+          event={event}
+          hostInfo={hostInfo}
+          openModal={openModal}
+        />
+      </Layout>
     </ThemeProvider>
   );
-};
-
-MyApp.getInitialProps = async ({ Component, ctx }) => {
-  let pageProps = {};
-
-  if (Component.getInitialProps) {
-    pageProps = await Component.getInitialProps(ctx);
-  }
-
-  const hostInfo = getHostInfoFromReq(ctx.req);
-
-  return { pageProps, hostInfo };
 };
 
 export default withApollo({ ssr: true })(MyApp);
