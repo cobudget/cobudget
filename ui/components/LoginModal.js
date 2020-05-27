@@ -1,18 +1,10 @@
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import useForm from "react-hook-form";
-import styled from "styled-components";
-import { Box } from "@material-ui/core";
-import Card from "../components/styled/Card";
-import Form from "../components/styled/Form";
 
-const SmallCard = styled(Card)`
-  max-width: 550px;
-  margin: 50px auto;
-  h1 {
-    text-align: center;
-  }
-`;
+import { Modal } from "@material-ui/core";
+
+import Form from "components/styled/Form";
 
 const SEND_MAGIC_LINK_MUTATION = gql`
   mutation SendMagicLink($email: String!) {
@@ -20,32 +12,20 @@ const SEND_MAGIC_LINK_MUTATION = gql`
   }
 `;
 
-export default ({ currentUser, event }) => {
+export default ({ open, handleClose }) => {
   const [sendMagicLink, { data, loading }] = useMutation(
     SEND_MAGIC_LINK_MUTATION
   );
   const { handleSubmit, register, errors } = useForm();
 
-  if (currentUser) {
-    return <Card>You are logged in as {currentUser.email}.</Card>;
-  }
-  let msg;
-  // switch (event.registrationPolicy) {
-  //   case "OPEN":
-  //     msg = "Log in or sign up with a magic link";
-  //     break;
-  //   case "REQUEST_TO_JOIN":
-  //     msg = "Log in or request to join";
-  //     break;
-  //   case "INVITE_ONLY":
-  //     msg = "Log in with magic link";
-  //     break;
-  // }
-
   return (
-    <SmallCard>
-      <Box p={3}>
-        <h1 className="text-2xl mb-2">{msg}</h1>
+    <Modal
+      open={open}
+      onClose={handleClose}
+      className="flex items-center justify-center p-4"
+    >
+      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <h1 className="text-3xl font-medium mb-2">Login or sign up</h1>
 
         {data && data.sendMagicLink ? (
           <div>
@@ -59,8 +39,12 @@ export default ({ currentUser, event }) => {
               sendMagicLink({ variables: { email } });
             })}
           >
-            <div className="two-cols-3-1">
+            <p className="text-gray-800 mb-1">
+              Enter your email to receive a magic link
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input
+                className="sm:col-start-1 sm:col-end-3"
                 name="email"
                 disabled={loading}
                 placeholder="Email"
@@ -78,7 +62,7 @@ export default ({ currentUser, event }) => {
             {errors.email && email.title.message}
           </Form>
         )}
-      </Box>
-    </SmallCard>
+      </div>
+    </Modal>
   );
 };

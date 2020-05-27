@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
+import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import { CogIcon } from "components/Icons";
 import EditEventModal from "components/EditEventModal";
@@ -14,7 +15,17 @@ const css = {
     "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
 };
 
-const NavItem = ({ href, as, currentPath, children, primary }) => {
+const NavItem = ({ onClick, href, as, currentPath, children, primary }) => {
+  if (Boolean(onClick)) {
+    return (
+      <button
+        className={`my-1 mx-1 px-3 py-2 sm:px-3 sm:my-0 block font-medium rounded-md focus:outline-none hover:bg-gray-200 focus:bg-gray-200 text-gray-800`}
+        onClick={onClick}
+      >
+        {children}
+      </button>
+    );
+  }
   return (
     <Link href={href} as={as}>
       <a
@@ -35,6 +46,8 @@ const NavItem = ({ href, as, currentPath, children, primary }) => {
 export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editEventModalOpen, setEditEventModalOpen] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+
   const router = useRouter();
   return (
     <header className=" sm:flex sm:justify-between sm:items-center sm:py-4">
@@ -168,7 +181,13 @@ export default ({ event, currentUser, openModal, logOut }) => {
             </>
           ) : (
             <>
-              <NavItem href="/login">Login</NavItem>
+              <NavItem onClick={() => setLoginModalOpen(true)}>
+                Login/Sign up
+              </NavItem>
+              <LoginModal
+                open={loginModalOpen}
+                handleClose={() => setLoginModalOpen(false)}
+              />
             </>
           )}
         </div>

@@ -33,13 +33,7 @@ export default ({ event, currentUser }) => {
     // todo: integrate this flow
 
     return (
-      <div>
-        You need to first{" "}
-        <Link href="/login">
-          <a>log in or sign up</a>
-        </Link>{" "}
-        before joining this event.
-      </div>
+      <div>You need to first log in or sign up before joining this event.</div>
     );
   }
   if (event.registrationPolicy === "INVITE_ONLY") {
