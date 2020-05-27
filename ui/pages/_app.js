@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { ApolloProvider } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import withData from "../utils/apolloClient";
+import { withApollo } from "lib/apollo";
 import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
@@ -145,7 +145,7 @@ const MyApp = ({ Component, pageProps, apollo, hostInfo }) => {
   const {
     data: { currentUser, event } = { currentUser: null, event: null },
   } = useQuery(TOP_LEVEL_QUERY, {
-    variables: { slug: router.query.event },
+    variables: { ...(Boolean(router.query) && { slug: router.query.event }) },
     client: apollo,
   });
 
@@ -199,4 +199,4 @@ MyApp.getInitialProps = async ({ Component, ctx }) => {
   return { pageProps, hostInfo };
 };
 
-export default withData(MyApp);
+export default withApollo({ ssr: true })(MyApp);
