@@ -84,16 +84,11 @@ export default ({ event, open, handleClose }) => {
               <Box my={2}>
                 <TextField
                   name="slug"
-                  label="URL"
+                  label="Slug"
                   defaultValue={event.slug}
                   fullWidth
                   inputRef={register}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        {process.env.DEPLOY_URL}/
-                      </InputAdornment>
-                    ),
                     onBlur: (e) => {
                       setValue("slug", slugify(e.target.value));
                     },
