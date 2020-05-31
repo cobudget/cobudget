@@ -145,7 +145,6 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
     data: { currentUser, event } = { currentUser: null, event: null },
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
-    client: apolloClient,
   });
 
   const [modal, setModal] = useState(null);

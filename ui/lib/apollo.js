@@ -92,7 +92,7 @@ export const withApollo = ({ ssr = false } = {}) => (PageComponent) => {
 
     return (
       <ApolloProvider client={client}>
-        <PageComponent {...pageProps} />
+        <PageComponent {...pageProps} apolloClient={client} />
       </ApolloProvider>
     );
   };
