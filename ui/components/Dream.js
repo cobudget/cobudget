@@ -164,7 +164,11 @@ const Dream = ({ dream, event, currentUser }) => {
               <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
                 {dream.approved && (
                   <>
-                    <div className="grid grid-cols-3 gap-1 text-center">
+                    <div
+                      className={`grid gap-1 text-center ${
+                        dream.maxGoalGrants ? "grid-cols-3" : "grid-cols-2"
+                      }`}
+                    >
                       <div>
                         <span className="block text-xl font-medium">
                           {dream.currentNumberOfGrants}
@@ -178,17 +182,19 @@ const Dream = ({ dream, event, currentUser }) => {
                             : "-"}
                         </span>
 
-                        <span className="uppercase text-sm">Min. goal</span>
-                      </div>
-                      <div>
-                        <span className="block text-xl font-medium">
-                          {dream.maxGoalGrants
-                            ? thousandSeparator(dream.maxGoalGrants)
-                            : "-"}
+                        <span className="uppercase text-sm">
+                          {dream.maxGoalGrants ? "Min. goal" : "Goal"}
                         </span>
-
-                        <span className="uppercase text-sm">Max. goal</span>
                       </div>
+                      {dream.maxGoalGrants && (
+                        <div>
+                          <span className="block text-xl font-medium">
+                            {thousandSeparator(dream.maxGoalGrants)}
+                          </span>
+
+                          <span className="uppercase text-sm">Max. goal</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="my-4">
@@ -344,7 +350,7 @@ const Dream = ({ dream, event, currentUser }) => {
                   // <Tooltip key={member.user.id} title={member.user.name}>
                   <div
                     key={member.user.id}
-                    className="flex items-center mr-2 md:mr-3"
+                    className="flex items-center mr-2 md:mr-3 sm:mb-2"
                   >
                     <Avatar user={member.user} />{" "}
                     <span className="ml-2 text-gray-700 hidden md:block">
