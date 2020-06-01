@@ -6,10 +6,14 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  IconButton,
 } from "@material-ui/core";
+import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
+
 import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import dayjs from "dayjs";
+import ReactMarkdown from "react-markdown";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -20,6 +24,7 @@ import SetGrantValue from "./SetGrantValue";
 import SetDreamCreationCloses from "./SetDreamCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
+import SetGuidelines from "./SetGuidelines";
 
 import thousandSeparator from "../../utils/thousandSeparator";
 
@@ -45,6 +50,7 @@ const modals = {
   SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
   SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
   SET_TOTAL_BUDGET: SetTotalBudget,
+  SET_GUIDELINES: SetGuidelines,
 };
 
 export const UPDATE_GRANTING_SETTINGS = gql`
@@ -272,6 +278,37 @@ export default ({ event, currentUser }) => {
           </ListItem>
         </List>
       </div>
+
+      {(event.guidelines ||
+        (currentUser &&
+          currentUser.membership &&
+          currentUser.membership.isAdmin)) && (
+        <>
+          <h2 className="text-xl mb-3 text-gray-800">Guidelines</h2>
+          <div className="shadow rounded-lg bg-white p-4 relative">
+            {event.guidelines ? (
+              <>
+                {currentUser &&
+                  currentUser.membership &&
+                  currentUser.membership.isAdmin && (
+                    <div className="absolute right-0 top-0 m-4">
+                      <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
+                        <EditIcon />
+                      </IconButton>
+                    </div>
+                  )}
+                <ReactMarkdown className="markdown" source={event.guidelines} />
+              </>
+            ) : (
+              <div className="flex justify-center">
+                <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
+                  <AddIcon />
+                </IconButton>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 };

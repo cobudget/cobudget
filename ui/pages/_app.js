@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
-import getHostInfoFromReq from "../utils/getHostInfo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
@@ -32,6 +31,7 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudgetGrants
       remainingGrants
       numberOfApprovedMembers
+      guidelines
     }
     currentUser {
       id
