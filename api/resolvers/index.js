@@ -114,7 +114,7 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      { eventId, slug, title, registrationPolicy, info },
+      { eventId, slug, title, registrationPolicy, info, guidelines },
       { currentUser, models: { Event, Member } }
     ) => {
       const currentMember = await Member.findOne({
@@ -130,7 +130,8 @@ const resolvers = {
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
-      if (info) event.info = info;
+      if (typeof info !== 'undefined') event.info = info;
+      if (typeof guidelines !== 'undefined') event.guidelines = guidelines;
 
       return event.save();
     },

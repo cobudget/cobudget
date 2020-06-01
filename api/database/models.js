@@ -76,6 +76,7 @@ const EventSchema = new Schema({
   grantingOpens: Date,
   grantingCloses: Date,
   pretixEvent: String,
+  guidelines: String,
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {
