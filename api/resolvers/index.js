@@ -177,7 +177,7 @@ const resolvers = {
         cocreators: [currentMember.id], // could argue for different thangs here?..
         budgetDescription,
         minGoal,
-        maxGoal,
+        ...(event.allowStretchGoals && { maxGoal }),
         images,
         budgetItems,
       }).save();
@@ -195,7 +195,7 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentUser, models: { Member, Dream } }
+      { currentUser, models: { Member, Dream, Event } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -204,10 +204,6 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      // add guide and isAdmin to being able to edit dream..
-
-      // rename dream.members to co-creators
-      // maybe save userIds instead of memberIds in this field?... mostly care about avatar/name etc.
       if (
         !currentMember ||
         (!dream.cocreators.includes(currentMember.id) &&
@@ -221,7 +217,14 @@ const resolvers = {
       dream.description = description;
       dream.summary = summary;
       dream.minGoal = minGoal;
-      dream.maxGoal = maxGoal;
+
+      if (maxGoal) {
+        const event = await Event.findOne({ _id: dream.eventId });
+        if (event.allowStretchGoals) {
+          dream.maxGoal = maxGoal;
+        }
+      }
+
       dream.images = images;
       dream.budgetItems = budgetItems;
 

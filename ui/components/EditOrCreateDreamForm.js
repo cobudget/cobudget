@@ -311,7 +311,7 @@ export default ({ dream = {}, event, editing }) => {
       <Box my={2} className={classes.row}>
         <TextField
           name="minGoal"
-          label="Min funding goal"
+          label="Funding goal"
           fullWidth
           defaultValue={minGoal}
           InputProps={{
@@ -323,20 +323,22 @@ export default ({ dream = {}, event, editing }) => {
           inputRef={register({ min: 0 })}
           variant="outlined"
         />
-        <TextField
-          name="maxGoal"
-          label="Max funding goal"
-          fullWidth
-          defaultValue={maxGoal}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">{event.currency}</InputAdornment>
-            ),
-          }}
-          inputProps={{ type: "number", min: 0 }}
-          inputRef={register({ min: 0 })}
-          variant="outlined"
-        />
+        {event.allowStretchGoals && (
+          <TextField
+            name="maxGoal"
+            label="Stretch goal"
+            fullWidth
+            defaultValue={maxGoal}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">{event.currency}</InputAdornment>
+              ),
+            }}
+            inputProps={{ type: "number", min: 0 }}
+            inputRef={register({ min: 0 })}
+            variant="outlined"
+          />
+        )}
       </Box>
 
       <EditBudgetItems

@@ -182,9 +182,7 @@ const Dream = ({ dream, event, currentUser }) => {
                             : "-"}
                         </span>
 
-                        <span className="uppercase text-sm">
-                          {dream.maxGoalGrants ? "Min. goal" : "Goal"}
-                        </span>
+                        <span className="uppercase text-sm">Goal</span>
                       </div>
                       {dream.maxGoalGrants && (
                         <div>
@@ -192,7 +190,9 @@ const Dream = ({ dream, event, currentUser }) => {
                             {thousandSeparator(dream.maxGoalGrants)}
                           </span>
 
-                          <span className="uppercase text-sm">Max. goal</span>
+                          <span className="uppercase text-sm">
+                            Stretch goal
+                          </span>
                         </div>
                       )}
                     </div>
