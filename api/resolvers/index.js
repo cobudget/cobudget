@@ -795,6 +795,7 @@ const resolvers = {
         dreamCreationCloses,
         grantingOpens,
         grantingCloses,
+        allowStretchGoals,
       },
       { currentUser, models: { Event, Member } }
     ) => {
@@ -899,6 +900,15 @@ const resolvers = {
           );
         }
         event.grantingCloses = grantingCloses;
+      }
+
+      if (typeof allowStretchGoals !== 'undefined') {
+        if (grantingHasStarted) {
+          throw new Error(
+            "You can't change stretch goal setting once granting has started"
+          );
+        }
+        event.allowStretchGoals = allowStretchGoals;
       }
 
       return event.save();

@@ -10,7 +10,7 @@ import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
 const SettingsListItem = ({
   primary,
   secondary,
-  value,
+  isSet,
   openModal,
   disabled,
   canEdit,
@@ -20,7 +20,7 @@ const SettingsListItem = ({
       <ListItemText primary={primary} secondary={secondary} />
       {canEdit && (
         <ListItemSecondaryAction>
-          {value ? (
+          {isSet ? (
             <IconButton onClick={openModal} disabled={disabled}>
               <EditIcon />
             </IconButton>

@@ -25,6 +25,7 @@ import SetDreamCreationCloses from "./SetDreamCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
 import SetGuidelines from "./SetGuidelines";
+import SetAllowStretchGoals from "./SetAllowStretchGoals";
 
 import thousandSeparator from "../../utils/thousandSeparator";
 
@@ -51,6 +52,7 @@ const modals = {
   SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
   SET_TOTAL_BUDGET: SetTotalBudget,
   SET_GUIDELINES: SetGuidelines,
+  SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
 };
 
 export const UPDATE_GRANTING_SETTINGS = gql`
@@ -64,6 +66,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $grantingOpens: Date
     $grantingCloses: Date
     $dreamCreationCloses: Date
+    $allowStretchGoals: Boolean
   ) {
     updateGrantingSettings(
       eventId: $eventId
@@ -75,6 +78,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingOpens: $grantingOpens
       grantingCloses: $grantingCloses
       dreamCreationCloses: $dreamCreationCloses
+      allowStretchGoals: $allowStretchGoals
     ) {
       id
       currency
@@ -87,6 +91,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingIsOpen
       dreamCreationCloses
       dreamCreationIsOpen
+      allowStretchGoals
     }
   }
 `;
@@ -131,7 +136,7 @@ export default ({ event, currentUser }) => {
           <SettingsListItem
             primary="Currency"
             secondary={event.currency}
-            value={event.currency}
+            isSet={event.currency}
             disabled={!event.dreamCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
@@ -142,7 +147,7 @@ export default ({ event, currentUser }) => {
           <SettingsListItem
             primary="Grants per member"
             secondary={event.grantsPerMember}
-            value={event.grantsPerMember}
+            isSet={event.grantsPerMember}
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANTS_PER_MEMBER")}
             canEdit={canEditSettings}
@@ -155,7 +160,7 @@ export default ({ event, currentUser }) => {
             secondary={
               event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
             }
-            value={event.maxGrantsToDream}
+            isSet={event.maxGrantsToDream}
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_MAX_GRANTS_TO_DREAM")}
             canEdit={canEditSettings}
@@ -170,7 +175,7 @@ export default ({ event, currentUser }) => {
                 ? `${thousandSeparator(event.totalBudget)} ${event.currency}`
                 : "Not set"
             }
-            value={event.totalBudget}
+            isSet={event.totalBudget}
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_TOTAL_BUDGET")}
             canEdit={canEditSettings}
@@ -185,9 +190,20 @@ export default ({ event, currentUser }) => {
                 ? `${thousandSeparator(event.grantValue)} ${event.currency}`
                 : "Not set"
             }
-            value={event.grantValue}
+            isSet={event.grantValue}
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANT_VALUE")}
+            canEdit={canEditSettings}
+          />
+
+          <Divider />
+
+          <SettingsListItem
+            primary="Allow stretch goals"
+            secondary={event.allowStretchGoals.toString()}
+            isSet={typeof event.allowStretchGoals !== "undefined"}
+            disabled={grantingHasOpened}
+            openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
           />
 
@@ -202,7 +218,7 @@ export default ({ event, currentUser }) => {
                   )
                 : "Not set"
             }
-            value={event.dreamCreationCloses}
+            isSet={event.dreamCreationCloses}
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
@@ -217,7 +233,7 @@ export default ({ event, currentUser }) => {
                 ? dayjs(event.grantingOpens).format("MMMM D, YYYY - h:mm a")
                 : "Not set"
             }
-            value={event.grantingOpens}
+            isSet={event.grantingOpens}
             openModal={() => handleOpen("SET_GRANTING_OPENS")}
             disabled={
               !event.dreamCreationCloses ||
@@ -236,7 +252,7 @@ export default ({ event, currentUser }) => {
                 ? dayjs(event.grantingCloses).format("MMMM D, YYYY - h:mm a")
                 : "Not set"
             }
-            value={event.grantingCloses}
+            isSet={event.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             disabled={!event.grantingOpens}
             canEdit={canEditSettings}

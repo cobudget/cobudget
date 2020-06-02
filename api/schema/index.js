@@ -81,6 +81,7 @@ const schema = gql`
       grantingOpens: Date
       grantingCloses: Date
       dreamCreationCloses: Date
+      allowStretchGoals: Boolean
     ): Event
     giveGrant(eventId: ID!, dreamId: ID!, value: Int!): Grant
     deleteGrant(eventId: ID!, grantId: ID!): Grant
@@ -120,6 +121,7 @@ const schema = gql`
     grantingCloses: Date
     grantingIsOpen: Boolean
     guidelines: String
+    allowStretchGoals: Boolean
   }
 
   scalar Date
