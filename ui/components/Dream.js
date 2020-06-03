@@ -4,6 +4,7 @@ import { useMutation } from "@apollo/react-hooks";
 import { Button, Tooltip, IconButton } from "@material-ui/core";
 import { Edit as EditIcon } from "@material-ui/icons";
 import Router from "next/router";
+import ReactMarkdown from "react-markdown";
 
 import Label from "./Label";
 import stringToHslColor from "../utils/stringToHslColor";
@@ -103,7 +104,7 @@ const Dream = ({ dream, event, currentUser }) => {
 
             <Gallery images={dream.images} size={100} />
 
-            <p className="whitespace-pre-line">{dream.description}</p>
+            <ReactMarkdown source={dream.description} className="markdown" />
 
             {dream.minGoal && (
               <div className="my-5">

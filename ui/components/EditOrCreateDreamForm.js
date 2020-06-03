@@ -287,7 +287,7 @@ export default ({ dream = {}, event, editing }) => {
       <Box my={2}>
         <TextField
           name="description"
-          label="Description"
+          label="Description (markdown allowed)"
           defaultValue={description}
           fullWidth
           inputRef={register}
