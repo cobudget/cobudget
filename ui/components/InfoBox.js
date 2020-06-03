@@ -10,12 +10,12 @@ export default ({ markdown, close }) => {
       className="shadow relative rounded-lg mt-2 mb-5 bg-white px-5 pt-4 pb-10 overflow-hidden markdown"
       style={!expanded ? { maxHeight: 90 } : {}}
     >
-      <button
+      {/* <button
         className="absolute right-0 top-0 m-2 p-2 text-gray-700 rounded-full hover:bg-gray-100 focus:outline-none focus:shadow-outline"
         onClick={close}
       >
         <CloseIcon className="w-6 h-6" />
-      </button>
+      </button> */}
 
       <ReactMarkdown source={markdown} />
 
