@@ -216,12 +216,14 @@ const schema = gql`
 
   type BudgetItem {
     description: String!
-    amount: String!
+    min: Int!
+    max: Int
   }
 
   input BudgetItemInput {
     description: String!
-    amount: String!
+    min: Int!
+    max: Int
   }
 
   # enum Visibility {
