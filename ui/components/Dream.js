@@ -139,7 +139,9 @@ const Dream = ({ dream, event, currentUser }) => {
                             {budgetItem.description}
                           </td>
                           <td className="border px-4 py-2">
-                            {budgetItem.amount} {event.currency}
+                            {budgetItem.min}
+                            {budgetItem.max && ` - ${budgetItem.max}`}{" "}
+                            {event.currency}
                           </td>
                         </tr>
                       ))}
@@ -190,9 +192,7 @@ const Dream = ({ dream, event, currentUser }) => {
                             {thousandSeparator(dream.maxGoalGrants)}
                           </span>
 
-                          <span className="uppercase text-sm">
-                            Stretch goal
-                          </span>
+                          <span className="uppercase text-sm">Max. goal</span>
                         </div>
                       )}
                     </div>
