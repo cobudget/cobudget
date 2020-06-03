@@ -45,7 +45,7 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
         <p className="text-gray-900">{comment.content}</p>
         {currentUser &&
           (currentUser.id === comment.author.id ||
-            currentUser.membership.isAdmin) && (
+            (currentUser.membership && currentUser.membership.isAdmin)) && (
             <button
               onClick={() => {
                 if (
