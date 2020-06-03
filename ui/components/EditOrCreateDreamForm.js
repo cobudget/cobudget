@@ -4,15 +4,9 @@ import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import Router from "next/router";
 
-import {
-  TextField,
-  Box,
-  InputAdornment,
-  Typography,
-  Button,
-} from "@material-ui/core";
+import * as yup from "yup";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { TextField, Box, Button } from "@material-ui/core";
 
 import ImageUpload from "./ImageUpload";
 import EditBudgetItems from "./EditBudgetItems";
@@ -195,8 +189,6 @@ export default ({ dream = {}, event, editing }) => {
       variables: {
         eventId: event.id,
         ...values,
-        minGoal: values.minGoal === "" ? null : Number(values.minGoal),
-        maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
       },
     })
@@ -218,8 +210,6 @@ export default ({ dream = {}, event, editing }) => {
       variables: {
         dreamId: dream.id,
         ...values,
-        minGoal: values.minGoal === "" ? null : Number(values.minGoal),
-        maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
       },
     })
@@ -305,41 +295,6 @@ export default ({ dream = {}, event, editing }) => {
           rows={15}
           variant="outlined"
         />
-      </Box>
-
-      <Typography variant="h6">Funding goals</Typography>
-
-      <Box my={2} className={classes.row}>
-        <TextField
-          name="minGoal"
-          label="Funding goal"
-          fullWidth
-          defaultValue={minGoal}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">{event.currency}</InputAdornment>
-            ),
-          }}
-          inputProps={{ type: "number", min: 0 }}
-          inputRef={register({ min: 0 })}
-          variant="outlined"
-        />
-        {event.allowStretchGoals && (
-          <TextField
-            name="maxGoal"
-            label="Stretch goal"
-            fullWidth
-            defaultValue={maxGoal}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">{event.currency}</InputAdornment>
-              ),
-            }}
-            inputProps={{ type: "number", min: 0 }}
-            inputRef={register({ min: 0 })}
-            variant="outlined"
-          />
-        )}
       </Box>
 
       <EditBudgetItems
