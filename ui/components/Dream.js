@@ -56,9 +56,8 @@ const Dream = ({ dream, event, currentUser }) => {
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
   const canEditDream =
-    (currentUser &&
-      currentUser.membership &&
-      (currentUser.membership.isAdmin || currentUser.membership.isGuide)) ||
+    currentUser?.membership?.isAdmin ||
+    currentUser?.membership?.isGuide ||
     isMemberOfDream(currentUser, dream);
 
   return (
