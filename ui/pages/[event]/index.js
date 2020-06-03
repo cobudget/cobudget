@@ -63,7 +63,7 @@ export default ({ currentUser, event }) => {
 
   return (
     <>
-      {event.info && <InfoBox markdown={event.info} close={dismissInfoBox} />}
+      {event.info && <InfoBox markdown={event.info} />}
 
       <Filterbar
         filterFavorites={filterFavorites}
