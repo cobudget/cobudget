@@ -32,24 +32,36 @@ module.exports = async (req, res) => {
         const { User, Member, Event } = getModels(db);
 
         const event = await Event.findOne({ pretixEvent: body.event });
-        console.log({ order });
-        const attendees = order.positions;
-        console.log({ attendees });
-        for (const attendee of attendees) {
-          console.log({ attendee });
-          const user = await User.findOneAndUpdate(
-            { email: attendee.attendee_email },
-            {},
-            { setDefaultsOnInsert: true, upsert: true, new: true }
-          );
 
-          const membership = await Member.findOneAndUpdate(
-            { userId: user.id, eventId: event.id },
-            { isApproved: true },
-            { setDefaultsOnInsert: true, upsert: true, new: true }
-          );
-          console.log({ user, membership, event });
-        }
+        const user = await User.findOneAndUpdate(
+          { email: order.email },
+          {},
+          { setDefaultsOnInsert: true, upsert: true, new: true }
+        );
+
+        const membership = await Member.findOneAndUpdate(
+          { userId: user.id, eventId: event.id },
+          { isApproved: true },
+          { setDefaultsOnInsert: true, upsert: true, new: true }
+        );
+
+        console.log({ user, membership, event });
+        // const attendees = order.positions;
+
+        // for (const attendee of attendees) {
+        //   const user = await User.findOneAndUpdate(
+        //     { email: attendee.attendee_email },
+        //     {},
+        //     { setDefaultsOnInsert: true, upsert: true, new: true }
+        //   );
+
+        //   const membership = await Member.findOneAndUpdate(
+        //     { userId: user.id, eventId: event.id },
+        //     { isApproved: true },
+        //     { setDefaultsOnInsert: true, upsert: true, new: true }
+        //   );
+        //   console.log({ user, membership, event });
+        // }
 
         res.send(200);
       }
