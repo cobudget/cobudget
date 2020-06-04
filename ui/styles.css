@@ -19,6 +19,18 @@ html {
   );
 }
 
+.btn {
+  @apply text-white bg-green font-medium transition-colors duration-100 rounded-md px-5 py-3;
+}
+
+/* .btn:hover {
+  @apply bg-indigo-darker;
+} */
+
+.btn:focus {
+  @apply outline-none shadow-outline;
+}
+
 .markdown h1,
 h2,
 h3,

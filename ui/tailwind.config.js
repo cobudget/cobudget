@@ -13,8 +13,24 @@ module.exports = {
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
+      colors: {
+        green: "#2cbc63",
+        red: "#eb4962",
+      },
+    },
+    borderWidth: {
+      default: "1px",
+      "0": "0",
+      "2": "2px",
+      "3": "3px",
+      "4": "4px",
     },
     animations: {
+      "fade-in": {
+        from: {
+          opacity: 0,
+        },
+      },
       spin: {
         from: {
           transform: "rotate(0deg)",
