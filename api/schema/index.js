@@ -141,6 +141,7 @@ const schema = gql`
     name: String
     avatar: String
     isOrgAdmin: Boolean
+    createdAt: Date
   }
 
   # rename to Membership
