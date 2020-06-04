@@ -44,8 +44,13 @@ module.exports = async (req, res) => {
 
           const membership = await Member.findOneAndUpdate(
             { userId: user.id, eventId: event.id },
-            { isApproved: true },
-            { setDefaultsOnInsert: true, upsert: true }
+            {
+              isApproved: true,
+              isAdmin: false,
+              isGuide: false,
+              createdAt: Date.now(),
+            },
+            { upsert: true }
           );
           console.log({ user, membership, event });
         }
