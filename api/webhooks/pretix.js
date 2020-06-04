@@ -34,8 +34,9 @@ module.exports = async (req, res) => {
         const event = await Event.findOne({ pretixEvent: body.event });
 
         const attendees = order.positions;
-
+        console.log({ attendees });
         for (const attendee of attendees) {
+          console.log({ attendee });
           const user = await User.findOneAndUpdate(
             { email: attendee.attendee_email },
             {},
@@ -44,13 +45,8 @@ module.exports = async (req, res) => {
 
           const membership = await Member.findOneAndUpdate(
             { userId: user.id, eventId: event.id },
-            {
-              isApproved: true,
-              isAdmin: false,
-              isGuide: false,
-              createdAt: Date.now(),
-            },
-            { upsert: true }
+            { isApproved: true },
+            { setDefaultsOnInsert: true, upsert: true, new: true }
           );
           console.log({ user, membership, event });
         }
