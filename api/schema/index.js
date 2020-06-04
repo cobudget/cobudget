@@ -134,7 +134,7 @@ const schema = gql`
 
   type User {
     id: ID!
-    email: String!
+    email: String
     verifiedEmail: Boolean!
     membership(slug: String): Member
     memberships: [Member!]
