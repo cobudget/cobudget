@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
         const { User, Member, Event } = getModels(db);
 
         const event = await Event.findOne({ pretixEvent: body.event });
-
+        console.log({ order });
         const attendees = order.positions;
         console.log({ attendees });
         for (const attendee of attendees) {
