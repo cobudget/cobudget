@@ -3,25 +3,10 @@ import {
   Box,
   InputAdornment,
   Button,
-  Typography
+  IconButton,
+  Typography,
 } from "@material-ui/core";
 import { Delete as DeleteIcon, Add as AddIcon } from "@material-ui/icons";
-
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles(theme => ({
-  row: {
-    margin: "16px 0",
-    display: "grid",
-    gridTemplateColumns: "8fr 6fr 2fr",
-    gridGap: theme.spacing(2)
-  },
-  [theme.breakpoints.down("xs")]: {
-    row: {
-      gridTemplateColumns: "1fr"
-    }
-  }
-}));
 
 export default ({
   event,
@@ -29,56 +14,86 @@ export default ({
   errors,
   budgetItems,
   addBudgetItem,
-  removeBudgetItem
+  removeBudgetItem,
 }) => {
-  const classes = useStyles();
-
   return (
     <Box my={2}>
       <Typography variant="h6">Budget items</Typography>
       {budgetItems.map((budgetItem, index) => {
         const fieldName = `budgetItems[${index}]`;
         return (
-          <div className={classes.row} key={fieldName}>
-            <TextField
-              name="description"
-              label="Description"
-              name={`${fieldName}.description`}
-              defaultValue={budgetItem.description}
-              inputRef={register({ required: "Required" })}
-              variant="outlined"
-              error={Boolean(errors[`${fieldName}.description`])}
-              helperText={
-                errors[`${fieldName}.description`] &&
-                errors[`${fieldName}.description`].message
-              }
-            />
-            <TextField
-              name="amount"
-              label="Amount"
-              name={`${fieldName}.amount`}
-              defaultValue={budgetItem.amount}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {event.currency}
-                  </InputAdornment>
-                )
-              }}
-              inputRef={register({ required: "Required" })}
-              variant="outlined"
-              error={Boolean(errors[`${fieldName}.amount`])}
-              helperText={
-                errors[`${fieldName}.amount`] &&
-                errors[`${fieldName}.amount`].message
-              }
-            />
-            <Button
-              onClick={() => removeBudgetItem(index)}
-              startIcon={<DeleteIcon />}
-            >
-              Delete
-            </Button>
+          <div className={`flex flex-col sm:flex-row my-4`} key={fieldName}>
+            <div className="mr-2 my-2 sm:my-0 flex-grow">
+              <TextField
+                name="description"
+                label="Description"
+                fullWidth
+                name={`${fieldName}.description`}
+                defaultValue={budgetItem.description}
+                inputRef={register({ required: "Required" })}
+                variant="outlined"
+                error={Boolean(errors[`${fieldName}.description`])}
+                helperText={
+                  errors[`${fieldName}.description`] &&
+                  errors[`${fieldName}.description`].message
+                }
+              />
+            </div>
+            <div className="mr-2 my-2 sm:my-0">
+              <TextField
+                name="min"
+                label={event.allowStretchGoals ? "Min amount" : "Amount"}
+                fullWidth
+                name={`${fieldName}.min`}
+                defaultValue={budgetItem.min}
+                inputProps={{ type: "number" }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {event.currency}
+                    </InputAdornment>
+                  ),
+                }}
+                inputRef={register({ required: "Required", min: 0 })}
+                variant="outlined"
+                error={Boolean(errors[`${fieldName}.min`])}
+                helperText={
+                  errors[`${fieldName}.min`] &&
+                  errors[`${fieldName}.min`].message
+                }
+              />
+            </div>
+
+            {event.allowStretchGoals && (
+              <div className="mr-2 my-2 sm:my-0">
+                <TextField
+                  name="max"
+                  label="Max amount"
+                  fullWidth
+                  name={`${fieldName}.max`}
+                  defaultValue={budgetItem.max}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        {event.currency}
+                      </InputAdornment>
+                    ),
+                  }}
+                  inputRef={register({ min: 0 })}
+                  variant="outlined"
+                  error={Boolean(errors[`${fieldName}.max`])}
+                  helperText={
+                    errors[`${fieldName}.max`] &&
+                    errors[`${fieldName}.max`].message
+                  }
+                />
+              </div>
+            )}
+            <div className="my-2 sm:my-0">
+              <IconButton onClick={() => removeBudgetItem(index)}>
+                <DeleteIcon />
+              </IconButton>
+            </div>
           </div>
         );
       })}

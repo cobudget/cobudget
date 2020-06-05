@@ -1,4 +1,4 @@
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 
@@ -32,13 +32,13 @@ const FinishSignUp = ({ closeModal }) => {
           </p> */}
 
         <form
-          onSubmit={handleSubmit(variables => {
+          onSubmit={handleSubmit((variables) => {
             updateUser({ variables })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
               })
-              .catch(err => {
+              .catch((err) => {
                 console.log({ err });
                 alert(err.message);
               });
@@ -53,7 +53,7 @@ const FinishSignUp = ({ closeModal }) => {
               helperText={errors.name && errors.name.message}
               fullWidth
               inputRef={register({
-                required: "Required"
+                required: "Required",
               })}
             />
           </Box>

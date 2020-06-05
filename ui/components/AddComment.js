@@ -1,4 +1,4 @@
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 

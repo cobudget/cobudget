@@ -45,7 +45,8 @@ export const DREAM_QUERY = gql`
       }
       budgetItems {
         description
-        amount
+        min
+        max
       }
     }
   }

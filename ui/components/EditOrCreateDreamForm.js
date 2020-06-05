@@ -1,18 +1,12 @@
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import Router from "next/router";
 
-import {
-  TextField,
-  Box,
-  InputAdornment,
-  Typography,
-  Button,
-} from "@material-ui/core";
+import * as yup from "yup";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { TextField, Box, Button } from "@material-ui/core";
 
 import ImageUpload from "./ImageUpload";
 import EditBudgetItems from "./EditBudgetItems";
@@ -77,7 +71,8 @@ const CREATE_DREAM = gql`
       }
       budgetItems {
         description
-        amount
+        min
+        max
       }
     }
   }
@@ -141,42 +136,42 @@ const EDIT_DREAM = gql`
       }
       budgetItems {
         description
-        amount
+        min
+        max
       }
     }
   }
 `;
 
-const useStyles = makeStyles((theme) => ({
-  row: {
-    margin: "16px 0",
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gridGap: theme.spacing(2),
-  },
-  [theme.breakpoints.down("xs")]: {
-    row: {
-      gridTemplateColumns: "1fr",
-    },
-  },
-}));
+const schema = yup.object().shape({
+  title: yup.string().required(),
+  slug: yup.string().required(),
+  summary: yup.string().required(),
+  description: yup.string(),
+  images: yup.array().of(
+    yup.object().shape({
+      small: yup.string().url().required(),
+      large: yup.string().url().required(),
+    })
+  ),
+  budgetItems: yup.array().of(
+    yup.object().shape({
+      description: yup.string().required(),
+      min: yup.number().positive().integer().required(),
+      max: yup.number().positive().integer(),
+    })
+  ),
+});
 
 export default ({ dream = {}, event, editing }) => {
-  const classes = useStyles();
-
   const [editDream] = useMutation(EDIT_DREAM);
   const [createDream] = useMutation(CREATE_DREAM);
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, errors } = useForm({
+    validationSchema: schema,
+  });
 
-  const {
-    title = "",
-    slug = "",
-    description = "",
-    summary = "",
-    minGoal = "",
-    maxGoal = "",
-  } = dream;
+  const { title = "", slug = "", description = "", summary = "" } = dream;
 
   const [slugValue, setSlugValue] = useState(slug);
   const [images, setImages] = useState(dream.images ? dream.images : []);
@@ -185,7 +180,7 @@ export default ({ dream = {}, event, editing }) => {
     dream.budgetItems ? dream.budgetItems : []
   );
   const addBudgetItem = () =>
-    setBudgetItems([...budgetItems, { description: "", value: "" }]);
+    setBudgetItems([...budgetItems, { description: "", min: 0, max: 0 }]);
   const removeBudgetItem = (i) =>
     setBudgetItems([...budgetItems.filter((item, index) => i !== index)]);
 
@@ -194,8 +189,6 @@ export default ({ dream = {}, event, editing }) => {
       variables: {
         eventId: event.id,
         ...values,
-        minGoal: values.minGoal === "" ? null : Number(values.minGoal),
-        maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
       },
     })
@@ -217,8 +210,6 @@ export default ({ dream = {}, event, editing }) => {
       variables: {
         dreamId: dream.id,
         ...values,
-        minGoal: values.minGoal === "" ? null : Number(values.minGoal),
-        maxGoal: values.maxGoal === "" ? null : Number(values.maxGoal),
         images,
       },
     })
@@ -296,7 +287,7 @@ export default ({ dream = {}, event, editing }) => {
       <Box my={2}>
         <TextField
           name="description"
-          label="Description"
+          label="Description (markdown allowed)"
           defaultValue={description}
           fullWidth
           inputRef={register}
@@ -304,41 +295,6 @@ export default ({ dream = {}, event, editing }) => {
           rows={15}
           variant="outlined"
         />
-      </Box>
-
-      <Typography variant="h6">Funding goals</Typography>
-
-      <Box my={2} className={classes.row}>
-        <TextField
-          name="minGoal"
-          label="Funding goal"
-          fullWidth
-          defaultValue={minGoal}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">{event.currency}</InputAdornment>
-            ),
-          }}
-          inputProps={{ type: "number", min: 0 }}
-          inputRef={register({ min: 0 })}
-          variant="outlined"
-        />
-        {event.allowStretchGoals && (
-          <TextField
-            name="maxGoal"
-            label="Stretch goal"
-            fullWidth
-            defaultValue={maxGoal}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">{event.currency}</InputAdornment>
-              ),
-            }}
-            inputProps={{ type: "number", min: 0 }}
-            inputRef={register({ min: 0 })}
-            variant="outlined"
-          />
-        )}
       </Box>
 
       <EditBudgetItems

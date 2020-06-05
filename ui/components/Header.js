@@ -182,7 +182,7 @@ export default ({ event, currentUser, openModal, logOut }) => {
           ) : (
             <>
               <NavItem onClick={() => setLoginModalOpen(true)}>
-                Login/Sign up
+                Login or Sign up
               </NavItem>
               <LoginModal
                 open={loginModalOpen}

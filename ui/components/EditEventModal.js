@@ -1,13 +1,7 @@
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import {
-  TextField,
-  Box,
-  InputAdornment,
-  Button,
-  Modal,
-} from "@material-ui/core";
+import { TextField, Box, Button, Modal } from "@material-ui/core";
 import SelectInput from "./SelectInput";
 
 import slugify from "../utils/slugify";

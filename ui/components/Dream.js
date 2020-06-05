@@ -4,6 +4,7 @@ import { useMutation } from "@apollo/react-hooks";
 import { Button, Tooltip, IconButton } from "@material-ui/core";
 import { Edit as EditIcon } from "@material-ui/icons";
 import Router from "next/router";
+import ReactMarkdown from "react-markdown";
 
 import Label from "./Label";
 import stringToHslColor from "../utils/stringToHslColor";
@@ -56,9 +57,8 @@ const Dream = ({ dream, event, currentUser }) => {
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
   const canEditDream =
-    (currentUser &&
-      currentUser.membership &&
-      (currentUser.membership.isAdmin || currentUser.membership.isGuide)) ||
+    currentUser?.membership?.isAdmin ||
+    currentUser?.membership?.isGuide ||
     isMemberOfDream(currentUser, dream);
 
   return (
@@ -104,7 +104,7 @@ const Dream = ({ dream, event, currentUser }) => {
 
             <Gallery images={dream.images} size={100} />
 
-            <p className="whitespace-pre-line">{dream.description}</p>
+            <ReactMarkdown source={dream.description} className="markdown" />
 
             {dream.minGoal && (
               <div className="my-5">
@@ -139,7 +139,9 @@ const Dream = ({ dream, event, currentUser }) => {
                             {budgetItem.description}
                           </td>
                           <td className="border px-4 py-2">
-                            {budgetItem.amount} {event.currency}
+                            {budgetItem.min}
+                            {budgetItem.max && ` - ${budgetItem.max}`}{" "}
+                            {event.currency}
                           </td>
                         </tr>
                       ))}
@@ -190,9 +192,7 @@ const Dream = ({ dream, event, currentUser }) => {
                             {thousandSeparator(dream.maxGoalGrants)}
                           </span>
 
-                          <span className="uppercase text-sm">
-                            Stretch goal
-                          </span>
+                          <span className="uppercase text-sm">Max. goal</span>
                         </div>
                       )}
                     </div>

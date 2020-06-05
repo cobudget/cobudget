@@ -1,4 +1,4 @@
-import useForm from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import { Box, Button, TextField } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";

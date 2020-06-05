@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
-import store from "store";
+// import store from "store";
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
@@ -36,11 +36,11 @@ export default ({ currentUser, event }) => {
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
-  const [showInfoBox, setShowInfoBox] = useState(true);
-  const dismissInfoBox = () => {
-    store.set(event.slug, { infoBoxDismissed: true });
-    setShowInfoBox(false);
-  };
+  // const [showInfoBox, setShowInfoBox] = useState(true);
+  // const dismissInfoBox = () => {
+  //   store.set(event.slug, { infoBoxDismissed: true });
+  //   setShowInfoBox(false);
+  // };
 
   let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
@@ -52,10 +52,10 @@ export default ({ currentUser, event }) => {
     }
   );
 
-  useEffect(() => {
-    const { infoBoxDismissed = false } = store.get(event.slug) || {};
-    if (infoBoxDismissed) setShowInfoBox(false);
-  }, []);
+  // useEffect(() => {
+  //   const { infoBoxDismissed = false } = store.get(event.slug) || {};
+  //   if (infoBoxDismissed) setShowInfoBox(false);
+  // }, []);
 
   if (filterFavorites) {
     dreams = dreams.filter((dream) => dream.favorite);
@@ -63,9 +63,7 @@ export default ({ currentUser, event }) => {
 
   return (
     <>
-      {event.info && showInfoBox && (
-        <InfoBox markdown={event.info} close={dismissInfoBox} />
-      )}
+      {event.info && <InfoBox markdown={event.info} />}
 
       <Filterbar
         filterFavorites={filterFavorites}

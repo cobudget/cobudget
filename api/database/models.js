@@ -120,8 +120,6 @@ const DreamSchema = new Schema({
   },
   description: String,
   cocreators: [Schema.Types.ObjectId],
-  minGoal: Number,
-  maxGoal: Number,
   images: [new Schema({ small: String, large: String })],
   comments: [
     new Schema({
@@ -134,11 +132,33 @@ const DreamSchema = new Schema({
     }),
   ],
   approved: { type: Boolean, default: false },
-  budgetItems: [new Schema({ description: String, amount: String })],
+  budgetItems: [
+    new Schema({
+      description: { type: String, required: true },
+      min: { type: Number, required: true },
+      max: Number,
+    }),
+  ],
   published: { type: Boolean, default: false },
 })
   .index({ eventId: 1, slug: 1 }, { unique: true })
   .index({ title: 'text', description: 'text', summary: 'text' });
+
+DreamSchema.virtual('minGoal').get(function () {
+  if (!this.budgetItems) return null;
+  return this.budgetItems.reduce((acc, item) => acc + item.min, 0);
+});
+
+DreamSchema.virtual('maxGoal').get(function () {
+  if (!this.budgetItems) return null;
+  const min = this.budgetItems.reduce((acc, item) => acc + item.min, 0);
+  const max = this.budgetItems.reduce(
+    (acc, item) => acc + (item.max ? item.max : item.min),
+    0
+  );
+  if (min === max) return null;
+  return max;
+});
 
 const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },

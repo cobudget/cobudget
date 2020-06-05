@@ -134,13 +134,14 @@ const schema = gql`
 
   type User {
     id: ID!
-    email: String!
+    email: String
     verifiedEmail: Boolean!
     membership(slug: String): Member
     memberships: [Member!]
     name: String
     avatar: String
     isOrgAdmin: Boolean
+    createdAt: Date
   }
 
   # rename to Membership
@@ -216,12 +217,14 @@ const schema = gql`
 
   type BudgetItem {
     description: String!
-    amount: String!
+    min: Int!
+    max: Int
   }
 
   input BudgetItemInput {
     description: String!
-    amount: String!
+    min: Int!
+    max: Int
   }
 
   # enum Visibility {

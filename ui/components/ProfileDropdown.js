@@ -77,7 +77,11 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
                 return null;
               }
               return (
-                <Link href="/[event]" as={`/${membership.event.slug}`}>
+                <Link
+                  href="/[event]"
+                  as={`/${membership.event.slug}`}
+                  key={membership.event.slug}
+                >
                   <a className={css.button}>{membership.event.title}</a>
                 </Link>
               );
