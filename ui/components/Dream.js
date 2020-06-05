@@ -106,7 +106,7 @@ const Dream = ({ dream, event, currentUser }) => {
 
             <ReactMarkdown source={dream.description} className="markdown" />
 
-            {dream.minGoal && (
+            {dream.minGoal > 0 && (
               <div className="my-5">
                 <h2 className="mb-2 text-2xl font-medium">Funding goals</h2>
 

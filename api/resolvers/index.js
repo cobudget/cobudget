@@ -171,7 +171,7 @@ const resolvers = {
       return new Dream({
         eventId,
         title,
-        slug: slugify(slug),
+        slug: slugify(title),
         description,
         summary,
         cocreators: [currentMember.id], // could argue for different thangs here?..

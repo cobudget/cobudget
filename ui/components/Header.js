@@ -9,6 +9,7 @@ import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import { CogIcon } from "components/Icons";
 import EditEventModal from "components/EditEventModal";
+import NewDreamModal from "components/NewDreamModal";
 
 const css = {
   mobileProfileItem:
@@ -47,6 +48,7 @@ export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editEventModalOpen, setEditEventModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const router = useRouter();
   return (
@@ -138,14 +140,19 @@ export default ({ event, currentUser, openModal, logOut }) => {
 
                       {event.dreamCreationIsOpen &&
                         currentUser.membership.isApproved && (
-                          <NavItem
-                            href="/[event]/create-dream"
-                            as={`/${event.slug}/create-dream`}
-                            currentPath={router.pathname}
-                            // primary
-                          >
-                            Create dream
-                          </NavItem>
+                          <>
+                            <NavItem
+                              onClick={() => setNewDreamModalOpen(true)}
+                              // primary
+                            >
+                              New dream
+                            </NavItem>
+                            <NewDreamModal
+                              open={newDreamModalOpen}
+                              handleClose={() => setNewDreamModalOpen(false)}
+                              event={event}
+                            />
+                          </>
                         )}
                     </>
                   ) : (
