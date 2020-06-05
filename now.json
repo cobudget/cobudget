@@ -17,7 +17,9 @@
     "JWT_SECRET": "@jwt-secret",
     "PRETIX_URL": "@pretix-url",
     "PRETIX_TOKEN": "@pretix-token",
-    "DEPLOY_URL": "https://dreams.blivande.com"
+    "DEPLOY_URL": "https://dreams.blivande.com",
+    "EMAIL_SENDER": "@email-sender",
+    "DOMAIN": "@domain"
   },
   "scope": "participio"
 }
