@@ -30,7 +30,7 @@ const schema = gql`
     createDream(
       eventId: ID!
       title: String!
-      slug: String!
+      slug: String
       description: String
       summary: String
       minGoal: Int
