@@ -330,24 +330,25 @@ const resolvers = {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
-
+  
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
       });
-
+  
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be a member and/or approved');
-
+  
       if (content.length === 0) throw new Error('You need content!');
-
+  
       dream.comments.push({
         authorId: currentUser.id,
         content,
       });
-
+  
       return await dream.save();
     },
+    
     deleteComment: async (
       parent,
       { dreamId, commentId },
@@ -356,15 +357,15 @@ const resolvers = {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
-
+  
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId: dream.eventId,
       });
-
+  
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
-
+  
       dream.comments = dream.comments.filter((comment) => {
         if (
           comment._id.toString() === commentId &&
@@ -374,7 +375,43 @@ const resolvers = {
           return false;
         return true;
       });
-
+  
+      return dream.save();
+    },
+  
+    editComment: async (
+      parent,
+      { dreamId, commentId, content },
+      { currentUser, models: { Member, Dream } }
+    ) => {
+      const dream = await Dream.findOne({
+        _id: dreamId,
+      });
+  
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+  
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+  
+      const comment = dream.comments.filter((comment) => {
+        if (
+          comment._id.toString() === commentId &&
+          (comment.authorId.toString() === currentUser.id ||
+            currentMember.isAdmin)
+        )
+          return true;
+        return false;
+      });
+      
+      if (comment.length == 0) {
+        throw new Error('Cant find that comment - Does this comment belongs to you?');
+      }
+      comment[0].content = content;
+      comment[0].updatedAt = new Date();
+  
       return dream.save();
     },
     sendMagicLink: async (

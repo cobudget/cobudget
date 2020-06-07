@@ -56,6 +56,7 @@ const schema = gql`
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
     addComment(dreamId: ID!, content: String!): Dream
+    editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
