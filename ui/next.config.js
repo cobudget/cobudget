@@ -12,10 +12,15 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 module.exports = (phase) => {
   const isDev = phase === PHASE_DEVELOPMENT_SERVER;
   const isProd = phase === PHASE_PRODUCTION_BUILD;
+
   const env = {
     GRAPHQL_URL: isDev
       ? "http://localhost:3000/api"
-      : `https://${process.env.VERCEL_URL}/api`,
+      : `https://${
+          process.env.VERCEL_URL
+            ? process.env.VERCEL_URL
+            : process.env.DEPLOY_URL
+        }/api`,
     IS_PROD: isProd,
   };
   return withBundleAnalyzer({

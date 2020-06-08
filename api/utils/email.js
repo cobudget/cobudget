@@ -5,12 +5,16 @@ const mailgun = require('mailgun-js')({
   host: 'api.eu.mailgun.net',
 });
 
+const DEPLOY_URL = process.env.VERCEL_URL
+  ? process.env.VERCEL_URL
+  : process.env.DEPLOY_URL;
+
 const sendMagicLinkEmail = async (user) => {
   // send magic link in production, log it in development
   const token = await generateLoginJWT(user);
 
   if (process.env.NODE_ENV === 'production') {
-    const url = `https://${process.env.VERCEL_URL}/?token=${token}`;
+    const url = `https://${DEPLOY_URL}/?token=${token}`;
     var data = {
       from: `${process.env.EMAIL_SENDER}`,
       to: user.email,
@@ -76,7 +80,7 @@ const sendRequestToJoinNotifications = async (user, event, emails) => {
       from: `${process.env.EMAIL_SENDER}`,
       to: emails,
       subject: `Request to join ${event.title}`,
-      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${process.env.VERCEL_URL}/${event.slug}/admin`,
+      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${DEPLOY_URL}/${event.slug}/admin`,
     };
     return mailgun
       .messages()
