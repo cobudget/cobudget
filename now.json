@@ -11,15 +11,5 @@
     { "src": "/(.*)", "dest": "/ui/$1", "continue": true }
   ],
   "regions": ["bru1"],
-  "env": {
-    "MONGO_URL": "@mongodbatlas-uri",
-    "MAILGUN_API_KEY": "@mailgun-api-key",
-    "JWT_SECRET": "@jwt-secret",
-    "PRETIX_URL": "@pretix-url",
-    "PRETIX_TOKEN": "@pretix-token",
-    "DEPLOY_URL": "https://dreams.blivande.com",
-    "EMAIL_SENDER": "@email-sender",
-    "DOMAIN": "@domain"
-  },
   "scope": "participio"
 }
