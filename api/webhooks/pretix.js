@@ -12,6 +12,9 @@ const { getConnection } = require('../database/connection');
 // }
 
 module.exports = async (req, res) => {
+  if (!process.env.PRETIX_URL) {
+    res.send(501);
+  }
   const { body } = req;
 
   switch (body.action) {

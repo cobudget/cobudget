@@ -1,7 +1,7 @@
 const { generateLoginJWT } = require('./auth');
 const mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
-  domain: 'dreams.wtf',
+  domain: process.env.MAILGUN_DOMAIN,
   host: 'api.eu.mailgun.net',
 });
 
@@ -10,9 +10,9 @@ const sendMagicLinkEmail = async (user) => {
   const token = await generateLoginJWT(user);
 
   if (process.env.NODE_ENV === 'production') {
-    const url = `${process.env.DEPLOY_URL}/?token=${token}`;
+    const url = `https://${process.env.VERCEL_URL}/?token=${token}`;
     var data = {
-      from: 'Dreams <wizard@dreams.wtf>', // send from subdomain?
+      from: `${process.env.EMAIL_SENDER}`,
       to: user.email,
       subject: 'Login to Dreams',
       text: `Here is your link: ${url}`,
@@ -47,11 +47,11 @@ const sendMagicLinkEmail = async (user) => {
 
 //   if (process.env.NODE_ENV === 'production') {
 //     var data = {
-//       from: 'Dreams <wizard@dreams.wtf>',
+//       from: ${process.env.EMAIL_SENDER},
 //       to: emails,
 //       subject: `You are invited to Dreams for ${event.title}`,
 //       'recipient-variables': recipientVars,
-//       text: `Here is your log in link: https://${event.slug}.dreams.wtf/?token=%recipient.token%`,
+//       text: `Here is your log in link: https://${process.env.VERCEL_URL}/?token=%recipient.token%`,
 //     };
 //     return mailgun
 //       .messages()
@@ -73,10 +73,10 @@ const sendMagicLinkEmail = async (user) => {
 const sendRequestToJoinNotifications = async (user, event, emails) => {
   if (process.env.NODE_ENV === 'production') {
     var data = {
-      from: 'Dreams <wizard@dreams.wtf>',
+      from: `${process.env.EMAIL_SENDER}`,
       to: emails,
       subject: `Request to join ${event.title}`,
-      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: ${process.env.DEPLOY_URL}/${event.slug}/admin`,
+      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${process.env.VERCEL_URL}/${event.slug}/admin`,
     };
     return mailgun
       .messages()
