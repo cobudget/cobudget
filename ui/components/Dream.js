@@ -89,7 +89,7 @@ const Dream = ({ dream, event, currentUser }) => {
                   onClick={() =>
                     Router.push(
                       "/[event]/[dream]/edit",
-                      `/${event.slug}/${dream.slug}/edit`
+                      `/${event.slug}/${dream.id}/edit`
                     )
                   }
                 >

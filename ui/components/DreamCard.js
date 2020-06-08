@@ -70,7 +70,7 @@ export default ({ dream, event, currentUser }) => {
 
             <Link
               href="/[event]/[dream]#comments"
-              as={`/${event.slug}/${dream.slug}#comments`}
+              as={`/${event.slug}/${dream.id}#comments`}
             >
               <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
                 <CommentIcon className="w-5 h-5" />

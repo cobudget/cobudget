@@ -11,78 +11,10 @@ import { TextField, Box, Button } from "@material-ui/core";
 import ImageUpload from "./ImageUpload";
 import EditBudgetItems from "./EditBudgetItems";
 
-import slugify from "../utils/slugify";
-
-const CREATE_DREAM = gql`
-  mutation CreateDream(
-    $eventId: ID!
-    $title: String!
-    $slug: String!
-    $description: String
-    $summary: String
-    $images: [ImageInput]
-    $minGoal: Int
-    $maxGoal: Int
-    $budgetItems: [BudgetItemInput]
-  ) {
-    createDream(
-      eventId: $eventId
-      title: $title
-      slug: $slug
-      description: $description
-      summary: $summary
-      images: $images
-      minGoal: $minGoal
-      maxGoal: $maxGoal
-      budgetItems: $budgetItems
-    ) {
-      id
-      slug
-      description
-      summary
-      title
-      minGoal
-      maxGoal
-      minGoalGrants
-      maxGoalGrants
-      currentNumberOfGrants
-      approved
-      cocreators {
-        id
-        user {
-          id
-          name
-        }
-      }
-      images {
-        small
-        large
-      }
-      numberOfComments
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          name
-          avatar
-        }
-      }
-      budgetItems {
-        description
-        min
-        max
-      }
-    }
-  }
-`;
-
 const EDIT_DREAM = gql`
   mutation EDIT_DREAM(
     $dreamId: ID!
     $title: String!
-    $slug: String!
     $description: String
     $summary: String
     $images: [ImageInput]
@@ -93,7 +25,6 @@ const EDIT_DREAM = gql`
     editDream(
       dreamId: $dreamId
       title: $title
-      slug: $slug
       description: $description
       summary: $summary
       images: $images
@@ -102,7 +33,6 @@ const EDIT_DREAM = gql`
       budgetItems: $budgetItems
     ) {
       id
-      slug
       description
       summary
       title
@@ -145,8 +75,7 @@ const EDIT_DREAM = gql`
 
 const schema = yup.object().shape({
   title: yup.string().required(),
-  slug: yup.string().required(),
-  summary: yup.string().required(),
+  summary: yup.string(),
   description: yup.string(),
   images: yup.array().of(
     yup.object().shape({
@@ -163,17 +92,15 @@ const schema = yup.object().shape({
   ),
 });
 
-export default ({ dream = {}, event, editing }) => {
+export default ({ dream = {}, event }) => {
   const [editDream] = useMutation(EDIT_DREAM);
-  const [createDream] = useMutation(CREATE_DREAM);
 
   const { handleSubmit, register, errors } = useForm({
     validationSchema: schema,
   });
 
-  const { title = "", slug = "", description = "", summary = "" } = dream;
+  const { title = "", description = "", summary = "" } = dream;
 
-  const [slugValue, setSlugValue] = useState(slug);
   const [images, setImages] = useState(dream.images ? dream.images : []);
 
   const [budgetItems, setBudgetItems] = useState(
@@ -184,49 +111,29 @@ export default ({ dream = {}, event, editing }) => {
   const removeBudgetItem = (i) =>
     setBudgetItems([...budgetItems.filter((item, index) => i !== index)]);
 
-  const onSubmitCreate = (values) => {
-    createDream({
-      variables: {
-        eventId: event.id,
-        ...values,
-        images,
-      },
-    })
-      .then(({ data }) => {
-        Router.push(
-          "/[event]/[dream]",
-          `/${event.slug}/${data.createDream.slug}`
-        );
-      })
-      .catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
-  };
-
-  const onSubmitEdit = (values) => {
-    images.forEach((image) => delete image.__typename); // apollo complains otherwise..
-    editDream({
-      variables: {
-        dreamId: dream.id,
-        ...values,
-        images,
-      },
-    })
-      .then(({ data }) => {
-        Router.push(
-          "/[event]/[dream]",
-          `/${event.slug}/${data.editDream.slug}`
-        );
-      })
-      .catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
-  };
-
   return (
-    <form onSubmit={handleSubmit(editing ? onSubmitEdit : onSubmitCreate)}>
+    <form
+      onSubmit={handleSubmit((values) => {
+        images.forEach((image) => delete image.__typename); // apollo complains otherwise..
+        editDream({
+          variables: {
+            dreamId: dream.id,
+            ...values,
+            images,
+          },
+        })
+          .then(({ data }) => {
+            Router.push(
+              "/[event]/[dream]",
+              `/${event.slug}/${data.editDream.id}`
+            );
+          })
+          .catch((err) => {
+            console.log({ err });
+            alert(err.message);
+          });
+      })}
+    >
       <Box my={2}>
         <TextField
           name="title"
@@ -236,32 +143,9 @@ export default ({ dream = {}, event, editing }) => {
           inputRef={register({
             required: "Required",
           })}
-          InputProps={{
-            onChange: (e) => {
-              if (!editing) setSlugValue(slugify(e.target.value));
-            },
-          }}
           variant="outlined"
           error={Boolean(errors.title)}
           helperText={errors.title && errors.title.message}
-        />
-      </Box>
-      <Box my={2}>
-        <TextField
-          name="slug"
-          label="Slug"
-          value={slugValue}
-          fullWidth
-          inputRef={register({
-            required: "Required",
-          })}
-          InputProps={{
-            onChange: (e) => setSlugValue(e.target.value),
-            onBlur: (e) => setSlugValue(slugify(e.target.value)),
-          }}
-          variant="outlined"
-          error={Boolean(errors.slug)}
-          helperText={errors.slug && errors.slug.message}
         />
       </Box>
 

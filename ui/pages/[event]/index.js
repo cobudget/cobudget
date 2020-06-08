@@ -12,7 +12,6 @@ export const DREAMS_QUERY = gql`
   query Dreams($eventId: ID!, $textSearchTerm: String) {
     dreams(eventId: $eventId, textSearchTerm: $textSearchTerm) {
       id
-      slug
       description
       summary
       title
@@ -84,8 +83,8 @@ export default ({ currentUser, event }) => {
               {dreams.map((dream) => (
                 <Link
                   href="/[event]/[dream]"
-                  as={`/${event.slug}/${dream.slug}`}
-                  key={dream.slug}
+                  as={`/${event.slug}/${dream.id}`}
+                  key={dream.id}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
                     <DreamCard

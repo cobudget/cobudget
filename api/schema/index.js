@@ -5,7 +5,7 @@ const schema = gql`
     currentUser: User
     events: [Event!]
     event(slug: String): Event
-    dream(eventId: ID!, slug: String!): Dream
+    dream(id: ID!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
     members(eventId: ID!, isApproved: Boolean): [Member]
   }
@@ -30,7 +30,6 @@ const schema = gql`
     createDream(
       eventId: ID!
       title: String!
-      slug: String
       description: String
       summary: String
       minGoal: Int
@@ -41,7 +40,6 @@ const schema = gql`
     editDream(
       dreamId: ID!
       title: String
-      slug: String
       description: String
       summary: String
       minGoal: Int
@@ -166,7 +164,6 @@ const schema = gql`
   type Dream {
     id: ID!
     event: Event!
-    slug: String!
     title: String!
     description: String
     summary: String

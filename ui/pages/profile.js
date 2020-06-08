@@ -115,7 +115,7 @@ export default ({ currentUser, event }) => {
                     <li key={grant.id}>
                       <Link
                         href="/[event]/[dream]"
-                        as={`/${membership.event.slug}/${grant.dream.slug}`}
+                        as={`/${membership.event.slug}/${grant.dream.id}`}
                       >
                         <a>{grant.dream.title}</a>
                       </Link>{" "}

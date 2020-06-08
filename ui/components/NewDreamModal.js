@@ -13,7 +13,6 @@ const CREATE_DREAM = gql`
   mutation CreateDream($eventId: ID!, $title: String!) {
     createDream(eventId: $eventId, title: $title) {
       id
-      slug
       title
     }
   }
@@ -33,7 +32,7 @@ export default ({ event, open, handleClose }) => {
       .then(({ data }) => {
         Router.push(
           "/[event]/[dream]",
-          `/${event.slug}/${data.createDream.slug}`
+          `/${event.slug}/${data.createDream.id}`
         );
         handleClose();
       })
@@ -65,11 +64,9 @@ export default ({ event, open, handleClose }) => {
             helperText={errors.title?.message}
           />
 
-          <div className="flex justify-end">
-            <Button size="large" type="submit" loading={loading}>
-              Create
-            </Button>
-          </div>
+          <Button size="large" type="submit" loading={loading}>
+            Create
+          </Button>
         </form>
       </div>
     </Modal>

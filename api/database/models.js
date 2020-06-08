@@ -111,8 +111,7 @@ EventSchema.virtual('dreamCreationIsOpen').get(function () {
 
 // Dream
 const DreamSchema = new Schema({
-  eventId: { type: Schema.Types.ObjectId, required: true },
-  slug: { type: String, required: true },
+  eventId: { type: Schema.Types.ObjectId, index: true, required: true },
   title: { type: String, required: true },
   summary: {
     type: String,
@@ -140,9 +139,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
-})
-  .index({ eventId: 1, slug: 1 }, { unique: true })
-  .index({ title: 'text', description: 'text', summary: 'text' });
+}).index({ title: 'text', description: 'text', summary: 'text' });
 
 DreamSchema.virtual('minGoal').get(function () {
   if (!this.budgetItems) return null;

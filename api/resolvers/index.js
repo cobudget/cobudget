@@ -24,8 +24,8 @@ const resolvers = {
       if (!slug) return null;
       return Event.findOne({ slug });
     },
-    dream: async (parent, { eventId, slug }, { models: { Dream } }) => {
-      return Dream.findOne({ eventId, slug });
+    dream: async (parent, { id }, { models: { Dream } }) => {
+      return Dream.findOne({ _id: id });
     },
     dreams: async (
       parent,
@@ -140,7 +140,6 @@ const resolvers = {
       {
         eventId,
         title,
-        slug,
         description,
         summary,
         budgetDescription,
@@ -171,7 +170,6 @@ const resolvers = {
       return new Dream({
         eventId,
         title,
-        slug: slugify(title),
         description,
         summary,
         cocreators: [currentMember.id], // could argue for different thangs here?..
@@ -187,7 +185,6 @@ const resolvers = {
       {
         dreamId,
         title,
-        slug,
         description,
         summary,
         minGoal,
@@ -213,7 +210,6 @@ const resolvers = {
         throw new Error('You are not a cocreator of this dream.');
 
       dream.title = title;
-      dream.slug = slugify(slug);
       dream.description = description;
       dream.summary = summary;
       dream.minGoal = minGoal;

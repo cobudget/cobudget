@@ -5,11 +5,11 @@ import Head from "next/head";
 
 import Dream from "../../../components/Dream";
 import HappySpinner from "../../../components/HappySpinner";
+
 export const DREAM_QUERY = gql`
-  query Dream($slug: String!, $eventId: ID!) {
-    dream(slug: $slug, eventId: $eventId) {
+  query Dream($id: ID!) {
+    dream(id: $id) {
       id
-      slug
       description
       summary
       title
@@ -56,12 +56,9 @@ export default ({ event, currentUser }) => {
   if (!event) return null;
   const router = useRouter();
 
-  const { data: { dream } = { dream: null }, loading, error } = useQuery(
-    DREAM_QUERY,
-    {
-      variables: { slug: router.query.dream, eventId: event.id },
-    }
-  );
+  const { data: { dream } = { dream: null }, loading } = useQuery(DREAM_QUERY, {
+    variables: { id: router.query.dream },
+  });
 
   if (dream)
     return (
