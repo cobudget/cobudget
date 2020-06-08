@@ -5,7 +5,7 @@ export default ({ children, disabled, loading, size, className, ...props }) => {
     <button
       {...props}
       disabled={disabled || loading}
-      className={`btn relative flex justify-center items-center border-3 border-transparent ${
+      className={`btn relative flex justify-center items-center ${
         ((disabled || loading) && "opacity-25") +
         " " +
         (size === "large" ? "text-xl" : "")

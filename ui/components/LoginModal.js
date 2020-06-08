@@ -40,7 +40,7 @@ export default ({ open, handleClose }) => {
               sendMagicLink({ variables: { email } });
             })}
           >
-            <div className="flex flex-col sm:flex-row items-start">
+            <div className="flex flex-col sm:flex-row">
               <TextField
                 className="mb-4 sm:mb-0 sm:mr-4 flex-grow"
                 name="email"
