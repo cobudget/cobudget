@@ -446,7 +446,7 @@ const resolvers = {
 
       return await sendMagicLinkEmail(user);
     },
-    updateProfile: async (parent, { name, avatar }, { currentUser }) => {
+    updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
       if (!currentUser) throw new Error('You need to be logged in..');
 
       // TODO figure this shit out
@@ -473,6 +473,7 @@ const resolvers = {
 
       if (name) currentUser.name = name;
       if (avatar) currentUser.avatar = avatar;
+      if (bio) currentUser.bio = bio;
 
       return currentUser.save();
     },

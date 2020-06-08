@@ -98,6 +98,7 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
+              <TableCell>Bio</TableCell>
               <TableCell align="right">Role</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
@@ -121,7 +122,9 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
                     )}
                   </Box>
                 </TableCell>
-
+                <TableCell component="th" scope="row">
+                  {member.user.bio}
+                </TableCell>
                 <TableCell align="right">
                   {member.isAdmin && <span className="mr-2">Admin</span>}
                   {member.isGuide && <span className="">Guide</span>}

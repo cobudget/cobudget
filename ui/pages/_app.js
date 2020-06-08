@@ -38,6 +38,7 @@ export const TOP_LEVEL_QUERY = gql`
       id
       name
       avatar
+      bio
       email
       isOrgAdmin
       memberships {
