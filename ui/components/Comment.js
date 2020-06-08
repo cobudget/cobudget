@@ -4,7 +4,12 @@ import { useMutation } from "@apollo/react-hooks";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "./Avatar";
+import { TextField, Button, IconButton } from "@material-ui/core";
 import { DeleteIcon } from "./Icons";
+import { Edit as EditIcon } from "@material-ui/icons";
+import { useForm } from "react-hook-form";
+import EditComment from "./EditComment";
+
 dayjs.extend(relativeTime);
 
 const DELETE_COMMENT_MUTATION = gql`
@@ -27,7 +32,12 @@ const DELETE_COMMENT_MUTATION = gql`
 `;
 
 const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
+  const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
+  const canEdit = currentUser &&
+  (currentUser.id === comment.author.id ||
+    (currentUser.membership && currentUser.membership.isAdmin));
+
   return (
     <div className="flex my-4">
       <div className="mr-4">
@@ -37,15 +47,22 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           <h5>{comment.author.name}</h5>
           <div className="flex items-center">
+            {canEdit && (<IconButton onClick={() => setEditMode(!isEditMode) }>
+              <EditIcon />
+            </IconButton>)}
             <span className="font-normal mr-2">
               {dayjs(comment.createdAt).fromNow()}
             </span>
           </div>
         </div>
+
+        { isEditMode ?
+        <EditComment comment={comment} dreamId={dreamId} currentUser={currentUser} handleDone={() => { setEditMode(false)}}/>
+        : 
         <p className="text-gray-900">{comment.content}</p>
-        {currentUser &&
-          (currentUser.id === comment.author.id ||
-            (currentUser.membership && currentUser.membership.isAdmin)) && (
+        }
+
+        { canEdit && (
             <button
               onClick={() => {
                 if (

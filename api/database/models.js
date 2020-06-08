@@ -127,6 +127,10 @@ const DreamSchema = new Schema({
         type: Date,
         default: Date.now,
       },
+      updatedAt: {
+        type: Date,
+        default: Date.now,
+      },
       content: String,
     }),
   ],
