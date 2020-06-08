@@ -10,6 +10,5 @@
     { "src": "/api/pretix", "dest": "/api/webhooks/pretix.js" },
     { "src": "/(.*)", "dest": "/ui/$1", "continue": true }
   ],
-  "regions": ["bru1"],
-  "scope": "participio"
+  "regions": ["bru1"]
 }
