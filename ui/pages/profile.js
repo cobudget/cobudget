@@ -9,6 +9,7 @@ const PROFILE_QUERY = gql`
     currentUser {
       id
       name
+      bio
       memberships {
         id
         event {

@@ -59,7 +59,7 @@ const schema = gql`
     deleteComment(dreamId: ID!, commentId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
-    updateProfile(name: String, avatar: String): User
+    updateProfile(name: String, avatar: String, bio: String): User
     # inviteMembers(emails: String!): [Member]
     updateMember(
       eventId: ID!
@@ -140,6 +140,7 @@ const schema = gql`
     memberships: [Member!]
     name: String
     avatar: String
+    bio: String
     isOrgAdmin: Boolean
     createdAt: Date
   }

@@ -6,11 +6,12 @@ import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
 
 const UPDATE_PROFILE_QUERY = gql`
-  mutation updateProfile($name: String, $avatar: String) {
-    updateProfile(name: $name, avatar: $avatar) {
+  mutation updateProfile($name: String, $avatar: String, $bio: String) {
+    updateProfile(name: $name, avatar: $avatar, bio: $bio) {
       id
       name
       avatar
+      bio
       email
     }
   }
@@ -49,6 +50,21 @@ const EditProfile = ({ closeModal, currentUser }) => {
               inputRef={register({
                 required: "Required",
               })}
+            />
+          </div>
+
+          <div className="my-4">
+            <TextField
+              name="bio"
+              label="Bio"
+              multiline
+              rows={5}
+              variant="outlined"
+              defaultValue={currentUser.bio}
+              error={Boolean(errors.bio)}
+              helperText={errors.bio && errors.bio.message}
+              fullWidth
+              inputRef={register()}
             />
           </div>
 

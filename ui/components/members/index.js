@@ -24,6 +24,7 @@ export const MEMBERS_QUERY = gql`
         email
         verifiedEmail
         avatar
+        bio
       }
     }
   }

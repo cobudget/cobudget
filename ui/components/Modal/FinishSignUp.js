@@ -6,11 +6,12 @@ import { Box, TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
 
 const UPDATE_CURRENT_USER = gql`
-  mutation updateProfile($name: String, $avatar: String) {
-    updateProfile(name: $name, avatar: $avatar) {
+  mutation updateProfile($name: String, $avatar: String, $bio: String) {
+    updateProfile(name: $name, avatar: $avatar, bio: $bio) {
       id
       name
       avatar
+      bio
       email
     }
   }

@@ -5,6 +5,7 @@ const dayjs = require('dayjs');
 const UserSchema = new Schema({
   name: String,
   avatar: String,
+  bio: String,
   email: {
     type: String,
     required: true,
