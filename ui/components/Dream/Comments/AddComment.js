@@ -42,7 +42,7 @@ const AddComment = ({ currentUser, dreamId }) => {
           .catch((err) => alert(err.message));
       })}
     >
-      <div className="flex mt-6">
+      <div className="flex">
         <div className="mr-4">
           <Avatar user={currentUser} />
         </div>
