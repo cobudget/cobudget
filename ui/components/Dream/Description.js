@@ -66,7 +66,9 @@ export default ({ description, dreamId, canEdit }) => {
             >
               Cancel
             </Button>
-            <Button loading={loading}>Save</Button>
+            <Button type="submit" loading={loading}>
+              Save
+            </Button>
           </div>
         </div>
       </form>
