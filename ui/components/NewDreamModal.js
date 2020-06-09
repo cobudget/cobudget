@@ -60,13 +60,24 @@ export default ({ event, open, handleClose }) => {
             inputRef={register({
               required: "Required",
             })}
+            autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
           />
 
-          <Button size="large" type="submit" loading={loading}>
-            Create
-          </Button>
+          <div className="flex">
+            <Button
+              size="large"
+              type="submit"
+              loading={loading}
+              className="mr-3"
+            >
+              Create
+            </Button>
+            <Button size="large" variant="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </div>
         </form>
       </div>
     </Modal>

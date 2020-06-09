@@ -1,0 +1,102 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
+import { Tooltip } from "react-tippy";
+
+import TextField from "components/TextField";
+import Button from "components/Button";
+import IconButton from "components/IconButton";
+import { EditIcon } from "components/Icons";
+
+const EDIT_SUMMARY_MUTATION = gql`
+  mutation EditSummary($dreamId: ID!, $summary: String) {
+    editDream(dreamId: $dreamId, summary: $summary) {
+      id
+      summary
+    }
+  }
+`;
+
+export default ({ summary, canEdit, dreamId }) => {
+  const [editDream, { loading }] = useMutation(EDIT_SUMMARY_MUTATION, {
+    variables: { dreamId },
+  });
+
+  const { handleSubmit, register, errors } = useForm();
+
+  const [editing, setEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(summary ?? "");
+  if (editing)
+    return (
+      <>
+        <form
+          onSubmit={handleSubmit((variables) =>
+            editDream({ variables })
+              .then(() => setEditing(false))
+              .catch((err) => alert(err.message))
+          )}
+        >
+          <TextField
+            className="mb-2"
+            multiline
+            name="summary"
+            placeholder="Summary"
+            inputRef={register}
+            inputProps={{
+              maxLength: 160,
+              value: inputValue,
+              onChange: (e) => setInputValue(e.target.value),
+            }}
+            autoFocus
+          />
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-sm text-gray-600 font-medium pl-4">
+              {160 - inputValue.length} characters remaining
+            </div>
+            <div className="flex">
+              <Button
+                className="mr-2"
+                variant="secondary"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button loading={loading} type="submit">
+                Save
+              </Button>
+            </div>
+          </div>
+        </form>
+      </>
+    );
+
+  if (summary)
+    return (
+      <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group">
+        {summary}
+        {canEdit && (
+          <div className="absolute top-0 right-0 invisible group-hover:visible">
+            <Tooltip title="Edit summary" position="bottom" size="small">
+              <IconButton onClick={() => setEditing(true)}>
+                <EditIcon className="h-6 w-6" />
+              </IconButton>
+            </Tooltip>
+          </div>
+        )}
+      </div>
+    );
+
+  if (canEdit)
+    return (
+      <button
+        onClick={() => setEditing(true)}
+        className="block w-full h-20 text-gray-600 font-semibold rounded-lg border-3 border-dashed hover:bg-gray-100 mb-4 focus:outline-none focus:bg-gray-100"
+      >
+        + Add summary
+      </button>
+    );
+
+  return null;
+};

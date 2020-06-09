@@ -300,7 +300,9 @@ export default ({ event, currentUser }) => {
           currentUser.membership &&
           currentUser.membership.isAdmin)) && (
         <>
-          <h2 className="text-xl mb-3 text-gray-800">Guidelines</h2>
+          <h2 className="text-xl mb-3 text-gray-800" id="guidelines">
+            Guidelines
+          </h2>
           <div className="shadow rounded-lg bg-white p-4 relative">
             {event.guidelines ? (
               <>

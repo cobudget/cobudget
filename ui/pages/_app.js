@@ -6,6 +6,7 @@ import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
 
 import "../styles.css";
+import "react-tippy/dist/tippy.css";
 
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";

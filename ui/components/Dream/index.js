@@ -1,22 +1,29 @@
 import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
-import { Button, Tooltip, IconButton } from "@material-ui/core";
-import { Edit as EditIcon } from "@material-ui/icons";
-import Router from "next/router";
-import ReactMarkdown from "react-markdown";
+import { Button } from "@material-ui/core";
+// import { Edit as EditIcon } from "@material-ui/icons";
+import { Tooltip } from "react-tippy";
 
-import Label from "./Label";
-import stringToHslColor from "../utils/stringToHslColor";
-import { isMemberOfDream } from "../utils/helpers";
-import thousandSeparator from "../utils/thousandSeparator";
-import Avatar from "./Avatar";
-import Gallery from "./Gallery";
+import stringToHslColor from "utils/stringToHslColor";
+import { isMemberOfDream } from "utils/helpers";
+import thousandSeparator from "utils/thousandSeparator";
+
+import Avatar from "components/Avatar";
+import IconButton from "components/IconButton";
+import Label from "components/Label";
+import ProgressBar from "components/ProgressBar";
+import { EditIcon } from "components/Icons";
+
+import EditCocreatorsModal from "./EditCocreatorsModal";
+import Images from "./Images";
 import GiveGrantlingsModal from "./GiveGrantlingsModal";
 import PreOrPostFundModal from "./PreOrPostFundModal";
-import ProgressBar from "./ProgressBar";
 import Comments from "./Comments";
-import EditCocreatorsModal from "./EditCocreatorsModal";
+import Budget from "./Budget";
+import Summary from "./Summary";
+import Title from "./Title";
+import Description from "./Description";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -45,6 +52,44 @@ const PUBLISH_DREAM_MUTATION = gql`
   }
 `;
 
+const EDIT_DREAM_MUTATION = gql`
+  mutation EditDream(
+    $dreamId: ID!
+    $title: String
+    $description: String
+    $summary: String
+    $images: [ImageInput]
+    $budgetItems: [BudgetItemInput]
+  ) {
+    editDream(
+      dreamId: $dreamId
+      title: $title
+      description: $description
+      summary: $summary
+      images: $images
+      budgetItems: $budgetItems
+    ) {
+      id
+      description
+      summary
+      title
+      minGoal
+      maxGoal
+      minGoalGrants
+      maxGoalGrants
+      images {
+        small
+        large
+      }
+      budgetItems {
+        description
+        min
+        max
+      }
+    }
+  }
+`;
+
 const Dream = ({ dream, event, currentUser }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
@@ -56,7 +101,7 @@ const Dream = ({ dream, event, currentUser }) => {
   const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
 
-  const canEditDream =
+  const canEdit =
     currentUser?.membership?.isAdmin ||
     currentUser?.membership?.isGuide ||
     isMemberOfDream(currentUser, dream);
@@ -82,79 +127,38 @@ const Dream = ({ dream, event, currentUser }) => {
       <div className="p-4 lg:p-6">
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
-            <div className="flex items-start justify-between">
-              <h1 className="mb-2 text-4xl font-medium">{dream.title}</h1>
-              {canEditDream && (
-                <IconButton
-                  onClick={() =>
-                    Router.push(
-                      "/[event]/[dream]/edit",
-                      `/${event.slug}/${dream.id}/edit`
-                    )
-                  }
-                >
-                  <EditIcon />
-                </IconButton>
-              )}
-            </div>
+            <Title title={dream.title} dreamId={dream.id} canEdit={canEdit} />
 
-            <p className="whitespace-pre-line mb-4 text-lg text-gray-900">
-              {dream.summary}
-            </p>
+            <Summary
+              dreamId={dream.id}
+              summary={dream.summary}
+              canEdit={canEdit}
+            />
 
-            <Gallery images={dream.images} size={100} />
+            <Images
+              images={dream.images}
+              size={100}
+              canEdit={canEdit}
+              dreamId={dream.id}
+            />
 
-            <ReactMarkdown source={dream.description} className="markdown" />
+            <Description
+              description={dream.description}
+              dreamId={dream.id}
+              canEdit={canEdit}
+            />
 
-            {dream.minGoal > 0 && (
-              <div className="my-5">
-                <h2 className="mb-2 text-2xl font-medium">Funding goals</h2>
+            <Budget
+              dreamId={dream.id}
+              budgetItems={dream.budgetItems}
+              canEdit={canEdit}
+              currency={event.currency}
+              allowStretchGoals={event.allowStretchGoals}
+              event={event}
+            />
 
-                <p>
-                  Min goal: {dream.minGoal} {event.currency}
-                </p>
-                {dream.maxGoal && (
-                  <p>
-                    Max goal: {dream.maxGoal} {event.currency}
-                  </p>
-                )}
-              </div>
-            )}
+            <hr className="mb-4 mt-1" />
 
-            {dream.budgetItems && dream.budgetItems.length > 0 && (
-              <>
-                <div className="my-5">
-                  <h2 className="mb-1 text-2xl font-medium">Budget</h2>
-                  <table className="table-fixed w-full">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 w-3/4">Description</th>
-                        <th className="px-4 py-2">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dream.budgetItems.map((budgetItem, i) => (
-                        <tr key={i} className="bg-white even:bg-gray-100">
-                          <td className="border px-4 py-2">
-                            {budgetItem.description}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {budgetItem.min}
-                            {budgetItem.max && ` - ${budgetItem.max}`}{" "}
-                            {event.currency}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </>
-            )}
-
-            <h2 className="mb-1 text-2xl font-medium" id="comments">
-              {dream.numberOfComments}{" "}
-              {dream.numberOfComments === 1 ? "comment" : "comments"}
-            </h2>
             <Comments
               currentUser={currentUser}
               comments={dream.comments}
@@ -162,7 +166,7 @@ const Dream = ({ dream, event, currentUser }) => {
             />
           </div>
           <div className="order-first md:order-last">
-            {(dream.approved || canEditDream) && (
+            {(dream.approved || canEdit) && (
               <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
                 {dream.approved && (
                   <>
@@ -229,7 +233,7 @@ const Dream = ({ dream, event, currentUser }) => {
                       )}
                   </>
                 )}
-                {canEditDream && (
+                {canEdit && (
                   <Button
                     color={dream.published ? "default" : "primary"}
                     variant={dream.published ? "text" : "contained"}
@@ -332,16 +336,21 @@ const Dream = ({ dream, event, currentUser }) => {
               </div>
             )}
 
-            <div className="mt-5">
-              <h2 className="mb-2 font-medium hidden md:block">
+            <div className="mt-5 group">
+              <h2 className="mb-2 font-medium hidden md:block relative">
                 <span className="mr-2">Co-creators</span>
-                {canEditDream && (
-                  <IconButton
-                    onClick={() => setCocreatorModalOpen(true)}
-                    size="small"
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
+                {canEdit && (
+                  <div className="absolute top-0 right-0 invisible group-hover:visible">
+                    <Tooltip
+                      title="Edit co-creators"
+                      position="bottom"
+                      size="small"
+                    >
+                      <IconButton onClick={() => setCocreatorModalOpen(true)}>
+                        <EditIcon className="h-5 w-5" />
+                      </IconButton>
+                    </Tooltip>
+                  </div>
                 )}
               </h2>
 
@@ -360,12 +369,9 @@ const Dream = ({ dream, event, currentUser }) => {
                   // </Tooltip>
                 ))}
                 <div className="block md:hidden">
-                  {canEditDream && (
-                    <IconButton
-                      onClick={() => setCocreatorModalOpen(true)}
-                      size="small"
-                    >
-                      <EditIcon fontSize="small" />
+                  {canEdit && (
+                    <IconButton onClick={() => setCocreatorModalOpen(true)}>
+                      <EditIcon className="h-5 w-5" />
                     </IconButton>
                   )}
                 </div>

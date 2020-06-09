@@ -42,8 +42,6 @@ const schema = gql`
       title: String
       description: String
       summary: String
-      minGoal: Int
-      maxGoal: Int
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
     ): Dream
@@ -263,6 +261,7 @@ const schema = gql`
     id: ID!
     author: User!
     createdAt: Date!
+    updatedAt: Date
     content: String!
   }
 

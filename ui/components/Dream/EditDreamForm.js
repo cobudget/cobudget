@@ -9,7 +9,7 @@ import * as yup from "yup";
 import { TextField, Box, Button } from "@material-ui/core";
 
 import ImageUpload from "./ImageUpload";
-import EditBudgetItems from "./EditBudgetItems";
+import EditBudgetItems from "./EditBudgetModal";
 
 const EDIT_DREAM = gql`
   mutation EDIT_DREAM(
