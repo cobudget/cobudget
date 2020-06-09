@@ -4,6 +4,9 @@ import Comment from "./Comment";
 const Comments = ({ currentUser, comments, dreamId }) => {
   return (
     <div>
+      <h2 className="mb-1 text-2xl font-medium" id="comments">
+        {comments.length} {comments.length === 1 ? "comment" : "comments"}
+      </h2>
       {comments.map((comment, index) => (
         <Comment
           comment={comment}
