@@ -20,10 +20,10 @@ html {
 }
 
 .markdown h1,
-h2,
-h3,
-h4,
-h5 {
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5 {
   @apply mb-2;
 }
 .markdown h1 {
