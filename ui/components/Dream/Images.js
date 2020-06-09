@@ -61,7 +61,7 @@ export default ({ dreamId, images, size, canEdit }) => {
           {canEdit && (
             <div className="absolute top-0 right-0 invisible group-hover:visible">
               <Tooltip title="Edit images" position="bottom" size="small">
-                <IconButton onClick={() => setEditing(true)}>
+                <IconButton onClick={() => setEditModalOpen(true)}>
                   <EditIcon className="h-6 w-6" />
                 </IconButton>
               </Tooltip>
