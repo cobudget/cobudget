@@ -49,7 +49,14 @@ export default ({ description, dreamId, canEdit }) => {
         />
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-600 font-medium pl-4">
-            Markdown allowed
+            <a
+              href="https://www.markdownguide.org/cheat-sheet/"
+              target="_/blank"
+              className="hover:text-gray-800 border-b hover:border-gray-800"
+            >
+              Markdown
+            </a>{" "}
+            allowed
           </div>
           <div className="flex">
             <Button
