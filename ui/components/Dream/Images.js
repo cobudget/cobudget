@@ -48,6 +48,7 @@ export default ({ dreamId, images, size, canEdit }) => {
     <>
       <EditImagesModal
         open={editModalOpen}
+        initialImages={images}
         handleClose={() => setEditModalOpen(false)}
         dreamId={dreamId}
       />
