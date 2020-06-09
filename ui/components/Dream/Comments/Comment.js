@@ -47,11 +47,6 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           <h5>{comment.author.name}</h5>
           <div className="flex items-center">
-            {canEdit && (
-              <IconButton onClick={() => setEditMode(!isEditMode)}>
-                <EditIcon />
-              </IconButton>
-            )}
             <span className="font-normal mr-2">
               {dayjs(comment.createdAt).fromNow()}
             </span>
