@@ -2,9 +2,9 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 
-import { TextField, Button } from "@material-ui/core";
-
-import Avatar from "../../Avatar";
+import TextField from "components/TextField";
+import Button from "components/Button";
+import Avatar from "components/Avatar";
 
 const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {
@@ -33,7 +33,7 @@ const AddComment = ({ currentUser, dreamId }) => {
 
   return (
     <form
-      onSubmit={handleSubmit((variables) => {
+      onSubmit={handleSubmit(() => {
         addComment({ variables: { content, dreamId } })
           .then(() => {
             inputRef.current.blur();
@@ -50,35 +50,40 @@ const AddComment = ({ currentUser, dreamId }) => {
           <div className="mb-2">
             <TextField
               name="content"
-              label="Add comment"
-              variant="outlined"
+              placeholder="Add comment"
               multiline
+              rows={1}
               error={Boolean(errors.content)}
-              helperText={errors.content && errors.content.message}
-              fullWidth
+              helperText={errors.content?.message}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              inputProps={{
+                value: content,
+                onChange: (e) => setContent(e.target.value),
+              }}
               inputRef={(e) => {
                 register({ required: "Required" });
                 inputRef.current = e;
               }}
             />
           </div>
-          <div
-            className={`flex justify-end ${
-              content.length ? "visible" : "invisible"
-            }`}
-          >
-            <Button
-              type="submit"
-              variant="contained"
-              size="large"
-              disabled={content.length === 0}
-              color="primary"
-            >
-              Submit
-            </Button>
-          </div>
+          {content.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                onClick={() => setContent("")}
+                variant="secondary"
+                className="mr-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={content.length === 0}
+                color="primary"
+              >
+                Submit
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </form>

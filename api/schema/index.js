@@ -261,6 +261,7 @@ const schema = gql`
     id: ID!
     author: User!
     createdAt: Date!
+    updatedAt: Date
     content: String!
   }
 

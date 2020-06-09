@@ -5,8 +5,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
 import { TextField, Button, IconButton } from "@material-ui/core";
-import { DeleteIcon } from "../../Icons";
-import { Edit as EditIcon } from "@material-ui/icons";
+import { DeleteIcon, EditIcon } from "components/Icons";
 import { useForm } from "react-hook-form";
 import EditComment from "./EditComment";
 
@@ -69,24 +68,36 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
             }}
           />
         ) : (
-          <p className="text-gray-900">{comment.content}</p>
-        )}
-
-        {canEdit && (
-          <button
-            onClick={() => {
-              if (
-                confirm("Are you sure you would like to delete this comment?")
-              )
-                deleteComment({
-                  variables: { dreamId, commentId: comment.id },
-                });
-            }}
-            className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"
-          >
-            <DeleteIcon className="w-4 h-4 mr-1" />
-            <span>Delete comment</span>
-          </button>
+          <>
+            <p className="text-gray-900">{comment.content}</p>
+            {canEdit && (
+              <div className="flex">
+                <button
+                  onClick={() => {
+                    if (
+                      confirm(
+                        "Are you sure you would like to delete this comment?"
+                      )
+                    )
+                      deleteComment({
+                        variables: { dreamId, commentId: comment.id },
+                      });
+                  }}
+                  className="mt-4 py-1 px-2 mr-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"
+                >
+                  <DeleteIcon className="w-4 h-4 mr-1" />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"
+                >
+                  <EditIcon className="w-4 h-4 mr-1" />
+                  <span>Edit</span>
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

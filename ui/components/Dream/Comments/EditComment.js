@@ -1,8 +1,10 @@
 import React from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { TextField, Button } from "@material-ui/core";
-import Box from '@material-ui/core/Box';
+// import { TextField, Button } from "@material-ui/core";
+import TextField from "components/TextField";
+import Button from "components/Button";
+import Box from "@material-ui/core/Box";
 import { useForm } from "react-hook-form";
 
 const EDIT_COMMENT_MUTATION = gql`
@@ -14,6 +16,7 @@ const EDIT_COMMENT_MUTATION = gql`
         id
         content
         createdAt
+        updatedAt
         author {
           id
           name
@@ -26,45 +29,39 @@ const EDIT_COMMENT_MUTATION = gql`
 
 const EditComment = ({ comment, dreamId, handleDone }) => {
   const { handleSubmit, register, errors } = useForm();
-  const inputRef = React.useRef();
-  const [content, setContent] = React.useState(comment.content);
 
-  const [editComment] = useMutation(EDIT_COMMENT_MUTATION);
+  const [editComment, { loading }] = useMutation(EDIT_COMMENT_MUTATION, {
+    variables: { dreamId, commentId: comment.id },
+  });
   return (
     <form
       onSubmit={handleSubmit((variables) => {
-        editComment({ variables: { dreamId, commentId: comment.id, content} })
+        editComment({ variables })
           .then(() => {
             handleDone();
           })
           .catch((err) => alert(err.message));
       })}
     >
-      <Box my={2}>
-        <TextField
-          name="content"
-          label="Edit comment"
-          variant="outlined"
-          multiline
-          error={Boolean(errors.content)}
-          helperText={errors.content && errors.content.message}
-          fullWidth
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          inputRef={(e) => {
-            register({ required: "Required" });
-            inputRef.current = e;
-          }}
-        />
-      </Box>
-      <Button
-        type="submit"
-        size="large"
-        variant="contained"
-        color="primary"
-      >
-        Save
-      </Button>
+      <TextField
+        name="content"
+        className="mb-2"
+        placeholder="Comment"
+        multiline
+        error={Boolean(errors.content)}
+        helperText={errors.content?.message}
+        defaultValue={comment.content}
+        inputRef={register({ required: "Required" })}
+        autoFocus
+      />
+      <div className="flex justify-end">
+        <Button onClick={handleDone} className="mr-2" variant="secondary">
+          Cancel
+        </Button>
+        <Button type="submit" loading={loading}>
+          Save
+        </Button>
+      </div>
     </form>
   );
 };
