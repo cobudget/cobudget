@@ -141,6 +141,16 @@ export const CloseIcon = (props) => (
   </svg>
 );
 
+// Heroicons solid question-mark-circle
+export const QuestionMarkIcon = (props) => (
+  <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
+    <path
+      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z"
+      clipRule="evenodd"
+      fillRule="evenodd"
+    ></path>
+  </svg>
+);
 
 // Heroicons cheveron-down
 export const CheveronDownIcon = (props) => (
@@ -190,5 +200,20 @@ export const LoaderIcon = (props) => (
     <path d="M12 18a1 1 0 0 0-1 1v2a1 1 0 0 0 2 0v-2a1 1 0 0 0-1-1z" />
     <path d="M17.73 16.14a1 1 0 0 0-1.39 1.44L17.78 19a1 1 0 0 0 .69.28 1 1 0 0 0 .72-.3 1 1 0 0 0 0-1.42z" />
     <path d="M6.27 16.14l-1.44 1.39a1 1 0 0 0 0 1.42 1 1 0 0 0 .72.3 1 1 0 0 0 .67-.25l1.44-1.39a1 1 0 0 0-1.39-1.44z" />
+  </svg>
+);
+
+// Heroicons outline pencil
+export const EditIcon = (props) => (
+  <svg
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    {...props}
+  >
+    <path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
   </svg>
 );

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import Avatar from "./Avatar";
-import { AddIcon, DeleteIcon } from "./Icons";
+import Avatar from "../Avatar";
+import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
 
 const SEARCH_MEMBERS_QUERY = gql`

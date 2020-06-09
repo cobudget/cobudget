@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 
 import { TextField, Button } from "@material-ui/core";
 
-import Avatar from "./Avatar";
+import Avatar from "../../Avatar";
 
 const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {

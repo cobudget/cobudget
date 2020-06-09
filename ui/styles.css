@@ -19,18 +19,6 @@ html {
   );
 }
 
-.btn {
-  @apply text-white bg-green font-medium transition-colors duration-100 rounded-md px-5 py-3;
-}
-
-/* .btn:hover {
-  @apply bg-indigo-darker;
-} */
-
-.btn:focus {
-  @apply outline-none shadow-outline;
-}
-
 .markdown h1,
 h2,
 h3,
@@ -39,13 +27,19 @@ h5 {
   @apply mb-2;
 }
 .markdown h1 {
-  @apply text-xl;
+  @apply text-xl font-semibold;
 }
 
 .markdown h2 {
-  @apply text-lg;
+  @apply text-lg font-semibold;
+}
+
+.markdown h3,
+h4,
+h5 {
+  @apply font-semibold;
 }
 
 .markdown p {
-  @apply text-gray-800 mb-2;
+  @apply text-gray-900 mb-2;
 }

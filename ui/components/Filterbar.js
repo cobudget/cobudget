@@ -1,5 +1,4 @@
-import { Tooltip } from "@material-ui/core";
-
+import { Tooltip } from "react-tippy";
 import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "./Icons";
 import debounce from "../utils/debounce";
 
@@ -15,7 +14,7 @@ export default ({
   }, 300);
 
   return (
-    <div className="flex mb-5">
+    <div className="flex mb-5 items-stretch">
       {/* <button
         className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-700 mr-2  ${
           listView ? "bg-gray-300" : ""
@@ -37,9 +36,13 @@ export default ({
         />
       </div>
       {currentUser && currentUser.membership && (
-        <Tooltip title={filterFavorites ? "Show all" : "Show favorites"}>
+        <Tooltip
+          title={filterFavorites ? "Show all" : "Show favorites"}
+          position="bottom"
+          size="small"
+        >
           <button
-            className={`mr-2 bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
+            className={`mr-2 bg-gray-200 h-full hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
               filterFavorites ? "bg-gray-300" : ""
             }`}
             onClick={toggleFilterFavorites}

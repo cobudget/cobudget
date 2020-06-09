@@ -14,8 +14,12 @@ module.exports = {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
       },
       colors: {
-        green: "#2cbc63",
+        green: { default: "#2cbc63", darker: "#24ab57" },
         red: "#eb4962",
+      },
+      shadowOutline: {
+        shadow: "0 0 0 3px",
+        alpha: "1",
       },
     },
     borderWidth: {
@@ -44,9 +48,13 @@ module.exports = {
   variants: {
     backgroundColor: ["responsive", "hover", "focus", "even"],
     textColor: ["responsive", "hover", "focus", "group-hover", "last"],
+    shadowOutline: ["focus"],
+    visibility: ["responsive", "group-hover"],
+    // borderStyle: ["hover", "focus"],
   },
   plugins: [
     require("tailwindcss-animations"),
     require("tailwindcss-font-inter")(),
+    require("tailwindcss-shadow-outline-colors")(),
   ],
 };

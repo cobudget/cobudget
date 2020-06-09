@@ -5,8 +5,8 @@ import { useRouter } from "next/router";
 import { TextField, Button, Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { DREAM_QUERY } from "../pages/[event]/[dream]";
-import { TOP_LEVEL_QUERY } from "../pages/_app";
+import { DREAM_QUERY } from "../../pages/[event]/[dream]";
+import { TOP_LEVEL_QUERY } from "../../pages/_app";
 const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
