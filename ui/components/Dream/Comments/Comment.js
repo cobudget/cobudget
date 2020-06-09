@@ -64,7 +64,9 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
           />
         ) : (
           <>
-            <p className="text-gray-900">{comment.content}</p>
+            <p className="text-gray-900 whitespace-pre-line">
+              {comment.content}
+            </p>
             {canEdit && (
               <div className="flex">
                 <button
