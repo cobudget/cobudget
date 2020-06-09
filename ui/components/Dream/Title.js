@@ -22,44 +22,49 @@ export default ({ title, canEdit, dreamId }) => {
   const [editDream, { loading }] = useMutation(EDIT_TITLE_MUTATION, {
     variables: { dreamId },
   });
+  const { handleSubmit, register, errors } = useForm();
+
   const [editing, setEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(title ?? "");
   if (editing) {
     return (
       <>
-        <TextField
-          className="mb-2"
-          placeholder="Title"
-          size="large"
-          inputProps={{
-            maxLength: 100,
-            value: inputValue,
-            onChange: (e) => setInputValue(e.target.value),
-          }}
-          autoFocus
-        />
-        <div className="flex justify-end  mb-4">
-          <div className="flex">
-            <Button
-              className="mr-2"
-              variant="secondary"
-              onClick={() => setEditing(false)}
-            >
-              Cancel
-            </Button>
+        <form
+          onSubmit={handleSubmit((variables) =>
+            editDream({ variables })
+              .then(() => setEditing(false))
+              .catch((err) => alert(err.message))
+          )}
+        >
+          <TextField
+            className="mb-2"
+            placeholder="Title"
+            name="title"
+            defaultValue={title}
+            size="large"
+            inputRef={register({ required: "Required" })}
+            inputProps={{
+              maxLength: 100,
+            }}
+            autoFocus
+            error={Boolean(errors.title)}
+            helperText={errors.title?.message}
+          />
+          <div className="flex justify-end  mb-4">
+            <div className="flex">
+              <Button
+                className="mr-2"
+                variant="secondary"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </Button>
 
-            <Button
-              loading={loading}
-              onClick={() =>
-                editDream({ variables: { title: inputValue } })
-                  .then(() => setEditing(false))
-                  .catch((err) => alert(err.message))
-              }
-            >
-              Save
-            </Button>
+              <Button loading={loading} type="submit">
+                Save
+              </Button>
+            </div>
           </div>
-        </div>
+        </form>
       </>
     );
   }
