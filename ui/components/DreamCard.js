@@ -88,9 +88,9 @@ export default ({ dream, event, currentUser }) => {
                 }}
               >
                 {dream.favorite ? (
-                  <HeartSolidIcon className="w-5 h-5 text-red-700" />
+                  <HeartSolidIcon className="w-5 h-5 text-red" />
                 ) : (
-                  <HeartOutlineIcon className="w-5 h-5 text-gray-700 hover:text-red-700" />
+                  <HeartOutlineIcon className="w-5 h-5 text-gray-700 hover:text-red" />
                 )}
               </button>
             )}
