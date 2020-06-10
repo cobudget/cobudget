@@ -203,8 +203,8 @@ const resolvers = {
       if (title) dream.title = title;
       if (typeof description !== 'undefined') dream.description = description;
       if (typeof summary !== 'undefined') dream.summary = summary;
-      if (typeof images !== undefined) dream.images = images;
-      if (typeof budgetItems !== undefined) dream.budgetItems = budgetItems;
+      if (typeof images !== 'undefined') dream.images = images;
+      if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
 
       return dream.save();
     },
