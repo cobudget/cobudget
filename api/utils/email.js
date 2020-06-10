@@ -80,7 +80,7 @@ const sendRequestToJoinNotifications = async (user, event, emails) => {
       from: `${process.env.EMAIL_SENDER}`,
       to: emails,
       subject: `Request to join ${event.title}`,
-      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${DEPLOY_URL}/${event.slug}/admin`,
+      text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${DEPLOY_URL}/${event.slug}/members`,
     };
     return mailgun
       .messages()
