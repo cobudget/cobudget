@@ -5,6 +5,8 @@ const {
   sendRequestToJoinNotifications,
 } = require('../utils/email');
 const { GraphQLScalarType } = require('graphql');
+const GraphQLJSON = require('graphql-type-json');
+const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
@@ -1158,6 +1160,8 @@ const resolvers = {
       return User.findOne({ _id: comment.authorId });
     },
   },
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
 };
 
 module.exports = resolvers;

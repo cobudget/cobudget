@@ -120,6 +120,7 @@ const DreamSchema = new Schema({
   },
   description: String,
   cocreators: [Schema.Types.ObjectId],
+  customFields: Schema.Types.Mixed,
   images: [new Schema({ small: String, large: String })],
   comments: [
     new Schema({

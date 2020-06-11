@@ -1,6 +1,9 @@
 const { gql } = require('apollo-server-micro');
 
 const schema = gql`
+  scalar JSON
+  scalar JSONObject
+
   type Query {
     currentUser: User
     events: [Event!]
@@ -173,6 +176,7 @@ const schema = gql`
     maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
+    customFields: JSON
     comments: [Comment]
     numberOfComments: Int
     currentNumberOfGrants: Int

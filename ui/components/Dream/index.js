@@ -128,7 +128,7 @@ const Dream = ({ dream, event, currentUser }) => {
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
             <Title title={dream.title} dreamId={dream.id} canEdit={canEdit} />
-
+            {dream.customFields && dream.customFields.electricity}
             <Summary
               dreamId={dream.id}
               summary={dream.summary}

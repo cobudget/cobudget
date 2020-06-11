@@ -1,7 +1,7 @@
 {
   "scripts": {
     "dev": "run-p db:up start",
-    "start": "now dev",
+    "start": "NODE_OPTIONS='--inspect' now dev",
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
     "postinstall": "cd ui && npm i && cd ../api && npm i"

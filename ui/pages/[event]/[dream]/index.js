@@ -20,6 +20,7 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       approved
       published
+      customFields
       cocreators {
         id
         user {
