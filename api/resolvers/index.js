@@ -137,6 +137,26 @@ const resolvers = {
 
       return event.save();
     },
+    editCustomFields: async (
+      parent,
+      {
+        eventId,
+        customFields
+      },
+      { currentUser, models: { Member, Dream, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+
+      if (!currentUser || !currentUser.isOrgAdmin)
+        throw new Error('You need to be logged in as organisation admin.');
+
+      const event = await Event.findOne({ _id: eventId });
+      event.customFields = customFields;
+      return event.save();
+    },
     createDream: async (
       parent,
       {

@@ -2,9 +2,9 @@ import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { TextField, Box, Button, Modal } from "@material-ui/core";
-import SelectInput from "./SelectInput";
-
-import slugify from "../utils/slugify";
+import SelectInput from "../SelectInput";
+import slugify from "../../utils/slugify";
+import CustomFields from "./CustomFields";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
@@ -127,6 +127,12 @@ export default ({ event, open, handleClose }) => {
               </Box>
             </Box>
           </form>
+          <Box my={2}>
+            <CustomFields
+              event={event}
+              customFields={event.customFields}
+          />
+          </Box>
         </div>
       </Modal>
     </>

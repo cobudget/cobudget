@@ -4,6 +4,7 @@
     "start": "now dev",
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
+    "storybook": "cd ui && start-storybook -p 6006",
     "postinstall": "cd ui && npm i && cd ../api && npm i"
   },
   "devDependencies": {

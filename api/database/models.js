@@ -79,6 +79,30 @@ const EventSchema = new Schema({
   pretixEvent: String,
   guidelines: String,
   allowStretchGoals: { type: Boolean, default: false },
+  customFields: [
+    new Schema({
+      slug: {
+        type: String,
+        required: true,
+        index: true,
+        unique: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      name: { type: String, required: true },
+      description: { type: String, required: true },
+      type: {
+        type: String,
+        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','FILE'],
+        default: 'TEXT',
+        required: true,
+      },
+      isRequired: { type: Boolean, required: true },
+      isShownOnFrontPage: Boolean,
+    }),
+  ],
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {

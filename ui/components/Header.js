@@ -8,7 +8,7 @@ import Avatar from "components/Avatar";
 import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import { CogIcon, HomeIcon } from "components/Icons";
-import EditEventModal from "components/EditEventModal";
+import EditEventModal from "components/Event/EditEventModal";
 import NewDreamModal from "components/NewDreamModal";
 import IconButton from "components/IconButton";
 

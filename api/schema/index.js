@@ -30,6 +30,11 @@ const schema = gql`
       guidelines: String
     ): Event!
 
+    editCustomFields(
+      eventId: ID!
+      customFields: [CustomFieldInput]!
+    ): Event!
+
     createDream(
       eventId: ID!
       title: String!
@@ -122,6 +127,7 @@ const schema = gql`
     grantingIsOpen: Boolean
     guidelines: String
     allowStretchGoals: Boolean
+    customFields: [CustomField]
   }
 
   scalar Date
@@ -267,6 +273,33 @@ const schema = gql`
     createdAt: Date!
     updatedAt: Date
     content: String!
+  }
+
+  enum CustomFieldType {
+    TEXT
+    MULTILINE_TEXT
+    BOOLEAN
+    FILE
+  }
+
+  type CustomField {
+    slug: String!
+    name: String!
+    description: String!
+    type: CustomFieldType!
+    isRequired: Boolean!
+    isShownOnFrontPage: Boolean 
+    createdAt: Date!
+  }
+
+  input CustomFieldInput {
+    slug: String!
+    name: String!
+    description: String!
+    type: CustomFieldType!
+    isRequired: Boolean!
+    isShownOnFrontPage: Boolean 
+    createdAt: Date
   }
 
   # type Flag {
