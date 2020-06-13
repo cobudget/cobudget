@@ -34,6 +34,15 @@ export const TOP_LEVEL_QUERY = gql`
       numberOfApprovedMembers
       guidelines
       allowStretchGoals
+      customFields {
+        slug
+        name
+        description
+        type
+        isRequired
+        isShownOnFrontPage
+        createdAt
+      }
     }
     currentUser {
       id

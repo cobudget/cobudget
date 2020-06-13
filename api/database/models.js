@@ -87,10 +87,6 @@ const EventSchema = new Schema({
         index: true,
         unique: true,
       },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-      },
       name: { type: String, required: true },
       description: { type: String, required: true },
       type: {
@@ -101,6 +97,10 @@ const EventSchema = new Schema({
       },
       isRequired: { type: Boolean, required: true },
       isShownOnFrontPage: Boolean,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
     }),
   ],
 });

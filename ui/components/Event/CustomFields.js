@@ -41,20 +41,12 @@ export default ({
                   <th className="px-4 py-2 w-3/4 border-b text-left font-medium">
                     Name
                   </th>
-                  <th className="px-4 py-2 border-b text-left font-medium">
-                    Description
-                  </th>
-                  <th className="px-4 py-2 border-b text-left font-medium">
-                    Type
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 {customFields.map((customField, i) => (
                   <tr key={i} className="bg-white even:bg-gray-100">
-                    <td className=" px-4 py-2">{customField.name}</td>
-                    <td className=" px-4 py-2">{customField.description}</td>
-                    <td className=" px-4 py-2">{customField.type}</td>
+                    <td className="px-4 py-2">{customField.name}</td>
                   </tr>
                 ))}
               </tbody>
