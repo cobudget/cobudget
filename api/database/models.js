@@ -144,6 +144,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
+  deleted: { type: Boolean, default: false },
 }).index({ title: 'text', description: 'text', summary: 'text' });
 
 DreamSchema.virtual('minGoal').get(function () {

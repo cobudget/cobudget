@@ -41,6 +41,7 @@ const resolvers = {
       if (currentMember && (currentMember.isAdmin || currentMember.isGuide)) {
         return Dream.find({
           eventId,
+          deleted: { $ne: true },
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
@@ -49,6 +50,7 @@ const resolvers = {
       if (currentMember) {
         return Dream.find({
           eventId,
+          deleted: { $ne: true },
           $or: [{ published: true }, { cocreators: currentMember.id }],
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
@@ -57,6 +59,7 @@ const resolvers = {
       return Dream.find({
         eventId,
         published: true,
+        deleted: { $ne: true },
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },
