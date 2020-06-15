@@ -14,7 +14,7 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
 
   return (
     <>
-      <div className="mb-2">
+      <div className="mb-8">
         <h2 className="text-xl mb-3">
           {requestsToJoin.length} requests to join
         </h2>
