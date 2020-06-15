@@ -2,7 +2,6 @@ import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import { useForm } from "react-hook-form";
-import slugify from "../../utils/slugify";
 import { Modal } from "@material-ui/core";
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -21,7 +20,6 @@ const EDIT_CUSTOM_FIELDS_MUTATION = gql`
   mutation EditCustomFields($eventId: ID!, $customFields: [CustomFieldInput]!) {
     editCustomFields(eventId: $eventId, customFields: $customFields) {
       customFields {
-        slug,
         name,
         description,
         type,
@@ -35,7 +33,6 @@ const EDIT_CUSTOM_FIELDS_MUTATION = gql`
 const schema = yup.object().shape({
   customFields: yup.array().of(
     yup.object().shape({
-      slug: yup.string().required(),
       name: yup.string().required(),
       description: yup.string().required(),
       type: yup.string().required(), //TODO: enum
@@ -104,20 +101,6 @@ export default ({
                         inputRef={register({
                           required: "Required",
                         })}
-                      />
-                    </Grid>
-
-                    <Grid item>
-                      <TextField
-                        name={`${fieldName}.slug`}
-                        defaultValue={customField.slug}
-                        inputRef={register}
-                        InputProps={{
-                          onBlur: (e) => {
-                            setValue("slug", slugify(e.target.value));
-                          },
-                        }}
-                        variant="outlined"
                       />
                     </Grid>
 

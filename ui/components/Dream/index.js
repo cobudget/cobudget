@@ -24,6 +24,7 @@ import Budget from "./Budget";
 import Summary from "./Summary";
 import Title from "./Title";
 import Description from "./Description";
+import EditCustomFields from "./CustomFields/EditCustomFields";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -60,6 +61,7 @@ const EDIT_DREAM_MUTATION = gql`
     $summary: String
     $images: [ImageInput]
     $budgetItems: [BudgetItemInput]
+    $customFields: [CustomFieldInput]
   ) {
     editDream(
       dreamId: $dreamId
@@ -68,6 +70,7 @@ const EDIT_DREAM_MUTATION = gql`
       summary: $summary
       images: $images
       budgetItems: $budgetItems
+      customFields: $customFields
     ) {
       id
       description
@@ -145,6 +148,12 @@ const Dream = ({ dream, event, currentUser }) => {
             <Description
               description={dream.description}
               dreamId={dream.id}
+              canEdit={canEdit}
+            />
+
+            <EditCustomFields
+              dreamId={dream.id}
+              customFields={dream.customFields} 
               canEdit={canEdit}
             />
 

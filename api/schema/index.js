@@ -52,6 +52,7 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
+      customFields: [CustomFieldInput]
     ): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
@@ -182,7 +183,7 @@ const schema = gql`
     maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
-    customFields: JSON
+    customFields: [CustomFieldValue]
     comments: [Comment]
     numberOfComments: Int
     currentNumberOfGrants: Int
@@ -275,6 +276,11 @@ const schema = gql`
     content: String!
   }
 
+  type CustomFieldValue {
+    fieldId: ID!
+    value: JSON
+  }
+
   enum CustomFieldType {
     TEXT
     MULTILINE_TEXT
@@ -283,7 +289,7 @@ const schema = gql`
   }
 
   type CustomField {
-    slug: String!
+    id: ID!
     name: String!
     description: String!
     type: CustomFieldType!
@@ -293,12 +299,11 @@ const schema = gql`
   }
 
   input CustomFieldInput {
-    slug: String!
     name: String!
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean 
+    isShownOnFrontPage: Boolean
     createdAt: Date
   }
 

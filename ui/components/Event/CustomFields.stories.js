@@ -1,6 +1,5 @@
 import React from "react";
 import CustomFields from "./CustomFields";
-
 export default { title: 'Custom Fields' };
 
 export const empty = () => {
@@ -22,7 +21,6 @@ export const withExistingFields = () => {
     id: 1,
     customFields: [{
       name: 'Name',
-      slug: 'SLUG',
       id: '12355',
       description: 'Description',
       type: 'TEXT',

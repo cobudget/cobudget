@@ -35,7 +35,6 @@ export const TOP_LEVEL_QUERY = gql`
       guidelines
       allowStretchGoals
       customFields {
-        slug
         name
         description
         type

@@ -204,7 +204,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary, images, budgetItems },
+      { dreamId, title, description, summary, images, budgetItems, customFields },
       { currentUser, models: { Member, Dream, Event } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
@@ -220,14 +220,15 @@ const resolvers = {
           !currentMember.isAdmin &&
           !currentMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+      throw new Error('You are not a cocreator of this dream.');
 
       if (title) dream.title = title;
       if (typeof description !== 'undefined') dream.description = description;
       if (typeof summary !== 'undefined') dream.summary = summary;
       if (typeof images !== 'undefined') dream.images = images;
       if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
-
+      if (typeof customFields !== 'undefined') dream.customFields = customFields;
+      
       return dream.save();
     },
     addCocreator: async (

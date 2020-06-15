@@ -81,12 +81,6 @@ const EventSchema = new Schema({
   allowStretchGoals: { type: Boolean, default: false },
   customFields: [
     new Schema({
-      slug: {
-        type: String,
-        required: true,
-        index: true,
-        unique: true,
-      },
       name: { type: String, required: true },
       description: { type: String, required: true },
       type: {
@@ -144,7 +138,11 @@ const DreamSchema = new Schema({
   },
   description: String,
   cocreators: [Schema.Types.ObjectId],
-  customFields: Schema.Types.Mixed,
+  customFields: [
+    new Schema({
+    fieldId: { type: Schema.Types.ObjectId, required: true },
+    value: Schema.Types.Mixed,
+  })],
   images: [new Schema({ small: String, large: String })],
   comments: [
     new Schema({
