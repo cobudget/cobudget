@@ -45,6 +45,7 @@ const schema = gql`
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
     ): Dream
+    deleteDream(dreamId: ID!): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
