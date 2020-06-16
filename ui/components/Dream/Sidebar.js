@@ -149,7 +149,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
                 )}
               </div>
 
-              {currentUser.membership.isAdmin && (
+              {currentUser?.membership?.isAdmin && (
                 <>
                   <div className="my-2">
                     {event.grantingHasClosed &&
@@ -220,25 +220,27 @@ export default ({ dream, event, currentUser, canEdit }) => {
                       Unapprove for granting
                     </button>
                   )}
-                {dream.minGoalGrants > 0 && currentUser?.membership?.isAdmin && (
-                  <>
-                    <button
-                      className={css.dropdownButton}
-                      onClick={() => {
-                        setPrePostFundModalOpen(true);
-                        setActionsDropdownOpen(false);
-                      }}
-                    >
-                      {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
-                    </button>
-                    <PreOrPostFundModal
-                      open={prePostFundModalOpen}
-                      handleClose={() => setPrePostFundModalOpen(false)}
-                      dream={dream}
-                      event={event}
-                    />
-                  </>
-                )}
+                {dream.approved &&
+                  dream.minGoalGrants > 0 &&
+                  currentUser?.membership?.isAdmin && (
+                    <>
+                      <button
+                        className={css.dropdownButton}
+                        onClick={() => {
+                          setPrePostFundModalOpen(true);
+                          setActionsDropdownOpen(false);
+                        }}
+                      >
+                        {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
+                      </button>
+                      <PreOrPostFundModal
+                        open={prePostFundModalOpen}
+                        handleClose={() => setPrePostFundModalOpen(false)}
+                        dream={dream}
+                        event={event}
+                      />
+                    </>
+                  )}
                 <button
                   className={css.dropdownButton}
                   onClick={() =>
