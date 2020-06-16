@@ -41,7 +41,6 @@ const resolvers = {
       if (currentMember && (currentMember.isAdmin || currentMember.isGuide)) {
         return Dream.find({
           eventId,
-          deleted: { $ne: true },
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
@@ -50,7 +49,6 @@ const resolvers = {
       if (currentMember) {
         return Dream.find({
           eventId,
-          deleted: { $ne: true },
           $or: [{ published: true }, { cocreators: currentMember.id }],
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
@@ -59,7 +57,6 @@ const resolvers = {
       return Dream.find({
         eventId,
         published: true,
-        deleted: { $ne: true },
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },
@@ -242,9 +239,7 @@ const resolvers = {
         throw new Error('You cant delete a Dream that has received grants');
       }
 
-      dream.deleted = true;
-
-      return dream.save();
+      return dream.remove();
     },
     addCocreator: async (
       parent,
