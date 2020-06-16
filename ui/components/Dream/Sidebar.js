@@ -3,17 +3,19 @@ import { Tooltip } from "react-tippy";
 import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
+import Router from "next/router";
 
 import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 
-import ActionsDropdown from "./ActionsDropdown";
 import GiveGrantlingsModal from "./GiveGrantlingsModal";
 import PreOrPostFundModal from "./PreOrPostFundModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
+
+import { DREAMS_QUERY } from "pages/[event]";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -64,6 +66,12 @@ export default ({ dream, event, currentUser, canEdit }) => {
 
   const [deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
+    refetchQueries: [
+      {
+        query: DREAMS_QUERY,
+        variables: { eventId: event.id },
+      },
+    ],
   });
 
   const [grantModalOpen, setGrantModalOpen] = useState(false);
@@ -238,7 +246,10 @@ export default ({ dream, event, currentUser, canEdit }) => {
                       "Are you sure you would like to delete this dream?"
                     ) &&
                     deleteDream()
-                      .then(() => setActionsDropdownOpen(false))
+                      .then(() => {
+                        setActionsDropdownOpen(false);
+                        Router.push("/[event]", `/${event.slug}`);
+                      })
                       .catch((err) => alert(err.message))
                   }
                 >
