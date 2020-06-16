@@ -208,6 +208,39 @@ const resolvers = {
 
       return dream.save();
     },
+    deleteDream: async (
+      parent,
+      { dreamId },
+      { currentUser, models: { Dream, Member, Grant } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !currentMember ||
+        (!dream.cocreators.includes(currentMember.id) &&
+          !currentMember.isAdmin &&
+          !currentMember.isGuide)
+      )
+        throw new Error('You are not a cocreator of this dream.');
+
+      const [
+        { grantsForDream } = { grantsForDream: 0 },
+      ] = await Grant.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
+        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+      ]);
+
+      if (grantsForDream > 0) {
+        throw new Error('You cant delete a Dream that has received grants');
+      }
+
+      return dream.remove();
+    },
     addCocreator: async (
       parent,
       { dreamId, memberId },

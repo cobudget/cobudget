@@ -45,7 +45,7 @@ export default ({ currentUser, event }) => {
     {
       variables: {
         eventId: event.id,
-        textSearchTerm,
+        ...(textSearchTerm && { textSearchTerm }),
       },
     }
   );
