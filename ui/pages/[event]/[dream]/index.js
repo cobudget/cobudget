@@ -57,9 +57,12 @@ export default ({ event, currentUser }) => {
   if (!event) return null;
   const router = useRouter();
 
-  const { data: { dream } = { dream: null }, loading } = useQuery(DREAM_QUERY, {
-    variables: { id: router.query.dream },
-  });
+  const { data: { dream } = { dream: null }, loading, error } = useQuery(
+    DREAM_QUERY,
+    {
+      variables: { id: router.query.dream },
+    }
+  );
 
   if (dream)
     return (
@@ -79,6 +82,15 @@ export default ({ event, currentUser }) => {
         <HappySpinner />
       </div>
     );
+
+  if (error) {
+    console.error(error);
+    return (
+      <div className="flex-grow flex justify-center items-center">
+        {error.message}
+      </div>
+    );
+  }
 
   return (
     <div className="flex-grow flex flex-col justify-center items-center">
