@@ -58,7 +58,7 @@ export default ({
     validationSchema: schema,
   });
 
-  const emptyCustomField = { description: "", min: 0, max: 0 };
+  const emptyCustomField = { description: ""};
 
   const [customFields, setCustomFields] = useState(
     initialCustomFields && initialCustomFields.length ? initialCustomFields : [emptyCustomField]

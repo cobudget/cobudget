@@ -61,7 +61,7 @@ const EDIT_DREAM_MUTATION = gql`
     $summary: String
     $images: [ImageInput]
     $budgetItems: [BudgetItemInput]
-    $customFields: [CustomFieldInput]
+    $customFields: [CustomFieldValueInput]
   ) {
     editDream(
       dreamId: $dreamId
@@ -88,6 +88,10 @@ const EDIT_DREAM_MUTATION = gql`
         description
         min
         max
+      }
+      customFields {
+        fieldId,
+        value
       }
     }
   }

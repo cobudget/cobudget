@@ -21,6 +21,7 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
+    
     editEvent(
       eventId: ID!
       slug: String
@@ -52,7 +53,7 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
-      customFields: [CustomFieldInput]
+      customFields: [CustomFieldValueInput]
     ): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
@@ -277,6 +278,11 @@ const schema = gql`
   }
 
   type CustomFieldValue {
+    fieldId: ID!
+    value: JSON
+  }
+
+  input CustomFieldValueInput {
     fieldId: ID!
     value: JSON
   }

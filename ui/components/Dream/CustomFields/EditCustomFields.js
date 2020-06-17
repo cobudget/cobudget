@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
@@ -6,15 +6,17 @@ import { Tooltip } from "react-tippy";
 import { useQuery } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 
-import TextField from "../../TextField";
+import EditCustomField from './EditCustomField';
 import Button from "../../Button";
 import IconButton from "../../IconButton";
 import { EditIcon } from "../../Icons";
 
 const CUSTOM_FIELDS_QUERY = gql`
-  query CustomFields($slug: STRING!) {
+  query CustomFields($slug: String!) {
     event(slug: $slug) {
+      id
       customFields {
+        id,
         name,
         description,
         type,
@@ -26,7 +28,7 @@ const CUSTOM_FIELDS_QUERY = gql`
 `;
 
 const EDIT_CUSTOM_FIELDS_MUTATION = gql`
-  mutation EditCustomFields($dreamId: ID!, $customFields: [CustomFieldInput]) {
+  mutation EditCustomFields($dreamId: ID!, $customFields: [CustomFieldValueInput]) {
     editDream(dreamId: $dreamId, customFields: $customFields) {
       id
       customFields {
@@ -42,13 +44,17 @@ export default ({ customFields, canEdit, dreamId }) => {
   const { data } = useQuery(CUSTOM_FIELDS_QUERY, {
     variables: { slug: router.query.event },
   });
-  const { customFields:defaultCustomFields } = data.event;
+  const { handleSubmit, register, errors } = useForm();
+  const [editing, setEditing] = useState(false);
 
   const [editCustomFields, { loading }] = useMutation(EDIT_CUSTOM_FIELDS_MUTATION, {
     variables: { dreamId },
   });
-  const { handleSubmit, register, errors } = useForm();
-  const [editing, setEditing] = useState(false);
+  if (!data) {
+    return (<></>);
+  }
+
+  const { customFields:defaultCustomFields } = data.event;
   
   if (editing) {
     return (
@@ -62,25 +68,16 @@ export default ({ customFields, canEdit, dreamId }) => {
         >
           { defaultCustomFields.map((defaultCustomField, index) => {
             const fieldName = `customFields[${index}]`;
+            const customField = customFields.filter(field => field.fieldId == defaultCustomField.id);
+            const defaultValue = customField && customField.length > 0 ? customField[0].value : null;
+            
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldName}>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  { defaultCustomField.name }
-                  { defaultCustomField.description }
-                  
-                </div>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <TextField
-                    placeholder="Value"
-                    name={`${fieldName}.value`}
-                    defaultValue={customFields.value}
-                    inputRef={register({
-                      required: defaultCustomField.isRequired ? "Required" : null,
-                    })}
-                  />
-                </div>
-            </div>
-          )
+              <EditCustomField
+                defaultCustomField={defaultCustomField} 
+                fieldName={fieldName}
+                defaultValue={defaultValue}
+                register={register} />
+            )
           })
           }
           <div className="flex justify-end  mb-4">
@@ -103,10 +100,23 @@ export default ({ customFields, canEdit, dreamId }) => {
     );
   }
 
-  return (
-    <div className="flex items-start justify-between group relative">
-      <h1 className="mb-2 text-4xl font-medium">Here we should show existing customFields</h1>
-      {canEdit && (
+  { return (customFields && customFields.length > 0) ?
+    (
+    <div className="flex flex-col items-start justify-between group relative">
+      { customFields.map((customField, index) => {
+        const defaultCustomField = defaultCustomFields.filter(field => field.id === customField.fieldId);
+        if(customField.value && defaultCustomField && defaultCustomField.length > 0) {
+          return  ( 
+          <div className="py-2" key={customField.fieldId}>
+            <h2 className="text-xl font-medium">{defaultCustomField[0].name}</h2>
+            <p>{customField.value}</p>
+          </div>
+        )
+        }
+      })
+      }
+      {
+      canEdit && (
         <div className="absolute top-0 right-0 invisible group-hover:visible">
           <Tooltip title="Edit custom fields" position="bottom" size="small">
             <IconButton onClick={() => setEditing(true)}>
@@ -114,7 +124,16 @@ export default ({ customFields, canEdit, dreamId }) => {
             </IconButton>
           </Tooltip>
         </div>
-      )}
+      )
+    }
     </div>
-  )
+  ) : canEdit? (
+    <button
+      onClick={() => setEditing(true)}
+      className="h-24 w-full  text-gray-600  font-semibold rounded-lg border-3 focus:outline-none border-dashed hover:bg-gray-100 mb-4"
+    >
+      + Add Custom Fields
+    </button>
+  ) : (<div>EMPTY</div>)
+  }
 };
