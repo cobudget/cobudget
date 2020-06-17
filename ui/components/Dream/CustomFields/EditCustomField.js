@@ -1,5 +1,6 @@
 import TextField from "../../TextField";
 import HiddenTextField from "../../HiddenTextField";
+import SelectInput from "../../SelectInput";
 
 export default ({ defaultCustomField, fieldName, defaultValue, register}) => {
   return (
@@ -15,14 +16,28 @@ export default ({ defaultCustomField, fieldName, defaultValue, register}) => {
         inputRef={register()}
       />
       <div className="mr-2 my-2 sm:my-0 flex-grow">
-        <TextField
-          placeholder="Value"
-          name={`${fieldName}.value`}
-          defaultValue={defaultValue}
-          inputRef={register({
-            required: defaultCustomField.isRequired ? "Required" : null,
-          })}
-        />
+        { defaultCustomField.type === 'TEXT' || defaultCustomField.type === 'MULTILINE_TEXT' ? (
+          <TextField
+            placeholder="Value"
+            name={`${fieldName}.value`}
+            defaultValue={defaultValue}
+            multiline = {defaultCustomField.type == 'MULTILINE_TEXT'}
+            inputRef={register({
+              required: defaultCustomField.isRequired ? "Required" : null,
+            })}
+          />
+        ) : (defaultCustomField.type === 'BOOLEAN')? (
+          <SelectInput
+              name={`${fieldName}.value`}
+              defaultValue={defaultValue}
+              inputRef={register}
+              fullWidth
+            >
+              <option value={true}>Yes</option>
+              <option value={false}>No</option>
+          </SelectInput>
+        ): null
+        }
       </div>
     </div>
   )

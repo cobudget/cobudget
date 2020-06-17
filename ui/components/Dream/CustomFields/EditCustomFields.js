@@ -134,6 +134,6 @@ export default ({ customFields, canEdit, dreamId }) => {
     >
       + Add Custom Fields
     </button>
-  ) : (<div>EMPTY</div>)
+  ) : null
   }
 };
