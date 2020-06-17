@@ -14,7 +14,7 @@ const calculateGoals = (budgetItems) => {
   const min = minExpenses - incomes;
   const max = maxExpenses - incomes;
   return {
-    max: max === min ? null : max > 0 ? max : 0,
+    max: max > 0 && max !== min ? max : null,
     min: min > 0 ? min : 0,
   };
 };

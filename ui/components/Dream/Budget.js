@@ -55,22 +55,10 @@ export default ({
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">
-                  {/* <thead>
-                    <tr>
-                      <th className="px-4 py-2 w-3/4 border-b text-left font-medium">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 border-b text-left font-medium">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead> */}
                   <tbody>
                     {incomeItems.map((budgetItem, i) => (
                       <tr key={i} className="bg-gray-100 even:bg-white">
-                        <td className="px-4 py-2 w-3/4">
-                          {budgetItem.description}
-                        </td>
+                        <td className="px-4 py-2">{budgetItem.description}</td>
                         <td className="px-4 py-2">
                           {thousandSeparator(budgetItem.min)} {currency}
                         </td>
@@ -87,22 +75,10 @@ export default ({
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">
-                  {/* <thead>
-                    <tr>
-                      <th className="px-4 py-2 w-3/4 border-b text-left font-medium">
-                        Description
-                      </th>
-                      <th className="px-4 py-2 border-b text-left font-medium">
-                        Amount
-                      </th>
-                    </tr>
-                  </thead> */}
                   <tbody>
                     {expenseItems.map((budgetItem, i) => (
                       <tr key={i} className="bg-gray-100 even:bg-white">
-                        <td className="px-4 py-2 w-3/4">
-                          {budgetItem.description}
-                        </td>
+                        <td className="px-4 py-2">{budgetItem.description}</td>
                         <td className="px-4 py-2">
                           {thousandSeparator(budgetItem.min)}
                           {budgetItem.max &&
@@ -118,7 +94,7 @@ export default ({
           )}
           <p className="font-lg font-medium mb-2">
             Total funding goal: {thousandSeparator(minGoal)} {currency}{" "}
-            {maxGoal && (
+            {maxGoal > 0 && (
               <>
                 (stretch goal: {thousandSeparator(maxGoal)} {currency})
               </>
