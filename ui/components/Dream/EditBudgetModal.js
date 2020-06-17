@@ -34,7 +34,13 @@ const schema = yup.object().shape({
     yup.object().shape({
       description: yup.string().required(),
       min: yup.number().positive().integer().required(),
-      max: yup.number().positive().integer(),
+      max: yup
+        .number()
+        .transform((cv) => (isNaN(cv) ? undefined : cv))
+        .nullable()
+        .positive()
+        .integer()
+        .moreThan(yup.ref("min"), "Max should be > min"),
       type: yup.string().required(),
     })
   ),
@@ -221,9 +227,9 @@ export default ({
               <AddIcon className="h-5 w-5 mr-1" /> Add row
             </Button>
           </div>
-          <div>
+          {/* <div>
             Total funding goal: {thousandSeparator(minGoal)} {currency}
-          </div>
+          </div> */}
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
