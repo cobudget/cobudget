@@ -1,5 +1,6 @@
 const { Schema } = require('mongoose');
 const dayjs = require('dayjs');
+const calculateGoals = require('../utils/calculateGoals');
 
 // User
 const UserSchema = new Schema({
@@ -141,24 +142,23 @@ const DreamSchema = new Schema({
       description: { type: String, required: true },
       min: { type: Number, required: true },
       max: Number,
+      type: {
+        type: String,
+        enum: ['INCOME', 'EXPENSE'],
+        required: true,
+      },
     }),
   ],
   published: { type: Boolean, default: false },
 }).index({ title: 'text', description: 'text', summary: 'text' });
 
 DreamSchema.virtual('minGoal').get(function () {
-  if (!this.budgetItems) return null;
-  return this.budgetItems.reduce((acc, item) => acc + item.min, 0);
+  const { min } = calculateGoals(this.budgetItems);
+  return min;
 });
 
 DreamSchema.virtual('maxGoal').get(function () {
-  if (!this.budgetItems) return null;
-  const min = this.budgetItems.reduce((acc, item) => acc + item.min, 0);
-  const max = this.budgetItems.reduce(
-    (acc, item) => acc + (item.max ? item.max : item.min),
-    0
-  );
-  if (min === max) return null;
+  const { max } = calculateGoals(this.budgetItems);
   return max;
 });
 

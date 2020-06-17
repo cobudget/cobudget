@@ -66,6 +66,8 @@ const Dream = ({ dream, event, currentUser }) => {
               currency={event.currency}
               allowStretchGoals={event.allowStretchGoals}
               event={event}
+              minGoal={dream.minGoal}
+              maxGoal={dream.maxGoal}
             />
 
             <hr className="mb-4 mt-1" />

@@ -47,6 +47,7 @@ export const DREAM_QUERY = gql`
         description
         min
         max
+        type
       }
     }
   }
