@@ -305,6 +305,7 @@ const schema = gql`
   }
 
   input CustomFieldInput {
+    id: ID
     name: String!
     description: String!
     type: CustomFieldType!

@@ -7,6 +7,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Grid from '@material-ui/core/Grid';
 import TextField from "../TextField";
+import HiddenTextField from "../HiddenTextField";
 import Button from "../Button";
 import IconButton from "../IconButton";
 import { DeleteIcon, AddIcon } from "../Icons";
@@ -20,6 +21,7 @@ const EDIT_CUSTOM_FIELDS_MUTATION = gql`
   mutation EditCustomFields($eventId: ID!, $customFields: [CustomFieldInput]!) {
     editCustomFields(eventId: $eventId, customFields: $customFields) {
       customFields {
+        id,
         name,
         description,
         type,
@@ -94,6 +96,11 @@ export default ({
                 <Grid item xs={12} key={fieldName}>
                   <Grid container>
                     <Grid item>
+                      <HiddenTextField
+                        name={`${fieldName}.id`}
+                        defaultValue={customField.id}
+                        inputRef={register()}
+                      />
                       <TextField
                         placeholder="Name"
                         name={`${fieldName}.name`}

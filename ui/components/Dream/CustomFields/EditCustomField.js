@@ -22,6 +22,7 @@ export default ({ defaultCustomField, fieldName, defaultValue, register}) => {
             name={`${fieldName}.value`}
             defaultValue={defaultValue}
             multiline = {defaultCustomField.type == 'MULTILINE_TEXT'}
+            rows={4}
             inputRef={register({
               required: defaultCustomField.isRequired ? "Required" : null,
             })}

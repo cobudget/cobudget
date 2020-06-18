@@ -39,6 +39,15 @@ const EDIT_CUSTOM_FIELDS_MUTATION = gql`
   }
 `;
 
+const renderBooleanOrValue = (value) => {
+  if(value === 'true' || value === 'false') {
+    return value ? 'Yes' : 'No';
+  }
+  else {
+    return value;
+  }
+}
+
 export default ({ customFields, canEdit, dreamId }) => {
   const router = useRouter();
   const { data } = useQuery(CUSTOM_FIELDS_QUERY, {
@@ -109,7 +118,7 @@ export default ({ customFields, canEdit, dreamId }) => {
           return  ( 
           <div className="py-2" key={customField.fieldId}>
             <h2 className="text-xl font-medium">{defaultCustomField[0].name}</h2>
-            <p>{customField.value}</p>
+            <p>{renderBooleanOrValue(customField.value)}</p>
           </div>
         )
         }
