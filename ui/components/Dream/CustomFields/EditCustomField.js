@@ -45,8 +45,6 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
       >
         <div className={`flex flex-col sm:flex-row my-2`}>
           <div className="mr-2 my-2 sm:my-0 flex-grow">
-            { defaultCustomField.name }
-            <br />
             { defaultCustomField.description }
           </div>
           <HiddenTextField
@@ -57,10 +55,11 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
           <div className="mr-2 my-2 sm:my-0 flex-grow">
             { defaultCustomField.type === 'TEXT' || defaultCustomField.type === 'MULTILINE_TEXT' ? (
               <TextField
-                placeholder="Value"
+                placeholder={defaultCustomField.name}
                 name={`${fieldName}.value`}
                 defaultValue={defaultValue}
-                multiline = {defaultCustomField.type == 'MULTILINE_TEXT'}
+                autoFocus
+                multiline={defaultCustomField.type == 'MULTILINE_TEXT'}
                 rows={4}
                 inputRef={register({
                   required: defaultCustomField.isRequired ? "Required" : null,
@@ -72,6 +71,7 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
                   defaultValue={defaultValue}
                   inputRef={register}
                   fullWidth
+                  autoFocus
                 >
                   <option value={''}></option>
                   <option value={true}>Yes</option>
@@ -122,7 +122,7 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
     return(
       <button
         onClick={() => setEditing(true)}
-        className="block w-full h-16 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-2"
+        className="block w-full h-16 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       > + Add {defaultCustomField.name}
       </button>
     )
