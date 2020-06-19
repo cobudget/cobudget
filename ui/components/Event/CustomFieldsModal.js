@@ -12,6 +12,7 @@ import Button from "../Button";
 import IconButton from "../IconButton";
 import { DeleteIcon, AddIcon } from "../Icons";
 import { Delete as OldDeleteIcon, Add as OldAddIcon } from "@material-ui/icons";
+import { makeStyles } from '@material-ui/core/styles';
 
 import SelectInput from "../SelectInput";
 
@@ -70,11 +71,19 @@ export default ({
   const removeCustomField = (i) =>
     setCustomFields([...customFields.filter((item, index) => i !== index)]);
 
+    const useStyles = makeStyles({
+      modalStyle:{
+        overflow:'scroll',
+        display:'grid'
+      }
+  });
+  
+  const classes = useStyles();
   return (
     <Modal
       open={open}
       onClose={()=> {}}
-      className="flex items-center justify-center p-4"
+      className={`flex items-center justify-center p-4 ${classes.modalStyle}`}
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-md">
         <h1 className="text-xl font-semibold">Edit custom fields</h1>

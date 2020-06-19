@@ -44,6 +44,12 @@ export default ({ event, open, handleClose }) => {
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h2 className="text-2xl">Event details</h2>
+          <Box my={2}>
+            <CustomFields
+              event={event}
+              customFields={event.customFields}
+            />
+          </Box>
           <form
             onSubmit={handleSubmit((variables) => {
               editEvent({
@@ -127,12 +133,6 @@ export default ({ event, open, handleClose }) => {
               </Box>
             </Box>
           </form>
-          <Box my={2}>
-            <CustomFields
-              event={event}
-              customFields={event.customFields}
-          />
-          </Box>
         </div>
       </Modal>
     </>
