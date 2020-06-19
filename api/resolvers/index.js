@@ -204,7 +204,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary, images, budgetItems, customFields },
+      { dreamId, title, description, summary, images, budgetItems },
       { currentUser, models: { Member, Dream, Event } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
@@ -227,7 +227,38 @@ const resolvers = {
       if (typeof summary !== 'undefined') dream.summary = summary;
       if (typeof images !== 'undefined') dream.images = images;
       if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
-      if (typeof customFields !== 'undefined') dream.customFields = customFields;
+      
+      return dream.save();
+    },
+    editDreamCustomField: async (
+      parent,
+      { dreamId, customField },
+      { currentUser, models: { Member, Dream, Event } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !currentMember ||
+        (!dream.cocreators.includes(currentMember.id) &&
+          !currentMember.isAdmin &&
+          !currentMember.isGuide)
+      )
+      throw new Error('You are not a cocreator of this dream.');
+
+      const existingField = dream.customFields.filter((field) => {
+        return field.fieldId == customField.fieldId;
+      });
+
+      if (existingField.length > 0) {
+        existingField[0].value = customField.value;
+      } else {
+        dream.customFields.push(customField);
+      }
       
       return dream.save();
     },

@@ -36,6 +36,11 @@ const schema = gql`
       customFields: [CustomFieldInput]!
     ): Event!
 
+    editDreamCustomField (
+      dreamId: ID!
+      customField: CustomFieldValueInput!
+    ): Dream!
+
     createDream(
       eventId: ID!
       title: String!
@@ -53,7 +58,6 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
-      customFields: [CustomFieldValueInput]
     ): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
