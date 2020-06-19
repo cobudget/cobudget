@@ -59,6 +59,7 @@ const schema = gql`
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
     ): Dream
+    deleteDream(dreamId: ID!): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
@@ -232,12 +233,19 @@ const schema = gql`
     description: String!
     min: Int!
     max: Int
+    type: BudgetItemType!
+  }
+
+  enum BudgetItemType {
+    INCOME
+    EXPENSE
   }
 
   input BudgetItemInput {
     description: String!
     min: Int!
     max: Int
+    type: BudgetItemType!
   }
 
   # enum Visibility {

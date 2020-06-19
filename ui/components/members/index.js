@@ -90,12 +90,8 @@ export default ({ event }) => {
     },
   });
 
-  //console.log({ members });
-
   const approvedMembers = members.filter((member) => member.isApproved);
-  const requestsToJoin = members.filter(
-    (member) => !member.isApproved && member.verifiedEmail
-  );
+  const requestsToJoin = members.filter((member) => !member.isApproved);
 
   const [open, setOpen] = React.useState(false);
 

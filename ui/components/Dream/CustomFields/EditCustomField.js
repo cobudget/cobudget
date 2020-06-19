@@ -105,7 +105,7 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
       <div className="flex flex-col items-start justify-between group relative">
         <div className="py-2" key={customField.fieldId}>
           <h2 className="text-xl font-medium">{defaultCustomField.name}</h2>
-          <p>{renderBooleanOrValue(customField.value)}</p>
+          <span dangerouslySetInnerHTML={{__html: renderBooleanOrValue(customField.value)}} />
         </div>
         { canEdit && (
         <div className="absolute top-0 right-0 invisible group-hover:visible">
@@ -137,6 +137,6 @@ const renderBooleanOrValue = (value) => {
     return value ? "Yes" : "No";
   }
   else {
-    return value;
+    return value.split('\n').join('<br/>');
   }
 }
