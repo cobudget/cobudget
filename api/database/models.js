@@ -86,7 +86,7 @@ const EventSchema = new Schema({
       description: { type: String, required: true },
       type: {
         type: String,
-        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','FILE'],
+        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE'],
         default: 'TEXT',
         required: true,
       },

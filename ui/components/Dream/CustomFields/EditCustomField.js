@@ -34,7 +34,6 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
   if(editing) {
     return (
       <form
-        key={defaultCustomField.id}
         onSubmit={handleSubmit((variables) =>
           {
           return editCustomFieldMutation({ variables })

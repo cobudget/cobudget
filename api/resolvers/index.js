@@ -154,6 +154,14 @@ const resolvers = {
         throw new Error('You need to be logged in as organisation admin.');
 
       const event = await Event.findOne({ _id: eventId });
+      // TODO: Remove this hack with proper id matching
+      // TODO Without it - it creates a new object on each call
+      customFields = customFields.map(field => {
+        if(field.id) {
+          field._id = field.id;
+        }
+        return field;
+      });
       event.customFields = customFields;
       return event.save();
     },

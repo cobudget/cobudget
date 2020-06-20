@@ -38,7 +38,7 @@ const schema = yup.object().shape({
     yup.object().shape({
       name: yup.string().required(),
       description: yup.string().required(),
-      type: yup.string().required(), //TODO: enum
+      type: yup.mixed().oneOf(['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE']).required(),
       isRequired: yup.bool().required(),
       isShownOnFrontPage: yup.bool(),
     })
@@ -142,7 +142,7 @@ export default ({
                       >
                         <option value="TEXT">Text field</option>
                         <option value="MULTILINE_TEXT">Multi line text</option>
-                        <option value="BOOLEAN">Checkbox - True / False</option>
+                        <option value="BOOLEAN">Checkbox - Yes / No</option>
                       </SelectInput>
                     </Grid>
 

@@ -36,6 +36,7 @@ export default ({ customFields, canEdit, dreamId }) => {
     const customField = customFields.filter(field => field.fieldId == defaultCustomField.id);
     return (
       <EditCustomField
+        key={defaultCustomField.id}
         defaultCustomField={defaultCustomField}
         customField={customField && customField.length > 0 ? customField[0]: null}
         dreamId={dreamId}
