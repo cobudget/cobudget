@@ -74,24 +74,38 @@ export default ({ event, currentUser, openModal, logOut }) => {
         (event?.color ? `bg-${event.color} shadow-md` : "") + " mb-8 w-full"
       }
     >
-      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 sm:px-3">
+      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
         <div className="flex items-center justify-between py-2 sm:p-0">
           <div className="flex items-center">
             {event ? (
               <>
-                <Tooltip title="See all events" position="bottom" size="small">
+                <Tooltip
+                  title={process.env.ORG_TITLE ?? `See all events`}
+                  position="bottom"
+                  size="small"
+                >
                   <div className="">
                     <Link href="/">
-                      <a
-                        className={
-                          "block p-1 rounded-md " +
-                          (event.color
-                            ? `text-white opacity-75 hover:opacity-100 hover:bg-${event.color}-darker`
-                            : "hover:bg-gray-200 text-gray-500 hover:text-gray-800")
-                        }
-                      >
-                        <HomeIcon className="h-5 w-5 " />
-                      </a>
+                      {process.env.ORG_LOGO ? (
+                        <a
+                          className={
+                            "block rounded overflow-hidden opacity-75 hover:opacity-100"
+                          }
+                        >
+                          <img className="h-7 w-7" src={process.env.ORG_LOGO} />
+                        </a>
+                      ) : (
+                        <a
+                          className={
+                            "block p-1 rounded-md " +
+                            (event.color
+                              ? `text-white opacity-75 hover:opacity-100 hover:bg-${event.color}-darker`
+                              : "hover:bg-gray-200 text-gray-500 hover:text-gray-800")
+                          }
+                        >
+                          <HomeIcon className="h-5 w-5 " />
+                        </a>
+                      )}
                     </Link>
                   </div>
                 </Tooltip>
@@ -99,18 +113,9 @@ export default ({ event, currentUser, openModal, logOut }) => {
                 <div className="group flex items-center">
                   <Link href="/[event]" as={`/${event.slug}`}>
                     <a
-                      className={`hover:bg-${event.color}-darker px-2 py-1 text-white rounded-md mx-3 font-medium`}
+                      className={`hover:bg-${event.color}-darker px-2 py-1 text-white rounded-md mx-2 font-medium`}
                     >
-                      <h1
-                      // className={
-                      //   "mx-3 font-medium  " +
-                      //   (event.color
-                      //     ? "text-white"
-                      //     : "text-gray-900 hover:text-black")
-                      // }
-                      >
-                        {event.title}
-                      </h1>
+                      <h1>{event.title}</h1>
                     </a>
                   </Link>
                   {currentUser?.membership?.isAdmin && (
@@ -143,7 +148,16 @@ export default ({ event, currentUser, openModal, logOut }) => {
                 </div>
               </>
             ) : (
-              <h1 className="text-lg font-medium text-gray-900 ">Dreams</h1>
+              <>
+                {process.env.ORG_LOGO && (
+                  <a className="block rounded overflow-hidden mr-4">
+                    <img className="h-7 w-7" src={process.env.ORG_LOGO} />
+                  </a>
+                )}
+                <h1 className="text-lg font-medium text-gray-900 ">
+                  {process.env.ORG_TITLE ?? "Dreams"}
+                </h1>
+              </>
             )}
           </div>
 

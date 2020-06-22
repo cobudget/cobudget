@@ -53,7 +53,7 @@ export default ({ children, currentUser, event, title, apollo, openModal }) => {
           openModal={openModal}
           logOut={logOut}
         />
-        <div className="mx-3 md:mx-5 pb-10 flex justify-center">{children}</div>
+        <div className="mx-2 md:mx-4 pb-10 flex justify-center">{children}</div>
       </div>
 
       {/* {process.env.IS_PROD && <DevelopmentNotice />} */}

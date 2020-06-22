@@ -41,6 +41,9 @@ module.exports = {
         shadow: "0 0 0 3px",
         alpha: "1",
       },
+      spacing: {
+        "7": "1.75rem",
+      },
     },
     borderWidth: {
       default: "1px",

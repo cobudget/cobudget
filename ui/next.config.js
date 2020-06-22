@@ -22,6 +22,12 @@ module.exports = (phase) => {
             : process.env.DEPLOY_URL
         }/api`,
     IS_PROD: isProd,
+    ...(process.env.ORG_LOGO && {
+      ORG_LOGO: process.env.ORG_LOGO,
+    }),
+    ...(process.env.ORG_TITLE && {
+      ORG_TITLE: process.env.ORG_TITLE,
+    }),
   };
   return withBundleAnalyzer({
     env,
