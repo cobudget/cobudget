@@ -1,4 +1,4 @@
-import stringToHslColor from "utils/stringToHslColor";
+import stringToHslColor, { stringToColor } from "utils/stringToHslColor";
 import { isMemberOfDream } from "utils/helpers";
 
 import Label from "components/Label";
@@ -26,12 +26,10 @@ const Dream = ({ dream, event, currentUser }) => {
         <img
           className="h-64 md:h-88 w-full object-cover object-center"
           src={dream.images[0].large}
-          style={{ background: stringToHslColor(dream.title) }}
         />
       ) : (
         <div
-          className="h-64 md:h-88 w-full"
-          style={{ background: stringToHslColor(dream.title) }}
+          className={`h-64 md:h-88 w-full bg-${stringToColor(dream.title)}`}
         />
       )}
 

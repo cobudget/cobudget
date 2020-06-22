@@ -66,14 +66,14 @@ export default ({ event, currentUser }) => {
 
   if (dream)
     return (
-      <>
+      <div className="max-w-screen-2lg flex-1">
         <Head>
           <title>
             {dream.title} | {event.title}
           </title>
         </Head>
         <Dream dream={dream} event={event} currentUser={currentUser} />
-      </>
+      </div>
     );
 
   if (loading)

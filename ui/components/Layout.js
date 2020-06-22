@@ -1,14 +1,8 @@
-import styled from "styled-components";
 import Head from "next/head";
 import Header from "./Header";
 import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
-//import DevelopmentNotice from "./DevelopmentNotice";
-
-const Container = styled.div`
-  flex: 0 1 1160px;
-`;
 
 export default ({ children, currentUser, event, title, apollo, openModal }) => {
   const router = useRouter();
@@ -38,7 +32,7 @@ export default ({ children, currentUser, event, title, apollo, openModal }) => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div>
       <Head>
         <title>
           {title
@@ -52,15 +46,16 @@ export default ({ children, currentUser, event, title, apollo, openModal }) => {
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <Container className="mx-3 md:mx-5 pb-10 min-h-screen flex flex-col">
+      <div>
         <Header
           event={event}
           currentUser={currentUser}
           openModal={openModal}
           logOut={logOut}
         />
-        {children}
-      </Container>
+        <div className="mx-3 md:mx-5 pb-10 flex justify-center">{children}</div>
+      </div>
+
       {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
     </div>
   );

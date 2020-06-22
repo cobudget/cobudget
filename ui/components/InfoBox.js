@@ -7,7 +7,7 @@ export default ({ markdown, close }) => {
 
   return (
     <div
-      className="shadow relative rounded-lg mt-2 mb-5 bg-white px-5 pt-4 pb-10 overflow-hidden markdown"
+      className="shadow relative rounded-lg mb-5 bg-white px-5 pt-4 pb-10 overflow-hidden markdown"
       style={!expanded ? { maxHeight: 90 } : {}}
     >
       {/* <button

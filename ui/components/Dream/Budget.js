@@ -112,30 +112,3 @@ export default ({
     </>
   );
 };
-
-// <>
-// <div className="my-5 rounded bg-gray-100 shadow overflow-hidden">
-//   {/* <h2 className="mb-1 uppercase tracking-wide font-medium p-2">
-//     Budget
-//   </h2> */}
-//   <table className="table-fixed w-full">
-//     <thead>
-//       <tr>
-//         <th className="px-4 py-2 w-3/4">Description</th>
-//         <th className="px-4 py-2">Amount</th>
-//       </tr>
-//     </thead>
-//     <tbody>
-//       {budgetItems.map((budgetItem, i) => (
-//         <tr key={i} className="bg-white even:bg-gray-100">
-//           <td className="border px-4 py-2">{budgetItem.description}</td>
-//           <td className="border px-4 py-2">
-//             {budgetItem.min}
-//             {budgetItem.max && ` - ${budgetItem.max}`} {currency}
-//           </td>
-//         </tr>
-//       ))}
-//     </tbody>
-//   </table>
-// </div>
-// </>

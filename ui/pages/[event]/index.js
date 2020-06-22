@@ -60,7 +60,7 @@ export default ({ currentUser, event }) => {
   }
 
   return (
-    <>
+    <div className="max-w-screen-2lg flex-1">
       {event.info && <InfoBox markdown={event.info} />}
 
       <Filterbar
@@ -104,6 +104,6 @@ export default ({ currentUser, event }) => {
           )}
         </>
       )}
-    </>
+    </div>
   );
 };

@@ -231,3 +231,19 @@ export const DotsHorizontalIcon = (props) => (
     <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"></path>
   </svg>
 );
+
+// heroicons check outline
+export const CheckIcon = (props) => (
+  <svg
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    className="h-6 w-6"
+    {...props}
+  >
+    <path d="M5 13l4 4L19 7"></path>
+  </svg>
+);

@@ -119,9 +119,7 @@ export default ({ event }) => {
       />
 
       <div className="flex justify-between">
-        <h2 className="text-xl mb-3 text-gray-800">
-          {approvedMembers.length} members
-        </h2>
+        <h2 className="text-xl mb-3">{approvedMembers.length} members</h2>
         {/* <div>
               <Button
                 variant="contained"

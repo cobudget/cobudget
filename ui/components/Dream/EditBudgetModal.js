@@ -235,7 +235,7 @@ export default ({
             <div className="pl-4">
               {event.guidelines && (
                 <a
-                  href={`/${event.slug}/granting#guidelines`}
+                  href={`/${event.slug}/about#guidelines`}
                   target="_blank"
                   className="text-sm text-gray-600 font-medium hover:text-gray-800"
                 >

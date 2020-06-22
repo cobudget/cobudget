@@ -1,9 +1,10 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { TextField, Box, Button, Modal } from "@material-ui/core";
 import SelectInput from "./SelectInput";
-
+import ColorPicker from "./ColorPicker";
 import slugify from "../utils/slugify";
 
 const EDIT_EVENT = gql`
@@ -13,6 +14,7 @@ const EDIT_EVENT = gql`
     $title: String
     $registrationPolicy: RegistrationPolicy
     $info: String
+    $color: String
   ) {
     editEvent(
       eventId: $eventId
@@ -20,19 +22,21 @@ const EDIT_EVENT = gql`
       title: $title
       registrationPolicy: $registrationPolicy
       info: $info
+      color: $color
     ) {
       id
       title
       slug
       registrationPolicy
       info
+      color
     }
   }
 `;
 
 export default ({ event, open, handleClose }) => {
   const [editEvent] = useMutation(EDIT_EVENT);
-
+  const [color, setColor] = useState(event.color);
   const { handleSubmit, register, setValue, formState, errors } = useForm();
 
   return (
@@ -53,6 +57,7 @@ export default ({ event, open, handleClose }) => {
                   totalBudget: Number(variables.totalBudget),
                   grantValue: Number(variables.grantValue),
                   grantsPerMember: Number(variables.grantsPerMember),
+                  color,
                 },
               })
                 .then((data) => {
@@ -103,6 +108,10 @@ export default ({ event, open, handleClose }) => {
                   <option value="INVITE_ONLY">Invite only</option>
                 </SelectInput>
               </Box>
+              <ColorPicker
+                color={color}
+                setColor={(color) => setColor(color)}
+              />
               <Box my={2}>
                 <TextField
                   name="info"
