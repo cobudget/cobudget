@@ -26,7 +26,7 @@ import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
 import SetGuidelines from "./SetGuidelines";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
-
+import SetAbout from "./SetAbout";
 import thousandSeparator from "../../utils/thousandSeparator";
 
 const useStyles = makeStyles((theme) => ({
@@ -53,6 +53,7 @@ const modals = {
   SET_TOTAL_BUDGET: SetTotalBudget,
   SET_GUIDELINES: SetGuidelines,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
+  SET_ABOUT: SetAbout,
 };
 
 export const UPDATE_GRANTING_SETTINGS = gql`
@@ -129,8 +130,63 @@ export default ({ event, currentUser }) => {
           {open && <ModalContent event={event} closeModal={handleClose} />}
         </div>
       </Modal>
+      {(event.about || currentUser?.membership?.isAdmin) && (
+        <>
+          <h2 className="text-xl mb-3" id="about">
+            About
+          </h2>
+          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
+            {event.about ? (
+              <>
+                {currentUser?.membership?.isAdmin && (
+                  <div className="absolute right-0 top-0 m-4">
+                    <IconButton onClick={() => handleOpen("SET_ABOUT")}>
+                      <EditIcon />
+                    </IconButton>
+                  </div>
+                )}
+                <ReactMarkdown className="markdown" source={event.about} />
+              </>
+            ) : (
+              <div className="flex justify-center">
+                <IconButton onClick={() => handleOpen("SET_ABOUT")}>
+                  <AddIcon />
+                </IconButton>
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
-      <h2 className="text-xl mb-3 text-gray-800">Granting settings</h2>
+      {(event.guidelines || currentUser?.membership?.isAdmin) && (
+        <>
+          <h2 className="text-xl mb-3" id="guidelines">
+            Guidelines
+          </h2>
+          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
+            {event.guidelines ? (
+              <>
+                {currentUser?.membership?.isAdmin && (
+                  <div className="absolute right-0 top-0 m-4">
+                    <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
+                      <EditIcon />
+                    </IconButton>
+                  </div>
+                )}
+                <ReactMarkdown className="markdown" source={event.guidelines} />
+              </>
+            ) : (
+              <div className="flex justify-center">
+                <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
+                  <AddIcon />
+                </IconButton>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      <h2 className="text-xl mb-3">Granting settings</h2>
       <div className="bg-white rounded-lg shadow mb-4">
         <List>
           <SettingsListItem
@@ -260,7 +316,7 @@ export default ({ event, currentUser }) => {
         </List>
       </div>
 
-      <h2 className="text-xl mb-3 text-gray-800">Granting status</h2>
+      <h2 className="text-xl mb-3">Granting status</h2>
       <div className="bg-white rounded-lg shadow mb-4">
         <List>
           <ListItem>
@@ -294,39 +350,6 @@ export default ({ event, currentUser }) => {
           </ListItem>
         </List>
       </div>
-
-      {(event.guidelines ||
-        (currentUser &&
-          currentUser.membership &&
-          currentUser.membership.isAdmin)) && (
-        <>
-          <h2 className="text-xl mb-3 text-gray-800" id="guidelines">
-            Guidelines
-          </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative">
-            {event.guidelines ? (
-              <>
-                {currentUser &&
-                  currentUser.membership &&
-                  currentUser.membership.isAdmin && (
-                    <div className="absolute right-0 top-0 m-4">
-                      <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                        <EditIcon />
-                      </IconButton>
-                    </div>
-                  )}
-                <ReactMarkdown className="markdown" source={event.guidelines} />
-              </>
-            ) : (
-              <div className="flex justify-center">
-                <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                  <AddIcon />
-                </IconButton>
-              </div>
-            )}
-          </div>
-        </>
-      )}
     </>
   );
 };

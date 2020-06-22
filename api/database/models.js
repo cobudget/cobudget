@@ -80,6 +80,7 @@ const EventSchema = new Schema({
   pretixEvent: String,
   guidelines: String,
   allowStretchGoals: { type: Boolean, default: false },
+  about: { type: String },
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {

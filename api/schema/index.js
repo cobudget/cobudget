@@ -25,6 +25,7 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy
       info: String
       guidelines: String
+      about: String
     ): Event!
 
     createDream(
@@ -119,6 +120,7 @@ const schema = gql`
     grantingCloses: Date
     grantingIsOpen: Boolean
     guidelines: String
+    about: String
     allowStretchGoals: Boolean
   }
 

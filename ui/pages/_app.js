@@ -33,6 +33,7 @@ export const TOP_LEVEL_QUERY = gql`
       remainingGrants
       numberOfApprovedMembers
       guidelines
+      about
       allowStretchGoals
     }
     currentUser {
