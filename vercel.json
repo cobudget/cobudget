@@ -1,9 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "ui/next.config.js", "use": "@now/next" },
-    { "src": "api/index.js", "use": "@now/node" },
-    { "src": "api/webhooks/pretix.js", "use": "@now/node" }
+    { "src": "ui/next.config.js", "use": "@vercel/next@canary" },
+    { "src": "api/index.js", "use": "@vercel/node" },
+    { "src": "api/webhooks/pretix.js", "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api", "dest": "/api/index.js" },
