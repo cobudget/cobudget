@@ -106,10 +106,10 @@ export default ({
         <h1 className="text-xl font-semibold mb-4">Edit budget</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            console.log({ variables });
-            editDream({ variables })
+            editDream({
+              variables: { budgetItems: [...(variables.budgetItems ?? [])] },
+            })
               .then((data) => {
-                console.log({ data });
                 handleClose();
               })
               .catch((err) => alert(err.message));
