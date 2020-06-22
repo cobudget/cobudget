@@ -78,7 +78,7 @@ export default ({ event, currentUser }) => {
 
   if (loading)
     return (
-      <div className="flex-grow flex justify-center items-center">
+      <div className="flex-grow flex justify-center items-center h-64">
         <HappySpinner />
       </div>
     );
