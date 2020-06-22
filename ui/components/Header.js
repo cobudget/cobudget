@@ -89,7 +89,7 @@ export default ({ event, currentUser, openModal, logOut }) => {
                       {process.env.ORG_LOGO ? (
                         <a
                           className={
-                            "block rounded overflow-hidden opacity-75 hover:opacity-100"
+                            "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
                           }
                         >
                           <img className="h-7 w-7" src={process.env.ORG_LOGO} />
