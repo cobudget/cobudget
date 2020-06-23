@@ -100,7 +100,7 @@ const SearchMembersResult = ({
 
   if (searchInput) {
     result = result.filter((member) =>
-      member.user.name.toLowerCase().includes(searchInput.toLowerCase())
+      member.user.name?.toLowerCase().includes(searchInput.toLowerCase())
     );
   }
 
