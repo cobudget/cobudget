@@ -29,6 +29,8 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy
       info: String
       guidelines: String
+      color: String
+      about: String
     ): Event!
 
     editCustomFields(
@@ -109,6 +111,7 @@ const schema = gql`
     slug: String!
     title: String!
     info: String
+    color: String
     # logo: String
     members: [Member!]!
     numberOfApprovedMembers: Int
@@ -133,6 +136,7 @@ const schema = gql`
     grantingCloses: Date
     grantingIsOpen: Boolean
     guidelines: String
+    about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
   }

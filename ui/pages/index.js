@@ -10,6 +10,7 @@ const EVENTS_QUERY = gql`
       id
       slug
       title
+      color
     }
   }
 `;
@@ -17,15 +18,17 @@ const EVENTS_QUERY = gql`
 export default () => {
   const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {events.map((event) => (
         <Link href="/[event]" as={`/${event.slug}`} key={event.slug}>
           <a
-            className="group p-4 h-32 font-medium rounded-md block text-white flex justify-between items-start transitions-shadows duration-75 hover:shadow-outline "
-            style={{ background: stringToHslColor(event.title, 60, 56) }}
+            className={
+              `bg-${event.color || "black"} ` +
+              `hover:shadow-outline-${event.color}-darker ` +
+              "group p-4 h-32 font-medium rounded-md block text-white flex justify-between items-start transitions-shadows duration-75"
+            }
           >
             {event.title}
-            <RightArrowIcon className="ml-4 w-4 h-4 text-white" />
           </a>
         </Link>
       ))}

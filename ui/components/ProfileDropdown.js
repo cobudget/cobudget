@@ -42,7 +42,7 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
           }
           color="primary"
         >
-          <Avatar user={currentUser} />
+          <Avatar user={currentUser} size="small" />
         </Badge>
       </button>
 

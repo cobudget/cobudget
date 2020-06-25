@@ -106,10 +106,10 @@ export default ({
         <h1 className="text-xl font-semibold mb-4">Edit budget</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            console.log({ variables });
-            editDream({ variables })
+            editDream({
+              variables: { budgetItems: [...(variables.budgetItems ?? [])] },
+            })
               .then((data) => {
-                console.log({ data });
                 handleClose();
               })
               .catch((err) => alert(err.message));
@@ -235,7 +235,7 @@ export default ({
             <div className="pl-4">
               {event.guidelines && (
                 <a
-                  href={`/${event.slug}/granting#guidelines`}
+                  href={`/${event.slug}/about#guidelines`}
                   target="_blank"
                   className="text-sm text-gray-600 font-medium hover:text-gray-800"
                 >

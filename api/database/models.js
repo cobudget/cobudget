@@ -80,6 +80,8 @@ const EventSchema = new Schema({
   pretixEvent: String,
   guidelines: String,
   allowStretchGoals: { type: Boolean, default: false },
+  color: { type: String, default: 'anthracit' },
+  about: { type: String },
   customFields: [
     new Schema({
       name: { type: String, required: true },

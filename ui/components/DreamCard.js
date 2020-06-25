@@ -1,4 +1,4 @@
-import stringToHslColor from "../utils/stringToHslColor";
+import stringToHslColor, { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
 import { useMutation } from "@apollo/react-hooks";
@@ -34,10 +34,7 @@ export default ({ dream, event, currentUser }) => {
           className="w-full h-48 object-cover object-center"
         />
       ) : (
-        <div
-          className="w-full h-48"
-          style={{ background: stringToHslColor(dream.title) }}
-        />
+        <div className={`w-full h-48 bg-${stringToColor(dream.title)}`} />
       )}
       {!dream.published && (
         <Label className="absolute right-0 m-2">Unpublished</Label>
@@ -68,15 +65,18 @@ export default ({ dream, event, currentUser }) => {
               </div>
             )}
 
-            <Link
-              href="/[event]/[dream]#comments"
-              as={`/${event.slug}/${dream.id}#comments`}
-            >
-              <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
-                <CommentIcon className="w-5 h-5" />
-                <span className="block ml-1">{dream.numberOfComments} </span>
-              </div>
-            </Link>
+            {dream.numberOfComments > 0 && (
+              <Link
+                href="/[event]/[dream]#comments"
+                as={`/${event.slug}/${dream.id}#comments`}
+              >
+                <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
+                  <CommentIcon className="w-5 h-5" />
+                  <span className="block ml-1">{dream.numberOfComments} </span>
+                </div>
+              </Link>
+            )}
+
             {currentUser && currentUser.membership && (
               <button
                 className="flex items-center focus:outline-none"

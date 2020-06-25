@@ -18,6 +18,7 @@ export const TOP_LEVEL_QUERY = gql`
       slug
       info
       title
+      color
       currency
       registrationPolicy
       totalBudget
@@ -33,6 +34,7 @@ export const TOP_LEVEL_QUERY = gql`
       remainingGrants
       numberOfApprovedMembers
       guidelines
+      about
       allowStretchGoals
       customFields {
         id,

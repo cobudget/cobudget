@@ -4,5 +4,9 @@ export default ({ event, currentUser }) => {
   const isAdmin =
     currentUser && currentUser.membership && currentUser.membership.isAdmin;
   if (!isAdmin) return null;
-  return <Members event={event} />;
+  return (
+    <div className="max-w-screen-md flex-1">
+      <Members event={event} />
+    </div>
+  );
 };

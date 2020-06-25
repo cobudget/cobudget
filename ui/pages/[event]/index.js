@@ -60,7 +60,7 @@ export default ({ currentUser, event }) => {
   }
 
   return (
-    <>
+    <div className="max-w-screen-2lg flex-1">
       {event.info && <InfoBox markdown={event.info} />}
 
       <Filterbar
@@ -72,7 +72,7 @@ export default ({ currentUser, event }) => {
       />
 
       {loading ? (
-        <div className="flex-grow flex justify-center items-center">
+        <div className="flex-grow flex justify-center items-center h-64">
           <HappySpinner />
         </div>
       ) : (
@@ -96,14 +96,14 @@ export default ({ currentUser, event }) => {
               ))}
             </div>
           ) : (
-            <div className="flex-grow flex flex-col justify-center items-center">
-              <h1 className="text-3xl text-gray-500 text-center">
+            <div className="flex-grow flex flex-col justify-center items-center h-64">
+              <h1 className="text-3xl text-gray-500 text-center ">
                 No dreams...
               </h1>
             </div>
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
