@@ -480,15 +480,11 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
-      const comment = dream.comments.filter((comment) => {
-        if (
-          comment._id.toString() === commentId &&
-          (comment.authorId.toString() === currentUser.id ||
-            currentMember.isAdmin)
-        )
-          return true;
-        return false;
-      });
+      const comment = dream.comments.filter((comment) => 
+        comment._id.toString() === commentId &&
+            (comment.authorId.toString() === currentUser.id ||
+                currentMember.isAdmin)
+      );
 
       if (comment.length == 0) {
         throw new Error(
