@@ -162,6 +162,19 @@ export default ({
                         })}
                         />
                     </Grid>
+
+                    <Grid item>
+                      <Controller
+                        as = { <FormControlLabel label="Show on front page"
+                          control={<Checkbox />}
+                        />
+                        }
+                        name={`${fieldName}.isShownOnFrontPage`}
+                        defaultValue={customField.isShownOnFrontPage}
+                        control={control}
+                        inputRef={register()}
+                        />
+                    </Grid>
                   </Grid>
 
                   <div className="my-2">
