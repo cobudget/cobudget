@@ -11,7 +11,6 @@ import HiddenTextField from "../HiddenTextField";
 import Button from "../Button";
 import IconButton from "../IconButton";
 import { DeleteIcon, AddIcon } from "../Icons";
-import { Delete as OldDeleteIcon, Add as OldAddIcon } from "@material-ui/icons";
 import { makeStyles } from '@material-ui/core/styles';
 
 import SelectInput from "../SelectInput";
