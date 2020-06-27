@@ -99,7 +99,7 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
     )
   }
 
-  if (customField) {
+  if (customField && customField.value) {
     return (
       <div className="flex flex-col items-start justify-between group relative">
         <div className="py-2" key={customField.fieldId}>

@@ -9,7 +9,7 @@ import Budget from "./Budget";
 import Summary from "./Summary";
 import Title from "./Title";
 import Description from "./Description";
-import EditCustomFields from "./CustomFields/EditCustomFields";
+import EditCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
 const Dream = ({ dream, event, currentUser }) => {

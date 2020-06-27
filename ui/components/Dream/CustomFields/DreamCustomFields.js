@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 
-import EditCustomField from "./EditCustomField";
+import DreamCustomField from "./DreamCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
   query CustomFields($slug: String!) {
@@ -35,7 +35,7 @@ export default ({ customFields, canEdit, dreamId }) => {
   { return defaultCustomFields.map((defaultCustomField, index) => {
     const customField = customFields.filter(field => field.fieldId == defaultCustomField.id);
     return (
-      <EditCustomField
+      <DreamCustomField
         key={defaultCustomField.id}
         defaultCustomField={defaultCustomField}
         customField={customField && customField.length > 0 ? customField[0]: null}
