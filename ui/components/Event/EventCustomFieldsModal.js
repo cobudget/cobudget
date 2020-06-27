@@ -142,9 +142,9 @@ export default ({
                           required: "Required",
                         })}
                       >
-                        <option value="TEXT">Text field</option>
-                        <option value="MULTILINE_TEXT">Multi line text</option>
-                        <option value="BOOLEAN">Checkbox - Yes / No</option>
+                        <option value="TEXT">Short Text</option>
+                        <option value="MULTILINE_TEXT">Long Text</option>
+                        <option value="BOOLEAN">Yes/No</option>
                       </SelectInput>
                     </Grid>
 
