@@ -67,8 +67,11 @@ export default ({
   );
 
   const addCustomField = () => setCustomFields([...customFields, emptyCustomField]);
-  const removeCustomField = (i) =>
-    setCustomFields([...customFields.filter((item, index) => i !== index)]);
+  const removeCustomField = (i) => {
+    if(confirm("Deleting a custom field would delete it from all the dreams that use it. Are you sure?")) {
+      return setCustomFields([...customFields.filter((item, index) => i !== index)]);
+    }
+  }
 
     const useStyles = makeStyles({
       modalStyle:{
