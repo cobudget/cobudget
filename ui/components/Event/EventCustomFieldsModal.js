@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Modal } from "@material-ui/core";
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -56,7 +56,7 @@ export default ({
     variables: { eventId: event.id },
   });
 
-  const { handleSubmit, register, errors } = useForm({
+  const { control, handleSubmit, register, errors } = useForm({
     validationSchema: schema,
   });
 
@@ -146,16 +146,18 @@ export default ({
                     </Grid>
 
                     <Grid item>
-                    <FormControlLabel
-                      control={<Checkbox
+                      <Controller
+                        as = { <FormControlLabel label="Is Required"
+                          control={<Checkbox />}
+                        />
+                        }
                         name={`${fieldName}.isRequired`}
                         defaultValue={customField.isRequired}
+                        control={control}
                         inputRef={register({
                           required: "Required",
                         })}
-                      />}
-                      label="Is Required"
-                    />
+                        />
                     </Grid>
                   </Grid>
 
