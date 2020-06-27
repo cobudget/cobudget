@@ -6,7 +6,7 @@ import { TextField, Box, Button, Modal } from "@material-ui/core";
 import SelectInput from "../SelectInput";
 import ColorPicker from "../ColorPicker";
 import slugify from "../../utils/slugify";
-import CustomFields from "./CustomFields";
+import CustomFields from "./EventCustomFields";
 
 const EDIT_EVENT = gql`
   mutation editEvent(

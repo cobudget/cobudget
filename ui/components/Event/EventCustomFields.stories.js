@@ -1,5 +1,5 @@
 import React from "react";
-import CustomFields from "./CustomFields";
+import CustomFields from "./EventCustomFields";
 export default { title: 'Custom Fields' };
 
 export const empty = () => {
@@ -14,7 +14,7 @@ export const empty = () => {
     />
   </>
   )
-}
+};
 
 export const withExistingFields = () => {
   const event = {
@@ -35,5 +35,5 @@ export const withExistingFields = () => {
     />
   </>
   )
-}
+};
 

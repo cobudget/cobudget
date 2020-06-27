@@ -1,5 +1,5 @@
 import { useState } from "react";
-import CustomFieldsModal from "./CustomFieldsModal";
+import EventCustomFieldsModal from "./EventCustomFieldsModal";
 
 export default ({
   customFields,
@@ -10,7 +10,7 @@ export default ({
   return (
     <>
       {editing && (
-        <CustomFieldsModal
+        <EventCustomFieldsModal
           initialCustomFields={customFields}
           handleClose={() => setEditing(false)}
           open={editing}
