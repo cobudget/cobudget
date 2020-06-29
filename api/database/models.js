@@ -144,6 +144,7 @@ const DreamSchema = new Schema({
   customFields: [
     new Schema({
     fieldId: { type: Schema.Types.ObjectId, required: true },
+    eventId: { type: Schema.Types.ObjectId, required: true },
     value: Schema.Types.Mixed,
   })],
   images: [new Schema({ small: String, large: String })],

@@ -294,12 +294,13 @@ const schema = gql`
   }
 
   type CustomFieldValue {
-    fieldId: ID!
+    customField: CustomField
     value: JSON
   }
 
   input CustomFieldValueInput {
     fieldId: ID!
+    eventId: ID!
     value: JSON
   }
 

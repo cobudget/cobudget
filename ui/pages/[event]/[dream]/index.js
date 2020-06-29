@@ -21,8 +21,16 @@ export const DREAM_QUERY = gql`
       approved
       published
       customFields {
-        fieldId
         value
+        customField {
+          id
+          name
+          type
+          description
+          isRequired
+          isShownOnFrontPage
+          createdAt
+        }
       }
       cocreators {
         id

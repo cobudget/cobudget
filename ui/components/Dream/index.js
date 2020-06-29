@@ -9,7 +9,7 @@ import Budget from "./Budget";
 import Summary from "./Summary";
 import Title from "./Title";
 import Description from "./Description";
-import EditCustomFields from "./CustomFields/DreamCustomFields";
+import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
 const Dream = ({ dream, event, currentUser }) => {
@@ -58,7 +58,8 @@ const Dream = ({ dream, event, currentUser }) => {
               canEdit={canEdit}
             />
 
-            <EditCustomFields
+            <DreamCustomFields
+              eventId={event.id}
               dreamId={dream.id}
               customFields={dream.customFields} 
               canEdit={canEdit}

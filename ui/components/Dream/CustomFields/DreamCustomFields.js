@@ -20,7 +20,7 @@ const CUSTOM_FIELDS_QUERY = gql`
   }
 `;
 
-export default ({ customFields, canEdit, dreamId }) => {
+export default ({ customFields, canEdit, eventId, dreamId }) => {
   const router = useRouter();
   const { data } = useQuery(CUSTOM_FIELDS_QUERY, {
     variables: { slug: router.query.event },
@@ -33,12 +33,13 @@ export default ({ customFields, canEdit, dreamId }) => {
   const { customFields:defaultCustomFields } = data.event;
   
   { return defaultCustomFields.map((defaultCustomField, index) => {
-    const customField = customFields.filter(field => field.fieldId == defaultCustomField.id);
+    const customField = customFields.filter(field => field.customField.id == defaultCustomField.id);
     return (
       <DreamCustomField
         key={defaultCustomField.id}
         defaultCustomField={defaultCustomField}
         customField={customField && customField.length > 0 ? customField[0]: null}
+        eventId={eventId}
         dreamId={dreamId}
         canEdit={canEdit}
       />

@@ -14,15 +14,11 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
   mutation EditCustomField($dreamId: ID!, $customField: CustomFieldValueInput!) {
     editDreamCustomField(dreamId: $dreamId, customField: $customField) {
       id
-      customFields {
-        fieldId
-        value
-      }
     }
   }
 `;
 
-export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
+export default ({ defaultCustomField, customField, eventId, dreamId, canEdit}) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
   const { handleSubmit, register, errors } = useForm();
@@ -49,6 +45,11 @@ export default ({ defaultCustomField, customField, dreamId, canEdit}) => {
           <HiddenTextField
             name={`${fieldName}.fieldId`}
             defaultValue={defaultCustomField.id}
+            inputRef={register()}
+          />
+          <HiddenTextField
+            name={`${fieldName}.eventId`}
+            defaultValue={eventId}
             inputRef={register()}
           />
           <div className="mr-2 my-2 sm:my-0 flex-grow">

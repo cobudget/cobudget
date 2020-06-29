@@ -1262,6 +1262,14 @@ const resolvers = {
   },
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
+  CustomFieldValue: {
+    customField: async(customFieldValue, args, {models: {Event}}) => {
+      const {eventId, fieldId, value} = customFieldValue;
+      const event = await Event.findOne({ _id: eventId });
+      const eventCustomField = event.customFields.filter(eventCustomField => eventCustomField.id == fieldId);
+      return eventCustomField[0];
+    }
+  }
 };
 
 module.exports = resolvers;
