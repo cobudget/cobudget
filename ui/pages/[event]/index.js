@@ -28,7 +28,6 @@ export const DREAMS_QUERY = gql`
           type
           description
           isRequired
-          isShownOnFrontPage
           createdAt
         }
       }
@@ -44,6 +43,8 @@ export default ({ currentUser, event }) => {
   if (!event) return null;
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
+  const [filterLabels, setFilterLabels] = useState();
+  
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
   // const [showInfoBox, setShowInfoBox] = useState(true);
@@ -81,6 +82,9 @@ export default ({ currentUser, event }) => {
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
         currentUser={currentUser}
+        defaultFilterLabels={event.filterLabels}
+        filterLabels={filterLabels}
+        setFilterLabels={setFilterLabels}
       />
 
       {loading ? (
@@ -102,6 +106,7 @@ export default ({ currentUser, event }) => {
                       dream={dream}
                       event={event}
                       currentUser={currentUser}
+                      filterLabels={filterLabels}
                     />
                   </a>
                 </Link>

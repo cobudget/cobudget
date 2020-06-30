@@ -139,6 +139,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
+    filterLabels: [CustomFieldFilterLabels]
   }
 
   scalar Date
@@ -311,13 +312,17 @@ const schema = gql`
     FILE
   }
 
+  type CustomFieldFilterLabels {
+    customField: CustomField
+    eventId: ID!
+  }
+
   type CustomField {
     id: ID!
     name: String!
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean 
     createdAt: Date!
   }
 
@@ -327,7 +332,6 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean
     createdAt: Date
   }
 

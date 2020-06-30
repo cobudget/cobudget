@@ -93,13 +93,17 @@ const EventSchema = new Schema({
         required: true,
       },
       isRequired: { type: Boolean, required: true },
-      isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,
       },
     }),
   ],
+  filterLabels: [
+    new Schema({
+    fieldId: { type: Schema.Types.ObjectId, required: true },
+    eventId: { type: Schema.Types.ObjectId, required: true },
+  })],
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {

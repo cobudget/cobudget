@@ -14,7 +14,6 @@ const CUSTOM_FIELDS_QUERY = gql`
         description,
         type,
         isRequired,
-        isShownOnFrontPage,
       }
     }
   }

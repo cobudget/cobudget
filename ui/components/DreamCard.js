@@ -3,6 +3,7 @@ import ProgressBar from "./ProgressBar";
 import Link from "next/link";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import styled from "styled-components";
 
 import {
   CoinIcon,
@@ -11,6 +12,11 @@ import {
   HeartSolidIcon,
 } from "./Icons";
 import Label from "./Label";
+
+const DreamCardText = styled.div`
+  max-height: 7.5em;
+  overflow: hidden;
+`;
 
 const TOGGLE_FAVORITE_MUTATION = gql`
   mutation ToggleFavoriteMutation($dreamId: ID!) {
@@ -21,7 +27,17 @@ const TOGGLE_FAVORITE_MUTATION = gql`
   }
 `;
 
-export default ({ dream, event, currentUser }) => {
+const getDreamCustomFieldValue = (dream, customFieldId) => {
+  if(!dream.customFields || dream.customFields.length == 0) return;
+  const existingField = dream.customFields.filter((field) => {
+    return field.customField.id == customFieldId;
+  });
+  if (existingField && existingField.length > 0) {
+    return existingField[0].value;
+  }
+}
+
+export default ({ dream, event, currentUser, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
@@ -42,8 +58,15 @@ export default ({ dream, event, currentUser }) => {
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
           <h3 className="text-xl font-medium mb-1 truncate">{dream.title}</h3>
-
-          <p className="text-gray-800">{dream.summary}</p>
+          
+          <p className="text-gray-800">
+          { filterLabels? 
+            <DreamCardText>{getDreamCustomFieldValue(dream, filterLabels)}</DreamCardText>
+            :
+            dream.summary
+          }
+          </p>
+        
         </div>
         <div>
           {(dream.minGoalGrants || dream.maxGoalGrants) && (

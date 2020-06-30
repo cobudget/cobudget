@@ -26,7 +26,6 @@ const EDIT_CUSTOM_FIELDS_MUTATION = gql`
         description,
         type,
         isRequired,
-        isShownOnFrontPage,
       }
     }
   }
@@ -39,7 +38,6 @@ const schema = yup.object().shape({
       description: yup.string().required(),
       type: yup.mixed().oneOf(['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE']).required(),
       isRequired: yup.bool().required(),
-      isShownOnFrontPage: yup.bool(),
     })
   ),
 });
@@ -160,19 +158,6 @@ export default ({
                         inputRef={register({
                           required: "Required",
                         })}
-                        />
-                    </Grid>
-
-                    <Grid item>
-                      <Controller
-                        as = { <FormControlLabel label="Show on front page"
-                          control={<Checkbox />}
-                        />
-                        }
-                        name={`${fieldName}.isShownOnFrontPage`}
-                        defaultValue={customField.isShownOnFrontPage}
-                        control={control}
-                        inputRef={register()}
                         />
                     </Grid>
                   </Grid>
