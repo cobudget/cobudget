@@ -12,6 +12,7 @@ import Button from "../Button";
 import IconButton from "../IconButton";
 import { DeleteIcon, AddIcon } from "../Icons";
 import { makeStyles } from '@material-ui/core/styles';
+import FilterLabelsAutoComplete from './FilterLabelsAutoComplete';
 
 import SelectInput from "../SelectInput";
 
@@ -45,8 +46,6 @@ const schema = yup.object().shape({
 export default ({
   initialCustomFields,
   event,
-  currency,
-  allowStretchGoals,
   handleClose,
   open,
 }) => {
@@ -63,6 +62,8 @@ export default ({
   const [customFields, setCustomFields] = useState(
     initialCustomFields && initialCustomFields.length ? initialCustomFields : [emptyCustomField]
   );
+
+  const [filterLabels, setFilterLabels] = useState([]);
 
   const addCustomField = () => setCustomFields([...customFields, emptyCustomField]);
   const removeCustomField = (i) => {
@@ -87,7 +88,11 @@ export default ({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-md">
         <h1 className="text-xl font-semibold">Edit custom fields</h1>
-
+        <FilterLabelsAutoComplete
+          defaultCustomFields={customFields}
+          filterLabels={filterLabels}
+          className="mb-6 mt-6"
+        />
         <form
           onSubmit={handleSubmit((variables) =>
             editCustomFields({ variables })

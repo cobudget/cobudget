@@ -65,6 +65,7 @@ export default ({
         defaultFilterLabels={defaultFilterLabels}
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
+        className={'mb-2 mt-2'}
       />
     </div>
   );
