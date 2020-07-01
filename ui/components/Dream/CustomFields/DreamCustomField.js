@@ -10,8 +10,8 @@ import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
 
-const EDIT_CUSTOM_FIELD_MUTATION = gql`
-  mutation EditCustomField(
+const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
+  mutation EditDreamCustomField(
     $dreamId: ID!
     $customField: CustomFieldValueInput!
   ) {
@@ -44,7 +44,7 @@ export default ({
   const [editing, setEditing] = useState(false);
   const { handleSubmit, register, errors } = useForm();
   const [editCustomFieldMutation, { loading }] = useMutation(
-    EDIT_CUSTOM_FIELD_MUTATION,
+    EDIT_DREAM_CUSTOM_FIELD_MUTATION,
     {
       variables: { dreamId },
     }
