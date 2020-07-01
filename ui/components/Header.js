@@ -63,7 +63,7 @@ const NavItem = ({
 
 export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(true);
+  const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
