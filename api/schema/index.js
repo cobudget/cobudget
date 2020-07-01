@@ -1,6 +1,9 @@
 const { gql } = require('apollo-server-micro');
 
 const schema = gql`
+  scalar JSON
+  scalar JSONObject
+
   type Query {
     currentUser: User
     events: [Event!]
@@ -18,6 +21,7 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
+
     editEvent(
       eventId: ID!
       slug: String
@@ -28,6 +32,19 @@ const schema = gql`
       color: String
       about: String
     ): Event!
+
+    addCustomField(eventId: ID!, customField: CustomFieldInput!): Event!
+    editCustomField(
+      eventId: ID!
+      fieldId: ID!
+      customField: CustomFieldInput!
+    ): Event!
+    deleteCustomField(eventId: ID!, fieldId: ID!): Event!
+
+    editDreamCustomField(
+      dreamId: ID!
+      customField: CustomFieldValueInput!
+    ): Dream!
 
     createDream(
       eventId: ID!
@@ -124,6 +141,7 @@ const schema = gql`
     guidelines: String
     about: String
     allowStretchGoals: Boolean
+    customFields: [CustomField]
   }
 
   scalar Date
@@ -178,6 +196,7 @@ const schema = gql`
     maxGoalGrants: Int
     minGoal: Int
     maxGoal: Int
+    customFields: [CustomFieldValue]
     comments: [Comment]
     numberOfComments: Int
     currentNumberOfGrants: Int
@@ -275,6 +294,43 @@ const schema = gql`
     createdAt: Date!
     updatedAt: Date
     content: String!
+  }
+
+  type CustomFieldValue {
+    customField: CustomField
+    value: JSON
+  }
+
+  input CustomFieldValueInput {
+    fieldId: ID!
+    eventId: ID!
+    value: JSON
+  }
+
+  enum CustomFieldType {
+    TEXT
+    MULTILINE_TEXT
+    BOOLEAN
+    FILE
+  }
+
+  type CustomField {
+    id: ID!
+    name: String!
+    description: String!
+    type: CustomFieldType!
+    isRequired: Boolean!
+    isShownOnFrontPage: Boolean
+    createdAt: Date!
+  }
+
+  input CustomFieldInput {
+    name: String!
+    description: String!
+    type: CustomFieldType!
+    isRequired: Boolean!
+    isShownOnFrontPage: Boolean
+    createdAt: Date
   }
 
   # type Flag {

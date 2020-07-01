@@ -96,7 +96,7 @@ export default ({ description, dreamId, canEdit }) => {
         onClick={() => setEditing(true)}
         className="block w-full h-64 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       >
-        + Add description
+        + Description
       </button>
     );
   return null;

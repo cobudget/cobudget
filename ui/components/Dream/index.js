@@ -9,6 +9,7 @@ import Budget from "./Budget";
 import Summary from "./Summary";
 import Title from "./Title";
 import Description from "./Description";
+import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
 const Dream = ({ dream, event, currentUser }) => {
@@ -37,7 +38,7 @@ const Dream = ({ dream, event, currentUser }) => {
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
             <Title title={dream.title} dreamId={dream.id} canEdit={canEdit} />
-
+            {dream.customFields && dream.customFields.electricity}
             <Summary
               dreamId={dream.id}
               summary={dream.summary}
@@ -54,6 +55,13 @@ const Dream = ({ dream, event, currentUser }) => {
             <Description
               description={dream.description}
               dreamId={dream.id}
+              canEdit={canEdit}
+            />
+
+            <DreamCustomFields
+              eventId={event.id}
+              dreamId={dream.id}
+              customFields={dream.customFields} 
               canEdit={canEdit}
             />
 

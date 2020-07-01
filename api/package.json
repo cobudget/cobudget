@@ -18,6 +18,7 @@
     "apollo-server-micro": "^2.9.12",
     "dayjs": "^1.8.20",
     "graphql": "^14.5.8",
+    "graphql-type-json": "0.3.2",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "micro-cors": "^0.1.1",

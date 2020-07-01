@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   },
   "engines": {
     "node": "12.x"
@@ -42,6 +44,13 @@
     "yup": "^0.29.1"
   },
   "devDependencies": {
+    "@apollo/react-testing": "3.1.4",
+    "@babel/core": "7.10.2",
+    "@storybook/addon-actions": "5.3.19",
+    "@storybook/addon-links": "5.3.19",
+    "@storybook/addons": "5.3.19",
+    "@storybook/react": "5.3.19",
+    "babel-loader": "8.1.0",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
     "tailwindcss": "^1.2.0",

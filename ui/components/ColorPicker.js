@@ -4,6 +4,7 @@ import colors from "utils/colors";
 export default ({ setColor, color: currentColor }) => {
   return (
     <div>
+      <label className="text-sm font-medium mb-1 block">Header color</label>
       <div className="flex flex-wrap">
         {colors.map((color) => (
           <button

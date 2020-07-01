@@ -5,6 +5,8 @@ const {
   sendRequestToJoinNotifications,
 } = require('../utils/email');
 const { GraphQLScalarType } = require('graphql');
+const GraphQLJSON = require('graphql-type-json');
+const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
@@ -146,6 +148,67 @@ const resolvers = {
 
       return event.save();
     },
+    addCustomField: async (
+      parent,
+      { eventId, customField },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to add custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      event.customFields.push({ ...customField });
+
+      return event.save();
+    },
+    editCustomField: async (
+      parent,
+      { eventId, fieldId, customField },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.customFields.id(fieldId);
+      // doc = { ...doc, ...customField };
+      doc.name = customField.name;
+      doc.type = customField.type;
+      doc.description = customField.description;
+      doc.isRequired = customField.isRequired;
+      doc.isShownOnFrontPage = customField.isShownOnFrontPage;
+
+      return event.save();
+    },
+    deleteCustomField: async (
+      parent,
+      { eventId, fieldId },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to remove a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.customFields.id(fieldId);
+      doc.remove();
+
+      return event.save();
+    },
     createDream: async (
       parent,
       {
@@ -216,6 +279,38 @@ const resolvers = {
       if (typeof summary !== 'undefined') dream.summary = summary;
       if (typeof images !== 'undefined') dream.images = images;
       if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
+
+      return dream.save();
+    },
+    editDreamCustomField: async (
+      parent,
+      { dreamId, customField },
+      { currentUser, models: { Member, Dream, Event } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !currentMember ||
+        (!dream.cocreators.includes(currentMember.id) &&
+          !currentMember.isAdmin &&
+          !currentMember.isGuide)
+      )
+        throw new Error('You are not a cocreator of this dream.');
+
+      const existingField = dream.customFields.filter((field) => {
+        return field.fieldId == customField.fieldId;
+      });
+
+      if (existingField.length > 0) {
+        existingField[0].value = customField.value;
+      } else {
+        dream.customFields.push(customField);
+      }
 
       return dream.save();
     },
@@ -418,15 +513,12 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
-      const comment = dream.comments.filter((comment) => {
-        if (
+      const comment = dream.comments.filter(
+        (comment) =>
           comment._id.toString() === commentId &&
           (comment.authorId.toString() === currentUser.id ||
             currentMember.isAdmin)
-        )
-          return true;
-        return false;
-      });
+      );
 
       if (comment.length == 0) {
         throw new Error(
@@ -1200,6 +1292,18 @@ const resolvers = {
   Comment: {
     author: async (comment, args, { models: { User } }) => {
       return User.findOne({ _id: comment.authorId });
+    },
+  },
+  JSON: GraphQLJSON,
+  JSONObject: GraphQLJSONObject,
+  CustomFieldValue: {
+    customField: async (customFieldValue, args, { models: { Event } }) => {
+      const { eventId, fieldId, value } = customFieldValue;
+      const event = await Event.findOne({ _id: eventId });
+      const eventCustomField = event.customFields.filter(
+        (eventCustomField) => eventCustomField.id == fieldId
+      );
+      return eventCustomField[0];
     },
   },
 };

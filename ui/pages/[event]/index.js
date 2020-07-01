@@ -20,6 +20,18 @@ export const DREAMS_QUERY = gql`
       numberOfComments
       favorite
       published
+      customFields {
+        value
+        customField {
+          id
+          name
+          type
+          description
+          isRequired
+          isShownOnFrontPage
+          createdAt
+        }
+      }
       images {
         small
         large

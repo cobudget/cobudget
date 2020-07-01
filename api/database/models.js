@@ -82,6 +82,24 @@ const EventSchema = new Schema({
   allowStretchGoals: { type: Boolean, default: false },
   color: { type: String, default: 'anthracit' },
   about: { type: String },
+  customFields: [
+    new Schema({
+      name: { type: String, required: true },
+      description: { type: String, required: true },
+      type: {
+        type: String,
+        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE'],
+        default: 'TEXT',
+        required: true,
+      },
+      isRequired: { type: Boolean, required: true },
+      isShownOnFrontPage: Boolean,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    }),
+  ],
 });
 
 EventSchema.virtual('grantingIsOpen').get(function () {
@@ -123,6 +141,12 @@ const DreamSchema = new Schema({
   },
   description: String,
   cocreators: [Schema.Types.ObjectId],
+  customFields: [
+    new Schema({
+    fieldId: { type: Schema.Types.ObjectId, required: true },
+    eventId: { type: Schema.Types.ObjectId, required: true },
+    value: Schema.Types.Mixed,
+  })],
   images: [new Schema({ small: String, large: String })],
   comments: [
     new Schema({
