@@ -74,7 +74,7 @@ export default ({ dreamId, images, size, canEdit }) => {
           onClick={() => setEditModalOpen(true)}
           className="h-24 w-full  text-gray-600  font-semibold rounded-lg border-3 focus:outline-none border-dashed hover:bg-gray-100 mb-4"
         >
-          + Add images
+          + Images
         </button>
       ) : null}
     </>

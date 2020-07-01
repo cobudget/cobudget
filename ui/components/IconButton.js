@@ -1,8 +1,11 @@
+import { LoaderIcon } from "components/Icons";
+
 export default ({
   children,
   className,
   onClick,
   tabIndex,
+  loading,
   type = "button",
 }) => (
   <button
@@ -10,7 +13,13 @@ export default ({
     onClick={onClick}
     tabIndex={tabIndex}
     type={type}
+    disabled={loading}
   >
-    {children}
+    {loading && (
+      <LoaderIcon className="w-6 h-6 absolute animation-spin animation-linear animation-2s" />
+    )}
+    <span className={loading ? "invisible" : "" + " flex items-center"}>
+      {children}
+    </span>
   </button>
 );

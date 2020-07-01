@@ -19,11 +19,11 @@ export default ({
         font-medium transition-colors duration-100 rounded-md 
         relative flex justify-center items-center 
         focus:outline-none focus:shadow-outline ${
-          ((disabled || loading) && "cursor-default") +
-          " " +
           (size === "large" ? "text-xl px-5 py-3" : "px-5 py-2") +
           " " +
-          (variant === "primary"
+          (disabled || loading
+            ? "cursor-default text-gray-600 bg-gray-200"
+            : variant === "primary"
             ? "text-white bg-green hover:bg-green-darker"
             : "text-gray-800 hover:bg-gray-200")
         } ${className}`}
