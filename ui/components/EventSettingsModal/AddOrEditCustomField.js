@@ -158,18 +158,6 @@ export default ({
                 inputRef={register}
               />
 
-              <Controller
-                as={
-                  <FormControlLabel
-                    label="Show on front page"
-                    control={<Checkbox />}
-                  />
-                }
-                name={"customField.isShownOnFrontPage"}
-                defaultValue={customField.isShownOnFrontPage}
-                control={control}
-                inputRef={register}
-              />
             </div>
           </div>
 
