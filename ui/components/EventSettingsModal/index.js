@@ -19,7 +19,7 @@ export default ({ event, handleClose }) => {
       <Modal
         open={true}
         onClose={handleClose}
-        className="flex items-start justify-center p-4 md:pt-16 overflow-y-scroll"
+        className="flex items-start justify-center p-4 md:pt-16 overflow-y-scroll max-h-screen"
       >
         <div className="bg-white rounded-lg shadow overflow-hidden focus:outline-none flex-1 max-w-screen-md grid grid-cols-4">
           <div className="bg-gray-100 shadow-inner pt-6 pb-12">

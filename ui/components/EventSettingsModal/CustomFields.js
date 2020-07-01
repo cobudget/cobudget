@@ -54,7 +54,7 @@ export default ({ event }) => {
         Custom fields are extra fields or questions for Dreams
       </p>
 
-      <div>
+      <div className="overflow-y-scroll max-h-screen">
         {event.customFields.map((customField) => (
           <div key={customField.id} className="p-4 shadow rounded my-4">
             <div className="flex items-center justify-between">
