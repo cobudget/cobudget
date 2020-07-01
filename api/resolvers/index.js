@@ -1302,6 +1302,17 @@ const resolvers = {
       const eventCustomField = event.customFields.filter(
         (eventCustomField) => eventCustomField.id == fieldId
       );
+      
+      if (!eventCustomField || eventCustomField.length == 0) {
+        return {
+          id: fieldId,
+          name: '⚠️ Missing custom field ⚠️',
+          description: 'Custom field was removed',
+          type: 'TEXT',
+          isRequired: false,
+          createdAt: new Date()
+        }
+      }
       return eventCustomField[0];
     }
   },
