@@ -1,7 +1,7 @@
 import { useState } from "react";
 import thousandSeparator from "utils/thousandSeparator";
 import IconButton from "components/IconButton";
-import { EditIcon } from "components/Icons";
+import { EditIcon, AddIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 
 import EditBudgetModal from "./EditBudgetModal";
@@ -106,7 +106,7 @@ export default ({
           onClick={() => setEditing(true)}
           className="block w-full h-32 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
         >
-          + Add budget
+          + Budget
         </button>
       ) : null}
     </>

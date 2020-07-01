@@ -9,7 +9,7 @@ const tabs = [
   { name: "Custom fields", component: CustomFields },
 ];
 
-export default ({ event, open, handleClose }) => {
+export default ({ event, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -17,7 +17,7 @@ export default ({ event, open, handleClose }) => {
   return (
     <>
       <Modal
-        open={open}
+        open={true}
         onClose={handleClose}
         className="flex items-start justify-center p-4 md:pt-16 overflow-y-scroll"
       >

@@ -137,12 +137,12 @@ export default ({ event, currentUser, openModal, logOut }) => {
                           <DotsHorizontalIcon className="h-4 w-4" />
                         </IconButton>
                       </Tooltip>
-
-                      <EventSettingsModal
-                        open={eventSettingsModalOpen}
-                        event={event}
-                        handleClose={() => setEventSettingsModalOpen(false)}
-                      />
+                      {eventSettingsModalOpen && (
+                        <EventSettingsModal
+                          event={event}
+                          handleClose={() => setEventSettingsModalOpen(false)}
+                        />
+                      )}
                     </>
                   )}
                 </div>
