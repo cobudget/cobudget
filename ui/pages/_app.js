@@ -37,7 +37,7 @@ export const TOP_LEVEL_QUERY = gql`
       about
       allowStretchGoals
       customFields {
-        id,
+        id
         name
         description
         type

@@ -21,7 +21,7 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
-    
+
     editEvent(
       eventId: ID!
       slug: String
@@ -33,12 +33,15 @@ const schema = gql`
       about: String
     ): Event!
 
-    editCustomFields(
+    addCustomField(eventId: ID!, customField: CustomFieldInput!): Event!
+    editCustomField(
       eventId: ID!
-      customFields: [CustomFieldInput]!
+      fieldId: ID!
+      customField: CustomFieldInput!
     ): Event!
+    deleteCustomField(eventId: ID!, fieldId: ID!): Event!
 
-    editDreamCustomField (
+    editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
     ): Dream!
@@ -317,12 +320,11 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean 
+    isShownOnFrontPage: Boolean
     createdAt: Date!
   }
 
   input CustomFieldInput {
-    id: ID
     name: String!
     description: String!
     type: CustomFieldType!

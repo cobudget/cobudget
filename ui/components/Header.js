@@ -9,7 +9,7 @@ import Avatar from "components/Avatar";
 import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import { HomeIcon, DotsHorizontalIcon } from "components/Icons";
-import EditEventModal from "components/Event/EditEventModal";
+import EventSettingsModal from "components/EventSettingsModal";
 import NewDreamModal from "components/NewDreamModal";
 import IconButton from "components/IconButton";
 
@@ -63,7 +63,7 @@ const NavItem = ({
 
 export default ({ event, currentUser, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [editEventModalOpen, setEditEventModalOpen] = useState(false);
+  const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(true);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
@@ -121,12 +121,12 @@ export default ({ event, currentUser, openModal, logOut }) => {
                   {currentUser?.membership?.isAdmin && (
                     <>
                       <Tooltip
-                        title="Event details"
+                        title="Event settings"
                         position="bottom"
                         size="small"
                       >
                         <IconButton
-                          onClick={() => setEditEventModalOpen(true)}
+                          onClick={() => setEventSettingsModalOpen(true)}
                           className={
                             event.color
                               ? `text-white bg-${event.color} hover:bg-${event.color}-darker opacity-75 hover:opacity-100`
@@ -138,10 +138,10 @@ export default ({ event, currentUser, openModal, logOut }) => {
                         </IconButton>
                       </Tooltip>
 
-                      <EditEventModal
-                        open={editEventModalOpen}
+                      <EventSettingsModal
+                        open={eventSettingsModalOpen}
                         event={event}
-                        handleClose={() => setEditEventModalOpen(false)}
+                        handleClose={() => setEventSettingsModalOpen(false)}
                       />
                     </>
                   )}

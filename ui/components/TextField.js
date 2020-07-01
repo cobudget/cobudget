@@ -16,7 +16,7 @@ const TextField = ({
   return (
     <div className={`flex flex-col ${className}`}>
       {label && (
-        <label htmlFor={name} className="text-sm px-4 text-gray-800 mb-1 block">
+        <label htmlFor={name} className="text-sm font-medium mb-1 block">
           {label}
         </label>
       )}
@@ -55,11 +55,6 @@ const TextField = ({
           {helperText}
         </span>
       )}
-      {/* {inputProps?.maxLength && (
-            <span className="text-gray-500">
-              {inputProps.maxLength} characters left
-            </span>
-          )} */}
     </div>
   );
 };

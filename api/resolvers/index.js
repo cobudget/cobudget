@@ -148,32 +148,65 @@ const resolvers = {
 
       return event.save();
     },
-    editCustomFields: async (
+    addCustomField: async (
       parent,
-      {
-        eventId,
-        customFields
-      },
-      { currentUser, models: { Member, Dream, Event } }
+      { eventId, customField },
+      { currentUser, models: { Member, Event } }
     ) => {
       const currentMember = await Member.findOne({
         userId: currentUser.id,
         eventId,
       });
-
-      if (!currentUser || !currentUser.isOrgAdmin)
-        throw new Error('You need to be logged in as organisation admin.');
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to add custom field');
 
       const event = await Event.findOne({ _id: eventId });
-      // TODO: Remove this hack with proper id matching
-      // TODO Without it - it creates a new object on each call
-      customFields = customFields.map(field => {
-        if(field.id) {
-          field._id = field.id;
-        }
-        return field;
+
+      event.customFields.push({ ...customField });
+
+      return event.save();
+    },
+    editCustomField: async (
+      parent,
+      { eventId, fieldId, customField },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
       });
-      event.customFields = customFields;
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.customFields.id(fieldId);
+      // doc = { ...doc, ...customField };
+      doc.name = customField.name;
+      doc.type = customField.type;
+      doc.description = customField.description;
+      doc.isRequired = customField.isRequired;
+      doc.isShownOnFrontPage = customField.isShownOnFrontPage;
+
+      return event.save();
+    },
+    deleteCustomField: async (
+      parent,
+      { eventId, fieldId },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to remove a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.customFields.id(fieldId);
+      doc.remove();
+
       return event.save();
     },
     createDream: async (
@@ -239,14 +272,14 @@ const resolvers = {
           !currentMember.isAdmin &&
           !currentMember.isGuide)
       )
-      throw new Error('You are not a cocreator of this dream.');
+        throw new Error('You are not a cocreator of this dream.');
 
       if (title) dream.title = title;
       if (typeof description !== 'undefined') dream.description = description;
       if (typeof summary !== 'undefined') dream.summary = summary;
       if (typeof images !== 'undefined') dream.images = images;
       if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
-      
+
       return dream.save();
     },
     editDreamCustomField: async (
@@ -267,7 +300,7 @@ const resolvers = {
           !currentMember.isAdmin &&
           !currentMember.isGuide)
       )
-      throw new Error('You are not a cocreator of this dream.');
+        throw new Error('You are not a cocreator of this dream.');
 
       const existingField = dream.customFields.filter((field) => {
         return field.fieldId == customField.fieldId;
@@ -278,7 +311,7 @@ const resolvers = {
       } else {
         dream.customFields.push(customField);
       }
-      
+
       return dream.save();
     },
     deleteDream: async (
@@ -480,10 +513,11 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
-      const comment = dream.comments.filter((comment) => 
-        comment._id.toString() === commentId &&
-            (comment.authorId.toString() === currentUser.id ||
-                currentMember.isAdmin)
+      const comment = dream.comments.filter(
+        (comment) =>
+          comment._id.toString() === commentId &&
+          (comment.authorId.toString() === currentUser.id ||
+            currentMember.isAdmin)
       );
 
       if (comment.length == 0) {
@@ -1263,13 +1297,15 @@ const resolvers = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {
-    customField: async(customFieldValue, args, {models: {Event}}) => {
-      const {eventId, fieldId, value} = customFieldValue;
+    customField: async (customFieldValue, args, { models: { Event } }) => {
+      const { eventId, fieldId, value } = customFieldValue;
       const event = await Event.findOne({ _id: eventId });
-      const eventCustomField = event.customFields.filter(eventCustomField => eventCustomField.id == fieldId);
+      const eventCustomField = event.customFields.filter(
+        (eventCustomField) => eventCustomField.id == fieldId
+      );
       return eventCustomField[0];
-    }
-  }
+    },
+  },
 };
 
 module.exports = resolvers;
