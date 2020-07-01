@@ -161,9 +161,7 @@ export default ({
 };
 
 const renderBooleanOrValue = (value) => {
-  if (value === "true" || value === "false") {
-    return value ? "Yes" : "No";
-  } else {
-    return value.split("\n").join("<br/>");
-  }
+  if (value === "true") return "Yes";
+  if (value === "false") return "No";
+  return value.split("\n").join("<br/>");
 };
