@@ -43,3 +43,11 @@ h5 {
 .markdown p {
   @apply text-gray-900 mb-2;
 }
+
+.markdown a {
+  @apply text-black underline;
+}
+
+.markdown li {
+  @apply list-disc list-inside;
+}
