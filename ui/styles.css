@@ -49,5 +49,11 @@ h5 {
 }
 
 .markdown li {
-  @apply list-disc list-inside;
+  @apply list-inside;
+}
+.markdown ul {
+  @apply list-disc;
+}
+.markdown ol {
+  @apply list-decimal;
 }
