@@ -146,6 +146,7 @@ export default ({
                     defaultValue={budgetItem.min}
                     inputProps={{ type: "number" }}
                     inputRef={register({ required: "Required", min: 0 })}
+                    endAdornment={<span>{currency}</span>}
                   />
                 </div>
 
@@ -197,6 +198,7 @@ export default ({
                     defaultValue={budgetItem.min}
                     inputProps={{ type: "number" }}
                     inputRef={register({ required: "Required", min: 0 })}
+                    endAdornment={<span>{currency}</span>}
                   />
                 </div>
 
@@ -207,6 +209,7 @@ export default ({
                       name={`${fieldName}.max`}
                       defaultValue={budgetItem.max}
                       inputRef={register({ min: 0, required: "Required" })}
+                      endAdornment={<span>{currency}</span>}
                     />
                   </div>
                 )}
