@@ -77,7 +77,17 @@ export default ({ description, dreamId, canEdit }) => {
   if (description)
     return (
       <div className="relative group pb-4">
-        <ReactMarkdown source={description} className="markdown" />
+        <ReactMarkdown
+          source={description}
+          className="markdown"
+          renderers={{
+            link: (props) => (
+              <a href={props.href} target="_blank">
+                {props.children}
+              </a>
+            ),
+          }}
+        />
         {canEdit && (
           <div className="absolute top-0 right-0 invisible group-hover:visible">
             <Tooltip title="Edit description" position="bottom" size="small">

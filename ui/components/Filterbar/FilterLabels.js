@@ -41,6 +41,7 @@ export default ({
       >
       {defaultFilterLabels.map(label => {
         const { customField } = label;
+        if(!customField) return;
         return (
             <ToggleButton key={customField.id} value={customField.id} className={`${classes.toggleButton}`}>
               <Tooltip

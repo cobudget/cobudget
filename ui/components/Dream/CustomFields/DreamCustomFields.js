@@ -9,11 +9,11 @@ const CUSTOM_FIELDS_QUERY = gql`
     event(slug: $slug) {
       id
       customFields {
-        id,
-        name,
-        description,
-        type,
-        isRequired,
+        id
+        name
+        description
+        type
+        isRequired
       }
     }
   }

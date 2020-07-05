@@ -124,7 +124,7 @@ export default ({ event, currentUser }) => {
         aria-describedby="simple-modal-description"
         open={Boolean(open)}
         onClose={handleClose}
-        className={classes.modal}
+        className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
         <div className={classes.innerModal}>
           {open && <ModalContent event={event} closeModal={handleClose} />}
