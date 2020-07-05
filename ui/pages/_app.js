@@ -46,7 +46,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
       filterLabels {
         customField {
-          id,
+          id
           name
           description
           type

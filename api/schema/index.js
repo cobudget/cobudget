@@ -40,6 +40,8 @@ const schema = gql`
       customField: CustomFieldInput!
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
+    
+    updateFilterLabels(eventId: ID!, filterLabelsId: [ID]!): Event!
 
     editDreamCustomField(
       dreamId: ID!

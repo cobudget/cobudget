@@ -40,7 +40,6 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-  const [filterLabels, setFilterLabels] = useState([]);
   
   const [deleteCustomField, { loading }] = useMutation(
     DELETE_CUSTOM_FIELD_MUTATION,
@@ -57,10 +56,11 @@ export default ({ event }) => {
 
       <div>
         <FilterLabelsAutoComplete
-            defaultCustomFields={event.customFields}
-            filterLabels={filterLabels}
-            className="mb-6 mt-6"
-          />
+          event={event}
+          defaultCustomFields={event.customFields}
+          filterLabels={event.filterLabels}
+          className="mb-6 mt-6"
+        />
       </div>
 
       <div className="overflow-y-scroll max-h-screen">

@@ -208,6 +208,26 @@ const resolvers = {
 
       return event.save();
     },
+    updateFilterLabels: async (
+      parent,
+      { eventId, filterLabelsId },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to update filter labels');
+      const event = await Event.findOne({ _id: eventId });
+      event.filterLabels = filterLabelsId.map(id => {
+        return {
+          fieldId: id,
+          eventId: eventId
+        }
+      });
+      return event.save();
+    },
     createDream: async (
       parent,
       {
