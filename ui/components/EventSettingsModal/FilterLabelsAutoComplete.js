@@ -29,7 +29,7 @@ export default ({
 
   const defaultValue = defaultCustomFields.filter((customFields) => 
   {
-    return filterLabels.some(filterLabel => filterLabel.customField.id === customFields.id)
+    return filterLabels.some(filterLabel => filterLabel.customField?.id === customFields.id)
   });
 
   return (
