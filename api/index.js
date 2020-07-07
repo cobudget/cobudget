@@ -26,7 +26,12 @@ const server = new ApolloServer({
     const db = await getConnection();
     const models = getModels(db);
 
+    let organization = null;
     const subdomain = req.headers['dreams-subdomain'];
+        
+    if (subdomain) {
+      organization = await models.Organization.findOne({ subdomain });
+    }
 
     let currentUser = null;
 
@@ -50,6 +55,7 @@ const server = new ApolloServer({
     return {
       models,
       currentUser,
+      currentOrganization
     };
   },
   playground: true,
