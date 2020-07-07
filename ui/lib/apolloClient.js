@@ -4,6 +4,7 @@ import { HttpLink } from "apollo-link-http";
 import fetch from "isomorphic-unfetch";
 import { setContext } from "apollo-link-context";
 import cookies from "next-cookies";
+import getHostInfo from "utils/getHostInfo";
 
 export default function createApolloClient(initialState, ctx) {
   // The `ctx` (NextPageContext) will only be present on the server.
@@ -18,10 +19,13 @@ export default function createApolloClient(initialState, ctx) {
   const authLink = setContext((req, { headers }) => {
     const { token } = cookies(ctx || {});
 
+    const { subdomain } = getHostInfo(ctx?.req);
+
     return {
       headers: {
         ...headers,
         authorization: token ? `Bearer ${token}` : "",
+        ["dreams-subdomain"]: subdomain,
       },
     };
   });
