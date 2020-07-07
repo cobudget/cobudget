@@ -55,7 +55,7 @@ const server = new ApolloServer({
     return {
       models,
       currentUser,
-      currentOrganization
+      organization
     };
   },
   playground: true,
