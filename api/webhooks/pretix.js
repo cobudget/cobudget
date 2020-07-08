@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getModels } = require('../database/models');
+const { getModels } = require('../database');
 const { getConnection } = require('../database/connection');
 
 // example request body:

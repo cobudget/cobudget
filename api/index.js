@@ -16,7 +16,7 @@ const cors = microCors({
 
 const schema = require('./schema');
 const resolvers = require('./resolvers');
-const { getModels } = require('./database/models');
+const { getModels } = require('./database');
 const { getConnection } = require('./database/connection');
 
 const server = new ApolloServer({
