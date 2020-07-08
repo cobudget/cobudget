@@ -539,8 +539,11 @@ const resolvers = {
     sendMagicLink: async (
       parent,
       { email: inputEmail },
-      { models: { User, Member, Event } }
+      { currentOrg, models: { User, Member, Event } }
     ) => {
+      if(!currentOrg) {
+        throw new Error('Users can only be created from within Organization (Subdomain)');
+      }
       const email = inputEmail.toLowerCase();
       const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -567,10 +570,10 @@ const resolvers = {
         //       throw new Error('Event has no registration policy');
         //   }
 
-        user = await new User({ email }).save();
+        user = await new User({ email, organizationId: currentOrg.id }).save();
       }
 
-      return await sendMagicLinkEmail(user);
+      return await sendMagicLinkEmail(currentOrg, user);
     },
     updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
       if (!currentUser) throw new Error('You need to be logged in..');

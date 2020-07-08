@@ -9,12 +9,13 @@ const DEPLOY_URL = process.env.VERCEL_URL
   ? process.env.VERCEL_URL
   : process.env.DEPLOY_URL;
 
-const sendMagicLinkEmail = async (user) => {
+const sendMagicLinkEmail = async (organization, user) => {
   // send magic link in production, log it in development
   const token = await generateLoginJWT(user);
+  const { subdomain } = organization;
 
-  if (process.env.NODE_ENV === 'production') {
-    const url = `https://${DEPLOY_URL}/?token=${token}`;
+  if (process.env.NODE_ENV === 'production') { 
+    const url = `https://${subdomain}.${DEPLOY_URL}/?token=${token}`;
     var data = {
       from: `${process.env.EMAIL_SENDER}`,
       to: user.email,
@@ -33,15 +34,15 @@ const sendMagicLinkEmail = async (user) => {
         throw new Error('Failed to send magic link');
       });
   } else {
-    const url = `http://localhost:3000/?token=${token}`;
+    const url = `http://${subdomain}.localhost:3000/?token=${token}`;
     console.log(`Here is your magic link: ${url}`);
     return true;
   }
 };
 
-// const sendInviteEmails = async (members, event) => {
+// const sendInviteEmails = async (organization, members, event) => {
 //   const emails = members.map((member) => member.email);
-
+//   const { subdomain } = organization;
 //   const recipientVars = await members.reduce(async (obj, member) => {
 //     return {
 //       ...(await obj),
@@ -55,7 +56,7 @@ const sendMagicLinkEmail = async (user) => {
 //       to: emails,
 //       subject: `You are invited to Dreams for ${event.title}`,
 //       'recipient-variables': recipientVars,
-//       text: `Here is your log in link: https://${process.env.VERCEL_URL}/?token=%recipient.token%`,
+//       text: `Here is your log in link: https://${subdomain}.${process.env.VERCEL_URL}/?token=%recipient.token%`,
 //     };
 //     return mailgun
 //       .messages()
