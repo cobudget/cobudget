@@ -28,10 +28,11 @@ const server = new ApolloServer({
 
     let organization = null;
     const subdomain = req.headers['dreams-subdomain'];
-        
-    if (subdomain) {
-      organization = await models.Organization.findOne({ subdomain });
-    }
+
+    // subdomain comes through as string 'undefined'
+    // if (subdomain) {
+    //   organization = await models.Organization.findOne({ subdomain });
+    // }
 
     let currentUser = null;
 
@@ -55,7 +56,7 @@ const server = new ApolloServer({
     return {
       models,
       currentUser,
-      organization
+      organization,
     };
   },
   playground: true,
