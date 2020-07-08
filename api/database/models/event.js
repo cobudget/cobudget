@@ -5,7 +5,6 @@ const EventSchema = new Schema({
   slug: {
     type: String,
     required: true,
-    unique: true,
   },
   title: { type: String, required: true },
   info: String,

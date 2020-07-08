@@ -7,7 +7,6 @@ const UserSchema = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
   },
   verifiedEmail: {
     type: Boolean,
@@ -22,6 +21,6 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
-});
+}).index({email: 1, organizationId: 1}, {unique: true}); // Unique on email + organization Id
 
 export default UserSchema;

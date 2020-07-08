@@ -28,9 +28,8 @@ const resolvers = {
     events: async (parent, args, { currentOrg, models: { Event } }) => {
       return Event.find( {organizationId: currentOrg.id});
     },
-    event: async (parent, { slug }, { models: { Event } }) => {
-      if (!slug) return null;
-      return Event.findOne({ slug });
+    event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -553,7 +552,7 @@ const resolvers = {
       // const event = await Event.findOne({ _id: eventId });
       // if (!event) throw new Error('Did not find event');
 
-      let user = await User.findOne({ email });
+      let user = await User.findOne({ email, organizationId: currentOrg.id });
 
       if (!user) {
         //  let isApproved;
@@ -1194,9 +1193,9 @@ const resolvers = {
     memberships: async (user, args, { models: { Member } }) => {
       return Member.find({ userId: user.id });
     },
-    membership: async (user, { slug }, { models: { Member, Event } }) => {
+    membership: async (user, { slug }, { currentOrg, models: { Member, Event } }) => {
       if (!slug) return null;
-      const event = await Event.findOne({ slug });
+      const event = await Event.findOne({ organizationId: currentOrg.id, slug });
       return Member.findOne({ userId: user.id, eventId: event.id });
     },
   },

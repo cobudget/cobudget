@@ -22,6 +22,7 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
   - This also installs dependencies in `/ui` and `/api`
 - Copy `.env.default` to `.env`
 - For `Firefox` browser - scroll to- to Subdomains section
+- After running (Make sure you check #Postrequisites section below)
 
 ### Running the project
 
@@ -52,11 +53,12 @@ This builds and serves both the API and the UI with one command, and provides ho
 
 # Postrequisites
 After running for the first time add default organization
-create a new organization with: 
+By visiting http://localhost:8081/db/test/organizations
+Then add a new document with: 
 ```
 {
   name: "Dev organization",
-  subdomian: "dev-org"
+  subdomain: "dev-org"
 }
 ```
 Then navigate to http://dev-org.localhost:3000/
