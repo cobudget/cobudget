@@ -25,8 +25,8 @@ const resolvers = {
     organizations: async (parent, args, { models: { Organization } }) => {
       return Organization.find();
     },
-    events: async (parent, args, { models: { Event } }) => {
-      return Event.find();
+    events: async (parent, args, { currentOrg, models: { Event } }) => {
+      return Event.find( {organizationId: currentOrg.id});
     },
     event: async (parent, { slug }, { models: { Event } }) => {
       if (!slug) return null;
@@ -93,7 +93,7 @@ const resolvers = {
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentUser, models: { Event, Member } }
+      { currentUser, currentOrg, models: { Event, Member } }
     ) => {
       if (!currentUser || !currentUser.isOrgAdmin)
         throw new Error('You need to be logged in as organisation admin.');
@@ -107,6 +107,7 @@ const resolvers = {
         summary,
         currency,
         registrationPolicy,
+        organizationId: currentOrg.id,
       });
 
       const member = await new Member({
