@@ -6,6 +6,8 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    currentOrg: Organization
+    organizations: [Organization!]
     events: [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
@@ -109,10 +111,17 @@ const schema = gql`
     registerForEvent(eventId: ID!): Member
   }
 
+  type Organization {
+    id: ID!
+    name: String!
+    subdomain: String!
+  }
+
   type Event {
     id: ID!
     slug: String!
     title: String!
+    organization: Organization!
     info: String
     color: String
     # logo: String
@@ -155,13 +164,14 @@ const schema = gql`
   type User {
     id: ID!
     email: String
+    name: String
     verifiedEmail: Boolean!
+    organization: Organization!
+    isOrgAdmin: Boolean
     membership(slug: String): Member
     memberships: [Member!]
-    name: String
     avatar: String
     bio: String
-    isOrgAdmin: Boolean
     createdAt: Date
   }
 

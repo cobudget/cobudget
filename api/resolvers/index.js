@@ -19,6 +19,12 @@ const resolvers = {
     currentUser: (parent, args, { currentUser }) => {
       return currentUser;
     },
+    currentOrg: (parent, args, { currentOrg }) => {
+      return currentOrg;
+    },
+    organizations: async (parent, args, { models: { Organization } }) => {
+      return Organization.find();
+    },
     events: async (parent, args, { models: { Event } }) => {
       return Event.find();
     },

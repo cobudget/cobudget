@@ -17,6 +17,7 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  organizationId: { type: Schema.Types.ObjectId, index: true, required: true },
   isOrgAdmin: {
     type: Boolean,
     default: false,

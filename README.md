@@ -21,6 +21,7 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
 - Copy `.env.default` to `.env`
+- For `Firefox` browser - scroll to- to Subdomains section
 
 ### Running the project
 
@@ -49,6 +50,17 @@ npm start
 This builds and serves both the API and the UI with one command, and provides hot reloading.
 `now dev` simulates the serverless deployment platform [Now](https://zeit.co/) where the project is deployed.
 
+# Postrequisites
+After running for the first time add default organization
+create a new organization with: 
+```
+{
+  name: "Dev organization",
+  subdomian: "dev-org"
+}
+```
+Then navigate to http://dev-org.localhost:3000/
+
 ### Resetting the db to its initial state
 
 While the db is running, in a new terminal:
@@ -60,6 +72,16 @@ npm run db:reset
 ### Using the local mongodb admin UI
 
 Just visit http://localhost:8081
+
+### Subdomains
+Currently when developing, Chrome is the only browser possible to support redirect sub.localhost:3000
+To add support for firefox do the following:
+1. Type in this url about:config search for network.dns.localDomains
+2. Double click the "value" field.
+3. Enter those urls seperated by commas dev-org.localhost,root.localhost
+
+Now you can visit http://dev-org.localhost:3000 or http://root.localhost:3000
+
 
 ## License
 
