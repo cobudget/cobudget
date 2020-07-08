@@ -25,7 +25,7 @@ export default function createApolloClient(initialState, ctx) {
       headers: {
         ...headers,
         authorization: token ? `Bearer ${token}` : "",
-        ["dreams-subdomain"]: subdomain,
+        ...(subdomain && { ["dreams-subdomain"]: subdomain }),
       },
     };
   });
