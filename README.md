@@ -30,7 +30,7 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
 Run the whole stack (db + code) from the root with:
 
 ```
-npm run dev
+export NODE_ENV=development && npm run dev
 ```
 
 #### Option 2
@@ -42,7 +42,7 @@ npm run db:up
 ```
 
 ```
-npm start
+export NODE_ENV=development && npm start
 ```
 
 > This last command calls `now dev`.
