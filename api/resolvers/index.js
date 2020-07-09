@@ -26,10 +26,10 @@ const resolvers = {
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
-      return Event.find( {organizationId: currentOrg.id});
+      return Event.find( {organizationId: currentOrg?.id});
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
-      return Event.findOne({ slug, organizationId: currentOrg.id });
+      return Event.findOne({ slug, organizationId: currentOrg?.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -106,7 +106,7 @@ const resolvers = {
         summary,
         currency,
         registrationPolicy,
-        organizationId: currentOrg.id,
+        organizationId: currentOrg?.id,
       });
 
       const member = await new Member({
