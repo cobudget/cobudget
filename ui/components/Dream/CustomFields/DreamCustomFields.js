@@ -35,7 +35,7 @@ export default ({ customFields, canEdit, eventId, dreamId }) => {
 
   return defaultCustomFields.map((defaultCustomField, index) => {
     const customField = customFields.filter(
-      (field) => field.customField.id == defaultCustomField.id
+      (field) => field.customField?.id == defaultCustomField.id
     );
     return (
       <DreamCustomField
