@@ -20,6 +20,7 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
   - Or run `nvm use` in this directory
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
+- If missing, install [npm-run-all](https://github.com/mysticatea/npm-run-all): `npm i -g npm-run-all`. It's necessary for the build process.
 - Copy `.env.default` to `.env`
 
 ### Running the project
