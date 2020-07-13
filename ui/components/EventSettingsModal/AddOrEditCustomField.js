@@ -5,14 +5,8 @@ import * as yup from "yup";
 
 import { Checkbox, Modal } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Grid from "@material-ui/core/Grid";
 import TextField from "../TextField";
-import HiddenTextField from "../HiddenTextField";
 import Button from "../Button";
-import IconButton from "components/IconButton";
-import { DeleteIcon, AddIcon, EditIcon } from "../Icons";
-import { makeStyles } from "@material-ui/core/styles";
-import Label from "components/Label";
 import { SelectField } from "../SelectInput";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
@@ -25,6 +19,7 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        isShownOnFrontPage
         createdAt
       }
     }
@@ -49,6 +44,7 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        isShownOnFrontPage
         createdAt
       }
     }
@@ -64,6 +60,7 @@ const schema = yup.object().shape({
       .oneOf(["TEXT", "MULTILINE_TEXT", "BOOLEAN", "ENUM", "FILE"])
       .required(),
     isRequired: yup.bool().required(),
+    isShownOnFrontPage: yup.bool().nullable(),
   }),
 });
 
@@ -75,6 +72,7 @@ export default ({
     description: "",
     type: "TEXT",
     isRequired: false,
+    isShownOnFrontPage: false,
   },
 }) => {
   const editing = Boolean(customField.id);
@@ -131,7 +129,6 @@ export default ({
             <div className="flex">
               <SelectField
                 name={"customField.type"}
-                //label="Type"
                 defaultValue={customField.type}
                 inputRef={register}
                 className="mr-4"
@@ -140,7 +137,6 @@ export default ({
                 <option value="MULTILINE_TEXT">Long Text</option>
                 <option value="BOOLEAN">Yes/No</option>
               </SelectField>
-
               <Controller
                 as={
                   <FormControlLabel
@@ -153,7 +149,18 @@ export default ({
                 control={control}
                 inputRef={register}
               />
-
+              <Controller
+                as={
+                  <FormControlLabel
+                    label="Show on front page"
+                    control={<Checkbox />}
+                  />
+                }
+                name={"customField.isShownOnFrontPage"}
+                defaultValue={customField.isShownOnFrontPage || false}
+                control={control}
+                inputRef={register}
+              />
             </div>
           </div>
 

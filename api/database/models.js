@@ -93,6 +93,7 @@ const EventSchema = new Schema({
         required: true,
       },
       isRequired: { type: Boolean, required: true },
+      isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,

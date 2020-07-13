@@ -42,6 +42,7 @@ export const TOP_LEVEL_QUERY = gql`
         description
         type
         isRequired
+        isShownOnFrontPage
         createdAt
       }
       filterLabels {

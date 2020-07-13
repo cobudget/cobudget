@@ -186,6 +186,7 @@ const resolvers = {
       doc.type = customField.type;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
+      doc.isShownOnFrontPage = customField.isShownOnFrontPage;
 
       return event.save();
     },
@@ -206,26 +207,6 @@ const resolvers = {
       let doc = event.customFields.id(fieldId);
       doc.remove();
 
-      return event.save();
-    },
-    updateFilterLabels: async (
-      parent,
-      { eventId, filterLabelsId },
-      { currentUser, models: { Member, Event } }
-    ) => {
-      const currentMember = await Member.findOne({
-        userId: currentUser.id,
-        eventId,
-      });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to update filter labels');
-      const event = await Event.findOne({ _id: eventId });
-      event.filterLabels = filterLabelsId.map(id => {
-        return {
-          fieldId: id,
-          eventId: eventId
-        }
-      });
       return event.save();
     },
     createDream: async (

@@ -28,6 +28,7 @@ export const DREAMS_QUERY = gql`
           type
           description
           isRequired
+          isShownOnFrontPage
           createdAt
         }
       }
@@ -82,7 +83,7 @@ export default ({ currentUser, event }) => {
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
         currentUser={currentUser}
-        defaultFilterLabels={event.filterLabels}
+        customFields={event.customFields}
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
       />

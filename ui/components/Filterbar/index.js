@@ -9,7 +9,7 @@ export default ({
   toggleFilterFavorites,
   textSearchTerm,
   setTextSearchTerm,
-  defaultFilterLabels,
+  customFields,
   filterLabels,
   setFilterLabels
 }) => {
@@ -62,7 +62,7 @@ export default ({
       )}
       
       <FilterLabels 
-        defaultFilterLabels={defaultFilterLabels}
+        customFields={customFields}
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
         className={'mb-2 mt-2'}

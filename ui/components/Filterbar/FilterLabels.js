@@ -30,20 +30,22 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
 
 
 export default ({
-  defaultFilterLabels,
+  customFields,
   filterLabels,
   setFilterLabels
 }) => {
+  if(!customFields) return;
+  
   const classes = useStyles();
+  const defaultFilterLabels = customFields.filter(customField => customField.isShownOnFrontPage);
+
   return (
     <StyledToggleButtonGroup
         value={filterLabels}
         exclusive
         onChange={(event, newSelectedFilter) => { setFilterLabels(newSelectedFilter) }}
       >
-      {defaultFilterLabels.map(label => {
-        const { customField } = label;
-        if(!customField) return;
+      {defaultFilterLabels.map(customField => {
         return (
             <ToggleButton key={customField.id} value={customField} className={`${classes.toggleButton}`}>
               <Tooltip

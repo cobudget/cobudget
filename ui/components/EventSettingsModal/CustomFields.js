@@ -8,7 +8,6 @@ import IconButton from "components/IconButton";
 import { DeleteIcon, AddIcon, EditIcon } from "components/Icons";
 
 import AddOrEditCustomField from "./AddOrEditCustomField";
-import FilterLabelsAutoComplete from "./FilterLabelsAutoComplete";
 
 const css = {
   label:
@@ -31,6 +30,7 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        isShownOnFrontPage
         createdAt
       }
     }
@@ -54,18 +54,9 @@ export default ({ event }) => {
         Custom fields are extra fields or questions for Dreams
       </p>
 
-      <div>
-        <FilterLabelsAutoComplete
-          event={event}
-          defaultCustomFields={event.customFields}
-          filterLabels={event.filterLabels}
-          className="mb-6 mt-6"
-        />
-      </div>
-
       <div className="overflow-y-scroll max-h-screen">
         {event.customFields.map((customField) => (
-          <div key={customField} className="p-4 shadow rounded my-4">
+          <div key={customField.id} className="p-4 shadow rounded my-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-lg">{customField.name}</h2>
               <div>
@@ -100,6 +91,9 @@ export default ({ event }) => {
               <span className={css.label}>Type: {types[customField.type]}</span>
               {customField.isRequired && (
                 <span className={css.label}>Is Required</span>
+              )}
+              {customField.isShownOnFrontPage && (
+                <span className={css.label}>Shown on front page</span>
               )}
             </div>
           </div>

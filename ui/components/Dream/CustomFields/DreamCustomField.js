@@ -25,6 +25,7 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
           type
           description
           isRequired
+          isShownOnFrontPage
           createdAt
         }
       }

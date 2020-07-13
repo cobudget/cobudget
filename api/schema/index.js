@@ -41,8 +41,6 @@ const schema = gql`
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
     
-    updateFilterLabels(eventId: ID!, filterLabelsId: [ID]!): Event!
-
     editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
@@ -328,6 +326,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
+    isShownOnFrontPage: Boolean
     createdAt: Date!
   }
 
@@ -336,6 +335,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
+    isShownOnFrontPage: Boolean
     createdAt: Date
   }
 
