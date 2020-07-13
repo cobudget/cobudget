@@ -1,10 +1,22 @@
 const { ApolloServer } = require('apollo-server-micro');
-const cors = require('micro-cors')();
 const jwt = require('jsonwebtoken');
+
+const microCors = require('micro-cors');
+const cors = microCors({
+  allowHeaders: [
+    'X-Requested-With',
+    'Access-Control-Allow-Origin',
+    'X-HTTP-Method-Override',
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'Dreams-Subdomain',
+  ],
+});
 
 const schema = require('./schema');
 const resolvers = require('./resolvers');
-const { getModels } = require('./database/models');
+const { getModels } = require('./database');
 const { getConnection } = require('./database/connection');
 
 const server = new ApolloServer({
@@ -13,6 +25,15 @@ const server = new ApolloServer({
   context: async ({ req }) => {
     const db = await getConnection();
     const models = getModels(db);
+
+    let organization = null;
+    const subdomain = req.headers['dreams-subdomain'];
+
+    if (subdomain) {
+      console.log({ subdomain });
+      // organization = await models.Organization.findOne({ subdomain });
+    }
+
     let currentUser = null;
 
     let token = req.headers.authorization
@@ -35,6 +56,7 @@ const server = new ApolloServer({
     return {
       models,
       currentUser,
+      organization,
     };
   },
   playground: true,
