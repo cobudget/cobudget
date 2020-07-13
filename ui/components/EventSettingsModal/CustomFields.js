@@ -40,7 +40,7 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-
+  
   const [deleteCustomField, { loading }] = useMutation(
     DELETE_CUSTOM_FIELD_MUTATION,
     {
