@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 const dayjs = require('dayjs');
 
 const EventSchema = new Schema({
@@ -38,7 +38,7 @@ const EventSchema = new Schema({
       description: { type: String, required: true },
       type: {
         type: String,
-        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE'],
+        enum: ['TEXT', 'MULTILINE_TEXT', 'BOOLEAN', 'ENUM', 'FILE'],
         default: 'TEXT',
         required: true,
       },
@@ -81,4 +81,4 @@ EventSchema.virtual('dreamCreationIsOpen').get(function () {
   return now.isBefore(dreamCreationCloses);
 });
 
-export default EventSchema;
+module.exports = EventSchema;

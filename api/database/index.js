@@ -1,8 +1,8 @@
-import UserSchema from './models/user';
-import MemberSchema from './models/member';
-import EventSchema from './models/event';
-import DreamSchema from './models/dream';
-import GrantSchema from './models/grant';
+const UserSchema = require('./models/user');
+const MemberSchema = require('./models/member');
+const EventSchema = require('./models/event');
+const DreamSchema = require('./models/dream');
+const GrantSchema = require('./models/grant');
 
 const getModels = (db) => {
   return {

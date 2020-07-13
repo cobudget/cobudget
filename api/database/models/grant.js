@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -14,4 +14,4 @@ const GrantSchema = new Schema({
   },
 });
 
-export default GrantSchema;
+module.exports = GrantSchema;
