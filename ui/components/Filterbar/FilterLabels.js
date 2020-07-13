@@ -13,7 +13,7 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       backgroundColor: "#e2e8f0",
     },
-    borderRadius: "4px !important"
+    borderRadius: "4px !important",
   },
 }));
 
@@ -28,37 +28,39 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
   },
 }))(ToggleButtonGroup);
 
+export default ({ customFields, filterLabels, setFilterLabels }) => {
+  if (!customFields) return;
 
-export default ({
-  customFields,
-  filterLabels,
-  setFilterLabels
-}) => {
-  if(!customFields) return;
-  
   const classes = useStyles();
-  const defaultFilterLabels = customFields.filter(customField => customField.isShownOnFrontPage);
+  const defaultFilterLabels = customFields.filter(
+    (customField) => customField.isShownOnFrontPage
+  );
 
   return (
     <StyledToggleButtonGroup
-        value={filterLabels}
-        exclusive
-        onChange={(event, newSelectedFilter) => { setFilterLabels(newSelectedFilter) }}
-      >
-      {defaultFilterLabels.map(customField => {
+      value={filterLabels}
+      exclusive
+      onChange={(event, newSelectedFilter) => {
+        setFilterLabels(newSelectedFilter);
+      }}
+    >
+      {defaultFilterLabels.map((customField) => {
         return (
-            <ToggleButton key={customField.id} value={customField} className={`${classes.toggleButton}`}>
-              <Tooltip
-                title={`Show the dream's ${customField.name}`}
-                position="bottom"
-                size="small"
-              >
-              <TagIcon className="inline w-6 h-6 pr-2"/>
+          <ToggleButton
+            key={customField.id}
+            value={customField}
+            className={`${classes.toggleButton}`}
+          >
+            <Tooltip
+              title={`Show the dream's ${customField.name}`}
+              position="bottom"
+              size="small"
+            >
               {customField.name}
-              </Tooltip>
-            </ToggleButton>
-        )
+            </Tooltip>
+          </ToggleButton>
+        );
       })}
     </StyledToggleButtonGroup>
   );
-}
+};
