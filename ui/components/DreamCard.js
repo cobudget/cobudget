@@ -10,8 +10,10 @@ import {
   CommentIcon,
   HeartOutlineIcon,
   HeartSolidIcon,
+  TagIcon
 } from "./Icons";
 import Label from "./Label";
+
 
 const DreamCardText = styled.div`
   max-height: 7.5em;
@@ -27,10 +29,10 @@ const TOGGLE_FAVORITE_MUTATION = gql`
   }
 `;
 
-const getDreamCustomFieldValue = (dream, customFieldId) => {
+const getDreamCustomFieldValue = (dream, customField) => {
   if(!dream.customFields || dream.customFields.length == 0) return;
   const existingField = dream.customFields.filter((field) => {
-    return field.customField.id == customFieldId;
+    return field.customField.id == customField.id;
   });
   if (existingField && existingField.length > 0) {
     return existingField[0].value;
@@ -59,13 +61,16 @@ export default ({ dream, event, currentUser, filterLabels }) => {
         <div className="mb-2">
           <h3 className="text-xl font-medium mb-1 truncate">{dream.title}</h3>
           
-          <p className="text-gray-800">
-          { filterLabels? 
-            <DreamCardText>{getDreamCustomFieldValue(dream, filterLabels)}</DreamCardText>
+          <div className="text-gray-800">
+          { filterLabels?
+            <>
+              <DreamCardText>{getDreamCustomFieldValue(dream, filterLabels)}</DreamCardText>
+              <Label className="absolute top-0 right-0 m-2"><TagIcon className="inline w-6 h-6 pr-1"/> {filterLabels.name}</Label>
+            </>
             :
             dream.summary
           }
-          </p>
+          </div>
         
         </div>
         <div>

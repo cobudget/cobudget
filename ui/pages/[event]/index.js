@@ -102,6 +102,7 @@ export default ({ currentUser, event }) => {
                   key={dream.id}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
+                    
                     <DreamCard
                       dream={dream}
                       event={event}

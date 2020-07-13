@@ -3,6 +3,7 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { Tooltip } from "react-tippy";
 import stringToHslColor, { stringToColor } from "../../utils/stringToHslColor";
+import { TagIcon } from "components/Icons";
 
 const useStyles = makeStyles((theme) => ({
   toggleButton: {
@@ -12,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
     "&:hover": {
       backgroundColor: "#e2e8f0",
     },
+    borderRadius: "4px !important"
   },
 }));
 
@@ -20,7 +22,7 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
     background: "none",
   },
   grouped: {
-    margin: theme.spacing(0, 2),
+    margin: theme.spacing(0, 1.5),
     height: "auto",
     border: "none",
   },
@@ -43,12 +45,13 @@ export default ({
         const { customField } = label;
         if(!customField) return;
         return (
-            <ToggleButton key={customField.id} value={customField.id} className={`${classes.toggleButton}`}>
+            <ToggleButton key={customField.id} value={customField} className={`${classes.toggleButton}`}>
               <Tooltip
                 title={`Show the dream's ${customField.name}`}
                 position="bottom"
                 size="small"
               >
+              <TagIcon className="inline w-6 h-6 pr-2"/>
               {customField.name}
               </Tooltip>
             </ToggleButton>
