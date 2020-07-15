@@ -7,7 +7,7 @@ const { ApolloServer } = require('apollo-server-express');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const bodyParser = require('body-parser');
-const pretixHandler = require('./webhooks/pretix');
+const pretixWebhook = require('./webhooks/pretix');
 // const microCors = require('micro-cors');
 // const cors = microCors({
 //   allowHeaders: [
@@ -75,10 +75,14 @@ server.applyMiddleware({ app });
 
 app.use(bodyParser.json());
 
-app.post('/pretix', pretixHandler);
+app.post('/pretix', pretixWebhook);
 
-app.listen({ port: process.env.PORT || 4000 }, () =>
-  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+const port = process.env.PORT || 4000;
+
+app.listen({ port }, () =>
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  )
 );
 
 // module.exports = cors((req, res) => {
