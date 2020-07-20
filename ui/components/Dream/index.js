@@ -26,7 +26,7 @@ const Dream = ({ dream, event, currentUser }) => {
       {dream.images.length > 0 ? (
         <img
           className="h-64 md:h-88 w-full object-cover object-center"
-          src={dream.images[0].large}
+          src={dream.images[0].large ?? dream.images[0].small}
         />
       ) : (
         <div
@@ -61,7 +61,7 @@ const Dream = ({ dream, event, currentUser }) => {
             <DreamCustomFields
               eventId={event.id}
               dreamId={dream.id}
-              customFields={dream.customFields} 
+              customFields={dream.customFields}
               canEdit={canEdit}
             />
 
