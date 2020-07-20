@@ -686,22 +686,10 @@ const resolvers = {
     approveForGranting: async (
       parent,
       { dreamId, approved },
-      { currentUser, models: { Dream, Member } }
+      { currentUser, models: { Dream }, controller }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
-
-      const currentMember = await Member.findOne({
-        userId: currentUser.id,
-        eventId: dream.eventId,
-      });
-
-      if (!currentMember || (!currentMember.isAdmin && !currentMember.isGuide))
-        throw new Error(
-          'You need to be admin or guide to approve for granting'
-        );
-
-      dream.approved = approved;
-      return dream.save();
+      return controller.setDreamApproval(dream, approved, currentUser);
     },
     giveGrant: async (
       parent,
