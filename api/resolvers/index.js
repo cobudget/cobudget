@@ -688,8 +688,8 @@ const resolvers = {
       { dreamId, approved },
       { currentUser, models: { Dream }, controller }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      return controller.setDreamApproval(dream, approved, currentUser);
+      console.log(dreamId);
+      return controller.setDreamApproval(dreamId, approved, currentUser);
     },
     giveGrant: async (
       parent,
