@@ -1129,34 +1129,12 @@ const resolvers = {
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
     },
-    minGoalGrants: async (dream, args, { models: { Event } }) => {
-      const { grantValue } = await Event.findOne({ _id: dream.eventId });
-      if (dream.minGoal === null || !grantValue) {
-        return null;
-      }
-      return Math.ceil(dream.minGoal / grantValue);
-    },
-    maxGoalGrants: async (dream, args, { models: { Event } }) => {
-      const { grantValue } = await Event.findOne({ _id: dream.eventId });
-      if (dream.maxGoal === null || !grantValue) {
-        return null;
-      }
-      return Math.ceil(dream.maxGoal / grantValue);
-    },
-    currentNumberOfGrants: async (dream, args, { models: { Grant } }) => {
-      const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
-        {
-          $match: {
-            dreamId: mongoose.Types.ObjectId(dream.id),
-            reclaimed: false,
-          },
-        },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
-      ]);
-      return grantsForDream;
-    },
+    minGoalGrants: async (dream, args, {controller}) => {
+      return await controller.minGoalGrants(dream); },
+    maxGoalGrants: async (dream, args, {controller}) => {
+      return await controller.maxGoalGrants(dream); },
+    currentNumberOfGrants: async (dream, args, {controller} ) => {
+      return await controller.currentNumberOfGrants(dream); },
     numberOfComments: (dream) => {
       return dream.comments.length;
     },
