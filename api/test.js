@@ -1,11 +1,6 @@
 const fetch = require("node-fetch");
 require('dotenv').config();
 
-if(!process.env.TEST_DREAM) 
-  console.log("Please perform the first-time setup in test.sh.");
-if(!process.env.TEST_EVENT) 
-  console.log("Please perform the first-time setup in test.sh.");
-
 async function do_query(query) {
   const json = {query};
   const result = await fetch("http://localhost:4000/graphql", {
@@ -19,9 +14,14 @@ async function do_query(query) {
   return await result.json();
 }
 
-async function check_query(query, expected) {
+async function check_query(query, condition) {
+  if(typeof condition === "string") {
+    let old = condition;
+    condition = res => JSON.stringify(res) === old;
+  }
+
   await do_query(query).then(res => {
-    if (JSON.stringify(res) === expected) {
+    if (condition(res)) {
       console.log("OK");
     } else {
       console.log("Error: ")
@@ -34,6 +34,7 @@ async function check_query(query, expected) {
 }
 
 (async function main() {
+  let dreamBudget = 10;
   subjects = {}
   { // First, setup
     let res = await do_query("{ currentUser {id} }");
@@ -54,7 +55,7 @@ async function check_query(query, expected) {
   grantingCloses: "2022-01-01",
   dreamCreationCloses: "2020-01-01",
   totalBudget:1000,
-  grantValue: 10
+  grantValue: 1
 ){id, grantingOpens, grantingCloses}}`);
     let { resEventId, grantingOpens, grantingCloses } = res.data.updateGrantingSettings;
     if (!resEventId === eventId) throw new Error("Not same event returned");
@@ -62,7 +63,7 @@ async function check_query(query, expected) {
     res = await do_query(`mutation { editDream(
   dreamId:"${dreamId}",
 	budgetItems:[
-    {description:"test", min:10,type:EXPENSE}
+    {description:"test", min:${dreamBudget},type:EXPENSE}
   ]
 ){id,maxGoal,maxGoalGrants,budgetItems{description,min,max}}}`);
     let {description, min, max} = res.data.editDream.budgetItems[0];
@@ -78,18 +79,31 @@ async function check_query(query, expected) {
 
 
   // Here follow the tests
-  do_query("{ currentUser {id} }");
-  check_query(
+  await check_query(
     `mutation {approveForGranting(dreamId:"${subjects.dreamId}", approved:true){approved}}`,
     '{"data":{"approveForGranting":{"approved":true}}}'
   );
-  check_query(
+
+  await check_query(
     `mutation {approveForGranting(dreamId:"${subjects.dreamId}", approved:false){approved}}`,
     '{"data":{"approveForGranting":{"approved":false}}}'
   );
-  check_query(
+
+  await check_query(
     `mutation {approveForGranting(dreamId:"${subjects.dreamId}", approved:true){approved}}`,
     '{"data":{"approveForGranting":{"approved":true}}}'
+  );
+
+  await check_query(`mutation { giveGrant(eventId:"${subjects.eventId}", dreamId: "${subjects.dreamId}", value:${dreamBudget+1}){value}}`,
+    res => !!res.errors
+  );
+
+  await check_query(`mutation { giveGrant(eventId:"${subjects.eventId}", dreamId: "${subjects.dreamId}", value:${dreamBudget}){value}}`,
+    '{"data":{"giveGrant":{"value":10}}}'
+  );
+
+  await check_query(`mutation { giveGrant(eventId:"${subjects.eventId}", dreamId: "${subjects.dreamId}", value:1){value}}`,
+    res => !!res.errors
   );
 
 })().catch(e => console.log(e));
