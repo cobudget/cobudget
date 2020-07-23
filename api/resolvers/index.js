@@ -62,6 +62,16 @@ const resolvers = {
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },
+    grant: async(
+        parent,
+        { grantId },
+        { models: { Grant } }
+    ) => {
+      let grant = await Grant.findOne({_id: grantId});
+      if(!grant)
+        throw new Error("That grant does not exist.");
+      return grant;
+    },
     members: async (
       parent,
       { eventId, isApproved },
@@ -701,74 +711,16 @@ const resolvers = {
     deleteGrant: async (
       parent,
       { eventId, grantId },
-      { currentUser, models: { Grant, Event, Member } }
+      { currentUser, controller }
     ) => {
-      const currentMember = await Member.findOne({
-        userId: currentUser.id,
-        eventId,
-      });
-
-      if (!currentMember || !currentMember.isApproved)
-        throw new Error(
-          'You need to be a logged in approved member to remove a grant'
-        );
-
-      const event = await Event.findOne({ _id: eventId });
-
-      // Check that granting is open
-      if (!event.grantingIsOpen)
-        throw new Error("Can't remove grant when granting is closed");
-
-      const grant = await Grant.findOneAndDelete({
-        _id: grantId,
-        memberId: currentMember.id,
-      });
-      return grant;
+      return await controller.deleteGrant(grantId, currentUser);
     },
     reclaimGrants: async (
       parent,
       { dreamId },
-      { currentUser, models: { Grant, Event, Dream, Member } }
+      { currentUser, controller }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-
-      const currentMember = await Member.findOne({
-        userId: currentUser.id,
-        eventId: dream.eventId,
-      });
-
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be admin to reclaim grants');
-
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      // Granting needs to be closed before you can reclaim grants
-      if (!event.grantingHasClosed)
-        throw new Error("You can't reclaim grants before granting has closed");
-
-      // If dream has reached minimum funding, you can't reclaim its grants
-      const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
-        {
-          $match: {
-            dreamId: mongoose.Types.ObjectId(dreamId),
-            reclaimed: false,
-          },
-        },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
-      ]);
-
-      const minGoalGrants = Math.ceil(dream.minGoal / event.grantValue);
-
-      if (grantsForDream >= minGoalGrants)
-        throw new Error(
-          "You can't reclaim grants if it has reached minimum funding"
-        );
-
-      await Grant.updateMany({ dreamId }, { reclaimed: true });
-
-      return dream;
+        return controller.reclaimGrantsForDream(dreamId, currentUser);
     },
     preOrPostFund: async (
       parent,

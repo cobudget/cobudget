@@ -119,7 +119,7 @@ const createController = ({ Dream, Member, Event, Grant }) => ({
 
     // Check that the max goal of the dream is not exceeded
     if(!await controller.hasRoomInBudgetForGrantOfSize(dream, value))
-      throw new Error("You can't overfund this dream.");
+      throw new Error("This grant would overfund this dream");
 
     // Check that it is not more than is allowed per dream (if this number is set)
     // TODO This value seems illogical anyway, what if there are two grants?
@@ -142,6 +142,62 @@ const createController = ({ Dream, Member, Event, Grant }) => ({
       value,
       memberId: currentMember.id,
     }).save();
+  },
+  deleteGrant: async (grantId, currentUser) => {
+    const grant = await Grant.findOne({ _id: grantId });
+    const currentMember = await Member.findOne({
+      userId: currentUser.id,
+      eventId: grant.eventId,
+    });
+
+    if (!currentMember || !currentMember.isApproved)
+      throw new Error(
+          'You need to be a logged in approved member to remove a grant'
+      );
+
+    const event = await Event.findOne({ _id: grant.eventId });
+
+    // Check that granting is open
+    if (!event.grantingIsOpen)
+      throw new Error("Can't remove grant when granting is closed");
+
+    return await Grant.findOneAndDelete({
+      _id: grantId,
+      memberId: currentMember.id,
+    });
+  },
+  hasReceivedMinimumFunding: async(aDream) => {
+    const grantsForDream = await controller.currentNumberOfGrants(aDream);
+    const minGoalGrants = await controller.minGoalGrants(aDream)
+    return grantsForDream >= minGoalGrants;
+  },
+  reclaimGrantsForDream: async (dreamId, currentUser) => {
+    const dream = await Dream.findOne({ _id: dreamId });
+    // For parallellization
+    const [event, currentMember] = await Promise.all([
+        Event.findOne({ _id: dream.eventId }),
+        Member.findOne({
+          userId: currentUser.id,
+          eventId: dream.eventId,
+        })
+    ]);
+
+    if (!currentMember || !currentMember.isAdmin)
+      throw new Error('You need to be admin to reclaim grants');
+
+    // Granting needs to be closed before you can reclaim grants
+    if (!event.grantingHasClosed)
+      throw new Error("You can't reclaim grants before granting has closed");
+
+    // If dream has reached minimum funding, you can't reclaim its grants
+    if(await controller.hasReceivedMinimumFunding(dream))
+      throw new Error(
+          "You can't reclaim grants if it has reached minimum funding"
+      );
+
+    await Grant.updateMany({ dreamId }, { reclaimed: true });
+
+    return dream;
   }
 })
 
