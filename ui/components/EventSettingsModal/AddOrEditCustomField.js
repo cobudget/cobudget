@@ -25,6 +25,7 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
         createdAt
       }

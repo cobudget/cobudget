@@ -24,7 +24,7 @@ const resolvers = {
     },
     event: async (parent, { slug }, { models: { Event } }) => {
       if (!slug) return null;
-      return Event.findOne({ slug });
+      return Event.findOne({ slug }).sort('customFields.position');
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -164,6 +164,24 @@ const resolvers = {
 
       event.customFields.push({ ...customField });
 
+      return event.save();
+    },
+    // Based on https://softwareengineering.stackexchange.com/a/195317/54663
+    setCustomFieldPosition: async (
+      parent,
+      { eventId, fieldId, beforePosition, afterPosition },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+      let doc = event.customFields.id(fieldId);
+      doc.position = ((beforePosition - afterPosition) / 2.0) + afterPosition;
       return event.save();
     },
     editCustomField: async (

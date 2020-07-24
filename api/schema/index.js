@@ -39,6 +39,12 @@ const schema = gql`
       fieldId: ID!
       customField: CustomFieldInput!
     ): Event!
+    setCustomFieldPosition(
+      eventId: ID!
+      fieldId: ID!
+      beforePosition: Float
+      afterPosition: Float
+    ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
 
     editDreamCustomField(
@@ -320,6 +326,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
+    position: Float!
     isShownOnFrontPage: Boolean
     createdAt: Date!
   }

@@ -28,6 +28,7 @@ export const DREAM_QUERY = gql`
           type
           description
           isRequired
+          position
           isShownOnFrontPage
           createdAt
         }
