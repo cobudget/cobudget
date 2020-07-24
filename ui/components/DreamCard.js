@@ -1,4 +1,4 @@
-import stringToHslColor, { stringToColor } from "../utils/stringToHslColor";
+import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
 import { useMutation } from "@apollo/react-hooks";
@@ -21,7 +21,17 @@ const TOGGLE_FAVORITE_MUTATION = gql`
   }
 `;
 
-export default ({ dream, event, currentUser }) => {
+const getDreamCustomFieldValue = (dream, customField) => {
+  if (!dream.customFields || dream.customFields.length == 0) return;
+  const existingField = dream.customFields.filter((field) => {
+    return field.customField.id == customField.id;
+  });
+  if (existingField && existingField.length > 0) {
+    return existingField[0].value;
+  }
+};
+
+export default ({ dream, event, currentUser, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
@@ -43,7 +53,22 @@ export default ({ dream, event, currentUser }) => {
         <div className="mb-2">
           <h3 className="text-xl font-medium mb-1 truncate">{dream.title}</h3>
 
-          <p className="text-gray-800">{dream.summary}</p>
+          <div className="text-gray-800">
+            {filterLabels ? (
+              <>
+                <div className="mt-1 p-2 bg-gray-100 rounded-md border border-gray-200">
+                  <span className=" text-xs block font-semibold uppercase tracking-wide text-gray-600">
+                    {filterLabels.name}
+                  </span>
+                  <div className="line-clamp-3">
+                    {getDreamCustomFieldValue(dream, filterLabels)}
+                  </div>
+                </div>
+              </>
+            ) : (
+              dream.summary
+            )}
+          </div>
         </div>
         <div>
           {(dream.minGoalGrants || dream.maxGoalGrants) && (

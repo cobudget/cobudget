@@ -1297,15 +1297,37 @@ const resolvers = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {
-    customField: async (customFieldValue, args, { models: { Event } }) => {
-      const { eventId, fieldId, value } = customFieldValue;
+    customField: async(customFieldValue, args, {models: {Event}}) => {
+      const {eventId, fieldId} = customFieldValue;
       const event = await Event.findOne({ _id: eventId });
       const eventCustomField = event.customFields.filter(
         (eventCustomField) => eventCustomField.id == fieldId
       );
+      
+      if (!eventCustomField || eventCustomField.length == 0) {
+        return {
+          id: fieldId,
+          name: '⚠️ Missing custom field ⚠️',
+          description: 'Custom field was removed',
+          type: 'TEXT',
+          isRequired: false,
+          createdAt: new Date()
+        }
+      }
       return eventCustomField[0];
-    },
+    }
   },
+  CustomFieldFilterLabels: {
+    customField: async(customFieldValue, args, {models: {Event}}) => {
+      const {eventId, fieldId} = customFieldValue;
+      const event = await Event.findOne({ _id: eventId });
+      if (!event.customFields) {
+        return;
+      }
+      const eventCustomField = event.customFields.filter(eventCustomField => eventCustomField.id == fieldId);
+      return eventCustomField[0];
+    }
+  }
 };
 
 module.exports = resolvers;

@@ -60,7 +60,6 @@ export default ({
             .catch((err) => alert(err.message));
         })}
       >
-        {/* {`flex flex-col sm:flex-row my-2`} */}
         <div className="">
           <h3 className="my-2 font-medium text-xl">
             {defaultCustomField.name}

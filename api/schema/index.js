@@ -40,7 +40,7 @@ const schema = gql`
       customField: CustomFieldInput!
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
-
+    
     editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
@@ -142,6 +142,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
+    filterLabels: [CustomFieldFilterLabels]
   }
 
   scalar Date
@@ -312,6 +313,11 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
+  }
+
+  type CustomFieldFilterLabels {
+    customField: CustomField
+    eventId: ID!
   }
 
   type CustomField {
