@@ -47,6 +47,7 @@
   "devDependencies": {
     "@apollo/react-testing": "3.1.4",
     "@babel/core": "7.10.2",
+    "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
     "@storybook/addon-actions": "5.3.19",
     "@storybook/addon-links": "5.3.19",
     "@storybook/addons": "5.3.19",

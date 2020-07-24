@@ -46,7 +46,7 @@ const schema = gql`
       afterPosition: Float
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
-
+    
     editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
@@ -148,6 +148,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
+    filterLabels: [CustomFieldFilterLabels]
   }
 
   scalar Date
@@ -233,8 +234,8 @@ const schema = gql`
   }
 
   type Image {
-    small: String!
-    large: String!
+    small: String
+    large: String
   }
 
   input ImageInput {
@@ -318,6 +319,11 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
+  }
+
+  type CustomFieldFilterLabels {
+    customField: CustomField
+    eventId: ID!
   }
 
   type CustomField {

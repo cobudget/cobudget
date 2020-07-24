@@ -46,6 +46,14 @@ export const TOP_LEVEL_QUERY = gql`
         isShownOnFrontPage
         createdAt
       }
+      filterLabels {
+        customField {
+          id
+          name
+          description
+          type
+        }
+      }
     }
     currentUser {
       id

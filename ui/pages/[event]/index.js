@@ -45,6 +45,8 @@ export default ({ currentUser, event }) => {
   if (!event) return null;
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
+  const [filterLabels, setFilterLabels] = useState();
+  
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
   // const [showInfoBox, setShowInfoBox] = useState(true);
@@ -72,6 +74,18 @@ export default ({ currentUser, event }) => {
     dreams = dreams.filter((dream) => dream.favorite);
   }
 
+  if(filterLabels) {
+    dreams = dreams.filter(dream => {
+      if (!dream.customFields || dream.customFields.length == 0) return;
+      const existingField = dream.customFields.filter((field) => {
+        return field.customField.id == filterLabels.id;
+      });
+      if (existingField && existingField.length > 0) {
+        return existingField[0].value;
+      }
+    })
+  }
+
   return (
     <div className="max-w-screen-2lg flex-1">
       {event.info && <InfoBox markdown={event.info} />}
@@ -82,6 +96,9 @@ export default ({ currentUser, event }) => {
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
         currentUser={currentUser}
+        customFields={event.customFields}
+        filterLabels={filterLabels}
+        setFilterLabels={setFilterLabels}
       />
 
       {loading ? (
@@ -99,10 +116,12 @@ export default ({ currentUser, event }) => {
                   key={dream.id}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
+                    
                     <DreamCard
                       dream={dream}
                       event={event}
                       currentUser={currentUser}
+                      filterLabels={filterLabels}
                     />
                   </a>
                 </Link>

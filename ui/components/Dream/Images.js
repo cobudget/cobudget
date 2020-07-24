@@ -103,7 +103,7 @@ function GalleryItem({ image, size }) {
 
       <Modal open={isOpen} onClose={close}>
         <Card>
-          <Image src={image.large} />
+          <Image src={image.large ?? image.small} />
         </Card>
       </Modal>
     </>

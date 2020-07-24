@@ -79,5 +79,6 @@ module.exports = {
     require("tailwindcss-animations"),
     require("tailwindcss-font-inter")(),
     require("tailwindcss-shadow-outline-colors")(),
+    require("@neojp/tailwindcss-line-clamp-utilities"),
   ],
 };

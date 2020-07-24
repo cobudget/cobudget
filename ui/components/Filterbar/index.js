@@ -1,6 +1,7 @@
 import { Tooltip } from "react-tippy";
-import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "./Icons";
-import debounce from "../utils/debounce";
+import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "../Icons";
+import debounce from "../../utils/debounce";
+import FilterLabels from "./FilterLabels";
 
 export default ({
   currentUser,
@@ -8,13 +9,17 @@ export default ({
   toggleFilterFavorites,
   textSearchTerm,
   setTextSearchTerm,
+  customFields,
+  filterLabels,
+  setFilterLabels
 }) => {
+
   const debouncedSearch = debounce((text) => {
     setTextSearchTerm(text);
   }, 300);
 
   return (
-    <div className="flex mb-5 items-stretch">
+    <div className="flex mb-5 items-stretch flex-wrap">
       {/* <button
         className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-700 mr-2  ${
           listView ? "bg-gray-300" : ""
@@ -55,6 +60,13 @@ export default ({
           </button>
         </Tooltip>
       )}
+      
+      <FilterLabels 
+        customFields={customFields}
+        filterLabels={filterLabels}
+        setFilterLabels={setFilterLabels}
+        className={'mb-2 mt-2'}
+      />
     </div>
   );
 };
