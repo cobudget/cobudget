@@ -24,7 +24,7 @@ const resolvers = {
     },
     event: async (parent, { slug }, { models: { Event } }) => {
       if (!slug) return null;
-      return Event.findOne({ slug }).sort('customFields.position');
+      return Event.findOne({ slug });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
