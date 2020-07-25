@@ -1131,6 +1131,24 @@ const resolvers = {
   },
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
+  Cursor: new GraphQLScalarType({
+    // Cursors are for iteration, they represent a point in a list, like a bookmark.
+    // On the backend they translate to an offset for now, but we might change that in the future.
+    // Therefore we base64-encode them to make sure the client does not rely on them having that meaning.
+    name: 'Cursor',
+    parseValue(value) {
+      return parseInt(new Buffer(value, "base64").toString("ascii"), 10)
+    },
+    serialize(value) {
+      return new Buffer(""+value).toString("base64");
+    },
+    parseLiteral(ast) {
+      if (ast.kind === Kind.STRING) {
+        return parseInt(new Buffer(ast.value, "base64").toString("ascii"), 10); // ast value is always in string format
+      }
+      return null;
+    },
+  }),
   CustomFieldValue: {
     customField: async (customFieldValue, args, { models: { Event } }) => {
       const { eventId, fieldId, value } = customFieldValue;

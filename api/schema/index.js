@@ -3,6 +3,7 @@ const { gql } = require('apollo-server-micro');
 const schema = gql`
   scalar JSON
   scalar JSONObject
+  scalar Cursor
 
   type Query {
     currentUser: User
