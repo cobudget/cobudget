@@ -112,8 +112,12 @@ export default ({
   // To allow real time dragging changes - we duplicate the list locally
   const [localCustomFields, setLocalCustomFields] = useState(customFields);
 
+  // This updated the global server custom fields with our local copy
   useEffect(() => {
-    setLocalCustomFields(customFields);
+    // The following prevents two requests from overriding and flickering in the ui
+    if(!loading) {
+      setLocalCustomFields(customFields);
+    }
   }, [customFields]);
 
   const [setCustomFieldPosition, { loading }] = useMutation(

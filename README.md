@@ -61,6 +61,9 @@ npm run db:reset
 
 Just visit http://localhost:8081
 
+## Migrations
+Until we have a proper migrations system - make sure you run migrations from `api/migrations` when instructed in the PR
+
 ## License
 
 Released under the AGPLv3+ which is included in the file [LICENSE](LICENSE) in the git repository
