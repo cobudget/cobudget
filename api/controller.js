@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 // I envision this file to be the Business Logic Layer. That's a fuzzy concept, but the goal is:
 //  1. To keep business rules here (e.g. only an adming can approve X)
 //  2. To push boilerplate outside, making focus on the ruels here easier
-const createController = ({ Dream, Member, Event, Grant }) => ({
+const createController = ({ Dream, Member, Event, Grant, LogEntries : { LogEntry, GrantGivenLogEntry }}) => ({
   setDreamApproval: async (aDreamId, newApprovalStatus, issuingUser) => {
     const aDream = await Dream.findOne({_id:aDreamId});
 
@@ -136,12 +136,23 @@ const createController = ({ Dream, Member, Event, Grant }) => ({
     if (!await controller.eventBudgetWontBeExceededBy(event, value))
       throw new Error('Total budget of event is exeeced with this grant');
 
-    return new Grant({
-      eventId: currentMember.eventId,
-      dreamId,
-      value,
-      memberId: currentMember.id,
-    }).save();
+    let [savedGrant] = await Promise.all([
+      new Grant({
+        eventId: currentMember.eventId,
+        dreamId,
+        value,
+        memberId: currentMember.id,
+      }).save(),
+      new GrantGivenLogEntry({
+        when: Date.now(),
+        givingUser: fromUser,
+        receivingDream: dream,
+        numberOfGrants: value,
+        grantValue: event.grantValue,
+        eventCurrency: event.currency
+      }).save()
+    ]);
+    return savedGrant;
   },
   deleteGrant: async (grantId, currentUser) => {
     const grant = await Grant.findOne({ _id: grantId });

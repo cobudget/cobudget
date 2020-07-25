@@ -21,7 +21,7 @@ async function check_query(query, condition) {
     condition = res => JSON.stringify(res) === old;
   }
 
-  await do_query(query).then(res => {
+  return await do_query(query).then(res => {
     try{
       if (condition(res)) {
         console.log("OK");
@@ -34,6 +34,7 @@ async function check_query(query, condition) {
       console.log("Error: ")
       console.log(util.inspect(res, {showHidden: false, depth: null}))
     }
+    return res;
   }).catch(err => {
       console.log("Error: ")
       console.log(util.inspect(res, {showHidden: false, depth: null}))
@@ -105,6 +106,7 @@ async function initialize(grantsPerMember=1000, totalBudget=1000) {
 }
 
 (async function main() {
+  let dateAtStartOfTests = Date.now();
   let regular = await initialize(1000);
   let userId = regular.userId;
 
@@ -190,6 +192,61 @@ async function initialize(grantsPerMember=1000, totalBudget=1000) {
       res => !!res.errors
   )
 
+  // LogEntries
+  await check_query(
+      `{ logEntries(since: ${Date.now()}) {
+        totalNumber
+        edges { node { __typename } }
+      }}`,
+    `{"data":{"logEntries":{"totalNumber":0,"edges":[]}}}`
+  )
+
+  await check_query(
+      `{ logEntries(since: ${dateAtStartOfTests}) {
+        totalNumber
+      }}`,
+      `{"data":{"logEntries":{"totalNumber":5}}}`
+  )
+
+  await check_query(
+      `{ logEntries(limit: 2, since: ${dateAtStartOfTests}) {
+        totalNumber, edges { node { __typename}, cursor }
+      }}`,
+      res => res.data
+          && res.data.logEntries
+          && res.data.logEntries.totalNumber === 5
+          && res.data.logEntries.edges.length === 2
+  )
+
+  let {data: {logEntries: prevLogEntries}} = await check_query(
+      `{ logEntries(limit: 2, since: ${dateAtStartOfTests}) {
+        totalNumber, edges { node { when }, cursor}
+      }}`,
+      res => res.data
+          //&& !console.log(util.inspect(res, {showHidden: false, depth: null}))
+          && res.data.logEntries
+          && res.data.logEntries.totalNumber === 5
+          && res.data.logEntries.edges.length === 2
+  )
+
+  let lastRes = await check_query(
+      `{ logEntries(limit: 2, after: "${prevLogEntries.edges[0].cursor}", since: ${dateAtStartOfTests}) {
+        totalNumber, edges { node { when }, cursor }
+      }}`,
+      res => res.data
+          && res.data.logEntries.edges[0].node.when == prevLogEntries.edges[1].node.when
+          && res.data.logEntries.edges[0].node.when != prevLogEntries.edges[0].node.when
+  )
+  prevLogEntries = lastRes.data.logEntries;
+
+  await check_query(
+      `{ logEntries(limit: 2, after: "${prevLogEntries.edges[0].cursor}", since: ${dateAtStartOfTests}) {
+        totalNumber, edges { node { when }, cursor }
+      }}`,
+      res => res.data
+          && res.data.logEntries.edges[0].node.when == prevLogEntries.edges[1].node.when
+          && res.data.logEntries.edges[0].node.when != prevLogEntries.edges[0].node.when
+  )
 
 })().catch(e => console.log(e));
 

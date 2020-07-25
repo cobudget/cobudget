@@ -92,6 +92,45 @@ const resolvers = {
         ...(typeof isApproved === 'boolean' && { isApproved }),
       });
     },
+    logEntries: async (
+        parent,
+        {limit, after, since},
+    ) => {
+      // Must give necessary info for child nodes, but don't want to make a query yet.
+      // E.g. dunno if it will be a count or a retrieve query.
+      return {
+        pagination: {limit, after},
+        filter: since
+            ? {when: { $gt: since}}
+            : {}
+      };
+    },
+  },
+  LogEntryConnection: {
+    totalNumber: async (
+        { filter },
+        args,
+        { models: { LogEntries: { LogEntry }}}) => {
+      return LogEntry.countDocuments(filter);
+    },
+    edges: async (
+        { filter, pagination },
+        args,
+        { models: { LogEntries: { LogEntry }}}
+    ) => {
+      let query = LogEntry.find(filter).sort("-when");
+
+      let {limit, after} = pagination
+      if(after) query = query.skip(after);
+      if(limit) query = query.limit(limit);
+
+      return (await query.exec())
+          .map((logEntry, index) => ({
+            node: logEntry,
+            cursor: (after || 0)+index+1
+          })
+      );
+    }
   },
   Mutation: {
     createEvent: async (
@@ -1159,6 +1198,15 @@ const resolvers = {
       return eventCustomField[0];
     },
   },
+  LogEntry : {
+    details: LogEntry => LogEntry
+  },
+  LogEntryDetails : {
+    __resolveType: async(obj) => {
+      if(obj.kind == "GrantGiven")
+        return "GrantGivenDetails";
+    }
+  }
 };
 
 module.exports = resolvers;
