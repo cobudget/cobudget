@@ -73,6 +73,18 @@ export default ({ currentUser, event }) => {
     dreams = dreams.filter((dream) => dream.favorite);
   }
 
+  if(filterLabels) {
+    dreams = dreams.filter(dream => {
+      if (!dream.customFields || dream.customFields.length == 0) return;
+      const existingField = dream.customFields.filter((field) => {
+        return field.customField.id == filterLabels.id;
+      });
+      if (existingField && existingField.length > 0) {
+        return existingField[0].value;
+      }
+    })
+  }
+
   return (
     <div className="max-w-screen-2lg flex-1">
       {event.info && <InfoBox markdown={event.info} />}

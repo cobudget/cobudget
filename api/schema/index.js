@@ -238,8 +238,8 @@ const schema = gql`
   }
 
   type Image {
-    small: String!
-    large: String!
+    small: String
+    large: String
   }
 
   input ImageInput {

@@ -1,24 +1,16 @@
-import stringToHslColor, { stringToColor } from "../utils/stringToHslColor";
+import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import styled from "styled-components";
 
 import {
   CoinIcon,
   CommentIcon,
   HeartOutlineIcon,
   HeartSolidIcon,
-  TagIcon
 } from "./Icons";
 import Label from "./Label";
-
-
-const DreamCardText = styled.div`
-  max-height: 7.5em;
-  overflow: hidden;
-`;
 
 const TOGGLE_FAVORITE_MUTATION = gql`
   mutation ToggleFavoriteMutation($dreamId: ID!) {
@@ -30,14 +22,14 @@ const TOGGLE_FAVORITE_MUTATION = gql`
 `;
 
 const getDreamCustomFieldValue = (dream, customField) => {
-  if(!dream.customFields || dream.customFields.length == 0) return;
+  if (!dream.customFields || dream.customFields.length == 0) return;
   const existingField = dream.customFields.filter((field) => {
     return field.customField.id == customField.id;
   });
   if (existingField && existingField.length > 0) {
     return existingField[0].value;
   }
-}
+};
 
 export default ({ dream, event, currentUser, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
@@ -60,18 +52,23 @@ export default ({ dream, event, currentUser, filterLabels }) => {
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
           <h3 className="text-xl font-medium mb-1 truncate">{dream.title}</h3>
-          
+
           <div className="text-gray-800">
-          { filterLabels?
-            <>
-              <DreamCardText>{getDreamCustomFieldValue(dream, filterLabels)}</DreamCardText>
-              <Label className="absolute top-0 right-0 m-2"><TagIcon className="inline w-6 h-6 pr-1"/> {filterLabels.name}</Label>
-            </>
-            :
-            dream.summary
-          }
+            {filterLabels ? (
+              <>
+                <div className="mt-1 p-2 bg-gray-100 rounded-md border border-gray-200">
+                  <span className=" text-xs block font-semibold uppercase tracking-wide text-gray-600">
+                    {filterLabels.name}
+                  </span>
+                  <div className="line-clamp-3">
+                    {getDreamCustomFieldValue(dream, filterLabels)}
+                  </div>
+                </div>
+              </>
+            ) : (
+              dream.summary
+            )}
           </div>
-        
         </div>
         <div>
           {(dream.minGoalGrants || dream.maxGoalGrants) && (
