@@ -12,10 +12,10 @@ const DEPLOY_URL = process.env.VERCEL_URL
 const sendMagicLinkEmail = async (organization, user) => {
   // send magic link in production, log it in development
   const token = await generateLoginJWT(user);
-  const { subdomain } = organization;
-
-  if (process.env.NODE_ENV === 'production') { 
-    const url = `https://${subdomain}.${DEPLOY_URL}/?token=${token}`;
+  const { subdomain, customDomain } = organization;
+  if (process.env.NODE_ENV === 'production') {
+    const domain = `https://${customDomain}` || `https://${subdomain}.${DEPLOY_URL}`;
+    const url = `${domain}/?token=${token}`;
     var data = {
       from: `${process.env.EMAIL_SENDER}`,
       to: user.email,
@@ -34,7 +34,8 @@ const sendMagicLinkEmail = async (organization, user) => {
         throw new Error('Failed to send magic link');
       });
   } else {
-    const url = `http://${subdomain}.localhost:3000/?token=${token}`;
+    const domain = `http://${customDomain}` || `http://${subdomain}.localhost:3000`;
+    const url = `${domain}/?token=${token}`;
     console.log(`Here is your magic link: ${url}`);
     return true;
   }

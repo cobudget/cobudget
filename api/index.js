@@ -11,6 +11,7 @@ const cors = microCors({
     'Authorization',
     'Accept',
     'Dreams-Subdomain',
+    'Dreams-Customdomain',
   ],
 });
 
@@ -29,12 +30,21 @@ const server = new ApolloServer({
     let currentUser = null;
     let currentOrg = null;
 
+    const subdomain = req.headers['dreams-subdomain'];
+    const customDomain = req.headers['dreams-customdomain'];
+    if(subdomain) {
+      currentOrg = await models.Organization.findOne({ subdomain });
+    }
+    if(!currentOrg && customDomain) {
+      currentOrg = await models.Organization.findOne({ customDomain });
+    }
+
     let token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
       : null;
 
     // Verify token if available
-    if (token) {
+    if (currentOrg && token) {
       try {
         token = jwt.verify(token, process.env.JWT_SECRET);
         currentUser = await models.User.findOne({ _id: token.sub });
@@ -44,11 +54,6 @@ const server = new ApolloServer({
         // );
         console.error('Authentication token is invalid');
       }
-    }
-
-    const subdomain = req.headers['dreams-subdomain'];
-    if(subdomain) {
-      currentOrg = await models.Organization.findOne({ subdomain });
     }
 
     return {

@@ -10,6 +10,10 @@ const OrganizationSchema = new Schema({
     required: true,
     unique: true,
   },
-}).index({ name: 'text', subdomain: 'text' });
+  customDomain: {
+    type: String,
+    unique: true,
+  },
+}).index({ name: 'text', subdomain: 'text', customDomain: 'text' });
 
 export default OrganizationSchema;

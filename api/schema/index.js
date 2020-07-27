@@ -115,6 +115,7 @@ const schema = gql`
     id: ID!
     name: String!
     subdomain: String!
+    customDomain: String
   }
 
   type Event {

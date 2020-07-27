@@ -84,6 +84,8 @@ To add support for firefox do the following:
 
 Now you can visit http://dev-org.localhost:3000 or http://root.localhost:3000
 
+### Custom domains
+A user can set a custom domain - it would always use `https` - make sure you set it like so under the `orgazniation` - add a `customDomain` field set to the custom domain. For example - `customdomain.com` OR `anothercustomdomain.com:3000` all lowercase
 
 ## License
 
