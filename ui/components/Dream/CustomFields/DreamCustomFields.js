@@ -14,6 +14,7 @@ const CUSTOM_FIELDS_QUERY = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
       }
     }
@@ -33,7 +34,7 @@ export default ({ customFields, canEdit, eventId, dreamId }) => {
   // TODO: can use the custom fields already fetched in the event query in _app
   const { customFields: defaultCustomFields } = data.event;
 
-  return defaultCustomFields.map((defaultCustomField, index) => {
+  return defaultCustomFields.sort((a,b) => a.position - b.position).map((defaultCustomField, index) => {
     const customField = customFields.filter(
       (field) => field.customField?.id == defaultCustomField.id
     );

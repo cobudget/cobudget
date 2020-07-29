@@ -42,12 +42,17 @@ const EventSchema = new Schema({
         required: true,
       },
       isRequired: { type: Boolean, required: true },
+      position: {
+        type: Number,
+        required: true,
+        default: 1000
+      },
       isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,
       },
-    }),
+    }).index({ position: 1 }),
   ],
 }).index({slug: 1, organizationId: 1}, {unique: true}); // Unique on slug + organization Id
 
