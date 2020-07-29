@@ -92,7 +92,6 @@ export default ({
     validationSchema: schema,
   });
 
-  console.log({ errors, customField });
   return (
     <Modal
       open={true}
