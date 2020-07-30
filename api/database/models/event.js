@@ -43,14 +43,19 @@ const EventSchema = new Schema({
         required: true,
       },
       isRequired: { type: Boolean, required: true },
+      position: {
+        type: Number,
+        required: true,
+        default: 1000
+      },
       isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,
       },
-    }),
+    }).index({ position: 1 }),
   ],
-});
+})
 
 EventSchema.virtual('grantingIsOpen').get(function () {
   if (!this.grantingOpens) return false;
