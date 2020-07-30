@@ -92,19 +92,20 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain, customDomain, adminEmail },
-      { models: { Organization } }
+      { models }
     ) => {
-      const organization = await new Organization({
+      const organization = new models.Organization({
         name,
         subdomain,
-        customDomain,
+        ...(customDomain && {customDomain}) //Only add custom domain if not null
       });
+      await organization.save();
 
-      const { isSentSuccess, user } = AuthService.sendMagicLink({ inputEmail: adminEmail, currentOrg, models});
+      const { user } = await AuthService.sendMagicLink({ inputEmail: adminEmail, currentOrg: organization, models});
       user.isOrgAdmin = true;
       await user.save();
 
-      return { organization, user, isSentSuccess };
+      return organization;
     },
     createEvent: async (
       parent,

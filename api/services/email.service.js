@@ -12,11 +12,10 @@ const DEPLOY_URL = process.env.VERCEL_URL
 class EmailService {
 
   static async sendMagicLinkEmail(token, organization, user) {
-    console.log({user});
     // send magic link in production, log it in development
     const { subdomain, customDomain } = organization;
     if (process.env.NODE_ENV === 'production') {
-      const domain = `https://${customDomain}` || `https://${subdomain}.${DEPLOY_URL}`;
+      const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
       const url = `${domain}/?token=${token}`;
       var data = {
         from: `${process.env.EMAIL_SENDER}`,
@@ -36,7 +35,7 @@ class EmailService {
           throw new Error('Failed to send magic link');
         });
     } else {
-      const domain = `http://${customDomain}` || `http://${subdomain}.localhost:3000`;
+      const domain = customDomain? `http://${customDomain}` : `http://${subdomain}.localhost:3000`;
       const url = `${domain}/?token=${token}`;
       console.log(`Here is your magic link: ${url}`);
       return true;
@@ -45,11 +44,12 @@ class EmailService {
 
   static async sendRequestToJoinNotifications(user, event, emails) {
     if (process.env.NODE_ENV === 'production') {
+      const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
       var data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: emails,
         subject: `Request to join ${event.title}`,
-        text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: https://${DEPLOY_URL}/${event.slug}/members`,
+        text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: ${domain}/${event.slug}/members`,
       };
       return mailgun
         .messages()
