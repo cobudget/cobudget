@@ -19,6 +19,7 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
         createdAt
       }
@@ -91,7 +92,6 @@ export default ({
     validationSchema: schema,
   });
 
-  console.log({ errors, customField });
   return (
     <Modal
       open={true}
