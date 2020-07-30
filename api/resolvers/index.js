@@ -1,15 +1,12 @@
 const slugify = require('../utils/slugify');
-const {
-  sendMagicLinkEmail,
-  sendInviteEmails,
-  sendRequestToJoinNotifications,
-} = require('../utils/email');
 const { GraphQLScalarType } = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
+const EmailService = require('../services/email.service');
+const AuthService = require('../services/auth.service');
 
 const resolvers = {
   Query: {
@@ -26,6 +23,9 @@ const resolvers = {
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
+      if(!currentOrg) { 
+        throw new Error('No organization found');
+      }
       return Event.find( {organizationId: currentOrg.id});
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
@@ -89,6 +89,23 @@ const resolvers = {
     },
   },
   Mutation: {
+    createOrganization: async (
+      parent,
+      { name, subdomain, customDomain, adminEmail },
+      { models: { Organization } }
+    ) => {
+      const organization = await new Organization({
+        name,
+        subdomain,
+        customDomain,
+      });
+
+      const { isSentSuccess, user } = AuthService.sendMagicLink({ inputEmail: adminEmail, currentOrg, models});
+      user.isOrgAdmin = true;
+      await user.save();
+
+      return { organization, user, isSentSuccess };
+    },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
@@ -556,41 +573,10 @@ const resolvers = {
     sendMagicLink: async (
       parent,
       { email: inputEmail },
-      { currentOrg, models: { User, Member, Event } }
+      { currentOrg, models }
     ) => {
-      if(!currentOrg) {
-        throw new Error('Users can only be created from within Organization (Subdomain)');
-      }
-      const email = inputEmail.toLowerCase();
-      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-      if (!emailRegex.test(email)) throw new Error('Not a valid email address');
-
-      // const event = await Event.findOne({ _id: eventId });
-      // if (!event) throw new Error('Did not find event');
-
-      let user = await User.findOne({ email, organizationId: currentOrg.id });
-
-      if (!user) {
-        //  let isApproved;
-
-        //   switch (event.registrationPolicy) {
-        //     case 'OPEN':
-        //       isApproved = true;
-        //       break;
-        //     case 'REQUEST_TO_JOIN':
-        //       isApproved = false;
-        //       break;
-        //     case 'INVITE_ONLY':
-        //       throw new Error('This event is invite only');
-        //     default:
-        //       throw new Error('Event has no registration policy');
-        //   }
-
-        user = await new User({ email, organizationId: currentOrg.id }).save();
-      }
-
-      return await sendMagicLinkEmail(currentOrg, user);
+      const { isSentSuccess } = await AuthService.sendMagicLink({inputEmail, currentOrg, models});
+      return isSentSuccess;
     },
     updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
       if (!currentUser) throw new Error('You need to be logged in..');
@@ -613,7 +599,7 @@ const resolvers = {
       //       eventId: currentMember.eventId,
       //       isAdmin: true,
       //     });
-      //     await sendRequestToJoinNotifications(member, event, admins);
+      //     await EmailService.sendRequestToJoinNotifications(member, event, admins);
       //   }
       // }
 
@@ -1162,7 +1148,7 @@ const resolvers = {
           }).populate('userId');
 
           const adminEmails = admins.map((member) => member.userId.email);
-          await sendRequestToJoinNotifications(currentUser, event, adminEmails);
+          await EmailService.sendRequestToJoinNotifications(currentUser, event, adminEmails);
           break;
 
         case 'INVITE_ONLY':

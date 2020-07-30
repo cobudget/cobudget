@@ -16,6 +16,13 @@ const schema = gql`
   }
 
   type Mutation {
+    createOrganization(
+      name: String!
+      subdomain: String!
+      customDomain: String
+      adminEmail: String!
+    ): Organization!
+
     createEvent(
       slug: String!
       title: String!
