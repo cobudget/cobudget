@@ -1328,6 +1328,7 @@ const resolvers = {
           name: '⚠️ Missing custom field ⚠️',
           description: 'Custom field was removed',
           type: 'TEXT',
+          position: 1000,
           isRequired: false,
           createdAt: new Date()
         }
