@@ -94,6 +94,10 @@ const resolvers = {
       { name, subdomain, customDomain, adminEmail },
       { models }
     ) => {
+      if(!adminEmail) {
+        throw new Error('Please enter valid email');
+      }
+
       const organization = new models.Organization({
         name,
         subdomain,
