@@ -53,15 +53,9 @@ This builds and serves both the API and the UI with one command, and provides ho
 
 # Postrequisites
 After running for the first time add default organization
-By visiting http://localhost:8081/db/test/organizations
-Then add a new document with: 
-```
-{
-  name: "Dev organization",
-  subdomain: "dev-org"
-}
-```
-Then navigate to http://dev-org.localhost:3000/
+By visiting http://localhost:8081/create-organization
+Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
+Then open the console and click the link to login to the new organization
 
 ### Resetting the db to its initial state
 
