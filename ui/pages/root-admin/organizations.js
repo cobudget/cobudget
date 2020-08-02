@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
-import HappySpinner from "../../components/HappySpinner";
 import OrganizationsTable from "../../components/Organizations/OrganizationsTable";
+import HappySpinner from "../../components/HappySpinner";
 
 export const ORGANIZATIONS_QUERY = gql`
   query Organizations {
