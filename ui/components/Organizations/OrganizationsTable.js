@@ -9,7 +9,6 @@ import {
   TableHead,
   TableRow
 } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 const ActionsDropdown = ({ deleteOrganization, organization }) => {
@@ -41,7 +40,7 @@ const ActionsDropdown = ({ deleteOrganization, organization }) => {
       >
         <MenuItem
           onClick={() => {
-            Alert("Havent implemented yet");
+            alert("Havent implemented yet");
             handleClose();
           }
         }
