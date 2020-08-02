@@ -95,7 +95,12 @@ export default ({currentUser}) => {
               defaultValue={currentUser?.email}
               error={errors.adminEmail}
               inputRef={register({
-                validate: value => value === getValues("adminEmail2") || "Emails don't match"
+                validate: value => value === getValues("adminEmail2") || "Emails don't match",
+                required: "Required",
+                pattern: {
+                  value: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                  message: "Invalid email",
+                },
               })}
               helperText={errors.adminEmail?.message}
             />

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const MailgunService = require('./email.service');
 const EmailService = require('./email.service');
+const { isValidEmail } = require('../utils/email');
 
 const jwtSecretKey = process.env.JWT_SECRET;
 const jwtOptions = {
@@ -31,10 +32,7 @@ class AuthService {
 
   static async sendMagicLink({ inputEmail, currentOrg, models: { User, Member, Event } }
   ) {
-    const email = inputEmail.toLowerCase();
-    const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  
-    if (!emailRegex.test(email)) throw new Error('Not a valid email address');
+    if (!isValidEmail(inputEmail)) throw new Error('Not a valid email address');
   
     let user;
     if(currentOrg) {

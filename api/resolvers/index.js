@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const EmailService = require('../services/email.service');
 const AuthService = require('../services/auth.service');
+const { isValidEmail } = require('../utils/email');
 
 const resolvers = {
   Query: {
@@ -94,9 +95,7 @@ const resolvers = {
       { name, subdomain, customDomain, adminEmail },
       { models }
     ) => {
-      if(!adminEmail) {
-        throw new Error('Please enter valid email');
-      }
+      if (!adminEmail || !isValidEmail(adminEmail)) throw new Error('Not a valid email address');
 
       const organization = new models.Organization({
         name,
