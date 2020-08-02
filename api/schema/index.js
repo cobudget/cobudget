@@ -101,6 +101,8 @@ const schema = gql`
       isGuide: Boolean
     ): Member
     deleteMember(eventId: ID!, memberId: ID!): Member
+    
+    deleteOrganization(organizationId: ID!): Organization
 
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
     updateGrantingSettings(
@@ -183,6 +185,7 @@ const schema = gql`
     verifiedEmail: Boolean!
     organization: Organization!
     isOrgAdmin: Boolean
+    isRootAdmin: Boolean
     membership(slug: String): Member
     memberships: [Member!]
     avatar: String

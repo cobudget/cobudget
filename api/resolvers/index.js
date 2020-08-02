@@ -20,7 +20,8 @@ const resolvers = {
     currentOrg: (parent, args, { currentOrg }) => {
       return currentOrg;
     },
-    organizations: async (parent, args, { models: { Organization } }) => {
+    organizations: async (parent, args, {currentUser,  models: { Organization } }) => {
+      if(!currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
@@ -698,6 +699,26 @@ const resolvers = {
       });
       // TODO: doesit actually delete?
       return member;
+    },
+    deleteOrganization: async (
+      parent,
+      { organizationId},
+      { currentUser, models: { Organization } }
+    ) => {
+      if(!currentUser || !currentUser.isRootAdmin)
+        throw new Error('You need to be root admin to delete and organization');
+
+      const organization = await Organization.findOne({
+        _id: organizationId,
+      });
+
+      if(!organization)
+        throw Error(`Cant find organization by id ${organizationId}`);
+
+      return await Organization.findOneAndDelete({
+        _id: organizationId,
+      });
+      
     },
     approveForGranting: async (
       parent,
