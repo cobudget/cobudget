@@ -9,6 +9,7 @@ import {
   TableHead,
   TableRow
 } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 const ActionsDropdown = ({ deleteOrganization, organization }) => {
