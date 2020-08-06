@@ -50,6 +50,7 @@ const SetCurrency = ({ closeModal, event }) => {
               <option value="USD">USD</option>
               <option value="SEK">SEK</option>
               <option value="DKK">DKK</option>
+              <option value="NOK">NOK</option>
             </SelectInput>
           </Box>
 
