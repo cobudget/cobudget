@@ -4,7 +4,15 @@ import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
 
-export default ({ children, currentUser, event, title, apollo, openModal }) => {
+export default ({
+  children,
+  currentUser,
+  currentOrg,
+  event,
+  title,
+  apollo,
+  openModal,
+}) => {
   const router = useRouter();
 
   // check for token in query to set it and remove it from url
@@ -50,6 +58,7 @@ export default ({ children, currentUser, event, title, apollo, openModal }) => {
         <Header
           event={event}
           currentUser={currentUser}
+          currentOrg={currentOrg}
           openModal={openModal}
           logOut={logOut}
         />

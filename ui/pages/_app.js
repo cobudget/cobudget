@@ -83,6 +83,7 @@ export const TOP_LEVEL_QUERY = gql`
     currentOrg {
       id
       name
+      logo
     }
     # currentMember {
     #   id
@@ -169,7 +170,11 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   });
 
   const {
-    data: { currentUser, currentOrg, event } = { currentUser: null, currentOrg: null, event: null },
+    data: { currentUser, currentOrg, event } = {
+      currentUser: null,
+      currentOrg: null,
+      event: null,
+    },
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
   });

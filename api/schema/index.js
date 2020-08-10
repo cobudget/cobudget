@@ -55,7 +55,7 @@ const schema = gql`
       afterPosition: Float
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
-    
+
     editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
@@ -101,7 +101,7 @@ const schema = gql`
       isGuide: Boolean
     ): Member
     deleteMember(eventId: ID!, memberId: ID!): Member
-    
+
     deleteOrganization(organizationId: ID!): Organization
 
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
@@ -131,6 +131,7 @@ const schema = gql`
     name: String!
     subdomain: String!
     customDomain: String
+    logo: String
   }
 
   type Event {
