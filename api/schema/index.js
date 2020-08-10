@@ -6,6 +6,8 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    currentOrg: Organization
+    organizations: [Organization!]
     events: [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
@@ -14,6 +16,13 @@ const schema = gql`
   }
 
   type Mutation {
+    createOrganization(
+      name: String!
+      subdomain: String!
+      customDomain: String
+      adminEmail: String!
+    ): Organization!
+
     createEvent(
       slug: String!
       title: String!
@@ -46,7 +55,7 @@ const schema = gql`
       afterPosition: Float
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
-    
+
     editDreamCustomField(
       dreamId: ID!
       customField: CustomFieldValueInput!
@@ -93,6 +102,8 @@ const schema = gql`
     ): Member
     deleteMember(eventId: ID!, memberId: ID!): Member
 
+    deleteOrganization(organizationId: ID!): Organization
+
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
     updateGrantingSettings(
       eventId: ID!
@@ -115,10 +126,19 @@ const schema = gql`
     registerForEvent(eventId: ID!): Member
   }
 
+  type Organization {
+    id: ID!
+    name: String!
+    subdomain: String!
+    customDomain: String
+    logo: String
+  }
+
   type Event {
     id: ID!
     slug: String!
     title: String!
+    organization: Organization!
     info: String
     color: String
     # logo: String
@@ -162,13 +182,15 @@ const schema = gql`
   type User {
     id: ID!
     email: String
+    name: String
     verifiedEmail: Boolean!
+    organization: Organization!
+    isOrgAdmin: Boolean
+    isRootAdmin: Boolean
     membership(slug: String): Member
     memberships: [Member!]
-    name: String
     avatar: String
     bio: String
-    isOrgAdmin: Boolean
     createdAt: Date
   }
 

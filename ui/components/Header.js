@@ -61,7 +61,7 @@ const NavItem = ({
   );
 };
 
-export default ({ event, currentUser, openModal, logOut }) => {
+export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -80,19 +80,19 @@ export default ({ event, currentUser, openModal, logOut }) => {
             {event ? (
               <>
                 <Tooltip
-                  title={process.env.ORG_TITLE ?? `See all events`}
+                  title={currentOrg.name ?? `See all events`}
                   position="bottom"
                   size="small"
                 >
                   <div className="">
                     <Link href="/">
-                      {process.env.ORG_LOGO ? (
+                      {currentOrg.logo ? (
                         <a
                           className={
                             "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
                           }
                         >
-                          <img className="h-7 w-7" src={process.env.ORG_LOGO} />
+                          <img className="h-7 w-7" src={currentOrg.logo} />
                         </a>
                       ) : (
                         <a
@@ -149,13 +149,13 @@ export default ({ event, currentUser, openModal, logOut }) => {
               </>
             ) : (
               <>
-                {process.env.ORG_LOGO && (
+                {currentOrg.logo && (
                   <a className="block rounded overflow-hidden mr-4">
                     <img className="h-7 w-7" src={process.env.ORG_LOGO} />
                   </a>
                 )}
                 <h1 className="text-lg font-medium text-gray-900 ">
-                  {process.env.ORG_TITLE ?? "Dreams"}
+                  {currentOrg.name ?? "Dreams"}
                 </h1>
               </>
             )}

@@ -80,6 +80,11 @@ export const TOP_LEVEL_QUERY = gql`
         }
       }
     }
+    currentOrg {
+      id
+      name
+      logo
+    }
     # currentMember {
     #   id
     #   name
@@ -165,7 +170,11 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   });
 
   const {
-    data: { currentUser, event } = { currentUser: null, event: null },
+    data: { currentUser, currentOrg, event } = {
+      currentUser: null,
+      currentOrg: null,
+      event: null,
+    },
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
   });
@@ -185,6 +194,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
+        currentOrg={currentOrg}
         apollo={apolloClient}
         openModal={openModal}
         event={event}
@@ -193,6 +203,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
           {...pageProps}
           event={event}
           currentUser={currentUser}
+          currentOrg={currentOrg}
           event={event}
           hostInfo={hostInfo}
           openModal={openModal}

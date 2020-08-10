@@ -1,15 +1,13 @@
 const slugify = require('../utils/slugify');
-const {
-  sendMagicLinkEmail,
-  sendInviteEmails,
-  sendRequestToJoinNotifications,
-} = require('../utils/email');
 const { GraphQLScalarType } = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
+const EmailService = require('../services/email.service');
+const AuthService = require('../services/auth.service');
+const { isValidEmail } = require('../utils/email');
 
 const resolvers = {
   Query: {
@@ -19,12 +17,21 @@ const resolvers = {
     currentUser: (parent, args, { currentUser }) => {
       return currentUser;
     },
-    events: async (parent, args, { models: { Event } }) => {
-      return Event.find();
+    currentOrg: (parent, args, { currentOrg }) => {
+      return currentOrg;
     },
-    event: async (parent, { slug }, { models: { Event } }) => {
-      if (!slug) return null;
-      return Event.findOne({ slug });
+    organizations: async (parent, args, {currentUser,  models: { Organization } }) => {
+      if(!currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
+      return Organization.find();
+    },
+    events: async (parent, args, { currentOrg, models: { Event } }) => {
+      if(!currentOrg) { 
+        throw new Error('No organization found');
+      }
+      return Event.find( {organizationId: currentOrg.id});
+    },
+    event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -84,14 +91,33 @@ const resolvers = {
     },
   },
   Mutation: {
+    createOrganization: async (
+      parent,
+      { name, subdomain, customDomain, adminEmail },
+      { models }
+    ) => {
+      if (!adminEmail || !isValidEmail(adminEmail)) throw new Error('Not a valid email address');
+
+      const organization = new models.Organization({
+        name,
+        subdomain,
+        ...(customDomain && {customDomain}) //Only add custom domain if not null
+      });
+      await organization.save();
+
+      const { user } = await AuthService.sendMagicLink({ inputEmail: adminEmail, currentOrg: organization, models});
+      user.isOrgAdmin = true;
+      await user.save();
+
+      return organization;
+    },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentUser, models: { Event, Member } }
+      { currentUser, currentOrg, models: { Event, Member } }
     ) => {
-      if (!currentUser || !currentUser.isOrgAdmin)
+      if (!currentUser || !currentUser.isOrgAdmin || currentUser.organizationId != currentOrg.id)
         throw new Error('You need to be logged in as organisation admin.');
-      // maybe add check to be org admin or so.
 
       // check slug..
       const event = await new Event({
@@ -101,6 +127,7 @@ const resolvers = {
         summary,
         currency,
         registrationPolicy,
+        organizationId: currentOrg.id,
       });
 
       const member = await new Member({
@@ -551,38 +578,10 @@ const resolvers = {
     sendMagicLink: async (
       parent,
       { email: inputEmail },
-      { models: { User, Member, Event } }
+      { currentOrg, models }
     ) => {
-      const email = inputEmail.toLowerCase();
-      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-      if (!emailRegex.test(email)) throw new Error('Not a valid email address');
-
-      // const event = await Event.findOne({ _id: eventId });
-      // if (!event) throw new Error('Did not find event');
-
-      let user = await User.findOne({ email });
-
-      if (!user) {
-        //  let isApproved;
-
-        //   switch (event.registrationPolicy) {
-        //     case 'OPEN':
-        //       isApproved = true;
-        //       break;
-        //     case 'REQUEST_TO_JOIN':
-        //       isApproved = false;
-        //       break;
-        //     case 'INVITE_ONLY':
-        //       throw new Error('This event is invite only');
-        //     default:
-        //       throw new Error('Event has no registration policy');
-        //   }
-
-        user = await new User({ email }).save();
-      }
-
-      return await sendMagicLinkEmail(user);
+      const { isSentSuccess } = await AuthService.sendMagicLink({inputEmail, currentOrg, models});
+      return isSentSuccess;
     },
     updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
       if (!currentUser) throw new Error('You need to be logged in..');
@@ -605,7 +604,7 @@ const resolvers = {
       //       eventId: currentMember.eventId,
       //       isAdmin: true,
       //     });
-      //     await sendRequestToJoinNotifications(member, event, admins);
+      //     await EmailService.sendRequestToJoinNotifications(member, event, admins);
       //   }
       // }
 
@@ -700,6 +699,26 @@ const resolvers = {
       });
       // TODO: doesit actually delete?
       return member;
+    },
+    deleteOrganization: async (
+      parent,
+      { organizationId},
+      { currentUser, models: { Organization } }
+    ) => {
+      if(!currentUser || !currentUser.isRootAdmin)
+        throw new Error('You need to be root admin to delete and organization');
+
+      const organization = await Organization.findOne({
+        _id: organizationId,
+      });
+
+      if(!organization)
+        throw Error(`Cant find organization by id ${organizationId}`);
+
+      return await Organization.findOneAndDelete({
+        _id: organizationId,
+      });
+      
     },
     approveForGranting: async (
       parent,
@@ -1154,7 +1173,7 @@ const resolvers = {
           }).populate('userId');
 
           const adminEmails = admins.map((member) => member.userId.email);
-          await sendRequestToJoinNotifications(currentUser, event, adminEmails);
+          await EmailService.sendRequestToJoinNotifications(currentUser, event, adminEmails);
           break;
 
         case 'INVITE_ONLY':
@@ -1202,9 +1221,9 @@ const resolvers = {
     memberships: async (user, args, { models: { Member } }) => {
       return Member.find({ userId: user.id });
     },
-    membership: async (user, { slug }, { models: { Member, Event } }) => {
+    membership: async (user, { slug }, { currentOrg, models: { Member, Event } }) => {
       if (!slug) return null;
-      const event = await Event.findOne({ slug });
+      const event = await Event.findOne({ organizationId: currentOrg.id, slug });
       return Member.findOne({ userId: user.id, eventId: event.id });
     },
   },
