@@ -27,6 +27,8 @@ export default function createApolloClient(initialState, ctx) {
       subdomain = null;
     }
 
+    console.log({ host, customdomain, subdomain });
+
     return {
       headers: {
         ...headers,
