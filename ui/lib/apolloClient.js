@@ -22,19 +22,10 @@ export default function createApolloClient(initialState, ctx) {
     let { host, subdomain } = getHostInfo(ctx?.req);
     let customdomain;
 
-    console.log({
-      host,
-      customdomain,
-      subdomain,
-      DEPLOY_URL: process.env.DEPLOY_URL,
-    });
-
     if (!host.endsWith(process.env.DEPLOY_URL)) {
       customdomain = host;
       subdomain = null;
     }
-
-    console.log({ customdomain });
 
     return {
       headers: {
