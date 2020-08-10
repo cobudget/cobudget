@@ -86,7 +86,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                 >
                   <div className="">
                     <Link href="/">
-                      {currentOrg.logo ? (
+                      {currentOrg?.logo ? (
                         <a
                           className={
                             "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
@@ -149,13 +149,13 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               </>
             ) : (
               <>
-                {currentOrg.logo && (
+                {currentOrg?.logo && (
                   <a className="block rounded overflow-hidden mr-4">
                     <img className="h-7 w-7" src={process.env.ORG_LOGO} />
                   </a>
                 )}
                 <h1 className="text-lg font-medium text-gray-900 ">
-                  {currentOrg.name ?? "Dreams"}
+                  {currentOrg?.name ?? "Dreams"}
                 </h1>
               </>
             )}
