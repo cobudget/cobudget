@@ -32,11 +32,11 @@ const server = new ApolloServer({
 
     const subdomain = req.headers['dreams-subdomain'];
     const customDomain = req.headers['dreams-customdomain'];
-    if(subdomain) {
-      currentOrg = await models.Organization.findOne({ subdomain });
-    }
-    if(!currentOrg && customDomain) {
+
+    if (customDomain) {
       currentOrg = await models.Organization.findOne({ customDomain });
+    } else if (subdomain) {
+      currentOrg = await models.Organization.findOne({ subdomain });
     }
 
     let token = req.headers.authorization
