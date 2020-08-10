@@ -51,8 +51,7 @@ const schema = gql`
     setCustomFieldPosition(
       eventId: ID!
       fieldId: ID!
-      beforePosition: Float
-      afterPosition: Float
+      newPosition: Float
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
 
@@ -129,7 +128,7 @@ const schema = gql`
   type Organization {
     id: ID!
     name: String!
-    subdomain: String!
+    subdomain: String
     customDomain: String
     logo: String
   }

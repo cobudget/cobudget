@@ -13,8 +13,8 @@ import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 
 const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
-  mutation SetCustomFieldPosition($eventId: ID!, $fieldId: ID!, $beforePosition: Float, $afterPosition: Float) {
-    setCustomFieldPosition(eventId: $eventId, fieldId: $fieldId, beforePosition: $beforePosition, afterPosition: $afterPosition) {
+  mutation SetCustomFieldPosition($eventId: ID!, $fieldId: ID!, $newPosition: Float) {
+    setCustomFieldPosition(eventId: $eventId, fieldId: $fieldId, newPosition: $newPosition) {
       id
       customFields {
         id
@@ -159,13 +159,13 @@ export default ({
 
     // In order to replace the position locally we must duplicate the custom fields locally
     let customFieldsNew = [...localCustomFields];
-    customField.position = ((beforePosition - afterPosition) / 2.0) + afterPosition;
+    const newPosition = ((beforePosition - afterPosition) / 2.0) + afterPosition;
+    customField.position = newPosition;
     setLocalCustomFields(customFieldsNew);
 
     setCustomFieldPosition({ variables: {
       fieldId: customField.id,
-      beforePosition,
-      afterPosition
+      newPosition
     }})
   };
 
