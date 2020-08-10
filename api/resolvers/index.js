@@ -21,7 +21,7 @@ const resolvers = {
       return currentOrg;
     },
     organizations: async (parent, args, {currentUser,  models: { Organization } }) => {
-      if(!currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
+      if(!currentUser || !currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {

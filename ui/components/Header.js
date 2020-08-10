@@ -151,7 +151,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               <>
                 {currentOrg?.logo && (
                   <a className="block rounded overflow-hidden mr-4">
-                    <img className="h-7 w-7" src={process.env.ORG_LOGO} />
+                    <img className="h-7 w-7" src={currentOrg?.logo} />
                   </a>
                 )}
                 <h1 className="text-lg font-medium text-gray-900 ">
