@@ -196,7 +196,7 @@ const resolvers = {
     // Based on https://softwareengineering.stackexchange.com/a/195317/54663
     setCustomFieldPosition: async (
       parent,
-      { eventId, fieldId, beforePosition, afterPosition },
+      { eventId, fieldId, newPosition },
       { currentUser, models: { Member, Event } }
     ) => {
       const currentMember = await Member.findOne({
@@ -208,7 +208,7 @@ const resolvers = {
 
       const event = await Event.findOne({ _id: eventId });
       let doc = event.customFields.id(fieldId);
-      doc.position = ((beforePosition - afterPosition) / 2.0) + afterPosition;
+      doc.position = newPosition;
       return event.save();
     },
     editCustomField: async (
