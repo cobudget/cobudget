@@ -83,7 +83,10 @@ export const TOP_LEVEL_QUERY = gql`
     currentOrg {
       id
       name
-      logo
+      logo {
+        small
+        large
+      }
     }
     # currentMember {
     #   id

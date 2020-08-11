@@ -1,56 +1,104 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { Box } from "@material-ui/core";
-import Button from "../components/Button";
-import TextField from "../components/TextField";
-import Card from "../components/styled/Card";
-import Form from "../components/styled/Form";
-import Router from "next/router";
+import Button from "../Button";
+import TextField from "../TextField";
+import Card from "../styled/Card";
+import Form from "../styled/Form";
+import ImageUpload from "components/ImageUpload";
 
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization(
     $name: String!
+    $logo: ImageInput
     $subdomain: String!
     $customDomain: String
     $adminEmail: String!
   ) {
     createOrganization(
       name: $name
+      logo: $logo
       subdomain: $subdomain
       customDomain: $customDomain
       adminEmail: $adminEmail
     ) {
       name
+      logo {
+        small
+        large
+      }
       subdomain
       customDomain
     }
   }
 `;
 
-export default ({currentUser}) => {
-  const [createOrganization, { data, error, loading }] = useMutation(CREATE_ORGANIZATION);
-  const { handleSubmit, register, errors, reset, getValues } = useForm();
+const EDIT_ORGANIZATION = gql`
+  mutation EditOrganization(
+    $organizationId: ID!
+    $name: String!
+    $logo: ImageInput
+    $subdomain: String!
+    $customDomain: String
+  ) {
+    editOrganization(
+      organizationId: $organizationId
+      name: $name
+      logo: $logo
+      subdomain: $subdomain
+      customDomain: $customDomain
+    ) {
+      name
+      logo {
+        small
+        large
+      }
+      subdomain
+      customDomain
+    }
+  }
+`;
 
-  const onSubmit = (variables) => {
-    createOrganization({ variables })
-      .then(({ data }) => {
-        let message = "Organization created successfully.";
-        {message += process.env.IS_PROD
-          ? "Magic link sent! Check your email inbox!"
-          : "Find the magic link in your development console!"}
-        alert(message);
-        reset();
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
+export default ({organization, currentUser}) => {
+  const [logoImage, setLogoImage] = useState(organization?.logo);
+  const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
+  const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
+    variables: { organizationId: organization?.id },
+  });
+  const { handleSubmit, register, errors, reset, getValues } = useForm();
+  
+  const isNew = !organization;
+
+  const onSubmit = async(variables) => {
+    try {
+      variables = {
+        ...variables,
+        logo: logoImage,
+      }
+      if(isNew) {
+        await createOrganization({ variables })
+      }else {
+        await editOrganization({ variables })
+      };
+      let message = isNew? "Organization created successfully." :  "Organization updated successfully.";
+      {message += !isNew ? '': process.env.IS_PROD
+        ? "\r\nMagic link sent! Check your email inbox!"
+        : "\r\nFind the magic link in your development console!"}
+      alert(message);
+      reset();
+    }
+    catch(err) {
+      console.error(err);
+      alert(err.message);
+    }
   };
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-2xl mb-2">Create organization</h1>
+        <h1 className="text-2xl mb-2">{isNew? 'Create organization': 'Edit organization'}</h1>
         <Form onSubmit={handleSubmit(onSubmit)}>
           <label>
             Name
@@ -58,6 +106,7 @@ export default ({currentUser}) => {
               name="name"
               placeholder="Name"
               inputRef={register({ required: "Required" })}
+              defaultValue={organization?.name}
               autoFocus
               className="mb-2"
               error={errors.name}
@@ -71,10 +120,17 @@ export default ({currentUser}) => {
               placeholder="dreamy-org"
               inputRef={register({ required: "Required" })}
               className="mb-2"
+              defaultValue={organization?.subdomain}
               error={errors.subdomain}
               helperText={errors.subdomain?.message}
             />
           </label>
+          <ImageUpload 
+            text = {"Upload Logo Image"}
+            onImageUploaded = {setLogoImage}
+            cloudinaryPreset = {'organization_logos'}
+            initialImage = {logoImage}
+            />
           <label>
             Custom Domain (Optional) [no need for http://]
             <TextField
@@ -82,11 +138,12 @@ export default ({currentUser}) => {
               placeholder="orgdomain.com"
               inputRef={register}
               className="mb-2"
+              defaultValue={organization?.customDomain}
               error={errors.customDomain}
               helperText={errors.customDomain?.message}
             />
           </label>
-          <label>
+          {isNew && <><label>
             Your email
             <TextField
               name="adminEmail"
@@ -118,8 +175,8 @@ export default ({currentUser}) => {
               })}
               helperText={errors.adminEmail2?.message}
             />
-          </label>
-          <Button type="submit" loading={loading}>Save</Button>
+          </label></>}
+          <Button type="submit" loading={loading || editLoading}>Save</Button>
         </Form>
       </Box>
     </Card>

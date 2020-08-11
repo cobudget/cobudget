@@ -53,6 +53,7 @@ const server = new ApolloServer({
         //   'Authentication token is invalid, please log in.'
         // );
         console.error('Authentication token is invalid');
+        console.error(error);
       }
     }
 

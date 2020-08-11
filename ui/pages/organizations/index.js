@@ -2,12 +2,17 @@ import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import OrganizationsTable from "../../components/Organizations/OrganizationsTable";
 import HappySpinner from "../../components/HappySpinner";
+import Router from "next/router";
 
 export const ORGANIZATIONS_QUERY = gql`
   query Organizations {
     organizations {
       id
       name
+      logo {
+        small
+        large
+      }
       subdomain
       customDomain
     }
@@ -34,7 +39,6 @@ export default ({ }) => {
       const { organizations } = cache.readQuery({
         query: ORGANIZATIONS_QUERY,
       });
-      console.log({deleteOrganization});
 
       cache.writeQuery({
         query: ORGANIZATIONS_QUERY,
@@ -44,6 +48,13 @@ export default ({ }) => {
       });
     },
   });
+
+  const updateOrganization = async ({organizationId}) => {
+    Router.push(
+      "/organizations/[organization]/edit",
+      `/organizations/${organizationId}/edit`
+    );
+  }
 
   if(error) {
     return (
@@ -67,6 +78,7 @@ export default ({ }) => {
         <OrganizationsTable
           organizations={organizations}
           deleteOrganization={deleteOrganization}
+          updateOrganization={updateOrganization}
         />
       </div>
     </>

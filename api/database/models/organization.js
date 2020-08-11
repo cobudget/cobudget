@@ -15,7 +15,7 @@ const OrganizationSchema = new Schema({
     unique: true,
     sparse: true,
   },
-  logo: String,
+  logo: new Schema({ small: String, large: String }),
 }).index({ name: 'text', subdomain: 'text', customDomain: 'text' });
 
 export default OrganizationSchema;

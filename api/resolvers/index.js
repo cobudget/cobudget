@@ -20,6 +20,11 @@ const resolvers = {
     currentOrg: (parent, args, { currentOrg }) => {
       return currentOrg;
     },
+    organization: async (parent, { id }, { currentUser, models: { Organization } }) => {
+      if(!currentUser) throw Error("You need to be logged in");
+      if(!currentUser.organizationId == id && !currentUser.isRootAdmin) throw Error("You need to belong to that organization");
+      return Organization.findOne({ _id: id });
+    },
     organizations: async (parent, args, {currentUser,  models: { Organization } }) => {
       if(!currentUser || !currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
       return Organization.find();
@@ -93,7 +98,7 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, customDomain, adminEmail },
+      { name, subdomain, customDomain, logo, adminEmail },
       { models }
     ) => {
       if (!adminEmail || !isValidEmail(adminEmail)) throw new Error('Not a valid email address');
@@ -101,6 +106,7 @@ const resolvers = {
       const organization = new models.Organization({
         name,
         subdomain,
+        logo,
         ...(customDomain && {customDomain}) //Only add custom domain if not null
       });
       await organization.save();
@@ -110,6 +116,19 @@ const resolvers = {
       await user.save();
 
       return organization;
+    },
+    editOrganization: async (
+      parent,
+      { organizationId, name, subdomain, customDomain, logo },
+      { models: { Organization } }
+    ) => {
+      console.log({logo});
+      const organization = await Organization.findOne({ _id: organizationId });
+      if(name) organization.name = name;
+      if(logo) organization.logo = logo;
+      if(subdomain) organization.subdomain = subdomain;
+      if(customDomain) organization.customDomain = customDomain;      
+      return organization.save();
     },
     createEvent: async (
       parent,

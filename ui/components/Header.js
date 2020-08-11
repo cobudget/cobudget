@@ -92,7 +92,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                             "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
                           }
                         >
-                          <img className="h-7 w-7" src={currentOrg.logo} />
+                          <img className="h-7 w-7" src={currentOrg.logo.small} />
                         </a>
                       ) : (
                         <a
@@ -151,7 +151,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               <>
                 {currentOrg?.logo && (
                   <a className="block rounded overflow-hidden mr-4">
-                    <img className="h-7 w-7" src={currentOrg?.logo} />
+                    <img className="h-7 w-7" src={currentOrg?.logo?.small} />
                   </a>
                 )}
                 <h1 className="text-lg font-medium text-gray-900 ">

@@ -8,6 +8,7 @@ const schema = gql`
     currentUser: User
     currentOrg: Organization
     organizations: [Organization!]
+    organization(id: ID!): Organization!
     events: [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
@@ -18,9 +19,18 @@ const schema = gql`
   type Mutation {
     createOrganization(
       name: String!
+      logo: ImageInput
       subdomain: String!
       customDomain: String
       adminEmail: String!
+    ): Organization!
+
+    editOrganization(
+      organizationId: ID!
+      name: String!
+      logo: ImageInput
+      subdomain: String!
+      customDomain: String
     ): Organization!
 
     createEvent(
@@ -130,7 +140,7 @@ const schema = gql`
     name: String!
     subdomain: String
     customDomain: String
-    logo: String
+    logo: Image
   }
 
   type Event {

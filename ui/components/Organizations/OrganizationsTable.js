@@ -11,7 +11,7 @@ import {
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
-const ActionsDropdown = ({ deleteOrganization, organization }) => {
+const ActionsDropdown = ({ deleteOrganization, updateOrganization, organization }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -40,7 +40,7 @@ const ActionsDropdown = ({ deleteOrganization, organization }) => {
       >
         <MenuItem
           onClick={() => {
-            alert("Havent implemented yet");
+            updateOrganization({organizationId: organization.id });
             handleClose();
           }
         }
@@ -67,7 +67,7 @@ const ActionsDropdown = ({ deleteOrganization, organization }) => {
   );
 };
 
-export default ({ organizations, deleteOrganization }) => {
+export default ({ organizations, updateOrganization, deleteOrganization }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -77,6 +77,7 @@ export default ({ organizations, deleteOrganization }) => {
               <TableCell>Name</TableCell>
               <TableCell>Subdomain</TableCell>
               <TableCell>Custom Domain</TableCell>
+              <TableCell>Logo</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -92,10 +93,14 @@ export default ({ organizations, deleteOrganization }) => {
                 <TableCell component="th" scope="row">
                   {organization.customDomain}
                 </TableCell>
+                <TableCell component="th" scope="row">
+                  <img src={organization.logo.small} style={{maxWidth: '100px'}}/>
+                </TableCell>
                 <TableCell align="right" padding="none">
                   <ActionsDropdown
                     organization={organization}
                     deleteOrganization={deleteOrganization}
+                    updateOrganization={updateOrganization}
                   />
                 </TableCell>
               </TableRow>
