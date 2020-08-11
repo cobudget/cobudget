@@ -92,7 +92,7 @@ export default ({ dreamId, initialImages = [], open, handleClose }) => {
 
     setImages([
       ...images,
-      { small: file.secure_url, large: file.eager[0].secure_url },
+      { small: file.eager[1].secure_url, large: file.eager[0].secure_url },
     ]);
     setUploadingImage(false);
   };
