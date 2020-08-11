@@ -22,7 +22,11 @@ export default function createApolloClient(initialState, ctx) {
     let { host, subdomain } = getHostInfo(ctx?.req);
     let customdomain;
 
-    if (!host.endsWith(process.env.DEPLOY_URL)) {
+    if (
+      !(
+        host.endsWith(process.env.DEPLOY_URL) || host.endsWith("localhost:3000")
+      )
+    ) {
       customdomain = host;
       subdomain = null;
     }
