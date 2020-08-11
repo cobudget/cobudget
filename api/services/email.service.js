@@ -43,6 +43,7 @@ class EmailService {
   };
 
   static async sendRequestToJoinNotifications(user, event, emails) {
+    const { subdomain, customDomain } = organization;
     if (process.env.NODE_ENV === 'production') {
       const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
       var data = {
