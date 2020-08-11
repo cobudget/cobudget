@@ -583,7 +583,7 @@ const resolvers = {
       const { isSentSuccess } = await AuthService.sendMagicLink({inputEmail, currentOrg, models});
       return isSentSuccess;
     },
-    updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
+    updateProfile: async (parent, { name, avatar, bio }, { currentUser, currentOrg }) => {
       if (!currentUser) throw new Error('You need to be logged in..');
 
       // TODO figure this shit out
@@ -604,7 +604,7 @@ const resolvers = {
       //       eventId: currentMember.eventId,
       //       isAdmin: true,
       //     });
-      //     await EmailService.sendRequestToJoinNotifications(member, event, admins);
+      //     await EmailService.sendRequestToJoinNotifications(currentOrg, member, event, admins);
       //   }
       // }
 
@@ -1139,7 +1139,7 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      { currentUser, models: { Member, Event } }
+      { currentUser, currentOrg, models: { Member, Event } }
     ) => {
       if (!currentUser)
         throw new Error('You need to be logged in to register for an event.');
@@ -1173,7 +1173,7 @@ const resolvers = {
           }).populate('userId');
 
           const adminEmails = admins.map((member) => member.userId.email);
-          await EmailService.sendRequestToJoinNotifications(currentUser, event, adminEmails);
+          await EmailService.sendRequestToJoinNotifications(currentOrg, currentUser, event, adminEmails);
           break;
 
         case 'INVITE_ONLY':
