@@ -74,6 +74,7 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell>Logo</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Subdomain</TableCell>
               <TableCell>Custom Domain</TableCell>
@@ -84,6 +85,9 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
           <TableBody>
             {organizations.map((organization) => (
               <TableRow key={organization.id}>
+                <TableCell component="th" scope="row">
+                  <img src={organization.logo?.small} style={{maxWidth: '50px'}}/>
+                </TableCell>
                 <TableCell component="th" scope="row">
                   {organization.name}
                 </TableCell>
