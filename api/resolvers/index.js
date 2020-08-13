@@ -101,7 +101,7 @@ const resolvers = {
       const organization = new models.Organization({
         name,
         subdomain,
-        ...(customDomain && {customDomain}) //Only add custom domain if not null
+        ...(customDomain && customDomain.length > 0 && { customDomain }), //Only add custom domain if not null
       });
       await organization.save();
 
