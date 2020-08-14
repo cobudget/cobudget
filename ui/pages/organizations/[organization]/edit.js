@@ -9,42 +9,45 @@ export const ORGANIZATION_QUERY = gql`
     organization(id: $id) {
       id
       name
-      logo {
-        small
-        large
-      }
+      logo
       subdomain
       customDomain
     }
   }
 `;
 
-export default ({currentUser}) => {
+export default ({ currentUser }) => {
   const router = useRouter();
-  const { data: { organization } = { organization: null }, loading, error } = useQuery(
-    ORGANIZATION_QUERY,
-    {
-      variables: { id: router.query.organization },
-    }
-  );
+  const {
+    data: { organization } = { organization: null },
+    loading,
+    error,
+  } = useQuery(ORGANIZATION_QUERY, {
+    variables: { id: router.query.organization },
+  });
 
-  if(error) {
+  if (error) {
     return (
       <h1 className="flex-grow flex justify-center items-center text-3xl text-red">
-        {error?.networkError?.result?.errors?.length > 0 ? error?.networkError?.result?.errors[0].message : error.message }
+        {error?.networkError?.result?.errors?.length > 0
+          ? error?.networkError?.result?.errors[0].message
+          : error.message}
       </h1>
     );
   }
 
   return (
     <>
-      { loading ? (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
-    ) : (
+      {loading ? (
+        <div className="flex-grow flex justify-center items-center h-64">
+          <HappySpinner />
+        </div>
+      ) : (
         <EditOrganization
-        currentUser={currentUser} organization={organization}/>
-    )}
+          currentUser={currentUser}
+          organization={organization}
+        />
+      )}
     </>
-)}
+  );
+};

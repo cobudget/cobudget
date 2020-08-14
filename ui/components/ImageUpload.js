@@ -4,7 +4,12 @@ import { Modal } from "@material-ui/core";
 
 import Button from "components/Button";
 
-export default ({ text = "Set Image", cloudinaryPreset, initialImage, onImageUploaded }) => {
+export default ({
+  text = "Set Image",
+  cloudinaryPreset,
+  initialImage,
+  onImageUploaded,
+}) => {
   const [image, setImage] = useState(initialImage);
   const { handleSubmit, register, errors } = useForm();
   const [open, setOpen] = useState(false);
@@ -24,12 +29,12 @@ export default ({ text = "Set Image", cloudinaryPreset, initialImage, onImageUpl
         { method: "POST", body: data }
       );
       const file = await res.json();
-      const newImage = { large: file.secure_url, small: file.secure_url};
+      const newImage = file.secure_url;
       setImage(newImage);
       setUploadingImage(false);
       onImageUploaded(newImage);
       handleClose();
-    } catch(error) {
+    } catch (error) {
       console.log(error);
       alert(error);
     } finally {
@@ -39,21 +44,23 @@ export default ({ text = "Set Image", cloudinaryPreset, initialImage, onImageUpl
 
   const handleClose = () => {
     setOpen(false);
-  }
+  };
 
-  if(!open) {
+  if (!open) {
     return (
       <div>
         <Button
-          variant="secondery"
-          onClick={() => { setOpen(true)}}
+          variant="secondary"
+          onClick={() => {
+            setOpen(true);
+          }}
           className="mr-2"
         >
           {text}
         </Button>
-        <img src={image?.small} />
-        </div> 
-    )
+        <img src={image} />
+      </div>
+    );
   }
 
   return (
@@ -65,17 +72,17 @@ export default ({ text = "Set Image", cloudinaryPreset, initialImage, onImageUpl
       <div className="bg-white rounded-lg shadow p-4 focus:outline-none flex-1 max-w-xs">
         <form
           onSubmit={handleSubmit(() => {
-            delete image.__typename; // apollo complains otherwise..
+            // delete image.__typename; // apollo complains otherwise..
             onImageUploaded(image);
           })}
         >
-
           {uploadingImage ? (
             <label>Uploading...</label>
           ) : (
             <>
               <label>
-                Upload image<br/>
+                Upload image
+                <br />
                 <input
                   type="file"
                   name="file"
@@ -87,12 +94,11 @@ export default ({ text = "Set Image", cloudinaryPreset, initialImage, onImageUpl
           )}
 
           <div className="flex justify-between items-center">
-            <div className=" text-sm text-gray-600 font-medium">
-            </div>
+            <div className=" text-sm text-gray-600 font-medium"></div>
             <div className="flex">
               <Button
                 variant="secondary"
-                onClick={ handleClose }
+                onClick={handleClose}
                 className="mr-2"
               >
                 Cancel

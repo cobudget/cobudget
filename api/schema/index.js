@@ -19,7 +19,7 @@ const schema = gql`
   type Mutation {
     createOrganization(
       name: String!
-      logo: ImageInput
+      logo: String
       subdomain: String!
       customDomain: String
       adminEmail: String!
@@ -28,7 +28,7 @@ const schema = gql`
     editOrganization(
       organizationId: ID!
       name: String!
-      logo: ImageInput
+      logo: String
       subdomain: String!
       customDomain: String
     ): Organization!
@@ -140,7 +140,7 @@ const schema = gql`
     name: String!
     subdomain: String
     customDomain: String
-    logo: Image
+    logo: String
   }
 
   type Event {
