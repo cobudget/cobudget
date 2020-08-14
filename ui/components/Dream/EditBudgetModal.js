@@ -120,14 +120,14 @@ export default ({
           {incomeItems.map((budgetItem, index) => {
             const fieldName = `budgetItems[${index}]`;
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldName}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={index}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <input
-                    className="hidden"
                     name={`${fieldName}.type`}
                     value={budgetItem.type}
-                    ref={register}
+                    ref={register()}
                     readOnly
+                    className="hidden"
                   />
                   <TextField
                     placeholder="Description"
@@ -173,14 +173,14 @@ export default ({
           {expenseItems.map((budgetItem, index) => {
             const fieldName = `budgetItems[${incomeItems.length + index}]`;
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldName}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={index}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <input
                     name={`${fieldName}.type`}
                     value={budgetItem.type}
-                    ref={register}
-                    className="hidden"
+                    ref={register()}
                     readOnly
+                    className="hidden"
                   />
                   <TextField
                     placeholder="Description"

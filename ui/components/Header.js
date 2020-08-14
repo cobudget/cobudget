@@ -31,7 +31,9 @@ const NavItem = ({
     return (
       <button
         className={
-          `my-1 mx-1 px-2 py-1 sm:my-0 block rounded focus:outline-none font-medium text-gray-800 sm:text-white border transitions-colors duration-75 ` +
+          `my-1 mx-1 px-2 py-1 sm:my-0 block rounded focus:outline-none font-medium text-gray-800  border transitions-colors duration-75 ` +
+          (eventColor ? "sm:text-white" : "sm:text-gray-800") +
+          " " +
           (primary
             ? `border-white hover:bg-white sm:hover:text-${eventColor}`
             : `border-transparent sm:hover:bg-${eventColor}-darker`)
