@@ -2,16 +2,21 @@ import {
   Box,
   IconButton,
   Menu,
-  MenuItem, Table,
+  MenuItem,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
-const ActionsDropdown = ({ deleteOrganization, updateOrganization, organization }) => {
+const ActionsDropdown = ({
+  deleteOrganization,
+  updateOrganization,
+  organization,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -40,10 +45,9 @@ const ActionsDropdown = ({ deleteOrganization, updateOrganization, organization 
       >
         <MenuItem
           onClick={() => {
-            updateOrganization({organizationId: organization.id });
+            updateOrganization({ organizationId: organization.id });
             handleClose();
-          }
-        }
+          }}
         >
           Update organization
         </MenuItem>
@@ -78,7 +82,6 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
               <TableCell>Name</TableCell>
               <TableCell>Subdomain</TableCell>
               <TableCell>Custom Domain</TableCell>
-              <TableCell>Logo</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -86,7 +89,7 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
             {organizations.map((organization) => (
               <TableRow key={organization.id}>
                 <TableCell component="th" scope="row">
-                  <img src={organization.logo?.small} style={{maxWidth: '50px'}}/>
+                  <img src={organization.logo} className="h-7 w-7 rounded" />
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {organization.name}
@@ -97,9 +100,7 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
                 <TableCell component="th" scope="row">
                   {organization.customDomain}
                 </TableCell>
-                <TableCell component="th" scope="row">
-                  <img src={organization.logo.small} style={{maxWidth: '100px'}}/>
-                </TableCell>
+
                 <TableCell align="right" padding="none">
                   <ActionsDropdown
                     organization={organization}
