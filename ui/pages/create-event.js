@@ -3,6 +3,7 @@ import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { Box } from "@material-ui/core";
 import slugify from "../utils/slugify";
+import currencies from "../utils/currencies";
 
 import Card from "../components/styled/Card";
 import Form from "../components/styled/Form";
@@ -77,11 +78,11 @@ export default () => {
                 required: "Required",
               })}
             >
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
-              <option value="NOK">NOK</option>
+              {currencies.map((currency) => (
+                <option value={currency} key={currency}>
+                  {currency}
+                </option>
+              ))}
             </select>
           </label>
           <label>
