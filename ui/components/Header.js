@@ -82,7 +82,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
             {event ? (
               <>
                 <Tooltip
-                  title={currentOrg.name ?? `See all events`}
+                  title={currentOrg?.name ?? `See all events`}
                   position="bottom"
                   size="small"
                 >
@@ -94,7 +94,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                             "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
                           }
                         >
-                          <img className="h-7 w-7" src={currentOrg.logo} />
+                          <img className="h-7 w-7" src={currentOrg?.logo} />
                         </a>
                       ) : (
                         <a
