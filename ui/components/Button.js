@@ -25,6 +25,8 @@ export default ({
             ? "cursor-default text-gray-600 bg-gray-200"
             : variant === "primary"
             ? "text-white bg-green hover:bg-green-darker"
+            : variant === "secondary"
+            ? "bg-gray-400 text-gray-800 hover:bg-gray-600 hover:text-gray-200"
             : "text-gray-800 hover:bg-gray-200")
         } ${className}`}
     >

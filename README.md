@@ -53,7 +53,7 @@ This builds and serves both the API and the UI with one command, and provides ho
 
 # Postrequisites
 After running for the first time add default organization
-By visiting http://dev-org.localhost:3000/create-organization
+By visiting http://dev-org.localhost:3000/organizations/create
 Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
 Then open the console and click the link to login to the new organization
 
@@ -82,8 +82,14 @@ Now you can visit http://dev-org.localhost:3000 or http://root.localhost:3000
 A user can set a custom domain - it would always use `https` - make sure you set it like so under the `orgazniation` - add a `customDomain` field set to the custom domain. For example - `customdomain.com` OR `anothercustomdomain.com:3000` all lowercase
 
 ### Organizations
-You can view local oragnizations by visiting `http://dev-org.localhost:3000/root-admin/organizations`
+You can view local oragnizations by visiting `http://dev-org.localhost:3000/organizations`
+Make sure you have the `isRootAdmin` set to your user
 
+
+### Setting up your own deploy
+#### Cloudinary
+If you set up your own deploy - make sure you create a cloudinary account
+also - make sure you create 2 presets named - "dreams" and "organization_logos"
 ## License
 
 Released under the AGPLv3+ which is included in the file [LICENSE](LICENSE) in the git repository

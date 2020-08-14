@@ -32,7 +32,8 @@ class EmailService {
           return true;
         })
         .catch((error) => {
-          throw new Error('Failed to send magic link');
+          console.error(error);
+          throw new Error(`Failed to send magic link ${error.message}`);
         });
     } else {
       const domain = customDomain? `http://${customDomain}` : `http://${subdomain}.localhost:3000`;

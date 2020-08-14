@@ -20,15 +20,30 @@ const resolvers = {
     currentOrg: (parent, args, { currentOrg }) => {
       return currentOrg;
     },
-    organizations: async (parent, args, {currentUser,  models: { Organization } }) => {
-      if(!currentUser.isRootAdmin) throw Error("Must be root admin to view organizations");
+    organization: async (
+      parent,
+      { id },
+      { currentUser, models: { Organization } }
+    ) => {
+      if (!currentUser) throw Error('You need to be logged in');
+      if (!currentUser.organizationId == id && !currentUser.isRootAdmin)
+        throw Error('You need to belong to that organization');
+      return Organization.findOne({ _id: id });
+    },
+    organizations: async (
+      parent,
+      args,
+      { currentUser, models: { Organization } }
+    ) => {
+      if (!currentUser || !currentUser.isRootAdmin)
+        throw Error('Must be root admin to view organizations');
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
-      if(!currentOrg) { 
+      if (!currentOrg) {
         throw new Error('No organization found');
       }
-      return Event.find( {organizationId: currentOrg.id});
+      return Event.find({ organizationId: currentOrg.id });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       return Event.findOne({ slug, organizationId: currentOrg.id });
@@ -93,30 +108,53 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, customDomain, adminEmail },
+      { name, subdomain, customDomain, logo, adminEmail },
       { models }
     ) => {
-      if (!adminEmail || !isValidEmail(adminEmail)) throw new Error('Not a valid email address');
+      if (!adminEmail || !isValidEmail(adminEmail))
+        throw new Error('Not a valid email address');
 
       const organization = new models.Organization({
         name,
         subdomain,
-        ...(customDomain && customDomain.length > 0 && { customDomain }), //Only add custom domain if not null
+        logo,
+        ...(customDomain && { customDomain }), //Only add custom domain if not null
       });
       await organization.save();
 
-      const { user } = await AuthService.sendMagicLink({ inputEmail: adminEmail, currentOrg: organization, models});
+      const { user } = await AuthService.sendMagicLink({
+        inputEmail: adminEmail,
+        currentOrg: organization,
+        models,
+      });
       user.isOrgAdmin = true;
       await user.save();
 
       return organization;
+    },
+    editOrganization: async (
+      parent,
+      { organizationId, name, subdomain, customDomain, logo },
+      { models: { Organization } }
+    ) => {
+      console.log({ logo });
+      const organization = await Organization.findOne({ _id: organizationId });
+      if (name) organization.name = name;
+      if (logo) organization.logo = logo;
+      if (subdomain) organization.subdomain = subdomain;
+      if (customDomain) organization.customDomain = customDomain;
+      return organization.save();
     },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
       { currentUser, currentOrg, models: { Event, Member } }
     ) => {
-      if (!currentUser || !currentUser.isOrgAdmin || currentUser.organizationId != currentOrg.id)
+      if (
+        !currentUser ||
+        !currentUser.isOrgAdmin ||
+        currentUser.organizationId != currentOrg.id
+      )
         throw new Error('You need to be logged in as organisation admin.');
 
       // check slug..
@@ -580,10 +618,18 @@ const resolvers = {
       { email: inputEmail },
       { currentOrg, models }
     ) => {
-      const { isSentSuccess } = await AuthService.sendMagicLink({inputEmail, currentOrg, models});
+      const { isSentSuccess } = await AuthService.sendMagicLink({
+        inputEmail,
+        currentOrg,
+        models,
+      });
       return isSentSuccess;
     },
-    updateProfile: async (parent, { name, avatar, bio }, { currentUser, currentOrg }) => {
+    updateProfile: async (
+      parent,
+      { name, avatar, bio },
+      { currentUser, currentOrg }
+    ) => {
       if (!currentUser) throw new Error('You need to be logged in..');
 
       // TODO figure this shit out
@@ -702,23 +748,22 @@ const resolvers = {
     },
     deleteOrganization: async (
       parent,
-      { organizationId},
+      { organizationId },
       { currentUser, models: { Organization } }
     ) => {
-      if(!currentUser || !currentUser.isRootAdmin)
+      if (!currentUser || !currentUser.isRootAdmin)
         throw new Error('You need to be root admin to delete and organization');
 
       const organization = await Organization.findOne({
         _id: organizationId,
       });
 
-      if(!organization)
+      if (!organization)
         throw Error(`Cant find organization by id ${organizationId}`);
 
       return await Organization.findOneAndDelete({
         _id: organizationId,
       });
-      
     },
     approveForGranting: async (
       parent,
@@ -1173,7 +1218,12 @@ const resolvers = {
           }).populate('userId');
 
           const adminEmails = admins.map((member) => member.userId.email);
-          await EmailService.sendRequestToJoinNotifications(currentOrg, currentUser, event, adminEmails);
+          await EmailService.sendRequestToJoinNotifications(
+            currentOrg,
+            currentUser,
+            event,
+            adminEmails
+          );
           break;
 
         case 'INVITE_ONLY':
@@ -1221,9 +1271,16 @@ const resolvers = {
     memberships: async (user, args, { models: { Member } }) => {
       return Member.find({ userId: user.id });
     },
-    membership: async (user, { slug }, { currentOrg, models: { Member, Event } }) => {
+    membership: async (
+      user,
+      { slug },
+      { currentOrg, models: { Member, Event } }
+    ) => {
       if (!slug) return null;
-      const event = await Event.findOne({ organizationId: currentOrg.id, slug });
+      const event = await Event.findOne({
+        organizationId: currentOrg.id,
+        slug,
+      });
       return Member.findOne({ userId: user.id, eventId: event.id });
     },
   },
@@ -1334,13 +1391,13 @@ const resolvers = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {
-    customField: async(customFieldValue, args, {models: {Event}}) => {
-      const {eventId, fieldId} = customFieldValue;
+    customField: async (customFieldValue, args, { models: { Event } }) => {
+      const { eventId, fieldId } = customFieldValue;
       const event = await Event.findOne({ _id: eventId });
       const eventCustomField = event.customFields.filter(
         (eventCustomField) => eventCustomField.id == fieldId
       );
-      
+
       if (!eventCustomField || eventCustomField.length == 0) {
         return {
           id: fieldId,
@@ -1349,23 +1406,25 @@ const resolvers = {
           type: 'TEXT',
           position: 1000,
           isRequired: false,
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        };
       }
       return eventCustomField[0];
-    }
+    },
   },
   CustomFieldFilterLabels: {
-    customField: async(customFieldValue, args, {models: {Event}}) => {
-      const {eventId, fieldId} = customFieldValue;
+    customField: async (customFieldValue, args, { models: { Event } }) => {
+      const { eventId, fieldId } = customFieldValue;
       const event = await Event.findOne({ _id: eventId });
       if (!event.customFields) {
         return;
       }
-      const eventCustomField = event.customFields.filter(eventCustomField => eventCustomField.id == fieldId);
+      const eventCustomField = event.customFields.filter(
+        (eventCustomField) => eventCustomField.id == fieldId
+      );
       return eventCustomField[0];
-    }
-  }
+    },
+  },
 };
 
 module.exports = resolvers;

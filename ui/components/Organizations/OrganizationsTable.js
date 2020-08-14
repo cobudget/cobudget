@@ -2,16 +2,21 @@ import {
   Box,
   IconButton,
   Menu,
-  MenuItem, Table,
+  MenuItem,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
-const ActionsDropdown = ({ deleteOrganization, organization }) => {
+const ActionsDropdown = ({
+  deleteOrganization,
+  updateOrganization,
+  organization,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -40,10 +45,9 @@ const ActionsDropdown = ({ deleteOrganization, organization }) => {
       >
         <MenuItem
           onClick={() => {
-            alert("Havent implemented yet");
+            updateOrganization({ organizationId: organization.id });
             handleClose();
-          }
-        }
+          }}
         >
           Update organization
         </MenuItem>
@@ -67,13 +71,14 @@ const ActionsDropdown = ({ deleteOrganization, organization }) => {
   );
 };
 
-export default ({ organizations, deleteOrganization }) => {
+export default ({ organizations, updateOrganization, deleteOrganization }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell>Logo</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Subdomain</TableCell>
               <TableCell>Custom Domain</TableCell>
@@ -84,6 +89,9 @@ export default ({ organizations, deleteOrganization }) => {
             {organizations.map((organization) => (
               <TableRow key={organization.id}>
                 <TableCell component="th" scope="row">
+                  <img src={organization.logo} className="h-7 w-7 rounded" />
+                </TableCell>
+                <TableCell component="th" scope="row">
                   {organization.name}
                 </TableCell>
                 <TableCell component="th" scope="row">
@@ -92,10 +100,12 @@ export default ({ organizations, deleteOrganization }) => {
                 <TableCell component="th" scope="row">
                   {organization.customDomain}
                 </TableCell>
+
                 <TableCell align="right" padding="none">
                   <ActionsDropdown
                     organization={organization}
                     deleteOrganization={deleteOrganization}
+                    updateOrganization={updateOrganization}
                   />
                 </TableCell>
               </TableRow>
