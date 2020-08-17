@@ -272,7 +272,10 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               </>
             ) : (
               <>
-                <NavItem onClick={() => setLoginModalOpen(true)}>
+                <NavItem
+                  onClick={() => setLoginModalOpen(true)}
+                  eventColor={event?.color}
+                >
                   Login or Sign up
                 </NavItem>
                 <LoginModal

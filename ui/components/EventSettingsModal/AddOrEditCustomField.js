@@ -2,6 +2,7 @@ import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 import { Checkbox, Modal } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -89,7 +90,7 @@ export default ({
   );
 
   const { control, handleSubmit, register, errors } = useForm({
-    validationSchema: schema,
+    resolver: yupResolver(schema),
   });
 
   return (
