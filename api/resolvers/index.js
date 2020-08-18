@@ -137,12 +137,11 @@ const resolvers = {
       { organizationId, name, subdomain, customDomain, logo },
       { models: { Organization } }
     ) => {
-      console.log({ logo });
       const organization = await Organization.findOne({ _id: organizationId });
-      if (name) organization.name = name;
-      if (logo) organization.logo = logo;
-      if (subdomain) organization.subdomain = subdomain;
-      if (customDomain) organization.customDomain = customDomain;
+      organization.name = name;
+      organization.logo = logo;
+      organization.subdomain = subdomain;
+      organization.customDomain = customDomain;
       return organization.save();
     },
     createEvent: async (
