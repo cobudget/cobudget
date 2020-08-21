@@ -4,6 +4,7 @@ import { useMutation } from "@apollo/react-hooks";
 import { Box, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
 
+import currencies from "utils/currencies";
 import SelectInput from "../SelectInput";
 import Card from "../styled/Card";
 
@@ -46,10 +47,11 @@ const SetCurrency = ({ closeModal, event }) => {
               inputRef={register}
               fullWidth
             >
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-              <option value="SEK">SEK</option>
-              <option value="DKK">DKK</option>
+              {currencies.map((currency) => (
+                <option value={currency} key={currency}>
+                  {currency}
+                </option>
+              ))}
             </SelectInput>
           </Box>
 

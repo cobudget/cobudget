@@ -18,6 +18,7 @@ const pretixWebhook = require('./webhooks/pretix');
 //     'Authorization',
 //     'Accept',
 //     'Dreams-Subdomain',
+//     'Dreams-Customdomain',
 //   ],
 // });
 
@@ -33,22 +34,24 @@ const server = new ApolloServer({
     const db = await getConnection();
     const models = getModels(db);
 
-    let organization = null;
-    const subdomain = req.headers['dreams-subdomain'];
-
-    if (subdomain) {
-      console.log({ subdomain });
-      // organization = await models.Organization.findOne({ subdomain });
-    }
-
     let currentUser = null;
+    let currentOrg = null;
+
+    const subdomain = req.headers['dreams-subdomain'];
+    const customDomain = req.headers['dreams-customdomain'];
+
+    if (customDomain) {
+      currentOrg = await models.Organization.findOne({ customDomain });
+    } else if (subdomain) {
+      currentOrg = await models.Organization.findOne({ subdomain });
+    }
 
     let token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
       : null;
 
     // Verify token if available
-    if (token) {
+    if (currentOrg && token) {
       try {
         token = jwt.verify(token, process.env.JWT_SECRET);
         currentUser = await models.User.findOne({ _id: token.sub });
@@ -57,13 +60,14 @@ const server = new ApolloServer({
         //   'Authentication token is invalid, please log in.'
         // );
         console.error('Authentication token is invalid');
+        console.error(error);
       }
     }
 
     return {
       models,
       currentUser,
-      organization,
+      currentOrg,
     };
   },
   playground: true,

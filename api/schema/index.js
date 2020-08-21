@@ -6,6 +6,9 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    currentOrg: Organization
+    organizations: [Organization!]
+    organization(id: ID!): Organization!
     events: [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
@@ -14,6 +17,22 @@ const schema = gql`
   }
 
   type Mutation {
+    createOrganization(
+      name: String!
+      logo: String
+      subdomain: String!
+      customDomain: String
+      adminEmail: String!
+    ): Organization!
+
+    editOrganization(
+      organizationId: ID!
+      name: String!
+      logo: String
+      subdomain: String!
+      customDomain: String
+    ): Organization!
+
     createEvent(
       slug: String!
       title: String!
@@ -38,6 +57,11 @@ const schema = gql`
       eventId: ID!
       fieldId: ID!
       customField: CustomFieldInput!
+    ): Event!
+    setCustomFieldPosition(
+      eventId: ID!
+      fieldId: ID!
+      newPosition: Float
     ): Event!
     deleteCustomField(eventId: ID!, fieldId: ID!): Event!
 
@@ -87,6 +111,8 @@ const schema = gql`
     ): Member
     deleteMember(eventId: ID!, memberId: ID!): Member
 
+    deleteOrganization(organizationId: ID!): Organization
+
     approveForGranting(dreamId: ID!, approved: Boolean!): Dream
     updateGrantingSettings(
       eventId: ID!
@@ -109,10 +135,19 @@ const schema = gql`
     registerForEvent(eventId: ID!): Member
   }
 
+  type Organization {
+    id: ID!
+    name: String!
+    subdomain: String
+    customDomain: String
+    logo: String
+  }
+
   type Event {
     id: ID!
     slug: String!
     title: String!
+    organization: Organization!
     info: String
     color: String
     # logo: String
@@ -142,6 +177,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
+    filterLabels: [CustomFieldFilterLabels]
   }
 
   scalar Date
@@ -155,13 +191,15 @@ const schema = gql`
   type User {
     id: ID!
     email: String
+    name: String
     verifiedEmail: Boolean!
+    organization: Organization!
+    isOrgAdmin: Boolean
+    isRootAdmin: Boolean
     membership(slug: String): Member
     memberships: [Member!]
-    name: String
     avatar: String
     bio: String
-    isOrgAdmin: Boolean
     createdAt: Date
   }
 
@@ -227,8 +265,8 @@ const schema = gql`
   }
 
   type Image {
-    small: String!
-    large: String!
+    small: String
+    large: String
   }
 
   input ImageInput {
@@ -314,12 +352,18 @@ const schema = gql`
     FILE
   }
 
+  type CustomFieldFilterLabels {
+    customField: CustomField
+    eventId: ID!
+  }
+
   type CustomField {
     id: ID!
     name: String!
     description: String!
     type: CustomFieldType!
     isRequired: Boolean!
+    position: Float!
     isShownOnFrontPage: Boolean
     createdAt: Date!
   }

@@ -19,13 +19,28 @@ export default function createApolloClient(initialState, ctx) {
   const authLink = setContext((req, { headers }) => {
     const { token } = cookies(ctx || {});
 
-    const { subdomain } = getHostInfo(ctx?.req);
+    let { host, subdomain } = getHostInfo(ctx?.req);
+    let customdomain;
+
+    if (
+      !(
+        host.endsWith(process.env.DEPLOY_URL) || host.endsWith("localhost:3000")
+      )
+    ) {
+      customdomain = host;
+      subdomain = null;
+    }
 
     return {
       headers: {
         ...headers,
         authorization: token ? `Bearer ${token}` : "",
-        ...(subdomain && { ["dreams-subdomain"]: subdomain }),
+        ...(subdomain && {
+          ["dreams-subdomain"]: subdomain,
+        }),
+        ...(customdomain && {
+          ["dreams-customdomain"]: customdomain,
+        }),
       },
     };
   });

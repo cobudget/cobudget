@@ -1,24 +1,12 @@
 import gql from "graphql-tag";
 import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
-import { Tooltip } from "react-tippy";
 
 import Button from "components/Button";
-import IconButton from "components/IconButton";
-import { DeleteIcon, AddIcon, EditIcon } from "components/Icons";
+import { AddIcon } from "components/Icons";
 
 import AddOrEditCustomField from "./AddOrEditCustomField";
-
-const css = {
-  label:
-    "bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-800 mr-2",
-};
-
-const types = {
-  TEXT: "Short Text",
-  MULTILINE_TEXT: "Long Text",
-  BOOLEAN: "Yes/No",
-};
+import DraggableCustomField from "./DraggableCustomFields";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
@@ -30,6 +18,7 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
         createdAt
       }
@@ -40,13 +29,14 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-
+  
   const [deleteCustomField, { loading }] = useMutation(
     DELETE_CUSTOM_FIELD_MUTATION,
     {
       variables: { eventId: event.id },
     }
   );
+  
   return (
     <>
       <h1 className="text-2xl font-semibold mb-2">Custom fields</h1>
@@ -54,51 +44,11 @@ export default ({ event }) => {
         Custom fields are extra fields or questions for Dreams
       </p>
 
-      <div className="overflow-y-scroll max-h-screen">
-        {event.customFields.map((customField) => (
-          <div key={customField.id} className="p-4 shadow rounded my-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-lg">{customField.name}</h2>
-              <div>
-                <Tooltip title="Edit" position="bottom" size="small">
-                  <IconButton
-                    onClick={() => setEditingCustomField(customField)}
-                    className="mx-1"
-                  >
-                    <EditIcon className="h-6 w-6" />
-                  </IconButton>
-                </Tooltip>
-
-                <Tooltip title="Delete" position="bottom" size="small">
-                  <IconButton
-                    loading={loading}
-                    onClick={() =>
-                      confirm(
-                        "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
-                      ) &&
-                      deleteCustomField({
-                        variables: { fieldId: customField.id },
-                      })
-                    }
-                  >
-                    <DeleteIcon className="h-6 w-6" />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            </div>
-            <p className="mb-2">{customField.description}</p>
-            <div className="flex">
-              <span className={css.label}>Type: {types[customField.type]}</span>
-              {customField.isRequired && (
-                <span className={css.label}>Is Required</span>
-              )}
-              {customField.isShownOnFrontPage && (
-                <span className={css.label}>Shown on front page</span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      <DraggableCustomField
+        event={event}
+        customFields={event.customFields}
+        setEditingCustomField={setEditingCustomField}
+        deleteCustomField={deleteCustomField}/>
 
       <div className="flex my-2">
         <Button

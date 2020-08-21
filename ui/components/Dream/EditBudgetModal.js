@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
-import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers";
 import { Modal } from "@material-ui/core";
 
 import TextField from "components/TextField";
@@ -48,7 +48,7 @@ const schema = yup.object().shape({
 
 export default ({
   dreamId,
-  budgetItems: initialBudgetItems = [],
+  budgetItems,
   event,
   currency,
   allowStretchGoals,
@@ -59,42 +59,18 @@ export default ({
     variables: { dreamId },
   });
 
-  const { handleSubmit, register, errors } = useForm({
-    validationSchema: schema,
+  const { handleSubmit, register, control } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: { budgetItems },
   });
 
-  const emptyExpense = {
-    description: undefined,
-    min: undefined,
-    max: undefined,
-    type: "EXPENSE",
-  };
+  const { fields, append, insert, remove } = useFieldArray({
+    control,
+    name: "budgetItems",
+  });
 
-  const emptyIncome = {
-    description: undefined,
-    min: undefined,
-    max: undefined,
-    type: "INCOME",
-  };
-
-  const [incomeItems, setIncomeItems] = useState(
-    initialBudgetItems.filter((item) => item.type === "INCOME")
-  );
-
-  const initialExpenses = initialBudgetItems.filter(
-    (item) => item.type === "EXPENSE"
-  );
-  const [expenseItems, setExpenseItems] = useState(
-    initialExpenses.length ? initialExpenses : [emptyExpense]
-  );
-
-  const addIncomeRow = () => setIncomeItems([...incomeItems, emptyIncome]);
-  const removeIncomeRow = (i) =>
-    setIncomeItems([...incomeItems.filter((item, index) => i !== index)]);
-
-  const addExpenseRow = () => setExpenseItems([...expenseItems, emptyExpense]);
-  const removeExpenseRow = (i) =>
-    setExpenseItems([...expenseItems.filter((item, index) => i !== index)]);
+  const incomeItems = fields.filter((field) => field.type === "INCOME");
+  const expenseItems = fields.filter((field) => field.type === "EXPENSE");
 
   return (
     <Modal
@@ -117,41 +93,38 @@ export default ({
         >
           <h2 className="text-lg font-semibold mb-2">Income</h2>
 
-          {incomeItems.map((budgetItem, index) => {
-            const fieldName = `budgetItems[${index}]`;
+          {incomeItems.map(({ id, description, type, min }, index) => {
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldName}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <input
-                    className="hidden"
-                    name={`${fieldName}.type`}
-                    value={budgetItem.type}
-                    ref={register}
-                    readOnly
-                  />
                   <TextField
                     placeholder="Description"
-                    name={`${fieldName}.description`}
-                    defaultValue={budgetItem.description}
-                    inputRef={register({
-                      required: "Required",
-                    })}
+                    name={`budgetItems[${index}].description`}
+                    inputRef={register()}
+                    defaultValue={description}
+                  />
+                  <input
+                    name={`budgetItems[${index}].type`}
+                    value={type}
+                    ref={register()}
+                    readOnly
+                    className="hidden"
                   />
                 </div>
 
                 <div className="mr-2 my-2 sm:my-0">
                   <TextField
-                    placeholder={allowStretchGoals ? "Min amount" : "Amount"}
-                    name={`${fieldName}.min`}
-                    defaultValue={budgetItem.min}
+                    placeholder={"Amount"}
+                    name={`budgetItems[${index}].min`}
+                    defaultValue={min}
                     inputProps={{ type: "number" }}
-                    inputRef={register({ required: "Required", min: 0 })}
+                    inputRef={register()}
                     endAdornment={<span>{currency}</span>}
                   />
                 </div>
 
                 <div className="my-2">
-                  <IconButton onClick={() => removeIncomeRow(index)}>
+                  <IconButton onClick={() => remove(index)}>
                     <DeleteIcon className="h-6 w-6 text-color-red" />
                   </IconButton>
                 </div>
@@ -161,7 +134,11 @@ export default ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
-              onClick={addIncomeRow}
+              onClick={() =>
+                insert(fields.filter((f) => f.type === "INCOME").length, {
+                  type: "INCOME",
+                })
+              }
               className="flex-grow"
             >
               <AddIcon className="h-5 w-5 mr-1" /> Add row
@@ -170,34 +147,32 @@ export default ({
 
           <h2 className="text-lg font-semibold mb-2">Expenses</h2>
 
-          {expenseItems.map((budgetItem, index) => {
-            const fieldName = `budgetItems[${incomeItems.length + index}]`;
+          {expenseItems.map(({ id, description, type, min, max }, i) => {
+            const index = i + incomeItems.length;
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldName}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <input
-                    name={`${fieldName}.type`}
-                    value={budgetItem.type}
-                    ref={register}
-                    className="hidden"
-                    readOnly
-                  />
                   <TextField
                     placeholder="Description"
-                    name={`${fieldName}.description`}
-                    defaultValue={budgetItem.description}
-                    inputRef={register({
-                      required: "Required",
-                    })}
+                    name={`budgetItems[${index}].description`}
+                    defaultValue={description}
+                    inputRef={register()}
+                  />
+                  <input
+                    name={`budgetItems[${index}].type`}
+                    value={type}
+                    ref={register()}
+                    readOnly
+                    className="hidden"
                   />
                 </div>
                 <div className="mr-2 my-2 sm:my-0">
                   <TextField
                     placeholder={allowStretchGoals ? "Min amount" : "Amount"}
-                    name={`${fieldName}.min`}
-                    defaultValue={budgetItem.min}
-                    inputProps={{ type: "number" }}
-                    inputRef={register({ required: "Required", min: 0 })}
+                    name={`budgetItems[${index}].min`}
+                    defaultValue={min}
+                    inputProps={{ type: "number", min: 0 }}
+                    inputRef={register()}
                     endAdornment={<span>{currency}</span>}
                   />
                 </div>
@@ -206,15 +181,16 @@ export default ({
                   <div className="mr-2 my-2 sm:my-0">
                     <TextField
                       placeholder="Max amount"
-                      name={`${fieldName}.max`}
-                      defaultValue={budgetItem.max}
-                      inputRef={register({ min: 0, required: "Required" })}
+                      name={`budgetItems[${index}].max`}
+                      defaultValue={max}
+                      inputProps={{ type: "number", min: 0 }}
+                      inputRef={register()}
                       endAdornment={<span>{currency}</span>}
                     />
                   </div>
                 )}
                 <div className="my-2">
-                  <IconButton onClick={() => removeExpenseRow(index)}>
+                  <IconButton onClick={() => remove(index)}>
                     <DeleteIcon className="h-6 w-6 text-color-red" />
                   </IconButton>
                 </div>
@@ -224,12 +200,13 @@ export default ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
-              onClick={addExpenseRow}
+              onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
               <AddIcon className="h-5 w-5 mr-1" /> Add row
             </Button>
           </div>
+
           {/* <div>
             Total funding goal: {thousandSeparator(minGoal)} {currency}
           </div> */}

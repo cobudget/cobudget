@@ -5,8 +5,6 @@ const EventSchema = new Schema({
   slug: {
     type: String,
     required: true,
-    index: true,
-    unique: true,
   },
   title: { type: String, required: true },
   info: String,
@@ -32,6 +30,7 @@ const EventSchema = new Schema({
   allowStretchGoals: { type: Boolean, default: false },
   color: { type: String, default: 'anthracit' },
   about: { type: String },
+  organizationId: { type: Schema.Types.ObjectId, required: true },
   customFields: [
     new Schema({
       name: { type: String, required: true },
@@ -43,14 +42,19 @@ const EventSchema = new Schema({
         required: true,
       },
       isRequired: { type: Boolean, required: true },
+      position: {
+        type: Number,
+        required: true,
+        default: 1000
+      },
       isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,
       },
-    }),
+    }).index({ position: 1 }),
   ],
-});
+}).index({slug: 1, organizationId: 1}, {unique: true}); // Unique on slug + organization Id
 
 EventSchema.virtual('grantingIsOpen').get(function () {
   if (!this.grantingOpens) return false;

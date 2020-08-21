@@ -1,8 +1,6 @@
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Link from "next/link";
-import { RightArrowIcon } from "../components/Icons";
-import stringToHslColor from "utils/stringToHslColor";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -15,8 +13,14 @@ const EVENTS_QUERY = gql`
   }
 `;
 
-export default () => {
-  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
+export default ({currentOrg}) => {
+  const { data: { events } = { events: [] }, loading } = useQuery(EVENTS_QUERY);
+
+  // TODO - perhaps a redirect to organization pages instead
+  if(!currentOrg) {
+    return (<div><h1 className="text-2xl">404 - Cant find this organization</h1></div>);
+  }
+
   return (
     <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {events.map((event) => (

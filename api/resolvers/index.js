@@ -1,15 +1,13 @@
 const slugify = require('../utils/slugify');
-const {
-  sendMagicLinkEmail,
-  sendInviteEmails,
-  sendRequestToJoinNotifications,
-} = require('../utils/email');
 const { GraphQLScalarType } = require('graphql');
 const GraphQLJSON = require('graphql-type-json');
 const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
+const EmailService = require('../services/email.service');
+const AuthService = require('../services/auth.service');
+const { isValidEmail } = require('../utils/email');
 
 const resolvers = {
   Query: {
@@ -19,12 +17,36 @@ const resolvers = {
     currentUser: (parent, args, { currentUser }) => {
       return currentUser;
     },
-    events: async (parent, args, { models: { Event } }) => {
-      return Event.find();
+    currentOrg: (parent, args, { currentOrg }) => {
+      return currentOrg;
     },
-    event: async (parent, { slug }, { models: { Event } }) => {
-      if (!slug) return null;
-      return Event.findOne({ slug });
+    organization: async (
+      parent,
+      { id },
+      { currentUser, models: { Organization } }
+    ) => {
+      if (!currentUser) throw Error('You need to be logged in');
+      if (!currentUser.organizationId == id && !currentUser.isRootAdmin)
+        throw Error('You need to belong to that organization');
+      return Organization.findOne({ _id: id });
+    },
+    organizations: async (
+      parent,
+      args,
+      { currentUser, models: { Organization } }
+    ) => {
+      if (!currentUser || !currentUser.isRootAdmin)
+        throw Error('Must be root admin to view organizations');
+      return Organization.find();
+    },
+    events: async (parent, args, { currentOrg, models: { Event } }) => {
+      if (!currentOrg) {
+        throw new Error('No organization found');
+      }
+      return Event.find({ organizationId: currentOrg.id });
+    },
+    event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -84,14 +106,55 @@ const resolvers = {
     },
   },
   Mutation: {
+    createOrganization: async (
+      parent,
+      { name, subdomain, customDomain, logo, adminEmail },
+      { models }
+    ) => {
+      if (!adminEmail || !isValidEmail(adminEmail))
+        throw new Error('Not a valid email address');
+
+      const organization = new models.Organization({
+        name,
+        subdomain,
+        logo,
+        ...(customDomain && { customDomain }), //Only add custom domain if not null
+      });
+      await organization.save();
+
+      const { user } = await AuthService.sendMagicLink({
+        inputEmail: adminEmail,
+        currentOrg: organization,
+        models,
+      });
+      user.isOrgAdmin = true;
+      await user.save();
+
+      return organization;
+    },
+    editOrganization: async (
+      parent,
+      { organizationId, name, subdomain, customDomain, logo },
+      { models: { Organization } }
+    ) => {
+      const organization = await Organization.findOne({ _id: organizationId });
+      organization.name = name;
+      organization.logo = logo;
+      organization.subdomain = subdomain;
+      organization.customDomain = customDomain;
+      return organization.save();
+    },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentUser, models: { Event, Member } }
+      { currentUser, currentOrg, models: { Event, Member } }
     ) => {
-      if (!currentUser || !currentUser.isOrgAdmin)
+      if (
+        !currentUser ||
+        !currentUser.isOrgAdmin ||
+        currentUser.organizationId != currentOrg.id
+      )
         throw new Error('You need to be logged in as organisation admin.');
-      // maybe add check to be org admin or so.
 
       // check slug..
       const event = await new Event({
@@ -101,6 +164,7 @@ const resolvers = {
         summary,
         currency,
         registrationPolicy,
+        organizationId: currentOrg.id,
       });
 
       const member = await new Member({
@@ -164,6 +228,24 @@ const resolvers = {
 
       event.customFields.push({ ...customField });
 
+      return event.save();
+    },
+    // Based on https://softwareengineering.stackexchange.com/a/195317/54663
+    setCustomFieldPosition: async (
+      parent,
+      { eventId, fieldId, newPosition },
+      { currentUser, models: { Member, Event } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a custom field');
+
+      const event = await Event.findOne({ _id: eventId });
+      let doc = event.customFields.id(fieldId);
+      doc.position = newPosition;
       return event.save();
     },
     editCustomField: async (
@@ -533,40 +615,20 @@ const resolvers = {
     sendMagicLink: async (
       parent,
       { email: inputEmail },
-      { models: { User, Member, Event } }
+      { currentOrg, models }
     ) => {
-      const email = inputEmail.toLowerCase();
-      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-      if (!emailRegex.test(email)) throw new Error('Not a valid email address');
-
-      // const event = await Event.findOne({ _id: eventId });
-      // if (!event) throw new Error('Did not find event');
-
-      let user = await User.findOne({ email });
-
-      if (!user) {
-        //  let isApproved;
-
-        //   switch (event.registrationPolicy) {
-        //     case 'OPEN':
-        //       isApproved = true;
-        //       break;
-        //     case 'REQUEST_TO_JOIN':
-        //       isApproved = false;
-        //       break;
-        //     case 'INVITE_ONLY':
-        //       throw new Error('This event is invite only');
-        //     default:
-        //       throw new Error('Event has no registration policy');
-        //   }
-
-        user = await new User({ email }).save();
-      }
-
-      return await sendMagicLinkEmail(user);
+      const { isSentSuccess } = await AuthService.sendMagicLink({
+        inputEmail,
+        currentOrg,
+        models,
+      });
+      return isSentSuccess;
     },
-    updateProfile: async (parent, { name, avatar, bio }, { currentUser }) => {
+    updateProfile: async (
+      parent,
+      { name, avatar, bio },
+      { currentUser, currentOrg }
+    ) => {
       if (!currentUser) throw new Error('You need to be logged in..');
 
       // TODO figure this shit out
@@ -587,7 +649,7 @@ const resolvers = {
       //       eventId: currentMember.eventId,
       //       isAdmin: true,
       //     });
-      //     await sendRequestToJoinNotifications(member, event, admins);
+      //     await EmailService.sendRequestToJoinNotifications(currentOrg, member, event, admins);
       //   }
       // }
 
@@ -682,6 +744,25 @@ const resolvers = {
       });
       // TODO: doesit actually delete?
       return member;
+    },
+    deleteOrganization: async (
+      parent,
+      { organizationId },
+      { currentUser, models: { Organization } }
+    ) => {
+      if (!currentUser || !currentUser.isRootAdmin)
+        throw new Error('You need to be root admin to delete and organization');
+
+      const organization = await Organization.findOne({
+        _id: organizationId,
+      });
+
+      if (!organization)
+        throw Error(`Cant find organization by id ${organizationId}`);
+
+      return await Organization.findOneAndDelete({
+        _id: organizationId,
+      });
     },
     approveForGranting: async (
       parent,
@@ -1102,7 +1183,7 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      { currentUser, models: { Member, Event } }
+      { currentUser, currentOrg, models: { Member, Event } }
     ) => {
       if (!currentUser)
         throw new Error('You need to be logged in to register for an event.');
@@ -1136,7 +1217,12 @@ const resolvers = {
           }).populate('userId');
 
           const adminEmails = admins.map((member) => member.userId.email);
-          await sendRequestToJoinNotifications(currentUser, event, adminEmails);
+          await EmailService.sendRequestToJoinNotifications(
+            currentOrg,
+            currentUser,
+            event,
+            adminEmails
+          );
           break;
 
         case 'INVITE_ONLY':
@@ -1184,9 +1270,16 @@ const resolvers = {
     memberships: async (user, args, { models: { Member } }) => {
       return Member.find({ userId: user.id });
     },
-    membership: async (user, { slug }, { models: { Member, Event } }) => {
+    membership: async (
+      user,
+      { slug },
+      { currentOrg, models: { Member, Event } }
+    ) => {
       if (!slug) return null;
-      const event = await Event.findOne({ slug });
+      const event = await Event.findOne({
+        organizationId: currentOrg.id,
+        slug,
+      });
       return Member.findOne({ userId: user.id, eventId: event.id });
     },
   },
@@ -1298,8 +1391,33 @@ const resolvers = {
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {
     customField: async (customFieldValue, args, { models: { Event } }) => {
-      const { eventId, fieldId, value } = customFieldValue;
+      const { eventId, fieldId } = customFieldValue;
       const event = await Event.findOne({ _id: eventId });
+      const eventCustomField = event.customFields.filter(
+        (eventCustomField) => eventCustomField.id == fieldId
+      );
+
+      if (!eventCustomField || eventCustomField.length == 0) {
+        return {
+          id: fieldId,
+          name: '⚠️ Missing custom field ⚠️',
+          description: 'Custom field was removed',
+          type: 'TEXT',
+          position: 1000,
+          isRequired: false,
+          createdAt: new Date(),
+        };
+      }
+      return eventCustomField[0];
+    },
+  },
+  CustomFieldFilterLabels: {
+    customField: async (customFieldValue, args, { models: { Event } }) => {
+      const { eventId, fieldId } = customFieldValue;
+      const event = await Event.findOne({ _id: eventId });
+      if (!event.customFields) {
+        return;
+      }
       const eventCustomField = event.customFields.filter(
         (eventCustomField) => eventCustomField.id == fieldId
       );
