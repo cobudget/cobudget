@@ -16,11 +16,7 @@ module.exports = (phase) => {
   const env = {
     GRAPHQL_URL: isDev
       ? "http://localhost:4000/graphql"
-      : `https://${
-          process.env.VERCEL_URL
-            ? process.env.VERCEL_URL
-            : process.env.DEPLOY_URL
-        }/api`,
+      : `https://api.dreams.wtf/graphql`,
     IS_PROD: isProd,
     DEPLOY_URL: process.env.DEPLOY_URL,
   };
