@@ -17,5 +17,6 @@ COPY --from=build /src/.next /usr/app/.next
 
 ENV NODE_ENV production
 ENV PORT 3000
+ENV DEPLOY_URL "dreams.wtf"
 
 CMD ["npm", "start"]
