@@ -54,7 +54,9 @@ const NavItem = ({
           " " +
           (primary
             ? "bg-black text-white hover:bg-gray-900"
-            : `sm:hover:bg-${eventColor}-darker text-gray-800 sm:text-white`)
+            : eventColor
+            ? `sm:text-white sm:hover:bg-${eventColor}-darker`
+            : "sm:text-gray-800")
         }`}
       >
         {children}
