@@ -5,10 +5,10 @@ import Card from "../styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($eventId: ID!, $guidelines: String) {
-    editEvent(eventId: $eventId, guidelines: $guidelines) {
+  mutation editEvent($eventId: ID!, $guidelinesMarkdown: String) {
+    editEvent(eventId: $eventId, guidelinesMarkdown: $guidelinesMarkdown) {
       id
-      guidelines
+      guidelinesMarkdown
     }
   }
 `;
@@ -39,9 +39,9 @@ export default ({ closeModal, event }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="guidelines"
+              name="guidelinesMarkdown"
               label="Guidelines (markdown)"
-              defaultValue={event.guidelines}
+              defaultValue={event.guidelinesMarkdown}
               inputRef={register}
               fullWidth
               multiline

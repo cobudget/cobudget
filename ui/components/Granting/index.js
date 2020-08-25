@@ -158,13 +158,13 @@ export default ({ event, currentUser }) => {
         </>
       )}
 
-      {(event.guidelines || currentUser?.membership?.isAdmin) && (
+      {(event.guidelinesMarkdown || currentUser?.membership?.isAdmin) && (
         <>
           <h2 className="text-xl mb-3" id="guidelines">
             Guidelines
           </h2>
           <div className="shadow rounded-lg bg-white p-4 relative mb-4">
-            {event.guidelines ? (
+            {event.guidelinesMarkdown ? (
               <>
                 {currentUser?.membership?.isAdmin && (
                   <div className="absolute right-0 top-0 m-4">
@@ -173,7 +173,10 @@ export default ({ event, currentUser }) => {
                     </IconButton>
                   </div>
                 )}
-                <ReactMarkdown className="markdown" source={event.guidelines} />
+                <ReactMarkdown
+                  className="markdown"
+                  source={event.guidelinesMarkdown}
+                />
               </>
             ) : (
               <div className="flex justify-center">

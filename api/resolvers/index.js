@@ -25,9 +25,9 @@ const resolvers = {
       { id },
       { currentUser, models: { Organization } }
     ) => {
-      if (!currentUser) throw Error('You need to be logged in');
+      if (!currentUser) throw new Error('You need to be logged in');
       if (!currentUser.organizationId == id && !currentUser.isRootAdmin)
-        throw Error('You need to belong to that organization');
+        throw new Error('You need to belong to that organization');
       return Organization.findOne({ _id: id });
     },
     organizations: async (
@@ -36,7 +36,7 @@ const resolvers = {
       { currentUser, models: { Organization } }
     ) => {
       if (!currentUser || !currentUser.isRootAdmin)
-        throw Error('Must be root admin to view organizations');
+        throw new Error('Must be root admin to view organizations');
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
@@ -46,6 +46,7 @@ const resolvers = {
       return Event.find({ organizationId: currentOrg.id });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
@@ -186,7 +187,7 @@ const resolvers = {
         title,
         registrationPolicy,
         info,
-        guidelines,
+        guidelinesMarkdown,
         color,
         about,
       },
@@ -206,9 +207,85 @@ const resolvers = {
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
       if (typeof info !== 'undefined') event.info = info;
-      if (typeof guidelines !== 'undefined') event.guidelines = guidelines;
+      if (typeof guidelinesMarkdown !== 'undefined')
+        event.guidelinesMarkdown = guidelinesMarkdown;
       if (typeof about !== 'undefined') event.about = about;
       if (color) event.color = color;
+
+      return event.save();
+    },
+    addGuideline: async (
+      parent,
+      { eventId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to add a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      event.guidelines.push({ ...guideline });
+
+      return event.save();
+    },
+    editGuideline: async (
+      parent,
+      { eventId, guidelineId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.guidelines.id(guidelineId);
+
+      doc.title = guideline.title;
+      doc.description = guideline.description;
+
+      return event.save();
+    },
+    setGuidelinePosition: async (
+      parent,
+      { eventId, guidelineId, newPosition },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to edit a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+      let doc = event.guidelines.id(guidelineId);
+      doc.position = newPosition;
+      return event.save();
+    },
+    deleteGuideline: async (
+      parent,
+      { eventId, guidelineId },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!currentMember || !currentMember.isAdmin)
+        throw new Error('You need to be event admin to remove a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.guidelines.id(guidelineId);
+      doc.remove();
 
       return event.save();
     },
@@ -758,7 +835,7 @@ const resolvers = {
       });
 
       if (!organization)
-        throw Error(`Cant find organization by id ${organizationId}`);
+        throw new Error(`Cant find organization by id ${organizationId}`);
 
       return await Organization.findOneAndDelete({
         _id: organizationId,

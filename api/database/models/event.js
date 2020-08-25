@@ -26,7 +26,18 @@ const EventSchema = new Schema({
   grantingOpens: Date,
   grantingCloses: Date,
   pretixEvent: String,
-  guidelines: String,
+  guidelinesMarkdown: String,
+  guidelines: [
+    new Schema({
+      title: { type: String, required: true },
+      description: { type: String, required: true },
+      position: {
+        type: Number,
+        required: true,
+        default: 1000,
+      },
+    }),
+  ],
   allowStretchGoals: { type: Boolean, default: false },
   color: { type: String, default: 'anthracit' },
   about: { type: String },
@@ -37,7 +48,7 @@ const EventSchema = new Schema({
       description: { type: String, required: true },
       type: {
         type: String,
-        enum: ['TEXT', 'MULTILINE_TEXT','BOOLEAN','ENUM','FILE'],
+        enum: ['TEXT', 'MULTILINE_TEXT', 'BOOLEAN', 'ENUM', 'FILE'],
         default: 'TEXT',
         required: true,
       },
@@ -45,7 +56,7 @@ const EventSchema = new Schema({
       position: {
         type: Number,
         required: true,
-        default: 1000
+        default: 1000,
       },
       isShownOnFrontPage: Boolean,
       createdAt: {
@@ -54,7 +65,7 @@ const EventSchema = new Schema({
       },
     }).index({ position: 1 }),
   ],
-}).index({slug: 1, organizationId: 1}, {unique: true}); // Unique on slug + organization Id
+}).index({ slug: 1, organizationId: 1 }, { unique: true }); // Unique on slug + organization Id
 
 EventSchema.virtual('grantingIsOpen').get(function () {
   if (!this.grantingOpens) return false;

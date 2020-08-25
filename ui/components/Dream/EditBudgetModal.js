@@ -213,7 +213,7 @@ export default ({
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
-              {event.guidelines && (
+              {event.guidelinesMarkdown && (
                 <a
                   href={`/${event.slug}/about#guidelines`}
                   target="_blank"
