@@ -36,6 +36,12 @@ export const TOP_LEVEL_QUERY = gql`
       guidelinesMarkdown
       about
       allowStretchGoals
+      guidelines {
+        id
+        title
+        description
+        position
+      }
       customFields {
         id
         name

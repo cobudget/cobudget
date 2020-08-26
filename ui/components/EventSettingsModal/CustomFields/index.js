@@ -29,14 +29,14 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-  
+
   const [deleteCustomField, { loading }] = useMutation(
     DELETE_CUSTOM_FIELD_MUTATION,
     {
       variables: { eventId: event.id },
     }
   );
-  
+
   return (
     <>
       <h1 className="text-2xl font-semibold mb-2">Custom fields</h1>
@@ -48,7 +48,8 @@ export default ({ event }) => {
         event={event}
         customFields={event.customFields}
         setEditingCustomField={setEditingCustomField}
-        deleteCustomField={deleteCustomField}/>
+        deleteCustomField={deleteCustomField}
+      />
 
       <div className="flex my-2">
         <Button
