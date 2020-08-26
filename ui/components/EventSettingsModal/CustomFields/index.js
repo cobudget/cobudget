@@ -8,34 +8,9 @@ import { AddIcon } from "components/Icons";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
 
-const DELETE_CUSTOM_FIELD_MUTATION = gql`
-  mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
-    deleteCustomField(eventId: $eventId, fieldId: $fieldId) {
-      id
-      customFields {
-        id
-        name
-        description
-        type
-        isRequired
-        position
-        isShownOnFrontPage
-        createdAt
-      }
-    }
-  }
-`;
-
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-
-  const [deleteCustomField, { loading }] = useMutation(
-    DELETE_CUSTOM_FIELD_MUTATION,
-    {
-      variables: { eventId: event.id },
-    }
-  );
 
   return (
     <>
@@ -48,7 +23,6 @@ export default ({ event }) => {
         event={event}
         customFields={event.customFields}
         setEditingCustomField={setEditingCustomField}
-        deleteCustomField={deleteCustomField}
       />
 
       <div className="flex my-2">

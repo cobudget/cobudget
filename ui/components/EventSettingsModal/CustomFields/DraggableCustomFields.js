@@ -12,9 +12,35 @@ import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 
+const DELETE_CUSTOM_FIELD_MUTATION = gql`
+  mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
+    deleteCustomField(eventId: $eventId, fieldId: $fieldId) {
+      id
+      customFields {
+        id
+        name
+        description
+        type
+        isRequired
+        position
+        isShownOnFrontPage
+        createdAt
+      }
+    }
+  }
+`;
+
 const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
-  mutation SetCustomFieldPosition($eventId: ID!, $fieldId: ID!, $newPosition: Float) {
-    setCustomFieldPosition(eventId: $eventId, fieldId: $fieldId, newPosition: $newPosition) {
+  mutation SetCustomFieldPosition(
+    $eventId: ID!
+    $fieldId: ID!
+    $newPosition: Float
+  ) {
+    setCustomFieldPosition(
+      eventId: $eventId
+      fieldId: $fieldId
+      newPosition: $newPosition
+    ) {
       id
       customFields {
         id
@@ -43,79 +69,87 @@ const types = {
 
 // We need to make sure that the zIndex is bigger the material design
 // modal otherwise the component disappear when dragged
-export const useStyles = makeStyles(
-  theme => ({
-    sorting: {
-      zIndex: theme.zIndex.modal + 100,
-    },
-  }),
-);
+export const useStyles = makeStyles((theme) => ({
+  sorting: {
+    zIndex: theme.zIndex.modal + 100,
+  },
+}));
 
-const DragHandle = sortableHandle(() => <span className="cursor-move group-hover:text-gray-600 pr-2"><DraggableIcon className="inline h-4 w-4"/></span>);
-
-const SortableItem = sortableElement(({customField, setEditingCustomField, deleteCustomField, loading}) => (
-  <li style={{listStyleType: "none"}} className="group bg-white rounded p-2 border-dashed border-gray-600">
-    {<DragHandle />}
-    
-    <div className="flex items-center justify-between">
-      <h2 className="font-semibold text-lg">{customField.name}</h2>
-      <div>
-        <Tooltip title="Edit" position="bottom" size="small">
-          <IconButton
-            onClick={() => setEditingCustomField(customField)}
-            className="mx-1"
-          >
-            <EditIcon className="h-6 w-6" />
-          </IconButton>
-        </Tooltip>
-
-        <Tooltip title="Delete" position="bottom" size="small">
-          <IconButton
-            onClick={() =>
-              confirm(
-                "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
-              ) &&
-              deleteCustomField({
-                variables: { fieldId: customField.id },
-              })
-            }
-          >
-            <DeleteIcon className="h-6 w-6" />
-          </IconButton>
-        </Tooltip>
-      </div>
-    </div>
-    <p className="mb-2">{customField.description}</p>
-    <div className="flex">
-      <span className={css.label}>Type: {types[customField.type]}</span>
-      {customField.isRequired && (
-        <span className={css.label}>Is Required</span>
-      )}
-      {customField.isShownOnFrontPage && (
-        <span className={css.label}>Shown on front page</span>
-      )}
-    </div>
-  </li>
+const DragHandle = sortableHandle(() => (
+  <span className="cursor-move group-hover:text-gray-600 pr-2">
+    <DraggableIcon className="inline h-4 w-4" />
+  </span>
 ));
 
-const SortableContainer = sortableContainer(({children}) => {
-  return <ul className="select-none">{children}</ul>
+const SortableItem = sortableElement(
+  ({ customField, setEditingCustomField, loading, eventId }) => {
+    const [deleteCustomField, { loading: deleting }] = useMutation(
+      DELETE_CUSTOM_FIELD_MUTATION,
+      {
+        variables: { eventId, fieldId: customField.id },
+      }
+    );
+
+    return (
+      <li
+        style={{ listStyleType: "none" }}
+        className="group bg-white rounded p-2 border-dashed border-gray-600"
+      >
+        {<DragHandle />}
+
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg">{customField.name}</h2>
+          <div>
+            <Tooltip title="Edit" position="bottom" size="small">
+              <IconButton
+                onClick={() => setEditingCustomField(customField)}
+                className="mx-1"
+              >
+                <EditIcon className="h-6 w-6" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Delete" position="bottom" size="small">
+              <IconButton
+                loading={deleting}
+                onClick={() =>
+                  confirm(
+                    "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
+                  ) && deleteCustomField()
+                }
+              >
+                <DeleteIcon className="h-6 w-6" />
+              </IconButton>
+            </Tooltip>
+          </div>
+        </div>
+        <p className="mb-2">{customField.description}</p>
+        <div className="flex">
+          <span className={css.label}>Type: {types[customField.type]}</span>
+          {customField.isRequired && (
+            <span className={css.label}>Is Required</span>
+          )}
+          {customField.isShownOnFrontPage && (
+            <span className={css.label}>Shown on front page</span>
+          )}
+        </div>
+      </li>
+    );
+  }
+);
+
+const SortableContainer = sortableContainer(({ children }) => {
+  return <ul className="select-none">{children}</ul>;
 });
 
-export default ({
-  event,
-  customFields,
-  setEditingCustomField,
-  deleteCustomField,
-}) => {
-
+export default ({ event, customFields, setEditingCustomField }) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localCustomFields, setLocalCustomFields] = useState(customFields);
 
   // This updated the global server custom fields with our local copy
   useEffect(() => {
     // The following prevents two requests from overriding and flickering in the ui
-    if(!loading) {
+    if (!loading) {
       setLocalCustomFields(customFields);
     }
   }, [customFields]);
@@ -138,18 +172,19 @@ export default ({
     let beforeCustomField;
 
     const afterCustomField = localCustomFields[newIndex];
-    if(oldIndex > newIndex) {
+    if (oldIndex > newIndex) {
       beforeCustomField = localCustomFields[newIndex - 1];
-    }else {
+    } else {
       beforeCustomField = localCustomFields[newIndex + 1];
     }
-    if(beforeCustomField) {
+    if (beforeCustomField) {
       beforePosition = beforeCustomField.position;
     } else {
       // Last element
-      beforePosition = localCustomFields[localCustomFields.length-1].position + 1;
-    } 
-    if(newIndex == 0) {
+      beforePosition =
+        localCustomFields[localCustomFields.length - 1].position + 1;
+    }
+    if (newIndex == 0) {
       // First element
       afterPosition = localCustomFields[0].position - 1;
       beforePosition = localCustomFields[0].position;
@@ -159,27 +194,36 @@ export default ({
 
     // In order to replace the position locally we must duplicate the custom fields locally
     let customFieldsNew = [...localCustomFields];
-    const newPosition = ((beforePosition - afterPosition) / 2.0) + afterPosition;
+    const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
     customField.position = newPosition;
     setLocalCustomFields(customFieldsNew);
 
-    setCustomFieldPosition({ variables: {
-      fieldId: customField.id,
-      newPosition
-    }})
+    setCustomFieldPosition({
+      variables: {
+        fieldId: customField.id,
+        newPosition,
+      },
+    });
   };
 
   return (
-    <SortableContainer onSortEnd={onSortEnd} useDragHandle helperClass={classes.sorting}>
-      {localCustomFields.sort((a,b) => a.position - b.position).map((customField, index) => (
-        <SortableItem
-          key={customField.id}
-          index={index}
-          customField={customField}
-          setEditingCustomField={setEditingCustomField}
-          deleteCustomField={deleteCustomField}
-          loading={loading}/>
-      ))}
+    <SortableContainer
+      onSortEnd={onSortEnd}
+      useDragHandle
+      helperClass={classes.sorting}
+    >
+      {localCustomFields
+        .sort((a, b) => a.position - b.position)
+        .map((customField, index) => (
+          <SortableItem
+            key={customField.id}
+            index={index}
+            customField={customField}
+            setEditingCustomField={setEditingCustomField}
+            loading={loading}
+            eventId={event.id}
+          />
+        ))}
     </SortableContainer>
   );
-}
+};

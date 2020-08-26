@@ -12,6 +12,19 @@ import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 
+const DELETE_GUIDELINE_MUTATION = gql`
+  mutation DeleteGuideline($eventId: ID!, $guidelineId: ID!) {
+    deleteGuideline(eventId: $eventId, guidelineId: $guidelineId) {
+      id
+      guidelines {
+        id
+        title
+        description
+      }
+    }
+  }
+`;
+
 const SET_GUIDELINE_POSITION_MUTATION = gql`
   mutation SetGuidelinePosition(
     $eventId: ID!
@@ -49,56 +62,58 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({ guideline, setEditingGuideline, deleteGuideline, loading }) => (
-    <li
-      style={{ listStyleType: "none" }}
-      className="group bg-white rounded p-2 border-dashed border-gray-600"
-    >
-      {<DragHandle />}
+  ({ guideline, setEditingGuideline, eventId, loading }) => {
+    const [deleteGuideline, { loading: deleting }] = useMutation(
+      DELETE_GUIDELINE_MUTATION,
+      {
+        variables: { eventId, guidelineId: guideline.id },
+      }
+    );
 
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-lg">{guideline.title}</h2>
-        <div>
-          <Tooltip title="Edit" position="bottom" size="small">
-            <IconButton
-              onClick={() => setEditingGuideline(guideline)}
-              className="mx-1"
-            >
-              <EditIcon className="h-6 w-6" />
-            </IconButton>
-          </Tooltip>
+    return (
+      <li
+        style={{ listStyleType: "none" }}
+        className="group bg-white rounded p-2 border-dashed border-gray-600"
+      >
+        {<DragHandle />}
 
-          <Tooltip title="Delete" position="bottom" size="small">
-            <IconButton
-              onClick={() =>
-                confirm(
-                  "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
-                ) &&
-                deleteGuideline({
-                  variables: { guidelineId: guideline.id },
-                })
-              }
-            >
-              <DeleteIcon className="h-6 w-6" />
-            </IconButton>
-          </Tooltip>
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold text-lg">{guideline.title}</h2>
+          <div>
+            <Tooltip title="Edit" position="bottom" size="small">
+              <IconButton
+                onClick={() => setEditingGuideline(guideline)}
+                className="mx-1"
+              >
+                <EditIcon className="h-6 w-6" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Delete" position="bottom" size="small">
+              <IconButton
+                loading={deleting}
+                onClick={() =>
+                  confirm(
+                    "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
+                  ) && deleteGuideline()
+                }
+              >
+                <DeleteIcon className="h-6 w-6" />
+              </IconButton>
+            </Tooltip>
+          </div>
         </div>
-      </div>
-      <p className="mb-2">{guideline.description}</p>
-    </li>
-  )
+        <p className="mb-2">{guideline.description}</p>
+      </li>
+    );
+  }
 );
 
 const SortableContainer = sortableContainer(({ children }) => {
   return <ul className="select-none">{children}</ul>;
 });
 
-export default ({
-  event,
-  guidelines,
-  setEditingGuideline,
-  deleteGuideline,
-}) => {
+export default ({ event, guidelines, setEditingGuideline }) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localGuidelines, setLocalGuidelines] = useState(guidelines);
 
@@ -175,8 +190,8 @@ export default ({
             index={index}
             guideline={guideline}
             setEditingGuideline={setEditingGuideline}
-            deleteGuideline={deleteGuideline}
             loading={loading}
+            eventId={event.id}
           />
         ))}
     </SortableContainer>
