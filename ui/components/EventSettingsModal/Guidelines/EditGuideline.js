@@ -104,6 +104,8 @@ export default ({
               placeholder="Description"
               name={"guideline.description"}
               defaultValue={guideline.description}
+              multiline
+              rows={4}
               inputRef={register}
               error={errors.guideline?.description}
               helperText={errors.guideline?.description?.message}
