@@ -43,7 +43,7 @@ export default ({ event, handleClose }) => {
     handleSubmit,
     register,
     setValue,
-    formState: { dirty },
+    formState: { isDirty },
     errors,
   } = useForm();
 
@@ -117,7 +117,7 @@ export default ({ event, handleClose }) => {
           <Button onClick={handleClose} variant="secondary" className="mr-2">
             Close
           </Button>
-          <Button type="submit" disabled={!dirty} loading={loading}>
+          <Button type="submit" disabled={!isDirty} loading={loading}>
             Save
           </Button>
         </div>
