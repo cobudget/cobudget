@@ -17,6 +17,7 @@ const EDIT_EVENT = gql`
     $registrationPolicy: RegistrationPolicy
     $info: String
     $color: String
+    $about: String
   ) {
     editEvent(
       eventId: $eventId
@@ -25,6 +26,7 @@ const EDIT_EVENT = gql`
       registrationPolicy: $registrationPolicy
       info: $info
       color: $color
+      about: $about
     ) {
       id
       title
@@ -32,6 +34,7 @@ const EDIT_EVENT = gql`
       registrationPolicy
       info
       color
+      about
     }
   }
 `;
@@ -48,7 +51,7 @@ export default ({ event, handleClose }) => {
   } = useForm();
 
   return (
-    <>
+    <div className="px-6">
       <h2 className="text-2xl font-semibold">General</h2>
       <form
         onSubmit={handleSubmit((variables) => {
@@ -113,15 +116,29 @@ export default ({ event, handleClose }) => {
           className="my-4"
         />
 
+        <TextField
+          name="about"
+          label="About (markdown allowed)"
+          defaultValue={event.about}
+          multiline
+          rows={5}
+          inputRef={register}
+          className="my-4"
+        />
+
         <div className="mt-2 flex justify-end">
           <Button onClick={handleClose} variant="secondary" className="mr-2">
             Close
           </Button>
-          <Button type="submit" disabled={!isDirty} loading={loading}>
+          <Button
+            type="submit"
+            disabled={!(isDirty || event.color !== color)}
+            loading={loading}
+          >
             Save
           </Button>
         </div>
       </form>
-    </>
+    </div>
   );
 };

@@ -3,9 +3,11 @@ import { Modal } from "@material-ui/core";
 
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
+import Guidelines from "./Guidelines";
 
 const tabs = [
   { name: "General", component: GeneralSettings },
+  { name: "Guidelines", component: Guidelines },
   { name: "Custom fields", component: CustomFields },
 ];
 
@@ -27,6 +29,7 @@ export default ({ event, handleClose }) => {
             <div className="flex flex-col">
               {tabs.map((tab, i) => (
                 <button
+                  key={tab.name}
                   onClick={() => setSelectedTab(i)}
                   className={
                     "text-left px-6 py-2 focus:outline-none " +
@@ -38,7 +41,7 @@ export default ({ event, handleClose }) => {
               ))}
             </div>
           </div>
-          <div className="p-6 col-span-3">
+          <div className="py-6 col-span-3">
             <SettingsComponent event={event} handleClose={handleClose} />
           </div>
         </div>

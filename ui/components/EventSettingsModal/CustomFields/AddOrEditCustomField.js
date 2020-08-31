@@ -7,9 +7,9 @@ import { yupResolver } from "@hookform/resolvers";
 
 import { Checkbox, Modal } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import TextField from "../TextField";
-import Button from "../Button";
-import { SelectField } from "../SelectInput";
+import TextField from "components/TextField";
+import Button from "components/Button";
+import { SelectField } from "components/SelectInput";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
   mutation AddCustomField($eventId: ID!, $customField: CustomFieldInput!) {
