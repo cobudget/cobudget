@@ -13,9 +13,9 @@ export default ({ event }) => {
   const [editingCustomField, setEditingCustomField] = useState(undefined);
 
   return (
-    <>
+    <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">Custom fields</h1>
-      <p className="text-gray-700 mb-2">
+      <p className="text-gray-700 mb-4">
         Custom fields are extra fields or questions for Dreams
       </p>
 
@@ -44,6 +44,6 @@ export default ({ event }) => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };

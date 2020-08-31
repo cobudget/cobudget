@@ -56,9 +56,12 @@ export const useStyles = makeStyles((theme) => ({
 }));
 
 const DragHandle = sortableHandle(() => (
-  <span className="cursor-move group-hover:text-gray-600 pr-2">
-    <DraggableIcon className="inline h-4 w-4" />
-  </span>
+  <IconButton
+    //onClick={() => setEditingGuideline(guideline)}
+    className="mx-1 cursor-move"
+  >
+    <DraggableIcon className="h-6 w-6" />
+  </IconButton>
 ));
 
 const SortableItem = sortableElement(
@@ -71,12 +74,7 @@ const SortableItem = sortableElement(
     );
 
     return (
-      <li
-        style={{ listStyleType: "none" }}
-        className="group bg-white rounded p-2 border-dashed border-gray-600"
-      >
-        {<DragHandle />}
-
+      <li className="group bg-white p-4 mb-3 rounded shadow list-none">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg">{guideline.title}</h2>
           <div>
@@ -94,12 +92,16 @@ const SortableItem = sortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
+                    "Are you sure you would like to delete this guideline?"
                   ) && deleteGuideline()
                 }
               >
                 <DeleteIcon className="h-6 w-6" />
               </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Drag to reorder" position="bottom" size="small">
+              <DragHandle />
             </Tooltip>
           </div>
         </div>

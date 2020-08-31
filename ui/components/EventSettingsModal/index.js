@@ -41,7 +41,7 @@ export default ({ event, handleClose }) => {
               ))}
             </div>
           </div>
-          <div className="p-6 col-span-3">
+          <div className="py-6 col-span-3">
             <SettingsComponent event={event} handleClose={handleClose} />
           </div>
         </div>

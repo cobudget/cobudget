@@ -8,34 +8,14 @@ import { AddIcon } from "components/Icons";
 import AddOrEditGuideline from "./EditGuideline";
 import DraggableGuidelines from "./DraggableGuidelines";
 
-const DELETE_GUIDELINE_MUTATION = gql`
-  mutation DeleteGuideline($eventId: ID!, $guidelineId: ID!) {
-    deleteGuideline(eventId: $eventId, guidelineId: $guidelineId) {
-      id
-      guidelines {
-        id
-        title
-        description
-      }
-    }
-  }
-`;
-
 export default ({ event }) => {
   const [addGuidelineModalOpen, setAddGuidelineModalOpen] = useState(false);
   const [editingGuideline, setEditingGuideline] = useState(undefined);
 
-  const [deleteGuideline, { loading }] = useMutation(
-    DELETE_GUIDELINE_MUTATION,
-    {
-      variables: { eventId: event.id },
-    }
-  );
-
   return (
-    <>
+    <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">Guidelines</h1>
-      <p className="text-gray-700 mb-2">
+      <p className="text-gray-700 mb-4">
         Set up the guidelines that dreams should follow.
       </p>
 
@@ -43,7 +23,6 @@ export default ({ event }) => {
         event={event}
         guidelines={event.guidelines}
         setEditingGuideline={setEditingGuideline}
-        deleteGuideline={deleteGuideline}
       />
 
       <div className="flex my-2">
@@ -65,6 +44,6 @@ export default ({ event }) => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };

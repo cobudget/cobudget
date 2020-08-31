@@ -24,7 +24,6 @@ import SetGrantValue from "./SetGrantValue";
 import SetDreamCreationCloses from "./SetDreamCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetGuidelines from "./SetGuidelines";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 import thousandSeparator from "../../utils/thousandSeparator";
@@ -51,7 +50,6 @@ const modals = {
   SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
   SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
   SET_TOTAL_BUDGET: SetTotalBudget,
-  SET_GUIDELINES: SetGuidelines,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_ABOUT: SetAbout,
 };
@@ -130,67 +128,38 @@ export default ({ event, currentUser }) => {
           {open && <ModalContent event={event} closeModal={handleClose} />}
         </div>
       </Modal>
-      {(event.about || currentUser?.membership?.isAdmin) && (
+      {event.about && (
         <>
           <h2 className="text-xl mb-3" id="about">
             About
           </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
-            {event.about ? (
-              <>
-                {currentUser?.membership?.isAdmin && (
-                  <div className="absolute right-0 top-0 m-4">
-                    <IconButton onClick={() => handleOpen("SET_ABOUT")}>
-                      <EditIcon />
-                    </IconButton>
-                  </div>
-                )}
-                <ReactMarkdown className="markdown" source={event.about} />
-              </>
-            ) : (
-              <div className="flex justify-center">
-                <IconButton onClick={() => handleOpen("SET_ABOUT")}>
-                  <AddIcon />
-                </IconButton>
-              </div>
-            )}
+          <div className="shadow rounded-lg bg-white p-4 relative mb-6">
+            <ReactMarkdown className="markdown" source={event.about} />
           </div>
         </>
       )}
 
-      {(event.guidelinesMarkdown || currentUser?.membership?.isAdmin) && (
+      {event.guidelines.length && (
         <>
           <h2 className="text-xl mb-3" id="guidelines">
             Guidelines
           </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
-            {event.guidelinesMarkdown ? (
-              <>
-                {currentUser?.membership?.isAdmin && (
-                  <div className="absolute right-0 top-0 m-4">
-                    <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                      <EditIcon />
-                    </IconButton>
-                  </div>
-                )}
+          <div className="shadow rounded-lg bg-white relative mb-6">
+            {event.guidelines.map((guideline) => (
+              <div className="border-b first:border-0 p-4">
+                <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <ReactMarkdown
                   className="markdown"
-                  source={event.guidelinesMarkdown}
+                  source={guideline.description}
                 />
-              </>
-            ) : (
-              <div className="flex justify-center">
-                <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                  <AddIcon />
-                </IconButton>
               </div>
-            )}
+            ))}
           </div>
         </>
       )}
 
       <h2 className="text-xl mb-3">Granting settings</h2>
-      <div className="bg-white rounded-lg shadow mb-4">
+      <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <SettingsListItem
             primary="Currency"
@@ -320,7 +289,7 @@ export default ({ event, currentUser }) => {
       </div>
 
       <h2 className="text-xl mb-3">Granting status</h2>
-      <div className="bg-white rounded-lg shadow mb-4">
+      <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
             <ListItemText
