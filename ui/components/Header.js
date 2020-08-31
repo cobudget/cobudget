@@ -199,17 +199,16 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               <>
                 {event && (
                   <>
+                    <NavItem
+                      href="/[event]/about"
+                      as={`/${event.slug}/about`}
+                      currentPath={router.pathname}
+                      eventColor={event.color}
+                    >
+                      About
+                    </NavItem>
                     {currentUser.membership ? (
                       <>
-                        <NavItem
-                          href="/[event]/about"
-                          as={`/${event.slug}/about`}
-                          currentPath={router.pathname}
-                          eventColor={event.color}
-                        >
-                          About
-                        </NavItem>
-
                         {currentUser.membership.isAdmin && (
                           <>
                             <NavItem
