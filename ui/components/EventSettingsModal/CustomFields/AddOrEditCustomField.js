@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { useForm, Controller } from "react-hook-form";
@@ -46,6 +47,7 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
         createdAt
       }
@@ -93,6 +95,10 @@ export default ({
     resolver: yupResolver(schema),
   });
 
+  // Requires to manage seperetly due to Material UI Checkbox 
+  const [isShownOnFrontPage, setIsShownOnFrontPage] = useState(customField.isShownOnFrontPage || false);
+  const [isRequired, setIsRequired] = useState(customField.isRequired || false);
+
   return (
     <Modal
       open={true}
@@ -104,10 +110,13 @@ export default ({
           {editing ? "Editing" : "Add"} custom field
         </h1>
         <form
-          onSubmit={handleSubmit((variables) =>
-            addOrEditCustomField({ variables })
+          onSubmit={handleSubmit((variables) => {
+            variables.customField.isShownOnFrontPage = isShownOnFrontPage;
+            variables.customField.isRequired = isRequired;
+            return addOrEditCustomField({ variables })
               .then(() => handleClose())
               .catch((err) => alert(err.message))
+          }
           )}
         >
           <div className="grid gap-4">
@@ -142,7 +151,13 @@ export default ({
                 as={
                   <FormControlLabel
                     label="Is Required"
-                    control={<Checkbox />}
+                    control={
+                      <Checkbox
+                      onChange={(e) => {
+                        setIsRequired(e.target.checked);
+                      }}
+                      checked={isRequired} />
+                    }
                   />
                 }
                 name={"customField.isRequired"}
@@ -154,11 +169,17 @@ export default ({
                 as={
                   <FormControlLabel
                     label="Show on front page"
-                    control={<Checkbox />}
+                    control={
+                      <Checkbox
+                        onChange={(e) => {
+                          setIsShownOnFrontPage(e.target.checked);
+                        }}
+                        checked={isShownOnFrontPage} />
+                      }
                   />
                 }
                 name={"customField.isShownOnFrontPage"}
-                defaultValue={customField.isShownOnFrontPage || false}
+                defaultValue={isShownOnFrontPage}
                 control={control}
                 inputRef={register}
               />
