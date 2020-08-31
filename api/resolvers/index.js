@@ -189,7 +189,7 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!(currentMember || currentMember.isAdmin || currentUser.isOrgAdmin))
         throw new Error('You need to be admin of this event.');
 
       const event = await Event.findOne({ _id: eventId });

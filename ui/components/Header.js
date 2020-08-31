@@ -122,7 +122,8 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                       <h1>{event.title}</h1>
                     </a>
                   </Link>
-                  {currentUser?.membership?.isAdmin && (
+                  {(currentUser?.membership?.isAdmin ||
+                    currentUser?.isOrgAdmin) && (
                     <>
                       <Tooltip
                         title="Event settings"
@@ -136,7 +137,6 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                               ? `text-white bg-${event.color} hover:bg-${event.color}-darker opacity-75 hover:opacity-100`
                               : "text-gray-500 hover:text-gray-800"
                           }
-                          style={{}}
                         >
                           <DotsHorizontalIcon className="h-4 w-4" />
                         </IconButton>
