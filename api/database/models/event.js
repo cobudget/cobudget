@@ -26,7 +26,6 @@ const EventSchema = new Schema({
   grantingOpens: Date,
   grantingCloses: Date,
   pretixEvent: String,
-  guidelinesMarkdown: String,
   guidelines: [
     new Schema({
       title: { type: String, required: true },

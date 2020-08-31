@@ -181,16 +181,7 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      {
-        eventId,
-        slug,
-        title,
-        registrationPolicy,
-        info,
-        guidelinesMarkdown,
-        color,
-        about,
-      },
+      { eventId, slug, title, registrationPolicy, info, color, about },
       { currentUser, models: { Event, Member } }
     ) => {
       const currentMember = await Member.findOne({
@@ -207,8 +198,6 @@ const resolvers = {
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
       if (typeof info !== 'undefined') event.info = info;
-      if (typeof guidelinesMarkdown !== 'undefined')
-        event.guidelinesMarkdown = guidelinesMarkdown;
       if (typeof about !== 'undefined') event.about = about;
       if (color) event.color = color;
 

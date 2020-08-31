@@ -33,7 +33,6 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudgetGrants
       remainingGrants
       numberOfApprovedMembers
-      guidelinesMarkdown
       about
       allowStretchGoals
       guidelines {

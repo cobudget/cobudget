@@ -47,7 +47,6 @@ const schema = gql`
       title: String
       registrationPolicy: RegistrationPolicy
       info: String
-      guidelinesMarkdown: String
       color: String
       about: String
     ): Event!
@@ -186,7 +185,6 @@ const schema = gql`
     grantingOpens: Date
     grantingCloses: Date
     grantingIsOpen: Boolean
-    guidelinesMarkdown: String
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
