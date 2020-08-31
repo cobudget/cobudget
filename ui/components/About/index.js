@@ -139,7 +139,7 @@ export default ({ event, currentUser }) => {
         </>
       )}
 
-      {event.guidelines.length && (
+      {Boolean(event.guidelines.length) && (
         <>
           <h2 className="text-xl mb-3" id="guidelines">
             Guidelines
