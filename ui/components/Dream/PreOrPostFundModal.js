@@ -33,15 +33,18 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
   const classes = useStyles();
   const router = useRouter();
 
+  const dreamId = dream.id;
+
   const [giveGrant] = useMutation(PRE_OR_POST_FUND_MUTATION, {
     update(cache, { data: { preOrPostFund } }) {
       const { dream } = cache.readQuery({
         query: DREAM_QUERY,
-        variables: { slug: router.query.dream, eventId: event.id },
+        variables: { id: dreamId },
       });
 
       cache.writeQuery({
         query: DREAM_QUERY,
+        variables: { id: dreamId },
         data: {
           dream: {
             ...dream,
