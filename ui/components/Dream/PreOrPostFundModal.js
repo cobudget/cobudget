@@ -77,7 +77,8 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
   );
 
   const amountToReachMaxGoal =
-    dream.maxGoalGrants - dream.currentNumberOfGrants;
+    Math.max(dream.maxGoalGrants, dream.minGoalGrants) -
+    dream.currentNumberOfGrants;
 
   return (
     <Modal open={open} onClose={handleClose} className={classes.modal}>
