@@ -209,7 +209,8 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                     </NavItem>
                     {currentUser.membership ? (
                       <>
-                        {currentUser.membership.isAdmin && (
+                        {(currentUser.membership.isAdmin ||
+                          currentUser.isOrgAdmin) && (
                           <>
                             <NavItem
                               href="/[event]/members"

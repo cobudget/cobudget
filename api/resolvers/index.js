@@ -770,7 +770,7 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
         throw new Error('You need to be admin to update member');
 
       const member = await Member.findOne({
