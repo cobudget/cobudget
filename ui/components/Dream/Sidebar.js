@@ -233,12 +233,6 @@ export default ({ dream, event, currentUser, canEdit }) => {
                       >
                         {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
                       </button>
-                      <PreOrPostFundModal
-                        open={prePostFundModalOpen}
-                        handleClose={() => setPrePostFundModalOpen(false)}
-                        dream={dream}
-                        event={event}
-                      />
                     </>
                   )}
                 <button
@@ -308,6 +302,12 @@ export default ({ dream, event, currentUser, canEdit }) => {
           currentUser={currentUser}
         />
       </div>
+      <PreOrPostFundModal
+        open={prePostFundModalOpen}
+        handleClose={() => setPrePostFundModalOpen(false)}
+        dream={dream}
+        event={event}
+      />
     </>
   );
 };
