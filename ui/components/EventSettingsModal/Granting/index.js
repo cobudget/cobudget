@@ -138,6 +138,7 @@ export default ({ event }) => {
             disabled={!event.dreamCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
+            eventColor={event.color}
             classes="px-6"
           />
 
@@ -150,6 +151,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANTS_PER_MEMBER")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -163,6 +165,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_MAX_GRANTS_TO_DREAM")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -178,6 +181,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_TOTAL_BUDGET")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -193,6 +197,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANT_VALUE")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -204,6 +209,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -221,6 +227,7 @@ export default ({ event }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -240,6 +247,7 @@ export default ({ event }) => {
               !event.grantValue
             }
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -255,6 +263,7 @@ export default ({ event }) => {
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             disabled={!event.grantingOpens}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
         </List>
       </div>
