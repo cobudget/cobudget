@@ -63,6 +63,7 @@ export default ({ event, open, handleClose }) => {
             autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
+            color={event.color}
           />
 
           <div className="flex justify-end">
@@ -71,10 +72,16 @@ export default ({ event, open, handleClose }) => {
               variant="secondary"
               onClick={handleClose}
               className="mr-3"
+              color={event.color}
             >
               Cancel
             </Button>
-            <Button size="large" type="submit" loading={loading}>
+            <Button
+              size="large"
+              type="submit"
+              loading={loading}
+              color={event.color}
+            >
               Create
             </Button>
           </div>
