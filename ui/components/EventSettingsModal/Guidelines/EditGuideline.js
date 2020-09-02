@@ -99,6 +99,7 @@ export default ({
               inputRef={register}
               error={errors.guideline?.title}
               helperText={errors.guideline?.title?.message}
+              color={event.color}
             />
             <TextField
               placeholder="Description"
@@ -109,6 +110,7 @@ export default ({
               inputRef={register}
               error={errors.guideline?.description}
               helperText={errors.guideline?.description?.message}
+              color={event.color}
             />
           </div>
 
@@ -118,10 +120,11 @@ export default ({
                 variant="secondary"
                 onClick={handleClose}
                 className="mr-2"
+                color={event.color}
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} color={event.color}>
                 Save
               </Button>
             </div>

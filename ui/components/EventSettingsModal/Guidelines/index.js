@@ -28,6 +28,7 @@ export default ({ event }) => {
       <div className="flex my-2">
         <Button
           variant="secondary"
+          color={event.color}
           onClick={() => setAddGuidelineModalOpen(true)}
           className="flex-grow"
         >

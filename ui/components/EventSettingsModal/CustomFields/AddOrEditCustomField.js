@@ -95,8 +95,10 @@ export default ({
     resolver: yupResolver(schema),
   });
 
-  // Requires to manage seperetly due to Material UI Checkbox 
-  const [isShownOnFrontPage, setIsShownOnFrontPage] = useState(customField.isShownOnFrontPage || false);
+  // Requires to manage seperetly due to Material UI Checkbox
+  const [isShownOnFrontPage, setIsShownOnFrontPage] = useState(
+    customField.isShownOnFrontPage || false
+  );
   const [isRequired, setIsRequired] = useState(customField.isRequired || false);
 
   return (
@@ -115,9 +117,8 @@ export default ({
             variables.customField.isRequired = isRequired;
             return addOrEditCustomField({ variables })
               .then(() => handleClose())
-              .catch((err) => alert(err.message))
-          }
-          )}
+              .catch((err) => alert(err.message));
+          })}
         >
           <div className="grid gap-4">
             <TextField
@@ -127,6 +128,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
+              color={event.color}
             />
             <TextField
               placeholder="Description"
@@ -135,6 +137,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
+              color={event.color}
             />
             <div className="flex">
               <SelectField
@@ -142,6 +145,7 @@ export default ({
                 defaultValue={customField.type}
                 inputRef={register}
                 className="mr-4"
+                color={event.color}
               >
                 <option value="TEXT">Short Text</option>
                 <option value="MULTILINE_TEXT">Long Text</option>
@@ -153,10 +157,11 @@ export default ({
                     label="Is Required"
                     control={
                       <Checkbox
-                      onChange={(e) => {
-                        setIsRequired(e.target.checked);
-                      }}
-                      checked={isRequired} />
+                        onChange={(e) => {
+                          setIsRequired(e.target.checked);
+                        }}
+                        checked={isRequired}
+                      />
                     }
                   />
                 }
@@ -174,8 +179,9 @@ export default ({
                         onChange={(e) => {
                           setIsShownOnFrontPage(e.target.checked);
                         }}
-                        checked={isShownOnFrontPage} />
-                      }
+                        checked={isShownOnFrontPage}
+                      />
+                    }
                   />
                 }
                 name={"customField.isShownOnFrontPage"}
@@ -190,12 +196,13 @@ export default ({
             <div className="flex">
               <Button
                 variant="secondary"
+                color={event.color}
                 onClick={handleClose}
                 className="mr-2"
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} color={event.color}>
                 Save
               </Button>
             </div>
