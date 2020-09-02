@@ -27,7 +27,7 @@ const EDIT_COMMENT_MUTATION = gql`
   }
 `;
 
-const EditComment = ({ comment, dreamId, handleDone }) => {
+const EditComment = ({ comment, dreamId, handleDone, event }) => {
   const { handleSubmit, register, errors } = useForm();
 
   const [editComment, { loading }] = useMutation(EDIT_COMMENT_MUTATION, {
@@ -53,12 +53,18 @@ const EditComment = ({ comment, dreamId, handleDone }) => {
         defaultValue={comment.content}
         inputRef={register({ required: "Required" })}
         autoFocus
+        color={event.color}
       />
       <div className="flex justify-end">
-        <Button onClick={handleDone} className="mr-2" variant="secondary">
+        <Button
+          onClick={handleDone}
+          className="mr-2"
+          variant="secondary"
+          color={event.color}
+        >
           Cancel
         </Button>
-        <Button type="submit" loading={loading}>
+        <Button type="submit" loading={loading} color={event.color}>
           Save
         </Button>
       </div>

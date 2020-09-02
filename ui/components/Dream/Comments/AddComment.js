@@ -25,8 +25,8 @@ const ADD_COMMENT = gql`
   }
 `;
 
-const AddComment = ({ currentUser, dreamId }) => {
-  const [addComment] = useMutation(ADD_COMMENT);
+const AddComment = ({ currentUser, dreamId, event }) => {
+  const [addComment, { loading }] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
   const inputRef = React.useRef();
@@ -64,6 +64,7 @@ const AddComment = ({ currentUser, dreamId }) => {
                 register({ required: "Required" });
                 inputRef.current = e;
               }}
+              color={event.color}
             />
           </div>
           {content.length > 0 && (
@@ -71,6 +72,7 @@ const AddComment = ({ currentUser, dreamId }) => {
               <Button
                 onClick={() => setContent("")}
                 variant="secondary"
+                color={event.color}
                 className="mr-2"
               >
                 Cancel
@@ -78,7 +80,8 @@ const AddComment = ({ currentUser, dreamId }) => {
               <Button
                 type="submit"
                 disabled={content.length === 0}
-                color="primary"
+                color={event.color}
+                loading={loading}
               >
                 Submit
               </Button>

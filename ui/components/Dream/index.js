@@ -81,6 +81,7 @@ const Dream = ({ dream, event, currentUser }) => {
               currentUser={currentUser}
               comments={dream.comments}
               dreamId={dream.id}
+              event={event}
             />
           </div>
           <div className="order-first md:order-last">
