@@ -2,11 +2,9 @@ import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 
-import thousandSeparator from "../../utils/thousandSeparator";
+import thousandSeparator from "utils/thousandSeparator";
 
-export default ({ event, currentUser }) => {
-  // const grantingHasOpened = dayjs(event.grantingOpens).isBefore(dayjs());
-
+export default ({ event }) => {
   return (
     <>
       {event.about && (

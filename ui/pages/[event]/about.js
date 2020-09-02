@@ -1,10 +1,10 @@
 import About from "components/About";
 
-export default ({ event, currentUser }) => {
+export default ({ event }) => {
   if (!event) return null;
   return (
     <div className="max-w-screen-md flex-1">
-      <About event={event} currentUser={currentUser} />
+      <About event={event} />
     </div>
   );
 };
