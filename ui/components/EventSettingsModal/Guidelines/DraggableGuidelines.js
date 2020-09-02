@@ -7,6 +7,7 @@ import {
   sortableHandle,
 } from "react-sortable-hoc";
 import { makeStyles } from "@material-ui/core";
+import ReactMarkdown from "react-markdown";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
