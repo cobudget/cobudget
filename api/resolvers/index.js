@@ -97,8 +97,12 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isApproved)
-        throw new Error('You need to be an approved member');
+      if (
+        !((currentMember && currentMember.isApproved) || currentUser.isOrgAdmin)
+      )
+        throw new Error(
+          'You need to be approved member or org admin to view members'
+        );
 
       return Member.find({
         eventId,

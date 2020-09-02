@@ -207,40 +207,38 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                     >
                       About
                     </NavItem>
-                    {currentUser.membership ? (
+                    {(currentUser.membership?.isAdmin ||
+                      currentUser.isOrgAdmin) && (
                       <>
-                        {(currentUser.membership.isAdmin ||
-                          currentUser.isOrgAdmin) && (
-                          <>
-                            <NavItem
-                              href="/[event]/members"
-                              as={`/${event.slug}/members`}
-                              currentPath={router.pathname}
-                              eventColor={event.color}
-                            >
-                              Members
-                            </NavItem>
-                          </>
-                        )}
-
-                        {event.dreamCreationIsOpen &&
-                          currentUser.membership.isApproved && (
-                            <>
-                              <NavItem
-                                onClick={() => setNewDreamModalOpen(true)}
-                                eventColor={event.color}
-                              >
-                                New dream
-                              </NavItem>
-                              <NewDreamModal
-                                open={newDreamModalOpen}
-                                handleClose={() => setNewDreamModalOpen(false)}
-                                event={event}
-                              />
-                            </>
-                          )}
+                        <NavItem
+                          href="/[event]/members"
+                          as={`/${event.slug}/members`}
+                          currentPath={router.pathname}
+                          eventColor={event.color}
+                        >
+                          Members
+                        </NavItem>
                       </>
-                    ) : (
+                    )}
+
+                    {currentUser.membership?.isApproved &&
+                      event.dreamCreationIsOpen && (
+                        <>
+                          <NavItem
+                            onClick={() => setNewDreamModalOpen(true)}
+                            eventColor={event.color}
+                          >
+                            New dream
+                          </NavItem>
+                          <NewDreamModal
+                            open={newDreamModalOpen}
+                            handleClose={() => setNewDreamModalOpen(false)}
+                            event={event}
+                          />
+                        </>
+                      )}
+
+                    {currentUser && !currentUser.membership && (
                       <>
                         {event.registrationPolicy !== "INVITE_ONLY" && (
                           <NavItem
