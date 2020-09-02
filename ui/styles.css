@@ -41,7 +41,7 @@ h5 {
 }
 
 .markdown hr {
-  @apply my-6;
+  @apply m-6;
 }
 
 .markdown p {
