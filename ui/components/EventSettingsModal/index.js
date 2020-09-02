@@ -4,9 +4,11 @@ import { Modal } from "@material-ui/core";
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
+import Granting from "./Granting";
 
 const tabs = [
   { name: "General", component: GeneralSettings },
+  { name: "Granting", component: Granting },
   { name: "Guidelines", component: Guidelines },
   { name: "Custom fields", component: CustomFields },
 ];

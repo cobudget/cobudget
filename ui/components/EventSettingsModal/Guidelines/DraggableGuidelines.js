@@ -56,10 +56,7 @@ export const useStyles = makeStyles((theme) => ({
 }));
 
 const DragHandle = sortableHandle(() => (
-  <IconButton
-    //onClick={() => setEditingGuideline(guideline)}
-    className="mx-1 cursor-move"
-  >
+  <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
   </IconButton>
 ));

@@ -1,36 +1,33 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
-
-import { Box, Button } from "@material-ui/core";
+import { Box, Button, TextField } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-
-import SelectInput from "../SelectInput";
-import Card from "../styled/Card";
+import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetAllowStretchGoals = ({ closeModal, event }) => {
+const SetCurrency = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Allow stretch goals</h1>
+        <h1 className="text-3xl">Set max grants to one dream</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
               variables: {
-                allowStretchGoals: variables.allowStretchGoals === "true",
+                maxGrantsToDream: Number(variables.maxGrantsToDream),
               },
             })
               .then(({ data }) => {
-                console.log({ data });
+                // console.log({ data });
                 closeModal();
               })
               .catch((err) => {
@@ -40,16 +37,19 @@ const SetAllowStretchGoals = ({ closeModal, event }) => {
           })}
         >
           <Box m="15px 0">
-            <SelectInput
-              name="allowStretchGoals"
-              label="Allow stretch goals"
-              defaultValue={event.allowStretchGoals}
-              inputRef={register}
+            <TextField
+              name="maxGrantsToDream"
+              label="Max grants to one dream per user"
+              defaultValue={event.maxGrantsToDream}
               fullWidth
-            >
-              <option value={true}>true</option>
-              <option value={false}>false</option>
-            </SelectInput>
+              inputRef={register}
+              InputProps={{
+                type: "number",
+                min: 1,
+                max: event.grantsPerMember,
+              }}
+              variant="outlined"
+            />
           </Box>
 
           <Button
@@ -66,4 +66,4 @@ const SetAllowStretchGoals = ({ closeModal, event }) => {
   );
 };
 
-export default SetAllowStretchGoals;
+export default SetCurrency;
