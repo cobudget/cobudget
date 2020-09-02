@@ -216,8 +216,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to add a guideline');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add a guideline');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -234,8 +234,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a guideline');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -255,8 +255,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a guideline');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
 
       const event = await Event.findOne({ _id: eventId });
       let doc = event.guidelines.id(guidelineId);
@@ -272,8 +272,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to remove a guideline');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a guideline');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -291,8 +291,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to add custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -310,8 +310,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
       const event = await Event.findOne({ _id: eventId });
       let doc = event.customFields.id(fieldId);
@@ -327,8 +327,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -351,8 +351,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to remove a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
