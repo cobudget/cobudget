@@ -102,7 +102,7 @@ const SortableItem = sortableElement(
             </Tooltip>
           </div>
         </div>
-        <p className="mb-2">{guideline.description}</p>
+        <ReactMarkdown source={guideline.description} className="markdown" />
       </li>
     );
   }
