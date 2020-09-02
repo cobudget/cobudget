@@ -127,12 +127,18 @@ export default ({ event, handleClose }) => {
         />
 
         <div className="mt-2 flex justify-end">
-          <Button onClick={handleClose} variant="secondary" className="mr-2">
+          <Button
+            color={color}
+            onClick={handleClose}
+            variant="secondary"
+            className="mr-2"
+          >
             Close
           </Button>
           <Button
+            color={color}
             type="submit"
-            disabled={!(isDirty || event.color !== color)}
+            //disabled={!(isDirty || event.color !== color)}
             loading={loading}
           >
             Save

@@ -65,17 +65,17 @@ export default ({ event, open, handleClose }) => {
             helperText={errors.title?.message}
           />
 
-          <div className="flex">
+          <div className="flex justify-end">
             <Button
               size="large"
-              type="submit"
-              loading={loading}
+              variant="secondary"
+              onClick={handleClose}
               className="mr-3"
             >
-              Create
-            </Button>
-            <Button size="large" variant="secondary" onClick={handleClose}>
               Cancel
+            </Button>
+            <Button size="large" type="submit" loading={loading}>
+              Create
             </Button>
           </div>
         </form>

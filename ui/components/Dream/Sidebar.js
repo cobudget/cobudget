@@ -1,4 +1,3 @@
-import { Button } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
 import gql from "graphql-tag";
 import { useState } from "react";
@@ -9,6 +8,7 @@ import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
+import Button from "components/Button";
 
 import GiveGrantlingsModal from "./GiveGrantlingsModal";
 import PreOrPostFundModal from "./PreOrPostFundModal";
@@ -89,10 +89,8 @@ export default ({ dream, event, currentUser, canEdit }) => {
               {currentUser?.membership?.availableGrants > 0 && (
                 <>
                   <Button
-                    variant="contained"
-                    color="primary"
+                    color={event.color}
                     fullWidth
-                    size="large"
                     onClick={() => setGrantModalOpen(true)}
                   >
                     Donate to dream
@@ -112,8 +110,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
             <>
               {!dream.published && (
                 <Button
-                  color="primary"
-                  variant="contained"
+                  color={event.color}
                   onClick={() =>
                     publishDream({
                       variables: { unpublish: dream.published },
@@ -132,8 +129,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
               <div className="my-2">
                 {!event.grantingHasClosed && !dream.approved && (
                   <Button
-                    color="primary"
-                    variant="contained"
+                    color={event.color}
                     fullWidth
                     onClick={() =>
                       approveForGranting({
@@ -157,6 +153,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
                       dream.currentNumberOfGrants < dream.minGoalGrants && (
                         <>
                           <Button
+                            color={event.color}
                             onClick={() =>
                               reclaimGrants({
                                 variables: { dreamId: dream.id },
