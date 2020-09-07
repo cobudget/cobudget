@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 const dayjs = require('dayjs');
 
 const EventSchema = new Schema({
@@ -95,4 +95,4 @@ EventSchema.virtual('dreamCreationIsOpen').get(function () {
   return now.isBefore(dreamCreationCloses);
 });
 
-export default EventSchema;
+module.exports = EventSchema;

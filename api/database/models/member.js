@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 const MemberSchema = new Schema({
   eventId: {
@@ -23,4 +23,4 @@ const MemberSchema = new Schema({
   favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }],
 }).index({ userId: 1, eventId: 1 }, { unique: true });
 
-export default MemberSchema;
+module.exports = MemberSchema;

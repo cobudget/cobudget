@@ -1,5 +1,6 @@
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import Router from "next/router";
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
 import TextField from "../TextField";
@@ -25,7 +26,10 @@ export default ({ event, handleClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     deleteEvent(event)
-      .then(() => handleClose())
+      .then(() => {
+        handleClose();
+        Router.push("/");
+      })
       .catch((err) => {
         console.log(err);
         alert(err.message);
@@ -44,9 +48,11 @@ export default ({ event, handleClose }) => {
       className="flex items-center justify-center p-4"
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
-        <h1 className="text-lg font-semibold mb-4">Are you absolutely sure?</h1>
+        <h1 className="text-2xl font-semibold mb-4">
+          Are you absolutely sure?
+        </h1>
         <Banner
-          className={"mb-2"}
+          className={"mb-4"}
           variant="critical"
           title={"Unexpected bad things will happen if you don’t read this!"}
         ></Banner>

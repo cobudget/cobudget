@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 const calculateGoals = require('../../utils/calculateGoals');
 
 const DreamSchema = new Schema({
@@ -12,10 +12,11 @@ const DreamSchema = new Schema({
   cocreators: [Schema.Types.ObjectId],
   customFields: [
     new Schema({
-    fieldId: { type: Schema.Types.ObjectId, required: true },
-    eventId: { type: Schema.Types.ObjectId, required: true },
-    value: Schema.Types.Mixed,
-  })],
+      fieldId: { type: Schema.Types.ObjectId, required: true },
+      eventId: { type: Schema.Types.ObjectId, required: true },
+      value: Schema.Types.Mixed,
+    }),
+  ],
   images: [new Schema({ small: String, large: String })],
   comments: [
     new Schema({
@@ -57,4 +58,4 @@ DreamSchema.virtual('maxGoal').get(function () {
   return max;
 });
 
-export default DreamSchema;
+module.exports = DreamSchema;

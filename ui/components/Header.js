@@ -145,6 +145,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                       {eventSettingsModalOpen && (
                         <EventSettingsModal
                           event={event}
+                          currentUser={currentUser}
                           handleClose={() => setEventSettingsModalOpen(false)}
                         />
                       )}

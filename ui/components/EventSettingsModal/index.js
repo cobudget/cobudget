@@ -13,7 +13,7 @@ const tabs = [
   { name: "Custom fields", component: CustomFields },
 ];
 
-export default ({ event, handleClose }) => {
+export default ({ event, currentUser, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -45,7 +45,11 @@ export default ({ event, handleClose }) => {
           </div>
           <div className="py-6 col-span-3">
             {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
-            <SettingsComponent event={event} handleClose={handleClose} />
+            <SettingsComponent
+              event={event}
+              handleClose={handleClose}
+              currentUser={currentUser}
+            />
           </div>
         </div>
       </Modal>
