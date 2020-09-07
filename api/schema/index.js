@@ -40,7 +40,6 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
-
     editEvent(
       eventId: ID!
       slug: String
@@ -50,6 +49,7 @@ const schema = gql`
       color: String
       about: String
     ): Event!
+    deleteEvent(eventId: ID!): Event
 
     addGuideline(eventId: ID!, guideline: GuidelineInput!): Event!
     editGuideline(

@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 const UserSchema = new Schema({
   name: String,
@@ -25,6 +25,6 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
-}).index({email: 1, organizationId: 1}, {unique: true}); // Unique on email + organization Id
+}).index({ email: 1, organizationId: 1 }, { unique: true }); // Unique on email + organization Id
 
-export default UserSchema;
+module.exports = UserSchema;

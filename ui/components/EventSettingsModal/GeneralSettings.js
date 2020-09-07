@@ -8,6 +8,7 @@ import Button from "components/Button";
 import { SelectField } from "../SelectInput";
 import ColorPicker from "../ColorPicker";
 import slugify from "../../utils/slugify";
+import DeleteEventModal from "./DeleteEventModal";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
@@ -39,9 +40,10 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event, handleClose }) => {
+export default ({ event, currentUser, handleClose }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
+  const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
     handleSubmit,
     register,
@@ -126,6 +128,19 @@ export default ({ event, handleClose }) => {
           className="my-4"
         />
 
+        {currentUser.isOrgAdmin && (
+          <>
+            <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
+            <Button
+              onClick={() => setIsDeleteModalOpened(true)}
+              variant="secondary"
+              color="red"
+            >
+              Delete this event
+            </Button>
+          </>
+        )}
+
         <div className="mt-2 flex justify-end">
           <Button
             color={color}
@@ -145,6 +160,15 @@ export default ({ event, handleClose }) => {
           </Button>
         </div>
       </form>
+
+      {isDeleteModalOpened && (
+        <DeleteEventModal
+          event={event}
+          handleClose={() => {
+            setIsDeleteModalOpened(false);
+          }}
+        />
+      )}
     </div>
   );
 };

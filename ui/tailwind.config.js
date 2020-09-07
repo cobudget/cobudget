@@ -8,7 +8,7 @@ module.exports = {
         sidebar: "1fr 300px",
       },
       height: {
-        "88": "22rem",
+        88: "22rem",
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
@@ -20,6 +20,8 @@ module.exports = {
         red: {
           100: "hsl(351, 80%, 96%)",
           200: "hsl(351, 80%, 93%)",
+          500: "hsl(351, 80%, 69%)",
+          900: "hsl(351, 80%, 14%)",
           default: "hsl(351, 80%, 60%)",
           darker: "hsl(351, 80%, 55%)",
         },
@@ -51,12 +53,16 @@ module.exports = {
         green: {
           100: "hsl(143, 62%, 96%)",
           200: "hsl(143, 62%, 93%)",
+          500: "hsl(143, 62%, 69%)",
+          900: "hsl(143, 62%, 14%)",
           default: "hsl(143, 62%, 45%)",
           darker: "hsl(143, 62%, 40%)",
         },
         yellow: {
           100: "hsl(49, 91%, 96%)",
           200: "hsl(49, 91%, 93%)",
+          500: "hsl(143, 62%, 69%)",
+          900: "hsl(143, 62%, 14%)",
           default: "hsl(49, 91%, 48%)",
           darker: "hsl(49, 91%, 43%)",
         },
@@ -84,15 +90,15 @@ module.exports = {
         alpha: "1",
       },
       spacing: {
-        "7": "1.75rem",
+        7: "1.75rem",
       },
     },
     borderWidth: {
       default: "1px",
-      "0": "0",
-      "2": "2px",
-      "3": "3px",
-      "4": "4px",
+      0: "0",
+      2: "2px",
+      3: "3px",
+      4: "4px",
     },
     animations: {
       "fade-in": {

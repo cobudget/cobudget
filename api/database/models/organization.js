@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+const { Schema } = require('mongoose');
 
 const OrganizationSchema = new Schema({
   name: {
@@ -18,4 +18,4 @@ const OrganizationSchema = new Schema({
   logo: String,
 }).index({ name: 'text', subdomain: 'text', customDomain: 'text' });
 
-export default OrganizationSchema;
+module.exports = OrganizationSchema;

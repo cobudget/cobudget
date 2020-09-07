@@ -207,6 +207,21 @@ const resolvers = {
 
       return event.save();
     },
+    deleteEvent: async (
+      parent,
+      { eventId },
+      { currentUser, models: { Event, Grant, Dream, Member } }
+    ) => {
+      if (!(currentUser && currentUser.isOrgAdmin))
+        throw new Error('You need to be org. admin to delete event');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      await Grant.deleteMany({ eventId });
+      await Dream.deleteMany({ eventId });
+      await Member.deleteMany({ eventId });
+      return event.remove();
+    },
     addGuideline: async (
       parent,
       { eventId, guideline },
