@@ -18,6 +18,7 @@ const EDIT_EVENT = gql`
     $registrationPolicy: RegistrationPolicy
     $info: String
     $color: String
+    $about: String
   ) {
     editEvent(
       eventId: $eventId
@@ -26,6 +27,7 @@ const EDIT_EVENT = gql`
       registrationPolicy: $registrationPolicy
       info: $info
       color: $color
+      about: $about
     ) {
       id
       title
@@ -33,6 +35,7 @@ const EDIT_EVENT = gql`
       registrationPolicy
       info
       color
+      about
     }
   }
 `;
@@ -45,12 +48,12 @@ export default ({ event, handleClose }) => {
     handleSubmit,
     register,
     setValue,
-    formState: { dirty },
+    formState: { isDirty },
     errors,
   } = useForm();
 
   return (
-    <>
+    <div className="px-6">
       <h2 className="text-2xl font-semibold">General</h2>
       <form
         onSubmit={handleSubmit((variables) => {
@@ -115,16 +118,40 @@ export default ({ event, handleClose }) => {
           className="my-4"
         />
 
-        <h2 className="text-2xl font-semibold mb-4">Danger Zone</h2>
-          <Button onClick={() => setIsDeleteModalOpened(true)} variant="secondary" className={"mr-2 hover:bg-red"}>
-              Delete this event
-          </Button>
-          
+        <TextField
+          name="about"
+          label="About (markdown allowed)"
+          defaultValue={event.about}
+          multiline
+          rows={5}
+          inputRef={register}
+          className="my-4"
+        />
+
+        <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
+        <Button
+          onClick={() => setIsDeleteModalOpened(true)}
+          variant="secondary"
+          color="red"
+        >
+          Delete this event
+        </Button>
+
         <div className="mt-2 flex justify-end">
-          <Button onClick={handleClose} variant="secondary" className="mr-2">
+          <Button
+            color={color}
+            onClick={handleClose}
+            variant="secondary"
+            className="mr-2"
+          >
             Close
           </Button>
-          <Button type="submit" disabled={!dirty} loading={loading}>
+          <Button
+            color={color}
+            type="submit"
+            //disabled={!(isDirty || event.color !== color)}
+            loading={loading}
+          >
             Save
           </Button>
         </div>
@@ -138,6 +165,6 @@ export default ({ event, handleClose }) => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };

@@ -25,9 +25,9 @@ const resolvers = {
       { id },
       { currentUser, models: { Organization } }
     ) => {
-      if (!currentUser) throw Error('You need to be logged in');
+      if (!currentUser) throw new Error('You need to be logged in');
       if (!currentUser.organizationId == id && !currentUser.isRootAdmin)
-        throw Error('You need to belong to that organization');
+        throw new Error('You need to belong to that organization');
       return Organization.findOne({ _id: id });
     },
     organizations: async (
@@ -36,7 +36,7 @@ const resolvers = {
       { currentUser, models: { Organization } }
     ) => {
       if (!currentUser || !currentUser.isRootAdmin)
-        throw Error('Must be root admin to view organizations');
+        throw new Error('Must be root admin to view organizations');
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
@@ -46,6 +46,7 @@ const resolvers = {
       return Event.find({ organizationId: currentOrg.id });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
@@ -96,8 +97,12 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isApproved)
-        throw new Error('You need to be an approved member');
+      if (
+        !((currentMember && currentMember.isApproved) || currentUser.isOrgAdmin)
+      )
+        throw new Error(
+          'You need to be approved member or org admin to view members'
+        );
 
       return Member.find({
         eventId,
@@ -137,12 +142,11 @@ const resolvers = {
       { organizationId, name, subdomain, customDomain, logo },
       { models: { Organization } }
     ) => {
-      console.log({ logo });
       const organization = await Organization.findOne({ _id: organizationId });
-      if (name) organization.name = name;
-      if (logo) organization.logo = logo;
-      if (subdomain) organization.subdomain = subdomain;
-      if (customDomain) organization.customDomain = customDomain;
+      organization.name = name;
+      organization.logo = logo;
+      organization.subdomain = subdomain;
+      organization.customDomain = customDomain;
       return organization.save();
     },
     createEvent: async (
@@ -181,16 +185,7 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      {
-        eventId,
-        slug,
-        title,
-        registrationPolicy,
-        info,
-        guidelines,
-        color,
-        about,
-      },
+      { eventId, slug, title, registrationPolicy, info, color, about },
       { currentUser, models: { Event, Member } }
     ) => {
       const currentMember = await Member.findOne({
@@ -198,7 +193,7 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
         throw new Error('You need to be admin of this event.');
 
       const event = await Event.findOne({ _id: eventId });
@@ -207,9 +202,83 @@ const resolvers = {
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
       if (typeof info !== 'undefined') event.info = info;
-      if (typeof guidelines !== 'undefined') event.guidelines = guidelines;
       if (typeof about !== 'undefined') event.about = about;
       if (color) event.color = color;
+
+      return event.save();
+    },
+    addGuideline: async (
+      parent,
+      { eventId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      event.guidelines.push({ ...guideline });
+
+      return event.save();
+    },
+    editGuideline: async (
+      parent,
+      { eventId, guidelineId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.guidelines.id(guidelineId);
+
+      doc.title = guideline.title;
+      doc.description = guideline.description;
+
+      return event.save();
+    },
+    setGuidelinePosition: async (
+      parent,
+      { eventId, guidelineId, newPosition },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+      let doc = event.guidelines.id(guidelineId);
+      doc.position = newPosition;
+      return event.save();
+    },
+    deleteGuideline: async (
+      parent,
+      { eventId, guidelineId },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a guideline');
+
+      const event = await Event.findOne({ _id: eventId });
+
+      let doc = event.guidelines.id(guidelineId);
+      doc.remove();
 
       return event.save();
     },
@@ -222,8 +291,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to add custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -241,8 +310,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
       const event = await Event.findOne({ _id: eventId });
       let doc = event.customFields.id(fieldId);
@@ -258,8 +327,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -282,8 +351,8 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to remove a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a custom field');
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -705,7 +774,7 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
         throw new Error('You need to be admin to update member');
 
       const member = await Member.findOne({
@@ -759,7 +828,7 @@ const resolvers = {
       });
 
       if (!organization)
-        throw Error(`Cant find organization by id ${organizationId}`);
+        throw new Error(`Cant find organization by id ${organizationId}`);
 
       return await Organization.findOneAndDelete({
         _id: organizationId,

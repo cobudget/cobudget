@@ -15,7 +15,7 @@
     "node": "12.x"
   },
   "dependencies": {
-    "apollo-server-micro": "^2.9.12",
+    "apollo-server-micro": "^2.14.2",
     "dayjs": "^1.8.20",
     "graphql": "^14.5.8",
     "graphql-type-json": "0.3.2",

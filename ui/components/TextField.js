@@ -13,6 +13,7 @@ const TextField = ({
   size,
   autoFocus,
   endAdornment,
+  color = "green",
 }) => {
   return (
     <div className={`flex flex-col ${className}`}>
@@ -24,7 +25,7 @@ const TextField = ({
       {multiline ? (
         <textarea
           className={`block  px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
-            error ? "border-red" : "border-transparent focus:border-green"
+            error ? "border-red" : `border-transparent focus:border-${color}`
           } transition-borders ease-in-out duration-200`}
           name={name}
           id={name}
@@ -39,7 +40,9 @@ const TextField = ({
         <div className="relative">
           <input
             className={`block  w-full px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
-              (error ? "border-red" : "border-transparent focus:border-green") +
+              (error
+                ? "border-red"
+                : `border-transparent focus:border-${color}`) +
               " " +
               (size === "large" ? "text-xl" : "") +
               " " +

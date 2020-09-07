@@ -8,6 +8,8 @@ export default ({
   variant = "primary",
   className,
   type = "button",
+  color = "blue",
+  fullWidth = false,
   ...props
 }) => {
   return (
@@ -19,16 +21,22 @@ export default ({
         font-medium transition-colors duration-100 rounded-md 
         relative flex justify-center items-center 
         focus:outline-none focus:shadow-outline ${
-          (size === "large" ? "text-xl px-5 py-3" : "px-5 py-2") +
+          (size === "large"
+            ? "text-xl px-5 py-3"
+            : size === "small"
+            ? "px-4 py-1"
+            : "px-5 py-2") +
           " " +
-          (disabled || loading
-            ? "cursor-default text-gray-600 bg-gray-200"
+          (fullWidth ? "w-full" : "") +
+          " " +
+          (disabled || loading ? "cursor-default" : "") +
+          " " +
+          (disabled
+            ? "text-gray-600 bg-gray-200"
             : variant === "primary"
-            ? "text-white bg-green hover:bg-green-darker"
+            ? `text-white bg-${color} hover:bg-${color}-darker`
             : variant === "secondary"
-            ? "bg-gray-400 text-gray-800 hover:bg-gray-600 hover:text-gray-200"
-            : variant === "error"
-            ? "text-white bg-red hover:bg-red-200"
+            ? `bg-${color}-100 text-${color}-darker hover:bg-${color}-200`
             : "text-gray-800 hover:bg-gray-200")
         } ${className}`}
     >

@@ -22,43 +22,46 @@ const NavItem = ({
   onClick,
   href,
   as,
-  currentPath,
+  currentPath = "",
+  className,
   children,
   primary,
   eventColor,
 }) => {
+  const active = currentPath === href;
+
+  const regularClasses = `border-transparent text-gray-800 hover:bg-gray-300`;
+  const primaryClasses = `border-anthracit hover:bg-anthracit-darker hover:text-gray-200`;
+  const regularEventClasses = `border-transparent text-white hover:bg-${eventColor}-darker`;
+  const primaryEventClasses = `border-white text-white hover:bg-white hover:text-${eventColor}`;
+  const eventActiveClasses = `border-transparent bg-${eventColor}-darker text-white`;
+
+  const colorsClasses = eventColor
+    ? primary
+      ? primaryEventClasses
+      : active
+      ? eventActiveClasses
+      : regularEventClasses
+    : primary
+    ? primaryClasses
+    : regularClasses;
+
+  const classes =
+    "my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 border-2 " +
+    colorsClasses +
+    " " +
+    className;
+
   if (Boolean(onClick)) {
     return (
-      <button
-        className={
-          `my-1 mx-1 px-2 py-1 sm:my-0 block rounded focus:outline-none font-medium text-gray-800  border transitions-colors duration-75 ` +
-          (eventColor ? "sm:text-white" : "sm:text-gray-800") +
-          " " +
-          (primary
-            ? `border-white hover:bg-white sm:hover:text-${eventColor}`
-            : `border-transparent sm:hover:bg-${eventColor}-darker`)
-        }
-        onClick={onClick}
-      >
+      <button className={classes} onClick={onClick}>
         {children}
       </button>
     );
   }
   return (
     <Link href={href} as={as}>
-      <a
-        className={`my-1 mx-1 px-2 py-1 sm:my-0 block rounded focus:outline-none font-medium ${
-          (currentPath === href
-            ? `bg-gray-200 sm:bg-${eventColor}-darker`
-            : "") +
-          " " +
-          (primary
-            ? "bg-black text-white hover:bg-gray-900"
-            : `sm:hover:bg-${eventColor}-darker text-gray-800 sm:text-white`)
-        }`}
-      >
-        {children}
-      </a>
+      <a className={classes}>{children}</a>
     </Link>
   );
 };
@@ -120,7 +123,8 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                       <h1>{event.title}</h1>
                     </a>
                   </Link>
-                  {currentUser?.membership?.isAdmin && (
+                  {(currentUser?.membership?.isAdmin ||
+                    currentUser?.isOrgAdmin) && (
                     <>
                       <Tooltip
                         title="Event settings"
@@ -134,7 +138,6 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                               ? `text-white bg-${event.color} hover:bg-${event.color}-darker opacity-75 hover:opacity-100`
                               : "text-gray-500 hover:text-gray-800"
                           }
-                          style={{}}
                         >
                           <DotsHorizontalIcon className="h-4 w-4" />
                         </IconButton>
@@ -150,16 +153,19 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                 </div>
               </>
             ) : (
-              <>
-                {currentOrg?.logo && (
-                  <a className="block rounded overflow-hidden mr-4">
-                    <img className="h-7 w-7" src={currentOrg.logo} />
-                  </a>
-                )}
-                <h1 className="text-lg font-medium text-gray-900 ">
-                  {currentOrg?.name ?? "Dreams"}
-                </h1>
-              </>
+              <Link href="/">
+                <a className="flex">
+                  {currentOrg?.logo && (
+                    <img
+                      className="h-7 w-7 block rounded overflow-hidden mr-4"
+                      src={currentOrg.logo}
+                    />
+                  )}
+                  <h1 className="text-lg font-medium text-gray-900 ">
+                    {currentOrg?.name ?? "Dreams"}
+                  </h1>
+                </a>
+              </Link>
             )}
           </div>
 
@@ -190,55 +196,57 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
         <nav
           className={` ${
             isMenuOpen ? "block" : "hidden"
-          } -ml-3 -mr-3 min-w-full sm:m-0 sm:min-w-0 sm:block bg-white sm:bg-transparent border-t sm:border-0`}
+          } -ml-3 -mr-3 min-w-full sm:m-0 sm:min-w-0 sm:block bg-${
+            event?.color ? event.color : "gray-100"
+          } sm:bg-transparent`}
         >
-          <div className="py-1 sm:flex sm:p-0 sm:items-center">
+          <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
                 {event && (
                   <>
-                    {currentUser.membership ? (
+                    <NavItem
+                      href="/[event]/about"
+                      as={`/${event.slug}/about`}
+                      currentPath={router.pathname}
+                      eventColor={event.color}
+                    >
+                      About
+                    </NavItem>
+                    {(currentUser.membership?.isAdmin ||
+                      currentUser.isOrgAdmin) && (
                       <>
                         <NavItem
-                          href="/[event]/about"
-                          as={`/${event.slug}/about`}
+                          href="/[event]/members"
+                          as={`/${event.slug}/members`}
                           currentPath={router.pathname}
                           eventColor={event.color}
                         >
-                          About
+                          Members
                         </NavItem>
-
-                        {currentUser.membership.isAdmin && (
-                          <>
-                            <NavItem
-                              href="/[event]/members"
-                              as={`/${event.slug}/members`}
-                              currentPath={router.pathname}
-                              eventColor={event.color}
-                            >
-                              Members
-                            </NavItem>
-                          </>
-                        )}
-
-                        {event.dreamCreationIsOpen &&
-                          currentUser.membership.isApproved && (
-                            <>
-                              <NavItem
-                                onClick={() => setNewDreamModalOpen(true)}
-                                eventColor={event.color}
-                              >
-                                New dream
-                              </NavItem>
-                              <NewDreamModal
-                                open={newDreamModalOpen}
-                                handleClose={() => setNewDreamModalOpen(false)}
-                                event={event}
-                              />
-                            </>
-                          )}
                       </>
-                    ) : (
+                    )}
+
+                    {currentUser.membership?.isApproved &&
+                      event.dreamCreationIsOpen && (
+                        <>
+                          <NavItem
+                            onClick={() => setNewDreamModalOpen(true)}
+                            eventColor={event.color}
+                            className="ml-2"
+                            primary
+                          >
+                            New dream
+                          </NavItem>
+                          <NewDreamModal
+                            open={newDreamModalOpen}
+                            handleClose={() => setNewDreamModalOpen(false)}
+                            event={event}
+                          />
+                        </>
+                      )}
+
+                    {currentUser && !currentUser.membership && (
                       <>
                         {event.registrationPolicy !== "INVITE_ONLY" && (
                           <NavItem
@@ -246,6 +254,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                             as={`/${event.slug}/register`}
                             currentPath={router.pathname}
                             eventColor={event.color}
+                            primary
                           >
                             {event.registrationPolicy === "REQUEST_TO_JOIN"
                               ? "Request to join"
@@ -258,7 +267,13 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                 )}
 
                 {!event && currentUser.isOrgAdmin && (
-                  <NavItem href="/create-event">Create event</NavItem>
+                  <NavItem
+                    primary
+                    currentPath={router.pathname}
+                    href="/create-event"
+                  >
+                    New event
+                  </NavItem>
                 )}
 
                 <div className="hidden sm:block sm:ml-4">
@@ -272,7 +287,11 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
               </>
             ) : (
               <>
-                <NavItem onClick={() => setLoginModalOpen(true)}>
+                <NavItem
+                  onClick={() => setLoginModalOpen(true)}
+                  eventColor={event?.color}
+                  primary
+                >
                   Login or Sign up
                 </NavItem>
                 <LoginModal
@@ -285,7 +304,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
 
           {/* Mobile view of profile dropdown contents above (i.e. all profile dropdown items are declared twice!)*/}
           {currentUser && (
-            <div className="pt-4 pb-1 sm:hidden border-t border-b mb-4 border-gray-300">
+            <div className="pt-4 pb-1 sm:hidden bg-white mb-4 border-gray-300">
               <div className="flex items-center px-3">
                 <Badge
                   overlap="circle"

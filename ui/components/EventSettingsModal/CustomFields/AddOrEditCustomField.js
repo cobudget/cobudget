@@ -1,13 +1,15 @@
+import { useState } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 import { Checkbox, Modal } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-import TextField from "../TextField";
-import Button from "../Button";
-import { SelectField } from "../SelectInput";
+import TextField from "components/TextField";
+import Button from "components/Button";
+import { SelectField } from "components/SelectInput";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
   mutation AddCustomField($eventId: ID!, $customField: CustomFieldInput!) {
@@ -45,6 +47,7 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         isRequired
+        position
         isShownOnFrontPage
         createdAt
       }
@@ -89,8 +92,14 @@ export default ({
   );
 
   const { control, handleSubmit, register, errors } = useForm({
-    validationSchema: schema,
+    resolver: yupResolver(schema),
   });
+
+  // Requires to manage seperetly due to Material UI Checkbox
+  const [isShownOnFrontPage, setIsShownOnFrontPage] = useState(
+    customField.isShownOnFrontPage || false
+  );
+  const [isRequired, setIsRequired] = useState(customField.isRequired || false);
 
   return (
     <Modal
@@ -103,11 +112,13 @@ export default ({
           {editing ? "Editing" : "Add"} custom field
         </h1>
         <form
-          onSubmit={handleSubmit((variables) =>
-            addOrEditCustomField({ variables })
+          onSubmit={handleSubmit((variables) => {
+            variables.customField.isShownOnFrontPage = isShownOnFrontPage;
+            variables.customField.isRequired = isRequired;
+            return addOrEditCustomField({ variables })
               .then(() => handleClose())
-              .catch((err) => alert(err.message))
-          )}
+              .catch((err) => alert(err.message));
+          })}
         >
           <div className="grid gap-4">
             <TextField
@@ -117,6 +128,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
+              color={event.color}
             />
             <TextField
               placeholder="Description"
@@ -125,6 +137,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
+              color={event.color}
             />
             <div className="flex">
               <SelectField
@@ -132,6 +145,7 @@ export default ({
                 defaultValue={customField.type}
                 inputRef={register}
                 className="mr-4"
+                color={event.color}
               >
                 <option value="TEXT">Short Text</option>
                 <option value="MULTILINE_TEXT">Long Text</option>
@@ -141,7 +155,14 @@ export default ({
                 as={
                   <FormControlLabel
                     label="Is Required"
-                    control={<Checkbox />}
+                    control={
+                      <Checkbox
+                        onChange={(e) => {
+                          setIsRequired(e.target.checked);
+                        }}
+                        checked={isRequired}
+                      />
+                    }
                   />
                 }
                 name={"customField.isRequired"}
@@ -153,11 +174,18 @@ export default ({
                 as={
                   <FormControlLabel
                     label="Show on front page"
-                    control={<Checkbox />}
+                    control={
+                      <Checkbox
+                        onChange={(e) => {
+                          setIsShownOnFrontPage(e.target.checked);
+                        }}
+                        checked={isShownOnFrontPage}
+                      />
+                    }
                   />
                 }
                 name={"customField.isShownOnFrontPage"}
-                defaultValue={customField.isShownOnFrontPage || false}
+                defaultValue={isShownOnFrontPage}
                 control={control}
                 inputRef={register}
               />
@@ -168,12 +196,13 @@ export default ({
             <div className="flex">
               <Button
                 variant="secondary"
+                color={event.color}
                 onClick={handleClose}
                 className="mr-2"
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} color={event.color}>
                 Save
               </Button>
             </div>

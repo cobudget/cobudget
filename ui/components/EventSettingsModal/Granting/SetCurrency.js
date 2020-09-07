@@ -1,8 +1,12 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
-import { Box, Button, TextField } from "@material-ui/core";
+
+import { Box, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
-import Card from "../styled/Card";
+
+import currencies from "utils/currencies";
+import SelectInput from "components/SelectInput";
+import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
@@ -12,20 +16,19 @@ const SetCurrency = ({ closeModal, event }) => {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register } = useForm();
+  const { handleSubmit, register, errors } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set max grants to one dream</h1>
-
+        <h1 className="text-3xl">Set currency</h1>
+        <Alert severity="warning">
+          Changing currency will also reset total budget and grant value. You
+          can't change this after dream creation closes.
+        </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({
-              variables: {
-                maxGrantsToDream: Number(variables.maxGrantsToDream),
-              },
-            })
+            updateGranting({ variables })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
@@ -37,19 +40,19 @@ const SetCurrency = ({ closeModal, event }) => {
           })}
         >
           <Box m="15px 0">
-            <TextField
-              name="maxGrantsToDream"
-              label="Max grants to one dream per user"
-              defaultValue={event.maxGrantsToDream}
-              fullWidth
+            <SelectInput
+              name="currency"
+              label="Currency"
+              defaultValue={event.currency}
               inputRef={register}
-              InputProps={{
-                type: "number",
-                min: 1,
-                max: event.grantsPerMember,
-              }}
-              variant="outlined"
-            />
+              fullWidth
+            >
+              {currencies.map((currency) => (
+                <option value={currency} key={currency}>
+                  {currency}
+                </option>
+              ))}
+            </SelectInput>
           </Box>
 
           <Button

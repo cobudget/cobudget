@@ -1,7 +1,7 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 
-const Comments = ({ currentUser, comments, dreamId }) => {
+const Comments = ({ currentUser, comments, dreamId, event }) => {
   return (
     <div>
       {(comments.length > 0 || currentUser?.membership) && (
@@ -17,10 +17,11 @@ const Comments = ({ currentUser, comments, dreamId }) => {
           dreamId={dreamId}
           showBorderBottom={Boolean(index + 1 !== comments.length)}
           key={index}
+          event={event}
         />
       ))}
       {currentUser && currentUser.membership && (
-        <AddComment currentUser={currentUser} dreamId={dreamId} />
+        <AddComment currentUser={currentUser} dreamId={dreamId} event={event} />
       )}
     </div>
   );

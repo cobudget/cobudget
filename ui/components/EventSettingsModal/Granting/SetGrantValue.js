@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@material-ui/core";
 
-import Card from "../styled/Card";
+import Card from "components/styled/Card";
 import thousandSeparator from "utils/thousandSeparator";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 

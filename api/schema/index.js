@@ -47,10 +47,22 @@ const schema = gql`
       title: String
       registrationPolicy: RegistrationPolicy
       info: String
-      guidelines: String
       color: String
       about: String
     ): Event!
+
+    addGuideline(eventId: ID!, guideline: GuidelineInput!): Event!
+    editGuideline(
+      eventId: ID!
+      guidelineId: ID!
+      guideline: GuidelineInput!
+    ): Event!
+    setGuidelinePosition(
+      eventId: ID!
+      guidelineId: ID!
+      newPosition: Float
+    ): Event!
+    deleteGuideline(eventId: ID!, guidelineId: ID!): Event!
 
     addCustomField(eventId: ID!, customField: CustomFieldInput!): Event!
     editCustomField(
@@ -173,11 +185,23 @@ const schema = gql`
     grantingOpens: Date
     grantingCloses: Date
     grantingIsOpen: Boolean
-    guidelines: String
+    guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
+  }
+
+  type Guideline {
+    id: ID!
+    title: String!
+    description: String!
+    position: Float!
+  }
+
+  input GuidelineInput {
+    title: String!
+    description: String!
   }
 
   scalar Date

@@ -3,9 +3,10 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-  Button,
 } from "@material-ui/core";
-import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
+import Button from "components/Button";
+import { Edit as EditIcon } from "@material-ui/icons";
+import { AddIcon } from "components/Icons";
 
 const SettingsListItem = ({
   primary,
@@ -14,6 +15,7 @@ const SettingsListItem = ({
   openModal,
   disabled,
   canEdit,
+  eventColor,
 }) => {
   return (
     <ListItem>
@@ -26,13 +28,12 @@ const SettingsListItem = ({
             </IconButton>
           ) : (
             <Button
-              variant="contained"
-              color="primary"
-              startIcon={<AddIcon />}
+              color={eventColor}
+              size="small"
               onClick={openModal}
               disabled={disabled}
             >
-              Set
+              <AddIcon className="h-4 w-4 -ml-2 mr-2" /> Set
             </Button>
           )}
         </ListItemSecondaryAction>

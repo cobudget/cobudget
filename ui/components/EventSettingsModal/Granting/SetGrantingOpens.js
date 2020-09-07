@@ -1,32 +1,32 @@
 import { useForm } from "react-hook-form";
+import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
 
-import Card from "../styled/Card";
+import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingCloses = ({ closeModal, event }) => {
+const SetGrantingOpens = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register } = useForm();
+  const { handleSubmit, register, errors } = useForm();
 
-  const [selectedDate, handleDateChange] = React.useState(
-    event.dreamCreationCloses
-  );
+  const [selectedDate, handleDateChange] = React.useState(event.grantingOpens);
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set dream creation closes date</h1>
+        <h1 className="text-3xl">Set granting open date</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({ variables: { dreamCreationCloses: selectedDate } })
+            console.log({ variables, selectedDate });
+            updateGranting({ variables: { grantingOpens: selectedDate } })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
@@ -40,12 +40,12 @@ const SetGrantingCloses = ({ closeModal, event }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label="Dream creation close date"
+                label="Granting opens date"
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}
                 inputVariant="outlined"
-                name="dreamCreationCloses"
+                name="grantingOpens"
                 inputRef={register}
                 fullWidth
               />
@@ -66,4 +66,4 @@ const SetGrantingCloses = ({ closeModal, event }) => {
   );
 };
 
-export default SetGrantingCloses;
+export default SetGrantingOpens;

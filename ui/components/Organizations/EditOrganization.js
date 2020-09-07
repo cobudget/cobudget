@@ -8,6 +8,8 @@ import TextField from "../TextField";
 import Card from "../styled/Card";
 import Form from "../styled/Form";
 import ImageUpload from "components/ImageUpload";
+import { Tooltip } from "react-tippy";
+import { QuestionMarkIcon } from "../Icons";
 
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization(
@@ -133,7 +135,17 @@ export default ({ organization, currentUser }) => {
             initialImage={logoImage}
           />
           <label>
-            Custom Domain (Optional) [no need for http://]
+            Custom Domain (Optional)<Tooltip
+              style={{display: 'inline-block'}}
+              title={`<b>No need for http://</b><br/>
+              For example to use 'dreams.YOURDOMAIN.com' you need to<br/>
+              1. Open your domain account provider<br/>
+              2. Set a new CNAME record with the name of 'dreams' and the value of ${process.env.DEPLOY_URL}`}
+              position="bottom"
+              size="small"
+            >
+              <QuestionMarkIcon className="w-5 h-5" />
+            </Tooltip>
             <TextField
               name="customDomain"
               placeholder="orgdomain.com"

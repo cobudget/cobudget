@@ -8,39 +8,14 @@ import { AddIcon } from "components/Icons";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
 
-const DELETE_CUSTOM_FIELD_MUTATION = gql`
-  mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
-    deleteCustomField(eventId: $eventId, fieldId: $fieldId) {
-      id
-      customFields {
-        id
-        name
-        description
-        type
-        isRequired
-        position
-        isShownOnFrontPage
-        createdAt
-      }
-    }
-  }
-`;
-
 export default ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
-  
-  const [deleteCustomField, { loading }] = useMutation(
-    DELETE_CUSTOM_FIELD_MUTATION,
-    {
-      variables: { eventId: event.id },
-    }
-  );
-  
+
   return (
-    <>
+    <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">Custom fields</h1>
-      <p className="text-gray-700 mb-2">
+      <p className="text-gray-700 mb-4">
         Custom fields are extra fields or questions for Dreams
       </p>
 
@@ -48,11 +23,12 @@ export default ({ event }) => {
         event={event}
         customFields={event.customFields}
         setEditingCustomField={setEditingCustomField}
-        deleteCustomField={deleteCustomField}/>
+      />
 
       <div className="flex my-2">
         <Button
           variant="secondary"
+          color={event.color}
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
@@ -69,6 +45,6 @@ export default ({ event }) => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };

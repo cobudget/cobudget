@@ -1,10 +1,10 @@
-import Granting from "components/Granting";
+import About from "components/About";
 
-export default ({ event, currentUser }) => {
-  if (!(currentUser && currentUser.membership)) return null;
+export default ({ event }) => {
+  if (!event) return null;
   return (
     <div className="max-w-screen-md flex-1">
-      <Granting event={event} currentUser={currentUser} />
+      <About event={event} />
     </div>
   );
 };
