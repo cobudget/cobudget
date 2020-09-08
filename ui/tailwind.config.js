@@ -9,6 +9,11 @@ module.exports = {
       },
       height: {
         88: "22rem",
+        100: "25rem",
+        148: "37rem",
+      },
+      width: {
+        100: "25rem",
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
@@ -92,6 +97,16 @@ module.exports = {
       spacing: {
         7: "1.75rem",
       },
+      keyframes: {
+        wiggle: {
+          "0%, 91%, 100%": { transform: "rotate(0deg)" },
+          "94%": { transform: "rotate(3deg)" },
+          "97%": { transform: "rotate(-3deg)" },
+        },
+      },
+      animation: {
+        wiggle: "wiggle 2.5s ease-in-out infinite",
+      },
     },
     borderWidth: {
       default: "1px",
@@ -121,6 +136,7 @@ module.exports = {
     textColor: ["responsive", "hover", "focus", "group-hover", "last"],
     shadowOutline: ["focus", "hover"],
     visibility: ["responsive", "group-hover"],
+    animation: ["responsive", "hover"],
     // borderStyle: ["hover", "focus"],
   },
   plugins: [
