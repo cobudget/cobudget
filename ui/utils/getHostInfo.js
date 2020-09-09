@@ -24,6 +24,6 @@ export default function getHostInfo(req) {
   return {
     subdomain,
     host,
-    protocol
+    protocol,
   };
 }
