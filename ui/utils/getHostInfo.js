@@ -13,7 +13,10 @@ export default function getHostInfo(req) {
 
   if (host) {
     const hostParts = host.split(".");
-    if (hostParts.length === (host.includes("localhost:") ? 2 : 3)) {
+    if (
+      hostParts.length ===
+      (host.includes("localhost:") ? 2 : host.includes("staging") ? 4 : 3)
+    ) {
       subdomain = hostParts[0];
     }
   }
