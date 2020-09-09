@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Link from "next/link";
@@ -67,22 +68,24 @@ const LandingPage = () => {
   );
 };
 
-const LinkCard = ({ color, href, children, className }) => {
+const LinkCard = forwardRef((props, ref) => {
+  const { color, className, children } = props;
   return (
     <a
-      href={href}
+      {...props}
       className={
         `bg-${color || "black"} ` +
         `hover:shadow-outline-${color}-darker ` +
-        "group p-4 font-medium rounded-md text-white flex justify-between items-start transitions-shadows duration-75" +
+        "cursor-pointer group p-4 font-medium rounded-md text-white flex justify-between items-start transitions-shadows duration-75" +
         " " +
         (className ? className : "h-32")
       }
+      ref={ref}
     >
       {children}
     </a>
   );
-};
+});
 
 export default ({ currentOrg }) => {
   const { data: { events } = { events: [] }, loading } = useQuery(EVENTS_QUERY);
@@ -91,7 +94,7 @@ export default ({ currentOrg }) => {
   if (!currentOrg) {
     return <LandingPage />;
   }
-
+  console.log({ events });
   return (
     <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {events.map((event) => (
