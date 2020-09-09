@@ -53,6 +53,23 @@ export const RightArrowIcon = (props) => (
   </svg>
 );
 
+export const ArrowUpIcon = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M5 10l7-7m0 0l7 7m-7-7v18"
+    />
+  </svg>
+);
+
 // Heroicons/emoji-happy/outline
 export const HappyEmojiIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
@@ -250,23 +267,22 @@ export const CheckIcon = (props) => (
 
 // heroicons menu-alt4 (Draggable icon)
 export const DraggableIcon = (props) => (
-  <svg
-    fill="currentColor"
-    viewBox="0 0 20 20"
-    {...props}
-  >
-    <path fillRule="evenodd" d="M3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"></path>
+  <svg fill="currentColor" viewBox="0 0 20 20" {...props}>
+    <path
+      fillRule="evenodd"
+      d="M3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 13a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+      clipRule="evenodd"
+    ></path>
   </svg>
 );
 
 // heroicons tag
 export const TagIcon = (props) => (
-  <svg
-    fill="currentColor"
-    viewBox="0 0 20 20"
-    className="w-6 h-6"
-    {...props}
-    >
-      <path fillRule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"></path>
+  <svg fill="currentColor" viewBox="0 0 20 20" className="w-6 h-6" {...props}>
+    <path
+      fillRule="evenodd"
+      d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+      clipRule="evenodd"
+    ></path>
   </svg>
 );
