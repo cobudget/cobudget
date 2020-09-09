@@ -1,12 +1,14 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { CloseIcon } from "components/Icons";
+import { CloseIcon, ArrowUpIcon } from "components/Icons";
+import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
 const ACTION = "ACTION";
 const ANSWER = "ANSWER";
+const INPUT = "INPUT";
 
 const GuidelineComponent = ({ guideline }) => {
   const [expanded, setExpanded] = useState(false);
@@ -25,6 +27,39 @@ const GuidelineComponent = ({ guideline }) => {
       </div>
 
       <ExpandButton expanded={expanded} setExpanded={setExpanded} />
+    </div>
+  );
+};
+
+const InputAction = ({ item, setChatItems, chatItems, color }) => {
+  const [input, setInput] = useState("");
+  const disabled = input.length === 0;
+  return (
+    <div className="mt-2 flex items-center min-w-full">
+      <TextField
+        placeholder="Write here..."
+        color={color}
+        className="flex-grow"
+        autoFocus
+        inputProps={{ value: input, onChange: (e) => setInput(e.target.value) }}
+      />
+
+      <button
+        onClick={() => {
+          item.sideEffect(input);
+          setChatItems([
+            ...chatItems,
+            { type: ANSWER, message: input },
+            ...item.chatItems,
+          ]);
+        }}
+        disabled={disabled}
+        className={`bg-${
+          disabled ? "gray-200" : color
+        } transition-colors duration-75 rounded-full p-2 text-white ml-2`}
+      >
+        <ArrowUpIcon className="h-6 w-6" />
+      </button>
     </div>
   );
 };
@@ -51,7 +86,7 @@ const Monster = ({ event }) => {
     ...[
       {
         type: ACTION,
-        message: "Does this dream comply with these guidelines?",
+        message: "Does this dream comply with the guidelines?",
         actions: [
           {
             label: "Yes, looks good to me!",
@@ -67,7 +102,26 @@ const Monster = ({ event }) => {
                 actions: event.guidelines.map((guideline) => ({
                   label: guideline.title,
                   sideEffect: () => console.log("API choosing guideline"),
-                  chatItems: [{ type: MESSAGE, message: "Ok, cool." }],
+                  chatItems: [
+                    {
+                      type: INPUT,
+                      message:
+                        "Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the dream creators.",
+                      sideEffect: (answer) =>
+                        console.log(
+                          "Flag: ",
+                          answer,
+                          " for guideline: ",
+                          guideline.title
+                        ),
+                      chatItems: [
+                        {
+                          type: MESSAGE,
+                          message: "Thank you! Your answer has been recorded.",
+                        },
+                      ],
+                    },
+                  ],
                 })),
               },
             ],
@@ -106,10 +160,20 @@ const Monster = ({ event }) => {
             {item.message}
           </div>
         );
+      case INPUT:
+        return (
+          <div
+            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+            key={i}
+          >
+            {item.message}
+          </div>
+        );
       case ANSWER:
         return (
           <div
             className={`self-end mt-1 mb-2 rounded-full bg-${event.color} font-semibold py-2 px-3 rounded-full text-white`}
+            key={i}
           >
             {item.message}
           </div>
@@ -141,7 +205,7 @@ const Monster = ({ event }) => {
             {chatItems.map((item, i) => renderChatItem(item, i))}
 
             {chatItems[chatItems.length - 1].actions && (
-              <div className="flex w-full justify-end flex-wrap -mx-1">
+              <div className="flex min-w-full justify-end flex-wrap -mx-1">
                 {chatItems[chatItems.length - 1].actions.map((action) => (
                   <button
                     className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
@@ -159,6 +223,15 @@ const Monster = ({ event }) => {
                   </button>
                 ))}
               </div>
+            )}
+
+            {chatItems[chatItems.length - 1].type === INPUT && (
+              <InputAction
+                item={chatItems[chatItems.length - 1]}
+                chatItems={chatItems}
+                setChatItems={setChatItems}
+                color={event.color}
+              />
             )}
           </div>
         </div>
