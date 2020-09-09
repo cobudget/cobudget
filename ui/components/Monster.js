@@ -1,5 +1,7 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { CloseIcon } from "components/Icons";
+import ExpandButton from "components/ExpandButton";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -15,6 +17,27 @@ const messagesBeforeGuidelines = [
 const messagesAfterGuidelines = [
   { type: MESSAGE, message: "Does this dream comply with these guidelines?" },
 ];
+
+const GuidelineComponent = ({ guideline }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="relative w-full">
+      <h2 className="mb-1 font-semibold">{guideline.title}</h2>
+      <div
+        className={expanded ? "" : "line-clamp-2"}
+        style={{ minHeight: "36px" }}
+      >
+        <ReactMarkdown
+          source={guideline.description}
+          className="markdown text-sm "
+        />
+      </div>
+
+      <ExpandButton expanded={expanded} setExpanded={setExpanded} />
+    </div>
+  );
+};
 
 const Monster = ({ event }) => {
   const [open, setOpen] = useState(false);
@@ -37,16 +60,7 @@ const Monster = ({ event }) => {
       case MESSAGE:
         return item.message;
       case GUIDELINE:
-        return (
-          <>
-            <h2 className="mb-1 font-semibold">{item.guideline.title}</h2>
-            <ReactMarkdown
-              source={item.guideline.description}
-              className="markdown text-sm line-clamp-2"
-            />
-            <button className="text-black text-sm">Show more</button>
-          </>
-        );
+        return <GuidelineComponent guideline={item.guideline} />;
     }
   };
   return (
@@ -71,8 +85,11 @@ const Monster = ({ event }) => {
             </button>
           </div>
           <div className="p-4 flex flex-col items-start overflow-y-scroll h-148">
-            {chatItems.map((item) => (
-              <div className="text-gray-800 bg-white shadow p-3 mb-2 rounded">
+            {chatItems.map((item, i) => (
+              <div
+                className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+                key={i}
+              >
                 {renderChatItem(item)}
               </div>
             ))}
@@ -82,13 +99,20 @@ const Monster = ({ event }) => {
 
       {bubbleOpen && !open && (
         <>
-          <div className="relative bg-white text-gray-800 w-64 cursor-pointer rounded-lg p-4 shadow-lg mb-2 animation-once animation-fade-in">
+          <div
+            className="relative bg-white text-gray-800 w-64 cursor-pointer rounded-lg p-4 shadow-lg mb-2 animation-once animation-fade-in"
+            onClick={() => {
+              setOpen(true);
+              closeBubble();
+            }}
+          >
             {messagesBeforeGuidelines[0].message}
             <button
-              className="absolute p-1 m-1 w-4 h-4 top-0 right-0 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full"
+              className="absolute p-1 m-1 top-0 right-0 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full"
               onClick={closeBubble}
+              tabIndex="-1"
             >
-              X
+              <CloseIcon className="h-4 w-4" />
             </button>
           </div>
         </>
