@@ -30,7 +30,7 @@ const LandingPage = () => {
         .
       </p>
       <p className="text-gray-800 mb-4">
-        We don't have a proper landing page yet but it is coming soon.
+        We don't have a proper landing page yet but one is in the works.
       </p>
 
       <p className="text-gray-800 mb-4">
