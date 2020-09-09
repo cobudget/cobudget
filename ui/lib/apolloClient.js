@@ -24,7 +24,9 @@ export default function createApolloClient(initialState, ctx) {
 
     if (
       !(
-        host.endsWith(process.env.DEPLOY_URL) || host.endsWith("localhost:3000")
+        host.endsWith(process.env.DEPLOY_URL) ||
+        host.endsWith("localhost:3000") ||
+        host.endsWith("staging.dreams.wtf")
       )
     ) {
       customdomain = host;
