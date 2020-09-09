@@ -5,18 +5,8 @@ import ExpandButton from "components/ExpandButton";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
-
-const messagesBeforeGuidelines = [
-  { type: MESSAGE, message: "Argh! Please help me review this dream!" },
-  {
-    type: MESSAGE,
-    message: "Here are the guidelines that dreams need to follow:",
-  },
-];
-
-const messagesAfterGuidelines = [
-  { type: MESSAGE, message: "Does this dream comply with these guidelines?" },
-];
+const ACTION = "ACTION";
+const ANSWER = "ANSWER";
 
 const GuidelineComponent = ({ guideline }) => {
   const [expanded, setExpanded] = useState(false);
@@ -49,18 +39,81 @@ const Monster = ({ event }) => {
     guideline,
   }));
 
-  const chatItems = [
-    ...messagesBeforeGuidelines,
+  const [chatItems, setChatItems] = useState([
+    ...[
+      { type: MESSAGE, message: "Argh! Please help me review this dream!" },
+      {
+        type: MESSAGE,
+        message: "Here are the guidelines that dreams need to follow:",
+      },
+    ],
     ...guidelines,
-    ...messagesAfterGuidelines,
-  ];
+    ...[
+      {
+        type: ACTION,
+        message: "Does this dream comply with these guidelines?",
+        actions: [
+          {
+            label: "Yes, looks good to me!",
+            sideEffect: () => console.log("calling FLAG api, looks good"),
+            chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
+          },
+          {
+            label: "No, it's breaking a guideline",
+            chatItems: [
+              {
+                type: ACTION,
+                message: "Which one?",
+                actions: event.guidelines.map((guideline) => ({
+                  label: guideline.title,
+                  sideEffect: () => console.log("API choosing guideline"),
+                  chatItems: [{ type: MESSAGE, message: "Ok, cool." }],
+                })),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  ]);
 
-  const renderChatItem = (item) => {
+  const renderChatItem = (item, i) => {
     switch (item.type) {
       case MESSAGE:
-        return item.message;
+        return (
+          <div
+            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+            key={i}
+          >
+            {item.message}
+          </div>
+        );
       case GUIDELINE:
-        return <GuidelineComponent guideline={item.guideline} />;
+        return (
+          <div
+            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+            key={i}
+          >
+            <GuidelineComponent guideline={item.guideline} />
+          </div>
+        );
+      case ACTION:
+        return (
+          <div
+            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+            key={i}
+          >
+            {item.message}
+          </div>
+        );
+      case ANSWER:
+        return (
+          <div
+            className={`self-end mt-1 mb-2 rounded-full bg-${event.color} font-semibold py-2 px-3 rounded-full text-white`}
+          >
+            {item.message}
+          </div>
+        );
     }
   };
   return (
@@ -78,21 +131,35 @@ const Monster = ({ event }) => {
           >
             <div className="">Review Monster</div>
             <button
-              className="absolute mr-2 right-0 "
+              className="absolute mr-2 right-0 focus:outline-none"
               onClick={() => setOpen(false)}
             >
               Close
             </button>
           </div>
           <div className="p-4 flex flex-col items-start overflow-y-scroll h-148">
-            {chatItems.map((item, i) => (
-              <div
-                className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
-                key={i}
-              >
-                {renderChatItem(item)}
+            {chatItems.map((item, i) => renderChatItem(item, i))}
+
+            {chatItems[chatItems.length - 1].actions && (
+              <div className="flex w-full justify-end flex-wrap -mx-1">
+                {chatItems[chatItems.length - 1].actions.map((action) => (
+                  <button
+                    className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
+                    key={action.label}
+                    onClick={() => {
+                      action.sideEffect && action.sideEffect();
+                      setChatItems([
+                        ...chatItems,
+                        { type: ANSWER, message: action.label },
+                        ...action.chatItems,
+                      ]);
+                    }}
+                  >
+                    {action.label}
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </div>
       )}
@@ -106,10 +173,13 @@ const Monster = ({ event }) => {
               closeBubble();
             }}
           >
-            {messagesBeforeGuidelines[0].message}
+            {chatItems[0].message}
             <button
               className="absolute p-1 m-1 top-0 right-0 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full"
-              onClick={closeBubble}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeBubble();
+              }}
               tabIndex="-1"
             >
               <CloseIcon className="h-4 w-4" />

@@ -87,7 +87,7 @@ module.exports = {
           100: "hsl(223, 3%, 96%)",
           200: "hsl(223, 3%, 93%)",
           default: "hsl(223, 3%, 15%)",
-          darker: "hsl(223, 3%, 10%)",
+          darker: "hsl(223, 3%, 5%)",
         },
       },
       shadowOutline: {
@@ -99,9 +99,9 @@ module.exports = {
       },
       keyframes: {
         wiggle: {
-          "0%, 91%, 100%": { transform: "rotate(0deg)" },
-          "94%": { transform: "rotate(3deg)" },
-          "97%": { transform: "rotate(-3deg)" },
+          "0%, 50%, 59%, 100%": { transform: "rotate(0deg)" },
+          "53%": { transform: "rotate(3deg)" },
+          "56%": { transform: "rotate(-3deg)" },
         },
       },
       animation: {
