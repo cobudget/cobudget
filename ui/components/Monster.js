@@ -263,7 +263,10 @@ const Monster = ({ event }) => {
 
       {!open && (
         <img
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            closeBubble();
+            setOpen(!open);
+          }}
           className="w-40 cursor-pointer animate-wiggle hover:animate-none"
           src="/calm-monster.gif"
         />
