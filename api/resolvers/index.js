@@ -731,6 +731,63 @@ const resolvers = {
 
       return dream.save();
     },
+    raiseFlag: async (
+      parent,
+      { dreamId, guidelineId, comment },
+      { currentUser, models: { Dream, Member } }
+    ) => {
+      // check membership
+      // check dreamReviewIsOpen
+      // check not already left a flag?
+
+      const dream = await Dream.findOne({ _id: dreamId });
+      dream.flags.push({
+        guidelineId,
+        comment,
+        type: 'RAISE_FLAG',
+        userId: currentUser.id,
+      });
+
+      return dream.save();
+    },
+    takeDownFlag: async (
+      parent,
+      { dreamId, flagId },
+      { currentUser, models: { Dream, Member } }
+    ) => {
+      // check membership
+      // check dreamReviewIsOpen
+      // check not already left a flag?
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      dream.flags.push({
+        takingDownFlagId: flagId,
+        comment,
+        type: 'TAKE_DOWN_FLAG',
+        userId: currentUser.id,
+      });
+
+      return dream.save();
+    },
+    allGoodFlag: async (
+      parent,
+      { dreamId },
+      { currentUser, models: { Dream, Member } }
+    ) => {
+      // check membership
+      // check dreamReviewIsOpen
+      // check have not left one of these flags already
+
+      const dream = await Dream.findOne({ _id: dreamId });
+      dream.flags.push({
+        type: 'ALL_GOOD_FLAG',
+        userId: currentUser.id,
+      });
+
+      return dream.save();
+    },
+
     sendMagicLink: async (
       parent,
       { email: inputEmail },
@@ -1478,6 +1535,27 @@ const resolvers = {
       });
       if (!currentMember) return false;
       return currentMember.favorites.includes(dream.id);
+    },
+    raisedFlags: async (dream, args, { currentUser, models: { Member } }) => {
+      const takeDownFlagIds = dream.flags
+        .filter((flag) => flag.type === 'TAKE_DOWN_FLAG')
+        .map((flag) => flag.takingDownFlagId);
+
+      return dream.flags.filter(
+        (flag) =>
+          flag.type === 'RAISE_FLAG' && !takeDownFlagIds.includes(flag.id)
+      );
+    },
+  },
+  Flag: {
+    guideline: async (flag, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: flag.parent().eventId });
+
+      return event.guidelines.id(flag.guidelineId);
+    },
+    user: async (parent, args, { currentUser, models: { Member, Dream } }) => {
+      // if not org admin or event admin or guide
+      return null;
     },
   },
   Grant: {

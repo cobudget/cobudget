@@ -111,6 +111,10 @@ const schema = gql`
     editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
 
+    raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
+    takeDownFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
+    allGoodFlag(dreamID: ID!): Dream
+
     sendMagicLink(email: String!): Boolean
     updateProfile(name: String, avatar: String, bio: String): User
     # inviteMembers(emails: String!): [Member]
@@ -266,11 +270,18 @@ const schema = gql`
     approved: Boolean
     favorite: Boolean
     published: Boolean
-    # answers: [QuestionAnswer]
-    # funding: Int!
-    # raisedFlags: [Flag]
+    flags: [Flag]
+    raisedFlags: [Flag]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Flag {
+    id: ID!
+    guideline: Guideline
+    user: User
+    comment: String
+    type: String
   }
 
   type Grant {
