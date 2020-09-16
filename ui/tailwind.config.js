@@ -103,9 +103,15 @@ module.exports = {
           "53%": { transform: "rotate(3deg)" },
           "56%": { transform: "rotate(-3deg)" },
         },
+        "mega-wiggle": {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "33%": { transform: "rotate(3deg)" },
+          "66%": { transform: "rotate(-3deg)" },
+        },
       },
       animation: {
         wiggle: "wiggle 2.5s ease-in-out infinite",
+        "mega-wiggle": "mega-wiggle 0.2s ease-in-out infinite",
       },
     },
     borderWidth: {

@@ -1,5 +1,8 @@
 import { useState } from "react";
+import gql from "graphql-tag";
 import ReactMarkdown from "react-markdown";
+import { useMutation } from "@apollo/react-hooks";
+
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
@@ -64,72 +67,211 @@ const InputAction = ({ item, setChatItems, chatItems, color }) => {
   );
 };
 
-const Monster = ({ event }) => {
+const RAISE_FLAG_MUTATION = gql`
+  mutation RaiseFlag($dreamId: ID!, $guidelineId: ID!, $comment: String!) {
+    raiseFlag(dreamId: $dreamId, guidelineId: $guidelineId, comment: $comment) {
+      id
+      raisedFlags {
+        id
+        comment
+        guideline {
+          id
+          title
+        }
+      }
+    }
+  }
+`;
+
+const TAKE_DOWN_FLAG_MUTATION = gql`
+  mutation TakeDownFlag($dreamId: ID!, $flagId: ID!, $comment: String!) {
+    takeDownFlag(dreamId: $dreamId, flagId: $flagId, comment: $comment) {
+      id
+      raisedFlags {
+        id
+        comment
+        guideline {
+          id
+          title
+        }
+      }
+    }
+  }
+`;
+
+const ALL_GOOD_FLAG_MUTATION = gql`
+  mutation AllGoodFlag($dreamId: ID!) {
+    allGoodFlag(dreamId: $dreamId) {
+      id
+    }
+  }
+`;
+
+const raiseFlagFlow = (guidelines, raiseFlag) => [
+  {
+    type: ACTION,
+    message: "Which one?",
+    actions: guidelines.map((guideline) => ({
+      label: guideline.title,
+      chatItems: [
+        {
+          type: INPUT,
+          message:
+            "Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the dream creators.",
+          sideEffect: (answer) => {
+            raiseFlag({
+              variables: {
+                guidelineId: guideline.id,
+                comment: answer,
+              },
+            }).then((data) => console.log({ data }));
+          },
+          chatItems: [
+            {
+              type: MESSAGE,
+              message: "Thank you! Your answer has been recorded.",
+            },
+          ],
+        },
+      ],
+    })),
+  },
+];
+
+const takeDownFlagFlow = (flagId, takeDownFlag) => [
+  {
+    type: INPUT,
+    message:
+      "You can take this flag down if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
+    sideEffect: (answer) => {
+      takeDownFlag({
+        variables: {
+          flagId,
+          comment: answer,
+        },
+      }).then((data) => console.log({ data }));
+    },
+    chatItems: [
+      {
+        type: MESSAGE,
+        message: "Thank you!",
+      },
+    ],
+  },
+];
+
+const Monster = ({ event, dream }) => {
   const [open, setOpen] = useState(false);
+  const isAngry = dream.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const closeBubble = () => setBubbleOpen(false);
+
+  const [raiseFlag] = useMutation(RAISE_FLAG_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const [takeDownFlag] = useMutation(TAKE_DOWN_FLAG_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const [allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+
+  const { raisedFlags } = dream;
 
   const guidelines = event.guidelines.map((guideline) => ({
     type: GUIDELINE,
     guideline,
   }));
 
-  const [chatItems, setChatItems] = useState([
-    ...[
-      { type: MESSAGE, message: "Argh! Please help me review this dream!" },
+  let items;
+
+  if (raisedFlags.length > 0) {
+    items = [
+      {
+        type: MESSAGE,
+        message:
+          "This dream has been flagged for breaking guidelines. Please help review it!",
+      },
       {
         type: MESSAGE,
         message: "Here are the guidelines that dreams need to follow:",
       },
-    ],
-    ...guidelines,
-    ...[
+      ...guidelines,
+      ...raisedFlags.map((raisedFlag) => ({
+        type: MESSAGE,
+        message: `Someone flagged this dream for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
+
+          "${raisedFlag.comment}"`,
+      })),
       {
         type: ACTION,
-        message: "Does this dream comply with the guidelines?",
+        message: `Could you help review this?`,
         actions: [
           {
-            label: "Yes, looks good to me!",
-            sideEffect: () => console.log("calling FLAG api, looks good"),
-            chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
+            label: "It is breaking another guideline",
+            chatItems: raiseFlagFlow(
+              event.guidelines.filter(
+                (guideline) =>
+                  !raisedFlags
+                    .map((flag) => flag.guideline.id)
+                    .includes(guideline.id)
+              ),
+              raiseFlag
+            ),
           },
-          {
-            label: "No, it's breaking a guideline",
-            chatItems: [
-              {
-                type: ACTION,
-                message: "Which one?",
-                actions: event.guidelines.map((guideline) => ({
-                  label: guideline.title,
-                  sideEffect: () => console.log("API choosing guideline"),
-                  chatItems: [
-                    {
-                      type: INPUT,
-                      message:
-                        "Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the dream creators.",
-                      sideEffect: (answer) =>
-                        console.log(
-                          "Flag: ",
-                          answer,
-                          " for guideline: ",
-                          guideline.title
-                        ),
-                      chatItems: [
-                        {
-                          type: MESSAGE,
-                          message: "Thank you! Your answer has been recorded.",
-                        },
-                      ],
-                    },
-                  ],
-                })),
+          raisedFlags.length > 1
+            ? {
+                label: "I'd like to take down a flag",
+                chatItems: [
+                  {
+                    type: ACTION,
+                    message: "Which one?",
+                    actions: raisedFlags.map((raisedFlag) => ({
+                      label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
+                      chatItems: takeDownFlagFlow(raisedFlag.id, takeDownFlag),
+                    })),
+                  },
+                ],
+              }
+            : {
+                label: "I'd like to take down the flag",
+                chatItems: takeDownFlagFlow(raisedFlags[0].id, takeDownFlag),
               },
-            ],
-          },
         ],
       },
-    ],
-  ]);
+    ];
+  } else {
+    items = [
+      ...[
+        { type: MESSAGE, message: "Argh! Please help me review this dream!" },
+        {
+          type: MESSAGE,
+          message: "Here are the guidelines that dreams need to follow:",
+        },
+      ],
+      ...guidelines,
+      ...[
+        {
+          type: ACTION,
+          message: "Does this dream comply with the guidelines?",
+          actions: [
+            {
+              label: "Yes, looks good to me!",
+              sideEffect: () =>
+                allGoodFlag().then((data) => console.log({ data })),
+              chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
+            },
+            {
+              label: "No, it's breaking a guideline",
+              chatItems: raiseFlagFlow(event.guidelines, raiseFlag),
+            },
+          ],
+        },
+      ],
+    ];
+  }
+
+  const [chatItems, setChatItems] = useState(items);
 
   const renderChatItem = (item, i) => {
     switch (item.type) {
@@ -267,8 +409,10 @@ const Monster = ({ event }) => {
             closeBubble();
             setOpen(!open);
           }}
-          className="w-40 cursor-pointer animate-wiggle hover:animate-none"
-          src="/calm-monster.gif"
+          className={`w-40 cursor-pointer ${
+            isAngry ? "animate-mega-wiggle" : "animate-wiggle"
+          } hover:animate-none`}
+          src={isAngry ? "/angry-monster.gif" : "/calm-monster.gif"}
         />
       )}
     </div>

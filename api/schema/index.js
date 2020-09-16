@@ -114,7 +114,7 @@ const schema = gql`
 
     raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
     takeDownFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
-    allGoodFlag(dreamID: ID!): Dream
+    allGoodFlag(dreamId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
     updateProfile(name: String, avatar: String, bio: String): User

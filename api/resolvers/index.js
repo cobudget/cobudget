@@ -763,7 +763,7 @@ const resolvers = {
     },
     takeDownFlag: async (
       parent,
-      { dreamId, flagId },
+      { dreamId, flagId, comment },
       { currentUser, models: { Dream, Member } }
     ) => {
       // check membership

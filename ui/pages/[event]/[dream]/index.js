@@ -20,6 +20,14 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       approved
       published
+      raisedFlags {
+        id
+        comment
+        guideline {
+          id
+          title
+        }
+      }
       customFields {
         value
         customField {
