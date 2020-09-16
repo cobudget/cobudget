@@ -747,11 +747,19 @@ const resolvers = {
       { dreamId, guidelineId, comment },
       { currentUser, models: { Dream, Member } }
     ) => {
-      // check membership
       // check dreamReviewIsOpen
       // check not already left a flag?
 
       const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
       dream.flags.push({
         guidelineId,
         comment,
@@ -766,11 +774,17 @@ const resolvers = {
       { dreamId, flagId, comment },
       { currentUser, models: { Dream, Member } }
     ) => {
-      // check membership
       // check dreamReviewIsOpen
       // check not already left a flag?
 
       const dream = await Dream.findOne({ _id: dreamId });
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
 
       dream.flags.push({
         takingDownFlagId: flagId,
@@ -786,11 +800,18 @@ const resolvers = {
       { dreamId },
       { currentUser, models: { Dream, Member } }
     ) => {
-      // check membership
       // check dreamReviewIsOpen
       // check have not left one of these flags already
-
       const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
       dream.flags.push({
         type: 'ALL_GOOD_FLAG',
         userId: currentUser.id,
@@ -1558,6 +1579,13 @@ const resolvers = {
       );
     },
   },
+  // type Flag {
+  //   id: ID!
+  //   guideline: Guideline
+  //   user: User
+  //   comment: String
+  //   type: String
+  // }
   Flag: {
     guideline: async (flag, args, { models: { Event } }) => {
       const event = await Event.findOne({ _id: flag.parent().eventId });
