@@ -185,7 +185,16 @@ const resolvers = {
     },
     editEvent: async (
       parent,
-      { eventId, slug, title, registrationPolicy, info, color, about },
+      {
+        eventId,
+        slug,
+        title,
+        registrationPolicy,
+        info,
+        color,
+        about,
+        dreamReviewIsOpen,
+      },
       { currentUser, models: { Event, Member } }
     ) => {
       const currentMember = await Member.findOne({
@@ -207,6 +216,8 @@ const resolvers = {
       if (typeof info !== 'undefined') event.info = info;
       if (typeof about !== 'undefined') event.about = about;
       if (color) event.color = color;
+      if (typeof dreamReviewIsOpen !== 'undefined')
+        event.dreamReviewIsOpen = dreamReviewIsOpen;
 
       return event.save();
     },

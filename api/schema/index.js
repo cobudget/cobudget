@@ -48,6 +48,7 @@ const schema = gql`
       info: String
       color: String
       about: String
+      dreamReviewIsOpen: Boolean
     ): Event!
     deleteEvent(eventId: ID!): Event
 
@@ -194,6 +195,7 @@ const schema = gql`
     allowStretchGoals: Boolean
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
+    dreamReviewIsOpen: Boolean
   }
 
   type Guideline {

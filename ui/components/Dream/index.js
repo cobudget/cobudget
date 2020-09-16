@@ -21,7 +21,10 @@ const Dream = ({ dream, event, currentUser }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-      <Monster event={event} />
+      {currentUser?.membership &&
+        event.dreamReviewIsOpen &&
+        event.guidelines.length > 0 && <Monster event={event} dream={dream} />}
+
       {!dream.published && (
         <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>
       )}

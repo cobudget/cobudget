@@ -19,6 +19,7 @@ const EDIT_EVENT = gql`
     $info: String
     $color: String
     $about: String
+    $dreamReviewIsOpen: Boolean
   ) {
     editEvent(
       eventId: $eventId
@@ -28,6 +29,7 @@ const EDIT_EVENT = gql`
       info: $info
       color: $color
       about: $about
+      dreamReviewIsOpen: $dreamReviewIsOpen
     ) {
       id
       title
@@ -36,6 +38,7 @@ const EDIT_EVENT = gql`
       info
       color
       about
+      dreamReviewIsOpen
     }
   }
 `;
@@ -64,6 +67,7 @@ export default ({ event, currentUser, handleClose }) => {
               totalBudget: Number(variables.totalBudget),
               grantValue: Number(variables.grantValue),
               grantsPerMember: Number(variables.grantsPerMember),
+              dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
               color,
             },
           })
@@ -127,6 +131,17 @@ export default ({ event, currentUser, handleClose }) => {
           inputRef={register}
           className="my-4"
         />
+
+        <SelectField
+          name="dreamReviewIsOpen"
+          label="Show Review Monster (need to configure guidelines too!)"
+          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="true">true</option>
+          <option value="false">false</option>
+        </SelectField>
 
         {currentUser.isOrgAdmin && (
           <>
