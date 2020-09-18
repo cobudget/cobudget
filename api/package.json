@@ -23,6 +23,6 @@
     "mailgun-js": "^0.22.0",
     "micro-cors": "^0.1.1",
     "mongoose": "^5.9.6",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   }
 }
