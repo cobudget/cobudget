@@ -2,6 +2,7 @@ import { useState } from "react";
 import gql from "graphql-tag";
 import ReactMarkdown from "react-markdown";
 import { useMutation } from "@apollo/react-hooks";
+import AutoScroll from "@brianmcallister/react-auto-scroll";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
@@ -25,7 +26,7 @@ const GuidelineComponent = ({ guideline }) => {
       >
         <ReactMarkdown
           source={guideline.description}
-          className="markdown text-sm "
+          className="markdown text-sm"
         />
       </div>
 
@@ -38,7 +39,7 @@ const InputAction = ({ item, setChatItems, chatItems, color }) => {
   const [input, setInput] = useState("");
   const disabled = input.length === 0;
   return (
-    <div className="mt-2 flex items-center min-w-full">
+    <div className="my-2 mx-3 flex items-center">
       <TextField
         placeholder="Write here..."
         color={color}
@@ -276,48 +277,33 @@ const Monster = ({ event, dream }) => {
   const renderChatItem = (item, i) => {
     switch (item.type) {
       case MESSAGE:
+      case ACTION:
+      case INPUT:
         return (
-          <div
-            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
-            key={i}
-          >
-            {item.message}
+          <div className="my-2 mx-3 flex justify-start" key={i}>
+            <div className="text-gray-800 bg-white shadow p-3 rounded">
+              {item.message}
+            </div>
           </div>
         );
       case GUIDELINE:
         return (
           <div
-            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
+            className="text-gray-800 bg-white shadow p-3 my-2 rounded mx-3"
             key={i}
           >
             <GuidelineComponent guideline={item.guideline} />
           </div>
         );
-      case ACTION:
-        return (
-          <div
-            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
-            key={i}
-          >
-            {item.message}
-          </div>
-        );
-      case INPUT:
-        return (
-          <div
-            className="text-gray-800 bg-white shadow p-3 mb-2 rounded"
-            key={i}
-          >
-            {item.message}
-          </div>
-        );
       case ANSWER:
         return (
-          <div
-            className={`self-end mt-1 mb-2 rounded-full bg-${event.color} font-semibold py-2 px-3 rounded-full text-white`}
-            key={i}
-          >
-            {item.message}
+          <div className={`mt-1 my-2 mx-3 flex justify-end`} key={i}>
+            <div
+              className={`rounded-full bg-${event.color} font-semibold py-2 px-3 text-white`}
+              key={i}
+            >
+              {item.message}
+            </div>
           </div>
         );
     }
@@ -343,38 +329,43 @@ const Monster = ({ event, dream }) => {
               Close
             </button>
           </div>
-          <div className="p-4 flex flex-col items-start overflow-y-scroll h-148">
-            {chatItems.map((item, i) => renderChatItem(item, i))}
+          <div>
+            <AutoScroll
+              showOption={false}
+              className="flex flex-col items-start overflow-y-scroll h-148"
+            >
+              {chatItems.map((item, i) => renderChatItem(item, i))}
 
-            {chatItems[chatItems.length - 1].actions && (
-              <div className="flex min-w-full justify-end flex-wrap -mx-1">
-                {chatItems[chatItems.length - 1].actions.map((action) => (
-                  <button
-                    className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
-                    key={action.label}
-                    onClick={() => {
-                      action.sideEffect && action.sideEffect();
-                      setChatItems([
-                        ...chatItems,
-                        { type: ANSWER, message: action.label },
-                        ...action.chatItems,
-                      ]);
-                    }}
-                  >
-                    {action.label}
-                  </button>
-                ))}
-              </div>
-            )}
+              {chatItems[chatItems.length - 1].actions && (
+                <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
+                  {chatItems[chatItems.length - 1].actions.map((action) => (
+                    <button
+                      className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
+                      key={action.label}
+                      onClick={() => {
+                        action.sideEffect && action.sideEffect();
+                        setChatItems([
+                          ...chatItems,
+                          { type: ANSWER, message: action.label },
+                          ...action.chatItems,
+                        ]);
+                      }}
+                    >
+                      {action.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
-            {chatItems[chatItems.length - 1].type === INPUT && (
-              <InputAction
-                item={chatItems[chatItems.length - 1]}
-                chatItems={chatItems}
-                setChatItems={setChatItems}
-                color={event.color}
-              />
-            )}
+              {chatItems[chatItems.length - 1].type === INPUT && (
+                <InputAction
+                  item={chatItems[chatItems.length - 1]}
+                  chatItems={chatItems}
+                  setChatItems={setChatItems}
+                  color={event.color}
+                />
+              )}
+            </AutoScroll>
           </div>
         </div>
       )}
