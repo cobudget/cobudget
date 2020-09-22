@@ -338,7 +338,7 @@ const Monster = ({ event, dream }) => {
                 {chatItems.map((item, i) => renderChatItem(item, i))}
 
                 {chatItems[chatItems.length - 1].actions && (
-                  <div className="flex min-w-full justify-end flex-wrap -mx-1 my-2 p-3">
+                  <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
                     {chatItems[chatItems.length - 1].actions.map((action) => (
                       <button
                         className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
