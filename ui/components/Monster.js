@@ -316,7 +316,7 @@ const Monster = ({ event, dream }) => {
     >
       {open && (
         <div
-          className={`bg-gray-100 rounded-lg shadow-lg border-${event.color} overflow-hidden border-3 w-100`}
+          className={`fixed inset-0 sm:relative sm:h-148 sm:w-100 bg-gray-100 sm:rounded-lg shadow-lg border-${event.color} overflow-hidden border-3 flex flex-col`}
         >
           <div
             className={`bg-${event.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
@@ -329,43 +329,45 @@ const Monster = ({ event, dream }) => {
               Close
             </button>
           </div>
-          <div>
-            <AutoScroll
-              showOption={false}
-              className="flex flex-col items-start overflow-y-scroll h-148"
-            >
-              {chatItems.map((item, i) => renderChatItem(item, i))}
+          <div className="relative h-full">
+            <div className="absolute inset-0">
+              <AutoScroll
+                showOption={false}
+                className="h-full overflow-y-scroll"
+              >
+                {chatItems.map((item, i) => renderChatItem(item, i))}
 
-              {chatItems[chatItems.length - 1].actions && (
-                <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
-                  {chatItems[chatItems.length - 1].actions.map((action) => (
-                    <button
-                      className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
-                      key={action.label}
-                      onClick={() => {
-                        action.sideEffect && action.sideEffect();
-                        setChatItems([
-                          ...chatItems,
-                          { type: ANSWER, message: action.label },
-                          ...action.chatItems,
-                        ]);
-                      }}
-                    >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                {chatItems[chatItems.length - 1].actions && (
+                  <div className="flex min-w-full justify-end flex-wrap -mx-1 my-2 p-3">
+                    {chatItems[chatItems.length - 1].actions.map((action) => (
+                      <button
+                        className={`bg-${event.color} m-1 hover:bg-${event.color}-darker font-semibold py-2 px-3 rounded-full text-white focus:outline-none`}
+                        key={action.label}
+                        onClick={() => {
+                          action.sideEffect && action.sideEffect();
+                          setChatItems([
+                            ...chatItems,
+                            { type: ANSWER, message: action.label },
+                            ...action.chatItems,
+                          ]);
+                        }}
+                      >
+                        {action.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-              {chatItems[chatItems.length - 1].type === INPUT && (
-                <InputAction
-                  item={chatItems[chatItems.length - 1]}
-                  chatItems={chatItems}
-                  setChatItems={setChatItems}
-                  color={event.color}
-                />
-              )}
-            </AutoScroll>
+                {chatItems[chatItems.length - 1].type === INPUT && (
+                  <InputAction
+                    item={chatItems[chatItems.length - 1]}
+                    chatItems={chatItems}
+                    setChatItems={setChatItems}
+                    color={event.color}
+                  />
+                )}
+              </AutoScroll>
+            </div>
           </div>
         </div>
       )}
