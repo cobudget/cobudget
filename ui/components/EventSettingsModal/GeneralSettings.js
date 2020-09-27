@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "../SelectInput";
@@ -19,7 +18,6 @@ const EDIT_EVENT = gql`
     $info: String
     $color: String
     $about: String
-    $dreamReviewIsOpen: Boolean
   ) {
     editEvent(
       eventId: $eventId
@@ -29,7 +27,6 @@ const EDIT_EVENT = gql`
       info: $info
       color: $color
       about: $about
-      dreamReviewIsOpen: $dreamReviewIsOpen
     ) {
       id
       title
@@ -38,7 +35,6 @@ const EDIT_EVENT = gql`
       info
       color
       about
-      dreamReviewIsOpen
     }
   }
 `;
@@ -131,17 +127,6 @@ export default ({ event, currentUser, handleClose }) => {
           inputRef={register}
           className="my-4"
         />
-
-        <SelectField
-          name="dreamReviewIsOpen"
-          label="Show Review Monster (need to configure guidelines too!)"
-          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
-          inputRef={register}
-          className="my-4"
-        >
-          <option value="true">true</option>
-          <option value="false">false</option>
-        </SelectField>
 
         {currentUser.isOrgAdmin && (
           <>
