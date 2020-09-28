@@ -812,6 +812,11 @@ const resolvers = {
       if (!currentMember || !currentMember.isApproved)
         throw new Error('You need to be logged in and/or approved');
 
+      for (flag in dream.flags) {
+        if (flag.userId === currentUser.id && flag.type === 'ALL_GOOD_FLAG')
+          throw new Error('You have already left an all good flag');
+      }
+
       dream.flags.push({
         type: 'ALL_GOOD_FLAG',
         userId: currentUser.id,
