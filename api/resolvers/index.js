@@ -745,7 +745,14 @@ const resolvers = {
     raiseFlag: async (
       parent,
       { dreamId, guidelineId, comment },
-      { currentUser, models: { Dream, Member } }
+      {
+        currentUser,
+        models: {
+          Dream,
+          Member,
+          logs: { FlagRaisedLog },
+        },
+      }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -767,12 +774,27 @@ const resolvers = {
         userId: currentUser.id,
       });
 
+      await new FlagRaisedLog({
+        dreamId,
+        eventId: dream.eventId,
+        userId: currentUser.id,
+        guidelineId,
+        comment,
+      }).save();
+
       return dream.save();
     },
-    takeDownFlag: async (
+    resolveFlag: async (
       parent,
       { dreamId, flagId, comment },
-      { currentUser, models: { Dream, Member } }
+      {
+        currentUser,
+        models: {
+          Dream,
+          Member,
+          logs: { FlagResolvedLog },
+        },
+      }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -787,11 +809,22 @@ const resolvers = {
         throw new Error('You need to be logged in and/or approved');
 
       dream.flags.push({
-        takingDownFlagId: flagId,
+        resolvingFlagId: flagId,
         comment,
-        type: 'TAKE_DOWN_FLAG',
+        type: 'RESOLVE_FLAG',
         userId: currentUser.id,
       });
+
+      const resolvedFlag = dream.flags.id(flagId);
+
+      await new FlagResolvedLog({
+        dreamId,
+        eventId: dream.eventId,
+        userId: currentUser.id,
+        guidelineId: resolvedFlag.guidelineId,
+        resolvingFlagId: flagId,
+        comment,
+      }).save();
 
       return dream.save();
     },
