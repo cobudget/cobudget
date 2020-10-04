@@ -64,6 +64,24 @@ export const DREAM_QUERY = gql`
           avatar
         }
       }
+      logs {
+        createdAt
+        type
+        details {
+          ... on FlagRaisedDetails {
+            comment
+            guideline {
+              title
+            }
+          }
+          ... on FlagResolvedDetails {
+            comment
+            guideline {
+              title
+            }
+          }
+        }
+      }
       budgetItems {
         description
         min
