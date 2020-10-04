@@ -55,6 +55,28 @@ export default ({ event, handleClose }) => {
           <option value="false">false</option>
         </SelectField>
 
+        {/* <SelectField
+          name="dreamReviewIsOpen"
+          label="Who see's review monster"
+          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="true">All participants</option>
+          <option value="false">Dream creators, guides & admins</option>
+        </SelectField>
+
+        <SelectField
+          name="dreamReviewIsOpen"
+          label="Who can resolve a flag"
+          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="true">All participants</option>
+          <option value="false">Dream creators, guides & admins</option>
+        </SelectField> */}
+
         <div className="mt-2 flex justify-end">
           <Button
             color={event.color}
