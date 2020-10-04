@@ -84,9 +84,9 @@ const RAISE_FLAG_MUTATION = gql`
   }
 `;
 
-const TAKE_DOWN_FLAG_MUTATION = gql`
-  mutation TakeDownFlag($dreamId: ID!, $flagId: ID!, $comment: String!) {
-    takeDownFlag(dreamId: $dreamId, flagId: $flagId, comment: $comment) {
+const RESOLVE_FLAG_MUTATION = gql`
+  mutation ResolveFlag($dreamId: ID!, $flagId: ID!, $comment: String!) {
+    resolveFlag(dreamId: $dreamId, flagId: $flagId, comment: $comment) {
       id
       raisedFlags {
         id
@@ -139,13 +139,13 @@ const raiseFlagFlow = (guidelines, raiseFlag) => [
   },
 ];
 
-const takeDownFlagFlow = (flagId, takeDownFlag) => [
+const resolveFlagFlow = (flagId, resolveFlag) => [
   {
     type: INPUT,
     message:
-      "You can take this flag down if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
+      "You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
     sideEffect: (answer) => {
-      takeDownFlag({
+      resolveFlag({
         variables: {
           flagId,
           comment: answer,
@@ -170,7 +170,7 @@ const Monster = ({ event, dream }) => {
   const [raiseFlag] = useMutation(RAISE_FLAG_MUTATION, {
     variables: { dreamId: dream.id },
   });
-  const [takeDownFlag] = useMutation(TAKE_DOWN_FLAG_MUTATION, {
+  const [resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION, {
     variables: { dreamId: dream.id },
   });
   const [allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION, {
@@ -222,21 +222,21 @@ const Monster = ({ event, dream }) => {
           },
           raisedFlags.length > 1
             ? {
-                label: "I'd like to take down a flag",
+                label: "I'd like to resolve a flag",
                 chatItems: [
                   {
                     type: ACTION,
                     message: "Which one?",
                     actions: raisedFlags.map((raisedFlag) => ({
                       label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
-                      chatItems: takeDownFlagFlow(raisedFlag.id, takeDownFlag),
+                      chatItems: resolveFlagFlow(raisedFlag.id, resolveFlag),
                     })),
                   },
                 ],
               }
             : {
-                label: "I'd like to take down the flag",
-                chatItems: takeDownFlagFlow(raisedFlags[0].id, takeDownFlag),
+                label: "I'd like to resolve the flag",
+                chatItems: resolveFlagFlow(raisedFlags[0].id, resolveFlag),
               },
         ],
       },
