@@ -1607,23 +1607,27 @@ const resolvers = {
       return currentMember.favorites.includes(dream.id);
     },
     raisedFlags: async (dream, args, { currentUser, models: { Member } }) => {
-      const takeDownFlagIds = dream.flags
-        .filter((flag) => flag.type === 'TAKE_DOWN_FLAG')
-        .map((flag) => flag.takingDownFlagId);
+      const resolveFlagIds = dream.flags
+        .filter((flag) => flag.type === 'RESOLVE_FLAG')
+        .map((flag) => flag.resolvingFlagId);
 
       return dream.flags.filter(
         (flag) =>
-          flag.type === 'RAISE_FLAG' && !takeDownFlagIds.includes(flag.id)
+          flag.type === 'RAISE_FLAG' && !resolveFlagIds.includes(flag.id)
       );
     },
+    logs: async (
+      dream,
+      args,
+      {
+        models: {
+          logs: { Log },
+        },
+      }
+    ) => {
+      return Log.find({ dreamId: dream.id });
+    },
   },
-  // type Flag {
-  //   id: ID!
-  //   guideline: Guideline
-  //   user: User
-  //   comment: String
-  //   type: String
-  // }
   Flag: {
     guideline: async (flag, args, { models: { Event } }) => {
       const event = await Event.findOne({ _id: flag.parent().eventId });
@@ -1696,6 +1700,40 @@ const resolvers = {
         (eventCustomField) => eventCustomField.id == fieldId
       );
       return eventCustomField[0];
+    },
+  },
+  Log: {
+    details: (log) => log,
+    user: async (log, args, { models: { User } }) => {
+      return null;
+      // TODO:  only show for admins
+      // return User.findOne({ _id: log.userId });
+    },
+    type: (log) => log.__t,
+    dream: async (log, args, { models: { Dream } }) => {
+      return Dream.findOne({ _id: log.dreamId });
+    },
+    event: async (log, args, { models: { Event } }) => {
+      return Event.findOne({ _id: log.eventId });
+    },
+  },
+  LogDetails: {
+    __resolveType: async (obj) => {
+      if (obj.__t == 'FlagRaised') return 'FlagRaisedDetails';
+      if (obj.__t == 'FlagResolved') return 'FlagResolvedDetails';
+      return null;
+    },
+  },
+  FlagRaisedDetails: {
+    guideline: async (log, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: log.eventId });
+      return event.guidelines.id(log.guidelineId);
+    },
+  },
+  FlagResolvedDetails: {
+    guideline: async (log, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: log.eventId });
+      return event.guidelines.id(log.guidelineId);
     },
   },
 };
