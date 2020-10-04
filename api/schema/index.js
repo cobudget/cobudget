@@ -113,7 +113,7 @@ const schema = gql`
     deleteComment(dreamId: ID!, commentId: ID!): Dream
 
     raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
-    takeDownFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
+    resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
     allGoodFlag(dreamId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
@@ -274,6 +274,7 @@ const schema = gql`
     published: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
+    logs: [Log]
     # reactions: [Reaction]
     # tags: [Tag]
   }
@@ -414,15 +415,26 @@ const schema = gql`
     createdAt: Date
   }
 
-  # type Flag {
-  #   title: String!
-  #   description: String!
-  # }
+  type Log {
+    createdAt: Date
+    user: User
+    dream: Dream
+    event: Event
+    details: LogDetails
+    type: String
+  }
 
-  # type FlagEvent {
-  #   flag: Flag!
-  #   flagger: Member!
-  # }
+  type FlagRaisedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  type FlagResolvedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
   # type QuestionAnswer {
   #   question: Question
