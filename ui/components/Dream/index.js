@@ -2,6 +2,7 @@ import stringToHslColor, { stringToColor } from "utils/stringToHslColor";
 import { isMemberOfDream } from "utils/helpers";
 
 import Label from "components/Label";
+import Monster from "components/Monster";
 
 import Images from "./Images";
 import Comments from "./Comments";
@@ -20,6 +21,10 @@ const Dream = ({ dream, event, currentUser }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
+      {currentUser?.membership &&
+        event.dreamReviewIsOpen &&
+        event.guidelines.length > 0 && <Monster event={event} dream={dream} />}
+
       {!dream.published && (
         <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>
       )}
@@ -82,6 +87,7 @@ const Dream = ({ dream, event, currentUser }) => {
               comments={dream.comments}
               dreamId={dream.id}
               event={event}
+              logs={dream.logs}
             />
           </div>
           <div className="order-first md:order-last">

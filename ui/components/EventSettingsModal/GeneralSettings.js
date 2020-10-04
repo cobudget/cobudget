@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "../SelectInput";
@@ -64,6 +63,7 @@ export default ({ event, currentUser, handleClose }) => {
               totalBudget: Number(variables.totalBudget),
               grantValue: Number(variables.grantValue),
               grantsPerMember: Number(variables.grantsPerMember),
+              dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
               color,
             },
           })

@@ -20,6 +20,14 @@ export const DREAM_QUERY = gql`
       currentNumberOfGrants
       approved
       published
+      raisedFlags {
+        id
+        comment
+        guideline {
+          id
+          title
+        }
+      }
       customFields {
         value
         customField {
@@ -54,6 +62,24 @@ export const DREAM_QUERY = gql`
           id
           name
           avatar
+        }
+      }
+      logs {
+        createdAt
+        type
+        details {
+          ... on FlagRaisedDetails {
+            comment
+            guideline {
+              title
+            }
+          }
+          ... on FlagResolvedDetails {
+            comment
+            guideline {
+              title
+            }
+          }
         }
       }
       budgetItems {

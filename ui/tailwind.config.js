@@ -9,6 +9,11 @@ module.exports = {
       },
       height: {
         88: "22rem",
+        100: "25rem",
+        148: "37rem",
+      },
+      width: {
+        100: "25rem",
       },
       fontFamily: {
         sans: ["Inter", ...defaultTheme.fontFamily.sans],
@@ -82,7 +87,7 @@ module.exports = {
           100: "hsl(223, 3%, 96%)",
           200: "hsl(223, 3%, 93%)",
           default: "hsl(223, 3%, 15%)",
-          darker: "hsl(223, 3%, 10%)",
+          darker: "hsl(223, 3%, 5%)",
         },
       },
       shadowOutline: {
@@ -91,6 +96,22 @@ module.exports = {
       },
       spacing: {
         7: "1.75rem",
+      },
+      keyframes: {
+        wiggle: {
+          "0%, 50%, 59%, 100%": { transform: "rotate(0deg)" },
+          "53%": { transform: "rotate(3deg)" },
+          "56%": { transform: "rotate(-3deg)" },
+        },
+        "mega-wiggle": {
+          "0%, 100%": { transform: "rotate(0deg)" },
+          "33%": { transform: "rotate(3deg)" },
+          "66%": { transform: "rotate(-3deg)" },
+        },
+      },
+      animation: {
+        wiggle: "wiggle 2.5s ease-in-out infinite",
+        "mega-wiggle": "mega-wiggle 0.2s ease-in-out infinite",
       },
     },
     borderWidth: {
@@ -121,6 +142,7 @@ module.exports = {
     textColor: ["responsive", "hover", "focus", "group-hover", "last"],
     shadowOutline: ["focus", "hover"],
     visibility: ["responsive", "group-hover"],
+    animation: ["responsive", "hover"],
     // borderStyle: ["hover", "focus"],
   },
   plugins: [

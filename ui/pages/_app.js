@@ -35,6 +35,7 @@ export const TOP_LEVEL_QUERY = gql`
       numberOfApprovedMembers
       about
       allowStretchGoals
+      dreamReviewIsOpen
       guidelines {
         id
         title

@@ -33,6 +33,23 @@ const DreamSchema = new Schema({
     }),
   ],
   approved: { type: Boolean, default: false },
+  flags: [
+    new Schema({
+      guidelineId: Schema.Types.ObjectId,
+      userId: Schema.Types.ObjectId,
+      comment: String,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      type: {
+        type: String,
+        enum: ['RAISE_FLAG', 'RESOLVE_FLAG', 'ALL_GOOD_FLAG'],
+        required: true,
+      },
+      resolvingFlagId: Schema.Types.ObjectId,
+    }),
+  ],
   budgetItems: [
     new Schema({
       description: { type: String, required: true },

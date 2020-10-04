@@ -48,6 +48,7 @@ const schema = gql`
       info: String
       color: String
       about: String
+      dreamReviewIsOpen: Boolean
     ): Event!
     deleteEvent(eventId: ID!): Event
 
@@ -110,6 +111,10 @@ const schema = gql`
     addComment(dreamId: ID!, content: String!): Dream
     editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
+
+    raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
+    resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
+    allGoodFlag(dreamId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
     updateProfile(name: String, avatar: String, bio: String): User
@@ -190,6 +195,7 @@ const schema = gql`
     allowStretchGoals: Boolean
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
+    dreamReviewIsOpen: Boolean
   }
 
   type Guideline {
@@ -266,11 +272,19 @@ const schema = gql`
     approved: Boolean
     favorite: Boolean
     published: Boolean
-    # answers: [QuestionAnswer]
-    # funding: Int!
-    # raisedFlags: [Flag]
+    flags: [Flag]
+    raisedFlags: [Flag]
+    logs: [Log]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Flag {
+    id: ID!
+    guideline: Guideline
+    user: User
+    comment: String
+    type: String
   }
 
   type Grant {
@@ -401,15 +415,26 @@ const schema = gql`
     createdAt: Date
   }
 
-  # type Flag {
-  #   title: String!
-  #   description: String!
-  # }
+  type Log {
+    createdAt: Date
+    user: User
+    dream: Dream
+    event: Event
+    details: LogDetails
+    type: String
+  }
 
-  # type FlagEvent {
-  #   flag: Flag!
-  #   flagger: Member!
-  # }
+  type FlagRaisedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  type FlagResolvedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
   # type QuestionAnswer {
   #   question: Question
