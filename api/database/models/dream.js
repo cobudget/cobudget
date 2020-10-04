@@ -44,10 +44,10 @@ const DreamSchema = new Schema({
       },
       type: {
         type: String,
-        enum: ['RAISE_FLAG', 'TAKE_DOWN_FLAG', 'ALL_GOOD_FLAG'],
+        enum: ['RAISE_FLAG', 'RESOLVE_FLAG', 'ALL_GOOD_FLAG'],
         required: true,
       },
-      takingDownFlagId: Schema.Types.ObjectId,
+      resolvingFlagId: Schema.Types.ObjectId,
     }),
   ],
   budgetItems: [
