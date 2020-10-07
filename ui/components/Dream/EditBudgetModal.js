@@ -134,6 +134,7 @@ export default ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
+              color={event.color}
               onClick={() =>
                 insert(fields.filter((f) => f.type === "INCOME").length, {
                   type: "INCOME",
@@ -200,6 +201,7 @@ export default ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
+              color={event.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
@@ -213,7 +215,7 @@ export default ({
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
-              {event.guidelines && (
+              {Boolean(event.guidelines.length) && (
                 <a
                   href={`/${event.slug}/about#guidelines`}
                   target="_blank"

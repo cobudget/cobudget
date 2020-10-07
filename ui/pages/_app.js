@@ -33,9 +33,15 @@ export const TOP_LEVEL_QUERY = gql`
       totalBudgetGrants
       remainingGrants
       numberOfApprovedMembers
-      guidelines
       about
       allowStretchGoals
+      dreamReviewIsOpen
+      guidelines {
+        id
+        title
+        description
+        position
+      }
       customFields {
         id
         name

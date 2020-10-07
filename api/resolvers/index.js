@@ -25,9 +25,9 @@ const resolvers = {
       { id },
       { currentUser, models: { Organization } }
     ) => {
-      if (!currentUser) throw Error('You need to be logged in');
+      if (!currentUser) throw new Error('You need to be logged in');
       if (!currentUser.organizationId == id && !currentUser.isRootAdmin)
-        throw Error('You need to belong to that organization');
+        throw new Error('You need to belong to that organization');
       return Organization.findOne({ _id: id });
     },
     organizations: async (
@@ -36,7 +36,7 @@ const resolvers = {
       { currentUser, models: { Organization } }
     ) => {
       if (!currentUser || !currentUser.isRootAdmin)
-        throw Error('Must be root admin to view organizations');
+        throw new Error('Must be root admin to view organizations');
       return Organization.find();
     },
     events: async (parent, args, { currentOrg, models: { Event } }) => {
@@ -46,6 +46,7 @@ const resolvers = {
       return Event.find({ organizationId: currentOrg.id });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
+      if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
@@ -96,8 +97,12 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isApproved)
-        throw new Error('You need to be an approved member');
+      if (
+        !((currentMember && currentMember.isApproved) || currentUser.isOrgAdmin)
+      )
+        throw new Error(
+          'You need to be approved member or org admin to view members'
+        );
 
       return Member.find({
         eventId,
@@ -186,9 +191,9 @@ const resolvers = {
         title,
         registrationPolicy,
         info,
-        guidelines,
         color,
         about,
+        dreamReviewIsOpen,
       },
       { currentUser, models: { Event, Member } }
     ) => {
@@ -197,18 +202,131 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
         throw new Error('You need to be admin of this event.');
 
-      const event = await Event.findOne({ _id: eventId });
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
 
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
       if (typeof info !== 'undefined') event.info = info;
-      if (typeof guidelines !== 'undefined') event.guidelines = guidelines;
       if (typeof about !== 'undefined') event.about = about;
       if (color) event.color = color;
+      if (typeof dreamReviewIsOpen !== 'undefined')
+        event.dreamReviewIsOpen = dreamReviewIsOpen;
+
+      return event.save();
+    },
+    deleteEvent: async (
+      parent,
+      { eventId },
+      { currentUser, models: { Event, Grant, Dream, Member } }
+    ) => {
+      if (!(currentUser && currentUser.isOrgAdmin))
+        throw new Error('You need to be org. admin to delete event');
+
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
+
+      if (!event)
+        throw new Error("Can't find event in your organization to delete.");
+
+      await Grant.deleteMany({ eventId });
+      await Dream.deleteMany({ eventId });
+      await Member.deleteMany({ eventId });
+      return event.remove();
+    },
+    addGuideline: async (
+      parent,
+      { eventId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add a guideline');
+
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
+
+      event.guidelines.push({ ...guideline });
+
+      return event.save();
+    },
+    editGuideline: async (
+      parent,
+      { eventId, guidelineId, guideline },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
+
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
+
+      let doc = event.guidelines.id(guidelineId);
+
+      doc.title = guideline.title;
+      doc.description = guideline.description;
+
+      return event.save();
+    },
+    setGuidelinePosition: async (
+      parent,
+      { eventId, guidelineId, newPosition },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a guideline');
+
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
+
+      let doc = event.guidelines.id(guidelineId);
+      doc.position = newPosition;
+      return event.save();
+    },
+    deleteGuideline: async (
+      parent,
+      { eventId, guidelineId },
+      { currentUser, models: { Event, Member } }
+    ) => {
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId,
+      });
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a guideline');
+
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
+
+      let doc = event.guidelines.id(guidelineId);
+      doc.remove();
 
       return event.save();
     },
@@ -221,10 +339,13 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to add custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to add custom field');
 
-      const event = await Event.findOne({ _id: eventId });
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
 
       event.customFields.push({ ...customField });
 
@@ -240,10 +361,13 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
-      const event = await Event.findOne({ _id: eventId });
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
       let doc = event.customFields.id(fieldId);
       doc.position = newPosition;
       return event.save();
@@ -257,10 +381,13 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to edit a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to edit a custom field');
 
-      const event = await Event.findOne({ _id: eventId });
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
 
       let doc = event.customFields.id(fieldId);
       // doc = { ...doc, ...customField };
@@ -281,10 +408,13 @@ const resolvers = {
         userId: currentUser.id,
         eventId,
       });
-      if (!currentMember || !currentMember.isAdmin)
-        throw new Error('You need to be event admin to remove a custom field');
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
+        throw new Error('You need to be admin to remove a custom field');
 
-      const event = await Event.findOne({ _id: eventId });
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentUser.organizationId,
+      });
 
       let doc = event.customFields.id(fieldId);
       doc.remove();
@@ -612,6 +742,122 @@ const resolvers = {
 
       return dream.save();
     },
+    raiseFlag: async (
+      parent,
+      { dreamId, guidelineId, comment },
+      {
+        currentUser,
+        models: {
+          Dream,
+          Member,
+          logs: { FlagRaisedLog },
+        },
+      }
+    ) => {
+      // check dreamReviewIsOpen
+      // check not already left a flag?
+
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      dream.flags.push({
+        guidelineId,
+        comment,
+        type: 'RAISE_FLAG',
+        userId: currentUser.id,
+      });
+
+      await new FlagRaisedLog({
+        dreamId,
+        eventId: dream.eventId,
+        userId: currentUser.id,
+        guidelineId,
+        comment,
+      }).save();
+
+      return dream.save();
+    },
+    resolveFlag: async (
+      parent,
+      { dreamId, flagId, comment },
+      {
+        currentUser,
+        models: {
+          Dream,
+          Member,
+          logs: { FlagResolvedLog },
+        },
+      }
+    ) => {
+      // check dreamReviewIsOpen
+      // check not already left a flag?
+
+      const dream = await Dream.findOne({ _id: dreamId });
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      dream.flags.push({
+        resolvingFlagId: flagId,
+        comment,
+        type: 'RESOLVE_FLAG',
+        userId: currentUser.id,
+      });
+
+      const resolvedFlag = dream.flags.id(flagId);
+
+      await new FlagResolvedLog({
+        dreamId,
+        eventId: dream.eventId,
+        userId: currentUser.id,
+        guidelineId: resolvedFlag.guidelineId,
+        resolvingFlagId: flagId,
+        comment,
+      }).save();
+
+      return dream.save();
+    },
+    allGoodFlag: async (
+      parent,
+      { dreamId },
+      { currentUser, models: { Dream, Member } }
+    ) => {
+      // check dreamReviewIsOpen
+      // check have not left one of these flags already
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentMember = await Member.findOne({
+        userId: currentUser.id,
+        eventId: dream.eventId,
+      });
+
+      if (!currentMember || !currentMember.isApproved)
+        throw new Error('You need to be logged in and/or approved');
+
+      for (flag in dream.flags) {
+        if (flag.userId === currentUser.id && flag.type === 'ALL_GOOD_FLAG')
+          throw new Error('You have already left an all good flag');
+      }
+
+      dream.flags.push({
+        type: 'ALL_GOOD_FLAG',
+        userId: currentUser.id,
+      });
+
+      return dream.save();
+    },
+
     sendMagicLink: async (
       parent,
       { email: inputEmail },
@@ -704,7 +950,7 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentMember || !currentMember.isAdmin)
+      if (!((currentMember && currentMember.isAdmin) || currentUser.isOrgAdmin))
         throw new Error('You need to be admin to update member');
 
       const member = await Member.findOne({
@@ -758,7 +1004,7 @@ const resolvers = {
       });
 
       if (!organization)
-        throw Error(`Cant find organization by id ${organizationId}`);
+        throw new Error(`Cant find organization by id ${organizationId}`);
 
       return await Organization.findOneAndDelete({
         _id: organizationId,
@@ -1360,6 +1606,38 @@ const resolvers = {
       if (!currentMember) return false;
       return currentMember.favorites.includes(dream.id);
     },
+    raisedFlags: async (dream, args, { currentUser, models: { Member } }) => {
+      const resolveFlagIds = dream.flags
+        .filter((flag) => flag.type === 'RESOLVE_FLAG')
+        .map((flag) => flag.resolvingFlagId);
+
+      return dream.flags.filter(
+        (flag) =>
+          flag.type === 'RAISE_FLAG' && !resolveFlagIds.includes(flag.id)
+      );
+    },
+    logs: async (
+      dream,
+      args,
+      {
+        models: {
+          logs: { Log },
+        },
+      }
+    ) => {
+      return Log.find({ dreamId: dream.id });
+    },
+  },
+  Flag: {
+    guideline: async (flag, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: flag.parent().eventId });
+
+      return event.guidelines.id(flag.guidelineId);
+    },
+    user: async (parent, args, { currentUser, models: { Member, Dream } }) => {
+      // if not org admin or event admin or guide
+      return null;
+    },
   },
   Grant: {
     dream: async (grant, args, { models: { Dream } }) => {
@@ -1422,6 +1700,40 @@ const resolvers = {
         (eventCustomField) => eventCustomField.id == fieldId
       );
       return eventCustomField[0];
+    },
+  },
+  Log: {
+    details: (log) => log,
+    user: async (log, args, { models: { User } }) => {
+      return null;
+      // TODO:  only show for admins
+      // return User.findOne({ _id: log.userId });
+    },
+    type: (log) => log.__t,
+    dream: async (log, args, { models: { Dream } }) => {
+      return Dream.findOne({ _id: log.dreamId });
+    },
+    event: async (log, args, { models: { Event } }) => {
+      return Event.findOne({ _id: log.eventId });
+    },
+  },
+  LogDetails: {
+    __resolveType: async (obj) => {
+      if (obj.__t == 'FlagRaised') return 'FlagRaisedDetails';
+      if (obj.__t == 'FlagResolved') return 'FlagResolvedDetails';
+      return null;
+    },
+  },
+  FlagRaisedDetails: {
+    guideline: async (log, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: log.eventId });
+      return event.guidelines.id(log.guidelineId);
+    },
+  },
+  FlagResolvedDetails: {
+    guideline: async (log, args, { models: { Event } }) => {
+      const event = await Event.findOne({ _id: log.eventId });
+      return event.guidelines.id(log.guidelineId);
     },
   },
 };

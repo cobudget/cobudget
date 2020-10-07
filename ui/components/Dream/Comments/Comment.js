@@ -30,7 +30,13 @@ const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
-const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
+const Comment = ({
+  comment,
+  dreamId,
+  currentUser,
+  showBorderBottom,
+  event,
+}) => {
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   const canEdit =
@@ -61,6 +67,7 @@ const Comment = ({ comment, dreamId, currentUser, showBorderBottom }) => {
             handleDone={() => {
               setEditMode(false);
             }}
+            event={event}
           />
         ) : (
           <>

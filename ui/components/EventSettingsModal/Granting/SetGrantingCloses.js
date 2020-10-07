@@ -1,13 +1,14 @@
 import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box, Button, TextField } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
-import Card from "../styled/Card";
+import { Box, Button } from "@material-ui/core";
+import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import DayjsUtils from "@date-io/dayjs";
 
+import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetCurrency = ({ closeModal, event }) => {
+const SetGrantingCloses = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
@@ -15,18 +16,16 @@ const SetCurrency = ({ closeModal, event }) => {
   });
   const { handleSubmit, register } = useForm();
 
+  const [selectedDate, handleDateChange] = React.useState(event.grantingCloses);
+
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set grants per member</h1>
-        <Alert severity="warning">
-          Changing grants per member will also reset grant value.
-        </Alert>
+        <h1 className="text-3xl">Set granting close date</h1>
+
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({
-              variables: { grantsPerMember: Number(variables.grantsPerMember) },
-            })
+            updateGranting({ variables: { grantingCloses: selectedDate } })
               .then(({ data }) => {
                 // console.log({ data });
                 closeModal();
@@ -38,18 +37,18 @@ const SetCurrency = ({ closeModal, event }) => {
           })}
         >
           <Box m="15px 0">
-            <TextField
-              name="grantsPerMember"
-              label="Grants per member"
-              defaultValue={event.grantsPerMember}
-              fullWidth
-              inputRef={register}
-              InputProps={{
-                type: "number",
-                min: 1,
-              }}
-              variant="outlined"
-            />
+            <MuiPickersUtilsProvider utils={DayjsUtils}>
+              <DateTimePicker
+                label="Granting close date"
+                variant="inline"
+                value={selectedDate}
+                onChange={handleDateChange}
+                inputVariant="outlined"
+                name="grantingCloses"
+                inputRef={register}
+                fullWidth
+              />
+            </MuiPickersUtilsProvider>
           </Box>
 
           <Button
@@ -66,4 +65,4 @@ const SetCurrency = ({ closeModal, event }) => {
   );
 };
 
-export default SetCurrency;
+export default SetGrantingCloses;

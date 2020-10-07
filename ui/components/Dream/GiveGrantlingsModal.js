@@ -2,8 +2,10 @@ import { useForm } from "react-hook-form";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
-import { TextField, Button, Modal } from "@material-ui/core";
+import { Modal } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import Button from "components/Button";
+import TextField from "components/TextField";
 
 import { DREAM_QUERY } from "../../pages/[event]/[dream]";
 import { TOP_LEVEL_QUERY } from "../../pages/_app";
@@ -34,15 +36,18 @@ const GiveGrantlingsModal = ({
   const classes = useStyles();
   const router = useRouter();
 
-  const [giveGrant] = useMutation(GIVE_GRANT, {
+  const dreamId = dream.id;
+
+  const [giveGrant, { loading }] = useMutation(GIVE_GRANT, {
     update(cache, { data: { giveGrant } }) {
       const { dream } = cache.readQuery({
         query: DREAM_QUERY,
-        variables: { slug: router.query.dream, eventId: event.id },
+        variables: { id: dreamId },
       });
 
       cache.writeQuery({
         query: DREAM_QUERY,
+        variables: { id: dreamId },
         data: {
           dream: {
             ...dream,
@@ -84,7 +89,9 @@ const GiveGrantlingsModal = ({
     <Modal open={open} onClose={handleClose} className={classes.modal}>
       <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
         <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
-        <p>Available grants: {currentUser.membership.availableGrants}</p>
+        <p className="text-gray-800">
+          Available grants: {currentUser.membership.availableGrants}
+        </p>
         {event.maxGrantsToDream && (
           <p className="text-sm text-gray-600 my-2">
             Max. {event.maxGrantsToDream} grants to one dream
@@ -114,6 +121,8 @@ const GiveGrantlingsModal = ({
               defaultValue="1"
               inputRef={register}
               fullWidth
+              size="large"
+              color={event.color}
               inputProps={{
                 type: "number",
                 min: "1",
@@ -126,15 +135,14 @@ const GiveGrantlingsModal = ({
                     : currentUser.membership.availableGrants
                 }`,
               }}
-              variant="outlined"
             />
           </div>
           <Button
             type="submit"
             size="large"
             fullWidth
-            variant="contained"
-            color="primary"
+            color={event.color}
+            loading={loading}
           >
             Donate grantlings
           </Button>

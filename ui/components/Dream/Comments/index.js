@@ -1,7 +1,13 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
+import Log from "./Log";
 
-const Comments = ({ currentUser, comments, dreamId }) => {
+const Comments = ({ currentUser, comments, logs, dreamId, event }) => {
+  const items = [
+    ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
+    ...logs.map((log) => ({ ...log, _type: "LOG" })),
+  ].sort((a, b) => a.createdAt - b.createdAt);
+
   return (
     <div>
       {(comments.length > 0 || currentUser?.membership) && (
@@ -10,17 +16,22 @@ const Comments = ({ currentUser, comments, dreamId }) => {
         </h2>
       )}
 
-      {comments.map((comment, index) => (
-        <Comment
-          comment={comment}
-          currentUser={currentUser}
-          dreamId={dreamId}
-          showBorderBottom={Boolean(index + 1 !== comments.length)}
-          key={index}
-        />
-      ))}
+      {items.map((item, index) => {
+        if (item._type === "COMMENT")
+          return (
+            <Comment
+              comment={item}
+              currentUser={currentUser}
+              dreamId={dreamId}
+              showBorderBottom={Boolean(index + 1 !== items.length)}
+              key={index}
+              event={event}
+            />
+          );
+        if (item._type === "LOG") return <Log log={item} key={index} />;
+      })}
       {currentUser && currentUser.membership && (
-        <AddComment currentUser={currentUser} dreamId={dreamId} />
+        <AddComment currentUser={currentUser} dreamId={dreamId} event={event} />
       )}
     </div>
   );

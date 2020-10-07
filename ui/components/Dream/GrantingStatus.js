@@ -11,7 +11,7 @@ export default ({ dream }) => {
       >
         <div>
           <span className="block text-xl font-medium">
-            {dream.currentNumberOfGrants}
+            {thousandSeparator(dream.currentNumberOfGrants)}
           </span>
           <span className="uppercase text-sm">Funded</span>
         </div>

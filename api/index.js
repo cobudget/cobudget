@@ -24,7 +24,7 @@ const pretixWebhook = require('./webhooks/pretix');
 
 const schema = require('./schema');
 const resolvers = require('./resolvers');
-const { getModels } = require('./database');
+const { getModels } = require('./database/models');
 const { getConnection } = require('./database/connection');
 
 const server = new ApolloServer({

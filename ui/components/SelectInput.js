@@ -39,6 +39,7 @@ export const SelectField = ({
   defaultValue,
   name,
   label,
+  color = "green",
   className = "",
 }) => {
   return (
@@ -50,7 +51,7 @@ export const SelectField = ({
       )}
       <div className="relative">
         <select
-          className="block appearance-none w-full bg-gray-100 border border-gray-100 py-3 px-4 pr-8 rounded focus:outline-none focus:shadow-outline-green transition-shadows ease-in-out duration-200"
+          className={`block appearance-none w-full bg-gray-100 border border-gray-100 py-3 px-4 pr-8 rounded focus:outline-none focus:shadow-outline-${color} transition-shadows ease-in-out duration-200`}
           name={name}
           id={name}
           ref={inputRef}

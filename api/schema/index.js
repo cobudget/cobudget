@@ -40,17 +40,30 @@ const schema = gql`
       description: String
       registrationPolicy: RegistrationPolicy!
     ): Event!
-
     editEvent(
       eventId: ID!
       slug: String
       title: String
       registrationPolicy: RegistrationPolicy
       info: String
-      guidelines: String
       color: String
       about: String
+      dreamReviewIsOpen: Boolean
     ): Event!
+    deleteEvent(eventId: ID!): Event
+
+    addGuideline(eventId: ID!, guideline: GuidelineInput!): Event!
+    editGuideline(
+      eventId: ID!
+      guidelineId: ID!
+      guideline: GuidelineInput!
+    ): Event!
+    setGuidelinePosition(
+      eventId: ID!
+      guidelineId: ID!
+      newPosition: Float
+    ): Event!
+    deleteGuideline(eventId: ID!, guidelineId: ID!): Event!
 
     addCustomField(eventId: ID!, customField: CustomFieldInput!): Event!
     editCustomField(
@@ -98,6 +111,10 @@ const schema = gql`
     addComment(dreamId: ID!, content: String!): Dream
     editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
     deleteComment(dreamId: ID!, commentId: ID!): Dream
+
+    raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
+    resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
+    allGoodFlag(dreamId: ID!): Dream
 
     sendMagicLink(email: String!): Boolean
     updateProfile(name: String, avatar: String, bio: String): User
@@ -173,11 +190,24 @@ const schema = gql`
     grantingOpens: Date
     grantingCloses: Date
     grantingIsOpen: Boolean
-    guidelines: String
+    guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
+    dreamReviewIsOpen: Boolean
+  }
+
+  type Guideline {
+    id: ID!
+    title: String!
+    description: String!
+    position: Float!
+  }
+
+  input GuidelineInput {
+    title: String!
+    description: String!
   }
 
   scalar Date
@@ -242,11 +272,19 @@ const schema = gql`
     approved: Boolean
     favorite: Boolean
     published: Boolean
-    # answers: [QuestionAnswer]
-    # funding: Int!
-    # raisedFlags: [Flag]
+    flags: [Flag]
+    raisedFlags: [Flag]
+    logs: [Log]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type Flag {
+    id: ID!
+    guideline: Guideline
+    user: User
+    comment: String
+    type: String
   }
 
   type Grant {
@@ -377,15 +415,26 @@ const schema = gql`
     createdAt: Date
   }
 
-  # type Flag {
-  #   title: String!
-  #   description: String!
-  # }
+  type Log {
+    createdAt: Date
+    user: User
+    dream: Dream
+    event: Event
+    details: LogDetails
+    type: String
+  }
 
-  # type FlagEvent {
-  #   flag: Flag!
-  #   flagger: Member!
-  # }
+  type FlagRaisedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  type FlagResolvedDetails {
+    guideline: Guideline
+    comment: String
+  }
+
+  union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
   # type QuestionAnswer {
   #   question: Question

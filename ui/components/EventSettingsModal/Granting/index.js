@@ -14,6 +14,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
+import thousandSeparator from "utils/thousandSeparator";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -24,10 +25,8 @@ import SetGrantValue from "./SetGrantValue";
 import SetDreamCreationCloses from "./SetDreamCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetGuidelines from "./SetGuidelines";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
-import thousandSeparator from "../../utils/thousandSeparator";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -51,7 +50,6 @@ const modals = {
   SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
   SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
   SET_TOTAL_BUDGET: SetTotalBudget,
-  SET_GUIDELINES: SetGuidelines,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_ABOUT: SetAbout,
 };
@@ -97,7 +95,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-export default ({ event, currentUser }) => {
+export default ({ event }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -114,11 +112,10 @@ export default ({ event, currentUser }) => {
 
   const grantingHasOpened = dayjs(event.grantingOpens).isBefore(dayjs());
 
-  const canEditSettings =
-    currentUser && currentUser.membership && currentUser.membership.isAdmin;
+  const canEditSettings = true;
 
   return (
-    <>
+    <div className="-mb-6">
       <Modal
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
@@ -130,64 +127,9 @@ export default ({ event, currentUser }) => {
           {open && <ModalContent event={event} closeModal={handleClose} />}
         </div>
       </Modal>
-      {(event.about || currentUser?.membership?.isAdmin) && (
-        <>
-          <h2 className="text-xl mb-3" id="about">
-            About
-          </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
-            {event.about ? (
-              <>
-                {currentUser?.membership?.isAdmin && (
-                  <div className="absolute right-0 top-0 m-4">
-                    <IconButton onClick={() => handleOpen("SET_ABOUT")}>
-                      <EditIcon />
-                    </IconButton>
-                  </div>
-                )}
-                <ReactMarkdown className="markdown" source={event.about} />
-              </>
-            ) : (
-              <div className="flex justify-center">
-                <IconButton onClick={() => handleOpen("SET_ABOUT")}>
-                  <AddIcon />
-                </IconButton>
-              </div>
-            )}
-          </div>
-        </>
-      )}
 
-      {(event.guidelines || currentUser?.membership?.isAdmin) && (
-        <>
-          <h2 className="text-xl mb-3" id="guidelines">
-            Guidelines
-          </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative mb-4">
-            {event.guidelines ? (
-              <>
-                {currentUser?.membership?.isAdmin && (
-                  <div className="absolute right-0 top-0 m-4">
-                    <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                      <EditIcon />
-                    </IconButton>
-                  </div>
-                )}
-                <ReactMarkdown className="markdown" source={event.guidelines} />
-              </>
-            ) : (
-              <div className="flex justify-center">
-                <IconButton onClick={() => handleOpen("SET_GUIDELINES")}>
-                  <AddIcon />
-                </IconButton>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-
-      <h2 className="text-xl mb-3">Granting settings</h2>
-      <div className="bg-white rounded-lg shadow mb-4">
+      <h2 className="text-2xl font-semibold mb-3 px-6">Granting</h2>
+      <div className="border-t">
         <List>
           <SettingsListItem
             primary="Currency"
@@ -196,6 +138,8 @@ export default ({ event, currentUser }) => {
             disabled={!event.dreamCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
+            eventColor={event.color}
+            classes="px-6"
           />
 
           <Divider />
@@ -207,6 +151,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANTS_PER_MEMBER")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -220,6 +165,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_MAX_GRANTS_TO_DREAM")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -235,6 +181,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_TOTAL_BUDGET")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -250,6 +197,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_GRANT_VALUE")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -261,6 +209,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -278,6 +227,7 @@ export default ({ event, currentUser }) => {
             disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -297,6 +247,7 @@ export default ({ event, currentUser }) => {
               !event.grantValue
             }
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
 
           <Divider />
@@ -312,44 +263,10 @@ export default ({ event, currentUser }) => {
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             disabled={!event.grantingOpens}
             canEdit={canEditSettings}
+            eventColor={event.color}
           />
         </List>
       </div>
-
-      <h2 className="text-xl mb-3">Granting status</h2>
-      <div className="bg-white rounded-lg shadow mb-4">
-        <List>
-          <ListItem>
-            <ListItemText
-              primary="Granting is"
-              secondary={event.grantingIsOpen ? "OPEN" : "CLOSED"}
-            />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText
-              primary="Unallocated grants in budget"
-              secondary={`${event.remainingGrants} grants`}
-            />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText
-              primary="Total grants in budget"
-              secondary={`${event.totalBudgetGrants} grants`}
-            />
-          </ListItem>
-          <Divider />
-          <ListItem>
-            <ListItemText
-              primary="Grants given"
-              secondary={`${
-                event.totalBudgetGrants - event.remainingGrants
-              } grants`}
-            />
-          </ListItem>
-        </List>
-      </div>
-    </>
+    </div>
   );
 };

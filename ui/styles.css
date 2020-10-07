@@ -40,6 +40,10 @@ h5 {
   @apply font-semibold;
 }
 
+.markdown hr {
+  @apply m-6;
+}
+
 .markdown p {
   @apply text-gray-900 mb-2;
 }
@@ -49,7 +53,7 @@ h5 {
 }
 
 .markdown li {
-  @apply list-inside;
+  @apply list-inside mb-2;
 }
 .markdown ul {
   @apply list-disc;

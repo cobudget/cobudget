@@ -1,6 +1,6 @@
 # Dreams
 
-[Building a multi-tentant dreams platform](https://edgeryders.eu/t/rewrite-of-dreams-for-multi-tenancy-and-wider-adoption/11476)
+[Building a multi-tenant dreams platform](https://edgeryders.eu/t/rewrite-of-dreams-for-multi-tenancy-and-wider-adoption/11476)
 
 ## Tech stack
 
