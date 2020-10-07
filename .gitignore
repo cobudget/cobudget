@@ -1,5 +1,5 @@
-
-gi .env
+git a
+.env
 node_modules
 
 .now
