@@ -1,6 +1,8 @@
-.env
+
+gi .env
 node_modules
 
 .now
 .vscode
 .vercel
+.idea

@@ -1,8 +1,8 @@
+const EmailTemplates = require('./email.templates');
 
 const mailgun = require('mailgun-js')({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
-  host: 'api.eu.mailgun.net',
 });
 
 const DEPLOY_URL = process.env.VERCEL_URL
@@ -13,15 +13,17 @@ class EmailService {
 
   static async sendMagicLinkEmail(token, organization, user) {
     // send magic link in production, log it in development
-    const { subdomain, customDomain } = organization;
+    const { subdomain, customDomain, name } = organization;
     if (process.env.NODE_ENV === 'production') {
       const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
       const url = `${domain}/?token=${token}`;
-      var data = {
+
+      const loginTemplate = await EmailTemplates.getLoginTemplate(name, url);
+      const data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: user.email,
-        subject: 'Login to Dreams',
-        text: `Here is your link: ${url}`,
+        subject: `Welcome to Dreams - ${name}`,
+        html: loginTemplate
       };
 
       return mailgun
@@ -47,7 +49,7 @@ class EmailService {
     const { subdomain, customDomain } = organization;
     if (process.env.NODE_ENV === 'production') {
       const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
-      var data = {
+      const data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: emails,
         subject: `Request to join ${event.title}`,
