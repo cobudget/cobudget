@@ -2,6 +2,33 @@
 version: "3.1"
 
 services:
+  ui:
+    ports:
+      - 3000:3000
+    build:
+      context: ui
+      dockerfile: Dockerfile
+    volumes:
+      - ./ui:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+    env_file:
+      - .env
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    volumes:
+      - ./api:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 4000:4000
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    environment:
+      WAIT_HOSTS: mongo:27017
   mongo:
     image: mongo
     restart: always

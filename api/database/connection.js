@@ -12,7 +12,7 @@ const getConnection = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
-      useFindAndModify: false
+      useFindAndModify: false,
     });
   }
   return connection;

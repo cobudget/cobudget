@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const { getModels } = require('../database');
+const { getModels } = require('../database/models');
 const { getConnection } = require('../database/connection');
 
 // example request body:
@@ -13,7 +13,7 @@ const { getConnection } = require('../database/connection');
 
 module.exports = async (req, res) => {
   if (!process.env.PRETIX_URL) {
-    res.send(501);
+    res.status(501).end();
   }
   const { body } = req;
 
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
         //   console.log({ user, membership, event });
         // }
 
-        res.send(200);
+        res.status(200).end();
       }
   }
 };

@@ -1,19 +1,26 @@
-const { ApolloServer } = require('apollo-server-micro');
-const jwt = require('jsonwebtoken');
+// const { ApolloServer } = require('apollo-server-micro');
+//const { ApolloServer, gql } = require('apollo-server');
 
-const microCors = require('micro-cors');
-const cors = microCors({
-  allowHeaders: [
-    'X-Requested-With',
-    'Access-Control-Allow-Origin',
-    'X-HTTP-Method-Override',
-    'Content-Type',
-    'Authorization',
-    'Accept',
-    'Dreams-Subdomain',
-    'Dreams-Customdomain',
-  ],
-});
+const express = require('express');
+const { ApolloServer } = require('apollo-server-express');
+
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const bodyParser = require('body-parser');
+const pretixWebhook = require('./webhooks/pretix');
+// const microCors = require('micro-cors');
+// const cors = microCors({
+//   allowHeaders: [
+//     'X-Requested-With',
+//     'Access-Control-Allow-Origin',
+//     'X-HTTP-Method-Override',
+//     'Content-Type',
+//     'Authorization',
+//     'Accept',
+//     'Dreams-Subdomain',
+//     'Dreams-Customdomain',
+//   ],
+// });
 
 const schema = require('./schema');
 const resolvers = require('./resolvers');
@@ -32,7 +39,6 @@ const server = new ApolloServer({
 
     const subdomain = req.headers['dreams-subdomain'];
     const customDomain = req.headers['dreams-customdomain'];
-
     if (customDomain) {
       currentOrg = await models.Organization.findOne({ customDomain });
     } else if (subdomain) {
@@ -67,10 +73,25 @@ const server = new ApolloServer({
   introspection: true,
 });
 
-module.exports = cors((req, res) => {
-  if (req.method === 'OPTIONS') {
-    res.end();
-    return;
-  }
-  return server.createHandler({ path: '/api' })(req, res);
-});
+const app = express();
+server.applyMiddleware({ app });
+
+app.use(bodyParser.json());
+
+app.post('/pretix', pretixWebhook);
+
+const port = process.env.PORT || 4000;
+
+app.listen({ port }, () =>
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  )
+);
+
+// module.exports = cors((req, res) => {
+//   if (req.method === 'OPTIONS') {
+//     res.end();
+//     return;
+//   }
+//   return server.createHandler({ path: '/api' })(req, res);
+// });

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
@@ -15,14 +15,20 @@
     "node": "12.x"
   },
   "dependencies": {
-    "apollo-server-micro": "^2.14.2",
+    "apollo-server-express": "^2.15.1",
+    "body-parser": "^1.19.0",
     "dayjs": "^1.8.20",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "graphql": "^14.5.8",
     "graphql-type-json": "0.3.2",
     "jsonwebtoken": "^8.5.1",
     "mailgun-js": "^0.22.0",
     "micro-cors": "^0.1.1",
     "mongoose": "^5.9.6",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
