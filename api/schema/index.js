@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-micro');
+const { gql } = require('apollo-server-express');
 
 const schema = gql`
   scalar JSON
