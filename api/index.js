@@ -39,7 +39,6 @@ const server = new ApolloServer({
 
     const subdomain = req.headers['dreams-subdomain'];
     const customDomain = req.headers['dreams-customdomain'];
-
     if (customDomain) {
       currentOrg = await models.Organization.findOne({ customDomain });
     } else if (subdomain) {
