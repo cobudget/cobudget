@@ -18,7 +18,7 @@ class EmailService {
       const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
       const url = `${domain}/?token=${token}`;
 
-      const loginTemplate = await EmailTemplates.getLoginTemplate(name, url);
+      const loginTemplate = await EmailTemplates.getLoginTemplate(organization, url);
       const data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: user.email,
