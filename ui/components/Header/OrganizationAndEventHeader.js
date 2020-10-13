@@ -1,12 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useQuery } from "@apollo/react-hooks";
+import gql from "graphql-tag";
 import { Tooltip } from "react-tippy";
 import { HomeIcon, DotsHorizontalIcon, ChevronArrowRightIcon } from "components/Icons";
 import EventSettingsModal from "components/EventSettingsModal";
 import IconButton from "components/IconButton";
 
+const DREAM_QUERY = gql`
+  query Dream($id: ID!) {
+    dream(id: $id) {
+      title
+    }
+  }
+`;
+
 export default ({currentOrg, event, currentUser}) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
+  const router = useRouter();
+  const { data: { dream } = { dream: null }, loading, error } = useQuery(
+    DREAM_QUERY,
+    {
+      variables: { id: router.query.dream },
+    }
+  );
+
   return (
     <>
       <Tooltip
@@ -50,6 +69,15 @@ export default ({currentOrg, event, currentUser}) => {
             <h1>{event.title}</h1>
           </a>
         </Link>
+
+        {/* We need to check both the dream and the router to prevent caching to appear */}
+        {dream && router.query?.dream && 
+          <>
+          <ChevronArrowRightIcon className={`w-5 h-5 text-white`} />
+          <span className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}>{dream?.title}</span>
+          </>
+        }
+
         {(currentUser?.membership?.isAdmin ||
           currentUser?.isOrgAdmin) && (
           <>
