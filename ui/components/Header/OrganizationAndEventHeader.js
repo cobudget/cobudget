@@ -66,7 +66,9 @@ export default ({currentOrg, event, currentUser}) => {
           <a
             className={`hover:bg-${event.color}-darker px-2 py-1 text-white rounded-md mx-0 font-medium`}
           >
-            <h1>{event.title}</h1>
+            <h1>{event.title.length <= 30 ?
+              event.title :
+              event.title.substr(0, 30)+ "..." }</h1>
           </a>
         </Link>
 
@@ -74,7 +76,11 @@ export default ({currentOrg, event, currentUser}) => {
         {dream && router.query?.dream && 
           <>
           <ChevronArrowRightIcon className={`w-5 h-5 text-white`} />
-          <span className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}>{dream?.title}</span>
+          <span className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}>
+            <h1>{dream.title.length <= 30 ?
+              dream.title :
+              dream.title.substr(0, 30)+ "..." }</h1>
+            </span>
           </>
         }
 
