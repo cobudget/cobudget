@@ -6,19 +6,16 @@ const mailgun = require('mailgun-js')({
 	host: process.env.MAILGUN_HOST,
 });
 
-const DEPLOY_URL = process.env.VERCEL_URL
-  ? process.env.VERCEL_URL
-  : process.env.DEPLOY_URL;
-
 class EmailService {
-
   static async sendMagicLinkEmail(token, organization, user) {
     // send magic link in production, log it in development
     const { subdomain, customDomain, name } = organization;
     if (process.env.NODE_ENV === 'production') {
-      const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
-      const url = `${domain}/?token=${token}`;
+      const domain = customDomain
+        ? `https://${customDomain}`
+        : `https://${subdomain}.${process.env.DEPLOY_URL}`;
 
+      const url = `${domain}/?token=${token}`;
       const loginTemplate = await EmailTemplates.getLoginTemplate(organization, url, domain);
       const data = {
         from: `${process.env.EMAIL_SENDER}`,
@@ -39,18 +36,28 @@ class EmailService {
           throw new Error(`Failed to send magic link ${error.message}`);
         });
     } else {
-      const domain = customDomain? `http://${customDomain}` : `http://${subdomain}.localhost:3000`;
+      const domain = customDomain
+        ? `http://${customDomain}`
+        : `http://${subdomain}.localhost:3000`;
       const url = `${domain}/?token=${token}`;
       console.log(`Here is your magic link: ${url}`);
       return true;
     }
-  };
+  }
 
-  static async sendRequestToJoinNotifications(organization, user, event, emails) {
+  static async sendRequestToJoinNotifications(
+    organization,
+    user,
+    event,
+    emails
+  ) {
     const { subdomain, customDomain } = organization;
     if (process.env.NODE_ENV === 'production') {
-      const domain = customDomain ? `https://${customDomain}` : `https://${subdomain}.${DEPLOY_URL}`;
-      const data = {
+      const domain = customDomain
+        ? `https://${customDomain}`
+        : `https://${subdomain}.${process.env.DEPLOY_URL}`;
+      
+        var data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: emails,
         subject: `Request to join ${event.title}`,
@@ -70,7 +77,7 @@ class EmailService {
     } else {
       console.log('in development, not sending request to join notifications');
     }
-  };
+  }
 }
 
 module.exports = EmailService;
