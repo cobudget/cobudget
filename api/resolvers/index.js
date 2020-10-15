@@ -5,7 +5,7 @@ const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
-const EmailService = require('../services/email.service');
+const EmailService = require('../services/EmailService/email.service');
 const AuthService = require('../services/auth.service');
 const { isValidEmail } = require('../utils/email');
 

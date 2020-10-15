@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const MailgunService = require('./email.service');
-const EmailService = require('./email.service');
+const MailgunService = require('./EmailService/email.service');
+const EmailService = require('./EmailService/email.service');
 const { isValidEmail } = require('../utils/email');
 
 const jwtSecretKey = process.env.JWT_SECRET;
