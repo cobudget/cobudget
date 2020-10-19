@@ -1,15 +1,29 @@
+import cookie from "cookie";
+
 import { useEffect, useState } from "react";
 import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
+import { SSRKeycloakProvider, SSRCookies } from "@react-keycloak/ssr";
+
+const keycloakCfg = {
+  realm: "plato",
+  url: "https://auth.platoproject.org/auth/",
+  clientId: "dreams",
+  "ssl-required": "external",
+  resource: "dreams",
+  "public-client": true,
+  "confidential-port": 0,
+};
 
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 
-import Layout from "../components/Layout";
-import Modal from "../components/Modal";
+import getHostInfo from "utils/getHostInfo";
+import Layout from "components/Layout";
+import Modal from "components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
   query EventAndMember($slug: String) {
@@ -166,8 +180,21 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
+
+const MyApp = ({ Component, pageProps, apolloClient, hostInfo, cookies }) => {
   const router = useRouter();
+
+  // redirect to correct org
+  useEffect(() => {
+    if (hostInfo.subdomain === "dispatch" && router.query.redirect) {
+      console.log("redirecting");
+      console.log(router);
+      console.log({ hash: window.location.hash });
+      window.location.replace(
+        router.query.redirect + "/" + window.location.hash
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -191,32 +218,61 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
     if (modal !== name) setModal(name);
   };
 
-  const closeModal = () => {
-    setModal(null);
-  };
+  const closeModal = () => setModal(null); // fix this.
 
   return (
-    <ThemeProvider theme={theme}>
-      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        currentOrg={currentOrg}
-        apollo={apolloClient}
-        openModal={openModal}
-        event={event}
-      >
-        <Component
-          {...pageProps}
-          event={event}
+    <SSRKeycloakProvider
+      keycloakConfig={keycloakCfg}
+      persistor={SSRCookies(cookies)}
+      initOptions={{
+        enableLogging: true,
+        onLoad: "check-sso",
+        silentCheckSsoRedirectUri: `http://dispatch.localhost:3000/?redirect=http%3A%2F%2F${hostInfo.subdomain}.localhost%3A3000`,
+      }}
+    >
+      <ThemeProvider theme={theme}>
+        <Modal
+          active={modal}
+          closeModal={closeModal}
+          currentUser={currentUser}
+        />
+        <Layout
           currentUser={currentUser}
           currentOrg={currentOrg}
-          event={event}
-          hostInfo={hostInfo}
+          apollo={apolloClient}
           openModal={openModal}
-        />
-      </Layout>
-    </ThemeProvider>
+          event={event}
+        >
+          <Component
+            {...pageProps}
+            event={event}
+            currentUser={currentUser}
+            currentOrg={currentOrg}
+            event={event}
+            hostInfo={hostInfo}
+            openModal={openModal}
+          />
+        </Layout>
+      </ThemeProvider>
+    </SSRKeycloakProvider>
   );
 };
 
+function parseCookies(req) {
+  if (!req || !req.headers) {
+    return {};
+  }
+  return cookie.parse(req.headers.cookie || "");
+}
+
+MyApp.getInitialProps = async (context) => {
+  // Extract cookies from AppContext
+  return {
+    hostInfo: getHostInfo(context?.ctx?.req),
+    cookies: parseCookies(context?.ctx?.req),
+  };
+};
+
 export default withApollo({ ssr: true })(MyApp);
+
+//

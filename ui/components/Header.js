@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@material-ui/core";
 import { useRouter } from "next/router";
 import { Tooltip } from "react-tippy";
+import { useKeycloak } from "@react-keycloak/ssr";
 
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -71,7 +72,9 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
+  const { keycloak, initialized } = useKeycloak();
 
+  console.log({ keycloak, initialized });
   const router = useRouter();
   return (
     <header
@@ -79,6 +82,36 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
         (event?.color ? `bg-${event.color} shadow-md` : "") + " mb-8 w-full"
       }
     >
+      <div>
+        <div>{`User is ${
+          !keycloak.authenticated ? "NOT " : ""
+        }authenticated`}</div>
+
+        {!!keycloak.authenticated ? (
+          <button
+            type="button"
+            onClick={() =>
+              keycloak.logout({
+                redirectUri:
+                  "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
+              })
+            }
+          >
+            Logout
+          </button>
+        ) : (
+          <button
+            onClick={() =>
+              keycloak.login({
+                redirectUri:
+                  "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
+              })
+            }
+          >
+            log in
+          </button>
+        )}
+      </div>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
         <div className="flex items-center justify-between py-2 sm:p-0">
           <div className="flex items-center">

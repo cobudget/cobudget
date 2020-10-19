@@ -1,0 +1,8 @@
+{
+  "realm": "plato",
+  "bearer-only": true,
+  "auth-server-url": "https://auth.platoproject.org/auth/",
+  "ssl-required": "external",
+  "resource": "dreams-api",
+  "confidential-port": 0
+}
