@@ -3,7 +3,9 @@ const EventSchema = require('./event');
 const DreamSchema = require('./dream');
 const GrantSchema = require('./grant');
 const {
-  schemas: { OrganizationSchema, UserSchema },
+  db: {
+    schemas: { OrganizationSchema, UserSchema },
+  },
 } = require('plato-core');
 
 const { createLogModels } = require('./log');
