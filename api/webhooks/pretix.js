@@ -1,7 +1,8 @@
 const fetch = require('node-fetch');
 const { getModels } = require('../database/models');
-const { getConnection } = require('../database/connection');
-
+const {
+  db: { getConnection },
+} = require('plato-core');
 // example request body:
 // {
 //   "notification_id": 123455,

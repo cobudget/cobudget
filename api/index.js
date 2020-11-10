@@ -25,13 +25,15 @@ const pretixWebhook = require('./webhooks/pretix');
 const schema = require('./schema');
 const resolvers = require('./resolvers');
 const { getModels } = require('./database/models');
-const { getConnection } = require('./database/connection');
+const {
+  db: { getConnection },
+} = require('plato-core');
 
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   context: async ({ req }) => {
-    const db = await getConnection();
+    const db = await getConnection(process.env.MONGO_URL);
     const models = getModels(db);
 
     let currentUser = null;
