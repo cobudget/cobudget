@@ -1,9 +1,11 @@
-const UserSchema = require('./user');
 const MemberSchema = require('./member');
 const EventSchema = require('./event');
 const DreamSchema = require('./dream');
 const GrantSchema = require('./grant');
-const OrganizationSchema = require('./organization');
+const {
+  schemas: { OrganizationSchema, UserSchema },
+} = require('plato-core');
+
 const { createLogModels } = require('./log');
 
 let models = null;
