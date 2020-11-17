@@ -1,7 +1,7 @@
-import initAuth from "nextjs-oidc";
+import { initAuth0 } from "@auth0/nextjs-auth0";
 
-export default initAuth({
-  issuer: "https://auth.platoproject.org/auth/realms/plato",
+export default initAuth0({
+  domain: "auth.platoproject.org/auth/realms/plato",
   clientId: process.env.KEYCLOAK_CLIENT_ID,
   clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
   scope: "openid profile",
