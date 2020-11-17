@@ -1,25 +1,54 @@
 import cookie from "cookie";
-
+import React from "react";
 import { useEffect, useState } from "react";
 import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
-import { SSRKeycloakProvider, SSRCookies } from "@react-keycloak/ssr";
+import { CookieStorage } from "cookie-storage";
 
-const keycloakCfg = {
+import { AuthProvider, UserManager } from "oidc-react";
+import { WebStorageStateStore } from "oidc-client";
+const authConfig = {
   realm: "plato",
-  url: "https://auth.platoproject.org/auth/",
+  url: "https://auth.platoproject.org/auth",
   clientId: "dreams",
-  "ssl-required": "external",
-  resource: "dreams",
-  "public-client": true,
-  "confidential-port": 0,
 };
 
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
+const redirectUri = "http://borderland.localhost:3000/";
+const config = {
+  cookies: {},
+  oidc: {
+    authority: `${authConfig.url}/realms/${authConfig.realm}`,
+    client_id: authConfig.clientId,
+    redirect_uri: redirectUri,
+    silent_redirect_uri: redirectUri,
+    post_logout_redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid",
+    loadUserInfo: false,
+    automaticSilentRenew: true,
+  },
+};
+
+const cookieStorage = new CookieStorage({
+  ...config.cookies,
+  expires: new Date(Date.now() + 50000000), //what should the expiration be?
+});
+
+const storage = {
+  userStore: new WebStorageStateStore({ store: cookieStorage }),
+  stateStore: new WebStorageStateStore({ store: cookieStorage }),
+};
+
+const managerConfig = {
+  ...config.oidc,
+  ...storage,
+};
+const userManager = new UserManager(managerConfig);
 
 import getHostInfo from "utils/getHostInfo";
 import Layout from "components/Layout";
@@ -180,8 +209,16 @@ const theme = createMuiTheme({
   ],
 });
 
+export const AuthContext = React.createContext({});
 
-const MyApp = ({ Component, pageProps, apolloClient, hostInfo, cookies }) => {
+const MyApp = ({
+  Component,
+  pageProps,
+  apolloClient,
+  hostInfo,
+  cookies,
+  token,
+}) => {
   const router = useRouter();
 
   // redirect to correct org
@@ -189,7 +226,10 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo, cookies }) => {
     if (hostInfo.subdomain === "dispatch" && router.query.redirect) {
       console.log("redirecting");
       console.log(router);
-      console.log({ hash: window.location.hash });
+      console.log({
+        hash: window.location.hash,
+        search: window.location.search,
+      });
       window.location.replace(
         router.query.redirect + "/" + window.location.hash
       );
@@ -219,16 +259,25 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo, cookies }) => {
   };
 
   const closeModal = () => setModal(null); // fix this.
+  //const redirectUri = `http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000`;
+  // const redirectUri = "http://localhost:3000/";
+  // hostInfo is undefined
+  const redirectUri = `http://borderland.localhost:3000/`;
+  //http://localhost:3000/#error=unauthorized_client&error_description=Client+is+not+allowed+to+initiate+browser+login+with+given+response_type.+Implicit+flow+is+disabled+for+the+client.&state=b0d32cc2-1026-446b-afeb-9e22652af592
+  // client is not allowed to initiate browser login with given response type, implicit flow is disabled for the client;
 
+  console.log({ hostInfo });
+  if (typeof window !== "undefined") {
+    console.log({ location: window.location });
+  }
   return (
-    <SSRKeycloakProvider
-      keycloakConfig={keycloakCfg}
-      persistor={SSRCookies(cookies)}
-      initOptions={{
-        enableLogging: true,
-        onLoad: "check-sso",
-        silentCheckSsoRedirectUri: `http://dispatch.localhost:3000/?redirect=http%3A%2F%2F${hostInfo.subdomain}.localhost%3A3000`,
+    <AuthProvider
+      autoSignIn={false}
+      onSignIn={async (user) => {
+        console.log(user);
+        //window.location.hash = "";
       }}
+      userManager={userManager}
     >
       <ThemeProvider theme={theme}>
         <Modal
@@ -254,7 +303,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo, cookies }) => {
           />
         </Layout>
       </ThemeProvider>
-    </SSRKeycloakProvider>
+    </AuthProvider>
   );
 };
 
@@ -267,12 +316,12 @@ function parseCookies(req) {
 
 MyApp.getInitialProps = async (context) => {
   // Extract cookies from AppContext
+  let parsedCookies = parseCookies(context?.ctx?.req);
+
   return {
     hostInfo: getHostInfo(context?.ctx?.req),
-    cookies: parseCookies(context?.ctx?.req),
+    cookies: parsedCookies,
   };
 };
 
 export default withApollo({ ssr: true })(MyApp);
-
-//

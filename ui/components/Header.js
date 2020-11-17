@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
 import { useRouter } from "next/router";
 import { Tooltip } from "react-tippy";
-import { useKeycloak } from "@react-keycloak/ssr";
-
+//import useAuth from "hooks/useAuth";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import LoginModal from "components/LoginModal";
@@ -13,6 +12,8 @@ import { HomeIcon, DotsHorizontalIcon } from "components/Icons";
 import EventSettingsModal from "components/EventSettingsModal";
 import NewDreamModal from "components/NewDreamModal";
 import IconButton from "components/IconButton";
+
+import { useAuth } from "oidc-react";
 
 const css = {
   mobileProfileItem:
@@ -67,14 +68,16 @@ const NavItem = ({
   );
 };
 
-export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
+const Header = ({ event, currentUser, currentOrg, openModal, logOut }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-  const { keycloak, initialized } = useKeycloak();
 
-  console.log({ keycloak, initialized });
+  const auth = useAuth();
+
+  console.log({ auth });
+
   const router = useRouter();
   return (
     <header
@@ -83,34 +86,39 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
       }
     >
       <div>
-        <div>{`User is ${
+        <button onClick={() => auth.signIn()}>Sign in</button>
+        <button onClick={() => auth.signOut()}>Sign out</button>
+        user: {auth?.userData?.profile.name}
+        {/* <div>{`User is ${
           !keycloak.authenticated ? "NOT " : ""
         }authenticated`}</div>
 
         {!!keycloak.authenticated ? (
           <button
             type="button"
-            onClick={() =>
-              keycloak.logout({
-                redirectUri:
-                  "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
-              })
-            }
+            onClick={() => {
+              // keycloak.logout({
+              //   redirectUri:
+              //     "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
+              // });
+              keycloak.logout();
+            }}
           >
             Logout
           </button>
         ) : (
           <button
-            onClick={() =>
-              keycloak.login({
-                redirectUri:
-                  "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
-              })
-            }
+            onClick={() => {
+              // keycloak.login({
+              //   redirectUri:
+              //     "http://dispatch.localhost:3000/?redirect=http%3A%2F%2Fborderland.localhost%3A3000",
+              // });
+              keycloak.login();
+            }}
           >
             log in
           </button>
-        )}
+        )} */}
       </div>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
         <div className="flex items-center justify-between py-2 sm:p-0">
@@ -429,3 +437,5 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
     </header>
   );
 };
+
+export default Header;
