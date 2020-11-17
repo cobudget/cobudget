@@ -88,13 +88,13 @@ const LinkCard = forwardRef((props, ref) => {
 });
 
 export default ({ currentOrg }) => {
-  const { data: { events } = { events: [] }, loading } = useQuery(EVENTS_QUERY);
-
   // TODO - perhaps a redirect to organization pages instead
   if (!currentOrg) {
     return <LandingPage />;
   }
-  console.log({ events });
+
+  const { data: { events } = { events: [] }, loading } = useQuery(EVENTS_QUERY);
+
   return (
     <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {events.map((event) => (
