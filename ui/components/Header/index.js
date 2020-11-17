@@ -76,16 +76,21 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
         (event?.color ? `bg-${event.color} shadow-md` : "") + " mb-8 w-full"
       }
     >
+      <div>
+        <a href="/api/login">Login</a>
+        <a href="/api/logout">Logout</a>
+      </div>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
         <div className="flex items-center justify-between py-2 sm:p-0">
           <div className="flex items-center">
             {event ? (
               <OrganizationAndEventHeader
-                currentOrg = {currentOrg}
-                event = {event}
-                currentUser = {currentUser} />
+                currentOrg={currentOrg}
+                event={event}
+                currentUser={currentUser}
+              />
             ) : (
-              <OrganizationOnlyHeader currentOrg = {currentOrg} />
+              <OrganizationOnlyHeader currentOrg={currentOrg} />
             )}
           </div>
 

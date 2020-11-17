@@ -4,7 +4,7 @@ import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
-
+import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 
@@ -168,6 +168,7 @@ const theme = createMuiTheme({
 
 const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   const router = useRouter();
+  const { user, loading } = useFetchUser();
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -195,27 +196,35 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
     setModal(null);
   };
 
+  console.log({ user, loading });
+
   return (
-    <ThemeProvider theme={theme}>
-      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        currentOrg={currentOrg}
-        apollo={apolloClient}
-        openModal={openModal}
-        event={event}
-      >
-        <Component
-          {...pageProps}
-          event={event}
+    <UserProvider value={{ user, loading }}>
+      <ThemeProvider theme={theme}>
+        <Modal
+          active={modal}
+          closeModal={closeModal}
+          currentUser={currentUser}
+        />
+        <Layout
           currentUser={currentUser}
           currentOrg={currentOrg}
-          event={event}
-          hostInfo={hostInfo}
+          apollo={apolloClient}
           openModal={openModal}
-        />
-      </Layout>
-    </ThemeProvider>
+          event={event}
+        >
+          <Component
+            {...pageProps}
+            event={event}
+            currentUser={currentUser}
+            currentOrg={currentOrg}
+            event={event}
+            hostInfo={hostInfo}
+            openModal={openModal}
+          />
+        </Layout>
+      </ThemeProvider>
+    </UserProvider>
   );
 };
 
