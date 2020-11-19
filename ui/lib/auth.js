@@ -1,7 +1,9 @@
 import { initAuth0 } from "@auth0/nextjs-auth0";
+import getHostInfo from "utils/getHostInfo";
 
-export default ({ host, protocol }) =>
-  initAuth0({
+export default (req) => {
+  const { host, protocol } = getHostInfo(req);
+  return initAuth0({
     domain: "auth.platoproject.org/auth/realms/plato",
     clientId: process.env.KEYCLOAK_CLIENT_ID,
     clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
@@ -20,7 +22,7 @@ export default ({ host, protocol }) =>
       // (Optional) Store the id_token in the session. Defaults to false.
       storeIdToken: false,
       // (Optional) Store the access_token in the session. Defaults to false.
-      storeAccessToken: false,
+      storeAccessToken: true,
       // (Optional) Store the refresh_token in the session. Defaults to false.
       storeRefreshToken: false,
     },
@@ -31,3 +33,4 @@ export default ({ host, protocol }) =>
       clockTolerance: 10000,
     },
   });
+};
