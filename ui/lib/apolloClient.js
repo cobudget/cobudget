@@ -3,8 +3,8 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
 import fetch from "isomorphic-unfetch";
 import { setContext } from "apollo-link-context";
-import cookies from "next-cookies";
 import getHostInfo from "utils/getHostInfo";
+import auth from "lib/auth";
 
 export default function createApolloClient(initialState, ctx) {
   // The `ctx` (NextPageContext) will only be present on the server.
@@ -16,8 +16,21 @@ export default function createApolloClient(initialState, ctx) {
     fetch,
   });
 
-  const authLink = setContext((req, { headers }) => {
-    const { token } = cookies(ctx || {});
+  const authLink = setContext(async (graphqlRequest, { headers }) => {
+    let token;
+
+    if (ctx?.req) {
+      const session = await auth(ctx.req).getSession(ctx.req);
+      token = session?.accessToken;
+    } else {
+      const response = await fetch("/api/getToken", {
+        credentials: "same-origin",
+      });
+      // const response = await fetch(`${window.location.origin}/api/getToken`, {
+      //   credentials: "same-origin",
+      // });
+      token = await response.text();
+    }
 
     let { host, subdomain } = getHostInfo(ctx?.req);
     let customdomain;
