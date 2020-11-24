@@ -16,7 +16,7 @@ const getModels = (db) => {
     models = {
       Organization: db.model('Organization', OrganizationSchema),
       User: db.model('User', UserSchema),
-      Member: db.model('Member', MemberSchema),
+      EventMember: db.model('EventMember', MemberSchema),
       Event: db.model('Event', EventSchema),
       Dream: db.model('Dream', DreamSchema),
       Grant: db.model('Grant', GrantSchema),
