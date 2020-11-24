@@ -19,6 +19,8 @@ export default function createApolloClient(initialState, ctx) {
   const authLink = setContext(async (graphqlRequest, { headers }) => {
     let token;
 
+    // strategy to get token from here: https://gist.github.com/BryceAMcDaniel/a710afe4fd877a04e55a921e4e74a21c
+
     if (ctx?.req) {
       const session = await auth(ctx.req).getSession(ctx.req);
       token = session?.accessToken;
@@ -26,9 +28,7 @@ export default function createApolloClient(initialState, ctx) {
       const response = await fetch("/api/getToken", {
         credentials: "same-origin",
       });
-      // const response = await fetch(`${window.location.origin}/api/getToken`, {
-      //   credentials: "same-origin",
-      // });
+
       token = await response.text();
     }
 

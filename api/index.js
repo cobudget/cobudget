@@ -46,8 +46,12 @@ const server = new ApolloServer({
     const db = await getConnection(process.env.MONGO_URL);
     const models = getModels(db);
 
-    let currentUser = null;
+    let currentUser = kauth.accessToken && kauth.accessToken.content;
+
+    console.log({ currentUser });
+
     let currentOrg = null;
+    let currentOrgMember;
 
     const subdomain = req.headers['dreams-subdomain'];
     const customDomain = req.headers['dreams-customdomain'];
@@ -55,6 +59,13 @@ const server = new ApolloServer({
       currentOrg = await models.Organization.findOne({ customDomain });
     } else if (subdomain) {
       currentOrg = await models.Organization.findOne({ subdomain });
+    }
+
+    if (currentOrg && currentUser) {
+      currentOrgMember = await models.OrgMember.findOne({
+        organizationId: currentOrg.id,
+        userId: currentUser.sub,
+      });
     }
 
     let token = req.headers.authorization
@@ -82,6 +93,7 @@ const server = new ApolloServer({
       models,
       currentUser,
       currentOrg,
+      currentOrgMember,
       // kauth,
     };
   },
