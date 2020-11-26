@@ -1,10 +1,10 @@
-const MemberSchema = require('./member');
+const EventMemberSchema = require('./eventMember');
 const EventSchema = require('./event');
 const DreamSchema = require('./dream');
 const GrantSchema = require('./grant');
 const {
   db: {
-    schemas: { OrganizationSchema, UserSchema },
+    schemas: { OrganizationSchema, OrgMemberSchema },
   },
 } = require('plato-core');
 
@@ -15,8 +15,8 @@ const getModels = (db) => {
   if (models === null)
     models = {
       Organization: db.model('Organization', OrganizationSchema),
-      User: db.model('User', UserSchema),
-      EventMember: db.model('EventMember', MemberSchema),
+      OrgMember: db.model('OrgMember', OrgMemberSchema),
+      EventMember: db.model('EventMember', EventMemberSchema),
       Event: db.model('Event', EventSchema),
       Dream: db.model('Dream', DreamSchema),
       Grant: db.model('Grant', GrantSchema),
