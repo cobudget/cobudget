@@ -13,7 +13,7 @@ const schema = gql`
     event(slug: String): Event
     dream(id: ID!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
-    members(eventId: ID!, isApproved: Boolean): [Member]
+    members(eventId: ID!, isApproved: Boolean): [EventMember]
   }
 
   type Mutation {
@@ -125,8 +125,8 @@ const schema = gql`
       isApproved: Boolean
       isAdmin: Boolean
       isGuide: Boolean
-    ): Member
-    deleteMember(eventId: ID!, memberId: ID!): Member
+    ): EventMember
+    deleteMember(eventId: ID!, memberId: ID!): EventMember
 
     deleteOrganization(organizationId: ID!): Organization
 
@@ -149,7 +149,7 @@ const schema = gql`
     preOrPostFund(dreamId: ID!, value: Int!): Grant
     toggleFavorite(dreamId: ID!): Dream
 
-    registerForEvent(eventId: ID!): Member
+    registerForEvent(eventId: ID!): EventMember
   }
 
   type Organization {
@@ -168,7 +168,7 @@ const schema = gql`
     info: String
     color: String
     # logo: String
-    members: [Member!]!
+    members: [EventMember!]!
     numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
@@ -223,21 +223,27 @@ const schema = gql`
     email: String
     name: String
     verifiedEmail: Boolean!
-    organization: Organization!
-    isOrgAdmin: Boolean
     isRootAdmin: Boolean
-    membership(slug: String): Member
-    memberships: [Member!]
+    orgMemberships: [OrgMember!]
     avatar: String
-    bio: String
     createdAt: Date
   }
 
-  # rename to Membership
-  type Member {
+  type OrgMember {
+    id: ID!
+    organization: Organization!
+    user: User!
+    isOrgAdmin: Boolean
+    # membership(slug: String): EventMembership #this is weird syntax...
+    bio: String #what do we do with this one?
+    createdAt: Date
+    eventMemberships: [EventMember!]
+  }
+
+  type EventMember {
     id: ID!
     event: Event!
-    user: User!
+    orgMember: OrgMember!
     isAdmin: Boolean!
     isGuide: Boolean
     isApproved: Boolean!
@@ -259,7 +265,7 @@ const schema = gql`
     description: String
     summary: String
     images: [Image!]
-    cocreators: [Member]!
+    cocreators: [EventMember]!
     minGoalGrants: Int
     maxGoalGrants: Int
     minGoal: Int
