@@ -1576,12 +1576,17 @@ const resolvers = {
       return new EventMember(newMember).save();
     },
   },
-  Member: {
-    user: async (member, args, { models: { User } }) => {
-      return User.findOne({ _id: member.userId });
-    },
+  EventMember: {
+    // user: async (member, args, { models: { User } }) => {
+    //   // this one is not existing in the schema.. but should be possible to have. still
+
+    //   return User.findOne({ _id: member.userId });
+    // },
     event: async (member, args, { models: { Event } }) => {
       return Event.findOne({ _id: member.eventId });
+    },
+    orgMember: async (member, args, { models: { OrgMember } }) => {
+      return OrgMember.findOne({ _id: member.orgMemberId });
     },
     availableGrants: async (member, args, { models: { Grant, Event } }) => {
       if (!member.isApproved) return 0;
@@ -1610,29 +1615,42 @@ const resolvers = {
       return Grant.find({ memberId: member.id });
     },
   },
+  OrgMember: {
+    user: async (orgMember, args, { kcAdminClient }) => {
+      const user = await kcAdminClient.users.findOne({
+        id: orgMember.userId,
+      });
+      console.log({ user });
+      return user;
+    },
+  },
   User: {
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
       return OrgMember.find({ userId: user.id });
     },
-    membership: async (
-      user,
-      { slug },
-      { currentOrg, models: { OrgMember, EventMember, Event } }
-    ) => {
-      if (!slug) return null;
-      const event = await Event.findOne({
-        organizationId: currentOrg.id,
-        slug,
-      });
-      const orgMembership = await OrgMember.findOne({
-        userId: user.id,
-        organizationId: currentOrg.id,
-      });
-      return EventMember.findOne({
-        orgMemberId: orgMembership.id,
-        eventId: event.id,
-      });
+    name: async (user) => {
+      console.log({ user });
+      return user.firstName + ' ' + user.lastName;
     },
+    // membership: async (
+    //   user,
+    //   { slug },
+    //   { currentOrg, models: { OrgMember, EventMember, Event } }
+    // ) => {
+    //   if (!slug) return null;
+    //   const event = await Event.findOne({
+    //     organizationId: currentOrg.id,
+    //     slug,
+    //   });
+    //   const orgMembership = await OrgMember.findOne({
+    //     userId: user.id,
+    //     organizationId: currentOrg.id,
+    //   });
+    //   return EventMember.findOne({
+    //     orgMemberId: orgMembership.id,
+    //     eventId: event.id,
+    //   });
+    // },
   },
   Event: {
     members: async (event, args, { models: { EventMember } }) => {

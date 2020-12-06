@@ -3,6 +3,7 @@
 
 const express = require('express');
 const { ApolloServer } = require('apollo-server-express');
+const KcAdminClient = require('keycloak-admin').default;
 
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -23,7 +24,7 @@ const keycloak = new Keycloak(
   {},
   {
     realm: 'plato',
-    'auth-server-url': 'https://auth.platoproject.org/auth/',
+    'auth-server-url': process.env.KEYCLOAK_AUTH_SERVER,
     'ssl-required': 'external',
     resource: 'dreams',
     'public-client': true,
@@ -38,17 +39,32 @@ const server = new ApolloServer({
   resolvers,
   context: async ({ req }) => {
     const kauth = new KeycloakContext({ req });
-    console.log({
-      kauth,
-      content: kauth.accessToken && kauth.accessToken.content,
-    });
 
     const db = await getConnection(process.env.MONGO_URL);
     const models = getModels(db);
 
-    let currentUser = kauth.accessToken && kauth.accessToken.content;
+    const kcAdminClient = new KcAdminClient({
+      baseUrl: process.env.KEYCLOAK_AUTH_SERVER,
+      realmName: 'master',
+      requestConfig: {
+        /* Axios request config options https://github.com/axios/axios#request-config */
+      },
+    });
 
-    console.log({ currentUser });
+    // Authorize with username / password
+    await kcAdminClient.auth({
+      username: process.env.KEYCLOAK_ADMIN_USERNAME,
+      password: process.env.KEYCLOAK_ADMIN_PASSWORD,
+      grantType: 'password',
+      clientId: 'admin-cli',
+      totp: '123456', // optional Time-based One-time Password if OTP is required in authentication flow
+    });
+
+    kcAdminClient.setConfig({
+      realmName: 'plato',
+    });
+
+    let currentUser = kauth.accessToken && kauth.accessToken.content;
 
     let currentOrg = null;
     let currentOrgMember;
@@ -71,7 +87,7 @@ const server = new ApolloServer({
     let token = req.headers.authorization
       ? req.headers.authorization.split(' ')[1]
       : null;
-    console.log({ tokenOnServer: token });
+
     // Verify token if available
     // if (currentOrg && token) {
     //   try {
@@ -94,6 +110,7 @@ const server = new ApolloServer({
       currentUser,
       currentOrg,
       currentOrgMember,
+      kcAdminClient,
       // kauth,
     };
   },
