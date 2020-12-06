@@ -1628,10 +1628,15 @@ const resolvers = {
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
       return OrgMember.find({ userId: user.id });
     },
-    name: async (user) => {
-      console.log({ user });
-      return user.firstName + ' ' + user.lastName;
+    name: (user) => user.firstName + ' ' + user.lastName,
+    createdAt: (user) => user.createdTimestamp,
+    verifiedEmail: (user) => user.emailVerified,
+    email: async (user, args, ctx) => {
+      // TODO: check whether you are allowed to see email
+      return null;
     },
+    isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
+    avatar: () => null, //TODO: what about avatars in keycloak?
     // membership: async (
     //   user,
     //   { slug },
