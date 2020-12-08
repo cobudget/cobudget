@@ -116,7 +116,8 @@ const schema = gql`
     resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
     allGoodFlag(dreamId: ID!): Dream
 
-    sendMagicLink(email: String!): Boolean
+    joinOrg: OrgMember
+
     updateProfile(name: String, avatar: String, bio: String): User
     # inviteMembers(emails: String!): [Member]
     updateMember(

@@ -944,17 +944,19 @@ const resolvers = {
       return dream.save();
     },
 
-    sendMagicLink: async (
+    joinOrg: async (
       parent,
-      { email: inputEmail },
-      { currentOrg, models }
+      args,
+      { currentUser, currentOrg, models: { OrgMember } }
     ) => {
-      const { isSentSuccess } = await AuthService.sendMagicLink({
-        inputEmail,
-        currentOrg,
-        models,
-      });
-      return isSentSuccess;
+      if (!currentUser) throw new Error('You need to be logged in.');
+
+      const orgMember = await new OrgMember({
+        userId: currentUser.id,
+        organizationId: currentOrg.id,
+      }).save();
+
+      return orgMember;
     },
     updateProfile: async (
       parent,
