@@ -155,9 +155,19 @@ const resolvers = {
     editOrganization: async (
       parent,
       { organizationId, name, subdomain, customDomain, logo },
-      { models: { Organization } }
+      { currentUser, currentOrgMember, models: { Organization } }
     ) => {
-      const organization = await Organization.findOne({ _id: organizationId });
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
+        throw new Error('You need to be logged in as organization admin.');
+      if (
+        organizationId !== currentOrgMember.organizationId ||
+        currentUser.isRootAdmin
+      )
+        throw new Error('You are not a member of this organization.');
+
+      const organization = await Organization.findOne({
+        _id: organizationId,
+      });
       organization.name = name;
       organization.logo = logo;
       organization.subdomain = subdomain;
