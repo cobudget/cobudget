@@ -127,29 +127,30 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, customDomain, logo, adminEmail },
-      { models }
+      { name, subdomain, customDomain, logo },
+      { currentUser, models: { Organization, OrgMember } }
     ) => {
-      if (!adminEmail || !isValidEmail(adminEmail))
-        throw new Error('Not a valid email address');
+      if (!currentUser) throw new Error('You need to be logged in!');
 
-      const organization = new models.Organization({
+      const organization = new Organization({
         name,
         subdomain,
         logo,
         ...(customDomain && { customDomain }), //Only add custom domain if not null
       });
-      await organization.save();
 
-      const { user } = await AuthService.sendMagicLink({
-        inputEmail: adminEmail,
-        currentOrg: organization,
-        models,
+      const orgMember = new OrgMember({
+        userId: currentUser.id,
+        organizationId: organization.id,
+        isOrgAdmin: true,
       });
-      user.isOrgAdmin = true;
-      await user.save();
 
-      return organization;
+      const [savedOrg] = await Promise.all([
+        organization.save(),
+        orgMember.save(),
+      ]);
+
+      return savedOrg;
     },
     editOrganization: async (
       parent,
