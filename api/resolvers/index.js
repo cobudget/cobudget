@@ -5,9 +5,13 @@ const { GraphQLJSONObject } = require('graphql-type-json');
 const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
-const EmailService = require('../services/EmailService/email.service');
-const AuthService = require('../services/auth.service');
-const { isValidEmail } = require('../utils/email');
+const { combineResolvers, skip } = require('graphql-resolvers');
+const isMemberOfOrg = (parent, { id }, { currentUser, currentOrgMember }) => {
+  if (!currentUser) throw new Error('You need to be logged in');
+  if (!currentOrgMember.organizationId == id && !currentUser.isRootAdmin)
+    throw new Error('You need to be a member of that organization');
+  return skip;
+};
 
 const resolvers = {
   Query: {
@@ -20,25 +24,18 @@ const resolvers = {
     currentOrg: (parent, args, { currentOrg }) => {
       return currentOrg;
     },
-    organization: async (
-      parent,
-      { id },
-      { currentUser, currentOrgMember, models: { Organization } }
-    ) => {
-      if (!currentUser) throw new Error('You need to be logged in');
-      if (!currentOrgMember.organizationId == id && !currentUser.isRootAdmin)
-        throw new Error('You need to belong to that organization');
-      return Organization.findOne({ _id: id });
-    },
-    organizations: async (
-      parent,
-      args,
-      { currentUser, models: { Organization } }
-    ) => {
-      if (!currentUser || !currentUser.isRootAdmin)
-        throw new Error('Must be root admin to view organizations');
-      return Organization.find();
-    },
+    organization: combineResolvers(
+      isMemberOfOrg,
+      async (parent, { id }, { models: { Organization } }) => {
+        return Organization.findOne({ _id: id });
+      }
+    ),
+    organizations: combineResolvers(
+      isRootAdmin,
+      async (parent, args, { models: { Organization } }) => {
+        return Organization.find();
+      }
+    ),
     events: async (parent, args, { currentOrg, models: { Event } }) => {
       if (!currentOrg) {
         throw new Error('No organization found');
