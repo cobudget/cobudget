@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    currentOrgMember: OrgMember
     currentOrg: Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!

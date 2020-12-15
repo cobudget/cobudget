@@ -55,7 +55,7 @@ const resolvers = {
       { currentOrgMember, models: { Dream, EventMember } }
     ) => {
       const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember?.id,
+        orgMemberId: currentOrgMember.id,
         eventId,
       });
 
