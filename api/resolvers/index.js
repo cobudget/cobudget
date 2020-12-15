@@ -1731,8 +1731,8 @@ const resolvers = {
     },
   },
   Dream: {
-    cocreators: async (dream, args, { models: { Member } }) => {
-      return Member.find({ _id: { $in: dream.cocreators } });
+    cocreators: async (dream, args, { models: { EventMember } }) => {
+      return EventMember.find({ _id: { $in: dream.cocreators } });
     },
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
@@ -1768,16 +1768,20 @@ const resolvers = {
     numberOfComments: (dream) => {
       return dream.comments.length;
     },
-    favorite: async (dream, args, { currentUser, models: { Member } }) => {
-      if (!currentUser) return false;
-      const currentMember = await Member.findOne({
-        userId: currentUser.id,
+    favorite: async (
+      dream,
+      args,
+      { currentOrgMember, models: { EventMember } }
+    ) => {
+      if (!currentOrgMember) return false;
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
       });
-      if (!currentMember) return false;
-      return currentMember.favorites.includes(dream.id);
+      if (!currentEventMember) return false;
+      return currentEventMember.favorites.includes(dream.id);
     },
-    raisedFlags: async (dream, args, { currentUser, models: { Member } }) => {
+    raisedFlags: async (dream) => {
       const resolveFlagIds = dream.flags
         .filter((flag) => flag.type === 'RESOLVE_FLAG')
         .map((flag) => flag.resolvingFlagId);
@@ -1805,7 +1809,7 @@ const resolvers = {
 
       return event.guidelines.id(flag.guidelineId);
     },
-    user: async (parent, args, { currentUser, models: { Member, Dream } }) => {
+    user: async (parent, args, { models: { EventMember, Dream } }) => {
       // if not org admin or event admin or guide
       return null;
     },
