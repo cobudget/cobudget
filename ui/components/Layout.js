@@ -7,6 +7,7 @@ import cookie from "js-cookie";
 export default ({
   children,
   currentUser,
+  currentOrgMember,
   currentOrg,
   event,
   title,
@@ -58,6 +59,7 @@ export default ({
         <Header
           event={event}
           currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           logOut={logOut}
