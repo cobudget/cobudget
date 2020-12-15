@@ -235,9 +235,9 @@ const schema = gql`
     organization: Organization!
     user: User!
     isOrgAdmin: Boolean
-    # membership(slug: String): EventMembership #this is weird syntax...
     bio: String #what do we do with this one?
     createdAt: Date
+    currentEventMembership(slug: String): EventMember #this is weird syntax...
     eventMemberships: [EventMember!]
   }
 

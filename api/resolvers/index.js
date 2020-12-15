@@ -1633,6 +1633,32 @@ const resolvers = {
       console.log({ user });
       return user;
     },
+    eventMemberships: async (orgMember, args, { models: { EventMember } }) => {
+      return EventMember.find({ orgMemberId: orgMember.id });
+    },
+    currentEventMembership: async (
+      orgMember,
+      { slug },
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { OrgMember, EventMember, Event },
+      }
+    ) => {
+      if (!slug) return null;
+      const event = await Event.findOne({
+        organizationId: currentOrg.id,
+        slug,
+      });
+      // const orgMembership = await OrgMember.findOne({
+      //   userId: user.id,
+      //   organizationId: currentOrg.id,
+      // });
+      return EventMember.findOne({
+        orgMemberId: orgMember.id,
+        eventId: event.id,
+      });
+    },
   },
   User: {
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
