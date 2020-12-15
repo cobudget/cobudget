@@ -62,20 +62,45 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
     currentUser {
-      id
+      # id
       name
       avatar
-      bio
+      # bio
       email
+      # isOrgAdmin
+      #  memberships {
+      #    id
+      #    event {
+      #      title
+      #      slug
+      #    }
+      #  }
+      # membership(slug: $slug) {
+      #       id
+      #      isAdmin
+      #     isGuide
+      #     isApproved
+      #    availableGrants
+      #   event {
+      #    title
+      #  }
+      #}
+    }
+    currentOrgMember {
+      bio
       isOrgAdmin
-      memberships {
+      user {
+        name
+        email
+      }
+      eventMemberships {
         id
         event {
           title
           slug
         }
       }
-      membership(slug: $slug) {
+      currentEventMembership(slug: $slug) {
         id
         isAdmin
         isGuide
@@ -86,6 +111,7 @@ export const TOP_LEVEL_QUERY = gql`
         }
       }
     }
+
     currentOrg {
       id
       name
@@ -177,9 +203,10 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   });
 
   const {
-    data: { currentUser, currentOrg, event } = {
+    data: { currentUser, currentOrg, currentOrgMember, event } = {
       currentUser: null,
       currentOrg: null,
+      currentOrgMember: null,
       event: null,
     },
   } = useQuery(TOP_LEVEL_QUERY, {
@@ -208,6 +235,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
         />
         <Layout
           currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           apollo={apolloClient}
           openModal={openModal}
@@ -217,6 +245,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
             {...pageProps}
             event={event}
             currentUser={currentUser}
+            currentOrgMember={currentOrgMember}
             currentOrg={currentOrg}
             event={event}
             hostInfo={hostInfo}
