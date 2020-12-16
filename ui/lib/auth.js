@@ -24,7 +24,7 @@ export default (req) => {
       // (Optional) Store the access_token in the session. Defaults to false.
       storeAccessToken: true,
       // (Optional) Store the refresh_token in the session. Defaults to false.
-      storeRefreshToken: false,
+      storeRefreshToken: true,
     },
     oidcClient: {
       // (Optional) Configure the timeout in milliseconds for HTTP requests to Auth0.

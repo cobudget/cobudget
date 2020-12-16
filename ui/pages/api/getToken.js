@@ -2,9 +2,9 @@ import auth from "lib/auth";
 
 export default async function getToken(req, res) {
   try {
-    const session = await auth(req).getSession(req);
-
-    if (session?.accessToken) res.send(session.accessToken);
+    const tokenCache = auth(req).tokenCache(req, res);
+    const { accessToken } = await tokenCache.getAccessToken();
+    if (accessToken) res.send(accessToken);
     res.status(204).end();
   } catch (error) {
     //console.error(error);
