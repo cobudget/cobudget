@@ -5,10 +5,11 @@
 //   }, false);
 // };
 
-export const isMemberOfDream = (currentUser, dream) => {
-  if (!currentUser || !dream || !currentUser.membership) return false;
+export const isMemberOfDream = (currentOrgMember, dream) => {
+  if (!currentOrgMember || !dream || !currentOrgMember.currentEventMembership)
+    return false;
   return dream.cocreators.reduce((res, member) => {
-    if (member.id === currentUser.membership.id) return true;
+    if (member.id === currentOrgMember.currentEventMembership.id) return true;
     return res;
   }, false);
 };
