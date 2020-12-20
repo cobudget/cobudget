@@ -127,7 +127,7 @@ export default ({
   dream,
   event,
   cocreators,
-  currentUser,
+  currentOrgMember,
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
@@ -153,7 +153,7 @@ export default ({
               member={member}
               remove={() => {
                 if (
-                  member.id !== currentUser.membership.id ||
+                  member.id !== currentOrgMember.currentEventMembership.id ||
                   confirm(
                     "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
                   )
