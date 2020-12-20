@@ -17,8 +17,11 @@ const ADD_COMMENT = gql`
         createdAt
         author {
           id
-          name
-          avatar
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }
