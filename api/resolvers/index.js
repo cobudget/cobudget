@@ -1835,8 +1835,8 @@ const resolvers = {
     },
   }),
   Comment: {
-    author: async (comment, args, { models: { User } }) => {
-      return User.findOne({ _id: comment.authorId });
+    author: async (comment, args, { models: { OrgMember } }) => {
+      return OrgMember.findOne({ _id: comment.authorId });
     },
   },
   JSON: GraphQLJSON,
