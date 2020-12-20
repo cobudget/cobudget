@@ -278,7 +278,7 @@ export default ({ dream, event, currentOrgMember, canEdit }) => {
             >
               <Avatar user={member.orgMember.user} />{" "}
               <span className="ml-2 text-gray-700 hidden md:block">
-                {member.orgMember.user.name}
+                {member.orgMember.user.username}
               </span>
             </div>
             // </Tooltip>
