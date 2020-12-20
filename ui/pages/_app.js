@@ -64,6 +64,7 @@ export const TOP_LEVEL_QUERY = gql`
     currentUser {
       # id
       name
+      username
       avatar
       # bio
       email
@@ -91,6 +92,7 @@ export const TOP_LEVEL_QUERY = gql`
       isOrgAdmin
       user {
         name
+        username
         email
       }
       eventMemberships {
