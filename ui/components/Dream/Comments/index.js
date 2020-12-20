@@ -2,7 +2,7 @@ import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
 
-const Comments = ({ currentUser, comments, logs, dreamId, event }) => {
+const Comments = ({ currentOrgMember, comments, logs, dreamId, event }) => {
   const items = [
     ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
     ...logs.map((log) => ({ ...log, _type: "LOG" })),
@@ -10,7 +10,7 @@ const Comments = ({ currentUser, comments, logs, dreamId, event }) => {
 
   return (
     <div>
-      {(comments.length > 0 || currentUser?.membership) && (
+      {(comments.length > 0 || currentOrgMember?.currentEventMembership) && (
         <h2 className="mb-4 text-2xl font-medium" id="comments">
           {comments.length} {comments.length === 1 ? "comment" : "comments"}
         </h2>
@@ -21,7 +21,7 @@ const Comments = ({ currentUser, comments, logs, dreamId, event }) => {
           return (
             <Comment
               comment={item}
-              currentUser={currentUser}
+              currentOrgMember={currentOrgMember}
               dreamId={dreamId}
               showBorderBottom={Boolean(index + 1 !== items.length)}
               key={index}
@@ -30,8 +30,12 @@ const Comments = ({ currentUser, comments, logs, dreamId, event }) => {
           );
         if (item._type === "LOG") return <Log log={item} key={index} />;
       })}
-      {currentUser && currentUser.membership && (
-        <AddComment currentUser={currentUser} dreamId={dreamId} event={event} />
+      {currentOrgMember && currentOrgMember.currentEventMembership && (
+        <AddComment
+          currentOrgMember={currentOrgMember}
+          dreamId={dreamId}
+          event={event}
+        />
       )}
     </div>
   );

@@ -83,7 +83,7 @@ const Dream = ({ dream, event, currentUser }) => {
             <hr className="mb-4 mt-1" />
 
             <Comments
-              currentUser={currentUser}
+              currentOrgMember={currentOrgMember}
               comments={dream.comments}
               dreamId={dream.id}
               event={event}
