@@ -222,6 +222,7 @@ const schema = gql`
 
   type User {
     id: ID!
+    username: String!
     email: String
     name: String
     verifiedEmail: Boolean!

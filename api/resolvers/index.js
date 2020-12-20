@@ -1663,6 +1663,8 @@ const resolvers = {
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
       return OrgMember.find({ userId: user.id });
     },
+    username: (user) =>
+      user.username ? user.username : user.preferred_username,
     name: (user) => user.firstName + ' ' + user.lastName,
     createdAt: (user) => user.createdTimestamp,
     verifiedEmail: (user) => user.emailVerified,
