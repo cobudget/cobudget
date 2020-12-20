@@ -532,6 +532,7 @@ const resolvers = {
         title,
         // description,
         // summary,
+        cocreators: [eventMember.id],
         // budgetDescription,
         // minGoal,
         // ...(event.allowStretchGoals && { maxGoal }),
