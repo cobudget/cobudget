@@ -375,7 +375,7 @@ const schema = gql`
 
   type Comment {
     id: ID!
-    author: User!
+    author: OrgMember!
     createdAt: Date!
     updatedAt: Date
     content: String!
