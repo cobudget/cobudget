@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
-import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import NewDreamModal from "components/NewDreamModal";
 import OrganizationOnlyHeader from "./OrganizationOnlyHeader";
@@ -73,7 +72,6 @@ export default ({
   logOut,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const router = useRouter();
@@ -83,10 +81,6 @@ export default ({
         (event?.color ? `bg-${event.color} shadow-md` : "") + " mb-8 w-full"
       }
     >
-      <div>
-        <a href="/api/login">Login</a>
-        <a href="/api/logout">Logout</a>
-      </div>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
         <div className="flex items-center justify-between py-2 sm:p-0">
           <div className="flex items-center">
@@ -212,6 +206,7 @@ export default ({
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
+                    currentOrgMember={currentOrgMember}
                     logOut={logOut}
                     openModal={openModal}
                     event={event}
@@ -223,16 +218,12 @@ export default ({
                 {currentOrg && (
                   <>
                     <NavItem
-                      onClick={() => setLoginModalOpen(true)}
+                      href="/api/login"
                       eventColor={event?.color}
                       primary
                     >
                       Login or Sign up
                     </NavItem>
-                    <LoginModal
-                      open={loginModalOpen}
-                      handleClose={() => setLoginModalOpen(false)}
-                    />
                   </>
                 )}
               </>
