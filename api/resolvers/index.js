@@ -776,7 +776,7 @@ const resolvers = {
       dream.comments = dream.comments.filter((comment) => {
         if (
           comment._id.toString() === commentId &&
-          (comment.authorId.toString() === currentUser.id ||
+          (comment.authorId.toString() === eventMember.id ||
             eventMember.isAdmin)
         )
           return false;
