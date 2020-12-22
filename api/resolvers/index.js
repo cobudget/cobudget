@@ -805,8 +805,8 @@ const resolvers = {
       const comment = dream.comments.filter(
         (comment) =>
           comment._id.toString() === commentId &&
-          (comment.authorId.toString() === currentUser.id ||
-            currentMember.isAdmin)
+          (comment.authorId.toString() === eventMember.id ||
+            eventMember.isAdmin)
       );
 
       if (comment.length == 0) {

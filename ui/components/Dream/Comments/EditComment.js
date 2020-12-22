@@ -16,11 +16,13 @@ const EDIT_COMMENT_MUTATION = gql`
         id
         content
         createdAt
-        updatedAt
         author {
           id
-          name
-          avatar
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }

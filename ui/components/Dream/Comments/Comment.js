@@ -40,9 +40,8 @@ const Comment = ({
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   const canEdit =
-    currentOrgMember &&
-    (currentOrgMember.id === comment.author.id ||
-      currentOrgMember.eventMembership?.isAdmin);
+    currentOrgMember?.currentEventMembership?.id === comment.author.id ||
+    currentOrgMember?.currentEventMembership?.isAdmin;
 
   return (
     <div className="flex my-4">
@@ -63,7 +62,6 @@ const Comment = ({
           <EditComment
             comment={comment}
             dreamId={dreamId}
-            currentUser={currentUser}
             handleDone={() => {
               setEditMode(false);
             }}
