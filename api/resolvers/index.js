@@ -54,10 +54,13 @@ const resolvers = {
       { eventId, textSearchTerm },
       { currentOrgMember, models: { Dream, EventMember } }
     ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
-      });
+      let currentEventMember;
+      if (currentOrgMember) {
+        currentEventMember = await EventMember.findOne({
+          orgMemberId: currentOrgMember.id,
+          eventId,
+        });
+      }
 
       // if admin or guide, show all dreams (published or unpublished)
       if (
@@ -71,6 +74,7 @@ const resolvers = {
       }
 
       // todo: create appropriate index for this query
+      // if event member, show dreams that are publisehd AND dreams where member is cocreator
       if (currentEventMember) {
         return Dream.find({
           eventId,
