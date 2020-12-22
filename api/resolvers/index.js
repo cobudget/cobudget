@@ -1669,6 +1669,10 @@ const resolvers = {
     id: (user) => (user.sub ? user.sub : user.id),
     username: (user) =>
       user.username ? user.username : user.preferred_username,
+    name: (user) =>
+      user.firstName
+        ? user.firstName + ' ' + user.lastName
+        : user.given_name + ' ' + user.family_name,
     firstName: (user) => (user.firstName ? user.firstName : user.given_name),
     lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
