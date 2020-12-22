@@ -4,48 +4,91 @@ import { useMutation } from "@apollo/react-hooks";
 
 import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
+import dirtyValues from "utils/dirtyValues";
 
 const UPDATE_PROFILE_QUERY = gql`
-  mutation updateProfile($name: String, $avatar: String, $bio: String) {
-    updateProfile(name: $name, avatar: $avatar, bio: $bio) {
+  mutation updateProfile(
+    $username: String
+    $firstName: String
+    $lastName: String
+    $bio: String
+  ) {
+    updateProfile(
+      username: $username
+      firstName: $firstName
+      lastName: $lastName
+      bio: $bio
+    ) {
       id
-      name
-      avatar
       bio
-      email
+      user {
+        id
+        email
+        avatar
+        username
+        firstName
+        lastName
+      }
     }
   }
 `;
 
-const EditProfile = ({ closeModal, currentUser }) => {
+const EditProfile = ({
+  closeModal,
+  currentUser,
+  currentOrgMember,
+  currentOrg,
+}) => {
   const [updateUser] = useMutation(UPDATE_PROFILE_QUERY);
-  const { handleSubmit, register, errors } = useForm();
-
+  const {
+    handleSubmit,
+    register,
+    errors,
+    formState: { isDirty, dirtyFields },
+  } = useForm();
   return (
     <Card>
       <div className="p-5">
         <h1 className="text-2xl">Edit profile</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            updateUser({ variables })
-              .then(({ data }) => {
-                // console.log({ data });
-                closeModal();
-              })
-              .catch((err) => {
-                console.log({ err });
-                alert(err.message);
-              });
+            if (isDirty) {
+              updateUser({ variables: dirtyValues(dirtyFields, variables) })
+                .then(({ data }) => {
+                  // console.log({ data });
+                  closeModal();
+                })
+                .catch((err) => {
+                  console.log({ err });
+                  alert(err.message);
+                });
+            } else {
+              closeModal();
+            }
           })}
         >
           <div className="my-4">
             <TextField
-              name="name"
-              label="Display name"
+              name="firstName"
+              label="First name"
               variant="outlined"
-              defaultValue={currentUser.name}
-              error={Boolean(errors.name)}
-              helperText={errors.name && errors.name.message}
+              defaultValue={currentUser.firstName}
+              error={Boolean(errors.firstName)}
+              helperText={errors.firstName?.message}
+              fullWidth
+              inputRef={register({
+                required: "Required",
+              })}
+            />
+          </div>
+          <div className="my-4">
+            <TextField
+              name="lastName"
+              label="Last name"
+              variant="outlined"
+              defaultValue={currentUser.lastName}
+              error={Boolean(errors.lastName)}
+              helperText={errors.lastName?.message}
               fullWidth
               inputRef={register({
                 required: "Required",
@@ -55,18 +98,34 @@ const EditProfile = ({ closeModal, currentUser }) => {
 
           <div className="my-4">
             <TextField
-              name="bio"
-              label="Bio"
-              multiline
-              rows={5}
+              name="username"
+              label="Username"
               variant="outlined"
-              defaultValue={currentUser.bio}
-              error={Boolean(errors.bio)}
-              helperText={errors.bio && errors.bio.message}
+              defaultValue={currentUser.username}
+              error={Boolean(errors.username)}
+              helperText={errors.username?.message}
               fullWidth
-              inputRef={register()}
+              inputRef={register({
+                required: "Required",
+              })}
             />
           </div>
+          {currentOrgMember && (
+            <div className="my-4">
+              <TextField
+                name="bio"
+                label={`Bio for ${currentOrg.name}`}
+                multiline
+                rows={5}
+                variant="outlined"
+                defaultValue={currentOrgMember.bio}
+                error={Boolean(errors.bio)}
+                helperText={errors.bio && errors.bio.message}
+                fullWidth
+                inputRef={register()}
+              />
+            </div>
+          )}
 
           <Button
             type="submit"

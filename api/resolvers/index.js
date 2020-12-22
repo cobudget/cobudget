@@ -965,38 +965,32 @@ const resolvers = {
     },
     updateProfile: async (
       parent,
-      { name, avatar, bio },
-      { currentUser, currentOrg }
+      { firstName, lastName, username, bio },
+      { kauth, currentOrgMember, kcAdminClient }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in..');
+      if (!kauth) throw new Error('You need to be logged in..');
 
-      // TODO figure this shit out
-
-      // const member = await Member.findOne({ _id: currentMember.id });
-
-      if (!currentUser.name && name) {
-        currentUser.verifiedEmail = true;
+      if (firstName || lastName || username) {
+        // update user in keycloak
+        try {
+          await kcAdminClient.users.update(
+            { id: kauth.sub },
+            {
+              ...(typeof firstName !== 'undefined' && { firstName }),
+              ...(typeof lastName !== 'undefined' && { lastName }),
+              ...(typeof username !== 'undefined' && { username }),
+            }
+          );
+        } catch (error) {
+          throw new Error(error);
+        }
       }
-      // // first time a member signs in
-      // if (!member.name) {
-      //   member.verifiedEmail = true;
 
-      //   if (!member.isApproved) {
-      //     // ping admins that there is a request to join
-      //     const event = await Event.findOne({ _id: currentMember.eventId });
-      //     const admins = await Member.find({
-      //       eventId: currentMember.eventId,
-      //       isAdmin: true,
-      //     });
-      //     await EmailService.sendRequestToJoinNotifications(currentOrg, member, event, admins);
-      //   }
-      // }
+      if (bio) {
+        currentOrgMember.bio = bio;
+      }
 
-      if (name) currentUser.name = name;
-      if (avatar) currentUser.avatar = avatar;
-      if (bio) currentUser.bio = bio;
-
-      return currentUser.save();
+      return currentOrgMember.save();
     },
     // inviteMembers: async (
     //   parent,
@@ -1672,9 +1666,11 @@ const resolvers = {
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
       return OrgMember.find({ userId: user.id });
     },
+    id: (user) => (user.sub ? user.sub : user.id),
     username: (user) =>
       user.username ? user.username : user.preferred_username,
-    name: (user) => user.firstName + ' ' + user.lastName,
+    firstName: (user) => (user.firstName ? user.firstName : user.given_name),
+    lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
     verifiedEmail: (user) => user.emailVerified,
     email: async (user, args, ctx) => {

@@ -47,7 +47,6 @@ export const DREAM_QUERY = gql`
           user {
             id
             username
-            name
             avatar
           }
         }
@@ -65,7 +64,6 @@ export const DREAM_QUERY = gql`
           id
           user {
             id
-            name
             username
             avatar
           }

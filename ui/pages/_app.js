@@ -62,36 +62,20 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
     currentUser {
-      # id
-      name
+      id
+      firstName
+      lastName
       username
       avatar
-      # bio
       email
-      # isOrgAdmin
-      #  memberships {
-      #    id
-      #    event {
-      #      title
-      #      slug
-      #    }
-      #  }
-      # membership(slug: $slug) {
-      #       id
-      #      isAdmin
-      #     isGuide
-      #     isApproved
-      #    availableGrants
-      #   event {
-      #    title
-      #  }
-      #}
     }
     currentOrgMember {
+      id
       bio
       isOrgAdmin
       user {
-        name
+        firstName
+        lastName
         username
         email
       }
@@ -194,7 +178,7 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
+const MyApp = ({ Component, pageProps, apolloClient }) => {
   const router = useRouter();
   const { user, loading } = useFetchUser();
 
@@ -205,12 +189,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   });
 
   const {
-    data: { currentUser, currentOrg, currentOrgMember, event } = {
-      currentUser: null,
-      currentOrg: null,
-      currentOrgMember: null,
-      event: null,
-    },
+    data: { currentUser, currentOrg, currentOrgMember, event } = {},
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
   });
@@ -225,15 +204,15 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
     setModal(null);
   };
 
-  console.log({ user, loading });
-
   return (
     <UserProvider value={{ user, loading }}>
       <ThemeProvider theme={theme}>
         <Modal
           active={modal}
           closeModal={closeModal}
+          currentOrgMember={currentOrgMember}
           currentUser={currentUser}
+          currentOrg={currentOrg}
         />
         <Layout
           currentUser={currentUser}
@@ -250,7 +229,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
             currentOrgMember={currentOrgMember}
             currentOrg={currentOrg}
             event={event}
-            hostInfo={hostInfo}
+            //hostInfo={hostInfo}
             openModal={openModal}
           />
         </Layout>
