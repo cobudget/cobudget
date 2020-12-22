@@ -88,7 +88,7 @@ export default ({
               <OrganizationAndEventHeader
                 currentOrg={currentOrg}
                 event={event}
-                currentUser={currentUser}
+                currentOrgMember={currentOrgMember}
               />
             ) : (
               <OrganizationOnlyHeader currentOrg={currentOrg} />

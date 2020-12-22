@@ -4,7 +4,11 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import { Tooltip } from "react-tippy";
-import { HomeIcon, DotsHorizontalIcon, ChevronArrowRightIcon } from "components/Icons";
+import {
+  HomeIcon,
+  DotsHorizontalIcon,
+  ChevronArrowRightIcon,
+} from "components/Icons";
 import EventSettingsModal from "components/EventSettingsModal";
 import IconButton from "components/IconButton";
 
@@ -16,7 +20,7 @@ const DREAM_QUERY = gql`
   }
 `;
 
-export default ({currentOrg, event, currentUser}) => {
+export default ({ currentOrg, event, currentUser }) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const router = useRouter();
   const { data: { dream } = { dream: null }, loading, error } = useQuery(
@@ -66,32 +70,34 @@ export default ({currentOrg, event, currentUser}) => {
           <a
             className={`hover:bg-${event.color}-darker px-2 py-1 text-white rounded-md mx-0 font-medium`}
           >
-            <h1>{event.title.length <= 30 ?
-              event.title :
-              event.title.substr(0, 30)+ "..." }</h1>
+            <h1>
+              {event.title.length <= 30
+                ? event.title
+                : event.title.substr(0, 30) + "..."}
+            </h1>
           </a>
         </Link>
 
         {/* We need to check both the dream and the router to prevent caching to appear */}
-        {dream && router.query?.dream && 
+        {dream && router.query?.dream && (
           <>
-          <ChevronArrowRightIcon className={`w-5 h-5 text-white`} />
-          <span className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}>
-            <h1>{dream.title.length <= 30 ?
-              dream.title :
-              dream.title.substr(0, 30)+ "..." }</h1>
+            <ChevronArrowRightIcon className={`w-5 h-5 text-white`} />
+            <span
+              className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}
+            >
+              <h1>
+                {dream.title.length <= 30
+                  ? dream.title
+                  : dream.title.substr(0, 30) + "..."}
+              </h1>
             </span>
           </>
-        }
+        )}
 
-        {(currentUser?.membership?.isAdmin ||
-          currentUser?.isOrgAdmin) && (
+        {(currentOrgMember?.currentEventMembership?.isAdmin ||
+          currentOrgMember?.isOrgAdmin) && (
           <>
-            <Tooltip
-              title="Event settings"
-              position="bottom"
-              size="small"
-            >
+            <Tooltip title="Event settings" position="bottom" size="small">
               <IconButton
                 onClick={() => setEventSettingsModalOpen(true)}
                 className={
@@ -106,7 +112,7 @@ export default ({currentOrg, event, currentUser}) => {
             {eventSettingsModalOpen && (
               <EventSettingsModal
                 event={event}
-                currentUser={currentUser}
+                currentOrgMember={currentOrgMember}
                 handleClose={() => setEventSettingsModalOpen(false)}
               />
             )}
@@ -114,5 +120,5 @@ export default ({currentOrg, event, currentUser}) => {
         )}
       </div>
     </>
-  )
-}
+  );
+};
