@@ -184,7 +184,7 @@ const resolvers = {
       { slug, title, description, summary, currency, registrationPolicy },
       { currentOrgMember, currentOrg, models: { Event, EventMember } }
     ) => {
-      if (!currentOrgMember || !currentOrgMember.isOrgAdmin)
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error('You need to be logged in as organisation admin.');
 
       // check slug..
