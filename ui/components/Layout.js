@@ -26,14 +26,6 @@ export default ({
     }
   }, [router.query]);
 
-  React.useEffect(() => {
-    // this will be first time user logs in
-    if (currentUser && !currentUser.name) {
-      // pop modal to set user name and maybe go through a dreams walk through? :)
-      openModal(modals.FINISH_SIGN_UP);
-    }
-  }, [currentUser]);
-
   const logOut = () => {
     cookie.remove("token");
     apollo.resetStore();
