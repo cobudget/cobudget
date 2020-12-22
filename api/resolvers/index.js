@@ -98,15 +98,19 @@ const resolvers = {
         throw new Error('You need to be a member of this org');
 
       const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMemberId.id,
+        orgMemberId: currentOrgMember.id,
         eventId,
       });
 
       // this does not stop currentOrgMembers from being from another org?
       // maybe removing this query so that you have to connect from the main query?
       // yeah, that would be better, i think.. TODO: remove query and fetch from event instead.
-      const event = await Event.findOne({ eventId });
-      if (currentOrgMember.organizationId !== event.organizationId)
+      const event = await Event.findOne({ _id: eventId });
+
+      if (
+        currentOrgMember.organizationId.toString() !==
+        event.organizationId.toString()
+      )
         throw new Error('Wrong org..');
 
       if (
