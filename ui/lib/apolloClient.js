@@ -22,9 +22,13 @@ export default function createApolloClient(initialState, ctx) {
     // strategy to get token from here: https://gist.github.com/BryceAMcDaniel/a710afe4fd877a04e55a921e4e74a21c
 
     if (ctx?.req) {
-      const tokenCache = auth(ctx.req).tokenCache(ctx.req, ctx.res);
-      const { accessToken } = await tokenCache.getAccessToken();
-      token = accessToken;
+      try {
+        const tokenCache = auth(ctx.req).tokenCache(ctx.req, ctx.res);
+        const { accessToken } = await tokenCache.getAccessToken();
+        token = accessToken;
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       const response = await fetch("/api/getToken", {
         credentials: "same-origin",
