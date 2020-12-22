@@ -74,7 +74,7 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
+                `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
               )
             )
               deleteMember({
@@ -107,12 +107,12 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
             {approvedMembers.map((member) => (
               <TableRow key={member.id}>
                 <TableCell component="th" scope="row">
-                  {member.user.name}
+                  {member.orgMember.user.name}
                 </TableCell>
                 <TableCell>
                   <Box display="flex" alignItems="center">
-                    <Box m="0 8px 0">{member.user.email}</Box>
-                    {!member.user.verifiedEmail && (
+                    <Box m="0 8px 0">{member.orgMember.user.email}</Box>
+                    {!member.orgMember.user.verifiedEmail && (
                       <Tooltip
                         title="Email not verified (has not logged in)"
                         placement="right"
@@ -123,7 +123,7 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
                   </Box>
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {member.user.bio}
+                  {member.orgMember.bio}
                 </TableCell>
                 <TableCell align="right">
                   {member.isAdmin && <span className="mr-2">Admin</span>}

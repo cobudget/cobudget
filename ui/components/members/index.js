@@ -18,13 +18,16 @@ export const MEMBERS_QUERY = gql`
       isGuide
       isApproved
       createdAt
-      user {
-        id
-        name
-        email
-        verifiedEmail
-        avatar
+      orgMember {
         bio
+        user {
+          id
+          name
+          username
+          email
+          verifiedEmail
+          avatar
+        }
       }
     }
   }
@@ -67,7 +70,7 @@ export default ({ event }) => {
     loading,
     error,
   } = useQuery(MEMBERS_QUERY, { variables: { eventId: event.id } });
-
+  console.log({ members, error, eventId: event.id });
   const [updateMember] = useMutation(UPDATE_MEMBER, {
     variables: { eventId: event.id },
   });
