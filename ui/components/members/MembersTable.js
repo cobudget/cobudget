@@ -96,6 +96,7 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell>Username</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Bio</TableCell>
@@ -106,6 +107,9 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
           <TableBody>
             {approvedMembers.map((member) => (
               <TableRow key={member.id}>
+                <TableCell component="th" scope="row">
+                  {member.orgMember.user.username}
+                </TableCell>
                 <TableCell component="th" scope="row">
                   {member.orgMember.user.name}
                 </TableCell>
