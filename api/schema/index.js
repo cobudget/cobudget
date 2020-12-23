@@ -22,8 +22,6 @@ const schema = gql`
       name: String!
       logo: String
       subdomain: String!
-      customDomain: String
-      adminEmail: String!
     ): Organization!
 
     editOrganization(

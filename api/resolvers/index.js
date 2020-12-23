@@ -132,20 +132,19 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, customDomain, logo },
-      { currentUser, models: { Organization, OrgMember } }
+      { name, subdomain, logo },
+      { kauth, kcAdminClient, models: { Organization, OrgMember } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in!');
+      if (!kauth) throw new Error('You need to be logged in!');
 
       const organization = new Organization({
         name,
         subdomain,
         logo,
-        ...(customDomain && { customDomain }), //Only add custom domain if not null
       });
 
       const orgMember = new OrgMember({
-        userId: currentUser.id,
+        userId: kauth.sub,
         organizationId: organization.id,
         isOrgAdmin: true,
       });
@@ -154,6 +153,20 @@ const resolvers = {
         organization.save(),
         orgMember.save(),
       ]);
+
+      const client = await kcAdminClient.clients.findOne({
+        id: 'dreams',
+      });
+
+      console.log({ client });
+      // await kcAdminClient.clients.update(
+      //   {id: clientUniqueId},
+      //   {
+      //     // clientId is required in client update. no idea why...
+      //     clientId,
+      //     description: 'test',
+      //   },
+      // );
 
       return savedOrg;
     },
