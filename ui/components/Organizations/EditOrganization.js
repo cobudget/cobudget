@@ -10,26 +10,18 @@ import Form from "../styled/Form";
 import ImageUpload from "components/ImageUpload";
 import { Tooltip } from "react-tippy";
 import { QuestionMarkIcon } from "../Icons";
+import Router from "next/router";
 
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization(
     $name: String!
     $logo: String
     $subdomain: String!
-    $customDomain: String
-    $adminEmail: String!
   ) {
-    createOrganization(
-      name: $name
-      logo: $logo
-      subdomain: $subdomain
-      customDomain: $customDomain
-      adminEmail: $adminEmail
-    ) {
+    createOrganization(name: $name, logo: $logo, subdomain: $subdomain) {
       name
       logo
       subdomain
-      customDomain
     }
   }
 `;
@@ -40,7 +32,6 @@ const EDIT_ORGANIZATION = gql`
     $name: String!
     $logo: String
     $subdomain: String!
-    $customDomain: String
   ) {
     editOrganization(
       organizationId: $organizationId
@@ -81,14 +72,16 @@ export default ({ organization, currentUser }) => {
       let message = isNew
         ? "Organization created successfully."
         : "Organization updated successfully.";
-      {
-        message += !isNew
-          ? ""
-          : process.env.IS_PROD
-          ? "\r\nMagic link sent! Check your email inbox!"
-          : "\r\nFind the magic link in your development console!";
+
+      if (isNew) {
+        window.history.pushState(
+          `http://${variables.subdomain}.localhost:3000`,
+          ""
+        );
+      } else {
+        alert(message);
       }
-      alert(message);
+      // alert(message);
       reset();
     } catch (err) {
       console.error(err);
@@ -134,68 +127,32 @@ export default ({ organization, currentUser }) => {
             cloudinaryPreset={"organization_logos"}
             initialImage={logoImage}
           />
-          <label>
-            Custom Domain (Optional)<Tooltip
-              style={{display: 'inline-block'}}
-              title={`<b>No need for http://</b><br/>
+          {organization?.customDomain && (
+            <label>
+              Custom Domain (Optional)
+              <Tooltip
+                style={{ display: "inline-block" }}
+                title={`<b>No need for http://</b><br/>
               For example to use 'dreams.YOURDOMAIN.com' you need to<br/>
               1. Open your domain account provider<br/>
               2. Set a new CNAME record with the name of 'dreams' and the value of ${process.env.DEPLOY_URL}`}
-              position="bottom"
-              size="small"
-            >
-              <QuestionMarkIcon className="w-5 h-5" />
-            </Tooltip>
-            <TextField
-              name="customDomain"
-              placeholder="orgdomain.com"
-              inputRef={register}
-              className="mb-2"
-              defaultValue={organization?.customDomain}
-              error={errors.customDomain}
-              helperText={errors.customDomain?.message}
-            />
-          </label>
-          {isNew && (
-            <>
-              <label>
-                Your email
-                <TextField
-                  name="adminEmail"
-                  placeholder="you@gmail.com"
-                  className="mb-2"
-                  defaultValue={currentUser?.email}
-                  error={errors.adminEmail}
-                  inputRef={register({
-                    validate: (value) =>
-                      value === getValues("adminEmail2") ||
-                      "Emails don't match",
-                    required: "Required",
-                    pattern: {
-                      value: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-                      message: "Invalid email",
-                    },
-                  })}
-                  helperText={errors.adminEmail?.message}
-                />
-              </label>
-              <label>
-                Confirm email
-                <TextField
-                  name="adminEmail2"
-                  placeholder="you@gmail.com"
-                  className="mb-2"
-                  defaultValue={currentUser?.email}
-                  error={errors.adminEmail2}
-                  inputRef={register({
-                    validate: (value) =>
-                      value === getValues("adminEmail") || "Emails don't match",
-                  })}
-                  helperText={errors.adminEmail2?.message}
-                />
-              </label>
-            </>
+                position="bottom"
+                size="small"
+              >
+                <QuestionMarkIcon className="w-5 h-5" />
+              </Tooltip>
+              <TextField
+                name="customDomain"
+                placeholder="orgdomain.com"
+                inputRef={register}
+                className="mb-2"
+                defaultValue={organization?.customDomain}
+                error={errors.customDomain}
+                helperText={errors.customDomain?.message}
+              />
+            </label>
           )}
+
           <Button type="submit" loading={loading || editLoading}>
             Save
           </Button>
