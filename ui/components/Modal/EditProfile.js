@@ -20,14 +20,14 @@ const UPDATE_PROFILE_QUERY = gql`
       bio: $bio
     ) {
       id
-      bio
-      user {
+      email
+      avatar
+      username
+      firstName
+      lastName
+      currentOrgMember {
         id
-        email
-        avatar
-        username
-        firstName
-        lastName
+        bio
       }
     }
   }

@@ -971,7 +971,6 @@ const resolvers = {
       if (!kauth) throw new Error('You need to be logged in..');
 
       if (firstName || lastName || username) {
-        // update user in keycloak
         try {
           await kcAdminClient.users.update(
             { id: kauth.sub },
@@ -986,11 +985,12 @@ const resolvers = {
         }
       }
 
-      if (bio) {
+      if (currentOrgMember && bio) {
         currentOrgMember.bio = bio;
+        await currentOrgMember.save();
       }
 
-      return currentOrgMember.save();
+      return kcAdminClient.users.findOne({ id: kauth.sub });
     },
     // inviteMembers: async (
     //   parent,
