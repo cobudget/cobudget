@@ -12,7 +12,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
-  query EventAndMember($slug: String) {
+  query TopLevelQuery($slug: String) {
     event(slug: $slug) {
       id
       slug
@@ -68,6 +68,10 @@ export const TOP_LEVEL_QUERY = gql`
       username
       avatar
       email
+      currentOrgMember {
+        id
+        bio
+      }
     }
     currentOrgMember {
       id

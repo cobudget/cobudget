@@ -119,7 +119,12 @@ const schema = gql`
 
     joinOrg: OrgMember
 
-    updateProfile(name: String, avatar: String, bio: String): User
+    updateProfile(
+      username: String
+      firstName: String
+      lastName: String
+      bio: String
+    ): User
     # inviteMembers(emails: String!): [Member]
     updateMember(
       eventId: ID!
@@ -225,11 +230,14 @@ const schema = gql`
     username: String!
     email: String
     name: String
+    firstName: String
+    lastName: String
     verifiedEmail: Boolean!
     isRootAdmin: Boolean
     orgMemberships: [OrgMember!]
     avatar: String
     createdAt: Date
+    currentOrgMember: OrgMember
   }
 
   type OrgMember {

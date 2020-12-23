@@ -2,7 +2,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
 import { useRouter } from "next/router";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/react-hooks";
 
+import TOP_LEVEL_QUERY from "pages/_app";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
@@ -63,6 +66,15 @@ const NavItem = ({
   );
 };
 
+const JOIN_ORG_MUTATION = gql`
+  mutation JoinOrg {
+    joinOrg {
+      id
+      bio
+    }
+  }
+`;
+
 export default ({
   event,
   currentUser,
@@ -73,8 +85,12 @@ export default ({
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-
   const router = useRouter();
+
+  const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
+    refetchQueries: ["TopLevelQuery"],
+  });
+
   return (
     <header
       className={
@@ -193,13 +209,19 @@ export default ({
                   </>
                 )}
 
-                {!event && currentOrgMember.isOrgAdmin && (
+                {!event && currentOrgMember?.isOrgAdmin && (
                   <NavItem
                     primary
                     currentPath={router.pathname}
                     href="/create-event"
                   >
                     New event
+                  </NavItem>
+                )}
+
+                {!currentOrgMember && (
+                  <NavItem primary onClick={() => joinOrg()}>
+                    Join org
                   </NavItem>
                 )}
 

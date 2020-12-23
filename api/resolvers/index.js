@@ -952,16 +952,14 @@ const resolvers = {
     joinOrg: async (
       parent,
       args,
-      { currentUser, currentOrg, models: { OrgMember } }
+      { kauth, currentOrg, models: { OrgMember } }
     ) => {
-      if (!currentUser) throw new Error('You need to be logged in.');
+      if (!kauth) throw new Error('You need to be logged in.');
 
-      const orgMember = await new OrgMember({
-        userId: currentUser.id,
+      return new OrgMember({
+        userId: kauth.sub,
         organizationId: currentOrg.id,
       }).save();
-
-      return orgMember;
     },
     updateProfile: async (
       parent,
@@ -1663,6 +1661,10 @@ const resolvers = {
     },
   },
   User: {
+    currentOrgMember: async (user, args, { currentOrgMember }) => {
+      if (!currentOrgMember) return null;
+      return user.sub === currentOrgMember.userId ? currentOrgMember : null;
+    },
     orgMemberships: async (user, args, { models: { OrgMember } }) => {
       return OrgMember.find({ userId: user.id });
     },
