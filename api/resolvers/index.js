@@ -148,19 +148,24 @@ const resolvers = {
         orgMember.save(),
       ]);
 
-      const client = await kcAdminClient.clients.findOne({
-        id: 'dreams',
+      const clientId = 'dreams';
+
+      const [client] = await kcAdminClient.clients.findOne({
+        clientId,
       });
 
-      console.log({ client });
-      // await kcAdminClient.clients.update(
-      //   {id: clientUniqueId},
-      //   {
-      //     // clientId is required in client update. no idea why...
-      //     clientId,
-      //     description: 'test',
-      //   },
-      // );
+      const newRedirectUris = [
+        ...client.redirectUris,
+        `https://${subdomain}.dreams.wtf/*`,
+      ];
+
+      await kcAdminClient.clients.update(
+        { id: client.id },
+        {
+          clientId,
+          redirectUris: newRedirectUris,
+        }
+      );
 
       return savedOrg;
     },
@@ -180,11 +185,44 @@ const resolvers = {
       const organization = await Organization.findOne({
         _id: organizationId,
       });
+
+      const isUpdatingRedirectUris = subdomain !== organization.subdomain;
+      let newRedirectUris;
+
+      if (isUpdatingRedirectUris) {
+        const clientId = 'dreams';
+
+        const [client] = await kcAdminClient.clients.findOne({
+          clientId,
+        });
+
+        const { redirectUris } = client;
+
+        const oldRedirectUri = `https://${organization.subdomain}.dreams.wtf/*`;
+
+        newRedirectUris = [
+          ...redirectUris.filter((uri) => uri !== oldRedirectUri),
+          `https://${subdomain}.dreams.wtf/*`,
+        ];
+      }
+
       organization.name = name;
       organization.logo = logo;
       organization.subdomain = subdomain;
       organization.customDomain = customDomain;
-      return organization.save();
+
+      await organization.save();
+
+      if (isUpdatingRedirectUris)
+        await kcAdminClient.clients.update(
+          { id: client.id },
+          {
+            clientId,
+            redirectUris: newRedirectUris,
+          }
+        );
+
+      return organization;
     },
     createEvent: async (
       parent,
