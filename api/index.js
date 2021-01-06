@@ -27,7 +27,9 @@ const keycloak = new Keycloak(
     'auth-server-url': process.env.KEYCLOAK_AUTH_SERVER,
     'ssl-required': 'external',
     resource: 'dreams',
-    'public-client': true,
+    credentials: {
+      secret: process.env.KEYCLOAK_CLIENT_SECRET,
+    },
     'confidential-port': 0,
   }
 );
