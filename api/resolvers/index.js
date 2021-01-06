@@ -15,15 +15,9 @@ const isMemberOfOrg = (parent, { id }, { currentUser, currentOrgMember }) => {
 
 const resolvers = {
   Query: {
-    // currentMember: (parent, args, { currentMember }) => {
-    //   return currentMember;
-    // },
-    currentUser: (parent, args, { currentUser }) => {
-      return currentUser;
-    },
-    currentOrg: (parent, args, { currentOrg }) => {
-      return currentOrg;
-    },
+    currentUser: (parent, args, { kauth }) => (kauth ? { ...kauth } : null),
+    currentOrg: (parent, args, { currentOrg }) => currentOrg,
+    currentOrgMember: (parent, args, { currentOrgMember }) => currentOrgMember,
     organization: combineResolvers(
       isMemberOfOrg,
       async (parent, { id }, { models: { Organization } }) => {

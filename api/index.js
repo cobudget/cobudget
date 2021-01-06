@@ -40,7 +40,12 @@ const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   context: async ({ req }) => {
-    const kauth = new KeycloakContext({ req });
+    let kauth;
+    try {
+      kauth = new KeycloakContext({ req });
+    } catch (err) {
+      console.log(err);
+    }
 
     const db = await getConnection(process.env.MONGO_URL);
     const models = getModels(db);
@@ -66,7 +71,7 @@ const server = new ApolloServer({
       realmName: 'plato',
     });
 
-    let currentUser = kauth.accessToken && kauth.accessToken.content;
+    let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
 
     let currentOrg = null;
     let currentOrgMember;
@@ -90,26 +95,9 @@ const server = new ApolloServer({
       ? req.headers.authorization.split(' ')[1]
       : null;
 
-    // Verify token if available
-    // if (currentOrg && token) {
-    //   try {
-    //     token = jwt.verify(token, process.env.JWT_SECRET);
-    //     currentUser = await models.User.findOne({
-    //       _id: token.sub,
-    //       organizationId: currentOrg.id,
-    //     });
-    //   } catch (error) {
-    //     // throw new AuthenticationError(
-    //     //   'Authentication token is invalid, please log in.'
-    //     // );
-    //     console.error('Authentication token is invalid');
-    //     console.error(error);
-    //   }
-    // }
-
     return {
       models,
-      currentUser,
+      kauth: currentUser,
       currentOrg,
       currentOrgMember,
       kcAdminClient,
