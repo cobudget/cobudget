@@ -6,12 +6,31 @@ const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const { combineResolvers, skip } = require('graphql-resolvers');
-const isMemberOfOrg = (parent, { id }, { currentUser, currentOrgMember }) => {
-  if (!currentUser) throw new Error('You need to be logged in');
-  if (!currentOrgMember.organizationId == id && !currentUser.isRootAdmin)
+
+const isRootAdmin = (parent, args, { currentUser }) => {
+  return currentUser && currentUser.isRootAdmin
+    ? skip
+    : new Error('You need to be root admin');
+};
+
+const isMemberOfOrg = (parent, { id }, { kauth, currentOrgMember }) => {
+  if (!kauth) throw new Error('You need to be logged in');
+  if (!currentOrgMember.organizationId == id && !kauth.isRootAdmin)
     throw new Error('You need to be a member of that organization');
   return skip;
 };
+
+// const canEditEvent = (parent, args, { currentOrgMember, models }) => {
+//   // args: eventId
+//   //and you are either a orgAdmin or eventAdmin..
+// };
+
+// const canEditDream = (parent, args, { currentOrgMember, models }) => {
+//   // args: eventId
+//   //and you are either a orgAdmin or eventAdmin..
+// };
+
+// const canEditOrg = (parent, args, { currentOrgMember, currentUser }) => {};
 
 const resolvers = {
   Query: {
