@@ -219,7 +219,7 @@ export default ({
                   </NavItem>
                 )}
 
-                {!currentOrgMember && (
+                {!currentOrgMember && currentOrg && (
                   <NavItem primary onClick={() => joinOrg()}>
                     Join org
                   </NavItem>
@@ -236,19 +236,9 @@ export default ({
                 </div>
               </>
             ) : (
-              <>
-                {currentOrg && (
-                  <>
-                    <NavItem
-                      href="/api/login"
-                      eventColor={event?.color}
-                      primary
-                    >
-                      Login or Sign up
-                    </NavItem>
-                  </>
-                )}
-              </>
+              <NavItem href="/api/login" eventColor={event?.color} primary>
+                Login or Sign up
+              </NavItem>
             )}
           </div>
 
