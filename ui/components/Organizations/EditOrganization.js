@@ -74,10 +74,10 @@ export default ({ organization, currentUser }) => {
         : "Organization updated successfully.";
 
       if (isNew) {
-        window.history.pushState(
-          `http://${variables.subdomain}.localhost:3000`,
-          ""
-        );
+        const url = process.env.isProd
+          ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
+          : `http://${variables.subdomain}.localhost:3000`;
+        window.location.assign(url);
       } else {
         alert(message);
       }
