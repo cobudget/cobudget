@@ -173,18 +173,20 @@ const resolvers = {
         clientId,
       });
 
-      const newRedirectUris = [
-        ...client.redirectUris,
-        `https://${subdomain}.dreams.wtf/*`,
-      ];
+      if (client.redirectUris) {
+        const newRedirectUris = [
+          ...client.redirectUris,
+          `https://${subdomain}.dreams.wtf/*`,
+        ];
 
-      await kcAdminClient.clients.update(
-        { id: client.id },
-        {
-          clientId,
-          redirectUris: newRedirectUris,
-        }
-      );
+        await kcAdminClient.clients.update(
+          { id: client.id },
+          {
+            clientId,
+            redirectUris: newRedirectUris,
+          }
+        );
+      }
 
       return savedOrg;
     },
