@@ -7,7 +7,8 @@ export default async function getToken(req, res) {
     if (accessToken) res.send(accessToken);
     res.status(204).end();
   } catch (error) {
-    //console.error(error);
-    res.status(error.status || 500).end(error.message);
+    res.status(200).end();
+    //res.status(error.status || 500).end(error.message);
   }
+  res.end();
 }

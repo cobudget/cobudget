@@ -4,7 +4,8 @@ export default async function profile(req, res) {
   try {
     await auth(req).handleProfile(req, res, {});
   } catch (error) {
-    console.error(error);
-    res.status(error.status || 500).end(error.message);
+    res.status(200).end();
+    //res.status(error.status || 500).end(error.message);
   }
+  res.end();
 }
