@@ -46,7 +46,7 @@ export default ({ currentUser, event }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [filterLabels, setFilterLabels] = useState();
-  
+
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
   // const [showInfoBox, setShowInfoBox] = useState(true);
@@ -64,6 +64,9 @@ export default ({ currentUser, event }) => {
       },
     }
   );
+  if (error) {
+    console.error(error);
+  }
 
   // useEffect(() => {
   //   const { infoBoxDismissed = false } = store.get(event.slug) || {};
@@ -74,8 +77,8 @@ export default ({ currentUser, event }) => {
     dreams = dreams.filter((dream) => dream.favorite);
   }
 
-  if(filterLabels) {
-    dreams = dreams.filter(dream => {
+  if (filterLabels) {
+    dreams = dreams.filter((dream) => {
       if (!dream.customFields || dream.customFields.length == 0) return;
       const existingField = dream.customFields.filter((field) => {
         return field.customField.id == filterLabels.id;
@@ -83,7 +86,7 @@ export default ({ currentUser, event }) => {
       if (existingField && existingField.length > 0) {
         return existingField[0].value;
       }
-    })
+    });
   }
 
   return (
@@ -116,7 +119,6 @@ export default ({ currentUser, event }) => {
                   key={dream.id}
                 >
                   <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
-                    
                     <DreamCard
                       dream={dream}
                       event={event}
