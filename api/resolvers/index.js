@@ -1771,6 +1771,11 @@ const resolvers = {
     //   });
     // },
   },
+  Organization: {
+    events: async (organization, args, { models: { Event } }) => {
+      return Event.find({ organizationId: organization.id });
+    },
+  },
   Event: {
     members: async (event, args, { models: { EventMember } }) => {
       return EventMember.find({ eventId: event.id });
