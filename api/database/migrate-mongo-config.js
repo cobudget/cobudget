@@ -3,7 +3,7 @@
 const config = {
   mongodb: {
     // TODO Change (or review) the url to your MongoDB:
-    url: 'mongodb://localhost/dreams',
+    url: process.env.MONGO_URL,
 
     options: {
       useNewUrlParser: true, // removes a deprecation warning when connecting
