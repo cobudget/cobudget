@@ -57,7 +57,7 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-export default ({ dream, event, currentUser, canEdit }) => {
+export default ({ dream, event, currentOrgMember, canEdit }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
@@ -86,7 +86,8 @@ export default ({ dream, event, currentUser, canEdit }) => {
           {dream.approved && (
             <>
               <GrantingStatus dream={dream} />
-              {currentUser?.membership?.availableGrants > 0 && (
+              {currentOrgMember?.currentEventMembership?.availableGrants >
+                0 && (
                 <>
                   <Button
                     color={event.color}
@@ -100,7 +101,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
                     handleClose={() => setGrantModalOpen(false)}
                     dream={dream}
                     event={event}
-                    currentUser={currentUser}
+                    currentOrgMember={currentOrgMember}
                   />
                 </>
               )}
@@ -123,8 +124,8 @@ export default ({ dream, event, currentUser, canEdit }) => {
               )}
             </>
           )}
-          {(currentUser?.membership?.isAdmin ||
-            currentUser?.membership?.isGuide) && (
+          {(currentOrgMember?.currentEventMembership?.isAdmin ||
+            currentOrgMember?.currentEventMembership?.isGuide) && (
             <div>
               <div className="my-2">
                 {!event.grantingHasClosed && !dream.approved && (
@@ -145,7 +146,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
                 )}
               </div>
 
-              {currentUser?.membership?.isAdmin && (
+              {currentOrgMember?.currentEventMembership?.isAdmin && (
                 <>
                   <div className="my-2">
                     {event.grantingHasClosed &&
@@ -199,8 +200,8 @@ export default ({ dream, event, currentUser, canEdit }) => {
                 )}
                 {dream.approved &&
                   !event.grantingHasClosed &&
-                  (currentUser?.membership?.isAdmin ||
-                    currentUser?.membership?.isGuide) && (
+                  (currentOrgMember?.currentEventMembership?.isAdmin ||
+                    currentOrgMember?.currentEventMembership?.isGuide) && (
                     <button
                       className={css.dropdownButton}
                       onClick={() =>
@@ -219,7 +220,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
                   )}
                 {dream.approved &&
                   dream.minGoalGrants > 0 &&
-                  currentUser?.membership?.isAdmin && (
+                  currentOrgMember?.currentEventMembership?.isAdmin && (
                     <>
                       <button
                         className={css.dropdownButton}
@@ -272,12 +273,12 @@ export default ({ dream, event, currentUser, canEdit }) => {
           {dream.cocreators.map((member) => (
             // <Tooltip key={member.user.id} title={member.user.name}>
             <div
-              key={member.user.id}
+              key={member.orgMember.user.id}
               className="flex items-center mr-2 md:mr-3 sm:mb-2"
             >
-              <Avatar user={member.user} />{" "}
+              <Avatar user={member.orgMember.user} />{" "}
               <span className="ml-2 text-gray-700 hidden md:block">
-                {member.user.name}
+                {member.orgMember.user.username}
               </span>
             </div>
             // </Tooltip>
@@ -296,7 +297,7 @@ export default ({ dream, event, currentUser, canEdit }) => {
           cocreators={dream.cocreators}
           event={event}
           dream={dream}
-          currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
         />
       </div>
       <PreOrPostFundModal

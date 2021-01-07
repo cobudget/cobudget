@@ -43,10 +43,12 @@ export const DREAM_QUERY = gql`
       }
       cocreators {
         id
-        user {
-          id
-          name
-          avatar
+        orgMember {
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
       images {
@@ -60,8 +62,11 @@ export const DREAM_QUERY = gql`
         createdAt
         author {
           id
-          name
-          avatar
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
       logs {
@@ -92,7 +97,7 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentUser }) => {
+export default ({ event, currentUser, currentOrgMember }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -102,7 +107,7 @@ export default ({ event, currentUser }) => {
       variables: { id: router.query.dream },
     }
   );
-
+  console.log({ dream });
   if (dream)
     return (
       <div className="max-w-screen-2lg flex-1">
@@ -111,7 +116,12 @@ export default ({ event, currentUser }) => {
             {dream.title} | {event.title}
           </title>
         </Head>
-        <Dream dream={dream} event={event} currentUser={currentUser} />
+        <Dream
+          dream={dream}
+          event={event}
+          currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
+        />
       </div>
     );
 

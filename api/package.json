@@ -22,13 +22,17 @@
     "ejs": "3.1.5",
     "express": "^4.17.1",
     "graphql": "^14.5.8",
+    "graphql-resolvers": "^0.4.2",
     "graphql-type-json": "0.3.2",
     "jsonwebtoken": "^8.5.1",
+    "keycloak-admin": "^1.14.3",
+    "keycloak-connect": "^11.0.3",
+    "keycloak-connect-graphql": "^0.6.4",
     "mailgun-js": "^0.22.0",
     "micro-cors": "^0.1.1",
     "mongoose": "^5.9.6",
     "node-fetch": "^2.6.0",
-    "plato-core": "github:Edgeryders-Participio/plato-core"
+    "plato-core": "github:Edgeryders-Participio/plato-core#keycloak-migration"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

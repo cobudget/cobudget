@@ -7,17 +7,17 @@ export default React.forwardRef((props, ref) => {
       className={`${
         props.size === "small" ? "h-8 w-8" : "h-10 w-10 text-xl"
       } bg-${stringToColor(
-        user.name ? user.name : "default"
+        user.username ? user.username : "default"
       )}-darker rounded-full text-white flex items-center justify-center select-none font-medium`}
       ref={ref}
-      alt={user.name && user.name}
+      alt={user.username && user.username}
       src={user.avatar && user.avatar}
       {...props}
       style={{
         ...props.style,
       }}
     >
-      {user.name ? user.name.charAt(0).toUpperCase() : ""}
+      {user.username ? user.username.charAt(0).toUpperCase() : ""}
     </div>
   );
 });

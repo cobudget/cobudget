@@ -39,7 +39,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event, currentUser, handleClose }) => {
+export default ({ event, currentOrgMember, handleClose }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
@@ -128,7 +128,7 @@ export default ({ event, currentUser, handleClose }) => {
           className="my-4"
         />
 
-        {currentUser.isOrgAdmin && (
+        {currentOrgMember.isOrgAdmin && (
           <>
             <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
             <Button

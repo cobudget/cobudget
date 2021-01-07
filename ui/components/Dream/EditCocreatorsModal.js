@@ -10,10 +10,12 @@ const SEARCH_MEMBERS_QUERY = gql`
     members(eventId: $eventId, isApproved: $isApproved) {
       id
       isApproved
-      user {
-        id
-        name
-        avatar
+      orgMember {
+        user {
+          id
+          username
+          avatar
+        }
       }
     }
   }
@@ -25,10 +27,12 @@ const ADD_CO_CREATOR_MUTATION = gql`
       id
       cocreators {
         id
-        user {
-          id
-          name
-          avatar
+        orgMember {
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }
@@ -41,10 +45,12 @@ const REMOVE_CO_CREATOR_MUTATION = gql`
       id
       cocreators {
         id
-        user {
-          id
-          name
-          avatar
+        orgMember {
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }
@@ -55,8 +61,10 @@ const Member = ({ member, add, remove }) => {
   return (
     <div className="flex items-center justify-between mb-2 overflow-y-scroll ">
       <div className="flex items-center">
-        <Avatar user={member.user} size="small" />
-        <span className="ml-2 text-gray-800">{member.user.name}</span>
+        <Avatar user={member.orgMember.user} size="small" />
+        <span className="ml-2 text-gray-800">
+          {member.orgMember.user.username}
+        </span>
       </div>
       <div className="flex items-center">
         {Boolean(add) && (
@@ -100,7 +108,9 @@ const SearchMembersResult = ({
 
   if (searchInput) {
     result = result.filter((member) =>
-      member.user.name?.toLowerCase().includes(searchInput.toLowerCase())
+      member.orgMember.user.username
+        ?.toLowerCase()
+        .includes(searchInput.toLowerCase())
     );
   }
 
@@ -127,7 +137,7 @@ export default ({
   dream,
   event,
   cocreators,
-  currentUser,
+  currentOrgMember,
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
@@ -153,7 +163,7 @@ export default ({
               member={member}
               remove={() => {
                 if (
-                  member.id !== currentUser.membership.id ||
+                  member.id !== currentOrgMember.currentEventMembership.id ||
                   confirm(
                     "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
                   )

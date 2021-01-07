@@ -2,10 +2,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
 import { useRouter } from "next/router";
+import gql from "graphql-tag";
+import { useMutation } from "@apollo/react-hooks";
 
+import TOP_LEVEL_QUERY from "pages/_app";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
-import LoginModal from "components/LoginModal";
 import { modals } from "components/Modal/index";
 import NewDreamModal from "components/NewDreamModal";
 import OrganizationOnlyHeader from "./OrganizationOnlyHeader";
@@ -64,12 +66,31 @@ const NavItem = ({
   );
 };
 
-export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
-  const [isMenuOpen, setMenuOpen] = useState(false);
-  const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
+const JOIN_ORG_MUTATION = gql`
+  mutation JoinOrg {
+    joinOrg {
+      id
+      bio
+    }
+  }
+`;
 
+export default ({
+  event,
+  currentUser,
+  currentOrgMember,
+  currentOrg,
+  openModal,
+  logOut,
+}) => {
+  const [isMenuOpen, setMenuOpen] = useState(false);
+  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
   const router = useRouter();
+
+  const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
+    refetchQueries: ["TopLevelQuery"],
+  });
+
   return (
     <header
       className={
@@ -81,11 +102,12 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
           <div className="flex items-center">
             {event ? (
               <OrganizationAndEventHeader
-                currentOrg = {currentOrg}
-                event = {event}
-                currentUser = {currentUser} />
+                currentOrg={currentOrg}
+                event={event}
+                currentOrgMember={currentOrgMember}
+              />
             ) : (
-              <OrganizationOnlyHeader currentOrg = {currentOrg} />
+              <OrganizationOnlyHeader currentOrg={currentOrg} />
             )}
           </div>
 
@@ -123,7 +145,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {event && (
+                {currentOrgMember && event && (
                   <>
                     <NavItem
                       href="/[event]/about"
@@ -133,8 +155,8 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                     >
                       About
                     </NavItem>
-                    {(currentUser.membership?.isAdmin ||
-                      currentUser.isOrgAdmin) && (
+                    {(currentOrgMember.currentEventMembership?.isAdmin ||
+                      currentOrgMember.isOrgAdmin) && (
                       <>
                         <NavItem
                           href="/[event]/members"
@@ -147,7 +169,7 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                       </>
                     )}
 
-                    {currentUser.membership?.isApproved &&
+                    {currentOrgMember.currentEventMembership?.isApproved &&
                       event.dreamCreationIsOpen && (
                         <>
                           <NavItem
@@ -166,27 +188,28 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                         </>
                       )}
 
-                    {currentUser && !currentUser.membership && (
-                      <>
-                        {event.registrationPolicy !== "INVITE_ONLY" && (
-                          <NavItem
-                            href="/[event]/register"
-                            as={`/${event.slug}/register`}
-                            currentPath={router.pathname}
-                            eventColor={event.color}
-                            primary
-                          >
-                            {event.registrationPolicy === "REQUEST_TO_JOIN"
-                              ? "Request to join"
-                              : "Join"}
-                          </NavItem>
-                        )}
-                      </>
-                    )}
+                    {currentOrgMember &&
+                      !currentOrgMember.currentEventMembership && (
+                        <>
+                          {event.registrationPolicy !== "INVITE_ONLY" && (
+                            <NavItem
+                              href="/[event]/register"
+                              as={`/${event.slug}/register`}
+                              currentPath={router.pathname}
+                              eventColor={event.color}
+                              primary
+                            >
+                              {event.registrationPolicy === "REQUEST_TO_JOIN"
+                                ? "Request to join"
+                                : "Join"}
+                            </NavItem>
+                          )}
+                        </>
+                      )}
                   </>
                 )}
 
-                {!event && currentUser.isOrgAdmin && (
+                {!event && currentOrgMember?.isOrgAdmin && (
                   <NavItem
                     primary
                     currentPath={router.pathname}
@@ -196,9 +219,16 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                   </NavItem>
                 )}
 
+                {!currentOrgMember && currentOrg && (
+                  <NavItem primary onClick={() => joinOrg()}>
+                    Join org
+                  </NavItem>
+                )}
+
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
+                    currentOrgMember={currentOrgMember}
                     logOut={logOut}
                     openModal={openModal}
                     event={event}
@@ -206,28 +236,14 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                 </div>
               </>
             ) : (
-              <>
-                {currentOrg && (
-                  <>
-                    <NavItem
-                      onClick={() => setLoginModalOpen(true)}
-                      eventColor={event?.color}
-                      primary
-                    >
-                      Login or Sign up
-                    </NavItem>
-                    <LoginModal
-                      open={loginModalOpen}
-                      handleClose={() => setLoginModalOpen(false)}
-                    />
-                  </>
-                )}
-              </>
+              <NavItem href="/api/login" eventColor={event?.color} primary>
+                Login or Sign up
+              </NavItem>
             )}
           </div>
 
           {/* Mobile view of profile dropdown contents above (i.e. all profile dropdown items are declared twice!)*/}
-          {currentUser && (
+          {currentOrgMember && (
             <div className="pt-4 pb-1 sm:hidden bg-white mb-4 border-gray-300">
               <div className="flex items-center px-3">
                 <Badge
@@ -237,21 +253,21 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                     horizontal: "right",
                   }}
                   badgeContent={
-                    currentUser.membership &&
-                    currentUser.membership.availableGrants
+                    currentOrgMember.currentEventMembership &&
+                    currentOrgMember.currentEventMembership.availableGrants
                   }
                   color="primary"
                 >
-                  <Avatar user={currentUser} />
+                  <Avatar user={currentOrgMember.user} />
                 </Badge>
                 <div className="ml-4">
                   <span className="font-semibold text-gray-600">
-                    {currentUser.name}
+                    {currentOrgMember.user.name}
                   </span>
-                  {/* {currentUser.membership &&
-                  Boolean(currentUser.membership.availableGrants) && (
+                  {/* {currentOrgMember.currentEventMembership &&
+                  Boolean(currentOrgMember.currentEventMembership.availableGrants) && (
                     <span className="block text-sm text-gray-600">
-                      You have {currentUser.membership.availableGrants} grants
+                      You have {currentOrgMember.currentEventMembership.availableGrants} grants
                       left
                     </span>
                   )} */}
@@ -264,21 +280,27 @@ export default ({ event, currentUser, currentOrg, openModal, logOut }) => {
                 <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
                   Memberships
                 </h2>
-                {currentUser.membership && (
+                {currentOrgMember.currentEventMembership && (
                   <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                    {currentUser.membership.event.title}
-                    {Boolean(currentUser.membership.availableGrants) && (
+                    {currentOrgMember.currentEventMembership.event.title}
+                    {Boolean(
+                      currentOrgMember.currentEventMembership.availableGrants
+                    ) && (
                       <p className=" text-gray-800 text-sm">
-                        You have {currentUser.membership.availableGrants} grants
-                        left
+                        You have{" "}
+                        {
+                          currentOrgMember.currentEventMembership
+                            .availableGrants
+                        }{" "}
+                        grants left
                       </p>
                     )}
                   </div>
                 )}
-                {currentUser.memberships.map((membership) => {
+                {currentOrgMember.eventMemberships.map((membership) => {
                   if (
-                    currentUser.membership &&
-                    currentUser.membership.id === membership.id
+                    currentOrgMember.currentEventMembership &&
+                    currentOrgMember.currentEventMembership.id === membership.id
                   ) {
                     return null;
                   }

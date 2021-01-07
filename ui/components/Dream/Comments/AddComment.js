@@ -17,15 +17,18 @@ const ADD_COMMENT = gql`
         createdAt
         author {
           id
-          name
-          avatar
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }
   }
 `;
 
-const AddComment = ({ currentUser, dreamId, event }) => {
+const AddComment = ({ currentOrgMember, dreamId, event }) => {
   const [addComment, { loading }] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
@@ -44,7 +47,7 @@ const AddComment = ({ currentUser, dreamId, event }) => {
     >
       <div className="flex">
         <div className="mr-4">
-          <Avatar user={currentUser} />
+          <Avatar user={currentOrgMember.user} />
         </div>
         <div className="flex-grow">
           <div className="mb-2">

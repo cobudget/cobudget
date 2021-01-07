@@ -13,15 +13,15 @@ import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
-const Dream = ({ dream, event, currentUser }) => {
+const Dream = ({ dream, event, currentUser, currentOrgMember }) => {
   const canEdit =
-    currentUser?.membership?.isAdmin ||
-    currentUser?.membership?.isGuide ||
-    isMemberOfDream(currentUser, dream);
+    currentOrgMember?.currentEventMembership?.isAdmin ||
+    currentOrgMember?.currentEventMembership?.isGuide ||
+    isMemberOfDream(currentOrgMember, dream);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-      {currentUser?.membership &&
+      {currentOrgMember?.currentEventMembership &&
         event.dreamReviewIsOpen &&
         event.guidelines.length > 0 && <Monster event={event} dream={dream} />}
 
@@ -83,7 +83,7 @@ const Dream = ({ dream, event, currentUser }) => {
             <hr className="mb-4 mt-1" />
 
             <Comments
-              currentUser={currentUser}
+              currentOrgMember={currentOrgMember}
               comments={dream.comments}
               dreamId={dream.id}
               event={event}
@@ -94,7 +94,7 @@ const Dream = ({ dream, event, currentUser }) => {
             <Sidebar
               dream={dream}
               event={event}
-              currentUser={currentUser}
+              currentOrgMember={currentOrgMember}
               canEdit={canEdit}
             />
           </div>

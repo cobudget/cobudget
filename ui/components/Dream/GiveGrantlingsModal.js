@@ -31,7 +31,7 @@ const GiveGrantlingsModal = ({
   handleClose,
   dream,
   event,
-  currentUser,
+  currentOrgMember,
 }) => {
   const classes = useStyles();
   const router = useRouter();
@@ -67,13 +67,13 @@ const GiveGrantlingsModal = ({
         variables: { slug: event.slug },
         data: {
           ...topLevelQueryData,
-          currentUser: {
-            ...topLevelQueryData.currentUser,
-            membership: {
-              ...topLevelQueryData.currentUser.membership,
+          currentOrgMember: {
+            ...topLevelQueryData.currentOrgMember,
+            currentEventMembership: {
+              ...topLevelQueryData.currentOrgMember.currentEventMembership,
               availableGrants:
-                topLevelQueryData.currentUser.membership.availableGrants -
-                giveGrant.value,
+                topLevelQueryData.currentOrgMember.currentEventMembership
+                  .availableGrants - giveGrant.value,
             },
           },
         },
@@ -90,7 +90,8 @@ const GiveGrantlingsModal = ({
       <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
         <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
         <p className="text-gray-800">
-          Available grants: {currentUser.membership.availableGrants}
+          Available grants:{" "}
+          {currentOrgMember.currentEventMembership.availableGrants}
         </p>
         {event.maxGrantsToDream && (
           <p className="text-sm text-gray-600 my-2">
@@ -129,10 +130,10 @@ const GiveGrantlingsModal = ({
                 max: `${
                   event.maxGrantsToDream
                     ? Math.min(
-                        currentUser.membership.availableGrants,
+                        currentOrgMember.currentEventMembership.availableGrants,
                         event.maxGrantsToDream
                       )
-                    : currentUser.membership.availableGrants
+                    : currentOrgMember.currentEventMembership.availableGrants
                 }`,
               }}
             />

@@ -4,7 +4,7 @@ import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { useRouter } from "next/router";
-
+import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 
@@ -12,7 +12,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
-  query EventAndMember($slug: String) {
+  query TopLevelQuery($slug: String) {
     event(slug: $slug) {
       id
       slug
@@ -63,19 +63,34 @@ export const TOP_LEVEL_QUERY = gql`
     }
     currentUser {
       id
-      name
+      firstName
+      lastName
+      username
       avatar
-      bio
       email
+      currentOrgMember {
+        id
+        bio
+      }
+    }
+    currentOrgMember {
+      id
+      bio
       isOrgAdmin
-      memberships {
+      user {
+        firstName
+        lastName
+        username
+        email
+      }
+      eventMemberships {
         id
         event {
           title
           slug
         }
       }
-      membership(slug: $slug) {
+      currentEventMembership(slug: $slug) {
         id
         isAdmin
         isGuide
@@ -86,6 +101,7 @@ export const TOP_LEVEL_QUERY = gql`
         }
       }
     }
+
     currentOrg {
       id
       name
@@ -166,8 +182,9 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
+const MyApp = ({ Component, pageProps, apolloClient }) => {
   const router = useRouter();
+  const { user, loading } = useFetchUser();
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -176,11 +193,7 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   });
 
   const {
-    data: { currentUser, currentOrg, event } = {
-      currentUser: null,
-      currentOrg: null,
-      event: null,
-    },
+    data: { currentUser, currentOrg, currentOrgMember, event } = {},
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
   });
@@ -196,26 +209,36 @@ const MyApp = ({ Component, pageProps, apolloClient, hostInfo }) => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        currentOrg={currentOrg}
-        apollo={apolloClient}
-        openModal={openModal}
-        event={event}
-      >
-        <Component
-          {...pageProps}
-          event={event}
+    <UserProvider value={{ user, loading }}>
+      <ThemeProvider theme={theme}>
+        <Modal
+          active={modal}
+          closeModal={closeModal}
+          currentOrgMember={currentOrgMember}
           currentUser={currentUser}
           currentOrg={currentOrg}
-          event={event}
-          hostInfo={hostInfo}
-          openModal={openModal}
         />
-      </Layout>
-    </ThemeProvider>
+        <Layout
+          currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
+          currentOrg={currentOrg}
+          apollo={apolloClient}
+          openModal={openModal}
+          event={event}
+        >
+          <Component
+            {...pageProps}
+            event={event}
+            currentUser={currentUser}
+            currentOrgMember={currentOrgMember}
+            currentOrg={currentOrg}
+            event={event}
+            //hostInfo={hostInfo}
+            openModal={openModal}
+          />
+        </Layout>
+      </ThemeProvider>
+    </UserProvider>
   );
 };
 

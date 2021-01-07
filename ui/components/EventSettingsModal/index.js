@@ -15,7 +15,7 @@ const tabs = [
   { name: "Custom fields", component: CustomFields },
 ];
 
-export default ({ event, currentUser, handleClose }) => {
+export default ({ event, currentOrgMember, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -50,7 +50,7 @@ export default ({ event, currentUser, handleClose }) => {
             <SettingsComponent
               event={event}
               handleClose={handleClose}
-              currentUser={currentUser}
+              currentOrgMember={currentOrgMember}
             />
           </div>
         </div>

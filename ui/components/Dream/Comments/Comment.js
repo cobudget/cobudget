@@ -22,8 +22,11 @@ const DELETE_COMMENT_MUTATION = gql`
         createdAt
         author {
           id
-          name
-          avatar
+          user {
+            id
+            username
+            avatar
+          }
         }
       }
     }
@@ -33,25 +36,24 @@ const DELETE_COMMENT_MUTATION = gql`
 const Comment = ({
   comment,
   dreamId,
-  currentUser,
+  currentOrgMember,
   showBorderBottom,
   event,
 }) => {
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   const canEdit =
-    currentUser &&
-    (currentUser.id === comment.author.id ||
-      (currentUser.membership && currentUser.membership.isAdmin));
+    currentOrgMember?.currentEventMembership?.id === comment.author.id ||
+    currentOrgMember?.currentEventMembership?.isAdmin;
 
   return (
     <div className="flex my-4">
       <div className="mr-4">
-        <Avatar user={comment.author} />
+        <Avatar user={comment.author.user} />
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
-          <h5>{comment.author.name}</h5>
+          <h5>{comment.author.user.username}</h5>
           <div className="flex items-center">
             <span className="font-normal mr-2">
               {dayjs(comment.createdAt).fromNow()}
@@ -63,7 +65,6 @@ const Comment = ({
           <EditComment
             comment={comment}
             dreamId={dreamId}
-            currentUser={currentUser}
             handleDone={() => {
               setEditMode(false);
             }}

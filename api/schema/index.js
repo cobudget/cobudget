@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    currentOrgMember: OrgMember
     currentOrg: Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
@@ -13,7 +14,7 @@ const schema = gql`
     event(slug: String): Event
     dream(id: ID!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
-    members(eventId: ID!, isApproved: Boolean): [Member]
+    members(eventId: ID!, isApproved: Boolean): [EventMember]
   }
 
   type Mutation {
@@ -21,8 +22,6 @@ const schema = gql`
       name: String!
       logo: String
       subdomain: String!
-      customDomain: String
-      adminEmail: String!
     ): Organization!
 
     editOrganization(
@@ -116,8 +115,14 @@ const schema = gql`
     resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
     allGoodFlag(dreamId: ID!): Dream
 
-    sendMagicLink(email: String!): Boolean
-    updateProfile(name: String, avatar: String, bio: String): User
+    joinOrg: OrgMember
+
+    updateProfile(
+      username: String
+      firstName: String
+      lastName: String
+      bio: String
+    ): User
     # inviteMembers(emails: String!): [Member]
     updateMember(
       eventId: ID!
@@ -125,8 +130,8 @@ const schema = gql`
       isApproved: Boolean
       isAdmin: Boolean
       isGuide: Boolean
-    ): Member
-    deleteMember(eventId: ID!, memberId: ID!): Member
+    ): EventMember
+    deleteMember(eventId: ID!, memberId: ID!): EventMember
 
     deleteOrganization(organizationId: ID!): Organization
 
@@ -149,7 +154,7 @@ const schema = gql`
     preOrPostFund(dreamId: ID!, value: Int!): Grant
     toggleFavorite(dreamId: ID!): Dream
 
-    registerForEvent(eventId: ID!): Member
+    registerForEvent(eventId: ID!): EventMember
   }
 
   type Organization {
@@ -158,6 +163,7 @@ const schema = gql`
     subdomain: String
     customDomain: String
     logo: String
+    events: [Event]
   }
 
   type Event {
@@ -168,7 +174,7 @@ const schema = gql`
     info: String
     color: String
     # logo: String
-    members: [Member!]!
+    members: [EventMember!]!
     numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
@@ -220,24 +226,34 @@ const schema = gql`
 
   type User {
     id: ID!
+    username: String!
     email: String
     name: String
+    firstName: String
+    lastName: String
     verifiedEmail: Boolean!
-    organization: Organization!
-    isOrgAdmin: Boolean
     isRootAdmin: Boolean
-    membership(slug: String): Member
-    memberships: [Member!]
+    orgMemberships: [OrgMember!]
     avatar: String
-    bio: String
     createdAt: Date
+    currentOrgMember: OrgMember
   }
 
-  # rename to Membership
-  type Member {
+  type OrgMember {
+    id: ID!
+    organization: Organization!
+    user: User!
+    isOrgAdmin: Boolean
+    bio: String #what do we do with this one?
+    createdAt: Date
+    currentEventMembership(slug: String): EventMember #this is weird syntax...
+    eventMemberships: [EventMember!]
+  }
+
+  type EventMember {
     id: ID!
     event: Event!
-    user: User!
+    orgMember: OrgMember!
     isAdmin: Boolean!
     isGuide: Boolean
     isApproved: Boolean!
@@ -259,7 +275,7 @@ const schema = gql`
     description: String
     summary: String
     images: [Image!]
-    cocreators: [Member]!
+    cocreators: [EventMember]!
     minGoalGrants: Int
     maxGoalGrants: Int
     minGoal: Int
@@ -366,7 +382,7 @@ const schema = gql`
 
   type Comment {
     id: ID!
-    author: User!
+    author: OrgMember!
     createdAt: Date!
     updatedAt: Date
     content: String!

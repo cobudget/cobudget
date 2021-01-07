@@ -9,7 +9,13 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
+const ProfileDropdown = ({
+  currentUser,
+  currentOrgMember,
+  event,
+  logOut,
+  openModal,
+}) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
@@ -38,7 +44,7 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
             horizontal: "right",
           }}
           badgeContent={
-            currentUser.membership && currentUser.membership.availableGrants
+            currentOrgMember?.currentEventMembership?.availableGrants
           }
           color="primary"
         >
@@ -58,21 +64,24 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
             <h2 className="px-4 text-xs my-1 font-semibold text-gray-500 uppercase tracking-wider">
               Memberships
             </h2>
-            {currentUser.membership && (
+            {currentOrgMember?.currentEventMembership && (
               <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                {currentUser.membership.event.title}
-                {Boolean(currentUser.membership.availableGrants) && (
+                {currentOrgMember.currentEventMembership.event.title}
+                {Boolean(
+                  currentOrgMember.currentEventMembership.availableGrants
+                ) && (
                   <p className=" text-gray-800 text-sm">
-                    You have {currentUser.membership.availableGrants} grants
-                    left
+                    You have{" "}
+                    {currentOrgMember.currentEventMembership.availableGrants}{" "}
+                    grants left
                   </p>
                 )}
               </div>
             )}
-            {currentUser.memberships.map((membership) => {
+            {currentOrgMember?.eventMemberships.map((membership) => {
               if (
-                currentUser.membership &&
-                currentUser.membership.id === membership.id
+                currentOrgMember.currentEventMembership &&
+                currentOrgMember.currentEventMembership.id === membership.id
               ) {
                 return null;
               }
@@ -98,9 +107,9 @@ const ProfileDropdown = ({ currentUser, event, logOut, openModal }) => {
             >
               Edit profile
             </button>
-            <button onClick={logOut} className={css.button}>
+            <a href="/api/logout" className={css.button}>
               Sign out
-            </button>
+            </a>
           </div>
         </>
       )}

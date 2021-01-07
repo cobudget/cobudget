@@ -7,6 +7,7 @@ import cookie from "js-cookie";
 export default ({
   children,
   currentUser,
+  currentOrgMember,
   currentOrg,
   event,
   title,
@@ -24,14 +25,6 @@ export default ({
       // trigger alert or something on invalid token
     }
   }, [router.query]);
-
-  React.useEffect(() => {
-    // this will be first time user logs in
-    if (currentUser && !currentUser.name) {
-      // pop modal to set user name and maybe go through a dreams walk through? :)
-      openModal(modals.FINISH_SIGN_UP);
-    }
-  }, [currentUser]);
 
   const logOut = () => {
     cookie.remove("token");
@@ -58,6 +51,7 @@ export default ({
         <Header
           event={event}
           currentUser={currentUser}
+          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           logOut={logOut}
