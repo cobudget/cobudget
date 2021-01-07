@@ -163,6 +163,7 @@ const schema = gql`
     subdomain: String
     customDomain: String
     logo: String
+    events: [Event]
   }
 
   type Event {
