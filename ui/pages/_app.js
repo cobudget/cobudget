@@ -78,6 +78,7 @@ export const TOP_LEVEL_QUERY = gql`
       bio
       isOrgAdmin
       user {
+        id
         firstName
         lastName
         username
