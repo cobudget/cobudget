@@ -225,7 +225,7 @@ const schema = gql`
   }
 
   type User {
-    id: ID!
+    id: ID
     username: String!
     email: String
     name: String
