@@ -1737,10 +1737,14 @@ const resolvers = {
     id: (user) => (user.sub ? user.sub : user.id),
     username: (user) =>
       user.username ? user.username : user.preferred_username,
-    name: (user) =>
-      user.firstName
-        ? user.firstName + ' ' + user.lastName
-        : user.given_name + ' ' + user.family_name,
+    name: (user) => {
+      const firstName = user.firstName ? user.firstName : user.given_name;
+      const lastName = user.lastName ? user.lastName : user.family_name;
+
+      if (firstName || lastName)
+        return `${firstName ? firstName : ''} ${lastName ? lastName : ''}`;
+      return null;
+    },
     firstName: (user) => (user.firstName ? user.firstName : user.given_name),
     lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
