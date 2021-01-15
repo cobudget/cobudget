@@ -76,7 +76,7 @@ export default ({ description, dreamId, canEdit }) => {
 
   if (description)
     return (
-      <div className="relative group pb-4">
+      <div className="relative pb-4">
         <ReactMarkdown
           source={description}
           className="markdown"
@@ -89,7 +89,7 @@ export default ({ description, dreamId, canEdit }) => {
           }}
         />
         {canEdit && (
-          <div className="absolute top-0 right-0 invisible group-hover:visible">
+          <div className="absolute top-0 right-0">
             <Tooltip title="Edit description" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />

@@ -126,7 +126,7 @@ export default ({
 
   if (customField && customField.value) {
     return (
-      <div className="flex flex-col items-start justify-between group relative">
+      <div className="flex flex-col items-start justify-between relative">
         <div className="py-2" key={customField.fieldId}>
           <h2 className="text-xl font-medium">{defaultCustomField.name}</h2>
           <span
@@ -136,7 +136,7 @@ export default ({
           />
         </div>
         {canEdit && (
-          <div className="absolute top-0 right-0 invisible group-hover:visible">
+          <div className="absolute top-0 right-0">
             <Tooltip title="Edit custom fields" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />

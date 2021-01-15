@@ -73,7 +73,7 @@ export default ({ title, canEdit, dreamId }) => {
       <div className="flex items-start justify-between group relative">
         <h1 className="mb-2 text-4xl font-medium">{title}</h1>
         {canEdit && (
-          <div className="absolute top-0 right-0 invisible group-hover:visible">
+          <div className="absolute top-0 right-0">
             <Tooltip title="Edit title" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />

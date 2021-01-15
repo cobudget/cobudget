@@ -255,11 +255,11 @@ export default ({ dream, event, currentOrgMember, canEdit }) => {
         </div>
       )}
 
-      <div className="mt-5 group">
+      <div className="mt-5">
         <h2 className="mb-2 font-medium hidden md:block relative">
           <span className="mr-2">Co-creators</span>
           {canEdit && (
-            <div className="absolute top-0 right-0 invisible group-hover:visible">
+            <div className="absolute top-0 right-0">
               <Tooltip title="Edit co-creators" position="bottom" size="small">
                 <IconButton onClick={() => setCocreatorModalOpen(true)}>
                   <EditIcon className="h-5 w-5" />

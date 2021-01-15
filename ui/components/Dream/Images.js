@@ -53,14 +53,14 @@ export default ({ dreamId, images, size, canEdit }) => {
         dreamId={dreamId}
       />
       {images.length > 0 ? (
-        <div className="group relative">
+        <div className="relative">
           <Gallery>
             {images.map((image) => (
               <GalleryItem key={image.small} image={image} size={size} />
             ))}
           </Gallery>
           {canEdit && (
-            <div className="absolute top-0 right-0 invisible group-hover:visible">
+            <div className="absolute top-0 right-0">
               <Tooltip title="Edit images" position="bottom" size="small">
                 <IconButton onClick={() => setEditModalOpen(true)}>
                   <EditIcon className="h-6 w-6" />

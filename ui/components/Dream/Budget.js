@@ -34,11 +34,11 @@ export default ({
       )}
 
       {budgetItems.length > 0 ? (
-        <div className="group relative mb-4">
+        <div className="relative mb-4">
           <div className="flex justify-between mb-2 ">
             <h2 className="text-2xl font-medium">Budget</h2>
             {canEdit && (
-              <div className="absolute top-0 right-0 invisible group-hover:visible">
+              <div className="absolute top-0 right-0">
                 <Tooltip title="Edit budget" position="bottom" size="small">
                   <IconButton onClick={() => setEditing(true)}>
                     <EditIcon className="h-6 w-6" />
