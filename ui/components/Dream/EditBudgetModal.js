@@ -76,7 +76,7 @@ export default ({
     <Modal
       open={open}
       onClose={handleClose}
-      className="flex items-center justify-center p-4"
+      className="flex items-start justify-center p-4 md:pt-16 overflow-y-scroll max-h-screen"
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-md">
         <h1 className="text-xl font-semibold mb-4">Edit budget</h1>

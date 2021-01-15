@@ -152,7 +152,7 @@ export default ({
     <Modal
       open={open}
       onClose={handleClose}
-      className="flex items-center justify-center p-4"
+      className="flex items-start justify-center p-4 md:pt-16 overflow-y-scroll max-h-screen"
     >
       <div className="bg-white rounded shadow p-6 grid grid-cols-2 gap-4 focus:outline-none">
         <div className="border-r pr-4">
