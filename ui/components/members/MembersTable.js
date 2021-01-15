@@ -117,10 +117,7 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
                   <Box display="flex" alignItems="center">
                     <Box m="0 8px 0">{member.orgMember.user.email}</Box>
                     {!member.orgMember.user.verifiedEmail && (
-                      <Tooltip
-                        title="Email not verified (has not logged in)"
-                        placement="right"
-                      >
+                      <Tooltip title="Email not verified" placement="right">
                         <HelpOutlineOutlinedIcon fontSize="small" />
                       </Tooltip>
                     )}
