@@ -66,8 +66,15 @@ const StyledLabel = muiStyled(InputLabel)({
   marginLeft: -5,
 });
 
+// prevent saving null values to images.
+const removeNullValues = (images) =>
+  images.map(({ small, large }) => ({
+    ...(small && { small }),
+    ...(large && { large }),
+  }));
+
 export default ({ dreamId, initialImages = [], open, handleClose }) => {
-  const [images, setImages] = useState(initialImages);
+  const [images, setImages] = useState(removeNullValues(initialImages));
 
   const [editDream, { loading }] = useMutation(EDIT_IMAGES_MUTATION, {
     variables: { dreamId },
@@ -89,11 +96,9 @@ export default ({ dreamId, initialImages = [], open, handleClose }) => {
       { method: "POST", body: data }
     );
     const file = await res.json();
-
-    setImages([
-      ...images,
-      { small: file.eager[1].secure_url, large: file.eager[0].secure_url },
-    ]);
+    const small = file.eager[1].secure_url;
+    const large = file.eager[0].secure_url;
+    setImages([...images, { small, ...(large && { large }) }]);
     setUploadingImage(false);
   };
 
