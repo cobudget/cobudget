@@ -1696,7 +1696,6 @@ const resolvers = {
       const user = await kcAdminClient.users.findOne({
         id: orgMember.userId,
       });
-      console.log({ user });
       return user;
     },
     eventMemberships: async (orgMember, args, { models: { EventMember } }) => {
@@ -1749,8 +1748,17 @@ const resolvers = {
     lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
     verifiedEmail: (user) => user.emailVerified,
-    email: async (user, args, ctx) => {
-      // TODO: check whether you are allowed to see email
+    email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
+      if (currentOrgMember && currentOrgMember.isOrgAdmin) {
+        const orgMember = await OrgMember.findOne({ userId: user.id });
+
+        if (
+          orgMember &&
+          orgMember.organizationId.toString() ==
+            currentOrgMember.organizationId.toString()
+        )
+          return user.email;
+      }
       return null;
     },
     isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
