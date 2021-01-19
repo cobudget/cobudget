@@ -610,7 +610,7 @@ const resolvers = {
         raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
       });
 
-      dream.discourseId = discoursePost.id;
+      dream.discourseTopicId = discoursePost.topic_id;
 
       return dream.save();
     },

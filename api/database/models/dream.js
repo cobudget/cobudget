@@ -63,7 +63,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
-  discourseId: { type: Number },
+  discourseTopicId: { type: Number },
 }).index({ title: 'text', description: 'text', summary: 'text' });
 
 DreamSchema.virtual('minGoal').get(function () {
