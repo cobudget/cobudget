@@ -37,4 +37,36 @@ module.exports = {
       return json.category;
     },
   },
+  users: {
+    create: async ({
+      name,
+      email,
+      password,
+      username,
+      active = true,
+      approved = true,
+    }) => {
+      const response = await fetch(`${DISCOURSE_API_URL}/users`, {
+        method: 'post',
+        headers,
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          username,
+          active,
+          approved,
+        }),
+      });
+
+      const json = await response.json();
+      // json = {
+      //     "success": true,
+      //     "active": true,
+      //     "message": "string",
+      //     "user_id": 0
+      //  }
+      return json;
+    },
+  },
 };
