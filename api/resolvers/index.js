@@ -6,7 +6,7 @@ const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const { combineResolvers, skip } = require('graphql-resolvers');
-
+const discourse = require('../lib/discourse');
 const isRootAdmin = (parent, args, { currentUser }) => {
   return currentUser && currentUser.isRootAdmin
     ? skip
@@ -582,7 +582,7 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentOrgMember, models: { EventMember, Dream, Event } }
+      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event } }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -600,19 +600,19 @@ const resolvers = {
       // // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       // if (maxGoal && (maxGoal <= minGoal || minGoal == null))
       //   throw new Error('max goal needs to be larger than min goal');
-
-      return new Dream({
+      const dream = new Dream({
         eventId,
         title,
-        // description,
-        // summary,
         cocreators: [eventMember.id],
-        // budgetDescription,
-        // minGoal,
-        // ...(event.allowStretchGoals && { maxGoal }),
-        // images,
-        // budgetItems,
-      }).save();
+      });
+      const discoursePost = await discourse.posts.create({
+        title,
+        raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+      });
+
+      dream.discourseId = discoursePost.id;
+
+      return dream.save();
     },
     editDream: async (
       parent,

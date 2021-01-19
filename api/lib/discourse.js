@@ -9,7 +9,7 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-module.exports = {
+const discourse = {
   categories: {
     getAll: async () => {
       const response = await fetch(`${DISCOURSE_API_URL}/categories`, {
@@ -92,8 +92,17 @@ module.exports = {
           ...(created_at && { created_at }),
         }),
       });
+      return response.json();
+    },
+    get: async (id) => {
+      // query parameter print=true will return up to 1000 posts in a topic
+      const response = await fetch(`${DISCOURSE_API_URL}/t/${id}.json`, {
+        headers,
+      });
       const json = await response.json();
       return json;
     },
   },
 };
+
+module.exports = discourse;
