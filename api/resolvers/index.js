@@ -1860,6 +1860,14 @@ const resolvers = {
       ]);
       return grantsForDream;
     },
+    discoursePosts: async (dream) => {
+      if (!dream.discourseTopicId) return null;
+      const {
+        post_stream: { posts },
+      } = await discourse.posts.get(dream.discourseTopicId);
+
+      return posts.filter((post) => post.post_number !== 1);
+    },
     numberOfComments: (dream) => {
       return dream.comments.length;
     },
@@ -1912,6 +1920,13 @@ const resolvers = {
   Grant: {
     dream: async (grant, args, { models: { Dream } }) => {
       return Dream.findOne({ _id: grant.dreamId });
+    },
+  },
+  DiscoursePost: {
+    orgMember: async (post, args, { models: { OrgMember } }) => {
+      return OrgMember.findOne({
+        discourseUsername: post.username,
+      });
     },
   },
   Date: new GraphQLScalarType({

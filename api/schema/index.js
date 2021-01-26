@@ -291,8 +291,19 @@ const schema = gql`
     flags: [Flag]
     raisedFlags: [Flag]
     logs: [Log]
+    discoursePosts: [DiscoursePost]
     # reactions: [Reaction]
     # tags: [Tag]
+  }
+
+  type DiscoursePost {
+    id: Int!
+    username: String
+    name: String
+    display_username: String
+    created_at: String
+    cooked: String
+    orgMember: OrgMember
   }
 
   type Flag {
