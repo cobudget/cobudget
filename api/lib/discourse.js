@@ -70,18 +70,24 @@ const discourse = {
     },
   },
   posts: {
-    create: async ({
-      title, // required if creating a new topic or new private message
-      topic_id, // required if creating a new post
-      raw, // required
-      category, // optional if creating a new topic, ignored if creating a new post
-      target_recipients, // required for private message, comma separated usernames
-      archetype, // required for private message, value: "private_message"
-      created_at, // pick a date other than the default current time
-    }) => {
+    create: async (
+      {
+        title, // required if creating a new topic or new private message
+        topic_id, // required if creating a new post
+        raw, // required
+        category, // optional if creating a new topic, ignored if creating a new post
+        target_recipients, // required for private message, comma separated usernames
+        archetype, // required for private message, value: "private_message"
+        created_at, // pick a date other than the default current time
+      },
+      { username }
+    ) => {
       const response = await fetch(`${DISCOURSE_API_URL}/posts`, {
         method: 'post',
-        headers,
+        headers: {
+          ...headers,
+          ...(username && { 'Api-Username': username }),
+        },
         body: JSON.stringify({
           ...(title && { title }),
           ...(topic_id && { topic_id }),
