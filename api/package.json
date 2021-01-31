@@ -32,7 +32,7 @@
     "micro-cors": "^0.1.1",
     "mongoose": "^5.9.6",
     "node-fetch": "^2.6.0",
-    "plato-core": "github:Edgeryders-Participio/plato-core#keycloak-migration"
+    "plato-core": "github:Edgeryders-Participio/plato-core"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
