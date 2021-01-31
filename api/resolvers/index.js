@@ -802,28 +802,36 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember, models: { Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
+      if (!currentOrgMember)
+        throw new Error('You need to be an org member to post comments.');
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be a member and/or approved');
+      if (!currentOrgMember.discourseUsername) {
+        throw new Error('You need to have a discourse account connected');
+      }
 
-      if (content.length === 0) throw new Error('You need content!');
+      if (content.length < 20)
+        throw new Error('Your post needs to be at least 20 characters long');
 
-      dream.comments.push({
-        authorId: currentOrgMember.id,
-        content,
-      });
+      if (dream.discourseTopicId) {
+        await discourse.posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: content,
+          },
+          { username: currentOrgMember.discourseUsername }
+        );
+      } else {
+        // TODO: post thread to discourse?
+        throw new Error('This thread does not exist on discourse');
+      }
 
-      return await dream.save();
+      return dream;
     },
 
     deleteComment: async (
