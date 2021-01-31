@@ -837,31 +837,32 @@ const resolvers = {
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember, models: { Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
+      if (!currentOrgMember || !currentOrgMember.discourseUsername)
+        throw new Error(
+          'You need to be an org member and have a discourse account connected'
+        );
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
+      const post = await discourse.posts.getSingle(commentId);
 
-      dream.comments = dream.comments.filter((comment) => {
-        if (
-          comment._id.toString() === commentId &&
-          (comment.authorId.toString() === eventMember.id ||
-            eventMember.isAdmin)
-        )
-          return false;
-        return true;
-      });
+      if (
+        post.username !== currentOrgMember.discourseUsername ||
+        !currentOrgMember.isOrgAdmin
+      ) {
+        throw new Error('You can only delete your own post.');
+      }
 
-      return dream.save();
+      await discourse.posts.delete(
+        commentId,
+        currentOrgMember.discourseUsername
+      );
+
+      return dream;
     },
     editComment: async (
       parent,

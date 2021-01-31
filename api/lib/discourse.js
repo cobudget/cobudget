@@ -108,6 +108,13 @@ const discourse = {
       const json = await response.json();
       return json;
     },
+    getSingle: async (id) => {
+      const response = await fetch(`${DISCOURSE_API_URL}/posts/${id}.json`, {
+        headers,
+      });
+      const json = await response.json();
+      return json;
+    },
     delete: async (id, username) => {
       const response = await fetch(`${DISCOURSE_API_URL}/posts/${id}`, {
         headers: {
