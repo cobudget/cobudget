@@ -901,14 +901,7 @@ const resolvers = {
     raiseFlag: async (
       parent,
       { dreamId, guidelineId, comment },
-      {
-        currentOrgMember,
-        models: {
-          Dream,
-          EventMember,
-          logs: { FlagRaisedLog },
-        },
-      }
+      { currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -916,6 +909,10 @@ const resolvers = {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
+
+      const event = await Event.findOne({ _id: dream.eventId });
+
+      const guideline = event.guidelines.id(guidelineId);
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -932,27 +929,19 @@ const resolvers = {
         userId: currentOrgMember.id,
       });
 
-      await new FlagRaisedLog({
-        dreamId,
-        eventId: dream.eventId,
-        userId: currentOrgMember.id,
-        guidelineId,
-        comment,
-      }).save();
+      if (dream.discourseTopicId) {
+        await discourse.posts.create({
+          topic_id: dream.discourseTopicId,
+          raw: `Someone flagged this dream for the **${guideline.title}** guideline. \n> ${comment}`,
+        });
+      }
 
       return dream.save();
     },
     resolveFlag: async (
       parent,
       { dreamId, flagId, comment },
-      {
-        currentOrgMember,
-        models: {
-          Dream,
-          EventMember,
-          logs: { FlagResolvedLog },
-        },
-      }
+      { currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -978,14 +967,16 @@ const resolvers = {
 
       const resolvedFlag = dream.flags.id(flagId);
 
-      await new FlagResolvedLog({
-        dreamId,
-        eventId: dream.eventId,
-        userId: currentOrgMember.id,
-        guidelineId: resolvedFlag.guidelineId,
-        resolvingFlagId: flagId,
-        comment,
-      }).save();
+      const event = await Event.findOne({ _id: dream.eventId });
+
+      const guideline = event.guidelines.id(resolvedFlag.guidelineId);
+
+      if (dream.discourseTopicId) {
+        await discourse.posts.create({
+          topic_id: dream.discourseTopicId,
+          raw: `Someone resolved a flag for the **${guideline.title}** guideline. \n> ${comment}`,
+        });
+      }
 
       return dream.save();
     },

@@ -80,7 +80,7 @@ const discourse = {
         archetype, // required for private message, value: "private_message"
         created_at, // pick a date other than the default current time
       },
-      { username }
+      { username } = {}
     ) => {
       const response = await fetch(`${DISCOURSE_API_URL}/posts`, {
         method: 'post',
