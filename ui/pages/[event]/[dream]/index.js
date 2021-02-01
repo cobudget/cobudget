@@ -55,6 +55,20 @@ export const DREAM_QUERY = gql`
         small
         large
       }
+      discoursePosts {
+        id
+        username
+        cooked
+        created_at #rename?
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
+      }
       numberOfComments
       comments {
         id

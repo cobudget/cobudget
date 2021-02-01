@@ -61,3 +61,7 @@ h5 {
 .markdown ol {
   @apply list-decimal;
 }
+
+.markdown blockquote {
+  @apply bg-gray-100 border-l-4 border-gray-200 px-2;
+}

@@ -29,6 +29,20 @@ const DELETE_COMMENT_MUTATION = gql`
           }
         }
       }
+      discoursePosts {
+        id
+        username
+        cooked
+        created_at #rename?
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
+      }
     }
   }
 `;
@@ -43,20 +57,26 @@ const Comment = ({
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
   const canEdit =
-    currentOrgMember?.currentEventMembership?.id === comment.author.id ||
-    currentOrgMember?.currentEventMembership?.isAdmin;
+    currentOrgMember &&
+    (currentOrgMember?.id === comment.orgMember?.id ||
+      currentOrgMember?.currentEventMembership?.isAdmin);
 
   return (
     <div className="flex my-4">
       <div className="mr-4">
-        <Avatar user={comment.author.user} />
+        <Avatar
+          user={comment.orgMember?.user ?? { username: comment.username }}
+        />
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
-          <h5>{comment.author.user.username}</h5>
+          <h5>
+            {comment.orgMember?.user.username ??
+              `${comment.username} (Discourse)`}
+          </h5>
           <div className="flex items-center">
             <span className="font-normal mr-2">
-              {dayjs(comment.createdAt).fromNow()}
+              {dayjs(comment.created_at).fromNow()}
             </span>
           </div>
         </div>
@@ -72,9 +92,11 @@ const Comment = ({
           />
         ) : (
           <>
-            <p className="text-gray-900 whitespace-pre-line">
-              {comment.content}
-            </p>
+            <div
+              className="text-gray-900 whitespace-pre-line markdown"
+              dangerouslySetInnerHTML={{ __html: comment.cooked }}
+            />
+
             {canEdit && (
               <div className="flex">
                 <button
@@ -93,13 +115,13 @@ const Comment = ({
                   <DeleteIcon className="w-4 h-4 mr-1" />
                   <span>Delete</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => setEditMode(true)}
                   className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"
                 >
                   <EditIcon className="w-4 h-4 mr-1" />
                   <span>Edit</span>
-                </button>
+                </button> */}
               </div>
             )}
           </>

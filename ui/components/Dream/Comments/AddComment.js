@@ -24,6 +24,20 @@ const ADD_COMMENT = gql`
           }
         }
       }
+      discoursePosts {
+        id
+        username
+        cooked
+        created_at #rename?
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
+      }
     }
   }
 `;
