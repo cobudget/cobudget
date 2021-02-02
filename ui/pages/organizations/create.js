@@ -7,5 +7,5 @@ export default ({ currentUser }) => {
         You need to log in to create an organization.
       </h1>
     );
-  return EditOrganization({ currentUser });
+  return <EditOrganization currentUser={currentUser} />;
 };
