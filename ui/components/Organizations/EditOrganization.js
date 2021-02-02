@@ -74,7 +74,7 @@ export default ({ organization, currentUser }) => {
         : "Organization updated successfully.";
 
       if (isNew) {
-        const url = process.env.isProd
+        const url = process.env.IS_PROD
           ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
           : `http://${variables.subdomain}.localhost:3000`;
         window.location.assign(url);
