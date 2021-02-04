@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 const { getModels } = require('../database/models');
 const {
   db: { getConnection },
-} = require('plato-core');
+} = require('@gustavlrsn/plato-core');
 // example request body:
 // {
 //   "notification_id": 123455,

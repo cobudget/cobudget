@@ -14,7 +14,7 @@ const resolvers = require('./resolvers');
 const { getModels } = require('./database/models');
 const {
   db: { getConnection },
-} = require('plato-core');
+} = require('@gustavlrsn/plato-core');
 
 const Keycloak = require('keycloak-connect');
 const { KeycloakContext } = require('keycloak-connect-graphql');
