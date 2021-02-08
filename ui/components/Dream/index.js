@@ -12,7 +12,6 @@ import Title from "./Title";
 import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
-import DiscourseComments from "./DiscourseComments";
 
 const Dream = ({ dream, event, currentUser, currentOrgMember }) => {
   const canEdit =
@@ -82,7 +81,6 @@ const Dream = ({ dream, event, currentUser, currentOrgMember }) => {
             />
 
             <hr className="mb-4 mt-1" />
-            {/* <DiscourseComments posts={dream.discoursePosts} /> */}
             <Comments
               currentOrgMember={currentOrgMember}
               comments={dream.comments}
