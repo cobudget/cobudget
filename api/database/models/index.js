@@ -6,7 +6,7 @@ const {
   db: {
     schemas: { OrganizationSchema, OrgMemberSchema },
   },
-} = require('@gustavlrsn/plato-core');
+} = require('@sensestack/plato-core');
 
 const { createLogModels } = require('./log');
 
