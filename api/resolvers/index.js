@@ -605,7 +605,9 @@ const resolvers = {
         title,
         cocreators: [eventMember.id],
       });
-      const discoursePost = await discourse.posts.create({
+
+      
+      const discoursePost = await discourse(currentOrg.discourse).posts.create({
         title,
         raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
       });
@@ -802,7 +804,7 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrgMember, models: { Dream } }
+      { currentOrg, currentOrgMember, models: { Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
@@ -812,6 +814,12 @@ const resolvers = {
         throw new Error('You need to be an org member to post comments.');
 
       if (!currentOrgMember.discourseUsername) {
+        // TODO: create account or guide user to connect to discourse account
+        
+        if(!currentOrg.discourse) {
+          // TODO: create user in plato discourse according to edgeryders/forms
+        }
+
         throw new Error('You need to have a discourse account connected');
       }
 
@@ -819,7 +827,7 @@ const resolvers = {
         throw new Error('Your post needs to be at least 20 characters long');
 
       if (dream.discourseTopicId) {
-        await discourse.posts.create(
+        await discourse(currentOrg.discourse).posts.create(
           {
             topic_id: dream.discourseTopicId,
             raw: content,
@@ -837,7 +845,7 @@ const resolvers = {
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrgMember, models: { Dream } }
+      { currentOrg, currentOrgMember, models: { Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
@@ -848,7 +856,7 @@ const resolvers = {
           'You need to be an org member and have a discourse account connected'
         );
 
-      const post = await discourse.posts.getSingle(commentId);
+      const post = await discourse(currentOrg.discourse).posts.getSingle(commentId);
 
       if (
         post.username !== currentOrgMember.discourseUsername ||
@@ -857,7 +865,7 @@ const resolvers = {
         throw new Error('You can only delete your own post.');
       }
 
-      await discourse.posts.delete(
+      await discourse(currentOrg.discourse).posts.delete(
         commentId,
         currentOrgMember.discourseUsername
       );
@@ -901,7 +909,7 @@ const resolvers = {
     raiseFlag: async (
       parent,
       { dreamId, guidelineId, comment },
-      { currentOrgMember, models: { Dream, Event, EventMember } }
+      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -930,7 +938,7 @@ const resolvers = {
       });
 
       if (dream.discourseTopicId) {
-        await discourse.posts.create({
+        await discourse(currentOrg.discourse).posts.create({
           topic_id: dream.discourseTopicId,
           raw: `Someone flagged this dream for the **${guideline.title}** guideline. \n> ${comment}`,
         });
@@ -941,7 +949,7 @@ const resolvers = {
     resolveFlag: async (
       parent,
       { dreamId, flagId, comment },
-      { currentOrgMember, models: { Dream, Event, EventMember } }
+      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -972,7 +980,7 @@ const resolvers = {
       const guideline = event.guidelines.id(resolvedFlag.guidelineId);
 
       if (dream.discourseTopicId) {
-        await discourse.posts.create({
+        await discourse(currentOrg.discourse).posts.create({
           topic_id: dream.discourseTopicId,
           raw: `Someone resolved a flag for the **${guideline.title}** guideline. \n> ${comment}`,
         });
@@ -1860,11 +1868,11 @@ const resolvers = {
       ]);
       return grantsForDream;
     },
-    discoursePosts: async (dream) => {
+    discoursePosts: async (dream, args, { currentOrg }) => {
       if (!dream.discourseTopicId) return null;
       const {
         post_stream: { posts },
-      } = await discourse.posts.get(dream.discourseTopicId);
+      } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
 
       return posts.filter((post) => post.post_number !== 1);
     },
