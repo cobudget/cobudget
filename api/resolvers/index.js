@@ -115,9 +115,6 @@ const resolvers = {
         eventId,
       });
 
-      // this does not stop currentOrgMembers from being from another org?
-      // maybe removing this query so that you have to connect from the main query?
-      // yeah, that would be better, i think.. TODO: remove query and fetch from event instead.
       const event = await Event.findOne({ _id: eventId });
 
       if (
@@ -1748,19 +1745,19 @@ const resolvers = {
     lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
     verifiedEmail: (user) => user.emailVerified,
-    email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
-      if (currentOrgMember && currentOrgMember.isOrgAdmin) {
-        const orgMember = await OrgMember.findOne({ userId: user.id });
+    // email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
+    //   if (currentOrgMember && currentOrgMember.isOrgAdmin) {
+    //     const orgMember = await OrgMember.findOne({ userId: user.id });
 
-        if (
-          orgMember &&
-          orgMember.organizationId.toString() ==
-            currentOrgMember.organizationId.toString()
-        )
-          return user.email;
-      }
-      return null;
-    },
+    //     if (
+    //       orgMember &&
+    //       orgMember.organizationId.toString() ==
+    //         currentOrgMember.organizationId.toString()
+    //     )
+    //       return user.email;
+    //   }
+    //   return null;
+    // },
     isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
     avatar: () => null, //TODO: what about avatars in keycloak?
     // membership: async (
@@ -1789,9 +1786,9 @@ const resolvers = {
     },
   },
   Event: {
-    members: async (event, args, { models: { EventMember } }) => {
-      return EventMember.find({ eventId: event.id });
-    },
+    // members: async (event, args, { models: { EventMember } }) => {
+    //   return EventMember.find({ eventId: event.id });
+    // },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     },

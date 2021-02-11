@@ -174,7 +174,7 @@ const schema = gql`
     info: String
     color: String
     # logo: String
-    members: [EventMember!]!
+    # members: [EventMember!]!
     numberOfApprovedMembers: Int
     dreams: [Dream!]
     # flags: [Flag!]
