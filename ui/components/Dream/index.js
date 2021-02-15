@@ -13,7 +13,7 @@ import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
-const Dream = ({ dream, event, currentUser, currentOrgMember }) => {
+const Dream = ({ dream, event, currentUser, currentOrgMember, currentOrg }) => {
   const canEdit =
     currentOrgMember?.currentEventMembership?.isAdmin ||
     currentOrgMember?.currentEventMembership?.isGuide ||
@@ -83,6 +83,7 @@ const Dream = ({ dream, event, currentUser, currentOrgMember }) => {
             <hr className="mb-4 mt-1" />
             <Comments
               currentOrgMember={currentOrgMember}
+              currentOrg={currentOrg}
               comments={dream.comments}
               dreamId={dream.id}
               event={event}

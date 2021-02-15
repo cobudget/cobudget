@@ -4,6 +4,7 @@ import Log from "./Log";
 
 const Comments = ({
   currentOrgMember,
+  currentOrg,
   comments,
   logs,
   dreamId,
@@ -22,7 +23,7 @@ const Comments = ({
           {posts.length} {posts.length === 1 ? "comment" : "comments"}
         </h2>
       )}
-
+      //TODO: clean up here, remove old logs and stuff
       {posts.map((post, index) => {
         // if (item._type === "COMMENT")
         //   return (
@@ -50,6 +51,7 @@ const Comments = ({
       {currentOrgMember && currentOrgMember.currentEventMembership && (
         <AddComment
           currentOrgMember={currentOrgMember}
+          currentOrg={currentOrg}
           dreamId={dreamId}
           event={event}
         />

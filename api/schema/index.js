@@ -164,6 +164,8 @@ const schema = gql`
     customDomain: String
     logo: String
     events: [Event]
+    discourseUrl: String!
+    # discourseApiKey: String
   }
 
   type Event {
@@ -248,6 +250,7 @@ const schema = gql`
     createdAt: Date
     currentEventMembership(slug: String): EventMember #this is weird syntax...
     eventMemberships: [EventMember!]
+    discourseUsername: String
   }
 
   type EventMember {

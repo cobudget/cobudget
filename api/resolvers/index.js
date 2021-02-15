@@ -606,7 +606,6 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      
       const discoursePost = await discourse(currentOrg.discourse).posts.create({
         title,
         raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
@@ -815,8 +814,8 @@ const resolvers = {
 
       if (!currentOrgMember.discourseUsername) {
         // TODO: create account or guide user to connect to discourse account
-        
-        if(!currentOrg.discourse) {
+
+        if (!currentOrg.discourse) {
           // TODO: create user in plato discourse according to edgeryders/forms
         }
 
@@ -856,7 +855,9 @@ const resolvers = {
           'You need to be an org member and have a discourse account connected'
         );
 
-      const post = await discourse(currentOrg.discourse).posts.getSingle(commentId);
+      const post = await discourse(currentOrg.discourse).posts.getSingle(
+        commentId
+      );
 
       if (
         post.username !== currentOrgMember.discourseUsername ||
@@ -1795,6 +1796,8 @@ const resolvers = {
     events: async (organization, args, { models: { Event } }) => {
       return Event.find({ organizationId: organization.id });
     },
+    discourseUrl: (organization) =>
+      organization.discourse.url ?? process.env.DISCOURSE_API_URL, //TODO: Check if works
   },
   Event: {
     members: async (event, args, { models: { EventMember } }) => {
@@ -1872,7 +1875,9 @@ const resolvers = {
       if (!dream.discourseTopicId) return null;
       const {
         post_stream: { posts },
-      } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
+      } = await discourse(currentOrg.discourse).posts.get(
+        dream.discourseTopicId
+      );
 
       return posts.filter((post) => post.post_number !== 1);
     },

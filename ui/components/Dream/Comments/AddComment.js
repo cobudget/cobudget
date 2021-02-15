@@ -6,6 +6,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
 
+import connectToDiscourse from "utils/connectToDiscourse";
+
 const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {
     addComment(content: $content, dreamId: $dreamId) {
@@ -42,12 +44,23 @@ const ADD_COMMENT = gql`
   }
 `;
 
-const AddComment = ({ currentOrgMember, dreamId, event }) => {
+
+function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
   const [addComment, { loading }] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
   const inputRef = React.useRef();
 
+  if (!currentOrgMember.discourseApiKey && typeof window !== "undefined") {
+    return (
+      <div>
+        <h2>You need to connect to a discourse account</h2>
+        <a href={connectToDiscourse.createLoginHref(currentOrg)}>
+          Connect to Discourse
+        </a>
+      </div>
+    );
+  }
   return (
     <form
       onSubmit={handleSubmit(() => {
@@ -108,6 +121,6 @@ const AddComment = ({ currentOrgMember, dreamId, event }) => {
       </div>
     </form>
   );
-};
+}
 
 export default AddComment;
