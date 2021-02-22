@@ -251,6 +251,7 @@ const schema = gql`
     currentEventMembership(slug: String): EventMember #this is weird syntax...
     eventMemberships: [EventMember!]
     discourseUsername: String
+    hasDiscourseApiKey: Boolean
   }
 
   type EventMember {

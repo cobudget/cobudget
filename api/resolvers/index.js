@@ -1709,6 +1709,7 @@ const resolvers = {
     },
   },
   OrgMember: {
+    hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,
     user: async (orgMember, args, { kcAdminClient }) => {
       const user = await kcAdminClient.users.findOne({
         id: orgMember.userId,
