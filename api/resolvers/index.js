@@ -827,7 +827,7 @@ const resolvers = {
               topic_id: dream.discourseTopicId,
               raw: content,
             },
-            { username: currentOrgMember.discourseUsername }
+            { userApiKey: currentOrgMember.discourseApiKey }
           );
         } else {
           // TODO: post thread to discourse

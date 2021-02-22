@@ -2,10 +2,16 @@ const fetch = require('node-fetch');
 
 const { DISCOURSE_API_URL, DISCOURSE_API_KEY } = process.env;
 
-const discourse = ({url = DISCOURSE_API_URL, apiKey = DISCOURSE_API_KEY} = {}) => {
+const discourse = ({
+  url = DISCOURSE_API_URL,
+  apiKey = DISCOURSE_API_KEY,
+} = {}) => {
   const headers = {
     'Api-Key': apiKey,
     'Api-Username': 'system',
+    'Content-Type': 'application/json',
+  };
+  const defaultHeaders = {
     'Content-Type': 'application/json',
   };
   return {
@@ -79,13 +85,16 @@ const discourse = ({url = DISCOURSE_API_URL, apiKey = DISCOURSE_API_KEY} = {}) =
           archetype, // required for private message, value: "private_message"
           created_at, // pick a date other than the default current time
         },
-        { username } = {}
+        { username, userApiKey } = {}
       ) => {
         const response = await fetch(`${url}/posts`, {
           method: 'post',
           headers: {
-            ...headers,
+            ...defaultHeaders,
             ...(username && { 'Api-Username': username }),
+            ...(userApiKey
+              ? { 'User-Api-Key': userApiKey }
+              : { 'Api-Key': apiKey }),
           },
           body: JSON.stringify({
             ...(title && { title }),
@@ -126,7 +135,7 @@ const discourse = ({url = DISCOURSE_API_URL, apiKey = DISCOURSE_API_KEY} = {}) =
         return response;
       },
     },
-  }
+  };
 };
 
 module.exports = discourse;
