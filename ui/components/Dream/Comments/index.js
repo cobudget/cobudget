@@ -16,15 +16,16 @@ const Comments = ({
   //   ...logs.map((log) => ({ ...log, _type: "LOG" })),
   // ].sort((a, b) => a.createdAt - b.createdAt);
 
+  //TODO: remove old logs, create new logs
+
   return (
     <div>
-      {(posts.length > 0 || currentOrgMember?.currentEventMembership) && (
+      {(comments.length > 0 || currentOrgMember?.currentEventMembership) && (
         <h2 className="mb-4 text-2xl font-medium" id="comments">
-          {posts.length} {posts.length === 1 ? "comment" : "comments"}
+          {comments.length} {comments.length === 1 ? "comment" : "comments"}
         </h2>
       )}
-      //TODO: clean up here, remove old logs and stuff
-      {posts.map((post, index) => {
+      {comments.map((comment, index) => {
         // if (item._type === "COMMENT")
         //   return (
         //     <Comment
@@ -39,11 +40,11 @@ const Comments = ({
         // if (item._type === "LOG") return <Log log={item} key={index} />;
         return (
           <Comment
-            comment={post}
+            comment={comment}
             currentOrgMember={currentOrgMember}
             dreamId={dreamId}
-            showBorderBottom={Boolean(index + 1 !== posts.length)}
-            key={post.id}
+            showBorderBottom={Boolean(index + 1 !== comments.length)}
+            key={comment.id}
             event={event}
           />
         );

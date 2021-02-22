@@ -164,7 +164,7 @@ const schema = gql`
     customDomain: String
     logo: String
     events: [Event]
-    discourseUrl: String!
+    discourseUrl: String
     # discourseApiKey: String
   }
 
@@ -295,19 +295,18 @@ const schema = gql`
     flags: [Flag]
     raisedFlags: [Flag]
     logs: [Log]
-    discoursePosts: [DiscoursePost]
     # reactions: [Reaction]
     # tags: [Tag]
   }
 
-  type DiscoursePost {
-    id: Int!
-    username: String
-    name: String
-    display_username: String
-    created_at: String
-    cooked: String
+  type Comment {
+    id: ID!
     orgMember: OrgMember
+    createdAt: Date!
+    updatedAt: Date
+    raw: String
+    cooked: String
+    discourseUsername: String
   }
 
   type Flag {
@@ -394,14 +393,6 @@ const schema = gql`
   #   by: Member!
   #   # createdAt
   # }
-
-  type Comment {
-    id: ID!
-    author: OrgMember!
-    createdAt: Date!
-    updatedAt: Date
-    content: String!
-  }
 
   type CustomFieldValue {
     customField: CustomField

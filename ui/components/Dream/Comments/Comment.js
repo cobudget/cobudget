@@ -2,6 +2,7 @@ import React from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import dayjs from "dayjs";
+import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
 import { TextField, Button, IconButton } from "@material-ui/core";
@@ -18,22 +19,10 @@ const DELETE_COMMENT_MUTATION = gql`
       numberOfComments
       comments {
         id
-        content
-        createdAt
-        author {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-      discoursePosts {
-        id
-        username
+        discourseUsername
         cooked
-        created_at #rename?
+        raw
+        createdAt
         orgMember {
           id
           user {
@@ -65,18 +54,20 @@ const Comment = ({
     <div className="flex my-4">
       <div className="mr-4">
         <Avatar
-          user={comment.orgMember?.user ?? { username: comment.username }}
+          user={
+            comment.orgMember?.user ?? { username: comment.discourseUsername }
+          }
         />
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           <h5>
             {comment.orgMember?.user.username ??
-              `${comment.username} (Discourse)`}
+              `${comment.discourseUsername} (Discourse user)`}
           </h5>
           <div className="flex items-center">
             <span className="font-normal mr-2">
-              {dayjs(comment.created_at).fromNow()}
+              {dayjs(comment.createdAt).fromNow()}
             </span>
           </div>
         </div>
@@ -92,10 +83,14 @@ const Comment = ({
           />
         ) : (
           <>
-            <div
-              className="text-gray-900 whitespace-pre-line markdown"
-              dangerouslySetInnerHTML={{ __html: comment.cooked }}
-            />
+            {comment.cooked ? (
+              <div
+                className="text-gray-900 whitespace-pre-line markdown"
+                dangerouslySetInnerHTML={{ __html: comment.cooked }}
+              />
+            ) : (
+              <ReactMarkdown source={comment.raw} className="markdown" />
+            )}
 
             {canEdit && (
               <div className="flex">

@@ -32,7 +32,7 @@
     "micro-cors": "^0.1.1",
     "mongoose": "^5.9.6",
     "node-fetch": "^2.6.0",
-    "@sensestack/plato-core": "^1.0.1"
+    "@sensestack/plato-core": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

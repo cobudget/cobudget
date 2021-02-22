@@ -88,7 +88,6 @@ const Dream = ({ dream, event, currentUser, currentOrgMember, currentOrg }) => {
               dreamId={dream.id}
               event={event}
               logs={dream.logs}
-              posts={dream.discoursePosts}
             />
           </div>
           <div className="order-first md:order-last">

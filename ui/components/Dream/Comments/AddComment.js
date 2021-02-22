@@ -1,12 +1,11 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import Link from "next/link";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
-
-import connectToDiscourse from "utils/connectToDiscourse";
 
 const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {
@@ -15,22 +14,10 @@ const ADD_COMMENT = gql`
       numberOfComments
       comments {
         id
-        content
-        createdAt
-        author {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-      discoursePosts {
-        id
-        username
+        discourseUsername
         cooked
-        created_at #rename?
+        raw
+        createdAt
         orgMember {
           id
           user {

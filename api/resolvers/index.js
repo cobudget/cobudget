@@ -1805,8 +1805,7 @@ const resolvers = {
     events: async (organization, args, { models: { Event } }) => {
       return Event.find({ organizationId: organization.id });
     },
-    discourseUrl: (organization) =>
-      organization.discourse.url ?? process.env.DISCOURSE_API_URL, //TODO: Check if works
+    discourseUrl: (organization) => organization.discourse?.url,
   },
   Event: {
     members: async (event, args, { models: { EventMember } }) => {
@@ -1880,17 +1879,27 @@ const resolvers = {
       ]);
       return grantsForDream;
     },
-    discoursePosts: async (dream, args, { currentOrg }) => {
-      if (!dream.discourseTopicId) return null;
-      const {
-        post_stream: { posts },
-      } = await discourse(currentOrg.discourse).posts.get(
-        dream.discourseTopicId
-      );
+    comments: async (dream, args, { currentOrg }) => {
+      if (currentOrg.discourse) {
+        if (!dream.discourseTopicId) return null;
+        const {
+          post_stream: { posts },
+        } = await discourse(currentOrg.discourse).posts.get(
+          dream.discourseTopicId
+        );
 
-      return posts.filter((post) => post.post_number !== 1);
+        return posts.filter((post) => post.post_number !== 1);
+      }
+
+      return dream.comments;
     },
-    numberOfComments: (dream) => {
+    numberOfComments: async (dream, args, { currentOrg }) => {
+      if (currentOrg.discourse) {
+        const { posts_count } = await discourse(currentOrg.discourse).posts.get(
+          dream.discourseTopicId
+        );
+        return posts_count - 1;
+      }
       return dream.comments.length;
     },
     favorite: async (
@@ -1928,6 +1937,28 @@ const resolvers = {
       return Log.find({ dreamId: dream.id });
     },
   },
+  Comment: {
+    createdAt: (post) => {
+      if (post.createdAt) return createdAt; // comment from mongodb
+      if (post.created_at) return new Date(post.created_at); // post from Discourse
+      return null;
+    },
+    discourseUsername: (post) => {
+      if (post.username) return post.username;
+      return null;
+    },
+    orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+      // comment from mongodb
+      // TODO: Rename authorId in mongo models to orgMemberId
+      if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
+
+      // post from discourse
+      return OrgMember.findOne({
+        organizationId: currentOrg.id,
+        discourseUsername: post.username,
+      });
+    },
+  },
   Flag: {
     guideline: async (flag, args, { models: { Event } }) => {
       const event = await Event.findOne({ _id: flag.parent().eventId });
@@ -1942,13 +1973,6 @@ const resolvers = {
   Grant: {
     dream: async (grant, args, { models: { Dream } }) => {
       return Dream.findOne({ _id: grant.dreamId });
-    },
-  },
-  DiscoursePost: {
-    orgMember: async (post, args, { models: { OrgMember } }) => {
-      return OrgMember.findOne({
-        discourseUsername: post.username,
-      });
     },
   },
   Date: new GraphQLScalarType({
@@ -1967,11 +1991,6 @@ const resolvers = {
       return null;
     },
   }),
-  Comment: {
-    author: async (comment, args, { models: { OrgMember } }) => {
-      return OrgMember.findOne({ _id: comment.authorId });
-    },
-  },
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {

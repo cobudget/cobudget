@@ -55,11 +55,12 @@ export const DREAM_QUERY = gql`
         small
         large
       }
-      discoursePosts {
+      comments {
         id
-        username
+        discourseUsername
         cooked
-        created_at #rename?
+        raw
+        createdAt
         orgMember {
           id
           user {
@@ -70,19 +71,6 @@ export const DREAM_QUERY = gql`
         }
       }
       numberOfComments
-      comments {
-        id
-        content
-        createdAt
-        author {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
       logs {
         createdAt
         type
@@ -111,7 +99,7 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentUser, currentOrgMember }) => {
+export default ({ event, currentUser, currentOrgMember, currentOrg }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -135,6 +123,7 @@ export default ({ event, currentUser, currentOrgMember }) => {
           event={event}
           currentUser={currentUser}
           currentOrgMember={currentOrgMember}
+          currentOrg={currentOrg}
         />
       </div>
     );
