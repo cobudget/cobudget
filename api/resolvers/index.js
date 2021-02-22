@@ -812,33 +812,41 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error('You need to be an org member to post comments.');
 
-      if (!currentOrgMember.discourseUsername) {
-        // TODO: create account or guide user to connect to discourse account
-
-        if (!currentOrg.discourse) {
-          // TODO: create user in plato discourse according to edgeryders/forms
+      if (currentOrg.discourse) {
+        if (!currentOrgMember.discourseUsername) {
+          throw new Error('You need to have a discourse account connected');
         }
 
-        throw new Error('You need to have a discourse account connected');
+        if (content.length < 20)
+          throw new Error('Your post needs to be at least 20 characters long');
+
+        if (dream.discourseTopicId) {
+          // TODO: error handling (expired api key, faulty discourse url)
+          await discourse(currentOrg.discourse).posts.create(
+            {
+              topic_id: dream.discourseTopicId,
+              raw: content,
+            },
+            { username: currentOrgMember.discourseUsername }
+          );
+        } else {
+          // TODO: post thread to discourse
+          throw new Error('This thread does not exist on discourse');
+        }
+
+        return dream;
       }
 
-      if (content.length < 20)
-        throw new Error('Your post needs to be at least 20 characters long');
+      // post regular comment
+      if (content.length < 3)
+        throw new Error('Your post needs to be at least 3 characters long!');
 
-      if (dream.discourseTopicId) {
-        await discourse(currentOrg.discourse).posts.create(
-          {
-            topic_id: dream.discourseTopicId,
-            raw: content,
-          },
-          { username: currentOrgMember.discourseUsername }
-        );
-      } else {
-        // TODO: post thread to discourse?
-        throw new Error('This thread does not exist on discourse');
-      }
+      dream.comments.push({
+        authorId: currentOrgMember.id,
+        content,
+      });
 
-      return dream;
+      return dream.save();
     },
 
     deleteComment: async (
