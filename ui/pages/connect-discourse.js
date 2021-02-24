@@ -1,32 +1,44 @@
 import { useRouter } from "next/router";
 import createDiscourseConnectUrl from "utils/createDiscourseConnectUrl";
+import Button from "components/Button";
+import { CheckIcon } from "components/Icons";
 
 export default ({ currentOrgMember, currentOrg }) => {
   const router = useRouter();
   if (!currentOrgMember) return null;
-  if (!currentOrg.discourse)
+  if (!currentOrg.discourseUrl)
     return (
       <div>Your organization has not set up custom discourse integration.</div>
     );
 
-  // TODO: Add more hand holding, instruct user to create account etc.
-
   return (
-    <div>
-      <h1>
-        {currentOrgMember.hasDiscourseApiKey
-          ? "You have successfully set up an API key"
-          : "Connect your account to your organizations Discourse account"}
+    <div className="max-w-screen-sm mt-10">
+      <h1 className="text-xl font-medium mb-4 flex items-center">
+        {currentOrgMember.hasDiscourseApiKey && (
+          <CheckIcon className="h-6 w-6 mr-2" />
+        )}
+        {!currentOrgMember.hasDiscourseApiKey
+          ? "Connect to Discourse"
+          : `You have connected your Discourse account "${currentOrgMember.discourseUsername}"`}
       </h1>
+      <p className="mb-4 text-gray-800">
+        {!currentOrgMember.hasDiscourseApiKey
+          ? "Click the button below to connect your existing account on your organizations Discourse or to create a new one."
+          : "Click the button below to re-connect, if your api key has expired or you have changed username on Discourse."}
+      </p>
 
       {typeof window !== "undefined" && (
         <div>
-          <a
-            className="bg-blue rounded text-white p-2"
+          <Button
             href={createDiscourseConnectUrl(currentOrg)}
+            variant={
+              currentOrgMember.hasDiscourseApiKey ? "secondary" : "primary"
+            }
           >
-            Connect to Discourse
-          </a>
+            {!currentOrgMember.hasDiscourseApiKey
+              ? "Connect to Discourse"
+              : "Re-connect to Discourse"}
+          </Button>
         </div>
       )}
     </div>
