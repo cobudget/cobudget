@@ -1597,7 +1597,12 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      { kauth, currentOrgMember, models: { EventMember, Event } }
+      {
+        kauth,
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Event, OrgMember },
+      }
     ) => {
       if (!kauth) throw new Error('You need to be logged in.');
 
