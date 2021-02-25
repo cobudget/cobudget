@@ -75,6 +75,14 @@ const JOIN_ORG_MUTATION = gql`
   }
 `;
 
+const JOIN_EVENT_MUTATION = gql`
+  mutation RegisterForEvent($eventId: ID!) {
+    registerForEvent(eventId: $eventId) {
+      isApproved
+    }
+  }
+`;
+
 export default ({
   event,
   currentUser,
@@ -89,6 +97,13 @@ export default ({
 
   const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
     refetchQueries: ["TopLevelQuery"],
+  });
+
+  const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
+    variables: { eventId: event?.id },
+    refetchQueries: [
+      { query: TOP_LEVEL_QUERY, variables: { slug: event?.slug } },
+    ],
   });
 
   return (
@@ -187,42 +202,43 @@ export default ({
                           />
                         </>
                       )}
-
-                    {currentOrgMember &&
-                      !currentOrgMember.currentEventMembership && (
-                        <>
-                          {event.registrationPolicy !== "INVITE_ONLY" && (
-                            <NavItem
-                              href="/[event]/register"
-                              as={`/${event.slug}/register`}
-                              currentPath={router.pathname}
-                              eventColor={event.color}
-                              primary
-                            >
-                              {event.registrationPolicy === "REQUEST_TO_JOIN"
-                                ? "Request to join"
-                                : "Join"}
-                            </NavItem>
-                          )}
-                        </>
-                      )}
                   </>
                 )}
-
-                {!event && currentOrgMember?.isOrgAdmin && (
-                  <NavItem
-                    primary
-                    currentPath={router.pathname}
-                    href="/create-event"
-                  >
-                    New event
-                  </NavItem>
-                )}
-
-                {!currentOrgMember && currentOrg && (
-                  <NavItem primary onClick={() => joinOrg()}>
-                    Join org
-                  </NavItem>
+                {currentOrg && (
+                  <>
+                    {!event && currentOrgMember?.isOrgAdmin && (
+                      <NavItem
+                        primary
+                        currentPath={router.pathname}
+                        href="/create-event"
+                      >
+                        New event
+                      </NavItem>
+                    )}
+                    {(!currentOrgMember ||
+                      !currentOrgMember.currentEventMembership) &&
+                      event &&
+                      event.registrationPolicy !== "INVITE_ONLY" && (
+                        <NavItem
+                          primary
+                          eventColor={event?.color}
+                          onClick={() => joinEvent()}
+                        >
+                          {event.registrationPolicy === "REQUEST_TO_JOIN"
+                            ? "Request to join"
+                            : "Join event"}
+                        </NavItem>
+                      )}
+                    {!currentOrgMember && !event && (
+                      <NavItem
+                        primary
+                        eventColor={event?.color}
+                        onClick={() => joinOrg()}
+                      >
+                        Join org
+                      </NavItem>
+                    )}
+                  </>
                 )}
 
                 <div className="hidden sm:block sm:ml-4">
