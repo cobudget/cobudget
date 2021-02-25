@@ -1597,15 +1597,21 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      { currentOrgMember, models: { EventMember, Event } }
+      { kauth, currentOrgMember, models: { EventMember, Event } }
     ) => {
-      if (!currentOrgMember)
-        throw new Error(
-          'You need to be a member of this org to register for an event.'
-        );
+      if (!kauth) throw new Error('You need to be logged in.');
+
+      let orgMember = currentOrgMember;
+
+      if (!orgMember) {
+        orgMember = await new OrgMember({
+          userId: kauth.sub,
+          organizationId: currentOrg.id,
+        }).save();
+      }
 
       const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
+        orgMemberId: orgMember.id,
         eventId,
       });
 
@@ -1616,7 +1622,7 @@ const resolvers = {
       let newMember = {
         isAdmin: false,
         eventId,
-        orgMemberId: currentOrgMember.id,
+        orgMemberId: orgMember.id,
       };
 
       switch (event.registrationPolicy) {
