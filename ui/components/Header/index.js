@@ -5,65 +5,17 @@ import { useRouter } from "next/router";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 
-import TOP_LEVEL_QUERY from "pages/_app";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
 import NewDreamModal from "components/NewDreamModal";
 import OrganizationOnlyHeader from "./OrganizationOnlyHeader";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
+import NavItem from "./NavItem";
 
 const css = {
   mobileProfileItem:
     "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
-};
-
-const NavItem = ({
-  onClick,
-  href,
-  as,
-  currentPath = "",
-  className,
-  children,
-  primary,
-  eventColor,
-}) => {
-  const active = currentPath === href;
-
-  const regularClasses = `border-transparent text-gray-800 hover:bg-gray-300`;
-  const primaryClasses = `border-anthracit hover:bg-anthracit-darker hover:text-gray-200`;
-  const regularEventClasses = `border-transparent text-white hover:bg-${eventColor}-darker`;
-  const primaryEventClasses = `border-white text-white hover:bg-white hover:text-${eventColor}`;
-  const eventActiveClasses = `border-transparent bg-${eventColor}-darker text-white`;
-
-  const colorsClasses = eventColor
-    ? primary
-      ? primaryEventClasses
-      : active
-      ? eventActiveClasses
-      : regularEventClasses
-    : primary
-    ? primaryClasses
-    : regularClasses;
-
-  const classes =
-    "my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 border-2 " +
-    colorsClasses +
-    " " +
-    className;
-
-  if (Boolean(onClick)) {
-    return (
-      <button className={classes} onClick={onClick}>
-        {children}
-      </button>
-    );
-  }
-  return (
-    <Link href={href} as={as}>
-      <a className={classes}>{children}</a>
-    </Link>
-  );
 };
 
 const JOIN_ORG_MUTATION = gql`
@@ -71,6 +23,14 @@ const JOIN_ORG_MUTATION = gql`
     joinOrg {
       id
       bio
+    }
+  }
+`;
+
+const JOIN_EVENT_MUTATION = gql`
+  mutation RegisterForEvent($eventId: ID!) {
+    registerForEvent(eventId: $eventId) {
+      isApproved
     }
   }
 `;
@@ -88,6 +48,11 @@ export default ({
   const router = useRouter();
 
   const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
+    refetchQueries: ["TopLevelQuery"],
+  });
+
+  const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
+    variables: { eventId: event?.id },
     refetchQueries: ["TopLevelQuery"],
   });
 
@@ -187,42 +152,43 @@ export default ({
                           />
                         </>
                       )}
-
-                    {currentOrgMember &&
-                      !currentOrgMember.currentEventMembership && (
-                        <>
-                          {event.registrationPolicy !== "INVITE_ONLY" && (
-                            <NavItem
-                              href="/[event]/register"
-                              as={`/${event.slug}/register`}
-                              currentPath={router.pathname}
-                              eventColor={event.color}
-                              primary
-                            >
-                              {event.registrationPolicy === "REQUEST_TO_JOIN"
-                                ? "Request to join"
-                                : "Join"}
-                            </NavItem>
-                          )}
-                        </>
-                      )}
                   </>
                 )}
-
-                {!event && currentOrgMember?.isOrgAdmin && (
-                  <NavItem
-                    primary
-                    currentPath={router.pathname}
-                    href="/create-event"
-                  >
-                    New event
-                  </NavItem>
-                )}
-
-                {!currentOrgMember && currentOrg && (
-                  <NavItem primary onClick={() => joinOrg()}>
-                    Join org
-                  </NavItem>
+                {currentOrg && (
+                  <>
+                    {!event && currentOrgMember?.isOrgAdmin && (
+                      <NavItem
+                        primary
+                        currentPath={router.pathname}
+                        href="/create-event"
+                      >
+                        New event
+                      </NavItem>
+                    )}
+                    {(!currentOrgMember ||
+                      !currentOrgMember.currentEventMembership) &&
+                      event &&
+                      event.registrationPolicy !== "INVITE_ONLY" && (
+                        <NavItem
+                          primary
+                          eventColor={event?.color}
+                          onClick={() => joinEvent()}
+                        >
+                          {event.registrationPolicy === "REQUEST_TO_JOIN"
+                            ? "Request to join"
+                            : "Join event"}
+                        </NavItem>
+                      )}
+                    {!currentOrgMember && !event && (
+                      <NavItem
+                        primary
+                        eventColor={event?.color}
+                        onClick={() => joinOrg()}
+                      >
+                        Join org
+                      </NavItem>
+                    )}
+                  </>
                 )}
 
                 <div className="hidden sm:block sm:ml-4">
@@ -273,6 +239,7 @@ export default ({
                   )} */}
                 </div>
               </div>
+
               <div className="mt-2 flex flex-col items-stretch">
                 {/* <Link href="/profile">
                 <a className={css.mobileProfileItem}>Profile</a>

@@ -98,7 +98,7 @@ export default ({ currentOrg }) => {
   return (
     <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {events.map((event) => (
-        <Link href="/[event]" as={`/${event.slug}`} key={event.slug}>
+        <Link href="/[event]" as={`/${event.slug}`} key={event.slug} passHref>
           <LinkCard color={event.color}>{event.title}</LinkCard>
         </Link>
       ))}
