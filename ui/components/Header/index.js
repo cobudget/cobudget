@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 
-import TOP_LEVEL_QUERY from "pages/_app";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
@@ -54,9 +53,7 @@ export default ({
 
   const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
     variables: { eventId: event?.id },
-    refetchQueries: [
-      { query: TOP_LEVEL_QUERY, variables: { slug: event?.slug } },
-    ],
+    refetchQueries: ["TopLevelQuery"],
   });
 
   return (
@@ -242,6 +239,7 @@ export default ({
                   )} */}
                 </div>
               </div>
+
               <div className="mt-2 flex flex-col items-stretch">
                 {/* <Link href="/profile">
                 <a className={css.mobileProfileItem}>Profile</a>
