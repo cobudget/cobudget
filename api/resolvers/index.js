@@ -1630,31 +1630,35 @@ const resolvers = {
         orgMemberId: orgMember.id,
       };
 
-      switch (event.registrationPolicy) {
-        case 'OPEN':
-          newMember.isApproved = true;
-          break;
-        case 'REQUEST_TO_JOIN':
-          newMember.isApproved = false;
+      if (orgMember.isOrgAdmin) {
+        newMember.isApproved = true;
+      } else {
+        switch (event.registrationPolicy) {
+          case 'OPEN':
+            newMember.isApproved = true;
+            break;
+          case 'REQUEST_TO_JOIN':
+            newMember.isApproved = false;
 
-          // TODO: need to fix this.. no emails saved in orgmembers
-          // // send request to join notification emails
-          // const admins = await EventMember.find({
-          //   eventId,
-          //   isAdmin: true,
-          // }).populate('orgMemberId');
+            // TODO: need to fix this.. no emails saved in orgmembers
+            // // send request to join notification emails
+            // const admins = await EventMember.find({
+            //   eventId,
+            //   isAdmin: true,
+            // }).populate('orgMemberId');
 
-          // const adminEmails = admins.map((member) => member.orgMemberId.email);
-          // await EmailService.sendRequestToJoinNotifications(
-          //   currentOrg,
-          //   currentUser,
-          //   event,
-          //   adminEmails
-          // );
-          break;
+            // const adminEmails = admins.map((member) => member.orgMemberId.email);
+            // await EmailService.sendRequestToJoinNotifications(
+            //   currentOrg,
+            //   currentUser,
+            //   event,
+            //   adminEmails
+            // );
+            break;
 
-        case 'INVITE_ONLY':
-          throw new Error('This event is invite only');
+          case 'INVITE_ONLY':
+            throw new Error('This event is invite only');
+        }
       }
 
       return new EventMember(newMember).save();

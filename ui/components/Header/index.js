@@ -168,7 +168,8 @@ export default ({
                     {(!currentOrgMember ||
                       !currentOrgMember.currentEventMembership) &&
                       event &&
-                      event.registrationPolicy !== "INVITE_ONLY" && (
+                      (event.registrationPolicy !== "INVITE_ONLY" ||
+                        currentOrgMember.isOrgAdmin) && (
                         <NavItem
                           primary
                           eventColor={event?.color}
