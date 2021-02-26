@@ -1460,6 +1460,7 @@ const resolvers = {
         _id: eventId,
         organizationId: currentOrgMember.organizationId,
       });
+
       if (!event)
         throw new Error("Can't find event in your organization to edit");
 
@@ -1470,8 +1471,6 @@ const resolvers = {
         )
       )
         throw new Error('You need to be admin to update granting settings.');
-
-      const event = await Event.findOne({ _id: eventId });
 
       const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
       const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
