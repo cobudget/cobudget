@@ -1456,8 +1456,20 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error('You need to be admin to update granting settings');
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentOrgMember.organizationId,
+      });
+      if (!event)
+        throw new Error("Can't find event in your organization to edit");
+
+      if (
+        !(
+          (currentEventMember && currentEventMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
+      )
+        throw new Error('You need to be admin to update granting settings.');
 
       const event = await Event.findOne({ _id: eventId });
 
