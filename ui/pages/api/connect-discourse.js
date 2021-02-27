@@ -35,9 +35,27 @@ export default async function (req, res) {
 
   const organization = await Organization.findOne({ subdomain });
 
-  const update = await OrgMember.update(
+  if (!organization.discourse) throw new Error("Missing discourse config");
+
+  // get discourse username
+  const discourseUserResponse = await fetch(
+    `${organization.discourse.url}/session/current.json`,
+    {
+      headers: {
+        "User-Api-Key": discourseApiKey,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  const {
+    current_user: { username },
+  } = await discourseUserResponse.json();
+
+  // save discourse user api key and username in database
+  await OrgMember.update(
     { userId, organizationId: organization.id },
-    { discourseApiKey }
+    { discourseApiKey, discourseUsername: username }
   );
 
   // TODO: error handling
