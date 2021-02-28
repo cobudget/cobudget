@@ -17,22 +17,22 @@ const discourse = ({
   return {
     categories: {
       getAll: async () => {
-        const response = await fetch(`${url}/categories`, {
+        const res = await fetch(`${url}/categories`, {
           headers,
         });
         const {
           category_list: { categories },
-        } = await response.json();
+        } = await res.json();
         return categories;
       },
       create: async ({ name, color = '2f2ad1', text_color = 'FFFFFF' }) => {
-        const response = await fetch(`${url}/categories`, {
+        const res = await fetch(`${url}/categories`, {
           method: 'post',
           headers,
           body: JSON.stringify({ name, color, text_color }),
         });
 
-        const json = await response.json();
+        const json = await res.json();
 
         if (json.errors) {
           console.log(json.errors);
@@ -51,7 +51,7 @@ const discourse = ({
         active = true,
         approved = true,
       }) => {
-        const response = await fetch(`${url}/users`, {
+        const res = await fetch(`${url}/users`, {
           method: 'post',
           headers,
           body: JSON.stringify({
@@ -64,7 +64,7 @@ const discourse = ({
           }),
         });
 
-        const json = await response.json();
+        const json = await res.json();
         // json = {
         //     "success": true,
         //     "active": true,
@@ -87,7 +87,7 @@ const discourse = ({
         },
         { username, userApiKey } = {}
       ) => {
-        const response = await fetch(`${url}/posts`, {
+        const res = await fetch(`${url}/posts`, {
           method: 'post',
           headers: {
             ...defaultHeaders,
@@ -106,33 +106,34 @@ const discourse = ({
             ...(created_at && { created_at }),
           }),
         });
-        return response.json();
+        return res.json();
       },
       get: async (id) => {
         // query parameter print=true will return up to 1000 posts in a topic
-        const response = await fetch(`${url}/t/${id}.json`, {
+        const res = await fetch(`${url}/t/${id}.json`, {
           headers,
         });
-        const json = await response.json();
+        const json = await res.json();
         return json;
       },
       getSingle: async (id) => {
-        const response = await fetch(`${url}/posts/${id}.json`, {
+        const res = await fetch(`${url}/posts/${id}.json`, {
           headers,
         });
-        const json = await response.json();
+        const json = await res.json();
         return json;
       },
-      delete: async (id, username) => {
-        const response = await fetch(`${url}/posts/${id}`, {
+      delete: async ({ id, userApiKey, username }) => {
+        const res = await fetch(`${url}/posts/${id}`, {
           headers: {
             ...headers,
+            ...(userApiKey && { 'User-Api-Key': userApiKey }),
             ...(username && { 'Api-Username': username }),
           },
           method: 'DELETE',
         });
 
-        return response;
+        return res;
       },
     },
   };
