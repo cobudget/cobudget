@@ -606,12 +606,20 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      const discoursePost = await discourse(currentOrg.discourse).posts.create({
-        title,
-        raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
-      });
+      if (currentOrg.discourse) {
+        const discoursePost = await discourse(
+          currentOrg.discourse
+        ).posts.create({
+          title,
+          raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+          username: 'system',
+          ...(currentOrg.discourse.dreamsCategoryId && {
+            category: currentOrg.discourse.dreamsCategoryId,
+          }),
+        });
 
-      dream.discourseTopicId = discoursePost.topic_id;
+        dream.discourseTopicId = discoursePost.topic_id;
+      }
 
       return dream.save();
     },
