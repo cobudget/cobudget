@@ -20,7 +20,7 @@ Everything on `master` is automatically deployed to [dreams.wtf](https://dreams.
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
 - In /api, copy `.env.default` to `.env`
-
+- In /ui, copy `.env.local.default` to `.env.local`
 - For `Firefox` browser - scroll to- to Subdomains section
 - After running (Make sure you check #Postrequisites section below)
 
