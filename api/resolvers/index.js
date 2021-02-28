@@ -822,25 +822,37 @@ const resolvers = {
 
       if (currentOrg.discourse) {
         if (!currentOrgMember.discourseApiKey) {
-          throw new Error('You need to have a discourse account connected');
+          throw new Error(
+            'You need to have a discourse account connected, go to /connect-discourse'
+          );
         }
 
         if (content.length < 20)
           throw new Error('Your post needs to be at least 20 characters long');
 
-        if (dream.discourseTopicId) {
-          // TODO: error handling (expired api key, faulty discourse url)
-          await discourse(currentOrg.discourse).posts.create(
-            {
-              topic_id: dream.discourseTopicId,
-              raw: content,
-            },
-            { userApiKey: currentOrgMember.discourseApiKey }
-          );
-        } else {
-          // TODO: post thread to discourse
-          throw new Error('This thread does not exist on discourse');
+        if (!dream.discouseTopicId) {
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create({
+            title,
+            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+            username: 'system',
+            ...(currentOrg.discourse.dreamsCategoryId && {
+              category: currentOrg.discourse.dreamsCategoryId,
+            }),
+          });
+
+          dream.discourseTopicId = discoursePost.topic_id;
         }
+
+        // TODO: error handling (expired api key, faulty discourse url)
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: content,
+          },
+          { userApiKey: currentOrgMember.discourseApiKey }
+        );
 
         return dream;
       }
@@ -1804,10 +1816,8 @@ const resolvers = {
         organizationId: currentOrg.id,
         slug,
       });
-      // const orgMembership = await OrgMember.findOne({
-      //   userId: user.id,
-      //   organizationId: currentOrg.id,
-      // });
+      // TODO: use currentOrgMember here instead? should not be on every event member?
+
       return EventMember.findOne({
         orgMemberId: orgMember.id,
         eventId: event.id,
@@ -1952,6 +1962,7 @@ const resolvers = {
     },
     comments: async (dream, args, { currentOrg }) => {
       if (currentOrg.discourse) {
+        // maybe I could do the migration here? :-)
         if (!dream.discourseTopicId) return null;
         const {
           post_stream: { posts },
@@ -2024,6 +2035,8 @@ const resolvers = {
 
       // comment from mongodb
       // TODO: Rename authorId in mongo models to orgMemberId
+      // is it orgMemberId now? Huh. Maybe it is not eventMember then.. idk.. seems untrue.
+
       if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
 
       // post from discourse
