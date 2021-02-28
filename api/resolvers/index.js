@@ -821,7 +821,7 @@ const resolvers = {
         throw new Error('You need to be an org member to post comments.');
 
       if (currentOrg.discourse) {
-        if (!currentOrgMember.discourseUsername) {
+        if (!currentOrgMember.discourseApiKey) {
           throw new Error('You need to have a discourse account connected');
         }
 
@@ -860,34 +860,57 @@ const resolvers = {
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrg, currentOrgMember, models: { Dream } }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
 
-      if (!currentOrgMember || !currentOrgMember.discourseUsername)
-        throw new Error(
-          'You need to be an org member and have a discourse account connected'
-        );
-
-      const post = await discourse(currentOrg.discourse).posts.getSingle(
-        commentId
-      );
-
-      if (
-        post.username !== currentOrgMember.discourseUsername ||
-        !currentOrgMember.isOrgAdmin
-      ) {
-        throw new Error('You can only delete your own post.');
+      if (!currentOrgMember) {
+        throw new Error('You need to be member of the org to delete comments');
       }
 
-      await discourse(currentOrg.discourse).posts.delete(
-        commentId,
-        currentOrgMember.discourseUsername
+      if (currentOrg.discourse) {
+        const post = await discourse(currentOrg.discourse).posts.getSingle(
+          commentId
+        );
+
+        if (
+          post.username !== currentOrgMember.discourseUsername ||
+          !currentOrgMember.isOrgAdmin
+        ) {
+          throw new Error(
+            'You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse'
+          );
+        }
+
+        await discourse(currentOrg.discourse).posts.delete({
+          id: commentId,
+          ...(post.username == currentOrgMember.discourseUsername && {
+            userApiKey: currentOrgMember.discourseApiKey,
+          }),
+          ...(post.username !== currentOrgMember.discourseUsername &&
+            currentOrgMember.isOrgAdmin && { username: 'system' }),
+        });
+        return dream;
+      }
+
+      // mongodb comments
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      dream.comments = dream.comments.filter(
+        (comment) =>
+          !(
+            comment._id.toString() === commentId &&
+            (comment.authorId.toString() === currentOrgMember.id.toString() ||
+              eventMember?.isAdmin)
+          )
       );
 
-      return dream;
+      return dream.save();
     },
     editComment: async (
       parent,
@@ -954,10 +977,37 @@ const resolvers = {
         userId: currentOrgMember.id,
       });
 
-      if (dream.discourseTopicId) {
-        await discourse(currentOrg.discourse).posts.create({
-          topic_id: dream.discourseTopicId,
-          raw: `Someone flagged this dream for the **${guideline.title}** guideline. \n> ${comment}`,
+      const logContent = `Someone flagged this dream for the **${guideline.title}** guideline. \n> ${comment}`;
+
+      if (currentOrg.discourse) {
+        if (!dream.discouseTopicId) {
+          // TODO: break out create thread into separate function
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create({
+            title,
+            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+            username: 'system',
+            ...(currentOrg.discourse.dreamsCategoryId && {
+              category: currentOrg.discourse.dreamsCategoryId,
+            }),
+          });
+
+          dream.discourseTopicId = discoursePost.topic_id;
+        }
+
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: logContent,
+          },
+          { username: 'system' }
+        );
+      } else {
+        dream.comments.push({
+          authorId: currentOrgMember.id,
+          content: logContent,
+          log: true,
         });
       }
 
@@ -996,10 +1046,23 @@ const resolvers = {
 
       const guideline = event.guidelines.id(resolvedFlag.guidelineId);
 
-      if (dream.discourseTopicId) {
-        await discourse(currentOrg.discourse).posts.create({
-          topic_id: dream.discourseTopicId,
-          raw: `Someone resolved a flag for the **${guideline.title}** guideline. \n> ${comment}`,
+      const logContent = `Someone resolved a flag for the **${guideline.title}** guideline. \n> ${comment}`;
+
+      if (currentOrg.discourse) {
+        if (dream.discourseTopicId) {
+          await discourse(currentOrg.discourse).posts.create(
+            {
+              topic_id: dream.discourseTopicId,
+              raw: logContent,
+            },
+            { username: 'system' }
+          );
+        }
+      } else {
+        dream.comments.push({
+          authorId: currentOrgMember.id,
+          content: logContent,
+          log: true,
         });
       }
 
@@ -1956,6 +2019,9 @@ const resolvers = {
       return null;
     },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+      // make logs anonymous
+      if (post.log) return null;
+
       // comment from mongodb
       // TODO: Rename authorId in mongo models to orgMemberId
       if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
