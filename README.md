@@ -40,7 +40,8 @@ export NODE_ENV=development && npm run dev
 
 #### Option 2: run db, api and ui separately
 
-1. Run MongoDB either in Docker (with `npm run db:up` in the root) or [standalone](https://docs.mongodb.com/manual/installation/) (if you are running it standalone alter the url for mongo in `api/.env` to `MONGO_URL=mongodb://localhost/dreams`)
+1. Run MongoDB either in Docker (with `npm run db:up` in the root) or [standalone](https://docs.mongodb.com/manual/installation/)
+   Note: If you are running MongoDB standalone, alter the MONGO_URL in `api/.env` to `mongodb://localhost/dreams`
 2. Run the API in one terminal: `cd api && npm run start`
 3. Run the UI in another terminal: `cd ui && npm run dev`
 
