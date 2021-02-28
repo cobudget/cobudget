@@ -30,6 +30,7 @@ const DreamSchema = new Schema({
         default: Date.now,
       },
       content: String,
+      log: Boolean,
     }),
   ],
   approved: { type: Boolean, default: false },
