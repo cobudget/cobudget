@@ -831,16 +831,21 @@ const resolvers = {
           throw new Error('Your post needs to be at least 20 characters long');
 
         if (!dream.discouseTopicId) {
+          const event = await Event.findOne({ _id: dream.eventId });
+
           const discoursePost = await discourse(
             currentOrg.discourse
-          ).posts.create({
-            title,
-            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
-            username: 'system',
-            ...(currentOrg.discourse.dreamsCategoryId && {
-              category: currentOrg.discourse.dreamsCategoryId,
-            }),
-          });
+          ).posts.create(
+            {
+              title: dream.title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
+            },
+            { username: 'system' }
+          );
 
           dream.discourseTopicId = discoursePost.topic_id;
         }
@@ -854,7 +859,7 @@ const resolvers = {
           { userApiKey: currentOrgMember.discourseApiKey }
         );
 
-        return dream;
+        return dream.save();
       }
 
       // post regular comment
@@ -993,14 +998,18 @@ const resolvers = {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
-          ).posts.create({
-            title,
-            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
-            username: 'system',
-            ...(currentOrg.discourse.dreamsCategoryId && {
-              category: currentOrg.discourse.dreamsCategoryId,
-            }),
-          });
+          ).posts.create(
+            {
+              title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
+            },
+            {
+              username: 'system',
+            }
+          );
 
           dream.discourseTopicId = discoursePost.topic_id;
         }
