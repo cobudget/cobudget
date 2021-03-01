@@ -1,19 +1,25 @@
+import { forwardRef } from "react";
 import { LoaderIcon } from "./Icons";
 
-export default ({
-  children,
-  disabled,
-  loading,
-  size,
-  variant = "primary",
-  className,
-  type = "button",
-  color = "blue",
-  fullWidth = false,
-  href,
-  ...props
-}) => {
-  const classes = `
+const Button = forwardRef(
+  (
+    {
+      children,
+      disabled,
+      loading,
+      size,
+      variant = "primary",
+      className,
+      type = "button",
+      color = "blue",
+      fullWidth = false,
+      href,
+      nextJsLink,
+      ...props
+    },
+    ref
+  ) => {
+    const classes = `
   font-medium transition-colors duration-100 rounded-md 
   relative flex justify-center items-center 
   focus:outline-none focus:shadow-outline ${
@@ -36,26 +42,30 @@ export default ({
       : "text-gray-800 hover:bg-gray-200")
   } ${className}`;
 
-  if (href)
-    return (
-      <a href={href} className={classes}>
-        {children}
-      </a>
-    );
+    if (href || nextJsLink)
+      return (
+        <a {...(href && { href })} ref={ref} className={classes}>
+          {children}
+        </a>
+      );
 
-  return (
-    <button
-      {...props}
-      disabled={disabled || loading}
-      type={type}
-      className={classes}
-    >
-      {loading && (
-        <LoaderIcon className="w-5 h-5 absolute animation-spin animation-linear animation-2s" />
-      )}
-      <span className={loading ? "invisible" : "" + " flex items-center"}>
-        {children}
-      </span>
-    </button>
-  );
-};
+    return (
+      <button
+        {...props}
+        disabled={disabled || loading}
+        type={type}
+        className={classes}
+        ref={ref}
+      >
+        {loading && (
+          <LoaderIcon className="w-5 h-5 absolute animation-spin animation-linear animation-2s" />
+        )}
+        <span className={loading ? "invisible" : "" + " flex items-center"}>
+          {children}
+        </span>
+      </button>
+    );
+  }
+);
+
+export default Button;

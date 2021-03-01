@@ -38,14 +38,12 @@ function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
   const inputRef = React.useRef();
 
   if (currentOrg.discourse && !currentOrgMember.hasDiscourseApiKey) {
-    //TODO: Fix button/link to look nice
     return (
-      <div>
-        <h2>You need to connect to a discourse account</h2>
-        <Link href={"/connect-discourse"}>
-          <a>Connect to Discourse</a>
-        </Link>
-      </div>
+      <Link href={"/connect-discourse"} passHref>
+        <Button color={event.color} nextJsLink className="my-2">
+          You need to connect to Discourse to comment
+        </Button>
+      </Link>
     );
   }
   return (
