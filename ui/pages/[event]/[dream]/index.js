@@ -110,7 +110,7 @@ export default ({ event, currentUser, currentOrgMember, currentOrg }) => {
       variables: { id: router.query.dream },
     }
   );
-  console.log({ dream });
+
   if (dream)
     return (
       <div className="max-w-screen-2lg flex-1">
