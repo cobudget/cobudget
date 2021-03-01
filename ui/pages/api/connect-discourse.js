@@ -11,19 +11,18 @@ const {
 
 const atob = (a) => Buffer.from(a, "base64").toString("binary");
 
-// const btoa = (b) => Buffer.from(b).toString("base64");
-
 export default async function (req, res) {
   const { query } = req;
   const { payload } = query;
-  const pem = process.env.PRIVATE_KEY;
+  const pem = process.env.PRIVATE_TOKEN_KEY;
   const privKey = forge.pki.privateKeyFromPem(pem);
+
   const cleanPayload = payload.replace(/ /g, "");
   const cypherCode = atob(cleanPayload);
-  const decryptCode = privKey.decrypt(cypherCode, "RSAES-PKCS1-V1_5");
-  const decryptedPayload = JSON.parse(decryptCode);
+  const decryptedPayload = privKey.decrypt(cypherCode, "RSAES-PKCS1-V1_5");
+  const parsedPayload = JSON.parse(decryptedPayload);
 
-  const { key: discourseApiKey } = decryptedPayload;
+  const { key: discourseApiKey } = parsedPayload;
 
   const tokenCache = auth(req).tokenCache(req, res);
   const { accessToken } = await tokenCache.getAccessToken();

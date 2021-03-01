@@ -1,15 +1,20 @@
-import { useRouter } from "next/router";
 import createDiscourseConnectUrl from "utils/createDiscourseConnectUrl";
 import Button from "components/Button";
 import { CheckIcon } from "components/Icons";
+import { useEffect, useState } from "react";
 
 export default ({ currentOrgMember, currentOrg }) => {
-  const router = useRouter();
   if (!currentOrgMember) return null;
   if (!currentOrg.discourseUrl)
     return (
       <div>Your organization has not set up custom discourse integration.</div>
     );
+
+  const [discourseConnectUrl, setUrl] = useState("");
+
+  useEffect(() => {
+    setUrl(createDiscourseConnectUrl(currentOrg));
+  }, []);
 
   return (
     <div className="max-w-screen-sm mt-10">
@@ -27,19 +32,17 @@ export default ({ currentOrgMember, currentOrg }) => {
           : "Click the button below to re-connect, if your api key has expired or you have changed username on Discourse."}
       </p>
 
-      {typeof window !== "undefined" && (
-        <div>
-          <Button
-            href={createDiscourseConnectUrl(currentOrg)}
-            variant={
-              currentOrgMember.hasDiscourseApiKey ? "secondary" : "primary"
-            }
-          >
-            {!currentOrgMember.hasDiscourseApiKey
-              ? "Connect to Discourse"
-              : "Re-connect to Discourse"}
-          </Button>
-        </div>
+      {discourseConnectUrl && (
+        <Button
+          href={discourseConnectUrl}
+          variant={
+            currentOrgMember.hasDiscourseApiKey ? "secondary" : "primary"
+          }
+        >
+          {!currentOrgMember.hasDiscourseApiKey
+            ? "Connect to Discourse"
+            : "Re-connect to Discourse"}
+        </Button>
       )}
     </div>
   );
