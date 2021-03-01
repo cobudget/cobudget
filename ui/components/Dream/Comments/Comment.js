@@ -6,7 +6,7 @@ import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
 import { TextField, Button, IconButton } from "@material-ui/core";
-import { DeleteIcon, EditIcon } from "components/Icons";
+import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
 import { useForm } from "react-hook-form";
 import EditComment from "./EditComment";
 
@@ -36,6 +36,12 @@ const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
+const LogIcon = () => (
+  <div className="bg-gray-100 text-gray-700 rounded-full h-10 w-10 flex items-center justify-center">
+    <FlagIcon className="h-5 w-5" />
+  </div>
+);
+
 const Comment = ({
   comment,
   dreamId,
@@ -45,6 +51,7 @@ const Comment = ({
 }) => {
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
+
   const canEdit =
     currentOrgMember &&
     (currentOrgMember?.id === comment.orgMember?.id ||
@@ -53,18 +60,26 @@ const Comment = ({
   return (
     <div className="flex my-4">
       <div className="mr-4">
-        <Avatar
-          user={
-            comment.orgMember?.user ?? { username: comment.discourseUsername }
-          }
-        />
+        {comment.isLog ? (
+          <LogIcon />
+        ) : (
+          <Avatar
+            user={
+              comment.orgMember?.user ?? { username: comment.discourseUsername }
+            }
+          />
+        )}
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
-          <h5>
-            {comment.orgMember?.user.username ??
-              `${comment.discourseUsername} (Discourse user)`}
-          </h5>
+          {comment.isLog ? (
+            <h5>Log</h5>
+          ) : (
+            <h5>
+              {comment.orgMember?.user.username ??
+                `${comment.discourseUsername} (Discourse user)`}
+            </h5>
+          )}
           <div className="flex items-center">
             <span className="font-normal mr-2">
               {dayjs(comment.createdAt).fromNow()}

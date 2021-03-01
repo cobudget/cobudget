@@ -61,6 +61,7 @@ export const DREAM_QUERY = gql`
         cooked
         raw
         createdAt
+        isLog
         orgMember {
           id
           user {

@@ -986,7 +986,7 @@ const resolvers = {
         userId: currentOrgMember.id,
       });
 
-      const logContent = `Someone flagged this dream for the **${guideline.title}** guideline. \n> ${comment}`;
+      const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
 
       if (currentOrg.discourse) {
         if (!dream.discouseTopicId) {
@@ -1016,7 +1016,7 @@ const resolvers = {
         dream.comments.push({
           authorId: currentOrgMember.id,
           content: logContent,
-          log: true,
+          isLog: true,
         });
       }
 
@@ -1055,7 +1055,7 @@ const resolvers = {
 
       const guideline = event.guidelines.id(resolvedFlag.guidelineId);
 
-      const logContent = `Someone resolved a flag for the **${guideline.title}** guideline. \n> ${comment}`;
+      const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
       if (currentOrg.discourse) {
         if (dream.discourseTopicId) {
@@ -1071,7 +1071,7 @@ const resolvers = {
         dream.comments.push({
           authorId: currentOrgMember.id,
           content: logContent,
-          log: true,
+          isLog: true,
         });
       }
 
@@ -2027,9 +2027,14 @@ const resolvers = {
       if (post.username) return post.username;
       return null;
     },
+    isLog: (comment) => {
+      if (comment.isLog) return comment.isLog;
+      if (comment.username === 'system') return true;
+      return false;
+    },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
       // make logs anonymous
-      if (post.log) return null;
+      if (post.isLog) return null;
 
       // comment from mongodb
       // TODO: Rename authorId in mongo models to orgMemberId

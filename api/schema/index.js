@@ -307,6 +307,7 @@ const schema = gql`
     raw: String
     cooked: String
     discourseUsername: String
+    isLog: Boolean
   }
 
   type Flag {
