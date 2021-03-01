@@ -606,14 +606,16 @@ const resolvers = {
       if (currentOrg.discourse) {
         const discoursePost = await discourse(
           currentOrg.discourse
-        ).posts.create({
-          title,
-          raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
-          username: 'system',
-          ...(currentOrg.discourse.dreamsCategoryId && {
-            category: currentOrg.discourse.dreamsCategoryId,
-          }),
-        });
+        ).posts.create(
+          {
+            title,
+            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+            ...(currentOrg.discourse.dreamsCategoryId && {
+              category: currentOrg.discourse.dreamsCategoryId,
+            }),
+          },
+          { username: 'system' }
+        );
 
         dream.discourseTopicId = discoursePost.topic_id;
       }
