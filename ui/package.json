@@ -10,7 +10,7 @@
     "build-storybook": "build-storybook"
   },
   "engines": {
-    "node": "12.x"
+    "node": "14.x"
   },
   "dependencies": {
     "@apollo/react-hooks": "3.1.3",
