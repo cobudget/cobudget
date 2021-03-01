@@ -113,18 +113,6 @@ export const TOP_LEVEL_QUERY = gql`
       customDomain
       discourseUrl
     }
-    # currentMember {
-    #   id
-    #   name
-    #   avatar
-    #   email
-    #   isAdmin
-    #   isApproved
-    #   availableGrants
-    #   event {
-    #     id
-    #   }
-    # }
   }
 `;
 
