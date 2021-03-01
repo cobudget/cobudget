@@ -12,7 +12,7 @@
     "singleQuote": true
   },
   "engines": {
-    "node": "12.x"
+    "node": "14.x"
   },
   "dependencies": {
     "@sensestack/plato-core": "^1.0.3",
