@@ -55,12 +55,14 @@ export const DREAM_QUERY = gql`
         small
         large
       }
-      numberOfComments
       comments {
         id
-        content
+        discourseUsername
+        cooked
+        raw
         createdAt
-        author {
+        isLog
+        orgMember {
           id
           user {
             id
@@ -69,6 +71,7 @@ export const DREAM_QUERY = gql`
           }
         }
       }
+      numberOfComments
       logs {
         createdAt
         type
@@ -97,7 +100,7 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentUser, currentOrgMember }) => {
+export default ({ event, currentUser, currentOrgMember, currentOrg }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -107,7 +110,7 @@ export default ({ event, currentUser, currentOrgMember }) => {
       variables: { id: router.query.dream },
     }
   );
-  console.log({ dream });
+
   if (dream)
     return (
       <div className="max-w-screen-2lg flex-1">
@@ -121,6 +124,7 @@ export default ({ event, currentUser, currentOrgMember }) => {
           event={event}
           currentUser={currentUser}
           currentOrgMember={currentOrgMember}
+          currentOrg={currentOrg}
         />
       </div>
     );

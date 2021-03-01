@@ -14,9 +14,12 @@ const EDIT_COMMENT_MUTATION = gql`
       numberOfComments
       comments {
         id
-        content
+        discourseUsername
+        cooked
+        raw
         createdAt
-        author {
+        isLog
+        orgMember {
           id
           user {
             id

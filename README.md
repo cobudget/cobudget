@@ -16,7 +16,8 @@ Everything on `master` is automatically deployed to [dreams.wtf](https://dreams.
 ### Prerequisites
 
 - [Install and run](https://docs.docker.com/compose/install/) Docker-compose
-- [Install Node.js](https://nodejs.org/en/) version >= 12.
+- [Install Node.js](https://nodejs.org/en/) version >= 14.
+  - Or run `nvm use` in this directory
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
 - In /api, copy `.env.default` to `.env`
@@ -47,10 +48,15 @@ export NODE_ENV=development && npm run dev
 
 # Postrequisites
 
+<<<<<<< HEAD
+After running for the first time add default organization
+=======
 After running for the first time, log in, add default organization
-By visiting http://dev-org.localhost:3000/organizations/create
-Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
-Then open the console and click the link to login to the new organization
+
+> > > > > > > 6cdb05bbbfad0aa8f15cad8aba6878190ad82bc3
+> > > > > > > By visiting http://dev-org.localhost:3000/organizations/create
+> > > > > > > Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
+> > > > > > > Then open the console and click the link to login to the new organization
 
 ### Resetting the db to its initial state
 

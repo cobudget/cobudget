@@ -6,7 +6,7 @@ const { Kind } = require('graphql/language');
 const mongoose = require('mongoose');
 const dayjs = require('dayjs');
 const { combineResolvers, skip } = require('graphql-resolvers');
-
+const discourse = require('../lib/discourse');
 const isRootAdmin = (parent, args, { currentUser }) => {
   return currentUser && currentUser.isRootAdmin
     ? skip
@@ -579,7 +579,7 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentOrgMember, models: { EventMember, Dream, Event } }
+      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event } }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -597,19 +597,28 @@ const resolvers = {
       // // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       // if (maxGoal && (maxGoal <= minGoal || minGoal == null))
       //   throw new Error('max goal needs to be larger than min goal');
-
-      return new Dream({
+      const dream = new Dream({
         eventId,
         title,
-        // description,
-        // summary,
         cocreators: [eventMember.id],
-        // budgetDescription,
-        // minGoal,
-        // ...(event.allowStretchGoals && { maxGoal }),
-        // images,
-        // budgetItems,
-      }).save();
+      });
+
+      if (currentOrg.discourse) {
+        const discoursePost = await discourse(
+          currentOrg.discourse
+        ).posts.create({
+          title,
+          raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+          username: 'system',
+          ...(currentOrg.discourse.dreamsCategoryId && {
+            category: currentOrg.discourse.dreamsCategoryId,
+          }),
+        });
+
+        dream.discourseTopicId = discoursePost.topic_id;
+      }
+
+      return dream.save();
     },
     editDream: async (
       parent,
@@ -799,56 +808,121 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrg, currentOrgMember, models: { Dream, Event } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
+      if (!currentOrgMember)
+        throw new Error('You need to be an org member to post comments.');
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be a member and/or approved');
+      if (currentOrg.discourse) {
+        if (!currentOrgMember.discourseApiKey) {
+          throw new Error(
+            'You need to have a discourse account connected, go to /connect-discourse'
+          );
+        }
 
-      if (content.length === 0) throw new Error('You need content!');
+        if (content.length < 20)
+          throw new Error('Your post needs to be at least 20 characters long');
+
+        if (!dream.discouseTopicId) {
+          const event = await Event.findOne({ _id: dream.eventId });
+
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create(
+            {
+              title: dream.title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
+            },
+            { username: 'system' }
+          );
+
+          dream.discourseTopicId = discoursePost.topic_id;
+        }
+
+        // TODO: error handling (expired api key, faulty discourse url)
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: content,
+          },
+          { userApiKey: currentOrgMember.discourseApiKey }
+        );
+
+        return dream.save();
+      }
+
+      // post regular comment
+      if (content.length < 3)
+        throw new Error('Your post needs to be at least 3 characters long!');
 
       dream.comments.push({
         authorId: currentOrgMember.id,
         content,
       });
 
-      return await dream.save();
+      return dream.save();
     },
 
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
 
+      if (!currentOrgMember) {
+        throw new Error('You need to be member of the org to delete comments');
+      }
+
+      if (currentOrg.discourse) {
+        const post = await discourse(currentOrg.discourse).posts.getSingle(
+          commentId
+        );
+
+        if (
+          post.username !== currentOrgMember.discourseUsername ||
+          !currentOrgMember.isOrgAdmin
+        ) {
+          throw new Error(
+            'You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse'
+          );
+        }
+
+        await discourse(currentOrg.discourse).posts.delete({
+          id: commentId,
+          ...(post.username == currentOrgMember.discourseUsername && {
+            userApiKey: currentOrgMember.discourseApiKey,
+          }),
+          ...(post.username !== currentOrgMember.discourseUsername &&
+            currentOrgMember.isOrgAdmin && { username: 'system' }),
+        });
+        return dream;
+      }
+
+      // mongodb comments
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
       });
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
-
-      dream.comments = dream.comments.filter((comment) => {
-        if (
-          comment._id.toString() === commentId &&
-          (comment.authorId.toString() === eventMember.id ||
-            eventMember.isAdmin)
-        )
-          return false;
-        return true;
-      });
+      dream.comments = dream.comments.filter(
+        (comment) =>
+          !(
+            comment._id.toString() === commentId &&
+            (comment.authorId.toString() === currentOrgMember.id.toString() ||
+              eventMember?.isAdmin)
+          )
+      );
 
       return dream.save();
     },
@@ -866,14 +940,11 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
-
       const comment = dream.comments.filter(
         (comment) =>
           comment._id.toString() === commentId &&
-          (comment.authorId.toString() === eventMember.id ||
-            eventMember.isAdmin)
+          (comment.authorId.toString() === currentOrgMember.id.toString() ||
+            eventMember?.isAdmin)
       );
 
       if (comment.length == 0) {
@@ -889,14 +960,7 @@ const resolvers = {
     raiseFlag: async (
       parent,
       { dreamId, guidelineId, comment },
-      {
-        currentOrgMember,
-        models: {
-          Dream,
-          EventMember,
-          logs: { FlagRaisedLog },
-        },
-      }
+      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -904,6 +968,10 @@ const resolvers = {
       const dream = await Dream.findOne({
         _id: dreamId,
       });
+
+      const event = await Event.findOne({ _id: dream.eventId });
+
+      const guideline = event.guidelines.id(guidelineId);
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -920,27 +988,50 @@ const resolvers = {
         userId: currentOrgMember.id,
       });
 
-      await new FlagRaisedLog({
-        dreamId,
-        eventId: dream.eventId,
-        userId: currentOrgMember.id,
-        guidelineId,
-        comment,
-      }).save();
+      const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
+
+      if (currentOrg.discourse) {
+        if (!dream.discouseTopicId) {
+          // TODO: break out create thread into separate function
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create(
+            {
+              title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
+            },
+            {
+              username: 'system',
+            }
+          );
+
+          dream.discourseTopicId = discoursePost.topic_id;
+        }
+
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: logContent,
+          },
+          { username: 'system' }
+        );
+      } else {
+        dream.comments.push({
+          authorId: currentOrgMember.id,
+          content: logContent,
+          isLog: true,
+        });
+      }
 
       return dream.save();
     },
     resolveFlag: async (
       parent,
       { dreamId, flagId, comment },
-      {
-        currentOrgMember,
-        models: {
-          Dream,
-          EventMember,
-          logs: { FlagResolvedLog },
-        },
-      }
+      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
@@ -966,14 +1057,46 @@ const resolvers = {
 
       const resolvedFlag = dream.flags.id(flagId);
 
-      await new FlagResolvedLog({
-        dreamId,
-        eventId: dream.eventId,
-        userId: currentOrgMember.id,
-        guidelineId: resolvedFlag.guidelineId,
-        resolvingFlagId: flagId,
-        comment,
-      }).save();
+      const event = await Event.findOne({ _id: dream.eventId });
+
+      const guideline = event.guidelines.id(resolvedFlag.guidelineId);
+
+      const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
+
+      if (currentOrg.discourse) {
+        if (!dream.discouseTopicId) {
+          // TODO: break out create thread into separate function
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create(
+            {
+              title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
+            },
+            {
+              username: 'system',
+            }
+          );
+
+          dream.discourseTopicId = discoursePost.topic_id;
+        }
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: logContent,
+          },
+          { username: 'system' }
+        );
+      } else {
+        dream.comments.push({
+          authorId: currentOrgMember.id,
+          content: logContent,
+          isLog: true,
+        });
+      }
 
       return dream.save();
     },
@@ -1715,6 +1838,7 @@ const resolvers = {
     },
   },
   OrgMember: {
+    hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,
     user: async (orgMember, args, { kcAdminClient }) => {
       const user = await kcAdminClient.users.findOne({
         id: orgMember.userId,
@@ -1738,10 +1862,8 @@ const resolvers = {
         organizationId: currentOrg.id,
         slug,
       });
-      // const orgMembership = await OrgMember.findOne({
-      //   userId: user.id,
-      //   organizationId: currentOrg.id,
-      // });
+      // TODO: use currentOrgMember here instead? should not be on every event member?
+
       return EventMember.findOne({
         orgMemberId: orgMember.id,
         eventId: event.id,
@@ -1810,6 +1932,7 @@ const resolvers = {
     events: async (organization, args, { models: { Event } }) => {
       return Event.find({ organizationId: organization.id });
     },
+    discourseUrl: (organization) => organization.discourse?.url,
   },
   Event: {
     // members: async (event, args, { models: { EventMember } }) => {
@@ -1883,7 +2006,30 @@ const resolvers = {
       ]);
       return grantsForDream;
     },
-    numberOfComments: (dream) => {
+    comments: async (dream, args, { currentOrg }) => {
+      if (currentOrg.discourse) {
+        let discourseComments = [];
+        if (dream.discourseTopicId) {
+          const {
+            post_stream: { posts },
+          } = await discourse(currentOrg.discourse).posts.get(
+            dream.discourseTopicId
+          );
+          discourseComments = posts.filter((post) => post.post_number !== 1);
+        }
+        // add together native comments with discourse posts to not have to migrate existings comments
+        return [...dream.comments, ...discourseComments];
+      }
+
+      return dream.comments;
+    },
+    numberOfComments: async (dream, args, { currentOrg }) => {
+      if (currentOrg.discourse && dream.discourseTopicId) {
+        const { posts_count } = await discourse(currentOrg.discourse).posts.get(
+          dream.discourseTopicId
+        );
+        return dream.comments.length + posts_count - 1;
+      }
       return dream.comments.length;
     },
     favorite: async (
@@ -1921,6 +2067,39 @@ const resolvers = {
       return Log.find({ dreamId: dream.id });
     },
   },
+  Comment: {
+    createdAt: (post) => {
+      if (post.createdAt) return post.createdAt; // comment from mongodb
+      if (post.created_at) return new Date(post.created_at); // post from Discourse
+      return null;
+    },
+    raw: (post) => post.content ?? null,
+    discourseUsername: (post) => {
+      if (post.username) return post.username;
+      return null;
+    },
+    isLog: (comment) => {
+      if (comment.isLog) return comment.isLog;
+      if (comment.username === 'system') return true;
+      return false;
+    },
+    orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+      // make logs anonymous
+      if (post.isLog) return null;
+
+      // comment from mongodb
+      // TODO: Rename authorId in mongo models to orgMemberId
+      // is it orgMemberId now? Huh. Maybe it is not eventMember then.. idk.. seems untrue.
+
+      if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
+
+      // post from discourse
+      return OrgMember.findOne({
+        organizationId: currentOrg.id,
+        discourseUsername: post.username,
+      });
+    },
+  },
   Flag: {
     guideline: async (flag, args, { models: { Event } }) => {
       const event = await Event.findOne({ _id: flag.parent().eventId });
@@ -1953,11 +2132,6 @@ const resolvers = {
       return null;
     },
   }),
-  Comment: {
-    author: async (comment, args, { models: { OrgMember } }) => {
-      return OrgMember.findOne({ _id: comment.authorId });
-    },
-  },
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {

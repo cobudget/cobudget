@@ -77,6 +77,8 @@ export const TOP_LEVEL_QUERY = gql`
       id
       bio
       isOrgAdmin
+      discourseUsername
+      hasDiscourseApiKey
       user {
         id
         firstName
@@ -107,6 +109,8 @@ export const TOP_LEVEL_QUERY = gql`
       id
       name
       logo
+      subdomain
+      discourseUrl
     }
     # currentMember {
     #   id

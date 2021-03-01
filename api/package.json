@@ -12,10 +12,10 @@
     "singleQuote": true
   },
   "engines": {
-    "node": "12.x"
+    "node": "14.x"
   },
   "dependencies": {
-    "@sensestack/plato-core": "^1.0.1",
+    "@sensestack/plato-core": "^1.0.3",
     "apollo-server-express": "^2.15.1",
     "body-parser": "^1.19.0",
     "dayjs": "^1.8.20",

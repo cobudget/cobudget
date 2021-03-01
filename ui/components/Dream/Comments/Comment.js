@@ -2,10 +2,11 @@ import React from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import dayjs from "dayjs";
+import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
 import { TextField, Button, IconButton } from "@material-ui/core";
-import { DeleteIcon, EditIcon } from "components/Icons";
+import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
 import { useForm } from "react-hook-form";
 import EditComment from "./EditComment";
 
@@ -18,9 +19,11 @@ const DELETE_COMMENT_MUTATION = gql`
       numberOfComments
       comments {
         id
-        content
+        discourseUsername
+        cooked
+        raw
         createdAt
-        author {
+        orgMember {
           id
           user {
             id
@@ -33,6 +36,12 @@ const DELETE_COMMENT_MUTATION = gql`
   }
 `;
 
+const LogIcon = () => (
+  <div className="bg-gray-100 text-gray-700 rounded-full h-10 w-10 flex items-center justify-center">
+    <FlagIcon className="h-5 w-5" />
+  </div>
+);
+
 const Comment = ({
   comment,
   dreamId,
@@ -42,18 +51,35 @@ const Comment = ({
 }) => {
   const [isEditMode, setEditMode] = React.useState(false);
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION);
+
   const canEdit =
-    currentOrgMember?.currentEventMembership?.id === comment.author.id ||
-    currentOrgMember?.currentEventMembership?.isAdmin;
+    currentOrgMember &&
+    (currentOrgMember?.id === comment.orgMember?.id ||
+      currentOrgMember?.currentEventMembership?.isAdmin);
 
   return (
     <div className="flex my-4">
       <div className="mr-4">
-        <Avatar user={comment.author.user} />
+        {comment.isLog ? (
+          <LogIcon />
+        ) : (
+          <Avatar
+            user={
+              comment.orgMember?.user ?? { username: comment.discourseUsername }
+            }
+          />
+        )}
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
-          <h5>{comment.author.user.username}</h5>
+          {comment.isLog ? (
+            <h5>Log</h5>
+          ) : (
+            <h5>
+              {comment.orgMember?.user.username ??
+                `${comment.discourseUsername} (Discourse user)`}
+            </h5>
+          )}
           <div className="flex items-center">
             <span className="font-normal mr-2">
               {dayjs(comment.createdAt).fromNow()}
@@ -72,9 +98,15 @@ const Comment = ({
           />
         ) : (
           <>
-            <p className="text-gray-900 whitespace-pre-line">
-              {comment.content}
-            </p>
+            {comment.cooked ? (
+              <div
+                className="text-gray-900 whitespace-pre-line markdown"
+                dangerouslySetInnerHTML={{ __html: comment.cooked }}
+              />
+            ) : (
+              <ReactMarkdown source={comment.raw} className="markdown" />
+            )}
+
             {canEdit && (
               <div className="flex">
                 <button
@@ -93,13 +125,13 @@ const Comment = ({
                   <DeleteIcon className="w-4 h-4 mr-1" />
                   <span>Delete</span>
                 </button>
-                <button
+                {/* <button
                   onClick={() => setEditMode(true)}
                   className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:shadow-outline"
                 >
                   <EditIcon className="w-4 h-4 mr-1" />
                   <span>Edit</span>
-                </button>
+                </button> */}
               </div>
             )}
           </>

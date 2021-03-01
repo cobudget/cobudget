@@ -30,6 +30,7 @@ const DreamSchema = new Schema({
         default: Date.now,
       },
       content: String,
+      isLog: Boolean,
     }),
   ],
   approved: { type: Boolean, default: false },
@@ -63,6 +64,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
+  discourseTopicId: { type: Number },
 }).index({ title: 'text', description: 'text', summary: 'text' });
 
 DreamSchema.virtual('minGoal').get(function () {

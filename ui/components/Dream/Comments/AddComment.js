@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import Link from "next/link";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -13,9 +14,12 @@ const ADD_COMMENT = gql`
       numberOfComments
       comments {
         id
-        content
+        discourseUsername
+        cooked
+        raw
         createdAt
-        author {
+        isLog
+        orgMember {
           id
           user {
             id
@@ -28,12 +32,20 @@ const ADD_COMMENT = gql`
   }
 `;
 
-const AddComment = ({ currentOrgMember, dreamId, event }) => {
+function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
   const [addComment, { loading }] = useMutation(ADD_COMMENT);
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
   const inputRef = React.useRef();
-
+  if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
+    return (
+      <Link href={"/connect-discourse"} passHref>
+        <Button color={event.color} nextJsLink className="my-2">
+          You need to connect to Discourse to comment
+        </Button>
+      </Link>
+    );
+  }
   return (
     <form
       onSubmit={handleSubmit(() => {
@@ -94,6 +106,6 @@ const AddComment = ({ currentOrgMember, dreamId, event }) => {
       </div>
     </form>
   );
-};
+}
 
 export default AddComment;
