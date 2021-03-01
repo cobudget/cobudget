@@ -1985,25 +1985,27 @@ const resolvers = {
     },
     comments: async (dream, args, { currentOrg }) => {
       if (currentOrg.discourse) {
-        // maybe I could do the migration here? :-)
-        if (!dream.discourseTopicId) return null;
-        const {
-          post_stream: { posts },
-        } = await discourse(currentOrg.discourse).posts.get(
-          dream.discourseTopicId
-        );
-
-        return posts.filter((post) => post.post_number !== 1);
+        let discourseComments = [];
+        if (dream.discourseTopicId) {
+          const {
+            post_stream: { posts },
+          } = await discourse(currentOrg.discourse).posts.get(
+            dream.discourseTopicId
+          );
+          discourseComments = posts.filter((post) => post.post_number !== 1);
+        }
+        // add together native comments with discourse posts to not have to migrate existings comments
+        return [...dream.comments, ...discourseComments];
       }
 
       return dream.comments;
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse) {
+      if (currentOrg.discourse && dream.discourseTopicId) {
         const { posts_count } = await discourse(currentOrg.discourse).posts.get(
           dream.discourseTopicId
         );
-        return posts_count - 1;
+        return dream.comments.length + posts_count - 1;
       }
       return dream.comments.length;
     },
