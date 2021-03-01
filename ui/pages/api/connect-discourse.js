@@ -37,7 +37,7 @@ export default async function (req, res) {
 
   let currentOrg;
 
-  if (host.contains(process.env.DEPLOY_URL)) {
+  if (host.includes(process.env.DEPLOY_URL)) {
     currentOrg = await Organization.findOne({ subdomain });
   } else {
     currentOrg = await Organization.findOne({ customDomain: host });
