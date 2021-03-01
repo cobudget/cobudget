@@ -238,7 +238,6 @@ const MyApp = ({ Component, pageProps, apolloClient }) => {
             currentOrgMember={currentOrgMember}
             currentOrg={currentOrg}
             event={event}
-            //hostInfo={hostInfo}
             openModal={openModal}
           />
         </Layout>
