@@ -1,22 +1,19 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
-import Log from "./Log";
 
 const Comments = ({
   currentOrgMember,
   currentOrg,
   comments,
-  logs,
   dreamId,
   event,
-  posts,
+  logs,
 }) => {
-  // const items = [
-  //   ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
-  //   ...logs.map((log) => ({ ...log, _type: "LOG" })),
-  // ].sort((a, b) => a.createdAt - b.createdAt);
-
-  //TODO: remove old logs, create new logs
+  // separate logs are deprecated, logs are now created as regular comments, but merging with them here to avoid migrations
+  const items = [
+    ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
+    ...logs.map((log) => ({ ...log, _type: "LOG" })),
+  ].sort((a, b) => a.createdAt - b.createdAt);
 
   return (
     <div>
@@ -25,19 +22,8 @@ const Comments = ({
           {comments.length} {comments.length === 1 ? "comment" : "comments"}
         </h2>
       )}
-      {comments.map((comment, index) => {
-        // if (item._type === "COMMENT")
-        //   return (
-        //     <Comment
-        //       comment={item}
-        //       currentOrgMember={currentOrgMember}
-        //       dreamId={dreamId}
-        //       showBorderBottom={Boolean(index + 1 !== items.length)}
-        //       key={index}
-        //       event={event}
-        //     />
-        //   );
-        // if (item._type === "LOG") return <Log log={item} key={index} />;
+      {items.map((comment, index) => {
+        if (item._type === "LOG") return <Log log={item} key={index} />;
         return (
           <Comment
             comment={comment}

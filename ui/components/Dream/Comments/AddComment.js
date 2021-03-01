@@ -18,6 +18,7 @@ const ADD_COMMENT = gql`
         cooked
         raw
         createdAt
+        isLog
         orgMember {
           id
           user {
@@ -36,8 +37,7 @@ function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
   const [content, setContent] = React.useState("");
   const { handleSubmit, register, errors } = useForm();
   const inputRef = React.useRef();
-
-  if (currentOrg.discourse && !currentOrgMember.hasDiscourseApiKey) {
+  if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
     return (
       <Link href={"/connect-discourse"} passHref>
         <Button color={event.color} nextJsLink className="my-2">
