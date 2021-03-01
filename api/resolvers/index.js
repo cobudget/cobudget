@@ -609,7 +609,11 @@ const resolvers = {
         ).posts.create(
           {
             title,
-            raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+            raw: `https://${
+              currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+            }/${event.slug}/${dream.id}`,
             ...(currentOrg.discourse.dreamsCategoryId && {
               category: currentOrg.discourse.dreamsCategoryId,
             }),
@@ -837,7 +841,11 @@ const resolvers = {
           ).posts.create(
             {
               title: dream.title,
-              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              raw: `https://${
+                currentOrg.customDomain
+                  ? currentOrg.customDomain
+                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+              }/${event.slug}/${dream.id}`,
 
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
@@ -1000,7 +1008,11 @@ const resolvers = {
           ).posts.create(
             {
               title,
-              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              raw: `https://${
+                currentOrg.customDomain
+                  ? currentOrg.customDomain
+                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+              }/${event.slug}/${dream.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
@@ -1073,7 +1085,11 @@ const resolvers = {
           ).posts.create(
             {
               title,
-              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              raw: `https://${
+                currentOrg.customDomain
+                  ? currentOrg.customDomain
+                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+              }/${event.slug}/${dream.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
