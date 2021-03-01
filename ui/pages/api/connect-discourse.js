@@ -1,3 +1,4 @@
+import fetch from "isomorphic-unfetch";
 import forge from "node-forge";
 import auth from "lib/auth";
 import jwt from "jsonwebtoken";
