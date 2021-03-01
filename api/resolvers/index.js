@@ -833,7 +833,7 @@ const resolvers = {
         if (content.length < 20)
           throw new Error('Your post needs to be at least 20 characters long');
 
-        if (!dream.discouseTopicId) {
+        if (!dream.discourseTopicId) {
           const event = await Event.findOne({ _id: dream.eventId });
 
           const discoursePost = await discourse(
@@ -1001,7 +1001,7 @@ const resolvers = {
       const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
 
       if (currentOrg.discourse) {
-        if (!dream.discouseTopicId) {
+        if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
@@ -1078,7 +1078,7 @@ const resolvers = {
       const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
       if (currentOrg.discourse) {
-        if (!dream.discouseTopicId) {
+        if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
