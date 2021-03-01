@@ -811,7 +811,7 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrg, currentOrgMember, models: { Dream } }
+      { currentOrg, currentOrgMember, models: { Dream, Event } }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
@@ -1058,15 +1058,32 @@ const resolvers = {
       const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
       if (currentOrg.discourse) {
-        if (dream.discourseTopicId) {
-          await discourse(currentOrg.discourse).posts.create(
+        if (!dream.discouseTopicId) {
+          // TODO: break out create thread into separate function
+          const discoursePost = await discourse(
+            currentOrg.discourse
+          ).posts.create(
             {
-              topic_id: dream.discourseTopicId,
-              raw: logContent,
+              title,
+              raw: `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}/${event.slug}/${dream.id}`,
+              ...(currentOrg.discourse.dreamsCategoryId && {
+                category: currentOrg.discourse.dreamsCategoryId,
+              }),
             },
-            { username: 'system' }
+            {
+              username: 'system',
+            }
           );
+
+          dream.discourseTopicId = discoursePost.topic_id;
         }
+        await discourse(currentOrg.discourse).posts.create(
+          {
+            topic_id: dream.discourseTopicId,
+            raw: logContent,
+          },
+          { username: 'system' }
+        );
       } else {
         dream.comments.push({
           authorId: currentOrgMember.id,
