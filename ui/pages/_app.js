@@ -110,6 +110,7 @@ export const TOP_LEVEL_QUERY = gql`
       name
       logo
       subdomain
+      customDomain
       discourseUrl
     }
     # currentMember {
