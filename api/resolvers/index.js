@@ -938,14 +938,11 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
-
       const comment = dream.comments.filter(
         (comment) =>
           comment._id.toString() === commentId &&
-          (comment.authorId.toString() === eventMember.id ||
-            eventMember.isAdmin)
+          (comment.authorId.toString() === currentOrgMember.id.toString() ||
+            eventMember?.isAdmin)
       );
 
       if (comment.length == 0) {
@@ -2021,10 +2018,11 @@ const resolvers = {
   },
   Comment: {
     createdAt: (post) => {
-      if (post.createdAt) return createdAt; // comment from mongodb
+      if (post.createdAt) return post.createdAt; // comment from mongodb
       if (post.created_at) return new Date(post.created_at); // post from Discourse
       return null;
     },
+    raw: (post) => post.content ?? null,
     discourseUsername: (post) => {
       if (post.username) return post.username;
       return null;

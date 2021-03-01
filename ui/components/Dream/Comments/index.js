@@ -49,7 +49,7 @@ const Comments = ({
           />
         );
       })}
-      {currentOrgMember && currentOrgMember.currentEventMembership && (
+      {currentOrgMember && (
         <AddComment
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
