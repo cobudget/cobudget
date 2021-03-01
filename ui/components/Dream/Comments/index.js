@@ -1,5 +1,6 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
+import Log from "./Log";
 
 const Comments = ({
   currentOrgMember,
@@ -23,7 +24,7 @@ const Comments = ({
         </h2>
       )}
       {items.map((comment, index) => {
-        if (item._type === "LOG") return <Log log={item} key={index} />;
+        if (comment._type === "LOG") return <Log log={comment} key={index} />;
         return (
           <Comment
             comment={comment}
