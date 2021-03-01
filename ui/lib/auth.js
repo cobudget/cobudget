@@ -1,14 +1,29 @@
 import { initAuth0 } from "@auth0/nextjs-auth0";
 import getHostInfo from "utils/getHostInfo";
 
-export default (req) => {
+export default (req, redirectPath) => {
   const { host, protocol } = getHostInfo(req);
+
+  let redirectPathQueryString = "";
+
+  // create redirectPath query parameters from redirectPath array
+  if (Array.isArray(redirectPath)) {
+    redirectPathQueryString = redirectPath.reduce(
+      (str, curr, i) => str + `${i == 0 ? "?" : "&"}redirectPath=${curr}`,
+      ""
+    );
+  } else if (redirectPath) {
+    redirectPathQueryString = `?redirectPath=${redirectPath}`;
+  }
+
+  const redirectUri = `${protocol}://${host}/api/callback${redirectPathQueryString}`;
+
   return initAuth0({
     domain: "auth.platoproject.org/auth/realms/plato",
     clientId: process.env.KEYCLOAK_CLIENT_ID,
     clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
     scope: "openid profile",
-    redirectUri: `${protocol}://${host}/api/callback`,
+    redirectUri,
     postLogoutRedirectUri: `${protocol}://${host}/`,
     session: {
       // The secret used to encrypt the cookie.

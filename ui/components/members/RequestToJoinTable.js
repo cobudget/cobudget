@@ -23,18 +23,26 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
+                  <TableCell>Username</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Email</TableCell>
+                  <TableCell>Bio</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {requestsToJoin.map((member) => (
-                  <TableRow key={member.user.email}>
+                  <TableRow key={member.id}>
                     <TableCell component="th" scope="row">
-                      {member.user.name}
+                      {member.orgMember.user.username}
                     </TableCell>
-                    <TableCell>{member.user.email}</TableCell>
+                    <TableCell component="th" scope="row">
+                      {member.orgMember.user.name}
+                    </TableCell>
+                    <TableCell>{member.orgMember.user.email}</TableCell>
+                    <TableCell component="th" scope="row">
+                      {member.orgMember.bio}
+                    </TableCell>
                     <TableCell align="right" padding="none">
                       <Box p="0 15px" display="flex" justifyContent="flex-end">
                         <Box m="0 8px 0">

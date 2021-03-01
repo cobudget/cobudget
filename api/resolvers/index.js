@@ -115,9 +115,6 @@ const resolvers = {
         eventId,
       });
 
-      // this does not stop currentOrgMembers from being from another org?
-      // maybe removing this query so that you have to connect from the main query?
-      // yeah, that would be better, i think.. TODO: remove query and fetch from event instead.
       const event = await Event.findOne({ _id: eventId });
 
       if (
@@ -1327,9 +1324,9 @@ const resolvers = {
     giveGrant: async (
       parent,
       { eventId, dreamId, value },
-      { currentOrgMember, models: { Member, Grant, Event, Dream } }
+      { currentOrgMember, models: { EventMember, Grant, Event, Dream } }
     ) => {
-      const currentEventMember = await Member.findOne({
+      const currentEventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
         eventId,
       });
@@ -1582,10 +1579,21 @@ const resolvers = {
         eventId,
       });
 
-      if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error('You need to be admin to update granting settings');
+      const event = await Event.findOne({
+        _id: eventId,
+        organizationId: currentOrgMember.organizationId,
+      });
 
-      const event = await Event.findOne({ _id: eventId });
+      if (!event)
+        throw new Error("Can't find event in your organization to edit");
+
+      if (
+        !(
+          (currentEventMember && currentEventMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
+      )
+        throw new Error('You need to be admin to update granting settings.');
 
       const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
       const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
@@ -1723,15 +1731,26 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      { currentOrgMember, models: { EventMember, Event } }
+      {
+        kauth,
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Event, OrgMember },
+      }
     ) => {
-      if (!currentOrgMember)
-        throw new Error(
-          'You need to be a member of this org to register for an event.'
-        );
+      if (!kauth) throw new Error('You need to be logged in.');
+
+      let orgMember = currentOrgMember;
+
+      if (!orgMember) {
+        orgMember = await new OrgMember({
+          userId: kauth.sub,
+          organizationId: currentOrg.id,
+        }).save();
+      }
 
       const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
+        orgMemberId: orgMember.id,
         eventId,
       });
 
@@ -1742,34 +1761,38 @@ const resolvers = {
       let newMember = {
         isAdmin: false,
         eventId,
-        orgMemberId: currentOrgMember.id,
+        orgMemberId: orgMember.id,
       };
 
-      switch (event.registrationPolicy) {
-        case 'OPEN':
-          newMember.isApproved = true;
-          break;
-        case 'REQUEST_TO_JOIN':
-          newMember.isApproved = false;
+      if (orgMember.isOrgAdmin) {
+        newMember.isApproved = true;
+      } else {
+        switch (event.registrationPolicy) {
+          case 'OPEN':
+            newMember.isApproved = true;
+            break;
+          case 'REQUEST_TO_JOIN':
+            newMember.isApproved = false;
 
-          // TODO: need to fix this.. no emails saved in orgmembers
-          // // send request to join notification emails
-          // const admins = await EventMember.find({
-          //   eventId,
-          //   isAdmin: true,
-          // }).populate('orgMemberId');
+            // TODO: need to fix this.. no emails saved in orgmembers
+            // // send request to join notification emails
+            // const admins = await EventMember.find({
+            //   eventId,
+            //   isAdmin: true,
+            // }).populate('orgMemberId');
 
-          // const adminEmails = admins.map((member) => member.orgMemberId.email);
-          // await EmailService.sendRequestToJoinNotifications(
-          //   currentOrg,
-          //   currentUser,
-          //   event,
-          //   adminEmails
-          // );
-          break;
+            // const adminEmails = admins.map((member) => member.orgMemberId.email);
+            // await EmailService.sendRequestToJoinNotifications(
+            //   currentOrg,
+            //   currentUser,
+            //   event,
+            //   adminEmails
+            // );
+            break;
 
-        case 'INVITE_ONLY':
-          throw new Error('This event is invite only');
+          case 'INVITE_ONLY':
+            throw new Error('This event is invite only');
+        }
       }
 
       return new EventMember(newMember).save();
@@ -1870,19 +1893,19 @@ const resolvers = {
     lastName: (user) => (user.lastName ? user.lastName : user.family_name),
     createdAt: (user) => user.createdTimestamp,
     verifiedEmail: (user) => user.emailVerified,
-    email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
-      if (currentOrgMember && currentOrgMember.isOrgAdmin) {
-        const orgMember = await OrgMember.findOne({ userId: user.id });
+    // email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
+    //   if (currentOrgMember && currentOrgMember.isOrgAdmin) {
+    //     const orgMember = await OrgMember.findOne({ userId: user.id });
 
-        if (
-          orgMember &&
-          orgMember.organizationId.toString() ==
-            currentOrgMember.organizationId.toString()
-        )
-          return user.email;
-      }
-      return null;
-    },
+    //     if (
+    //       orgMember &&
+    //       orgMember.organizationId.toString() ==
+    //         currentOrgMember.organizationId.toString()
+    //     )
+    //       return user.email;
+    //   }
+    //   return null;
+    // },
     isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
     avatar: () => null, //TODO: what about avatars in keycloak?
     // membership: async (
@@ -1912,9 +1935,9 @@ const resolvers = {
     discourseUrl: (organization) => organization.discourse?.url,
   },
   Event: {
-    members: async (event, args, { models: { EventMember } }) => {
-      return EventMember.find({ eventId: event.id });
-    },
+    // members: async (event, args, { models: { EventMember } }) => {
+    //   return EventMember.find({ eventId: event.id });
+    // },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     },

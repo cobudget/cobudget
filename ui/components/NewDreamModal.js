@@ -21,6 +21,7 @@ const CREATE_DREAM = gql`
 export default ({ event, open, handleClose }) => {
   const [createDream, { loading }] = useMutation(CREATE_DREAM, {
     variables: { eventId: event.id },
+    refetchQueries: ["Dreams"],
   });
 
   const { handleSubmit, register, errors } = useForm();

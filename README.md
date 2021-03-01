@@ -9,7 +9,7 @@ The project consists of two parts:
 - `/api`: a GraphQL API built with Node.js, MongoDB and Apollo Server
 - `/ui`: a front-end application built with React and Next.js
 
-Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [dreams.wtf](https://dreams.wtf)
+Everything on `master` is automatically deployed to [dreams.wtf](https://dreams.wtf)
 
 ## Development
 
@@ -20,13 +20,18 @@ Everything on `master` is automatically deployed to [Now](https://zeit.co/) as [
   - Or run `nvm use` in this directory
 - Install dependencies: `npm i`
   - This also installs dependencies in `/ui` and `/api`
-- Copy `.env.default` to `.env`
+- In /api, copy `.env.default` to `.env`
+- In /ui, copy `.env.local.default` to `.env.local`
 - For `Firefox` browser - scroll to- to Subdomains section
 - After running (Make sure you check #Postrequisites section below)
 
+### Requires a Keycloak server
+
+You also need to set up a Keycloak server on your own. (TODO: add keycloak to development setup).
+
 ### Running the project
 
-#### Option 1
+#### Option 1: single command
 
 Run the whole stack (db + code) from the root with:
 
@@ -34,29 +39,24 @@ Run the whole stack (db + code) from the root with:
 export NODE_ENV=development && npm run dev
 ```
 
-#### Option 2
+#### Option 2: run db, api and ui separately
 
-Run the mongo db and the code separately using 2 terminals::
-
-```
-npm run db:up
-```
-
-```
-export NODE_ENV=development && npm start
-```
-
-> This last command calls `now dev`.
-
-This builds and serves both the API and the UI with one command, and provides hot reloading.
-`now dev` simulates the serverless deployment platform [Now](https://zeit.co/) where the project is deployed.
+1. Run MongoDB either in Docker (with `npm run db:up` in the root) or [standalone](https://docs.mongodb.com/manual/installation/)
+   Note: If you are running MongoDB standalone, alter the MONGO_URL in `api/.env` to `mongodb://localhost/dreams`
+2. Run the API in one terminal: `cd api && npm run start`
+3. Run the UI in another terminal: `cd ui && npm run dev`
 
 # Postrequisites
 
+<<<<<<< HEAD
 After running for the first time add default organization
-By visiting http://dev-org.localhost:3000/organizations/create
-Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
-Then open the console and click the link to login to the new organization
+=======
+After running for the first time, log in, add default organization
+
+> > > > > > > 6cdb05bbbfad0aa8f15cad8aba6878190ad82bc3
+> > > > > > > By visiting http://dev-org.localhost:3000/organizations/create
+> > > > > > > Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
+> > > > > > > Then open the console and click the link to login to the new organization
 
 ### Resetting the db to its initial state
 
