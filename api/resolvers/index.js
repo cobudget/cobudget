@@ -1201,9 +1201,9 @@ const resolvers = {
     giveGrant: async (
       parent,
       { eventId, dreamId, value },
-      { currentOrgMember, models: { Member, Grant, Event, Dream } }
+      { currentOrgMember, models: { EventMember, Grant, Event, Dream } }
     ) => {
-      const currentEventMember = await Member.findOne({
+      const currentEventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
         eventId,
       });
