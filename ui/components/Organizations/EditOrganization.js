@@ -2,15 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import { Box } from "@material-ui/core";
 import Button from "../Button";
 import TextField from "../TextField";
-import Card from "../styled/Card";
-import Form from "../styled/Form";
 import ImageUpload from "components/ImageUpload";
 import { Tooltip } from "react-tippy";
 import { QuestionMarkIcon } from "../Icons";
-import Router from "next/router";
+import slugify from "utils/slugify";
 
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization(
@@ -56,6 +53,10 @@ export default ({ organization, currentUser }) => {
   });
   const { handleSubmit, register, errors, reset, getValues } = useForm();
 
+  const [slugValue, setSlugValue] = React.useState(
+    organization?.subdomain ?? ""
+  );
+
   const isNew = !organization;
 
   const onSubmit = async (variables) => {
@@ -90,74 +91,80 @@ export default ({ organization, currentUser }) => {
   };
 
   return (
-    <Card>
-      <Box p={3}>
-        <h1 className="text-2xl mb-2">
-          {isNew ? "Create organization" : "Edit organization"}
-        </h1>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <label>
-            Name
-            <TextField
-              name="name"
-              placeholder="Name"
-              inputRef={register({ required: "Required" })}
-              defaultValue={organization?.name}
-              autoFocus
-              className="mb-2"
-              error={errors.name}
-              helperText={errors.name?.message}
-            />
-          </label>
-          <label>
-            Subdomain
-            <TextField
-              name="subdomain"
-              placeholder="dreamy-org"
-              inputRef={register({ required: "Required" })}
-              className="mb-2"
-              defaultValue={organization?.subdomain}
-              error={errors.subdomain}
-              helperText={errors.subdomain?.message}
-            />
-          </label>
-          <ImageUpload
-            text={"Upload Logo Image"}
-            onImageUploaded={setLogoImage}
-            cloudinaryPreset={"organization_logos"}
-            initialImage={logoImage}
-          />
-          {organization?.customDomain && (
-            <label>
-              Custom Domain (Optional)
-              <Tooltip
-                style={{ display: "inline-block" }}
-                title={`<b>No need for http://</b><br/>
+    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
+      <h1 className="text-2xl font-semibold mb-2">
+        {isNew ? "Create organization" : "Edit organization"}
+      </h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <TextField
+          name="name"
+          label="Name"
+          placeholder="Name"
+          inputRef={register({ required: "Required" })}
+          defaultValue={organization?.name}
+          autoFocus
+          className="mb-2"
+          error={errors.name}
+          helperText={errors.name?.message}
+        />
+
+        <TextField
+          name="subdomain"
+          label="Subdomain"
+          placeholder="subdomain"
+          inputRef={register({ required: "Required" })}
+          className="mb-2"
+          defaultValue={organization?.subdomain}
+          error={errors.subdomain}
+          inputProps={{
+            value: slugValue,
+            onChange: (e) => setSlugValue(e.target.value),
+            onBlur: (e) => setSlugValue(slugify(e.target.value)),
+          }}
+          helperText={errors.subdomain?.message}
+          endAdornment={<span>.{process.env.DEPLOY_URL}</span>}
+        />
+
+        {organization?.customDomain && (
+          <TextField
+            name="customDomain"
+            labelComponent={() => (
+              <>
+                Custom Domain (Optional)
+                <Tooltip
+                  style={{ display: "inline-block" }}
+                  title={`<b>No need for http://</b><br/>
               For example to use 'dreams.YOURDOMAIN.com' you need to<br/>
               1. Open your domain account provider<br/>
               2. Set a new CNAME record with the name of 'dreams' and the value of ${process.env.DEPLOY_URL}`}
-                position="bottom"
-                size="small"
-              >
-                <QuestionMarkIcon className="w-5 h-5" />
-              </Tooltip>
-              <TextField
-                name="customDomain"
-                placeholder="orgdomain.com"
-                inputRef={register}
-                className="mb-2"
-                defaultValue={organization?.customDomain}
-                error={errors.customDomain}
-                helperText={errors.customDomain?.message}
-              />
-            </label>
-          )}
+                  position="bottom"
+                  size="small"
+                >
+                  <QuestionMarkIcon className="w-5 h-5" />
+                </Tooltip>
+              </>
+            )}
+            placeholder="orgdomain.com"
+            inputRef={register}
+            className="mb-2"
+            defaultValue={organization?.customDomain}
+            error={errors.customDomain}
+            helperText={errors.customDomain?.message}
+          />
+        )}
 
-          <Button type="submit" loading={loading || editLoading}>
-            Save
-          </Button>
-        </Form>
-      </Box>
-    </Card>
+        <ImageUpload
+          text={"Upload Logo Image"}
+          onImageUploaded={setLogoImage}
+          cloudinaryPreset={"organization_logos"}
+          initialImage={logoImage}
+          className="my-2"
+        />
+
+        <Button type="submit" loading={loading || editLoading}>
+          Save
+        </Button>
+      </form>
+    </div>
   );
 };

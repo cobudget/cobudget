@@ -9,6 +9,7 @@ export default ({
   cloudinaryPreset,
   initialImage,
   onImageUploaded,
+  className,
 }) => {
   const [image, setImage] = useState(initialImage);
   const { handleSubmit, register, errors } = useForm();
@@ -46,9 +47,9 @@ export default ({
     setOpen(false);
   };
 
-  if (!open) {
-    return (
-      <div>
+  return (
+    <>
+      <div className={className}>
         <Button
           variant="secondary"
           onClick={() => {
@@ -60,56 +61,53 @@ export default ({
         </Button>
         <img src={image} />
       </div>
-    );
-  }
+      <Modal
+        open={open}
+        onClose={handleClose}
+        className="flex items-center justify-center p-2"
+      >
+        <div className="bg-white rounded-lg shadow p-4 focus:outline-none flex-1 max-w-xs">
+          <form
+            onSubmit={handleSubmit(() => {
+              // delete image.__typename; // apollo complains otherwise..
+              onImageUploaded(image);
+            })}
+          >
+            {uploadingImage ? (
+              <label>Uploading...</label>
+            ) : (
+              <>
+                <label>
+                  Upload image
+                  <br />
+                  <input
+                    type="file"
+                    name="file"
+                    placeholder="Upload image"
+                    onChange={uploadFile}
+                  />
+                </label>
+              </>
+            )}
 
-  return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      className="flex items-center justify-center p-2"
-    >
-      <div className="bg-white rounded-lg shadow p-4 focus:outline-none flex-1 max-w-xs">
-        <form
-          onSubmit={handleSubmit(() => {
-            // delete image.__typename; // apollo complains otherwise..
-            onImageUploaded(image);
-          })}
-        >
-          {uploadingImage ? (
-            <label>Uploading...</label>
-          ) : (
-            <>
-              <label>
-                Upload image
-                <br />
-                <input
-                  type="file"
-                  name="file"
-                  placeholder="Upload image"
-                  onChange={uploadFile}
-                />
-              </label>
-            </>
-          )}
-
-          <div className="flex justify-between items-center">
-            <div className=" text-sm text-gray-600 font-medium"></div>
-            <div className="flex">
-              <Button
-                variant="secondary"
-                onClick={handleClose}
-                className="mr-2"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" loading={uploadingImage}>
-                Save
-              </Button>
+            <div className="flex justify-between items-center">
+              <div className=" text-sm text-gray-600 font-medium"></div>
+              <div className="flex">
+                <Button
+                  variant="secondary"
+                  onClick={handleClose}
+                  className="mr-2"
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" loading={uploadingImage}>
+                  Save
+                </Button>
+              </div>
             </div>
-          </div>
-        </form>
-      </div>
-    </Modal>
+          </form>
+        </div>
+      </Modal>
+    </>
   );
 };

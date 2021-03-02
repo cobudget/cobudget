@@ -4,6 +4,7 @@ const TextField = ({
   name,
   placeholder,
   label,
+  labelComponent,
   defaultValue,
   error,
   helperText,
@@ -15,11 +16,12 @@ const TextField = ({
   endAdornment,
   color = "green",
 }) => {
+  const LabelComponent = labelComponent;
   return (
     <div className={`flex flex-col ${className}`}>
-      {label && (
+      {(label || labelComponent) && (
         <label htmlFor={name} className="text-sm font-medium mb-1 block">
-          {label}
+          {label ? label : <LabelComponent />}
         </label>
       )}
       {multiline ? (
