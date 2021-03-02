@@ -1,13 +1,15 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import { Box } from "@material-ui/core";
-import slugify from "../utils/slugify";
-import currencies from "../utils/currencies";
-
-import Card from "../components/styled/Card";
-import Form from "../components/styled/Form";
+import { Tooltip } from "react-tippy";
 import Router from "next/router";
+
+import slugify from "utils/slugify";
+import currencies from "utils/currencies";
+import TextField from "components/TextField";
+import { SelectField } from "components/SelectInput";
+import Button from "components/Button";
+import { QuestionMarkIcon } from "components/Icons";
 
 const CREATE_EVENT = gql`
   mutation CreateEvent(
@@ -44,61 +46,78 @@ export default () => {
   };
 
   return (
-    <Card>
-      <Box p={3}>
-        <h1 className="text-2xl mb-2">Create event</h1>
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <label>
-            Title <span>{errors.title && errors.title.message}</span>
-            <input
-              name="title"
-              ref={register({
-                required: "Required",
-              })}
-              onChange={(e) => setSlugValue(slugify(e.target.value))}
-            />
-          </label>
-          <label>
-            Slug <span>{errors.slug && errors.slug.message}</span>
-            <input
-              name="slug"
-              ref={register({
-                required: "Required",
-              })}
-              value={slugValue}
-              onChange={(e) => setSlugValue(e.target.value)}
-              onBlur={(e) => setSlugValue(slugify(e.target.value))}
-            />
-          </label>
-          <label>
-            Currency <span>{errors.currency && errors.currency.message}</span>
-            <select
-              name="currency"
-              ref={register({
-                required: "Required",
-              })}
-            >
-              {currencies.map((currency) => (
-                <option value={currency} key={currency}>
-                  {currency}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Registration policy{" "}
-            <span>
-              {errors.registrationPolicy && errors.registrationPolicy.message}
-            </span>
-            <select name="registrationPolicy" ref={register}>
-              <option value="OPEN">Open</option>
-              <option value="REQUEST_TO_JOIN">Request to join</option>
-              <option value="INVITE_ONLY">Invite only</option>
-            </select>
-          </label>
-          <button type="submit">Submit</button>
-        </Form>
-      </Box>
-    </Card>
+    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
+      <h1 className="text-2xl mb-2 font-semibold">New event</h1>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <TextField
+          name="title"
+          label="Title"
+          placeholder="Title"
+          inputRef={register({ required: "Required" })}
+          autoFocus
+          className="mb-2"
+          error={errors.title}
+          helperText={errors.title?.message}
+          inputProps={{
+            onChange: (e) => setSlugValue(slugify(e.target.value)),
+          }}
+        />
+        <TextField
+          name="slug"
+          labelComponent={() => (
+            <div className="items-center flex">
+              Slug
+              <Tooltip
+                title={`The part that comes after the domain in the URL`}
+                position="bottom"
+                size="small"
+              >
+                <QuestionMarkIcon className="ml-1 w-5 h-5 text-gray-600 hover:text-black" />
+              </Tooltip>
+            </div>
+          )}
+          placeholder="Slug"
+          inputRef={register({ required: "Required" })}
+          className="mb-2"
+          error={errors.slug}
+          helperText={errors.slug?.message}
+          inputProps={{
+            value: slugValue,
+            onChange: (e) => setSlugValue(e.target.value),
+            onBlur: (e) => setSlugValue(slugify(e.target.value)),
+          }}
+        />
+        <SelectField
+          name="currency"
+          label="Currency"
+          className="mb-2"
+          inputRef={register({
+            required: "Required",
+          })}
+        >
+          {currencies.map((currency) => (
+            <option value={currency} key={currency}>
+              {currency}
+            </option>
+          ))}
+        </SelectField>
+        <SelectField
+          name="registrationPolicy"
+          label="Registration policy"
+          className="my-2"
+          inputRef={register({
+            required: "Required",
+          })}
+        >
+          <option value="OPEN">Open</option>
+          <option value="REQUEST_TO_JOIN">Request to join</option>
+          <option value="INVITE_ONLY">Invite only</option>
+        </SelectField>
+
+        <Button className="mt-2" type="submit">
+          Create
+        </Button>
+      </form>
+    </div>
   );
 };
