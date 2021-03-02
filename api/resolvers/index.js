@@ -250,7 +250,6 @@ const resolvers = {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error('You need to be logged in as organisation admin.');
 
-      // check slug..
       const event = await new Event({
         slug,
         title,
@@ -259,21 +258,16 @@ const resolvers = {
         currency,
         registrationPolicy,
         organizationId: currentOrg.id,
-      });
+      }).save();
 
-      const eventMember = await new EventMember({
+      await new EventMember({
         orgMemberId: currentOrgMember.id,
         eventId: event.id,
         isAdmin: true,
         isApproved: true,
-      });
+      }).save();
 
-      const [savedEvent] = await Promise.all([
-        event.save(),
-        eventMember.save(),
-      ]);
-
-      return savedEvent;
+      return event;
     },
     editEvent: async (
       parent,
