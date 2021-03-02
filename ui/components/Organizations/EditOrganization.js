@@ -129,10 +129,9 @@ export default ({ organization, currentUser }) => {
           <TextField
             name="customDomain"
             labelComponent={() => (
-              <>
-                Custom Domain (Optional)
+              <div className="items-center flex">
+                Custom Domain (optional)
                 <Tooltip
-                  style={{ display: "inline-block" }}
                   title={`<b>No need for http://</b><br/>
               For example to use 'dreams.YOURDOMAIN.com' you need to<br/>
               1. Open your domain account provider<br/>
@@ -140,9 +139,9 @@ export default ({ organization, currentUser }) => {
                   position="bottom"
                   size="small"
                 >
-                  <QuestionMarkIcon className="w-5 h-5" />
+                  <QuestionMarkIcon className="ml-1 w-5 h-5 text-gray-600 hover:text-black" />
                 </Tooltip>
-              </>
+              </div>
             )}
             placeholder="orgdomain.com"
             inputRef={register}
