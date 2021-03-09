@@ -48,7 +48,7 @@ const TextField = ({
               " " +
               (size === "large" ? "text-xl" : "") +
               " " +
-              (Boolean(endAdornment) ? "pr-12" : "")
+              (endAdornment ? "pr-12" : "")
             } transition-borders ease-in-out duration-200`}
             name={name}
             id={name}

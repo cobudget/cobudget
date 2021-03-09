@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
 
 const { DISCOURSE_API_URL, DISCOURSE_API_KEY } = process.env;
 
@@ -7,12 +7,12 @@ const discourse = ({
   apiKey = DISCOURSE_API_KEY,
 } = {}) => {
   const headers = {
-    'Api-Key': apiKey,
-    'Api-Username': 'system',
-    'Content-Type': 'application/json',
+    "Api-Key": apiKey,
+    "Api-Username": "system",
+    "Content-Type": "application/json",
   };
   const defaultHeaders = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
   return {
     categories: {
@@ -25,9 +25,9 @@ const discourse = ({
         } = await res.json();
         return categories;
       },
-      create: async ({ name, color = '2f2ad1', text_color = 'FFFFFF' }) => {
+      create: async ({ name, color = "2f2ad1", text_color = "FFFFFF" }) => {
         const res = await fetch(`${url}/categories`, {
-          method: 'post',
+          method: "post",
           headers,
           body: JSON.stringify({ name, color, text_color }),
         });
@@ -52,7 +52,7 @@ const discourse = ({
         approved = true,
       }) => {
         const res = await fetch(`${url}/users`, {
-          method: 'post',
+          method: "post",
           headers,
           body: JSON.stringify({
             name,
@@ -88,13 +88,13 @@ const discourse = ({
         { username, userApiKey } = {}
       ) => {
         const res = await fetch(`${url}/posts`, {
-          method: 'post',
+          method: "post",
           headers: {
             ...defaultHeaders,
-            ...(username && { 'Api-Username': username }),
+            ...(username && { "Api-Username": username }),
             ...(userApiKey
-              ? { 'User-Api-Key': userApiKey }
-              : { 'Api-Key': apiKey }),
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
           },
           body: JSON.stringify({
             ...(title && { title }),
@@ -127,10 +127,10 @@ const discourse = ({
         const res = await fetch(`${url}/posts/${id}`, {
           headers: {
             ...headers,
-            ...(userApiKey && { 'User-Api-Key': userApiKey }),
-            ...(username && { 'Api-Username': username }),
+            ...(userApiKey && { "User-Api-Key": userApiKey }),
+            ...(username && { "Api-Username": username }),
           },
-          method: 'DELETE',
+          method: "DELETE",
         });
 
         return res;

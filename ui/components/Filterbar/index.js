@@ -11,9 +11,8 @@ export default ({
   setTextSearchTerm,
   customFields,
   filterLabels,
-  setFilterLabels
+  setFilterLabels,
 }) => {
-
   const debouncedSearch = debounce((text) => {
     setTextSearchTerm(text);
   }, 300);
@@ -60,12 +59,12 @@ export default ({
           </button>
         </Tooltip>
       )}
-      
-      <FilterLabels 
+
+      <FilterLabels
         customFields={customFields}
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
-        className={'mb-2 mt-2'}
+        className={"mb-2 mt-2"}
       />
     </div>
   );
