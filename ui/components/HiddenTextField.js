@@ -13,7 +13,7 @@ const HiddenTextField = ({
       ref={inputRef}
       placeholder={placeholder}
       defaultValue={defaultValue}
-      type='hidden'
+      type="hidden"
       {...inputProps}
     />
   );

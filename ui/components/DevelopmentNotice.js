@@ -17,7 +17,7 @@ export default function DevelopmentNotice() {
       <Snackbar
         anchorOrigin={{
           vertical: "bottom",
-          horizontal: "left"
+          horizontal: "left",
         }}
         open={open}
         onClose={handleClose}

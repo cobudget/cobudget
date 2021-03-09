@@ -8,7 +8,7 @@
     "storybook": "cd ui && start-storybook -p 6006",
     "postinstall": "cd ui && npm i && cd ../api && npm i",
     "lint": "prettier --ignore-path .gitignore --check . && eslint .",
-    "fix": "eslint . --fix"
+    "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix"
   },
   "devDependencies": {
     "eslint": "7.21.0",

@@ -7,14 +7,13 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Dokku deploy
-      uses: vitalyliber/dokku-github-action@v6.1
-      env:
-        PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
-        HOST: api.dreams.wtf
-        PROJECT: dreams-api
+      - uses: actions/checkout@v1
+      - name: Dokku deploy
+        uses: vitalyliber/dokku-github-action@v6.1
+        env:
+          PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          HOST: api.dreams.wtf
+          PROJECT: dreams-api

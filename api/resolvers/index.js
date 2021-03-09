@@ -1,22 +1,22 @@
-const slugify = require('../utils/slugify');
-const { GraphQLScalarType } = require('graphql');
-const GraphQLJSON = require('graphql-type-json');
-const { GraphQLJSONObject } = require('graphql-type-json');
-const { Kind } = require('graphql/language');
-const mongoose = require('mongoose');
-const dayjs = require('dayjs');
-const { combineResolvers, skip } = require('graphql-resolvers');
-const discourse = require('../lib/discourse');
+const slugify = require("../utils/slugify");
+const { GraphQLScalarType } = require("graphql");
+const GraphQLJSON = require("graphql-type-json");
+const { GraphQLJSONObject } = require("graphql-type-json");
+const { Kind } = require("graphql/language");
+const mongoose = require("mongoose");
+const dayjs = require("dayjs");
+const { combineResolvers, skip } = require("graphql-resolvers");
+const discourse = require("../lib/discourse");
 const isRootAdmin = (parent, args, { currentUser }) => {
   return currentUser && currentUser.isRootAdmin
     ? skip
-    : new Error('You need to be root admin');
+    : new Error("You need to be root admin");
 };
 
 const isMemberOfOrg = (parent, { id }, { kauth, currentOrgMember }) => {
-  if (!kauth) throw new Error('You need to be logged in');
+  if (!kauth) throw new Error("You need to be logged in");
   if (!currentOrgMember.organizationId == id && !kauth.isRootAdmin)
-    throw new Error('You need to be a member of that organization');
+    throw new Error("You need to be a member of that organization");
   return skip;
 };
 
@@ -51,7 +51,7 @@ const resolvers = {
     ),
     events: async (parent, args, { currentOrg, models: { Event } }) => {
       if (!currentOrg) {
-        throw new Error('No organization found');
+        throw new Error("No organization found");
       }
       return Event.find({ organizationId: currentOrg.id });
     },
@@ -108,7 +108,7 @@ const resolvers = {
       { currentOrgMember, models: { EventMember, Event } }
     ) => {
       if (!currentOrgMember)
-        throw new Error('You need to be a member of this org');
+        throw new Error("You need to be a member of this org");
 
       const currentEventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -121,7 +121,7 @@ const resolvers = {
         currentOrgMember.organizationId.toString() !==
         event.organizationId.toString()
       )
-        throw new Error('Wrong org..');
+        throw new Error("Wrong org..");
 
       if (
         !(
@@ -130,12 +130,12 @@ const resolvers = {
         )
       )
         throw new Error(
-          'You need to be approved member of this event or org admin to view EventMembers'
+          "You need to be approved member of this event or org admin to view EventMembers"
         );
 
       return EventMember.find({
         eventId,
-        ...(typeof isApproved === 'boolean' && { isApproved }),
+        ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
   },
@@ -145,7 +145,7 @@ const resolvers = {
       { name, subdomain, logo },
       { kauth, kcAdminClient, models: { Organization, OrgMember } }
     ) => {
-      if (!kauth) throw new Error('You need to be logged in!');
+      if (!kauth) throw new Error("You need to be logged in!");
 
       const organization = new Organization({
         name,
@@ -164,7 +164,7 @@ const resolvers = {
         orgMember.save(),
       ]);
 
-      const clientId = 'dreams';
+      const clientId = "dreams";
 
       const [client] = await kcAdminClient.clients.findOne({
         clientId,
@@ -193,12 +193,12 @@ const resolvers = {
       { currentUser, currentOrgMember, models: { Organization } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error('You need to be logged in as organization admin.');
+        throw new Error("You need to be logged in as organization admin.");
       if (
         organizationId !== currentOrgMember.organizationId ||
         currentUser.isRootAdmin
       )
-        throw new Error('You are not a member of this organization.');
+        throw new Error("You are not a member of this organization.");
 
       const organization = await Organization.findOne({
         _id: organizationId,
@@ -208,7 +208,7 @@ const resolvers = {
       let newRedirectUris;
 
       if (isUpdatingRedirectUris) {
-        const clientId = 'dreams';
+        const clientId = "dreams";
 
         const [client] = await kcAdminClient.clients.findOne({
           clientId,
@@ -248,7 +248,7 @@ const resolvers = {
       { currentOrgMember, currentOrg, models: { Event, EventMember } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error('You need to be logged in as organisation admin.');
+        throw new Error("You need to be logged in as organisation admin.");
 
       const event = await new Event({
         slug,
@@ -298,15 +298,15 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin of this event.');
+        throw new Error("You need to be admin of this event.");
 
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
-      if (typeof info !== 'undefined') event.info = info;
-      if (typeof about !== 'undefined') event.about = about;
+      if (typeof info !== "undefined") event.info = info;
+      if (typeof about !== "undefined") event.about = about;
       if (color) event.color = color;
-      if (typeof dreamReviewIsOpen !== 'undefined')
+      if (typeof dreamReviewIsOpen !== "undefined")
         event.dreamReviewIsOpen = dreamReviewIsOpen;
 
       return event.save();
@@ -317,7 +317,7 @@ const resolvers = {
       { currentOrgMember, models: { Event, Grant, Dream, EventMember } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error('You need to be org. admin to delete event');
+        throw new Error("You need to be org. admin to delete event");
 
       const event = await Event.findOne({
         _id: eventId,
@@ -353,7 +353,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to add a guideline');
+        throw new Error("You need to be admin to add a guideline");
 
       event.guidelines.push({ ...guideline });
 
@@ -380,7 +380,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to edit a guideline');
+        throw new Error("You need to be admin to edit a guideline");
 
       let doc = event.guidelines.id(guidelineId);
 
@@ -410,7 +410,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to edit a guideline');
+        throw new Error("You need to be admin to edit a guideline");
 
       let doc = event.guidelines.id(guidelineId);
       doc.position = newPosition;
@@ -437,7 +437,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to remove a guideline');
+        throw new Error("You need to be admin to remove a guideline");
 
       let doc = event.guidelines.id(guidelineId);
       doc.remove();
@@ -465,7 +465,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to add a custom field');
+        throw new Error("You need to be admin to add a custom field");
 
       event.customFields.push({ ...customField });
 
@@ -493,7 +493,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to edit a custom field');
+        throw new Error("You need to be admin to edit a custom field");
 
       let doc = event.customFields.id(fieldId);
       doc.position = newPosition;
@@ -520,7 +520,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to edit a custom field');
+        throw new Error("You need to be admin to edit a custom field");
 
       let doc = event.customFields.id(fieldId);
       // doc = { ...doc, ...customField };
@@ -553,7 +553,7 @@ const resolvers = {
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error('You need to be admin to delete a custom field');
+        throw new Error("You need to be admin to delete a custom field");
 
       let doc = event.customFields.id(fieldId);
       doc.remove();
@@ -581,12 +581,12 @@ const resolvers = {
       });
 
       if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
+        throw new Error("You need to be logged in and/or approved");
 
       const event = await Event.findOne({ _id: eventId });
 
       if (!event.dreamCreationIsOpen)
-        throw new Error('Dream creation is not open');
+        throw new Error("Dream creation is not open");
 
       // // if maxGoal is defined, it needs to be larger than minGoal, that also needs to be defined
       // if (maxGoal && (maxGoal <= minGoal || minGoal == null))
@@ -612,7 +612,7 @@ const resolvers = {
               category: currentOrg.discourse.dreamsCategoryId,
             }),
           },
-          { username: 'system' }
+          { username: "system" }
         );
 
         dream.discourseTopicId = discoursePost.topic_id;
@@ -638,13 +638,13 @@ const resolvers = {
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+        throw new Error("You are not a cocreator of this dream.");
 
       if (title) dream.title = title;
-      if (typeof description !== 'undefined') dream.description = description;
-      if (typeof summary !== 'undefined') dream.summary = summary;
-      if (typeof images !== 'undefined') dream.images = images;
-      if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
+      if (typeof description !== "undefined") dream.description = description;
+      if (typeof summary !== "undefined") dream.summary = summary;
+      if (typeof images !== "undefined") dream.images = images;
+      if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
 
       return dream.save();
     },
@@ -666,7 +666,7 @@ const resolvers = {
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+        throw new Error("You are not a cocreator of this dream.");
 
       const existingField = dream.customFields.filter((field) => {
         return field.fieldId == customField.fieldId;
@@ -698,17 +698,17 @@ const resolvers = {
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+        throw new Error("You are not a cocreator of this dream.");
 
       const [
         { grantsForDream } = { grantsForDream: 0 },
       ] = await Grant.aggregate([
         { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
 
       if (grantsForDream > 0) {
-        throw new Error('You cant delete a Dream that has received grants');
+        throw new Error("You cant delete a Dream that has received grants");
       }
 
       return dream.remove();
@@ -731,18 +731,18 @@ const resolvers = {
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+        throw new Error("You are not a cocreator of this dream.");
 
       // check that added memberId is not already part of the thing
       if (dream.cocreators.includes(memberId))
-        throw new Error('Member is already cocreator of dream');
+        throw new Error("Member is already cocreator of dream");
 
       // check that memberId is a member of event
       const member = await EventMember.findOne({
         _id: memberId,
         eventId: dream.eventId,
       });
-      if (!member) throw new Error('No member found with this id');
+      if (!member) throw new Error("No member found with this id");
 
       dream.cocreators.push(memberId);
 
@@ -765,11 +765,11 @@ const resolvers = {
         !eventMember.isGuide &&
         !dream.cocreators.includes(eventMember.id)
       )
-        throw new Error('You need to be a cocreator to remove co-creators.');
+        throw new Error("You need to be a cocreator to remove co-creators.");
 
       // check that added memberId is not already part of the thing
       if (!dream.cocreators.includes(memberId))
-        throw new Error('Member is not a co-creator of this dream.');
+        throw new Error("Member is not a co-creator of this dream.");
 
       // can't remove last person
       if (dream.cocreators.length === 1)
@@ -799,7 +799,7 @@ const resolvers = {
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
-        throw new Error('You are not a cocreator of this dream.');
+        throw new Error("You are not a cocreator of this dream.");
 
       dream.published = !unpublish;
 
@@ -815,17 +815,17 @@ const resolvers = {
       });
 
       if (!currentOrgMember)
-        throw new Error('You need to be an org member to post comments.');
+        throw new Error("You need to be an org member to post comments.");
 
       if (currentOrg.discourse) {
         if (!currentOrgMember.discourseApiKey) {
           throw new Error(
-            'You need to have a discourse account connected, go to /connect-discourse'
+            "You need to have a discourse account connected, go to /connect-discourse"
           );
         }
 
         if (content.length < 20)
-          throw new Error('Your post needs to be at least 20 characters long');
+          throw new Error("Your post needs to be at least 20 characters long");
 
         if (!dream.discourseTopicId) {
           const event = await Event.findOne({ _id: dream.eventId });
@@ -845,7 +845,7 @@ const resolvers = {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
             },
-            { username: 'system' }
+            { username: "system" }
           );
 
           dream.discourseTopicId = discoursePost.topic_id;
@@ -865,7 +865,7 @@ const resolvers = {
 
       // post regular comment
       if (content.length < 3)
-        throw new Error('Your post needs to be at least 3 characters long!');
+        throw new Error("Your post needs to be at least 3 characters long!");
 
       dream.comments.push({
         authorId: currentOrgMember.id,
@@ -885,7 +885,7 @@ const resolvers = {
       });
 
       if (!currentOrgMember) {
-        throw new Error('You need to be member of the org to delete comments');
+        throw new Error("You need to be member of the org to delete comments");
       }
 
       if (currentOrg.discourse) {
@@ -898,7 +898,7 @@ const resolvers = {
           !currentOrgMember.isOrgAdmin
         ) {
           throw new Error(
-            'You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse'
+            "You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse"
           );
         }
 
@@ -908,7 +908,7 @@ const resolvers = {
             userApiKey: currentOrgMember.discourseApiKey,
           }),
           ...(post.username !== currentOrgMember.discourseUsername &&
-            currentOrgMember.isOrgAdmin && { username: 'system' }),
+            currentOrgMember.isOrgAdmin && { username: "system" }),
         });
         return dream;
       }
@@ -953,7 +953,7 @@ const resolvers = {
 
       if (comment.length == 0) {
         throw new Error(
-          'Cant find that comment - Does this comment belongs to you?'
+          "Cant find that comment - Does this comment belongs to you?"
         );
       }
       comment[0].content = content;
@@ -983,12 +983,12 @@ const resolvers = {
       });
 
       if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
+        throw new Error("You need to be logged in and/or approved");
 
       dream.flags.push({
         guidelineId,
         comment,
-        type: 'RAISE_FLAG',
+        type: "RAISE_FLAG",
         userId: currentOrgMember.id,
       });
 
@@ -1012,7 +1012,7 @@ const resolvers = {
               }),
             },
             {
-              username: 'system',
+              username: "system",
             }
           );
 
@@ -1024,7 +1024,7 @@ const resolvers = {
             topic_id: dream.discourseTopicId,
             raw: logContent,
           },
-          { username: 'system' }
+          { username: "system" }
         );
       } else {
         dream.comments.push({
@@ -1054,12 +1054,12 @@ const resolvers = {
       });
 
       if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
+        throw new Error("You need to be logged in and/or approved");
 
       dream.flags.push({
         resolvingFlagId: flagId,
         comment,
-        type: 'RESOLVE_FLAG',
+        type: "RESOLVE_FLAG",
         userId: currentOrgMember.id,
       });
 
@@ -1089,7 +1089,7 @@ const resolvers = {
               }),
             },
             {
-              username: 'system',
+              username: "system",
             }
           );
 
@@ -1100,7 +1100,7 @@ const resolvers = {
             topic_id: dream.discourseTopicId,
             raw: logContent,
           },
-          { username: 'system' }
+          { username: "system" }
         );
       } else {
         dream.comments.push({
@@ -1129,18 +1129,18 @@ const resolvers = {
       });
 
       if (!eventMember || !eventMember.isApproved)
-        throw new Error('You need to be logged in and/or approved');
+        throw new Error("You need to be logged in and/or approved");
 
       for (flag in dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
-          flag.type === 'ALL_GOOD_FLAG'
+          flag.type === "ALL_GOOD_FLAG"
         )
-          throw new Error('You have already left an all good flag');
+          throw new Error("You have already left an all good flag");
       }
 
       dream.flags.push({
-        type: 'ALL_GOOD_FLAG',
+        type: "ALL_GOOD_FLAG",
         userId: currentOrgMember.id,
       });
 
@@ -1152,7 +1152,7 @@ const resolvers = {
       args,
       { kauth, currentOrg, models: { OrgMember } }
     ) => {
-      if (!kauth) throw new Error('You need to be logged in.');
+      if (!kauth) throw new Error("You need to be logged in.");
 
       return new OrgMember({
         userId: kauth.sub,
@@ -1164,16 +1164,16 @@ const resolvers = {
       { firstName, lastName, username, bio },
       { kauth, currentOrgMember, kcAdminClient }
     ) => {
-      if (!kauth) throw new Error('You need to be logged in..');
+      if (!kauth) throw new Error("You need to be logged in..");
 
       if (firstName || lastName || username) {
         try {
           await kcAdminClient.users.update(
             { id: kauth.sub },
             {
-              ...(typeof firstName !== 'undefined' && { firstName }),
-              ...(typeof lastName !== 'undefined' && { lastName }),
-              ...(typeof username !== 'undefined' && { username }),
+              ...(typeof firstName !== "undefined" && { firstName }),
+              ...(typeof lastName !== "undefined" && { lastName }),
+              ...(typeof username !== "undefined" && { username }),
             }
           );
         } catch (error) {
@@ -1239,22 +1239,22 @@ const resolvers = {
           currentOrgMember.isOrgAdmin
         )
       )
-        throw new Error('You need to be admin to update member');
+        throw new Error("You need to be admin to update member");
 
       const member = await EventMember.findOne({
         _id: memberId,
         eventId,
       });
 
-      if (!member) throw new Error('No member to update found');
+      if (!member) throw new Error("No member to update found");
 
-      if (typeof isApproved !== 'undefined') {
+      if (typeof isApproved !== "undefined") {
         member.isApproved = isApproved;
       } // send notification on approving?
-      if (typeof isAdmin !== 'undefined') {
+      if (typeof isAdmin !== "undefined") {
         member.isAdmin = isAdmin;
       }
-      if (typeof isGuide !== 'undefined') {
+      if (typeof isGuide !== "undefined") {
         member.isGuide = isGuide;
       }
       return member.save();
@@ -1275,7 +1275,7 @@ const resolvers = {
           currentOrgMember.isOrgAdmin
         )
       )
-        throw new Error('You need to be admin to delete member');
+        throw new Error("You need to be admin to delete member");
 
       const member = await EventMember.findOneAndDelete({
         _id: memberId,
@@ -1296,7 +1296,7 @@ const resolvers = {
         )
       )
         throw new Error(
-          'You need to be org. or root admin to delete an organization'
+          "You need to be org. or root admin to delete an organization"
         );
 
       const organization = await Organization.findOne({
@@ -1327,7 +1327,7 @@ const resolvers = {
         (!currentEventMember.isAdmin && !currentEventMember.isGuide)
       )
         throw new Error(
-          'You need to be admin or guide to approve for granting'
+          "You need to be admin or guide to approve for granting"
         );
 
       dream.approved = approved;
@@ -1345,27 +1345,27 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          'You need to be a logged in approved member to grant things'
+          "You need to be a logged in approved member to grant things"
         );
 
-      if (value <= 0) throw new Error('Value needs to be more than zero');
+      if (value <= 0) throw new Error("Value needs to be more than zero");
 
       const event = await Event.findOne({ _id: eventId });
 
       // Check that granting is open
-      if (!event.grantingIsOpen) throw new Error('Granting is not open');
+      if (!event.grantingIsOpen) throw new Error("Granting is not open");
 
       const dream = await Dream.findOne({ _id: dreamId, eventId });
 
       if (!dream.approved)
-        throw new Error('Dream is not approved for granting');
+        throw new Error("Dream is not approved for granting");
 
       // Check that the max goal of the dream is not exceeded
       const [
         { grantsForDream } = { grantsForDream: 0 },
       ] = await Grant.aggregate([
         { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
 
       // TODO: Create virtual on dream model instead?
@@ -1390,14 +1390,14 @@ const resolvers = {
         {
           $match: {
             memberId: mongoose.Types.ObjectId(currentEventMember.id),
-            type: 'USER',
+            type: "USER",
           },
         },
-        { $group: { _id: null, grantsFromUser: { $sum: '$value' } } },
+        { $group: { _id: null, grantsFromUser: { $sum: "$value" } } },
       ]);
 
       if (grantsFromUser + value > event.grantsPerMember)
-        throw new Error('You are trying to spend too many grants.');
+        throw new Error("You are trying to spend too many grants.");
 
       // Check that total budget of event will not be exceeded
       const [
@@ -1409,7 +1409,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } },
+        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
       ]);
 
       const totalGrantsToSpend = Math.floor(
@@ -1417,7 +1417,7 @@ const resolvers = {
       );
 
       if (grantsFromEverybody + value > totalGrantsToSpend)
-        throw new Error('Total budget of event is exeeced with this grant');
+        throw new Error("Total budget of event is exeeced with this grant");
 
       return new Grant({
         eventId: currentEventMember.eventId,
@@ -1438,7 +1438,7 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          'You need to be a logged in approved member to remove a grant'
+          "You need to be a logged in approved member to remove a grant"
         );
 
       const event = await Event.findOne({ _id: eventId });
@@ -1466,7 +1466,7 @@ const resolvers = {
       });
 
       if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error('You need to be admin to reclaim grants');
+        throw new Error("You need to be admin to reclaim grants");
 
       const event = await Event.findOne({ _id: dream.eventId });
 
@@ -1484,7 +1484,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
 
       const minGoalGrants = Math.ceil(dream.minGoal / event.grantValue);
@@ -1511,16 +1511,16 @@ const resolvers = {
       });
 
       if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error('You need to be admin to pre or post fund');
+        throw new Error("You need to be admin to pre or post fund");
 
-      if (value <= 0) throw new Error('Value needs to be more than zero');
+      if (value <= 0) throw new Error("Value needs to be more than zero");
 
       const event = await Event.findOne({ _id: dream.eventId });
 
       // TODO: check whether certain settings are set, like grant value and total budget
 
       if (!dream.approved)
-        throw new Error('Dream is not approved for granting');
+        throw new Error("Dream is not approved for granting");
 
       // Check that the max goal of the dream is not exceeded
       const [
@@ -1532,7 +1532,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
 
       const maxGoalGrants = Math.ceil(
@@ -1552,7 +1552,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } },
+        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
       ]);
 
       const totalGrantsToSpend = Math.floor(
@@ -1560,13 +1560,13 @@ const resolvers = {
       );
 
       if (grantsFromEverybody + value > totalGrantsToSpend)
-        throw new Error('Total budget of event is exeeced with this grant');
+        throw new Error("Total budget of event is exeeced with this grant");
 
       return new Grant({
         eventId: dream.eventId,
         dreamId,
         value,
-        type: event.grantingHasClosed ? 'POST_FUND' : 'PRE_FUND',
+        type: event.grantingHasClosed ? "POST_FUND" : "PRE_FUND",
         memberId: currentEventMember.id,
       }).save();
     },
@@ -1605,7 +1605,7 @@ const resolvers = {
           currentOrgMember.isOrgAdmin
         )
       )
-        throw new Error('You need to be admin to update granting settings.');
+        throw new Error("You need to be admin to update granting settings.");
 
       const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
       const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
@@ -1681,7 +1681,7 @@ const resolvers = {
 
         if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
           throw new Error(
-            'Granting opens date needs to be after dream creation closing date'
+            "Granting opens date needs to be after dream creation closing date"
           );
         }
 
@@ -1700,7 +1700,7 @@ const resolvers = {
         event.grantingCloses = grantingCloses;
       }
 
-      if (typeof allowStretchGoals !== 'undefined') {
+      if (typeof allowStretchGoals !== "undefined") {
         if (grantingHasStarted) {
           throw new Error(
             "You can't change stretch goal setting once granting has started"
@@ -1726,7 +1726,7 @@ const resolvers = {
       });
 
       if (!currentEventMember)
-        throw new Error('You need to be a member to favorite something.');
+        throw new Error("You need to be a member to favorite something.");
 
       if (currentEventMember.favorites.includes(dreamId)) {
         currentEventMember.favorites = currentEventMember.favorites.filter(
@@ -1750,7 +1750,7 @@ const resolvers = {
         models: { EventMember, Event, OrgMember },
       }
     ) => {
-      if (!kauth) throw new Error('You need to be logged in.');
+      if (!kauth) throw new Error("You need to be logged in.");
 
       let orgMember = currentOrgMember;
 
@@ -1766,7 +1766,7 @@ const resolvers = {
         eventId,
       });
 
-      if (currentEventMember) throw new Error('You are already a member');
+      if (currentEventMember) throw new Error("You are already a member");
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -1780,10 +1780,10 @@ const resolvers = {
         newMember.isApproved = true;
       } else {
         switch (event.registrationPolicy) {
-          case 'OPEN':
+          case "OPEN":
             newMember.isApproved = true;
             break;
-          case 'REQUEST_TO_JOIN':
+          case "REQUEST_TO_JOIN":
             newMember.isApproved = false;
 
             // TODO: need to fix this.. no emails saved in orgmembers
@@ -1802,8 +1802,8 @@ const resolvers = {
             // );
             break;
 
-          case 'INVITE_ONLY':
-            throw new Error('This event is invite only');
+          case "INVITE_ONLY":
+            throw new Error("This event is invite only");
         }
       }
 
@@ -1835,10 +1835,10 @@ const resolvers = {
         {
           $match: {
             memberId: mongoose.Types.ObjectId(member.id),
-            type: 'USER',
+            type: "USER",
           },
         },
-        { $group: { _id: null, grantsFromMember: { $sum: '$value' } } },
+        { $group: { _id: null, grantsFromMember: { $sum: "$value" } } },
       ]);
 
       if (!event.grantingIsOpen) return 0;
@@ -1898,7 +1898,7 @@ const resolvers = {
       const lastName = user.lastName ? user.lastName : user.family_name;
 
       if (firstName || lastName)
-        return `${firstName ? firstName : ''} ${lastName ? lastName : ''}`;
+        return `${firstName ? firstName : ""} ${lastName ? lastName : ""}`;
       return null;
     },
     firstName: (user) => (user.firstName ? user.firstName : user.given_name),
@@ -1976,7 +1976,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsFromEverybody: { $sum: '$value' } } },
+        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
       ]);
       return (
         Math.floor(event.totalBudget / event.grantValue) - grantsFromEverybody
@@ -2014,7 +2014,7 @@ const resolvers = {
             reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsForDream: { $sum: '$value' } } },
+        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
       return grantsForDream;
     },
@@ -2059,12 +2059,12 @@ const resolvers = {
     },
     raisedFlags: async (dream) => {
       const resolveFlagIds = dream.flags
-        .filter((flag) => flag.type === 'RESOLVE_FLAG')
+        .filter((flag) => flag.type === "RESOLVE_FLAG")
         .map((flag) => flag.resolvingFlagId);
 
       return dream.flags.filter(
         (flag) =>
-          flag.type === 'RAISE_FLAG' && !resolveFlagIds.includes(flag.id)
+          flag.type === "RAISE_FLAG" && !resolveFlagIds.includes(flag.id)
       );
     },
     logs: async (
@@ -2092,7 +2092,7 @@ const resolvers = {
     },
     isLog: (comment) => {
       if (comment.isLog) return comment.isLog;
-      if (comment.username === 'system') return true;
+      if (comment.username === "system") return true;
       return false;
     },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
@@ -2129,8 +2129,8 @@ const resolvers = {
     },
   },
   Date: new GraphQLScalarType({
-    name: 'Date',
-    description: 'Date custom scalar type',
+    name: "Date",
+    description: "Date custom scalar type",
     parseValue(value) {
       return new Date(value); // value from the client
     },
@@ -2157,9 +2157,9 @@ const resolvers = {
       if (!eventCustomField || eventCustomField.length == 0) {
         return {
           id: fieldId,
-          name: '⚠️ Missing custom field ⚠️',
-          description: 'Custom field was removed',
-          type: 'TEXT',
+          name: "⚠️ Missing custom field ⚠️",
+          description: "Custom field was removed",
+          type: "TEXT",
           position: 1000,
           isRequired: false,
           createdAt: new Date(),
@@ -2198,8 +2198,8 @@ const resolvers = {
   },
   LogDetails: {
     __resolveType: async (obj) => {
-      if (obj.__t == 'FlagRaised') return 'FlagRaisedDetails';
-      if (obj.__t == 'FlagResolved') return 'FlagResolvedDetails';
+      if (obj.__t == "FlagRaised") return "FlagRaisedDetails";
+      if (obj.__t == "FlagResolved") return "FlagResolvedDetails";
       return null;
     },
   },
