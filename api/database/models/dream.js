@@ -1,5 +1,5 @@
-const { Schema } = require('mongoose');
-const calculateGoals = require('../../utils/calculateGoals');
+const { Schema } = require("mongoose");
+const calculateGoals = require("../../utils/calculateGoals");
 
 const DreamSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, index: true, required: true },
@@ -45,7 +45,7 @@ const DreamSchema = new Schema({
       },
       type: {
         type: String,
-        enum: ['RAISE_FLAG', 'RESOLVE_FLAG', 'ALL_GOOD_FLAG'],
+        enum: ["RAISE_FLAG", "RESOLVE_FLAG", "ALL_GOOD_FLAG"],
         required: true,
       },
       resolvingFlagId: Schema.Types.ObjectId,
@@ -58,21 +58,21 @@ const DreamSchema = new Schema({
       max: Number,
       type: {
         type: String,
-        enum: ['INCOME', 'EXPENSE'],
+        enum: ["INCOME", "EXPENSE"],
         required: true,
       },
     }),
   ],
   published: { type: Boolean, default: false },
   discourseTopicId: { type: Number },
-}).index({ title: 'text', description: 'text', summary: 'text' });
+}).index({ title: "text", description: "text", summary: "text" });
 
-DreamSchema.virtual('minGoal').get(function () {
+DreamSchema.virtual("minGoal").get(function () {
   const { min } = calculateGoals(this.budgetItems);
   return min;
 });
 
-DreamSchema.virtual('maxGoal').get(function () {
+DreamSchema.virtual("maxGoal").get(function () {
   const { max } = calculateGoals(this.budgetItems);
   return max;
 });

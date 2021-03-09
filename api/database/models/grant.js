@@ -1,4 +1,4 @@
-const { Schema } = require('mongoose');
+const { Schema } = require("mongoose");
 
 const GrantSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -8,8 +8,8 @@ const GrantSchema = new Schema({
   reclaimed: { type: Boolean, default: false },
   type: {
     type: String,
-    enum: ['PRE_FUND', 'USER', 'POST_FUND'],
-    default: 'USER',
+    enum: ["PRE_FUND", "USER", "POST_FUND"],
+    default: "USER",
     required: true,
   },
 });

@@ -1,4 +1,4 @@
-const { Schema } = require('mongoose');
+const { Schema } = require("mongoose");
 
 const LogSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -19,17 +19,17 @@ const FlagResolvedSchema = new Schema({
 });
 
 function createLogModels(db) {
-  const discriminatorOptions = { discriminatorKey: 'kind' };
-  const Log = db.model('Log', LogSchema);
+  const discriminatorOptions = { discriminatorKey: "kind" };
+  const Log = db.model("Log", LogSchema);
 
   const FlagRaisedLog = Log.discriminator(
-    'FlagRaised',
+    "FlagRaised",
     FlagRaisedSchema,
     discriminatorOptions
   );
 
   const FlagResolvedLog = Log.discriminator(
-    'FlagResolved',
+    "FlagResolved",
     FlagResolvedSchema,
     discriminatorOptions
   );

@@ -1,4 +1,4 @@
-const { Schema } = require('mongoose');
+const { Schema } = require("mongoose");
 
 const EventMemberSchema = new Schema({
   eventId: {
@@ -10,7 +10,7 @@ const EventMemberSchema = new Schema({
     type: Schema.Types.ObjectId,
     index: true,
     required: true,
-    ref: 'OrgMember',
+    ref: "OrgMember",
   },
   isAdmin: { type: Boolean, required: true, default: false },
   isGuide: { type: Boolean, default: false },
@@ -20,7 +20,7 @@ const EventMemberSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  favorites: [{ type: Schema.Types.ObjectId, ref: 'Dream' }],
+  favorites: [{ type: Schema.Types.ObjectId, ref: "Dream" }],
 }).index({ orgMemberId: 1, eventId: 1 }, { unique: true });
 
 module.exports = EventMemberSchema;
