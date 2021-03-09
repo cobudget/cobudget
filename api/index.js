@@ -12,12 +12,15 @@ const pretixWebhook = require('./webhooks/pretix');
 const schema = require('./schema');
 const resolvers = require('./resolvers');
 const { getModels } = require('./database/models');
+const EventHub = require('./services/eventHub.service');
 const {
   db: { getConnection },
 } = require('@sensestack/plato-core');
 
 const Keycloak = require('keycloak-connect');
 const { KeycloakContext } = require('keycloak-connect-graphql');
+
+const subscribers = require('./subscribers/index');
 
 const app = express();
 const keycloak = new Keycloak(
@@ -97,6 +100,7 @@ const server = new ApolloServer({
 
     return {
       models,
+      eventHub: EventHub,
       kauth: currentUser,
       currentOrg,
       currentOrgMember,
@@ -115,6 +119,8 @@ app.use(bodyParser.json());
 app.post('/pretix', pretixWebhook);
 
 const port = process.env.PORT || 4000;
+
+subscribers.initialize(EventHub);
 
 app.listen({ port }, () =>
   console.log(

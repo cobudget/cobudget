@@ -143,7 +143,7 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain, logo },
-      { kauth, kcAdminClient, models: { Organization, OrgMember } }
+      { kauth, kcAdminClient, models: { Organization, OrgMember }, eventHub }
     ) => {
       if (!kauth) throw new Error('You need to be logged in!');
 
@@ -185,12 +185,13 @@ const resolvers = {
         );
       }
 
+      eventHub.publish('create-organization', { organization: savedOrg, actor: orgMember });
       return savedOrg;
     },
     editOrganization: async (
       parent,
       { organizationId, name, subdomain, customDomain, logo },
-      { currentUser, currentOrgMember, models: { Organization } }
+      { currentUser, currentOrgMember, models: { Organization }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error('You need to be logged in as organization admin.');
@@ -240,12 +241,13 @@ const resolvers = {
           }
         );
 
+      eventHub.publish('edit-organization', { organization, actor: currentOrgMember });
       return organization;
     },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentOrgMember, currentOrg, models: { Event, EventMember } }
+      { currentOrgMember, currentOrg, models: { Event, EventMember }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error('You need to be logged in as organisation admin.');
@@ -267,6 +269,7 @@ const resolvers = {
         isApproved: true,
       }).save();
 
+      eventHub.publish('create-event', { event, actor: currentOrgMember });
       return event;
     },
     editEvent: async (
@@ -281,7 +284,7 @@ const resolvers = {
         about,
         dreamReviewIsOpen,
       },
-      { currentUser, currentOrgMember, models: { Event, EventMember } }
+      { currentUser, currentOrgMember, models: { Event, EventMember }, eventHub }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -309,12 +312,13 @@ const resolvers = {
       if (typeof dreamReviewIsOpen !== 'undefined')
         event.dreamReviewIsOpen = dreamReviewIsOpen;
 
+      eventHub.publish('edit-event', { event, actor: currentOrgMember });
       return event.save();
     },
     deleteEvent: async (
       parent,
       { eventId },
-      { currentOrgMember, models: { Event, Grant, Dream, EventMember } }
+      { currentOrgMember, models: { Event, Grant, Dream, EventMember }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error('You need to be org. admin to delete event');
@@ -330,6 +334,8 @@ const resolvers = {
       await Grant.deleteMany({ eventId });
       await Dream.deleteMany({ eventId });
       await EventMember.deleteMany({ eventId });
+
+      eventHub.publish('delete-event', { event, actor: currentOrgMember });
       return event.remove();
     },
     addGuideline: async (
@@ -573,7 +579,7 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event } }
+      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event }, eventHub }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -618,12 +624,13 @@ const resolvers = {
         dream.discourseTopicId = discoursePost.topic_id;
       }
 
+      eventHub.publish('create-dream', { dream, actor: currentOrgMember });
       return dream.save();
     },
     editDream: async (
       parent,
       { dreamId, title, description, summary, images, budgetItems },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember, models: { EventMember, Dream }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -646,6 +653,7 @@ const resolvers = {
       if (typeof images !== 'undefined') dream.images = images;
       if (typeof budgetItems !== 'undefined') dream.budgetItems = budgetItems;
 
+      eventHub.publish('edit-dream', { dream, actor: currentOrgMember });
       return dream.save();
     },
     editDreamCustomField: async (
@@ -683,7 +691,7 @@ const resolvers = {
     deleteDream: async (
       parent,
       { dreamId },
-      { currentOrgMember, models: { Dream, EventMember, Grant } }
+      { currentOrgMember, models: { Dream, EventMember, Grant }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -711,6 +719,7 @@ const resolvers = {
         throw new Error('You cant delete a Dream that has received grants');
       }
 
+      eventHub.publish('delete-dream', { dream, actor: currentOrgMember });
       return dream.remove();
     },
     addCocreator: async (
@@ -784,7 +793,7 @@ const resolvers = {
     publishDream: async (
       parent,
       { dreamId, unpublish },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember, models: { EventMember, Dream }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -803,12 +812,13 @@ const resolvers = {
 
       dream.published = !unpublish;
 
+      eventHub.publish('publish-dream', { dream, actor: currentOrgMember });
       return dream.save();
     },
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrg, currentOrgMember, models: { Dream, Event } }
+      { currentOrg, currentOrgMember, models: { Dream, Event }, eventHub }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
@@ -867,11 +877,9 @@ const resolvers = {
       if (content.length < 3)
         throw new Error('Your post needs to be at least 3 characters long!');
 
-      dream.comments.push({
-        authorId: currentOrgMember.id,
-        content,
-      });
-
+      const comment = { authorId: currentOrgMember.id, content }
+      dream.comments.push(comment);
+      eventHub.publish('create-comment', { comment, actor: currentOrgMember });
       return dream.save();
     },
 
@@ -933,7 +941,7 @@ const resolvers = {
     editComment: async (
       parent,
       { dreamId, commentId, content },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember, models: { EventMember, Dream }, eventHub }
     ) => {
       const dream = await Dream.findOne({
         _id: dreamId,
@@ -959,6 +967,7 @@ const resolvers = {
       comment[0].content = content;
       comment[0].updatedAt = new Date();
 
+      eventHub.publish('edit-comment', { comment, actor: currentOrgMember });
       return dream.save();
     },
     raiseFlag: async (
