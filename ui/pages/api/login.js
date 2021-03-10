@@ -11,6 +11,7 @@ export default async function login(req, res) {
     if (path.length > 0) {
       // create redirectPath array if path exists (is not the root)
       redirectPath = path.split("/").map((str) => encodeURIComponent(str));
+      console.log("redirectPath", redirectPath);
     }
   }
   try {

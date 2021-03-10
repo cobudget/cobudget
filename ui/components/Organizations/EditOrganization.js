@@ -45,13 +45,13 @@ const EDIT_ORGANIZATION = gql`
   }
 `;
 
-export default ({ organization, currentUser }) => {
+export default ({ organization }) => {
   const [logoImage, setLogoImage] = useState(organization?.logo);
   const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
   const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
     variables: { organizationId: organization?.id },
   });
-  const { handleSubmit, register, errors, reset, getValues } = useForm();
+  const { handleSubmit, register, errors, reset } = useForm();
 
   const [slugValue, setSlugValue] = React.useState(
     organization?.subdomain ?? ""
