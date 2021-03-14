@@ -1,24 +1,24 @@
 // const { ApolloServer } = require('apollo-server-micro');
 //const { ApolloServer, gql } = require('apollo-server');
 
-const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
-const KcAdminClient = require('keycloak-admin').default;
+const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+const KcAdminClient = require("keycloak-admin").default;
 
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const bodyParser = require('body-parser');
-const pretixWebhook = require('./webhooks/pretix');
-const schema = require('./schema');
-const resolvers = require('./resolvers');
-const { getModels } = require('./database/models');
-const EventHub = require('./services/eventHub.service');
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
+const bodyParser = require("body-parser");
+const pretixWebhook = require("./webhooks/pretix");
+const schema = require("./schema");
+const resolvers = require("./resolvers");
+const { getModels } = require("./database/models");
+const EventHub = require("./services/eventHub.service");
 const {
   db: { getConnection },
-} = require('@sensestack/plato-core');
+} = require("@sensestack/plato-core");
 
-const Keycloak = require('keycloak-connect');
-const { KeycloakContext } = require('keycloak-connect-graphql');
+const Keycloak = require("keycloak-connect");
+const { KeycloakContext } = require("keycloak-connect-graphql");
 
 const subscribers = require('./subscribers/index');
 
@@ -26,18 +26,18 @@ const app = express();
 const keycloak = new Keycloak(
   {},
   {
-    realm: 'plato',
-    'auth-server-url': process.env.KEYCLOAK_AUTH_SERVER,
-    'ssl-required': 'external',
-    resource: 'dreams',
+    realm: "plato",
+    "auth-server-url": process.env.KEYCLOAK_AUTH_SERVER,
+    "ssl-required": "external",
+    resource: "dreams",
     credentials: {
       secret: process.env.KEYCLOAK_CLIENT_SECRET,
     },
-    'confidential-port': 0,
+    "confidential-port": 0,
   }
 );
 
-app.use('/graphql', keycloak.middleware());
+app.use("/graphql", keycloak.middleware());
 
 const server = new ApolloServer({
   typeDefs: schema,
@@ -55,7 +55,7 @@ const server = new ApolloServer({
 
     const kcAdminClient = new KcAdminClient({
       baseUrl: process.env.KEYCLOAK_AUTH_SERVER,
-      realmName: 'master',
+      realmName: "master",
       requestConfig: {
         /* Axios request config options https://github.com/axios/axios#request-config */
       },
@@ -65,13 +65,13 @@ const server = new ApolloServer({
     await kcAdminClient.auth({
       username: process.env.KEYCLOAK_ADMIN_USERNAME,
       password: process.env.KEYCLOAK_ADMIN_PASSWORD,
-      grantType: 'password',
-      clientId: 'admin-cli',
-      totp: '123456', // optional Time-based One-time Password if OTP is required in authentication flow
+      grantType: "password",
+      clientId: "admin-cli",
+      totp: "123456", // optional Time-based One-time Password if OTP is required in authentication flow
     });
 
     kcAdminClient.setConfig({
-      realmName: 'plato',
+      realmName: "plato",
     });
 
     let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
@@ -79,8 +79,8 @@ const server = new ApolloServer({
     let currentOrg = null;
     let currentOrgMember;
 
-    const subdomain = req.headers['dreams-subdomain'];
-    const customDomain = req.headers['dreams-customdomain'];
+    const subdomain = req.headers["dreams-subdomain"];
+    const customDomain = req.headers["dreams-customdomain"];
     if (customDomain) {
       currentOrg = await models.Organization.findOne({ customDomain });
     } else if (subdomain) {
@@ -95,7 +95,7 @@ const server = new ApolloServer({
     }
 
     let token = req.headers.authorization
-      ? req.headers.authorization.split(' ')[1]
+      ? req.headers.authorization.split(" ")[1]
       : null;
 
     return {
@@ -116,7 +116,7 @@ server.applyMiddleware({ app });
 
 app.use(bodyParser.json());
 
-app.post('/pretix', pretixWebhook);
+app.post("/pretix", pretixWebhook);
 
 const port = process.env.PORT || 4000;
 

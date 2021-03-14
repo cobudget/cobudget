@@ -34,7 +34,7 @@ const NavItem = ({
     " " +
     className;
 
-  if (Boolean(onClick)) {
+  if (onClick) {
     return (
       <button className={classes} onClick={onClick}>
         {children}

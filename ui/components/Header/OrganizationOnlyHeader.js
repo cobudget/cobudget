@@ -14,4 +14,4 @@ export default ({ currentOrg }) => (
       </h1>
     </a>
   </Link>
-)
+);

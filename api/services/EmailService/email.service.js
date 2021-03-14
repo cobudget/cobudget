@@ -1,34 +1,38 @@
-const EmailTemplates = require('./email.templates');
+const EmailTemplates = require("./email.templates");
 
-const mailgun = require('mailgun-js')({
+const mailgun = require("mailgun-js")({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
-	host: process.env.MAILGUN_HOST,
+  host: process.env.MAILGUN_HOST,
 });
 
 class EmailService {
   static async sendMagicLinkEmail(token, organization, user) {
     // send magic link in production, log it in development
     const { subdomain, customDomain, name } = organization;
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       const domain = customDomain
         ? `https://${customDomain}`
         : `https://${subdomain}.${process.env.DEPLOY_URL}`;
 
       const url = `${domain}/?token=${token}`;
-      const loginTemplate = await EmailTemplates.getLoginTemplate(organization, url, domain);
+      const loginTemplate = await EmailTemplates.getLoginTemplate(
+        organization,
+        url,
+        domain
+      );
       const data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: user.email,
         subject: `Welcome to Dreams - ${name}`,
-        html: loginTemplate
+        html: loginTemplate,
       };
 
       return mailgun
         .messages()
         .send(data)
         .then(() => {
-          console.log('Successfully sent magic link with Mailgun');
+          console.log("Successfully sent magic link with Mailgun");
           return true;
         })
         .catch((error) => {
@@ -52,12 +56,12 @@ class EmailService {
     emails
   ) {
     const { subdomain, customDomain } = organization;
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       const domain = customDomain
         ? `https://${customDomain}`
         : `https://${subdomain}.${process.env.DEPLOY_URL}`;
-      
-        var data = {
+
+      var data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: emails,
         subject: `Request to join ${event.title}`,
@@ -67,7 +71,7 @@ class EmailService {
         .messages()
         .send(data)
         .then(() => {
-          console.log('Successfully sent request to join');
+          console.log("Successfully sent request to join");
           return true;
         })
         .catch((error) => {
@@ -75,7 +79,7 @@ class EmailService {
           throw new Error(error.message);
         });
     } else {
-      console.log('in development, not sending request to join notifications');
+      console.log("in development, not sending request to join notifications");
     }
   }
 }

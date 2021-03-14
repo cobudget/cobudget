@@ -1,8 +1,8 @@
-const fetch = require('node-fetch');
-const { getModels } = require('../database/models');
+const fetch = require("node-fetch");
+const { getModels } = require("../database/models");
 const {
   db: { getConnection },
-} = require('@sensestack/plato-core');
+} = require("@sensestack/plato-core");
 // example request body:
 // {
 //   "notification_id": 123455,
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
   const { body } = req;
 
   switch (body.action) {
-    case 'pretix.event.order.paid':
+    case "pretix.event.order.paid":
       const pretixRes = await fetch(
         `${process.env.PRETIX_URL}/api/v1/organizers/${body.organizer}/events/${body.event}/orders/${body.code}/`,
         {
@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
 
       const order = await pretixRes.json();
 
-      if (order.status === 'p') {
+      if (order.status === "p") {
         const db = await getConnection();
         const { User, Member, Event } = getModels(db);
 

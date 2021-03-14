@@ -1,5 +1,5 @@
-const { Schema } = require('mongoose');
-const dayjs = require('dayjs');
+const { Schema } = require("mongoose");
+const dayjs = require("dayjs");
 
 const EventSchema = new Schema({
   slug: {
@@ -11,8 +11,8 @@ const EventSchema = new Schema({
   currency: String,
   registrationPolicy: {
     type: String,
-    enum: ['OPEN', 'REQUEST_TO_JOIN', 'INVITE_ONLY'],
-    default: 'OPEN',
+    enum: ["OPEN", "REQUEST_TO_JOIN", "INVITE_ONLY"],
+    default: "OPEN",
     required: true,
   },
   totalBudget: Number,
@@ -38,7 +38,7 @@ const EventSchema = new Schema({
     }),
   ],
   allowStretchGoals: { type: Boolean, default: false },
-  color: { type: String, default: 'anthracit' },
+  color: { type: String, default: "anthracit" },
   about: { type: String },
   organizationId: { type: Schema.Types.ObjectId, required: true },
   customFields: [
@@ -47,8 +47,8 @@ const EventSchema = new Schema({
       description: { type: String, required: true },
       type: {
         type: String,
-        enum: ['TEXT', 'MULTILINE_TEXT', 'BOOLEAN', 'ENUM', 'FILE'],
-        default: 'TEXT',
+        enum: ["TEXT", "MULTILINE_TEXT", "BOOLEAN", "ENUM", "FILE"],
+        default: "TEXT",
         required: true,
       },
       isRequired: { type: Boolean, required: true },
@@ -67,7 +67,7 @@ const EventSchema = new Schema({
   dreamReviewIsOpen: Boolean,
 }).index({ slug: 1, organizationId: 1 }, { unique: true }); // Unique on slug + organization Id
 
-EventSchema.virtual('grantingIsOpen').get(function () {
+EventSchema.virtual("grantingIsOpen").get(function () {
   if (!this.grantingOpens) return false;
 
   const now = dayjs();
@@ -81,13 +81,13 @@ EventSchema.virtual('grantingIsOpen').get(function () {
   }
 });
 
-EventSchema.virtual('grantingHasClosed').get(function () {
+EventSchema.virtual("grantingHasClosed").get(function () {
   if (!this.grantingCloses) return false;
 
   return dayjs().isBefore(dayjs(this.grantingCloses));
 });
 
-EventSchema.virtual('dreamCreationIsOpen').get(function () {
+EventSchema.virtual("dreamCreationIsOpen").get(function () {
   if (!this.dreamCreationCloses) return true;
 
   const now = dayjs();

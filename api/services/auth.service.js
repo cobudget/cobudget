@@ -1,18 +1,17 @@
-const jwt = require('jsonwebtoken');
-const MailgunService = require('./EmailService/email.service');
-const EmailService = require('./EmailService/email.service');
-const { isValidEmail } = require('../utils/email');
+const jwt = require("jsonwebtoken");
+const MailgunService = require("./EmailService/email.service");
+const EmailService = require("./EmailService/email.service");
+const { isValidEmail } = require("../utils/email");
 
 const jwtSecretKey = process.env.JWT_SECRET;
 const jwtOptions = {
   // issuer:
   // audience:
-  algorithm: 'HS256',
-  expiresIn: '30d'
+  algorithm: "HS256",
+  expiresIn: "30d",
 };
 
 class AuthService {
-
   static generateLoginJWT(user) {
     return new Promise((resolve, reject) => {
       return jwt.sign(
@@ -28,29 +27,36 @@ class AuthService {
         }
       );
     });
-  };
+  }
 
-  static async sendMagicLink({ inputEmail, currentOrg, models: { User, Member, Event } }
-  ) {
-    if (!isValidEmail(inputEmail)) throw new Error('Not a valid email address');
+  static async sendMagicLink({
+    inputEmail,
+    currentOrg,
+    models: { User, Member, Event },
+  }) {
+    if (!isValidEmail(inputEmail)) throw new Error("Not a valid email address");
     const email = inputEmail.toLowerCase();
-  
+
     let user;
-    if(currentOrg) {
+    if (currentOrg) {
       user = await User.findOne({ email, organizationId: currentOrg.id });
     }
-    
+
     if (!user) {
       user = await new User({ email, organizationId: currentOrg.id }).save();
     }
 
     const token = await this.generateLoginJWT(user);
-    const isSentSuccess = await EmailService.sendMagicLinkEmail(token, currentOrg, user);
-    
+    const isSentSuccess = await EmailService.sendMagicLinkEmail(
+      token,
+      currentOrg,
+      user
+    );
+
     return {
       isSentSuccess,
-      user
-    }
+      user,
+    };
   }
 }
 
