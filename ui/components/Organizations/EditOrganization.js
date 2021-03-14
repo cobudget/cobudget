@@ -48,6 +48,7 @@ const EDIT_ORGANIZATION = gql`
 
 export default ({ organization }) => {
   const router = useRouter();
+  const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
   const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
   const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
@@ -85,8 +86,7 @@ export default ({ organization }) => {
           process.env.REALITIES_DEPLOY_URL
         }/${variables.subdomain}`;
 
-        const url =
-          router.query.from === "realities" ? realitiesUrl : dreamsUrl;
+        const url = fromRealities ? realitiesUrl : dreamsUrl;
 
         window.location.assign(url);
       } else {
@@ -119,8 +119,8 @@ export default ({ organization }) => {
 
         <TextField
           name="subdomain"
-          label="Subdomain"
-          placeholder="subdomain"
+          label={fromRealities ? "Link" : "Subdomain"}
+          placeholder={fromRealities ? "org-link" : "subdomain"}
           inputRef={register({ required: "Required" })}
           className="mb-2"
           defaultValue={organization?.subdomain}
@@ -131,7 +131,12 @@ export default ({ organization }) => {
             onBlur: (e) => setSlugValue(slugify(e.target.value)),
           }}
           helperText={errors.subdomain?.message}
-          endAdornment={<span>.{process.env.DEPLOY_URL}</span>}
+          startAdornment={
+            fromRealities && <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+          }
+          endAdornment={
+            !fromRealities && <span>.{process.env.DEPLOY_URL}</span>
+          }
         />
 
         {organization?.customDomain && (
