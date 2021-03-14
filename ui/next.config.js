@@ -19,6 +19,7 @@ module.exports = (phase) => {
       : `https://api.dreams.wtf/graphql`,
     IS_PROD: isProd,
     DEPLOY_URL: process.env.DEPLOY_URL,
+    REALITIES_DEPLOY_URL: process.env.REALITIES_DEPLOY_URL,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
   };
   return withBundleAnalyzer({

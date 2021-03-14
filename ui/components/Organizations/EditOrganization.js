@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Button from "../Button";
@@ -46,6 +47,7 @@ const EDIT_ORGANIZATION = gql`
 `;
 
 export default ({ organization }) => {
+  const router = useRouter();
   const [logoImage, setLogoImage] = useState(organization?.logo);
   const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
   const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
@@ -75,14 +77,21 @@ export default ({ organization }) => {
         : "Organization updated successfully.";
 
       if (isNew) {
-        const url = process.env.IS_PROD
+        const dreamsUrl = process.env.IS_PROD
           ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
           : `http://${variables.subdomain}.localhost:3000`;
+
+        const realitiesUrl = `http${process.env.IS_PROD ? "s" : ""}://${
+          process.env.REALITIES_DEPLOY_URL
+        }/${variables.subdomain}`;
+
+        const url =
+          router.query.from === "realities" ? realitiesUrl : dreamsUrl;
+
         window.location.assign(url);
       } else {
         alert(message);
       }
-      // alert(message);
       reset();
     } catch (err) {
       console.error(err);
