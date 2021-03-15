@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Button from "../Button";
@@ -45,13 +46,15 @@ const EDIT_ORGANIZATION = gql`
   }
 `;
 
-export default ({ organization, currentUser }) => {
+export default ({ organization }) => {
+  const router = useRouter();
+  const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
   const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
   const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
     variables: { organizationId: organization?.id },
   });
-  const { handleSubmit, register, errors, reset, getValues } = useForm();
+  const { handleSubmit, register, errors, reset } = useForm();
 
   const [slugValue, setSlugValue] = React.useState(
     organization?.subdomain ?? ""
@@ -75,14 +78,20 @@ export default ({ organization, currentUser }) => {
         : "Organization updated successfully.";
 
       if (isNew) {
-        const url = process.env.IS_PROD
+        const dreamsUrl = process.env.IS_PROD
           ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
           : `http://${variables.subdomain}.localhost:3000`;
+
+        const realitiesUrl = `http${process.env.IS_PROD ? "s" : ""}://${
+          process.env.REALITIES_DEPLOY_URL
+        }/${variables.subdomain}`;
+
+        const url = fromRealities ? realitiesUrl : dreamsUrl;
+
         window.location.assign(url);
       } else {
         alert(message);
       }
-      // alert(message);
       reset();
     } catch (err) {
       console.error(err);
@@ -110,8 +119,8 @@ export default ({ organization, currentUser }) => {
 
         <TextField
           name="subdomain"
-          label="Subdomain"
-          placeholder="subdomain"
+          label={fromRealities ? "Link" : "Subdomain"}
+          placeholder={fromRealities ? "org-link" : "subdomain"}
           inputRef={register({ required: "Required" })}
           className="mb-2"
           defaultValue={organization?.subdomain}
@@ -122,7 +131,12 @@ export default ({ organization, currentUser }) => {
             onBlur: (e) => setSlugValue(slugify(e.target.value)),
           }}
           helperText={errors.subdomain?.message}
-          endAdornment={<span>.{process.env.DEPLOY_URL}</span>}
+          startAdornment={
+            fromRealities && <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+          }
+          endAdornment={
+            !fromRealities && <span>.{process.env.DEPLOY_URL}</span>
+          }
         />
 
         {organization?.customDomain && (

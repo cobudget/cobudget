@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const TextField = ({
   inputRef,
   inputProps,
@@ -13,9 +15,11 @@ const TextField = ({
   rows,
   size,
   autoFocus,
+  startAdornment,
   endAdornment,
   color = "green",
 }) => {
+  const [hasFocus, setHasFocus] = useState(false);
   const LabelComponent = labelComponent;
   return (
     <div className={`flex flex-col ${className}`}>
@@ -39,17 +43,27 @@ const TextField = ({
           {...inputProps}
         />
       ) : (
-        <div className="relative">
+        <div
+          className={`relative flex rounded-md  bg-gray-100 border-3
+            ${hasFocus ? "bg-white" : ""}
+            ${error ? "border-red" : "border-transparent"}
+            ${hasFocus && !error ? `border-${color}` : ""}
+          `}
+        >
+          {startAdornment && (
+            <label
+              htmlFor={name}
+              className="ml-4 flex items-center text-gray-500"
+            >
+              {startAdornment}
+            </label>
+          )}
           <input
-            className={`block  w-full px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
-              (error
-                ? "border-red"
-                : `border-transparent focus:border-${color}`) +
-              " " +
-              (size === "large" ? "text-xl" : "") +
-              " " +
-              (endAdornment ? "pr-12" : "")
-            } transition-borders ease-in-out duration-200`}
+            className={`block  w-full px-4 py-3 focus:outline-none transition-borders ease-in-out duration-200
+              ${size === "large" ? "text-xl" : ""}
+              ${startAdornment ? "pl-1" : ""}
+              ${endAdornment ? "pr-1" : ""}
+            `}
             name={name}
             id={name}
             ref={inputRef}
@@ -57,11 +71,22 @@ const TextField = ({
             defaultValue={defaultValue}
             autoFocus={autoFocus}
             {...inputProps}
+            onFocus={(e) => {
+              setHasFocus(true);
+              inputProps?.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setHasFocus(false);
+              inputProps?.onBlur?.(e);
+            }}
           />
           {endAdornment && (
-            <span className="absolute mr-4 right-0 top-0 bottom-0 flex items-center text-gray-500">
+            <label
+              htmlFor={name}
+              className="mr-4 flex items-center text-gray-500"
+            >
               {endAdornment}
-            </span>
+            </label>
           )}
         </div>
       )}

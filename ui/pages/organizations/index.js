@@ -24,7 +24,7 @@ const DELETE_ORGANIZATION = gql`
   }
 `;
 
-export default ({}) => {
+export default () => {
   const {
     data: { organizations } = { organizations: [] },
     loading,
