@@ -603,29 +603,9 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      if (currentOrg.discourse) {
-        const discoursePost = await discourse(
-          currentOrg.discourse
-        ).posts.create(
-          {
-            title,
-            raw: `https://${
-              currentOrg.customDomain
-                ? currentOrg.customDomain
-                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-            }/${event.slug}/${dream.id}`,
-            ...(currentOrg.discourse.dreamsCategoryId && {
-              category: currentOrg.discourse.dreamsCategoryId,
-            }),
-          },
-          { username: "system" }
-        );
+      eventHub.publish('create-dream', { dream, event, currentOrg, currentOrgMember });
 
-        dream.discourseTopicId = discoursePost.topic_id;
-      }
-
-      eventHub.publish('create-dream', { dream, actor: currentOrgMember });
-      return dream.save();
+      dream.save();
     },
     editDream: async (
       parent,
@@ -653,7 +633,8 @@ const resolvers = {
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
 
-      eventHub.publish('edit-dream', { dream, actor: currentOrgMember });
+      eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream });
+
       return dream.save();
     },
     editDreamCustomField: async (
@@ -820,66 +801,20 @@ const resolvers = {
       { content, dreamId },
       { currentOrg, currentOrgMember, models: { Dream, Event }, eventHub }
     ) => {
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
+      const dream = await Dream.findOne({ _id: dreamId });
+      const event = await Event.findOne({ _id: dream.eventId });
 
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (currentOrg.discourse) {
-        if (!currentOrgMember.discourseApiKey) {
-          throw new Error(
-            "You need to have a discourse account connected, go to /connect-discourse"
-          );
-        }
+      const minLength = currentOrg.discourse ? 20 : 3
 
-        if (content.length < 20)
-          throw new Error("Your post needs to be at least 20 characters long");
-
-        if (!dream.discourseTopicId) {
-          const event = await Event.findOne({ _id: dream.eventId });
-
-          const discoursePost = await discourse(
-            currentOrg.discourse
-          ).posts.create(
-            {
-              title: dream.title,
-              raw: `https://${
-                currentOrg.customDomain
-                  ? currentOrg.customDomain
-                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${event.slug}/${dream.id}`,
-
-              ...(currentOrg.discourse.dreamsCategoryId && {
-                category: currentOrg.discourse.dreamsCategoryId,
-              }),
-            },
-            { username: "system" }
-          );
-
-          dream.discourseTopicId = discoursePost.topic_id;
-        }
-
-        // TODO: error handling (expired api key, faulty discourse url)
-        await discourse(currentOrg.discourse).posts.create(
-          {
-            topic_id: dream.discourseTopicId,
-            raw: content,
-          },
-          { userApiKey: currentOrgMember.discourseApiKey }
-        );
-
-        return dream.save();
-      }
-
-      // post regular comment
-      if (content.length < 3)
+      if (content.length < minLength)
         throw new Error("Your post needs to be at least 3 characters long!");
 
       const comment = { authorId: currentOrgMember.id, content }
       dream.comments.push(comment);
-      eventHub.publish('create-comment', { comment, actor: currentOrgMember });
+      eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
       return dream.save();
     },
 
@@ -888,38 +823,10 @@ const resolvers = {
       { dreamId, commentId },
       { currentOrg, currentOrgMember, models: { EventMember, Dream } }
     ) => {
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
+      const dream = await Dream.findOne({ _id: dreamId });
 
-      if (!currentOrgMember) {
+      if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
-      }
-
-      if (currentOrg.discourse) {
-        const post = await discourse(currentOrg.discourse).posts.getSingle(
-          commentId
-        );
-
-        if (
-          post.username !== currentOrgMember.discourseUsername ||
-          !currentOrgMember.isOrgAdmin
-        ) {
-          throw new Error(
-            "You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse"
-          );
-        }
-
-        await discourse(currentOrg.discourse).posts.delete({
-          id: commentId,
-          ...(post.username == currentOrgMember.discourseUsername && {
-            userApiKey: currentOrgMember.discourseApiKey,
-          }),
-          ...(post.username !== currentOrgMember.discourseUsername &&
-            currentOrgMember.isOrgAdmin && { username: "system" }),
-        });
-        return dream;
-      }
 
       // mongodb comments
       const eventMember = await EventMember.findOne({

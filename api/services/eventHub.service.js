@@ -4,7 +4,17 @@ class EventHub {
   })
 
   static publish(channel, event) {
-    this.subscriptions[channel].forEach(fn => fn(event))
+    this.subscriptions[channel].reduce(({ success, errors }, fn) => {
+      try {
+        fn(event);
+        return errors;
+      } catch(err) {
+        return errors.concat(err);
+      }
+    }, []);
+
+    if (errors.length)
+      throw new Error(errors.join(', '));
   }
 
   static subscribe(channel, fn) {

@@ -1,5 +1,5 @@
 module.exports = {
-  initialize(eventHub) {
+  initialize(eventHub, models) {
     if (!process.env.LOOMIO_API_URL) { return }
 
     console.log(`Integrating with Loomio at ${process.env.LOOMIO_API_URL}`)
