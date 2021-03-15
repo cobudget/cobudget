@@ -6,7 +6,7 @@ const Comments = ({
   currentOrgMember,
   currentOrg,
   comments,
-  dreamId,
+  dream,
   event,
   logs,
 }) => {
@@ -19,9 +19,12 @@ const Comments = ({
   return (
     <div>
       {(comments.length > 0 || currentOrgMember?.currentEventMembership) && (
-        <h2 className="mb-4 text-2xl font-medium" id="comments">
-          {comments.length} {comments.length === 1 ? "comment" : "comments"}
-        </h2>
+        <div className="flex justify-between items-center">
+          <h2 className="mb-4 text-2xl font-medium" id="comments">
+            {comments.length} {comments.length === 1 ? "comment" : "comments"}
+          </h2>
+          {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>Read it on Discourse</a>}
+        </div>
       )}
       {items.map((comment, index) => {
         if (comment._type === "LOG") return <Log log={comment} key={index} />;
@@ -29,7 +32,7 @@ const Comments = ({
           <Comment
             comment={comment}
             currentOrgMember={currentOrgMember}
-            dreamId={dreamId}
+            dreamId={dream.id}
             showBorderBottom={Boolean(index + 1 !== comments.length)}
             key={comment.id}
             event={event}
@@ -40,7 +43,7 @@ const Comments = ({
         <AddComment
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
-          dreamId={dreamId}
+          dreamId={dream.id}
           event={event}
         />
       )}

@@ -85,7 +85,7 @@ const Dream = ({ dream, event, currentUser, currentOrgMember, currentOrg }) => {
               currentOrgMember={currentOrgMember}
               currentOrg={currentOrg}
               comments={dream.comments}
-              dreamId={dream.id}
+              dream={dream}
               event={event}
               logs={dream.logs}
             />

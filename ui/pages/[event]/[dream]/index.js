@@ -71,6 +71,7 @@ export const DREAM_QUERY = gql`
           }
         }
       }
+      discourseTopicUrl
       numberOfComments
       logs {
         createdAt

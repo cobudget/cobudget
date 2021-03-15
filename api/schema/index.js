@@ -295,6 +295,7 @@ const schema = gql`
     flags: [Flag]
     raisedFlags: [Flag]
     logs: [Log]
+    discourseTopicUrl: String
     # reactions: [Reaction]
     # tags: [Tag]
   }

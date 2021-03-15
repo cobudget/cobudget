@@ -77,4 +77,10 @@ DreamSchema.virtual("maxGoal").get(function () {
   return max;
 });
 
+DreamSchema.virtual("discourseTopicUrl").get(function() {
+  if (!process.env.DISCOURSE_API_URL) { return }
+
+  return `${process.env.DISCOURSE_API_URL}/t/${this.discourseTopicId}`;
+});
+
 module.exports = DreamSchema;

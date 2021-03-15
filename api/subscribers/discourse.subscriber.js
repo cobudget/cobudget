@@ -33,6 +33,7 @@ module.exports = {
         throw new Error("Unable to create topic on Discourse; please try again");
 
       dream.discourseTopicId = post.topic_id;
+      dream.save();
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
