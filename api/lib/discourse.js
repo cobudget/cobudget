@@ -136,7 +136,6 @@ const discourse = ({
         });
 
         const { post = {} } = await res.json();
-        console.log(post);
         return post;
       },
       get: async (id) => {

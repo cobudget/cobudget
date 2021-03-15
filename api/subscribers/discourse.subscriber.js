@@ -18,7 +18,7 @@ module.exports = {
       const domain = currentOrg.customDomain || [currentOrg.subdomain, process.env.DEPLOY_URL].join('.')
       const post = await discourse(currentOrg.discourse).posts.create({
         title: dream.title,
-        raw: this.generateDreamMarkdown(dream),
+        raw: this.generateDreamMarkdown(dream, event),
         category: currentOrg.discourse.dreamsCategoryId,
       }, {
         username: currentOrgMember.discourseUsername,
@@ -45,7 +45,7 @@ module.exports = {
       }
 
       const post = await discourse(currentOrg.discourse).posts.update(dream.discourseTopicId, {
-        title: dream.title, raw: this.generateDreamMarkdown(dream)
+        title: dream.title, raw: this.generateDreamMarkdown(dream, event)
       }, {
         username: currentOrgMember.discourseUsername,
         userApiKey: currentOrgMember.discourseApiKey,
@@ -105,16 +105,49 @@ module.exports = {
     });
   },
 
-  generateDreamMarkdown(dream) {
+  generateDreamMarkdown(dream, event) {
     const content = []
     if (dream.summary) {
       content.push('## Summary');
       content.push(dream.summary);
     }
+
     if (dream.description) {
       content.push('## Description');
       content.push(dream.description);
     }
+
+    if (dream.budgetItems.length) {
+      const income = dream.budgetItems.filter(({ type }) => type === 'INCOME');
+      const expenses = dream.budgetItems.filter(({ type }) => type === 'EXPENSE');
+
+      content.push('## Budget Items');
+
+      if (income.length) {
+        content.push('#### Income / Existing funding');
+        content.push([
+          `|Description|Amount|`,
+          `|---|---|`,
+          ...income.map(({ description, min }) => `|${description}|${min} ${event.currency}|`)
+        ].join('\n'));      }
+
+      if (expenses.length) {
+        content.push('#### Expenses');
+        content.push([
+          `|Description|Amount|`,
+          `|---|---|`,
+          ...expenses.map(({ description, min }) => `|${description}|${min} ${event.currency}|`)
+        ].join('\n'));
+      }
+
+      content.push(`Total funding goal: ${dream.minGoal} ${event.currency}`)
+    }
+
+    if (dream.images.length) {
+      content.push('## Images');
+      dream.images.forEach(({ small }) => content.push(`![](${small})`));
+    }
+
     return content.join('\n\n');
   }
 }

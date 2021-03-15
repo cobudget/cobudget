@@ -826,7 +826,6 @@ const resolvers = {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
       const comment = dream.comments.find(c => c.id === commentId);
-      console.log(dream, event, comment);
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
