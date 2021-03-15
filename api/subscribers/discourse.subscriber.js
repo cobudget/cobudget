@@ -18,15 +18,41 @@ module.exports = {
       const domain = currentOrg.customDomain || [currentOrg.subdomain, process.env.DEPLOY_URL].join('.')
       const post = await discourse(currentOrg.discourse).posts.create({
         title: dream.title,
-        raw: `https://${domain}/${event.slug}/${dream.id}`,
+        raw: this.generateDreamMarkdown(dream),
         category: currentOrg.discourse.dreamsCategoryId,
-      }, { username: currentOrg.discourse.username || 'system' });
+      }, {
+        username: currentOrgMember.discourseUsername,
+        userApiKey: currentOrgMember.discourseApiKey,
+      });
 
       if (!post.id)
         throw new Error("Unable to create topic on Discourse; please try again");
 
       dream.discourseTopicId = post.topic_id;
       dream.save();
+    });
+
+    eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
+      if (!currentOrg.discourse) { return }
+      if (!currentOrgMember.discourseApiKey)
+        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+
+      console.log(`Updating dream ${dream.id} on discourse`);
+
+      if (!dream.discourseTopicId) {
+        await eventHub.publish('create-dream', { currentOrg, event, dream });
+        dream = models.Dream.findOne({ _id: dream.id });
+      }
+
+      const post = await discourse(currentOrg.discourse).posts.update(dream.discourseTopicId, {
+        title: dream.title, raw: this.generateDreamMarkdown(dream)
+      }, {
+        username: currentOrgMember.discourseUsername,
+        userApiKey: currentOrgMember.discourseApiKey,
+      });
+
+      if (!post.id)
+        throw new Error("Unable to create post on Discourse; please try again");
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -44,7 +70,10 @@ module.exports = {
       const post = await discourse(currentOrg.discourse).posts.create({
         topic_id: dream.discourseTopicId,
         raw: comment.content
-      }, { userApiKey: currentOrgMember.discourseApiKey });
+      }, {
+        username: currentOrgMember.discourseUsername,
+        userApiKey: currentOrgMember.discourseApiKey
+      });
 
       if (!post.id)
         throw new Error("Unable to create post on Discourse; please try again");
@@ -74,5 +103,18 @@ module.exports = {
       if (!res.ok)
         throw new Error("Unable to delete post on Discourse; please try again");
     });
+  },
+
+  generateDreamMarkdown(dream) {
+    const content = []
+    if (dream.summary) {
+      content.push('## Summary');
+      content.push(dream.summary);
+    }
+    if (dream.description) {
+      content.push('## Description');
+      content.push(dream.description);
+    }
+    return content.join('\n\n');
   }
 }

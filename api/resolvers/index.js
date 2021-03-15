@@ -610,9 +610,10 @@ const resolvers = {
     editDream: async (
       parent,
       { dreamId, title, description, summary, images, budgetItems },
-      { currentOrgMember, models: { EventMember, Dream }, eventHub }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
+      const event = await Event.findOne({ _id: dream.eventId });
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -672,7 +673,7 @@ const resolvers = {
     deleteDream: async (
       parent,
       { dreamId },
-      { currentOrgMember, models: { Dream, EventMember, Grant }, eventHub }
+      { currentOrg, currentOrgMember, models: { Dream, EventMember, Grant }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 

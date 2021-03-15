@@ -108,6 +108,37 @@ const discourse = ({
         });
         return res.json();
       },
+      update: async (topicId, { title, raw }, { username, userApiKey } = {}) => {
+        const postRes = await fetch(`${url}/posts/by_number/${topicId}/1.json`, {
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          }
+        });
+
+        const { id } = await postRes.json();
+        if (!id)
+          throw new Error("Unable to fetch topic from Discourse, please try again");
+
+        const res = await fetch(`${url}/posts/${id}`, {
+          method: "put",
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          },
+          body: JSON.stringify({ title, post: { raw } }),
+        });
+
+        const { post = {} } = await res.json();
+        console.log(post);
+        return post;
+      },
       get: async (id) => {
         // query parameter print=true will return up to 1000 posts in a topic
         const res = await fetch(`${url}/t/${id}.json`, {
