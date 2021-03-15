@@ -10,8 +10,12 @@ module.exports = {
       console.log('TODO: publish category to discourse (?)');
     });
 
-    eventHub.subscribe('create-dream', async ({ currentOrg, event, dream }) => {
+    eventHub.subscribe('create-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       if (!currentOrg.discourse) { return }
+      if (!dream.published) { return } // Only push published dreams to Discourse
+
+      if (!currentOrgMember.discourseApiKey)
+        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Publishing dream ${dream.id} to discourse...`)
 
@@ -29,18 +33,19 @@ module.exports = {
         throw new Error("Unable to create topic on Discourse; please try again");
 
       dream.discourseTopicId = post.topic_id;
-      dream.save();
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       if (!currentOrg.discourse) { return }
+      if (!dream.published) { return } // Only push published dreams to Discourse
+
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Updating dream ${dream.id} on discourse`);
 
       if (!dream.discourseTopicId) {
-        await eventHub.publish('create-dream', { currentOrg, event, dream });
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
         dream = models.Dream.findOne({ _id: dream.id });
       }
 
@@ -55,6 +60,12 @@ module.exports = {
         throw new Error("Unable to create post on Discourse; please try again");
     });
 
+    eventHub.subscribe('publish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
+      dream.discourseTopicId
+        ? eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream })
+        : eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream })
+    });
+
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
       if (!currentOrg.discourse) { return }
       if (!currentOrgMember.discourseApiKey)
@@ -63,7 +74,7 @@ module.exports = {
       console.log(`Publishing comment in dream ${dream.id} to discourse...`)
 
       if (!dream.discourseTopicId) {
-        await eventHub.publish('create-dream', { currentOrg, event, dream });
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
         dream = models.Dream.findOne({ _id: dream.id });
       }
 
@@ -117,7 +128,7 @@ module.exports = {
       content.push(dream.description);
     }
 
-    if (dream.budgetItems.length) {
+    if (dream.budgetItems && dream.budgetItems.length > 0) {
       const income = dream.budgetItems.filter(({ type }) => type === 'INCOME');
       const expenses = dream.budgetItems.filter(({ type }) => type === 'EXPENSE');
 
@@ -143,7 +154,7 @@ module.exports = {
       content.push(`Total funding goal: ${dream.minGoal} ${event.currency}`)
     }
 
-    if (dream.images.length) {
+    if (dream.images && dream.images.length > 0) {
       content.push('## Images');
       dream.images.forEach(({ small }) => content.push(`![](${small})`));
     }

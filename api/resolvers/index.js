@@ -603,9 +603,9 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      eventHub.publish('create-dream', { dream, event, currentOrg, currentOrgMember });
+      eventHub.publish('create-dream', { currentOrg, currentOrgMember, dream, event });
 
-      dream.save();
+      return dream.save();
     },
     editDream: async (
       parent,
@@ -775,9 +775,10 @@ const resolvers = {
     publishDream: async (
       parent,
       { dreamId, unpublish },
-      { currentOrgMember, models: { EventMember, Dream }, eventHub }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
+      const event = await Event.findOne({ _id: dream.eventId });
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
