@@ -55,7 +55,7 @@ module.exports = {
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
-      console.log(`Deleting comment ${comment.id} to discourse...`)
+      console.log(`Deleting comment ${comment.id} on discourse...`)
 
       const post = await discourse(currentOrg.discourse).posts.getSingle(comment.id);
 

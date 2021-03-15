@@ -185,7 +185,7 @@ const resolvers = {
         );
       }
 
-      eventHub.publish('create-organization', { organization: savedOrg, actor: orgMember });
+      eventHub.publish('create-organization', { currentOrganization: savedOrg, currentOrgMember });
       return savedOrg;
     },
     editOrganization: async (
@@ -241,7 +241,7 @@ const resolvers = {
           }
         );
 
-      eventHub.publish('edit-organization', { organization, actor: currentOrgMember });
+      eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
       return organization;
     },
     createEvent: async (
@@ -269,7 +269,7 @@ const resolvers = {
         isApproved: true,
       }).save();
 
-      eventHub.publish('create-event', { event, actor: currentOrgMember });
+      eventHub.publish('create-event', { currentOrg, currentOrgMember, event });
       return event;
     },
     editEvent: async (
@@ -312,7 +312,7 @@ const resolvers = {
       if (typeof dreamReviewIsOpen !== "undefined")
         event.dreamReviewIsOpen = dreamReviewIsOpen;
 
-      eventHub.publish('edit-event', { event, actor: currentOrgMember });
+      eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
       return event.save();
     },
     deleteEvent: async (
@@ -335,7 +335,7 @@ const resolvers = {
       await Dream.deleteMany({ eventId });
       await EventMember.deleteMany({ eventId });
 
-      eventHub.publish('delete-event', { event, actor: currentOrgMember });
+      eventHub.publish('delete-event', { currentOrg, currentOrgMember, event });
       return event.remove();
     },
     addGuideline: async (
@@ -700,7 +700,7 @@ const resolvers = {
         throw new Error("You cant delete a Dream that has received grants");
       }
 
-      eventHub.publish('delete-dream', { dream, actor: currentOrgMember });
+      eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
       return dream.remove();
     },
     addCocreator: async (
@@ -793,7 +793,7 @@ const resolvers = {
 
       dream.published = !unpublish;
 
-      eventHub.publish('publish-dream', { dream, actor: currentOrgMember });
+      eventHub.publish('publish-dream', { currentOrg, currentOrgMember, event, dream });
       return dream.save();
     },
     addComment: async (
@@ -803,14 +803,13 @@ const resolvers = {
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
+      const minLength = currentOrg.discourse ? 20 : 3
 
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      const minLength = currentOrg.discourse ? 20 : 3
-
       if (content.length < minLength)
-        throw new Error("Your post needs to be at least 3 characters long!");
+        throw new Error(`Your post needs to be at least ${minLength} characters long!`);
 
       const comment = { authorId: currentOrgMember.id, content }
       dream.comments.push(comment);
@@ -821,28 +820,26 @@ const resolvers = {
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream } }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
+      const event = await Event.findOne({ _id: dream.eventId });
+      const comment = dream.comments.find(c => c.id === commentId);
+      console.log(dream, event, comment);
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
 
-      // mongodb comments
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+        eventId: event.id,
       });
 
-      dream.comments = dream.comments.filter(
-        (comment) =>
-          !(
-            comment._id.toString() === commentId &&
-            (comment.authorId.toString() === currentOrgMember.id.toString() ||
-              eventMember?.isAdmin)
-          )
-      );
+      if (!eventMember?.isAdmin && comment.authorId.toString !== currentOrgMember.id.toString())
+        throw new Error("You may only delete your own comments unless you are an administrator of this event");
 
+      eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
+      dream.comments = dream.comments.filter(comment => comment._id.toString() !== commentId);
       return dream.save();
     },
     editComment: async (
@@ -874,7 +871,7 @@ const resolvers = {
       comment[0].content = content;
       comment[0].updatedAt = new Date();
 
-      eventHub.publish('edit-comment', { comment, actor: currentOrgMember });
+      eventHub.publish('edit-comment', { currentOrgMember, dream, comment });
       return dream.save();
     },
     raiseFlag: async (

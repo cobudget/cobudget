@@ -4,12 +4,12 @@ class EventHub {
   })
 
   static publish(channel, event) {
-    this.subscriptions[channel].reduce(({ success, errors }, fn) => {
+    const errors = this.subscriptions[channel].reduce((result, fn) => {
       try {
         fn(event);
-        return errors;
+        return result;
       } catch(err) {
-        return errors.concat(err);
+        return result.concat(err);
       }
     }, []);
 
