@@ -23,7 +23,7 @@ const Comments = ({
           <h2 className="mb-4 text-2xl font-medium" id="comments">
             {comments.length} {comments.length === 1 ? "comment" : "comments"}
           </h2>
-          {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>Read it on Discourse</a>}
+          {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>View on Discourse</a>}
         </div>
       )}
       {items.map((comment, index) => {

@@ -836,7 +836,7 @@ const resolvers = {
         eventId: event.id,
       });
 
-      if (!eventMember?.isAdmin && comment.authorId.toString !== currentOrgMember.id.toString())
+      if (!eventMember?.isAdmin && comment.authorId.toString() !== currentOrgMember.id.toString())
         throw new Error("You may only delete your own comments unless you are an administrator of this event");
 
       eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
@@ -1931,23 +1931,6 @@ const resolvers = {
         { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
       return grantsForDream;
-    },
-    comments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse) {
-        let discourseComments = [];
-        if (dream.discourseTopicId) {
-          const {
-            post_stream: { posts },
-          } = await discourse(currentOrg.discourse).posts.get(
-            dream.discourseTopicId
-          );
-          discourseComments = posts.filter((post) => post.post_number !== 1);
-        }
-        // add together native comments with discourse posts to not have to migrate existings comments
-        return [...dream.comments, ...discourseComments];
-      }
-
-      return dream.comments;
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
       if (currentOrg.discourse && dream.discourseTopicId) {

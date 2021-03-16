@@ -89,6 +89,15 @@ module.exports = {
 
       if (!post.id)
         throw new Error("Unable to create post on Discourse; please try again");
+
+      dream.comments = dream.comments.map(c => (
+        console.log(comment.id, c.id) ||
+        c.id === comment.id
+          ? { ...comment, discoursePostId: post.id }
+          : c
+      ));
+      dream.save();
+      console.log(dream);
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
