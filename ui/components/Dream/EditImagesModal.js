@@ -82,7 +82,7 @@ export default ({ dreamId, initialImages = [], open, handleClose }) => {
 
   const { handleSubmit, register, errors } = useForm();
 
-  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const uploadFile = async (e) => {
     setUploadingImage(true);

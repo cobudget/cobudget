@@ -22,7 +22,7 @@ const Button = forwardRef(
     const classes = `
   font-medium transition-colors duration-100 rounded-md 
   relative flex justify-center items-center 
-  focus:outline-none focus:shadow-outline ${
+  focus:outline-none focus:ring ${
     (size === "large"
       ? "text-xl px-5 py-3"
       : size === "small"
@@ -36,9 +36,9 @@ const Button = forwardRef(
     (disabled
       ? "text-gray-600 bg-gray-200"
       : variant === "primary"
-      ? `text-white bg-${color} hover:bg-${color}-darker`
+      ? `text-white bg-${color} hover:bg-${color}-dark`
       : variant === "secondary"
-      ? `bg-${color}-100 text-${color}-darker hover:bg-${color}-200`
+      ? `bg-${color}-100 text-${color}-dark hover:bg-${color}-200`
       : "text-gray-800 hover:bg-gray-200")
   } ${className}`;
 

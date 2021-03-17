@@ -1,3 +1,4 @@
+import React from "react"
 import stringToHslColor, { stringToColor } from "../utils/stringToHslColor";
 
 export default React.forwardRef((props, ref) => {
@@ -8,7 +9,7 @@ export default React.forwardRef((props, ref) => {
         props.size === "small" ? "h-8 w-8" : "h-10 w-10 text-xl"
       } bg-${stringToColor(
         user.username ? user.username : "default"
-      )}-darker rounded-full text-white flex items-center justify-center select-none font-medium`}
+      )}-dark rounded-full text-white flex items-center justify-center select-none font-medium`}
       ref={ref}
       alt={user.username && user.username}
       src={user.avatar && user.avatar}

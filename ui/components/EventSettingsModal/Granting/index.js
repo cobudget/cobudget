@@ -1,19 +1,13 @@
+import React from "react";
 import {
-  List,
-  Typography,
   Modal,
-  Box,
-  ListItem,
-  ListItemText,
+  List,
   Divider,
-  IconButton,
 } from "@material-ui/core";
-import { Edit as EditIcon, Add as AddIcon } from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
 import dayjs from "dayjs";
-import ReactMarkdown from "react-markdown";
 import thousandSeparator from "utils/thousandSeparator";
 
 import SettingsListItem from "./SettingsListItem";

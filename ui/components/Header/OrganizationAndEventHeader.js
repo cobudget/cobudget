@@ -52,7 +52,7 @@ export default ({ currentOrg, event, currentOrgMember }) => {
                 className={
                   "block p-1 rounded-md " +
                   (event.color
-                    ? `text-white opacity-75 hover:opacity-100 hover:bg-${event.color}-darker`
+                    ? `text-white opacity-75 hover:opacity-100 hover:bg-${event.color}-dark`
                     : "hover:bg-gray-200 text-gray-500 hover:text-gray-800")
                 }
               >
@@ -68,7 +68,7 @@ export default ({ currentOrg, event, currentOrgMember }) => {
       <div className="group flex items-center">
         <Link href="/[event]" as={`/${event.slug}`}>
           <a
-            className={`hover:bg-${event.color}-darker px-2 py-1 text-white rounded-md mx-0 font-medium`}
+            className={`hover:bg-${event.color}-dark px-2 py-1 text-white rounded-md mx-0 font-medium`}
           >
             <h1>
               {event.title.length <= 30
@@ -102,7 +102,7 @@ export default ({ currentOrg, event, currentOrgMember }) => {
                 onClick={() => setEventSettingsModalOpen(true)}
                 className={
                   event.color
-                    ? `text-white bg-${event.color} hover:bg-${event.color}-darker opacity-75 hover:opacity-100`
+                    ? `text-white bg-${event.color} hover:bg-${event.color}-dark opacity-75 hover:opacity-100`
                     : "text-gray-500 hover:text-gray-800"
                 }
               >

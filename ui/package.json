@@ -29,6 +29,7 @@
     "apollo-client": "^2.6.4",
     "apollo-link-context": "^1.0.19",
     "apollo-link-http": "^1.5.16",
+    "autoprefixer": "^10.2.5",
     "dayjs": "^1.8.20",
     "get-random-values": "^1.2.2",
     "graphql": "^14.5.8",
@@ -36,13 +37,14 @@
     "isomorphic-unfetch": "^3.0.0",
     "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
-    "next": "^9.4.1",
+    "next": "^10.0.9",
     "next-cookies": "^2.0.3",
     "next-fonts": "^0.19.0",
     "node-forge": "^0.10.0",
     "nookies": "^2.5.2",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
+    "postcss": "^8.2.8",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
     "react-hook-form": "^6.3.3",
     "react-markdown": "^4.3.1",
     "react-sortable-hoc": "1.11.0",
@@ -63,8 +65,7 @@
     "babel-loader": "8.1.0",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
-    "tailwindcss": "^1.7.6",
-    "tailwindcss-font-inter": "^1.0.8",
-    "tailwindcss-shadow-outline-colors": "0.0.8"
+    "tailwindcss": "^2.0.3",
+    "tailwindcss-font-inter": "^1.0.8"
   }
 }

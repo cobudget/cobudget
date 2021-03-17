@@ -56,9 +56,7 @@ export default ({ organization }) => {
   });
   const { handleSubmit, register, errors, reset } = useForm();
 
-  const [slugValue, setSlugValue] = React.useState(
-    organization?.subdomain ?? ""
-  );
+  const [slugValue, setSlugValue] = useState(organization?.subdomain ?? "");
 
   const isNew = !organization;
 

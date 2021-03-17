@@ -2,7 +2,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import ExpandButton from "components/ExpandButton";
 
-export default ({ markdown, close }) => {
+const InfoBox = ({ markdown, close }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -23,3 +23,5 @@ export default ({ markdown, close }) => {
     </div>
   );
 };
+
+export default InfoBox;

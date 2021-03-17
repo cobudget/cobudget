@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   IconButton,
@@ -17,7 +18,7 @@ const ActionsDropdown = ({
   updateOrganization,
   organization,
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {

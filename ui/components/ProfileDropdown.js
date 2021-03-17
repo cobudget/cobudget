@@ -35,7 +35,7 @@ const ProfileDropdown = ({
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="z-20 relative block rounded-full focus:outline-none focus:shadow-outline"
+        className="z-20 relative block rounded-full focus:outline-none focus:ring"
       >
         <Badge
           overlap="circle"

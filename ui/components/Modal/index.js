@@ -1,4 +1,4 @@
-import { Modal } from "@material-ui/core";
+import { Modal as MUIModal } from "@material-ui/core";
 import EditProfile from "./EditProfile";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -22,7 +22,7 @@ const modalComponents = {
   EDIT_PROFILE: EditProfile,
 };
 
-export default ({
+const Modal = ({
   active,
   closeModal,
   currentOrgMember,
@@ -33,7 +33,11 @@ export default ({
   const ModalComponent = modalComponents[active];
 
   return (
-    <Modal open={Boolean(active)} onClose={() => {}} className={classes.modal}>
+    <MUIModal
+      open={Boolean(active)}
+      onClose={() => {}}
+      className={classes.modal}
+    >
       <div className={classes.innerModal}>
         {active && (
           <ModalComponent
@@ -44,6 +48,8 @@ export default ({
           />
         )}
       </div>
-    </Modal>
+    </MUIModal>
   );
 };
+
+export default Modal;

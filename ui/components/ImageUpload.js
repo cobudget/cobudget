@@ -15,7 +15,7 @@ export default ({
   const { handleSubmit, register, errors } = useForm();
   const [open, setOpen] = useState(false);
 
-  const [uploadingImage, setUploadingImage] = React.useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const uploadFile = async (e) => {
     try {

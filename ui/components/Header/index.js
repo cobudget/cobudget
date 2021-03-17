@@ -15,7 +15,7 @@ import NavItem from "./NavItem";
 
 const css = {
   mobileProfileItem:
-    "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:shadow-outline",
+    "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:ring",
 };
 
 const JOIN_ORG_MUTATION = gql`
@@ -35,7 +35,7 @@ const JOIN_EVENT_MUTATION = gql`
   }
 `;
 
-export default ({
+const Header = ({
   event,
   currentUser,
   currentOrgMember,
@@ -82,7 +82,7 @@ export default ({
               className={
                 `p-1 my-1 block focus:outline-none rounded opacity-75 ` +
                 (event?.color
-                  ? `text-white hover:bg-${event.color}-darker focus:bg-${event.color}-darker focus:opacity-100`
+                  ? `text-white hover:bg-${event.color}-dark focus:bg-${event.color}-dark focus:opacity-100`
                   : "text-gray-800 hover:bg-gray-200")
               }
             >
@@ -305,3 +305,5 @@ export default ({
     </header>
   );
 };
+
+export default Header;

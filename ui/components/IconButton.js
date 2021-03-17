@@ -1,6 +1,6 @@
 import { LoaderIcon } from "components/Icons";
 
-export default ({
+const IconButton = ({
   children,
   className,
   onClick,
@@ -9,7 +9,7 @@ export default ({
   type = "button",
 }) => (
   <button
-    className={`rounded-full p-2 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:shadow-outline ${className}`}
+    className={`rounded-full p-2 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring ${className}`}
     onClick={onClick}
     tabIndex={tabIndex}
     type={type}
@@ -23,3 +23,5 @@ export default ({
     </span>
   </button>
 );
+
+export default IconButton;
