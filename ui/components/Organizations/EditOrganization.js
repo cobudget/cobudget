@@ -46,7 +46,7 @@ const EDIT_ORGANIZATION = gql`
   }
 `;
 
-export default ({ organization }) => {
+const EditOrganization = ({ organization }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
@@ -179,3 +179,5 @@ export default ({ organization }) => {
     </div>
   );
 };
+
+export default EditOrganization;
