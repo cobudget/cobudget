@@ -74,8 +74,8 @@ const LinkCard = forwardRef((props, ref) => {
     <a
       {...props}
       className={
-        `bg-${color || "black"} ` +
-        `hover:shadow-outline-${color}-darker ` +
+        `bg-${color} ` +
+        `ring-${color}-dark hover:ring ` +
         "cursor-pointer group p-4 font-medium rounded-md text-white flex justify-between items-start transitions-shadows duration-75" +
         " " +
         (className ? className : "h-32")
