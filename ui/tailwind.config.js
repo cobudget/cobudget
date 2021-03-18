@@ -34,6 +34,7 @@ module.exports = {
       // adding these colors to the safelist since they are often put together as a dynamic string concatenation
       // and would be purged otherwise
       safelist: [
+        ...classes,
         ...classes.map((c) => `hover:${c}`),
         ...classes.map((c) => `focus:${c}`),
         ...classes.map((c) => `focus-within:${c}`),
