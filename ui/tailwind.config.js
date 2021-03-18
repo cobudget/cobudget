@@ -1,6 +1,39 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
 
+const colors = [
+  "red",
+  "lavendel",
+  "blue",
+  "orange",
+  "purple",
+  "green",
+  "yellow",
+  "pink",
+  "aqua",
+  "anthracit",
+];
+
 module.exports = {
+  purge: {
+    content: [
+      "./pages/**/*.{js,ts,jsx,tsx}",
+      "./components/**/*.{js,ts,jsx,tsx}",
+    ],
+    options: {
+      // adding these colors to the safelist since they are often put together as a dynamic string concatenation
+      // and would be purged otherwise
+      safelist: [
+        ...colors.map((c) => `bg-${c}`),
+        ...colors.map((c) => `bg-${c}-100`),
+        ...colors.map((c) => `bg-${c}-200`),
+        ...colors.map((c) => `bg-${c}-dark`),
+        ...colors.map((c) => `text-${c}`),
+        ...colors.map((c) => `text-${c}-dark`),
+        ...colors.map((c) => `border-${c}`),
+        ...colors.map((c) => `ring-${c}-dark`),
+      ],
+    },
+  },
   theme: {
     extend: {
       gridTemplateColumns: {
