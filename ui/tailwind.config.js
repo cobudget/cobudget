@@ -13,6 +13,17 @@ const colors = [
   "anthracit",
 ];
 
+const classes = [
+  ...colors.map((c) => `bg-${c}`),
+  ...colors.map((c) => `bg-${c}-100`),
+  ...colors.map((c) => `bg-${c}-200`),
+  ...colors.map((c) => `bg-${c}-dark`),
+  ...colors.map((c) => `text-${c}`),
+  ...colors.map((c) => `text-${c}-dark`),
+  ...colors.map((c) => `border-${c}`),
+  ...colors.map((c) => `ring-${c}-dark`),
+];
+
 module.exports = {
   purge: {
     content: [
@@ -23,14 +34,9 @@ module.exports = {
       // adding these colors to the safelist since they are often put together as a dynamic string concatenation
       // and would be purged otherwise
       safelist: [
-        ...colors.map((c) => `bg-${c}`),
-        ...colors.map((c) => `bg-${c}-100`),
-        ...colors.map((c) => `bg-${c}-200`),
-        ...colors.map((c) => `bg-${c}-dark`),
-        ...colors.map((c) => `text-${c}`),
-        ...colors.map((c) => `text-${c}-dark`),
-        ...colors.map((c) => `border-${c}`),
-        ...colors.map((c) => `ring-${c}-dark`),
+        ...classes.map((c) => `hover:${c}`),
+        ...classes.map((c) => `focus:${c}`),
+        ...classes.map((c) => `focus-within:${c}`),
       ],
     },
   },
