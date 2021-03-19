@@ -3,7 +3,8 @@ import getHostInfo from "utils/getHostInfo";
 
 export default async function login(req, res) {
   const { host } = getHostInfo(req);
-  const path = req.headers.referer.split(host)[1];
+
+  const path = req.headers?.referer?.split(host)[1];
 
   try {
     await auth(req).handleLogin(req, res, {
