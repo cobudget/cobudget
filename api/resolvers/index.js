@@ -814,7 +814,11 @@ const resolvers = {
         throw new Error(`Your post needs to be at least ${minLength} characters long!`);
 
       const comment = { authorId: currentOrgMember.id, content }
-      dream.comments.push(comment);
+
+      if (!currentOrg.discourse) {
+        dream.comments.push(comment);
+      }
+
       eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
       return dream.save();
     },

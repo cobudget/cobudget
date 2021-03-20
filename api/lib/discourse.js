@@ -1,11 +1,6 @@
 const fetch = require("node-fetch");
 
-const { DISCOURSE_API_URL, DISCOURSE_API_KEY } = process.env;
-
-const discourse = ({
-  url = DISCOURSE_API_URL,
-  apiKey = DISCOURSE_API_KEY,
-} = {}) => {
+const discourse = ({ url, apiKey } = {}) => {
   const headers = {
     "Api-Key": apiKey,
     "Api-Username": "system",

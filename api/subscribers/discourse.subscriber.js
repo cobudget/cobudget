@@ -2,9 +2,7 @@ const discourse = require("../lib/discourse");
 
 module.exports = {
   initialize(eventHub, models) {
-    if (!process.env.DISCOURSE_API_URL) { return }
-
-    console.log(`Integrating with Discourse at ${process.env.DISCOURSE_API_URL}`)
+    console.log(`Integrating with Discourse...`)
 
     eventHub.subscribe('create-event', ({ event, actor }) => {
       console.log('TODO: publish category to discourse (?)');
