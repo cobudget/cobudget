@@ -1,10 +1,10 @@
+import React from "react";
 import Head from "next/head";
 import Header from "./Header";
-import { modals } from "./Modal";
 import Router, { useRouter } from "next/router";
 import cookie from "js-cookie";
 
-export default ({
+const Layout = ({
   children,
   currentUser,
   currentOrgMember,
@@ -63,3 +63,5 @@ export default ({
     </div>
   );
 };
+
+export default Layout;

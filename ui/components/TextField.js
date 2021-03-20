@@ -13,6 +13,7 @@ const TextField = ({
   rows,
   size,
   autoFocus,
+  startAdornment,
   endAdornment,
   color = "green",
 }) => {
@@ -28,7 +29,7 @@ const TextField = ({
         <textarea
           className={`block  px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
             error ? "border-red" : `border-transparent focus:border-${color}`
-          } transition-borders ease-in-out duration-200`}
+          } transition-colors ease-in-out duration-200`}
           name={name}
           id={name}
           ref={inputRef}
@@ -39,17 +40,26 @@ const TextField = ({
           {...inputProps}
         />
       ) : (
-        <div className="relative">
+        <div
+          className={`relative flex rounded-md border-3 transition-colors ease-in-out duration-200 
+            bg-gray-100 focus-within:bg-white 
+            ${error ? "border-red" : `border-transparent focus-within:border-${color}`}
+          `}
+        >
+          {startAdornment && (
+            <label
+              htmlFor={name}
+              className="ml-4 flex items-center text-gray-500"
+            >
+              {startAdornment}
+            </label>
+          )}
           <input
-            className={`block  w-full px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
-              (error
-                ? "border-red"
-                : `border-transparent focus:border-${color}`) +
-              " " +
-              (size === "large" ? "text-xl" : "") +
-              " " +
-              (endAdornment ? "pr-12" : "")
-            } transition-borders ease-in-out duration-200`}
+            className={`block w-full px-4 py-3 focus:outline-none transition-colors ease-in-out duration-200 bg-transparent
+              ${size === "large" ? "text-xl" : ""}
+              ${startAdornment ? "pl-1" : ""}
+              ${endAdornment ? "pr-1" : ""}
+            `}
             name={name}
             id={name}
             ref={inputRef}
@@ -57,11 +67,20 @@ const TextField = ({
             defaultValue={defaultValue}
             autoFocus={autoFocus}
             {...inputProps}
+            onFocus={(e) => {
+              inputProps?.onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              inputProps?.onBlur?.(e);
+            }}
           />
           {endAdornment && (
-            <span className="absolute mr-4 right-0 top-0 bottom-0 flex items-center text-gray-500">
+            <label
+              htmlFor={name}
+              className="mr-4 flex items-center text-gray-500"
+            >
               {endAdornment}
-            </span>
+            </label>
           )}
         </div>
       )}

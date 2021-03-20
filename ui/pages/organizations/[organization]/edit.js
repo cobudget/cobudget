@@ -16,7 +16,7 @@ export const ORGANIZATION_QUERY = gql`
   }
 `;
 
-export default ({ currentUser }) => {
+export default () => {
   const router = useRouter();
   const {
     data: { organization } = { organization: null },
@@ -43,10 +43,7 @@ export default ({ currentUser }) => {
           <HappySpinner />
         </div>
       ) : (
-        <EditOrganization
-          currentUser={currentUser}
-          organization={organization}
-        />
+        <EditOrganization organization={organization} />
       )}
     </>
   );

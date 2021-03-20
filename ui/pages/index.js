@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Link from "next/link";
+import Button from "components/Button";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -16,54 +17,23 @@ const EVENTS_QUERY = gql`
 
 const LandingPage = () => {
   return (
-    <div className="max-w-screen-sm flex-1">
-      <h1 className="text-2xl mb-4 font-semibold">Hello!</h1>
-      <p className="text-gray-800 mb-4">
-        This is a new version of Dreams that is multi-tenant, meaning that many
-        organizations and events can use the same installation.{" "}
-        <a
-          href="https://edgeryders.eu/t/rewrite-of-dreams-for-multi-tenancy-and-wider-adoption/11476"
-          target="_blank"
-          className="text-black underline"
-        >
-          Read more about dreams here
-        </a>
-        .
-      </p>
-      <p className="text-gray-800 mb-4">
-        We don't have a proper landing page yet but one is in the works.
-      </p>
-
-      <p className="text-gray-800 mb-4">
-        In the meanwhile, you can check out the Blivande organization to get a
-        feel for the platform:
-      </p>
-      <LinkCard
-        className="mb-4 w-64 h-14"
-        href="https://dreams.blivande.com"
-        color="anthracit"
-      >
-        <div className="flex items-center">
-          <img
-            src="https://i.imgur.com/RAs4Zeo.png"
-            className="h-8 w-8 mr-4 rounded"
-          />
-          Blivande
-        </div>
-      </LinkCard>
-
-      <p className="text-gray-800 mb-4">
-        If you want to create your own organization on dreams and be part of the
-        beta testing,{" "}
-        <a
-          href="https://forum.blivande.com/c/plato/22"
-          target="_blank"
-          className="text-black underline"
-        >
-          talk to us here
-        </a>
-        !
-      </p>
+    <div className="max-w-screen-xl pt-10 flex-1 grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div>
+        <h1 className="text-6xl mb-8 font-medium">
+          Digital tools for participant-driven culture
+        </h1>
+        <p className="text-xl text-gray-800 mb-8">
+          Plato tools help you gather ideas, take decisions, map needs, budgets
+          and areas of responsibility, and provide a socially focused digital
+          meeting place for the participants.
+        </p>
+        <Link href="/organizations/create">
+          <Button color="anthracit" size="large">
+            Create a Community
+          </Button>
+        </Link>
+      </div>
+      <img className="" src="/frihamnstorget.jpeg" />
     </div>
   );
 };
@@ -74,8 +44,8 @@ const LinkCard = forwardRef((props, ref) => {
     <a
       {...props}
       className={
-        `bg-${color || "black"} ` +
-        `hover:shadow-outline-${color}-darker ` +
+        `bg-${color} ` +
+        `ring-${color}-dark hover:ring ` +
         "cursor-pointer group p-4 font-medium rounded-md text-white flex justify-between items-start transitions-shadows duration-75" +
         " " +
         (className ? className : "h-32")
@@ -87,7 +57,7 @@ const LinkCard = forwardRef((props, ref) => {
   );
 });
 
-export default ({ currentOrg }) => {
+const IndexPage = ({ currentOrg }) => {
   // TODO - perhaps a redirect to organization pages instead
   if (!currentOrg) {
     return <LandingPage />;
@@ -105,3 +75,5 @@ export default ({ currentOrg }) => {
     </div>
   );
 };
+
+export default IndexPage;

@@ -23,8 +23,10 @@ export default function createApolloClient(initialState, ctx) {
 
     if (ctx?.req) {
       try {
-        const tokenCache = auth(ctx.req).tokenCache(ctx.req, ctx.res);
-        const { accessToken } = await tokenCache.getAccessToken();
+        const { accessToken } = await auth(ctx.req).getAccessToken(
+          ctx.req,
+          ctx.res
+        );
         token = accessToken;
       } catch (error) {
         console.log(error);

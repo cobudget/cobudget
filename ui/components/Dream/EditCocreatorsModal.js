@@ -70,7 +70,7 @@ const Member = ({ member, add, remove }) => {
         {Boolean(add) && (
           <button
             onClick={add}
-            className="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:shadow-outline text-gray-800"
+            className="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:ring text-gray-800"
           >
             <AddIcon className="w-6 h-6" />
           </button>
@@ -78,7 +78,7 @@ const Member = ({ member, add, remove }) => {
         {Boolean(remove) && (
           <button
             onClick={remove}
-            className="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:shadow-outline text-gray-800"
+            className="rounded-full p-1 hover:bg-gray-200 focus:outline-none focus:ring text-gray-800"
           >
             <DeleteIcon className="w-6 h-6" />
           </button>
@@ -131,7 +131,7 @@ const SearchMembersResult = ({
   );
 };
 
-export default ({
+const EditCocreatorsModal = ({
   open,
   handleClose,
   dream,
@@ -182,7 +182,7 @@ export default ({
             <input
               value={searchInput}
               placeholder="Filter by name..."
-              className="bg-gray-200 rounded py-2 px-3 mb-4 focus:outline-none focus:shadow-outline focus:bg-white"
+              className="bg-gray-200 rounded py-2 px-3 mb-4 focus:outline-none focus:ring focus:bg-white"
               onChange={(e) => setSearchInput(e.target.value)}
             />
             <SearchMembersResult
@@ -197,3 +197,5 @@ export default ({
     </Modal>
   );
 };
+
+export default EditCocreatorsModal;
