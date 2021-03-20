@@ -30,6 +30,11 @@ module.exports = {
       if (!post.id)
         throw new Error("Unable to create topic on Discourse; please try again");
 
+      dream.comments.forEach(comment => {
+        console.log(`Publishing comment ${comment.id} to discourse...`)
+        eventHub.publish('create-comment', { currentOrg, currentOrgMember, event, dream, comment });
+      });
+
       dream.discourseTopicId = post.topic_id;
       dream.save();
     });
@@ -105,18 +110,9 @@ module.exports = {
 
       console.log(`Deleting comment ${comment.id} on discourse...`)
 
-      const post = await discourse(currentOrg.discourse).posts.getSingle(comment.id);
-
-      if (post.username !== currentOrgMember.discourseUsername)
-        throw new Error("You can only delete your own post. If this is your post, re-connect to discourse on /connect-discourse");
-
-      const credentials = post.username === currentOrgMember.discourseUsername
-        ? { userApiKey: currentOrgMember.discourseApiKey }
-        : { username: currentOrg.discourse.username || 'system' }
-
       const res = await discourse(currentOrg.discourse).posts.delete({
         id: comment.id,
-        ...credentials
+        userApiKey: currentOrgMember.discourseApiKey,
       });
 
       if (!res.ok)

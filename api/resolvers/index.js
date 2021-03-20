@@ -830,7 +830,7 @@ const resolvers = {
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
-      const comment = dream.comments.find(c => c.id === commentId);
+      const comment = { id: commentId }
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
@@ -840,44 +840,43 @@ const resolvers = {
         eventId: event.id,
       });
 
-      if (!eventMember?.isAdmin && comment.authorId.toString() !== currentOrgMember.id.toString())
-        throw new Error("You may only delete your own comments unless you are an administrator of this event");
+      if (!currentOrg.discourse) {
+        dream.comments = dream.comments.filter(comment => comment._id.toString() !== commentId);
+        return dream.save();
+      }
 
       eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
-      dream.comments = dream.comments.filter(comment => comment._id.toString() !== commentId);
-      return dream.save();
     },
     editComment: async (
       parent,
       { dreamId, commentId, content },
-      { currentOrgMember, models: { EventMember, Dream }, eventHub }
+      { currentOrg, currentOrgMember, models: { EventMember, Dream }, eventHub }
     ) => {
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
+      const dream = await Dream.findOne({ _id: dreamId });
+      const comment = { id: commentId };
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
       });
 
-      const comment = dream.comments.filter(
-        (comment) =>
-          comment._id.toString() === commentId &&
-          (comment.authorId.toString() === currentOrgMember.id.toString() ||
-            eventMember?.isAdmin)
-      );
-
-      if (comment.length == 0) {
-        throw new Error(
-          "Cant find that comment - Does this comment belongs to you?"
+      if (!currentOrg.discourse) {
+        const comment = dream.comments.filter(
+          (comment) =>
+            comment._id.toString() === commentId &&
+            (comment.authorId.toString() === currentOrgMember.id.toString() ||
+              eventMember?.isAdmin)
         );
-      }
-      comment[0].content = content;
-      comment[0].updatedAt = new Date();
 
-      eventHub.publish('edit-comment', { currentOrgMember, dream, comment });
-      return dream.save();
+        if (comment.length == 0) {
+          throw new Error("Cant find that comment - Does this comment belongs to you?");
+        }
+        comment[0].content = content;
+        comment[0].updatedAt = new Date();
+        dream.save();
+      }
+
+      eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
     },
     raiseFlag: async (
       parent,
@@ -1935,6 +1934,14 @@ const resolvers = {
         { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
       ]);
       return grantsForDream;
+    },
+    comments: async (dream, args, { currentOrg }) => {
+      if (!dream.discourseTopicId) { return dream.comments; }
+
+      const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
+      console.log(posts);
+
+      return posts.filter(({ post_number }) => post_number !== 1);
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
       if (currentOrg.discourse && dream.discourseTopicId) {
