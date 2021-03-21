@@ -846,6 +846,8 @@ const resolvers = {
       }
 
       eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
+
+      return dream;
     },
     editComment: async (
       parent,
@@ -877,6 +879,8 @@ const resolvers = {
       }
 
       eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
+
+      return dream;
     },
     raiseFlag: async (
       parent,
