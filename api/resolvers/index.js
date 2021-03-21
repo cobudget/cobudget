@@ -853,7 +853,7 @@ const resolvers = {
       { currentOrg, currentOrgMember, models: { EventMember, Dream }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
-      const comment = { id: commentId };
+      const comment = { id: commentId, content };
 
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
