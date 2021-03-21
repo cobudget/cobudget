@@ -112,6 +112,7 @@ export default ({ currentOrg, event, currentOrgMember }) => {
             {eventSettingsModalOpen && (
               <EventSettingsModal
                 event={event}
+                currentOrg={currentOrg}
                 currentOrgMember={currentOrgMember}
                 handleClose={() => setEventSettingsModalOpen(false)}
               />

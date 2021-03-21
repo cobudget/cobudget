@@ -36,6 +36,7 @@ export const TOP_LEVEL_QUERY = gql`
       about
       allowStretchGoals
       dreamReviewIsOpen
+      discourseCategoryId
       guidelines {
         id
         title

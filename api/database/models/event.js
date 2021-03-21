@@ -65,6 +65,7 @@ const EventSchema = new Schema({
     }).index({ position: 1 }),
   ],
   dreamReviewIsOpen: Boolean,
+  discourseCategoryId: { type: Number },
 }).index({ slug: 1, organizationId: 1 }, { unique: true }); // Unique on slug + organization Id
 
 EventSchema.virtual("grantingIsOpen").get(function () {

@@ -138,6 +138,20 @@ const resolvers = {
         ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
+    categories: async (
+      parent,
+      {},
+      { currentOrg, currentOrgMember }
+    ) => {
+      if (!currentOrg.discourse) { return []; }
+
+      const categories = await discourse(currentOrg.discourse).categories.getAll({
+        username: currentOrgMember.discourseUsername,
+        apiKey: currentOrgMember.discourseApiKey,
+      })
+
+      return categories;
+    },
   },
   Mutation: {
     createOrganization: async (
@@ -283,8 +297,9 @@ const resolvers = {
         color,
         about,
         dreamReviewIsOpen,
+        discourseCategoryId,
       },
-      { currentUser, currentOrgMember, models: { Event, EventMember }, eventHub }
+      { currentOrg, currentOrgMember, models: { Event, EventMember }, eventHub }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -311,6 +326,7 @@ const resolvers = {
       if (color) event.color = color;
       if (typeof dreamReviewIsOpen !== "undefined")
         event.dreamReviewIsOpen = dreamReviewIsOpen;
+      if (discourseCategoryId) event.discourseCategoryId = discourseCategoryId;
 
       eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
       return event.save();

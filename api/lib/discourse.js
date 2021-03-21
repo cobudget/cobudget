@@ -12,7 +12,7 @@ const discourse = ({ url, apiKey } = {}) => {
   return {
     categories: {
       getAll: async () => {
-        const res = await fetch(`${url}/categories`, {
+        const res = await fetch(`${url}/categories.json`, {
           headers,
         });
         const {
