@@ -4,10 +4,6 @@ module.exports = {
   initialize(eventHub, models) {
     console.log(`Integrating with Discourse...`)
 
-    eventHub.subscribe('create-event', ({ event, actor }) => {
-      console.log('TODO: publish category to discourse (?)');
-    });
-
     eventHub.subscribe('create-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       if (!currentOrg.discourse) { return }
       if (!dream.published) { return } // Only push published dreams to Discourse
@@ -53,16 +49,23 @@ module.exports = {
         dream = models.Dream.findOne({ _id: dream.id });
       }
 
-      const post = await discourse(currentOrg.discourse).posts.update(dream.discourseTopicId, {
-        title: dream.title,
-        raw: this.generateDreamMarkdown(dream, event),
+      const post = await discourse(currentOrg.discourse).topics.getSummary({
+        id: dream.discourseTopicId
       }, {
         username: currentOrgMember.discourseUsername,
         userApiKey: currentOrgMember.discourseApiKey,
       });
 
       if (!post.id)
-        throw new Error("Unable to create post on Discourse; please try again");
+        throw new Error("Unable to find topic post on Discourse; please try again");
+
+      const comment = {
+        id: post.id,
+        title: dream.title,
+        content: this.generateDreamMarkdown(dream, event),
+      };
+
+      eventHub.publish('edit-comment', { currentOrg, currentOrgMember, event, dream, comment });
     });
 
     eventHub.subscribe('publish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
@@ -101,7 +104,31 @@ module.exports = {
           : c
       ));
       dream.save();
-      console.log(dream);
+    });
+
+    eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      if (!currentOrg.discourse) { return }
+      if (!currentOrgMember.discourseApiKey)
+        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+
+      console.log(`Updating comment ${comment.id} in dream ${dream.id} to discourse...`);
+
+      if (!dream.discourseTopicId) {
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
+        dream = models.Dream.findOne({ _id: dream.id });
+      }
+
+      const post = await discourse(currentOrg.discourse).posts.update(comment.id, {
+        title: dream.title,
+        raw: comment.content,
+      }, {
+        username: currentOrgMember.discourseUsername,
+        userApiKey: currentOrgMember.discourseApiKey,
+      });
+
+      if (!post.id)
+        throw new Error("Unable to create post on Discourse; please try again");
+      // TODO: edit functionality
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {

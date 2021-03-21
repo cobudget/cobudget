@@ -103,21 +103,7 @@ const discourse = ({ url, apiKey } = {}) => {
         });
         return res.json();
       },
-      update: async (topicId, { title, raw }, { username, userApiKey } = {}) => {
-        const postRes = await fetch(`${url}/posts/by_number/${topicId}/1.json`, {
-          headers: {
-            ...defaultHeaders,
-            ...(username && { "Api-Username": username }),
-            ...(userApiKey
-              ? { "User-Api-Key": userApiKey }
-              : { "Api-Key": apiKey }),
-          }
-        });
-
-        const { id } = await postRes.json();
-        if (!id)
-          throw new Error("Unable to fetch topic from Discourse, please try again");
-
+      update: async (id, { title, raw }, { username, userApiKey } = {}) => {
         const res = await fetch(`${url}/posts/${id}`, {
           method: "put",
           headers: {
@@ -161,6 +147,22 @@ const discourse = ({ url, apiKey } = {}) => {
         return res;
       },
     },
+    topics: {
+      getSummary: async ({ id }, { username, userApiKey, apiKey }) => {
+        const postRes = await fetch(`${url}/posts/by_number/${id}/1.json`, {
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          }
+        });
+
+        const post = await postRes.json();
+        return post;
+      }
+    }
   };
 };
 

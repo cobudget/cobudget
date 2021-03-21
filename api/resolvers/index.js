@@ -1939,7 +1939,6 @@ const resolvers = {
       if (!dream.discourseTopicId) { return dream.comments; }
 
       const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
-      console.log(posts);
 
       return posts.filter(({ post_number }) => post_number !== 1);
     },
