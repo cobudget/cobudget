@@ -102,6 +102,18 @@ const resolvers = {
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
     },
+    orgMembers: async (
+      parent,
+      args,
+      { currentOrg, currentOrgMember, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org admin to view this");
+
+      return OrgMember.find({
+        organizationId: currentOrg.id,
+      });
+    },
     members: async (
       parent,
       { eventId, isApproved },

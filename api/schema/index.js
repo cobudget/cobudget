@@ -14,6 +14,7 @@ const schema = gql`
     event(slug: String): Event
     dream(id: ID!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
+    orgMembers: [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
   }
 

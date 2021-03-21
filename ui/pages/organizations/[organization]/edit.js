@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import HappySpinner from "components/HappySpinner";
-import EditOrganization from "components/Organizations/EditOrganization";
+import EditOrganization from "components/Org/EditOrganization";
 
 export const ORGANIZATION_QUERY = gql`
   query Organization($id: ID!) {

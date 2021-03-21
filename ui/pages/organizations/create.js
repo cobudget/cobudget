@@ -1,4 +1,4 @@
-import EditOrganization from "components/Organizations/EditOrganization";
+import EditOrganization from "components/Org/EditOrganization";
 
 export default ({ currentUser }) => {
   if (!currentUser)
