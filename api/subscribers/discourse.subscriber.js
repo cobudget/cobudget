@@ -17,7 +17,7 @@ module.exports = {
       const post = await discourse(currentOrg.discourse).posts.create({
         title: dream.title,
         raw: this.generateDreamMarkdown(dream, event),
-        category: currentOrg.discourse.dreamsCategoryId,
+        category: event.discourseCategoryId,
       }, {
         username: currentOrgMember.discourseUsername,
         userApiKey: currentOrgMember.discourseApiKey,
