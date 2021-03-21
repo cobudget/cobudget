@@ -125,6 +125,7 @@ const schema = gql`
       bio: String
     ): User
     # inviteMembers(emails: String!): [Member]
+    updateOrgMember(memberId: ID!, isOrgAdmin: Boolean): OrgMember
     updateMember(
       eventId: ID!
       memberId: ID!

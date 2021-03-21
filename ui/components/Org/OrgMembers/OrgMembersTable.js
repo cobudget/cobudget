@@ -14,7 +14,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
-const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
+const ActionsDropdown = ({ updateOrgMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -43,38 +43,26 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
       >
         <MenuItem
           onClick={() => {
-            updateMember({
+            updateOrgMember({
               variables: {
                 memberId: member.id,
-                isAdmin: !member.isAdmin,
+                isOrgAdmin: !member.isOrgAdmin,
               },
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isAdmin ? "Remove admin" : "Make admin"}
+          {member.isOrgAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            updateMember({
-              variables: {
-                memberId: member.id,
-                isGuide: !member.isGuide,
-              },
-            }).then(() => {
-              handleClose();
-            });
-          }}
-        >
-          {member.isGuide ? "Remove guide" : "Make guide"}
-        </MenuItem>
+        {/* how to also remove the user's event memberships when their org
+            membership is removed?
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
+                `Are you sure you would like to delete org membership from user with email ${member.user.email}?`
               )
             )
               deleteMember({
@@ -83,13 +71,13 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
           }}
         >
           <Box color="error.main">Delete</Box>
-        </MenuItem>
+        </MenuItem>*/}
       </Menu>
     </>
   );
 };
 
-export default ({ members, updateMember, deleteMember }) => {
+export default ({ members, updateOrgMember, deleteMember }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -133,7 +121,7 @@ export default ({ members, updateMember, deleteMember }) => {
                   <ActionsDropdown
                     member={member}
                     deleteMember={deleteMember}
-                    updateMember={updateMember}
+                    updateOrgMember={updateOrgMember}
                   />
                 </TableCell>
               </TableRow>

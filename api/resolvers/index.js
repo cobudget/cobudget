@@ -1235,6 +1235,26 @@ const resolvers = {
 
     //   return members;
     // },
+    updateOrgMember: async (
+      parent,
+      { memberId, isOrgAdmin },
+      { currentOrg, currentOrgMember, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org admin to update member");
+
+      const orgMember = await OrgMember.findOne({
+        _id: memberId,
+        organizationId: currentOrg.id,
+      });
+
+      if (!orgMember) throw new Error("No member to update found");
+
+      if (typeof isOrgAdmin !== "undefined") {
+        orgMember.isOrgAdmin = isOrgAdmin;
+      }
+      return orgMember.save();
+    },
     updateMember: async (
       parent,
       { eventId, memberId, isApproved, isAdmin, isGuide },

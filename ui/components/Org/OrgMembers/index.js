@@ -1,10 +1,9 @@
 import gql from "graphql-tag";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 
 import HappySpinner from "../../HappySpinner";
 import OrgMembersTable from "./OrgMembersTable";
 
-// TODO: this is event members, change to getting org members
 export const ORG_MEMBERS_QUERY = gql`
   query OrgMembers {
     orgMembers {
@@ -23,30 +22,15 @@ export const ORG_MEMBERS_QUERY = gql`
   }
 `;
 
-// // TODO: change to edit org members, not event members
-// const UPDATE_MEMBER = gql`
-//   mutation UpdateMember(
-//     $memberId: ID!
-//     $eventId: ID!
-//     $isAdmin: Boolean
-//     $isApproved: Boolean
-//     $isGuide: Boolean
-//   ) {
-//     updateMember(
-//       memberId: $memberId
-//       eventId: $eventId
-//       isAdmin: $isAdmin
-//       isApproved: $isApproved
-//       isGuide: $isGuide
-//     ) {
-//       id
-//       isAdmin
-//       isApproved
-//       isGuide
-//     }
-//   }
-// `;
-//
+const UPDATE_ORG_MEMBER = gql`
+  mutation UpdateOrgMember($memberId: ID!, $isOrgAdmin: Boolean) {
+    updateOrgMember(memberId: $memberId, isOrgAdmin: $isOrgAdmin) {
+      id
+      isOrgAdmin
+    }
+  }
+`;
+
 // // TODO: change to deleting org members, not event members
 // const DELETE_MEMBER = gql`
 //   mutation UpdateMember($memberId: ID!, $eventId: ID!) {
@@ -59,10 +43,7 @@ export const ORG_MEMBERS_QUERY = gql`
 export default () => {
   const { data, loading, error } = useQuery(ORG_MEMBERS_QUERY);
   const orgMembers = data?.orgMembers;
-  // console.log({ org, orgMembers, error });
-  // const [updateMember] = useMutation(UPDATE_MEMBER, {
-  //   variables: { eventId: event.id },
-  // });
+  const [updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
 
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
   //   variables: { eventId: event.id },
@@ -99,7 +80,7 @@ export default () => {
         <h2 className="text-xl mb-3">{orgMembers.length} members</h2>
       </div>
 
-      <OrgMembersTable members={orgMembers} />
+      <OrgMembersTable members={orgMembers} updateOrgMember={updateOrgMember} />
     </div>
   );
 };
