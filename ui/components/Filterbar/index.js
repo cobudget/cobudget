@@ -3,7 +3,7 @@ import { HeartOutlineIcon, HeartSolidIcon, SearchIcon } from "../Icons";
 import debounce from "../../utils/debounce";
 import FilterLabels from "./FilterLabels";
 
-export default ({
+const Filterbar = ({
   currentUser,
   filterFavorites,
   toggleFilterFavorites,
@@ -20,7 +20,7 @@ export default ({
   return (
     <div className="flex mb-5 items-stretch flex-wrap">
       {/* <button
-        className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-700 mr-2  ${
+        className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:ring text-gray-700 mr-2  ${
           listView ? "bg-gray-300" : ""
         }`}
         onClick={toggleListView}
@@ -34,7 +34,7 @@ export default ({
         </span>
         <input
           placeholder="Search..."
-          className="appearance-none bg-gray-200 rounded block pl-10 pr-6 py-2 w-full placeholder-gray-600 text-gray-800 focus:bg-white focus:text-gray-800 focus:outline-none focus:shadow-outline"
+          className="appearance-none bg-gray-200 rounded block pl-10 pr-6 py-2 w-full placeholder-gray-600 text-gray-800 focus:bg-white focus:text-gray-800 focus:outline-none focus:ring focus:ring"
           defaultValue={textSearchTerm}
           onChange={(e) => debouncedSearch(e.target.value)}
         />
@@ -46,7 +46,7 @@ export default ({
           size="small"
         >
           <button
-            className={`mr-2 bg-gray-200 h-full hover:bg-gray-300 px-3 rounded focus:outline-none focus:shadow-outline text-gray-600  ${
+            className={`mr-2 bg-gray-200 h-full hover:bg-gray-300 px-3 rounded focus:outline-none focus:ring text-gray-600  ${
               filterFavorites ? "bg-gray-300" : ""
             }`}
             onClick={toggleFilterFavorites}
@@ -69,3 +69,5 @@ export default ({
     </div>
   );
 };
+
+export default Filterbar;

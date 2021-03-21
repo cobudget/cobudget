@@ -13,10 +13,10 @@ const NavItem = ({
   const active = currentPath === href;
 
   const regularClasses = `border-transparent text-gray-800 hover:bg-gray-300`;
-  const primaryClasses = `border-anthracit hover:bg-anthracit-darker hover:text-gray-200`;
-  const regularEventClasses = `border-transparent text-white hover:bg-${eventColor}-darker`;
+  const primaryClasses = `border-anthracit hover:bg-anthracit-dark hover:text-gray-200`;
+  const regularEventClasses = `border-transparent text-white hover:bg-${eventColor}-dark`;
   const primaryEventClasses = `border-white text-white hover:bg-white hover:text-${eventColor}`;
-  const eventActiveClasses = `border-transparent bg-${eventColor}-darker text-white`;
+  const eventActiveClasses = `border-transparent bg-${eventColor}-dark text-white`;
 
   const colorsClasses = eventColor
     ? primary

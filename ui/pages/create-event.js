@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
@@ -33,7 +34,7 @@ const CREATE_EVENT = gql`
 export default () => {
   const [createEvent, { data, error }] = useMutation(CREATE_EVENT);
   const { handleSubmit, register, errors } = useForm();
-  const [slugValue, setSlugValue] = React.useState("");
+  const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
     createEvent({ variables })

@@ -10,7 +10,7 @@ export default ({ currentOrg }) => (
         />
       )}
       <h1 className="text-lg font-medium text-gray-900 ">
-        {currentOrg?.name ?? "Dreams"}
+        {currentOrg?.name ?? "Plato"}
       </h1>
     </a>
   </Link>

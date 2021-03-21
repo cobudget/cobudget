@@ -31,7 +31,7 @@ const getDreamCustomFieldValue = (dream, customField) => {
   }
 };
 
-export default ({ dream, event, currentUser, filterLabels }) => {
+const DreamCard = ({ dream, event, currentUser, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
@@ -125,3 +125,5 @@ export default ({ dream, event, currentUser, filterLabels }) => {
     </div>
   );
 };
+
+export default DreamCard;

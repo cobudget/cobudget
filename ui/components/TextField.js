@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 const TextField = ({
   inputRef,
   inputProps,
@@ -19,7 +17,6 @@ const TextField = ({
   endAdornment,
   color = "green",
 }) => {
-  const [hasFocus, setHasFocus] = useState(false);
   const LabelComponent = labelComponent;
   return (
     <div className={`flex flex-col ${className}`}>
@@ -32,7 +29,7 @@ const TextField = ({
         <textarea
           className={`block  px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
             error ? "border-red" : `border-transparent focus:border-${color}`
-          } transition-borders ease-in-out duration-200`}
+          } transition-colors ease-in-out duration-200`}
           name={name}
           id={name}
           ref={inputRef}
@@ -44,10 +41,9 @@ const TextField = ({
         />
       ) : (
         <div
-          className={`relative flex rounded-md  bg-gray-100 border-3
-            ${hasFocus ? "bg-white" : ""}
-            ${error ? "border-red" : "border-transparent"}
-            ${hasFocus && !error ? `border-${color}` : ""}
+          className={`relative flex rounded-md border-3 transition-colors ease-in-out duration-200 
+            bg-gray-100 focus-within:bg-white 
+            ${error ? "border-red" : `border-transparent focus-within:border-${color}`}
           `}
         >
           {startAdornment && (
@@ -59,7 +55,7 @@ const TextField = ({
             </label>
           )}
           <input
-            className={`block  w-full px-4 py-3 focus:outline-none transition-borders ease-in-out duration-200
+            className={`block w-full px-4 py-3 focus:outline-none transition-colors ease-in-out duration-200 bg-transparent
               ${size === "large" ? "text-xl" : ""}
               ${startAdornment ? "pl-1" : ""}
               ${endAdornment ? "pr-1" : ""}
@@ -72,11 +68,9 @@ const TextField = ({
             autoFocus={autoFocus}
             {...inputProps}
             onFocus={(e) => {
-              setHasFocus(true);
               inputProps?.onFocus?.(e);
             }}
             onBlur={(e) => {
-              setHasFocus(false);
               inputProps?.onBlur?.(e);
             }}
           />

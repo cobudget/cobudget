@@ -24,8 +24,7 @@ export default async function (req, res) {
 
   const { key: discourseApiKey } = parsedPayload;
 
-  const tokenCache = auth(req).tokenCache(req, res);
-  const { accessToken } = await tokenCache.getAccessToken();
+  const { accessToken } = await auth(req).getAccessToken(req, res);
   const { sub: userId } = jwt.decode(accessToken);
 
   const db = await getConnection(process.env.MONGO_URL);

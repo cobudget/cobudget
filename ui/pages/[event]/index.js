@@ -41,7 +41,7 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-export default ({ currentUser, event }) => {
+const EventPage = ({ currentUser, event }) => {
   if (!event) return null;
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
@@ -118,7 +118,7 @@ export default ({ currentUser, event }) => {
                   as={`/${event.slug}/${dream.id}`}
                   key={dream.id}
                 >
-                  <a className="flex focus:outline-none focus:shadow-outline rounded-lg">
+                  <a className="flex focus:outline-none focus:ring rounded-lg">
                     <DreamCard
                       dream={dream}
                       event={event}
@@ -141,3 +141,5 @@ export default ({ currentUser, event }) => {
     </div>
   );
 };
+
+export default EventPage;

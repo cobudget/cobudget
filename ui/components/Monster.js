@@ -373,7 +373,7 @@ const Monster = ({ event, dream }) => {
                   <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
                     {chatItems[chatItems.length - 1].actions.map((action) => (
                       <button
-                        className={`border-2 border-${event.color} m-1 hover:bg-${event.color} text-${event.color}-darker hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
+                        className={`border-2 border-${event.color} m-1 hover:bg-${event.color} text-${event.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
                         key={action.label}
                         onClick={() => {
                           action.sideEffect && action.sideEffect();
