@@ -54,7 +54,8 @@ module.exports = {
       }
 
       const post = await discourse(currentOrg.discourse).posts.update(dream.discourseTopicId, {
-        title: dream.title, raw: this.generateDreamMarkdown(dream, event)
+        title: dream.title,
+        raw: this.generateDreamMarkdown(dream, event),
       }, {
         username: currentOrgMember.discourseUsername,
         userApiKey: currentOrgMember.discourseApiKey,

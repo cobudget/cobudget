@@ -305,7 +305,7 @@ const schema = gql`
     orgMember: OrgMember
     createdAt: Date!
     updatedAt: Date
-    raw: String
+    content: String
     cooked: String
     discourseUsername: String
     isLog: Boolean

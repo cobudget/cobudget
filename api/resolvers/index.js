@@ -1993,7 +1993,7 @@ const resolvers = {
       if (post.created_at) return new Date(post.created_at); // post from Discourse
       return null;
     },
-    raw: (post) => post.content ?? null,
+    content: (post) => post.raw ?? post.content ?? null,
     discourseUsername: (post) => {
       if (post.username) return post.username;
       return null;

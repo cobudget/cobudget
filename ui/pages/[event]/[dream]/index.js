@@ -59,7 +59,7 @@ export const DREAM_QUERY = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {

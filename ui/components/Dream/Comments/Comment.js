@@ -21,7 +21,7 @@ const DELETE_COMMENT_MUTATION = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         orgMember {
           id
@@ -104,7 +104,7 @@ const Comment = ({
                 dangerouslySetInnerHTML={{ __html: comment.cooked }}
               />
             ) : (
-              <ReactMarkdown source={comment.raw} className="markdown" />
+              <ReactMarkdown source={comment.content} className="markdown" />
             )}
 
             {canEdit && (

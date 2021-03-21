@@ -135,7 +135,7 @@ const discourse = ({ url, apiKey } = {}) => {
       },
       get: async (id) => {
         // query parameter print=true will return up to 1000 posts in a topic
-        const res = await fetch(`${url}/t/${id}.json`, {
+        const res = await fetch(`${url}/t/${id}.json?include_raw=true`, {
           headers,
         });
         const json = await res.json();
