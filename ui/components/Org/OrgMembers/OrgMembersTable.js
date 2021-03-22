@@ -83,7 +83,7 @@ const ActionsDropdown = ({
   );
 };
 
-export default ({ members, updateOrgMember, deleteMember }) => {
+const OrgMembersTable = ({ members, updateOrgMember, deleteMember }) => {
   const onlyOneAdmin =
     members.filter((member) => member.isOrgAdmin).length <= 1;
 
@@ -142,3 +142,5 @@ export default ({ members, updateOrgMember, deleteMember }) => {
     </div>
   );
 };
+
+export default OrgMembersTable;

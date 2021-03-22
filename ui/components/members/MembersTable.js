@@ -90,7 +90,7 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
   );
 };
 
-export default ({ approvedMembers, updateMember, deleteMember }) => {
+const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -146,3 +146,5 @@ export default ({ approvedMembers, updateMember, deleteMember }) => {
     </div>
   );
 };
+
+export default EventMembersTable;

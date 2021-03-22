@@ -1,6 +1,6 @@
 import OrgMembers from "components/Org/OrgMembers";
 
-export default ({ currentOrg, currentOrgMember }) => {
+const OrgMembersPage = ({ currentOrg, currentOrgMember }) => {
   const isAdmin = currentOrgMember?.isOrgAdmin;
   if (!isAdmin) return null;
   return (
@@ -9,3 +9,5 @@ export default ({ currentOrg, currentOrgMember }) => {
     </div>
   );
 };
+
+export default OrgMembersPage;

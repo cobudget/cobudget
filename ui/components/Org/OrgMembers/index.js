@@ -40,7 +40,7 @@ const UPDATE_ORG_MEMBER = gql`
 //   }
 // `;
 
-export default () => {
+const OrgMembers = () => {
   const { data, loading, error } = useQuery(ORG_MEMBERS_QUERY);
   const orgMembers = data?.orgMembers;
   const [updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
@@ -84,3 +84,5 @@ export default () => {
     </div>
   );
 };
+
+export default OrgMembers;
