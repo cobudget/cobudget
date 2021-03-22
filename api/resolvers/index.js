@@ -1251,6 +1251,14 @@ const resolvers = {
       if (!orgMember) throw new Error("No member to update found");
 
       if (typeof isOrgAdmin !== "undefined") {
+        if (isOrgAdmin === false) {
+          const orgAdmins = await OrgMember.find({
+            organizationId: currentOrg.id,
+            isOrgAdmin: true,
+          });
+          if (orgAdmins.length <= 1)
+            throw new Error("You need at least 1 org admin");
+        }
         orgMember.isOrgAdmin = isOrgAdmin;
       }
       return orgMember.save();
