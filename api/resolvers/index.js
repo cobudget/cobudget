@@ -284,7 +284,7 @@ const resolvers = {
         about,
         dreamReviewIsOpen,
       },
-      { currentUser, currentOrgMember, models: { Event, EventMember }, eventHub }
+      { currentOrgMember, currentOrg, models: { Event, EventMember }, eventHub }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
