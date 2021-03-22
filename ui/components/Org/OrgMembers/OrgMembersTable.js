@@ -14,7 +14,12 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
-const ActionsDropdown = ({ updateOrgMember, deleteMember, member }) => {
+const ActionsDropdown = ({
+  onlyOneAdmin,
+  updateOrgMember,
+  deleteMember,
+  member,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -42,6 +47,7 @@ const ActionsDropdown = ({ updateOrgMember, deleteMember, member }) => {
         onClose={handleClose}
       >
         <MenuItem
+          disabled={onlyOneAdmin && member.isOrgAdmin}
           onClick={() => {
             updateOrgMember({
               variables: {
@@ -78,6 +84,9 @@ const ActionsDropdown = ({ updateOrgMember, deleteMember, member }) => {
 };
 
 export default ({ members, updateOrgMember, deleteMember }) => {
+  const onlyOneAdmin =
+    members.filter((member) => member.isOrgAdmin).length <= 1;
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -122,6 +131,7 @@ export default ({ members, updateOrgMember, deleteMember }) => {
                     member={member}
                     deleteMember={deleteMember}
                     updateOrgMember={updateOrgMember}
+                    onlyOneAdmin={onlyOneAdmin}
                   />
                 </TableCell>
               </TableRow>
