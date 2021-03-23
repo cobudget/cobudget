@@ -8,7 +8,7 @@ export default async function login(req, res) {
 
   try {
     await auth(req).handleLogin(req, res, {
-      returnTo: path,
+      ...(path && { returnTo: path }),
     });
   } catch (error) {
     console.error(error);
