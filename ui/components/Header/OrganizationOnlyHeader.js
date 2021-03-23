@@ -5,7 +5,7 @@ export default ({ currentOrg }) => (
     <a className="flex">
       {currentOrg?.logo && (
         <img
-          className="h-7 w-7 block rounded overflow-hidden mr-4"
+          className="h-7 w-7 object-cover block rounded overflow-hidden mr-4"
           src={currentOrg.logo}
         />
       )}

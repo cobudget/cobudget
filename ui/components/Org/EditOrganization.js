@@ -46,7 +46,7 @@ const EDIT_ORGANIZATION = gql`
   }
 `;
 
-const EditOrganization = ({ organization }) => {
+const EditOrganization = ({ organization, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
@@ -98,19 +98,19 @@ const EditOrganization = ({ organization }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-      <h1 className="text-2xl font-semibold mb-2">
-        {isNew ? "Create organization" : "Edit organization"}
+    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md">
+      <h1 className="text-2xl font-semibold mb-4">
+        {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
           name="name"
-          label="Name"
-          placeholder="Name"
+          label="Name your community"
+          placeholder={`${currentUser.firstName}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
           autoFocus
-          className="mb-2"
+          className="mb-4"
           error={errors.name}
           helperText={errors.name?.message}
         />
@@ -118,9 +118,9 @@ const EditOrganization = ({ organization }) => {
         <TextField
           name="subdomain"
           label={fromRealities ? "Link" : "Subdomain"}
-          placeholder={fromRealities ? "org-link" : "subdomain"}
+          placeholder={slugify(`${currentUser.firstName}'s community`)}
           inputRef={register({ required: "Required" })}
-          className="mb-2"
+          className="mb-4"
           defaultValue={organization?.subdomain}
           error={errors.subdomain}
           inputProps={{
@@ -157,7 +157,7 @@ const EditOrganization = ({ organization }) => {
             )}
             placeholder="orgdomain.com"
             inputRef={register}
-            className="mb-2"
+            className="mb-4"
             defaultValue={organization?.customDomain}
             error={errors.customDomain}
             helperText={errors.customDomain?.message}
@@ -165,15 +165,15 @@ const EditOrganization = ({ organization }) => {
         )}
 
         <ImageUpload
-          text={"Upload Logo Image"}
+          label="Logo"
           onImageUploaded={setLogoImage}
-          cloudinaryPreset={"organization_logos"}
+          cloudinaryPreset="organization_logos"
           initialImage={logoImage}
           className="my-2"
         />
 
-        <Button type="submit" loading={loading || editLoading}>
-          Save
+        <Button fullWidth type="submit" loading={loading || editLoading}>
+          {isNew ? "Continue" : "Save"}
         </Button>
       </form>
     </div>
