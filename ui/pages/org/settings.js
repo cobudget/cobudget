@@ -4,9 +4,15 @@ import { useRouter } from "next/router";
 import OrgMembers from "components/Org/OrgMembers";
 import EditOrganization from "components/Org/EditOrganization";
 
+const TabContainer = ({ children }) => (
+  <div className="flex-grow flex justify-center items-center pt-6">
+    {children}
+  </div>
+);
+
 const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
   const router = useRouter();
-  const [currentTab, setCurrentTab] = useState("general");
+  const [currentTab, setCurrentTab] = useState(router.query.tab ?? "general");
 
   useEffect(() => {
     if (router.query.tab) {
@@ -35,19 +41,15 @@ const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
           <Tab label="Members" value="members" />
         </Tabs>
       </Paper>
-      {currentTab === "general" && (
-        <div>
+      <TabContainer>
+        {currentTab === "general" && (
           <EditOrganization
             organization={currentOrg}
             currentUser={currentUser}
           />
-        </div>
-      )}
-      {currentTab === "members" && (
-        <div>
-          <OrgMembers />
-        </div>
-      )}
+        )}
+        {currentTab === "members" && <OrgMembers />}
+      </TabContainer>
     </div>
   );
 };
