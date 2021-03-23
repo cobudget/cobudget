@@ -9,6 +9,7 @@ const NavItem = ({
   children,
   primary,
   eventColor,
+  external,
 }) => {
   const active = currentPath === href;
 
@@ -39,6 +40,13 @@ const NavItem = ({
       <button className={classes} onClick={onClick}>
         {children}
       </button>
+    );
+  }
+  if (external) {
+    return (
+      <a href={href} className={classes}>
+        {children}
+      </a>
     );
   }
   return (
