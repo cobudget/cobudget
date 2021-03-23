@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useMutation } from "@apollo/react-hooks";
@@ -178,6 +179,10 @@ const EditOrganization = ({ organization, currentUser }) => {
       </form>
     </div>
   );
+};
+
+EditOrganization.propTypes = {
+  currentUser: PropTypes.object.isRequired,
 };
 
 export default EditOrganization;

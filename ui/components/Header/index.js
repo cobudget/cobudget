@@ -165,7 +165,9 @@ const Header = ({
                         >
                           New event
                         </NavItem>
-                        <NavItem href="/org/members">Org settings</NavItem>
+                        <NavItem href="/org/settings?tab=general">
+                          Org settings
+                        </NavItem>
                       </>
                     )}
                     {(!currentOrgMember ||

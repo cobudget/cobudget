@@ -1,9 +1,18 @@
-import { useState } from "react";
-import OrgMembers from "components/Org/OrgMembers";
+import { useState, useEffect } from "react";
 import { Paper, Tabs, Tab } from "@material-ui/core";
+import { useRouter } from "next/router";
+import OrgMembers from "components/Org/OrgMembers";
+import EditOrganization from "components/Org/EditOrganization";
 
-const OrgSettingsPage = ({ currentOrg, currentOrgMember }) => {
-  const [currentTab, setCurrentTab] = useState("members");
+const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
+  const router = useRouter();
+  const [currentTab, setCurrentTab] = useState("general");
+
+  useEffect(() => {
+    if (router.query.tab) {
+      setCurrentTab(router.query.tab);
+    }
+  }, [router.query.tab]);
 
   const isAdmin = currentOrgMember?.isOrgAdmin;
   if (!isAdmin) return null;
@@ -13,7 +22,11 @@ const OrgSettingsPage = ({ currentOrg, currentOrgMember }) => {
       <Paper>
         <Tabs
           value={currentTab}
-          onChange={(ev, newTab) => setCurrentTab(newTab)}
+          onChange={(ev, newTab) =>
+            router.push(`?tab=${newTab}`, undefined, {
+              shallow: true,
+            })
+          }
           indicatorColor="primary"
           textColor="primary"
           centered
@@ -24,12 +37,15 @@ const OrgSettingsPage = ({ currentOrg, currentOrgMember }) => {
       </Paper>
       {currentTab === "general" && (
         <div>
-          <div>general settings here</div>
+          <EditOrganization
+            organization={currentOrg}
+            currentUser={currentUser}
+          />
         </div>
       )}
       {currentTab === "members" && (
         <div>
-          <OrgMembers org={currentOrg} />
+          <OrgMembers />
         </div>
       )}
     </div>

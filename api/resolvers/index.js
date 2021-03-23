@@ -8,6 +8,7 @@ const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
 const discourse = require("../lib/discourse");
 const isRootAdmin = (parent, args, { currentUser }) => {
+  // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
     ? skip
     : new Error("You need to be root admin");

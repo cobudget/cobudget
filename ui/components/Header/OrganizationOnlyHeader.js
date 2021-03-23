@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default ({ currentOrg }) => (
+const OrganizationOnlyHeader = ({ currentOrg }) => (
   <Link href="/">
     <a className="flex">
       {currentOrg?.logo && (
@@ -15,3 +15,5 @@ export default ({ currentOrg }) => (
     </a>
   </Link>
 );
+
+export default OrganizationOnlyHeader;
