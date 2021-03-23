@@ -21,7 +21,7 @@ const INVITE_MEMBERS = gql`
   }
 `;
 
-export default ({ handleClose }) => {
+const InviteMembersForm = ({ handleClose }) => {
   const { handleSubmit, register, errors, reset } = useForm();
 
   const [inviteMembers] = useMutation(INVITE_MEMBERS, {
@@ -80,3 +80,5 @@ export default ({ handleClose }) => {
     </Card>
   );
 };
+
+export default InviteMembersForm;

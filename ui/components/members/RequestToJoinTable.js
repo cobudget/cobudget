@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@material-ui/core";
 
-export default ({ requestsToJoin, updateMember, deleteMember }) => {
+const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
   if (requestsToJoin.length === 0) return null;
 
   return (
@@ -94,3 +94,5 @@ export default ({ requestsToJoin, updateMember, deleteMember }) => {
     </>
   );
 };
+
+export default RequestToJoinTable;
