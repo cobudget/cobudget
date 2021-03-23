@@ -110,7 +110,7 @@ export default ({ currentUser, event }) => {
 
             {membership.givenGrants.length > 0 && (
               <>
-                <h3 className="text-lg mt-4">Grants given</h3>
+                <h3 className="text-lg mt-4">Tokens given</h3>
                 <ul>
                   {membership.givenGrants.map((grant) => (
                     <li key={grant.id}>
@@ -120,7 +120,7 @@ export default ({ currentUser, event }) => {
                       >
                         <a>{grant.dream.title}</a>
                       </Link>{" "}
-                      - {grant.value} grants -{" "}
+                      - {grant.value} tokens -{" "}
                       <button
                         onClick={() =>
                           deleteGrant({

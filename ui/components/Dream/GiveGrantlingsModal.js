@@ -83,19 +83,19 @@ const GiveGrantlingsModal = ({
   const { handleSubmit, register, errors } = useForm();
 
   // TODO: show how many I have given to this dream
-  // TODO: allow me to remove given grants
+  // TODO: allow me to remove given tokens
 
   return (
     <Modal open={open} onClose={handleClose} className={classes.modal}>
       <div className="p-5 bg-white rounded-lg shadow-md overflow-hidden outline-none">
-        <h1 className="text-3xl mb-2 font-medium">Give grantlings to dream!</h1>
+        <h1 className="text-3xl mb-2 font-medium">Give tokens to dream!</h1>
         <p className="text-gray-800">
-          Available grants:{" "}
+          Available tokens:{" "}
           {currentOrgMember.currentEventMembership.availableGrants}
         </p>
         {event.maxGrantsToDream && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {event.maxGrantsToDream} grants to one dream
+            Max. {event.maxGrantsToDream} tokens to one dream
           </p>
         )}
         <form
@@ -145,7 +145,7 @@ const GiveGrantlingsModal = ({
             color={event.color}
             loading={loading}
           >
-            Donate grantlings
+            Fund
           </Button>
         </form>
       </div>
