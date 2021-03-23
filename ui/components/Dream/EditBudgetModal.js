@@ -91,61 +91,6 @@ export default ({
               .catch((err) => alert(err.message));
           })}
         >
-          <h2 className="text-lg font-semibold mb-2">Income</h2>
-
-          {incomeItems.map(({ id, description, type, min }, index) => {
-            return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <TextField
-                    placeholder="Description"
-                    name={`budgetItems[${index}].description`}
-                    inputRef={register()}
-                    defaultValue={description}
-                  />
-                  <input
-                    name={`budgetItems[${index}].type`}
-                    value={type}
-                    ref={register()}
-                    readOnly
-                    className="hidden"
-                  />
-                </div>
-
-                <div className="mr-2 my-2 sm:my-0">
-                  <TextField
-                    placeholder={"Amount"}
-                    name={`budgetItems[${index}].min`}
-                    defaultValue={min}
-                    inputProps={{ type: "number" }}
-                    inputRef={register()}
-                    endAdornment={<span>{currency}</span>}
-                  />
-                </div>
-
-                <div className="my-2">
-                  <IconButton onClick={() => remove(index)}>
-                    <DeleteIcon className="h-6 w-6 text-color-red" />
-                  </IconButton>
-                </div>
-              </div>
-            );
-          })}
-          <div className="flex mb-2">
-            <Button
-              variant="secondary"
-              color={event.color}
-              onClick={() =>
-                insert(fields.filter((f) => f.type === "INCOME").length, {
-                  type: "INCOME",
-                })
-              }
-              className="flex-grow"
-            >
-              <AddIcon className="h-5 w-5 mr-1" /> Add row
-            </Button>
-          </div>
-
           <h2 className="text-lg font-semibold mb-2">Expenses</h2>
 
           {expenseItems.map(({ id, description, type, min, max }, i) => {
@@ -198,11 +143,66 @@ export default ({
               </div>
             );
           })}
-          <div className="flex mb-2">
+          <div className="flex mb-4">
             <Button
               variant="secondary"
               color={event.color}
               onClick={() => append({ type: "EXPENSE" })}
+              className="flex-grow"
+            >
+              <AddIcon className="h-5 w-5 mr-1" /> Add row
+            </Button>
+          </div>
+
+          <h2 className="text-lg font-semibold my-2">Existing funding</h2>
+
+          {incomeItems.map(({ id, description, type, min }, index) => {
+            return (
+              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
+                <div className="mr-2 my-2 sm:my-0 flex-grow">
+                  <TextField
+                    placeholder="Description"
+                    name={`budgetItems[${index}].description`}
+                    inputRef={register()}
+                    defaultValue={description}
+                  />
+                  <input
+                    name={`budgetItems[${index}].type`}
+                    value={type}
+                    ref={register()}
+                    readOnly
+                    className="hidden"
+                  />
+                </div>
+
+                <div className="mr-2 my-2 sm:my-0">
+                  <TextField
+                    placeholder={"Amount"}
+                    name={`budgetItems[${index}].min`}
+                    defaultValue={min}
+                    inputProps={{ type: "number" }}
+                    inputRef={register()}
+                    endAdornment={<span>{currency}</span>}
+                  />
+                </div>
+
+                <div className="my-2">
+                  <IconButton onClick={() => remove(index)}>
+                    <DeleteIcon className="h-6 w-6 text-color-red" />
+                  </IconButton>
+                </div>
+              </div>
+            );
+          })}
+          <div className="flex mb-2">
+            <Button
+              variant="secondary"
+              color={event.color}
+              onClick={() =>
+                insert(fields.filter((f) => f.type === "INCOME").length, {
+                  type: "INCOME",
+                })
+              }
               className="flex-grow"
             >
               <AddIcon className="h-5 w-5 mr-1" /> Add row
