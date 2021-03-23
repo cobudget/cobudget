@@ -122,7 +122,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           placeholder={slugify(`${currentUser.firstName}'s community`)}
           inputRef={register({ required: "Required" })}
           className="mb-4"
-          defaultValue={organization?.subdomain}
           error={errors.subdomain}
           inputProps={{
             value: slugValue,
