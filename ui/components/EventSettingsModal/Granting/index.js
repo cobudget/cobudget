@@ -214,7 +214,7 @@ export default ({ event }) => {
                 : "Not set"
             }
             isSet={event.dreamCreationCloses}
-            disabled={grantingHasOpened}
+            //disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
             eventColor={event.color}

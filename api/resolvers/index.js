@@ -1711,19 +1711,19 @@ const resolvers = {
       if (grantingOpens) {
         if (
           !event.totalBudget ||
-          !event.grantValue ||
-          !event.dreamCreationCloses
+          !event.grantValue
+          // || !event.dreamCreationCloses
         ) {
           throw new Error(
-            "You can't set granting opening date before setting total budget, token value & dream creation close date"
+            "You can't set granting opening date before setting total budget & token value "
           );
         }
 
-        if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
-          throw new Error(
-            "Granting opens date needs to be after dream creation closing date"
-          );
-        }
+        // if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
+        //   throw new Error(
+        //     "Granting opens date needs to be after dream creation closing date"
+        //   );
+        // }
 
         event.grantingOpens = grantingOpens;
       }
