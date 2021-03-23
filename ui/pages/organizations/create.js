@@ -1,8 +1,6 @@
 import EditOrganization from "components/Org/EditOrganization";
-import { useRouter } from "next/router";
 
 const CreateOrganizationPage = ({ currentUser }) => {
-  const router = useRouter();
   if (!currentUser) {
     if (typeof window !== "undefined") window.location.assign("/api/login");
     return (
