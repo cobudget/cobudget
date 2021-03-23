@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  Modal,
-  List,
-  Divider,
-} from "@material-ui/core";
+import { Modal, List, Divider } from "@material-ui/core";
 
 import { makeStyles } from "@material-ui/core/styles";
 import gql from "graphql-tag";
@@ -139,7 +135,7 @@ export default ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Grants per member"
+            primary="Tokens per member"
             secondary={event.grantsPerMember}
             isSet={event.grantsPerMember}
             disabled={grantingHasOpened}
@@ -151,7 +147,7 @@ export default ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Max. grants to one dream per user"
+            primary="Max. tokens to one dream per user"
             secondary={
               event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
             }
@@ -181,7 +177,7 @@ export default ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Grant value"
+            primary="Token value"
             secondary={
               event.grantValue
                 ? `${thousandSeparator(event.grantValue)} ${event.currency}`

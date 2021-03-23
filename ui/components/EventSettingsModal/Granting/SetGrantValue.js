@@ -33,10 +33,10 @@ const SetGrantValue = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set grant value</h1>
+        <h1 className="text-3xl">Set token value</h1>
         <Box my={1}>
           <TextField
-            label="Grants per member"
+            label="Tokens per member"
             value={event.grantsPerMember}
             disabled
             fullWidth
@@ -99,7 +99,7 @@ const SetGrantValue = ({ closeModal, event }) => {
         </Box>
         <Box my={1}>
           <Typography>
-            Recommended grant value based on these parameters:{" "}
+            Recommended token value based on these parameters:{" "}
             <strong>
               {recommendedGrantValue.toFixed(2)} {event.currency}
             </strong>
@@ -123,7 +123,7 @@ const SetGrantValue = ({ closeModal, event }) => {
           <Box m="15px 0">
             <TextField
               name="grantValue"
-              label="Grant value"
+              label="Token value"
               defaultValue={event.grantValue}
               fullWidth
               inputRef={register}

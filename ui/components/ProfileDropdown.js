@@ -73,7 +73,7 @@ const ProfileDropdown = ({
                   <p className=" text-gray-800 text-sm">
                     You have{" "}
                     {currentOrgMember.currentEventMembership.availableGrants}{" "}
-                    grants left
+                    tokens left
                   </p>
                 )}
               </div>

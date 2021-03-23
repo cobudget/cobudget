@@ -94,7 +94,7 @@ export default ({ dream, event, currentOrgMember, canEdit }) => {
                     fullWidth
                     onClick={() => setGrantModalOpen(true)}
                   >
-                    Donate to dream
+                    Fund
                   </Button>
                   <GiveGrantlingsModal
                     open={grantModalOpen}
@@ -161,7 +161,7 @@ export default ({ dream, event, currentOrgMember, canEdit }) => {
                               }).catch((err) => alert(err.message))
                             }
                           >
-                            Reclaim grants
+                            Reclaim tokens
                           </Button>
                           <br />
                         </>

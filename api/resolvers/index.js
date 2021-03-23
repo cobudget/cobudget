@@ -720,7 +720,7 @@ const resolvers = {
       ]);
 
       if (grantsForDream > 0) {
-        throw new Error("You cant delete a Dream that has received grants");
+        throw new Error("You cant delete a Dream that has received tokens");
       }
 
       return dream.remove();
@@ -1385,7 +1385,7 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          "You need to be a logged in approved member to grant things"
+          "You need to be a logged in approved member to fund things"
         );
 
       if (value <= 0) throw new Error("Value needs to be more than zero");
@@ -1419,11 +1419,11 @@ const resolvers = {
       // Check that it is not more than is allowed per dream (if this number is set)
       if (event.maxGrantsToDream && value > event.maxGrantsToDream) {
         throw new Error(
-          `You can give a maximum of ${event.maxGrantsToDream} grants to one dream`
+          `You can give a maximum of ${event.maxGrantsToDream} tokens to one dream`
         );
       }
 
-      // Check that user has not spent more grants than he has
+      // Check that user has not spent more tokens than he has
       const [
         { grantsFromUser } = { grantsFromUser: 0 },
       ] = await Grant.aggregate([
@@ -1437,7 +1437,7 @@ const resolvers = {
       ]);
 
       if (grantsFromUser + value > event.grantsPerMember)
-        throw new Error("You are trying to spend too many grants.");
+        throw new Error("You are trying to spend too many tokens.");
 
       // Check that total budget of event will not be exceeded
       const [
@@ -1478,14 +1478,14 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          "You need to be a logged in approved member to remove a grant"
+          "You need to be a logged in approved member to remove tokens"
         );
 
       const event = await Event.findOne({ _id: eventId });
 
       // Check that granting is open
       if (!event.grantingIsOpen)
-        throw new Error("Can't remove grant when granting is closed");
+        throw new Error("Can't remove granted tokens when granting is closed");
 
       const grant = await Grant.findOneAndDelete({
         _id: grantId,
@@ -1506,15 +1506,15 @@ const resolvers = {
       });
 
       if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error("You need to be admin to reclaim grants");
+        throw new Error("You need to be admin to reclaim tokens");
 
       const event = await Event.findOne({ _id: dream.eventId });
 
-      // Granting needs to be closed before you can reclaim grants
+      // Granting needs to be closed before you can reclaim tokens
       if (!event.grantingHasClosed)
-        throw new Error("You can't reclaim grants before granting has closed");
+        throw new Error("You can't reclaim tokens before granting has closed");
 
-      // If dream has reached minimum funding, you can't reclaim its grants
+      // If dream has reached minimum funding, you can't reclaim its tokens
       const [
         { grantsForDream } = { grantsForDream: 0 },
       ] = await Grant.aggregate([
@@ -1531,7 +1531,7 @@ const resolvers = {
 
       if (grantsForDream >= minGoalGrants)
         throw new Error(
-          "You can't reclaim grants if it has reached minimum funding"
+          "You can't reclaim tokens if it has reached minimum funding"
         );
 
       await Grant.updateMany({ dreamId }, { reclaimed: true });
@@ -1665,10 +1665,10 @@ const resolvers = {
       }
 
       if (grantsPerMember) {
-        // granting can't have started to change grants per member
+        // granting can't have started to change tokens per member
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change grants per member once granting has started"
+            "You can't change tokens per member once granting has started"
           );
         }
         event.grantsPerMember = grantsPerMember;
@@ -1678,7 +1678,7 @@ const resolvers = {
       if (maxGrantsToDream) {
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change max grants to dream once granting has started"
+            "You can't change max tokens to dream once granting has started"
           );
         }
         event.maxGrantsToDream = maxGrantsToDream;
@@ -1695,10 +1695,10 @@ const resolvers = {
       }
 
       if (grantValue) {
-        // granting can't have started to change grant value
+        // granting can't have started to change token value
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change grant value once granting has started"
+            "You can't change token value once granting has started"
           );
         }
         event.grantValue = grantValue;
@@ -1715,7 +1715,7 @@ const resolvers = {
           !event.dreamCreationCloses
         ) {
           throw new Error(
-            "You can't set granting opening date before setting total budget, grant value & dream creation close date"
+            "You can't set granting opening date before setting total budget, token value & dream creation close date"
           );
         }
 

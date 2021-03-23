@@ -48,7 +48,7 @@ export default ({ event }) => {
 
           <ListItem>
             <ListItemText
-              primary="Grants per member"
+              primary="Tokens per member"
               secondary={event.grantsPerMember}
             />
           </ListItem>
@@ -57,7 +57,7 @@ export default ({ event }) => {
 
           <ListItem>
             <ListItemText
-              primary="Max. grants to one dream per user"
+              primary="Max. tokens to one dream per user"
               secondary={
                 event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
               }
@@ -154,24 +154,24 @@ export default ({ event }) => {
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Unallocated grants in budget"
-              secondary={`${event.remainingGrants} grants`}
+              primary="Unallocated tokens in budget"
+              secondary={`${event.remainingGrants} tokens`}
             />
           </ListItem>
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Total grants in budget"
-              secondary={`${event.totalBudgetGrants} grants`}
+              primary="Total tokens in budget"
+              secondary={`${event.totalBudgetGrants} tokens`}
             />
           </ListItem>
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Grants given"
+              primary="Tokens given"
               secondary={`${
                 event.totalBudgetGrants - event.remainingGrants
-              } grants`}
+              } tokens`}
             />
           </ListItem>
         </List>

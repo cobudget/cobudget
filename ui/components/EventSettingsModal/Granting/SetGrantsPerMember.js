@@ -18,9 +18,9 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set grants per member</h1>
+        <h1 className="text-3xl">Set tokens per member</h1>
         <Alert severity="warning">
-          Changing grants per member will also reset grant value.
+          Changing tokens per member will also reset grant value.
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
@@ -40,7 +40,7 @@ const SetCurrency = ({ closeModal, event }) => {
           <Box m="15px 0">
             <TextField
               name="grantsPerMember"
-              label="Grants per member"
+              label="Tokens per member"
               defaultValue={event.grantsPerMember}
               fullWidth
               inputRef={register}

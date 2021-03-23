@@ -242,7 +242,7 @@ const Header = ({
                   {/* {currentOrgMember.currentEventMembership &&
                   Boolean(currentOrgMember.currentEventMembership.availableGrants) && (
                     <span className="block text-sm text-gray-600">
-                      You have {currentOrgMember.currentEventMembership.availableGrants} grants
+                      You have {currentOrgMember.currentEventMembership.availableGrants} tokens
                       left
                     </span>
                   )} */}
@@ -268,7 +268,7 @@ const Header = ({
                           currentOrgMember.currentEventMembership
                             .availableGrants
                         }{" "}
-                        grants left
+                        tokens left
                       </p>
                     )}
                   </div>
