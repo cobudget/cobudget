@@ -207,12 +207,6 @@ const resolvers = {
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
-      console.log({
-        organizationId,
-        currentOrgMember,
-        orgId: currentOrgMember.organizationId,
-        currentUser,
-      });
       if (
         organizationId !== currentOrgMember.organizationId.toString() &&
         !currentUser?.isRootAdmin
