@@ -37,7 +37,6 @@ const EDIT_ORGANIZATION = gql`
       name: $name
       logo: $logo
       subdomain: $subdomain
-      customDomain: $customDomain
     ) {
       name
       logo
@@ -137,6 +136,8 @@ const EditOrganization = ({ organization, currentUser }) => {
           }
         />
 
+        {/* removing this for now since currently don't automatically update
+            the redirect uris in keycloak
         {organization?.customDomain && (
           <TextField
             name="customDomain"
@@ -163,6 +164,7 @@ const EditOrganization = ({ organization, currentUser }) => {
             helperText={errors.customDomain?.message}
           />
         )}
+        */}
 
         <ImageUpload
           label="Logo"

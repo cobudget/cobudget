@@ -30,7 +30,6 @@ const schema = gql`
       name: String!
       logo: String
       subdomain: String!
-      customDomain: String
     ): Organization!
 
     createEvent(
