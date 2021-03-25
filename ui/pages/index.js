@@ -57,21 +57,46 @@ const LinkCard = forwardRef((props, ref) => {
   );
 });
 
-const IndexPage = ({ currentOrg }) => {
+const IndexPage = ({ currentOrg, currentOrgMember }) => {
+  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY, {
+    skip: !currentOrg,
+  });
+
   // TODO - perhaps a redirect to organization pages instead
   if (!currentOrg) {
     return <LandingPage />;
   }
 
-  const { data: { events } = { events: [] }, loading } = useQuery(EVENTS_QUERY);
+  const showTodos = currentOrgMember.isOrgAdmin;
+  //const showTodos = false;
 
   return (
-    <div className="max-w-screen-2lg flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {events.map((event) => (
-        <Link href="/[event]" as={`/${event.slug}`} key={event.slug} passHref>
-          <LinkCard color={event.color}>{event.title}</LinkCard>
-        </Link>
-      ))}
+    <div
+      className={`max-w-screen-2lg flex-1 grid gap-14 grid-cols-1 ${
+        showTodos ? "md:grid-cols-2" : ""
+      }`}
+    >
+      {showTodos && (
+        <div className="bg-white rounded-lg shadow p-6 max-w-md">
+          <h1 className="text-2xl font-semibold mb-4">
+            {"👌 Let's get this ball rolling!"}
+          </h1>
+          <div>put the todolist here</div>
+        </div>
+      )}
+      <div
+        className={`grid ${
+          showTodos
+            ? "grid-cols-1 md:grid-cols-2"
+            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+        }`}
+      >
+        {events.map((event) => (
+          <Link href="/[event]" as={`/${event.slug}`} key={event.slug} passHref>
+            <LinkCard color={event.color}>{event.title}</LinkCard>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };
