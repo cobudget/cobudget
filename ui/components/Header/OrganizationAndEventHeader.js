@@ -20,7 +20,11 @@ const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ currentOrg, event, currentOrgMember }) => {
+const OrganizationAndEventHeader = ({
+  currentOrg,
+  event,
+  currentOrgMember,
+}) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const router = useRouter();
   const { data: { dream } = { dream: null }, loading, error } = useQuery(
@@ -122,3 +126,5 @@ export default ({ currentOrg, event, currentOrgMember }) => {
     </>
   );
 };
+
+export default OrganizationAndEventHeader;

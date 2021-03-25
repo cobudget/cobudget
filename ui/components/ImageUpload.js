@@ -50,6 +50,7 @@ const ImageUpload = ({
           <div className="h-24 w-24 relative">
             <img className="w-24 h-24 object-cover rounded" src={image} />
             <button
+              type="button"
               onClick={() => {
                 setImage(null);
                 onImageUploaded(null);

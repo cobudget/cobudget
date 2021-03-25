@@ -85,7 +85,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-export default ({ event }) => {
+const EventSettingsModalGranting = ({ event }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -260,3 +260,5 @@ export default ({ event }) => {
     </div>
   );
 };
+
+export default EventSettingsModalGranting;

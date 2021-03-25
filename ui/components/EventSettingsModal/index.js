@@ -15,7 +15,7 @@ const tabs = [
   { name: "Custom fields", component: CustomFields },
 ];
 
-export default ({ event, currentOrgMember, handleClose }) => {
+const EventSettingsModal = ({ event, currentOrgMember, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -58,3 +58,5 @@ export default ({ event, currentOrgMember, handleClose }) => {
     </>
   );
 };
+
+export default EventSettingsModal;

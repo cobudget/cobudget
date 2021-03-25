@@ -8,6 +8,7 @@ const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
 const discourse = require("../lib/discourse");
 const isRootAdmin = (parent, args, { currentUser }) => {
+  // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
     ? skip
     : new Error("You need to be root admin");
@@ -201,14 +202,14 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain, customDomain, logo },
-      { currentUser, currentOrgMember, models: { Organization } }
+      { organizationId, name, subdomain, logo },
+      { currentUser, kcAdminClient, currentOrgMember, models: { Organization } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
       if (
-        organizationId !== currentOrgMember.organizationId ||
-        currentUser.isRootAdmin
+        organizationId !== currentOrgMember.organizationId.toString() &&
+        !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
 
@@ -219,13 +220,13 @@ const resolvers = {
       const isUpdatingRedirectUris = subdomain !== organization.subdomain;
       let newRedirectUris;
 
+      const clientId = "dreams";
+
+      const [client] = await kcAdminClient.clients.findOne({
+        clientId,
+      });
+
       if (isUpdatingRedirectUris) {
-        const clientId = "dreams";
-
-        const [client] = await kcAdminClient.clients.findOne({
-          clientId,
-        });
-
         const { redirectUris } = client;
 
         const oldRedirectUri = `https://${organization.subdomain}.dreams.wtf/*`;
@@ -239,7 +240,7 @@ const resolvers = {
       organization.name = name;
       organization.logo = logo;
       organization.subdomain = subdomain;
-      organization.customDomain = customDomain;
+      // organization.customDomain = customDomain;
 
       await organization.save();
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useMutation } from "@apollo/react-hooks";
@@ -36,7 +37,6 @@ const EDIT_ORGANIZATION = gql`
       name: $name
       logo: $logo
       subdomain: $subdomain
-      customDomain: $customDomain
     ) {
       name
       logo
@@ -121,7 +121,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           placeholder={slugify(`${currentUser.firstName}'s community`)}
           inputRef={register({ required: "Required" })}
           className="mb-4"
-          defaultValue={organization?.subdomain}
           error={errors.subdomain}
           inputProps={{
             value: slugValue,
@@ -137,6 +136,8 @@ const EditOrganization = ({ organization, currentUser }) => {
           }
         />
 
+        {/* removing this for now since currently don't automatically update
+            the redirect uris in keycloak
         {organization?.customDomain && (
           <TextField
             name="customDomain"
@@ -163,6 +164,7 @@ const EditOrganization = ({ organization, currentUser }) => {
             helperText={errors.customDomain?.message}
           />
         )}
+        */}
 
         <ImageUpload
           label="Logo"
@@ -178,6 +180,10 @@ const EditOrganization = ({ organization, currentUser }) => {
       </form>
     </div>
   );
+};
+
+EditOrganization.propTypes = {
+  currentUser: PropTypes.object.isRequired,
 };
 
 export default EditOrganization;

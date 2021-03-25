@@ -1,7 +1,7 @@
 import { initAuth0 } from "@auth0/nextjs-auth0";
 import getHostInfo from "utils/getHostInfo";
 
-export default (req) => {
+const auth = (req) => {
   const { host, protocol } = getHostInfo(req);
   const onDeployUrl = host.includes(process.env.DEPLOY_URL);
 
@@ -30,3 +30,5 @@ export default (req) => {
     },
   });
 };
+
+export default auth;
