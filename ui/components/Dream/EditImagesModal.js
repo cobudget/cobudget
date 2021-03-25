@@ -73,7 +73,12 @@ const removeNullValues = (images) =>
     ...(large && { large }),
   }));
 
-export default ({ dreamId, initialImages = [], open, handleClose }) => {
+const EditImagesModal = ({
+  dreamId,
+  initialImages = [],
+  open,
+  handleClose,
+}) => {
   const [images, setImages] = useState(removeNullValues(initialImages));
 
   const [editDream, { loading }] = useMutation(EDIT_IMAGES_MUTATION, {
@@ -180,3 +185,5 @@ export default ({ dreamId, initialImages = [], open, handleClose }) => {
     </Modal>
   );
 };
+
+export default EditImagesModal;

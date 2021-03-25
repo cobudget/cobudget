@@ -18,7 +18,7 @@ const EDIT_SUMMARY_MUTATION = gql`
   }
 `;
 
-export default ({ summary, canEdit, dreamId }) => {
+const DreamSummary = ({ summary, canEdit, dreamId }) => {
   const [editDream, { loading }] = useMutation(EDIT_SUMMARY_MUTATION, {
     variables: { dreamId },
   });
@@ -100,3 +100,5 @@ export default ({ summary, canEdit, dreamId }) => {
 
   return null;
 };
+
+export default DreamSummary;

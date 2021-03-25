@@ -6,7 +6,7 @@ import { Tooltip } from "react-tippy";
 
 import EditBudgetModal from "./EditBudgetModal";
 
-export default ({
+const DreamBudget = ({
   budgetItems,
   dreamId,
   canEdit,
@@ -110,3 +110,5 @@ export default ({
     </>
   );
 };
+
+export default DreamBudget;

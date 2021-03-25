@@ -3,6 +3,8 @@ import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Link from "next/link";
 import Button from "components/Button";
+import TodoList from "components/TodoList";
+import { AddIcon } from "components/Icons";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -76,19 +78,12 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
         showTodos ? "md:grid-cols-2" : ""
       }`}
     >
-      {showTodos && (
-        <div className="bg-white rounded-lg shadow p-6 max-w-md">
-          <h1 className="text-2xl font-semibold mb-4">
-            {"👌 Let's get this ball rolling!"}
-          </h1>
-          <div>put the todolist here</div>
-        </div>
-      )}
+      {showTodos && <TodoList />}
       <div
-        className={`grid ${
+        className={`grid gap-4 ${
           showTodos
             ? "grid-cols-1 md:grid-cols-2"
-            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
         }`}
       >
         {events.map((event) => (
@@ -96,6 +91,13 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
             <LinkCard color={event.color}>{event.title}</LinkCard>
           </Link>
         ))}
+        <button
+          type="button"
+          onClick={() => null}
+          className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
+        >
+          <AddIcon className="p-8" />
+        </button>
       </div>
     </div>
   );
