@@ -2046,6 +2046,11 @@ const resolvers = {
     ) => {
       return Log.find({ dreamId: dream.id });
     },
+    discourseTopicUrl: (dream, args, { currentOrg }) => {
+      if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
+
+      return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
   },
   Comment: {
     createdAt: (post) => {
