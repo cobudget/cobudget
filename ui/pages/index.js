@@ -69,7 +69,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
     return <LandingPage />;
   }
 
-  const showTodos = currentOrgMember.isOrgAdmin;
+  const showTodos = currentOrgMember?.isOrgAdmin;
   //const showTodos = false;
 
   return (
@@ -78,26 +78,46 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
         showTodos ? "md:grid-cols-2" : ""
       }`}
     >
-      {showTodos && <TodoList />}
-      <div
-        className={`grid gap-4 ${
-          showTodos
-            ? "grid-cols-1 md:grid-cols-2"
-            : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-        }`}
-      >
-        {events.map((event) => (
-          <Link href="/[event]" as={`/${event.slug}`} key={event.slug} passHref>
-            <LinkCard color={event.color}>{event.title}</LinkCard>
-          </Link>
-        ))}
-        <button
-          type="button"
-          onClick={() => null}
-          className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
+      {showTodos && (
+        <div>
+          <div className="text-sm text-gray-700 font-medium mb-1 block">
+            GET GOING
+          </div>
+          <TodoList />
+        </div>
+      )}
+      <div>
+        <div className="text-sm text-gray-700 font-medium mb-1 block">
+          EVENTS
+        </div>
+        <div
+          className={`grid gap-4 ${
+            showTodos
+              ? "grid-cols-1 md:grid-cols-2"
+              : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          }`}
         >
-          <AddIcon className="p-8" />
-        </button>
+          {events.map((event) => (
+            <Link
+              href="/[event]"
+              as={`/${event.slug}`}
+              key={event.slug}
+              passHref
+            >
+              <LinkCard color={event.color}>{event.title}</LinkCard>
+            </Link>
+          ))}
+          {currentOrgMember?.isOrgAdmin && (
+            <Link href="/create-event">
+              <button
+                type="button"
+                className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
+              >
+                <AddIcon className="p-8" />
+              </button>
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
