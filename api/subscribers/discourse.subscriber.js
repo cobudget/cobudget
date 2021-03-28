@@ -19,8 +19,8 @@ module.exports = {
         raw: this.generateDreamMarkdown(dream, event),
         category: event.discourseCategoryId,
       }, {
-        username: currentOrgMember.discourseUsername,
-        userApiKey: currentOrgMember.discourseApiKey,
+        username: 'system',
+        apiKey: currentOrg.discourse.apiKey,
       });
 
       if (!post.id)
@@ -52,8 +52,8 @@ module.exports = {
       const post = await discourse(currentOrg.discourse).topics.getSummary({
         id: dream.discourseTopicId
       }, {
-        username: currentOrgMember.discourseUsername,
-        userApiKey: currentOrgMember.discourseApiKey,
+        username: 'system',
+        apiKey: currentOrg.discourse.apiKey,
       });
 
       if (!post.id)
