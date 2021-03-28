@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Table,
@@ -15,7 +14,12 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 
-const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
+const ActionsDropdown = ({
+  onlyOneAdmin,
+  updateOrgMember,
+  deleteMember,
+  member,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -43,39 +47,28 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
         onClose={handleClose}
       >
         <MenuItem
+          disabled={onlyOneAdmin && member.isOrgAdmin}
           onClick={() => {
-            updateMember({
+            updateOrgMember({
               variables: {
                 memberId: member.id,
-                isAdmin: !member.isAdmin,
+                isOrgAdmin: !member.isOrgAdmin,
               },
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isAdmin ? "Remove admin" : "Make admin"}
+          {member.isOrgAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            updateMember({
-              variables: {
-                memberId: member.id,
-                isGuide: !member.isGuide,
-              },
-            }).then(() => {
-              handleClose();
-            });
-          }}
-        >
-          {member.isGuide ? "Remove guide" : "Make guide"}
-        </MenuItem>
+        {/* how to also remove the user's event memberships when their org
+            membership is removed?
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
+                `Are you sure you would like to delete org membership from user with email ${member.user.email}?`
               )
             )
               deleteMember({
@@ -84,13 +77,16 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
           }}
         >
           <Box color="error.main">Delete</Box>
-        </MenuItem>
+        </MenuItem>*/}
       </Menu>
     </>
   );
 };
 
-const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
+const OrgMembersTable = ({ members, updateOrgMember, deleteMember }) => {
+  const onlyOneAdmin =
+    members.filter((member) => member.isOrgAdmin).length <= 1;
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -106,18 +102,18 @@ const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {approvedMembers.map((member) => (
+            {members.map((member) => (
               <TableRow key={member.id}>
                 <TableCell component="th" scope="row">
-                  {member.orgMember.user.username}
+                  {member.user.username}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {member.orgMember.user.name}
+                  {member.user.name}
                 </TableCell>
                 <TableCell>
                   <Box display="flex" alignItems="center">
-                    <Box m="0 8px 0">{member.orgMember.user.email}</Box>
-                    {!member.orgMember.user.verifiedEmail && (
+                    <Box m="0 8px 0">{member.user.email}</Box>
+                    {!member.user.verifiedEmail && (
                       <Tooltip title="Email not verified" placement="right">
                         <HelpOutlineOutlinedIcon fontSize="small" />
                       </Tooltip>
@@ -125,17 +121,17 @@ const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
                   </Box>
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {member.orgMember.bio}
+                  {member.bio}
                 </TableCell>
                 <TableCell align="right">
-                  {member.isAdmin && <span className="mr-2">Admin</span>}
-                  {member.isGuide && <span className="">Guide</span>}
+                  {member.isOrgAdmin && <span className="mr-2">Admin</span>}
                 </TableCell>
                 <TableCell align="right" padding="none">
                   <ActionsDropdown
                     member={member}
                     deleteMember={deleteMember}
-                    updateMember={updateMember}
+                    updateOrgMember={updateOrgMember}
+                    onlyOneAdmin={onlyOneAdmin}
                   />
                 </TableCell>
               </TableRow>
@@ -147,4 +143,4 @@ const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
   );
 };
 
-export default EventMembersTable;
+export default OrgMembersTable;

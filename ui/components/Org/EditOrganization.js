@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { useMutation } from "@apollo/react-hooks";
@@ -36,7 +37,6 @@ const EDIT_ORGANIZATION = gql`
       name: $name
       logo: $logo
       subdomain: $subdomain
-      customDomain: $customDomain
     ) {
       name
       logo
@@ -46,7 +46,7 @@ const EDIT_ORGANIZATION = gql`
   }
 `;
 
-const EditOrganization = ({ organization }) => {
+const EditOrganization = ({ organization, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
@@ -98,19 +98,19 @@ const EditOrganization = ({ organization }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-      <h1 className="text-2xl font-semibold mb-2">
-        {isNew ? "Create organization" : "Edit organization"}
+    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md">
+      <h1 className="text-2xl font-semibold mb-4">
+        {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
       </h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
           name="name"
-          label="Name"
-          placeholder="Name"
+          label="Name your community"
+          placeholder={`${currentUser.firstName}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
           autoFocus
-          className="mb-2"
+          className="mb-4"
           error={errors.name}
           helperText={errors.name?.message}
         />
@@ -118,10 +118,9 @@ const EditOrganization = ({ organization }) => {
         <TextField
           name="subdomain"
           label={fromRealities ? "Link" : "Subdomain"}
-          placeholder={fromRealities ? "org-link" : "subdomain"}
+          placeholder={slugify(`${currentUser.firstName}'s community`)}
           inputRef={register({ required: "Required" })}
-          className="mb-2"
-          defaultValue={organization?.subdomain}
+          className="mb-4"
           error={errors.subdomain}
           inputProps={{
             value: slugValue,
@@ -137,6 +136,8 @@ const EditOrganization = ({ organization }) => {
           }
         />
 
+        {/* removing this for now since currently don't automatically update
+            the redirect uris in keycloak
         {organization?.customDomain && (
           <TextField
             name="customDomain"
@@ -157,27 +158,32 @@ const EditOrganization = ({ organization }) => {
             )}
             placeholder="orgdomain.com"
             inputRef={register}
-            className="mb-2"
+            className="mb-4"
             defaultValue={organization?.customDomain}
             error={errors.customDomain}
             helperText={errors.customDomain?.message}
           />
         )}
+        */}
 
         <ImageUpload
-          text={"Upload Logo Image"}
+          label="Logo"
           onImageUploaded={setLogoImage}
-          cloudinaryPreset={"organization_logos"}
+          cloudinaryPreset="organization_logos"
           initialImage={logoImage}
           className="my-2"
         />
 
-        <Button type="submit" loading={loading || editLoading}>
-          Save
+        <Button fullWidth type="submit" loading={loading || editLoading}>
+          {isNew ? "Continue" : "Save"}
         </Button>
       </form>
     </div>
   );
+};
+
+EditOrganization.propTypes = {
+  currentUser: PropTypes.object.isRequired,
 };
 
 export default EditOrganization;

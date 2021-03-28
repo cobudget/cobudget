@@ -8,6 +8,7 @@ const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
 const discourse = require("../lib/discourse");
 const isRootAdmin = (parent, args, { currentUser }) => {
+  // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
     ? skip
     : new Error("You need to be root admin");
@@ -100,6 +101,18 @@ const resolvers = {
         eventId,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+      });
+    },
+    orgMembers: async (
+      parent,
+      args,
+      { currentOrg, currentOrgMember, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org admin to view this");
+
+      return OrgMember.find({
+        organizationId: currentOrg.id,
       });
     },
     members: async (
@@ -205,13 +218,13 @@ const resolvers = {
     editOrganization: async (
       parent,
       { organizationId, name, subdomain, customDomain, logo },
-      { currentUser, currentOrgMember, models: { Organization }, eventHub }
+      { currentUser, kcAdminClient, currentOrgMember, models: { Organization }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
       if (
-        organizationId !== currentOrgMember.organizationId ||
-        currentUser.isRootAdmin
+        organizationId !== currentOrgMember.organizationId.toString() &&
+        !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
 
@@ -222,13 +235,13 @@ const resolvers = {
       const isUpdatingRedirectUris = subdomain !== organization.subdomain;
       let newRedirectUris;
 
+      const clientId = "dreams";
+
+      const [client] = await kcAdminClient.clients.findOne({
+        clientId,
+      });
+
       if (isUpdatingRedirectUris) {
-        const clientId = "dreams";
-
-        const [client] = await kcAdminClient.clients.findOne({
-          clientId,
-        });
-
         const { redirectUris } = client;
 
         const oldRedirectUri = `https://${organization.subdomain}.dreams.wtf/*`;
@@ -242,7 +255,7 @@ const resolvers = {
       organization.name = name;
       organization.logo = logo;
       organization.subdomain = subdomain;
-      organization.customDomain = customDomain;
+      // organization.customDomain = customDomain;
 
       await organization.save();
 
@@ -714,7 +727,7 @@ const resolvers = {
       ]);
 
       if (grantsForDream > 0) {
-        throw new Error("You cant delete a Dream that has received grants");
+        throw new Error("You cant delete a Dream that has received tokens");
       }
 
       eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
@@ -1160,6 +1173,34 @@ const resolvers = {
 
     //   return members;
     // },
+    updateOrgMember: async (
+      parent,
+      { memberId, isOrgAdmin },
+      { currentOrg, currentOrgMember, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org admin to update member");
+
+      const orgMember = await OrgMember.findOne({
+        _id: memberId,
+        organizationId: currentOrg.id,
+      });
+
+      if (!orgMember) throw new Error("No member to update found");
+
+      if (typeof isOrgAdmin !== "undefined") {
+        if (isOrgAdmin === false) {
+          const orgAdmins = await OrgMember.find({
+            organizationId: currentOrg.id,
+            isOrgAdmin: true,
+          });
+          if (orgAdmins.length <= 1)
+            throw new Error("You need at least 1 org admin");
+        }
+        orgMember.isOrgAdmin = isOrgAdmin;
+      }
+      return orgMember.save();
+    },
     updateMember: async (
       parent,
       { eventId, memberId, isApproved, isAdmin, isGuide },
@@ -1282,7 +1323,7 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          "You need to be a logged in approved member to grant things"
+          "You need to be a logged in approved member to fund things"
         );
 
       if (value <= 0) throw new Error("Value needs to be more than zero");
@@ -1316,11 +1357,11 @@ const resolvers = {
       // Check that it is not more than is allowed per dream (if this number is set)
       if (event.maxGrantsToDream && value > event.maxGrantsToDream) {
         throw new Error(
-          `You can give a maximum of ${event.maxGrantsToDream} grants to one dream`
+          `You can give a maximum of ${event.maxGrantsToDream} tokens to one dream`
         );
       }
 
-      // Check that user has not spent more grants than he has
+      // Check that user has not spent more tokens than he has
       const [
         { grantsFromUser } = { grantsFromUser: 0 },
       ] = await Grant.aggregate([
@@ -1334,7 +1375,7 @@ const resolvers = {
       ]);
 
       if (grantsFromUser + value > event.grantsPerMember)
-        throw new Error("You are trying to spend too many grants.");
+        throw new Error("You are trying to spend too many tokens.");
 
       // Check that total budget of event will not be exceeded
       const [
@@ -1375,14 +1416,14 @@ const resolvers = {
 
       if (!currentEventMember || !currentEventMember.isApproved)
         throw new Error(
-          "You need to be a logged in approved member to remove a grant"
+          "You need to be a logged in approved member to remove tokens"
         );
 
       const event = await Event.findOne({ _id: eventId });
 
       // Check that granting is open
       if (!event.grantingIsOpen)
-        throw new Error("Can't remove grant when granting is closed");
+        throw new Error("Can't remove granted tokens when granting is closed");
 
       const grant = await Grant.findOneAndDelete({
         _id: grantId,
@@ -1403,15 +1444,15 @@ const resolvers = {
       });
 
       if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error("You need to be admin to reclaim grants");
+        throw new Error("You need to be admin to reclaim tokens");
 
       const event = await Event.findOne({ _id: dream.eventId });
 
-      // Granting needs to be closed before you can reclaim grants
+      // Granting needs to be closed before you can reclaim tokens
       if (!event.grantingHasClosed)
-        throw new Error("You can't reclaim grants before granting has closed");
+        throw new Error("You can't reclaim tokens before granting has closed");
 
-      // If dream has reached minimum funding, you can't reclaim its grants
+      // If dream has reached minimum funding, you can't reclaim its tokens
       const [
         { grantsForDream } = { grantsForDream: 0 },
       ] = await Grant.aggregate([
@@ -1428,7 +1469,7 @@ const resolvers = {
 
       if (grantsForDream >= minGoalGrants)
         throw new Error(
-          "You can't reclaim grants if it has reached minimum funding"
+          "You can't reclaim tokens if it has reached minimum funding"
         );
 
       await Grant.updateMany({ dreamId }, { reclaimed: true });
@@ -1562,10 +1603,10 @@ const resolvers = {
       }
 
       if (grantsPerMember) {
-        // granting can't have started to change grants per member
+        // granting can't have started to change tokens per member
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change grants per member once granting has started"
+            "You can't change tokens per member once granting has started"
           );
         }
         event.grantsPerMember = grantsPerMember;
@@ -1575,7 +1616,7 @@ const resolvers = {
       if (maxGrantsToDream) {
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change max grants to dream once granting has started"
+            "You can't change max tokens to dream once granting has started"
           );
         }
         event.maxGrantsToDream = maxGrantsToDream;
@@ -1592,10 +1633,10 @@ const resolvers = {
       }
 
       if (grantValue) {
-        // granting can't have started to change grant value
+        // granting can't have started to change token value
         if (grantingHasStarted) {
           throw new Error(
-            "You can't change grant value once granting has started"
+            "You can't change token value once granting has started"
           );
         }
         event.grantValue = grantValue;
@@ -1608,19 +1649,19 @@ const resolvers = {
       if (grantingOpens) {
         if (
           !event.totalBudget ||
-          !event.grantValue ||
-          !event.dreamCreationCloses
+          !event.grantValue
+          // || !event.dreamCreationCloses
         ) {
           throw new Error(
-            "You can't set granting opening date before setting total budget, grant value & dream creation close date"
+            "You can't set granting opening date before setting total budget & token value "
           );
         }
 
-        if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
-          throw new Error(
-            "Granting opens date needs to be after dream creation closing date"
-          );
-        }
+        // if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
+        //   throw new Error(
+        //     "Granting opens date needs to be after dream creation closing date"
+        //   );
+        // }
 
         event.grantingOpens = grantingOpens;
       }

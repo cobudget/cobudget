@@ -157,13 +157,18 @@ const Header = ({
                 {currentOrg && (
                   <>
                     {!event && currentOrgMember?.isOrgAdmin && (
-                      <NavItem
-                        primary
-                        currentPath={router.pathname}
-                        href="/create-event"
-                      >
-                        New event
-                      </NavItem>
+                      <>
+                        <NavItem
+                          primary
+                          currentPath={router.pathname}
+                          href="/create-event"
+                        >
+                          New event
+                        </NavItem>
+                        <NavItem href="/org/settings?tab=general">
+                          Org settings
+                        </NavItem>
+                      </>
                     )}
                     {(!currentOrgMember ||
                       !currentOrgMember.currentEventMembership) &&
@@ -203,7 +208,12 @@ const Header = ({
                 </div>
               </>
             ) : (
-              <NavItem href="/api/login" eventColor={event?.color} primary>
+              <NavItem
+                href="/api/login"
+                external
+                eventColor={event?.color}
+                primary
+              >
                 Login or Sign up
               </NavItem>
             )}
@@ -234,7 +244,7 @@ const Header = ({
                   {/* {currentOrgMember.currentEventMembership &&
                   Boolean(currentOrgMember.currentEventMembership.availableGrants) && (
                     <span className="block text-sm text-gray-600">
-                      You have {currentOrgMember.currentEventMembership.availableGrants} grants
+                      You have {currentOrgMember.currentEventMembership.availableGrants} tokens
                       left
                     </span>
                   )} */}
@@ -260,7 +270,7 @@ const Header = ({
                           currentOrgMember.currentEventMembership
                             .availableGrants
                         }{" "}
-                        grants left
+                        tokens left
                       </p>
                     )}
                   </div>

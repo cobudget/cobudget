@@ -20,7 +20,11 @@ const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ currentOrg, event, currentOrgMember }) => {
+const OrganizationAndEventHeader = ({
+  currentOrg,
+  event,
+  currentOrgMember,
+}) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
   const router = useRouter();
   const { data: { dream } = { dream: null }, loading, error } = useQuery(
@@ -45,7 +49,7 @@ export default ({ currentOrg, event, currentOrgMember }) => {
                   "block rounded overflow-hidden opacity-50 hover:opacity-100 transition-opacity duration-100"
                 }
               >
-                <img className="h-7 w-7" src={currentOrg?.logo} />
+                <img className="h-7 w-7 object-cover" src={currentOrg?.logo} />
               </a>
             ) : (
               <a
@@ -123,3 +127,5 @@ export default ({ currentOrg, event, currentOrgMember }) => {
     </>
   );
 };
+
+export default OrganizationAndEventHeader;

@@ -1,8 +1,9 @@
 import { initAuth0 } from "@auth0/nextjs-auth0";
 import getHostInfo from "utils/getHostInfo";
 
-export default (req) => {
+const auth = (req) => {
   const { host, protocol } = getHostInfo(req);
+  const onDeployUrl = host.includes(process.env.DEPLOY_URL);
 
   return initAuth0({
     auth0Logout: false,
@@ -20,9 +21,14 @@ export default (req) => {
       rolling: true,
       rollingDuration: 60 * 60 * 24 * 7,
       cookie: {
-        //domain: "" (optional)
+        ...(onDeployUrl &&
+          process.env.NODE_ENV == "production" && {
+            domain: process.env.DEPLOY_URL,
+          }),
         sameSite: "lax",
       },
     },
   });
 };
+
+export default auth;

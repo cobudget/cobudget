@@ -17,7 +17,7 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set max grants to one dream</h1>
+        <h1 className="text-3xl">Set max tokens to one dream</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
@@ -39,7 +39,7 @@ const SetCurrency = ({ closeModal, event }) => {
           <Box m="15px 0">
             <TextField
               name="maxGrantsToDream"
-              label="Max grants to one dream per user"
+              label="Max tokens to one dream per user"
               defaultValue={event.maxGrantsToDream}
               fullWidth
               inputRef={register}

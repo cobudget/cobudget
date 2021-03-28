@@ -90,13 +90,13 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
           {event.grantingHasClosed ? "Post" : "Pre"}-fund dream
         </h1>
         <p className="text-gray-800">
-          Available grants in event pool: {event.remainingGrants}
+          Available tokens in event pool: {event.remainingGrants}
         </p>
         <p className="text-gray-800">
-          Grantlings needed to reach minimum goal: {amountToReachMinGoal}
+          Tokens needed to reach minimum goal: {amountToReachMinGoal}
         </p>
         <p className="text-gray-800">
-          Grantlings needed to reach maximum goal: {amountToReachMaxGoal}
+          Tokens needed to reach maximum goal: {amountToReachMaxGoal}
         </p>
         {event.remainingGrants > amountToReachMinGoal ? (
           <form
@@ -146,7 +146,7 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
           </form>
         ) : (
           <p>
-            There is not enough grants left to reach this dreams minimum goal.
+            There is not enough tokens left to reach this dreams minimum goal.
           </p>
         )}
       </div>

@@ -1,11 +1,11 @@
 import Link from "next/link";
 
-export default ({ currentOrg }) => (
+const OrganizationOnlyHeader = ({ currentOrg }) => (
   <Link href="/">
     <a className="flex">
       {currentOrg?.logo && (
         <img
-          className="h-7 w-7 block rounded overflow-hidden mr-4"
+          className="h-7 w-7 object-cover block rounded overflow-hidden mr-4"
           src={currentOrg.logo}
         />
       )}
@@ -15,3 +15,5 @@ export default ({ currentOrg }) => (
     </a>
   </Link>
 );
+
+export default OrganizationOnlyHeader;

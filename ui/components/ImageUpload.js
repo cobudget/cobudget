@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Modal } from "@material-ui/core";
-
+import { CloseIcon, LoaderIcon } from "components/Icons";
 import Button from "components/Button";
 
-export default ({
-  text = "Set Image",
+const ImageUpload = ({
+  label,
   cloudinaryPreset,
   initialImage,
   onImageUploaded,
   className,
+  ...otherProps
 }) => {
+  const fileInputField = useRef(null);
   const [image, setImage] = useState(initialImage);
-  const { handleSubmit, register, errors } = useForm();
-  const [open, setOpen] = useState(false);
-
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const uploadFile = async (e) => {
@@ -43,71 +42,52 @@ export default ({
     }
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
   return (
-    <>
-      <div className={className}>
-        <Button
-          variant="secondary"
-          onClick={() => {
-            setOpen(true);
-          }}
-          className="mr-2"
-        >
-          {text}
-        </Button>
-        <img src={image} />
+    <div className="mb-4">
+      <label className="text-sm font-medium mb-1 block">{label}</label>
+      <div className="relative h-24 w-24">
+        {image ? (
+          <div className="h-24 w-24 relative">
+            <img className="w-24 h-24 object-cover rounded" src={image} />
+            <button
+              type="button"
+              onClick={() => {
+                setImage(null);
+                onImageUploaded(null);
+              }}
+              className="absolute right-0 top-0 -mr-2 -mt-2 w-5 h-5 rounded-full bg-black text-white font-bold flex items-center justify-center"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() => fileInputField.current.click()}
+              disabled={uploadingImage}
+              className="flex items-center justify-center h-24 w-24 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
+            >
+              {uploadingImage ? (
+                <LoaderIcon className="w-6 h-6 absolute animation-spin animation-linear animation-2s" />
+              ) : (
+                "Upload image"
+              )}
+            </button>
+            <input
+              type="file"
+              ref={fileInputField}
+              onChange={uploadFile}
+              title=""
+              value=""
+              className="w-full absolute inset-0 opacity-0 focus:outline-none z-0 block"
+              {...otherProps}
+            />
+          </>
+        )}
       </div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        className="flex items-center justify-center p-2"
-      >
-        <div className="bg-white rounded-lg shadow p-4 focus:outline-none flex-1 max-w-xs">
-          <form
-            onSubmit={handleSubmit(() => {
-              // delete image.__typename; // apollo complains otherwise..
-              onImageUploaded(image);
-            })}
-          >
-            {uploadingImage ? (
-              <label>Uploading...</label>
-            ) : (
-              <>
-                <label>
-                  Upload image
-                  <br />
-                  <input
-                    type="file"
-                    name="file"
-                    placeholder="Upload image"
-                    onChange={uploadFile}
-                  />
-                </label>
-              </>
-            )}
-
-            <div className="flex justify-between items-center">
-              <div className=" text-sm text-gray-600 font-medium"></div>
-              <div className="flex">
-                <Button
-                  variant="secondary"
-                  onClick={handleClose}
-                  className="mr-2"
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" loading={uploadingImage}>
-                  Save
-                </Button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </Modal>
-    </>
+    </div>
   );
 };
+
+export default ImageUpload;

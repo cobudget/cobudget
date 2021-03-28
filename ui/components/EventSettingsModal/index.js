@@ -16,7 +16,7 @@ const defaultTabs = [
   { name: "Custom fields", component: CustomFields },
 ];
 
-export default ({ event, currentOrg, currentOrgMember, handleClose }) => {
+const EventSettingsModal = ({ event, currentOrg, currentOrgMember, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const tabs = useMemo(() => (
@@ -65,3 +65,5 @@ export default ({ event, currentOrg, currentOrgMember, handleClose }) => {
     </>
   );
 };
+
+export default EventSettingsModal;
