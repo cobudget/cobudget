@@ -31,7 +31,7 @@ const CREATE_EVENT = gql`
   }
 `;
 
-export default () => {
+export default function CreateEventPage() {
   const [createEvent, { data, error }] = useMutation(CREATE_EVENT);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
@@ -121,4 +121,4 @@ export default () => {
       </form>
     </div>
   );
-};
+}
