@@ -1,7 +1,12 @@
+import { useState } from "react";
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 
-import HappySpinner from "../../HappySpinner";
+import Button from "components/Button";
+import HappySpinner from "components/HappySpinner";
+
+import InviteMembersModal from "components/InviteMembersModal";
+
 import OrgMembersTable from "./OrgMembersTable";
 
 export const ORG_MEMBERS_QUERY = gql`
@@ -44,7 +49,7 @@ const OrgMembers = () => {
   const { data, loading, error } = useQuery(ORG_MEMBERS_QUERY);
   const orgMembers = data?.orgMembers;
   const [updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
-
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
   //   variables: { eventId: event.id },
   //   update(cache, { data: { deleteMember } }) {
@@ -76,8 +81,16 @@ const OrgMembers = () => {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <h2 className="text-xl mb-3">{orgMembers.length} members</h2>
+      <div className="flex justify-between mb-3 items-center">
+        <h2 className="text-xl font-semibold">{orgMembers.length} members</h2>{" "}
+        <div>
+          <Button onClick={() => setInviteModalOpen(true)}>
+            Invite members
+          </Button>
+          {inviteModalOpen && (
+            <InviteMembersModal handleClose={() => setInviteModalOpen(false)} />
+          )}
+        </div>
       </div>
 
       <OrgMembersTable members={orgMembers} updateOrgMember={updateOrgMember} />
