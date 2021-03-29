@@ -6,7 +6,9 @@ const { Kind } = require("graphql/language");
 const mongoose = require("mongoose");
 const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
+const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
+
 const isRootAdmin = (parent, args, { currentUser }) => {
   // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
@@ -1201,41 +1203,181 @@ const resolvers = {
 
       return kcAdminClient.users.findOne({ id: kauth.sub });
     },
-    // inviteMembers: async (
-    //   parent,
-    //   { emails },
-    //   { currentMember, models: { Member, Event } }
-    // ) => {
-    //   if (!currentMember || !currentMember.isAdmin)
-    //     throw new Error('You need to be admin to invite new members');
+    inviteEventMembers: async (
+      parent,
+      { emails: emailsString, eventId },
+      {
+        currentOrgMember,
+        currentOrg,
+        kcAdminClient,
+        models: { OrgMember, EventMember, Event },
+      }
+    ) => {
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
 
-    //   const emailArray = emails.split(',');
+      const event = await Event.findOne({ _id: eventId });
 
-    //   if (emailArray.length > 1000)
-    //     throw new Error('You can only invite 1000 people at a time.');
+      if (!currentEventMember || !currentEventMember.isAdmin)
+        throw new Error("You need to be admin to invite new members");
 
-    //   const memberObjs = emailArray.map((email) => ({
-    //     email: email.trim(),
-    //     eventId: currentMember.eventId,
-    //     isApproved: true,
-    //   }));
+      const emails = emailsString.split(",");
 
-    //   let members = [];
+      if (emails.length > 1000)
+        throw new Error("You can only invite 1000 people at a time");
 
-    //   for (memberObj of memberObjs) {
-    //     try {
-    //       members.push(await new Member(memberObj).save());
-    //     } catch (error) {
-    //       console.log(error);
-    //     }
-    //   }
+      // let newOrgMembers = [];
+      const newEventMembers = [];
 
-    //   const event = await Event.findOne({ _id: currentMember.eventId });
+      for (email of emails) {
+        const [user] = await kcAdminClient.users.findOne({
+          email: email.trim(),
+        });
 
-    //   if (members.length > 0) await sendInviteEmails(members, event);
+        if (user) {
+          const orgMember = await OrgMember.findOne({ userId: user.id });
+          if (orgMember) {
+            const eventMember = await EventMember.findOne({
+              orgMemberId: orgMember.id,
+              eventId,
+            });
+            if (eventMember) {
+              // TODO: use upsert here to adjust isApproved
+            } else {
+              newEventMembers.push(
+                await new EventMember({
+                  orgMemberId: orgMember.id,
+                  eventId,
+                  isApproved: true,
+                }).save()
+              );
+            }
+          } else {
+            const orgMember = await new OrgMember({
+              userId: user.id,
+              organizationId: currentOrgMember.organizationId,
+            }).save();
 
-    //   return members;
-    // },
+            newEventMembers.push(
+              await new EventMember({
+                orgMemberId: orgMember.id,
+                eventId,
+                isApproved: true,
+              }).save()
+            );
+          }
+        } else {
+          const user = await kcAdminClient.users.create({
+            username: email.trim(),
+            email: email.trim(),
+            requiredActions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            enabled: true,
+          });
+
+          await kcAdminClient.users.executeActionsEmail({
+            id: user.id,
+            lifespan: 60 * 60 * 24 * 90,
+            actions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            clientId: "dreams",
+            redirectUri: `https://${
+              currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+            }/${event.slug}`,
+          });
+
+          const orgMember = await new OrgMember({
+            userId: user.id,
+            organizationId: currentOrgMember.organizationId,
+          }).save();
+
+          newEventMembers.push(
+            await new EventMember({
+              orgMemberId: orgMember.id,
+              eventId,
+              isApproved: true,
+            }).save()
+          );
+        }
+      }
+      return newEventMembers;
+    },
+    inviteOrgMembers: async (
+      parent,
+      { emails: emailsString },
+      { currentOrgMember, currentOrg, kcAdminClient, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org. admin to invite members.");
+
+      const emails = emailsString.split(",");
+
+      if (emails.length > 1000)
+        throw new Error("You can only invite 1000 people at a time");
+
+      let newOrgMembers = [];
+
+      for (email of emails) {
+        const [user] = await kcAdminClient.users.findOne({
+          email: email.trim(),
+        });
+        if (user) {
+          const orgMember = await OrgMember.findOne({ userId: user.id });
+          if (orgMember) {
+            // do nothing?
+          } else {
+            newOrgMembers.push(
+              await new OrgMember({
+                userId: user.id,
+                organizationId: currentOrgMember.organizationId,
+              }).save()
+            );
+          }
+        } else {
+          const user = await kcAdminClient.users.create({
+            username: email.trim(),
+            email: email.trim(),
+            requiredActions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            enabled: true,
+          });
+
+          await kcAdminClient.users.executeActionsEmail({
+            id: user.id,
+            lifespan: 60 * 60 * 24 * 90,
+            actions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            clientId: "dreams",
+            redirectUri: `https://${
+              currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+            }/`,
+          });
+
+          newOrgMembers.push(
+            await new OrgMember({
+              userId: user.id,
+              organizationId: currentOrgMember.organizationId,
+            }).save()
+          );
+        }
+      }
+
+      return newOrgMembers;
+    },
     updateOrgMember: async (
       parent,
       { memberId, isOrgAdmin },
