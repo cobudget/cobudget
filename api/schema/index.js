@@ -123,7 +123,8 @@ const schema = gql`
       lastName: String
       bio: String
     ): User
-    # inviteMembers(emails: String!): [Member]
+    inviteEventMembers(emails: String!, eventId: ID!): [EventMember]
+    inviteOrgMembers(emails: String!): [OrgMember]
     updateOrgMember(memberId: ID!, isOrgAdmin: Boolean): OrgMember
     updateMember(
       eventId: ID!
