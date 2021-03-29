@@ -1288,7 +1288,9 @@ const resolvers = {
               KCRequiredActionAlias.UPDATE_PASSWORD,
             ],
             clientId: "dreams",
-            redirectUri: `https://${
+            redirectUri: `${
+              process.env.NODE_ENV === "production" ? "https" : "http"
+            }://${
               currentOrg.customDomain
                 ? currentOrg.customDomain
                 : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
@@ -1361,7 +1363,9 @@ const resolvers = {
               KCRequiredActionAlias.UPDATE_PASSWORD,
             ],
             clientId: "dreams",
-            redirectUri: `https://${
+            redirectUri: `${
+              process.env.NODE_ENV === "production" ? "https" : "http"
+            }://${
               currentOrg.customDomain
                 ? currentOrg.customDomain
                 : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
