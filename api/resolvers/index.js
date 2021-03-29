@@ -110,6 +110,7 @@ const resolvers = {
       args,
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
+      if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
@@ -2046,18 +2047,16 @@ const resolvers = {
     currentEventMembership: async (
       orgMember,
       { slug },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { OrgMember, EventMember, Event },
-      }
+      { currentOrgMember, models: { EventMember, Event } }
     ) => {
-      if (!slug) return null;
+      if (!slug || !currentOrgMember) return null;
+      if (orgMember.id.toString() !== currentOrgMember.id.toString())
+        return null;
+
       const event = await Event.findOne({
-        organizationId: currentOrg.id,
+        organizationId: currentOrgMember.organizationId,
         slug,
       });
-      // TODO: use currentOrgMember here instead? should not be on every event member?
 
       return EventMember.findOne({
         orgMemberId: orgMember.id,
