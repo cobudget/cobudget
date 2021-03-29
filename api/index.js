@@ -5,7 +5,6 @@ const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
 const KcAdminClient = require("keycloak-admin").default;
 
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const pretixWebhook = require("./webhooks/pretix");
