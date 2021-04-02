@@ -834,17 +834,16 @@ const resolvers = {
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
-      const minLength = currentOrg.discourse ? 20 : 3
 
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (content.length < minLength)
-        throw new Error(`Your post needs to be at least ${minLength} characters long!`);
+      if (content.length < process.env.MIN_POST_LENGTH || 3)
+        throw new Error(`Your post needs to be at least ${process.env.MIN_POST_LENGTH} characters long!`);
 
       const comment = { authorId: currentOrgMember.id, content }
 
-      if (!currentOrg.discourse) {
+      if (!currentOrg.discourse || !dream.published) {
         dream.comments.push(comment);
       }
 

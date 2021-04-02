@@ -27,7 +27,6 @@ module.exports = {
         throw new Error("Unable to create topic on Discourse; please try again");
 
       dream.comments.forEach(comment => {
-        console.log(`Publishing comment ${comment.id} to discourse...`)
         eventHub.publish('create-comment', { currentOrg, currentOrgMember, event, dream, comment });
       });
 
@@ -36,8 +35,7 @@ module.exports = {
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      if (!currentOrg.discourse) { return }
-      if (!dream.published) { return } // Only push published dreams to Discourse
+      if (!currentOrg.discourse || !dream.published) { return }
 
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
@@ -75,7 +73,7 @@ module.exports = {
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      if (!currentOrg.discourse) { return }
+      if (!currentOrg.discourse || !dream.published) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
@@ -97,12 +95,6 @@ module.exports = {
       if (!post.id)
         throw new Error("Unable to create post on Discourse; please try again");
 
-      dream.comments = dream.comments.map(c => (
-        console.log(comment.id, c.id) ||
-        c.id === comment.id
-          ? { ...comment, discoursePostId: post.id }
-          : c
-      ));
       dream.save();
     });
 
