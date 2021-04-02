@@ -6,6 +6,7 @@ import { Modal } from "@material-ui/core";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
+import Banner from "components/Banner";
 
 // import { MEMBERS_QUERY } from ".";
 
@@ -71,6 +72,29 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
         <h1 className="text-xl font-semibold mb-2">
           Invite {eventId ? "event " : ""}members
         </h1>
+        <Banner
+          className={"mb-4"}
+          variant="warning"
+          title={`This feature is in beta, please note: `}
+        >
+          <ul className="list-disc ml-5">
+            <li className="mt-2">
+              This is currently more of a quick way of adding people as members
+              of the organization and/or event, rather than a proper invite
+              functionality.
+            </li>
+            <li className="mt-2">
+              People added here should be expecting to be added to the platform.
+            </li>
+            <li className="mt-2">
+              People without Plato accounts will get an anonymous "Welcome to
+              Plato" email to complete their signup.
+            </li>
+            <li className="mt-2">
+              People with Plato accounts will get no notification or email.
+            </li>
+          </ul>
+        </Banner>
         <form
           onSubmit={handleSubmit((variables) => {
             inviteMembers({ variables })
@@ -105,7 +129,7 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
               Cancel
             </Button>
             <Button type="submit" loading={loading}>
-              Send invites
+              Add people
             </Button>
           </div>
         </form>
