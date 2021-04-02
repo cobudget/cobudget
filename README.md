@@ -48,15 +48,9 @@ export NODE_ENV=development && npm run dev
 
 # Postrequisites
 
-<<<<<<< HEAD
-After running for the first time add default organization
-=======
-After running for the first time, log in, add default organization
-
-> > > > > > > 6cdb05bbbfad0aa8f15cad8aba6878190ad82bc3
-> > > > > > > By visiting http://dev-org.localhost:3000/organizations/create
-> > > > > > > Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`
-> > > > > > > Then open the console and click the link to login to the new organization
+After running for the first time, log in, add default organization by visiting http://dev-org.localhost:3000/organizations/create
+Make sure you fill the subdomain to be `dev-org` and dont set the `custom domain`.
+Then open the console and click the link to login to the new organization.
 
 ### Resetting the db to its initial state
 
