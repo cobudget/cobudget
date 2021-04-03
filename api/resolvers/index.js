@@ -1245,7 +1245,8 @@ const resolvers = {
               eventId,
             });
             if (eventMember) {
-              // TODO: use upsert here to adjust isApproved
+              eventMember.isApproved = true;
+              await eventMember.save();
             } else {
               newEventMembers.push(
                 await new EventMember({
@@ -1334,9 +1335,7 @@ const resolvers = {
         });
         if (user) {
           const orgMember = await OrgMember.findOne({ userId: user.id });
-          if (orgMember) {
-            // do nothing?
-          } else {
+          if (!orgMember) {
             newOrgMembers.push(
               await new OrgMember({
                 userId: user.id,
