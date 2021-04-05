@@ -107,16 +107,20 @@ const resolvers = {
     },
     orgMembers: async (
       parent,
-      args,
+      { limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
       if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find({
-        organizationId: currentOrg.id,
-      });
+      return OrgMember.find(
+        {
+          organizationId: currentOrg.id,
+        },
+        null,
+        { limit }
+      );
     },
     members: async (
       parent,
