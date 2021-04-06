@@ -52,11 +52,11 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (parent, args, { currentOrg, models: { Event } }) => {
+    events: async (parent, { limit }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) {
         throw new Error("No organization found");
       }
-      return Event.find({ organizationId: currentOrg.id });
+      return Event.find({ organizationId: currentOrg.id }, null, { limit });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) return null;

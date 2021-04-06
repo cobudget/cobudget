@@ -27,6 +27,10 @@ const GET_TODO_INFO = gql`
     orgMembers(limit: 2) {
       id
     }
+
+    events(limit: 1) {
+      id
+    }
   }
 `;
 
@@ -47,6 +51,8 @@ const TodoList = () => {
       done = true;
     } else if (index === 1) {
       done = data.orgMembers.length > 1;
+    } else if (index === 2) {
+      done = data.events.length > 0;
     }
 
     return {
@@ -54,6 +60,10 @@ const TodoList = () => {
       done,
     };
   });
+
+  // TODO: when this is true, send a mutation that hides the todolist
+  const allDone = todos.every((todo) => todo.done);
+  console.log("alldone", allDone);
 
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-md">
