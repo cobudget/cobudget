@@ -2,6 +2,7 @@ import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
+import NavItem from "components/Header/NavItem";
 
 const rawTodos = [
   {
@@ -85,6 +86,17 @@ const TodoList = () => {
             </div>
           </div>
         ))}
+      </div>
+      <div className="mt-4">
+        <NavItem
+          onClick={() =>
+            window.confirm("Are you sure you want skip this introduction?") &&
+            console.log("yes")
+          }
+          className="text-xs opacity-70 ml-auto"
+        >
+          Hide intro
+        </NavItem>
       </div>
     </div>
   );
