@@ -1,5 +1,6 @@
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
+import Link from "next/link";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
@@ -44,6 +45,27 @@ const SET_TODOS_FINISHED = gql`
   }
 `;
 
+const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
+  return (
+    <a
+      className={`flex space-x-2 ${
+        todo.link ? "hover:bg-gray-300 cursor-pointer" : ""
+      } ${todo.done ? "opacity-60" : ""}`}
+      onClick={onClick}
+      href={href}
+      ref={ref}
+    >
+      <div className="flex-none rounded-full p-1 mt-1.5 mx-2 h-7 w-7 bg-gray-100 flex items-center justify-center">
+        {todo.done ? <CheckIcon /> : index + 1}
+      </div>
+      <div>
+        <div className="text-lg">{todo.title}</div>
+        <div className="text-sm text-gray-700">{todo.desc}</div>
+      </div>
+    </a>
+  );
+});
+
 const TodoList = () => {
   const { data, loading, error } = useQuery(GET_TODO_INFO);
   const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
@@ -82,20 +104,15 @@ const TodoList = () => {
         {"👌 Let's get this ball rolling!"}
       </h1>
       <div className="flex flex-col space-y-3">
-        {todos.map((todo, index) => (
-          <div
-            key={index}
-            className={`flex space-x-2 ${todo.done ? "opacity-60" : ""}`}
-          >
-            <div className="flex-none rounded-full p-1 mt-1.5 mx-2 h-7 w-7 bg-gray-100 flex items-center justify-center">
-              {todo.done ? <CheckIcon /> : index + 1}
-            </div>
-            <div>
-              <div className="text-lg">{todo.title}</div>
-              <div className="text-sm text-gray-700">{todo.desc}</div>
-            </div>
-          </div>
-        ))}
+        {todos.map((todo, index) =>
+          todo.link ? (
+            <Link key={index} href={todo.link}>
+              <TodoItem todo={todo} index={index} />
+            </Link>
+          ) : (
+            <TodoItem key={index} todo={todo} index={index} />
+          )
+        )}
       </div>
       <div className="mt-4">
         <NavItem
