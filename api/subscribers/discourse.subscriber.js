@@ -13,10 +13,10 @@ module.exports = {
 
       console.log(`Publishing dream ${dream.id} to discourse...`)
 
-      const domain = currentOrg.customDomain || [currentOrg.subdomain, process.env.DEPLOY_URL].join('.')
+      // const domain = currentOrg.customDomain || [currentOrg.subdomain, process.env.DEPLOY_URL].join('.')
       const post = await discourse(currentOrg.discourse).posts.create({
         title: dream.title,
-        raw: this.generateDreamMarkdown(dream, event),
+        raw: this.generateDreamMarkdown(dream, event, currentOrg),
         category: event.discourseCategoryId,
       }, {
         username: 'system',
@@ -60,7 +60,7 @@ module.exports = {
       const comment = {
         id: post.id,
         title: dream.title,
-        content: this.generateDreamMarkdown(dream, event),
+        content: this.generateDreamMarkdown(dream, event, currentOrg),
       };
 
       eventHub.publish('edit-comment', { currentOrg, currentOrgMember, event, dream, comment });
@@ -140,8 +140,15 @@ module.exports = {
     });
   },
 
-  generateDreamMarkdown(dream, event) {
-    const content = []
+  generateDreamMarkdown(dream, event, org) {
+    const dreamUrl = `${process.env.NODE_ENV == 'production' ? 'https' : 'http'}://${
+      org.customDomain
+        ? org.customDomain
+        : `${org.subdomain}.${process.env.DEPLOY_URL}`
+    }/${event.slug}/${dream.id}`
+
+    const content = ['View and edit this post on the Dreams platform: ', dreamUrl]
+
     if (dream.summary) {
       content.push('## Summary');
       content.push(dream.summary);
