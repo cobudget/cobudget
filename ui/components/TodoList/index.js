@@ -1,28 +1,10 @@
+import { useEffect, useState } from "react";
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import Link from "next/link";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
-
-const rawTodos = [
-  {
-    title: "Create community",
-    desc:
-      "This is your own home on the Plato platform, now available under not-here.platoproject.org",
-    link: null,
-  },
-  {
-    title: "Invite members",
-    desc: "Invite your community members by email",
-    link: "/org/settings?tab=members",
-  },
-  {
-    title: "Create first event",
-    desc: "An event is a page for gathering ideas from the community.",
-    link: "/create-event",
-  },
-];
 
 const GET_TODO_INFO = gql`
   query TodoInfo {
@@ -48,7 +30,7 @@ const SET_TODOS_FINISHED = gql`
 const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
   return (
     <a
-      className={`flex space-x-2 ${
+      className={`flex space-x-2 rounded ${
         todo.link ? "hover:bg-gray-300 cursor-pointer" : ""
       } ${todo.done ? "opacity-60" : ""}`}
       onClick={onClick}
@@ -69,6 +51,34 @@ const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
 const TodoList = () => {
   const { data, loading, error } = useQuery(GET_TODO_INFO);
   const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
+  const [loc, setLoc] = useState("");
+
+  const rawTodos = [
+    {
+      title: "Create community",
+      desc: `This is your own home on the Plato platform, now available under ${loc}`,
+      link: null,
+    },
+    {
+      title: "Invite members",
+      desc: "Invite your community members by email",
+      link: "/org/settings?tab=members",
+    },
+    {
+      title: "Create first event",
+      desc: "An event is a page for gathering ideas from the community.",
+      link: "/create-event",
+    },
+  ];
+
+  useEffect(() => {
+    setLoc(
+      window.location
+        .toString()
+        .replace(/https?:/, "")
+        .replace(/\//g, "")
+    );
+  }, []);
 
   if (error) {
     console.error("Couldn't check todo status", error);
