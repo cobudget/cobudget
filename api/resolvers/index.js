@@ -262,6 +262,19 @@ const resolvers = {
 
       return organization;
     },
+    setTodosFinished: async (
+      parent,
+      args,
+      { currentOrg, currentOrgMember }
+    ) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
+        throw new Error("You need to be logged in as organization admin.");
+
+      currentOrg.finishedTodos = true;
+      await currentOrg.save();
+
+      return currentOrg;
+    },
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
@@ -2134,6 +2147,14 @@ const resolvers = {
       return Event.find({ organizationId: organization.id });
     },
     discourseUrl: (organization) => organization.discourse?.url,
+    finishedTodos: (org, args, { currentOrgMember }) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
+        // You need to be logged in as organization admin
+        return false;
+      }
+
+      return org.finishedTodos;
+    },
   },
   Event: {
     // members: async (event, args, { models: { EventMember } }) => {

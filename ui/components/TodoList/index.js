@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
@@ -35,8 +35,18 @@ const GET_TODO_INFO = gql`
   }
 `;
 
+const SET_TODOS_FINISHED = gql`
+  mutation SetTodosFinished {
+    setTodosFinished {
+      id
+      finishedTodos
+    }
+  }
+`;
+
 const TodoList = () => {
   const { data, loading, error } = useQuery(GET_TODO_INFO);
+  const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
 
   if (error) {
     console.error("Couldn't check todo status", error);
@@ -91,7 +101,7 @@ const TodoList = () => {
         <NavItem
           onClick={() =>
             window.confirm("Are you sure you want skip this introduction?") &&
-            console.log("yes")
+            setTodosFinished()
           }
           className="text-xs opacity-70 ml-auto"
         >

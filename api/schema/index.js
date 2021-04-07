@@ -31,6 +31,7 @@ const schema = gql`
       logo: String
       subdomain: String!
     ): Organization!
+    setTodosFinished: Organization
 
     createEvent(
       slug: String!
@@ -168,6 +169,7 @@ const schema = gql`
     events: [Event]
     discourseUrl: String
     # discourseApiKey: String
+    finishedTodos: Boolean
   }
 
   type Event {

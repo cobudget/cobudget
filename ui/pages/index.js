@@ -69,7 +69,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
     return <LandingPage />;
   }
 
-  const showTodos = currentOrgMember?.isOrgAdmin;
+  const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
   //const showTodos = false;
 
   return (
