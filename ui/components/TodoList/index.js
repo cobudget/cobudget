@@ -44,14 +44,14 @@ const LoadingBar = ({ ratio }) => {
 const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
   return (
     <a
-      className={`flex space-x-2 rounded ${
+      className={`py-2 flex space-x-2 rounded ${
         todo.link ? "hover:bg-gray-300 cursor-pointer" : ""
       } ${todo.done ? "opacity-60" : ""}`}
       onClick={onClick}
       href={href}
       ref={ref}
     >
-      <div className="flex-none rounded-full p-1 mt-1.5 mx-2 h-7 w-7 bg-gray-100 flex items-center justify-center">
+      <div className="flex-none rounded-full p-1 mt-1 mx-2 h-7 w-7 bg-gray-100 flex items-center justify-center">
         {todo.done ? <CheckIcon /> : index + 1}
       </div>
       <div>
@@ -133,11 +133,11 @@ const TodoList = () => {
 
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-md">
-      <h1 className="text-2xl font-semibold mb-5 text-center">
+      <h1 className="text-2xl font-semibold mb-5 mt-2 text-center">
         {"👌 Let's get this ball rolling!"}
       </h1>
       <LoadingBar ratio={doneRatio} />
-      <div className="flex flex-col space-y-3">
+      <div className="flex flex-col space-y-2">
         {todos.map((todo, index) =>
           todo.link ? (
             <Link key={index} href={todo.link}>
