@@ -44,7 +44,7 @@ module.exports = {
 
       if (!dream.discourseTopicId) {
         await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-        dream = models.Dream.findOne({ _id: dream.id });
+        dream = await models.Dream.findOne({ _id: dream.id });
       }
 
       const post = await discourse(currentOrg.discourse).topics.getSummary({
@@ -81,7 +81,7 @@ module.exports = {
 
       if (!dream.discourseTopicId) {
         await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-        dream = models.Dream.findOne({ _id: dream.id });
+        dream = await models.Dream.findOne({ _id: dream.id });
       }
 
       const post = await discourse(currentOrg.discourse).posts.create({
@@ -107,7 +107,7 @@ module.exports = {
 
       if (!dream.discourseTopicId) {
         await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-        dream = models.Dream.findOne({ _id: dream.id });
+        dream = await models.Dream.findOne({ _id: dream.id });
       }
 
       const post = await discourse(currentOrg.discourse).posts.update(comment.id, {
