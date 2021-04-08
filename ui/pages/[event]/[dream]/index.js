@@ -100,7 +100,7 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export default ({ event, currentUser, currentOrgMember, currentOrg }) => {
+const DreamPage = ({ event, currentUser, currentOrgMember, currentOrg }) => {
   if (!event) return null;
   const router = useRouter();
 
@@ -152,3 +152,5 @@ export default ({ event, currentUser, currentOrgMember, currentOrg }) => {
     </div>
   );
 };
+
+export default DreamPage;

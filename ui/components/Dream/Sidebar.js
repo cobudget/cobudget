@@ -57,7 +57,7 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-export default ({ dream, event, currentOrgMember, canEdit }) => {
+const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
@@ -309,3 +309,5 @@ export default ({ dream, event, currentOrgMember, canEdit }) => {
     </>
   );
 };
+
+export default DreamSidebar;

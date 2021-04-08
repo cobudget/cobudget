@@ -42,7 +42,7 @@ const Image = styled.img`
   max-width: calc(100vw - 60px);
 `;
 
-export default ({ dreamId, images, size, canEdit }) => {
+const DreamImages = ({ dreamId, images, size, canEdit }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   return (
     <>
@@ -109,3 +109,5 @@ function GalleryItem({ image, size }) {
     </>
   );
 }
+
+export default DreamImages;

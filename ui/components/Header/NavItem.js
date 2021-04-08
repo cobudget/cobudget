@@ -29,11 +29,7 @@ const NavItem = ({
     ? primaryClasses
     : regularClasses;
 
-  const classes =
-    "my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 border-2 " +
-    colorsClasses +
-    " " +
-    className;
+  const classes = `my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 border-2 ${colorsClasses} ${className}`;
 
   if (onClick) {
     return (

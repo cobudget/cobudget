@@ -19,7 +19,7 @@ const EDIT_DESCRIPTION_MUTATION = gql`
   }
 `;
 
-export default ({ description, dreamId, canEdit }) => {
+const DreamDescription = ({ description, dreamId, canEdit }) => {
   const [editDream, { loading }] = useMutation(EDIT_DESCRIPTION_MUTATION, {
     variables: { dreamId },
   });
@@ -111,3 +111,5 @@ export default ({ description, dreamId, canEdit }) => {
     );
   return null;
 };
+
+export default DreamDescription;

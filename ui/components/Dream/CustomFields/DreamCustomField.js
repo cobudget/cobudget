@@ -34,7 +34,7 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
   }
 `;
 
-export default ({
+const DreamCustomField = ({
   defaultCustomField,
   customField,
   eventId,
@@ -165,3 +165,5 @@ const renderBooleanOrValue = (value) => {
   if (value === "false") return "No";
   return value.split("\n").join("<br/>");
 };
+
+export default DreamCustomField;

@@ -52,11 +52,11 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (parent, args, { currentOrg, models: { Event } }) => {
+    events: async (parent, { limit }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) {
         throw new Error("No organization found");
       }
-      return Event.find({ organizationId: currentOrg.id });
+      return Event.find({ organizationId: currentOrg.id }, null, { limit });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) return null;
@@ -107,16 +107,20 @@ const resolvers = {
     },
     orgMembers: async (
       parent,
-      args,
+      { limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
       if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find({
-        organizationId: currentOrg.id,
-      });
+      return OrgMember.find(
+        {
+          organizationId: currentOrg.id,
+        },
+        null,
+        { limit }
+      );
     },
     members: async (
       parent,
@@ -257,6 +261,19 @@ const resolvers = {
         );
 
       return organization;
+    },
+    setTodosFinished: async (
+      parent,
+      args,
+      { currentOrg, currentOrgMember }
+    ) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
+        throw new Error("You need to be logged in as organization admin.");
+
+      currentOrg.finishedTodos = true;
+      await currentOrg.save();
+
+      return currentOrg;
     },
     createEvent: async (
       parent,
@@ -2130,6 +2147,14 @@ const resolvers = {
       return Event.find({ organizationId: organization.id });
     },
     discourseUrl: (organization) => organization.discourse?.url,
+    finishedTodos: (org, args, { currentOrgMember }) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
+        // You need to be logged in as organization admin
+        return false;
+      }
+
+      return org.finishedTodos;
+    },
   },
   Event: {
     // members: async (event, args, { models: { EventMember } }) => {

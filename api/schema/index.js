@@ -10,11 +10,11 @@ const schema = gql`
     currentOrg: Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events: [Event!]
+    events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
     dreams(eventId: ID!, textSearchTerm: String): [Dream]
-    orgMembers: [OrgMember]
+    orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
   }
 
@@ -31,6 +31,7 @@ const schema = gql`
       logo: String
       subdomain: String!
     ): Organization!
+    setTodosFinished: Organization
 
     createEvent(
       slug: String!
@@ -168,6 +169,7 @@ const schema = gql`
     events: [Event]
     discourseUrl: String
     # discourseApiKey: String
+    finishedTodos: Boolean
   }
 
   type Event {
