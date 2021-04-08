@@ -82,7 +82,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
           <div className="text-sm text-gray-700 font-medium mb-3 block">
             GET GOING
           </div>
-          <TodoList />
+          <TodoList subdomain={currentOrg.subdomain} />
         </div>
       )}
       <div>

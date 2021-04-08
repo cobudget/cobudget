@@ -62,16 +62,15 @@ const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
   );
 });
 
-const TodoList = () => {
+const TodoList = ({ subdomain }) => {
   const { data, loading, error } = useQuery(GET_TODO_INFO);
   const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
-  const [loc, setLoc] = useState("");
   const [allDone, setAllDone] = useState(false);
 
   const rawTodos = [
     {
       title: "Create community",
-      desc: `This is your own home on the Plato platform, now available under ${loc}`,
+      desc: `This is your own home on the Plato platform, now available under ${subdomain}.${process.env.DEPLOY_URL}`,
       link: null,
     },
     {
@@ -85,15 +84,6 @@ const TodoList = () => {
       link: "/create-event",
     },
   ];
-
-  useEffect(() => {
-    setLoc(
-      window.location
-        .toString()
-        .replace(/https?:/, "")
-        .replace(/\//g, "")
-    );
-  }, []);
 
   useEffect(() => {
     if (allDone) {
