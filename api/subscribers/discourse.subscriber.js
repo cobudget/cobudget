@@ -22,9 +22,9 @@ module.exports = {
         username: 'system',
         apiKey: currentOrg.discourse.apiKey,
       });
+      if (post.errors)
+        throw new Error(["Discourse API:", ...post.errors]);
 
-      if (!post.id)
-        throw new Error("Unable to create topic on Discourse; please try again");
 
       dream.comments.forEach(comment => {
         eventHub.publish('create-comment', { currentOrg, currentOrgMember, event, dream, comment });
@@ -53,10 +53,10 @@ module.exports = {
         username: 'system',
         apiKey: currentOrg.discourse.apiKey,
       });
+      if (post.errors)
+        throw new Error(["Discourse API:", ...post.errors]);
 
-      if (!post.id)
-        throw new Error("Unable to find topic post on Discourse; please try again");
-
+      
       const comment = {
         id: post.id,
         title: dream.title,
@@ -92,9 +92,9 @@ module.exports = {
         userApiKey: currentOrgMember.discourseApiKey
       });
 
-      if (!post.id)
-        throw new Error("Unable to create post on Discourse; please try again");
-
+      if (post.errors)
+        throw new Error(["Discourse API:", ...post.errors]);
+      
       dream.save();
     });
 
@@ -118,8 +118,9 @@ module.exports = {
         userApiKey: currentOrgMember.discourseApiKey,
       });
 
-      if (!post.id)
-        throw new Error("Unable to create post on Discourse; please try again");
+      if (post.errors)
+        throw new Error(["Discourse API:", ...post.errors]);
+
       // TODO: edit functionality
     });
 
