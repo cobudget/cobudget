@@ -27,6 +27,20 @@ const SET_TODOS_FINISHED = gql`
   }
 `;
 
+const LoadingBar = ({ ratio }) => {
+  return (
+    <div className="flex items-center mx-3 space-x-4 mb-6">
+      <div className="text-xs text-gray-500">{~~(ratio * 100)}%</div>
+      <div className="flex-1 bg-gray-200 rounded-full h-2">
+        <div
+          className="bg-purple-700 rounded-full h-2"
+          style={{ width: `${ratio * 100}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
 const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
   return (
     <a
@@ -115,11 +129,14 @@ const TodoList = () => {
     setAllDone(true);
   }
 
+  const doneRatio = todos.filter((todo) => todo.done).length / todos.length;
+
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-md">
-      <h1 className="text-2xl font-semibold mb-4 text-center">
+      <h1 className="text-2xl font-semibold mb-5 text-center">
         {"👌 Let's get this ball rolling!"}
       </h1>
+      <LoadingBar ratio={doneRatio} />
       <div className="flex flex-col space-y-3">
         {todos.map((todo, index) =>
           todo.link ? (

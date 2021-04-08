@@ -79,14 +79,14 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
     >
       {showTodos && (
         <div>
-          <div className="text-sm text-gray-700 font-medium mb-1 block">
+          <div className="text-sm text-gray-700 font-medium mb-3 block">
             GET GOING
           </div>
           <TodoList />
         </div>
       )}
       <div>
-        <div className="text-sm text-gray-700 font-medium mb-1 block">
+        <div className="text-sm text-gray-700 font-medium mb-3 block">
           EVENTS
         </div>
         <div
