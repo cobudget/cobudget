@@ -170,7 +170,7 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain, logo },
-      { kauth, kcAdminClient, models: { Organization, OrgMember }, eventHub }
+      { kauth, kcAdminClient, currentOrgMember, models: { Organization, OrgMember }, eventHub }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
 
@@ -838,8 +838,8 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (content.length < process.env.MIN_POST_LENGTH || 3)
-        throw new Error(`Your post needs to be at least ${process.env.MIN_POST_LENGTH} characters long!`);
+      if (content.length < (currentOrg.discourse?.minPostLength || 3))
+        throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
 
       const comment = { authorId: currentOrgMember.id, content }
 
