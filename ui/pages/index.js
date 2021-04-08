@@ -70,7 +70,6 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
   }
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
-  //const showTodos = false;
 
   return (
     <div

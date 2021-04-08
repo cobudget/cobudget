@@ -52,6 +52,7 @@ const TodoList = () => {
   const { data, loading, error } = useQuery(GET_TODO_INFO);
   const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
   const [loc, setLoc] = useState("");
+  const [allDone, setAllDone] = useState(false);
 
   const rawTodos = [
     {
@@ -80,13 +81,18 @@ const TodoList = () => {
     );
   }, []);
 
+  useEffect(() => {
+    if (allDone) {
+      setTodosFinished();
+    }
+  }, [allDone, setTodosFinished]);
+
   if (error) {
     console.error("Couldn't check todo status", error);
     return null;
   }
   if (loading) return <HappySpinner />;
 
-  console.log({ data });
   const todos = rawTodos.map((todo, index) => {
     let done = false;
 
@@ -104,9 +110,10 @@ const TodoList = () => {
     };
   });
 
-  // TODO: when this is true, send a mutation that hides the todolist
-  const allDone = todos.every((todo) => todo.done);
-  console.log("alldone", allDone);
+  const done = todos.every((todo) => todo.done);
+  if (done && !allDone) {
+    setAllDone(true);
+  }
 
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-md">
