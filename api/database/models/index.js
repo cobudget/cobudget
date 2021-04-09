@@ -2,6 +2,9 @@ const EventMemberSchema = require("./eventMember");
 const EventSchema = require("./event");
 const DreamSchema = require("./dream");
 const GrantSchema = require("./grant");
+const AllocationSchema = require("./allocation");
+const ContributionSchema = require("./contribution");
+
 const {
   db: {
     schemas: { OrganizationSchema, OrgMemberSchema },
@@ -20,6 +23,8 @@ const getModels = (db) => {
       Event: db.model("Event", EventSchema),
       Dream: db.model("Dream", DreamSchema),
       Grant: db.model("Grant", GrantSchema),
+      Allocation: db.model("Allocation", AllocationSchema),
+      Contribution: db.model("Contribution", ContributionSchema),
       logs: createLogModels(db),
     };
 
