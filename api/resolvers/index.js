@@ -2052,6 +2052,31 @@ const resolvers = {
     givenGrants: async (member, args, { models: { Grant } }) => {
       return Grant.find({ memberId: member.id });
     },
+    balance: async (member, args, { models: { Allocation, Contribution } }) => {
+      const [
+        { totalAllocations } = { totalAllocations: 0 },
+      ] = await Allocation.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(member.id),
+          },
+        },
+        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
+      ]);
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(member.id),
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalAllocations - totalContributions;
+    },
   },
   OrgMember: {
     hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,

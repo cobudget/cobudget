@@ -268,6 +268,7 @@ const schema = gql`
     createdAt: Date
     availableGrants: Int
     givenGrants: [Grant]
+    balance: Float
     # roles: [Role]
   }
 
