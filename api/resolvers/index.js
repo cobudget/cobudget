@@ -162,10 +162,11 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, logo },
+      { name, subdomain: dirtySubdomain, logo },
       { kauth, kcAdminClient, models: { Organization, OrgMember } }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = new Organization({
         name,
@@ -209,7 +210,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain, logo },
+      { organizationId, name, subdomain: dirtySubdomain, logo },
       { currentUser, kcAdminClient, currentOrgMember, models: { Organization } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
@@ -219,6 +220,8 @@ const resolvers = {
         !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = await Organization.findOne({
         _id: organizationId,
