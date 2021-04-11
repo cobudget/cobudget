@@ -9,6 +9,12 @@ const { combineResolvers, skip } = require("graphql-resolvers");
 const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
 
+const orgHasDiscourse = (org) => {
+  // note: `org` is a mongoose object which is why we can't just check
+  // that org.discourse exists
+  return org.discourse.url && org.discourse.apiKey;
+};
+
 const isRootAdmin = (parent, args, { currentUser }) => {
   // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
@@ -630,7 +636,7 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         const discoursePost = await discourse(
           currentOrg.discourse
         ).posts.create(
@@ -850,7 +856,7 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!currentOrgMember.discourseApiKey) {
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
@@ -921,7 +927,7 @@ const resolvers = {
         throw new Error("You need to be member of the org to delete comments");
       }
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         const post = await discourse(currentOrg.discourse).posts.getSingle(
           commentId
         );
@@ -1027,7 +1033,7 @@ const resolvers = {
 
       const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -1104,7 +1110,7 @@ const resolvers = {
 
       const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -2229,7 +2235,7 @@ const resolvers = {
       return grantsForDream;
     },
     comments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         let discourseComments = [];
         if (dream.discourseTopicId) {
           const {
@@ -2246,7 +2252,7 @@ const resolvers = {
       return dream.comments;
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse && dream.discourseTopicId) {
+      if (orgHasDiscourse(currentOrg) && dream.discourseTopicId) {
         const { posts_count } = await discourse(currentOrg.discourse).posts.get(
           dream.discourseTopicId
         );
