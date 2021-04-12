@@ -79,6 +79,8 @@ const discourse = ({ url, apiKey } = {}) => {
           target_recipients, // required for private message, comma separated usernames
           archetype, // required for private message, value: "private_message"
           created_at, // pick a date other than the default current time
+          unlist_topic,
+
         },
         { username, userApiKey } = {}
       ) => {
@@ -99,6 +101,7 @@ const discourse = ({ url, apiKey } = {}) => {
             ...(target_recipients && { target_recipients }),
             ...(archetype && { archetype }),
             ...(created_at && { created_at }),
+            ...(unlist_topic && { unlist_topic }),
           }),
         });
         return res.json();

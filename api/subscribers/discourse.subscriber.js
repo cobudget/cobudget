@@ -71,33 +71,25 @@ module.exports = {
         username: 'system',
         apiKey: currentOrg.discourse.apiKey,
       });
-
-      console.log(post);
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      try {
-        if (!currentOrg.discourse || !dream.discourseTopicId) { return }
-        if (!currentOrgMember.discourseApiKey)
-          throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+      if (!currentOrg.discourse || !dream.discourseTopicId) { return }
+      if (!currentOrgMember.discourseApiKey)
+        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
-        console.log(`Publishing comment in dream ${dream.id} to discourse...`)
+      console.log(`Publishing comment in dream ${dream.id} to discourse...`)
 
-        const post = await discourse(currentOrg.discourse).posts.create({
-          topic_id: dream.discourseTopicId,
-          raw: comment.content
-        }, {
-          username: currentOrgMember.discourseUsername,
-          userApiKey: currentOrgMember.discourseApiKey
-        });
+      const post = await discourse(currentOrg.discourse).posts.create({
+        topic_id: dream.discourseTopicId,
+        raw: comment.content
+      }, {
+        username: currentOrgMember.discourseUsername,
+        userApiKey: currentOrgMember.discourseApiKey
+      });
 
-        if (post.errors)
-          throw new Error(["Discourse API:", ...post.errors]);
-
-        dream.save();
-      } catch (err) {
-        console.error(err);
-      }
+      if (post.errors)
+        throw new Error(["Discourse API:", ...post.errors]);
     });
 
     eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -106,11 +98,6 @@ module.exports = {
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Updating comment ${comment.id} in dream ${dream.id} to discourse...`);
-
-      if (!dream.discourseTopicId) {
-        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-        dream = await models.Dream.findOne({ _id: dream.id });
-      }
 
       const post = await discourse(currentOrg.discourse).posts.update(comment.id, {
         title: dream.title,
@@ -122,8 +109,6 @@ module.exports = {
 
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
-
-      // TODO: edit functionality
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
