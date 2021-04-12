@@ -161,7 +161,21 @@ const discourse = ({ url, apiKey } = {}) => {
 
         const post = await postRes.json();
         return post;
-      }
+      },
+      updateStatus: async ({ id, status, enabled }, { usename, userApiKey, apiKey }) => {
+        const res = await fetch(`${url}/t/${id}/status.json`, {
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          },
+          method: "PUT",
+        });
+
+        return await res.json();
+      },
     }
   };
 };

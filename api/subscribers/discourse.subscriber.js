@@ -18,6 +18,7 @@ module.exports = {
         title: dream.title,
         raw: this.generateDreamMarkdown(dream, event),
         category: event.discourseCategoryId,
+        unlist_topic: !dream.published,
       }, {
         username: 'system',
         apiKey: currentOrg.discourse.apiKey,
@@ -67,9 +68,25 @@ module.exports = {
     });
 
     eventHub.subscribe('publish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      dream.discourseTopicId
-        ? eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream })
-        : eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream })
+      const post = await discourse(currentOrg.discourse).topics.updateStatus({
+        id: dream.discourseTopicId,
+        status: 'visible',
+        enabled: true
+      }, {
+        username: 'system',
+        apiKey: currentOrg.discourse.apiKey,
+      });
+    });
+
+    eventHub.subscribe('unpublish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
+      const post = await discourse(currentOrg.discourse).topics.updateStatus({
+        id: dream.discourseTopicId,
+        status: 'visible',
+        enabled: false
+      }, {
+        username: 'system',
+        apiKey: currentOrg.discourse.apiKey,
+      });
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
