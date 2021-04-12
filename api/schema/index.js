@@ -288,15 +288,14 @@ const schema = gql`
     summary: String
     images: [Image!]
     cocreators: [EventMember]!
-    minGoalGrants: Int
-    maxGoalGrants: Int
+    budgetItems: [BudgetItem!]
     minGoal: Int
     maxGoal: Int
+    totalContributions: Int
     customFields: [CustomFieldValue]
     comments: [Comment]
     numberOfComments: Int
-    currentNumberOfGrants: Int
-    budgetItems: [BudgetItem!]
+
     approved: Boolean
     favorite: Boolean
     published: Boolean
