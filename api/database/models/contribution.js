@@ -5,7 +5,14 @@ const ContributionSchema = new Schema({
   eventId: { type: Schema.Types.ObjectId, required: true, index: true },
   eventMemberId: { type: Schema.Types.ObjectId, required: true },
   dreamId: { type: Schema.Types.ObjectId, required: true, index: true },
-  amount: { type: Number, required: true },
+  amount: {
+    type: Number,
+    required: true,
+    validate: {
+      validator: Number.isInteger,
+      message: "{VALUE} is not an integer value",
+    },
+  },
 });
 
 module.exports = ContributionSchema;

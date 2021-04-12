@@ -269,6 +269,7 @@ const schema = gql`
     availableGrants: Int
     givenGrants: [Grant]
     balance: Float
+    balance: Int # stored as cents
     # roles: [Role]
   }
 
