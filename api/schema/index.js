@@ -157,6 +157,8 @@ const schema = gql`
     preOrPostFund(dreamId: ID!, value: Int!): Grant
     toggleFavorite(dreamId: ID!): Dream
 
+    allocate(eventMemberId: ID!, amount: Int!): EventMember
+
     registerForEvent(eventId: ID!): EventMember
   }
 
@@ -268,7 +270,6 @@ const schema = gql`
     createdAt: Date
     availableGrants: Int
     givenGrants: [Grant]
-    balance: Float
     balance: Int # stored as cents
     # roles: [Role]
   }

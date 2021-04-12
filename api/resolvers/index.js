@@ -1537,6 +1537,34 @@ const resolvers = {
       dream.approved = approved;
       return dream.save();
     },
+    allocate: async (
+      _,
+      { eventMemberId, amount },
+      { currentOrgMember, models: { EventMember, Allocation } }
+    ) => {
+      if (!currentOrgMember) throw new Error("You need to be logged in.");
+
+      const targetEventMember = await EventMember.findOne({
+        _id: eventMemberId,
+      });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: targetEventMember.eventId,
+      });
+
+      if (!currentEventMember?.isAdmin)
+        throw new Error("You need to be event admin to allocate funds.");
+
+      await new Allocation({
+        organizationId: currentOrgMember.organizationId,
+        eventId: targetEventMember.eventId,
+        eventMemberId,
+        amount,
+      }).save();
+
+      return targetEventMember;
+    },
     giveGrant: async (
       parent,
       { eventId, dreamId, value },
