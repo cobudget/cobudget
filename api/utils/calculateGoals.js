@@ -11,8 +11,11 @@ const calculateGoals = (budgetItems) => {
     .filter((item) => item.type === "EXPENSE")
     .reduce((acc, item) => acc + (item.max ? item.max : item.min), 0);
 
-  const min = minExpenses - incomes;
-  const max = maxExpenses - incomes;
+  // times 100 to provide value in cents
+  // TODO: make budget items store value in cents
+  const min = (minExpenses - incomes) * 100;
+  const max = (maxExpenses - incomes) * 100;
+
   return {
     max: max > 0 && max !== min ? max : null,
     min: min > 0 ? min : 0,

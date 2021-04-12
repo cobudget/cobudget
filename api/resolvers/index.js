@@ -1565,6 +1565,94 @@ const resolvers = {
 
       return targetEventMember;
     },
+    contribute: async (
+      _,
+      { eventId, dreamId, amount },
+      {
+        currentOrgMember,
+        models: { Dream, Event, EventMember, Allocation, Contribution },
+      }
+    ) => {
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      if (!currentEventMember || !currentEventMember.isApproved)
+        throw new Error(
+          "You need to be a logged in approved member to fund things"
+        );
+
+      if (amount <= 0) throw new Error("Value needs to be more than zero");
+
+      const event = await Event.findOne({ _id: eventId });
+
+      // Check that granting is open
+      if (!event.grantingIsOpen) throw new Error("Granting is not open");
+
+      const dream = await Dream.findOne({ _id: dreamId, eventId });
+
+      if (!dream.approved)
+        throw new Error("Dream is not approved for granting");
+
+      // Check that the max goal of the dream is not exceeded
+      const [
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
+        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
+      ]);
+
+      const maxGoal = Math.max(dream.maxGoal, dream.minGoal);
+
+      if (contributionsForDream + amount > maxGoal)
+        throw new Error("You can't overfund this dream.");
+
+      // Check that it is not more than is allowed per dream (if this number is set)
+      if (event.maxGrantsToDream && amount > event.maxGrantsToDream) {
+        throw new Error(
+          `You can give a maximum of ${event.maxGrantsToDream / 100} ${
+            event.currency
+          } to one dream`
+        );
+      }
+
+      // Check that user has not spent more tokens than he has
+      const [
+        { contributionsFromUser } = { contributionsFromUser: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
+          },
+        },
+        { $group: { _id: null, contributionsFromUser: { $sum: "$amount" } } },
+      ]);
+
+      const [
+        { allocationsForUser } = { allocationForUser: 0 },
+      ] = await Allocation.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
+          },
+        },
+        { $group: { _id: null, allocationForUser: { $sum: "$amount" } } },
+      ]);
+
+      if (contributionsFromUser + amount > allocationsForUser)
+        throw new Error("You are trying to spend more than what you have.");
+
+      await new Contribution({
+        organizationId: currentOrgMember.organizationId,
+        eventId,
+        eventMemberId: currentEventMember.id,
+        dreamId,
+        amount,
+      }).save();
+
+      return dream;
+    },
     giveGrant: async (
       parent,
       { eventId, dreamId, value },

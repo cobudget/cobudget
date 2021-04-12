@@ -158,6 +158,7 @@ const schema = gql`
     toggleFavorite(dreamId: ID!): Dream
 
     allocate(eventMemberId: ID!, amount: Int!): EventMember
+    contribute(eventId: ID!, dreamId: ID!, amount: Int!): Dream
 
     registerForEvent(eventId: ID!): EventMember
   }
