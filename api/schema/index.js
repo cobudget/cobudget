@@ -171,7 +171,6 @@ const schema = gql`
     logo: String
     events: [Event]
     discourseUrl: String
-    # discourseApiKey: String
     finishedTodos: Boolean
   }
 

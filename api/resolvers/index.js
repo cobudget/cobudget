@@ -2131,11 +2131,6 @@ const resolvers = {
     },
   },
   EventMember: {
-    // user: async (member, args, { models: { User } }) => {
-    //   // this one is not existing in the schema.. but should be possible to have. still
-
-    //   return User.findOne({ _id: member.userId });
-    // },
     event: async (member, args, { models: { Event } }) => {
       return Event.findOne({ _id: member.eventId });
     },
