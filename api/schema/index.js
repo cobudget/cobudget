@@ -182,24 +182,12 @@ const schema = gql`
     organization: Organization!
     info: String
     color: String
-    # logo: String
-    # members: [EventMember!]!
     numberOfApprovedMembers: Int
     dreams: [Dream!]
-    # flags: [Flag!]
-    # questions: [Question!]
-    # reactions: [Emoji] #requried or not? ui implications?
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
-    # grantingPeriods: [GrantingPeriod]
-    currency: String! # scalar? # can't change after first submission closes
-    # useGrantlings: Boolean! # can't change after first submission close
-    totalBudget: Int
-    totalBudgetGrants: Int
-    remainingGrants: Int
-    grantValue: Int
-    grantsPerMember: Int
-    maxGrantsToDream: Int
+    currency: String!
+    maxAmountToDreamPerUser: Int
     dreamCreationCloses: Date
     dreamCreationIsOpen: Boolean
     grantingOpens: Date

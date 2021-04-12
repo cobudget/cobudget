@@ -2298,9 +2298,6 @@ const resolvers = {
     },
   },
   Event: {
-    // members: async (event, args, { models: { EventMember } }) => {
-    //   return EventMember.find({ eventId: event.id });
-    // },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     },
@@ -2313,25 +2310,6 @@ const resolvers = {
         eventId: event.id,
         isApproved: true,
       });
-    },
-    totalBudgetGrants: async (event) => {
-      return Math.floor(event.totalBudget / event.grantValue);
-    },
-    remainingGrants: async (event, args, { models: { Grant } }) => {
-      const [
-        { grantsFromEverybody } = { grantsFromEverybody: 0 },
-      ] = await Grant.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-            reclaimed: false,
-          },
-        },
-        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
-      ]);
-      return (
-        Math.floor(event.totalBudget / event.grantValue) - grantsFromEverybody
-      );
     },
   },
   Dream: {
