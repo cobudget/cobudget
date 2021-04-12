@@ -13,8 +13,10 @@ class EventHub {
       }
     }, []);
 
-    if (errors.length)
+    if (errors.length) {
+      errors.map(console.error);
       throw new Error(errors.join(', '));
+    }
   }
 
   static subscribe(channel, fn) {
