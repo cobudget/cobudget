@@ -113,6 +113,7 @@ export const TOP_LEVEL_QUERY = gql`
       subdomain
       customDomain
       discourseUrl
+      finishedTodos
     }
   }
 `;

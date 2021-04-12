@@ -9,7 +9,6 @@ const { makeExecutableSchema } = require("graphql-tools");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const KcAdminClient = require("keycloak-admin").default;
 
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const bodyParser = require("body-parser");
 const pretixWebhook = require("./webhooks/pretix");

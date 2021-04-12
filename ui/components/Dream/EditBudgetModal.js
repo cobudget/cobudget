@@ -46,7 +46,7 @@ const schema = yup.object().shape({
   ),
 });
 
-export default ({
+const EditBudgetModal = ({
   dreamId,
   budgetItems,
   event,
@@ -243,3 +243,5 @@ export default ({
     </Modal>
   );
 };
+
+export default EditBudgetModal;

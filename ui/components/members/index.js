@@ -2,12 +2,10 @@ import React from "react";
 import gql from "graphql-tag";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 
-import { Box, Button, Modal } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import { makeStyles } from "@material-ui/core/styles";
+import Button from "components/Button";
+import HappySpinner from "components/HappySpinner";
+import InviteMembersModal from "components/InviteMembersModal";
 
-import HappySpinner from "../HappySpinner";
-import InviteMembersForm from "./InviteMembersForm";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 
@@ -71,7 +69,7 @@ const EventMembers = ({ event }) => {
     loading,
     error,
   } = useQuery(MEMBERS_QUERY, { variables: { eventId: event.id } });
-  //console.log({ members, error, eventId: event.id });
+
   const [updateMember] = useMutation(UPDATE_MEMBER, {
     variables: { eventId: event.id },
   });
@@ -97,15 +95,7 @@ const EventMembers = ({ event }) => {
   const approvedMembers = members.filter((member) => member.isApproved);
   const requestsToJoin = members.filter((member) => !member.isApproved);
 
-  const [open, setOpen] = React.useState(false);
-
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const [inviteModalOpen, setInviteModalOpen] = React.useState(false);
 
   if (loading)
     return (
@@ -122,27 +112,21 @@ const EventMembers = ({ event }) => {
         deleteMember={deleteMember}
       />
 
-      <div className="flex justify-between">
-        <h2 className="text-xl mb-3">{approvedMembers.length} members</h2>
-        {/* <div>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpen}
-                startIcon={<AddIcon />}
-              >
-                Invite members
-              </Button>
-              <Modal
-                open={open}
-                onClose={handleClose}
-                className={classes.modal}
-              >
-                <div className={classes.innerModal}>
-                  <InviteMembersForm handleClose={handleClose} />
-                </div>
-              </Modal>
-            </div> */}
+      <div className="flex justify-between mb-3 items-center">
+        <h2 className="text-xl font-semibold">
+          {approvedMembers.length} members
+        </h2>
+        <div>
+          <Button onClick={() => setInviteModalOpen(true)}>
+            Invite members
+          </Button>
+          {inviteModalOpen && (
+            <InviteMembersModal
+              handleClose={() => setInviteModalOpen(false)}
+              eventId={event.id}
+            />
+          )}
+        </div>
       </div>
 
       <MembersTable

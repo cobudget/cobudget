@@ -7,7 +7,15 @@ const { Kind } = require("graphql/language");
 const mongoose = require("mongoose");
 const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
+const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
+
+const orgHasDiscourse = (org) => {
+  // note: `org` is a mongoose object which is why we can't just check
+  // that org.discourse exists
+  return org.discourse.url && org.discourse.apiKey;
+};
+
 const isRootAdmin = (parent, args, { currentUser }) => {
   // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
@@ -51,11 +59,11 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (parent, args, { currentOrg, models: { Event } }) => {
+    events: async (parent, { limit }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) {
         throw new Error("No organization found");
       }
-      return Event.find({ organizationId: currentOrg.id });
+      return Event.find({ organizationId: currentOrg.id }, null, { limit });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) return null;
@@ -106,15 +114,20 @@ const resolvers = {
     },
     orgMembers: async (
       parent,
-      args,
+      { limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
+      if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find({
-        organizationId: currentOrg.id,
-      });
+      return OrgMember.find(
+        {
+          organizationId: currentOrg.id,
+        },
+        null,
+        { limit }
+      );
     },
     members: async (
       parent,
@@ -170,10 +183,11 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, logo },
+      { name, subdomain: dirtySubdomain, logo },
       { kauth, kcAdminClient, currentOrgMember, models: { Organization, OrgMember }, eventHub }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = new Organization({
         name,
@@ -218,7 +232,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain, customDomain, logo },
+      { organizationId, name, subdomain: dirtySubdomain, logo },
       { currentUser, kcAdminClient, currentOrgMember, models: { Organization }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
@@ -228,6 +242,8 @@ const resolvers = {
         !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = await Organization.findOne({
         _id: organizationId,
@@ -271,6 +287,19 @@ const resolvers = {
 
       eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
       return organization;
+    },
+    setTodosFinished: async (
+      parent,
+      args,
+      { currentOrg, currentOrgMember }
+    ) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
+        throw new Error("You need to be logged in as organization admin.");
+
+      currentOrg.finishedTodos = true;
+      await currentOrg.save();
+
+      return currentOrg;
     },
     createEvent: async (
       parent,
@@ -839,6 +868,9 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
+      if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
+        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
         throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
 
@@ -944,7 +976,7 @@ const resolvers = {
 
       const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -1021,7 +1053,7 @@ const resolvers = {
 
       const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -1138,41 +1170,184 @@ const resolvers = {
 
       return kcAdminClient.users.findOne({ id: kauth.sub });
     },
-    // inviteMembers: async (
-    //   parent,
-    //   { emails },
-    //   { currentMember, models: { Member, Event } }
-    // ) => {
-    //   if (!currentMember || !currentMember.isAdmin)
-    //     throw new Error('You need to be admin to invite new members');
+    inviteEventMembers: async (
+      parent,
+      { emails: emailsString, eventId },
+      {
+        currentOrgMember,
+        currentOrg,
+        kcAdminClient,
+        models: { OrgMember, EventMember, Event },
+      }
+    ) => {
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
 
-    //   const emailArray = emails.split(',');
+      const event = await Event.findOne({ _id: eventId });
 
-    //   if (emailArray.length > 1000)
-    //     throw new Error('You can only invite 1000 people at a time.');
+      if (!currentEventMember || !currentEventMember.isAdmin)
+        throw new Error("You need to be admin to invite new members");
 
-    //   const memberObjs = emailArray.map((email) => ({
-    //     email: email.trim(),
-    //     eventId: currentMember.eventId,
-    //     isApproved: true,
-    //   }));
+      const emails = emailsString.split(",");
 
-    //   let members = [];
+      if (emails.length > 1000)
+        throw new Error("You can only invite 1000 people at a time");
 
-    //   for (memberObj of memberObjs) {
-    //     try {
-    //       members.push(await new Member(memberObj).save());
-    //     } catch (error) {
-    //       console.log(error);
-    //     }
-    //   }
+      // let newOrgMembers = [];
+      const newEventMembers = [];
 
-    //   const event = await Event.findOne({ _id: currentMember.eventId });
+      for (email of emails) {
+        const [user] = await kcAdminClient.users.findOne({
+          email: email.trim(),
+        });
 
-    //   if (members.length > 0) await sendInviteEmails(members, event);
+        if (user) {
+          const orgMember = await OrgMember.findOne({ userId: user.id });
+          if (orgMember) {
+            const eventMember = await EventMember.findOne({
+              orgMemberId: orgMember.id,
+              eventId,
+            });
+            if (eventMember) {
+              eventMember.isApproved = true;
+              await eventMember.save();
+            } else {
+              newEventMembers.push(
+                await new EventMember({
+                  orgMemberId: orgMember.id,
+                  eventId,
+                  isApproved: true,
+                }).save()
+              );
+            }
+          } else {
+            const orgMember = await new OrgMember({
+              userId: user.id,
+              organizationId: currentOrgMember.organizationId,
+            }).save();
 
-    //   return members;
-    // },
+            newEventMembers.push(
+              await new EventMember({
+                orgMemberId: orgMember.id,
+                eventId,
+                isApproved: true,
+              }).save()
+            );
+          }
+        } else {
+          const user = await kcAdminClient.users.create({
+            username: email.trim(),
+            email: email.trim(),
+            requiredActions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            enabled: true,
+          });
+
+          await kcAdminClient.users.executeActionsEmail({
+            id: user.id,
+            lifespan: 60 * 60 * 24 * 90,
+            actions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            clientId: "dreams",
+            redirectUri: `${
+              process.env.NODE_ENV === "production" ? "https" : "http"
+            }://${
+              currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+            }/${event.slug}`,
+          });
+
+          const orgMember = await new OrgMember({
+            userId: user.id,
+            organizationId: currentOrgMember.organizationId,
+          }).save();
+
+          newEventMembers.push(
+            await new EventMember({
+              orgMemberId: orgMember.id,
+              eventId,
+              isApproved: true,
+            }).save()
+          );
+        }
+      }
+      return newEventMembers;
+    },
+    inviteOrgMembers: async (
+      parent,
+      { emails: emailsString },
+      { currentOrgMember, currentOrg, kcAdminClient, models: { OrgMember } }
+    ) => {
+      if (!currentOrgMember?.isOrgAdmin)
+        throw new Error("You need to be org. admin to invite members.");
+
+      const emails = emailsString.split(",");
+
+      if (emails.length > 1000)
+        throw new Error("You can only invite 1000 people at a time");
+
+      let newOrgMembers = [];
+
+      for (email of emails) {
+        const [user] = await kcAdminClient.users.findOne({
+          email: email.trim(),
+        });
+        if (user) {
+          const orgMember = await OrgMember.findOne({ userId: user.id });
+          if (!orgMember) {
+            newOrgMembers.push(
+              await new OrgMember({
+                userId: user.id,
+                organizationId: currentOrgMember.organizationId,
+              }).save()
+            );
+          }
+        } else {
+          const user = await kcAdminClient.users.create({
+            username: email.trim(),
+            email: email.trim(),
+            requiredActions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            enabled: true,
+          });
+
+          await kcAdminClient.users.executeActionsEmail({
+            id: user.id,
+            lifespan: 60 * 60 * 24 * 90,
+            actions: [
+              KCRequiredActionAlias.UPDATE_PROFILE,
+              KCRequiredActionAlias.UPDATE_PASSWORD,
+            ],
+            clientId: "dreams",
+            redirectUri: `${
+              process.env.NODE_ENV === "production" ? "https" : "http"
+            }://${
+              currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+            }/`,
+          });
+
+          newOrgMembers.push(
+            await new OrgMember({
+              userId: user.id,
+              organizationId: currentOrgMember.organizationId,
+            }).save()
+          );
+        }
+      }
+
+      return newOrgMembers;
+    },
     updateOrgMember: async (
       parent,
       { memberId, isOrgAdmin },
@@ -1846,18 +2021,16 @@ const resolvers = {
     currentEventMembership: async (
       orgMember,
       { slug },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { OrgMember, EventMember, Event },
-      }
+      { currentOrgMember, models: { EventMember, Event } }
     ) => {
-      if (!slug) return null;
+      if (!slug || !currentOrgMember) return null;
+      if (orgMember.id.toString() !== currentOrgMember.id.toString())
+        return null;
+
       const event = await Event.findOne({
-        organizationId: currentOrg.id,
+        organizationId: currentOrgMember.organizationId,
         slug,
       });
-      // TODO: use currentOrgMember here instead? should not be on every event member?
 
       return EventMember.findOne({
         orgMemberId: orgMember.id,
@@ -1928,6 +2101,14 @@ const resolvers = {
       return Event.find({ organizationId: organization.id });
     },
     discourseUrl: (organization) => organization.discourse?.url,
+    finishedTodos: (org, args, { currentOrgMember }) => {
+      if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
+        // You need to be logged in as organization admin
+        return false;
+      }
+
+      return org.finishedTodos;
+    },
   },
   Event: {
     // members: async (event, args, { models: { EventMember } }) => {

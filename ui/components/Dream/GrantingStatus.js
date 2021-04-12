@@ -1,7 +1,7 @@
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-export default ({ dream }) => {
+const GrantingStatus = ({ dream }) => {
   return (
     <>
       <div
@@ -46,3 +46,5 @@ export default ({ dream }) => {
     </>
   );
 };
+
+export default GrantingStatus;

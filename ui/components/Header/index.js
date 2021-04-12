@@ -157,18 +157,9 @@ const Header = ({
                 {currentOrg && (
                   <>
                     {!event && currentOrgMember?.isOrgAdmin && (
-                      <>
-                        <NavItem
-                          primary
-                          currentPath={router.pathname}
-                          href="/create-event"
-                        >
-                          New event
-                        </NavItem>
-                        <NavItem href="/org/settings?tab=general">
-                          Org settings
-                        </NavItem>
-                      </>
+                      <NavItem href="/org/settings?tab=general">
+                        Org settings
+                      </NavItem>
                     )}
                     {(!currentOrgMember ||
                       !currentOrgMember.currentEventMembership) &&

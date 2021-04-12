@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 
 import { FlagIcon } from "components/Icons";
 
-export default ({ log }) => {
+const CommentsLog = ({ log }) => {
   let headline;
 
   switch (log.type) {
@@ -50,3 +50,5 @@ export default ({ log }) => {
     </div>
   );
 };
+
+export default CommentsLog;
