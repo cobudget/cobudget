@@ -11,9 +11,7 @@ const InfoBox = ({ markdown, close }) => {
         "shadow rounded-lg mb-5 bg-white px-5 pt-4 pb-2 overflow-hidden "
       }
     >
-      <div
-        className={"relative markdown" + " " + (!expanded && "line-clamp-3")}
-      >
+      <div className={"relative markdown" + " " + (!expanded && "max-h-32")}>
         <ReactMarkdown source={markdown} />
 
         <div className="-mx-2">
