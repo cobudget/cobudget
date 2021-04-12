@@ -468,6 +468,10 @@ const schema = gql`
     comment: String
   }
 
+  type Subscription {
+    commentsChanged(dreamID: ID!): Dream
+  }
+
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
   # type QuestionAnswer {

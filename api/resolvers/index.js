@@ -1787,6 +1787,13 @@ const resolvers = {
       return new EventMember(newMember).save();
     },
   },
+  Subscription: {
+    commentsChanged: {
+      subscribe: (parent, args, { eventHub }) => {
+        eventHub.liveUpdate.asyncIterator(['create-comment', 'edit-comment', 'delete-comment'])
+      }
+    }
+  },
   EventMember: {
     // user: async (member, args, { models: { User } }) => {
     //   // this one is not existing in the schema.. but should be possible to have. still

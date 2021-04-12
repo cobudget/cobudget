@@ -29,6 +29,7 @@
     "apollo-client": "^2.6.4",
     "apollo-link-context": "^1.0.19",
     "apollo-link-http": "^1.5.16",
+    "apollo-link-ws": "^1.0.20",
     "autoprefixer": "^10.2.5",
     "dayjs": "^1.8.20",
     "get-random-values": "^1.2.2",
@@ -51,6 +52,7 @@
     "react-tippy": "^1.4.0",
     "store": "^2.0.12",
     "styled-components": "^4.4.1",
+    "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss-animations": "^2.0.0",
     "yup": "^0.29.3"
   },

@@ -3,6 +3,10 @@
 
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
+const { createServer } = require("http");
+const { execute, subscribe } = require("graphql");
+const { makeExecutableSchema } = require("graphql-tools");
+const { SubscriptionServer } = require("subscriptions-transport-ws");
 const KcAdminClient = require("keycloak-admin").default;
 
 const jwt = require("jsonwebtoken");
@@ -42,6 +46,7 @@ app.use("/graphql", keycloak.middleware());
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  subscriptions: { path: '/subscriptions' },
   context: async ({ req }) => {
     let kauth;
     try {
@@ -122,11 +127,20 @@ const port = process.env.PORT || 4000;
 
 subscribers.initialize(EventHub);
 
-app.listen({ port }, () =>
-  console.log(
-    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+const appWithSockets = createServer(app);
+appWithSockets.listen(port, () => {
+  delete resolvers.Upload; // Where did Upload come from?
+  new SubscriptionServer(
+    {
+      execute,
+      subscribe,
+      schema: makeExecutableSchema({ typeDefs: schema, resolvers })
+    },
+    { server: appWithSockets, path: appWithSockets.subscriptionsPath }
   )
-);
+  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
+  console.log(`🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`)
+});
 
 // module.exports = cors((req, res) => {
 //   if (req.method === 'OPTIONS') {

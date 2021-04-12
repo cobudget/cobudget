@@ -1,20 +1,52 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
+import gql from "graphql-tag";
+import { useSubscription } from "@apollo/react-hooks";
 
 const Comments = ({
   currentOrgMember,
   currentOrg,
-  comments,
   dream,
   event,
   logs,
 }) => {
   // separate logs are deprecated, logs are now created as regular comments, but merging with them here to avoid migrations
-  const items = [
-    ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
-    ...logs.map((log) => ({ ...log, _type: "LOG" })),
-  ].sort((a, b) => a.createdAt - b.createdAt);
+  // const items = [
+  //   ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
+  //   ...logs.map((log) => ({ ...log, _type: "LOG" })),
+  // ].sort((a, b) => a.createdAt - b.createdAt);
+
+  const COMMENTS_SUBSCRIPTION = gql`
+    subscription OnCommentsChanged($dreamID: ID!) {
+      commentsChanged(dreamID: $dreamID) {
+        id
+        comments {
+          id
+          discourseUsername
+          cooked
+          content
+          createdAt
+          isLog
+          orgMember {
+            id
+            user {
+              id
+              username
+              avatar
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const { data, error, loading } = useSubscription(
+    COMMENTS_SUBSCRIPTION,
+    { variables: { dreamID: dream.id }
+  });
+  console.log(data, error, loading);
+  const comments = [];
 
   return (
     <div>
@@ -26,7 +58,7 @@ const Comments = ({
           {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>View on Discourse</a>}
         </div>
       )}
-      {items.map((comment, index) => {
+      {comments.map((comment, index) => {
         if (comment._type === "LOG") return <Log log={comment} key={index} />;
         return (
           <Comment
