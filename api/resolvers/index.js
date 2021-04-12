@@ -2000,14 +2000,14 @@ const resolvers = {
 
       const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
 
-      return posts.filter(({ post_number }) => post_number !== 1);
+      return posts
+        .filter(({ post_type }) => post_type === 1)
+        .filter(({ post_number }) => post_number !== 1);
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
       if (currentOrg.discourse && dream.discourseTopicId) {
-        const { posts_count } = await discourse(currentOrg.discourse).posts.get(
-          dream.discourseTopicId
-        );
-        return dream.comments.length + posts_count - 1;
+        const { posts_count } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
+        return posts_count - 1;
       }
       return dream.comments.length;
     },
