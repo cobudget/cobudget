@@ -21,17 +21,12 @@ export const TOP_LEVEL_QUERY = gql`
       color
       currency
       registrationPolicy
-      totalBudget
-      grantValue
-      grantsPerMember
-      maxGrantsToDream
+      maxAmountToDreamPerUser
       dreamCreationCloses
       dreamCreationIsOpen
       grantingOpens
       grantingCloses
       grantingIsOpen
-      totalBudgetGrants
-      remainingGrants
       numberOfApprovedMembers
       about
       allowStretchGoals
@@ -98,7 +93,7 @@ export const TOP_LEVEL_QUERY = gql`
         isAdmin
         isGuide
         isApproved
-        availableGrants
+        balance
         event {
           title
         }
