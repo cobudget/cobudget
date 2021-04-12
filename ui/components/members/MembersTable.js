@@ -10,11 +10,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@material-ui/core";
+import { Tooltip } from "react-tippy";
+
 import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import AllocateModal from "./AllocateModal";
 
 const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
@@ -111,25 +111,29 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
         </div>
       </TableCell>
       <TableCell>
-        <Box display="flex" alignItems="center">
-          <Box m="0 8px 0">{member.orgMember.user.email}</Box>
-          {!member.orgMember.user.verifiedEmail && (
-            <Tooltip title="Email not verified" placement="right">
-              <HelpOutlineOutlinedIcon fontSize="small" />
-            </Tooltip>
-          )}
-        </Box>
+        <p>{member.orgMember.user.email}</p>
+        {!member.orgMember.user.verifiedEmail && (
+          <p className="text-sm text-gray-500">(not verified)</p>
+        )}
       </TableCell>
       <TableCell component="th" scope="row">
-        <p className="line-clamp-1">{member.orgMember.bio}</p>
+        {member.orgMember.bio && (
+          <Tooltip
+            position="bottom-start"
+            size="small"
+            title={member.orgMember.bio}
+          >
+            <p className="truncate max-w-xs">{member.orgMember.bio}</p>
+          </Tooltip>
+        )}
       </TableCell>
-      <TableCell align="right">
-        {member.isAdmin && <span className="mr-2">Admin</span>}
-        {member.isGuide && <span className="">Guide</span>}
+      <TableCell align="right" className="flex space-x-2">
+        {member.isAdmin && <p>Admin</p>}
+        {member.isGuide && <p>Guide</p>}
       </TableCell>
       <TableCell align="right">
         <button
-          className="py-1 px-2 whitespace-nowrap rounded hover:bg-green-200"
+          className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
           onClick={() => setAllocateModalOpen(true)}
         >
           {member.balance / 100} {event.currency}

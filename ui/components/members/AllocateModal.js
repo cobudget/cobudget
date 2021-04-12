@@ -49,7 +49,7 @@ const AllocateModal = ({ member, event, handleClose }) => {
       className="flex items-center justify-center p-4"
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
-        <h1 className="text-xl font-semibold mb-4">
+        <h1 className="text-xl font-semibold mb-4 break-words">
           Add to @{member.orgMember.user.username}'s balance
         </h1>
         <p className="text-center mb-2">
