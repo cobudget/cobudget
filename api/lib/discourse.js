@@ -149,7 +149,7 @@ const discourse = ({ url, apiKey } = {}) => {
     },
     topics: {
       getSummary: async ({ id }, { username, userApiKey, apiKey }) => {
-        const postRes = await fetch(`${url}/posts/by_number/${id}/1.json`, {
+        const res = await fetch(`${url}/posts/by_number/${id}/1.json`, {
           headers: {
             ...defaultHeaders,
             ...(username && { "Api-Username": username }),
@@ -159,10 +159,9 @@ const discourse = ({ url, apiKey } = {}) => {
           }
         });
 
-        const post = await postRes.json();
-        return post;
+        return await res.json();
       },
-      updateStatus: async ({ id, status, enabled }, { usename, userApiKey, apiKey }) => {
+      updateStatus: async ({ id, status, enabled }, { username, userApiKey, apiKey }) => {
         const res = await fetch(`${url}/t/${id}/status.json`, {
           headers: {
             ...defaultHeaders,
@@ -172,6 +171,10 @@ const discourse = ({ url, apiKey } = {}) => {
               : { "Api-Key": apiKey }),
           },
           method: "PUT",
+          body: JSON.stringify({
+            status,
+            enabled: enabled.toString(),
+          }),
         });
 
         return await res.json();

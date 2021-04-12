@@ -6,8 +6,6 @@ module.exports = {
 
     eventHub.subscribe('create-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       if (!currentOrg.discourse) { return }
-      if (!dream.published) { return } // Only push published dreams to Discourse
-
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
@@ -16,7 +14,7 @@ module.exports = {
       const domain = currentOrg.customDomain || [currentOrg.subdomain, process.env.DEPLOY_URL].join('.')
       const post = await discourse(currentOrg.discourse).posts.create({
         title: dream.title,
-        raw: this.generateDreamMarkdown(dream, event),
+        raw: this.generateDreamMarkdown(dream, event, currentOrg),
         category: event.discourseCategoryId,
         unlist_topic: !dream.published,
       }, {
@@ -36,17 +34,12 @@ module.exports = {
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      if (!currentOrg.discourse || !dream.published) { return }
+      if (!currentOrg.discourse || !dream.discourseTopicId) { return }
 
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Updating dream ${dream.id} on discourse`);
-
-      if (!dream.discourseTopicId) {
-        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-        dream = await models.Dream.findOne({ _id: dream.id });
-      }
 
       const post = await discourse(currentOrg.discourse).topics.getSummary({
         id: dream.discourseTopicId
@@ -68,39 +61,27 @@ module.exports = {
     });
 
     eventHub.subscribe('publish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      const post = await discourse(currentOrg.discourse).topics.updateStatus({
-        id: dream.discourseTopicId,
-        status: 'visible',
-        enabled: true
-      }, {
-        username: 'system',
-        apiKey: currentOrg.discourse.apiKey,
-      });
-    });
+      console.log(`Setting visibility of dream ${dream.id} to ${dream.published} on Discourse...`);
 
-    eventHub.subscribe('unpublish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       const post = await discourse(currentOrg.discourse).topics.updateStatus({
         id: dream.discourseTopicId,
         status: 'visible',
-        enabled: false
+        enabled: dream.published
       }, {
         username: 'system',
         apiKey: currentOrg.discourse.apiKey,
       });
+
+      console.log(post);
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
       try {
-        if (!currentOrg.discourse || !dream.published) { return }
+        if (!currentOrg.discourse || !dream.discourseTopicId) { return }
         if (!currentOrgMember.discourseApiKey)
           throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
         console.log(`Publishing comment in dream ${dream.id} to discourse...`)
-
-        if (!dream.discourseTopicId) {
-          await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
-          dream = await models.Dream.findOne({ _id: dream.id });
-        }
 
         const post = await discourse(currentOrg.discourse).posts.create({
           topic_id: dream.discourseTopicId,
@@ -163,13 +144,14 @@ module.exports = {
   },
 
   generateDreamMarkdown(dream, event, org) {
-    const dreamUrl = `${process.env.NODE_ENV == 'production' ? 'https' : 'http'}://${
-      org.customDomain
-        ? org.customDomain
-        : `${org.subdomain}.${process.env.DEPLOY_URL}`
-    }/${event.slug}/${dream.id}`
+    const content = [];
 
-    const content = ['View and edit this post on the Dreams platform: ', dreamUrl]
+    if (org) {
+      const protocol = process.env.NODE_ENV == 'production' ? 'https': 'http'
+      const domain = org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`
+      const dreamUrl = `${protocol}://${domain}/${event.slug}/${dream.id}`
+      content.push('View and edit this post on the Dreams platform: ', dreamUrl)
+    }
 
     if (dream.summary) {
       content.push('## Summary');
