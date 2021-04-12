@@ -1,4 +1,5 @@
 const discourse = require("../lib/discourse");
+const liveUpdate = require("../services/liveUpdate.service");
 
 module.exports = {
   initialize(eventHub, models) {
@@ -90,6 +91,8 @@ module.exports = {
 
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
+
+      liveUpdate.publish('commentCreated', { commentCreated: post });
     });
 
     eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -109,6 +112,8 @@ module.exports = {
 
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
+
+      liveUpdate.publish('commentEdited', { commentEdited: post });
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -125,6 +130,8 @@ module.exports = {
 
       if (!res.ok)
         throw new Error("Unable to delete post on Discourse; please try again");
+
+      liveUpdate.publish('commentDeleted', { commentDeleted: comment });
     });
   },
 

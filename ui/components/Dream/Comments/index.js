@@ -1,3 +1,4 @@
+import { useState } from "react";
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
@@ -11,42 +12,63 @@ const Comments = ({
   event,
   logs,
 }) => {
-  // separate logs are deprecated, logs are now created as regular comments, but merging with them here to avoid migrations
-  // const items = [
-  //   ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
-  //   ...logs.map((log) => ({ ...log, _type: "LOG" })),
-  // ].sort((a, b) => a.createdAt - b.createdAt);
+  const [comments, setComments] = useState(dream.comments || []);
 
-  const COMMENTS_SUBSCRIPTION = gql`
-    subscription OnCommentsChanged($dreamID: ID!) {
-      commentsChanged(dreamID: $dreamID) {
+  const COMMENTS_CREATED = gql`
+    subscription OnCommentCreated($dreamID: ID!) {
+      commentCreated(dreamID: $dreamID) {
         id
-        comments {
-          id
-          discourseUsername
-          cooked
-          content
-          createdAt
-          isLog
-          orgMember {
-            id
-            user {
-              id
-              username
-              avatar
-            }
-          }
-        }
       }
     }
   `;
 
-  const { data, error, loading } = useSubscription(
-    COMMENTS_SUBSCRIPTION,
-    { variables: { dreamID: dream.id }
+  const COMMENTS_DELETED = gql`
+    subscription OnCommentDeleted($dreamID: ID!) {
+      commentDeleted(dreamID: $dreamID) {
+        id
+      }
+    }
+  `;
+
+  const COMMENTS_EDITED = gql`
+    subscription OnCommentEdited($dreamID: ID!) {
+      commentEdited(dreamID: $dreamID) {
+        id
+        cooked
+        content
+      }
+    }
+  `;
+
+  useSubscription(COMMENTS_CREATED, {
+    variables: { dreamID: dream.id },
+    onSubscriptionData: ({
+      subscriptionData: { data: { commentAdded } }
+    }) => {
+      // setComments(comments => comments.concat(commentAdded))
+    }
   });
-  console.log(data, error, loading);
-  const comments = [];
+
+  useSubscription(COMMENTS_EDITED, {
+    variables: { dreamID: dream.id },
+    onSubscriptionData: ({
+      subscriptionData: { data: { commentEdited: { id, cooked, content } } }
+    }) => {
+      // setComments(comments => comments.map(c => c.id === id
+      //   ? ({ ...c, cooked, content })
+      //   : c
+      // ))
+    }
+  });
+
+  useSubscription(COMMENTS_DELETED, {
+    variables: { dreamID: dream.id },
+    onSubscriptionData: ({
+      subscriptionData: { data: { commentDeleted: { id } } }
+    }) => {
+      // setComments(comments => comments.filter(c => c.id !== id))
+    }
+  });
 
   return (
     <div>

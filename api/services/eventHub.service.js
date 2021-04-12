@@ -1,8 +1,4 @@
-const { PubSub } = require("apollo-server-express");
-
 class EventHub {
-  static liveUpdate = new PubSub()
-
   static subscriptions = new Proxy({}, {
     get: (target, name) => target.hasOwnProperty(name) ? target[name] : []
   })
@@ -21,8 +17,6 @@ class EventHub {
       errors.map(console.error);
       throw new Error(errors.join(', '));
     }
-
-    this.liveUpdate.publish(channel, event);
   }
 
   static subscribe(channel, fn) {

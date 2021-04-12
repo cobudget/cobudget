@@ -1,4 +1,5 @@
 const slugify = require("../utils/slugify");
+const liveUpdate = require("../services/liveUpdate.service");
 const { GraphQLScalarType } = require("graphql");
 const GraphQLJSON = require("graphql-type-json");
 const { GraphQLJSONObject } = require("graphql-type-json");
@@ -1788,11 +1789,9 @@ const resolvers = {
     },
   },
   Subscription: {
-    commentsChanged: {
-      subscribe: (parent, args, { eventHub }) => {
-        eventHub.liveUpdate.asyncIterator(['create-comment', 'edit-comment', 'delete-comment'])
-      }
-    }
+    commentCreated: { subscribe: () => liveUpdate.asyncIterator(['commentCreated']) },
+    commentEdited: { subscribe: () => liveUpdate.asyncIterator(['commentEdited']) },
+    commentDeleted: { subscribe: () => liveUpdate.asyncIterator(['commentDeleted']) },
   },
   EventMember: {
     // user: async (member, args, { models: { User } }) => {
@@ -2012,10 +2011,6 @@ const resolvers = {
         .filter(({ post_number }) => post_number !== 1);
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse && dream.discourseTopicId) {
-        const { posts_count } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
-        return posts_count - 1;
-      }
       return dream.comments.length;
     },
     favorite: async (
