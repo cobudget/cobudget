@@ -92,7 +92,7 @@ module.exports = {
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
 
-      liveUpdate.publish('commentCreated', { commentCreated: post });
+      liveUpdate.publish('commentCreated', { commentCreated: { ...post, orgMember: currentOrgMember } });
     });
 
     eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {

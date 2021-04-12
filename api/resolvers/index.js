@@ -844,7 +844,7 @@ const resolvers = {
 
       const comment = { authorId: currentOrgMember.id, content }
 
-      if (!currentOrg.discourse || !dream.published) {
+      if (!currentOrg.discourse) {
         dream.comments.push(comment);
       }
 
