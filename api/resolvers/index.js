@@ -1624,9 +1624,12 @@ const resolvers = {
         throw new Error("You can't overfund this dream.");
 
       // Check that it is not more than is allowed per dream (if this number is set)
-      if (event.maxGrantsToDream && amount > event.maxGrantsToDream) {
+      if (
+        event.maxAmountToDreamPerUser &&
+        amount > event.maxAmountToDreamPerUser
+      ) {
         throw new Error(
-          `You can give a maximum of ${event.maxGrantsToDream / 100} ${
+          `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
             event.currency
           } to one dream`
         );
@@ -1645,14 +1648,14 @@ const resolvers = {
       ]);
 
       const [
-        { allocationsForUser } = { allocationForUser: 0 },
+        { allocationsForUser } = { allocationsForUser: 0 },
       ] = await Allocation.aggregate([
         {
           $match: {
             eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
           },
         },
-        { $group: { _id: null, allocationForUser: { $sum: "$amount" } } },
+        { $group: { _id: null, allocationsForUser: { $sum: "$amount" } } },
       ]);
 
       if (contributionsFromUser + amount > allocationsForUser)
