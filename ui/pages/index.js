@@ -60,9 +60,7 @@ const LinkCard = forwardRef((props, ref) => {
 });
 
 const IndexPage = ({ currentOrg, currentOrgMember }) => {
-  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY, {
-    skip: !currentOrg,
-  });
+  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
 
   // TODO - perhaps a redirect to organization pages instead
   if (!currentOrg) {

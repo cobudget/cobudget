@@ -9,6 +9,12 @@ const { combineResolvers, skip } = require("graphql-resolvers");
 const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
 
+const orgHasDiscourse = (org) => {
+  // note: `org` is a mongoose object which is why we can't just check
+  // that org.discourse exists
+  return org.discourse.url && org.discourse.apiKey;
+};
+
 const isRootAdmin = (parent, args, { currentUser }) => {
   // TODO: this is old code that doesn't really work right now
   return currentUser && currentUser.isRootAdmin
@@ -67,14 +73,20 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventId, textSearchTerm },
-      { currentOrgMember, models: { Dream, EventMember } }
+      { eventSlug, textSearchTerm },
+      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
     ) => {
       let currentEventMember;
+
+      const event = await Event.findOne({
+        slug: eventSlug,
+        organizationId: currentOrg.id,
+      });
+
       if (currentOrgMember) {
         currentEventMember = await EventMember.findOne({
           orgMemberId: currentOrgMember.id,
-          eventId,
+          eventId: event.id,
         });
       }
 
@@ -84,7 +96,7 @@ const resolvers = {
         (currentEventMember.isAdmin || currentEventMember.isGuide)
       ) {
         return Dream.find({
-          eventId,
+          eventId: event.id,
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
@@ -93,14 +105,14 @@ const resolvers = {
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
       if (currentEventMember) {
         return Dream.find({
-          eventId,
+          eventId: event.id,
           $or: [{ published: true }, { cocreators: currentEventMember.id }],
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
 
       return Dream.find({
-        eventId,
+        eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
@@ -162,10 +174,11 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, logo },
+      { name, subdomain: dirtySubdomain, logo },
       { kauth, kcAdminClient, models: { Organization, OrgMember } }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = new Organization({
         name,
@@ -209,7 +222,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain, logo },
+      { organizationId, name, subdomain: dirtySubdomain, logo },
       { currentUser, kcAdminClient, currentOrgMember, models: { Organization } }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
@@ -219,6 +232,8 @@ const resolvers = {
         !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+
+      const subdomain = slugify(dirtySubdomain);
 
       const organization = await Organization.findOne({
         _id: organizationId,
@@ -630,7 +645,7 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         const discoursePost = await discourse(
           currentOrg.discourse
         ).posts.create(
@@ -850,7 +865,7 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!currentOrgMember.discourseApiKey) {
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
@@ -921,7 +936,7 @@ const resolvers = {
         throw new Error("You need to be member of the org to delete comments");
       }
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         const post = await discourse(currentOrg.discourse).posts.getSingle(
           commentId
         );
@@ -1027,7 +1042,7 @@ const resolvers = {
 
       const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -1104,7 +1119,7 @@ const resolvers = {
 
       const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
 
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         if (!dream.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
@@ -2328,7 +2343,7 @@ const resolvers = {
       return contributionsForDream;
     },
     comments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse) {
+      if (orgHasDiscourse(currentOrg)) {
         let discourseComments = [];
         if (dream.discourseTopicId) {
           const {
@@ -2345,7 +2360,7 @@ const resolvers = {
       return dream.comments;
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
-      if (currentOrg.discourse && dream.discourseTopicId) {
+      if (orgHasDiscourse(currentOrg) && dream.discourseTopicId) {
         const { posts_count } = await discourse(currentOrg.discourse).posts.get(
           dream.discourseTopicId
         );
