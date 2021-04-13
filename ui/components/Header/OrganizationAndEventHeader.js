@@ -24,15 +24,13 @@ const OrganizationAndEventHeader = ({
   currentOrg,
   event,
   currentOrgMember,
+  router,
 }) => {
   const [eventSettingsModalOpen, setEventSettingsModalOpen] = useState(false);
-  const router = useRouter();
-  const { data: { dream } = { dream: null }, loading, error } = useQuery(
-    DREAM_QUERY,
-    {
-      variables: { id: router.query.dream },
-    }
-  );
+  const { data: { dream } = { dream: null } } = useQuery(DREAM_QUERY, {
+    variables: { id: router.query.dream },
+    skip: !router.query.dream,
+  });
 
   return (
     <>

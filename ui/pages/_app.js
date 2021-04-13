@@ -3,7 +3,6 @@ import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import { useRouter } from "next/router";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
@@ -172,7 +171,7 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient, router }) => {
+const MyApp = ({ Component, pageProps, router }) => {
   const { user, loading } = useFetchUser();
 
   useEffect(() => {
@@ -210,9 +209,9 @@ const MyApp = ({ Component, pageProps, apolloClient, router }) => {
           currentUser={currentUser}
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
-          apollo={apolloClient}
           openModal={openModal}
           event={event}
+          router={router}
         >
           <Component
             {...pageProps}

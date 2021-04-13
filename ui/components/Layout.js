@@ -1,8 +1,6 @@
 import React from "react";
 import Head from "next/head";
 import Header from "./Header";
-import Router, { useRouter } from "next/router";
-import cookie from "js-cookie";
 
 const Layout = ({
   children,
@@ -11,27 +9,9 @@ const Layout = ({
   currentOrg,
   event,
   title,
-  apollo,
   openModal,
+  router,
 }) => {
-  const router = useRouter();
-
-  // check for token in query to set it and remove it from url
-  React.useEffect(() => {
-    if (router.query.token) {
-      cookie.set("token", router.query.token, { expires: 30 });
-      apollo.resetStore();
-      Router.push("/"); // change this to just be replace current route?
-      // trigger alert or something on invalid token
-    }
-  }, [router.query]);
-
-  const logOut = () => {
-    cookie.remove("token");
-    apollo.resetStore();
-    Router.push("/");
-  };
-
   return (
     <div>
       <Head>
@@ -54,7 +34,7 @@ const Layout = ({
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
-          logOut={logOut}
+          router={router}
         />
         <div className="mx-2 md:mx-4 pb-10 flex justify-center">{children}</div>
       </div>

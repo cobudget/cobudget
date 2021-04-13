@@ -9,7 +9,7 @@ import Filterbar from "../../components/Filterbar";
 import InfoBox from "../../components/InfoBox";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventSlug: String, $textSearchTerm: String) {
+  query Dreams($eventSlug: String!, $textSearchTerm: String) {
     dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
       id
       description

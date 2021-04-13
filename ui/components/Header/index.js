@@ -41,11 +41,10 @@ const Header = ({
   currentOrgMember,
   currentOrg,
   openModal,
-  logOut,
+  router,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-  const router = useRouter();
 
   const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
     refetchQueries: ["TopLevelQuery"],
@@ -70,6 +69,7 @@ const Header = ({
                 currentOrg={currentOrg}
                 event={event}
                 currentOrgMember={currentOrgMember}
+                router={router}
               />
             ) : (
               <OrganizationOnlyHeader currentOrg={currentOrg} />
@@ -192,7 +192,6 @@ const Header = ({
                   <ProfileDropdown
                     currentUser={currentUser}
                     currentOrgMember={currentOrgMember}
-                    logOut={logOut}
                     openModal={openModal}
                     event={event}
                   />
@@ -295,9 +294,9 @@ const Header = ({
                 >
                   Edit profile
                 </button>
-                <button onClick={logOut} className={css.mobileProfileItem}>
+                <a href={"/api/logout"} className={css.mobileProfileItem}>
                   Sign out
-                </button>
+                </a>
               </div>
             </div>
           )}
