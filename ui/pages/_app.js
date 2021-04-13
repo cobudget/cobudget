@@ -177,8 +177,7 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient }) => {
-  const router = useRouter();
+const MyApp = ({ Component, pageProps, apolloClient, router }) => {
   const { user, loading } = useFetchUser();
 
   useEffect(() => {
@@ -202,7 +201,6 @@ const MyApp = ({ Component, pageProps, apolloClient }) => {
   const closeModal = () => {
     setModal(null);
   };
-
   return (
     <UserProvider value={{ user, loading }}>
       <ThemeProvider theme={theme}>
@@ -227,8 +225,8 @@ const MyApp = ({ Component, pageProps, apolloClient }) => {
             currentUser={currentUser}
             currentOrgMember={currentOrgMember}
             currentOrg={currentOrg}
-            event={event}
             openModal={openModal}
+            router={router}
           />
         </Layout>
       </ThemeProvider>

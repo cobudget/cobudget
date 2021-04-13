@@ -13,7 +13,7 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventId: ID!, textSearchTerm: String): [Dream]
+    dreams(eventSlug: String, textSearchTerm: String): [Dream]
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
   }

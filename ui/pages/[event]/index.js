@@ -41,8 +41,7 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-const EventPage = ({ currentUser, event }) => {
-  if (!event) return null;
+const EventPage = ({ currentUser, event, router }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [filterLabels, setFilterLabels] = useState();
@@ -59,7 +58,7 @@ const EventPage = ({ currentUser, event }) => {
     DREAMS_QUERY,
     {
       variables: {
-        eventId: event.id,
+        eventSlug: router.query.event,
         ...(textSearchTerm && { textSearchTerm }),
       },
     }
@@ -67,6 +66,7 @@ const EventPage = ({ currentUser, event }) => {
   if (error) {
     console.error(error);
   }
+  if (!event) return null;
 
   // useEffect(() => {
   //   const { infoBoxDismissed = false } = store.get(event.slug) || {};

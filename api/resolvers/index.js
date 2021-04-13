@@ -73,14 +73,20 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventId, textSearchTerm },
-      { currentOrgMember, models: { Dream, EventMember } }
+      { eventSlug, textSearchTerm },
+      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
     ) => {
       let currentEventMember;
+
+      const event = await Event.findOne({
+        slug: eventSlug,
+        organizationId: currentOrg.id,
+      });
+
       if (currentOrgMember) {
         currentEventMember = await EventMember.findOne({
           orgMemberId: currentOrgMember.id,
-          eventId,
+          eventId: event.id,
         });
       }
 
@@ -90,7 +96,7 @@ const resolvers = {
         (currentEventMember.isAdmin || currentEventMember.isGuide)
       ) {
         return Dream.find({
-          eventId,
+          eventId: event.id,
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
@@ -99,14 +105,14 @@ const resolvers = {
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
       if (currentEventMember) {
         return Dream.find({
-          eventId,
+          eventId: event.id,
           $or: [{ published: true }, { cocreators: currentEventMember.id }],
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         });
       }
 
       return Dream.find({
-        eventId,
+        eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
       });
