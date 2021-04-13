@@ -68,7 +68,6 @@ const EventMembers = ({ event }) => {
   const {
     data: { members } = { members: [] },
     loading,
-    error,
   } = useQuery(EVENT_MEMBERS_QUERY, { variables: { eventId: event.id } });
 
   const [updateMember] = useMutation(UPDATE_MEMBER, {
@@ -79,12 +78,12 @@ const EventMembers = ({ event }) => {
     variables: { eventId: event.id },
     update(cache, { data: { deleteMember } }) {
       const { members } = cache.readQuery({
-        query: MEMBERS_QUERY,
+        query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
       });
 
       cache.writeQuery({
-        query: MEMBERS_QUERY,
+        query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
         data: {
           members: members.filter((member) => member.id !== deleteMember.id),

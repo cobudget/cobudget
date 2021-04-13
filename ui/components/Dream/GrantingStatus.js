@@ -1,7 +1,7 @@
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-const GrantingStatus = ({ dream }) => {
+const GrantingStatus = ({ dream, event }) => {
   return (
     <>
       <div
@@ -11,13 +11,14 @@ const GrantingStatus = ({ dream }) => {
       >
         <div>
           <span className="block text-xl font-medium">
-            {thousandSeparator(dream.totalContributions)}
+            {thousandSeparator(dream.totalContributions / 100)} {event.currency}
           </span>
           <span className="uppercase text-sm">Funded</span>
         </div>
         <div>
           <span className="block text-xl font-medium">
-            {dream.minGoal ? thousandSeparator(dream.minGoal) : "-"}
+            {dream.minGoal ? thousandSeparator(dream.minGoal / 100) : "-"}{" "}
+            {event.currency}
           </span>
 
           <span className="uppercase text-sm">Goal</span>
@@ -25,7 +26,7 @@ const GrantingStatus = ({ dream }) => {
         {dream.maxGoal && (
           <div>
             <span className="block text-xl font-medium">
-              {thousandSeparator(dream.maxGoal)}
+              {thousandSeparator(dream.maxGoal / 100)} {event.currency}
             </span>
 
             <span className="uppercase text-sm">Max. goal</span>
