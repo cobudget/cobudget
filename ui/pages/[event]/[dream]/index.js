@@ -98,10 +98,13 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-const DreamPage = ({ event, currentUser, currentOrgMember, currentOrg }) => {
-  if (!event) return null;
-  const router = useRouter();
-
+const DreamPage = ({
+  event,
+  currentUser,
+  currentOrgMember,
+  currentOrg,
+  router,
+}) => {
   const { data: { dream } = { dream: null }, loading, error } = useQuery(
     DREAM_QUERY,
     {

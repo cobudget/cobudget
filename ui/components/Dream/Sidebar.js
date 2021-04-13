@@ -10,7 +10,7 @@ import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 import Button from "components/Button";
 
-import GiveGrantlingsModal from "./GiveGrantlingsModal";
+import ContributeModal from "./ContributeModal";
 import PreOrPostFundModal from "./PreOrPostFundModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
@@ -78,6 +78,8 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const dreamCanBeFunded =
+    Math.max(dream.minGoal, dream.maxGoal) > dream.totalContributions;
 
   return (
     <>
@@ -85,9 +87,8 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
           {dream.approved && (
             <>
-              <GrantingStatus dream={dream} />
-              {currentOrgMember?.currentEventMembership?.availableGrants >
-                0 && (
+              <GrantingStatus dream={dream} event={event} />
+              {dreamCanBeFunded && (
                 <>
                   <Button
                     color={event.color}
@@ -96,13 +97,14 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                   >
                     Fund
                   </Button>
-                  <GiveGrantlingsModal
-                    open={grantModalOpen}
-                    handleClose={() => setGrantModalOpen(false)}
-                    dream={dream}
-                    event={event}
-                    currentOrgMember={currentOrgMember}
-                  />
+                  {grantModalOpen && (
+                    <ContributeModal
+                      handleClose={() => setGrantModalOpen(false)}
+                      dream={dream}
+                      event={event}
+                      currentOrgMember={currentOrgMember}
+                    />
+                  )}
                 </>
               )}
             </>

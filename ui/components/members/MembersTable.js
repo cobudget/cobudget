@@ -16,6 +16,7 @@ import { Tooltip } from "react-tippy";
 import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
+import thousandSeparator from "utils/thousandSeparator";
 
 const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -136,7 +137,7 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
           className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
           onClick={() => setAllocateModalOpen(true)}
         >
-          {member.balance / 100} {event.currency}
+          {thousandSeparator(member.balance / 100)} {event.currency}
         </button>
         {allocateModalOpen && (
           <AllocateModal
