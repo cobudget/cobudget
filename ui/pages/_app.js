@@ -177,7 +177,7 @@ const theme = createMuiTheme({
   ],
 });
 
-const MyApp = ({ Component, pageProps, apolloClient, router }) => {
+const MyApp = ({ Component, pageProps, router }) => {
   const { user, loading } = useFetchUser();
 
   useEffect(() => {
