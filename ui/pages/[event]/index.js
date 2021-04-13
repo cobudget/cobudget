@@ -8,8 +8,8 @@ import Filterbar from "../../components/Filterbar";
 import InfoBox from "../../components/InfoBox";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventId: ID!, $textSearchTerm: String) {
-    dreams(eventId: $eventId, textSearchTerm: $textSearchTerm) {
+  query Dreams($eventSlug: String!, $textSearchTerm: String) {
+    dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
       id
       description
       summary
