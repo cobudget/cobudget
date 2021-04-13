@@ -11,22 +11,7 @@ const ALLOCATE_MUTATION = gql`
   mutation Allocate($eventMemberId: ID!, $amount: Int!) {
     allocate(eventMemberId: $eventMemberId, amount: $amount) {
       id
-      isAdmin
-      isGuide
-      isApproved
-      createdAt
       balance
-      orgMember {
-        bio
-        user {
-          id
-          name
-          username
-          email
-          verifiedEmail
-          avatar
-        }
-      }
     }
   }
 `;
@@ -59,7 +44,14 @@ const AllocateModal = ({ member, event, handleClose }) => {
           +
         </p>
 
-        <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            allocate()
+              .then(() => handleClose())
+              .catch((err) => alert(err.message));
+          }}
+        >
           <TextField
             inputProps={{
               value: inputValue,
@@ -77,15 +69,7 @@ const AllocateModal = ({ member, event, handleClose }) => {
             <Button onClick={handleClose} variant="secondary">
               Cancel
             </Button>
-            <Button
-              onClick={() =>
-                allocate()
-                  .then(() => handleClose())
-                  .catch((err) => alert(err.message))
-              }
-              loading={loading}
-              disabled={disabled}
-            >
+            <Button type="submit" loading={loading} disabled={disabled}>
               Done
             </Button>
           </div>
