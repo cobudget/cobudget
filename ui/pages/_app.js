@@ -3,7 +3,6 @@ import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
 import { useQuery } from "@apollo/react-hooks";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
-import { useRouter } from "next/router";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
