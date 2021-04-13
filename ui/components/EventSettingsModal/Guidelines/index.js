@@ -8,7 +8,7 @@ import { AddIcon } from "components/Icons";
 import AddOrEditGuideline from "./EditGuideline";
 import DraggableGuidelines from "./DraggableGuidelines";
 
-export default ({ event }) => {
+const Guidelines = ({ event }) => {
   const [addGuidelineModalOpen, setAddGuidelineModalOpen] = useState(false);
   const [editingGuideline, setEditingGuideline] = useState(undefined);
 
@@ -21,8 +21,8 @@ export default ({ event }) => {
 
       <DraggableGuidelines
         event={event}
-        guidelines={event.guidelines}
-        setEditingGuideline={setEditingGuideline}
+        items={event.guidelines}
+        setEditingItem={setEditingGuideline}
       />
 
       <div className="flex my-2">
@@ -48,3 +48,5 @@ export default ({ event }) => {
     </div>
   );
 };
+
+export default Guidelines;

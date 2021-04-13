@@ -43,7 +43,11 @@ const TextField = ({
         <div
           className={`relative flex rounded-md border-3 transition-colors ease-in-out duration-200 
             bg-gray-100 focus-within:bg-white 
-            ${error ? "border-red" : `border-transparent focus-within:border-${color}`}
+            ${
+              error
+                ? "border-red"
+                : `border-transparent focus-within:border-${color}`
+            }
           `}
         >
           {startAdornment && (

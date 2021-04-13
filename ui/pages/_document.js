@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Document from "next/document";
 import { ServerStyleSheet as StyledComponentSheet } from "styled-components";
 import { ServerStyleSheets as MaterialUiServerStyleSheet } from "@material-ui/styles";

@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from "react";
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import {
-  sortableContainer,
-  sortableElement,
-  sortableHandle,
-} from "react-sortable-hoc";
-import { makeStyles } from "@material-ui/core";
+import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import ReactMarkdown from "react-markdown";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
+import DraggableItems from "../DraggableItems";
 
 const DELETE_GUIDELINE_MUTATION = gql`
   mutation DeleteGuideline($eventId: ID!, $guidelineId: ID!) {
@@ -48,14 +43,6 @@ const SET_GUIDELINE_POSITION_MUTATION = gql`
   }
 `;
 
-// We need to make sure that the zIndex is bigger the material design
-// modal otherwise the component disappear when dragged
-export const useStyles = makeStyles((theme) => ({
-  sorting: {
-    zIndex: theme.zIndex.modal + 100,
-  },
-}));
-
 const DragHandle = sortableHandle(() => (
   <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
@@ -63,7 +50,7 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({ guideline, setEditingGuideline, eventId, loading }) => {
+  ({ item: guideline, setEditingItem: setEditingGuideline, eventId }) => {
     const [deleteGuideline, { loading: deleting }] = useMutation(
       DELETE_GUIDELINE_MUTATION,
       {
@@ -109,92 +96,31 @@ const SortableItem = sortableElement(
   }
 );
 
-const SortableContainer = sortableContainer(({ children }) => {
-  return <ul className="select-none">{children}</ul>;
-});
-
-const DraggableGuidelines = ({ event, guidelines, setEditingGuideline }) => {
-  // To allow real time dragging changes - we duplicate the list locally
-  const [localGuidelines, setLocalGuidelines] = useState(guidelines);
-
-  // This updated the global server custom fields with our local copy
-  useEffect(() => {
-    // The following prevents two requests from overriding and flickering in the ui
-    if (!loading) {
-      setLocalGuidelines(guidelines);
-    }
-  }, [guidelines, loading]);
-
+const DraggableGuidelines = ({ event, items, setEditingItem }) => {
   const [setGuidelinePosition, { loading }] = useMutation(
     SET_GUIDELINE_POSITION_MUTATION,
     {
       variables: { eventId: event.id },
     }
   );
-
-  const classes = useStyles();
-
-  // Extract the position of the custom fields before and after the new index to calculate the new
-  // custom field position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    const guideline = localGuidelines[oldIndex];
-    let beforePosition;
-    let afterPosition;
-    let beforeGuideline;
-
-    const afterGuideline = localGuidelines[newIndex];
-    if (oldIndex > newIndex) {
-      beforeGuideline = localGuidelines[newIndex - 1];
-    } else {
-      beforeGuideline = localGuidelines[newIndex + 1];
-    }
-    if (beforeGuideline) {
-      beforePosition = beforeGuideline.position;
-    } else {
-      // Last element
-      beforePosition = localGuidelines[localGuidelines.length - 1].position + 1;
-    }
-    if (newIndex == 0) {
-      // First element
-      afterPosition = localGuidelines[0].position - 1;
-      beforePosition = localGuidelines[0].position;
-    } else {
-      afterPosition = afterGuideline.position;
-    }
-
-    // In order to replace the position locally we must duplicate the custom fields locally
-    let guidelinesNew = [...localGuidelines];
-    const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
-    guideline.position = newPosition;
-    setLocalGuidelines(guidelinesNew);
-
+  const setItemPosition = (guidelineId, newPosition) => {
     setGuidelinePosition({
       variables: {
-        guidelineId: guideline.id,
+        guidelineId,
         newPosition,
       },
     });
   };
 
   return (
-    <SortableContainer
-      onSortEnd={onSortEnd}
-      useDragHandle
-      helperClass={classes.sorting}
-    >
-      {localGuidelines
-        .sort((a, b) => a.position - b.position)
-        .map((guideline, index) => (
-          <SortableItem
-            key={guideline.id}
-            index={index}
-            guideline={guideline}
-            setEditingGuideline={setEditingGuideline}
-            loading={loading}
-            eventId={event.id}
-          />
-        ))}
-    </SortableContainer>
+    <DraggableItems
+      event={event}
+      items={items}
+      setItemPosition={setItemPosition}
+      setPositionLoading={loading}
+      SortableItem={SortableItem}
+      setEditingItem={setEditingItem}
+    />
   );
 };
 
