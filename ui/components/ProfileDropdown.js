@@ -9,13 +9,7 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({
-  currentUser,
-  currentOrgMember,
-  event,
-  logOut,
-  openModal,
-}) => {
+const ProfileDropdown = ({ currentUser, currentOrgMember, openModal }) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {

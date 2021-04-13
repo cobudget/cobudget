@@ -215,9 +215,9 @@ const MyApp = ({ Component, pageProps, apolloClient, router }) => {
           currentUser={currentUser}
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
-          apollo={apolloClient}
           openModal={openModal}
           event={event}
+          router={router}
         >
           <Component
             {...pageProps}
