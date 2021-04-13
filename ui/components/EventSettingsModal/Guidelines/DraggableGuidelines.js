@@ -113,7 +113,7 @@ const SortableContainer = sortableContainer(({ children }) => {
   return <ul className="select-none">{children}</ul>;
 });
 
-export default ({ event, guidelines, setEditingGuideline }) => {
+const DraggableGuidelines = ({ event, guidelines, setEditingGuideline }) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localGuidelines, setLocalGuidelines] = useState(guidelines);
 
@@ -123,7 +123,7 @@ export default ({ event, guidelines, setEditingGuideline }) => {
     if (!loading) {
       setLocalGuidelines(guidelines);
     }
-  }, [guidelines]);
+  }, [guidelines, loading]);
 
   const [setGuidelinePosition, { loading }] = useMutation(
     SET_GUIDELINE_POSITION_MUTATION,
@@ -197,3 +197,5 @@ export default ({ event, guidelines, setEditingGuideline }) => {
     </SortableContainer>
   );
 };
+
+export default DraggableGuidelines;

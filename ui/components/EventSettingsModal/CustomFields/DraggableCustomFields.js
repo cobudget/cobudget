@@ -141,7 +141,11 @@ const SortableContainer = sortableContainer(({ children }) => {
   return <ul className="select-none">{children}</ul>;
 });
 
-export default ({ event, customFields, setEditingCustomField }) => {
+const DraggableCustomFields = ({
+  event,
+  customFields,
+  setEditingCustomField,
+}) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localCustomFields, setLocalCustomFields] = useState(customFields);
 
@@ -151,7 +155,7 @@ export default ({ event, customFields, setEditingCustomField }) => {
     if (!loading) {
       setLocalCustomFields(customFields);
     }
-  }, [customFields]);
+  }, [customFields, loading]);
 
   const [setCustomFieldPosition, { loading }] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION,
@@ -226,3 +230,5 @@ export default ({ event, customFields, setEditingCustomField }) => {
     </SortableContainer>
   );
 };
+
+export default DraggableCustomFields;
