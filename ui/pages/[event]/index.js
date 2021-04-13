@@ -2,21 +2,22 @@ import gql from "graphql-tag";
 import { useState } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import Link from "next/link";
+
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
 import InfoBox from "../../components/InfoBox";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventId: ID!, $textSearchTerm: String) {
-    dreams(eventId: $eventId, textSearchTerm: $textSearchTerm) {
+  query Dreams($eventSlug: String, $textSearchTerm: String) {
+    dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
       id
       description
       summary
       title
-      minGoalGrants
-      maxGoalGrants
-      currentNumberOfGrants
+      minGoal
+      maxGoal
+      totalContributions
       numberOfComments
       favorite
       published

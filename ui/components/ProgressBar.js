@@ -8,8 +8,7 @@ const StyledProgressBar = styled.div`
 
   position: relative;
   .filler {
-    width: ${(props) =>
-      (props.currentNumberOfGrants / props.maxGoalGrants) * 100}%;
+    width: ${(props) => (props.totalContributions / props.maxGoal) * 100}%;
     height: 100%;
     background: #10b92b;
     border-radius: inherit;
@@ -18,39 +17,30 @@ const StyledProgressBar = styled.div`
     width: ${(props) => props.height * 2}px;
     height: ${(props) => props.height * 2}px;
     background: ${(props) =>
-      props.currentNumberOfGrants >= props.minGoalGrants
-        ? "#10b92b"
-        : "#E5E5E5"};
+      props.totalContributions >= props.minGoal ? "#10b92b" : "#E5E5E5"};
     border: ${(props) => props.height / 3}px solid
       ${(props) =>
-        props.currentNumberOfGrants >= props.minGoalGrants
-          ? "#00920f"
-          : "#ABABAB"};
+        props.totalContributions >= props.minGoal ? "#00920f" : "#ABABAB"};
     border-radius: ${(props) => props.height}px;
     position: absolute;
     left: calc(
-      ${(props) => (props.minGoalGrants / props.maxGoalGrants) * 100}% -
+      ${(props) => (props.minGoal / props.maxGoal) * 100}% -
         ${(props) => props.height}px
     );
     top: -${(props) => props.height / 2}px;
   }
 `;
 
-const ProgressBar = ({
-  currentNumberOfGrants,
-  minGoalGrants,
-  maxGoalGrants,
-  height = 6,
-}) => {
+const ProgressBar = ({ totalContributions, minGoal, maxGoal, height = 6 }) => {
   return (
     <StyledProgressBar
-      currentNumberOfGrants={currentNumberOfGrants}
-      minGoalGrants={minGoalGrants}
-      maxGoalGrants={maxGoalGrants || minGoalGrants}
+      totalContributions={totalContributions}
+      minGoal={minGoal}
+      maxGoal={maxGoal || minGoal}
       height={height}
     >
       <div className="filler" />
-      {maxGoalGrants && <div className="dot" />}
+      {maxGoal && <div className="dot" />}
     </StyledProgressBar>
   );
 };

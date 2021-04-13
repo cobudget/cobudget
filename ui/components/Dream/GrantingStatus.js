@@ -6,26 +6,26 @@ const GrantingStatus = ({ dream }) => {
     <>
       <div
         className={`grid gap-1 text-center ${
-          dream.maxGoalGrants ? "grid-cols-3" : "grid-cols-2"
+          dream.maxGoal ? "grid-cols-3" : "grid-cols-2"
         }`}
       >
         <div>
           <span className="block text-xl font-medium">
-            {thousandSeparator(dream.currentNumberOfGrants)}
+            {thousandSeparator(dream.totalContributions)}
           </span>
           <span className="uppercase text-sm">Funded</span>
         </div>
         <div>
           <span className="block text-xl font-medium">
-            {dream.minGoalGrants ? thousandSeparator(dream.minGoalGrants) : "-"}
+            {dream.minGoal ? thousandSeparator(dream.minGoal) : "-"}
           </span>
 
           <span className="uppercase text-sm">Goal</span>
         </div>
-        {dream.maxGoalGrants && (
+        {dream.maxGoal && (
           <div>
             <span className="block text-xl font-medium">
-              {thousandSeparator(dream.maxGoalGrants)}
+              {thousandSeparator(dream.maxGoal)}
             </span>
 
             <span className="uppercase text-sm">Max. goal</span>
@@ -34,11 +34,11 @@ const GrantingStatus = ({ dream }) => {
       </div>
 
       <div className="my-4">
-        {dream.minGoalGrants > 0 && (
+        {dream.minGoal > 0 && (
           <ProgressBar
-            currentNumberOfGrants={dream.currentNumberOfGrants}
-            minGoalGrants={dream.minGoalGrants}
-            maxGoalGrants={dream.maxGoalGrants}
+            totalContributions={dream.totalContributions}
+            minGoal={dream.minGoal}
+            maxGoal={dream.maxGoal}
             height={10}
           />
         )}

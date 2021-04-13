@@ -15,9 +15,7 @@ export const DREAM_QUERY = gql`
       title
       minGoal
       maxGoal
-      minGoalGrants
-      maxGoalGrants
-      currentNumberOfGrants
+      totalContributions
       approved
       published
       raisedFlags {
