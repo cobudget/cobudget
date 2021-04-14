@@ -23,54 +23,53 @@ const DraggableItems = ({
   setEditingItem,
 }) => {
   // To allow real time dragging changes - we duplicate the list locally
-  const [localCustomFields, setLocalCustomFields] = useState(items);
+  const [localItems, setLocalItems] = useState(items);
 
-  // This updated the global server custom fields with our local copy
+  // This updated the global server items with our local copy
   useEffect(() => {
     // The following prevents two requests from overriding and flickering in the ui
     if (!setPositionLoading) {
-      setLocalCustomFields(items);
+      setLocalItems(items);
     }
   }, [items, setPositionLoading]);
 
   const classes = useStyles();
 
-  // Extract the position of the custom fields before and after the new index to calculate the new
-  // custom field position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
+  // Extract the position of the items before and after the new index to calculate the new
+  // item position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
   const onSortEnd = ({ oldIndex, newIndex }) => {
-    const customField = localCustomFields[oldIndex];
+    const item = localItems[oldIndex];
     let beforePosition;
     let afterPosition;
-    let beforeCustomField;
+    let beforeItem;
 
-    const afterCustomField = localCustomFields[newIndex];
+    const afterItem = localItems[newIndex];
     if (oldIndex > newIndex) {
-      beforeCustomField = localCustomFields[newIndex - 1];
+      beforeItem = localItems[newIndex - 1];
     } else {
-      beforeCustomField = localCustomFields[newIndex + 1];
+      beforeItem = localItems[newIndex + 1];
     }
-    if (beforeCustomField) {
-      beforePosition = beforeCustomField.position;
+    if (beforeItem) {
+      beforePosition = beforeItem.position;
     } else {
       // Last element
-      beforePosition =
-        localCustomFields[localCustomFields.length - 1].position + 1;
+      beforePosition = localItems[localItems.length - 1].position + 1;
     }
     if (newIndex == 0) {
       // First element
-      afterPosition = localCustomFields[0].position - 1;
-      beforePosition = localCustomFields[0].position;
+      afterPosition = localItems[0].position - 1;
+      beforePosition = localItems[0].position;
     } else {
-      afterPosition = afterCustomField.position;
+      afterPosition = afterItem.position;
     }
 
-    // In order to replace the position locally we must duplicate the custom fields locally
-    let customFieldsNew = [...localCustomFields];
+    // In order to replace the position locally we must duplicate the items locally
+    let itemsNew = [...localItems];
     const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
-    customField.position = newPosition;
-    setLocalCustomFields(customFieldsNew);
+    item.position = newPosition;
+    setLocalItems(itemsNew);
 
-    setItemPosition(customField.id, newPosition);
+    setItemPosition(item.id, newPosition);
   };
 
   return (
@@ -79,7 +78,7 @@ const DraggableItems = ({
       useDragHandle
       helperClass={classes.sorting}
     >
-      {localCustomFields
+      {localItems
         .sort((a, b) => a.position - b.position)
         .map((item, index) => (
           <SortableItem
