@@ -62,8 +62,10 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
       onClose={handleClose}
       className="flex items-center justify-center p-4"
     >
-      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
-        <h1 className="text-2xl mb-2 font-semibold">Contribute to dream!</h1>
+      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
+        <h1 className="text-2xl mb-2 font-semibold">
+          Contribute to {dream.title}
+        </h1>
         <p className="text-gray-800">
           Available balance:{" "}
           {currentOrgMember.currentEventMembership.balance / 100}{" "}
@@ -83,31 +85,41 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
               .catch((err) => alert(err.message));
           }}
         >
-          <div className="my-3">
-            <TextField
-              fullWidth
-              autoFocus
-              placeholder="0"
-              endAdornment={event.currency}
-              size="large"
-              color={event.color}
-              inputProps={{
-                value: inputValue,
-                onChange: (e) => setInputValue(e.target.value),
-                type: "number",
-                min: "0",
-                max: `${max / 100}`,
-              }}
-            />
-          </div>
+          <TextField
+            fullWidth
+            className="my-3"
+            autoFocus
+            placeholder="0"
+            endAdornment={event.currency}
+            size="large"
+            color={event.color}
+            inputProps={{
+              value: inputValue,
+              onChange: (e) => setInputValue(e.target.value),
+              type: "number",
+              min: "0",
+              max: `${max / 100}`,
+            }}
+          />
           <Button
             type="submit"
             size="large"
             fullWidth
             color={event.color}
             loading={loading}
+            disabled={amount <= 0}
+            className="my-2"
           >
             Fund
+          </Button>
+          <Button
+            size="large"
+            fullWidth
+            variant="secondary"
+            color={event.color}
+            onClick={handleClose}
+          >
+            Cancel
           </Button>
         </form>
       </div>

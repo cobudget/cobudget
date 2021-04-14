@@ -20,7 +20,7 @@ const Button = forwardRef(
     ref
   ) => {
     const classes = `
-  font-medium transition-colors duration-100 rounded-md 
+  font-medium transition-colors transition-opacity duration-100 rounded-md 
   relative flex justify-center items-center 
   focus:outline-none focus:ring ${
     (size === "large"
@@ -33,12 +33,14 @@ const Button = forwardRef(
     " " +
     (disabled || loading ? "cursor-default" : "") +
     " " +
-    (disabled
-      ? "text-gray-600 bg-gray-200"
-      : variant === "primary"
-      ? `text-white bg-${color} hover:bg-${color}-dark`
+    (disabled ? "opacity-75" : "hover:") +
+    " " +
+    (variant === "primary"
+      ? `text-white bg-${color} ${!disabled ? `hover:bg-${color}-dark` : ""}`
       : variant === "secondary"
-      ? `bg-${color}-100 text-${color}-dark hover:bg-${color}-200`
+      ? `bg-${color}-100 text-${color}-dark ${
+          !disabled ? `hover:bg-${color}-200` : ""
+        }`
       : "text-gray-800 hover:bg-gray-200")
   } ${className}`;
 
