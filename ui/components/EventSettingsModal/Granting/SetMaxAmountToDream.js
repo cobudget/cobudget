@@ -38,7 +38,7 @@ const SetCurrency = ({ closeModal, event }) => {
             <TextField
               name="maxAmountToDreamPerUser"
               label="Max. amount to one dream per user"
-              defaultValue={event.maxAmountToDreamPerUser}
+              defaultValue={event.maxAmountToDreamPerUser / 100}
               fullWidth
               inputRef={register}
               InputProps={{
