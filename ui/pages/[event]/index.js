@@ -42,7 +42,7 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-const EventPage = ({ currentUser, event, router }) => {
+const EventPage = ({ currentOrgMember, event, router }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [filterLabels, setFilterLabels] = useState();
@@ -99,7 +99,7 @@ const EventPage = ({ currentUser, event, router }) => {
         toggleFilterFavorites={toggleFilterFavorites}
         textSearchTerm={textSearchTerm}
         setTextSearchTerm={setTextSearchTerm}
-        currentUser={currentUser}
+        currentOrgMember={currentOrgMember}
         customFields={event.customFields}
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
@@ -123,7 +123,7 @@ const EventPage = ({ currentUser, event, router }) => {
                     <DreamCard
                       dream={dream}
                       event={event}
-                      currentUser={currentUser}
+                      currentOrgMember={currentOrgMember}
                       filterLabels={filterLabels}
                     />
                   </a>

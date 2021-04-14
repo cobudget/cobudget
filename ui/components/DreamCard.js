@@ -31,11 +31,10 @@ const getDreamCustomFieldValue = (dream, customField) => {
   }
 };
 
-const DreamCard = ({ dream, event, currentUser, filterLabels }) => {
+const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
-
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {dream.images.length ? (
@@ -71,21 +70,21 @@ const DreamCard = ({ dream, event, currentUser, filterLabels }) => {
           </div>
         </div>
         <div>
-          {(dream.minGoalGrants || dream.maxGoalGrants) && (
+          {(dream.minGoal || dream.maxGoal) && (
             <ProgressBar
-              currentNumberOfGrants={dream.currentNumberOfGrants}
-              minGoalGrants={dream.minGoalGrants}
-              maxGoalGrants={dream.maxGoalGrants}
+              color={event.color}
+              ratio={dream.totalContributions / dream.minGoal}
+              className="mt-2 mb-3"
             />
           )}
 
-          <div className="flex mt-1">
-            {(dream.minGoalGrants || dream.maxGoalGrants) && (
-              <div className="mr-3 flex items-center text-gray-700 hover:text-green-700">
+          <div className="flex space-x-3 mt-1">
+            {(dream.minGoal || dream.maxGoal) && (
+              <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
-                <span className="block ml-1">
-                  {dream.currentNumberOfGrants}/
-                  {dream.maxGoalGrants || dream.minGoalGrants}
+                <span className="block ml-1 text-sm">
+                  {Math.round((dream.totalContributions / dream.minGoal) * 100)}
+                  %
                 </span>
               </div>
             )}
@@ -95,14 +94,16 @@ const DreamCard = ({ dream, event, currentUser, filterLabels }) => {
                 href="/[event]/[dream]#comments"
                 as={`/${event.slug}/${dream.id}#comments`}
               >
-                <div className="mr-3 flex items-center text-gray-700 hover:text-blue-700">
+                <div className="flex items-center text-gray-700">
                   <CommentIcon className="w-5 h-5" />
-                  <span className="block ml-1">{dream.numberOfComments} </span>
+                  <span className="block ml-1 text-sm">
+                    {dream.numberOfComments}
+                  </span>
                 </div>
               </Link>
             )}
 
-            {currentUser && currentUser.membership && (
+            {/* {currentOrgMember?.currentEventMembership && (
               <button
                 className="flex items-center focus:outline-none"
                 tabIndex="-1"
@@ -113,12 +114,12 @@ const DreamCard = ({ dream, event, currentUser, filterLabels }) => {
                 }}
               >
                 {dream.favorite ? (
-                  <HeartSolidIcon className="w-5 h-5 text-red" />
+                  <HeartSolidIcon className="w-5 h-5 text-red hover:text-red-dark" />
                 ) : (
                   <HeartOutlineIcon className="w-5 h-5 text-gray-700 hover:text-red" />
                 )}
               </button>
-            )}
+            )} */}
           </div>
         </div>
       </div>
