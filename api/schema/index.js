@@ -148,10 +148,7 @@ const schema = gql`
       dreamCreationCloses: Date
       allowStretchGoals: Boolean
     ): Event
-    giveGrant(eventId: ID!, dreamId: ID!, value: Int!): Grant
-    deleteGrant(eventId: ID!, grantId: ID!): Grant
-    reclaimGrants(dreamId: ID!): Dream
-    preOrPostFund(dreamId: ID!, value: Int!): Grant
+
     toggleFavorite(dreamId: ID!): Dream
 
     allocate(eventMemberId: ID!, amount: Int!): EventMember
@@ -253,8 +250,6 @@ const schema = gql`
     isGuide: Boolean
     isApproved: Boolean!
     createdAt: Date
-    availableGrants: Int
-    givenGrants: [Grant]
     balance: Int # stored as cents
     # roles: [Role]
   }
@@ -307,21 +302,6 @@ const schema = gql`
     user: User
     comment: String
     type: String
-  }
-
-  type Grant {
-    id: ID!
-    dream: Dream!
-    value: Int!
-    reclaimed: Boolean!
-    type: GrantType!
-    # user: Member!
-  }
-
-  enum GrantType {
-    PRE_FUND
-    USER
-    POST_FUND
   }
 
   type Image {
