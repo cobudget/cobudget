@@ -1,6 +1,4 @@
-import gql from "graphql-tag";
 import { useState } from "react";
-import { useMutation } from "@apollo/react-hooks";
 
 import Button from "components/Button";
 import { AddIcon } from "components/Icons";
