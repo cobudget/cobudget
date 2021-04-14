@@ -142,10 +142,7 @@ const schema = gql`
     updateGrantingSettings(
       eventId: ID!
       currency: String
-      grantsPerMember: Int
-      maxGrantsToDream: Int
-      totalBudget: Int
-      grantValue: Int
+      maxAmountToDreamPerUser: Int
       grantingOpens: Date
       grantingCloses: Date
       dreamCreationCloses: Date

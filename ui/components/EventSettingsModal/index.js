@@ -9,10 +9,10 @@ import DreamReview from "./DreamReview";
 
 const tabs = [
   { name: "General", component: GeneralSettings },
-  { name: "Granting", component: Granting },
   { name: "Guidelines", component: Guidelines },
   { name: "Dream Review", component: DreamReview },
   { name: "Custom fields", component: CustomFields },
+  { name: "Granting", component: Granting },
 ];
 
 const EventSettingsModal = ({ event, currentOrgMember, handleClose }) => {

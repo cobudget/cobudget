@@ -39,17 +39,15 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event, currentOrgMember, handleClose }) => {
+export default function GeneralSettings({
+  event,
+  currentOrgMember,
+  handleClose,
+}) {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
-  const {
-    handleSubmit,
-    register,
-    setValue,
-    formState: { isDirty },
-    errors,
-  } = useForm();
+  const { handleSubmit, register, setValue } = useForm();
 
   return (
     <div className="px-6">
@@ -171,4 +169,4 @@ export default ({ event, currentOrgMember, handleClose }) => {
       )}
     </div>
   );
-};
+}

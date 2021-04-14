@@ -1,12 +1,11 @@
 import { useForm } from "react-hook-form";
-import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
-import { Box, Button, TextField, InputAdornment } from "@material-ui/core";
+import { Box, Button, TextField } from "@material-ui/core";
 import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetTotalBudget = ({ closeModal, event }) => {
+const SetCurrency = ({ closeModal, event }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
@@ -17,16 +16,18 @@ const SetTotalBudget = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set total budget</h1>
+        <h1 className="text-3xl">Set max. amount to one dream per user</h1>
+
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { totalBudget: Number(variables.totalBudget) },
+              variables: {
+                maxAmountToDreamPerUser: Math.round(
+                  variables.maxAmountToDreamPerUser * 100
+                ),
+              },
             })
-              .then(({ data }) => {
-                // console.log({ data });
-                closeModal();
-              })
+              .then(() => closeModal())
               .catch((err) => {
                 console.log({ err });
                 alert(err.message);
@@ -35,18 +36,14 @@ const SetTotalBudget = ({ closeModal, event }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="totalBudget"
-              label="Total budget"
-              defaultValue={event.totalBudget}
+              name="maxAmountToDreamPerUser"
+              label="Max. amount to one dream per user"
+              defaultValue={event.maxAmountToDreamPerUser}
               fullWidth
               inputRef={register}
               InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {event.currency}
-                  </InputAdornment>
-                ),
                 type: "number",
+                min: "1",
               }}
               variant="outlined"
             />
@@ -66,4 +63,4 @@ const SetTotalBudget = ({ closeModal, event }) => {
   );
 };
 
-export default SetTotalBudget;
+export default SetCurrency;

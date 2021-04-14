@@ -1913,10 +1913,7 @@ const resolvers = {
       {
         eventId,
         currency,
-        grantsPerMember,
-        maxGrantsToDream,
-        totalBudget,
-        grantValue,
+        maxAmountToDreamPerUser,
         dreamCreationCloses,
         grantingOpens,
         grantingCloses,
@@ -1945,7 +1942,6 @@ const resolvers = {
       )
         throw new Error("You need to be admin to update granting settings.");
 
-      const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
       const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
         dayjs()
       );
@@ -1958,48 +1954,10 @@ const resolvers = {
           );
         }
         event.currency = currency;
-        event.totalBudget = undefined;
-        event.grantValue = undefined;
       }
 
-      if (grantsPerMember) {
-        // granting can't have started to change tokens per member
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change tokens per member once granting has started"
-          );
-        }
-        event.grantsPerMember = grantsPerMember;
-        event.grantValue = undefined;
-      }
-
-      if (maxGrantsToDream) {
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change max tokens to dream once granting has started"
-          );
-        }
-        event.maxGrantsToDream = maxGrantsToDream;
-      }
-
-      if (totalBudget) {
-        // can only increase total budget after granting has started
-        if (grantingHasStarted && totalBudget < event.totalBudget) {
-          throw new Error(
-            "You can't decrease total budget once granting has started"
-          );
-        }
-        event.totalBudget = totalBudget;
-      }
-
-      if (grantValue) {
-        // granting can't have started to change token value
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change token value once granting has started"
-          );
-        }
-        event.grantValue = grantValue;
+      if (maxAmountToDreamPerUser) {
+        event.maxAmountToDreamPerUser = maxAmountToDreamPerUser;
       }
 
       if (dreamCreationCloses) {
@@ -2007,22 +1965,6 @@ const resolvers = {
       }
 
       if (grantingOpens) {
-        if (
-          !event.totalBudget ||
-          !event.grantValue
-          // || !event.dreamCreationCloses
-        ) {
-          throw new Error(
-            "You can't set granting opening date before setting total budget & token value "
-          );
-        }
-
-        // if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
-        //   throw new Error(
-        //     "Granting opens date needs to be after dream creation closing date"
-        //   );
-        // }
-
         event.grantingOpens = grantingOpens;
       }
 
@@ -2039,11 +1981,6 @@ const resolvers = {
       }
 
       if (typeof allowStretchGoals !== "undefined") {
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change stretch goal setting once granting has started"
-          );
-        }
         event.allowStretchGoals = allowStretchGoals;
       }
 
