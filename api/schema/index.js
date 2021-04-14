@@ -472,9 +472,7 @@ const schema = gql`
   }
 
   type Subscription {
-    commentCreated(dreamID: ID!): Comment
-    commentEdited(dreamID: ID!): Comment
-    commentDeleted(dreamID: ID!): Comment
+    commentsChanged(dreamID: ID!): Dream
   }
 
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails

@@ -92,7 +92,7 @@ module.exports = {
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
 
-      liveUpdate.publish('commentCreated', { commentCreated: { ...post, orgMember: currentOrgMember } });
+      liveUpdate.publish('commentsChanged', { commentsChanged: { id: dream.id } });
     });
 
     eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -113,7 +113,7 @@ module.exports = {
       if (post.errors)
         throw new Error(["Discourse API:", ...post.errors]);
 
-      liveUpdate.publish('commentEdited', { commentEdited: post });
+      liveUpdate.publish('commentsChanged', { commentsChanged: { id: dream.id } });
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
@@ -129,9 +129,9 @@ module.exports = {
       });
 
       if (!res.ok)
-        throw new Error("Unable to delete post on Discourse; please try again");
+        throw new Error(["Discourse API:", res.statusText]);
 
-      liveUpdate.publish('commentDeleted', { commentDeleted: comment });
+      liveUpdate.publish('commentsChanged', { commentsChanged: { id: dream.id } });
     });
   },
 

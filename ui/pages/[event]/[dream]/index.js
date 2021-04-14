@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useSubscription } from "@apollo/react-hooks";
 import { useRouter } from "next/router";
 import Head from "next/head";
 
@@ -105,12 +105,23 @@ const DreamPage = ({ event, currentUser, currentOrgMember, currentOrg }) => {
   if (!event) return null;
   const router = useRouter();
 
-  const { data: { dream } = { dream: null }, loading, error } = useQuery(
+  const COMMENTS_CHANGED = gql`
+    subscription OnCommentChanged($dreamID: ID!) {
+      commentsChanged(dreamID: $dreamID) { id }
+    }
+  `;
+
+  const { data: { dream } = { dream: null }, loading, error, refetch } = useQuery(
     DREAM_QUERY,
     {
+      onCompleted: console.log,
       variables: { id: router.query.dream },
     }
   );
+  useSubscription(COMMENTS_CHANGED, { variables: { dreamID: dream?.id }, onSubscriptionData: () => {
+    console.log('refetching...')
+    refetch()
+  } });
 
   if (dream)
     return (

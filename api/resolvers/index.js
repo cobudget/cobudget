@@ -868,17 +868,16 @@ const resolvers = {
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
 
-      if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
+      if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
         throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
 
-      const comment = { authorId: currentOrgMember.id, content }
+      const comment = { content }
 
-      if (!currentOrg.discourse) {
+      if (!orgHasDiscourse(currentOrg))
         dream.comments.push(comment);
-      }
 
       eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
       return dream.save();
@@ -1964,9 +1963,7 @@ const resolvers = {
     },
   },
   Subscription: {
-    commentCreated: { subscribe: () => liveUpdate.asyncIterator(['commentCreated']) },
-    commentEdited: { subscribe: () => liveUpdate.asyncIterator(['commentEdited']) },
-    commentDeleted: { subscribe: () => liveUpdate.asyncIterator(['commentDeleted']) },
+    commentsChanged: { subscribe: () => liveUpdate.asyncIterator(['commentsChanged']) },
   },
   EventMember: {
     // user: async (member, args, { models: { User } }) => {
