@@ -33,7 +33,6 @@ const EventSchema = new Schema({
       position: {
         type: Number,
         required: true,
-        default: 1000,
       },
     }),
   ],
@@ -55,7 +54,6 @@ const EventSchema = new Schema({
       position: {
         type: Number,
         required: true,
-        default: 1000,
       },
       isShownOnFrontPage: Boolean,
       createdAt: {

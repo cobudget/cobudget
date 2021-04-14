@@ -403,7 +403,12 @@ const resolvers = {
       )
         throw new Error("You need to be admin to add a guideline");
 
-      event.guidelines.push({ ...guideline });
+      const position =
+        event.guidelines
+          .map((gl) => gl.position)
+          .reduce((a, b) => Math.max(a, b), 1000) + 1;
+
+      event.guidelines.push({ ...guideline, position });
 
       return event.save();
     },
@@ -515,7 +520,12 @@ const resolvers = {
       )
         throw new Error("You need to be admin to add a custom field");
 
-      event.customFields.push({ ...customField });
+      const position =
+        event.customFields
+          .map((cf) => cf.position)
+          .reduce((a, b) => Math.max(a, b), 1000) + 1;
+
+      event.customFields.push({ ...customField, position });
 
       return event.save();
     },
