@@ -195,6 +195,10 @@ const schema = gql`
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
     dreamReviewIsOpen: Boolean
+    totalAllocations: Int
+    totalContributions: Int
+    totalContributionsFunding: Int
+    totalContributionsFunded: Int
   }
 
   type Guideline {

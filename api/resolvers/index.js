@@ -2016,25 +2016,6 @@ const resolvers = {
     // },
     isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
     avatar: () => null, //TODO: what about avatars in keycloak?
-    // membership: async (
-    //   user,
-    //   { slug },
-    //   { currentOrg, models: { OrgMember, EventMember, Event } }
-    // ) => {
-    //   if (!slug) return null;
-    //   const event = await Event.findOne({
-    //     organizationId: currentOrg.id,
-    //     slug,
-    //   });
-    //   const orgMembership = await OrgMember.findOne({
-    //     userId: user.id,
-    //     organizationId: currentOrg.id,
-    //   });
-    //   return EventMember.findOne({
-    //     orgMemberId: orgMembership.id,
-    //     eventId: event.id,
-    //   });
-    // },
   },
   Organization: {
     events: async (organization, args, { models: { Event } }) => {
@@ -2063,6 +2044,80 @@ const resolvers = {
         eventId: event.id,
         isApproved: true,
       });
+    },
+    totalAllocations: async (event, args, { models: { Allocation } }) => {
+      const [
+        { totalAllocations } = { totalAllocations: 0 },
+      ] = await Allocation.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+          },
+        },
+        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
+      ]);
+      return totalAllocations;
+    },
+    totalContributions: async (event, args, { models: { Contribution } }) => {
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+      return totalContributions;
+    },
+    totalContributionsFunding: async (
+      event,
+      args,
+      { models: { Contribution, Dream } }
+    ) => {
+      const fundingNowDreamIds = await Dream.distinct("_id", {
+        eventId: event.id,
+        fundedAt: null,
+      });
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+            dreamId: { $in: fundingNowDreamIds },
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalContributions;
+    },
+    totalContributionsFunded: async (
+      event,
+      args,
+      { models: { Contribution, Dream } }
+    ) => {
+      const fundedDreamIds = await Dream.distinct("_id", {
+        eventId: event.id,
+        fundedAt: { $ne: null },
+      });
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+            dreamId: { $in: fundedDreamIds },
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalContributions;
     },
   },
   Dream: {
