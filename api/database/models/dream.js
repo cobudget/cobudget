@@ -64,6 +64,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
+  completedAt: { type: Date },
   discourseTopicId: { type: Number },
 }).index({ title: "text", description: "text", summary: "text" });
 
@@ -75,6 +76,10 @@ DreamSchema.virtual("minGoal").get(function () {
 DreamSchema.virtual("maxGoal").get(function () {
   const { max } = calculateGoals(this.budgetItems);
   return max;
+});
+
+DreamSchema.virtual("isCompleted").get(function () {
+  return !!this.completedAt;
 });
 
 module.exports = DreamSchema;

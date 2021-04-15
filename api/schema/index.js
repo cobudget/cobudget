@@ -154,6 +154,8 @@ const schema = gql`
     allocate(eventMemberId: ID!, amount: Int!): EventMember
     contribute(eventId: ID!, dreamId: ID!, amount: Int!): Dream
 
+    markAsCompleted(dreamId: ID!): Dream
+
     registerForEvent(eventId: ID!): EventMember
   }
 
@@ -283,6 +285,8 @@ const schema = gql`
     logs: [Log]
     # reactions: [Reaction]
     # tags: [Tag]
+    completedAt: Date
+    isCompleted: Boolean
   }
 
   type Comment {

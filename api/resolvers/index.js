@@ -1671,6 +1671,28 @@ const resolvers = {
 
       return dream;
     },
+    markAsCompleted: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember } }
+    ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+      if (!currentEventMember?.isAdmin)
+        throw new Error(
+          "You need to be event admin to mark a dream as completed"
+        );
+
+      dream.completedAt = Date.now();
+      return dream.save();
+    },
     updateGrantingSettings: async (
       parent,
       {
