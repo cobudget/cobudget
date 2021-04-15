@@ -1623,6 +1623,11 @@ const resolvers = {
       if (contributionsForDream + amount > maxGoal)
         throw new Error("You can't overfund this dream.");
 
+      // mark dream as funded if it has reached its max goal
+      if (contributionsForDream + amount === maxGoal) {
+        dream.fundedAt = Date.now();
+      }
+
       // Check that it is not more than is allowed per dream (if this number is set)
       if (
         event.maxAmountToDreamPerUser &&
