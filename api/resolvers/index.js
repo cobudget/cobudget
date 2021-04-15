@@ -1179,7 +1179,7 @@ const resolvers = {
       if (!eventMember || !eventMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (flag in dream.flags) {
+      for (const flag in dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
           flag.type === "ALL_GOOD_FLAG"
@@ -1264,7 +1264,7 @@ const resolvers = {
       // let newOrgMembers = [];
       const newEventMembers = [];
 
-      for (email of emails) {
+      for (const email of emails) {
         const [user] = await kcAdminClient.users.findOne({
           email: email.trim(),
         });
