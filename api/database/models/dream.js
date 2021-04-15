@@ -64,6 +64,7 @@ const DreamSchema = new Schema({
     }),
   ],
   published: { type: Boolean, default: false },
+  fundedAt: { type: Date },
   completedAt: { type: Date },
   discourseTopicId: { type: Number },
 }).index({ title: "text", description: "text", summary: "text" });
@@ -78,7 +79,11 @@ DreamSchema.virtual("maxGoal").get(function () {
   return max;
 });
 
-DreamSchema.virtual("isCompleted").get(function () {
+DreamSchema.virtual("funded").get(function () {
+  return !!this.fundedAt;
+});
+
+DreamSchema.virtual("completed").get(function () {
   return !!this.completedAt;
 });
 
