@@ -1,6 +1,5 @@
 import gql from "graphql-tag";
 import { useQuery } from "@apollo/react-hooks";
-import { useRouter } from "next/router";
 import Head from "next/head";
 
 import Dream from "../../../components/Dream";
@@ -18,6 +17,10 @@ export const DREAM_QUERY = gql`
       totalContributions
       approved
       published
+      completed
+      completedAt
+      funded
+      fundedAt
       raisedFlags {
         id
         comment

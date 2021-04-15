@@ -154,6 +154,7 @@ const schema = gql`
     allocate(eventMemberId: ID!, amount: Int!): EventMember
     contribute(eventId: ID!, dreamId: ID!, amount: Int!): Dream
 
+    acceptFunding(dreamId: ID!): Dream
     markAsCompleted(dreamId: ID!): Dream
 
     registerForEvent(eventId: ID!): EventMember
@@ -270,9 +271,6 @@ const schema = gql`
     images: [Image!]
     cocreators: [EventMember]!
     budgetItems: [BudgetItem!]
-    minGoal: Int
-    maxGoal: Int
-    totalContributions: Int
     customFields: [CustomFieldValue]
     comments: [Comment]
     numberOfComments: Int
@@ -285,8 +283,14 @@ const schema = gql`
     logs: [Log]
     # reactions: [Reaction]
     # tags: [Tag]
+    minGoal: Int
+    maxGoal: Int
+    totalContributions: Int
+
+    fundedAt: Date
+    funded: Boolean
     completedAt: Date
-    isCompleted: Boolean
+    completed: Boolean
   }
 
   type Comment {

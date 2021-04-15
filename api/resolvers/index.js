@@ -1698,6 +1698,45 @@ const resolvers = {
       dream.completedAt = Date.now();
       return dream.save();
     },
+    acceptFunding: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember, Contribution } }
+    ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !currentEventMember ||
+        (!dream.cocreators.includes(currentEventMember.id) &&
+          !currentEventMember.isAdmin)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      const [
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            dreamId: dream._id,
+          },
+        },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
+      ]);
+
+      if (contributionsForDream < dream.minGoal)
+        throw new Error("Dream has not reached its minimum goal yet.");
+
+      dream.fundedAt = Date.now();
+      return dream.save();
+    },
     updateGrantingSettings: async (
       parent,
       {

@@ -26,20 +26,31 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
   }
 `;
 
-const RECLAIM_GRANTS_MUTATION = gql`
-  mutation ReclaimGrants($dreamId: ID!) {
-    reclaimGrants(dreamId: $dreamId) {
-      id
-      currentNumberOfGrants
-    }
-  }
-`;
-
 const PUBLISH_DREAM_MUTATION = gql`
   mutation PublishDream($dreamId: ID!, $unpublish: Boolean) {
     publishDream(dreamId: $dreamId, unpublish: $unpublish) {
       id
       published
+    }
+  }
+`;
+
+const MARK_AS_COMPLETED_MUTATION = gql`
+  mutation MarkAsCompleted($dreamId: ID!) {
+    markAsCompleted(dreamId: $dreamId) {
+      id
+      completedAt
+      completed
+    }
+  }
+`;
+
+const ACCEPT_FUNDING_MUTATION = gql`
+  mutation AcceptFunding($dreamId: ID!) {
+    acceptFunding(dreamId: $dreamId) {
+      id
+      fundedAt
+      funded
     }
   }
 `;
@@ -59,47 +70,70 @@ const css = {
 
 const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
-  const [reclaimGrants] = useMutation(RECLAIM_GRANTS_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
   });
-
+  const [markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const [acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
   const [deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
     refetchQueries: [
       {
         query: DREAMS_QUERY,
-        variables: { eventId: event.id },
+        variables: { eventSlug: event.slug },
       },
     ],
   });
 
-  const [grantModalOpen, setGrantModalOpen] = useState(false);
-  const [prePostFundModalOpen, setPrePostFundModalOpen] = useState(false);
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
-  const dreamCanBeFunded =
-    Math.max(dream.minGoal, dream.maxGoal) > dream.totalContributions;
+
+  const isEventAdminOrGuide =
+    currentOrgMember?.currentEventMembership?.isAdmin ||
+    currentOrgMember?.currentEventMembership?.isGuide;
+  const hasNotReachedMaxGoal =
+    dream.totalContributions < Math.max(dream.minGoal, dream.maxGoal);
+  const hasReachedMinGoal = dream.totalContributions > dream.minGoal;
+
+  const showFundButton =
+    !dream.funded &&
+    hasNotReachedMaxGoal &&
+    currentOrgMember?.currentEventMembership?.balance;
+  const showAcceptFundingButton =
+    !dream.funded && canEdit && hasNotReachedMaxGoal && hasReachedMinGoal;
+  const showPublishButton = canEdit && !dream.published;
+  const showMarkAsCompletedButton =
+    isEventAdminOrGuide && dream.funded && !dream.completed;
+  const showApproveButton =
+    isEventAdminOrGuide && !event.grantingHasClosed && !dream.approved;
+  const showUnapproveButton =
+    isEventAdminOrGuide && dream.approved && !dream.totalContributions;
+  const showDeleteButton = canEdit && !dream.totalContributions;
 
   return (
     <>
       {(dream.approved || canEdit) && (
-        <div className="-mt-20 bg-white rounded-lg shadow-md p-5">
+        <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
           {dream.approved && (
             <>
               <GrantingStatus dream={dream} event={event} />
-              {dreamCanBeFunded && (
+              {showFundButton && (
                 <>
                   <Button
                     color={event.color}
                     fullWidth
-                    onClick={() => setGrantModalOpen(true)}
+                    onClick={() => setContributeModalOpen(true)}
                   >
                     Fund
                   </Button>
-                  {grantModalOpen && (
+                  {contributeModalOpen && (
                     <ContributeModal
-                      handleClose={() => setGrantModalOpen(false)}
+                      handleClose={() => setContributeModalOpen(false)}
                       dream={dream}
                       event={event}
                       currentOrgMember={currentOrgMember}
@@ -107,73 +141,63 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                   )}
                 </>
               )}
-            </>
-          )}
-          {canEdit && (
-            <>
-              {!dream.published && (
+              {showAcceptFundingButton && (
                 <Button
                   color={event.color}
-                  onClick={() =>
-                    publishDream({
-                      variables: { unpublish: dream.published },
-                    })
-                  }
                   fullWidth
+                  onClick={() =>
+                    confirm(
+                      "Are you sure you would like to accept and finalize funding for this dream? This can't be undone."
+                    ) && acceptFunding().catch((err) => alert(err.message))
+                  }
                 >
-                  Publish
+                  Accept funding
                 </Button>
               )}
             </>
           )}
-          {(currentOrgMember?.currentEventMembership?.isAdmin ||
-            currentOrgMember?.currentEventMembership?.isGuide) && (
-            <div>
-              <div className="my-2">
-                {!event.grantingHasClosed && !dream.approved && (
-                  <Button
-                    color={event.color}
-                    fullWidth
-                    onClick={() =>
-                      approveForGranting({
-                        variables: {
-                          dreamId: dream.id,
-                          approved: true,
-                        },
-                      }).catch((err) => alert(err.message))
-                    }
-                  >
-                    Approve for granting
-                  </Button>
-                )}
-              </div>
-
-              {currentOrgMember?.currentEventMembership?.isAdmin && (
-                <>
-                  <div className="my-2">
-                    {event.grantingHasClosed &&
-                      dream.currentNumberOfGrants > 0 &&
-                      dream.currentNumberOfGrants < dream.minGoalGrants && (
-                        <>
-                          <Button
-                            color={event.color}
-                            onClick={() =>
-                              reclaimGrants({
-                                variables: { dreamId: dream.id },
-                              }).catch((err) => alert(err.message))
-                            }
-                          >
-                            Reclaim tokens
-                          </Button>
-                          <br />
-                        </>
-                      )}
-                  </div>
-                </>
-              )}
-            </div>
+          {showPublishButton && (
+            <Button
+              color={event.color}
+              onClick={() =>
+                publishDream({
+                  variables: { unpublish: dream.published },
+                })
+              }
+              fullWidth
+            >
+              Publish
+            </Button>
           )}
-
+          {showApproveButton && (
+            <Button
+              color={event.color}
+              fullWidth
+              onClick={() =>
+                approveForGranting({
+                  variables: {
+                    dreamId: dream.id,
+                    approved: true,
+                  },
+                }).catch((err) => alert(err.message))
+              }
+            >
+              Approve for granting
+            </Button>
+          )}
+          {showMarkAsCompletedButton && (
+            <Button
+              color={event.color}
+              fullWidth
+              onClick={() =>
+                confirm(
+                  "Are you sure you would like to mark this dream as completed? This can't be undone."
+                ) && markAsCompleted().catch((err) => alert(err.message))
+              }
+            >
+              Mark as completed
+            </Button>
+          )}
           {canEdit && (
             <div className="relative">
               <div className="flex justify-end">
@@ -200,57 +224,41 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                     Unpublish
                   </button>
                 )}
-                {dream.approved &&
-                  !event.grantingHasClosed &&
-                  (currentOrgMember?.currentEventMembership?.isAdmin ||
-                    currentOrgMember?.currentEventMembership?.isGuide) && (
-                    <button
-                      className={css.dropdownButton}
-                      onClick={() =>
-                        approveForGranting({
-                          variables: {
-                            dreamId: dream.id,
-                            approved: false,
-                          },
-                        })
-                          .then(() => setActionsDropdownOpen(false))
-                          .catch((err) => alert(err.message))
-                      }
-                    >
-                      Unapprove for granting
-                    </button>
-                  )}
-                {dream.approved &&
-                  dream.minGoalGrants > 0 &&
-                  currentOrgMember?.currentEventMembership?.isAdmin && (
-                    <>
-                      <button
-                        className={css.dropdownButton}
-                        onClick={() => {
-                          setPrePostFundModalOpen(true);
-                          setActionsDropdownOpen(false);
-                        }}
-                      >
-                        {event.grantingHasClosed ? "Post-fund" : "Pre-fund"}
-                      </button>
-                    </>
-                  )}
-                <button
-                  className={css.dropdownButton}
-                  onClick={() =>
-                    confirm(
-                      "Are you sure you would like to delete this dream?"
-                    ) &&
-                    deleteDream()
-                      .then(() => {
-                        setActionsDropdownOpen(false);
-                        Router.push("/[event]", `/${event.slug}`);
+                {showUnapproveButton && (
+                  <button
+                    className={css.dropdownButton}
+                    onClick={() =>
+                      approveForGranting({
+                        variables: {
+                          dreamId: dream.id,
+                          approved: false,
+                        },
                       })
-                      .catch((err) => alert(err.message))
-                  }
-                >
-                  Delete
-                </button>
+                        .then(() => setActionsDropdownOpen(false))
+                        .catch((err) => alert(err.message))
+                    }
+                  >
+                    Unapprove for granting
+                  </button>
+                )}
+                {showDeleteButton && (
+                  <button
+                    className={css.dropdownButton}
+                    onClick={() =>
+                      confirm(
+                        "Are you sure you would like to delete this dream?"
+                      ) &&
+                      deleteDream()
+                        .then(() => {
+                          setActionsDropdownOpen(false);
+                          Router.push("/[event]", `/${event.slug}`);
+                        })
+                        .catch((err) => alert(err.message))
+                    }
+                  >
+                    Delete
+                  </button>
+                )}
               </Dropdown>
             </div>
           )}
@@ -302,12 +310,6 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
           currentOrgMember={currentOrgMember}
         />
       </div>
-      <PreOrPostFundModal
-        open={prePostFundModalOpen}
-        handleClose={() => setPrePostFundModalOpen(false)}
-        dream={dream}
-        event={event}
-      />
     </>
   );
 };
