@@ -14,7 +14,7 @@ let globalApolloClient = null;
  * inside getStaticProps, getStaticPaths or getServerSideProps
  * @param {NextPageContext | NextAppContext} ctx
  */
-export const initOnContext = (ctx) => {
+const initOnContext = (ctx) => {
   const inAppContext = Boolean(ctx.ctx);
 
   // We consider installing `withApollo({ ssr: true })` on global App level
