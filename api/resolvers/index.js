@@ -900,8 +900,9 @@ const resolvers = {
         eventId: event.id,
       });
 
-      if (!currentOrg.discourse) {
-        dream.comments = dream.comments.filter(comment => comment._id.toString() !== commentId);
+      if (!orgHasDiscourse(currentOrg)) {
+        console.log(dream.comments)
+        dream.comments = dream.comments.filter(comment => comment.id.toString() !== commentId);
         return dream.save();
       }
 
@@ -922,7 +923,7 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!currentOrg.discourse) {
+      if (!orgHasDiscourse(currentOrg)) {
         const comment = dream.comments.filter(
           (comment) =>
             comment._id.toString() === commentId &&

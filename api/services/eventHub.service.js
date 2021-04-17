@@ -12,7 +12,6 @@ class EventHub {
         return result.concat(err);
       }
     }, []);
-    console.log('errors: ', errors)
 
     if (errors.length) {
       errors.map(console.error);

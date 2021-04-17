@@ -1,12 +1,14 @@
 const discourse = require("../lib/discourse");
 const liveUpdate = require("../services/liveUpdate.service");
 
+const orgHasDiscourse = (org) => org.discourse.url && org.discourse.apiKey
+
 module.exports = {
   initialize(eventHub, models) {
     console.log(`Integrating with Discourse...`)
 
     eventHub.subscribe('create-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      if (!currentOrg.discourse) { return }
+      if (!orgHasDiscourse(currentOrg)) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
@@ -35,7 +37,7 @@ module.exports = {
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      if (!currentOrg.discourse || !dream.discourseTopicId) { return }
+      if (!orgHasDiscourse(currentOrg) || !dream.discourseTopicId) { return }
 
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
@@ -75,7 +77,7 @@ module.exports = {
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      if (!currentOrg.discourse || !dream.discourseTopicId) { return }
+      if (!orgHasDiscourse(currentOrg) || !dream.discourseTopicId) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
@@ -96,7 +98,7 @@ module.exports = {
     });
 
     eventHub.subscribe('edit-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      if (!currentOrg.discourse) { return }
+      if (!orgHasDiscourse(currentOrg)) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
@@ -117,7 +119,7 @@ module.exports = {
     });
 
     eventHub.subscribe('delete-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      if (!currentOrg.discourse) { return }
+      if (!orgHasDiscourse(currentOrg)) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
