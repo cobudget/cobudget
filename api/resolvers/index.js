@@ -874,7 +874,7 @@ const resolvers = {
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
         throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
 
-      const comment = { content }
+      const comment = { content, authorId: currentOrgMember.id, }
 
       if (!orgHasDiscourse(currentOrg))
         dream.comments.push(comment);
