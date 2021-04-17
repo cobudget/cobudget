@@ -227,7 +227,7 @@ const resolvers = {
         );
       }
 
-      eventHub.publish('create-organization', { currentOrganization: savedOrg, currentOrgMember });
+      await eventHub.publish('create-organization', { currentOrganization: savedOrg, currentOrgMember });
       return savedOrg;
     },
     editOrganization: async (
@@ -285,7 +285,7 @@ const resolvers = {
           }
         );
 
-      eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
+      await eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
       return organization;
     },
     setTodosFinished: async (
@@ -326,7 +326,7 @@ const resolvers = {
         isApproved: true,
       }).save();
 
-      eventHub.publish('create-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish('create-event', { currentOrg, currentOrgMember, event });
       return event;
     },
     editEvent: async (
@@ -371,7 +371,7 @@ const resolvers = {
         event.dreamReviewIsOpen = dreamReviewIsOpen;
       if (discourseCategoryId) event.discourseCategoryId = discourseCategoryId;
 
-      eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
       return event.save();
     },
     deleteEvent: async (
@@ -394,7 +394,7 @@ const resolvers = {
       await Dream.deleteMany({ eventId });
       await EventMember.deleteMany({ eventId });
 
-      eventHub.publish('delete-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish('delete-event', { currentOrg, currentOrgMember, event });
       return event.remove();
     },
     addGuideline: async (
@@ -662,7 +662,7 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      eventHub.publish('create-dream', { currentOrg, currentOrgMember, dream, event });
+      await eventHub.publish('create-dream', { currentOrg, currentOrgMember, dream, event });
 
       return dream.save();
     },
@@ -693,7 +693,7 @@ const resolvers = {
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
 
-      eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream });
 
       return dream.save();
     },
@@ -760,7 +760,7 @@ const resolvers = {
         throw new Error("You cant delete a Dream that has received tokens");
       }
 
-      eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
       return dream.remove();
     },
     addCocreator: async (
@@ -854,7 +854,7 @@ const resolvers = {
 
       dream.published = !unpublish;
 
-      eventHub.publish('publish-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish('publish-dream', { currentOrg, currentOrgMember, event, dream });
       return dream.save();
     },
     addComment: async (
@@ -879,7 +879,7 @@ const resolvers = {
       if (!orgHasDiscourse(currentOrg))
         dream.comments.push(comment);
 
-      eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
+      await eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
       return dream.save();
     },
 
@@ -905,7 +905,7 @@ const resolvers = {
         return dream.save();
       }
 
-      eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
+      await eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
 
       return dream;
     },
@@ -938,7 +938,7 @@ const resolvers = {
         dream.save();
       }
 
-      eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
+      await eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
 
       return dream;
     },

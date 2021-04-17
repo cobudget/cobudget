@@ -3,15 +3,16 @@ class EventHub {
     get: (target, name) => target.hasOwnProperty(name) ? target[name] : []
   })
 
-  static publish(channel, event) {
-    const errors = this.subscriptions[channel].reduce((result, fn) => {
+  static publish = async (channel, event) => {
+    const errors = await this.subscriptions[channel].reduce(async (result, fn) => {
       try {
-        fn(event);
+        await fn(event);
         return result;
       } catch(err) {
         return result.concat(err);
       }
     }, []);
+    console.log('errors: ', errors)
 
     if (errors.length) {
       errors.map(console.error);
