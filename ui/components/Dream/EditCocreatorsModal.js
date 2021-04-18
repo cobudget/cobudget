@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import Avatar from "../Avatar";
 import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";

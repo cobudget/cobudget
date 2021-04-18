@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
 
 import { Modal } from "@material-ui/core";

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import gql from "graphql-tag";
 import ReactMarkdown from "react-markdown";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import AutoScroll from "@brianmcallister/react-auto-scroll";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";

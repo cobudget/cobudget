@@ -1,8 +1,8 @@
 import React from "react";
 import { Modal, List, Divider } from "@material-ui/core";
+import { gql } from "@apollo/client";
 
 import { makeStyles } from "@material-ui/core/styles";
-import gql from "graphql-tag";
 import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
 

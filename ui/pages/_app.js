@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, gql } from "@apollo/client";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";

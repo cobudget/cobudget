@@ -1,9 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Badge } from "@material-ui/core";
-import { useRouter } from "next/router";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";

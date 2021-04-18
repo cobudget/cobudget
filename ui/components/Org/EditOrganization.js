@@ -2,13 +2,10 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import Button from "../Button";
 import TextField from "../TextField";
 import ImageUpload from "components/ImageUpload";
-import { Tooltip } from "react-tippy";
-import { QuestionMarkIcon } from "../Icons";
 import slugify from "utils/slugify";
 
 const CREATE_ORGANIZATION = gql`

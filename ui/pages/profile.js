@@ -1,8 +1,5 @@
-import { useQuery, useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import Link from "next/link";
-
-import { TOP_LEVEL_QUERY } from "./_app";
 
 const PROFILE_QUERY = gql`
   query Profile {

@@ -1,6 +1,5 @@
-import gql from "graphql-tag";
 import { useState } from "react";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
 import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";

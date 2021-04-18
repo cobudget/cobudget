@@ -1,13 +1,10 @@
 import React from "react";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
-import { TextField, Button, IconButton } from "@material-ui/core";
-import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
-import { useForm } from "react-hook-form";
+import { DeleteIcon, FlagIcon } from "components/Icons";
 import EditComment from "./EditComment";
 
 dayjs.extend(relativeTime);

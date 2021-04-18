@@ -1,8 +1,7 @@
-import { ApolloClient } from "apollo-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { HttpLink } from "apollo-link-http";
+import { ApolloClient, HttpLink } from "@apollo/client";
+import { InMemoryCache } from "@apollo/client/cache";
 import fetch from "isomorphic-unfetch";
-import { setContext } from "apollo-link-context";
+import { setContext } from "@apollo/client/link/context";
 import getHostInfo from "utils/getHostInfo";
 import auth from "lib/auth";
 

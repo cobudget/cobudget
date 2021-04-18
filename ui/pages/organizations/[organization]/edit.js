@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
-import { useQuery } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useQuery, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
 import EditOrganization from "components/Org/EditOrganization";
 
