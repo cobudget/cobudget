@@ -53,12 +53,6 @@ async function makeContext(orgSlug) {
 
 export default function createRealitiesApollo() {
   if (typeof window === "undefined") return null;
-  console.log(
-    "endpoint",
-    process.env.REACT_APP_GRAPHQL_ENDPOINT,
-    "subscription",
-    process.env.REACT_APP_GRAPHQL_SUBSCRIPTION
-  );
 
   const { subdomain: orgSlug } = getHostInfo();
 

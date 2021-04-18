@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
 import createRealitiesApollo from "lib/realities/createRealitiesApollo";
@@ -18,11 +19,10 @@ export const GET_NEEDS = gql`
     }
   }
 `;
+
 const realitiesApollo = createRealitiesApollo();
 
-const RealitiesPage = ({ currentOrg, currentOrgMember }) => {
-  console.log("on realities page", { currentOrg, currentOrgMember });
-
+const RealitiesPage = () => {
   const { data, error, loading } = useQuery(GET_NEEDS, {
     skip: typeof window === "undefined",
     client: realitiesApollo,
@@ -34,16 +34,14 @@ const RealitiesPage = ({ currentOrg, currentOrgMember }) => {
   }
   if (loading) return <HappySpinner />;
 
-  console.log("data", data);
-
   return (
     <div>
       <div>Needs & Resps:</div>
       <ul className="list-disc">
         {data?.needs.map((need) => {
           return (
-            <>
-              <li key={need.nodeId}>{need.title}</li>
+            <React.Fragment key={need.nodeId}>
+              <li>{need.title}</li>
               {need.fulfilledBy.map((resp) => {
                 return (
                   <li key={resp.nodeId} className="ml-5">
@@ -51,7 +49,7 @@ const RealitiesPage = ({ currentOrg, currentOrgMember }) => {
                   </li>
                 );
               })}
-            </>
+            </React.Fragment>
           );
         })}
       </ul>
