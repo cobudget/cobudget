@@ -1,9 +1,10 @@
-import { gql, ApolloClient, ApolloLink, split, HttpLink } from "@apollo/client";
+import { ApolloClient, ApolloLink, split, HttpLink } from "@apollo/client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { setContext } from "@apollo/client/link/context";
 import { InMemoryCache } from "@apollo/client/cache";
 import getHostInfo from "utils/getHostInfo";
+import { CACHE_QUERY } from "./queries";
 
 const defaults = {
   showCreateNeed: false,
@@ -11,14 +12,6 @@ const defaults = {
   showDetailedEditNeedView: false,
   showDetailedEditRespView: false,
 };
-const CACHE_QUERY = gql`
-  query ShowCreates {
-    showCreateNeed @client
-    showCreateResponsibility @client
-    showDetailedEditNeedView @client
-    showDetailedEditRespView @client
-  }
-`;
 
 // import introspectionQueryResultData from './fragmentTypes.json';
 
