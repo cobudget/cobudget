@@ -78,7 +78,7 @@ const DraggableItems = ({
       useDragHandle
       helperClass={classes.sorting}
     >
-      {localItems
+      {[...localItems]
         .sort((a, b) => a.position - b.position)
         .map((item, index) => (
           <SortableItem
