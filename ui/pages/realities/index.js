@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
 import createRealitiesApollo from "lib/realities/createRealitiesApollo";
+import { REALITIES_CREATE_SUBSCRIPTION } from "lib/realities/subscriptions";
 
 const GET_NEEDS = gql`
   query Needs {
@@ -41,7 +42,7 @@ const realitiesApollo = createRealitiesApollo();
 
 const RealitiesPage = () => {
   const onServer = typeof window === "undefined";
-  const { data, error, loading } = useQuery(GET_NEEDS, {
+  const { data, error, loading, subscribeToMore } = useQuery(GET_NEEDS, {
     skip: onServer,
     client: realitiesApollo,
   });
@@ -61,6 +62,27 @@ const RealitiesPage = () => {
       }
     },
   });
+
+  useEffect(
+    () =>
+      subscribeToMore({
+        document: REALITIES_CREATE_SUBSCRIPTION,
+        updateQuery: (prev, { subscriptionData }) => {
+          if (!subscriptionData.data) return prev;
+          const { realityCreated } = subscriptionData.data;
+
+          if (realityCreated.__typename !== "Need") return prev;
+
+          const alreadyExists =
+            prev.needs.filter((need) => need.nodeId === realityCreated.nodeId)
+              .length > 0;
+
+          if (alreadyExists) return prev;
+          return { needs: [realityCreated, ...prev.needs] };
+        },
+      }),
+    [subscribeToMore]
+  );
 
   if (error || mutError) {
     console.error("realities error", error, mutError);
