@@ -33,7 +33,7 @@ module.exports = {
       });
 
       dream.discourseTopicId = post.topic_id;
-      dream.save();
+      await dream.save();
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
