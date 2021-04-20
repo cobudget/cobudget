@@ -19,7 +19,7 @@ module.exports = (phase) => {
       : `https://api.dreams.wtf/graphql`,
     GRAPHQL_SUBSCRIPTIONS_URL: isDev
       ? "ws://localhost:4000/subscriptions"
-      : `ws://api.dreams.wtf/subscriptions`,
+      : `wss://api.dreams.wtf/subscriptions`,
     IS_PROD: isProd,
     DEPLOY_URL: process.env.DEPLOY_URL,
     REALITIES_DEPLOY_URL: process.env.REALITIES_DEPLOY_URL,
