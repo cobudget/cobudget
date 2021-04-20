@@ -9,8 +9,6 @@ module.exports = {
 
     eventHub.subscribe('create-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       if (!orgHasDiscourse(currentOrg)) { return }
-      if (!currentOrgMember.discourseApiKey)
-        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Publishing dream ${dream.id} to discourse...`)
 
