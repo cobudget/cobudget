@@ -83,6 +83,9 @@ module.exports = {
 
       console.log(`Publishing comment in dream ${dream.id} to discourse...`)
 
+      if (!dream.discourseTopicId)
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
+
       const post = await discourse(currentOrg.discourse).posts.create({
         topic_id: dream.discourseTopicId,
         raw: comment.content
