@@ -16,6 +16,7 @@ const schema = gql`
     dreams(eventSlug: String, textSearchTerm: String): [Dream]
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
+    categories: [Category!]
   }
 
   type Mutation {
@@ -49,6 +50,7 @@ const schema = gql`
       color: String
       about: String
       dreamReviewIsOpen: Boolean
+      discourseCategoryId: Int
     ): Event!
     deleteEvent(eventId: ID!): Event
 
@@ -208,6 +210,7 @@ const schema = gql`
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
     dreamReviewIsOpen: Boolean
+    discourseCategoryId: Int
   }
 
   type Guideline {
@@ -299,6 +302,7 @@ const schema = gql`
     flags: [Flag]
     raisedFlags: [Flag]
     logs: [Log]
+    discourseTopicUrl: String
     # reactions: [Reaction]
     # tags: [Tag]
   }
@@ -308,10 +312,16 @@ const schema = gql`
     orgMember: OrgMember
     createdAt: Date!
     updatedAt: Date
-    raw: String
+    content: String
     cooked: String
     discourseUsername: String
     isLog: Boolean
+  }
+
+  type Category {
+    id: ID!
+    name: String
+    color: String
   }
 
   type Flag {
@@ -459,6 +469,10 @@ const schema = gql`
   type FlagResolvedDetails {
     guideline: Guideline
     comment: String
+  }
+
+  type Subscription {
+    commentsChanged(dreamID: ID!): Dream
   }
 
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails
