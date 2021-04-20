@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
 import { sortableContainer } from "react-sortable-hoc";
+import { cloneDeep } from "lodash";
 
 // We need to make sure that the zIndex is bigger the material design
 // modal otherwise the component disappear when dragged
@@ -23,13 +24,13 @@ const DraggableItems = ({
   setEditingItem,
 }) => {
   // To allow real time dragging changes - we duplicate the list locally
-  const [localItems, setLocalItems] = useState(items);
+  const [localItems, setLocalItems] = useState(cloneDeep(items));
 
   // This updated the global server items with our local copy
   useEffect(() => {
     // The following prevents two requests from overriding and flickering in the ui
     if (!setPositionLoading) {
-      setLocalItems(items);
+      setLocalItems(cloneDeep(items));
     }
   }, [items, setPositionLoading]);
 
@@ -38,7 +39,6 @@ const DraggableItems = ({
   // Extract the position of the items before and after the new index to calculate the new
   // item position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
   const onSortEnd = ({ oldIndex, newIndex }) => {
-    const item = localItems[oldIndex];
     let beforePosition;
     let afterPosition;
     let beforeItem;
@@ -63,11 +63,10 @@ const DraggableItems = ({
       afterPosition = afterItem.position;
     }
 
-    // In order to replace the position locally we must duplicate the items locally
-    let itemsNew = [...localItems];
     const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
+    const item = localItems[oldIndex];
     item.position = newPosition;
-    setLocalItems(itemsNew);
+    setLocalItems(localItems);
 
     setItemPosition(item.id, newPosition);
   };
@@ -78,7 +77,9 @@ const DraggableItems = ({
       useDragHandle
       helperClass={classes.sorting}
     >
-      {[...localItems]
+      {localItems
+        // lol this sort actually mutates localItems, which turns out to be
+        // central to the functioning of this
         .sort((a, b) => a.position - b.position)
         .map((item, index) => (
           <SortableItem

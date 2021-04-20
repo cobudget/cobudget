@@ -184,11 +184,14 @@ const MyApp = ({ Component, pageProps, router }) => {
       jssStyles.parentNode.removeChild(jssStyles);
   });
 
+  console.log("running top level");
   const {
     data: { currentUser, currentOrg, currentOrgMember, event } = {},
   } = useQuery(TOP_LEVEL_QUERY, {
     variables: { slug: router.query.event },
   });
+  console.log("current", { currentOrg });
+  // hmm doesn't seem to be loading if you e.g. go directly to an event
 
   const [modal, setModal] = useState(null);
 
