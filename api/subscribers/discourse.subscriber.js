@@ -37,7 +37,12 @@ module.exports = {
     });
 
     eventHub.subscribe('edit-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
-      if (!orgHasDiscourse(currentOrg) || !dream.discourseTopicId) { return }
+      if (!orgHasDiscourse(currentOrg)) { return }
+
+      if (!dream.discourseTopicId) {
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
+        dream = Dream.findOne({ _id: dream.id });
+      }
 
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
@@ -66,6 +71,11 @@ module.exports = {
     eventHub.subscribe('publish-dream', async ({ currentOrg, currentOrgMember, event, dream }) => {
       console.log(`Setting visibility of dream ${dream.id} to ${dream.published} on Discourse...`);
 
+      if (!dream.discourseTopicId) {
+        await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
+        dream = Dream.findOne({ _id: dream.id });
+      }
+
       const post = await discourse(currentOrg.discourse).topics.updateStatus({
         id: dream.discourseTopicId,
         status: 'visible',
@@ -77,14 +87,16 @@ module.exports = {
     });
 
     eventHub.subscribe('create-comment', async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-      if (!orgHasDiscourse(currentOrg) || !dream.discourseTopicId) { return }
+      if (!orgHasDiscourse(currentOrg)) { return }
       if (!currentOrgMember.discourseApiKey)
         throw new Error("You need to have a discourse account connected, go to /connect-discourse");
 
       console.log(`Publishing comment in dream ${dream.id} to discourse...`)
 
-      if (!dream.discourseTopicId)
+      if (!dream.discourseTopicId) {
         await eventHub.publish('create-dream', { currentOrg, currentOrgMember, event, dream });
+        dream = Dream.findOne({ _id: dream.id });
+      }
 
       const post = await discourse(currentOrg.discourse).posts.create({
         topic_id: dream.discourseTopicId,
