@@ -170,6 +170,14 @@ module.exports = {
       content.push(dream.description);
     }
 
+    if (dream.customFields) {
+      dream.customFields.forEach( customField => {
+        const customFieldName = event.customFields.find(customEventField => String(customEventField._id) === String(customField.fieldId)).name
+        content.push(`## ${customFieldName}`);
+        content.push(customField.value)
+      });
+    }
+
     if (dream.budgetItems && dream.budgetItems.length > 0) {
       const income = dream.budgetItems.filter(({ type }) => type === 'INCOME');
       const expenses = dream.budgetItems.filter(({ type }) => type === 'EXPENSE');
