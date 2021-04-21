@@ -2134,7 +2134,9 @@ const resolvers = {
       return contributionsForDream;
     },
     comments: async (dream, args, { currentOrg }) => {
-      if (!dream.discourseTopicId) { return dream.comments; }
+      if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {
+        return dream.comments;
+      }
 
       const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
 
