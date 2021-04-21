@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
-import { DeleteIcon, FlagIcon } from "components/Icons";
+import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
 import EditComment from "./EditComment";
 
 dayjs.extend(relativeTime);
