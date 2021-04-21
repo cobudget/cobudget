@@ -359,7 +359,7 @@ const schema = gql`
   }
 
   type BudgetItem {
-    id
+    id: ID!
     description: String!
     min: Int!
     max: Int
