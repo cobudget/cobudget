@@ -79,5 +79,5 @@ h5 {
 }
 
 .markdown a.mention {
-  @apply pointer-events-none;
+  @apply pointer-events-none cursor-default;
 }
