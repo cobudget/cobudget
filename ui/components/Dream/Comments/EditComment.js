@@ -13,7 +13,7 @@ const EDIT_COMMENT_MUTATION = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {

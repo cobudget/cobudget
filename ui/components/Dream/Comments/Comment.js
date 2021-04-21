@@ -18,7 +18,7 @@ const DELETE_COMMENT_MUTATION = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         orgMember {
           id
@@ -97,11 +97,11 @@ const Comment = ({
           <>
             {comment.cooked ? (
               <div
-                className="text-gray-900 whitespace-pre-line markdown"
+                className="text-gray-900 markdown"
                 dangerouslySetInnerHTML={{ __html: comment.cooked }}
               />
             ) : (
-              <ReactMarkdown source={comment.raw} className="markdown" />
+              <ReactMarkdown source={comment.content} className="markdown" />
             )}
 
             {canEdit && (
@@ -122,13 +122,13 @@ const Comment = ({
                   <DeleteIcon className="w-4 h-4 mr-1" />
                   <span>Delete</span>
                 </button>
-                {/* <button
+                <button
                   onClick={() => setEditMode(true)}
                   className="mt-4 py-1 px-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:ring"
                 >
                   <EditIcon className="w-4 h-4 mr-1" />
                   <span>Edit</span>
-                </button> */}
+                </button>
               </div>
             )}
           </>

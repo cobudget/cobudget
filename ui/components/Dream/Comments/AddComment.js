@@ -16,7 +16,7 @@ const ADD_COMMENT = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {

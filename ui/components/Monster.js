@@ -83,7 +83,7 @@ const RAISE_FLAG_MUTATION = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {
@@ -115,7 +115,7 @@ const RESOLVE_FLAG_MUTATION = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {

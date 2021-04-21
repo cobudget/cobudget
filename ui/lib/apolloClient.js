@@ -1,7 +1,9 @@
-import { ApolloClient, HttpLink } from "@apollo/client";
+import { ApolloClient, HttpLink, split } from "@apollo/client";
 import { InMemoryCache } from "@apollo/client/cache";
-import fetch from "isomorphic-unfetch";
+import { getMainDefinition } from "@apollo/client/utilities";
+import { WebSocketLink } from "@apollo/client/link/ws";
 import { setContext } from "@apollo/client/link/context";
+import fetch from "isomorphic-unfetch";
 import getHostInfo from "utils/getHostInfo";
 import auth from "lib/auth";
 
@@ -9,11 +11,29 @@ export default function createApolloClient(initialState, ctx) {
   // The `ctx` (NextPageContext) will only be present on the server.
   // use it to extract auth headers (ctx.req) or similar.
 
+  const wsLink = process.browser
+    ? new WebSocketLink({
+        uri: process.env.GRAPHQL_SUBSCRIPTIONS_URL,
+        options: { reconnect: true },
+      })
+    : null;
+
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_URL, // Server URL (must be absolute)
     credentials: "same-origin", // Additional fetch() options like `credentials` or `headers`
     fetch,
   });
+
+  const appLink = process.browser
+    ? split(
+        ({ query }) => {
+          const { kind, operation } = getMainDefinition(query);
+          return kind === "OperationDefinition" && operation === "subscription";
+        },
+        wsLink,
+        httpLink
+      )
+    : httpLink;
 
   const authLink = setContext(async (graphqlRequest, { headers }) => {
     let token;
@@ -68,7 +88,7 @@ export default function createApolloClient(initialState, ctx) {
 
   return new ApolloClient({
     ssrMode: Boolean(ctx),
-    link: authLink.concat(httpLink),
+    link: authLink.concat(appLink),
     cache: new InMemoryCache({
       dataIdFromObject: (object) =>
         `${object.__typename}:${object.id}:${object.eventId}`,

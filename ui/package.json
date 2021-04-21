@@ -46,6 +46,7 @@
     "react-tippy": "^1.4.0",
     "store": "^2.0.12",
     "styled-components": "^4.4.1",
+    "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss-animations": "^2.0.0",
     "yup": "^0.29.3"
   },
