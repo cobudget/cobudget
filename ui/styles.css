@@ -65,3 +65,19 @@ h5 {
 .markdown blockquote {
   @apply bg-gray-100 border-l-4 border-gray-200 px-2;
 }
+
+.markdown img.emoji {
+  @apply w-5 h-5 align-middle inline;
+}
+
+.markdown img.avatar {
+  @apply hidden;
+}
+
+.markdown div.meta {
+  @apply hidden;
+}
+
+.markdown a.mention {
+  @apply pointer-events-none;
+}
