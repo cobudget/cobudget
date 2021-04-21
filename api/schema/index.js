@@ -348,6 +348,7 @@ const schema = gql`
   }
 
   type Image {
+    id: ID!
     small: String
     large: String
   }
