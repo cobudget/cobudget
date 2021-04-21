@@ -171,17 +171,17 @@ const resolvers = {
         ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
-    categories: async (
-      parent,
-      {},
-      { currentOrg, currentOrgMember }
-    ) => {
-      if (!currentOrg.discourse) { return []; }
+    categories: async (parent, {}, { currentOrg, currentOrgMember }) => {
+      if (!currentOrg.discourse) {
+        return [];
+      }
 
-      const categories = await discourse(currentOrg.discourse).categories.getAll({
+      const categories = await discourse(
+        currentOrg.discourse
+      ).categories.getAll({
         username: currentOrgMember.discourseUsername,
         apiKey: currentOrgMember.discourseApiKey,
-      })
+      });
 
       return categories;
     },
@@ -190,7 +190,13 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain: dirtySubdomain, logo },
-      { kauth, kcAdminClient, currentOrgMember, models: { Organization, OrgMember }, eventHub }
+      {
+        kauth,
+        kcAdminClient,
+        currentOrgMember,
+        models: { Organization, OrgMember },
+        eventHub,
+      }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
       const subdomain = slugify(dirtySubdomain);
@@ -233,13 +239,22 @@ const resolvers = {
         );
       }
 
-      await eventHub.publish('create-organization', { currentOrganization: savedOrg, currentOrgMember });
+      await eventHub.publish("create-organization", {
+        currentOrganization: savedOrg,
+        currentOrgMember,
+      });
       return savedOrg;
     },
     editOrganization: async (
       parent,
       { organizationId, name, subdomain: dirtySubdomain, logo },
-      { currentUser, kcAdminClient, currentOrgMember, models: { Organization }, eventHub }
+      {
+        currentUser,
+        kcAdminClient,
+        currentOrgMember,
+        models: { Organization },
+        eventHub,
+      }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
@@ -291,7 +306,10 @@ const resolvers = {
           }
         );
 
-      await eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
+      await eventHub.publish("edit-organization", {
+        currentOrg: organization,
+        currentOrgMember,
+      });
       return organization;
     },
     setTodosFinished: async (
@@ -332,7 +350,11 @@ const resolvers = {
         isApproved: true,
       }).save();
 
-      await eventHub.publish('create-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("create-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event;
     },
     editEvent: async (
@@ -377,13 +399,21 @@ const resolvers = {
         event.dreamReviewIsOpen = dreamReviewIsOpen;
       if (discourseCategoryId) event.discourseCategoryId = discourseCategoryId;
 
-      await eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("edit-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event.save();
     },
     deleteEvent: async (
       parent,
       { eventId },
-      { currentOrgMember, models: { Event, Grant, Dream, EventMember }, eventHub }
+      {
+        currentOrgMember,
+        models: { Event, Grant, Dream, EventMember },
+        eventHub,
+      }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be org. admin to delete event");
@@ -400,7 +430,11 @@ const resolvers = {
       await Dream.deleteMany({ eventId });
       await EventMember.deleteMany({ eventId });
 
-      await eventHub.publish('delete-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("delete-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event.remove();
     },
     addGuideline: async (
@@ -654,7 +688,12 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -678,14 +717,24 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      await eventHub.publish('create-dream', { currentOrg, currentOrgMember, dream, event });
+      await eventHub.publish("create-dream", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        event,
+      });
 
       return dream.save();
     },
     editDream: async (
       parent,
       { dreamId, title, description, summary, images, budgetItems },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
@@ -709,7 +758,12 @@ const resolvers = {
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
 
-      await eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish("edit-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
 
       return dream.save();
     },
@@ -748,7 +802,12 @@ const resolvers = {
     deleteDream: async (
       parent,
       { dreamId },
-      { currentOrg, currentOrgMember, models: { Dream, EventMember, Grant }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { Dream, EventMember, Grant },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -776,7 +835,12 @@ const resolvers = {
         throw new Error("You cant delete a Dream that has received tokens");
       }
 
-      await eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish("delete-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
       return dream.remove();
     },
     addCocreator: async (
@@ -850,7 +914,12 @@ const resolvers = {
     publishDream: async (
       parent,
       { dreamId, unpublish },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
@@ -870,7 +939,12 @@ const resolvers = {
 
       dream.published = !unpublish;
 
-      await eventHub.publish('publish-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish("publish-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
       return dream.save();
     },
     addComment: async (
@@ -885,28 +959,44 @@ const resolvers = {
         throw new Error("You need to be an org member to post comments.");
 
       if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey)
-        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+        throw new Error(
+          "You need to have a discourse account connected, go to /connect-discourse"
+        );
 
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
-        throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
+        throw new Error(
+          `Your post needs to be at least ${
+            currentOrg.discourse?.minPostLength || 3
+          } characters long!`
+        );
 
-      const comment = { content, authorId: currentOrgMember.id, }
+      const comment = { content, authorId: currentOrgMember.id };
 
-      if (!orgHasDiscourse(currentOrg))
-        dream.comments.push(comment);
+      if (!orgHasDiscourse(currentOrg)) dream.comments.push(comment);
 
-      await eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
+      await eventHub.publish("create-comment", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        event,
+        comment,
+      });
       return dream.save();
     },
 
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
-      const comment = { id: commentId }
+      const comment = { id: commentId };
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
@@ -917,12 +1007,20 @@ const resolvers = {
       });
 
       if (!orgHasDiscourse(currentOrg)) {
-        console.log(dream.comments)
-        dream.comments = dream.comments.filter(comment => comment.id.toString() !== commentId);
+        console.log(dream.comments);
+        dream.comments = dream.comments.filter(
+          (comment) => comment.id.toString() !== commentId
+        );
         return dream.save();
       }
 
-      await eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
+      await eventHub.publish("delete-comment", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+        comment,
+      });
 
       return dream;
     },
@@ -948,14 +1046,21 @@ const resolvers = {
         );
 
         if (comment.length == 0) {
-          throw new Error("Cant find that comment - Does this comment belongs to you?");
+          throw new Error(
+            "Cant find that comment - Does this comment belongs to you?"
+          );
         }
         comment[0].content = content;
         comment[0].updatedAt = new Date();
         dream.save();
       }
 
-      await eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
+      await eventHub.publish("edit-comment", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        comment,
+      });
 
       return dream;
     },
@@ -1905,7 +2010,9 @@ const resolvers = {
     },
   },
   Subscription: {
-    commentsChanged: { subscribe: () => liveUpdate.asyncIterator(['commentsChanged']) },
+    commentsChanged: {
+      subscribe: () => liveUpdate.asyncIterator(["commentsChanged"]),
+    },
   },
   EventMember: {
     event: async (member, args, { models: { Event } }) => {
@@ -2138,7 +2245,11 @@ const resolvers = {
         return dream.comments;
       }
 
-      const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
+      const {
+        post_stream: { posts },
+      } = await discourse(currentOrg.discourse).posts.get(
+        dream.discourseTopicId
+      );
 
       return posts
         .filter(({ post_type }) => post_type === 1)
