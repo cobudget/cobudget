@@ -100,7 +100,7 @@ const Comment = ({
           <>
             {comment.cooked ? (
               <div
-                className="text-gray-900 whitespace-pre-line markdown"
+                className="text-gray-900 markdown"
                 dangerouslySetInnerHTML={{ __html: comment.cooked }}
               />
             ) : (
