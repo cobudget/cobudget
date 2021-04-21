@@ -1,5 +1,4 @@
-import gql from "graphql-tag";
-import { useQuery, useSubscription } from "@apollo/react-hooks";
+import { useQuery, useSubscription, gql } from "@apollo/client";
 import { useRouter } from "next/router";
 import Head from "next/head";
 

@@ -1,8 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useQuery } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useQuery, gql } from "@apollo/client";
 import { Tooltip } from "react-tippy";
 import {
   HomeIcon,

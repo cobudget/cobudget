@@ -1,5 +1,4 @@
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";

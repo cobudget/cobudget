@@ -1,5 +1,4 @@
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
