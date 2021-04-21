@@ -18,6 +18,7 @@ export const MEMBERS_QUERY = gql`
       isApproved
       createdAt
       orgMember {
+        id
         bio
         user {
           id

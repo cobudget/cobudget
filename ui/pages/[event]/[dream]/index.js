@@ -52,6 +52,7 @@ export const DREAM_QUERY = gql`
         }
       }
       images {
+        id
         small
         large
       }
@@ -107,21 +108,28 @@ const DreamPage = ({ event, currentUser, currentOrgMember, currentOrg }) => {
 
   const COMMENTS_CHANGED = gql`
     subscription OnCommentChanged($dreamID: ID!) {
-      commentsChanged(dreamID: $dreamID) { id }
+      commentsChanged(dreamID: $dreamID) {
+        id
+      }
     }
   `;
 
-  const { data: { dream } = { dream: null }, loading, error, refetch } = useQuery(
-    DREAM_QUERY,
-    {
-      onCompleted: console.log,
-      variables: { id: router.query.dream },
-    }
-  );
-  useSubscription(COMMENTS_CHANGED, { variables: { dreamID: dream?.id }, onSubscriptionData: () => {
-    console.log('refetching...')
-    refetch()
-  } });
+  const {
+    data: { dream } = { dream: null },
+    loading,
+    error,
+    refetch,
+  } = useQuery(DREAM_QUERY, {
+    onCompleted: console.log,
+    variables: { id: router.query.dream },
+  });
+  useSubscription(COMMENTS_CHANGED, {
+    variables: { dreamID: dream?.id },
+    onSubscriptionData: () => {
+      console.log("refetching...");
+      refetch();
+    },
+  });
 
   if (dream)
     return (
