@@ -65,6 +65,7 @@ const DreamSchema = new Schema({
   ],
   published: { type: Boolean, default: false },
   fundedAt: { type: Date },
+  canceledAt: { type: Date },
   completedAt: { type: Date },
   discourseTopicId: { type: Number },
 }).index({ title: "text", description: "text", summary: "text" });
@@ -87,4 +88,7 @@ DreamSchema.virtual("completed").get(function () {
   return !!this.completedAt;
 });
 
+DreamSchema.virtual("canceled").get(function () {
+  return !!this.canceledAt;
+});
 module.exports = DreamSchema;

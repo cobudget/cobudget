@@ -1718,7 +1718,7 @@ const resolvers = {
         (!dream.cocreators.includes(currentEventMember.id) &&
           !currentEventMember.isAdmin)
       )
-        throw new Error("You are not a cocreator of this dream.");
+        throw new Error("You are not an admin or cocreator of this dream.");
 
       const [
         { contributionsForDream } = { contributionsForDream: 0 },
@@ -1735,6 +1735,46 @@ const resolvers = {
         throw new Error("Dream has not reached its minimum goal yet.");
 
       dream.fundedAt = Date.now();
+      return dream.save();
+    },
+    cancelFunding: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember, Contribution } }
+    ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !currentEventMember ||
+        (!dream.cocreators.includes(currentEventMember.id) &&
+          !currentEventMember.isAdmin)
+      )
+        throw new Error("You are not an admin or cocreator of this dream.");
+
+      if (dream.completed)
+        throw new Error(
+          "This dream has already been marked completed, can't cancel funding."
+        );
+
+      if (dream.fundedAt) {
+        dream.fundedAt = null;
+      }
+
+      dream.canceledAt = Date.now();
+
+      // delete all contributions
+      await Contribution.deleteMany({ dreamId });
+
+      // TODO: notify contribuors that they have been "re-imbursed"
+
       return dream.save();
     },
     updateGrantingSettings: async (

@@ -11,7 +11,6 @@ import IconButton from "components/IconButton";
 import Button from "components/Button";
 
 import ContributeModal from "./ContributeModal";
-import PreOrPostFundModal from "./PreOrPostFundModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
@@ -55,6 +54,18 @@ const ACCEPT_FUNDING_MUTATION = gql`
   }
 `;
 
+const CANCEL_FUNDING_MUTATION = gql`
+  mutation CancelFunding($dreamId: ID!) {
+    cancelFunding(dreamId: $dreamId) {
+      id
+      fundedAt
+      funded
+      canceled
+      canceledAt
+    }
+  }
+`;
+
 const DELETE_DREAM_MUTATION = gql`
   mutation DeleteDream($dreamId: ID!) {
     deleteDream(dreamId: $dreamId) {
@@ -77,6 +88,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
     variables: { dreamId: dream.id },
   });
   const [acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const [cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION, {
     variables: { dreamId: dream.id },
   });
   const [deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
@@ -103,7 +117,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const showFundButton =
     !dream.funded &&
     hasNotReachedMaxGoal &&
-    currentOrgMember?.currentEventMembership?.balance;
+    !!currentOrgMember?.currentEventMembership?.balance;
   const showAcceptFundingButton =
     !dream.funded && canEdit && hasNotReachedMaxGoal && hasReachedMinGoal;
   const showPublishButton = canEdit && !dream.published;
@@ -114,10 +128,11 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const showUnapproveButton =
     isEventAdminOrGuide && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
+  const showCancelFundingButton = dream.approved && !dream.canceled && canEdit;
 
   return (
     <>
-      {(dream.approved || canEdit) && (
+      {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
           {dream.approved && (
             <>
@@ -222,6 +237,21 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                     }
                   >
                     Unpublish
+                  </button>
+                )}
+                {showCancelFundingButton && (
+                  <button
+                    className={css.dropdownButton}
+                    onClick={() =>
+                      confirm(
+                        "Are you sure you would like to cancel funding? This is irreversible and will return all contributions to those that have contributed."
+                      ) &&
+                      cancelFunding()
+                        .then(() => setActionsDropdownOpen(false))
+                        .catch((err) => alert(err.message))
+                    }
+                  >
+                    Cancel funding
                   </button>
                 )}
                 {showUnapproveButton && (

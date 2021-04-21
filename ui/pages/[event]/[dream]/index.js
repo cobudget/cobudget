@@ -21,6 +21,8 @@ export const DREAM_QUERY = gql`
       completedAt
       funded
       fundedAt
+      canceled
+      canceledAt
       raisedFlags {
         id
         comment
