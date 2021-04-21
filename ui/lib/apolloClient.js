@@ -69,6 +69,9 @@ export default function createApolloClient(initialState, ctx) {
   return new ApolloClient({
     ssrMode: Boolean(ctx),
     link: authLink.concat(httpLink),
-    cache: new InMemoryCache().restore(initialState),
+    cache: new InMemoryCache({
+      dataIdFromObject: (object) =>
+        `${object.__typename}:${object.id}:${object.eventId}`,
+    }).restore(initialState),
   });
 }
