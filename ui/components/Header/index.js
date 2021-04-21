@@ -1,8 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
-
+import { useMutation, gql } from "@apollo/client";
 import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";

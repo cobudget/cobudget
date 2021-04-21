@@ -1,5 +1,4 @@
-import gql from "graphql-tag";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import OrganizationsTable from "../../components/Org/OrganizationsTable";
 import HappySpinner from "../../components/HappySpinner";
 import Router from "next/router";

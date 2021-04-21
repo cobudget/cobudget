@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
-import { useQuery } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
 import Button from "components/Button";
 import TodoList from "components/TodoList";

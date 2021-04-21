@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 

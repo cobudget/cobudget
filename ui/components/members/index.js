@@ -1,6 +1,5 @@
 import React from "react";
-import gql from "graphql-tag";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useMutation, gql } from "@apollo/client";
 
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
@@ -19,6 +18,7 @@ export const EVENT_MEMBERS_QUERY = gql`
       createdAt
       balance
       orgMember {
+        id
         bio
         user {
           id

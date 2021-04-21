@@ -1,6 +1,4 @@
-import gql from "graphql-tag";
 import { useState } from "react";
-import { useMutation } from "@apollo/react-hooks";
 
 import Button from "components/Button";
 import { AddIcon } from "components/Icons";
@@ -8,7 +6,7 @@ import { AddIcon } from "components/Icons";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
 
-export default ({ event }) => {
+const CustomFields = ({ event }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
 
@@ -21,8 +19,8 @@ export default ({ event }) => {
 
       <DraggableCustomField
         event={event}
-        customFields={event.customFields}
-        setEditingCustomField={setEditingCustomField}
+        items={event.customFields}
+        setEditingItem={setEditingCustomField}
       />
 
       <div className="flex my-2">
@@ -48,3 +46,5 @@ export default ({ event }) => {
     </div>
   );
 };
+
+export default CustomFields;

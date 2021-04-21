@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import Link from "next/link";
 
 import TextField from "components/TextField";
@@ -17,7 +16,7 @@ const ADD_COMMENT = gql`
         id
         discourseUsername
         cooked
-        raw
+        content
         createdAt
         isLog
         orgMember {

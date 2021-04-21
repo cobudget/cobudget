@@ -1,11 +1,6 @@
 const fetch = require("node-fetch");
 
-const { DISCOURSE_API_URL, DISCOURSE_API_KEY } = process.env;
-
-const discourse = ({
-  url = DISCOURSE_API_URL,
-  apiKey = DISCOURSE_API_KEY,
-} = {}) => {
+const discourse = ({ url, apiKey } = {}) => {
   const headers = {
     "Api-Key": apiKey,
     "Api-Username": "system",
@@ -17,7 +12,7 @@ const discourse = ({
   return {
     categories: {
       getAll: async () => {
-        const res = await fetch(`${url}/categories`, {
+        const res = await fetch(`${url}/categories.json`, {
           headers,
         });
         const {
@@ -84,6 +79,8 @@ const discourse = ({
           target_recipients, // required for private message, comma separated usernames
           archetype, // required for private message, value: "private_message"
           created_at, // pick a date other than the default current time
+          unlist_topic,
+
         },
         { username, userApiKey } = {}
       ) => {
@@ -104,17 +101,32 @@ const discourse = ({
             ...(target_recipients && { target_recipients }),
             ...(archetype && { archetype }),
             ...(created_at && { created_at }),
+            ...(unlist_topic && { unlist_topic }),
           }),
         });
         return res.json();
       },
+      update: async (id, { title, raw }, { username, userApiKey } = {}) => {
+        const res = await fetch(`${url}/posts/${id}`, {
+          method: "put",
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          },
+          body: JSON.stringify({ title, post: { raw } }),
+        });
+
+        const { post = {} } = await res.json();
+        return post;
+      },
       get: async (id) => {
-        // query parameter print=true will return up to 1000 posts in a topic
-        const res = await fetch(`${url}/t/${id}.json`, {
+        const res = await fetch(`${url}/t/${id}.json?include_raw=true`, {
           headers,
         });
-        const json = await res.json();
-        return json;
+        return await res.json();
       },
       getSingle: async (id) => {
         const res = await fetch(`${url}/posts/${id}.json`, {
@@ -136,6 +148,39 @@ const discourse = ({
         return res;
       },
     },
+    topics: {
+      getSummary: async ({ id }, { username, userApiKey, apiKey }) => {
+        const res = await fetch(`${url}/posts/by_number/${id}/1.json`, {
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          }
+        });
+
+        return await res.json();
+      },
+      updateStatus: async ({ id, status, enabled }, { username, userApiKey, apiKey }) => {
+        const res = await fetch(`${url}/t/${id}/status.json`, {
+          headers: {
+            ...defaultHeaders,
+            ...(username && { "Api-Username": username }),
+            ...(userApiKey
+              ? { "User-Api-Key": userApiKey }
+              : { "Api-Key": apiKey }),
+          },
+          method: "PUT",
+          body: JSON.stringify({
+            status,
+            enabled: enabled.toString(),
+          }),
+        });
+
+        return await res.json();
+      },
+    }
   };
 };
 

@@ -3,6 +3,10 @@
 
 const express = require("express");
 const { ApolloServer } = require("apollo-server-express");
+const { createServer } = require("http");
+const { execute, subscribe } = require("graphql");
+const { makeExecutableSchema } = require("graphql-tools");
+const { SubscriptionServer } = require("subscriptions-transport-ws");
 const KcAdminClient = require("keycloak-admin").default;
 
 require("dotenv").config();
@@ -11,12 +15,15 @@ const pretixWebhook = require("./webhooks/pretix");
 const schema = require("./schema");
 const resolvers = require("./resolvers");
 const { getModels } = require("./database/models");
+const EventHub = require("./services/eventHub.service");
 const {
   db: { getConnection },
 } = require("@sensestack/plato-core");
 
 const Keycloak = require("keycloak-connect");
 const { KeycloakContext } = require("keycloak-connect-graphql");
+
+const subscribers = require('./subscribers/index');
 
 const app = express();
 const keycloak = new Keycloak(
@@ -38,6 +45,7 @@ app.use("/graphql", keycloak.middleware());
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
+  subscriptions: { path: '/subscriptions' },
   context: async ({ req }) => {
     let kauth;
     try {
@@ -96,6 +104,7 @@ const server = new ApolloServer({
 
     return {
       models,
+      eventHub: EventHub,
       kauth: currentUser,
       currentOrg,
       currentOrgMember,
@@ -115,11 +124,22 @@ app.post("/pretix", pretixWebhook);
 
 const port = process.env.PORT || 4000;
 
-app.listen({ port }, () =>
-  console.log(
-    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+subscribers.initialize(EventHub);
+
+const appWithSockets = createServer(app);
+appWithSockets.listen(port, () => {
+  delete resolvers.Upload; // Where did Upload come from?
+  new SubscriptionServer(
+    {
+      execute,
+      subscribe,
+      schema: makeExecutableSchema({ typeDefs: schema, resolvers })
+    },
+    { server: appWithSockets, path: appWithSockets.subscriptionsPath }
   )
-);
+  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
+  console.log(`🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`)
+});
 
 // module.exports = cors((req, res) => {
 //   if (req.method === 'OPTIONS') {

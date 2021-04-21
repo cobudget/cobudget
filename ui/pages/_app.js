@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import gql from "graphql-tag";
 import { withApollo } from "lib/apollo";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, gql } from "@apollo/client";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
@@ -30,6 +29,7 @@ export const TOP_LEVEL_QUERY = gql`
       about
       allowStretchGoals
       dreamReviewIsOpen
+      discourseCategoryId
       guidelines {
         id
         title
@@ -47,6 +47,7 @@ export const TOP_LEVEL_QUERY = gql`
         createdAt
       }
       filterLabels {
+        eventId
         customField {
           id
           name
@@ -83,6 +84,7 @@ export const TOP_LEVEL_QUERY = gql`
       eventMemberships {
         id
         event {
+          id
           title
           slug
         }
@@ -94,6 +96,7 @@ export const TOP_LEVEL_QUERY = gql`
         isApproved
         balance
         event {
+          id
           title
         }
       }

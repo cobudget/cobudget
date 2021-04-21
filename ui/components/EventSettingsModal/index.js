@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Modal } from "@material-ui/core";
 
 import CustomFields from "./CustomFields";
@@ -6,8 +6,9 @@ import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
 import DreamReview from "./DreamReview";
+import Discourse from "./Discourse";
 
-const tabs = [
+const defaultTabs = [
   { name: "General", component: GeneralSettings },
   { name: "Guidelines", component: Guidelines },
   { name: "Dream Review", component: DreamReview },
@@ -15,8 +16,14 @@ const tabs = [
   { name: "Granting", component: Granting },
 ];
 
-const EventSettingsModal = ({ event, currentOrgMember, handleClose }) => {
+const EventSettingsModal = ({ event, currentOrg, currentOrgMember, handleClose }) => {
   const [selectedTab, setSelectedTab] = useState(0);
+
+  const tabs = useMemo(() => (
+    currentOrg.discourseUrl
+      ? defaultTabs.concat({ name: "Discourse", component: Discourse })
+      : defaultTabs
+  ), [defaultTabs, currentOrg.discourse])
 
   const SettingsComponent = tabs[selectedTab].component;
 

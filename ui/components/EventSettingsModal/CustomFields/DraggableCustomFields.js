@@ -1,16 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
-import {
-  sortableContainer,
-  sortableElement,
-  sortableHandle,
-} from "react-sortable-hoc";
-import { makeStyles } from "@material-ui/core";
+import { useMutation, gql } from "@apollo/client";
+import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
+import DraggableItems from "../DraggableItems";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
@@ -67,14 +61,6 @@ const types = {
   BOOLEAN: "Yes/No",
 };
 
-// We need to make sure that the zIndex is bigger the material design
-// modal otherwise the component disappear when dragged
-export const useStyles = makeStyles((theme) => ({
-  sorting: {
-    zIndex: theme.zIndex.modal + 100,
-  },
-}));
-
 const DragHandle = sortableHandle(() => (
   <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
@@ -82,7 +68,7 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({ customField, setEditingCustomField, loading, eventId }) => {
+  ({ item: customField, setEditingItem: setEditingCustomField, eventId }) => {
     const [deleteCustomField, { loading: deleting }] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION,
       {
@@ -137,22 +123,7 @@ const SortableItem = sortableElement(
   }
 );
 
-const SortableContainer = sortableContainer(({ children }) => {
-  return <ul className="select-none">{children}</ul>;
-});
-
-export default ({ event, customFields, setEditingCustomField }) => {
-  // To allow real time dragging changes - we duplicate the list locally
-  const [localCustomFields, setLocalCustomFields] = useState(customFields);
-
-  // This updated the global server custom fields with our local copy
-  useEffect(() => {
-    // The following prevents two requests from overriding and flickering in the ui
-    if (!loading) {
-      setLocalCustomFields(customFields);
-    }
-  }, [customFields]);
-
+const DraggableCustomFields = ({ event, items, setEditingItem }) => {
   const [setCustomFieldPosition, { loading }] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION,
     {
@@ -160,69 +131,25 @@ export default ({ event, customFields, setEditingCustomField }) => {
     }
   );
 
-  const classes = useStyles();
-
-  // Extract the position of the custom fields before and after the new index to calculate the new
-  // custom field position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
-  const onSortEnd = ({ oldIndex, newIndex }) => {
-    const customField = localCustomFields[oldIndex];
-    let beforePosition;
-    let afterPosition;
-    let beforeCustomField;
-
-    const afterCustomField = localCustomFields[newIndex];
-    if (oldIndex > newIndex) {
-      beforeCustomField = localCustomFields[newIndex - 1];
-    } else {
-      beforeCustomField = localCustomFields[newIndex + 1];
-    }
-    if (beforeCustomField) {
-      beforePosition = beforeCustomField.position;
-    } else {
-      // Last element
-      beforePosition =
-        localCustomFields[localCustomFields.length - 1].position + 1;
-    }
-    if (newIndex == 0) {
-      // First element
-      afterPosition = localCustomFields[0].position - 1;
-      beforePosition = localCustomFields[0].position;
-    } else {
-      afterPosition = afterCustomField.position;
-    }
-
-    // In order to replace the position locally we must duplicate the custom fields locally
-    let customFieldsNew = [...localCustomFields];
-    const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
-    customField.position = newPosition;
-    setLocalCustomFields(customFieldsNew);
-
+  const setItemPosition = (customFieldId, newPosition) => {
     setCustomFieldPosition({
       variables: {
-        fieldId: customField.id,
+        fieldId: customFieldId,
         newPosition,
       },
     });
   };
 
   return (
-    <SortableContainer
-      onSortEnd={onSortEnd}
-      useDragHandle
-      helperClass={classes.sorting}
-    >
-      {localCustomFields
-        .sort((a, b) => a.position - b.position)
-        .map((customField, index) => (
-          <SortableItem
-            key={customField.id}
-            index={index}
-            customField={customField}
-            setEditingCustomField={setEditingCustomField}
-            loading={loading}
-            eventId={event.id}
-          />
-        ))}
-    </SortableContainer>
+    <DraggableItems
+      event={event}
+      items={items}
+      setItemPosition={setItemPosition}
+      setPositionLoading={loading}
+      SortableItem={SortableItem}
+      setEditingItem={setEditingItem}
+    />
   );
 };
+
+export default DraggableCustomFields;

@@ -1,10 +1,9 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/react-hooks";
-import { useState, useEffect } from "react";
+import { useMutation, gql } from "@apollo/client";
+import { useState } from "react";
 import { Tooltip } from "react-tippy";
-import gql from "graphql-tag";
 import IconButton from "../../IconButton";
-import { EditIcon, AddIcon } from "../../Icons";
+import { EditIcon } from "../../Icons";
 import TextField from "../../TextField";
 import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";

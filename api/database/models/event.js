@@ -27,7 +27,6 @@ const EventSchema = new Schema({
       position: {
         type: Number,
         required: true,
-        default: 1000,
       },
     }),
   ],
@@ -49,7 +48,6 @@ const EventSchema = new Schema({
       position: {
         type: Number,
         required: true,
-        default: 1000,
       },
       isShownOnFrontPage: Boolean,
       createdAt: {
@@ -59,6 +57,7 @@ const EventSchema = new Schema({
     }).index({ position: 1 }),
   ],
   dreamReviewIsOpen: Boolean,
+  discourseCategoryId: { type: Number },
 }).index({ slug: 1, organizationId: 1 }, { unique: true }); // Unique on slug + organization Id
 
 EventSchema.virtual("grantingIsOpen").get(function () {

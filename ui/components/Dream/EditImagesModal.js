@@ -1,6 +1,5 @@
-import gql from "graphql-tag";
 import { useState } from "react";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { styled as muiStyled } from "@material-ui/core/styles";

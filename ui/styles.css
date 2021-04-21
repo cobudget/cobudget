@@ -45,7 +45,7 @@ h5 {
 }
 
 .markdown p {
-  @apply text-gray-900 mb-2;
+  @apply text-gray-900 my-2;
 }
 
 .markdown a {
@@ -63,5 +63,33 @@ h5 {
 }
 
 .markdown blockquote {
-  @apply bg-gray-100 border-l-4 border-gray-200 px-2;
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+}
+
+.markdown aside {
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+}
+
+.markdown aside blockquote {
+  @apply bg-transparent border-0 p-0 m-0;
+}
+
+.markdown aside .title {
+  @apply text-sm font-medium text-black mt-1;
+}
+
+.markdown img.emoji {
+  @apply w-5 h-5 align-middle inline;
+}
+
+.markdown img.avatar {
+  @apply hidden;
+}
+
+.markdown div.meta {
+  @apply hidden;
+}
+
+.markdown a.mention {
+  @apply pointer-events-none cursor-default;
 }

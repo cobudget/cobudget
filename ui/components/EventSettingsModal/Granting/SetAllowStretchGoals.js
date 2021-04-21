@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation } from "@apollo/client";
 
 import { Box, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";

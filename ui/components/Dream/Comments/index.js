@@ -1,36 +1,33 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
+import gql from "graphql-tag";
 
 const Comments = ({
   currentOrgMember,
   currentOrg,
-  comments,
-  dreamId,
+  dream,
   event,
   logs,
 }) => {
-  // separate logs are deprecated, logs are now created as regular comments, but merging with them here to avoid migrations
-  const items = [
-    ...comments.map((comment) => ({ ...comment, _type: "COMMENT" })),
-    ...logs.map((log) => ({ ...log, _type: "LOG" })),
-  ].sort((a, b) => a.createdAt - b.createdAt);
-
   return (
     <div>
-      {(comments.length > 0 || currentOrgMember?.currentEventMembership) && (
-        <h2 className="mb-4 text-2xl font-medium" id="comments">
-          {comments.length} {comments.length === 1 ? "comment" : "comments"}
-        </h2>
+      {(dream.comments.length > 0 || currentOrgMember?.currentEventMembership) && (
+        <div className="flex justify-between items-center">
+          <h2 className="mb-4 text-2xl font-medium" id="comments">
+            {dream.comments.length} {dream.comments.length === 1 ? "comment" : "comments"}
+          </h2>
+          {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>View on Discourse</a>}
+        </div>
       )}
-      {items.map((comment, index) => {
+      {dream.comments.map((comment, index) => {
         if (comment._type === "LOG") return <Log log={comment} key={index} />;
         return (
           <Comment
             comment={comment}
             currentOrgMember={currentOrgMember}
-            dreamId={dreamId}
-            showBorderBottom={Boolean(index + 1 !== comments.length)}
+            dreamId={dream.id}
+            showBorderBottom={Boolean(index + 1 !== dream.comments.length)}
             key={comment.id}
             event={event}
           />
@@ -40,7 +37,7 @@ const Comments = ({
         <AddComment
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
-          dreamId={dreamId}
+          dreamId={dream.id}
           event={event}
         />
       )}
