@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 
 import Button from "components/Button";
 import TextField from "components/TextField";
