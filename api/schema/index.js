@@ -359,6 +359,7 @@ const schema = gql`
   }
 
   type BudgetItem {
+    id
     description: String!
     min: Int!
     max: Int

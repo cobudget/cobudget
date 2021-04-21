@@ -20,6 +20,7 @@ export const DREAMS_QUERY = gql`
       favorite
       published
       customFields {
+        id
         value
         customField {
           id

@@ -92,6 +92,7 @@ export const DREAM_QUERY = gql`
         }
       }
       budgetItems {
+        id
         description
         min
         max
