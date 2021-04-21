@@ -33,6 +33,7 @@ export const DREAMS_QUERY = gql`
         }
       }
       images {
+        id
         small
         large
       }
