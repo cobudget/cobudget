@@ -411,6 +411,7 @@ const resolvers = {
       { eventId },
       {
         currentOrgMember,
+        currentOrg,
         models: { Event, Grant, Dream, EventMember },
         eventHub,
       }
@@ -939,12 +940,16 @@ const resolvers = {
 
       dream.published = !unpublish;
 
-      await eventHub.publish("publish-dream", {
-        currentOrg,
-        currentOrgMember,
-        event,
-        dream,
-      });
+      // TODO: make the publish dream event not dependent on org having discourse
+      if (orgHasDiscourse(currentOrg)) {
+        await eventHub.publish("publish-dream", {
+          currentOrg,
+          currentOrgMember,
+          event,
+          dream,
+        });
+      }
+
       return dream.save();
     },
     addComment: async (
