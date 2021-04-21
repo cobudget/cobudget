@@ -1,8 +1,7 @@
 import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import Link from "next/link";
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 
 import {
   CoinIcon,

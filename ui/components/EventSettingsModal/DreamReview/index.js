@@ -1,6 +1,5 @@
 import { useForm } from "react-hook-form";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 

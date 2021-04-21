@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import gql from "graphql-tag";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import Link from "next/link";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";

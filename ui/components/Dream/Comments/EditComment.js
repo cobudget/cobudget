@@ -1,10 +1,7 @@
 import React from "react";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
-// import { TextField, Button } from "@material-ui/core";
+import { useMutation, gql } from "@apollo/client";
 import TextField from "components/TextField";
 import Button from "components/Button";
-import Box from "@material-ui/core/Box";
 import { useForm } from "react-hook-form";
 
 const EDIT_COMMENT_MUTATION = gql`

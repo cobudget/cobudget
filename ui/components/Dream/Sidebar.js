@@ -1,7 +1,6 @@
 import { Tooltip } from "react-tippy";
-import gql from "graphql-tag";
 import { useState } from "react";
-import { useMutation } from "@apollo/react-hooks";
+import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
 
 import Dropdown from "components/Dropdown";

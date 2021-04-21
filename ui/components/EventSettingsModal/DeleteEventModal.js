@@ -1,5 +1,4 @@
-import { useMutation } from "@apollo/react-hooks";
-import gql from "graphql-tag";
+import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
