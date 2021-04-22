@@ -806,12 +806,12 @@ const resolvers = {
       {
         currentOrg,
         currentOrgMember,
-        models: { Dream, EventMember, Grant },
+        models: { Dream, EventMember, Contribution, Event },
         eventHub,
       }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
-
+      const event = await Event.findOne({ _id: dream.eventId });
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
@@ -826,14 +826,16 @@ const resolvers = {
         throw new Error("You are not a cocreator of this dream.");
 
       const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
         { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
       ]);
 
-      if (grantsForDream > 0) {
-        throw new Error("You cant delete a Dream that has received tokens");
+      if (contributionsForDream > 0) {
+        throw new Error(
+          "You cant delete a Dream that has received contributions"
+        );
       }
 
       await eventHub.publish("delete-dream", {
