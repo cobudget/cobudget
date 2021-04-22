@@ -95,7 +95,7 @@ const SearchMembersResult = ({
   eventId,
   addCocreator,
 }) => {
-  const { data: { members } = { members: [] }, loading, error } = useQuery(
+  const { data: { members } = { members: [] } } = useQuery(
     SEARCH_MEMBERS_QUERY,
     {
       variables: { eventId, isApproved: true },
