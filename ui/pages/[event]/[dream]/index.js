@@ -47,6 +47,7 @@ export const DREAM_QUERY = gql`
       cocreators {
         id
         orgMember {
+          id
           user {
             id
             username
