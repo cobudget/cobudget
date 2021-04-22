@@ -1125,7 +1125,7 @@ const resolvers = {
             currentOrg.discourse
           ).posts.create(
             {
-              title,
+              title: dream.title,
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
@@ -1202,7 +1202,7 @@ const resolvers = {
             currentOrg.discourse
           ).posts.create(
             {
-              title,
+              title: dream.title,
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
