@@ -66,11 +66,6 @@ module.exports = {
           dream = Dream.findOne({ _id: dream.id });
         }
 
-        if (!currentOrgMember.discourseApiKey)
-          throw new Error(
-            "You need to have a discourse account connected, go to /connect-discourse"
-          );
-
         console.log(`Updating dream ${dream.id} on discourse`);
 
         const post = await discourse(currentOrg.discourse).topics.getSummary(
@@ -85,19 +80,17 @@ module.exports = {
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        const comment = {
-          id: post.id,
-          title: dream.title,
-          content: this.generateDreamMarkdown(dream, event, currentOrg),
-        };
-
-        eventHub.publish("edit-comment", {
-          currentOrg,
-          currentOrgMember,
-          event,
-          dream,
-          comment,
-        });
+        await discourse(currentOrg.discourse).posts.update(
+          post.id,
+          {
+            title: dream.title,
+            raw: this.generateDreamMarkdown(dream, event, currentOrg),
+          },
+          {
+            username: "system",
+            apiKey: currentOrg.discourse.apiKey,
+          }
+        );
       }
     );
 
