@@ -10,6 +10,7 @@ const SEARCH_MEMBERS_QUERY = gql`
       id
       isApproved
       orgMember {
+        id
         user {
           id
           username
@@ -27,6 +28,7 @@ const ADD_CO_CREATOR_MUTATION = gql`
       cocreators {
         id
         orgMember {
+          id
           user {
             id
             username
