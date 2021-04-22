@@ -31,6 +31,7 @@ export const DREAM_QUERY = gql`
         }
       }
       customFields {
+        id
         value
         customField {
           id

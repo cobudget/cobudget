@@ -17,6 +17,7 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
     editDreamCustomField(dreamId: $dreamId, customField: $customField) {
       id
       customFields {
+        id
         value
         customField {
           id

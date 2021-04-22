@@ -394,6 +394,7 @@ const schema = gql`
   # }
 
   type CustomFieldValue {
+    id: ID!
     customField: CustomField
     value: JSON
   }
