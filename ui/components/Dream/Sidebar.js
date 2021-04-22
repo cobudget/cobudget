@@ -61,6 +61,7 @@ const CANCEL_FUNDING_MUTATION = gql`
       funded
       canceled
       canceledAt
+      totalContributions
     }
   }
 `;
@@ -115,6 +116,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
 
   const showFundButton =
     !dream.funded &&
+    !dream.canceled &&
     hasNotReachedMaxGoal &&
     !!currentOrgMember?.currentEventMembership?.balance;
   const showAcceptFundingButton =

@@ -1670,6 +1670,13 @@ const resolvers = {
       if (!dream.approved)
         throw new Error("Dream is not approved for granting");
 
+      if (dream.canceled)
+        throw new Error("Funding has been canceled for dream");
+
+      if (dream.funded) throw new Error("Dream has been funded");
+
+      if (dream.completed) throw new Error("Dream is already completed");
+
       // Check that the max goal of the dream is not exceeded
       const [
         { contributionsForDream } = { contributionsForDream: 0 },
