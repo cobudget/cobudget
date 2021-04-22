@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { Box, Button, TextField } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
 import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
@@ -17,19 +16,18 @@ const SetCurrency = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set tokens per member</h1>
-        <Alert severity="warning">
-          Changing tokens per member will also reset grant value.
-        </Alert>
+        <h1 className="text-3xl">Set max. amount to one dream per user</h1>
+
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: { grantsPerMember: Number(variables.grantsPerMember) },
+              variables: {
+                maxAmountToDreamPerUser: Math.round(
+                  variables.maxAmountToDreamPerUser * 100
+                ),
+              },
             })
-              .then(({ data }) => {
-                // console.log({ data });
-                closeModal();
-              })
+              .then(() => closeModal())
               .catch((err) => {
                 console.log({ err });
                 alert(err.message);
@@ -38,14 +36,14 @@ const SetCurrency = ({ closeModal, event }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="grantsPerMember"
-              label="Tokens per member"
-              defaultValue={event.grantsPerMember}
+              name="maxAmountToDreamPerUser"
+              label="Max. amount to one dream per user"
+              defaultValue={event.maxAmountToDreamPerUser / 100}
               fullWidth
               inputRef={register}
               InputProps={{
                 type: "number",
-                min: 1,
+                min: "1",
               }}
               variant="outlined"
             />

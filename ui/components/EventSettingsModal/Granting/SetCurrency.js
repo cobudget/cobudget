@@ -16,15 +16,15 @@ const SetCurrency = ({ closeModal, event }) => {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">Set currency</h1>
         <Alert severity="warning">
-          Changing currency will also reset total budget and grant value. You
-          can't change this after dream creation closes.
+          You should not change currency after someone has added budgets or
+          granting has started.
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {

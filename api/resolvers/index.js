@@ -171,17 +171,17 @@ const resolvers = {
         ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
-    categories: async (
-      parent,
-      {},
-      { currentOrg, currentOrgMember }
-    ) => {
-      if (!currentOrg.discourse) { return []; }
+    categories: async (parent, {}, { currentOrg, currentOrgMember }) => {
+      if (!currentOrg.discourse) {
+        return [];
+      }
 
-      const categories = await discourse(currentOrg.discourse).categories.getAll({
+      const categories = await discourse(
+        currentOrg.discourse
+      ).categories.getAll({
         username: currentOrgMember.discourseUsername,
         apiKey: currentOrgMember.discourseApiKey,
-      })
+      });
 
       return categories;
     },
@@ -190,7 +190,13 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain: dirtySubdomain, logo },
-      { kauth, kcAdminClient, currentOrgMember, models: { Organization, OrgMember }, eventHub }
+      {
+        kauth,
+        kcAdminClient,
+        currentOrgMember,
+        models: { Organization, OrgMember },
+        eventHub,
+      }
     ) => {
       if (!kauth) throw new Error("You need to be logged in!");
       const subdomain = slugify(dirtySubdomain);
@@ -233,13 +239,22 @@ const resolvers = {
         );
       }
 
-      await eventHub.publish('create-organization', { currentOrganization: savedOrg, currentOrgMember });
+      await eventHub.publish("create-organization", {
+        currentOrganization: savedOrg,
+        currentOrgMember,
+      });
       return savedOrg;
     },
     editOrganization: async (
       parent,
       { organizationId, name, subdomain: dirtySubdomain, logo },
-      { currentUser, kcAdminClient, currentOrgMember, models: { Organization }, eventHub }
+      {
+        currentUser,
+        kcAdminClient,
+        currentOrgMember,
+        models: { Organization },
+        eventHub,
+      }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
@@ -291,7 +306,10 @@ const resolvers = {
           }
         );
 
-      await eventHub.publish('edit-organization', { currentOrg: organization, currentOrgMember });
+      await eventHub.publish("edit-organization", {
+        currentOrg: organization,
+        currentOrgMember,
+      });
       return organization;
     },
     setTodosFinished: async (
@@ -332,7 +350,11 @@ const resolvers = {
         isApproved: true,
       }).save();
 
-      await eventHub.publish('create-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("create-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event;
     },
     editEvent: async (
@@ -377,13 +399,22 @@ const resolvers = {
         event.dreamReviewIsOpen = dreamReviewIsOpen;
       if (discourseCategoryId) event.discourseCategoryId = discourseCategoryId;
 
-      await eventHub.publish('edit-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("edit-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event.save();
     },
     deleteEvent: async (
       parent,
       { eventId },
-      { currentOrgMember, models: { Event, Grant, Dream, EventMember }, eventHub }
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { Event, Grant, Dream, EventMember },
+        eventHub,
+      }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be org. admin to delete event");
@@ -400,7 +431,11 @@ const resolvers = {
       await Dream.deleteMany({ eventId });
       await EventMember.deleteMany({ eventId });
 
-      await eventHub.publish('delete-event', { currentOrg, currentOrgMember, event });
+      await eventHub.publish("delete-event", {
+        currentOrg,
+        currentOrgMember,
+        event,
+      });
       return event.remove();
     },
     addGuideline: async (
@@ -654,7 +689,12 @@ const resolvers = {
         images,
         budgetItems,
       },
-      { currentOrgMember, currentOrg, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const eventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -678,14 +718,24 @@ const resolvers = {
         cocreators: [eventMember.id],
       });
 
-      await eventHub.publish('create-dream', { currentOrg, currentOrgMember, dream, event });
+      await eventHub.publish("create-dream", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        event,
+      });
 
       return dream.save();
     },
     editDream: async (
       parent,
       { dreamId, title, description, summary, images, budgetItems },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
@@ -709,7 +759,12 @@ const resolvers = {
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
 
-      await eventHub.publish('edit-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish("edit-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
 
       return dream.save();
     },
@@ -748,7 +803,12 @@ const resolvers = {
     deleteDream: async (
       parent,
       { dreamId },
-      { currentOrg, currentOrgMember, models: { Dream, EventMember, Grant }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { Dream, EventMember, Grant },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -776,7 +836,12 @@ const resolvers = {
         throw new Error("You cant delete a Dream that has received tokens");
       }
 
-      await eventHub.publish('delete-dream', { currentOrg, currentOrgMember, event, dream });
+      await eventHub.publish("delete-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
       return dream.remove();
     },
     addCocreator: async (
@@ -850,7 +915,12 @@ const resolvers = {
     publishDream: async (
       parent,
       { dreamId, unpublish },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
@@ -870,7 +940,16 @@ const resolvers = {
 
       dream.published = !unpublish;
 
-      await eventHub.publish('publish-dream', { currentOrg, currentOrgMember, event, dream });
+      // TODO: make the publish dream event not dependent on org having discourse
+      if (orgHasDiscourse(currentOrg)) {
+        await eventHub.publish("publish-dream", {
+          currentOrg,
+          currentOrgMember,
+          event,
+          dream,
+        });
+      }
+
       return dream.save();
     },
     addComment: async (
@@ -885,28 +964,44 @@ const resolvers = {
         throw new Error("You need to be an org member to post comments.");
 
       if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey)
-        throw new Error("You need to have a discourse account connected, go to /connect-discourse");
+        throw new Error(
+          "You need to have a discourse account connected, go to /connect-discourse"
+        );
 
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
-        throw new Error(`Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3} characters long!`);
+        throw new Error(
+          `Your post needs to be at least ${
+            currentOrg.discourse?.minPostLength || 3
+          } characters long!`
+        );
 
-      const comment = { content, authorId: currentOrgMember.id, }
+      const comment = { content, authorId: currentOrgMember.id };
 
-      if (!orgHasDiscourse(currentOrg))
-        dream.comments.push(comment);
+      if (!orgHasDiscourse(currentOrg)) dream.comments.push(comment);
 
-      await eventHub.publish('create-comment', { currentOrg, currentOrgMember, dream, event, comment });
+      await eventHub.publish("create-comment", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        event,
+        comment,
+      });
       return dream.save();
     },
 
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
-      const comment = { id: commentId }
+      const comment = { id: commentId };
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
@@ -917,12 +1012,20 @@ const resolvers = {
       });
 
       if (!orgHasDiscourse(currentOrg)) {
-        console.log(dream.comments)
-        dream.comments = dream.comments.filter(comment => comment.id.toString() !== commentId);
+        console.log(dream.comments);
+        dream.comments = dream.comments.filter(
+          (comment) => comment.id.toString() !== commentId
+        );
         return dream.save();
       }
 
-      await eventHub.publish('delete-comment', { currentOrg, currentOrgMember, event, dream, comment });
+      await eventHub.publish("delete-comment", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+        comment,
+      });
 
       return dream;
     },
@@ -948,14 +1051,21 @@ const resolvers = {
         );
 
         if (comment.length == 0) {
-          throw new Error("Cant find that comment - Does this comment belongs to you?");
+          throw new Error(
+            "Cant find that comment - Does this comment belongs to you?"
+          );
         }
         comment[0].content = content;
         comment[0].updatedAt = new Date();
         dream.save();
       }
 
-      await eventHub.publish('edit-comment', { currentOrg, currentOrgMember, dream, comment });
+      await eventHub.publish("edit-comment", {
+        currentOrg,
+        currentOrgMember,
+        dream,
+        comment,
+      });
 
       return dream;
     },
@@ -1129,7 +1239,7 @@ const resolvers = {
       if (!eventMember || !eventMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (flag in dream.flags) {
+      for (const flag in dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
           flag.type === "ALL_GOOD_FLAG"
@@ -1214,7 +1324,7 @@ const resolvers = {
       // let newOrgMembers = [];
       const newEventMembers = [];
 
-      for (email of emails) {
+      for (const email of emails) {
         const [user] = await kcAdminClient.users.findOne({
           email: email.trim(),
         });
@@ -1502,10 +1612,41 @@ const resolvers = {
       dream.approved = approved;
       return dream.save();
     },
-    giveGrant: async (
-      parent,
-      { eventId, dreamId, value },
-      { currentOrgMember, models: { EventMember, Grant, Event, Dream } }
+    allocate: async (
+      _,
+      { eventMemberId, amount },
+      { currentOrgMember, models: { EventMember, Allocation } }
+    ) => {
+      if (!currentOrgMember) throw new Error("You need to be logged in.");
+
+      const targetEventMember = await EventMember.findOne({
+        _id: eventMemberId,
+      });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: targetEventMember.eventId,
+      });
+
+      if (!currentEventMember?.isAdmin)
+        throw new Error("You need to be event admin to allocate funds.");
+
+      await new Allocation({
+        organizationId: currentOrgMember.organizationId,
+        eventId: targetEventMember.eventId,
+        eventMemberId,
+        amount,
+      }).save();
+
+      return targetEventMember;
+    },
+    contribute: async (
+      _,
+      { eventId, dreamId, amount },
+      {
+        currentOrgMember,
+        models: { Dream, Event, EventMember, Allocation, Contribution },
+      }
     ) => {
       const currentEventMember = await EventMember.findOne({
         orgMemberId: currentOrgMember.id,
@@ -1517,7 +1658,7 @@ const resolvers = {
           "You need to be a logged in approved member to fund things"
         );
 
-      if (value <= 0) throw new Error("Value needs to be more than zero");
+      if (amount <= 0) throw new Error("Value needs to be more than zero");
 
       const event = await Event.findOne({ _id: eventId });
 
@@ -1529,149 +1670,109 @@ const resolvers = {
       if (!dream.approved)
         throw new Error("Dream is not approved for granting");
 
+      if (dream.canceled)
+        throw new Error("Funding has been canceled for dream");
+
+      if (dream.funded) throw new Error("Dream has been funded");
+
+      if (dream.completed) throw new Error("Dream is already completed");
+
       // Check that the max goal of the dream is not exceeded
       const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
         { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
       ]);
 
-      // TODO: Create virtual on dream model instead?
-      const maxGoalGrants = Math.ceil(
-        Math.max(dream.maxGoal, dream.minGoal) / event.grantValue
-      );
+      const maxGoal = Math.max(dream.maxGoal, dream.minGoal);
 
-      if (grantsForDream + value > maxGoalGrants)
+      if (contributionsForDream + amount > maxGoal)
         throw new Error("You can't overfund this dream.");
 
+      // mark dream as funded if it has reached its max goal
+      if (contributionsForDream + amount === maxGoal) {
+        dream.fundedAt = Date.now();
+      }
+
       // Check that it is not more than is allowed per dream (if this number is set)
-      if (event.maxGrantsToDream && value > event.maxGrantsToDream) {
+      if (
+        event.maxAmountToDreamPerUser &&
+        amount > event.maxAmountToDreamPerUser
+      ) {
         throw new Error(
-          `You can give a maximum of ${event.maxGrantsToDream} tokens to one dream`
+          `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
+            event.currency
+          } to one dream`
         );
       }
 
       // Check that user has not spent more tokens than he has
       const [
-        { grantsFromUser } = { grantsFromUser: 0 },
-      ] = await Grant.aggregate([
+        { contributionsFromUser } = { contributionsFromUser: 0 },
+      ] = await Contribution.aggregate([
         {
           $match: {
-            memberId: mongoose.Types.ObjectId(currentEventMember.id),
-            type: "USER",
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
           },
         },
-        { $group: { _id: null, grantsFromUser: { $sum: "$value" } } },
+        { $group: { _id: null, contributionsFromUser: { $sum: "$amount" } } },
       ]);
 
-      if (grantsFromUser + value > event.grantsPerMember)
-        throw new Error("You are trying to spend too many tokens.");
-
-      // Check that total budget of event will not be exceeded
       const [
-        { grantsFromEverybody } = { grantsFromEverybody: 0 },
-      ] = await Grant.aggregate([
+        { allocationsForUser } = { allocationsForUser: 0 },
+      ] = await Allocation.aggregate([
         {
           $match: {
-            eventId: mongoose.Types.ObjectId(currentEventMember.eventId),
-            reclaimed: false,
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
           },
         },
-        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
+        { $group: { _id: null, allocationsForUser: { $sum: "$amount" } } },
       ]);
 
-      const totalGrantsToSpend = Math.floor(
-        event.totalBudget / event.grantValue
-      );
+      if (contributionsFromUser + amount > allocationsForUser)
+        throw new Error("You are trying to spend more than what you have.");
 
-      if (grantsFromEverybody + value > totalGrantsToSpend)
-        throw new Error("Total budget of event is exeeced with this grant");
-
-      return new Grant({
-        eventId: currentEventMember.eventId,
-        dreamId,
-        value,
-        memberId: currentEventMember.id,
-      }).save();
-    },
-    deleteGrant: async (
-      parent,
-      { eventId, grantId },
-      { currentOrgMember, models: { Grant, Event, EventMember } }
-    ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
+      await new Contribution({
+        organizationId: currentOrgMember.organizationId,
         eventId,
-      });
-
-      if (!currentEventMember || !currentEventMember.isApproved)
-        throw new Error(
-          "You need to be a logged in approved member to remove tokens"
-        );
-
-      const event = await Event.findOne({ _id: eventId });
-
-      // Check that granting is open
-      if (!event.grantingIsOpen)
-        throw new Error("Can't remove granted tokens when granting is closed");
-
-      const grant = await Grant.findOneAndDelete({
-        _id: grantId,
-        memberId: currentEventMember.id,
-      });
-      return grant;
-    },
-    reclaimGrants: async (
-      parent,
-      { dreamId },
-      { currentOrgMember, models: { Grant, Event, Dream, EventMember } }
-    ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
-
-      if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error("You need to be admin to reclaim tokens");
-
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      // Granting needs to be closed before you can reclaim tokens
-      if (!event.grantingHasClosed)
-        throw new Error("You can't reclaim tokens before granting has closed");
-
-      // If dream has reached minimum funding, you can't reclaim its tokens
-      const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
-        {
-          $match: {
-            dreamId: mongoose.Types.ObjectId(dreamId),
-            reclaimed: false,
-          },
-        },
-        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
-      ]);
-
-      const minGoalGrants = Math.ceil(dream.minGoal / event.grantValue);
-
-      if (grantsForDream >= minGoalGrants)
-        throw new Error(
-          "You can't reclaim tokens if it has reached minimum funding"
-        );
-
-      await Grant.updateMany({ dreamId }, { reclaimed: true });
+        eventMemberId: currentEventMember.id,
+        dreamId,
+        amount,
+      }).save();
 
       return dream;
     },
-    preOrPostFund: async (
-      parent,
-      { dreamId, value },
-      { currentOrgMember, models: { Grant, Dream, Event, EventMember } }
+    markAsCompleted: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember } }
     ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+      if (!currentEventMember?.isAdmin)
+        throw new Error(
+          "You need to be event admin to mark a dream as completed"
+        );
+
+      dream.completedAt = Date.now();
+      return dream.save();
+    },
+    acceptFunding: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember, Contribution } }
+    ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
       const dream = await Dream.findOne({ _id: dreamId });
 
       const currentEventMember = await EventMember.findOne({
@@ -1679,75 +1780,76 @@ const resolvers = {
         eventId: dream.eventId,
       });
 
-      if (!currentEventMember || !currentEventMember.isAdmin)
-        throw new Error("You need to be admin to pre or post fund");
+      if (
+        !currentEventMember ||
+        (!dream.cocreators.includes(currentEventMember.id) &&
+          !currentEventMember.isAdmin)
+      )
+        throw new Error("You are not an admin or cocreator of this dream.");
 
-      if (value <= 0) throw new Error("Value needs to be more than zero");
-
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      // TODO: check whether certain settings are set, like grant value and total budget
-
-      if (!dream.approved)
-        throw new Error("Dream is not approved for granting");
-
-      // Check that the max goal of the dream is not exceeded
       const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
         {
           $match: {
-            dreamId: mongoose.Types.ObjectId(dreamId),
-            reclaimed: false,
+            dreamId: dream._id,
           },
         },
-        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
       ]);
 
-      const maxGoalGrants = Math.ceil(
-        Math.max(dream.maxGoal, dream.minGoal) / event.grantValue
-      );
+      if (contributionsForDream < dream.minGoal)
+        throw new Error("Dream has not reached its minimum goal yet.");
 
-      if (grantsForDream + value > maxGoalGrants)
-        throw new Error("You can't overfund this dream.");
+      dream.fundedAt = Date.now();
+      return dream.save();
+    },
+    cancelFunding: async (
+      _,
+      { dreamId },
+      { currentOrgMember, models: { Dream, EventMember, Contribution } }
+    ) => {
+      if (!currentOrgMember) {
+        throw new Error("You need to be logged in.");
+      }
+      const dream = await Dream.findOne({ _id: dreamId });
 
-      // Check that total budget of event will not be exceeded
-      const [
-        { grantsFromEverybody } = { grantsFromEverybody: 0 },
-      ] = await Grant.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(dream.eventId),
-            reclaimed: false,
-          },
-        },
-        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
-      ]);
-
-      const totalGrantsToSpend = Math.floor(
-        event.totalBudget / event.grantValue
-      );
-
-      if (grantsFromEverybody + value > totalGrantsToSpend)
-        throw new Error("Total budget of event is exeeced with this grant");
-
-      return new Grant({
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
-        dreamId,
-        value,
-        type: event.grantingHasClosed ? "POST_FUND" : "PRE_FUND",
-        memberId: currentEventMember.id,
-      }).save();
+      });
+
+      if (
+        !currentEventMember ||
+        (!dream.cocreators.includes(currentEventMember.id) &&
+          !currentEventMember.isAdmin)
+      )
+        throw new Error("You are not an admin or cocreator of this dream.");
+
+      if (dream.completed)
+        throw new Error(
+          "This dream has already been marked completed, can't cancel funding."
+        );
+
+      if (dream.fundedAt) {
+        dream.fundedAt = null;
+      }
+
+      dream.canceledAt = Date.now();
+
+      // delete all contributions
+      await Contribution.deleteMany({ dreamId });
+
+      // TODO: notify contribuors that they have been "re-imbursed"
+
+      return dream.save();
     },
     updateGrantingSettings: async (
       parent,
       {
         eventId,
         currency,
-        grantsPerMember,
-        maxGrantsToDream,
-        totalBudget,
-        grantValue,
+        maxAmountToDreamPerUser,
         dreamCreationCloses,
         grantingOpens,
         grantingCloses,
@@ -1776,7 +1878,6 @@ const resolvers = {
       )
         throw new Error("You need to be admin to update granting settings.");
 
-      const grantingHasStarted = dayjs(event.grantingOpens).isBefore(dayjs());
       const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
         dayjs()
       );
@@ -1789,48 +1890,10 @@ const resolvers = {
           );
         }
         event.currency = currency;
-        event.totalBudget = undefined;
-        event.grantValue = undefined;
       }
 
-      if (grantsPerMember) {
-        // granting can't have started to change tokens per member
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change tokens per member once granting has started"
-          );
-        }
-        event.grantsPerMember = grantsPerMember;
-        event.grantValue = undefined;
-      }
-
-      if (maxGrantsToDream) {
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change max tokens to dream once granting has started"
-          );
-        }
-        event.maxGrantsToDream = maxGrantsToDream;
-      }
-
-      if (totalBudget) {
-        // can only increase total budget after granting has started
-        if (grantingHasStarted && totalBudget < event.totalBudget) {
-          throw new Error(
-            "You can't decrease total budget once granting has started"
-          );
-        }
-        event.totalBudget = totalBudget;
-      }
-
-      if (grantValue) {
-        // granting can't have started to change token value
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change token value once granting has started"
-          );
-        }
-        event.grantValue = grantValue;
+      if (maxAmountToDreamPerUser) {
+        event.maxAmountToDreamPerUser = maxAmountToDreamPerUser;
       }
 
       if (dreamCreationCloses) {
@@ -1838,22 +1901,6 @@ const resolvers = {
       }
 
       if (grantingOpens) {
-        if (
-          !event.totalBudget ||
-          !event.grantValue
-          // || !event.dreamCreationCloses
-        ) {
-          throw new Error(
-            "You can't set granting opening date before setting total budget & token value "
-          );
-        }
-
-        // if (dayjs(grantingOpens).isBefore(dayjs(event.dreamCreationCloses))) {
-        //   throw new Error(
-        //     "Granting opens date needs to be after dream creation closing date"
-        //   );
-        // }
-
         event.grantingOpens = grantingOpens;
       }
 
@@ -1870,11 +1917,6 @@ const resolvers = {
       }
 
       if (typeof allowStretchGoals !== "undefined") {
-        if (grantingHasStarted) {
-          throw new Error(
-            "You can't change stretch goal setting once granting has started"
-          );
-        }
         event.allowStretchGoals = allowStretchGoals;
       }
 
@@ -1980,45 +2022,41 @@ const resolvers = {
     },
   },
   Subscription: {
-    commentsChanged: { subscribe: () => liveUpdate.asyncIterator(['commentsChanged']) },
+    commentsChanged: {
+      subscribe: () => liveUpdate.asyncIterator(["commentsChanged"]),
+    },
   },
   EventMember: {
-    // user: async (member, args, { models: { User } }) => {
-    //   // this one is not existing in the schema.. but should be possible to have. still
-
-    //   return User.findOne({ _id: member.userId });
-    // },
     event: async (member, args, { models: { Event } }) => {
       return Event.findOne({ _id: member.eventId });
     },
     orgMember: async (member, args, { models: { OrgMember } }) => {
       return OrgMember.findOne({ _id: member.orgMemberId });
     },
-    availableGrants: async (member, args, { models: { Grant, Event } }) => {
-      if (!member.isApproved) return 0;
-
-      const event = await Event.findOne({
-        _id: member.eventId,
-      });
-
+    balance: async (member, args, { models: { Allocation, Contribution } }) => {
       const [
-        { grantsFromMember } = { grantsFromMember: 0 },
-      ] = await Grant.aggregate([
+        { totalAllocations } = { totalAllocations: 0 },
+      ] = await Allocation.aggregate([
         {
           $match: {
-            memberId: mongoose.Types.ObjectId(member.id),
-            type: "USER",
+            eventMemberId: mongoose.Types.ObjectId(member.id),
           },
         },
-        { $group: { _id: null, grantsFromMember: { $sum: "$value" } } },
+        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
       ]);
 
-      if (!event.grantingIsOpen) return 0;
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(member.id),
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
 
-      return event.grantsPerMember - grantsFromMember;
-    },
-    givenGrants: async (member, args, { models: { Grant } }) => {
-      return Grant.find({ memberId: member.id });
+      return totalAllocations - totalContributions;
     },
   },
   OrgMember: {
@@ -2090,25 +2128,6 @@ const resolvers = {
     // },
     isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
     avatar: () => null, //TODO: what about avatars in keycloak?
-    // membership: async (
-    //   user,
-    //   { slug },
-    //   { currentOrg, models: { OrgMember, EventMember, Event } }
-    // ) => {
-    //   if (!slug) return null;
-    //   const event = await Event.findOne({
-    //     organizationId: currentOrg.id,
-    //     slug,
-    //   });
-    //   const orgMembership = await OrgMember.findOne({
-    //     userId: user.id,
-    //     organizationId: currentOrg.id,
-    //   });
-    //   return EventMember.findOne({
-    //     orgMemberId: orgMembership.id,
-    //     eventId: event.id,
-    //   });
-    // },
   },
   Organization: {
     events: async (organization, args, { models: { Event } }) => {
@@ -2125,9 +2144,6 @@ const resolvers = {
     },
   },
   Event: {
-    // members: async (event, args, { models: { EventMember } }) => {
-    //   return EventMember.find({ eventId: event.id });
-    // },
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     },
@@ -2141,24 +2157,79 @@ const resolvers = {
         isApproved: true,
       });
     },
-    totalBudgetGrants: async (event) => {
-      return Math.floor(event.totalBudget / event.grantValue);
-    },
-    remainingGrants: async (event, args, { models: { Grant } }) => {
+    totalAllocations: async (event, args, { models: { Allocation } }) => {
       const [
-        { grantsFromEverybody } = { grantsFromEverybody: 0 },
-      ] = await Grant.aggregate([
+        { totalAllocations } = { totalAllocations: 0 },
+      ] = await Allocation.aggregate([
         {
           $match: {
             eventId: mongoose.Types.ObjectId(event.id),
-            reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsFromEverybody: { $sum: "$value" } } },
+        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
       ]);
-      return (
-        Math.floor(event.totalBudget / event.grantValue) - grantsFromEverybody
-      );
+      return totalAllocations;
+    },
+    totalContributions: async (event, args, { models: { Contribution } }) => {
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+      return totalContributions;
+    },
+    totalContributionsFunding: async (
+      event,
+      args,
+      { models: { Contribution, Dream } }
+    ) => {
+      const fundingNowDreamIds = await Dream.distinct("_id", {
+        eventId: event.id,
+        fundedAt: null,
+      });
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+            dreamId: { $in: fundingNowDreamIds },
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalContributions;
+    },
+    totalContributionsFunded: async (
+      event,
+      args,
+      { models: { Contribution, Dream } }
+    ) => {
+      const fundedDreamIds = await Dream.distinct("_id", {
+        eventId: event.id,
+        fundedAt: { $ne: null },
+      });
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+            dreamId: { $in: fundedDreamIds },
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalContributions;
     },
   },
   Dream: {
@@ -2168,38 +2239,29 @@ const resolvers = {
     event: async (dream, args, { models: { Event } }) => {
       return Event.findOne({ _id: dream.eventId });
     },
-    minGoalGrants: async (dream, args, { models: { Event } }) => {
-      const { grantValue } = await Event.findOne({ _id: dream.eventId });
-      if (dream.minGoal === null || !grantValue) {
-        return null;
-      }
-      return Math.ceil(dream.minGoal / grantValue);
-    },
-    maxGoalGrants: async (dream, args, { models: { Event } }) => {
-      const { grantValue } = await Event.findOne({ _id: dream.eventId });
-      if (dream.maxGoal === null || !grantValue) {
-        return null;
-      }
-      return Math.ceil(dream.maxGoal / grantValue);
-    },
-    currentNumberOfGrants: async (dream, args, { models: { Grant } }) => {
+    totalContributions: async (dream, args, { models: { Contribution } }) => {
       const [
-        { grantsForDream } = { grantsForDream: 0 },
-      ] = await Grant.aggregate([
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
         {
           $match: {
             dreamId: mongoose.Types.ObjectId(dream.id),
-            reclaimed: false,
           },
         },
-        { $group: { _id: null, grantsForDream: { $sum: "$value" } } },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
       ]);
-      return grantsForDream;
+      return contributionsForDream;
     },
     comments: async (dream, args, { currentOrg }) => {
-      if (!dream.discourseTopicId) { return dream.comments; }
+      if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {
+        return dream.comments;
+      }
 
-      const { post_stream: { posts } } = await discourse(currentOrg.discourse).posts.get(dream.discourseTopicId);
+      const {
+        post_stream: { posts },
+      } = await discourse(currentOrg.discourse).posts.get(
+        dream.discourseTopicId
+      );
 
       return posts
         .filter(({ post_type }) => post_type === 1)
@@ -2290,11 +2352,6 @@ const resolvers = {
     user: async (parent, args, { models: { EventMember, Dream } }) => {
       // if not org admin or event admin or guide
       return null;
-    },
-  },
-  Grant: {
-    dream: async (grant, args, { models: { Dream } }) => {
-      return Dream.findOne({ _id: grant.dreamId });
     },
   },
   Date: new GraphQLScalarType({

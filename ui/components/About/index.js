@@ -4,7 +4,7 @@ import ReactMarkdown from "react-markdown";
 
 import thousandSeparator from "utils/thousandSeparator";
 
-export default ({ event }) => {
+export default function AboutPage({ event }) {
   return (
     <>
       {event.about && (
@@ -12,7 +12,7 @@ export default ({ event }) => {
           <h2 className="text-xl mb-3" id="about">
             About
           </h2>
-          <div className="shadow rounded-lg bg-white p-4 relative mb-6">
+          <div className="shadow rounded-lg bg-white p-4 pb-2 relative mb-6">
             <ReactMarkdown className="markdown" source={event.about} />
           </div>
         </>
@@ -23,9 +23,9 @@ export default ({ event }) => {
           <h2 className="text-xl mb-3" id="guidelines">
             Guidelines
           </h2>
-          <div className="shadow rounded-lg bg-white relative mb-6">
+          <div className="shadow rounded-lg bg-white relative mb-6 divide-y divide-gray-200">
             {event.guidelines.map((guideline) => (
-              <div className="border-b first:border-0 p-4">
+              <div key={guideline.id} className="p-4 pb-2">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <ReactMarkdown
                   className="markdown"
@@ -44,52 +44,19 @@ export default ({ event }) => {
             <ListItemText primary={"Currency"} secondary={event.currency} />
           </ListItem>
 
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Tokens per member"
-              secondary={event.grantsPerMember}
-            />
-          </ListItem>
-
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Max. tokens to one dream per user"
-              secondary={
-                event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
-              }
-            />
-          </ListItem>
-
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Total budget"
-              secondary={
-                event.totalBudget
-                  ? `${thousandSeparator(event.totalBudget)} ${event.currency}`
-                  : "Not set"
-              }
-            />
-          </ListItem>
-
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Grant value"
-              secondary={
-                event.grantValue
-                  ? `${thousandSeparator(event.grantValue)} ${event.currency}`
-                  : "Not set"
-              }
-            />
-          </ListItem>
-
+          {event.maxAmountToDreamPerUser && (
+            <>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary="Max. amount to one dream per user"
+                  secondary={`${thousandSeparator(
+                    event.maxAmountToDreamPerUser / 100
+                  )} ${event.currency}`}
+                />
+              </ListItem>
+            </>
+          )}
           <Divider />
 
           <ListItem>
@@ -99,46 +66,45 @@ export default ({ event }) => {
             />
           </ListItem>
 
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Dream creation closes"
-              secondary={
-                event.dreamCreationCloses
-                  ? dayjs(event.dreamCreationCloses).format(
-                      "MMMM D, YYYY - h:mm a"
-                    )
-                  : "Not set"
-              }
-            />
-          </ListItem>
-
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Granting opens"
-              secondary={
-                event.grantingOpens
-                  ? dayjs(event.grantingOpens).format("MMMM D, YYYY - h:mm a")
-                  : "Not set"
-              }
-            />
-          </ListItem>
-
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Granting closes"
-              secondary={
-                event.grantingCloses
-                  ? dayjs(event.grantingCloses).format("MMMM D, YYYY - h:mm a")
-                  : "Not set"
-              }
-            />
-          </ListItem>
+          {event.dreamCreationCloses && (
+            <>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary="Dream creation closes"
+                  secondary={dayjs(event.dreamCreationCloses).format(
+                    "MMMM D, YYYY - h:mm a"
+                  )}
+                />
+              </ListItem>
+            </>
+          )}
+          {event.grantingOpens && (
+            <>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary="Granting opens"
+                  secondary={dayjs(event.grantingOpens).format(
+                    "MMMM D, YYYY - h:mm a"
+                  )}
+                />
+              </ListItem>
+            </>
+          )}
+          {event.grantingCloses && (
+            <>
+              <Divider />
+              <ListItem>
+                <ListItemText
+                  primary="Granting closes"
+                  secondary={dayjs(event.grantingCloses).format(
+                    "MMMM D, YYYY - h:mm a"
+                  )}
+                />
+              </ListItem>
+            </>
+          )}
         </List>
       </div>
 
@@ -147,35 +113,43 @@ export default ({ event }) => {
         <List>
           <ListItem>
             <ListItemText
-              primary="Granting is"
-              secondary={event.grantingIsOpen ? "OPEN" : "CLOSED"}
+              primary="Total allocations"
+              secondary={`${thousandSeparator(event.totalAllocations / 100)} ${
+                event.currency
+              }`}
             />
           </ListItem>
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Unallocated tokens in budget"
-              secondary={`${event.remainingGrants} tokens`}
+              primary="Total contributions"
+              secondary={`${thousandSeparator(
+                event.totalContributions / 100
+              )} ${event.currency}`}
             />
           </ListItem>
+
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Total tokens in budget"
-              secondary={`${event.totalBudgetGrants} tokens`}
+              primary="Total contributions in funding now dreams"
+              secondary={`${thousandSeparator(
+                event.totalContributionsFunding / 100
+              )} ${event.currency}`}
             />
           </ListItem>
+
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Tokens given"
-              secondary={`${
-                event.totalBudgetGrants - event.remainingGrants
-              } tokens`}
+              primary="Total contributions in funded dreams"
+              secondary={`${thousandSeparator(
+                event.totalContributionsFunded / 100
+              )} ${event.currency}`}
             />
           </ListItem>
         </List>
       </div>
     </>
   );
-};
+}

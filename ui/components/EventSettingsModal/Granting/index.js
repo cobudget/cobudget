@@ -8,10 +8,7 @@ import thousandSeparator from "utils/thousandSeparator";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
-import SetGrantsPerMember from "./SetGrantsPerMember";
-import SetMaxGrantsToDream from "./SetMaxGrantsToDream";
-import SetTotalBudget from "./SetTotalBudget";
-import SetGrantValue from "./SetGrantValue";
+import SetMaxAmountToDream from "./SetMaxAmountToDream";
 import SetDreamCreationCloses from "./SetDreamCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
@@ -36,10 +33,7 @@ const modals = {
   SET_DREAM_CREATION_CLOSES: SetDreamCreationCloses,
   SET_GRANTING_OPENS: SetGrantingOpens,
   SET_GRANTING_CLOSES: SetGrantingCloses,
-  SET_GRANT_VALUE: SetGrantValue,
-  SET_GRANTS_PER_MEMBER: SetGrantsPerMember,
-  SET_MAX_GRANTS_TO_DREAM: SetMaxGrantsToDream,
-  SET_TOTAL_BUDGET: SetTotalBudget,
+  SET_MAX_AMOUNT_TO_DREAM: SetMaxAmountToDream,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_ABOUT: SetAbout,
 };
@@ -48,10 +42,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
     $eventId: ID!
     $currency: String
-    $grantsPerMember: Int
-    $maxGrantsToDream: Int
-    $totalBudget: Int
-    $grantValue: Int
+    $maxAmountToDreamPerUser: Int
     $grantingOpens: Date
     $grantingCloses: Date
     $dreamCreationCloses: Date
@@ -60,10 +51,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     updateGrantingSettings(
       eventId: $eventId
       currency: $currency
-      grantsPerMember: $grantsPerMember
-      maxGrantsToDream: $maxGrantsToDream
-      totalBudget: $totalBudget
-      grantValue: $grantValue
+      maxAmountToDreamPerUser: $maxAmountToDreamPerUser
       grantingOpens: $grantingOpens
       grantingCloses: $grantingCloses
       dreamCreationCloses: $dreamCreationCloses
@@ -71,10 +59,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     ) {
       id
       currency
-      grantsPerMember
-      maxGrantsToDream
-      totalBudget
-      grantValue
+      maxAmountToDreamPerUser
       grantingOpens
       grantingCloses
       grantingIsOpen
@@ -135,69 +120,27 @@ const EventSettingsModalGranting = ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Tokens per member"
-            secondary={event.grantsPerMember}
-            isSet={event.grantsPerMember}
-            disabled={grantingHasOpened}
-            openModal={() => handleOpen("SET_GRANTS_PER_MEMBER")}
-            canEdit={canEditSettings}
-            eventColor={event.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
-            primary="Max. tokens to one dream per user"
-            secondary={
-              event.maxGrantsToDream ? event.maxGrantsToDream : "Not set"
-            }
-            isSet={event.maxGrantsToDream}
-            disabled={grantingHasOpened}
-            openModal={() => handleOpen("SET_MAX_GRANTS_TO_DREAM")}
-            canEdit={canEditSettings}
-            eventColor={event.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
-            primary="Total budget"
-            secondary={
-              event.totalBudget
-                ? `${thousandSeparator(event.totalBudget)} ${event.currency}`
-                : "Not set"
-            }
-            isSet={event.totalBudget}
-            disabled={grantingHasOpened}
-            openModal={() => handleOpen("SET_TOTAL_BUDGET")}
-            canEdit={canEditSettings}
-            eventColor={event.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
-            primary="Token value"
-            secondary={
-              event.grantValue
-                ? `${thousandSeparator(event.grantValue)} ${event.currency}`
-                : "Not set"
-            }
-            isSet={event.grantValue}
-            disabled={grantingHasOpened}
-            openModal={() => handleOpen("SET_GRANT_VALUE")}
-            canEdit={canEditSettings}
-            eventColor={event.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
             primary="Allow stretch goals"
             secondary={event.allowStretchGoals.toString()}
             isSet={typeof event.allowStretchGoals !== "undefined"}
-            disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
+            canEdit={canEditSettings}
+            eventColor={event.color}
+          />
+
+          <Divider />
+
+          <SettingsListItem
+            primary="Max. amount to one dream per user"
+            secondary={
+              event.maxAmountToDreamPerUser
+                ? `${thousandSeparator(event.maxAmountToDreamPerUser / 100)} ${
+                    event.currency
+                  }`
+                : "Not set"
+            }
+            isSet={!!event.maxAmountToDreamPerUser}
+            openModal={() => handleOpen("SET_MAX_AMOUNT_TO_DREAM")}
             canEdit={canEditSettings}
             eventColor={event.color}
           />
@@ -214,7 +157,6 @@ const EventSettingsModalGranting = ({ event }) => {
                 : "Not set"
             }
             isSet={event.dreamCreationCloses}
-            //disabled={grantingHasOpened}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
             eventColor={event.color}
@@ -231,11 +173,6 @@ const EventSettingsModalGranting = ({ event }) => {
             }
             isSet={event.grantingOpens}
             openModal={() => handleOpen("SET_GRANTING_OPENS")}
-            disabled={
-              !event.dreamCreationCloses ||
-              !event.totalBudget ||
-              !event.grantValue
-            }
             canEdit={canEditSettings}
             eventColor={event.color}
           />
@@ -251,7 +188,6 @@ const EventSettingsModalGranting = ({ event }) => {
             }
             isSet={event.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
-            disabled={!event.grantingOpens}
             canEdit={canEditSettings}
             eventColor={event.color}
           />

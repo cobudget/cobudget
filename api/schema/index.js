@@ -13,7 +13,7 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String, textSearchTerm: String): [Dream]
+    dreams(eventSlug: String!, textSearchTerm: String): [Dream]
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
@@ -144,20 +144,21 @@ const schema = gql`
     updateGrantingSettings(
       eventId: ID!
       currency: String
-      grantsPerMember: Int
-      maxGrantsToDream: Int
-      totalBudget: Int
-      grantValue: Int
+      maxAmountToDreamPerUser: Int
       grantingOpens: Date
       grantingCloses: Date
       dreamCreationCloses: Date
       allowStretchGoals: Boolean
     ): Event
-    giveGrant(eventId: ID!, dreamId: ID!, value: Int!): Grant
-    deleteGrant(eventId: ID!, grantId: ID!): Grant
-    reclaimGrants(dreamId: ID!): Dream
-    preOrPostFund(dreamId: ID!, value: Int!): Grant
+
     toggleFavorite(dreamId: ID!): Dream
+
+    allocate(eventMemberId: ID!, amount: Int!): EventMember
+    contribute(eventId: ID!, dreamId: ID!, amount: Int!): Dream
+
+    cancelFunding(dreamId: ID!): Dream
+    acceptFunding(dreamId: ID!): Dream
+    markAsCompleted(dreamId: ID!): Dream
 
     registerForEvent(eventId: ID!): EventMember
   }
@@ -170,7 +171,6 @@ const schema = gql`
     logo: String
     events: [Event]
     discourseUrl: String
-    # discourseApiKey: String
     finishedTodos: Boolean
   }
 
@@ -181,24 +181,12 @@ const schema = gql`
     organization: Organization!
     info: String
     color: String
-    # logo: String
-    # members: [EventMember!]!
     numberOfApprovedMembers: Int
     dreams: [Dream!]
-    # flags: [Flag!]
-    # questions: [Question!]
-    # reactions: [Emoji] #requried or not? ui implications?
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
-    # grantingPeriods: [GrantingPeriod]
-    currency: String! # scalar? # can't change after first submission closes
-    # useGrantlings: Boolean! # can't change after first submission close
-    totalBudget: Int
-    totalBudgetGrants: Int
-    remainingGrants: Int
-    grantValue: Int
-    grantsPerMember: Int
-    maxGrantsToDream: Int
+    currency: String!
+    maxAmountToDreamPerUser: Int
     dreamCreationCloses: Date
     dreamCreationIsOpen: Boolean
     grantingOpens: Date
@@ -210,6 +198,10 @@ const schema = gql`
     customFields: [CustomField]
     filterLabels: [CustomFieldFilterLabels]
     dreamReviewIsOpen: Boolean
+    totalAllocations: Int
+    totalContributions: Int
+    totalContributionsFunding: Int
+    totalContributionsFunded: Int
     discourseCategoryId: Int
   }
 
@@ -269,8 +261,7 @@ const schema = gql`
     isGuide: Boolean
     isApproved: Boolean!
     createdAt: Date
-    availableGrants: Int
-    givenGrants: [Grant]
+    balance: Int # stored as cents
     # roles: [Role]
   }
 
@@ -287,15 +278,11 @@ const schema = gql`
     summary: String
     images: [Image!]
     cocreators: [EventMember]!
-    minGoalGrants: Int
-    maxGoalGrants: Int
-    minGoal: Int
-    maxGoal: Int
+    budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
     comments: [Comment]
     numberOfComments: Int
-    currentNumberOfGrants: Int
-    budgetItems: [BudgetItem!]
+
     approved: Boolean
     favorite: Boolean
     published: Boolean
@@ -305,6 +292,16 @@ const schema = gql`
     discourseTopicUrl: String
     # reactions: [Reaction]
     # tags: [Tag]
+    minGoal: Int
+    maxGoal: Int
+    totalContributions: Int
+
+    fundedAt: Date
+    funded: Boolean
+    completedAt: Date
+    completed: Boolean
+    canceledAt: Date
+    canceled: Boolean
   }
 
   type Comment {
@@ -330,21 +327,6 @@ const schema = gql`
     user: User
     comment: String
     type: String
-  }
-
-  type Grant {
-    id: ID!
-    dream: Dream!
-    value: Int!
-    reclaimed: Boolean!
-    type: GrantType!
-    # user: Member!
-  }
-
-  enum GrantType {
-    PRE_FUND
-    USER
-    POST_FUND
   }
 
   type Image {

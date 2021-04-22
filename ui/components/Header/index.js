@@ -1,8 +1,7 @@
 import { useState } from "react";
 import Link from "next/link";
-import { Badge } from "@material-ui/core";
 import { useMutation, gql } from "@apollo/client";
-
+import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
@@ -211,31 +210,11 @@ const Header = ({
           {currentOrgMember && (
             <div className="pt-4 pb-1 sm:hidden bg-white mb-4 border-gray-300">
               <div className="flex items-center px-3">
-                <Badge
-                  overlap="circle"
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "right",
-                  }}
-                  badgeContent={
-                    currentOrgMember.currentEventMembership &&
-                    currentOrgMember.currentEventMembership.availableGrants
-                  }
-                  color="primary"
-                >
-                  <Avatar user={currentOrgMember.user} />
-                </Badge>
+                <Avatar user={currentOrgMember.user} />
                 <div className="ml-4">
                   <span className="font-semibold text-gray-600">
                     {currentOrgMember.user.name}
                   </span>
-                  {/* {currentOrgMember.currentEventMembership &&
-                  Boolean(currentOrgMember.currentEventMembership.availableGrants) && (
-                    <span className="block text-sm text-gray-600">
-                      You have {currentOrgMember.currentEventMembership.availableGrants} tokens
-                      left
-                    </span>
-                  )} */}
                 </div>
               </div>
 
@@ -250,15 +229,18 @@ const Header = ({
                   <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
                     {currentOrgMember.currentEventMembership.event.title}
                     {Boolean(
-                      currentOrgMember.currentEventMembership.availableGrants
+                      currentOrgMember.currentEventMembership.balance
                     ) && (
                       <p className=" text-gray-800 text-sm">
                         You have{" "}
-                        {
-                          currentOrgMember.currentEventMembership
-                            .availableGrants
-                        }{" "}
-                        tokens left
+                        <span className="text-black font-medium">
+                          {thousandSeparator(
+                            currentOrgMember.currentEventMembership.balance /
+                              100
+                          )}{" "}
+                          {event.currency}
+                        </span>{" "}
+                        to contribute
                       </p>
                     )}
                   </div>

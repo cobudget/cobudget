@@ -91,10 +91,10 @@ const DreamBudget = ({
             </>
           )}
           <p className="font-lg font-medium mb-2">
-            Total funding goal: {thousandSeparator(minGoal)} {currency}{" "}
+            Total funding goal: {thousandSeparator(minGoal / 100)} {currency}{" "}
             {maxGoal > 0 && (
               <>
-                (stretch goal: {thousandSeparator(maxGoal)} {currency})
+                (stretch goal: {thousandSeparator(maxGoal / 100)} {currency})
               </>
             )}
           </p>

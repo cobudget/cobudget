@@ -16,8 +16,6 @@ const EDIT_BUDGET_MUTATION = gql`
       id
       minGoal
       maxGoal
-      minGoalGrants
-      maxGoalGrants
       budgetItems {
         description
         min

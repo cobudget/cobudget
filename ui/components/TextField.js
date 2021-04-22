@@ -15,7 +15,7 @@ const TextField = ({
   autoFocus,
   startAdornment,
   endAdornment,
-  color = "green",
+  color = "blue",
 }) => {
   const LabelComponent = labelComponent;
   return (

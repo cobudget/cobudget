@@ -1,4 +1,4 @@
-import stringToHslColor, { stringToColor } from "utils/stringToHslColor";
+import { stringToColor } from "utils/stringToHslColor";
 import { isMemberOfDream } from "utils/helpers";
 
 import Label from "components/Label";
@@ -13,7 +13,7 @@ import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
-const Dream = ({ dream, event, currentUser, currentOrgMember, currentOrg }) => {
+const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
   const canEdit =
     currentOrgMember?.currentEventMembership?.isAdmin ||
     currentOrgMember?.currentEventMembership?.isGuide ||

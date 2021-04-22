@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   Box,
   Table,
@@ -10,13 +10,16 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@material-ui/core";
+import { Tooltip } from "react-tippy";
+
+import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
+import AllocateModal from "./AllocateModal";
+import thousandSeparator from "utils/thousandSeparator";
 
 const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -90,55 +93,101 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
   );
 };
 
-const EventMembersTable = ({ approvedMembers, updateMember, deleteMember }) => {
+const Row = ({ member, deleteMember, updateMember, event }) => {
+  const [allocateModalOpen, setAllocateModalOpen] = useState(false);
+
+  return (
+    <TableRow>
+      <TableCell component="th" scope="row">
+        <div className="flex space-x-3">
+          <Avatar user={member.orgMember.user} />
+          <div>
+            <p className="font-medium text-base">
+              {member.orgMember.user.name}
+            </p>
+            <p className="text-gray-700 text-sm">
+              @{member.orgMember.user.username}
+            </p>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <p>{member.orgMember.user.email}</p>
+        {!member.orgMember.user.verifiedEmail && (
+          <p className="text-sm text-gray-500">(not verified)</p>
+        )}
+      </TableCell>
+      <TableCell component="th" scope="row">
+        {member.orgMember.bio && (
+          <Tooltip
+            position="bottom-start"
+            size="small"
+            title={member.orgMember.bio}
+          >
+            <p className="truncate max-w-xs">{member.orgMember.bio}</p>
+          </Tooltip>
+        )}
+      </TableCell>
+      <TableCell align="right" className="flex space-x-2">
+        {member.isAdmin && <p>Admin</p>}
+        {member.isGuide && <p>Guide</p>}
+      </TableCell>
+      <TableCell align="right">
+        <button
+          className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
+          onClick={() => setAllocateModalOpen(true)}
+        >
+          {thousandSeparator(member.balance / 100)} {event.currency}
+        </button>
+        {allocateModalOpen && (
+          <AllocateModal
+            open={allocateModalOpen}
+            member={member}
+            event={event}
+            handleClose={() => setAllocateModalOpen(false)}
+          />
+        )}
+      </TableCell>
+      <TableCell align="right" padding="none">
+        <ActionsDropdown
+          member={member}
+          deleteMember={deleteMember}
+          updateMember={updateMember}
+        />
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const EventMembersTable = ({
+  approvedMembers,
+  updateMember,
+  deleteMember,
+  event,
+}) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Username</TableCell>
-              <TableCell>Name</TableCell>
+              <TableCell>User</TableCell>
               <TableCell>Email</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell align="right">Role</TableCell>
+              <TableCell align="right">Balance</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {approvedMembers.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell component="th" scope="row">
-                  {member.orgMember.user.username}
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  {member.orgMember.user.name}
-                </TableCell>
-                <TableCell>
-                  <Box display="flex" alignItems="center">
-                    <Box m="0 8px 0">{member.orgMember.user.email}</Box>
-                    {!member.orgMember.user.verifiedEmail && (
-                      <Tooltip title="Email not verified" placement="right">
-                        <HelpOutlineOutlinedIcon fontSize="small" />
-                      </Tooltip>
-                    )}
-                  </Box>
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  {member.orgMember.bio}
-                </TableCell>
-                <TableCell align="right">
-                  {member.isAdmin && <span className="mr-2">Admin</span>}
-                  {member.isGuide && <span className="">Guide</span>}
-                </TableCell>
-                <TableCell align="right" padding="none">
-                  <ActionsDropdown
-                    member={member}
-                    deleteMember={deleteMember}
-                    updateMember={updateMember}
-                  />
-                </TableCell>
-              </TableRow>
+              <Row
+                key={member.id}
+                member={member}
+                event={event}
+                deleteMember={deleteMember}
+                updateMember={updateMember}
+              />
             ))}
           </TableBody>
         </Table>

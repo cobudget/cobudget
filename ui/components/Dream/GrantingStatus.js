@@ -1,49 +1,45 @@
+import dayjs from "dayjs";
+
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-const GrantingStatus = ({ dream }) => {
+const GrantingStatus = ({ dream, event }) => {
+  const ratio = isNaN(dream.totalContributions / dream.minGoal)
+    ? 0
+    : dream.totalContributions / dream.minGoal;
+
   return (
-    <>
-      <div
-        className={`grid gap-1 text-center ${
-          dream.maxGoalGrants ? "grid-cols-3" : "grid-cols-2"
-        }`}
-      >
-        <div>
-          <span className="block text-xl font-medium">
-            {thousandSeparator(dream.currentNumberOfGrants)}
-          </span>
-          <span className="uppercase text-sm">Funded</span>
-        </div>
-        <div>
-          <span className="block text-xl font-medium">
-            {dream.minGoalGrants ? thousandSeparator(dream.minGoalGrants) : "-"}
-          </span>
-
-          <span className="uppercase text-sm">Goal</span>
-        </div>
-        {dream.maxGoalGrants && (
-          <div>
-            <span className="block text-xl font-medium">
-              {thousandSeparator(dream.maxGoalGrants)}
-            </span>
-
-            <span className="uppercase text-sm">Max. goal</span>
-          </div>
-        )}
+    <div className="space-y-0">
+      <div className="mb-2">
+        <ProgressBar
+          ratio={ratio}
+          className="mb-2"
+          size="large"
+          color={event.color}
+        />
+        <p className={`text-xl font-semibold text-${event.color}-dark`}>
+          {thousandSeparator(dream.totalContributions / 100)} {event.currency}
+        </p>
+        <p className="text-sm text-gray-700">
+          contributed of {thousandSeparator(dream.minGoal / 100)}{" "}
+          {event.currency} goal
+        </p>
       </div>
 
-      <div className="my-4">
-        {dream.minGoalGrants > 0 && (
-          <ProgressBar
-            currentNumberOfGrants={dream.currentNumberOfGrants}
-            minGoalGrants={dream.minGoalGrants}
-            maxGoalGrants={dream.maxGoalGrants}
-            height={10}
-          />
+      <div className="text-sm text-gray-700 space-y-2">
+        {dream.funded && (
+          <p>Funded on {dayjs(dream.fundedAt).format("MMMM D, YYYY")}</p>
+        )}
+        {dream.canceled && (
+          <p>
+            Funding canceled on {dayjs(dream.canceledAt).format("MMMM D, YYYY")}
+          </p>
+        )}
+        {dream.completed && (
+          <p>Completed on {dayjs(dream.completedAt).format("MMMM D, YYYY")}</p>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

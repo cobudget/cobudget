@@ -4,7 +4,7 @@ import debounce from "../../utils/debounce";
 import FilterLabels from "./FilterLabels";
 
 const Filterbar = ({
-  currentUser,
+  currentOrgMember,
   filterFavorites,
   toggleFilterFavorites,
   textSearchTerm,
@@ -39,7 +39,7 @@ const Filterbar = ({
           onChange={(e) => debouncedSearch(e.target.value)}
         />
       </div>
-      {currentUser && currentUser.membership && (
+      {/* {currentOrgMember?.currentEventMembership && (
         <Tooltip
           title={filterFavorites ? "Show all" : "Show favorites"}
           position="bottom"
@@ -58,7 +58,7 @@ const Filterbar = ({
             )}
           </button>
         </Tooltip>
-      )}
+      )} */}
 
       <FilterLabels
         customFields={customFields}

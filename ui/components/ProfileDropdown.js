@@ -1,15 +1,20 @@
 import React, { useEffect } from "react";
-import { Badge } from "@material-ui/core";
 import Avatar from "./Avatar";
 import { modals } from "./Modal/index";
 import Link from "next/link";
+import thousandSeparator from "utils/thousandSeparator";
 
 const css = {
   button:
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({ currentUser, currentOrgMember, openModal }) => {
+const ProfileDropdown = ({
+  currentUser,
+  currentOrgMember,
+  openModal,
+  event,
+}) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
@@ -31,19 +36,7 @@ const ProfileDropdown = ({ currentUser, currentOrgMember, openModal }) => {
         onClick={() => setOpen(!open)}
         className="z-20 relative block rounded-full focus:outline-none focus:ring"
       >
-        <Badge
-          overlap="circle"
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          badgeContent={
-            currentOrgMember?.currentEventMembership?.availableGrants
-          }
-          color="primary"
-        >
-          <Avatar user={currentUser} size="small" />
-        </Badge>
+        <Avatar user={currentUser} size="small" />
       </button>
 
       {open && (
@@ -61,13 +54,16 @@ const ProfileDropdown = ({ currentUser, currentOrgMember, openModal }) => {
             {currentOrgMember?.currentEventMembership && (
               <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
                 {currentOrgMember.currentEventMembership.event.title}
-                {Boolean(
-                  currentOrgMember.currentEventMembership.availableGrants
-                ) && (
-                  <p className=" text-gray-800 text-sm">
+                {Boolean(currentOrgMember.currentEventMembership.balance) && (
+                  <p className="mt-1 text-gray-800 text-sm">
                     You have{" "}
-                    {currentOrgMember.currentEventMembership.availableGrants}{" "}
-                    tokens left
+                    <span className="text-black font-medium">
+                      {thousandSeparator(
+                        currentOrgMember.currentEventMembership.balance / 100
+                      )}{" "}
+                      {event.currency}
+                    </span>{" "}
+                    to contribute
                   </p>
                 )}
               </div>

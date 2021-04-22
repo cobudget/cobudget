@@ -8,7 +8,7 @@ import InviteMembersModal from "components/InviteMembersModal";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 
-export const MEMBERS_QUERY = gql`
+export const EVENT_MEMBERS_QUERY = gql`
   query Members($eventId: ID!) {
     members(eventId: $eventId) {
       id
@@ -16,6 +16,7 @@ export const MEMBERS_QUERY = gql`
       isGuide
       isApproved
       createdAt
+      balance
       orgMember {
         id
         bio
@@ -67,8 +68,7 @@ const EventMembers = ({ event }) => {
   const {
     data: { members } = { members: [] },
     loading,
-    error,
-  } = useQuery(MEMBERS_QUERY, { variables: { eventId: event.id } });
+  } = useQuery(EVENT_MEMBERS_QUERY, { variables: { eventId: event.id } });
 
   const [updateMember] = useMutation(UPDATE_MEMBER, {
     variables: { eventId: event.id },
@@ -78,12 +78,12 @@ const EventMembers = ({ event }) => {
     variables: { eventId: event.id },
     update(cache, { data: { deleteMember } }) {
       const { members } = cache.readQuery({
-        query: MEMBERS_QUERY,
+        query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
       });
 
       cache.writeQuery({
-        query: MEMBERS_QUERY,
+        query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
         data: {
           members: members.filter((member) => member.id !== deleteMember.id),
@@ -133,6 +133,7 @@ const EventMembers = ({ event }) => {
         approvedMembers={approvedMembers}
         updateMember={updateMember}
         deleteMember={deleteMember}
+        event={event}
       />
     </>
   );

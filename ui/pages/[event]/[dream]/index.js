@@ -1,5 +1,4 @@
 import { useQuery, useSubscription, gql } from "@apollo/client";
-import { useRouter } from "next/router";
 import Head from "next/head";
 
 import Dream from "../../../components/Dream";
@@ -14,11 +13,15 @@ export const DREAM_QUERY = gql`
       title
       minGoal
       maxGoal
-      minGoalGrants
-      maxGoalGrants
-      currentNumberOfGrants
+      totalContributions
       approved
       published
+      completed
+      completedAt
+      funded
+      fundedAt
+      canceled
+      canceledAt
       raisedFlags {
         id
         comment
@@ -102,10 +105,13 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-const DreamPage = ({ event, currentUser, currentOrgMember, currentOrg }) => {
-  if (!event) return null;
-  const router = useRouter();
-
+const DreamPage = ({
+  event,
+  currentUser,
+  currentOrgMember,
+  currentOrg,
+  router,
+}) => {
   const COMMENTS_CHANGED = gql`
     subscription OnCommentChanged($dreamID: ID!) {
       commentsChanged(dreamID: $dreamID) {

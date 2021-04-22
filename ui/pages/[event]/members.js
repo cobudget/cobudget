@@ -6,7 +6,7 @@ const EventMembersPage = ({ event, currentOrgMember }) => {
     currentOrgMember?.isOrgAdmin;
   if (!isAdmin || !event) return null;
   return (
-    <div className="max-w-screen-md flex-1">
+    <div className="max-w-screen-xl flex-1">
       <Members event={event} />
     </div>
   );
