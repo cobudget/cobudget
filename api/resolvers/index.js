@@ -771,7 +771,12 @@ const resolvers = {
     editDreamCustomField: async (
       parent,
       { dreamId, customField },
-      { currentOrgMember, models: { EventMember, Dream } }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { EventMember, Dream, Event },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
@@ -779,6 +784,8 @@ const resolvers = {
         orgMemberId: currentOrgMember.id,
         eventId: dream.eventId,
       });
+
+      const event = await Event.findOne({ _id: dream.eventId });
 
       if (
         !eventMember ||
@@ -797,6 +804,13 @@ const resolvers = {
       } else {
         dream.customFields.push(customField);
       }
+
+      await eventHub.publish("edit-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+      });
 
       return dream.save();
     },
