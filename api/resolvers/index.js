@@ -1626,6 +1626,10 @@ const resolvers = {
         );
 
       dream.approved = approved;
+      if (approved) {
+        dream.canceledAt = null;
+      }
+
       return dream.save();
     },
     allocate: async (
