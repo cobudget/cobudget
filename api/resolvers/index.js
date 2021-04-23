@@ -1847,10 +1847,8 @@ const resolvers = {
           "This dream has already been marked completed, can't cancel funding."
         );
 
-      if (dream.fundedAt) {
-        dream.fundedAt = null;
-      }
-
+      dream.fundedAt = null;
+      dream.approved = false;
       dream.canceledAt = Date.now();
 
       // delete all contributions
