@@ -61,23 +61,21 @@ const EventSchema = new Schema({
 }).index({ slug: 1, organizationId: 1 }, { unique: true }); // Unique on slug + organization Id
 
 EventSchema.virtual("grantingIsOpen").get(function () {
-  if (!this.grantingOpens) return false;
-
   const now = dayjs();
-  const grantingOpens = dayjs(this.grantingOpens);
+  const grantingHasOpened = this.grantingOpens
+    ? dayjs(this.grantingOpens).isBefore(now)
+    : true;
+  const grantingHasClosed = this.grantingCloses
+    ? dayjs(this.grantingCloses).isBefore(now)
+    : false;
 
-  if (this.grantingCloses) {
-    const grantingCloses = dayjs(this.grantingCloses);
-    return grantingOpens.isBefore(now) && now.isBefore(grantingCloses);
-  } else {
-    return grantingOpens.isBefore(now);
-  }
+  return grantingHasOpened && !grantingHasClosed;
 });
 
 EventSchema.virtual("grantingHasClosed").get(function () {
-  if (!this.grantingCloses) return false;
-
-  return dayjs().isBefore(dayjs(this.grantingCloses));
+  return this.grantingCloses
+    ? dayjs(this.grantingCloses).isBefore(dayjs())
+    : false;
 });
 
 EventSchema.virtual("dreamCreationIsOpen").get(function () {
