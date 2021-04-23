@@ -15,12 +15,12 @@ const RealitiesPageClientSide = ({ currentOrgMember }) => {
   );
 };
 
-const RealitiesPage = () => {
+const RealitiesPage = ({ currentOrgMember }) => {
   const onServer = typeof window === "undefined";
   // until we've fixed ssr for the realities apollo client we'll just skip ssr here
   if (onServer) return <HappySpinner />;
 
-  return <RealitiesPageClientSide />;
+  return <RealitiesPageClientSide currentOrgMember={currentOrgMember} />;
 };
 
 export default RealitiesPage;
