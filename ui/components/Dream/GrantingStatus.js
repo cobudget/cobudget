@@ -10,21 +10,23 @@ const GrantingStatus = ({ dream, event }) => {
 
   return (
     <div className="space-y-0">
-      <div className="mb-2">
-        <ProgressBar
-          ratio={ratio}
-          className="mb-2"
-          size="large"
-          color={event.color}
-        />
-        <p className={`text-xl font-semibold text-${event.color}-dark`}>
-          {thousandSeparator(dream.totalContributions / 100)} {event.currency}
-        </p>
-        <p className="text-sm text-gray-700">
-          contributed of {thousandSeparator(dream.minGoal / 100)}{" "}
-          {event.currency} goal
-        </p>
-      </div>
+      {dream.approved && (
+        <div className="mb-2">
+          <ProgressBar
+            ratio={ratio}
+            className="mb-2"
+            size="large"
+            color={event.color}
+          />
+          <p className={`text-xl font-semibold text-${event.color}-dark`}>
+            {thousandSeparator(dream.totalContributions / 100)} {event.currency}
+          </p>
+          <p className="text-sm text-gray-700">
+            contributed of {thousandSeparator(dream.minGoal / 100)}{" "}
+            {event.currency} goal
+          </p>
+        </div>
+      )}
 
       <div className="text-sm text-gray-700 space-y-2">
         {dream.funded && (

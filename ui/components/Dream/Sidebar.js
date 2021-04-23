@@ -20,6 +20,8 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
     approveForGranting(dreamId: $dreamId, approved: $approved) {
       id
       approved
+      canceled
+      canceledAt
     }
   }
 `;
@@ -61,6 +63,7 @@ const CANCEL_FUNDING_MUTATION = gql`
       funded
       canceled
       canceledAt
+      approved
       totalContributions
     }
   }
@@ -115,12 +118,17 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
   const hasReachedMinGoal = dream.totalContributions > dream.minGoal;
 
   const showFundButton =
+    dream.approved &&
     !dream.funded &&
     !dream.canceled &&
     hasNotReachedMaxGoal &&
     !!currentOrgMember?.currentEventMembership?.balance;
   const showAcceptFundingButton =
-    !dream.funded && canEdit && hasNotReachedMaxGoal && hasReachedMinGoal;
+    dream.approved &&
+    !dream.funded &&
+    canEdit &&
+    hasNotReachedMaxGoal &&
+    hasReachedMinGoal;
   const showPublishButton = canEdit && !dream.published;
   const showMarkAsCompletedButton =
     isEventAdminOrGuide && dream.funded && !dream.completed;
@@ -135,43 +143,40 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
     <>
       {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
-          {dream.approved && (
+          <GrantingStatus dream={dream} event={event} />
+          {showFundButton && (
             <>
-              <GrantingStatus dream={dream} event={event} />
-              {showFundButton && (
-                <>
-                  <Button
-                    color={event.color}
-                    fullWidth
-                    onClick={() => setContributeModalOpen(true)}
-                  >
-                    Fund
-                  </Button>
-                  {contributeModalOpen && (
-                    <ContributeModal
-                      handleClose={() => setContributeModalOpen(false)}
-                      dream={dream}
-                      event={event}
-                      currentOrgMember={currentOrgMember}
-                    />
-                  )}
-                </>
-              )}
-              {showAcceptFundingButton && (
-                <Button
-                  color={event.color}
-                  fullWidth
-                  onClick={() =>
-                    confirm(
-                      "Are you sure you would like to accept and finalize funding for this dream? This can't be undone."
-                    ) && acceptFunding().catch((err) => alert(err.message))
-                  }
-                >
-                  Accept funding
-                </Button>
+              <Button
+                color={event.color}
+                fullWidth
+                onClick={() => setContributeModalOpen(true)}
+              >
+                Fund
+              </Button>
+              {contributeModalOpen && (
+                <ContributeModal
+                  handleClose={() => setContributeModalOpen(false)}
+                  dream={dream}
+                  event={event}
+                  currentOrgMember={currentOrgMember}
+                />
               )}
             </>
           )}
+          {showAcceptFundingButton && (
+            <Button
+              color={event.color}
+              fullWidth
+              onClick={() =>
+                confirm(
+                  "Are you sure you would like to accept and finalize funding for this dream? This can't be undone."
+                ) && acceptFunding().catch((err) => alert(err.message))
+              }
+            >
+              Accept funding
+            </Button>
+          )}
+
           {showPublishButton && (
             <Button
               color={event.color}
