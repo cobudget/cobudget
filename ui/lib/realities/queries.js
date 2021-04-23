@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 export const CACHE_QUERY = gql`
   query ShowCreates {

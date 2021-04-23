@@ -1,23 +1,22 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
-import gql from "graphql-tag";
 
-const Comments = ({
-  currentOrgMember,
-  currentOrg,
-  dream,
-  event,
-  logs,
-}) => {
+const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
   return (
     <div>
-      {(dream.comments.length > 0 || currentOrgMember?.currentEventMembership) && (
+      {(dream.comments.length > 0 ||
+        currentOrgMember?.currentEventMembership) && (
         <div className="flex justify-between items-center">
           <h2 className="mb-4 text-2xl font-medium" id="comments">
-            {dream.comments.length} {dream.comments.length === 1 ? "comment" : "comments"}
+            {dream.comments.length}{" "}
+            {dream.comments.length === 1 ? "comment" : "comments"}
           </h2>
-          {dream.discourseTopicUrl && <a target="_blank" href={dream.discourseTopicUrl}>View on Discourse</a>}
+          {dream.discourseTopicUrl && (
+            <a target="_blank" href={dream.discourseTopicUrl}>
+              View on Discourse
+            </a>
+          )}
         </div>
       )}
       {dream.comments.map((comment, index) => {

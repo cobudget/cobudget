@@ -1,6 +1,6 @@
 // Subscriptions that need to be accessible to several components
 
-import gql from "graphql-tag";
+import { gql } from "@apollo/client";
 
 export const REALITIES_CREATE_SUBSCRIPTION = gql`
   subscription realityCreated {
