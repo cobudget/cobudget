@@ -69,7 +69,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
           </div>
         </div>
         <div>
-          {(dream.minGoal || dream.maxGoal) && (
+          {(dream.minGoal || dream.maxGoal) && dream.approved && (
             <ProgressBar
               color={event.color}
               ratio={dream.totalContributions / dream.minGoal}
@@ -78,7 +78,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
           )}
 
           <div className="flex space-x-3 mt-1">
-            {(dream.minGoal || dream.maxGoal) && (
+            {(dream.minGoal || dream.maxGoal) && dream.approved && (
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
