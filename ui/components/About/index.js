@@ -120,11 +120,22 @@ export default function AboutPage({ event }) {
             />
           </ListItem>
           <Divider />
+
           <ListItem>
             <ListItemText
               primary="Total contributions"
               secondary={`${thousandSeparator(
                 event.totalContributions / 100
+              )} ${event.currency}`}
+            />
+          </ListItem>
+          <Divider />
+
+          <ListItem>
+            <ListItemText
+              primary="Total in members balances (allocations - contributions)"
+              secondary={`${thousandSeparator(
+                event.totalInMembersBalances / 100
               )} ${event.currency}`}
             />
           </ListItem>

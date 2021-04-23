@@ -202,6 +202,7 @@ const schema = gql`
     totalContributions: Int
     totalContributionsFunding: Int
     totalContributionsFunded: Int
+    totalInMembersBalances: Int
     discourseCategoryId: Int
   }
 

@@ -22,6 +22,7 @@ export const EVENT_QUERY = gql`
       currency
       totalContributions
       totalAllocations
+      totalInMembersBalances
       totalContributionsFunding
       totalContributionsFunded
     }

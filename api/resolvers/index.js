@@ -2249,6 +2249,35 @@ const resolvers = {
 
       return totalContributions;
     },
+    totalInMembersBalances: async (
+      event,
+      args,
+      { models: { Contribution, Allocation } }
+    ) => {
+      const [
+        { totalAllocations } = { totalAllocations: 0 },
+      ] = await Allocation.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+          },
+        },
+        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
+      ]);
+
+      const [
+        { totalContributions } = { totalContributions: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventId: mongoose.Types.ObjectId(event.id),
+          },
+        },
+        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+      ]);
+
+      return totalAllocations - totalContributions;
+    },
   },
   Dream: {
     cocreators: async (dream, args, { models: { EventMember } }) => {
