@@ -20,6 +20,8 @@ export const DREAMS_QUERY = gql`
       numberOfComments
       favorite
       published
+      approved
+      canceled
       customFields {
         value
         customField {

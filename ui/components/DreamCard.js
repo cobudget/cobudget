@@ -34,6 +34,8 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
   const [toggleFavorite, { loading }] = useMutation(TOGGLE_FAVORITE_MUTATION, {
     variables: { dreamId: dream.id },
   });
+  const showFundingStats =
+    (dream.minGoal || dream.maxGoal) && dream.approved && !dream.canceled;
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {dream.images.length ? (
@@ -69,7 +71,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
           </div>
         </div>
         <div>
-          {(dream.minGoal || dream.maxGoal) && dream.approved && (
+          {showFundingStats && (
             <ProgressBar
               color={event.color}
               ratio={dream.totalContributions / dream.minGoal}
@@ -78,7 +80,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
           )}
 
           <div className="flex space-x-3 mt-1">
-            {(dream.minGoal || dream.maxGoal) && dream.approved && (
+            {showFundingStats && (
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
