@@ -51,14 +51,37 @@ const SetGrantingCloses = ({ closeModal, event }) => {
             </MuiPickersUtilsProvider>
           </Box>
 
-          <Button
-            type="submit"
-            size="large"
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              type="submit"
+              size="large"
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+            {event.grantingCloses && (
+              <Button
+                type="button"
+                size="large"
+                variant="contained"
+                color="secondary"
+                className="ml-2"
+                onClick={() => {
+                  updateGranting({ variables: { grantingCloses: null } })
+                    .then(() => {
+                      closeModal();
+                    })
+                    .catch((err) => {
+                      console.log({ err });
+                      alert(err.message);
+                    });
+                }}
+              >
+                Clear date
+              </Button>
+            )}
+          </div>
         </form>
       </Box>
     </Card>

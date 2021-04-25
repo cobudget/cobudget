@@ -14,7 +14,7 @@ const SetGrantingOpens = ({ closeModal, event }) => {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(event.grantingOpens);
 
@@ -24,10 +24,9 @@ const SetGrantingOpens = ({ closeModal, event }) => {
         <h1 className="text-3xl">Set granting open date</h1>
 
         <form
-          onSubmit={handleSubmit((variables) => {
-            console.log({ variables, selectedDate });
+          onSubmit={handleSubmit(() => {
             updateGranting({ variables: { grantingOpens: selectedDate } })
-              .then(({ data }) => {
+              .then(() => {
                 // console.log({ data });
                 closeModal();
               })
@@ -52,14 +51,39 @@ const SetGrantingOpens = ({ closeModal, event }) => {
             </MuiPickersUtilsProvider>
           </Box>
 
-          <Button
-            type="submit"
-            size="large"
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              type="submit"
+              size="large"
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+
+            {event.grantingOpens && (
+              <Button
+                type="button"
+                size="large"
+                variant="contained"
+                color="secondary"
+                className="ml-2"
+                onClick={() => {
+                  updateGranting({ variables: { grantingOpens: null } })
+                    .then(() => {
+                      // console.log({ data });
+                      closeModal();
+                    })
+                    .catch((err) => {
+                      console.log({ err });
+                      alert(err.message);
+                    });
+                }}
+              >
+                Clear date
+              </Button>
+            )}
+          </div>
         </form>
       </Box>
     </Card>

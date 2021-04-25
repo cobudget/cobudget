@@ -1910,27 +1910,19 @@ const resolvers = {
         event.currency = currency;
       }
 
-      if (maxAmountToDreamPerUser) {
+      if (typeof maxAmountToDreamPerUser !== "undefined") {
         event.maxAmountToDreamPerUser = maxAmountToDreamPerUser;
       }
 
-      if (dreamCreationCloses) {
+      if (typeof dreamCreationCloses !== "undefined") {
         event.dreamCreationCloses = dreamCreationCloses;
       }
 
-      if (grantingOpens) {
+      if (typeof grantingOpens !== "undefined") {
         event.grantingOpens = grantingOpens;
       }
 
-      if (grantingCloses) {
-        if (
-          !event.grantingOpens ||
-          dayjs(grantingCloses).isBefore(dayjs(event.grantingOpens))
-        ) {
-          throw new Error(
-            "You can't set granting close date before opening date"
-          );
-        }
+      if (typeof grantingCloses !== "undefined") {
         event.grantingCloses = grantingCloses;
       }
 
