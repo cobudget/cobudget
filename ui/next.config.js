@@ -24,6 +24,8 @@ module.exports = (phase) => {
     DEPLOY_URL: process.env.DEPLOY_URL,
     REALITIES_DEPLOY_URL: process.env.REALITIES_DEPLOY_URL,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
+    REACT_APP_GRAPHQL_ENDPOINT: process.env.REACT_APP_GRAPHQL_ENDPOINT,
+    REACT_APP_GRAPHQL_SUBSCRIPTION: process.env.REACT_APP_GRAPHQL_SUBSCRIPTION,
   };
   return withBundleAnalyzer({
     env,

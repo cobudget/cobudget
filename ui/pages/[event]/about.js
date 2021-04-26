@@ -1,5 +1,4 @@
-import { useQuery } from "@apollo/client";
-import gql from "graphql-tag";
+import { useQuery, gql } from "@apollo/client";
 import About from "components/About";
 import HappySpinner from "components/HappySpinner";
 export const EVENT_QUERY = gql`
