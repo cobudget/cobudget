@@ -7,12 +7,15 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
+  IconButton as MuiIconButton,
   Menu,
   MenuItem,
 } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
 
+import BulkAllocateModal from "./BulkAllocateModal";
+import IconButton from "components/IconButton";
+import { AddIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
@@ -31,14 +34,14 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
   };
   return (
     <>
-      <IconButton
+      <MuiIconButton
         aria-label="more"
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
       >
         <MoreVertIcon />
-      </IconButton>
+      </MuiIconButton>
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
@@ -165,6 +168,8 @@ const EventMembersTable = ({
   deleteMember,
   event,
 }) => {
+  const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
+
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -175,7 +180,26 @@ const EventMembersTable = ({
               <TableCell>Email</TableCell>
               <TableCell>Bio</TableCell>
               <TableCell align="right">Role</TableCell>
-              <TableCell align="right">Balance</TableCell>
+              <TableCell align="right">
+                <div className="flex items-center justify-end space-x-1">
+                  <span className="block">Balance</span>{" "}
+                  <Tooltip
+                    title="Allocate to all members"
+                    position="bottom-center"
+                    size="small"
+                  >
+                    <IconButton onClick={() => setBulkAllocateModalOpen(true)}>
+                      <AddIcon className="h-4 w-4" />
+                    </IconButton>
+                  </Tooltip>
+                </div>
+                {bulkAllocateModalOpen && (
+                  <BulkAllocateModal
+                    event={event}
+                    handleClose={() => setBulkAllocateModalOpen(false)}
+                  />
+                )}
+              </TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>

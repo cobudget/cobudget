@@ -1660,6 +1660,37 @@ const resolvers = {
 
       return targetEventMember;
     },
+    bulkAllocate: async (
+      _,
+      { eventId, amount },
+      { currentOrgMember, models: { EventMember, Allocation } }
+    ) => {
+      if (!currentOrgMember) throw new Error("You need to be logged in.");
+
+      const eventMembers = await EventMember.find({
+        eventId,
+        isApproved: true,
+      });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      if (!currentEventMember?.isAdmin)
+        throw new Error("You need to be event admin to allocate funds.");
+
+      for (const member of eventMembers) {
+        await new Allocation({
+          organizationId: currentOrgMember.organizationId,
+          eventId,
+          eventMemberId: member.id,
+          amount,
+        }).save();
+      }
+
+      return eventMembers;
+    },
     contribute: async (
       _,
       { eventId, dreamId, amount },
