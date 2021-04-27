@@ -1662,8 +1662,8 @@ const resolvers = {
     },
     bulkAllocate: async (
       _,
-      { eventId, amount },
-      { currentOrgMember, models: { EventMember, Allocation } }
+      { eventId, amount, type },
+      { currentOrgMember, models: { EventMember, Allocation, Contribution } }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in.");
 
@@ -1681,12 +1681,47 @@ const resolvers = {
         throw new Error("You need to be event admin to allocate funds.");
 
       for (const member of eventMembers) {
-        await new Allocation({
-          organizationId: currentOrgMember.organizationId,
-          eventId,
-          eventMemberId: member.id,
-          amount,
-        }).save();
+        if (type === "ADD") {
+          await new Allocation({
+            organizationId: currentOrgMember.organizationId,
+            eventId,
+            eventMemberId: member.id,
+            amount,
+          }).save();
+        } else if (type === "SET") {
+          const [
+            { totalAllocations } = { totalAllocations: 0 },
+          ] = await Allocation.aggregate([
+            {
+              $match: {
+                eventMemberId: mongoose.Types.ObjectId(member.id),
+              },
+            },
+            { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
+          ]);
+
+          const [
+            { totalContributions } = { totalContributions: 0 },
+          ] = await Contribution.aggregate([
+            {
+              $match: {
+                eventMemberId: mongoose.Types.ObjectId(member.id),
+              },
+            },
+            { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
+          ]);
+
+          const balance = totalAllocations - totalContributions;
+
+          const adjustment = amount - balance;
+
+          await new Allocation({
+            organizationId: currentOrgMember.organizationId,
+            eventId,
+            eventMemberId: member.id,
+            amount: adjustment,
+          }).save();
+        }
       }
 
       return eventMembers;
