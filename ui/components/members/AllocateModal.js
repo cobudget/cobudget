@@ -48,12 +48,6 @@ const AllocateModal = ({ member, event, handleClose }) => {
           selected={type}
           className="mx-auto mb-4"
         />
-        {/* <p className="text-center mt-4 mb-2">
-          <span>
-            {thousandSeparator(member.balance / 100)} {event.currency}{" "}
-          </span>{" "}
-          +
-        </p> */}
 
         <form
           onSubmit={(e) => {
