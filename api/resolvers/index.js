@@ -9,6 +9,7 @@ const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
 const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
+const { allocateToMember } = require("../controller");
 
 const orgHasDiscourse = (org) => {
   // note: `org` is a mongoose object which is why we can't just check
@@ -171,7 +172,7 @@ const resolvers = {
         ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
-    categories: async (parent, {}, { currentOrg, currentOrgMember }) => {
+    categories: async (parent, args, { currentOrg, currentOrgMember }) => {
       if (!currentOrg.discourse) {
         return [];
       }
@@ -1651,47 +1652,16 @@ const resolvers = {
       if (!currentEventMember?.isAdmin)
         throw new Error("You need to be event admin to allocate funds.");
 
-      if (type === "ADD") {
-        await new Allocation({
-          organizationId: currentOrgMember.organizationId,
-          eventId: targetEventMember.eventId,
+      await allocateToMember(
+        {
           eventMemberId,
+          eventId: targetEventMember.eventId,
+          organizationId: currentOrgMember.organizationId,
           amount,
-        }).save();
-      } else if (type === "SET") {
-        const [
-          { totalAllocations } = { totalAllocations: 0 },
-        ] = await Allocation.aggregate([
-          {
-            $match: {
-              eventMemberId: mongoose.Types.ObjectId(eventMemberId),
-            },
-          },
-          { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-        ]);
-
-        const [
-          { totalContributions } = { totalContributions: 0 },
-        ] = await Contribution.aggregate([
-          {
-            $match: {
-              eventMemberId: mongoose.Types.ObjectId(eventMemberId),
-            },
-          },
-          { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-        ]);
-
-        const balance = totalAllocations - totalContributions;
-
-        const adjustment = amount - balance;
-
-        await new Allocation({
-          organizationId: currentOrgMember.organizationId,
-          eventId: targetEventMember.eventId,
-          eventMemberId,
-          amount: adjustment,
-        }).save();
-      }
+          type,
+        },
+        { Allocation, Contribution }
+      );
 
       return targetEventMember;
     },
@@ -1716,47 +1686,16 @@ const resolvers = {
         throw new Error("You need to be event admin to allocate funds.");
 
       for (const member of eventMembers) {
-        if (type === "ADD") {
-          await new Allocation({
+        await allocateToMember(
+          {
+            eventMemberId: member.id,
             organizationId: currentOrgMember.organizationId,
             eventId,
-            eventMemberId: member.id,
             amount,
-          }).save();
-        } else if (type === "SET") {
-          const [
-            { totalAllocations } = { totalAllocations: 0 },
-          ] = await Allocation.aggregate([
-            {
-              $match: {
-                eventMemberId: mongoose.Types.ObjectId(member.id),
-              },
-            },
-            { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-          ]);
-
-          const [
-            { totalContributions } = { totalContributions: 0 },
-          ] = await Contribution.aggregate([
-            {
-              $match: {
-                eventMemberId: mongoose.Types.ObjectId(member.id),
-              },
-            },
-            { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-          ]);
-
-          const balance = totalAllocations - totalContributions;
-
-          const adjustment = amount - balance;
-
-          await new Allocation({
-            organizationId: currentOrgMember.organizationId,
-            eventId,
-            eventMemberId: member.id,
-            amount: adjustment,
-          }).save();
-        }
+            type,
+          },
+          { Allocation, Contribution }
+        );
       }
 
       return eventMembers;
