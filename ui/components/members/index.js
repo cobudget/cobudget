@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
 
 import Button from "components/Button";
@@ -95,7 +95,7 @@ const EventMembers = ({ event }) => {
   const approvedMembers = members.filter((member) => member.isApproved);
   const requestsToJoin = members.filter((member) => !member.isApproved);
 
-  const [inviteModalOpen, setInviteModalOpen] = React.useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   if (loading)
     return (
@@ -116,7 +116,7 @@ const EventMembers = ({ event }) => {
         <h2 className="text-xl font-semibold">
           {approvedMembers.length} members
         </h2>
-        <div>
+        <div className="flex items-center space-x-2">
           <Button onClick={() => setInviteModalOpen(true)}>
             Invite members
           </Button>

@@ -153,7 +153,16 @@ const schema = gql`
 
     toggleFavorite(dreamId: ID!): Dream
 
-    allocate(eventMemberId: ID!, amount: Int!): EventMember
+    allocate(
+      eventMemberId: ID!
+      amount: Int!
+      type: AllocationType!
+    ): EventMember
+    bulkAllocate(
+      eventId: ID!
+      amount: Int!
+      type: AllocationType!
+    ): [EventMember]
     contribute(eventId: ID!, dreamId: ID!, amount: Int!): Dream
 
     cancelFunding(dreamId: ID!): Dream
@@ -224,6 +233,11 @@ const schema = gql`
     OPEN
     REQUEST_TO_JOIN
     INVITE_ONLY
+  }
+
+  enum AllocationType {
+    ADD
+    SET
   }
 
   type User {

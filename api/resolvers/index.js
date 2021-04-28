@@ -9,6 +9,7 @@ const dayjs = require("dayjs");
 const { combineResolvers, skip } = require("graphql-resolvers");
 const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
+const { allocateToMember } = require("../controller");
 
 const orgHasDiscourse = (org) => {
   // note: `org` is a mongoose object which is why we can't just check
@@ -171,7 +172,7 @@ const resolvers = {
         ...(typeof isApproved === "boolean" && { isApproved }),
       });
     },
-    categories: async (parent, {}, { currentOrg, currentOrgMember }) => {
+    categories: async (parent, args, { currentOrg, currentOrgMember }) => {
       if (!currentOrg.discourse) {
         return [];
       }
@@ -1634,8 +1635,8 @@ const resolvers = {
     },
     allocate: async (
       _,
-      { eventMemberId, amount },
-      { currentOrgMember, models: { EventMember, Allocation } }
+      { eventMemberId, amount, type },
+      { currentOrgMember, models: { EventMember, Allocation, Contribution } }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in.");
 
@@ -1651,14 +1652,53 @@ const resolvers = {
       if (!currentEventMember?.isAdmin)
         throw new Error("You need to be event admin to allocate funds.");
 
-      await new Allocation({
-        organizationId: currentOrgMember.organizationId,
-        eventId: targetEventMember.eventId,
-        eventMemberId,
-        amount,
-      }).save();
+      await allocateToMember(
+        {
+          eventMemberId,
+          eventId: targetEventMember.eventId,
+          organizationId: currentOrgMember.organizationId,
+          amount,
+          type,
+        },
+        { Allocation, Contribution }
+      );
 
       return targetEventMember;
+    },
+    bulkAllocate: async (
+      _,
+      { eventId, amount, type },
+      { currentOrgMember, models: { EventMember, Allocation, Contribution } }
+    ) => {
+      if (!currentOrgMember) throw new Error("You need to be logged in.");
+
+      const eventMembers = await EventMember.find({
+        eventId,
+        isApproved: true,
+      });
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      if (!currentEventMember?.isAdmin)
+        throw new Error("You need to be event admin to allocate funds.");
+
+      for (const member of eventMembers) {
+        await allocateToMember(
+          {
+            eventMemberId: member.id,
+            organizationId: currentOrgMember.organizationId,
+            eventId,
+            amount,
+            type,
+          },
+          { Allocation, Contribution }
+        );
+      }
+
+      return eventMembers;
     },
     contribute: async (
       _,
