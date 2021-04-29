@@ -1,6 +1,6 @@
 const KcAdminClient = require("keycloak-admin").default;
 
-export default async function () {
+module.exports = async function () {
   const kcAdminClient = new KcAdminClient({
     baseUrl: process.env.KEYCLOAK_AUTH_SERVER,
     realmName: "master",
@@ -23,4 +23,4 @@ export default async function () {
   });
 
   return kcAdminClient;
-}
+};

@@ -18,7 +18,7 @@ const EventHub = require("./services/eventHub.service");
 const {
   db: { getConnection },
 } = require("@sensestack/plato-core");
-import initKcAdminClient from "./utils/initKcAdminClient";
+const initKcAdminClient = require("./utils/initKcAdminClient");
 
 const Keycloak = require("keycloak-connect");
 const { KeycloakContext } = require("keycloak-connect-graphql");
