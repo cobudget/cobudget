@@ -60,28 +60,32 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (parent, { limit }, { currentOrg, currentOrgMember, models: { Event } }) => {
+    events: async (
+      parent,
+      { limit },
+      { currentOrg, currentOrgMember, models: { Event } }
+    ) => {
       if (!currentOrg) {
         throw new Error("No organization found");
       }
 
       // if admin or guide, show all events (current or archived)
-      if (
-        currentOrgMember && currentOrgMember.isOrgAdmin
-      ) {
-        return Event.find({ 
-          organizationId: currentOrg.id
-          }, 
-          null, 
+      if (currentOrgMember && currentOrgMember.isOrgAdmin) {
+        return Event.find(
+          {
+            organizationId: currentOrg.id,
+          },
+          null,
           { limit }
         );
       }
 
-      return Event.find({ 
-        organizationId: currentOrg.id,
-        archived: false
-        }, 
-        null, 
+      return Event.find(
+        {
+          organizationId: currentOrg.id,
+          archived: { $ne: true },
+        },
+        null,
         { limit }
       );
     },
