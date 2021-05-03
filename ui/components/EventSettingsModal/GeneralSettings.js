@@ -64,6 +64,7 @@ export default function GeneralSettings({
               grantValue: Number(variables.grantValue),
               grantsPerMember: Number(variables.grantsPerMember),
               dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
+              archived: variables.archived === "true",
               color,
             },
           })
