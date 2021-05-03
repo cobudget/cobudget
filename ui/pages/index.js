@@ -4,6 +4,7 @@ import Link from "next/link";
 import Button from "components/Button";
 import TodoList from "components/TodoList";
 import { AddIcon } from "components/Icons";
+import Label from "components/Label";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -11,6 +12,7 @@ const EVENTS_QUERY = gql`
       id
       slug
       title
+      archived
       color
     }
   }
@@ -100,7 +102,12 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
               key={event.slug}
               passHref
             >
-              <LinkCard color={event.color}>{event.title}</LinkCard>
+              <LinkCard color={event.color}>
+                {event.title}
+                {event.archived && (
+                  <Label className="right-0 m-2">Archived</Label>
+                )}
+              </LinkCard>
             </Link>
           ))}
           {currentOrgMember?.isOrgAdmin && (

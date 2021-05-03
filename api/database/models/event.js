@@ -15,6 +15,7 @@ const EventSchema = new Schema({
     default: "OPEN",
     required: true,
   },
+  archived: { type: Boolean, default: false },
   maxAmountToDreamPerUser: Number,
   dreamCreationCloses: Date,
   grantingOpens: Date,

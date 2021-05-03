@@ -45,6 +45,7 @@ const schema = gql`
       eventId: ID!
       slug: String
       title: String
+      archived: Boolean
       registrationPolicy: RegistrationPolicy
       info: String
       color: String
@@ -187,6 +188,7 @@ const schema = gql`
     id: ID!
     slug: String!
     title: String!
+    archived: Boolean
     organization: Organization!
     info: String
     color: String

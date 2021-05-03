@@ -13,6 +13,7 @@ const EDIT_EVENT = gql`
     $eventId: ID!
     $slug: String
     $title: String
+    $archived: Boolean
     $registrationPolicy: RegistrationPolicy
     $info: String
     $color: String
@@ -22,6 +23,7 @@ const EDIT_EVENT = gql`
       eventId: $eventId
       slug: $slug
       title: $title
+      archived: $archived
       registrationPolicy: $registrationPolicy
       info: $info
       color: $color
@@ -30,6 +32,7 @@ const EDIT_EVENT = gql`
       id
       title
       slug
+      archived
       registrationPolicy
       info
       color
@@ -125,6 +128,19 @@ export default function GeneralSettings({
           className="my-4"
         />
 
+        {currentOrgMember.isOrgAdmin && (
+          <SelectField
+            name="archived"
+            label="Archive event"
+            defaultValue={event.archived ? "true" : "false"}
+            inputRef={register}
+            className="my-4"
+          >
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </SelectField>
+        )}
+        
         {currentOrgMember.isOrgAdmin && (
           <>
             <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>

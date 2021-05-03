@@ -60,11 +60,30 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (parent, { limit }, { currentOrg, models: { Event } }) => {
+    events: async (parent, { limit }, { currentOrg, currentOrgMember, models: { Event } }) => {
       if (!currentOrg) {
         throw new Error("No organization found");
       }
-      return Event.find({ organizationId: currentOrg.id }, null, { limit });
+
+      // if admin or guide, show all events (current or archived)
+      if (
+        currentOrgMember && currentOrgMember.isOrgAdmin
+      ) {
+        return Event.find({ 
+          organizationId: currentOrg.id
+          }, 
+          null, 
+          { limit }
+        );
+      }
+
+      return Event.find({ 
+        organizationId: currentOrg.id,
+        archived: false
+        }, 
+        null, 
+        { limit }
+      );
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) return null;
@@ -364,6 +383,7 @@ const resolvers = {
         eventId,
         slug,
         title,
+        archived,
         registrationPolicy,
         info,
         color,
@@ -392,6 +412,7 @@ const resolvers = {
 
       if (slug) event.slug = slugify(slug);
       if (title) event.title = title;
+      if (typeof archived !== "undefined") event.archived = archived;
       if (registrationPolicy) event.registrationPolicy = registrationPolicy;
       if (typeof info !== "undefined") event.info = info;
       if (typeof about !== "undefined") event.about = about;
