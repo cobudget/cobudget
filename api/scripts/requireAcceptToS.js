@@ -11,13 +11,9 @@ if (!process.env.KEYCLOAK_AUTH_SERVER) {
 const TERMS = RequiredActionAlias.terms_and_conditions;
 
 initKcAdminClient().then(async (kcAdminClient) => {
-  //const userCount = await kcAdminClient.users.count();
-  //console.log("number", userCount);
-  // atm ~500 users, can check with the above snippet. update the below max accordingly
+  // atm ~700 registered users, update the below max accordingly
   const users = await kcAdminClient.users.find({ max: 1000 });
 
-  //console.log("users", users);
-  //console.log("user 1:", users[20]);
   console.log("Total users:", users.length);
 
   // users who haven't accepted the terms yet
@@ -36,19 +32,25 @@ initKcAdminClient().then(async (kcAdminClient) => {
     usersWithoutRequired.length
   );
 
-  //const userId = currentUser.id;
-  //await kcAdminClient.users.update(
-  //  { id: userId },
-  //  {
-  //    firstName: "william",
-  //    lastName: "chang",
-  //    requiredActions: [RequiredActionAlias.UPDATE_PASSWORD],
-  //    emailVerified: true,
-  //  }
-  //);
+  let i = 0;
+  for (const user of usersWithoutRequired) {
+    i++;
+    if (i % 100 === 0) {
+      console.log("At user", i, "out of", usersWithoutRequired.length);
+    }
 
-  //const me = await kcAdminClient.users.findOne({
-  //  id: "32f170b5-afdf-4b1a-bdc4-c694a467e0d1",
-  //});
-  //console.log("me", me);
+    console.log("username", user.username);
+    await kcAdminClient.users.update(
+      { id: user.id },
+      {
+        requiredActions: [...user.requiredActions, TERMS],
+      }
+    );
+
+    // if you want to take it slow
+    //if (i === 10) {
+    //  console.log("done for now");
+    //  return;
+    //}
+  }
 });
