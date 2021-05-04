@@ -1463,7 +1463,7 @@ const resolvers = {
 
       let newOrgMembers = [];
 
-      for (email of emails) {
+      for (const email of emails) {
         const [user] = await kcAdminClient.users.findOne({
           email: email.trim(),
         });
