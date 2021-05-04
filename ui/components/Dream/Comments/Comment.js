@@ -13,22 +13,6 @@ const DELETE_COMMENT_MUTATION = gql`
   mutation DeleteComment($dreamId: ID!, $commentId: ID!) {
     deleteComment(dreamId: $dreamId, commentId: $commentId) {
       id
-      numberOfComments
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
     }
   }
 `;

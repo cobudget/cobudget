@@ -209,6 +209,26 @@ const resolvers = {
 
       return categories;
     },
+    commentSet: async (
+      parent,
+      { dreamId, from = 0, limit = 30, order = 'desc' },
+      { currentOrg, models: { Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      let comments;
+      if (orgHasDiscourse(currentOrg)) {
+        const topic = await discourse(currentOrg.discourse).posts.get(
+          dream.discourseTopicId,
+        )
+        comments = topic.post_stream.posts.filter(post => post.post_number > 1);
+      } else {
+        comments = dream.comments;
+      }
+
+      if (order === 'desc') { comments = comments.reverse(); }
+      return { total: comments.length, comments: comments.slice(from, from + limit) }
+    },
   },
   Mutation: {
     createOrganization: async (
@@ -1054,7 +1074,6 @@ const resolvers = {
       });
 
       if (!orgHasDiscourse(currentOrg)) {
-        console.log(dream.comments);
         dream.comments = dream.comments.filter(
           (comment) => comment.id.toString() !== commentId
         );
@@ -2355,24 +2374,6 @@ const resolvers = {
         { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
       ]);
       return contributionsForDream;
-    },
-    comments: async (dream, args, { currentOrg }) => {
-      if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {
-        return dream.comments;
-      }
-
-      const {
-        post_stream: { posts },
-      } = await discourse(currentOrg.discourse).posts.get(
-        dream.discourseTopicId
-      );
-
-      return posts
-        .filter(({ post_type }) => post_type === 1)
-        .filter(({ post_number }) => post_number !== 1);
-    },
-    numberOfComments: async (dream, args, { currentOrg }) => {
-      return dream.comments.length;
     },
     favorite: async (
       dream,

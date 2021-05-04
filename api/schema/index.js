@@ -14,6 +14,7 @@ const schema = gql`
     event(slug: String): Event
     dream(id: ID!): Dream
     dreams(eventSlug: String!, textSearchTerm: String): [Dream]
+    commentSet(dreamId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
@@ -297,9 +298,6 @@ const schema = gql`
     cocreators: [EventMember]!
     budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
-    comments: [Comment]
-    numberOfComments: Int
-
     approved: Boolean
     favorite: Boolean
     published: Boolean
@@ -330,6 +328,11 @@ const schema = gql`
     cooked: String
     discourseUsername: String
     isLog: Boolean
+  }
+
+  type CommentSet {
+    total: Int
+    comments: [Comment]
   }
 
   type Category {
@@ -474,7 +477,7 @@ const schema = gql`
   }
 
   type Subscription {
-    commentsChanged(dreamID: ID!): Dream
+    commentsChanged(dreamId: ID!): Dream
   }
 
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails

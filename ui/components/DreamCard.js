@@ -90,20 +90,6 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
               </div>
             )}
 
-            {dream.numberOfComments > 0 && (
-              <Link
-                href="/[event]/[dream]#comments"
-                as={`/${event.slug}/${dream.id}#comments`}
-              >
-                <div className="flex items-center text-gray-700">
-                  <CommentIcon className="w-5 h-5" />
-                  <span className="block ml-1 text-sm">
-                    {dream.numberOfComments}
-                  </span>
-                </div>
-              </Link>
-            )}
-
             {/* {currentOrgMember?.currentEventMembership && (
               <button
                 className="flex items-center focus:outline-none"

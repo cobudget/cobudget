@@ -8,23 +8,6 @@ const EDIT_COMMENT_MUTATION = gql`
   mutation EditComment($dreamId: ID!, $commentId: ID!, $content: String!) {
     editComment(dreamId: $dreamId, commentId: $commentId, content: $content) {
       id
-      numberOfComments
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        isLog
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
     }
   }
 `;

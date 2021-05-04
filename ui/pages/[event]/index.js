@@ -17,7 +17,6 @@ export const DREAMS_QUERY = gql`
       minGoal
       maxGoal
       totalContributions
-      numberOfComments
       favorite
       published
       approved

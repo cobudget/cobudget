@@ -1,4 +1,4 @@
-import { useQuery, useSubscription, gql } from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
 import Head from "next/head";
 
 import Dream from "../../../components/Dream";
@@ -60,24 +60,7 @@ export const DREAM_QUERY = gql`
         small
         large
       }
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        isLog
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
       discourseTopicUrl
-      numberOfComments
       logs {
         createdAt
         type
@@ -107,6 +90,38 @@ export const DREAM_QUERY = gql`
   }
 `;
 
+export const COMMENTS_QUERY = gql`
+  query Comments($dreamId: ID!, $from: Int, $limit: Int, $order: String) {
+    commentSet(dreamId: $dreamId, from: $from, limit: $limit, order: $order) {
+      total
+      comments {
+        id
+        discourseUsername
+        cooked
+        content
+        createdAt
+        isLog
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const COMMENTS_CHANGED_SUBSCRIPTION = gql`
+  subscription OnCommentChanged($dreamID: ID!) {
+    commentsChanged(dreamID: $dreamID) {
+      id
+    }
+  }
+`;
+
 const DreamPage = ({
   event,
   currentUser,
@@ -114,14 +129,6 @@ const DreamPage = ({
   currentOrg,
   router,
 }) => {
-  const COMMENTS_CHANGED = gql`
-    subscription OnCommentChanged($dreamID: ID!) {
-      commentsChanged(dreamID: $dreamID) {
-        id
-      }
-    }
-  `;
-
   const {
     data: { dream } = { dream: null },
     loading,
@@ -130,13 +137,6 @@ const DreamPage = ({
   } = useQuery(DREAM_QUERY, {
     onCompleted: console.log,
     variables: { id: router.query.dream },
-  });
-  useSubscription(COMMENTS_CHANGED, {
-    variables: { dreamID: dream?.id },
-    onSubscriptionData: () => {
-      console.log("refetching...");
-      refetch();
-    },
   });
 
   if (dream)

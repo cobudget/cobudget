@@ -11,23 +11,6 @@ const ADD_COMMENT = gql`
   mutation addComment($content: String!, $dreamId: ID!) {
     addComment(content: $content, dreamId: $dreamId) {
       id
-      numberOfComments
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        isLog
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
     }
   }
 `;
