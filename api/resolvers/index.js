@@ -105,10 +105,12 @@ const resolvers = {
         orgMemberId: currentOrgMember.id,
       });
 
-      if (!currentOrgMember?.isOrgAdmin || !eventMember?.isAdmin)
+      if (!currentOrgMember?.isOrgAdmin && !eventMember?.isAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return Contribution.find({ eventId }).sort({ createdAt: -1 });
+      return Contribution.find({ eventId }).sort({
+        createdAt: -1,
+      });
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
