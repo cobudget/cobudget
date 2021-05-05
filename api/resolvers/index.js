@@ -2236,6 +2236,12 @@ const resolvers = {
     },
   },
   Event: {
+    info: (event) =>
+      event.info.length
+        ? event.info
+        : `# Welcome to ${event.title}'s dream page`,
+    about: (event) =>
+      event.about.length ? event.about : `# About ${event.title}`,
     dreams: async (event, args, { models: { Dream } }) => {
       return Dream.find({ eventId: event.id });
     },
