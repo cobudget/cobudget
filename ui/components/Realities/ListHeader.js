@@ -1,10 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Button, Card } from "reactstrap";
+import { Button, Card } from "@material-ui/core";
 import { useQuery } from "@apollo/client";
 import styled from "styled-components";
 import { FaPlus } from "react-icons/fa";
 import { CACHE_QUERY } from "lib/realities/queries";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
 const StyledHeader = styled(Card)`
   color: white;
@@ -28,7 +29,10 @@ const ListHeaderText = styled.span`
 `;
 
 const ListHeader = ({ needIsExpanded }) => {
-  const { data: localData = {}, client } = useQuery(CACHE_QUERY);
+  const realitiesApollo = getRealitiesApollo();
+  const { data: localData = {}, client } = useQuery(CACHE_QUERY, {
+    client: realitiesApollo,
+  });
 
   return (
     <StyledHeader>

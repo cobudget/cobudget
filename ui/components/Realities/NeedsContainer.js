@@ -15,15 +15,14 @@ import ListHeader from "./ListHeader";
 import HappySpinner from "components/HappySpinner";
 import CreateNeed from "./CreateNeed";
 import NeedsList from "./NeedsList";
-import createRealitiesApollo from "lib/realities/createRealitiesApollo";
-
-const realitiesApollo = createRealitiesApollo();
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
 const NeedsContainer = ({ currentUser }) => {
   //TODO: put respId/needId in the url
   //const { orgSlug, responsibilityId, needId } = useParams();
   const [responsibilityId, setResponsibilityId] = useState(null);
   const [needId, setNeedId] = useState(null);
+  const realitiesApollo = getRealitiesApollo();
 
   const { data: localData = {} } = useQuery(CACHE_QUERY, {
     client: realitiesApollo,
