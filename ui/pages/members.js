@@ -1,5 +1,5 @@
 import OrgMembers from "components/Org/OrgMembers";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const OrgMembersPage = ({ currentOrgMember }) => {
   const isAdmin = currentOrgMember?.isOrgAdmin;
@@ -7,7 +7,7 @@ const OrgMembersPage = ({ currentOrgMember }) => {
 
   return (
     <>
-      <DashboardMenu currentOrgMember={currentOrgMember} />
+      <SubMenu currentOrgMember={currentOrgMember} />
 
       <div className="page">
         <OrgMembers />

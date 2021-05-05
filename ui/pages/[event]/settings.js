@@ -1,5 +1,5 @@
 import EventSettings from "components/EventSettings";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const EventSettingsPage = ({ event, currentOrgMember, currentOrg }) => {
   const isAdmin =
@@ -8,7 +8,7 @@ const EventSettingsPage = ({ event, currentOrgMember, currentOrg }) => {
   if (!isAdmin || !event) return null;
   return (
     <div className="flex-1">
-      <DashboardMenu currentOrgMember={currentOrgMember} event={event} />
+      <SubMenu currentOrgMember={currentOrgMember} event={event} />
       <EventSettings
         event={event}
         currentOrg={currentOrg}

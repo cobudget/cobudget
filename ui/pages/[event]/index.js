@@ -6,7 +6,7 @@ import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
 import InfoBox from "../../components/InfoBox";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 export const DREAMS_QUERY = gql`
   query Dreams($eventSlug: String!, $textSearchTerm: String) {
     dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
@@ -94,7 +94,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
 
   return (
     <>
-      <DashboardMenu currentOrgMember={currentOrgMember} event={event} />
+      <SubMenu currentOrgMember={currentOrgMember} event={event} />
 
       <div className="page flex-1">
         {event.info && <InfoBox markdown={event.info} />}

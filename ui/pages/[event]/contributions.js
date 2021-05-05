@@ -1,5 +1,5 @@
 import Contributions from "components/Contributions";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const ContributionsPage = ({ event, currentOrgMember }) => {
   const isAdmin =
@@ -8,7 +8,7 @@ const ContributionsPage = ({ event, currentOrgMember }) => {
   if (!isAdmin || !event) return null;
   return (
     <div className="">
-      <DashboardMenu currentOrgMember={currentOrgMember} event={event} />
+      <SubMenu currentOrgMember={currentOrgMember} event={event} />
       <Contributions event={event} />
     </div>
   );

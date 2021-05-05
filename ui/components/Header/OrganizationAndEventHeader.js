@@ -1,14 +1,6 @@
-import { useState } from "react";
 import Link from "next/link";
 import { useQuery, gql } from "@apollo/client";
-import { Tooltip } from "react-tippy";
-import {
-  HomeIcon,
-  DotsHorizontalIcon,
-  ChevronArrowRightIcon,
-} from "components/Icons";
-import EventSettingsModal from "components/EventSettingsModal";
-import IconButton from "components/IconButton";
+import { ChevronArrowRightIcon } from "components/Icons";
 
 const DREAM_QUERY = gql`
   query Dream($id: ID!) {

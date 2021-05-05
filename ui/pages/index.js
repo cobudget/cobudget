@@ -5,7 +5,7 @@ import Button from "components/Button";
 import TodoList from "components/TodoList";
 import { AddIcon } from "components/Icons";
 import Label from "components/Label";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -75,7 +75,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
 
   return (
     <>
-      <DashboardMenu currentOrgMember={currentOrgMember} />
+      <SubMenu currentOrgMember={currentOrgMember} />
       <div
         className={`page flex-1 grid gap-14 grid-cols-1 ${
           showTodos ? "md:grid-cols-2" : ""

@@ -1,5 +1,5 @@
 import EditOrganization from "components/Org/EditOrganization";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
   const isAdmin = currentOrgMember?.isOrgAdmin;
@@ -7,7 +7,7 @@ const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
 
   return (
     <>
-      <DashboardMenu currentOrgMember={currentOrgMember} />
+      <SubMenu currentOrgMember={currentOrgMember} />
       <div className="page">
         <EditOrganization organization={currentOrg} currentUser={currentUser} />
       </div>

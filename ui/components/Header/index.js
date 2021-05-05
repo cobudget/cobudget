@@ -5,8 +5,6 @@ import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
-import NewDreamModal from "components/NewDreamModal";
-import OrganizationOnlyHeader from "./OrganizationOnlyHeader";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
 
@@ -41,7 +39,6 @@ const Header = ({
   router,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
     refetchQueries: ["TopLevelQuery"],

@@ -1,12 +1,12 @@
 import React from "react";
 
 import Realities from "components/Realities";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 const RealitiesPage = ({ currentOrgMember }) => {
   return (
     <>
-      <DashboardMenu currentOrgMember={currentOrgMember} />
+      <SubMenu currentOrgMember={currentOrgMember} />
       <div className="page">
         <Realities />
       </div>
