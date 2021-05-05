@@ -433,9 +433,7 @@ const Monster = ({ event, dream }) => {
             closeBubble();
             setOpen(!open);
           }}
-          className={`w-40 cursor-pointer ${
-            isAngry ? "animate-mega-wiggle" : "animate-wiggle"
-          } hover:animate-none`}
+          className={`w-40 cursor-pointer hover:animate-none`}
           src={isAngry ? "/angry-monster.gif" : "/calm-monster.gif"}
         />
       )}
