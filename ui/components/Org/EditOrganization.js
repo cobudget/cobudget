@@ -95,7 +95,7 @@ const EditOrganization = ({ organization, currentUser }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md">
+    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto">
       <h1 className="text-2xl font-semibold mb-4">
         {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
       </h1>
