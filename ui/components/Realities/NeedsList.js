@@ -1,13 +1,14 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import styled from "styled-components";
-import { ListGroup } from "reactstrap";
+//import styled from "styled-components";
+//import { ListGroup } from "reactstrap";
+import { List } from "@material-ui/core";
 import _ from "lodash";
 import NeedsListItem from "./NeedsListItem";
 
-const NeedsListGroup = styled(ListGroup)`
-  margin-bottom: 1rem;
-`;
+//const NeedsListGroup = styled(ListGroup)`
+//  margin-bottom: 1rem;
+//`;
 
 const NeedsList = ({
   expandedNeedId,
@@ -29,7 +30,7 @@ const NeedsList = ({
     ["asc"]
   );
   return (
-    <NeedsListGroup>
+    <List className="bg-white">
       {sortedNeeds.map((need) => (
         <NeedsListItem
           key={need.nodeId}
@@ -39,7 +40,7 @@ const NeedsList = ({
           expandThisNeed={() => setExpandedNeedId(need.nodeId)}
         />
       ))}
-    </NeedsListGroup>
+    </List>
   );
 };
 

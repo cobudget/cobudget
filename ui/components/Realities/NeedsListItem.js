@@ -1,9 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { ListGroupItem, Collapse } from "reactstrap";
+//import { ListGroupItem, Collapse } from "reactstrap";
+import { ListItem, Collapse } from "@material-ui/core";
 //import { useHistory, useParams } from "react-router-dom";
-import colors from "lib/realities/colors";
+//import colors from "lib/realities/colors";
 //import ResponsibilitiesContainer from "./components/ResponsibilitiesContainer";
 import MissingRealizersOnNeed from "./MissingRealizersOnNeed";
 
@@ -11,18 +12,18 @@ const ResponsibilitiesContainer = () => {
   return <div>resp container</div>;
 };
 
-const NeedsListGroupItem = styled(ListGroupItem)`
-  display: flex;
-  justify-content: space-between;
-  &:focus {
-    outline: none;
-  }
-  &.active {
-    background-color: ${({ filledin }) => (filledin ? colors.need : "white")};
-    border-color: ${colors.need};
-    color: ${({ filledin }) => (filledin ? "white" : colors.need)};
-  }
-`;
+//const NeedsListGroupItem = styled(ListGroupItem)`
+//  display: flex;
+//  justify-content: space-between;
+//  &:focus {
+//    outline: none;
+//  }
+//  &.active {
+//    background-color: ${({ filledin }) => (filledin ? colors.need : "white")};
+//    border-color: ${colors.need};
+//    color: ${({ filledin }) => (filledin ? "white" : colors.need)};
+//  }
+//`;
 
 const CollapseWrapper = styled.div`
   margin-left: 2rem;
@@ -48,21 +49,23 @@ const NeedsListItem = ({
 
   return (
     <>
-      <NeedsListGroupItem
-        tag="button"
-        href="#"
-        action
+      <ListItem
+        button
         //TODO
         //filledin={params.needId === need.nodeId ? "true" : ""}
         filledin={false}
-        active={isHighlighted /*TODO: || params.needId === need.nodeId*/}
         onClick={expandThisNeed}
+        className={`${
+          isHighlighted /*TODO: || params.needId === need.nodeId*/
+            ? "bg-green-200"
+            : ""
+        }`}
       >
         {need.title}
         <MissingRealizersOnNeed need={need} />
-      </NeedsListGroupItem>
+      </ListItem>
       <CollapseWrapper>
-        <Collapse isOpen={isExpanded}>
+        <Collapse in={isExpanded}>
           {need.fulfilledBy.length === 0 && (
             <div>
               This Need doesn&apos;t contain any Responsibilities yet.{" "}
