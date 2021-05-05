@@ -3,6 +3,7 @@ import { gql, useMutation } from "@apollo/client";
 import * as yup from "yup";
 import { Formik } from "formik";
 import { GET_NEEDS, CACHE_QUERY } from "lib/realities/queries";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import ListForm from "./ListForm";
 
 const CREATE_NEED = gql`
@@ -25,8 +26,10 @@ const CREATE_NEED = gql`
 const CreateNeed = () => {
   //const history = useHistory();
   //const { orgSlug } = useParams();
+  const realitiesApollo = getRealitiesApollo();
 
   const [createNeed] = useMutation(CREATE_NEED, {
+    client: realitiesApollo,
     update: (cache, { data: { createNeed: createNeedRes } }) => {
       cache.writeQuery({
         query: CACHE_QUERY,
