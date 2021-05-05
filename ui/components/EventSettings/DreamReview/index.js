@@ -12,7 +12,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event, handleClose }) => {
+export default ({ event }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
     variables: { eventId: event.id },
   });
@@ -39,7 +39,7 @@ export default ({ event, handleClose }) => {
               dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
             },
           })
-            .then(() => handleClose())
+            //.then(() => null)
             .catch((error) => alert(error.message));
         })}
       >
@@ -77,14 +77,6 @@ export default ({ event, handleClose }) => {
         </SelectField> */}
 
         <div className="mt-2 flex justify-end">
-          <Button
-            color={event.color}
-            onClick={handleClose}
-            variant="secondary"
-            className="mr-2"
-          >
-            Close
-          </Button>
           <Button
             color={event.color}
             type="submit"

@@ -106,7 +106,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           placeholder={`${currentUser.firstName}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
-          autoFocus
           className="mb-4"
           error={errors.name}
           helperText={errors.name?.message}

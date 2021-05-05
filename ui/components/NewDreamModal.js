@@ -17,7 +17,7 @@ const CREATE_DREAM = gql`
   }
 `;
 
-export default ({ event, open, handleClose }) => {
+export default ({ event, handleClose }) => {
   const [createDream, { loading }] = useMutation(CREATE_DREAM, {
     variables: { eventId: event.id },
     refetchQueries: ["Dreams"],
@@ -44,7 +44,7 @@ export default ({ event, open, handleClose }) => {
 
   return (
     <Modal
-      open={open}
+      open={true}
       onClose={handleClose}
       className="flex items-center justify-center p-4"
     >

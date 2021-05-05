@@ -1,31 +1,60 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
+import { useQuery, gql } from "@apollo/client";
+import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
 
-export default function AboutPage({ event }) {
-  return (
-    <>
-      {event.about && (
-        <>
-          <h2 className="text-xl mb-3" id="about">
-            About
-          </h2>
-          <div className="shadow rounded-lg bg-white p-4 pb-2 relative mb-6">
-            <ReactMarkdown className="markdown" source={event.about} />
-          </div>
-        </>
-      )}
+export const EVENT_QUERY = gql`
+  query EventQuery($slug: String) {
+    event(slug: $slug) {
+      id
+      about
+      guidelines {
+        id
+        title
+        description
+        position
+      }
+      maxAmountToDreamPerUser
+      allowStretchGoals
+      dreamCreationCloses
+      grantingOpens
+      grantingCloses
+      color
+      currency
+      totalContributions
+      totalAllocations
+      totalInMembersBalances
+      totalContributionsFunding
+      totalContributionsFunded
+    }
+  }
+`;
 
+export default function AboutPage({ router }) {
+  const { data: { event } = {}, loading } = useQuery(EVENT_QUERY, {
+    variables: { slug: router.query.event },
+  });
+
+  if (loading)
+    return (
+      <div className="flex-grow flex justify-center items-center">
+        <HappySpinner />
+      </div>
+    );
+
+  return (
+    <div className="max-w-screen-md">
       {Boolean(event.guidelines.length) && (
         <>
-          <h2 className="text-xl mb-3" id="guidelines">
+          <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines
           </h2>
-          <div className="shadow rounded-lg bg-white relative mb-6 divide-y divide-gray-200">
+          <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
             {event.guidelines.map((guideline) => (
-              <div key={guideline.id} className="p-4 pb-2">
+              <div key={guideline.id} className="p-4">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <ReactMarkdown
                   className="markdown"
@@ -37,7 +66,7 @@ export default function AboutPage({ event }) {
         </>
       )}
 
-      <h2 className="text-xl mb-3">Granting settings</h2>
+      <h2 className="text-xl font-semibold mb-3">Granting settings</h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
@@ -108,7 +137,7 @@ export default function AboutPage({ event }) {
         </List>
       </div>
 
-      <h2 className="text-xl mb-3">Granting status</h2>
+      <h2 className="text-xl font-semibold mb-3">Granting status</h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
@@ -161,6 +190,6 @@ export default function AboutPage({ event }) {
           </ListItem>
         </List>
       </div>
-    </>
+    </div>
   );
 }

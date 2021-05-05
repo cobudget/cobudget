@@ -85,8 +85,6 @@ const EventSettingsModalGranting = ({ event }) => {
 
   const ModalContent = modals[open];
 
-  const grantingHasOpened = dayjs(event.grantingOpens).isBefore(dayjs());
-
   const canEditSettings = true;
 
   return (

@@ -141,7 +141,7 @@ const DreamPage = ({
 
   if (dream)
     return (
-      <div className="max-w-screen-2lg flex-1">
+      <div className="page">
         <Head>
           <title>
             {dream.title} | {event.title}
