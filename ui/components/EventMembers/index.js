@@ -5,7 +5,7 @@ import Link from "next/link";
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import InviteMembersModal from "components/InviteMembersModal";
-import DashboardMenu from "components/SubMenu";
+import SubMenu from "components/SubMenu";
 
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
