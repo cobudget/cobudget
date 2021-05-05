@@ -93,6 +93,23 @@ const resolvers = {
       if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
+    contributions: async (
+      parent,
+      { eventId },
+      { currentOrgMember, models: { EventMember, Contribution } }
+    ) => {
+      if (!currentOrgMember) throw new Error("You need to be logged in");
+
+      const eventMember = await EventMember.findOne({
+        eventId,
+        orgMemberId: currentOrgMember.id,
+      });
+
+      if (!currentOrgMember?.isOrgAdmin || !eventMember?.isAdmin)
+        throw new Error("You need to be org admin to view this");
+
+      return Contribution.find({ eventId }).sort({ createdAt: -1 });
+    },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
     },
@@ -2412,6 +2429,25 @@ const resolvers = {
       if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
 
       return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
+  },
+  Transaction: {
+    __resolveType(transaction) {
+      if (transaction.dreamId) {
+        return "Contribution";
+      }
+      return "Allocation"; // GraphQLError is thrown
+    },
+  },
+  Contribution: {
+    dream: async (contribution, args, { models: { Dream } }) => {
+      return Dream.findOne({ _id: contribution.dreamId });
+    },
+    event: async (contribution, args, { models: { Event } }) => {
+      return Event.findOne({ _id: contribution.eventId });
+    },
+    eventMember: async (contribution, args, { models: { EventMember } }) => {
+      return EventMember.findOne({ _id: contribution.eventMemberId });
     },
   },
   Comment: {
