@@ -13,6 +13,7 @@ const ContributionSchema = new Schema({
       message: "{VALUE} is not an integer value",
     },
   },
+  createdAt: { type: Date, required: true, default: Date.now },
 });
 
 module.exports = ContributionSchema;
