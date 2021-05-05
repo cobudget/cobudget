@@ -1,24 +1,25 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
-import styled from "styled-components";
+//import styled from "styled-components";
 //import { useHistory, useParams } from "react-router-dom";
-import { ListGroup, ListGroupItem } from "reactstrap";
+//import { ListGroup, ListGroupItem } from "reactstrap";
+import { List, ListItem } from "@material-ui/core";
 import _ from "lodash";
-import colors from "lib/realities/colors";
+//import colors from "lib/realities/colors";
 import RealizersMissingIcon from "./RealizersMissingIcon";
 
-const ResponsibilitiesListGroupItem = styled(ListGroupItem)`
-  display: flex;
-  justify-content: space-between;
-  &:focus {
-    outline: none;
-  }
-  &.active {
-    background-color: ${colors.responsibility};
-    border-color: ${colors.responsibility};
-    color: white;
-  }
-`;
+//const ResponsibilitiesListGroupItem = styled(ListGroupItem)`
+//  display: flex;
+//  justify-content: space-between;
+//  &:focus {
+//    outline: none;
+//  }
+//  &.active {
+//    background-color: ${colors.responsibility};
+//    border-color: ${colors.responsibility};
+//    color: white;
+//  }
+//`;
 
 const renderMissingRealizerIcon = (responsibility) => {
   if (!responsibility.realizer) {
@@ -50,13 +51,11 @@ const ResponsibilitiesList = ({
     ["asc"]
   );
   return (
-    <ListGroup>
+    <List disablePadding>
       {sortedResponsibilities.map((responsibility) => (
-        <ResponsibilitiesListGroupItem
+        <ListItem
+          button
           key={responsibility.nodeId}
-          tag="button"
-          href="#"
-          action
           active={responsibility.nodeId === selectedResponsibilityId}
           onClick={
             () => null /*history.push(`/${orgSlug}/${responsibility.nodeId}`)*/
@@ -64,9 +63,9 @@ const ResponsibilitiesList = ({
         >
           {responsibility.title}
           {renderMissingRealizerIcon(responsibility)}
-        </ResponsibilitiesListGroupItem>
+        </ListItem>
       ))}
-    </ListGroup>
+    </List>
   );
 };
 
