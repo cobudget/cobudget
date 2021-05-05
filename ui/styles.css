@@ -42,7 +42,7 @@ h5 {
 }
 
 .markdown hr {
-  @apply m-6;
+  @apply mt-6 mb-6 !important;
 }
 
 .markdown p {
@@ -64,11 +64,11 @@ h5 {
 }
 
 .markdown blockquote {
-  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2;
 }
 
 .markdown aside {
-  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2;
 }
 
 .markdown aside blockquote {
@@ -76,7 +76,7 @@ h5 {
 }
 
 .markdown aside .title {
-  @apply text-sm font-medium text-black mt-1;
+  @apply text-sm font-medium text-black mt-1 !important;
 }
 
 .markdown img.emoji {
