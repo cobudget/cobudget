@@ -15,9 +15,7 @@ const EDIT_EVENT = gql`
     $title: String
     $archived: Boolean
     $registrationPolicy: RegistrationPolicy
-    $info: String
     $color: String
-    $about: String
   ) {
     editEvent(
       eventId: $eventId
@@ -25,18 +23,14 @@ const EDIT_EVENT = gql`
       title: $title
       archived: $archived
       registrationPolicy: $registrationPolicy
-      info: $info
       color: $color
-      about: $about
     ) {
       id
       title
       slug
       archived
       registrationPolicy
-      info
       color
-      about
     }
   }
 `;
@@ -118,26 +112,6 @@ export default function GeneralSettings({
         </SelectField>
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
-
-        <TextField
-          name="info"
-          label="Homepage message (markdown allowed)"
-          defaultValue={event.info}
-          multiline
-          rows={5}
-          inputRef={register}
-          className="my-4"
-        />
-
-        <TextField
-          name="about"
-          label="About (markdown allowed)"
-          defaultValue={event.about}
-          multiline
-          rows={5}
-          inputRef={register}
-          className="my-4"
-        />
 
         {currentOrgMember.isOrgAdmin && (
           <SelectField

@@ -13,7 +13,7 @@ html {
 }
 
 .page {
-  @apply py-10 px-2 md:px-4 max-w-screen-xl mx-auto;
+  @apply py-5 px-2 md:px-4 max-w-screen-xl mx-auto;
 }
 
 .expand-gradient {
@@ -23,15 +23,12 @@ html {
   );
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4,
-.markdown h5 {
-  @apply mb-2;
+.markdown {
+  @apply space-y-2;
 }
+
 .markdown h1 {
-  @apply text-xl font-semibold;
+  @apply text-2xl font-semibold;
 }
 
 .markdown h2 {
@@ -49,7 +46,7 @@ h5 {
 }
 
 .markdown p {
-  @apply text-gray-900 my-2;
+  @apply text-gray-900;
 }
 
 .markdown a {
@@ -57,7 +54,7 @@ h5 {
 }
 
 .markdown li {
-  @apply list-inside mb-2;
+  @apply list-inside;
 }
 .markdown ul {
   @apply list-disc;

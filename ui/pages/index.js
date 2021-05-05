@@ -6,6 +6,7 @@ import TodoList from "components/TodoList";
 import { AddIcon } from "components/Icons";
 import Label from "components/Label";
 import SubMenu from "components/SubMenu";
+import PageHero from "components/PageHero";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -76,57 +77,65 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
   return (
     <>
       <SubMenu currentOrgMember={currentOrgMember} />
+      <PageHero>
+        <div className="flex justify-between">
+          <h2 className="text-2xl font-semibold">
+            {events.length} dream{" "}
+            {events.length === 1 ? "collection" : "collections"}
+          </h2>
+          {currentOrgMember?.isOrgAdmin && (
+            <Link href={`/new-collection`}>
+              <Button size="large" color="anthracit">
+                New collection
+              </Button>
+            </Link>
+          )}
+        </div>
+      </PageHero>
       <div
-        className={`page flex-1 grid gap-14 grid-cols-1 ${
-          showTodos ? "md:grid-cols-2" : ""
+        className={`-mt-12 page flex-1 grid gap-10 grid-cols-1 ${
+          showTodos ? "md:grid-cols-5" : ""
         }`}
       >
+        <div
+          className={`grid gap-4 ${
+            showTodos
+              ? "grid-cols-1 md:grid-cols-2 col-span-3"
+              : "grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4"
+          }`}
+        >
+          {events.map((event) => (
+            <Link
+              href="/[event]"
+              as={`/${event.slug}`}
+              key={event.slug}
+              passHref
+            >
+              <LinkCard color={event.color}>
+                {event.title}
+                {event.archived && (
+                  <Label className="right-0 m-2">Archived</Label>
+                )}
+              </LinkCard>
+            </Link>
+          ))}
+          {currentOrgMember?.isOrgAdmin && (
+            <Link href="/new-collection">
+              <button
+                type="button"
+                className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
+              >
+                <AddIcon className="p-8" />
+              </button>
+            </Link>
+          )}
+        </div>
         {showTodos && (
-          <div>
-            <div className="text-sm text-gray-700 font-medium mb-3 block">
-              GET GOING
-            </div>
+          <div className="col-span-2">
+            {/* <div className="text-sm font-semibold mb-10 block">Get Going</div> */}
             <TodoList subdomain={currentOrg.subdomain} />
           </div>
         )}
-        <div>
-          <div className="text-sm text-gray-700 font-medium mb-3 block tracking-wider">
-            COLLECTIONS{" "}
-          </div>
-          <div
-            className={`grid gap-4 ${
-              showTodos
-                ? "grid-cols-1 md:grid-cols-2"
-                : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-            }`}
-          >
-            {events.map((event) => (
-              <Link
-                href="/[event]"
-                as={`/${event.slug}`}
-                key={event.slug}
-                passHref
-              >
-                <LinkCard color={event.color}>
-                  {event.title}
-                  {event.archived && (
-                    <Label className="right-0 m-2">Archived</Label>
-                  )}
-                </LinkCard>
-              </Link>
-            ))}
-            {currentOrgMember?.isOrgAdmin && (
-              <Link href="/create-event">
-                <button
-                  type="button"
-                  className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
-                >
-                  <AddIcon className="p-8" />
-                </button>
-              </Link>
-            )}
-          </div>
-        </div>
       </div>
     </>
   );

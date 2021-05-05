@@ -47,25 +47,14 @@ export default function AboutPage({ router }) {
 
   return (
     <div className="max-w-screen-md">
-      {event.about && (
-        <>
-          <h2 className="text-xl font-semibold mb-3" id="about">
-            About
-          </h2>
-          <div className="shadow rounded-lg bg-white p-4 pb-2 relative mb-6">
-            <ReactMarkdown className="markdown" source={event.about} />
-          </div>
-        </>
-      )}
-
       {Boolean(event.guidelines.length) && (
         <>
           <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines
           </h2>
-          <div className="shadow rounded-lg bg-white relative mb-6 divide-y divide-gray-200">
+          <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
             {event.guidelines.map((guideline) => (
-              <div key={guideline.id} className="p-4 pb-2">
+              <div key={guideline.id} className="p-4">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <ReactMarkdown
                   className="markdown"

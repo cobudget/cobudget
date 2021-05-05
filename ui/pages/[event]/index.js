@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
-
-import DreamCard from "../../components/DreamCard";
-import HappySpinner from "../../components/HappySpinner";
-import Filterbar from "../../components/Filterbar";
-import InfoBox from "../../components/InfoBox";
+import DreamCard from "components/DreamCard";
+import HappySpinner from "components/HappySpinner";
+import Filterbar from "components/Filterbar";
 import SubMenu from "components/SubMenu";
+import PageHero from "components/PageHero";
+import Button from "components/Button";
+import NewDreamModal from "components/NewDreamModal";
+import EditableField from "components/EditableField";
+
 export const DREAMS_QUERY = gql`
   query Dreams($eventSlug: String!, $textSearchTerm: String) {
     dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
@@ -48,6 +51,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [filterLabels, setFilterLabels] = useState();
+  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
@@ -95,10 +99,55 @@ const EventPage = ({ currentOrgMember, event, router }) => {
   return (
     <>
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
+      <PageHero>
+        <div className="flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="col-span-2">
+              <EditableField
+                value={event.info}
+                label="Add homepage message"
+                placeholder={`# Welcome to ${event.title}'s dream page`}
+                canEdit={
+                  currentOrgMember?.isOrgAdmin ||
+                  currentOrgMember?.currentEventMembership?.isAdmin
+                }
+                name="info"
+                className="h-10"
+                MUTATION={gql`
+                  mutation EditHomepageMessage($eventId: ID!, $info: String) {
+                    editEvent(eventId: $eventId, info: $info) {
+                      id
+                      info
+                    }
+                  }
+                `}
+                variables={{ eventId: event.id }}
+              />
+            </div>
+            <div className="flex justify-end items-start">
+              {event.dreamCreationIsOpen &&
+                currentOrgMember?.currentEventMembership?.isApproved && (
+                  <>
+                    <Button
+                      color={event.color}
+                      onClick={() => setNewDreamModalOpen(true)}
+                    >
+                      New dream
+                    </Button>
+                    {newDreamModalOpen && (
+                      <NewDreamModal
+                        event={event}
+                        handleClose={() => setNewDreamModalOpen(false)}
+                      />
+                    )}
+                  </>
+                )}
+            </div>
+          </div>
+        </div>
+      </PageHero>
 
       <div className="page flex-1">
-        {event.info && <InfoBox markdown={event.info} />}
-
         <Filterbar
           filterFavorites={filterFavorites}
           toggleFilterFavorites={toggleFilterFavorites}
