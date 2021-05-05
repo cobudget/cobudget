@@ -275,7 +275,7 @@ const Monster = ({ event, dream }) => {
   } else {
     items = [
       ...[
-        { type: MESSAGE, message: "This help review this dream!" },
+        { type: MESSAGE, message: "Please help review this dream!" },
         {
           type: MESSAGE,
           message: "Here are the guidelines that dreams need to follow:",
