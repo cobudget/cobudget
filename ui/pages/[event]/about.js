@@ -1,49 +1,14 @@
-import { useQuery, gql } from "@apollo/client";
 import About from "components/About";
-import HappySpinner from "components/HappySpinner";
-export const EVENT_QUERY = gql`
-  query EventQuery($slug: String) {
-    event(slug: $slug) {
-      id
-      about
-      guidelines {
-        id
-        title
-        description
-        position
-      }
-      maxAmountToDreamPerUser
-      allowStretchGoals
-      dreamCreationCloses
-      grantingOpens
-      grantingCloses
-      color
-      currency
-      totalContributions
-      totalAllocations
-      totalInMembersBalances
-      totalContributionsFunding
-      totalContributionsFunded
-    }
-  }
-`;
+import SubMenu from "components/SubMenu";
 
-export default function AboutPage({ router }) {
-  const { data: { event } = {}, loading } = useQuery(EVENT_QUERY, {
-    variables: { slug: router.query.event },
-  });
-
-  if (loading)
-    return (
-      <div className="flex-grow flex justify-center items-center">
-        <HappySpinner />
-      </div>
-    );
-
+export default function AboutPage({ router, event, currentOrgMember }) {
   if (!event) return null;
   return (
-    <div className="max-w-screen-md flex-1">
-      <About event={event} />
-    </div>
+    <>
+      <SubMenu currentOrgMember={currentOrgMember} event={event} />
+      <div className="page">
+        <About router={router} />
+      </div>
+    </>
   );
 }
