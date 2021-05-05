@@ -14,8 +14,11 @@ export const CONTRIBUTIONS_QUERY = gql`
       amount
       createdAt
       eventMember {
+        id
         orgMember {
+          id
           user {
+            id
             username
           }
         }
