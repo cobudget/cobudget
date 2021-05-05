@@ -129,6 +129,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
                 currentOrgMember?.currentEventMembership?.isApproved && (
                   <>
                     <Button
+                      size="large"
                       color={event.color}
                       onClick={() => setNewDreamModalOpen(true)}
                     >
