@@ -15,15 +15,22 @@ import ListHeader from "./ListHeader";
 import HappySpinner from "components/HappySpinner";
 import CreateNeed from "./CreateNeed";
 import NeedsList from "./NeedsList";
+import createRealitiesApollo from "lib/realities/createRealitiesApollo";
+
+const realitiesApollo = createRealitiesApollo();
 
 const NeedsContainer = ({ currentUser }) => {
   //TODO: put respId/needId in the url
   //const { orgSlug, responsibilityId, needId } = useParams();
-  const responsibilityId = useState(null);
-  const needId = useState(null);
+  const [responsibilityId, setResponsibilityId] = useState(null);
+  const [needId, setNeedId] = useState(null);
 
-  const { data: localData = {} } = useQuery(CACHE_QUERY);
-  const { subscribeToMore, loading, error, data } = useQuery(GET_NEEDS);
+  const { data: localData = {} } = useQuery(CACHE_QUERY, {
+    client: realitiesApollo,
+  });
+  const { subscribeToMore, loading, error, data } = useQuery(GET_NEEDS, {
+    client: realitiesApollo,
+  });
   const {
     loading: loadingFulfills,
     error: errorFulfills,
@@ -31,6 +38,7 @@ const NeedsContainer = ({ currentUser }) => {
   } = useQuery(GET_RESP_FULFILLS, {
     variables: { responsibilityId },
     skip: !responsibilityId,
+    client: realitiesApollo,
   });
 
   const [expandedNeedId, setExpandedNeedId] = useState(undefined);
