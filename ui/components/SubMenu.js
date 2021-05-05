@@ -17,6 +17,7 @@ export const eventItems = ({ currentOrgMember, event }) => {
     currentOrgMember?.currentEventMembership?.isAdmin;
   return [
     { label: "Overview", href: `/${event.slug}` },
+    { label: "About", href: `/${event.slug}/about` },
     { label: "Members", href: `/${event.slug}/members`, admin: true },
     {
       label: "Contributions",
@@ -27,7 +28,7 @@ export const eventItems = ({ currentOrgMember, event }) => {
   ].filter((i) => (i.admin ? isAdmin : true));
 };
 
-export default function DashboardMenu({ event, currentOrgMember }) {
+export default function SubMenu({ event, currentOrgMember }) {
   const router = useRouter();
 
   const items = event

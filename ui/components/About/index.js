@@ -6,10 +6,10 @@ import thousandSeparator from "utils/thousandSeparator";
 
 export default function AboutPage({ event }) {
   return (
-    <>
+    <div className="max-w-screen-md">
       {event.about && (
         <>
-          <h2 className="text-xl mb-3" id="about">
+          <h2 className="text-xl font-semibold mb-3" id="about">
             About
           </h2>
           <div className="shadow rounded-lg bg-white p-4 pb-2 relative mb-6">
@@ -20,7 +20,7 @@ export default function AboutPage({ event }) {
 
       {Boolean(event.guidelines.length) && (
         <>
-          <h2 className="text-xl mb-3" id="guidelines">
+          <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines
           </h2>
           <div className="shadow rounded-lg bg-white relative mb-6 divide-y divide-gray-200">
@@ -37,7 +37,7 @@ export default function AboutPage({ event }) {
         </>
       )}
 
-      <h2 className="text-xl mb-3">Granting settings</h2>
+      <h2 className="text-xl font-semibold mb-3">Granting settings</h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
@@ -108,7 +108,7 @@ export default function AboutPage({ event }) {
         </List>
       </div>
 
-      <h2 className="text-xl mb-3">Granting status</h2>
+      <h2 className="text-xl font-semibold mb-3">Granting status</h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
@@ -161,6 +161,6 @@ export default function AboutPage({ event }) {
           </ListItem>
         </List>
       </div>
-    </>
+    </div>
   );
 }
