@@ -1,5 +1,5 @@
 import SubMenu from "components/SubMenu";
-import Contributions from "components/Contributions";
+import Contributions from "components/ContributionsRename";
 
 const ContributionsPage = ({ event, currentOrgMember }) => {
   const isAdmin =
