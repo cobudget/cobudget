@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "@apollo/client";
 import { Tooltip } from "react-tippy";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -78,11 +79,19 @@ const EditableField = ({
           source={value}
           className="markdown"
           renderers={{
-            link: (props) => (
-              <a href={props.href} target="_blank" rel="noreferrer">
-                {props.children}
-              </a>
-            ),
+            link: (props) => {
+              if (props.href.includes("http"))
+                return (
+                  <a href={props.href} target="_blank" rel="noreferrer">
+                    {props.children}
+                  </a>
+                );
+              return (
+                <Link href={props.href}>
+                  <a>{props.children}</a>
+                </Link>
+              );
+            },
           }}
         />
         {canEdit && (
