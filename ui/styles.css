@@ -9,7 +9,11 @@
 }
 
 html {
-  @apply bg-gray-100;
+  @apply bg-gray-50;
+}
+
+.page {
+  @apply py-10 px-2 md:px-4 max-w-screen-xl mx-auto;
 }
 
 .expand-gradient {

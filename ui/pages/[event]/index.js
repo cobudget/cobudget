@@ -6,7 +6,7 @@ import DreamCard from "../../components/DreamCard";
 import HappySpinner from "../../components/HappySpinner";
 import Filterbar from "../../components/Filterbar";
 import InfoBox from "../../components/InfoBox";
-
+import DashboardMenu from "components/SubMenu";
 export const DREAMS_QUERY = gql`
   query Dreams($eventSlug: String!, $textSearchTerm: String) {
     dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
@@ -93,55 +93,59 @@ const EventPage = ({ currentOrgMember, event, router }) => {
   }
 
   return (
-    <div className="max-w-screen-2lg flex-1">
-      {event.info && <InfoBox markdown={event.info} />}
+    <>
+      <DashboardMenu currentOrgMember={currentOrgMember} event={event} />
 
-      <Filterbar
-        filterFavorites={filterFavorites}
-        toggleFilterFavorites={toggleFilterFavorites}
-        textSearchTerm={textSearchTerm}
-        setTextSearchTerm={setTextSearchTerm}
-        currentOrgMember={currentOrgMember}
-        customFields={event.customFields}
-        filterLabels={filterLabels}
-        setFilterLabels={setFilterLabels}
-      />
+      <div className="page flex-1">
+        {event.info && <InfoBox markdown={event.info} />}
 
-      {loading ? (
-        <div className="flex-grow flex justify-center items-center h-64">
-          <HappySpinner />
-        </div>
-      ) : (
-        <>
-          {dreams.length ? (
-            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {dreams.map((dream) => (
-                <Link
-                  href="/[event]/[dream]"
-                  as={`/${event.slug}/${dream.id}`}
-                  key={dream.id}
-                >
-                  <a className="flex focus:outline-none focus:ring rounded-lg">
-                    <DreamCard
-                      dream={dream}
-                      event={event}
-                      currentOrgMember={currentOrgMember}
-                      filterLabels={filterLabels}
-                    />
-                  </a>
-                </Link>
-              ))}
-            </div>
-          ) : (
-            <div className="flex-grow flex flex-col justify-center items-center h-64">
-              <h1 className="text-3xl text-gray-500 text-center ">
-                No dreams...
-              </h1>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+        <Filterbar
+          filterFavorites={filterFavorites}
+          toggleFilterFavorites={toggleFilterFavorites}
+          textSearchTerm={textSearchTerm}
+          setTextSearchTerm={setTextSearchTerm}
+          currentOrgMember={currentOrgMember}
+          customFields={event.customFields}
+          filterLabels={filterLabels}
+          setFilterLabels={setFilterLabels}
+        />
+
+        {loading ? (
+          <div className="flex-grow flex justify-center items-center h-64">
+            <HappySpinner />
+          </div>
+        ) : (
+          <>
+            {dreams.length ? (
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                {dreams.map((dream) => (
+                  <Link
+                    href="/[event]/[dream]"
+                    as={`/${event.slug}/${dream.id}`}
+                    key={dream.id}
+                  >
+                    <a className="flex focus:outline-none focus:ring rounded-lg">
+                      <DreamCard
+                        dream={dream}
+                        event={event}
+                        currentOrgMember={currentOrgMember}
+                        filterLabels={filterLabels}
+                      />
+                    </a>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="flex-grow flex flex-col justify-center items-center h-64">
+                <h1 className="text-3xl text-gray-500 text-center ">
+                  No dreams...
+                </h1>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

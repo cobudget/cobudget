@@ -216,6 +216,13 @@ const MyApp = ({ Component, pageProps, router }) => {
           openModal={openModal}
           event={event}
           router={router}
+          title={
+            currentOrg
+              ? event
+                ? `${event.title} | ${currentOrg.name}`
+                : currentOrg.name
+              : "Plato"
+          }
         >
           <Component
             {...pageProps}

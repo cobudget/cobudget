@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
+import Link from "next/link";
 
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import InviteMembersModal from "components/InviteMembersModal";
+import DashboardMenu from "components/SubMenu";
 
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
+import { useRouter } from "next/router";
 
 export const EVENT_MEMBERS_QUERY = gql`
   query Members($eventId: ID!) {
@@ -99,42 +102,44 @@ const EventMembers = ({ event }) => {
 
   if (loading)
     return (
-      <div className="flex-grow flex justify-center items-center">
+      <div className="page flex justify-center">
         <HappySpinner />
       </div>
     );
 
   return (
     <>
-      <RequestsToJoinTable
-        requestsToJoin={requestsToJoin}
-        updateMember={updateMember}
-        deleteMember={deleteMember}
-      />
+      <div className="page">
+        <RequestsToJoinTable
+          requestsToJoin={requestsToJoin}
+          updateMember={updateMember}
+          deleteMember={deleteMember}
+        />
 
-      <div className="flex justify-between mb-3 items-center">
-        <h2 className="text-xl font-semibold">
-          {approvedMembers.length} members
-        </h2>
-        <div className="flex items-center space-x-2">
-          <Button onClick={() => setInviteModalOpen(true)}>
-            Invite members
-          </Button>
-          {inviteModalOpen && (
-            <InviteMembersModal
-              handleClose={() => setInviteModalOpen(false)}
-              eventId={event.id}
-            />
-          )}
+        <div className="flex justify-between mb-3 items-center">
+          <h2 className="text-xl font-semibold">
+            {approvedMembers.length} members
+          </h2>
+          <div className="flex items-center space-x-2">
+            <Button onClick={() => setInviteModalOpen(true)}>
+              Invite members
+            </Button>
+            {inviteModalOpen && (
+              <InviteMembersModal
+                handleClose={() => setInviteModalOpen(false)}
+                eventId={event.id}
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      <MembersTable
-        approvedMembers={approvedMembers}
-        updateMember={updateMember}
-        deleteMember={deleteMember}
-        event={event}
-      />
+        <MembersTable
+          approvedMembers={approvedMembers}
+          updateMember={updateMember}
+          deleteMember={deleteMember}
+          event={event}
+        />
+      </div>
     </>
   );
 };

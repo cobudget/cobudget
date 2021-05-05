@@ -1,15 +1,11 @@
 import { useState, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { Modal } from "@material-ui/core";
 import { CloseIcon, LoaderIcon } from "components/Icons";
-import Button from "components/Button";
 
 const ImageUpload = ({
   label,
   cloudinaryPreset,
   initialImage,
   onImageUploaded,
-  className,
   ...otherProps
 }) => {
   const fileInputField = useRef(null);
@@ -33,7 +29,6 @@ const ImageUpload = ({
       setImage(newImage);
       setUploadingImage(false);
       onImageUploaded(newImage);
-      handleClose();
     } catch (error) {
       console.log(error);
       alert(error);
