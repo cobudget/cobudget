@@ -5,12 +5,8 @@ import styled from "styled-components";
 import { ListItem, Collapse } from "@material-ui/core";
 //import { useHistory, useParams } from "react-router-dom";
 //import colors from "lib/realities/colors";
-//import ResponsibilitiesContainer from "./components/ResponsibilitiesContainer";
+import ResponsibilitiesContainer from "./ResponsibilitiesContainer";
 import MissingRealizersOnNeed from "./MissingRealizersOnNeed";
-
-const ResponsibilitiesContainer = () => {
-  return <div>resp container</div>;
-};
 
 //const NeedsListGroupItem = styled(ListGroupItem)`
 //  display: flex;
