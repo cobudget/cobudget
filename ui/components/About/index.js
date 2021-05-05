@@ -1,10 +1,50 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
+import { useQuery, gql } from "@apollo/client";
+import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
 
-export default function AboutPage({ event }) {
+export const EVENT_QUERY = gql`
+  query EventQuery($slug: String) {
+    event(slug: $slug) {
+      id
+      about
+      guidelines {
+        id
+        title
+        description
+        position
+      }
+      maxAmountToDreamPerUser
+      allowStretchGoals
+      dreamCreationCloses
+      grantingOpens
+      grantingCloses
+      color
+      currency
+      totalContributions
+      totalAllocations
+      totalInMembersBalances
+      totalContributionsFunding
+      totalContributionsFunded
+    }
+  }
+`;
+
+export default function AboutPage({ router }) {
+  const { data: { event } = {}, loading } = useQuery(EVENT_QUERY, {
+    variables: { slug: router.query.event },
+  });
+
+  if (loading)
+    return (
+      <div className="flex-grow flex justify-center items-center">
+        <HappySpinner />
+      </div>
+    );
+
   return (
     <div className="max-w-screen-md">
       {event.about && (
