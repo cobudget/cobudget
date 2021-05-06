@@ -75,7 +75,7 @@ const ImageUpload = ({
               onChange={uploadFile}
               title=""
               value=""
-              className="w-full absolute inset-0 opacity-0 focus:outline-none z-0 block"
+              className="w-full absolute inset-0 opacity-0 hidden focus:outline-none -z-10"
               {...otherProps}
             />
           </>

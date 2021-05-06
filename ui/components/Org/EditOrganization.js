@@ -15,6 +15,7 @@ const CREATE_ORGANIZATION = gql`
     $subdomain: String!
   ) {
     createOrganization(name: $name, logo: $logo, subdomain: $subdomain) {
+      id
       name
       logo
       subdomain
@@ -35,6 +36,7 @@ const EDIT_ORGANIZATION = gql`
       logo: $logo
       subdomain: $subdomain
     ) {
+      id
       name
       logo
       subdomain
@@ -95,18 +97,17 @@ const EditOrganization = ({ organization, currentUser }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">
-        {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
-      </h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto space-y-4">
+        <h1 className="text-2xl font-semibold">
+          {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
+        </h1>
         <TextField
           name="name"
           label="Name your community"
           placeholder={`${currentUser.firstName}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
-          className="mb-4"
           error={errors.name}
           helperText={errors.name?.message}
         />
@@ -116,7 +117,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           label={fromRealities ? "Link" : "Subdomain"}
           placeholder={slugify(`${currentUser.firstName}'s community`)}
           inputRef={register({ required: "Required" })}
-          className="mb-4"
           error={errors.subdomain}
           inputProps={{
             value: slugValue,
@@ -167,14 +167,13 @@ const EditOrganization = ({ organization, currentUser }) => {
           onImageUploaded={setLogoImage}
           cloudinaryPreset="organization_logos"
           initialImage={logoImage}
-          className="my-2"
         />
 
         <Button fullWidth type="submit" loading={loading || editLoading}>
           {isNew ? "Continue" : "Save"}
         </Button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 
