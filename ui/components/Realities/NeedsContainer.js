@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
-//import { useHistory, useParams } from "react-router-dom";
+import { useRouter } from "next/router";
 import {
   GET_NEEDS,
   GET_RESP_FULFILLS,
@@ -18,10 +18,10 @@ import NeedsList from "./NeedsList";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
 const NeedsContainer = ({ currentUser }) => {
-  //TODO: put respId/needId in the url
-  //const { orgSlug, responsibilityId, needId } = useParams();
-  const [responsibilityId, setResponsibilityId] = useState(null);
-  const [needId, setNeedId] = useState(null);
+  const router = useRouter();
+  const {
+    query: { respId, needId },
+  } = router;
   const realitiesApollo = getRealitiesApollo();
 
   const { data: localData = {} } = useQuery(CACHE_QUERY, {
@@ -35,8 +35,8 @@ const NeedsContainer = ({ currentUser }) => {
     error: errorFulfills,
     data: dataFulfills,
   } = useQuery(GET_RESP_FULFILLS, {
-    variables: { responsibilityId },
-    skip: !responsibilityId,
+    variables: { responsibilityId: respId },
+    skip: !respId,
     client: realitiesApollo,
   });
 
@@ -53,22 +53,21 @@ const NeedsContainer = ({ currentUser }) => {
         if (error) return `Error! ${error.message}`;
         if (errorFulfills) return `Error! ${errorFulfills.message}`;
 
-        if (!responsibilityId && needId !== highlightedNeedId) {
+        if (!respId && needId !== highlightedNeedId) {
           setHighlightedNeedId(needId);
           setExpandedNeedId(needId);
         } else if (!loadingFulfills && dataFulfills) {
           if (dataFulfills.responsibility === null) {
             // if the respId is invalid for some reason
-            // TODO
-            //history.push(`/${orgSlug}`);
+            router.push(`/realities/`);
             return null;
           }
           const fulfillsNeedId = dataFulfills.responsibility.fulfills.nodeId;
-          if (!expandedNeedId || lastRespId !== responsibilityId) {
+          if (!expandedNeedId || lastRespId !== respId) {
             // if we're new on the page or if something makes us nav to another
             // resp
             setExpandedNeedId(fulfillsNeedId);
-            setLastRespId(responsibilityId);
+            setLastRespId(respId);
           }
           if (fulfillsNeedId !== highlightedNeedId) {
             setHighlightedNeedId(fulfillsNeedId);
