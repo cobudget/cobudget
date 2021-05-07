@@ -1,9 +1,10 @@
 import React from "react";
+import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import { gql, useQuery } from "@apollo/client";
-//import { useHistory, useParams } from "react-router-dom";
 import HappySpinner from "components/HappySpinner";
 import { GET_RESP_FULFILLS, CACHE_QUERY } from "lib/realities/queries";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import DetailView from "./DetailView";
 
 const createDetailViewQuery = (nodeType) => {
@@ -63,9 +64,9 @@ const GET_NEED = createDetailViewQuery("need");
 const GET_RESPONSIBILITY = createDetailViewQuery("responsibility");
 
 const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
-  //const history = useHistory();
-  //const params = useParams();
-  const params = { responsibilityId: null, needId: null };
+  const router = useRouter();
+  const { query } = router;
+  const realitiesApollo = getRealitiesApollo();
 
   // sorry for the confusing code, i blame not being able to use control flow
   // around hooks
@@ -88,27 +89,28 @@ const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
     error: errorFulfills,
     data: dataFulfills,
   } = useQuery(GET_RESP_FULFILLS, {
-    variables: { responsibilityId: params.responsibilityId },
-    skip: !params.responsibilityId || viewResp,
+    client: realitiesApollo,
+    variables: { responsibilityId: query.respId },
+    skip: !query.respId || viewResp,
   });
 
   let needId;
-  if (params.responsibilityId) {
+  if (query.respId) {
     needId =
       !loadingFulfills && dataFulfills && dataFulfills.responsibility
         ? dataFulfills.responsibility.fulfills.nodeId
         : "";
-  } else if (params.needId) {
-    needId = params.needId;
+  } else if (query.needId) {
+    needId = query.needId;
   }
 
   const queryProps = viewResp
     ? {
         query: GET_RESPONSIBILITY,
         variables: {
-          nodeId: params.responsibilityId,
+          nodeId: query.respId,
         },
-        skip: !params.responsibilityId,
+        skip: !query.respId,
       }
     : {
         query: GET_NEED,
@@ -117,12 +119,12 @@ const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
         },
         skip: !needId,
       };
-  const { loading, error, data = {}, client } = useQuery(
-    queryProps.query,
-    queryProps
-  );
+  const { loading, error, data = {}, client } = useQuery(queryProps.query, {
+    ...queryProps,
+    client: realitiesApollo,
+  });
 
-  if (!params.responsibilityId && !needId) return null;
+  if (!query.respId && !needId) return null;
   if (loadingFulfills || loading) return <HappySpinner />;
   if (error) return `Error! ${error.message}`;
   if (errorFulfills) return `Error! ${errorFulfills.message}`;

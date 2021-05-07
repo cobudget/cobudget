@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 //import { ListGroup, ListGroupItem } from "reactstrap";
 import { List, ListItem } from "@material-ui/core";
 import _ from "lodash";
+import { useRouter } from "next/router";
 //import colors from "lib/realities/colors";
 import RealizersMissingIcon from "./RealizersMissingIcon";
 
@@ -35,6 +36,7 @@ const ResponsibilitiesList = ({
 }) => {
   //const history = useHistory();
   //const { orgSlug } = useParams();
+  const router = useRouter();
 
   useEffect(() => subscribeToResponsibilitiesEvents(), [
     subscribeToResponsibilitiesEvents,
@@ -57,9 +59,7 @@ const ResponsibilitiesList = ({
           button
           key={responsibility.nodeId}
           active={responsibility.nodeId === selectedResponsibilityId}
-          onClick={
-            () => null /*history.push(`/${orgSlug}/${responsibility.nodeId}`)*/
-          }
+          onClick={() => router.push(`/realities/${responsibility.nodeId}`)}
         >
           {responsibility.title}
           {renderMissingRealizerIcon(responsibility)}
