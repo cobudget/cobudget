@@ -7,6 +7,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 //import { withRouter } from "react-router-dom";
 import { FaUnlink } from "react-icons/fa";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import InfoForm from "./InfoForm";
 
 const ADD_RESP_HAS_DELIBERATION = gql`
@@ -33,7 +34,10 @@ const InvalidUrlText = styled.span`
 `;
 
 const AddDeliberation = ({ nodeId }) => {
-  const [createDeliberation] = useMutation(ADD_RESP_HAS_DELIBERATION);
+  const realitiesApollo = getRealitiesApollo();
+  const [createDeliberation] = useMutation(ADD_RESP_HAS_DELIBERATION, {
+    client: realitiesApollo,
+  });
 
   return (
     <FormGroup>

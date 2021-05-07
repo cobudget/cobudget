@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useQuery } from "@apollo/client";
 import { Card, CardBody } from "reactstrap";
 import HappySpinner from "components/HappySpinner";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import withDebouncedProp from "./withDebouncedProp";
 import TypeaheadResults from "./TypeaheadResults";
 
@@ -29,7 +30,9 @@ const TypeaheadResultsContainer = withDebouncedProp(
     searchQuery,
     queryDataToResultsArray,
   }) => {
+    const realitiesApollo = getRealitiesApollo();
     const { loading, error, data } = useQuery(searchQuery, {
+      client: realitiesApollo,
       variables: { term: inputValue },
       fetchPolicy: "no-cache",
     });

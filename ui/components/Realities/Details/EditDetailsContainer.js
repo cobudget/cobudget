@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
 import * as yup from "yup";
 import { Formik } from "formik";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import EditDetailsForm from "./EditDetailsForm";
 
 const createEditDetailsMutation = (nodeType, isResp) => gql`
@@ -42,8 +43,10 @@ const createEditDetailsMutation = (nodeType, isResp) => gql`
 `;
 
 const EditDetailsContainer = ({ node, isResp, stopEdit }) => {
+  const realitiesApollo = getRealitiesApollo();
   const [updateNode] = useMutation(
-    createEditDetailsMutation(node.__typename, isResp)
+    createEditDetailsMutation(node.__typename, isResp),
+    { client: realitiesApollo }
   );
 
   return (

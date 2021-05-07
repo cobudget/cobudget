@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { ListGroupItem, Button, FormGroup, Label } from "reactstrap";
 //import { useHistory, useParams } from "react-router-dom";
 
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import { GET_RESPONSIBILITIES } from "lib/realities/queries";
 import TypeaheadInput from "./TypeaheadInput";
 import TypeBadge from "./TypeBadge";
@@ -32,10 +33,10 @@ const CHANGE_FULFILLS = gql`
 `;
 
 const ChangeFulfills = ({ node }) => {
-  //const history = useHistory();
-  //const { orgSlug } = useParams();
+  const realitiesApollo = getRealitiesApollo();
   const [editing, setEditing] = useState(false);
   const [changeOwner] = useMutation(CHANGE_FULFILLS, {
+    client: realitiesApollo,
     update: (cache, { data: { changeFulfills } }) => {
       const { responsibilities } = cache.readQuery({
         query: GET_RESPONSIBILITIES,

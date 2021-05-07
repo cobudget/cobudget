@@ -1,8 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
-//import { withRouter } from "react-router-dom";
 import { Button } from "reactstrap";
+import { useRouter } from "next/router";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
 const REMOVE_DEPENDENCY = gql`
   mutation RemoveDependency_removeResponsibilityDependsOnResponsibilitiesMutation(
@@ -25,9 +26,11 @@ const REMOVE_DEPENDENCY = gql`
 `;
 
 const RemoveDependency = ({ nodeId }) => {
-  //TODO
-  const params = { responsibilityId: null, needId: null };
-  const [removeDependency, { loading }] = useMutation(REMOVE_DEPENDENCY);
+  const router = useRouter();
+  const realitiesApollo = getRealitiesApollo();
+  const [removeDependency, { loading }] = useMutation(REMOVE_DEPENDENCY, {
+    client: realitiesApollo,
+  });
 
   return (
     <Button
@@ -39,7 +42,7 @@ const RemoveDependency = ({ nodeId }) => {
         removeDependency({
           variables: {
             from: {
-              nodeId: params.responsibilityId || params.needId,
+              nodeId: router.query.responsibilityId || router.query.needId,
             },
             to: { nodeId },
           },

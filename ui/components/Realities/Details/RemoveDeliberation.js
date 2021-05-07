@@ -1,8 +1,8 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
-//import { withRouter } from "react-router-dom";
 import { Button } from "reactstrap";
+import { useRouter } from "next/router";
+import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
 const REMOVE_RESP_HAS_DELIBERATION = gql`
   mutation RemoveDeliberation_removeRespHasDeliberationMutation(
@@ -21,11 +21,12 @@ const REMOVE_RESP_HAS_DELIBERATION = gql`
 `;
 
 const RemoveDeliberation = ({ url }) => {
-  // TODO
-  const params = { responsibilityId: null };
-  const [removeDeliberation, { loading }] = useMutation(
-    REMOVE_RESP_HAS_DELIBERATION
-  );
+  const router = useRouter();
+  const realitiesApollo = getRealitiesApollo();
+  const [
+    removeDeliberation,
+    { loading },
+  ] = useMutation(REMOVE_RESP_HAS_DELIBERATION, { client: realitiesApollo });
 
   return (
     <Button
@@ -36,7 +37,7 @@ const RemoveDeliberation = ({ url }) => {
         e.stopPropagation();
         removeDeliberation({
           variables: {
-            from: { nodeId: params.responsibilityId },
+            from: { nodeId: router.query.respId },
             to: { url },
           },
         });
@@ -45,22 +46,6 @@ const RemoveDeliberation = ({ url }) => {
       Remove
     </Button>
   );
-};
-
-RemoveDeliberation.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      responsibilityId: PropTypes.string,
-    }),
-  }),
-};
-
-RemoveDeliberation.defaultProps = {
-  match: {
-    params: {
-      responsibilityId: undefined,
-    },
-  },
 };
 
 export default RemoveDeliberation;
