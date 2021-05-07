@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useQuery } from "@apollo/client";
-//import { useParams } from "react-router-dom";
+import { useRouter } from "next/router";
 import { GET_RESPONSIBILITIES, CACHE_QUERY } from "lib/realities/queries";
 import {
   REALITIES_CREATE_SUBSCRIPTION,
@@ -15,8 +15,7 @@ import ResponsibilitiesList from "./ResponsibilitiesList";
 
 const ResponsibilitiesContainer = ({ needId }) => {
   const realitiesApollo = getRealitiesApollo();
-  //const params = useParams();
-  const params = { responsibilityId: null };
+  const router = useRouter();
   const { data: localData = {} } = useQuery(CACHE_QUERY, {
     client: realitiesApollo,
   });
@@ -41,7 +40,7 @@ const ResponsibilitiesContainer = ({ needId }) => {
         return (
           <ResponsibilitiesList
             responsibilities={data.responsibilities}
-            selectedResponsibilityId={params.responsibilityId}
+            selectedRespId={router.query.respId}
             subscribeToResponsibilitiesEvents={() => {
               const unsubscribes = [
                 subscribeToMore({

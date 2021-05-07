@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 //import styled from "styled-components";
 //import { useHistory, useParams } from "react-router-dom";
 //import { ListGroup, ListGroupItem } from "reactstrap";
-import { List, ListItem } from "@material-ui/core";
+import { List, ListItem, makeStyles } from "@material-ui/core";
 import _ from "lodash";
 import { useRouter } from "next/router";
-//import colors from "lib/realities/colors";
+import colors from "lib/realities/colors";
 import RealizersMissingIcon from "./RealizersMissingIcon";
 
 //const ResponsibilitiesListGroupItem = styled(ListGroupItem)`
@@ -22,6 +22,15 @@ import RealizersMissingIcon from "./RealizersMissingIcon";
 //  }
 //`;
 
+const useStyles = makeStyles({
+  item: {
+    "background-color": ({ active }) => (active ? colors.responsibility : ""),
+    border: ({ active }) =>
+      active ? `${colors.responsibility} 1px solid` : "",
+    color: ({ active }) => (active ? "white" : ""),
+  },
+});
+
 const renderMissingRealizerIcon = (responsibility) => {
   if (!responsibility.realizer) {
     return <RealizersMissingIcon />;
@@ -29,15 +38,30 @@ const renderMissingRealizerIcon = (responsibility) => {
   return "";
 };
 
+const RespItem = ({ resp, selectedRespId }) => {
+  const router = useRouter();
+
+  const classes = useStyles({
+    active: resp.nodeId === selectedRespId,
+  });
+
+  return (
+    <ListItem
+      button
+      onClick={() => router.push(`/realities/${resp.nodeId}`)}
+      className={classes.item}
+    >
+      {resp.title}
+      {renderMissingRealizerIcon(resp)}
+    </ListItem>
+  );
+};
+
 const ResponsibilitiesList = ({
-  selectedResponsibilityId,
+  selectedRespId,
   responsibilities,
   subscribeToResponsibilitiesEvents,
 }) => {
-  //const history = useHistory();
-  //const { orgSlug } = useParams();
-  const router = useRouter();
-
   useEffect(() => subscribeToResponsibilitiesEvents(), [
     subscribeToResponsibilitiesEvents,
   ]);
@@ -52,18 +76,15 @@ const ResponsibilitiesList = ({
     ],
     ["asc"]
   );
+
   return (
     <List disablePadding>
-      {sortedResponsibilities.map((responsibility) => (
-        <ListItem
-          button
-          key={responsibility.nodeId}
-          active={responsibility.nodeId === selectedResponsibilityId}
-          onClick={() => router.push(`/realities/${responsibility.nodeId}`)}
-        >
-          {responsibility.title}
-          {renderMissingRealizerIcon(responsibility)}
-        </ListItem>
+      {sortedResponsibilities.map((resp) => (
+        <RespItem
+          key={resp.nodeId}
+          resp={resp}
+          selectedRespId={selectedRespId}
+        />
       ))}
     </List>
   );
@@ -77,12 +98,12 @@ ResponsibilitiesList.propTypes = {
       title: PropTypes.string,
     })
   ),
-  selectedResponsibilityId: PropTypes.string,
+  selectedRespId: PropTypes.string,
 };
 
 ResponsibilitiesList.defaultProps = {
   responsibilities: [],
-  selectedResponsibilityId: undefined,
+  selectedRespId: undefined,
 };
 
 export default ResponsibilitiesList;

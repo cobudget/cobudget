@@ -57,11 +57,6 @@ const NeedsListItem = ({
     active: isHighlighted || router.query.needId === need.nodeId,
   });
 
-  console.log("ishigh", isHighlighted);
-  console.log("routerneedId", router.query.needId);
-  console.log("neednodeId", need.nodeId);
-  console.log("filledin", router.query.needId === need.nodeId);
-  console.log("active", isHighlighted || router.query.needId === need.nodeId);
   return (
     <>
       <ListItem
