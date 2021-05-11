@@ -687,6 +687,7 @@ const resolvers = {
       // doc = { ...doc, ...customField };
       doc.name = customField.name;
       doc.type = customField.type;
+      doc.limit = customField.limit;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
       doc.isShownOnFrontPage = customField.isShownOnFrontPage;

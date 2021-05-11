@@ -45,6 +45,9 @@ const EventSchema = new Schema({
         default: "TEXT",
         required: true,
       },
+      limit : {
+        type: Number
+      },
       isRequired: { type: Boolean, required: true },
       position: {
         type: Number,

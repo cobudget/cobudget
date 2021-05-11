@@ -465,6 +465,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     position: Float!
     isShownOnFrontPage: Boolean
@@ -475,6 +476,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     isShownOnFrontPage: Boolean
     createdAt: Date

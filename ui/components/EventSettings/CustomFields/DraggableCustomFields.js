@@ -15,6 +15,7 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         name
         description
         type
+        limit
         isRequired
         position
         isShownOnFrontPage
@@ -41,6 +42,7 @@ const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
         name
         description
         type
+        limit
         isRequired
         position
         isShownOnFrontPage

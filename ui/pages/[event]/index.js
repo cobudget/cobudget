@@ -31,6 +31,7 @@ export const DREAMS_QUERY = gql`
           id
           name
           type
+          limit
           description
           isRequired
           position

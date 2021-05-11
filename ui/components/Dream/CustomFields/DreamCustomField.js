@@ -23,6 +23,7 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
           id
           name
           type
+          limit
           description
           position
           isRequired
@@ -44,6 +45,7 @@ const DreamCustomField = ({
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
   const { handleSubmit, register, errors } = useForm();
+  const [inputValue, setInputValue] = useState(defaultValue ?? "");
   const [editCustomFieldMutation, { loading }] = useMutation(
     EDIT_DREAM_CUSTOM_FIELD_MUTATION,
     {
@@ -89,6 +91,11 @@ const DreamCustomField = ({
                 inputRef={register({
                   required: defaultCustomField.isRequired ? "Required" : null,
                 })}
+                inputProps={{
+                  maxLength: defaultCustomField.limit,
+                  value: inputValue,
+                  onChange: (e) => setInputValue(e.target.value),
+                }}
               />
             ) : defaultCustomField.type === "BOOLEAN" ? (
               <SelectInput
@@ -105,7 +112,10 @@ const DreamCustomField = ({
             ) : null}
           </div>
         </div>
-        <div className="flex justify-end my-4">
+        <div className="flex justify-between items-center mb-4">
+        <div className="text-sm text-gray-600 font-medium pl-4">
+            {defaultCustomField.limit ? String(defaultCustomField.limit - inputValue.length) + " characters remaining." : ""}
+          </div>
           <div className="flex">
             <Button
               className="mr-2"
