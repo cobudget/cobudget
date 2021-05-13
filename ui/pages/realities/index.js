@@ -1,7 +1,9 @@
 import Realities from "components/Realities";
 
-const RealitiesPage = ({ currentUser }) => {
-  return <Realities currentUser={currentUser} />;
+const RealitiesPage = ({ currentOrgMember, currentUser }) => {
+  return (
+    <Realities currentOrgMember={currentOrgMember} currentUser={currentUser} />
+  );
 };
 
 export default RealitiesPage;

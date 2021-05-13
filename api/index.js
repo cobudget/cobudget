@@ -23,7 +23,7 @@ const {
 const Keycloak = require("keycloak-connect");
 const { KeycloakContext } = require("keycloak-connect-graphql");
 
-const subscribers = require('./subscribers/index');
+const subscribers = require("./subscribers/index");
 
 const app = express();
 const keycloak = new Keycloak(
@@ -45,7 +45,7 @@ app.use("/graphql", keycloak.middleware());
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
-  subscriptions: { path: '/subscriptions' },
+  subscriptions: { path: "/subscriptions" },
   context: async ({ req }) => {
     let kauth;
     try {
@@ -133,12 +133,16 @@ appWithSockets.listen(port, () => {
     {
       execute,
       subscribe,
-      schema: makeExecutableSchema({ typeDefs: schema, resolvers })
+      schema: makeExecutableSchema({ typeDefs: schema, resolvers }),
     },
     { server: appWithSockets, path: appWithSockets.subscriptionsPath }
-  )
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
-  console.log(`🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`)
+  );
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
+  console.log(
+    `🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`
+  );
 });
 
 // module.exports = cors((req, res) => {
