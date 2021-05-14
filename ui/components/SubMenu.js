@@ -5,7 +5,7 @@ const orgItems = ({ currentOrgMember }) => {
   console.log({ currentOrgMember });
   return [
     { label: "Overview", href: "/" },
-    // { label: "Realities", href: "/realities", admin: true },
+    // { label: "Realities", href: "/realities" },
     { label: "Members", href: "/members", admin: true },
     { label: "Settings", href: "/settings", admin: true },
   ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));

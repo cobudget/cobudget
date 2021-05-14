@@ -1,6 +1,5 @@
 import React from "react";
 //import styled from "styled-components";
-import { Col, Container, Row } from "reactstrap";
 import HappySpinner from "components/HappySpinner";
 import SubMenu from "components/SubMenu";
 import NeedsContainer from "components/Realities/NeedsContainer";
@@ -15,22 +14,22 @@ const RealitiesHome = ({ currentOrgMember, currentUser }) => (
   <>
     <SubMenu currentOrgMember={currentOrgMember} />
     <div className="page">
-      <Container fluid>
+      <div className="md:container md:mx-auto">
         {/*<SearchRow className="d-md-none">
-      <Col>
-        <Search />
-      </Col>
-    </SearchRow>*/}
-        <Row>
-          <Col md="6" lg={{ size: 4, offset: 1 }}>
-            <NeedsContainer currentUser={currentUser} />
+          <Col>
+            <Search />
           </Col>
-          <Col md="6">
+        </SearchRow>*/}
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-full md:col-span-6 lg:col-span-4 lg:col-start-2">
+            <NeedsContainer currentUser={currentUser} />
+          </div>
+          <div className="col-span-full md:col-span-6">
             <DetailViewContainer currentUser={currentUser} viewResp={false} />
             <DetailViewContainer currentUser={currentUser} viewResp />
-          </Col>
-        </Row>
-      </Container>
+          </div>
+        </div>
+      </div>
     </div>
   </>
 );
