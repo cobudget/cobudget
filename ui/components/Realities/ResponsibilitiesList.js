@@ -24,7 +24,12 @@ import RealizersMissingIcon from "./RealizersMissingIcon";
 
 const useStyles = makeStyles({
   item: {
-    "background-color": ({ active }) => (active ? colors.responsibility : ""),
+    "background-color": ({ active }) =>
+      active ? `${colors.responsibility}` : "",
+    "&:hover": {
+      "background-color": ({ active }) =>
+        active ? `${colors.responsibility}` : "",
+    },
     border: ({ active }) =>
       active ? `${colors.responsibility} 1px solid` : "",
     color: ({ active }) => (active ? "white" : ""),

@@ -29,6 +29,9 @@ const CollapseWrapper = styled.div`
 const useStyles = makeStyles({
   list: {
     "background-color": ({ filledin }) => (filledin ? colors.need : ""),
+    "&:hover": {
+      "background-color": ({ filledin }) => (filledin ? colors.need : ""),
+    },
     border: ({ active }) => (active ? `${colors.need} 1px solid` : ""),
     color: ({ filledin, active }) =>
       //filledin ? "white" : active ? colors.need : "",
