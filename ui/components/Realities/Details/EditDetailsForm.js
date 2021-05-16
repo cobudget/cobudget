@@ -121,7 +121,7 @@ const EditDetailsForm = ({
       >
         Save
       </Button>
-      <Button color="link" onClick={cancel} disabled={isSubmitting}>
+      <Button onClick={cancel} disabled={isSubmitting}>
         Cancel
       </Button>
     </div>

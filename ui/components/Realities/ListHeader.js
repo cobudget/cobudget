@@ -7,23 +7,6 @@ import { FaPlus } from "react-icons/fa";
 import { CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
-const StyledHeader = styled(Card)`
-  color: white;
-  flex-direction: row;
-  font-size: 1.25rem;
-  justify-content: start;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem 0.5rem 0.5rem 0.5rem;
-`;
-
-const AddButton = styled(Button)`
-  display: grid;
-  grid-auto-flow: column;
-  align-items: center;
-  grid-column-gap: 0.3rem;
-  margin-right: 0.5rem;
-`;
-
 const ListHeaderText = styled.span`
   line-height: 2.1rem;
 `;
@@ -35,43 +18,43 @@ const ListHeader = ({ needIsExpanded }) => {
   });
 
   return (
-    <StyledHeader>
-      <AddButton
-        onClick={() =>
-          client.writeQuery({
-            query: CACHE_QUERY,
-            data: {
-              showCreateNeed: !localData.showCreateNeed,
-              showCreateResponsibility: false,
-            },
-          })
-        }
-        color="need"
-        data-cy="list-header-create-need-btn"
-      >
-        <ListHeaderText>Need</ListHeaderText>
-        <FaPlus />
-      </AddButton>
-      <AddButton
-        style={{
-          visibility: needIsExpanded ? "" : "hidden",
-        }}
-        onClick={() =>
-          client.writeQuery({
-            query: CACHE_QUERY,
-            data: {
-              showCreateResponsibility: !localData.showCreateResponsibility,
-              showCreateNeed: false,
-            },
-          })
-        }
-        color="responsibility"
-        data-cy="list-header-create-resp-btn"
-      >
-        <ListHeaderText>Responsibility</ListHeaderText>
-        <FaPlus />
-      </AddButton>
-    </StyledHeader>
+    <Card>
+      <div className="m-2 space-x-2">
+        <Button
+          onClick={() =>
+            client.writeQuery({
+              query: CACHE_QUERY,
+              data: {
+                showCreateNeed: !localData.showCreateNeed,
+                showCreateResponsibility: false,
+              },
+            })
+          }
+          data-cy="list-header-create-need-btn"
+        >
+          <ListHeaderText>Need</ListHeaderText>
+          <FaPlus />
+        </Button>
+        <Button
+          style={{
+            visibility: needIsExpanded ? "" : "hidden",
+          }}
+          onClick={() =>
+            client.writeQuery({
+              query: CACHE_QUERY,
+              data: {
+                showCreateResponsibility: !localData.showCreateResponsibility,
+                showCreateNeed: false,
+              },
+            })
+          }
+          data-cy="list-header-create-resp-btn"
+        >
+          <ListHeaderText>Responsibility</ListHeaderText>
+          <FaPlus />
+        </Button>
+      </div>
+    </Card>
   );
 };
 

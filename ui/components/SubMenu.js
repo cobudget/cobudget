@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 const orgItems = ({ currentOrgMember }) => {
-  console.log({ currentOrgMember });
   return [
     { label: "Overview", href: "/" },
     // { label: "Realities", href: "/realities" },

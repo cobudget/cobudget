@@ -156,7 +156,7 @@ const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
       node={node}
       fullscreen={fullscreen}
       showEdit={showEdit}
-      isLoggedIn={currentUser}
+      isLoggedIn={!!currentUser}
       startEdit={() => setEdit(true)}
       stopEdit={() => setEdit(false)}
       onClickFullscreen={onClickFullscreen}

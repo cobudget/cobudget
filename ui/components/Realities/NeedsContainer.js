@@ -45,7 +45,7 @@ const NeedsContainer = ({ currentUser }) => {
   const [lastRespId, setLastRespId] = useState(undefined);
 
   return (
-    <div data-cy="needs-container">
+    <div data-cy="needs-container" className="space-y-2">
       {currentUser && <ListHeader needIsExpanded={!!expandedNeedId} />}
       {localData.showCreateNeed && <CreateNeed />}
       {(() => {

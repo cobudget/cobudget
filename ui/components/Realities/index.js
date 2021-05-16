@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 //import styled from "styled-components";
 import HappySpinner from "components/HappySpinner";
 import SubMenu from "components/SubMenu";
@@ -35,7 +35,10 @@ const RealitiesHome = ({ currentOrgMember, currentUser }) => (
 );
 
 const Realities = ({ currentOrgMember, currentUser }) => {
-  const onServer = typeof window === "undefined";
+  const [onServer, setOnServer] = useState(true);
+  useEffect(() => {
+    setOnServer(false);
+  }, []);
   // until we've fixed ssr for the realities apollo client we'll just skip ssr here
   if (onServer) return <HappySpinner />;
 
