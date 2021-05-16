@@ -12,6 +12,7 @@ import {
   Label,
   Row,
 } from "reactstrap";
+import { TextField } from "@material-ui/core";
 import TypeaheadInput from "./TypeaheadInput";
 
 function personToString(person) {
@@ -45,10 +46,11 @@ const EditDetailsForm = ({
   isSubmitting,
   cancel,
 }) => (
-  <StyledForm onSubmit={handleSubmit} noValidate>
+  <form onSubmit={handleSubmit} className="space-y-4 pt-4">
     <FormGroup>
-      <Label for="editDetailsTitle">Title</Label>
-      <Input
+      <TextField
+        label="Title"
+        variant="outlined"
         name="title"
         id="editDetailsTitle"
         value={values.title}
@@ -59,11 +61,11 @@ const EditDetailsForm = ({
       />
       <FormFeedback>{touched.title && errors.title}</FormFeedback>
     </FormGroup>
-    <Row>
-      <Col md={isResp ? "6" : "12"}>
+    <div className="grid grid-cols-2 gap-3">
+      <div className={`col-span-full ${isResp ? "md:col-span-1" : ""}`}>
         <FormGroup>
-          <Label for="editDetailsGuide">Guide</Label>
           <TypeaheadInput
+            label="Guide"
             name="guide"
             id="editDetailsGuide"
             selectedItem={values.guide}
@@ -81,11 +83,11 @@ const EditDetailsForm = ({
             {touched.guide && errors.guide}
           </FormFeedback>
         </FormGroup>
-      </Col>
+      </div>
       {isResp && (
-        <Col md="6">
-          <Label for="editDetailsRealizer">Realizer</Label>
+        <div className="col-span-full md:col-span-1">
           <TypeaheadInput
+            label="Realizer"
             name="realizer"
             id="editDetailsRealizer"
             selectedItem={values.realizer}
@@ -102,9 +104,9 @@ const EditDetailsForm = ({
           >
             {touched.realizer && errors.realizer}
           </FormFeedback>
-        </Col>
+        </div>
       )}
-    </Row>
+    </div>
     <FormGroup>
       <Label for="editDetailsDescription">Description</Label>
       <Input
@@ -120,13 +122,15 @@ const EditDetailsForm = ({
       />
       <FormFeedback>{touched.description && errors.description}</FormFeedback>
     </FormGroup>
-    <Button type="submit" color="primary" disabled={isSubmitting}>
-      Save
-    </Button>
-    <Button color="link" onClick={cancel} disabled={isSubmitting}>
-      Cancel
-    </Button>
-  </StyledForm>
+    <div>
+      <Button type="submit" color="primary" disabled={isSubmitting}>
+        Save
+      </Button>
+      <Button color="link" onClick={cancel} disabled={isSubmitting}>
+        Cancel
+      </Button>
+    </div>
+  </form>
 );
 
 EditDetailsForm.propTypes = {

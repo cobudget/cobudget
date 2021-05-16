@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import Downshift from "downshift";
-import { Input } from "reactstrap";
+import { TextField } from "@material-ui/core";
 import TypeaheadResultsContainer from "./TypeaheadResultsContainer";
 
 const Wrapper = styled.span`
@@ -11,6 +11,7 @@ const Wrapper = styled.span`
 `;
 
 const TypeaheadInput = ({
+  label,
   name,
   id,
   placeholder,
@@ -41,7 +42,9 @@ const TypeaheadInput = ({
       clearSelection,
     }) => (
       <Wrapper {...getRootProps({ refKey: "innerRef" })}>
-        <Input
+        <TextField
+          label={label}
+          variant="outlined"
           {...getInputProps({
             name,
             id,
