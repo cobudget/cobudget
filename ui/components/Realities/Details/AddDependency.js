@@ -35,8 +35,8 @@ const AddDependency = ({ nodeType, nodeId }) => {
 
   return (
     <FormGroup>
-      <Label for="editDetailsTitle">Add dependency</Label>
       <TypeaheadInput
+        label="Add dependency"
         placeholder="Search responsibilities"
         disabled={loadingAddDependency}
         searchQuery={gql`

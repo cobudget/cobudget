@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { gql, useMutation } from "@apollo/client";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { ListGroupItem, Button, FormGroup, Label } from "reactstrap";
-//import { useHistory, useParams } from "react-router-dom";
+import { Button, ButtonGroup } from "@material-ui/core";
+import { FormGroup, Label } from "reactstrap";
+import { useRouter } from "next/router";
 
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import { GET_RESPONSIBILITIES } from "lib/realities/queries";
@@ -12,12 +13,6 @@ import TypeBadge from "./TypeBadge";
 
 const StyledFormGroup = styled(FormGroup)`
   margin-bottom: 2em;
-`;
-
-const ButtonWrapper = styled.span`
-  position: absolute;
-  top: 0.54em;
-  right: 0.54em;
 `;
 
 const CHANGE_FULFILLS = gql`
@@ -33,6 +28,7 @@ const CHANGE_FULFILLS = gql`
 `;
 
 const ChangeFulfills = ({ node }) => {
+  const router = useRouter();
   const realitiesApollo = getRealitiesApollo();
   const [editing, setEditing] = useState(false);
   const [changeOwner] = useMutation(CHANGE_FULFILLS, {
@@ -98,29 +94,25 @@ const ChangeFulfills = ({ node }) => {
             }}
           />
         ) : (
-          <ListGroupItem
-            onClick={
-              () => null
-              //TODO
-              //history.push(`/${orgSlug}/need/${node.fulfills.nodeId}`)
-            }
-            action
-          >
-            <TypeBadge nodeType="Need" />
-            {node.fulfills.title}
-            <ButtonWrapper>
-              <Button
-                size="sm"
-                color="primary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleEdit();
-                }}
-              >
-                Change
-              </Button>
-            </ButtonWrapper>
-          </ListGroupItem>
+          <ButtonGroup>
+            <Button
+              onClick={() =>
+                router.push(`/realities/need/${node.fulfills.nodeId}`)
+              }
+            >
+              <TypeBadge nodeType="Need" />
+              {node.fulfills.title}
+            </Button>
+            <Button
+              color="primary"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleEdit();
+              }}
+            >
+              Change
+            </Button>
+          </ButtonGroup>
         )}
       </div>
     </StyledFormGroup>

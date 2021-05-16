@@ -1,16 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { gql } from "@apollo/client";
-import styled from "styled-components";
-import {
-  Button,
-  Form,
-  FormFeedback,
-  FormGroup,
-  Input,
-  Label,
-} from "reactstrap";
-import { TextField } from "@material-ui/core";
+import { FormFeedback, FormGroup } from "reactstrap";
+import { TextField, Button } from "@material-ui/core";
 import TypeaheadInput from "./TypeaheadInput";
 
 function personToString(person) {
@@ -121,7 +113,12 @@ const EditDetailsForm = ({
       <FormFeedback>{touched.description && errors.description}</FormFeedback>
     </FormGroup>
     <div>
-      <Button type="submit" color="primary" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        disabled={isSubmitting}
+      >
         Save
       </Button>
       <Button color="link" onClick={cancel} disabled={isSubmitting}>
