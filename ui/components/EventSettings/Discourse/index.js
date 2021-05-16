@@ -22,7 +22,7 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-export default ({ event, handleClose }) => {
+export default ({ event }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
     variables: { eventId: event.id },
   });
@@ -34,9 +34,7 @@ export default ({ event, handleClose }) => {
   const {
     handleSubmit,
     register,
-    setValue,
     formState: { isDirty },
-    errors,
   } = useForm();
 
   return (
@@ -54,7 +52,7 @@ export default ({ event, handleClose }) => {
               discourseCategoryId: parseInt(variables.discourseCategoryId),
             },
           })
-            .then(() => handleClose())
+            //.then(() => handleClose())
             .catch((error) => alert(error.message));
         })}
       >
@@ -76,14 +74,6 @@ export default ({ event, handleClose }) => {
         )}
 
         <div className="mt-2 flex justify-end">
-          <Button
-            color={event.color}
-            onClick={handleClose}
-            variant="secondary"
-            className="mr-2"
-          >
-            Close
-          </Button>
           <Button
             color={event.color}
             type="submit"

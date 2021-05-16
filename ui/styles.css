@@ -9,7 +9,11 @@
 }
 
 html {
-  @apply bg-gray-100;
+  @apply bg-gray-50;
+}
+
+.page {
+  @apply py-5 px-2 md:px-4 max-w-screen-xl mx-auto;
 }
 
 .expand-gradient {
@@ -19,15 +23,12 @@ html {
   );
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4,
-.markdown h5 {
-  @apply mb-2;
+.markdown {
+  @apply space-y-2;
 }
+
 .markdown h1 {
-  @apply text-xl font-semibold;
+  @apply text-2xl font-semibold;
 }
 
 .markdown h2 {
@@ -41,11 +42,11 @@ h5 {
 }
 
 .markdown hr {
-  @apply m-6;
+  @apply mt-6 mb-6 !important;
 }
 
 .markdown p {
-  @apply text-gray-900 my-2;
+  @apply text-gray-900;
 }
 
 .markdown a {
@@ -53,7 +54,7 @@ h5 {
 }
 
 .markdown li {
-  @apply list-inside mb-2;
+  @apply list-inside;
 }
 .markdown ul {
   @apply list-disc;
@@ -63,11 +64,11 @@ h5 {
 }
 
 .markdown blockquote {
-  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2;
 }
 
 .markdown aside {
-  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2 my-2;
+  @apply bg-gray-100 border-l-4 border-gray-200 px-4 py-2;
 }
 
 .markdown aside blockquote {
@@ -75,7 +76,7 @@ h5 {
 }
 
 .markdown aside .title {
-  @apply text-sm font-medium text-black mt-1;
+  @apply text-sm font-medium text-black mt-1 !important;
 }
 
 .markdown img.emoji {

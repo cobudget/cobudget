@@ -1,6 +1,7 @@
-import Members from "components/EventMembers";
+import EventSettings from "components/EventSettings";
 import SubMenu from "components/SubMenu";
-const EventMembersPage = ({ event, currentOrgMember }) => {
+
+const EventSettingsPage = ({ event, currentOrgMember, currentOrg }) => {
   const isAdmin =
     currentOrgMember?.currentEventMembership?.isAdmin ||
     currentOrgMember?.isOrgAdmin;
@@ -8,9 +9,13 @@ const EventMembersPage = ({ event, currentOrgMember }) => {
   return (
     <div className="flex-1">
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
-      <Members event={event} />
+      <EventSettings
+        event={event}
+        currentOrg={currentOrg}
+        currentOrgMember={currentOrgMember}
+      />
     </div>
   );
 };
 
-export default EventMembersPage;
+export default EventSettingsPage;

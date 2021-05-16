@@ -15,9 +15,7 @@ const EDIT_EVENT = gql`
     $title: String
     $archived: Boolean
     $registrationPolicy: RegistrationPolicy
-    $info: String
     $color: String
-    $about: String
   ) {
     editEvent(
       eventId: $eventId
@@ -25,31 +23,36 @@ const EDIT_EVENT = gql`
       title: $title
       archived: $archived
       registrationPolicy: $registrationPolicy
-      info: $info
       color: $color
-      about: $about
     ) {
       id
       title
       slug
       archived
       registrationPolicy
-      info
       color
-      about
     }
   }
 `;
 
 export default function GeneralSettings({
   event,
+  currentOrg,
   currentOrgMember,
-  handleClose,
 }) {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
-  const { handleSubmit, register, setValue } = useForm();
+  const {
+    handleSubmit,
+    register,
+    setValue,
+    formState: { isDirty },
+  } = useForm();
+
+  const startUrl = currentOrg.customDomain
+    ? currentOrg.customDomain + "/"
+    : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}/`;
 
   return (
     <div className="px-6">
@@ -68,7 +71,7 @@ export default function GeneralSettings({
               color,
             },
           })
-            .then(() => handleClose())
+            .then(() => alert("Settings updated!"))
             .catch((error) => alert(error.message));
         })}
       >
@@ -83,10 +86,11 @@ export default function GeneralSettings({
 
         <TextField
           name="slug"
-          label="Slug"
+          label="URL"
           placeholder="Slug"
           defaultValue={event.slug}
           inputRef={register}
+          startAdornment={startUrl}
           inputProps={{
             onBlur: (e) => {
               setValue("slug", slugify(e.target.value));
@@ -109,26 +113,6 @@ export default function GeneralSettings({
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
 
-        <TextField
-          name="info"
-          label="Homepage message (markdown allowed)"
-          defaultValue={event.info}
-          multiline
-          rows={5}
-          inputRef={register}
-          className="my-4"
-        />
-
-        <TextField
-          name="about"
-          label="About (markdown allowed)"
-          defaultValue={event.about}
-          multiline
-          rows={5}
-          inputRef={register}
-          className="my-4"
-        />
-
         {currentOrgMember.isOrgAdmin && (
           <SelectField
             name="archived"
@@ -141,7 +125,7 @@ export default function GeneralSettings({
             <option value="false">No</option>
           </SelectField>
         )}
-        
+
         {currentOrgMember.isOrgAdmin && (
           <>
             <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
@@ -158,16 +142,8 @@ export default function GeneralSettings({
         <div className="mt-2 flex justify-end">
           <Button
             color={color}
-            onClick={handleClose}
-            variant="secondary"
-            className="mr-2"
-          >
-            Close
-          </Button>
-          <Button
-            color={color}
             type="submit"
-            //disabled={!(isDirty || event.color !== color)}
+            disabled={!(isDirty || event.color !== color)}
             loading={loading}
           >
             Save

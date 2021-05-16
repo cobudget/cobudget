@@ -5,8 +5,6 @@ import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
-import NewDreamModal from "components/NewDreamModal";
-import OrganizationOnlyHeader from "./OrganizationOnlyHeader";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
 
@@ -41,7 +39,6 @@ const Header = ({
   router,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
     refetchQueries: ["TopLevelQuery"],
@@ -51,26 +48,19 @@ const Header = ({
     variables: { eventId: event?.id },
     refetchQueries: ["TopLevelQuery"],
   });
-
+  const color = event?.color ?? "anthracit";
   return (
-    <header
-      className={
-        (event?.color ? `bg-${event.color} shadow-md` : "") + " mb-8 w-full"
-      }
-    >
-      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4">
+    <header className={`bg-${color} shadow-md w-full`}>
+      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between py-2 sm:p-0">
           <div className="flex items-center">
-            {event ? (
-              <OrganizationAndEventHeader
-                currentOrg={currentOrg}
-                event={event}
-                currentOrgMember={currentOrgMember}
-                router={router}
-              />
-            ) : (
-              <OrganizationOnlyHeader currentOrg={currentOrg} />
-            )}
+            <OrganizationAndEventHeader
+              currentOrg={currentOrg}
+              event={event}
+              color={color}
+              currentOrgMember={currentOrgMember}
+              router={router}
+            />
           </div>
 
           <div className="sm:hidden">
@@ -78,9 +68,7 @@ const Header = ({
               onClick={() => setMenuOpen(!isMenuOpen)}
               className={
                 `p-1 my-1 block focus:outline-none rounded opacity-75 ` +
-                (event?.color
-                  ? `text-white hover:bg-${event.color}-dark focus:bg-${event.color}-dark focus:opacity-100`
-                  : "text-gray-800 hover:bg-gray-200")
+                `text-white hover:bg-${color}-dark focus:bg-${color}-dark focus:opacity-100`
               }
             >
               <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -107,7 +95,7 @@ const Header = ({
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {currentOrgMember && event && (
+                {/* {currentOrgMember && event && (
                   <>
                     <NavItem
                       href="/[event]/about"
@@ -117,19 +105,6 @@ const Header = ({
                     >
                       About
                     </NavItem>
-                    {(currentOrgMember.currentEventMembership?.isAdmin ||
-                      currentOrgMember.isOrgAdmin) && (
-                      <>
-                        <NavItem
-                          href="/[event]/members"
-                          as={`/${event.slug}/members`}
-                          currentPath={router.pathname}
-                          eventColor={event.color}
-                        >
-                          Members
-                        </NavItem>
-                      </>
-                    )}
 
                     {currentOrgMember.currentEventMembership?.isApproved &&
                       event.dreamCreationIsOpen && (
@@ -150,14 +125,9 @@ const Header = ({
                         </>
                       )}
                   </>
-                )}
+                )} */}
                 {currentOrg && (
                   <>
-                    {!event && currentOrgMember?.isOrgAdmin && (
-                      <NavItem href="/org/settings?tab=general">
-                        Org settings
-                      </NavItem>
-                    )}
                     {(!currentOrgMember ||
                       !currentOrgMember.currentEventMembership) &&
                       event &&
@@ -165,7 +135,7 @@ const Header = ({
                         currentOrgMember.isOrgAdmin) && (
                         <NavItem
                           primary
-                          eventColor={event?.color}
+                          eventColor={color}
                           onClick={() => joinEvent()}
                         >
                           {event.registrationPolicy === "REQUEST_TO_JOIN"
@@ -176,7 +146,7 @@ const Header = ({
                     {!currentOrgMember && !event && (
                       <NavItem
                         primary
-                        eventColor={event?.color}
+                        eventColor={color}
                         onClick={() => joinOrg()}
                       >
                         Join org
@@ -195,12 +165,7 @@ const Header = ({
                 </div>
               </>
             ) : (
-              <NavItem
-                href="/api/login"
-                external
-                eventColor={event?.color}
-                primary
-              >
+              <NavItem href="/api/login" external eventColor={color} primary>
                 Login or Sign up
               </NavItem>
             )}

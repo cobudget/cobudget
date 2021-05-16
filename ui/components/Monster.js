@@ -243,7 +243,7 @@ const Monster = ({ event, dream }) => {
   } else {
     items = [
       ...[
-        { type: MESSAGE, message: "Argh! Please help me review this dream!" },
+        { type: MESSAGE, message: "Please help review this dream!" },
         {
           type: MESSAGE,
           message: "Here are the guidelines that dreams need to follow:",
@@ -401,9 +401,7 @@ const Monster = ({ event, dream }) => {
             closeBubble();
             setOpen(!open);
           }}
-          className={`w-40 cursor-pointer ${
-            isAngry ? "animate-mega-wiggle" : "animate-wiggle"
-          } hover:animate-none`}
+          className={`w-40 cursor-pointer hover:animate-none`}
           src={isAngry ? "/angry-monster.gif" : "/calm-monster.gif"}
         />
       )}

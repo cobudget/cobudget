@@ -18,6 +18,7 @@ const schema = gql`
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
+    contributions(eventId: ID!): [Contribution]
   }
 
   type Mutation {
@@ -378,6 +379,31 @@ const schema = gql`
     min: Int!
     max: Int
     type: BudgetItemType!
+  }
+
+  interface Transaction {
+    id: ID!
+    event: Event!
+    eventMember: EventMember!
+    amount: Int!
+    createdAt: Date
+  }
+
+  type Contribution implements Transaction {
+    id: ID!
+    event: Event!
+    eventMember: EventMember!
+    amount: Int!
+    createdAt: Date
+    dream: Dream!
+  }
+
+  type Allocation implements Transaction {
+    id: ID!
+    event: Event!
+    eventMember: EventMember!
+    amount: Int!
+    createdAt: Date
   }
 
   # enum Visibility {

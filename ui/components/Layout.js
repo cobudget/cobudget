@@ -15,13 +15,7 @@ const Layout = ({
   return (
     <div style={{ "min-height": "100vh" }} className="flex flex-col">
       <Head>
-        <title>
-          {title
-            ? `${title} | Dreams`
-            : event
-            ? `${event.title} | Dreams`
-            : "Dreams"}
-        </title>
+        <title>{title}</title>
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
@@ -36,11 +30,11 @@ const Layout = ({
           openModal={openModal}
           router={router}
         />
-        <div className="mx-2 md:mx-4 pb-10 flex justify-center">{children}</div>
+        <div className="">{children}</div>
       </div>
 
       {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
-      <div className="space-x-2 text-sm text-center mt-auto py-10">
+      <div className="space-x-6 text-sm text-center mt-auto pt-10 pb-4 text-gray-500">
         <a
           href="https://www.iubenda.com/privacy-policy/58637640/cookie-policy"
           target="_blank"
@@ -48,7 +42,6 @@ const Layout = ({
         >
           Cookie Policy
         </a>
-        <span>|</span>
         <a
           href="https://www.iubenda.com/privacy-policy/58637640"
           target="_blank"
@@ -56,7 +49,6 @@ const Layout = ({
         >
           Privacy Policy
         </a>
-        <span>|</span>
         <a
           href="https://www.iubenda.com/terms-and-conditions/58637640"
           target="_blank"
