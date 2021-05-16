@@ -4,13 +4,11 @@ import { gql } from "@apollo/client";
 import styled from "styled-components";
 import {
   Button,
-  Col,
   Form,
   FormFeedback,
   FormGroup,
   Input,
   Label,
-  Row,
 } from "reactstrap";
 import { TextField } from "@material-ui/core";
 import TypeaheadInput from "./TypeaheadInput";
@@ -28,10 +26,6 @@ const SEARCH_PERSON = gql`
       email
     }
   }
-`;
-
-const StyledForm = styled(Form)`
-  margin-bottom: 1rem;
 `;
 
 const EditDetailsForm = ({
@@ -53,6 +47,7 @@ const EditDetailsForm = ({
         variant="outlined"
         name="title"
         id="editDetailsTitle"
+        fullWidth
         value={values.title}
         disabled={isSubmitting}
         onChange={handleChange}
@@ -108,11 +103,14 @@ const EditDetailsForm = ({
       )}
     </div>
     <FormGroup>
-      <Label for="editDetailsDescription">Description</Label>
-      <Input
+      <TextField
+        label="Description"
         name="description"
         id="editDetailsDescription"
         type="textarea"
+        multiline
+        variant="outlined"
+        fullWidth
         rows={3}
         value={values.description}
         disabled={isSubmitting}

@@ -45,6 +45,7 @@ const TypeaheadInput = ({
         <TextField
           label={label}
           variant="outlined"
+          fullWidth
           {...getInputProps({
             name,
             id,
