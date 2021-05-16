@@ -11,8 +11,12 @@ import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventSlug: String!, $textSearchTerm: String) {
-    dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
+  query Dreams($eventSlug: String!, $textSearchTerm: String, $tags: [String!]) {
+    dreams(
+      eventSlug: $eventSlug
+      textSearchTerm: $textSearchTerm
+      tags: $tags
+    ) {
       id
       description
       summary
@@ -61,12 +65,20 @@ const EventPage = ({ currentOrgMember, event, router }) => {
   //   setShowInfoBox(false);
   // };
 
+  const { tag, s } = router.query;
+  const tags = Array.isArray(tag)
+    ? tag
+    : typeof tag === "undefined"
+    ? null
+    : [tag];
+
   let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
     {
       variables: {
         eventSlug: router.query.event,
-        ...(textSearchTerm && { textSearchTerm }),
+        ...(!!s && { textSearchTerm: s }),
+        ...(tags && { tags }),
       },
     }
   );
@@ -152,12 +164,14 @@ const EventPage = ({ currentOrgMember, event, router }) => {
         <Filterbar
           filterFavorites={filterFavorites}
           toggleFilterFavorites={toggleFilterFavorites}
-          textSearchTerm={textSearchTerm}
+          textSearchTerm={s}
           setTextSearchTerm={setTextSearchTerm}
           currentOrgMember={currentOrgMember}
           customFields={event.customFields}
           filterLabels={filterLabels}
           setFilterLabels={setFilterLabels}
+          tags={tags}
+          event={event}
         />
 
         {loading ? (

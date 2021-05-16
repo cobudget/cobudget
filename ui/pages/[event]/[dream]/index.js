@@ -22,6 +22,7 @@ export const DREAM_QUERY = gql`
       fundedAt
       canceled
       canceledAt
+      tags
       raisedFlags {
         id
         comment
