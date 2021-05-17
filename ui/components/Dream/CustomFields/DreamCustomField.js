@@ -87,7 +87,7 @@ const DreamCustomField = ({
                 defaultValue={defaultValue}
                 autoFocus
                 multiline={defaultCustomField.type == "MULTILINE_TEXT"}
-                rows={4}
+                rows={10}
                 inputRef={register({
                   required: defaultCustomField.isRequired ? "Required" : null,
                 })}

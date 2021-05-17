@@ -114,7 +114,7 @@ export default ({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <h1 className="text-lg font-semibold mb-2">
-          {editing ? "Editing" : "Add"} custom field
+          {editing ? "Editing" : "Add"} question
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {

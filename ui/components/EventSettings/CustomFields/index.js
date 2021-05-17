@@ -31,7 +31,7 @@ const CustomFields = ({ event }) => {
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> Add custom question
+          <AddIcon className="h-5 w-5 mr-1" /> Add question
         </Button>
       </div>
       {(addCustomFieldModalOpen || editingCustomField) && (

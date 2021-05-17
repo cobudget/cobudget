@@ -371,7 +371,7 @@ const resolvers = {
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentOrgMember, currentOrg, models: { Event, EventMember }, eventHub }
+      { currentOrgMember, currentOrg, models: { Event, EventMember, CustomField }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organisation admin.");
@@ -393,12 +393,28 @@ const resolvers = {
         isApproved: true,
       }).save();
 
+      customField = {
+        name: "Description",
+        description: "Describe your Dream",
+        type: "MULTILINE_TEXT",
+        limit: null,
+        isRequired: false,
+        isShownOnFrontPage: false,
+      }
+
+      const position =
+        event.customFields
+          .map((cf) => cf.position)
+          .reduce((a, b) => Math.max(a, b), 1000) + 1;
+          
+      // event.customFields.push({ ...customField, position });
+
       await eventHub.publish("create-event", {
         currentOrg,
         currentOrgMember,
         event,
       });
-      return event;
+      return event.save();
     },
     editEvent: async (
       parent,
