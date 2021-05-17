@@ -2,9 +2,9 @@ import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { Card, CardBody, CardHeader } from "reactstrap";
-import { FaEdit, FaTimesCircle, FaExpand, FaBars } from "react-icons/fa";
+import { FaEdit, FaTimesCircle } from "react-icons/fa";
+import { IconButton } from "@material-ui/core";
 import colors from "lib/realities/colors";
-import IconButton from "./IconButton";
 import Dependencies from "./Dependencies";
 import Deliberations from "./Deliberations";
 import EditDetailsContainer from "./EditDetailsContainer";
@@ -25,26 +25,13 @@ const HeaderText = styled.span`
   line-height: 2.125rem;
 `;
 
-const HeaderButton = styled(IconButton)`
-  font-size: 1.25rem;
-  padding: 0 0.4rem 0.2rem 0.4rem;
-`;
-
 const Divider = styled.div`
   background-color: #ced4da;
   height: 1px;
   margin: 2rem 0;
 `;
 
-const DetailView = ({
-  node,
-  fullscreen,
-  showEdit,
-  isLoggedIn,
-  startEdit,
-  stopEdit,
-  onClickFullscreen,
-}) => {
+const DetailView = ({ node, showEdit, isLoggedIn, startEdit, stopEdit }) => {
   const isResp = node.__typename === "Responsibility";
 
   return (
@@ -52,22 +39,16 @@ const DetailView = ({
       <DetailViewCardHeader
         color={isResp ? colors.responsibility : colors.need}
       >
-        <HeaderButton
-          onClick={onClickFullscreen}
-          style={{ visibility: isResp && "hidden" }}
-        >
-          {fullscreen ? <FaBars /> : <FaExpand />}
-        </HeaderButton>
         <HeaderText>{`${node.__typename}: ${node.title}`}</HeaderText>
         <div style={{ visibility: !isLoggedIn && "hidden" }}>
           {showEdit ? (
-            <HeaderButton onClick={stopEdit}>
-              <FaTimesCircle />
-            </HeaderButton>
+            <IconButton size="small" onClick={stopEdit}>
+              <FaTimesCircle className="text-white" />
+            </IconButton>
           ) : (
-            <HeaderButton onClick={startEdit}>
-              <FaEdit />
-            </HeaderButton>
+            <IconButton size="small" onClick={startEdit}>
+              <FaEdit className="text-white" />
+            </IconButton>
           )}
         </div>
       </DetailViewCardHeader>
@@ -142,12 +123,10 @@ DetailView.propTypes = {
       })
     ),
   }),
-  fullscreen: PropTypes.bool,
   showEdit: PropTypes.bool,
   isLoggedIn: PropTypes.bool,
   startEdit: PropTypes.func,
   stopEdit: PropTypes.func,
-  onClickFullscreen: PropTypes.func,
 };
 
 DetailView.defaultProps = {
@@ -168,12 +147,10 @@ DetailView.defaultProps = {
     },
     dependsOnResponsibilities: [],
   },
-  fullscreen: false,
   showEdit: false,
   isLoggedIn: false,
   startEdit: () => null,
   stopEdit: () => null,
-  onClickFullscreen: () => null,
 };
 
 export default DetailView;

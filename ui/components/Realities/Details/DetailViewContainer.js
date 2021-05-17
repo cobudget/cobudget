@@ -63,7 +63,7 @@ const createDetailViewQuery = (nodeType) => {
 const GET_NEED = createDetailViewQuery("need");
 const GET_RESPONSIBILITY = createDetailViewQuery("responsibility");
 
-const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
+const DetailViewContainer = ({ currentUser, viewResp }) => {
   const router = useRouter();
   const { query } = router;
   const realitiesApollo = getRealitiesApollo();
@@ -129,13 +129,6 @@ const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
   if (error) return `Error! ${error.message}`;
   if (errorFulfills) return `Error! ${errorFulfills.message}`;
 
-  //const fullscreenToggleUrl = fullscreen
-  //  ? `/${params.orgSlug}/${params.responsibilityId || `need/${needId}`}`
-  //  : `/${params.orgSlug}/reality/${
-  //      params.responsibilityId || `need/${needId}`
-  //    }`;
-  const onClickFullscreen = () => null; /*history.push(fullscreenToggleUrl)*/
-
   const showEdit = viewResp
     ? data.showDetailedEditRespView
     : data.showDetailedEditNeedView;
@@ -154,23 +147,16 @@ const DetailViewContainer = ({ currentUser, fullscreen, viewResp }) => {
   return (
     <DetailView
       node={node}
-      fullscreen={fullscreen}
       showEdit={showEdit}
       isLoggedIn={!!currentUser}
       startEdit={() => setEdit(true)}
       stopEdit={() => setEdit(false)}
-      onClickFullscreen={onClickFullscreen}
     />
   );
 };
 
 DetailViewContainer.propTypes = {
-  fullscreen: PropTypes.bool,
   viewResp: PropTypes.bool.isRequired,
-};
-
-DetailViewContainer.defaultProps = {
-  fullscreen: false,
 };
 
 export default DetailViewContainer;
