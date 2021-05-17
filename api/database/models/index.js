@@ -4,7 +4,6 @@ const DreamSchema = require("./dream");
 const GrantSchema = require("./grant");
 const AllocationSchema = require("./allocation");
 const ContributionSchema = require("./contribution");
-const CustomFieldSchema = require("./customField")
 
 const {
   db: {
@@ -22,7 +21,6 @@ const getModels = (db) => {
       OrgMember: db.model("OrgMember", OrgMemberSchema),
       EventMember: db.model("EventMember", EventMemberSchema),
       Event: db.model("Event", EventSchema),
-      CustomField: db.model("CustomField", CustomFieldSchema),
       Dream: db.model("Dream", DreamSchema),
       Grant: db.model("Grant", GrantSchema),
       Allocation: db.model("Allocation", AllocationSchema),
