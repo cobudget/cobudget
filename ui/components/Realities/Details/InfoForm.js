@@ -1,17 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import styled from "styled-components";
-import { Form, FormGroup, Input } from "reactstrap";
-
-const Wrapper = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 0.5rem;
-`;
+import { TextField } from "@material-ui/core";
 
 const InfoForm = ({
+  label,
   inputName,
   placeholder,
   value,
@@ -20,28 +12,20 @@ const InfoForm = ({
   handleSubmit,
   isSubmitting,
 }) => (
-  <Wrapper>
-    <Form onSubmit={handleSubmit}>
-      <StyledFormGroup>
-        <Input
-          name={inputName}
-          type="input"
-          placeholder={placeholder}
-          value={value}
-          disabled={isSubmitting}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyPress={(e) => {
-            // Submit form if user hits Enter
-            if (e.key === "Enter") {
-              e.preventDefault();
-              handleSubmit();
-            }
-          }}
-        />
-      </StyledFormGroup>
-    </Form>
-  </Wrapper>
+  <form onSubmit={handleSubmit}>
+    <TextField
+      label={label}
+      name={inputName}
+      variant="outlined"
+      fullWidth
+      type="input"
+      placeholder={placeholder}
+      value={value}
+      disabled={isSubmitting}
+      onChange={handleChange}
+      onBlur={handleBlur}
+    />
+  </form>
 );
 
 InfoForm.propTypes = {
