@@ -1,7 +1,12 @@
-import React, { useState } from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import { Button, Modal, ModalBody, ModalFooter, Tooltip } from "reactstrap";
+import {
+  Tooltip,
+  Dialog,
+  Button,
+  DialogContent,
+  DialogActions,
+} from "@material-ui/core";
 
 const Wrapper = styled.div`
   margin-bottom: 1rem;
@@ -16,48 +21,40 @@ const DeleteNodeButton = ({
   disabledReason,
   error,
 }) => {
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-
   return (
     <Wrapper>
-      {disabled && disabledReason && (
-        <Tooltip
-          isOpen={tooltipOpen}
-          toggle={() => setTooltipOpen(!tooltipOpen)}
-          target="DeleteNodeButton"
-        >
-          {disabledReason}
-        </Tooltip>
-      )}
-      <Button
-        color="danger"
-        onClick={onToggleConfirmationModal}
-        disabled={disabled}
-        id="DeleteNodeButton"
-      >
-        Delete {nodeType.toLowerCase()}
-      </Button>
-      {error && <p className="text-danger">{error}</p>}
-      <Modal
-        isOpen={confirmationModalIsOpen}
-        toggle={onToggleConfirmationModal}
-      >
-        <ModalBody>
-          Are you sure you want to delete this {nodeType.toLowerCase()}?
-        </ModalBody>
-        <ModalFooter>
+      <Tooltip title={disabled && disabledReason ? disabledReason : ""}>
+        <span>
           <Button
-            color="danger"
+            color="secondary"
+            onClick={onToggleConfirmationModal}
+            disabled={disabled}
+          >
+            Delete {nodeType.toLowerCase()}
+          </Button>
+        </span>
+      </Tooltip>
+      {error && <p className="text-danger">{error}</p>}
+      <Dialog
+        disableBackdropClick
+        disableEscapeKeyDown
+        maxWidth="xs"
+        open={confirmationModalIsOpen}
+      >
+        <DialogContent>
+          Are you sure you want to delete this {nodeType.toLowerCase()}?
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="secondary"
             onClick={onConfirmSoftDelete}
             disabled={disabled}
           >
             Yes, delete this {nodeType.toLowerCase()}
           </Button>
-          <Button color="link" onClick={onToggleConfirmationModal}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
+          <Button onClick={onToggleConfirmationModal}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </Wrapper>
   );
 };
