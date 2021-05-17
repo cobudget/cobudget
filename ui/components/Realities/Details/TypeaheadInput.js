@@ -43,10 +43,10 @@ const TypeaheadInput = ({
     }) => (
       <Wrapper {...getRootProps({ refKey: "innerRef" })}>
         <TextField
-          label={label}
-          variant="outlined"
-          fullWidth
           {...getInputProps({
+            label,
+            variant: "outlined",
+            fullWidth: true,
             name,
             id,
             placeholder,
@@ -56,7 +56,7 @@ const TypeaheadInput = ({
               if (!inputValue) clearSelection();
               onBlur(e);
             },
-            invalid,
+            error: invalid,
           })}
         />
         {isOpen && (
