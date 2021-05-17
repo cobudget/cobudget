@@ -62,18 +62,7 @@ const NeedsListItem = ({
 
   return (
     <>
-      <ListItem
-        button
-        //TODO
-        //filledin={params.needId === need.nodeId ? "true" : ""}
-        onClick={expandThisNeed}
-        //classes={`${
-        //  isHighlighted || router.query.needId === need.nodeId
-        //    ? "bg-green-200"
-        //    : ""
-        //}`}
-        className={classes.list}
-      >
+      <ListItem button onClick={expandThisNeed} className={classes.list}>
         {need.title}
         <MissingRealizersOnNeed need={need} />
       </ListItem>

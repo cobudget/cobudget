@@ -1,24 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import styled from "styled-components";
-import { ListGroup, ListGroupItem } from "reactstrap";
+import { List, ListItem, ListItemSecondaryAction } from "@material-ui/core";
 import TypeBadge from "./TypeBadge";
 import RemoveDeliberation from "./RemoveDeliberation";
-
-const StyledListGroup = styled(ListGroup)`
-  margin-bottom: 2em;
-`;
-
-const StyledListGroupItem = styled(ListGroupItem)`
-  position: relative;
-  ${(props) => props.showremove && "padding-right: 6em;"}
-`;
-
-const RemoveWrapper = styled.span`
-  position: absolute;
-  top: 0.54em;
-  right: 0.54em;
-`;
 
 const DeliberationList = ({ deliberations, showRemove }) => {
   const handleClick = (url) => {
@@ -26,29 +10,24 @@ const DeliberationList = ({ deliberations, showRemove }) => {
     win.focus();
   };
   return (
-    <StyledListGroup>
+    <List>
       {deliberations.map(({ node: { __typename, nodeId, title, url } }) => (
-        <StyledListGroupItem
+        <ListItem
+          button
           key={nodeId}
-          tag="div"
-          action
           onClick={() => handleClick(url)}
-          showremove={
-            showRemove
-              ? "true"
-              : "" /* styled component doesn't want a boolean */
-          }
+          disableGutters
         >
           <TypeBadge nodeType={__typename} />
           {title || url}
           {showRemove && (
-            <RemoveWrapper>
+            <ListItemSecondaryAction>
               <RemoveDeliberation url={url} />
-            </RemoveWrapper>
+            </ListItemSecondaryAction>
           )}
-        </StyledListGroupItem>
+        </ListItem>
       ))}
-    </StyledListGroup>
+    </List>
   );
 };
 
