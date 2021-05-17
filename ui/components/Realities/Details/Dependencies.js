@@ -1,20 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
-//import { useHistory, useParams } from "react-router-dom";
 import AddDependency from "./AddDependency";
 import DependencyList from "./DependencyList";
 
 const Dependencies = ({ isLoggedIn, nodeId, dependencies, showAddRemove }) => {
-  //const history = useHistory();
-  //const { orgSlug } = useParams();
   return (
-    <div>
+    <div className="mt-5">
       {isLoggedIn && showAddRemove && <AddDependency nodeId={nodeId} />}
       <DependencyList
-        dependencies={dependencies.map((dep) => ({
-          node: dep,
-          onClick: () => null /*history.push(`/${orgSlug}/${dep.nodeId}`)*/,
-        }))}
+        dependencies={dependencies}
         showRemove={isLoggedIn && showAddRemove}
       />
     </div>

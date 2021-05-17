@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
-import { Button } from "reactstrap";
+import { Button } from "@material-ui/core";
 import { useRouter } from "next/router";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 
@@ -34,8 +34,8 @@ const RemoveDependency = ({ nodeId }) => {
 
   return (
     <Button
-      size="sm"
-      color="danger"
+      color="secondary"
+      variant="outlined"
       disabled={loading}
       onClick={(e) => {
         e.stopPropagation();

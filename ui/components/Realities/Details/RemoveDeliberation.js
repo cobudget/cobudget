@@ -20,7 +20,7 @@ const REMOVE_RESP_HAS_DELIBERATION = gql`
   }
 `;
 
-const RemoveDeliberation = ({ url, ...props }) => {
+const RemoveDeliberation = ({ url }) => {
   const router = useRouter();
   const realitiesApollo = getRealitiesApollo();
   const [
@@ -30,7 +30,6 @@ const RemoveDeliberation = ({ url, ...props }) => {
 
   return (
     <Button
-      {...props}
       disabled={loading}
       color="secondary"
       variant="outlined"
