@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
-//import { useHistory, useParams } from "react-router-dom";
+import { useRouter } from "next/router";
 import { GET_NEEDS, GET_RESPONSIBILITIES } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import DeleteNodeButton from "./DeleteNodeButton";
@@ -28,6 +28,7 @@ const SOFT_DELETE_RESPONSIBILITY = gql`
 `;
 
 const DeleteNodeContainer = ({ node, stopEdit }) => {
+  const router = useRouter();
   const { __typename: nodeType, nodeId } = node;
   const realitiesApollo = getRealitiesApollo();
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
@@ -49,8 +50,7 @@ const DeleteNodeContainer = ({ node, stopEdit }) => {
               ),
             },
           });
-          //TODO
-          //history.push(`/${params.orgSlug}`);
+          router.push(`/realities`);
         } else {
           const needId = data.softDeleteResponsibility.fulfills.nodeId;
           const { responsibilities } = cache.readQuery({
@@ -66,8 +66,7 @@ const DeleteNodeContainer = ({ node, stopEdit }) => {
               ),
             },
           });
-          //TODO
-          //history.push(`/${params.orgSlug}/need/${needId}`);
+          router.push(`/realities/need/${needId}`);
         }
       },
     }

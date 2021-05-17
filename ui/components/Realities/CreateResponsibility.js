@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
 import * as yup from "yup";
-//import { useHistory, useParams } from "react-router-dom";
+import { useRouter } from "next/router";
 import { Formik } from "formik";
 import { GET_RESPONSIBILITIES, CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
@@ -25,9 +25,8 @@ const CREATE_RESPONSIBILITY = gql`
 `;
 
 const CreateResponsibility = ({ needId }) => {
+  const router = useRouter();
   const realitiesApollo = getRealitiesApollo();
-  //const history = useHistory();
-  //const params = useParams();
   const [createResponsibility] = useMutation(CREATE_RESPONSIBILITY, {
     client: realitiesApollo,
     update: (cache, { data: { createResponsibility: createRespRes } }) => {
@@ -72,9 +71,7 @@ const CreateResponsibility = ({ needId }) => {
           },
         }).then(({ data }) => {
           resetForm();
-          //history.push(
-          //  `/${params.orgSlug}/${data.createResponsibility.nodeId}`
-          //);
+          router.push(`/realities/${data.createResponsibility.nodeId}`);
         });
       }}
     >

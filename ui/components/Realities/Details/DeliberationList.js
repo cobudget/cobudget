@@ -12,12 +12,7 @@ const DeliberationList = ({ deliberations, showRemove }) => {
   return (
     <List>
       {deliberations.map(({ node: { __typename, nodeId, title, url } }) => (
-        <ListItem
-          button
-          key={nodeId}
-          onClick={() => handleClick(url)}
-          disableGutters
-        >
+        <ListItem button key={nodeId} onClick={() => handleClick(url)}>
           <TypeBadge nodeType={__typename} />
           {title || url}
           {showRemove && (

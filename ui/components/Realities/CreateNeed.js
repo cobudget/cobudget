@@ -2,6 +2,7 @@ import React from "react";
 import { gql, useMutation } from "@apollo/client";
 import * as yup from "yup";
 import { Formik } from "formik";
+import { useRouter } from "next/router";
 import { GET_NEEDS, CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import ListForm from "./ListForm";
@@ -24,8 +25,7 @@ const CREATE_NEED = gql`
 `;
 
 const CreateNeed = () => {
-  //const history = useHistory();
-  //const { orgSlug } = useParams();
+  const router = useRouter();
   const realitiesApollo = getRealitiesApollo();
 
   const [createNeed] = useMutation(CREATE_NEED, {
@@ -59,8 +59,7 @@ const CreateNeed = () => {
       onSubmit={(values, { resetForm }) => {
         createNeed({ variables: { title: values.title } }).then(({ data }) => {
           resetForm();
-          //TODO
-          //history.push(`/${orgSlug}/need/${data.createNeed.nodeId}`);
+          router.push(`/realities/need/${data.createNeed.nodeId}`);
         });
       }}
     >
