@@ -18,7 +18,7 @@ const EDIT_DESCRIPTION_MUTATION = gql`
   }
 `;
 
-const DreamDescription = ({ description, limit, dreamId, canEdit }) => {
+const DreamDescription = ({ description, dreamId, canEdit }) => {
   const [editDream, { loading }] = useMutation(EDIT_DESCRIPTION_MUTATION, {
     variables: { dreamId },
   });
@@ -60,7 +60,7 @@ const DreamDescription = ({ description, limit, dreamId, canEdit }) => {
             >
               Markdown
             </a>{" "}
-            allowed. {limit ? String(limit - inputValue.length) + " characters remaining." : ""}
+            allowed.
           </div>
           <div className="flex">
             <Button
