@@ -160,10 +160,6 @@ module.exports = {
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
-
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
-        });
       }
     );
 
@@ -195,10 +191,6 @@ module.exports = {
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
-
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
-        });
       }
     );
 
@@ -221,10 +213,6 @@ module.exports = {
         });
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
-
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
-        });
       }
     );
   },

@@ -115,8 +115,8 @@ export const COMMENTS_QUERY = gql`
 `;
 
 export const COMMENTS_CHANGED_SUBSCRIPTION = gql`
-  subscription OnCommentChanged($dreamID: ID!) {
-    commentsChanged(dreamID: $dreamID) {
+  subscription OnCommentChanged($dreamId: ID!) {
+    commentsChanged(dreamId: $dreamId) {
       id
     }
   }
@@ -133,11 +133,7 @@ const DreamPage = ({
     data: { dream } = { dream: null },
     loading,
     error,
-    refetch,
-  } = useQuery(DREAM_QUERY, {
-    onCompleted: console.log,
-    variables: { id: router.query.dream },
-  });
+  } = useQuery(DREAM_QUERY, { variables: { id: router.query.dream } });
 
   if (dream)
     return (

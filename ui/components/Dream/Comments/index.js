@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AddComment from "./AddComment";
 import Comment from "./Comment";
-import { gql, useQuery, useSubscription } from "@apollo/client";
+import { gql, useQuery, useSubscription, NetworkStatus } from "@apollo/client";
 import Log from "./Log";
 import HappySpinner from "components/HappySpinner";
 import { COMMENTS_QUERY, COMMENTS_CHANGED_SUBSCRIPTION } from "pages/[event]/[dream]";
@@ -11,33 +11,36 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
   const [from, setFrom] = useState(0);
   const [limit, setLimit] = useState(3);
   const [order, setOrder] = useState('desc');
-  const [total, setTotal] = useState(0);
-  const [comments, setComments] = useState([]);
+  const [commentSet, setCommentSet] = useState({ total: 0, comments: [] });
   const {
+    data,
     loading,
     error,
     refetch,
+    networkStatus,
   } = useQuery(COMMENTS_QUERY, {
     variables: { dreamId: dream.id, from, limit, order },
-    onCompleted: data => {
-      setTotal(data.commentSet.total)
-      setComments(data.commentSet.comments)
-    }
+    notifyOnNetworkStatusChange: true
   });
+  useEffect(() => {
+    if (networkStatus != NetworkStatus.ready) { return; }
+
+    setCommentSet(data.commentSet);
+  }, [networkStatus]);
 
   useSubscription(COMMENTS_CHANGED_SUBSCRIPTION, {
     variables: { dreamId: dream.id },
-    onSubscriptionData: () => refetch()
+    onSubscriptionData: () => refetch(),
   });
 
   return (
     <div>
-      {(comments.length > 0 ||
+      {(commentSet.comments.length > 0 ||
         currentOrgMember?.currentEventMembership) && (
         <>
           <div className="flex justify-between items-center">
             <h2 className="mb-4 text-2xl font-medium" id="comments">
-              {`${comments.length} of ${total} ${total === 1 ? 'comment' : 'comments'}`}
+              {`${commentSet.comments.length} of ${commentSet.total} ${commentSet.total === 1 ? 'comment' : 'comments'}`}
             </h2>
 
             {dream.discourseTopicUrl && (
@@ -47,17 +50,17 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
             )}
           </div>
           {loading && <HappySpinner size={6} />}
-          {total > comments.length && !loading && <button onClick={() => setFrom(f => f + limit)}>Load more</button>}
+          {commentSet.total > commentSet.comments.length && !loading && <button onClick={() => setFrom(f => f + limit)}>Load more</button>}
         </>
       )}
-      {comments.map((comment, index) => {
+      {commentSet.comments.map((comment, index) => {
         if (comment._type === "LOG") return <Log log={comment} key={index} />;
         return (
           <Comment
             comment={comment}
             currentOrgMember={currentOrgMember}
             dreamId={dream.id}
-            showBorderBottom={Boolean(index + 1 !== comments.length)}
+            showBorderBottom={Boolean(index + 1 !== commentSet.comments.length)}
             key={comment.id}
             event={event}
           />

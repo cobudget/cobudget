@@ -101,10 +101,8 @@ export default function createApolloClient(initialState, ctx) {
                   const current = existing.findIndex(c => readField('id', c) == readField('id', comment));
 
                   if (current === -1) {
-                    console.log('pushing...')
                     merged.push(comment);
                   } else {
-                    console.log('merging...')
                     merged[current] = mergeObjects(existing[current], comment);
                   }
                 });

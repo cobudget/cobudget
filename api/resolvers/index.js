@@ -1057,6 +1057,8 @@ const resolvers = {
         event,
         comment,
       });
+
+      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
       return dream.save();
     },
 
@@ -1096,6 +1098,7 @@ const resolvers = {
         dream,
         comment,
       });
+      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
       return dream;
     },
@@ -1136,6 +1139,7 @@ const resolvers = {
         dream,
         comment,
       });
+      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
       return dream;
     },
