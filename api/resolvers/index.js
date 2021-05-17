@@ -371,7 +371,7 @@ const resolvers = {
     createEvent: async (
       parent,
       { slug, title, description, summary, currency, registrationPolicy },
-      { currentOrgMember, currentOrg, models: { Event, EventMember, CustomField }, eventHub }
+      { currentOrgMember, currentOrg, models: { Event, EventMember }, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organisation admin.");
