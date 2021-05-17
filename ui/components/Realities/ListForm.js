@@ -1,27 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
-import {
-  Button,
-  Form,
-  FormGroup,
-  Input,
-  Container,
-  Row,
-  Col,
-} from "reactstrap";
+import { Button, TextField } from "@material-ui/core";
 
 const Wrapper = styled.div`
   margin: 0.5rem 0;
-`;
-
-const StyledFormGroup = styled(FormGroup)`
-  margin: 0;
-  margin-right: 0.5rem;
-`;
-
-const SaveCol = styled(Col)`
-  align-self: end;
 `;
 
 const ListForm = ({
@@ -34,40 +17,23 @@ const ListForm = ({
   isSubmitting,
 }) => (
   <Wrapper>
-    <Form onSubmit={handleSubmit} data-cy="list-form">
-      <Container fluid="sm">
-        <Row noGutters>
-          <Col>
-            <StyledFormGroup>
-              <Input
-                name={inputName}
-                type="textarea"
-                autoFocus
-                rows={2}
-                placeholder={placeholder}
-                value={value}
-                disabled={isSubmitting}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                onKeyPress={(e) => {
-                  // Submit form if user hits Enter
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleSubmit();
-                  }
-                }}
-                data-cy="list-form-name-input"
-              />
-            </StyledFormGroup>
-          </Col>
-          <SaveCol xs="auto">
-            <Button size="sm" type="submit" disabled={!value || isSubmitting}>
-              Save
-            </Button>
-          </SaveCol>
-        </Row>
-      </Container>
-    </Form>
+    <form onSubmit={handleSubmit} className="flex" data-cy="list-form">
+      <TextField
+        name={inputName}
+        variant="outlined"
+        size="small"
+        autoFocus
+        placeholder={placeholder}
+        value={value}
+        disabled={isSubmitting}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        data-cy="list-form-name-input"
+      />
+      <Button type="submit" disabled={!value || isSubmitting}>
+        Save
+      </Button>
+    </form>
   </Wrapper>
 );
 
