@@ -397,24 +397,21 @@ const resolvers = {
         name: "Description",
         description: "Describe your Dream",
         type: "MULTILINE_TEXT",
-        limit: null,
         isRequired: false,
         isShownOnFrontPage: false,
       }
 
-      const position =
-        event.customFields
-          .map((cf) => cf.position)
-          .reduce((a, b) => Math.max(a, b), 1000) + 1;
-          
-      // event.customFields.push({ ...customField, position });
+      const position = 1001
+
+      event.customFields.push({ ...customField, position });
+      event.save()
 
       await eventHub.publish("create-event", {
         currentOrg,
         currentOrgMember,
         event,
       });
-      return event.save();
+      return event;
     },
     editEvent: async (
       parent,
