@@ -11,8 +11,12 @@ import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventSlug: String!, $textSearchTerm: String) {
-    dreams(eventSlug: $eventSlug, textSearchTerm: $textSearchTerm) {
+  query Dreams($eventSlug: String!, $textSearchTerm: String, $tags: [String!]) {
+    dreams(
+      eventSlug: $eventSlug
+      textSearchTerm: $textSearchTerm
+      tags: $tags
+    ) {
       id
       description
       summary
@@ -50,36 +54,33 @@ export const DREAMS_QUERY = gql`
 
 const EventPage = ({ currentOrgMember, event, router }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
-  const [textSearchTerm, setTextSearchTerm] = useState("");
   const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
-  // const [showInfoBox, setShowInfoBox] = useState(true);
-  // const dismissInfoBox = () => {
-  //   store.set(event.slug, { infoBoxDismissed: true });
-  //   setShowInfoBox(false);
-  // };
+  const { tag, s } = router.query;
+  const tags = Array.isArray(tag)
+    ? tag
+    : typeof tag === "undefined"
+    ? null
+    : [tag];
 
   let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
     DREAMS_QUERY,
     {
       variables: {
         eventSlug: router.query.event,
-        ...(textSearchTerm && { textSearchTerm }),
+        ...(!!s && { textSearchTerm: s }),
+        ...(tags && { tags }),
       },
+      fetchPolicy: "cache-and-network",
     }
   );
   if (error) {
     console.error(error);
   }
   if (!event) return null;
-
-  // useEffect(() => {
-  //   const { infoBoxDismissed = false } = store.get(event.slug) || {};
-  //   if (infoBoxDismissed) setShowInfoBox(false);
-  // }, []);
 
   if (filterFavorites) {
     dreams = dreams.filter((dream) => dream.favorite);
@@ -153,12 +154,13 @@ const EventPage = ({ currentOrgMember, event, router }) => {
         <Filterbar
           filterFavorites={filterFavorites}
           toggleFilterFavorites={toggleFilterFavorites}
-          textSearchTerm={textSearchTerm}
-          setTextSearchTerm={setTextSearchTerm}
+          textSearchTerm={s}
           currentOrgMember={currentOrgMember}
           customFields={event.customFields}
           filterLabels={filterLabels}
           setFilterLabels={setFilterLabels}
+          tags={tags}
+          event={event}
         />
 
         {loading ? (

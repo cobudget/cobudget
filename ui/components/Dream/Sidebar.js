@@ -2,12 +2,16 @@ import { Tooltip } from "react-tippy";
 import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
 
+import slugify from "utils/slugify";
 import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 import Button from "components/Button";
+import TextField from "components/TextField";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
@@ -77,12 +81,26 @@ const DELETE_DREAM_MUTATION = gql`
   }
 `;
 
+const EDIT_TAGS_MUTATION = gql`
+  mutation EditTags($dreamId: ID!, $tags: [String!]) {
+    editDream(dreamId: $dreamId, tags: $tags) {
+      id
+      tags
+    }
+  }
+`;
+
 const css = {
   dropdownButton:
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
 const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [editingTags, setEditingTags] = useState(false);
+
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
@@ -105,10 +123,10 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
       },
     ],
   });
-
-  const [contributeModalOpen, setContributeModalOpen] = useState(false);
-  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
-  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [editTags] = useMutation(EDIT_TAGS_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const { handleSubmit, register } = useForm();
 
   const isEventAdminOrGuide =
     currentOrgMember?.currentEventMembership?.isAdmin ||
@@ -300,51 +318,116 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
           )}
         </div>
       )}
+      <div className="mt-5 space-y-5">
+        <div className="">
+          <h2 className="mb-2 font-medium hidden md:block relative">
+            <span className="mr-2 font-medium ">Co-creators</span>
+            {canEdit && (
+              <div className="absolute top-0 right-0">
+                <Tooltip
+                  title="Edit co-creators"
+                  position="bottom"
+                  size="small"
+                >
+                  <IconButton onClick={() => setCocreatorModalOpen(true)}>
+                    <EditIcon className="h-5 w-5" />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            )}
+          </h2>
 
-      <div className="mt-5">
-        <h2 className="mb-2 font-medium hidden md:block relative">
-          <span className="mr-2">Co-creators</span>
-          {canEdit && (
-            <div className="absolute top-0 right-0">
-              <Tooltip title="Edit co-creators" position="bottom" size="small">
+          <div className="flex items-center flex-wrap">
+            {dream.cocreators.map((member) => (
+              // <Tooltip key={member.user.id} title={member.user.name}>
+              <div
+                key={member.orgMember.user.id}
+                className="flex items-center mr-2 md:mr-3 sm:mb-2"
+              >
+                <Avatar user={member.orgMember.user} />{" "}
+                <span className="ml-2 text-gray-700 hidden md:block">
+                  {member.orgMember.user.username}
+                </span>
+              </div>
+              // </Tooltip>
+            ))}
+            <div className="block md:hidden">
+              {canEdit && (
                 <IconButton onClick={() => setCocreatorModalOpen(true)}>
                   <EditIcon className="h-5 w-5" />
                 </IconButton>
-              </Tooltip>
+              )}
+            </div>
+          </div>
+          <EditCocreatorsModal
+            open={cocreatorModalOpen}
+            handleClose={() => setCocreatorModalOpen(false)}
+            cocreators={dream.cocreators}
+            event={event}
+            dream={dream}
+            currentOrgMember={currentOrgMember}
+          />
+        </div>
+        <div className="">
+          <h2 className="mb-2 font-medium hidden md:block relative">
+            <span className="mr-2 font-medium ">Tags</span>
+            {canEdit && (
+              <div className="absolute top-0 right-0">
+                <Tooltip title="Edit tags" position="bottom" size="small">
+                  <IconButton onClick={() => setEditingTags(true)}>
+                    <EditIcon className="h-5 w-5" />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            )}
+          </h2>
+          {editingTags ? (
+            <>
+              <form
+                className="block space-y-2 mt-4"
+                onSubmit={handleSubmit((variables) => {
+                  const tags = variables.tags
+                    .split(",")
+                    .filter((t) => t) // remove empty strings
+                    .map((tag) => slugify(tag));
+
+                  editTags({ variables: { tags } })
+                    .then(() => setEditingTags(false))
+                    .catch((err) => alert(err.message));
+                })}
+              >
+                <TextField
+                  defaultValue={dream.tags?.toString()}
+                  name="tags"
+                  inputRef={register}
+                  placeholder="Comma-separated tags"
+                  color={event.color}
+                  autoFocus
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    onClick={() => setEditingTags(false)}
+                    variant="secondary"
+                    color={event.color}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" color={event.color}>
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </>
+          ) : (
+            <div className="flex items-center flex-wrap">
+              {dream.tags?.map((tag) => (
+                <Link key={tag} href={`/${event.slug}?tag=${tag}`}>
+                  <a className="text-gray-500 hover:text-black mr-2">#{tag}</a>
+                </Link>
+              ))}
             </div>
           )}
-        </h2>
-
-        <div className="flex items-center flex-wrap">
-          {dream.cocreators.map((member) => (
-            // <Tooltip key={member.user.id} title={member.user.name}>
-            <div
-              key={member.orgMember.user.id}
-              className="flex items-center mr-2 md:mr-3 sm:mb-2"
-            >
-              <Avatar user={member.orgMember.user} />{" "}
-              <span className="ml-2 text-gray-700 hidden md:block">
-                {member.orgMember.user.username}
-              </span>
-            </div>
-            // </Tooltip>
-          ))}
-          <div className="block md:hidden">
-            {canEdit && (
-              <IconButton onClick={() => setCocreatorModalOpen(true)}>
-                <EditIcon className="h-5 w-5" />
-              </IconButton>
-            )}
-          </div>
         </div>
-        <EditCocreatorsModal
-          open={cocreatorModalOpen}
-          handleClose={() => setCocreatorModalOpen(false)}
-          cocreators={dream.cocreators}
-          event={event}
-          dream={dream}
-          currentOrgMember={currentOrgMember}
-        />
       </div>
     </>
   );
