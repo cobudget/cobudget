@@ -117,7 +117,7 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventSlug, textSearchTerm },
+      { eventSlug, textSearchTerm, tags },
       { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
     ) => {
       let currentEventMember;
@@ -134,7 +134,14 @@ const resolvers = {
         });
       }
 
-      // if admin or guide, show all dreams (published or unpublished)
+      const tagQuery = {
+        ...(tags
+          ? {
+              tags: { $all: tags },
+            }
+          : null),
+      };
+
       if (
         currentEventMember &&
         (currentEventMember.isAdmin || currentEventMember.isGuide)
@@ -142,7 +149,8 @@ const resolvers = {
         return Dream.find({
           eventId: event.id,
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-        });
+          ...tagQuery,
+        }).sort({ createdAt: -1 });
       }
 
       // todo: create appropriate index for this query
@@ -152,14 +160,16 @@ const resolvers = {
           eventId: event.id,
           $or: [{ published: true }, { cocreators: currentEventMember.id }],
           ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-        });
+          ...tagQuery,
+        }).sort({ createdAt: -1 });
       }
 
       return Dream.find({
         eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-      });
+        ...tagQuery,
+      }).sort({ createdAt: -1 });
     },
     orgMembers: async (
       parent,
@@ -764,7 +774,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary, images, budgetItems },
+      { dreamId, title, description, summary, images, budgetItems, tags },
       {
         currentOrg,
         currentOrgMember,
@@ -793,6 +803,8 @@ const resolvers = {
       if (typeof summary !== "undefined") dream.summary = summary;
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
+      if (typeof tags !== "undefined")
+        dream.tags = tags.map((tag) => slugify(tag));
 
       await eventHub.publish("edit-dream", {
         currentOrg,
