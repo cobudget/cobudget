@@ -384,6 +384,16 @@ const resolvers = {
         currency,
         registrationPolicy,
         organizationId: currentOrg.id,
+        customFields: [
+          {
+            name: "Description",
+            description: "Describe your Dream",
+            type: "MULTILINE_TEXT",
+            isRequired: false,
+            isShownOnFrontPage: false,
+            position: 1001,
+          },
+        ],
       }).save();
 
       await new EventMember({
@@ -392,19 +402,6 @@ const resolvers = {
         isAdmin: true,
         isApproved: true,
       }).save();
-
-      customField = {
-        name: "Description",
-        description: "Describe your Dream",
-        type: "MULTILINE_TEXT",
-        isRequired: false,
-        isShownOnFrontPage: false,
-      }
-
-      const position = 1001
-
-      event.customFields.push({ ...customField, position });
-      event.save()
 
       await eventHub.publish("create-event", {
         currentOrg,
