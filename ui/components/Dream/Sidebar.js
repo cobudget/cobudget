@@ -388,13 +388,11 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                 onSubmit={handleSubmit((variables) => {
                   const tags = variables.tags
                     .split(",")
+                    .filter((t) => t) // remove empty strings
                     .map((tag) => slugify(tag));
 
                   editTags({ variables: { tags } })
-                    .then((data) => {
-                      console.log({ data });
-                      setEditingTags(false);
-                    })
+                    .then(() => setEditingTags(false))
                     .catch((err) => alert(err.message));
                 })}
               >
