@@ -1,25 +1,16 @@
 import React, { useState, useEffect } from "react";
-//import styled from "styled-components";
 import HappySpinner from "components/HappySpinner";
 import SubMenu from "components/SubMenu";
-import NeedsContainer from "components/Realities/NeedsContainer";
-//import Search from 'components/Search';
-import DetailViewContainer from "components/Realities/Details/DetailViewContainer";
-
-//const SearchRow = styled(Row)`
-//  margin-bottom: 20px;
-//`;
+import NeedsContainer from "./NeedsContainer";
+import DetailViewContainer from "./Details/DetailViewContainer";
+import Search from "./Search";
 
 const RealitiesHome = ({ currentOrgMember, currentUser }) => (
   <>
     <SubMenu currentOrgMember={currentOrgMember} />
     <div className="page">
       <div className="md:container md:mx-auto">
-        {/*<SearchRow className="d-md-none">
-          <Col>
-            <Search />
-          </Col>
-        </SearchRow>*/}
+        <Search />
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-full md:col-span-6 lg:col-span-4 lg:col-start-2">
             <NeedsContainer currentUser={currentUser} />
