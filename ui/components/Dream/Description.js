@@ -26,6 +26,7 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
   const { handleSubmit, register, errors } = useForm();
 
   const [editing, setEditing] = useState(false);
+  const [inputValue, setInputValue] = useState(description ?? "");
 
   if (editing)
     return (
@@ -44,6 +45,10 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
           rows={10}
           defaultValue={description}
           autoFocus
+          inputProps={{
+            value: inputValue,
+            onChange: (e) => setInputValue(e.target.value),
+          }}
           className="mb-2"
         />
         <div className="flex justify-between items-center mb-4">
@@ -55,7 +60,7 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
             >
               Markdown
             </a>{" "}
-            allowed
+            allowed.
           </div>
           <div className="flex">
             <Button

@@ -13,7 +13,7 @@ const Layout = ({
   router,
 }) => {
   return (
-    <div style={{ "min-height": "100vh" }} className="flex flex-col">
+    <div style={{ "minHeight": "100vh" }} className="flex flex-col">
       <Head>
         <title>{title}</title>
         <meta

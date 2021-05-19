@@ -394,6 +394,16 @@ const resolvers = {
         currency,
         registrationPolicy,
         organizationId: currentOrg.id,
+        customFields: [
+          {
+            name: "Description",
+            description: "Describe your Dream",
+            type: "MULTILINE_TEXT",
+            isRequired: false,
+            isShownOnFrontPage: false,
+            position: 1001,
+          },
+        ],
       }).save();
 
       await new EventMember({
@@ -697,6 +707,7 @@ const resolvers = {
       // doc = { ...doc, ...customField };
       doc.name = customField.name;
       doc.type = customField.type;
+      doc.limit = customField.limit;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
       doc.isShownOnFrontPage = customField.isShownOnFrontPage;
