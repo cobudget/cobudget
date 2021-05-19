@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { ListGroup, ListGroupItem } from "reactstrap";
+import { List, ListItem } from "@material-ui/core";
 import TypeBadge from "./Details/TypeBadge";
 
 const SearchResults = ({
@@ -13,10 +13,10 @@ const SearchResults = ({
   // be breaking the accessibility thing now), but that's apparently a
   // functional component so when it tries to attach a ref to it it breaks
   <div {...getMenuProps()}>
-    <ListGroup flush>
+    <List>
       {results.map((item, index) => (
         // eslint-disable-next-line react/jsx-key
-        <ListGroupItem
+        <ListItem
           {...getItemProps({
             key: item.nodeId,
             item,
@@ -27,9 +27,9 @@ const SearchResults = ({
         >
           <TypeBadge nodeType={item.__typename} />
           {item.title || item.name}
-        </ListGroupItem>
+        </ListItem>
       ))}
-    </ListGroup>
+    </List>
   </div>
 );
 

@@ -60,7 +60,8 @@ const SearchResultsContainer = withDebouncedProp(
         const searchResults = [
           ...(data.needs || []),
           ...(data.responsibilities || []),
-          ...(data.persons || []),
+          // TODO: add person page
+          //...(data.persons || []),
         ];
         if (searchResults.length === 0) return <CardBody>No results</CardBody>;
         return (
