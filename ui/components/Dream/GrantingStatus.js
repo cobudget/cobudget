@@ -4,9 +4,10 @@ import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
 const GrantingStatus = ({ dream, event }) => {
-  const ratio = isNaN(dream.totalContributions / dream.minGoal)
+  const funding = dream.totalContributions + dream.income;
+  const ratio = isNaN(funding / dream.minGoal)
     ? 0
-    : dream.totalContributions / dream.minGoal;
+    : funding / dream.minGoal;
 
   return (
     <div className="space-y-0">
@@ -19,10 +20,10 @@ const GrantingStatus = ({ dream, event }) => {
             color={event.color}
           />
           <p className={`text-xl font-semibold text-${event.color}-dark`}>
-            {thousandSeparator(dream.totalContributions / 100)} {event.currency}
+            {thousandSeparator(funding / 100)} {event.currency}
           </p>
           <p className="text-sm text-gray-700">
-            contributed of {thousandSeparator(dream.minGoal / 100)}{" "}
+            funded of {thousandSeparator(dream.minGoal / 100)}{" "}
             {event.currency} goal
           </p>
         </div>

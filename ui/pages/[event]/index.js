@@ -19,6 +19,7 @@ export const DREAMS_QUERY = gql`
       title
       minGoal
       maxGoal
+      income
       totalContributions
       numberOfComments
       favorite
