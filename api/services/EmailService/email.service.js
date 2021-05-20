@@ -7,6 +7,30 @@ const mailgun = require("mailgun-js")({
 });
 
 class EmailService {
+  static async sendEmail(to, subject, text) {
+    if (process.env.NODE_ENV === "production") {
+      const data = {
+        from: `${process.env.EMAIL_SENDER}`,
+        to,
+        subject,
+        text,
+      };
+      return mailgun
+        .messages()
+        .send(data)
+        .then(() => {
+          console.log("Successfully sent emails");
+          return true;
+        })
+        .catch((error) => {
+          console.error({ error });
+          throw new Error(error.message);
+        });
+    } else {
+      console.log("in development, not sending emails");
+    }
+  }
+
   static async sendMagicLinkEmail(token, organization, user) {
     // send magic link in production, log it in development
     const { subdomain, customDomain, name } = organization;
