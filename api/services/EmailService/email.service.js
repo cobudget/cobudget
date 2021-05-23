@@ -7,11 +7,52 @@ const mailgun = require("mailgun-js")({
 });
 
 class EmailService {
-  static async sendEmail(to, subject, text) {
+  static async sendCommentNotification({
+    dream,
+    models: { EventMember, OrgMember },
+    kcAdminClient,
+    event,
+    currentOrg,
+    currentOrgMember,
+    comment,
+  }) {
+    const cocreatorEventMemberIds = dream.cocreators;
+
+    const eventMembers = await EventMember.find({
+      _id: { $in: cocreatorEventMemberIds },
+    });
+
+    const orgMemberIds = eventMembers.map((member) => member.orgMemberId);
+    const orgMembers = await OrgMember.find({ _id: { $in: orgMemberIds } });
+
+    const emails = [];
+    orgMembers.forEach(async (orgMember) => {
+      const { email } = await kcAdminClient.users.findOne({
+        id: orgMember.userId,
+      });
+      if (orgMember.id !== currentOrgMember.id) emails.push(email);
+    });
+
+    const { name } = await kcAdminClient.users.findOne({
+      id: currentOrgMember.userId,
+    });
+
+    const domain = currentOrg.customDomain
+      ? `https://${currentOrg.customDomain}`
+      : `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}`;
+    const link = `${domain}/${event.slug}/${dream.id}`;
+    const subject = `${name} commented on ${dream.title}`;
+    const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
+
+    if (emails.length) await this.sendEmail(emails, subject, text);
+    console.log("0 emails sent");
+  }
+
+  static async sendEmail(emails, subject, text) {
     if (process.env.NODE_ENV === "production") {
       const data = {
         from: `${process.env.EMAIL_SENDER}`,
-        to,
+        to: emails,
         subject,
         text,
       };
@@ -27,7 +68,7 @@ class EmailService {
           throw new Error(error.message);
         });
     } else {
-      console.log("in development, not sending emails");
+      console.log(`In development, not sending ${emails.length} emails`);
     }
   }
 
