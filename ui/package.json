@@ -39,7 +39,7 @@
     "next-cookies": "^2.0.3",
     "next-fonts": "^0.19.0",
     "node-forge": "^0.10.0",
-    "postcss": "^8.2.8",
+    "postcss": "^8.2.10",
     "prop-types": "^15.7.2",
     "react": "16.14.0",
     "react-dom": "16.14.0",
