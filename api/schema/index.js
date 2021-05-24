@@ -113,9 +113,9 @@ const schema = gql`
 
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
-    addComment(dreamId: ID!, content: String!): Dream
-    editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
-    deleteComment(dreamId: ID!, commentId: ID!): Dream
+    addComment(dreamId: ID!, content: String!): Comment
+    editComment(dreamId: ID!, commentId: ID!, content: String!): Comment
+    deleteComment(dreamId: ID!, commentId: ID!): Comment
 
     raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
     resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream

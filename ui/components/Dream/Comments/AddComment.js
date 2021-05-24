@@ -1,25 +1,17 @@
-import React from "react";
+import React, { useRef, useState, useContext } from "react";
+import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
 import Link from "next/link";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
 
-const ADD_COMMENT = gql`
-  mutation addComment($content: String!, $dreamId: ID!) {
-    addComment(content: $content, dreamId: $dreamId) {
-      id
-    }
-  }
-`;
-
-function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
-  const [addComment, { loading }] = useMutation(ADD_COMMENT);
-  const [content, setContent] = React.useState("");
+function AddComment() {
+  const [content, setContent] = useState("");
   const { handleSubmit, register, errors } = useForm();
-  const inputRef = React.useRef();
+  const inputRef = useRef();
+  const { loading, addComment, dream, event, currentOrg, currentOrgMember } = useContext(Context);
   if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
     return (
       <Link href={"/connect-discourse"} passHref>
@@ -32,7 +24,7 @@ function AddComment({ currentOrgMember, currentOrg, dreamId, event }) {
   return (
     <form
       onSubmit={handleSubmit(() => {
-        addComment({ variables: { content, dreamId } })
+        addComment({ variables: { dreamId: dream.id, content } })
           .then(() => {
             inputRef.current.blur();
             setContent("");

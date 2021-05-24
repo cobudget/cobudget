@@ -90,38 +90,6 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-export const COMMENTS_QUERY = gql`
-  query Comments($dreamId: ID!, $from: Int, $limit: Int, $order: String) {
-    commentSet(dreamId: $dreamId, from: $from, limit: $limit, order: $order) {
-      total
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        isLog
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const COMMENTS_CHANGED_SUBSCRIPTION = gql`
-  subscription OnCommentChanged($dreamId: ID!) {
-    commentsChanged(dreamId: $dreamId) {
-      id
-    }
-  }
-`;
-
 const DreamPage = ({
   event,
   currentUser,

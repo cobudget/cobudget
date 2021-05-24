@@ -1059,7 +1059,8 @@ const resolvers = {
       });
 
       liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
-      return dream.save();
+      dream.save();
+      return comment;
     },
 
     deleteComment: async (
@@ -1088,7 +1089,6 @@ const resolvers = {
         dream.comments = dream.comments.filter(
           (comment) => comment.id.toString() !== commentId
         );
-        return dream.save();
       }
 
       await eventHub.publish("delete-comment", {
@@ -1100,7 +1100,7 @@ const resolvers = {
       });
       liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
-      return dream;
+      return comment;
     },
     editComment: async (
       parent,
@@ -1141,7 +1141,7 @@ const resolvers = {
       });
       liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
-      return dream;
+      return comment;
     },
     raiseFlag: async (
       parent,
