@@ -1,16 +1,15 @@
 import React from "react";
-import { KcApp, defaultKcProps, kcContext, kcContextMocks } from "keycloakify";
-import "./index.css";
-// TODO: import index.css from preview.js instead, idk if it works to import from here
-//import App from "./App";
+import { KcApp, defaultKcProps, kcContext } from "keycloakify";
 
 const KeycloakApp = ({ mock }) => {
   return (
     <React.StrictMode>
       <KcApp
-        kcContext={mock ? kcContextMocks.kcLoginContext : kcContext}
+        kcContext={mock ?? kcContext}
         {...{
           ...defaultKcProps,
+          // This injects the class properly but index.css doesn't seem to be
+          // able to get imported, at least in storybook
           kcHeaderWrapperClass: "top-class",
         }}
       />
