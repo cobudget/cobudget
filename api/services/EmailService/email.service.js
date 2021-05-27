@@ -1,10 +1,13 @@
-const EmailTemplates = require("./email.templates");
-
 const mailgun = require("mailgun-js")({
   apiKey: process.env.MAILGUN_API_KEY,
   domain: process.env.MAILGUN_DOMAIN,
   host: process.env.MAILGUN_HOST,
 });
+
+const createDomain = (org) =>
+  org.customDomain
+    ? `https://${org.customDomain}`
+    : `https://${org.subdomain}.${process.env.DEPLOY_URL}`;
 
 class EmailService {
   static async sendCommentNotification({
@@ -37,10 +40,7 @@ class EmailService {
       id: currentOrgMember.userId,
     });
 
-    const domain = currentOrg.customDomain
-      ? `https://${currentOrg.customDomain}`
-      : `https://${currentOrg.subdomain}.${process.env.DEPLOY_URL}`;
-    const link = `${domain}/${event.slug}/${dream.id}`;
+    const link = `${createDomain(currentOrg)}/${event.slug}/${dream.id}`;
     const subject = `${name} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
 
@@ -71,59 +71,14 @@ class EmailService {
     }
   }
 
-  static async sendMagicLinkEmail(token, organization, user) {
-    // send magic link in production, log it in development
-    const { subdomain, customDomain, name } = organization;
-    if (process.env.NODE_ENV === "production") {
-      const domain = customDomain
-        ? `https://${customDomain}`
-        : `https://${subdomain}.${process.env.DEPLOY_URL}`;
-
-      const url = `${domain}/?token=${token}`;
-      const loginTemplate = await EmailTemplates.getLoginTemplate(
-        organization,
-        url,
-        domain
-      );
-      const data = {
-        from: `${process.env.EMAIL_SENDER}`,
-        to: user.email,
-        subject: `Welcome to Dreams - ${name}`,
-        html: loginTemplate,
-      };
-
-      return mailgun
-        .messages()
-        .send(data)
-        .then(() => {
-          console.log("Successfully sent magic link with Mailgun");
-          return true;
-        })
-        .catch((error) => {
-          console.error(error);
-          throw new Error(`Failed to send magic link ${error.message}`);
-        });
-    } else {
-      const domain = customDomain
-        ? `http://${customDomain}`
-        : `http://${subdomain}.localhost:3000`;
-      const url = `${domain}/?token=${token}`;
-      console.log(`Here is your magic link: ${url}`);
-      return true;
-    }
-  }
-
   static async sendRequestToJoinNotifications(
     organization,
     user,
     event,
     emails
   ) {
-    const { subdomain, customDomain } = organization;
     if (process.env.NODE_ENV === "production") {
-      const domain = customDomain
-        ? `https://${customDomain}`
-        : `https://${subdomain}.${process.env.DEPLOY_URL}`;
+      const domain = createDomain(organization);
 
       var data = {
         from: `${process.env.EMAIL_SENDER}`,
