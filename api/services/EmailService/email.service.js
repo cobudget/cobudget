@@ -36,12 +36,12 @@ class EmailService {
       if (orgMember.id !== currentOrgMember.id) emails.push(email);
     });
 
-    const { name } = await kcAdminClient.users.findOne({
+    const { username } = await kcAdminClient.users.findOne({
       id: currentOrgMember.userId,
     });
 
     const link = `${createDomain(currentOrg)}/${event.slug}/${dream.id}`;
-    const subject = `${name} commented on ${dream.title}`;
+    const subject = `${username} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
 
     await this.sendEmail(emails, subject, text);
