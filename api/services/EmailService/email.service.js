@@ -44,12 +44,11 @@ class EmailService {
     const subject = `${name} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
 
-    if (emails.length) await this.sendEmail(emails, subject, text);
-    console.log("0 emails sent");
+    await this.sendEmail(emails, subject, text);
   }
 
   static async sendEmail(emails, subject, text) {
-    if (process.env.NODE_ENV === "production") {
+    if (process.env.NODE_ENV === "production" && emails.length) {
       const data = {
         from: `${process.env.EMAIL_SENDER}`,
         to: emails,
