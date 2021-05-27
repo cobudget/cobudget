@@ -77,10 +77,6 @@ const server = new ApolloServer({
       });
     }
 
-    let token = req.headers.authorization
-      ? req.headers.authorization.split(" ")[1]
-      : null;
-
     const kcAdminClient = await initKcAdminClient();
 
     return {
