@@ -132,7 +132,7 @@ const Header = ({
                       !currentOrgMember.currentEventMembership) &&
                       event &&
                       (event.registrationPolicy !== "INVITE_ONLY" ||
-                        currentOrgMember.isOrgAdmin) && (
+                        currentOrgMember?.isOrgAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
