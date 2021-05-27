@@ -1,9 +1,13 @@
 import React from "react";
+import { Button } from "@material-ui/core";
 import { KcApp, defaultKcProps, kcContext } from "keycloakify";
 
 const KeycloakApp = ({ mock }) => {
   return (
     <React.StrictMode>
+      <Button variant="contained" color="primary">
+        Primary
+      </Button>
       <KcApp
         kcContext={mock ?? kcContext}
         {...{
