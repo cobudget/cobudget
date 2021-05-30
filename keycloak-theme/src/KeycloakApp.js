@@ -8,8 +8,6 @@ const DefaultApp = ({ ctx }) => {
       kcContext={ctx}
       {...{
         ...defaultKcProps,
-        // This injects the class properly but index.css doesn't seem to be
-        // able to get imported, at least in storybook
         kcHeaderWrapperClass: "top-class",
       }}
     />
