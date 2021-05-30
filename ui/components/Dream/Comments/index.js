@@ -15,7 +15,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
     event,
     dream,
   });
-  const { comments, total, loading } = context;
+  const { comments, from, setFrom, limit, total, loading } = context;
 
   return (
     <Context.Provider value={context}>
