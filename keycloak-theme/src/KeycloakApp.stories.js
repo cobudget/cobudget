@@ -7,6 +7,9 @@ export const Login = () => <KeycloakApp mock={kcContextMocks.kcLoginContext} />;
 export const Register = () => (
   <KeycloakApp mock={kcContextMocks.kcRegisterContext} />
 );
+export const LoginVerifyEmail = () => (
+  <KeycloakApp mock={kcContextMocks.kcLoginVerifyEmailContext} />
+);
 export const Terms = () => <KeycloakApp mock={kcContextMocks.kcTermsContext} />;
 
 export default {
