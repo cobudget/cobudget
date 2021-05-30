@@ -13,7 +13,7 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String!, textSearchTerm: String): [Dream]
+    dreams(eventSlug: String!, textSearchTerm: String, tags: [String!]): [Dream]
     commentSet(dreamId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
@@ -105,6 +105,7 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
+      tags: [String!]
     ): Dream
     deleteDream(dreamId: ID!): Dream
 
@@ -307,7 +308,7 @@ const schema = gql`
     logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
-    # tags: [Tag]
+    tags: [String!]
     minGoal: Int
     maxGoal: Int
     totalContributions: Int
@@ -468,6 +469,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     position: Float!
     isShownOnFrontPage: Boolean
@@ -478,6 +480,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     isShownOnFrontPage: Boolean
     createdAt: Date

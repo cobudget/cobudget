@@ -12,6 +12,7 @@ const CUSTOM_FIELDS_QUERY = gql`
         name
         description
         type
+        limit
         isRequired
         position
         isShownOnFrontPage

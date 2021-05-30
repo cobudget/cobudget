@@ -55,12 +55,17 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               canEdit={canEdit}
               dreamId={dream.id}
             />
-
-            <Description
-              description={dream.description}
-              dreamId={dream.id}
-              canEdit={canEdit}
-            />
+            
+            {dream.description && (
+              <Description
+                // We no longer use this field for new dreams.
+                // Eventually we will migrate all current descriptions to custom fields.
+                description={dream.description}
+                dreamId={dream.id}
+                canEdit={canEdit}
+              />
+            )
+            }
 
             <DreamCustomFields
               eventId={event.id}

@@ -73,7 +73,7 @@ export default function AboutPage({ router }) {
             <ListItemText primary={"Currency"} secondary={event.currency} />
           </ListItem>
 
-          {event.maxAmountToDreamPerUser && (
+          {!!event.maxAmountToDreamPerUser && (
             <>
               <Divider />
               <ListItem>

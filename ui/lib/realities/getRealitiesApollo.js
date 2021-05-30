@@ -44,7 +44,7 @@ async function makeContext(orgSlug) {
   };
 }
 
-export default function createRealitiesApollo() {
+function createRealitiesApollo() {
   if (typeof window === "undefined") return null;
 
   const { subdomain: orgSlug } = getHostInfo();
@@ -103,4 +103,14 @@ export default function createRealitiesApollo() {
   client.onResetStore(initStore);
 
   return client;
+}
+
+let realitiesApollo = null;
+
+export default function getRealitiesApollo() {
+  if (realitiesApollo === null) {
+    realitiesApollo = createRealitiesApollo();
+  }
+
+  return realitiesApollo;
 }
