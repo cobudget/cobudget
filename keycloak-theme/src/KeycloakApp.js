@@ -1,5 +1,6 @@
 import React from "react";
 import { KcApp, defaultKcProps, kcContext } from "keycloakify";
+import "./index.css";
 import Terms from "./components/Terms";
 
 const DefaultApp = ({ ctx }) => {

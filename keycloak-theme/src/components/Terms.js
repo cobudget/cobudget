@@ -2,7 +2,9 @@ const Terms = ({ ctx }) => {
   const { url } = ctx;
   return (
     <div>
-      <div>Please accept the Privacy Policy and Terms and Conditions</div>
+      <div className="text-3xl text-red-600">
+        Please accept the Privacy Policy and Terms and Conditions
+      </div>
       <div>
         Please go to the following links to read the{" "}
         <a
