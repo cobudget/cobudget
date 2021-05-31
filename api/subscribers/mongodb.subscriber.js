@@ -25,7 +25,7 @@ module.exports = {
         dream.comments.push(comment);
         dream.save();
 
-        return comment;
+        return dream.comments.reverse()[0];
       }
     );
 
@@ -35,19 +35,19 @@ module.exports = {
       async ({ currentOrg, currentOrgMember, event, eventMember, dream, comment }) => {
         if (orgHasDiscourse(currentOrg)) { return; }
 
-        const existing = dream.comments.find(
-          (comment) =>
-            comment._id.toString() === commentId &&
-            (comment.authorId.toString() === currentOrgMember.id.toString() ||
-              eventMember?.isAdmin)
-        );
+        const existing = dream.comments.find(c => (
+          c._id.toString() === comment.id && (
+            c.authorId.toString() === currentOrgMember.id.toString() ||
+            eventMember?.isAdmin
+          )
+        ));
 
         if (!existing)
           throw new Error(
             "Cant find that comment - Does this comment belongs to you?"
           );
 
-        existing.content = content;
+        existing.content = comment.content;
         existing.updatedAt = new Date();
         dream.save();
 
@@ -61,7 +61,7 @@ module.exports = {
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
         if (orgHasDiscourse(currentOrg)) { return; }
 
-        dream.comments = dream.comments.filter(({ id }) => id.toString() !== commentId);
+        dream.comments = dream.comments.filter(({ id }) => id.toString() !== comment.id.toString());
         dream.save();
       }
     );
