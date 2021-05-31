@@ -7,6 +7,7 @@ import Avatar from "../../Avatar";
 import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
 import EditComment from "./EditComment";
 import Context from "contexts/comment";
+import { LoaderIcon } from "../../Icons";
 
 dayjs.extend(relativeTime);
 
@@ -20,6 +21,7 @@ const Comment = ({
   comment,
   showBorderBottom,
 }) => {
+  const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const { deleteComment, currentOrgMember, dream } = useContext(Context);
 
@@ -72,12 +74,16 @@ const Comment = ({
                 <button
                   onClick={() => (
                     confirm("Are you sure you would like to delete this comment?") && (
-                      deleteComment({ variables: { dreamId: dream.id, commentId: comment.id } })
+                      deleteComment({ variables: { dreamId: dream.id, commentId: comment.id } }) && setSubmitting(true)
                     )
                   )}
                   className="mt-4 py-1 px-2 mr-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:ring"
                 >
-                  <DeleteIcon className="w-4 h-4 mr-1" />
+                  {submitting ? (
+                    <LoaderIcon className="w-5 h-5 animation-spin animation-linear animation-2s" />
+                  ) : (
+                    <DeleteIcon className="w-4 h-4 mr-1" />
+                  )}
                   <span>Delete</span>
                 </button>
                 <button

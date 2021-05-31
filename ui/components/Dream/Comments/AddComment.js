@@ -9,9 +9,10 @@ import Avatar from "components/Avatar";
 
 function AddComment() {
   const [content, setContent] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
   const inputRef = useRef();
-  const { loading, addComment, dream, event, currentOrg, currentOrgMember } = useContext(Context);
+  const { addComment, dream, event, currentOrg, currentOrgMember } = useContext(Context);
   if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
     return (
       <Link href={"/connect-discourse"} passHref>
@@ -24,11 +25,13 @@ function AddComment() {
   return (
     <form
       onSubmit={handleSubmit(() => {
+        setSubmitting(true);
         addComment({ variables: { dreamId: dream.id, content } })
           .then(() => {
             inputRef.current.blur();
             setContent("");
           })
+          .finally(() => setSubmitting(false))
           .catch((err) => alert(err.message));
       })}
     >
@@ -71,7 +74,7 @@ function AddComment() {
                 type="submit"
                 disabled={content.length === 0}
                 color={event.color}
-                loading={loading}
+                loading={submitting}
               >
                 Submit
               </Button>
