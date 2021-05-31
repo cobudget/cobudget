@@ -1093,6 +1093,7 @@ const resolvers = {
         currentOrg,
         currentOrgMember,
         event,
+        eventMember,
         dream,
         comment,
       });
