@@ -11,6 +11,7 @@ const Terms = ({ ctx }) => {
         <div className="mb-12">
           Please go to the following links to read the{" "}
           <a
+            className="text-blue-600 underline"
             href="https://www.iubenda.com/privacy-policy/58637640"
             target="_blank"
             rel="noreferrer"
@@ -19,6 +20,7 @@ const Terms = ({ ctx }) => {
           </a>{" "}
           and the{" "}
           <a
+            className="text-blue-600 underline"
             href="https://www.iubenda.com/terms-and-conditions/58637640"
             target="_blank"
             rel="noreferrer"
