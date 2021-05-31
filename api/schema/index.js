@@ -312,6 +312,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     totalContributions: Int
+    numberOfComments: Int
 
     fundedAt: Date
     funded: Boolean

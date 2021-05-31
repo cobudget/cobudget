@@ -2371,6 +2371,12 @@ const resolvers = {
       ]);
       return contributionsForDream;
     },
+    numberOfComments: async (dream, args, { currentOrg }) => {
+      // Only display number of comments for non-Discourse orgs
+      if (orgHasDiscourse(currentOrg)) { return; }
+
+      return dream.comments.length;
+    },
     favorite: async (
       dream,
       args,
