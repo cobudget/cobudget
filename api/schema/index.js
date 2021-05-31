@@ -111,6 +111,8 @@ const schema = gql`
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
 
+    addTag(dreamId: ID!, tagId: ID, tagValue: String): Dream
+
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
     addComment(dreamId: ID!, content: String!): Dream

@@ -18,6 +18,7 @@ import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
 import { DREAMS_QUERY } from "pages/[event]";
+import AddTag from "components/Dream/AddTag";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -371,7 +372,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">Tags</span>
-            {canEdit && (
+            {/* {canEdit && (
               <div className="absolute top-0 right-0">
                 <Tooltip title="Edit tags" position="bottom" size="small">
                   <IconButton onClick={() => setEditingTags(true)}>
@@ -379,7 +380,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                   </IconButton>
                 </Tooltip>
               </div>
-            )}
+            )} */}
           </h2>
           {editingTags ? (
             <>
@@ -421,10 +422,13 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
           ) : (
             <div className="flex items-center flex-wrap">
               {dream.tags?.map((tag) => (
-                <Link key={tag} href={`/${event.slug}?tag=${tag}`}>
-                  <a className="text-gray-500 hover:text-black mr-2">#{tag}</a>
+                <Link key={tag.id} href={`/${event.slug}?tag=${tag.value}`}>
+                  <a className="text-gray-500 hover:text-black mr-2">
+                    {tag.value}
+                  </a>
                 </Link>
               ))}
+              <AddTag placeholder="Add tag" items={event.tags} dream={dream} />
             </div>
           )}
         </div>

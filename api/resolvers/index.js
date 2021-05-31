@@ -826,6 +826,30 @@ const resolvers = {
 
       return dream.save();
     },
+    addTag: async (
+      parent,
+      { dreamId, tagId, tagValue },
+      { currentOrg, currentOrgMember, models: { Tag, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+      if (tagId) {
+        dream.tags.push(tagId);
+        await dream.save();
+        console.log("saving new tagId to dream", tagId);
+      } else if (tagValue) {
+        const tag = await new Tag({
+          value: tagValue,
+          eventId: dream.eventId,
+          organizationId: currentOrg.id,
+        }).save();
+        dream.tags.push(tag.id);
+        await dream.save();
+        console.log("adding new tag: ", tag, dream);
+      } else {
+        throw new Error("You need to provide either tag id or tag value");
+      }
+      return dream;
+    },
     editDreamCustomField: async (
       parent,
       { dreamId, customField },
