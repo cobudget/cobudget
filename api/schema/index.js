@@ -335,6 +335,11 @@ const schema = gql`
     comments: [Comment]
   }
 
+  type CommentAction {
+    comment: Comment!
+    action: String
+  }
+
   type Category {
     id: ID!
     name: String
@@ -504,7 +509,7 @@ const schema = gql`
   }
 
   type Subscription {
-    commentsChanged(dreamId: ID!): Dream
+    commentsChanged(dreamId: ID!): CommentAction!
   }
 
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails

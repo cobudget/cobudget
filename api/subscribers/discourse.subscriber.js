@@ -176,8 +176,10 @@ module.exports = {
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        const created = this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: created, action: 'created' } });
 
-        return this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
+        return created;
       }
     );
 
@@ -211,7 +213,10 @@ module.exports = {
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        return this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
+        const updated = this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: updated, action: 'edited' } });
+
+        return updated;
       }
     );
 
@@ -235,6 +240,8 @@ module.exports = {
         });
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
+
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment, action: 'deleted' } });
 
         return comment;
       }

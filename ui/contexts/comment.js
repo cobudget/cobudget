@@ -35,7 +35,21 @@ export const useCommentContext = (initialInput) => {
   const COMMENTS_CHANGED_SUBSCRIPTION = gql`
     subscription OnCommentChanged($dreamId: ID!) {
       commentsChanged(dreamId: $dreamId) {
-        id
+        action
+        comment {
+          id
+          content
+          htmlContent
+          createdAt
+          orgMember {
+            id
+            user {
+              id
+              username
+              avatar
+            }
+          }
+        }
       }
     }
   `;
@@ -116,7 +130,7 @@ export const useCommentContext = (initialInput) => {
         comments: comments.map(c => c.id === data.editComment.id ? data.editComment : c),
         total
       };
-      updateQuery(() => ({ commentSet }))
+      updateQuery(() => ({ commentSet }));
       setComments(commentSet.comments);
       setTotal(commentSet.total);
     }
@@ -143,7 +157,25 @@ export const useCommentContext = (initialInput) => {
 
   useSubscription(COMMENTS_CHANGED_SUBSCRIPTION, {
     variables: { dreamId: initialInput.dream.id },
-    // TODO: live updating
+    onSubscriptionData: ({
+      subscriptionData: {
+        data: { commentsChanged: { comment, action } }
+      }
+    }) => {
+      switch(action) {
+        case 'created':
+          setTotal(total + 1);
+          setComments(comments.concat(comment));
+          break;
+        case 'edited':
+          setComments(comments.map(c => c.id === comment.id ? comment : c))
+          break;
+        case 'deleted':
+          setTotal(total - 1);
+          setComments(comments.filter(c => c.id !== comment.id));
+          break;
+      }
+    },
   });
 
   return {

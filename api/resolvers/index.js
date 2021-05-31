@@ -1059,7 +1059,6 @@ const resolvers = {
         comment,
       });
 
-      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
       return discourse || mongodb;
     },
 
@@ -1093,7 +1092,6 @@ const resolvers = {
         dream,
         comment,
       });
-      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
       return comment;
     },
@@ -1116,7 +1114,6 @@ const resolvers = {
         dream,
         comment,
       });
-      liveUpdate.publish("commentsChanged", { commentsChanged: { id: dream.id } });
 
       return discourse || mongodb;
     },
