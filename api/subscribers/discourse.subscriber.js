@@ -107,9 +107,9 @@ module.exports = {
     eventHub.subscribe(
       "publish-dream",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream }) => {
+      async ({ currentOrg, currentOrgMember, event, dream, unpublish }) => {
         console.log(
-          `Setting visibility of dream ${dream.id} to ${dream.published} on Discourse...`
+          `Setting visibility of dream ${dream.id} to ${!unpublish} on Discourse...`
         );
 
         if (!dream.discourseTopicId) {
@@ -126,7 +126,7 @@ module.exports = {
           {
             id: dream.discourseTopicId,
             status: "visible",
-            enabled: !!dream.published,
+            enabled: !unpublish,
           },
           {
             username: "system",

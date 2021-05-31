@@ -12,6 +12,15 @@ module.exports = {
     );
 
     eventHub.subscribe(
+      "publish-dream",
+      "mongodb",
+      async ({ dream, unpublish }) => {
+        dream.published = !unpublish;
+        return dream.save();
+      }
+    )
+
+    eventHub.subscribe(
       "create-comment",
       "mongodb",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {

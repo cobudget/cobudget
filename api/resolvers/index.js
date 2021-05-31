@@ -1029,19 +1029,15 @@ const resolvers = {
       )
         throw new Error("You are not a cocreator of this dream.");
 
-      dream.published = !unpublish;
+      const { mongodb } = await eventHub.publish("publish-dream", {
+        currentOrg,
+        currentOrgMember,
+        event,
+        dream,
+        unpublish,
+      });
 
-      // TODO: make the publish dream event not dependent on org having discourse
-      if (orgHasDiscourse(currentOrg)) {
-        await eventHub.publish("publish-dream", {
-          currentOrg,
-          currentOrgMember,
-          event,
-          dream,
-        });
-      }
-
-      return dream.save();
+      return mongodb;
     },
     addComment: async (
       parent,
