@@ -34,11 +34,7 @@ const Comment = ({
         {comment.isLog ? (
           <LogIcon />
         ) : (
-          <Avatar
-            user={
-              comment.orgMember?.user ?? { username: comment.discourseUsername }
-            }
-          />
+          <Avatar user={comment.orgMember?.user} />
         )}
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
@@ -46,10 +42,7 @@ const Comment = ({
           {comment.isLog ? (
             <h5>Log</h5>
           ) : (
-            <h5>
-              {comment.orgMember?.user.username ??
-                `${comment.discourseUsername} (Discourse user)`}
-            </h5>
+            <h5>{comment.orgMember?.user.username}</h5>
           )}
           <div className="flex items-center">
             <span className="font-normal mr-2">
@@ -65,10 +58,10 @@ const Comment = ({
           />
         ) : (
           <>
-            {comment.cooked ? (
+            {comment.htmlContent ? (
               <div
                 className="text-gray-900 markdown"
-                dangerouslySetInnerHTML={{ __html: comment.cooked }}
+                dangerouslySetInnerHTML={{ __html: comment.htmlContent }}
               />
             ) : (
               <ReactMarkdown source={comment.content} className="markdown" />

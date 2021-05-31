@@ -326,10 +326,8 @@ const schema = gql`
     orgMember: OrgMember
     createdAt: Date!
     updatedAt: Date
-    content: String
-    cooked: String
-    discourseUsername: String
-    isLog: Boolean
+    content: String!
+    htmlContent: String
   }
 
   type CommentSet {

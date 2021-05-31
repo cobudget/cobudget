@@ -16,11 +16,9 @@ export const useCommentContext = (initialInput) => {
         total
         comments {
           id
-          discourseUsername
-          cooked
           content
+          htmlContent
           createdAt
-          isLog
           orgMember {
             id
             user {
@@ -46,6 +44,18 @@ export const useCommentContext = (initialInput) => {
     mutation addComment($content: String!, $dreamId: ID!) {
       addComment(content: $content, dreamId: $dreamId) {
         id
+        content
+        htmlContent
+        createdAt
+        updatedAt
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
       }
     }
   `;
@@ -54,6 +64,18 @@ export const useCommentContext = (initialInput) => {
     mutation EditComment($dreamId: ID!, $commentId: ID!, $content: String!) {
       editComment(dreamId: $dreamId, commentId: $commentId, content: $content) {
         id
+        content
+        htmlContent
+        createdAt
+        updatedAt
+        orgMember {
+          id
+          user {
+            id
+            username
+            avatar
+          }
+        }
       }
     }
   `;
@@ -129,6 +151,9 @@ export const useCommentContext = (initialInput) => {
     event: initialInput.event,
     currentOrg: initialInput.currentOrg,
     currentOrgMember: initialInput.currentOrgMember,
+    from, setFrom,
+    limit, setLimit,
+    order, setOrder,
     addComment,
     editComment,
     deleteComment,
