@@ -11,7 +11,7 @@ const defaultTabs = [
   { name: "General", component: GeneralSettings },
   { name: "Guidelines", component: Guidelines },
   { name: "Dream Review", component: DreamReview },
-  { name: "Custom fields", component: CustomFields },
+  { name: "Questions", component: CustomFields },
   { name: "Granting", component: Granting },
 ];
 

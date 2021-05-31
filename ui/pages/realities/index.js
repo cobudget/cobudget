@@ -1,16 +1,8 @@
-import React from "react";
-
 import Realities from "components/Realities";
-import SubMenu from "components/SubMenu";
 
-const RealitiesPage = ({ currentOrgMember }) => {
+const RealitiesPage = ({ currentOrgMember, currentUser }) => {
   return (
-    <>
-      <SubMenu currentOrgMember={currentOrgMember} />
-      <div className="page">
-        <Realities />
-      </div>
-    </>
+    <Realities currentOrgMember={currentOrgMember} currentUser={currentUser} />
   );
 };
 

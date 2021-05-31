@@ -57,7 +57,7 @@ export default ({ event, handleClose }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{event.title}</b> event, dreams, custom fields, comments and remove
+          <b>{event.title}</b> event, dreams, questions, comments and remove
           all collaborators.{" "}
         </p>
         <p className="mb-4">

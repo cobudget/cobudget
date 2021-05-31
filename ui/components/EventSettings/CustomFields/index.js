@@ -12,9 +12,10 @@ const CustomFields = ({ event }) => {
 
   return (
     <div className="px-6">
-      <h1 className="text-2xl font-semibold mb-2">Custom fields</h1>
+      <h1 className="text-2xl font-semibold mb-2">Questions</h1>
+
       <p className="text-gray-700 mb-4">
-        Custom fields are extra fields or questions for Dreams
+        Add questions for Dreams to answer.
       </p>
 
       <DraggableCustomField
@@ -30,7 +31,7 @@ const CustomFields = ({ event }) => {
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> Add custom field
+          <AddIcon className="h-5 w-5 mr-1" /> Add question
         </Button>
       </div>
       {(addCustomFieldModalOpen || editingCustomField) && (
