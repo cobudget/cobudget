@@ -2377,6 +2377,9 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    tags: async (event, args, { models: { Tag } }) => {
+      return Tag.find({ eventId: event.id });
+    },
   },
   Dream: {
     cocreators: async (dream, args, { models: { EventMember } }) => {
@@ -2454,6 +2457,9 @@ const resolvers = {
       if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
 
       return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
+    tags: async (dream, args, { models: { Tag } }) => {
+      return Tag.find({ _id: { $in: dream.tags } });
     },
   },
   Transaction: {

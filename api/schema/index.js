@@ -217,6 +217,12 @@ const schema = gql`
     totalContributionsFunded: Int
     totalInMembersBalances: Int
     discourseCategoryId: Int
+    tags: [Tag!]
+  }
+
+  type Tag {
+    id: ID!
+    value: String!
   }
 
   type Guideline {
@@ -310,7 +316,7 @@ const schema = gql`
     logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
-    tags: [String!]
+    tags: [Tag!]
     minGoal: Int
     maxGoal: Int
     totalContributions: Int
