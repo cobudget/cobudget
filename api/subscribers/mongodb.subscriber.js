@@ -66,7 +66,7 @@ module.exports = {
 
         liveUpdate.publish("commentsChanged", { commentsChanged: { comment: updated, action: 'edited' } });
 
-        return existing;
+        return updated;
       }
     );
 
