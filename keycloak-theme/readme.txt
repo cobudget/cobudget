@@ -31,6 +31,11 @@ docker cp keycloak-theme-keycloak-theme-0.1.0.jar keycloak.web.1:/opt/jboss/keyc
 ---------
 
 # for now you need to manually add the email theme
+
+# get the file in there
+docker cp messages_en.properties keycloak.web.1:/opt/jboss/keycloak/
+# get into the dokku/docker container
+dokku enter keycloak
 # first create a "plato" theme if it doesn't exist (e.g. after a reboot) 
 cd /opt/jboss/keycloak/themes/
 cp -r keycloak plato
