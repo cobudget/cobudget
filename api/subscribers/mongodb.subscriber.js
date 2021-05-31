@@ -1,4 +1,5 @@
 const { orgHasDiscourse } = require("./discourse.subscriber");
+const liveUpdate = require("../services/liveUpdate.service");
 const MIN_POST_LENGTH = 3;
 
 module.exports = {
@@ -34,7 +35,10 @@ module.exports = {
         dream.comments.push(comment);
         dream.save();
 
-        return dream.comments.reverse()[0];
+        const created = dream.comments.reverse()[0];
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: created, action: 'created' } });
+
+        return created;
       }
     );
 
@@ -44,21 +48,23 @@ module.exports = {
       async ({ currentOrg, currentOrgMember, event, eventMember, dream, comment }) => {
         if (orgHasDiscourse(currentOrg)) { return; }
 
-        const existing = dream.comments.find(c => (
+        const updated = dream.comments.find(c => (
           c._id.toString() === comment.id && (
             c.authorId.toString() === currentOrgMember.id.toString() ||
             eventMember?.isAdmin
           )
         ));
 
-        if (!existing)
+        if (!updated)
           throw new Error(
             "Cant find that comment - Does this comment belongs to you?"
           );
 
-        existing.content = comment.content;
-        existing.updatedAt = new Date();
+        updated.content = comment.content;
+        updated.updatedAt = new Date();
         dream.save();
+
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: updated, action: 'edited' } });
 
         return existing;
       }
@@ -70,8 +76,13 @@ module.exports = {
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
         if (orgHasDiscourse(currentOrg)) { return; }
 
-        dream.comments = dream.comments.filter(({ id }) => id.toString() !== comment.id.toString());
+        const deleted = dream.comments.find(({ id }) => id === comment.id);
+        dream.comments = dream.comments.filter(({ id }) => id !== comment.id);
         dream.save();
+
+        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: deleted, action: 'deleted' } });
+
+        return deleted;
       }
     );
   },
