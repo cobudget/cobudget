@@ -13,7 +13,7 @@ const Layout = ({
   router,
 }) => {
   return (
-    <div style={{ "minHeight": "100vh" }} className="flex flex-col">
+    <div style={{ minHeight: "100vh" }} className="flex flex-col">
       <Head>
         <title>{title}</title>
         <meta
@@ -35,25 +35,10 @@ const Layout = ({
 
       {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
       <div className="space-x-6 text-sm text-center mt-auto pt-10 pb-4 text-gray-500">
-        <a
-          href="https://www.iubenda.com/privacy-policy/58637640/cookie-policy"
-          target="_blank"
-          rel="noreferrer"
-        >
-          Cookie Policy
-        </a>
-        <a
-          href="https://www.iubenda.com/privacy-policy/58637640"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href="/privacy-policy" target="_blank" rel="noreferrer">
           Privacy Policy
         </a>
-        <a
-          href="https://www.iubenda.com/terms-and-conditions/58637640"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
           Terms and Conditions
         </a>
       </div>
