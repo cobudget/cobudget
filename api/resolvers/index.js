@@ -850,6 +850,15 @@ const resolvers = {
       }
       return dream;
     },
+    removeTag: async (
+      _,
+      { dreamId, tagId },
+      { currentOrg, currentOrgMember, models: { Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+      dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
+      return dream.save();
+    },
     editDreamCustomField: async (
       parent,
       { dreamId, customField },
