@@ -19,6 +19,7 @@ import GrantingStatus from "./GrantingStatus";
 
 import { DREAMS_QUERY } from "pages/[event]";
 import AddTag from "components/Dream/AddTag";
+import Tags from "./Tags";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -369,69 +370,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
             currentOrgMember={currentOrgMember}
           />
         </div>
-        <div className="">
-          <h2 className="mb-2 font-medium hidden md:block relative">
-            <span className="mr-2 font-medium ">Tags</span>
-            {/* {canEdit && (
-              <div className="absolute top-0 right-0">
-                <Tooltip title="Edit tags" position="bottom" size="small">
-                  <IconButton onClick={() => setEditingTags(true)}>
-                    <EditIcon className="h-5 w-5" />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            )} */}
-          </h2>
-          {editingTags ? (
-            <>
-              <form
-                className="block space-y-2 mt-4"
-                onSubmit={handleSubmit((variables) => {
-                  const tags = variables.tags
-                    .split(",")
-                    .filter((t) => t) // remove empty strings
-                    .map((tag) => slugify(tag));
-
-                  editTags({ variables: { tags } })
-                    .then(() => setEditingTags(false))
-                    .catch((err) => alert(err.message));
-                })}
-              >
-                <TextField
-                  defaultValue={dream.tags?.toString()}
-                  name="tags"
-                  inputRef={register}
-                  placeholder="Comma-separated tags"
-                  color={event.color}
-                  autoFocus
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    onClick={() => setEditingTags(false)}
-                    variant="secondary"
-                    color={event.color}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" color={event.color}>
-                    Save
-                  </Button>
-                </div>
-              </form>
-            </>
-          ) : (
-            <div className="flex items-center flex-wrap">
-              {dream.tags?.map((tag) => (
-                <Link key={tag.id} href={`/${event.slug}?tag=${tag.value}`}>
-                  <a className="text-gray-500 hover:text-black mr-2">
-                    {tag.value}
-                  </a>
-                </Link>
-              ))}
-              <AddTag placeholder="Add tag" items={event.tags} dream={dream} />
-            </div>
-          )}
-        </div>
+        <Tags dream={dream} event={event} />
       </div>
     </>
   );
