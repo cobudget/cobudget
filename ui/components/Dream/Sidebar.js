@@ -18,7 +18,6 @@ import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
 import { DREAMS_QUERY } from "pages/[event]";
-import AddTag from "components/Dream/AddTag";
 import Tags from "./Tags";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
@@ -370,7 +369,7 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
             currentOrgMember={currentOrgMember}
           />
         </div>
-        <Tags dream={dream} event={event} />
+        <Tags dream={dream} event={event} canEdit={canEdit} />
       </div>
     </>
   );

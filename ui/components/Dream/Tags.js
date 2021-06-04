@@ -15,7 +15,7 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-export default ({ dream, event }) => {
+export default ({ dream, event, canEdit }) => {
   const [removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
   return (
@@ -33,7 +33,7 @@ export default ({ dream, event }) => {
       )} */}
       </h2>
 
-      <div className="flex items-center flex-wrap gap-4 mb-4">
+      <div className="flex items-center flex-wrap gap-3 mb-4">
         {dream.tags?.map((tag) => (
           <div
             key={tag.id}
@@ -42,19 +42,20 @@ export default ({ dream, event }) => {
             <Link href={`/${event.slug}?tag=${tag.value}`}>
               <a className="text-gray-500 hover:text-black mr-2">{tag.value}</a>
             </Link>
-            <button
-              onClick={() =>
-                removeTag({ variables: { dreamId: dream.id, tagId: tag.id } })
-              }
-              className="rounded-full bg-gray-400 hover:bg-black"
-            >
-              <CloseIcon className="w-3 h-3 text-white" />
-            </button>
+            {canEdit && (
+              <button
+                onClick={() =>
+                  removeTag({ variables: { dreamId: dream.id, tagId: tag.id } })
+                }
+                className="rounded-full bg-gray-400 hover:bg-black"
+              >
+                <CloseIcon className="w-3 h-3 text-white" />
+              </button>
+            )}
           </div>
         ))}
       </div>
-
-      <AddTag items={event.tags} dream={dream} />
+      {canEdit && <AddTag items={event.tags} dream={dream} />}
     </div>
   );
 };
