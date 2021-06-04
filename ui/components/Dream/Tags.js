@@ -20,18 +20,7 @@ export default ({ dream, event, canEdit }) => {
 
   return (
     <div className="">
-      <h2 className="mb-2 font-medium hidden md:block relative">
-        <span className="mr-2 font-medium ">Tags</span>
-        {/* {canEdit && (
-        <div className="absolute top-0 right-0">
-          <Tooltip title="Edit tags" position="bottom" size="small">
-            <IconButton onClick={() => setEditingTags(true)}>
-              <EditIcon className="h-5 w-5" />
-            </IconButton>
-          </Tooltip>
-        </div>
-      )} */}
-      </h2>
+      <h2 className="mb-2 font-medium hidden md:block relative">Tags</h2>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
         {dream.tags?.map((tag) => (
