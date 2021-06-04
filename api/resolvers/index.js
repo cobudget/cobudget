@@ -117,8 +117,12 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventSlug, textSearchTerm, tags },
-      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
+      { eventSlug, textSearchTerm, tags: tagValues },
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { Event, Dream, EventMember, Tag },
+      }
     ) => {
       let currentEventMember;
 
@@ -133,6 +137,17 @@ const resolvers = {
           eventId: event.id,
         });
       }
+
+      let tags;
+
+      if (tagValues) {
+        tags = await Tag.find({
+          eventId: event.id,
+          value: { $in: tagValues },
+        });
+      }
+
+      console.log({ tags });
 
       const tagQuery = {
         ...(tags
@@ -849,7 +864,6 @@ const resolvers = {
       if (tagId) {
         dream.tags.push(tagId);
         await dream.save();
-        console.log("saving new tagId to dream", tagId);
       } else if (tagValue) {
         const tag = await new Tag({
           value: tagValue,
@@ -858,7 +872,6 @@ const resolvers = {
         }).save();
         dream.tags.push(tag.id);
         await dream.save();
-        console.log("adding new tag: ", tag, dream);
       } else {
         throw new Error("You need to provide either tag id or tag value");
       }
