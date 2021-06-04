@@ -829,9 +829,23 @@ const resolvers = {
     addTag: async (
       parent,
       { dreamId, tagId, tagValue },
-      { currentOrg, currentOrgMember, models: { Tag, Dream } }
+      { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
       if (tagId) {
         dream.tags.push(tagId);
         await dream.save();
@@ -853,9 +867,23 @@ const resolvers = {
     removeTag: async (
       _,
       { dreamId, tagId },
-      { currentOrg, currentOrgMember, models: { Dream } }
+      { currentOrgMember, models: { EventMember, Dream } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
       dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
       return dream.save();
     },
