@@ -117,7 +117,7 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventSlug, textSearchTerm, tags: tagValues },
+      { eventSlug, textSearchTerm, tag: tagValue },
       {
         currentOrgMember,
         currentOrg,
@@ -138,21 +138,19 @@ const resolvers = {
         });
       }
 
-      let tags;
+      let tag;
 
-      if (tagValues) {
-        tags = await Tag.find({
+      if (tagValue) {
+        tag = await Tag.findOne({
           eventId: event.id,
-          value: { $in: tagValues },
+          value: tagValue,
         });
       }
 
-      console.log({ tags });
-
       const tagQuery = {
-        ...(tags
+        ...(tag
           ? {
-              tags: { $all: tags },
+              tags: tag,
             }
           : null),
       };
