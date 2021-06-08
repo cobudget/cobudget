@@ -4,6 +4,7 @@ const DreamSchema = require("./dream");
 const GrantSchema = require("./grant");
 const AllocationSchema = require("./allocation");
 const ContributionSchema = require("./contribution");
+const TagSchema = require("./tag");
 
 const {
   db: {
@@ -25,6 +26,7 @@ const getModels = (db) => {
       Grant: db.model("Grant", GrantSchema),
       Allocation: db.model("Allocation", AllocationSchema),
       Contribution: db.model("Contribution", ContributionSchema),
+      Tag: db.model("Tag", TagSchema),
       logs: createLogModels(db),
     };
 

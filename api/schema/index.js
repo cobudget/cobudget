@@ -13,7 +13,7 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String!, textSearchTerm: String, tags: [String!]): [Dream]
+    dreams(eventSlug: String!, textSearchTerm: String, tag: String): [Dream]
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
@@ -110,6 +110,9 @@ const schema = gql`
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
+
+    addTag(dreamId: ID!, tagId: ID, tagValue: String): Dream
+    removeTag(dreamId: ID!, tagId: ID!): Dream
 
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
@@ -217,6 +220,12 @@ const schema = gql`
     totalContributionsFunded: Int
     totalInMembersBalances: Int
     discourseCategoryId: Int
+    tags: [Tag!]
+  }
+
+  type Tag {
+    id: ID!
+    value: String!
   }
 
   type Guideline {
@@ -310,7 +319,7 @@ const schema = gql`
     logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
-    tags: [String!]
+    tags: [Tag!]
     minGoal: Int
     maxGoal: Int
     totalContributions: Int
