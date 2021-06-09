@@ -24,11 +24,11 @@ const LandingPage = () => {
   return (
     <div className="page">
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="">
-          <h1 className="text-6xl mb-8 font-medium">
+        <div className="space-y-8">
+          <h1 className="text-6xl font-medium">
             Digital tools for participant-driven culture
           </h1>
-          <p className="text-xl text-gray-800 mb-8">
+          <p className="text-xl text-gray-800">
             Plato tools help you gather ideas, take decisions, map needs,
             budgets and areas of responsibility, and provide a socially focused
             digital meeting place for the participants.
@@ -38,6 +38,16 @@ const LandingPage = () => {
               Create a Community
             </Button>
           </Link>
+          <p className="text-sm text-gray-800">
+            Plato is currently in an open beta version. There are bugs and
+            features will change continually. The platform should not be used
+            for mission-critical projects, and we do not allow for-profit
+            organizations to use it at the moment. If you want to try it out
+            please write us on{" "}
+            <a className="text-black" href="mailto:info@platoproject.org">
+              info@platoproject.org
+            </a>
+          </p>
         </div>
         <img className="" src="/frihamnstorget.jpeg" />
       </div>
