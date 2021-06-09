@@ -39,14 +39,17 @@ const LandingPage = () => {
             </Button>
           </Link>
           <p className="text-sm text-gray-800">
-            Plato is currently in an open beta version. There are bugs and
-            features will change continually. The platform should not be used
-            for mission-critical projects, and we do not allow for-profit
-            organizations to use it at the moment. If you want to try it out
-            please write us on{" "}
-            <a className="text-black" href="mailto:info@platoproject.org">
+            Plato is in open beta. That means we are still working on it, and
+            some things might not always work as expected. If you need Plato for
+            a mission-critical project, please get in touch at{" "}
+            <a
+              className="text-black underline"
+              href="mailto:info@platoproject.org"
+            >
               info@platoproject.org
             </a>
+            . Plato is currently free for small non-profits. If you need Plato
+            for your business or large organization, let’s talk!
           </p>
         </div>
         <img className="" src="/frihamnstorget.jpeg" />
