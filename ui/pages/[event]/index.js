@@ -11,11 +11,18 @@ import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
 
 export const DREAMS_QUERY = gql`
-  query Dreams($eventSlug: String!, $textSearchTerm: String, $tags: [String!]) {
+  query Dreams(
+    $eventSlug: String!
+    $textSearchTerm: String
+    $tags: [String!]
+    $offset: Int
+  ) {
     dreams(
       eventSlug: $eventSlug
       textSearchTerm: $textSearchTerm
       tags: $tags
+      offset: $offset
+      limit: 3
     ) {
       id
       description
@@ -53,11 +60,8 @@ export const DREAMS_QUERY = gql`
 `;
 
 const EventPage = ({ currentOrgMember, event, router }) => {
-  const [filterFavorites, setFilterFavorites] = useState(false);
   const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-
-  const toggleFilterFavorites = () => setFilterFavorites(!filterFavorites);
 
   const { tag, s } = router.query;
   const tags = Array.isArray(tag)
@@ -66,25 +70,28 @@ const EventPage = ({ currentOrgMember, event, router }) => {
     ? null
     : [tag];
 
-  let { data: { dreams } = { dreams: [] }, loading, error } = useQuery(
-    DREAMS_QUERY,
-    {
-      variables: {
-        eventSlug: router.query.event,
-        ...(!!s && { textSearchTerm: s }),
-        ...(tags && { tags }),
-      },
-      fetchPolicy: "cache-and-network",
-    }
-  );
+  let {
+    data: { dreams } = { dreams: [] },
+    loading,
+    error,
+    fetchMore,
+  } = useQuery(DREAMS_QUERY, {
+    variables: {
+      eventSlug: router.query.event,
+      offset: 0,
+      ...(!!s && { textSearchTerm: s }),
+      ...(tags && { tags }),
+    },
+    fetchPolicy: "cache-and-network",
+    nextFetchPolicy: "cache-first",
+  });
+
+  const allDreams = dreams;
+
   if (error) {
     console.error(error);
   }
   if (!event) return null;
-
-  if (filterFavorites) {
-    dreams = dreams.filter((dream) => dream.favorite);
-  }
 
   if (filterLabels) {
     dreams = dreams.filter((dream) => {
@@ -152,8 +159,6 @@ const EventPage = ({ currentOrgMember, event, router }) => {
 
       <div className="page flex-1">
         <Filterbar
-          filterFavorites={filterFavorites}
-          toggleFilterFavorites={toggleFilterFavorites}
           textSearchTerm={s}
           currentOrgMember={currentOrgMember}
           customFields={event.customFields}
@@ -162,40 +167,44 @@ const EventPage = ({ currentOrgMember, event, router }) => {
           tags={tags}
           event={event}
         />
-
+        {dreams.length ? (
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            {dreams.map((dream) => (
+              <Link
+                href="/[event]/[dream]"
+                as={`/${event.slug}/${dream.id}`}
+                key={dream.id}
+              >
+                <a className="flex focus:outline-none focus:ring rounded-lg">
+                  <DreamCard
+                    dream={dream}
+                    event={event}
+                    currentOrgMember={currentOrgMember}
+                    filterLabels={filterLabels}
+                  />
+                </a>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="flex-grow flex flex-col justify-center items-center h-64">
+            <h1 className="text-3xl text-gray-500 text-center ">
+              No dreams...
+            </h1>
+          </div>
+        )}
         {loading ? (
           <div className="flex-grow flex justify-center items-center h-64">
             <HappySpinner />
           </div>
         ) : (
-          <>
-            {dreams.length ? (
-              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                {dreams.map((dream) => (
-                  <Link
-                    href="/[event]/[dream]"
-                    as={`/${event.slug}/${dream.id}`}
-                    key={dream.id}
-                  >
-                    <a className="flex focus:outline-none focus:ring rounded-lg">
-                      <DreamCard
-                        dream={dream}
-                        event={event}
-                        currentOrgMember={currentOrgMember}
-                        filterLabels={filterLabels}
-                      />
-                    </a>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="flex-grow flex flex-col justify-center items-center h-64">
-                <h1 className="text-3xl text-gray-500 text-center ">
-                  No dreams...
-                </h1>
-              </div>
-            )}
-          </>
+          <div
+            onClick={() =>
+              fetchMore({ variables: { offset: allDreams.length } })
+            }
+          >
+            Load more
+          </div>
         )}
       </div>
     </>

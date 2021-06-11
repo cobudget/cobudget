@@ -1,6 +1,9 @@
 import { ApolloClient, HttpLink, split } from "@apollo/client";
 import { InMemoryCache } from "@apollo/client/cache";
-import { getMainDefinition } from "@apollo/client/utilities";
+import {
+  getMainDefinition,
+  offsetLimitPagination,
+} from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "isomorphic-unfetch";
@@ -90,6 +93,13 @@ export default function createApolloClient(initialState, ctx) {
     ssrMode: Boolean(ctx),
     link: authLink.concat(appLink),
     cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            dreams: offsetLimitPagination(),
+          },
+        },
+      },
       dataIdFromObject: (object) =>
         `${object.__typename}:${object.id}:${object.eventId}`,
     }).restore(initialState),

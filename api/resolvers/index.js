@@ -117,9 +117,10 @@ const resolvers = {
     },
     dreams: async (
       parent,
-      { eventSlug, textSearchTerm, tags },
+      { eventSlug, textSearchTerm, tags, offset, limit },
       { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
     ) => {
+      console.log("offset", offset, "limit", limit);
       let currentEventMember;
 
       const event = await Event.findOne({
@@ -146,11 +147,15 @@ const resolvers = {
         currentEventMember &&
         (currentEventMember.isAdmin || currentEventMember.isGuide)
       ) {
-        return Dream.find({
-          eventId: event.id,
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-          ...tagQuery,
-        }).sort({ createdAt: -1 });
+        return Dream.find(
+          {
+            eventId: event.id,
+            ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+            ...tagQuery,
+          },
+          null,
+          { skip: offset, limit }
+        ).sort({ createdAt: -1 });
       }
 
       // todo: create appropriate index for this query
@@ -2262,6 +2267,8 @@ const resolvers = {
         : `# About ${event.title}`;
     },
     dreams: async (event, args, { models: { Dream } }) => {
+      // TODO: i don't think this field is used (instead we just use the top level dreams query), let's see
+      throw new Error("we're actually using this field huh");
       return Dream.find({ eventId: event.id });
     },
     numberOfApprovedMembers: async (
