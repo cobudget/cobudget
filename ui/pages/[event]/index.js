@@ -9,6 +9,7 @@ import PageHero from "components/PageHero";
 import Button from "components/Button";
 import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
+import { CheveronDownIcon } from "components/Icons";
 
 export const DREAMS_QUERY = gql`
   query Dreams(
@@ -16,44 +17,54 @@ export const DREAMS_QUERY = gql`
     $textSearchTerm: String
     $tags: [String!]
     $offset: Int
+    $limit: Int
   ) {
-    dreams(
+    dreamsPage(
       eventSlug: $eventSlug
       textSearchTerm: $textSearchTerm
       tags: $tags
       offset: $offset
-      limit: 3
+      limit: $limit
     ) {
-      id
-      description
-      summary
-      title
-      minGoal
-      maxGoal
-      totalContributions
-      numberOfComments
-      favorite
-      published
-      approved
-      canceled
-      customFields {
-        value
-        customField {
-          id
-          name
-          type
-          limit
-          description
-          isRequired
-          position
-          isShownOnFrontPage
-          createdAt
-        }
-      }
-      images {
+      moreExist
+      dreams(
+        eventSlug: $eventSlug
+        textSearchTerm: $textSearchTerm
+        tags: $tags
+        offset: $offset
+        limit: $limit
+      ) {
         id
-        small
-        large
+        description
+        summary
+        title
+        minGoal
+        maxGoal
+        totalContributions
+        numberOfComments
+        favorite
+        published
+        approved
+        canceled
+        customFields {
+          value
+          customField {
+            id
+            name
+            type
+            limit
+            description
+            isRequired
+            position
+            isShownOnFrontPage
+            createdAt
+          }
+        }
+        images {
+          id
+          small
+          large
+        }
       }
     }
   }
@@ -71,7 +82,9 @@ const EventPage = ({ currentOrgMember, event, router }) => {
     : [tag];
 
   let {
-    data: { dreams } = { dreams: [] },
+    data: { dreamsPage: { moreExist, dreams } } = {
+      dreamsPage: { dreams: [] },
+    },
     loading,
     error,
     fetchMore,
@@ -79,6 +92,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
     variables: {
       eventSlug: router.query.event,
       offset: 0,
+      limit: 3,
       ...(!!s && { textSearchTerm: s }),
       ...(tags && { tags }),
     },
@@ -193,19 +207,22 @@ const EventPage = ({ currentOrgMember, event, router }) => {
             </h1>
           </div>
         )}
-        {loading ? (
-          <div className="flex-grow flex justify-center items-center h-64">
-            <HappySpinner />
-          </div>
-        ) : (
-          <div
-            onClick={() =>
-              fetchMore({ variables: { offset: allDreams.length } })
-            }
-          >
-            Load more
-          </div>
-        )}
+        {moreExist &&
+          (loading ? (
+            <div className="flex-grow flex justify-center items-center h-64">
+              <HappySpinner />
+            </div>
+          ) : (
+            <button
+              className="hover:bg-gray-300 p-1 m-auto mt-7 h-full rounded flex justify-center items-center focus:outline-none opacity-75"
+              onClick={() =>
+                fetchMore({ variables: { offset: allDreams.length } })
+              }
+            >
+              <div>Load more</div>
+              <CheveronDownIcon className="h-8 w-8 ml-3 p-1 text-gray-900 bg-gray-100 rounded-full" />
+            </button>
+          ))}
       </div>
     </>
   );

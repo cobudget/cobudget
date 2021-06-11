@@ -94,7 +94,7 @@ export default function createApolloClient(initialState, ctx) {
     link: authLink.concat(appLink),
     cache: new InMemoryCache({
       typePolicies: {
-        Query: {
+        DreamsPage: {
           fields: {
             dreams: offsetLimitPagination(),
           },

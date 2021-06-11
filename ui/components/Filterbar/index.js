@@ -87,27 +87,6 @@ const Filterbar = ({
         </form>
       </div>
 
-      {/* {currentOrgMember?.currentEventMembership && (
-        <Tooltip
-          title={filterFavorites ? "Show all" : "Show favorites"}
-          position="bottom"
-          size="small"
-        >
-          <button
-            className={`mr-2 bg-gray-200 h-full hover:bg-gray-300 px-3 rounded focus:outline-none focus:ring text-gray-600  ${
-              filterFavorites ? "bg-gray-300" : ""
-            }`}
-            onClick={toggleFilterFavorites}
-          >
-            {filterFavorites ? (
-              <HeartSolidIcon className="h-5 w-5" />
-            ) : (
-              <HeartOutlineIcon className="h-5 w-5" />
-            )}
-          </button>
-        </Tooltip>
-      )} */}
-
       <FilterLabels
         customFields={customFields}
         filterLabels={filterLabels}
