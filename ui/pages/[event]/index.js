@@ -15,14 +15,14 @@ export const DREAMS_QUERY = gql`
   query Dreams(
     $eventSlug: String!
     $textSearchTerm: String
-    $tags: [String!]
+    $tag: String
     $offset: Int
     $limit: Int
   ) {
     dreamsPage(
       eventSlug: $eventSlug
       textSearchTerm: $textSearchTerm
-      tags: $tags
+      tag: $tag
       offset: $offset
       limit: $limit
     ) {
@@ -30,7 +30,7 @@ export const DREAMS_QUERY = gql`
       dreams(
         eventSlug: $eventSlug
         textSearchTerm: $textSearchTerm
-        tags: $tags
+        tag: $tag
         offset: $offset
         limit: $limit
       ) {
@@ -75,11 +75,6 @@ const EventPage = ({ currentOrgMember, event, router }) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const { tag, s } = router.query;
-  const tags = Array.isArray(tag)
-    ? tag
-    : typeof tag === "undefined"
-    ? null
-    : [tag];
 
   let {
     data: { dreamsPage: { moreExist, dreams } } = {
@@ -94,7 +89,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
       offset: 0,
       limit: 9,
       ...(!!s && { textSearchTerm: s }),
-      ...(tags && { tags }),
+      ...(!!tag && { tag }),
     },
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
@@ -178,7 +173,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
           customFields={event.customFields}
           filterLabels={filterLabels}
           setFilterLabels={setFilterLabels}
-          tags={tags}
+          tag={tag}
           event={event}
         />
         {dreams.length ? (

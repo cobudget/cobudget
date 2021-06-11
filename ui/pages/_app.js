@@ -57,6 +57,10 @@ export const TOP_LEVEL_QUERY = gql`
           type
         }
       }
+      tags {
+        id
+        value
+      }
     }
     currentUser {
       id

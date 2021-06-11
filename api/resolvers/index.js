@@ -117,8 +117,12 @@ const resolvers = {
     },
     dreamsPage: async (
       parent,
-      { eventSlug, textSearchTerm, tags, offset, limit },
-      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
+      { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { Event, Dream, EventMember, Tag },
+      }
     ) => {
       let currentEventMember;
 
@@ -134,10 +138,19 @@ const resolvers = {
         });
       }
 
+      let tag;
+
+      if (tagValue) {
+        tag = await Tag.findOne({
+          eventId: event.id,
+          value: tagValue,
+        });
+      }
+
       const tagQuery = {
-        ...(tags
+        ...(tag
           ? {
-              tags: { $all: tags },
+              tags: tag,
             }
           : null),
       };
@@ -837,6 +850,65 @@ const resolvers = {
         dream,
       });
 
+      return dream.save();
+    },
+    addTag: async (
+      parent,
+      { dreamId, tagId, tagValue },
+      { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      if (tagId) {
+        dream.tags.push(tagId);
+        await dream.save();
+      } else if (tagValue) {
+        const tag = await new Tag({
+          value: tagValue,
+          eventId: dream.eventId,
+          organizationId: currentOrg.id,
+        }).save();
+        dream.tags.push(tag.id);
+        await dream.save();
+      } else {
+        throw new Error("You need to provide either tag id or tag value");
+      }
+      return dream;
+    },
+    removeTag: async (
+      _,
+      { dreamId, tagId },
+      { currentOrgMember, models: { EventMember, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
       return dream.save();
     },
     editDreamCustomField: async (
@@ -2392,6 +2464,9 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    tags: async (event, args, { models: { Tag } }) => {
+      return Tag.find({ eventId: event.id });
+    },
   },
   Dream: {
     cocreators: async (dream, args, { models: { EventMember } }) => {
@@ -2469,6 +2544,9 @@ const resolvers = {
       if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
 
       return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
+    tags: async (dream, args, { models: { Tag } }) => {
+      return Tag.find({ _id: { $in: dream.tags } });
     },
   },
   Transaction: {

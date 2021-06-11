@@ -71,7 +71,7 @@ const DreamSchema = new Schema({
   tags: {
     type: [
       {
-        type: String,
+        type: Schema.Types.ObjectId,
         index: true,
       },
     ],
