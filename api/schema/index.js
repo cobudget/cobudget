@@ -204,7 +204,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    dreams: [Dream!]
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     currency: String!

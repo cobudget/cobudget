@@ -2346,11 +2346,6 @@ const resolvers = {
         ? event.about
         : `# About ${event.title}`;
     },
-    dreams: async (event, args, { models: { Dream } }) => {
-      // TODO: i don't think this field is used (instead we just use the top level dreams query), let's see
-      throw new Error("we're actually using this field huh");
-      return Dream.find({ eventId: event.id });
-    },
     numberOfApprovedMembers: async (
       event,
       args,
