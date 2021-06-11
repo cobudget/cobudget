@@ -151,7 +151,7 @@ const resolvers = {
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
       const memberQuery = {
         eventId: event.id,
-        $or: [{ published: true }, { cocreators: currentEventMember.id }],
+        $or: [{ published: true }, { cocreators: currentEventMember?.id }],
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
       };
