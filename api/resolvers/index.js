@@ -120,7 +120,6 @@ const resolvers = {
       { eventSlug, textSearchTerm, tags, offset, limit },
       { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
     ) => {
-      console.log("offset", offset, "limit", limit);
       let currentEventMember;
 
       const event = await Event.findOne({
