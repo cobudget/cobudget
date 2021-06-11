@@ -171,17 +171,18 @@ const resolvers = {
           ? memberQuery
           : othersQuery;
 
-      const dreams = [
-        ...(await Dream.find(query, null, { skip: offset, limit }).sort({
+      const dreamsWithExtra = [
+        ...(await Dream.find(query, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
           createdAt: -1,
         })),
       ];
 
       return {
-        // TODO: if you managed to load a full page, this will be true even if there
-        // isn't more
-        moreExist: dreams.length === limit,
-        dreams,
+        moreExist: dreamsWithExtra.length > limit,
+        dreams: dreamsWithExtra.slice(0, limit),
       };
     },
     orgMembers: async (
