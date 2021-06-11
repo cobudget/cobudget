@@ -92,7 +92,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
     variables: {
       eventSlug: router.query.event,
       offset: 0,
-      limit: 3,
+      limit: 9,
       ...(!!s && { textSearchTerm: s }),
       ...(tags && { tags }),
     },
