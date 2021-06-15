@@ -93,9 +93,9 @@ const resolvers = {
       if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
-    contributions: async (
+    contributionsPage: async (
       parent,
-      { eventId },
+      { eventId, offset, limit },
       { currentOrgMember, models: { EventMember, Contribution } }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in");
@@ -108,9 +108,19 @@ const resolvers = {
       if (!(currentOrgMember?.isOrgAdmin || eventMember?.isAdmin))
         throw new Error("You need to be org admin to view this");
 
-      return Contribution.find({ eventId }).sort({
-        createdAt: -1,
-      });
+      const contributionsWithExtra = [
+        ...(await Contribution.find({ eventId }, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
+        })),
+      ];
+
+      return {
+        moreExist: contributionsWithExtra.length > limit,
+        contributions: contributionsWithExtra.slice(0, limit),
+      };
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });

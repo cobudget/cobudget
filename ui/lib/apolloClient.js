@@ -99,6 +99,11 @@ export default function createApolloClient(initialState, ctx) {
             dreams: offsetLimitPagination(),
           },
         },
+        ContributionsPage: {
+          fields: {
+            contributions: offsetLimitPagination(),
+          },
+        },
       },
       dataIdFromObject: (object) =>
         `${object.__typename}:${object.id}:${object.eventId}`,

@@ -23,7 +23,7 @@ const schema = gql`
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
-    contributions(eventId: ID!): [Contribution]
+    contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
 
   type Mutation {
@@ -419,6 +419,11 @@ const schema = gql`
     amount: Int!
     createdAt: Date
     dream: Dream!
+  }
+
+  type ContributionsPage {
+    moreExist: Boolean
+    contributions(eventId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
   type Allocation implements Transaction {
