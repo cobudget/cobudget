@@ -2339,7 +2339,7 @@ const resolvers = {
     info: (event) => {
       return event.info && event.info.length
         ? event.info
-        : `# Welcome to ${event.title}'s dream page`;
+        : `# Welcome to ${event.title}`;
     },
     about: (event) => {
       return event.about && event.about.length

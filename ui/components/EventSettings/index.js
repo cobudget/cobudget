@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-
+import dreamName from "utils/dreamName";
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
@@ -7,16 +7,16 @@ import Granting from "./Granting";
 import DreamReview from "./DreamReview";
 import Discourse from "./Discourse";
 
-const defaultTabs = [
-  { name: "General", component: GeneralSettings },
-  { name: "Guidelines", component: Guidelines },
-  { name: "Dream Review", component: DreamReview },
-  { name: "Questions", component: CustomFields },
-  { name: "Granting", component: Granting },
-];
-
 const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
   const [selectedTab, setSelectedTab] = useState(0);
+
+  const defaultTabs = [
+    { name: "General", component: GeneralSettings },
+    { name: "Guidelines", component: Guidelines },
+    { name: `${dreamName(currentOrg, true)} Review`, component: DreamReview },
+    { name: "Questions", component: CustomFields },
+    { name: "Granting", component: Granting },
+  ];
 
   const tabs = useMemo(
     () =>

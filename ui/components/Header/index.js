@@ -95,37 +95,6 @@ const Header = ({
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {/* {currentOrgMember && event && (
-                  <>
-                    <NavItem
-                      href="/[event]/about"
-                      as={`/${event.slug}/about`}
-                      currentPath={router.pathname}
-                      eventColor={event.color}
-                    >
-                      About
-                    </NavItem>
-
-                    {currentOrgMember.currentEventMembership?.isApproved &&
-                      event.dreamCreationIsOpen && (
-                        <>
-                          <NavItem
-                            onClick={() => setNewDreamModalOpen(true)}
-                            eventColor={event.color}
-                            className="ml-2"
-                            primary
-                          >
-                            New dream
-                          </NavItem>
-                          <NewDreamModal
-                            open={newDreamModalOpen}
-                            handleClose={() => setNewDreamModalOpen(false)}
-                            event={event}
-                          />
-                        </>
-                      )}
-                  </>
-                )} */}
                 {currentOrg && (
                   <>
                     {(!currentOrgMember ||

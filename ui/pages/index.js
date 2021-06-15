@@ -7,6 +7,7 @@ import { AddIcon } from "components/Icons";
 import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
+import dreamName from "utils/dreamName";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -92,7 +93,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
       <PageHero>
         <div className="flex justify-between">
           <h2 className="text-2xl font-semibold">
-            {events.length} dream{" "}
+            {events.length} {dreamName(currentOrg)}{" "}
             {events.length === 1 ? "collection" : "collections"}
           </h2>
           {currentOrgMember?.isOrgAdmin && (
