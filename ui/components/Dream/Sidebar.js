@@ -2,16 +2,14 @@ import { Tooltip } from "react-tippy";
 import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 
-import slugify from "utils/slugify";
 import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 import Button from "components/Button";
-import TextField from "components/TextField";
+import dreamName from "utils/dreamName";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
@@ -96,7 +94,13 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
+const DreamSidebar = ({
+  dream,
+  event,
+  currentOrgMember,
+  canEdit,
+  currentOrg,
+}) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -188,7 +192,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  "Are you sure you would like to accept and finalize funding for this dream? This can't be undone."
+                  `Are you sure you would like to accept and finalize funding for this ${dreamName(
+                    currentOrg
+                  )}? This can't be undone.`
                 ) && acceptFunding().catch((err) => alert(err.message))
               }
             >
@@ -231,7 +237,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  "Are you sure you would like to mark this dream as completed? This can't be undone."
+                  `Are you sure you would like to mark this ${dreamName(
+                    currentOrg
+                  )} as completed? This can't be undone.`
                 ) && markAsCompleted().catch((err) => alert(err.message))
               }
             >
@@ -301,7 +309,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        "Are you sure you would like to delete this dream?"
+                        `Are you sure you would like to delete this ${dreamName(
+                          currentOrg
+                        )}?`
                       ) &&
                       deleteDream()
                         .then(() => {

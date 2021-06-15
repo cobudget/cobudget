@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "@apollo/client";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
+import dreamName from "utils/dreamName";
 
 const EDIT_EVENT = gql`
   mutation editEvent($eventId: ID!, $dreamReviewIsOpen: Boolean) {
@@ -12,7 +13,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event }) => {
+export default ({ event, currentOrg }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
     variables: { eventId: event.id },
   });
@@ -26,10 +27,12 @@ export default ({ event }) => {
 
   return (
     <div className="px-6">
-      <h2 className="text-2xl font-semibold mb-2">Dream Review</h2>
+      <h2 className="text-2xl font-semibold mb-2">
+        {dreamName(currentOrg, true)} Review
+      </h2>
       <p className="text-gray-700 mb-4">
-        If you have set up guidelines you can allow users to review each others
-        dreams according to them.
+        If you have set up guidelines you can allow users to review each others{" "}
+        {dreamName(currentOrg)}s according to them.
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
@@ -45,7 +48,7 @@ export default ({ event }) => {
       >
         <SelectField
           name="dreamReviewIsOpen"
-          label="Show Review Monster"
+          label="Show Review Prompt"
           defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"

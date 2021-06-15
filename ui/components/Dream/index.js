@@ -23,7 +23,9 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {currentOrgMember?.currentEventMembership &&
         event.dreamReviewIsOpen &&
-        event.guidelines.length > 0 && <Monster event={event} dream={dream} />}
+        event.guidelines.length > 0 && (
+          <Monster event={event} dream={dream} currentOrg={currentOrg} />
+        )}
 
       {!dream.published && (
         <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>
@@ -55,7 +57,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               canEdit={canEdit}
               dreamId={dream.id}
             />
-            
+
             {dream.description && (
               <Description
                 // We no longer use this field for new dreams.
@@ -64,8 +66,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
                 dreamId={dream.id}
                 canEdit={canEdit}
               />
-            )
-            }
+            )}
 
             <DreamCustomFields
               eventId={event.id}
@@ -100,6 +101,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               event={event}
               currentOrgMember={currentOrgMember}
               canEdit={canEdit}
+              currentOrg={currentOrg}
             />
           </div>
         </div>

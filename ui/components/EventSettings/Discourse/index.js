@@ -3,6 +3,7 @@ import { useMutation, useQuery, gql } from "@apollo/client";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
+import dreamName from "utils/dreamName";
 
 const EDIT_EVENT = gql`
   mutation editEvent($eventId: ID!, $discourseCategoryId: Int) {
@@ -22,7 +23,7 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-export default ({ event }) => {
+export default ({ event, currentOrg }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
     variables: { eventId: event.id },
   });
@@ -41,8 +42,8 @@ export default ({ event }) => {
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">Category</h2>
       <p className="text-gray-700 mb-4">
-        Select the discourse category that dreams at this event will be posted
-        to
+        Select the discourse category that {dreamName(currentOrg)}s at this
+        event will be posted to
       </p>
       <form
         onSubmit={handleSubmit((variables) => {

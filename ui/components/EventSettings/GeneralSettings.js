@@ -157,6 +157,7 @@ export default function GeneralSettings({
           handleClose={() => {
             setIsDeleteModalOpened(false);
           }}
+          currentOrg={currentOrg}
         />
       )}
     </div>
