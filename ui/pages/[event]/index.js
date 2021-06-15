@@ -2,14 +2,13 @@ import { useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
 import DreamCard from "components/DreamCard";
-import HappySpinner from "components/HappySpinner";
 import Filterbar from "components/Filterbar";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
 import Button from "components/Button";
 import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
-import { CheveronDownIcon } from "components/Icons";
+import LoadMore from "components/LoadMore";
 
 export const DREAMS_QUERY = gql`
   query Dreams(
@@ -91,6 +90,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
+    notifyOnNetworkStatusChange: true,
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
   });
@@ -202,22 +202,11 @@ const EventPage = ({ currentOrgMember, event, router }) => {
             </h1>
           </div>
         )}
-        {moreExist &&
-          (loading ? (
-            <div className="flex-grow flex justify-center items-center h-64">
-              <HappySpinner />
-            </div>
-          ) : (
-            <button
-              className="hover:bg-gray-300 p-1 m-auto mt-7 h-full rounded flex justify-center items-center focus:outline-none opacity-75"
-              onClick={() =>
-                fetchMore({ variables: { offset: allDreams.length } })
-              }
-            >
-              <div>Load more</div>
-              <CheveronDownIcon className="h-8 w-8 ml-3 p-1 text-gray-900 bg-gray-100 rounded-full" />
-            </button>
-          ))}
+        <LoadMore
+          moreExist={moreExist}
+          loading={loading}
+          onClick={() => fetchMore({ variables: { offset: allDreams.length } })}
+        />
       </div>
     </>
   );
