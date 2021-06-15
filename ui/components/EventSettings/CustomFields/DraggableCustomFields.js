@@ -5,6 +5,7 @@ import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
+import dreamName from "utils/dreamName";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
@@ -70,7 +71,12 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({ item: customField, setEditingItem: setEditingCustomField, eventId }) => {
+  ({
+    item: customField,
+    setEditingItem: setEditingCustomField,
+    eventId,
+    currentOrg,
+  }) => {
     const [deleteCustomField, { loading: deleting }] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION,
       {
@@ -97,7 +103,9 @@ const SortableItem = sortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    "Deleting a custom field would delete it from all the dreams that use it. Are you sure?"
+                    `Deleting a custom field would delete it from all the ${dreamName(
+                      currentOrg
+                    )}s that use it. Are you sure?`
                   ) && deleteCustomField()
                 }
               >
@@ -125,7 +133,12 @@ const SortableItem = sortableElement(
   }
 );
 
-const DraggableCustomFields = ({ event, items, setEditingItem }) => {
+const DraggableCustomFields = ({
+  event,
+  items,
+  setEditingItem,
+  currentOrg,
+}) => {
   const [setCustomFieldPosition, { loading }] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION,
     {
@@ -150,6 +163,7 @@ const DraggableCustomFields = ({ event, items, setEditingItem }) => {
       setPositionLoading={loading}
       SortableItem={SortableItem}
       setEditingItem={setEditingItem}
+      currentOrg={currentOrg}
     />
   );
 };

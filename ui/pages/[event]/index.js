@@ -9,6 +9,7 @@ import PageHero from "components/PageHero";
 import Button from "components/Button";
 import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
+import dreamName from "utils/dreamName";
 
 export const DREAMS_QUERY = gql`
   query Dreams($eventSlug: String!, $textSearchTerm: String, $tag: String) {
@@ -48,7 +49,7 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-const EventPage = ({ currentOrgMember, event, router }) => {
+const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
@@ -126,12 +127,13 @@ const EventPage = ({ currentOrgMember, event, router }) => {
                       color={event.color}
                       onClick={() => setNewDreamModalOpen(true)}
                     >
-                      New dream
+                      New {dreamName(currentOrg)}
                     </Button>
                     {newDreamModalOpen && (
                       <NewDreamModal
                         event={event}
                         handleClose={() => setNewDreamModalOpen(false)}
+                        currentOrg={currentOrg}
                       />
                     )}
                   </>
@@ -152,6 +154,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
           setFilterLabels={setFilterLabels}
           tag={tag}
           event={event}
+          currentOrg={currentOrg}
         />
 
         {loading ? (
@@ -182,7 +185,7 @@ const EventPage = ({ currentOrgMember, event, router }) => {
             ) : (
               <div className="flex-grow flex flex-col justify-center items-center h-64">
                 <h1 className="text-3xl text-gray-500 text-center ">
-                  No dreams...
+                  No {dreamName(currentOrg)}s...
                 </h1>
               </div>
             )}

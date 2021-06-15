@@ -2,6 +2,7 @@ import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
+import dreamName from "utils/dreamName";
 import TextField from "../TextField";
 import Button from "../Button";
 import Banner from "../Banner";
@@ -14,7 +15,7 @@ const DELETE_EVENT_MUTATION = gql`
   }
 `;
 
-export default ({ event, handleClose }) => {
+export default ({ event, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
   const [deleteEvent, { loading }] = useMutation(DELETE_EVENT_MUTATION, {
     variables: {
@@ -57,8 +58,8 @@ export default ({ event, handleClose }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{event.title}</b> event, dreams, questions, comments and remove
-          all collaborators.{" "}
+          <b>{event.title}</b> collection, {dreamName(currentOrg)}s, questions,
+          comments and remove all collaborators.{" "}
         </p>
         <p className="mb-4">
           Please type <b>{event.slug}</b> to confirm.

@@ -19,8 +19,8 @@ export const eventItems = ({ currentOrgMember, event }) => {
     { label: "About", href: `/${event.slug}/about` },
     { label: "Members", href: `/${event.slug}/members`, admin: true },
     {
-      label: "Contributions",
-      href: `/${event.slug}/contributions`,
+      label: "Transactions",
+      href: `/${event.slug}/transactions`,
       admin: true,
     },
     { label: "Settings", href: `/${event.slug}/settings`, admin: true },

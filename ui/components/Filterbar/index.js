@@ -21,6 +21,7 @@ const Filterbar = ({
   setFilterLabels,
   tag,
   event,
+  currentOrg,
 }) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
@@ -132,6 +133,7 @@ const Filterbar = ({
         filterLabels={filterLabels}
         setFilterLabels={setFilterLabels}
         className={"mb-2 mt-2"}
+        currentOrg={currentOrg}
       />
     </div>
   );

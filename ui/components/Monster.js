@@ -6,6 +6,7 @@ import AutoScroll from "@brianmcallister/react-auto-scroll";
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
+import dreamName from "utils/dreamName";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -139,7 +140,7 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = (guidelines, raiseFlag) => [
+const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -148,8 +149,9 @@ const raiseFlagFlow = (guidelines, raiseFlag) => [
       chatItems: [
         {
           type: INPUT,
-          message:
-            "Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the dream creators.",
+          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${dreamName(
+            currentOrg
+          )} creators.`,
           sideEffect: (answer) => {
             raiseFlag({
               variables: {
@@ -192,7 +194,7 @@ const resolveFlagFlow = (flagId, resolveFlag) => [
   },
 ];
 
-const Monster = ({ event, dream }) => {
+const Monster = ({ event, dream, currentOrg }) => {
   const [open, setOpen] = useState(false);
   const isAngry = dream.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
@@ -221,17 +223,24 @@ const Monster = ({ event, dream }) => {
     items = [
       {
         type: MESSAGE,
-        message:
-          "This dream has been flagged for breaking guidelines. Please help review it!",
+        message: `This ${dreamName(
+          currentOrg
+        )} has been flagged for breaking guidelines. Please help review it!`,
       },
       {
         type: MESSAGE,
-        message: "Here are the guidelines that dreams need to follow:",
+        message: `Here are the guidelines that ${dreamName(
+          currentOrg
+        )}s need to follow:`,
       },
       ...guidelines,
       ...raisedFlags.map((raisedFlag) => ({
         type: MESSAGE,
-        message: `Someone flagged this dream for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
+        message: `Someone flagged this ${dreamName(
+          currentOrg
+        )} for breaking the "${
+          raisedFlag.guideline.title
+        }" guideline with this comment:
 
           "${raisedFlag.comment}"`,
       })),
@@ -248,7 +257,8 @@ const Monster = ({ event, dream }) => {
                     .map((flag) => flag.guideline.id)
                     .includes(guideline.id)
               ),
-              raiseFlag
+              raiseFlag,
+              currentOrg
             ),
           },
           raisedFlags.length > 1
@@ -275,17 +285,24 @@ const Monster = ({ event, dream }) => {
   } else {
     items = [
       ...[
-        { type: MESSAGE, message: "Please help review this dream!" },
         {
           type: MESSAGE,
-          message: "Here are the guidelines that dreams need to follow:",
+          message: `Please help review this ${dreamName(currentOrg)}!`,
+        },
+        {
+          type: MESSAGE,
+          message: `Here are the guidelines that ${dreamName(
+            currentOrg
+          )}s need to follow:`,
         },
       ],
       ...guidelines,
       ...[
         {
           type: ACTION,
-          message: "Does this dream comply with the guidelines?",
+          message: `Does this ${dreamName(
+            currentOrg
+          )} comply with the guidelines?`,
           actions: [
             {
               label: "Yes, looks good to me!",
@@ -352,7 +369,7 @@ const Monster = ({ event, dream }) => {
           <div
             className={`bg-${event.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
           >
-            <div className="">Review Monster</div>
+            <div className="">Review</div>
             <button
               className="absolute mr-2 right-0 focus:outline-none"
               onClick={() => setOpen(false)}
