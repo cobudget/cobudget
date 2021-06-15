@@ -38,8 +38,9 @@ const InputAction = ({ item, setChatItems, chatItems, color }) => {
   const [input, setInput] = useState("");
   const disabled = input.length === 0;
   return (
-    <div className="my-2 mx-3 flex items-center">
+    <div className="my-2 mx-3 flex items-end">
       <TextField
+        multiline
         placeholder="Write here..."
         color={color}
         className="flex-grow"
