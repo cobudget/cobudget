@@ -5,7 +5,12 @@ import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
 import EditableField from "components/EditableField";
 
-export default function AboutPage({ router, event, currentOrgMember }) {
+export default function AboutPage({
+  router,
+  event,
+  currentOrgMember,
+  currentOrg,
+}) {
   if (!event) return null;
   return (
     <>
@@ -37,7 +42,7 @@ export default function AboutPage({ router, event, currentOrgMember }) {
         </div>
       </PageHero>
       <div className="page">
-        <About router={router} />
+        <About router={router} currentOrg={currentOrg} />
       </div>
     </>
   );

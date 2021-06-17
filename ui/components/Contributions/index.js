@@ -50,7 +50,7 @@ const Contributions = ({ event }) => {
     <>
       <div className="page">
         <div className="flex justify-between mb-3 items-center">
-          <h2 className="text-xl font-semibold">All contributions</h2>
+          <h2 className="text-xl font-semibold">All transactions</h2>
         </div>
         {!!contributions.length && (
           <div className="bg-white divide-y-default divide-gray-200 py-1 rounded shadow">

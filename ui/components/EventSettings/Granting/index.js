@@ -5,6 +5,7 @@ import { gql } from "@apollo/client";
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
+import dreamName from "utils/dreamName";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -70,7 +71,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const EventSettingsModalGranting = ({ event }) => {
+const EventSettingsModalGranting = ({ event, currentOrg }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -97,7 +98,13 @@ const EventSettingsModalGranting = ({ event }) => {
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
         <div className={classes.innerModal}>
-          {open && <ModalContent event={event} closeModal={handleClose} />}
+          {open && (
+            <ModalContent
+              event={event}
+              closeModal={handleClose}
+              currentOrg={currentOrg}
+            />
+          )}
         </div>
       </Modal>
 
@@ -129,7 +136,7 @@ const EventSettingsModalGranting = ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Max. amount to one dream per user"
+            primary={`Max. amount to one ${dreamName(currentOrg)} per user`}
             secondary={
               event.maxAmountToDreamPerUser
                 ? `${thousandSeparator(event.maxAmountToDreamPerUser / 100)} ${
@@ -146,7 +153,7 @@ const EventSettingsModalGranting = ({ event }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Dream creation closes"
+            primary={`${dreamName(currentOrg, true)} creation closes`}
             secondary={
               event.dreamCreationCloses
                 ? dayjs(event.dreamCreationCloses).format(
