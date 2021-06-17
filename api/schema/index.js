@@ -13,7 +13,13 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String!, textSearchTerm: String, tag: String): [Dream]
+    dreamsPage(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): DreamsPage
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
@@ -198,7 +204,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    dreams: [Dream!]
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     currency: String!
@@ -330,6 +335,17 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+  }
+
+  type DreamsPage {
+    moreExist: Boolean
+    dreams(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): [Dream]
   }
 
   type Comment {

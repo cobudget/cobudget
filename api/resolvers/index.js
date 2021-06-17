@@ -115,9 +115,9 @@ const resolvers = {
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
     },
-    dreams: async (
+    dreamsPage: async (
       parent,
-      { eventSlug, textSearchTerm, tag: tagValue },
+      { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
       {
         currentOrgMember,
         currentOrg,
@@ -155,34 +155,47 @@ const resolvers = {
           : null),
       };
 
-      if (
-        currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide)
-      ) {
-        return Dream.find({
-          eventId: event.id,
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-          ...tagQuery,
-        }).sort({ createdAt: -1 });
-      }
-
+      const adminQuery = {
+        eventId: event.id,
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
       // todo: create appropriate index for this query
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
-      if (currentEventMember) {
-        return Dream.find({
-          eventId: event.id,
-          $or: [{ published: true }, { cocreators: currentEventMember.id }],
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-          ...tagQuery,
-        }).sort({ createdAt: -1 });
-      }
-
-      return Dream.find({
+      const memberQuery = {
+        eventId: event.id,
+        $or: [{ published: true }, { cocreators: currentEventMember?.id }],
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
+      const othersQuery = {
         eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
-      }).sort({ createdAt: -1 });
+      };
+
+      const query =
+        currentEventMember &&
+        (currentEventMember.isAdmin || currentEventMember.isGuide)
+          ? adminQuery
+          : currentEventMember
+          ? memberQuery
+          : othersQuery;
+
+      const dreamsWithExtra = [
+        ...(await Dream.find(query, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
+        })),
+      ];
+
+      return {
+        moreExist: dreamsWithExtra.length > limit,
+        dreams: dreamsWithExtra.slice(0, limit),
+      };
     },
     orgMembers: async (
       parent,
@@ -2332,9 +2345,6 @@ const resolvers = {
       return event.about && event.about.length
         ? event.about
         : `# About ${event.title}`;
-    },
-    dreams: async (event, args, { models: { Dream } }) => {
-      return Dream.find({ eventId: event.id });
     },
     numberOfApprovedMembers: async (
       event,
