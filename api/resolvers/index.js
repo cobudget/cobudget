@@ -207,22 +207,29 @@ const resolvers = {
         dreams: dreamsWithExtra.slice(0, limit),
       };
     },
-    orgMembers: async (
+    orgMembersPage: async (
       parent,
-      { limit },
+      { offset, limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
       if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find(
-        {
-          organizationId: currentOrg.id,
-        },
-        null,
-        { limit }
-      );
+      const orgMembersWithExtra = [
+        ...(await OrgMember.find(
+          {
+            organizationId: currentOrg.id,
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: orgMembersWithExtra.length > limit,
+        orgMembers: orgMembersWithExtra.slice(0, limit),
+      };
     },
     members: async (
       parent,

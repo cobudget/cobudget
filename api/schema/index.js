@@ -20,7 +20,7 @@ const schema = gql`
       offset: Int
       limit: Int
     ): DreamsPage
-    orgMembers(limit: Int): [OrgMember]
+    orgMembersPage(offset: Int, limit: Int): OrgMembersPage
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
     contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
@@ -284,6 +284,11 @@ const schema = gql`
     eventMemberships: [EventMember!]
     discourseUsername: String
     hasDiscourseApiKey: Boolean
+  }
+
+  type OrgMembersPage {
+    moreExist: Boolean
+    orgMembers(offset: Int, limit: Int): [OrgMember]
   }
 
   type EventMember {

@@ -1,7 +1,6 @@
 import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
 
-import HappySpinner from "components/HappySpinner";
 import thousandSeparator from "utils/thousandSeparator";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
@@ -44,7 +43,7 @@ const Contributions = ({ event }) => {
     fetchMore,
   } = useQuery(CONTRIBUTIONS_QUERY, {
     notifyOnNetworkStatusChange: true,
-    variables: { eventId: event.id, offset: 0, limit: 2 },
+    variables: { eventId: event.id, offset: 0, limit: 15 },
   });
 
   return (
