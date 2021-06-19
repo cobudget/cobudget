@@ -68,6 +68,16 @@ const DreamSchema = new Schema({
   canceledAt: { type: Date },
   completedAt: { type: Date },
   discourseTopicId: { type: Number },
+  tags: {
+    type: [
+      {
+        type: Schema.Types.ObjectId,
+        index: true,
+      },
+    ],
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 }).index({ title: "text", description: "text", summary: "text" });
 
 

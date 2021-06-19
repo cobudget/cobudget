@@ -4,11 +4,12 @@ import { useMutation } from "@apollo/client";
 import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
+import dreamName from "utils/dreamName";
 
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingCloses = ({ closeModal, event }) => {
+const SetGrantingCloses = ({ closeModal, event, currentOrg }) => {
   const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
     variables: {
       eventId: event.id,
@@ -23,7 +24,9 @@ const SetGrantingCloses = ({ closeModal, event }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set dream creation closes date</h1>
+        <h1 className="text-3xl">
+          Set {dreamName(currentOrg)} creation closes date
+        </h1>
 
         <form
           onSubmit={handleSubmit(() => {
@@ -41,7 +44,7 @@ const SetGrantingCloses = ({ closeModal, event }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label="Dream creation close date"
+                label={`${dreamName(currentOrg, true)} creation close date`}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}

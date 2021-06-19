@@ -13,7 +13,13 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String!, textSearchTerm: String): [Dream]
+    dreamsPage(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): DreamsPage
     orgMembers(limit: Int): [OrgMember]
     members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
@@ -104,11 +110,15 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
+      tags: [String!]
     ): Dream
     deleteDream(dreamId: ID!): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
+
+    addTag(dreamId: ID!, tagId: ID, tagValue: String): Dream
+    removeTag(dreamId: ID!, tagId: ID!): Dream
 
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
@@ -194,7 +204,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    dreams: [Dream!]
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     currency: String!
@@ -216,6 +225,12 @@ const schema = gql`
     totalContributionsFunded: Int
     totalInMembersBalances: Int
     discourseCategoryId: Int
+    tags: [Tag!]
+  }
+
+  type Tag {
+    id: ID!
+    value: String!
   }
 
   type Guideline {
@@ -309,7 +324,7 @@ const schema = gql`
     logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
-    # tags: [Tag]
+    tags: [Tag!]
     minGoal: Int
     maxGoal: Int
     income: Int
@@ -321,6 +336,17 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+  }
+
+  type DreamsPage {
+    moreExist: Boolean
+    dreams(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): [Dream]
   }
 
   type Comment {
@@ -466,6 +492,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     position: Float!
     isShownOnFrontPage: Boolean
@@ -476,6 +503,7 @@ const schema = gql`
     name: String!
     description: String!
     type: CustomFieldType!
+    limit: Int
     isRequired: Boolean!
     isShownOnFrontPage: Boolean
     createdAt: Date

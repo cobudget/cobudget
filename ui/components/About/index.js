@@ -5,6 +5,7 @@ import { useQuery, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
+import dreamName from "utils/dreamName";
 
 export const EVENT_QUERY = gql`
   query EventQuery($slug: String) {
@@ -33,7 +34,7 @@ export const EVENT_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ router }) {
+export default function AboutPage({ router, currentOrg }) {
   const { data: { event } = {}, loading } = useQuery(EVENT_QUERY, {
     variables: { slug: router.query.event },
   });
@@ -73,12 +74,14 @@ export default function AboutPage({ router }) {
             <ListItemText primary={"Currency"} secondary={event.currency} />
           </ListItem>
 
-          {event.maxAmountToDreamPerUser && (
+          {!!event.maxAmountToDreamPerUser && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Max. amount to one dream per user"
+                  primary={`Max. amount to one ${dreamName(
+                    currentOrg
+                  )} per user`}
                   secondary={`${thousandSeparator(
                     event.maxAmountToDreamPerUser / 100
                   )} ${event.currency}`}
@@ -100,7 +103,7 @@ export default function AboutPage({ router }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Dream creation closes"
+                  primary={`${dreamName(currentOrg, true)} creation closes`}
                   secondary={dayjs(event.dreamCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -172,7 +175,9 @@ export default function AboutPage({ router }) {
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Total contributions in funding now dreams"
+              primary={`Total contributions in funding now ${dreamName(
+                currentOrg
+              )}s`}
               secondary={`${thousandSeparator(
                 event.totalContributionsFunding / 100
               )} ${event.currency}`}
@@ -182,7 +187,9 @@ export default function AboutPage({ router }) {
           <Divider />
           <ListItem>
             <ListItemText
-              primary="Total contributions in funded dreams"
+              primary={`Total contributions in funded ${dreamName(
+                currentOrg
+              )}s`}
               secondary={`${thousandSeparator(
                 event.totalContributionsFunded / 100
               )} ${event.currency}`}

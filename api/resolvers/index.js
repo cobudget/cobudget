@@ -115,10 +115,14 @@ const resolvers = {
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
     },
-    dreams: async (
+    dreamsPage: async (
       parent,
-      { eventSlug, textSearchTerm },
-      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
+      { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { Event, Dream, EventMember, Tag },
+      }
     ) => {
       let currentEventMember;
 
@@ -134,32 +138,64 @@ const resolvers = {
         });
       }
 
-      // if admin or guide, show all dreams (published or unpublished)
-      if (
-        currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide)
-      ) {
-        return Dream.find({
+      let tag;
+
+      if (tagValue) {
+        tag = await Tag.findOne({
           eventId: event.id,
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+          value: tagValue,
         });
       }
 
+      const tagQuery = {
+        ...(tag
+          ? {
+              tags: tag,
+            }
+          : null),
+      };
+
+      const adminQuery = {
+        eventId: event.id,
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
       // todo: create appropriate index for this query
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
-      if (currentEventMember) {
-        return Dream.find({
-          eventId: event.id,
-          $or: [{ published: true }, { cocreators: currentEventMember.id }],
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-        });
-      }
-
-      return Dream.find({
+      const memberQuery = {
+        eventId: event.id,
+        $or: [{ published: true }, { cocreators: currentEventMember?.id }],
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
+      const othersQuery = {
         eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-      });
+        ...tagQuery,
+      };
+
+      const query =
+        currentEventMember &&
+        (currentEventMember.isAdmin || currentEventMember.isGuide)
+          ? adminQuery
+          : currentEventMember
+          ? memberQuery
+          : othersQuery;
+
+      const dreamsWithExtra = [
+        ...(await Dream.find(query, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
+        })),
+      ];
+
+      return {
+        moreExist: dreamsWithExtra.length > limit,
+        dreams: dreamsWithExtra.slice(0, limit),
+      };
     },
     orgMembers: async (
       parent,
@@ -384,6 +420,16 @@ const resolvers = {
         currency,
         registrationPolicy,
         organizationId: currentOrg.id,
+        customFields: [
+          {
+            name: "Description",
+            description: "Describe your Dream",
+            type: "MULTILINE_TEXT",
+            isRequired: false,
+            isShownOnFrontPage: false,
+            position: 1001,
+          },
+        ],
       }).save();
 
       await new EventMember({
@@ -687,6 +733,7 @@ const resolvers = {
       // doc = { ...doc, ...customField };
       doc.name = customField.name;
       doc.type = customField.type;
+      doc.limit = customField.limit;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
       doc.isShownOnFrontPage = customField.isShownOnFrontPage;
@@ -764,7 +811,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary, images, budgetItems },
+      { dreamId, title, description, summary, images, budgetItems, tags },
       {
         currentOrg,
         currentOrgMember,
@@ -793,6 +840,8 @@ const resolvers = {
       if (typeof summary !== "undefined") dream.summary = summary;
       if (typeof images !== "undefined") dream.images = images;
       if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
+      if (typeof tags !== "undefined")
+        dream.tags = tags.map((tag) => slugify(tag));
 
       await eventHub.publish("edit-dream", {
         currentOrg,
@@ -801,6 +850,65 @@ const resolvers = {
         dream,
       });
 
+      return dream.save();
+    },
+    addTag: async (
+      parent,
+      { dreamId, tagId, tagValue },
+      { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      if (tagId) {
+        dream.tags.push(tagId);
+        await dream.save();
+      } else if (tagValue) {
+        const tag = await new Tag({
+          value: tagValue,
+          eventId: dream.eventId,
+          organizationId: currentOrg.id,
+        }).save();
+        dream.tags.push(tag.id);
+        await dream.save();
+      } else {
+        throw new Error("You need to provide either tag id or tag value");
+      }
+      return dream;
+    },
+    removeTag: async (
+      _,
+      { dreamId, tagId },
+      { currentOrgMember, models: { EventMember, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
       return dream.save();
     },
     editDreamCustomField: async (
@@ -2231,15 +2339,12 @@ const resolvers = {
     info: (event) => {
       return event.info && event.info.length
         ? event.info
-        : `# Welcome to ${event.title}'s dream page`;
+        : `# Welcome to ${event.title}`;
     },
     about: (event) => {
       return event.about && event.about.length
         ? event.about
         : `# About ${event.title}`;
-    },
-    dreams: async (event, args, { models: { Dream } }) => {
-      return Dream.find({ eventId: event.id });
     },
     numberOfApprovedMembers: async (
       event,
@@ -2354,6 +2459,9 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    tags: async (event, args, { models: { Tag } }) => {
+      return Tag.find({ eventId: event.id });
+    },
   },
   Dream: {
     cocreators: async (dream, args, { models: { EventMember } }) => {
@@ -2431,6 +2539,9 @@ const resolvers = {
       if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
 
       return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
+    tags: async (dream, args, { models: { Tag } }) => {
+      return Tag.find({ _id: { $in: dream.tags } });
     },
   },
   Transaction: {

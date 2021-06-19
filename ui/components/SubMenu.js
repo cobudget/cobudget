@@ -2,10 +2,9 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 
 const orgItems = ({ currentOrgMember }) => {
-  console.log({ currentOrgMember });
   return [
     { label: "Overview", href: "/" },
-    // { label: "Realities", href: "/realities", admin: true },
+    // { label: "Realities", href: "/realities" },
     { label: "Members", href: "/members", admin: true },
     { label: "Settings", href: "/settings", admin: true },
   ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));
@@ -20,8 +19,8 @@ export const eventItems = ({ currentOrgMember, event }) => {
     { label: "About", href: `/${event.slug}/about` },
     { label: "Members", href: `/${event.slug}/members`, admin: true },
     {
-      label: "Contributions",
-      href: `/${event.slug}/contributions`,
+      label: "Transactions",
+      href: `/${event.slug}/transactions`,
       admin: true,
     },
     { label: "Settings", href: `/${event.slug}/settings`, admin: true },

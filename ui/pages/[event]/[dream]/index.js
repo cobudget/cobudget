@@ -23,6 +23,10 @@ export const DREAM_QUERY = gql`
       fundedAt
       canceled
       canceledAt
+      tags {
+        id
+        value
+      }
       raisedFlags {
         id
         comment
@@ -38,6 +42,7 @@ export const DREAM_QUERY = gql`
           id
           name
           type
+          limit
           description
           isRequired
           position

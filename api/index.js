@@ -7,7 +7,6 @@ const { createServer } = require("http");
 const { execute, subscribe } = require("graphql");
 const { makeExecutableSchema } = require("graphql-tools");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
-const KcAdminClient = require("keycloak-admin").default;
 
 require("dotenv").config();
 const bodyParser = require("body-parser");
@@ -19,11 +18,12 @@ const EventHub = require("./services/eventHub.service");
 const {
   db: { getConnection },
 } = require("@sensestack/plato-core");
+const initKcAdminClient = require("./utils/initKcAdminClient");
 
 const Keycloak = require("keycloak-connect");
 const { KeycloakContext } = require("keycloak-connect-graphql");
 
-const subscribers = require('./subscribers/index');
+const subscribers = require("./subscribers/index");
 
 const app = express();
 const keycloak = new Keycloak(
@@ -45,7 +45,7 @@ app.use("/graphql", keycloak.middleware());
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
-  subscriptions: { path: '/subscriptions' },
+  subscriptions: { path: "/subscriptions" },
   context: async ({ req }) => {
     let kauth;
     try {
@@ -56,27 +56,6 @@ const server = new ApolloServer({
 
     const db = await getConnection(process.env.MONGO_URL);
     const models = getModels(db);
-
-    const kcAdminClient = new KcAdminClient({
-      baseUrl: process.env.KEYCLOAK_AUTH_SERVER,
-      realmName: "master",
-      requestConfig: {
-        /* Axios request config options https://github.com/axios/axios#request-config */
-      },
-    });
-
-    // Authorize with username / password
-    await kcAdminClient.auth({
-      username: process.env.KEYCLOAK_ADMIN_USERNAME,
-      password: process.env.KEYCLOAK_ADMIN_PASSWORD,
-      grantType: "password",
-      clientId: "admin-cli",
-      totp: "123456", // optional Time-based One-time Password if OTP is required in authentication flow
-    });
-
-    kcAdminClient.setConfig({
-      realmName: "plato",
-    });
 
     let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
 
@@ -98,9 +77,7 @@ const server = new ApolloServer({
       });
     }
 
-    let token = req.headers.authorization
-      ? req.headers.authorization.split(" ")[1]
-      : null;
+    const kcAdminClient = await initKcAdminClient();
 
     return {
       models,
@@ -133,12 +110,16 @@ appWithSockets.listen(port, () => {
     {
       execute,
       subscribe,
-      schema: makeExecutableSchema({ typeDefs: schema, resolvers })
+      schema: makeExecutableSchema({ typeDefs: schema, resolvers }),
     },
     { server: appWithSockets, path: appWithSockets.subscriptionsPath }
-  )
-  console.log(`🚀 Server ready at http://localhost:${port}${server.graphqlPath}`)
-  console.log(`🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`)
+  );
+  console.log(
+    `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+  );
+  console.log(
+    `🚀 Websockets ready at ws://localhost:${port}${server.subscriptionsPath}`
+  );
 });
 
 // module.exports = cors((req, res) => {

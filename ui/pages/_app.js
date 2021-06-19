@@ -42,6 +42,7 @@ export const TOP_LEVEL_QUERY = gql`
         name
         description
         type
+        limit
         isRequired
         position
         isShownOnFrontPage
@@ -55,6 +56,10 @@ export const TOP_LEVEL_QUERY = gql`
           description
           type
         }
+      }
+      tags {
+        id
+        value
       }
     }
     currentUser {

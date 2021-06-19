@@ -2,18 +2,21 @@ import { Tooltip } from "react-tippy";
 import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
+import { useForm } from "react-hook-form";
 
 import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 import Button from "components/Button";
+import dreamName from "utils/dreamName";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
 import { DREAMS_QUERY } from "pages/[event]";
+import Tags from "./Tags";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -77,12 +80,32 @@ const DELETE_DREAM_MUTATION = gql`
   }
 `;
 
+const EDIT_TAGS_MUTATION = gql`
+  mutation EditTags($dreamId: ID!, $tags: [String!]) {
+    editDream(dreamId: $dreamId, tags: $tags) {
+      id
+      tags
+    }
+  }
+`;
+
 const css = {
   dropdownButton:
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
+const DreamSidebar = ({
+  dream,
+  event,
+  currentOrgMember,
+  canEdit,
+  currentOrg,
+}) => {
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
+  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [editingTags, setEditingTags] = useState(false);
+
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
@@ -105,10 +128,10 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
       },
     ],
   });
-
-  const [contributeModalOpen, setContributeModalOpen] = useState(false);
-  const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
-  const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [editTags] = useMutation(EDIT_TAGS_MUTATION, {
+    variables: { dreamId: dream.id },
+  });
+  const { handleSubmit, register } = useForm();
 
   const isEventAdminOrGuide =
     currentOrgMember?.currentEventMembership?.isAdmin ||
@@ -169,7 +192,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  "Are you sure you would like to accept and finalize funding for this dream? This can't be undone."
+                  `Are you sure you would like to accept and finalize funding for this ${dreamName(
+                    currentOrg
+                  )}? This can't be undone.`
                 ) && acceptFunding().catch((err) => alert(err.message))
               }
             >
@@ -212,7 +237,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  "Are you sure you would like to mark this dream as completed? This can't be undone."
+                  `Are you sure you would like to mark this ${dreamName(
+                    currentOrg
+                  )} as completed? This can't be undone.`
                 ) && markAsCompleted().catch((err) => alert(err.message))
               }
             >
@@ -282,7 +309,9 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        "Are you sure you would like to delete this dream?"
+                        `Are you sure you would like to delete this ${dreamName(
+                          currentOrg
+                        )}?`
                       ) &&
                       deleteDream()
                         .then(() => {
@@ -300,51 +329,57 @@ const DreamSidebar = ({ dream, event, currentOrgMember, canEdit }) => {
           )}
         </div>
       )}
+      <div className="mt-5 space-y-5">
+        <div className="">
+          <h2 className="mb-2 font-medium hidden md:block relative">
+            <span className="mr-2 font-medium ">Co-creators</span>
+            {canEdit && (
+              <div className="absolute top-0 right-0">
+                <Tooltip
+                  title="Edit co-creators"
+                  position="bottom"
+                  size="small"
+                >
+                  <IconButton onClick={() => setCocreatorModalOpen(true)}>
+                    <EditIcon className="h-5 w-5" />
+                  </IconButton>
+                </Tooltip>
+              </div>
+            )}
+          </h2>
 
-      <div className="mt-5">
-        <h2 className="mb-2 font-medium hidden md:block relative">
-          <span className="mr-2">Co-creators</span>
-          {canEdit && (
-            <div className="absolute top-0 right-0">
-              <Tooltip title="Edit co-creators" position="bottom" size="small">
+          <div className="flex items-center flex-wrap">
+            {dream.cocreators.map((member) => (
+              // <Tooltip key={member.user.id} title={member.user.name}>
+              <div
+                key={member.orgMember.user.id}
+                className="flex items-center mr-2 md:mr-3 sm:mb-2"
+              >
+                <Avatar user={member.orgMember.user} />{" "}
+                <span className="ml-2 text-gray-700 hidden md:block">
+                  {member.orgMember.user.username}
+                </span>
+              </div>
+              // </Tooltip>
+            ))}
+            <div className="block md:hidden">
+              {canEdit && (
                 <IconButton onClick={() => setCocreatorModalOpen(true)}>
                   <EditIcon className="h-5 w-5" />
                 </IconButton>
-              </Tooltip>
+              )}
             </div>
-          )}
-        </h2>
-
-        <div className="flex items-center flex-wrap">
-          {dream.cocreators.map((member) => (
-            // <Tooltip key={member.user.id} title={member.user.name}>
-            <div
-              key={member.orgMember.user.id}
-              className="flex items-center mr-2 md:mr-3 sm:mb-2"
-            >
-              <Avatar user={member.orgMember.user} />{" "}
-              <span className="ml-2 text-gray-700 hidden md:block">
-                {member.orgMember.user.username}
-              </span>
-            </div>
-            // </Tooltip>
-          ))}
-          <div className="block md:hidden">
-            {canEdit && (
-              <IconButton onClick={() => setCocreatorModalOpen(true)}>
-                <EditIcon className="h-5 w-5" />
-              </IconButton>
-            )}
           </div>
+          <EditCocreatorsModal
+            open={cocreatorModalOpen}
+            handleClose={() => setCocreatorModalOpen(false)}
+            cocreators={dream.cocreators}
+            event={event}
+            dream={dream}
+            currentOrgMember={currentOrgMember}
+          />
         </div>
-        <EditCocreatorsModal
-          open={cocreatorModalOpen}
-          handleClose={() => setCocreatorModalOpen(false)}
-          cocreators={dream.cocreators}
-          event={event}
-          dream={dream}
-          currentOrgMember={currentOrgMember}
-        />
+        <Tags dream={dream} event={event} canEdit={canEdit} />
       </div>
     </>
   );

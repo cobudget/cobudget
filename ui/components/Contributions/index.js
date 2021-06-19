@@ -49,7 +49,7 @@ const Contributions = ({ event }) => {
       <div className="page">
         <div className="flex justify-between mb-3 items-center">
           <h2 className="text-xl font-semibold">
-            {contributions.length} contributions
+            {contributions.length} transactions
           </h2>
         </div>
         {!!contributions.length && (
