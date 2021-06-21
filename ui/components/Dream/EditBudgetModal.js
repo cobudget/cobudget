@@ -30,12 +30,12 @@ const schema = yup.object().shape({
   budgetItems: yup.array().of(
     yup.object().shape({
       description: yup.string().required(),
-      min: yup.number().positive().integer().required(),
+      min: yup.number().integer().min(0).required(),
       max: yup
         .number()
         .transform((cv) => (isNaN(cv) ? undefined : cv))
         .nullable()
-        .positive()
+        .min(0)
         .integer()
         .moreThan(yup.ref("min"), "Max should be > min"),
       type: yup.string().required(),
@@ -151,7 +151,7 @@ const EditBudgetModal = ({
             </Button>
           </div>
 
-          <h2 className="text-lg font-semibold my-2">Existing funding</h2>
+          <h2 className="text-lg font-semibold my-2">Existing funding and resources</h2>
 
           {incomeItems.map(({ id, description, type, min }, index) => {
             return (
