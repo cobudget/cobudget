@@ -72,7 +72,7 @@ const DreamBudget = ({
           )}
           {incomeItems.length > 0 && (
             <>
-              <h3 className="font-lg font-medium mb-2">Existing funding</h3>
+              <h3 className="font-lg font-medium mb-2">Existing funding and resources</h3>
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">

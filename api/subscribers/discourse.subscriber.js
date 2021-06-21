@@ -273,7 +273,7 @@ module.exports = {
       content.push("## Budget Items");
 
       if (income.length) {
-        content.push("#### Income / Existing funding");
+        content.push("#### Existing funding and resources");
         content.push(
           [
             `|Description|Amount|`,
