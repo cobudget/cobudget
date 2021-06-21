@@ -96,7 +96,11 @@ export default function createApolloClient(initialState, ctx) {
       typePolicies: {
         DreamsPage: {
           fields: {
-            dreams: offsetLimitPagination(),
+            dreams: offsetLimitPagination([
+              "eventSlug",
+              "textSearchTerm",
+              "tag",
+            ]),
           },
         },
       },
