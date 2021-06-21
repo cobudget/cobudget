@@ -84,7 +84,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
-                  {Math.round((dream.totalContributions + dream.income / dream.minGoal) * 100)}
+                  {Math.round(((dream.totalContributions + dream.income) / dream.minGoal) * 100)}
                   %
                 </span>
               </div>
