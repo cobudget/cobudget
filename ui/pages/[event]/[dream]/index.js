@@ -13,6 +13,7 @@ export const DREAM_QUERY = gql`
       title
       minGoal
       maxGoal
+      income
       totalContributions
       approved
       published
