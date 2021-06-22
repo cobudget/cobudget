@@ -21,7 +21,12 @@ const schema = gql`
       limit: Int
     ): DreamsPage
     orgMembersPage(offset: Int, limit: Int): OrgMembersPage
-    members(eventId: ID!, isApproved: Boolean): [EventMember]
+    membersPage(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): MembersPage
     categories: [Category!]
     contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
@@ -301,6 +306,16 @@ const schema = gql`
     createdAt: Date
     balance: Int # stored as cents
     # roles: [Role]
+  }
+
+  type MembersPage {
+    moreExist: Boolean
+    members(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): [EventMember]
   }
 
   # enum Role {

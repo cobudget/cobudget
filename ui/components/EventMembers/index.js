@@ -1,35 +1,67 @@
 import { useState } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
-import Link from "next/link";
 
 import Button from "components/Button";
-import HappySpinner from "components/HappySpinner";
 import InviteMembersModal from "components/InviteMembersModal";
-import SubMenu from "components/SubMenu";
+import LoadMore from "components/LoadMore";
 
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
-import { useRouter } from "next/router";
 
 export const EVENT_MEMBERS_QUERY = gql`
-  query Members($eventId: ID!) {
-    members(eventId: $eventId) {
-      id
-      isAdmin
-      isGuide
-      isApproved
-      createdAt
-      balance
-      orgMember {
+  query Members($eventId: ID!, $offset: Int, $limit: Int) {
+    approvedMembersPage: membersPage(
+      eventId: $eventId
+      isApproved: true
+      offset: $offset
+      limit: $limit
+    ) {
+      moreExist
+      approvedMembers: members(
+        eventId: $eventId
+        isApproved: true
+        offset: $offset
+        limit: $limit
+      ) {
         id
-        bio
-        user {
+        isAdmin
+        isGuide
+        isApproved
+        createdAt
+        balance
+        orgMember {
           id
-          name
-          username
-          email
-          verifiedEmail
-          avatar
+          bio
+          user {
+            id
+            name
+            username
+            email
+            verifiedEmail
+            avatar
+          }
+        }
+      }
+    }
+    requestsToJoinPage: membersPage(eventId: $eventId, isApproved: false) {
+      requestsToJoin: members(eventId: $eventId, isApproved: false) {
+        id
+        isAdmin
+        isGuide
+        isApproved
+        createdAt
+        balance
+        orgMember {
+          id
+          bio
+          user {
+            id
+            name
+            username
+            email
+            verifiedEmail
+            avatar
+          }
         }
       }
     }
@@ -69,9 +101,24 @@ const DELETE_MEMBER = gql`
 
 const EventMembers = ({ event }) => {
   const {
-    data: { members } = { members: [] },
+    data: {
+      approvedMembersPage: { moreExist, approvedMembers },
+      requestsToJoinPage: { requestsToJoin },
+    } = {
+      approvedMembersPage: {
+        approvedMembers: [],
+      },
+      requestsToJoinPage: {
+        requestsToJoin: [],
+      },
+    },
     loading,
-  } = useQuery(EVENT_MEMBERS_QUERY, { variables: { eventId: event.id } });
+    error,
+    fetchMore,
+  } = useQuery(EVENT_MEMBERS_QUERY, {
+    notifyOnNetworkStatusChange: true,
+    variables: { eventId: event.id, offset: 0, limit: 10 },
+  });
 
   const [updateMember] = useMutation(UPDATE_MEMBER, {
     variables: { eventId: event.id },
@@ -80,7 +127,10 @@ const EventMembers = ({ event }) => {
   const [deleteMember] = useMutation(DELETE_MEMBER, {
     variables: { eventId: event.id },
     update(cache, { data: { deleteMember } }) {
-      const { members } = cache.readQuery({
+      const {
+        approvedMembersPage: { approvedMembers },
+        requestsToJoinPage: { requestsToJoin },
+      } = cache.readQuery({
         query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
       });
@@ -89,23 +139,34 @@ const EventMembers = ({ event }) => {
         query: EVENT_MEMBERS_QUERY,
         variables: { eventId: event.id },
         data: {
-          members: members.filter((member) => member.id !== deleteMember.id),
+          approvedMembersPage: {
+            approvedMembers: approvedMembers.filter(
+              (member) => member.id !== deleteMember.id
+            ),
+          },
+        },
+      });
+
+      cache.writeQuery({
+        query: EVENT_MEMBERS_QUERY,
+        variables: { eventId: event.id },
+        data: {
+          requestsToJoinPage: {
+            requestsToJoin: requestsToJoin.filter(
+              (member) => member.id !== deleteMember.id
+            ),
+          },
         },
       });
     },
   });
 
-  const approvedMembers = members.filter((member) => member.isApproved);
-  const requestsToJoin = members.filter((member) => !member.isApproved);
-
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
-  if (loading)
-    return (
-      <div className="page flex justify-center">
-        <HappySpinner />
-      </div>
-    );
+  if (error) {
+    console.error(error);
+    return null;
+  }
 
   return (
     <>
@@ -117,9 +178,7 @@ const EventMembers = ({ event }) => {
         />
 
         <div className="flex justify-between mb-3 items-center">
-          <h2 className="text-xl font-semibold">
-            {approvedMembers.length} members
-          </h2>
+          <h2 className="text-xl font-semibold">All collection members</h2>
           <div className="flex items-center space-x-2">
             <Button onClick={() => setInviteModalOpen(true)}>
               Invite members
@@ -138,6 +197,14 @@ const EventMembers = ({ event }) => {
           updateMember={updateMember}
           deleteMember={deleteMember}
           event={event}
+        />
+
+        <LoadMore
+          moreExist={moreExist}
+          loading={loading}
+          onClick={() =>
+            fetchMore({ variables: { offset: approvedMembers.length } })
+          }
         />
       </div>
     </>

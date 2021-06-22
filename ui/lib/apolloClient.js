@@ -108,6 +108,11 @@ export default function createApolloClient(initialState, ctx) {
             ]),
           },
         },
+        MembersPage: {
+          fields: {
+            members: offsetLimitPagination(["eventId", "isApproved"]),
+          },
+        },
         ContributionsPage: {
           fields: {
             contributions: offsetLimitPagination(["eventId"]),

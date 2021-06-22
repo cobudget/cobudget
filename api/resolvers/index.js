@@ -231,9 +231,9 @@ const resolvers = {
         orgMembers: orgMembersWithExtra.slice(0, limit),
       };
     },
-    members: async (
+    membersPage: async (
       parent,
-      { eventId, isApproved },
+      { eventId, isApproved, offset, limit },
       { currentOrgMember, models: { EventMember, Event } }
     ) => {
       if (!currentOrgMember)
@@ -262,10 +262,21 @@ const resolvers = {
           "You need to be approved member of this event or org admin to view EventMembers"
         );
 
-      return EventMember.find({
-        eventId,
-        ...(typeof isApproved === "boolean" && { isApproved }),
-      });
+      const eventMembersWithExtra = [
+        ...(await EventMember.find(
+          {
+            eventId,
+            ...(typeof isApproved === "boolean" && { isApproved }),
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: eventMembersWithExtra.length > limit,
+        members: eventMembersWithExtra.slice(0, limit),
+      };
     },
     categories: async (parent, args, { currentOrg, currentOrgMember }) => {
       if (!currentOrg.discourse) {
