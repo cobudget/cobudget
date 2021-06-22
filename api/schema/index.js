@@ -332,6 +332,7 @@ const schema = gql`
     tags: [Tag!]
     minGoal: Int
     maxGoal: Int
+    income: Int
     totalContributions: Int
 
     fundedAt: Date

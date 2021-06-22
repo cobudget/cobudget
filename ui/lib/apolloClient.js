@@ -101,7 +101,11 @@ export default function createApolloClient(initialState, ctx) {
         },
         DreamsPage: {
           fields: {
-            dreams: offsetLimitPagination(),
+            dreams: offsetLimitPagination([
+              "eventSlug",
+              "textSearchTerm",
+              "tag",
+            ]),
           },
         },
         ContributionsPage: {

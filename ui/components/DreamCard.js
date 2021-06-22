@@ -74,7 +74,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
           {showFundingStats && (
             <ProgressBar
               color={event.color}
-              ratio={dream.totalContributions / dream.minGoal}
+              ratio={(dream.totalContributions + dream.income) / dream.minGoal}
               className="mt-2 mb-3"
             />
           )}
@@ -84,7 +84,7 @@ const DreamCard = ({ dream, event, currentOrgMember, filterLabels }) => {
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
-                  {Math.round((dream.totalContributions / dream.minGoal) * 100)}
+                  {Math.round(((dream.totalContributions + dream.income) / dream.minGoal) * 100)}
                   %
                 </span>
               </div>

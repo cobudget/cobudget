@@ -80,6 +80,12 @@ const DreamSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 }).index({ title: "text", description: "text", summary: "text" });
 
+
+DreamSchema.virtual("income").get(function () {
+  const { incomes } = calculateGoals(this.budgetItems);
+  return incomes;
+});
+
 DreamSchema.virtual("minGoal").get(function () {
   const { min } = calculateGoals(this.budgetItems);
   return min;
