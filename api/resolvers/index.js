@@ -186,10 +186,24 @@ const resolvers = {
           ? memberQuery
           : othersQuery;
 
+      const userSeed = currentOrgMember
+        ? new Date(currentOrgMember.createdAt).getTime() % 1000
+        : 1;
+
       const dreamsWithExtra = [
         ...(await Dream.aggregate([{ $match: query }])
           .addFields({
-            position: { $mod: [{ $toDouble: "$createdAt" }, 1000] },
+            position: {
+              $mod: [
+                {
+                  $multiply: [
+                    { $mod: [{ $toDouble: "$createdAt" }, 1000] },
+                    userSeed,
+                  ],
+                },
+                1000,
+              ],
+            },
           })
           .sort({
             position: 1,
@@ -197,8 +211,6 @@ const resolvers = {
           .skip(offset)
           .limit(limit + 1)),
       ].map((d) => ({ ...d, id: d._id }));
-
-      console.log("dreamsextra", dreamsWithExtra);
 
       return {
         moreExist: dreamsWithExtra.length > limit,
