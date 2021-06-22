@@ -184,13 +184,18 @@ const resolvers = {
           : othersQuery;
 
       const dreamsWithExtra = [
-        ...(await Dream.find(query, null, {
-          skip: offset,
-          limit: limit + 1,
-        }).sort({
-          createdAt: -1,
-        })),
-      ];
+        ...(await Dream.aggregate([
+          { $match: { eventId: mongoose.Types.ObjectId(event.id) } },
+        ])
+          .addFields({ potato: { $concat: ["$title", "asdf"] } })
+          .sort({
+            createdAt: -1,
+          })
+          .skip(offset)
+          .limit(limit + 1)),
+      ].map((d) => ({ ...d, id: d._id }));
+
+      console.log("dreamsextra", dreamsWithExtra);
 
       return {
         moreExist: dreamsWithExtra.length > limit,
