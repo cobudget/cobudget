@@ -197,7 +197,12 @@ const resolvers = {
               $mod: [
                 {
                   $multiply: [
-                    { $mod: [{ $toDouble: "$createdAt" }, 1000] },
+                    {
+                      $mod: [
+                        { $toDouble: { $ifNull: ["$createdAt", 1] } },
+                        1000,
+                      ],
+                    },
                     userSeed,
                   ],
                 },
