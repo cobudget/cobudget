@@ -150,29 +150,26 @@ const resolvers = {
       const tagQuery = {
         ...(tag
           ? {
-              tags: mongoose.Types.ObjectId(tag._id),
+              tags: tag,
             }
           : null),
       };
 
       const adminQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
+        eventId: event.id,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
       };
       // todo: create appropriate index for this query
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
       const memberQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
-        $or: [
-          { published: true },
-          { cocreators: mongoose.Types.ObjectId(currentEventMember?.id) },
-        ],
+        eventId: event.id,
+        $or: [{ published: true }, { cocreators: currentEventMember?.id }],
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
       };
       const othersQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
+        eventId: event.id,
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
@@ -186,44 +183,14 @@ const resolvers = {
           ? memberQuery
           : othersQuery;
 
-      const userSeed = currentOrgMember
-        ? new Date(currentOrgMember.createdAt).getTime() % 1000
-        : 1;
-
       const dreamsWithExtra = [
-        ...(await Dream.aggregate([{ $match: query }])
-          .addFields({
-            position: {
-              $mod: [
-                {
-                  $multiply: [
-                    {
-                      $mod: [
-                        { $toDouble: { $ifNull: ["$createdAt", 1] } },
-                        1000,
-                      ],
-                    },
-                    userSeed,
-                  ],
-                },
-                1000,
-              ],
-            },
-          })
-          .sort({
-            position: 1,
-          })
-          .skip(offset)
-          .limit(limit + 1)),
-      ].map((dream) => ({
-        ...dream,
-        id: dream._id,
-        customFields: dream.customFields.map((field) => ({
-          ...field,
-          id: field._id,
+        ...(await Dream.find(query, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
         })),
-        images: dream.images.map((image) => ({ ...image, id: image._id })),
-      }));
+      ];
 
       return {
         moreExist: dreamsWithExtra.length > limit,
