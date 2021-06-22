@@ -188,9 +188,11 @@ const resolvers = {
 
       const dreamsWithExtra = [
         ...(await Dream.aggregate([{ $match: query }])
-          .addFields({ potato: { $concat: ["$title", "asdf"] } })
+          .addFields({
+            position: { $mod: [{ $toDouble: "$createdAt" }, 1000] },
+          })
           .sort({
-            createdAt: -1,
+            position: 1,
           })
           .skip(offset)
           .limit(limit + 1)),
