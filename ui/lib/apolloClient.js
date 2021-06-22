@@ -110,7 +110,7 @@ export default function createApolloClient(initialState, ctx) {
         },
         ContributionsPage: {
           fields: {
-            contributions: offsetLimitPagination(),
+            contributions: offsetLimitPagination(["eventId"]),
           },
         },
       },
