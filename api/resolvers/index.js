@@ -121,6 +121,7 @@ const resolvers = {
       {
         currentOrgMember,
         currentOrg,
+        kauth,
         models: { Event, Dream, EventMember, Tag },
       }
     ) => {
@@ -190,20 +191,28 @@ const resolvers = {
         ? new Date(currentOrgMember.createdAt).getTime() % 1000
         : 1;
 
+      const msPerDay = 1000 * 60 * 60 * 30; // one day being 30hrs :P
+      const timeSeed = ((new Date().getTime() % msPerDay) / msPerDay) * 1000;
+
       const dreamsWithExtra = [
         ...(await Dream.aggregate([{ $match: query }])
           .addFields({
             position: {
               $mod: [
                 {
-                  $multiply: [
+                  $add: [
                     {
-                      $mod: [
-                        { $toDouble: { $ifNull: ["$createdAt", 1] } },
-                        1000,
+                      $multiply: [
+                        {
+                          $mod: [
+                            { $toDouble: { $ifNull: ["$createdAt", 1] } },
+                            1000,
+                          ],
+                        },
+                        userSeed,
                       ],
                     },
-                    userSeed,
+                    timeSeed,
                   ],
                 },
                 1000,
