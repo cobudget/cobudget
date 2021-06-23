@@ -212,6 +212,7 @@ const resolvers = {
           })
           .sort({
             position: 1,
+            _id: 1,
           })
           .skip(offset)
           .limit(limit + 1)),
