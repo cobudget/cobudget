@@ -5,7 +5,10 @@ function capitalize(str) {
 
 // quick hack to change the word dream to bucket for the cobudget org
 export default (org, shouldCapitalize) => {
-  const name = org?.subdomain === "cobudget" ? "bucket" : "dream";
+  const name =
+    org?.subdomain === "cobudget" || org?.subdomain === "grassrootsfund"
+      ? "bucket"
+      : "dream";
   if (shouldCapitalize) return capitalize(name);
   return name;
 };
