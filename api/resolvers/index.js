@@ -117,11 +117,10 @@ const resolvers = {
     },
     dreamsPage: async (
       parent,
-      { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
+      { eventSlug, textSearchTerm, tag: tagValue, timeSeed, offset, limit },
       {
         currentOrgMember,
         currentOrg,
-        kauth,
         models: { Event, Dream, EventMember, Tag },
       }
     ) => {
@@ -190,9 +189,6 @@ const resolvers = {
       const userSeed = currentOrgMember
         ? new Date(currentOrgMember.createdAt).getTime() % 1000
         : 1;
-
-      const msPerDay = 1000 * 60 * 60 * 30; // one day being 30hrs :P
-      const timeSeed = ((new Date().getTime() % msPerDay) / msPerDay) * 1000;
 
       const dreamSeed = {
         $mod: [{ $toDouble: { $ifNull: ["$createdAt", 1] } }, 1000],
