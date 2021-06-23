@@ -194,6 +194,10 @@ const resolvers = {
       const msPerDay = 1000 * 60 * 60 * 30; // one day being 30hrs :P
       const timeSeed = ((new Date().getTime() % msPerDay) / msPerDay) * 1000;
 
+      const dreamSeed = {
+        $mod: [{ $toDouble: { $ifNull: ["$createdAt", 1] } }, 1000],
+      };
+
       const dreamsWithExtra = [
         ...(await Dream.aggregate([{ $match: query }])
           .addFields({
@@ -202,15 +206,7 @@ const resolvers = {
                 {
                   $add: [
                     {
-                      $multiply: [
-                        {
-                          $mod: [
-                            { $toDouble: { $ifNull: ["$createdAt", 1] } },
-                            1000,
-                          ],
-                        },
-                        userSeed,
-                      ],
+                      $multiply: [dreamSeed, userSeed],
                     },
                     timeSeed,
                   ],
