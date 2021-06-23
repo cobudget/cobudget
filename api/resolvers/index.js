@@ -215,15 +215,7 @@ const resolvers = {
           })
           .skip(offset)
           .limit(limit + 1)),
-      ].map((dream) => ({
-        ...dream,
-        id: dream._id,
-        customFields: dream.customFields.map((field) => ({
-          ...field,
-          id: field._id,
-        })),
-        images: dream.images.map((image) => ({ ...image, id: image._id })),
-      }));
+      ].map((dream) => Dream(dream));
 
       return {
         moreExist: dreamsWithExtra.length > limit,
