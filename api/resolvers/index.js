@@ -1924,9 +1924,30 @@ const resolvers = {
       }
 
       // Check that it is not more than is allowed per dream (if this number is set)
+
+      const [
+        { contributionsFromUserToThisDream } = {
+          contributionsFromUserToThisDream: 0,
+        },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
+            dreamId: mongoose.Types.ObjectId(dreamId),
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            contributionsFromUserToThisDream: { $sum: "$amount" },
+          },
+        },
+      ]);
+
       if (
         event.maxAmountToDreamPerUser &&
-        amount > event.maxAmountToDreamPerUser
+        amount + contributionsFromUserToThisDream >
+          event.maxAmountToDreamPerUser
       ) {
         throw new Error(
           `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
