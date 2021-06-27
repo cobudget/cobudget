@@ -72,7 +72,6 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-
 const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
   const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
@@ -98,24 +97,10 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
     nextFetchPolicy: "cache-first",
   });
 
-  const allDreams = dreams;
-
   if (error) {
     console.error(error);
   }
   if (!event) return null;
-
-  if (filterLabels) {
-    dreams = dreams.filter((dream) => {
-      if (!dream.customFields || dream.customFields.length == 0) return;
-      const existingField = dream.customFields.filter((field) => {
-        return field.customField.id == filterLabels.id;
-      });
-      if (existingField && existingField.length > 0) {
-        return existingField[0].value;
-      }
-    });
-  }
 
   return (
     <>
@@ -216,7 +201,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
             <button
               className="hover:bg-gray-300 p-1 m-auto mt-7 h-full rounded flex justify-center items-center focus:outline-none opacity-75"
               onClick={() =>
-                fetchMore({ variables: { offset: allDreams.length } })
+                fetchMore({ variables: { offset: dreams.length } })
               }
             >
               <div>Load more</div>
