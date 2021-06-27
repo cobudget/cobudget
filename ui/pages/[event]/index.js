@@ -73,7 +73,6 @@ export const DREAMS_QUERY = gql`
 `;
 
 const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
-  const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const { tag, s } = router.query;
@@ -159,12 +158,8 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
         <Filterbar
           textSearchTerm={s}
           currentOrgMember={currentOrgMember}
-          customFields={event.customFields}
-          filterLabels={filterLabels}
-          setFilterLabels={setFilterLabels}
           tag={tag}
           event={event}
-          currentOrg={currentOrg}
         />
         {dreams.length ? (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -175,12 +170,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
                 key={dream.id}
               >
                 <a className="flex focus:outline-none focus:ring rounded-lg">
-                  <DreamCard
-                    dream={dream}
-                    event={event}
-                    currentOrgMember={currentOrgMember}
-                    filterLabels={filterLabels}
-                  />
+                  <DreamCard dream={dream} event={event} />
                 </a>
               </Link>
             ))}
