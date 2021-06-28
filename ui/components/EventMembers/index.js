@@ -117,7 +117,7 @@ const EventMembers = ({ event }) => {
     fetchMore,
   } = useQuery(EVENT_MEMBERS_QUERY, {
     notifyOnNetworkStatusChange: true,
-    variables: { eventId: event.id, offset: 0, limit: 10 },
+    variables: { eventId: event.id, offset: 0, limit: 1000 },
   });
 
   const [updateMember] = useMutation(UPDATE_MEMBER, {
