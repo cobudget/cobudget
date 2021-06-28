@@ -20,10 +20,15 @@ const schema = gql`
       offset: Int
       limit: Int
     ): DreamsPage
-    orgMembers(limit: Int): [OrgMember]
-    members(eventId: ID!, isApproved: Boolean): [EventMember]
+    orgMembersPage(offset: Int, limit: Int): OrgMembersPage
+    membersPage(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): MembersPage
     categories: [Category!]
-    contributions(eventId: ID!): [Contribution]
+    contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
 
   type Mutation {
@@ -286,6 +291,11 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
   }
 
+  type OrgMembersPage {
+    moreExist: Boolean
+    orgMembers(offset: Int, limit: Int): [OrgMember]
+  }
+
   type EventMember {
     id: ID!
     event: Event!
@@ -296,6 +306,16 @@ const schema = gql`
     createdAt: Date
     balance: Int # stored as cents
     # roles: [Role]
+  }
+
+  type MembersPage {
+    moreExist: Boolean
+    members(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): [EventMember]
   }
 
   # enum Role {
@@ -420,6 +440,11 @@ const schema = gql`
     amount: Int!
     createdAt: Date
     dream: Dream!
+  }
+
+  type ContributionsPage {
+    moreExist: Boolean
+    contributions(eventId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
   type Allocation implements Transaction {

@@ -93,9 +93,9 @@ const resolvers = {
       if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
-    contributions: async (
+    contributionsPage: async (
       parent,
-      { eventId },
+      { eventId, offset, limit },
       { currentOrgMember, models: { EventMember, Contribution } }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in");
@@ -108,9 +108,19 @@ const resolvers = {
       if (!(currentOrgMember?.isOrgAdmin || eventMember?.isAdmin))
         throw new Error("You need to be org admin to view this");
 
-      return Contribution.find({ eventId }).sort({
-        createdAt: -1,
-      });
+      const contributionsWithExtra = [
+        ...(await Contribution.find({ eventId }, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
+        })),
+      ];
+
+      return {
+        moreExist: contributionsWithExtra.length > limit,
+        contributions: contributionsWithExtra.slice(0, limit),
+      };
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
@@ -223,26 +233,33 @@ const resolvers = {
         dreams: dreamsWithExtra.slice(0, limit),
       };
     },
-    orgMembers: async (
+    orgMembersPage: async (
       parent,
-      { limit },
+      { offset, limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
       if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find(
-        {
-          organizationId: currentOrg.id,
-        },
-        null,
-        { limit }
-      );
+      const orgMembersWithExtra = [
+        ...(await OrgMember.find(
+          {
+            organizationId: currentOrg.id,
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: orgMembersWithExtra.length > limit,
+        orgMembers: orgMembersWithExtra.slice(0, limit),
+      };
     },
-    members: async (
+    membersPage: async (
       parent,
-      { eventId, isApproved },
+      { eventId, isApproved, offset, limit },
       { currentOrgMember, models: { EventMember, Event } }
     ) => {
       if (!currentOrgMember)
@@ -271,10 +288,21 @@ const resolvers = {
           "You need to be approved member of this event or org admin to view EventMembers"
         );
 
-      return EventMember.find({
-        eventId,
-        ...(typeof isApproved === "boolean" && { isApproved }),
-      });
+      const eventMembersWithExtra = [
+        ...(await EventMember.find(
+          {
+            eventId,
+            ...(typeof isApproved === "boolean" && { isApproved }),
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: eventMembersWithExtra.length > limit,
+        members: eventMembersWithExtra.slice(0, limit),
+      };
     },
     categories: async (parent, args, { currentOrg, currentOrgMember }) => {
       if (!currentOrg.discourse) {
