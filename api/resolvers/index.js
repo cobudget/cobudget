@@ -1543,7 +1543,7 @@ const resolvers = {
         });
 
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id });
+          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
           if (orgMember) {
             const eventMember = await EventMember.findOne({
               orgMemberId: orgMember.id,
@@ -1639,7 +1639,7 @@ const resolvers = {
           email: email.trim(),
         });
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id });
+          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
           if (!orgMember) {
             newOrgMembers.push(
               await new OrgMember({
