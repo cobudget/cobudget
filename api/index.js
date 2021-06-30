@@ -46,6 +46,9 @@ const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   subscriptions: { path: "/subscriptions" },
+  formatError: (err) => {
+    return process.env.NODE_ENV === "production" ? new Error(err.message) : err;
+  },
   context: async ({ req }) => {
     let kauth;
     try {
