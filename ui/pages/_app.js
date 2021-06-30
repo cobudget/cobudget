@@ -45,7 +45,6 @@ export const TOP_LEVEL_QUERY = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
       filterLabels {

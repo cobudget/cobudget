@@ -45,15 +45,14 @@ const EventSchema = new Schema({
         default: "TEXT",
         required: true,
       },
-      limit : {
-        type: Number
+      limit: {
+        type: Number,
       },
       isRequired: { type: Boolean, required: true },
       position: {
         type: Number,
         required: true,
       },
-      isShownOnFrontPage: Boolean,
       createdAt: {
         type: Date,
         default: Date.now,

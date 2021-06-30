@@ -22,7 +22,6 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
     }
@@ -49,7 +48,6 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
     }
@@ -64,9 +62,11 @@ const schema = yup.object().shape({
       .mixed()
       .oneOf(["TEXT", "MULTILINE_TEXT", "BOOLEAN", "ENUM", "FILE"])
       .required(),
-    limit: yup.number().transform((cv) => (isNaN(cv) ? undefined : cv)).nullable(),
+    limit: yup
+      .number()
+      .transform((cv) => (isNaN(cv) ? undefined : cv))
+      .nullable(),
     isRequired: yup.bool().required(),
-    isShownOnFrontPage: yup.bool().nullable(),
   }),
 });
 
@@ -79,7 +79,6 @@ export default ({
     type: "TEXT",
     limit: null,
     isRequired: false,
-    isShownOnFrontPage: false,
   },
 }) => {
   const editing = Boolean(customField.id);
@@ -100,9 +99,6 @@ export default ({
   });
 
   // Requires to manage seperetly due to Material UI Checkbox
-  const [isShownOnFrontPage, setIsShownOnFrontPage] = useState(
-    customField.isShownOnFrontPage || false
-  );
   const [isRequired, setIsRequired] = useState(customField.isRequired || false);
   const [limit, setLimit] = useState(Number(customField.limit) || null);
 
@@ -118,7 +114,6 @@ export default ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            variables.customField.isShownOnFrontPage = isShownOnFrontPage;
             variables.customField.isRequired = isRequired;
             return addOrEditCustomField({ variables })
               .then(() => handleClose())
@@ -146,22 +141,22 @@ export default ({
             />
             <div className="flex">
               <SelectField
-                  name={"customField.type"}
-                  defaultValue={customField.type}
-                  inputRef={register}
-                  className="mr-4"
-                  color={event.color}
-                  inputProps={{
-                    value: typeInputValue,
-                    onChange: (e) => setTypeInputValue(e.target.value)
-                  }}
-                >
-                  <option value="TEXT">Short Text</option>
-                  <option value="MULTILINE_TEXT">Long Text</option>
-                  <option value="BOOLEAN">Yes/No</option>
+                name={"customField.type"}
+                defaultValue={customField.type}
+                inputRef={register}
+                className="mr-4"
+                color={event.color}
+                inputProps={{
+                  value: typeInputValue,
+                  onChange: (e) => setTypeInputValue(e.target.value),
+                }}
+              >
+                <option value="TEXT">Short Text</option>
+                <option value="MULTILINE_TEXT">Long Text</option>
+                <option value="BOOLEAN">Yes/No</option>
               </SelectField>
-              {
-                typeInputValue == "TEXT" || typeInputValue == "MULTILINE_TEXT" ?
+              {typeInputValue == "TEXT" ||
+              typeInputValue == "MULTILINE_TEXT" ? (
                 <TextField
                   placeholder="Character limit"
                   name={"customField.limit"}
@@ -174,11 +169,10 @@ export default ({
                     type: "number",
                     min: "1",
                     value: limit,
-                    onChange: (e) => setLimit(e.target.value)
+                    onChange: (e) => setLimit(e.target.value),
                   }}
                 />
-                : null
-              }
+              ) : null}
             </div>
             <div className="flex">
               <Controller
@@ -197,25 +191,6 @@ export default ({
                 }
                 name={"customField.isRequired"}
                 defaultValue={customField.isRequired}
-                control={control}
-                inputRef={register}
-              />
-              <Controller
-                as={
-                  <FormControlLabel
-                    label="Show on front page"
-                    control={
-                      <Checkbox
-                        onChange={(e) => {
-                          setIsShownOnFrontPage(e.target.checked);
-                        }}
-                        checked={isShownOnFrontPage}
-                      />
-                    }
-                  />
-                }
-                name={"customField.isShownOnFrontPage"}
-                defaultValue={isShownOnFrontPage}
                 control={control}
                 inputRef={register}
               />

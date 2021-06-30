@@ -58,7 +58,6 @@ export const DREAMS_QUERY = gql`
             description
             isRequired
             position
-            isShownOnFrontPage
             createdAt
           }
         }

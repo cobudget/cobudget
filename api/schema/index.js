@@ -495,7 +495,6 @@ const schema = gql`
     limit: Int
     isRequired: Boolean!
     position: Float!
-    isShownOnFrontPage: Boolean
     createdAt: Date!
   }
 
@@ -505,7 +504,6 @@ const schema = gql`
     type: CustomFieldType!
     limit: Int
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean
     createdAt: Date
   }
 

@@ -452,7 +452,6 @@ const resolvers = {
             description: "Describe your Dream",
             type: "MULTILINE_TEXT",
             isRequired: false,
-            isShownOnFrontPage: false,
             position: 1001,
           },
         ],
@@ -762,7 +761,6 @@ const resolvers = {
       doc.limit = customField.limit;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
-      doc.isShownOnFrontPage = customField.isShownOnFrontPage;
 
       return event.save();
     },
