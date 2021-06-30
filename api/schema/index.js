@@ -163,8 +163,6 @@ const schema = gql`
       allowStretchGoals: Boolean
     ): Event
 
-    toggleFavorite(dreamId: ID!): Dream
-
     allocate(
       eventMemberId: ID!
       amount: Int!
@@ -316,7 +314,6 @@ const schema = gql`
     numberOfComments: Int
 
     approved: Boolean
-    favorite: Boolean
     published: Boolean
     flags: [Flag]
     raisedFlags: [Flag]

@@ -20,7 +20,6 @@ const EventMemberSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  favorites: [{ type: Schema.Types.ObjectId, ref: "Dream" }],
 }).index({ orgMemberId: 1, eventId: 1 }, { unique: true });
 
 module.exports = EventMemberSchema;

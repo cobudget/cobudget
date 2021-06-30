@@ -44,7 +44,6 @@ export const DREAMS_QUERY = gql`
         income
         totalContributions
         numberOfComments
-        favorite
         published
         approved
         canceled

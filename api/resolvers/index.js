@@ -2159,35 +2159,6 @@ const resolvers = {
 
       return event.save();
     },
-    toggleFavorite: async (
-      parent,
-      { dreamId },
-      { currentOrgMember, models: { Dream, EventMember } }
-    ) => {
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
-
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
-
-      if (!currentEventMember)
-        throw new Error("You need to be a member to favorite something.");
-
-      if (currentEventMember.favorites.includes(dreamId)) {
-        currentEventMember.favorites = currentEventMember.favorites.filter(
-          (favoriteId) => favoriteId != dreamId
-        );
-        await currentEventMember.save();
-      } else {
-        currentEventMember.favorites.push(dreamId);
-        await currentEventMember.save();
-      }
-
-      return dream;
-    },
     registerForEvent: async (
       parent,
       { eventId },
@@ -2545,19 +2516,6 @@ const resolvers = {
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
       return dream.comments.length;
-    },
-    favorite: async (
-      dream,
-      args,
-      { currentOrgMember, models: { EventMember } }
-    ) => {
-      if (!currentOrgMember) return false;
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
-      if (!currentEventMember) return false;
-      return currentEventMember.favorites.includes(dream.id);
     },
     raisedFlags: async (dream) => {
       const resolveFlagIds = dream.flags
