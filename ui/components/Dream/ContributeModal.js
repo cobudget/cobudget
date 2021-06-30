@@ -98,6 +98,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
               type: "number",
               min: "0",
               max: `${max / 100}`,
+              step: 0.01,
             }}
           />
           <Button
