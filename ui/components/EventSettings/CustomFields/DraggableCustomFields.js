@@ -19,7 +19,6 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
     }
