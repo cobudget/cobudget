@@ -2692,19 +2692,6 @@ const resolvers = {
       return eventCustomField[0];
     },
   },
-  CustomFieldFilterLabels: {
-    customField: async (customFieldValue, args, { models: { Event } }) => {
-      const { eventId, fieldId } = customFieldValue;
-      const event = await Event.findOne({ _id: eventId });
-      if (!event.customFields) {
-        return;
-      }
-      const eventCustomField = event.customFields.filter(
-        (eventCustomField) => eventCustomField.id == fieldId
-      );
-      return eventCustomField[0];
-    },
-  },
   Log: {
     details: (log) => log,
     user: async (log, args, { models: { User } }) => {

@@ -217,7 +217,6 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
-    filterLabels: [CustomFieldFilterLabels]
     dreamReviewIsOpen: Boolean
     totalAllocations: Int
     totalContributions: Int
@@ -480,11 +479,6 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
-  }
-
-  type CustomFieldFilterLabels {
-    customField: CustomField
-    eventId: ID!
   }
 
   type CustomField {

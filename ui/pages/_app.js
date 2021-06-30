@@ -47,15 +47,6 @@ export const TOP_LEVEL_QUERY = gql`
         position
         createdAt
       }
-      filterLabels {
-        eventId
-        customField {
-          id
-          name
-          description
-          type
-        }
-      }
       tags {
         id
         value
