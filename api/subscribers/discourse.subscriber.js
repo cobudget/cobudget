@@ -2,7 +2,9 @@ const discourse = require("../lib/discourse");
 const liveUpdate = require("../services/liveUpdate.service");
 
 module.exports = {
-  orgHasDiscourse(org) { return org.discourse.url && org.discourse.apiKey },
+  orgHasDiscourse(org) {
+    return org.discourse.url && org.discourse.apiKey;
+  },
   generateComment(post, orgMember) {
     return {
       id: post.id,
@@ -10,11 +12,9 @@ module.exports = {
       authorId: orgMember.id,
       content: post.raw,
       htmlContent: post.cooked,
-    }
+    };
   },
   initialize(eventHub, { Dream }) {
-    console.log(`Integrating with Discourse...`);
-
     eventHub.subscribe(
       "create-dream",
       "discourse",
@@ -108,8 +108,14 @@ module.exports = {
       "publish-dream",
       "discourse",
       async ({ currentOrg, currentOrgMember, event, dream, unpublish }) => {
+        if (!this.orgHasDiscourse(currentOrg)) {
+          return;
+        }
+
         console.log(
-          `Setting visibility of dream ${dream.id} to ${!unpublish} on Discourse...`
+          `Setting visibility of dream ${
+            dream.id
+          } to ${!unpublish} on Discourse...`
         );
 
         if (!dream.discourseTopicId) {
@@ -140,7 +146,9 @@ module.exports = {
       "create-comment",
       "discourse",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) { return; }
+        if (!this.orgHasDiscourse(currentOrg)) {
+          return;
+        }
 
         if (!currentOrgMember.discourseApiKey)
           throw new Error(
@@ -176,8 +184,13 @@ module.exports = {
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
-        const created = this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: created, action: 'created' } });
+        const created = this.generateComment(
+          { ...post, raw: comment.content },
+          currentOrgMember
+        );
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment: created, action: "created" },
+        });
 
         return created;
       }
@@ -213,8 +226,13 @@ module.exports = {
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        const updated = this.generateComment({ ...post, raw: comment.content }, currentOrgMember);
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: updated, action: 'edited' } });
+        const updated = this.generateComment(
+          { ...post, raw: comment.content },
+          currentOrgMember
+        );
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment: updated, action: "edited" },
+        });
 
         return updated;
       }
@@ -241,7 +259,9 @@ module.exports = {
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
 
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment, action: 'deleted' } });
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment, action: "deleted" },
+        });
 
         return comment;
       }
@@ -319,7 +339,9 @@ module.exports = {
         );
       }
 
-      content.push(`Total funding goal: ${dream.minGoal/100} ${event.currency}`);
+      content.push(
+        `Total funding goal: ${dream.minGoal / 100} ${event.currency}`
+      );
     }
 
     if (dream.images && dream.images.length > 0) {
