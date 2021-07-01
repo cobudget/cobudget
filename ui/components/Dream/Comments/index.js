@@ -4,12 +4,13 @@ import Comment from "./Comment";
 import Log from "./Log";
 import HappySpinner from "components/HappySpinner";
 import Context, { useCommentContext } from "contexts/comment";
+import LoadMore from "components/LoadMore";
 
 const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
   const context = useCommentContext({
     from: 0,
     limit: 3,
-    order: 'desc',
+    order: "desc",
     currentOrg,
     currentOrgMember,
     event,
@@ -23,7 +24,9 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
         <>
           <div className="flex justify-between items-center">
             <h2 className="mb-4 text-2xl font-medium" id="comments">
-              {`${comments.length} of ${total} ${total === 1 ? 'comment' : 'comments'}`}
+              {`${comments.length} of ${total} ${
+                total === 1 ? "comment" : "comments"
+              }`}
             </h2>
 
             {dream.discourseTopicUrl && (
@@ -32,8 +35,12 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
               </a>
             )}
           </div>
-          {loading && <HappySpinner size={6} />}
-          {total > comments.length && !loading && <button onClick={() => setFrom(f => f + limit)}>Load more</button>}
+          <LoadMore
+            moreExist={total > comments.length}
+            loading={loading}
+            reverse
+            onClick={() => setFrom((f) => f + limit)}
+          />
         </>
       )}
       {comments.map((comment, index) => {
@@ -46,9 +53,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
           />
         );
       })}
-      {currentOrgMember && (
-        <AddComment />
-      )}
+      {currentOrgMember && <AddComment />}
     </Context.Provider>
   );
 };
