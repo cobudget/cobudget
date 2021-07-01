@@ -168,8 +168,6 @@ const schema = gql`
       allowStretchGoals: Boolean
     ): Event
 
-    toggleFavorite(dreamId: ID!): Dream
-
     allocate(
       eventMemberId: ID!
       amount: Int!
@@ -222,7 +220,6 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
-    filterLabels: [CustomFieldFilterLabels]
     dreamReviewIsOpen: Boolean
     totalAllocations: Int
     totalContributions: Int
@@ -337,7 +334,6 @@ const schema = gql`
     numberOfComments: Int
 
     approved: Boolean
-    favorite: Boolean
     published: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
@@ -507,11 +503,6 @@ const schema = gql`
     FILE
   }
 
-  type CustomFieldFilterLabels {
-    customField: CustomField
-    eventId: ID!
-  }
-
   type CustomField {
     id: ID!
     name: String!
@@ -520,7 +511,6 @@ const schema = gql`
     limit: Int
     isRequired: Boolean!
     position: Float!
-    isShownOnFrontPage: Boolean
     createdAt: Date!
   }
 
@@ -530,7 +520,6 @@ const schema = gql`
     type: CustomFieldType!
     limit: Int
     isRequired: Boolean!
-    isShownOnFrontPage: Boolean
     createdAt: Date
   }
 

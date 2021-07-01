@@ -43,7 +43,6 @@ export const DREAMS_QUERY = gql`
         income
         totalContributions
         numberOfComments
-        favorite
         published
         approved
         canceled
@@ -57,7 +56,6 @@ export const DREAMS_QUERY = gql`
             description
             isRequired
             position
-            isShownOnFrontPage
             createdAt
           }
         }
@@ -72,7 +70,6 @@ export const DREAMS_QUERY = gql`
 `;
 
 const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
-  const [filterLabels, setFilterLabels] = useState();
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
 
   const { tag, s } = router.query;
@@ -97,24 +94,10 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
     nextFetchPolicy: "cache-first",
   });
 
-  const allDreams = dreams;
-
   if (error) {
     console.error(error);
   }
   if (!event) return null;
-
-  if (filterLabels) {
-    dreams = dreams.filter((dream) => {
-      if (!dream.customFields || dream.customFields.length == 0) return;
-      const existingField = dream.customFields.filter((field) => {
-        return field.customField.id == filterLabels.id;
-      });
-      if (existingField && existingField.length > 0) {
-        return existingField[0].value;
-      }
-    });
-  }
 
   return (
     <>
@@ -173,12 +156,8 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
         <Filterbar
           textSearchTerm={s}
           currentOrgMember={currentOrgMember}
-          customFields={event.customFields}
-          filterLabels={filterLabels}
-          setFilterLabels={setFilterLabels}
           tag={tag}
           event={event}
-          currentOrg={currentOrg}
         />
         {dreams.length ? (
           <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -189,12 +168,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
                 key={dream.id}
               >
                 <a className="flex focus:outline-none focus:ring rounded-lg">
-                  <DreamCard
-                    dream={dream}
-                    event={event}
-                    currentOrgMember={currentOrgMember}
-                    filterLabels={filterLabels}
-                  />
+                  <DreamCard dream={dream} event={event} />
                 </a>
               </Link>
             ))}
@@ -209,7 +183,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
         <LoadMore
           moreExist={moreExist}
           loading={loading}
-          onClick={() => fetchMore({ variables: { offset: allDreams.length } })}
+          onClick={() => fetchMore({ variables: { offset: dreams.length } })}
         />
       </div>
     </>

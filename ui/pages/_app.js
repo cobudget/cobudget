@@ -45,17 +45,7 @@ export const TOP_LEVEL_QUERY = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
-      }
-      filterLabels {
-        eventId
-        customField {
-          id
-          name
-          description
-          type
-        }
       }
       tags {
         id
