@@ -88,9 +88,9 @@ const resolvers = {
       if (!currentOrg) return null;
       return Event.findOne({ slug, organizationId: currentOrg.id });
     },
-    contributions: async (
+    contributionsPage: async (
       parent,
-      { eventId },
+      { eventId, offset, limit },
       { currentOrgMember, models: { EventMember, Contribution } }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in");
@@ -103,17 +103,31 @@ const resolvers = {
       if (!(currentOrgMember?.isOrgAdmin || eventMember?.isAdmin))
         throw new Error("You need to be org admin to view this");
 
-      return Contribution.find({ eventId }).sort({
-        createdAt: -1,
-      });
+      const contributionsWithExtra = [
+        ...(await Contribution.find({ eventId }, null, {
+          skip: offset,
+          limit: limit + 1,
+        }).sort({
+          createdAt: -1,
+        })),
+      ];
+
+      return {
+        moreExist: contributionsWithExtra.length > limit,
+        contributions: contributionsWithExtra.slice(0, limit),
+      };
     },
     dream: async (parent, { id }, { models: { Dream } }) => {
       return Dream.findOne({ _id: id });
     },
-    dreams: async (
+    dreamsPage: async (
       parent,
-      { eventSlug, textSearchTerm, tags },
-      { currentOrgMember, currentOrg, models: { Event, Dream, EventMember } }
+      { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
+      {
+        currentOrgMember,
+        currentOrg,
+        models: { Event, Dream, EventMember, Tag },
+      }
     ) => {
       let currentEventMember;
 
@@ -129,63 +143,118 @@ const resolvers = {
         });
       }
 
+      let tag;
+
+      if (tagValue) {
+        tag = await Tag.findOne({
+          eventId: event.id,
+          value: tagValue,
+        });
+      }
+
       const tagQuery = {
-        ...(tags
+        ...(tag
           ? {
-              tags: { $all: tags },
+              tags: mongoose.Types.ObjectId(tag._id),
             }
           : null),
       };
 
-      if (
-        currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide)
-      ) {
-        return Dream.find({
-          eventId: event.id,
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-          ...tagQuery,
-        }).sort({ createdAt: -1 });
-      }
-
+      const adminQuery = {
+        eventId: mongoose.Types.ObjectId(event.id),
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
       // todo: create appropriate index for this query
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
-      if (currentEventMember) {
-        return Dream.find({
-          eventId: event.id,
-          $or: [{ published: true }, { cocreators: currentEventMember.id }],
-          ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
-          ...tagQuery,
-        }).sort({ createdAt: -1 });
-      }
-
-      return Dream.find({
-        eventId: event.id,
+      const memberQuery = {
+        eventId: mongoose.Types.ObjectId(event.id),
+        $or: [
+          { published: true },
+          { cocreators: mongoose.Types.ObjectId(currentEventMember?.id) },
+        ],
+        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...tagQuery,
+      };
+      const othersQuery = {
+        eventId: mongoose.Types.ObjectId(event.id),
         published: true,
         ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
         ...tagQuery,
-      }).sort({ createdAt: -1 });
+      };
+
+      const query =
+        currentEventMember &&
+        (currentEventMember.isAdmin || currentEventMember.isGuide)
+          ? adminQuery
+          : currentEventMember
+          ? memberQuery
+          : othersQuery;
+
+      const userSeed = currentOrgMember
+        ? new Date(currentOrgMember.createdAt).getTime() % 1000
+        : 1;
+
+      const dreamsWithExtra = [
+        ...(await Dream.aggregate([{ $match: query }])
+          .addFields({
+            position: {
+              $mod: [
+                {
+                  $multiply: [
+                    {
+                      $mod: [
+                        { $toDouble: { $ifNull: ["$createdAt", 1] } },
+                        1000,
+                      ],
+                    },
+                    userSeed,
+                  ],
+                },
+                1000,
+              ],
+            },
+          })
+          .sort({
+            position: 1,
+            _id: 1,
+          })
+          .skip(offset)
+          .limit(limit + 1)),
+      ].map((dream) => Dream(dream));
+
+      return {
+        moreExist: dreamsWithExtra.length > limit,
+        dreams: dreamsWithExtra.slice(0, limit),
+      };
     },
-    orgMembers: async (
+    orgMembersPage: async (
       parent,
-      { limit },
+      { offset, limit },
       { currentOrg, currentOrgMember, models: { OrgMember } }
     ) => {
       if (!currentOrg) return null;
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
-      return OrgMember.find(
-        {
-          organizationId: currentOrg.id,
-        },
-        null,
-        { limit }
-      );
+      const orgMembersWithExtra = [
+        ...(await OrgMember.find(
+          {
+            organizationId: currentOrg.id,
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: orgMembersWithExtra.length > limit,
+        orgMembers: orgMembersWithExtra.slice(0, limit),
+      };
     },
-    members: async (
+    membersPage: async (
       parent,
-      { eventId, isApproved },
+      { eventId, isApproved, offset, limit },
       { currentOrgMember, models: { EventMember, Event } }
     ) => {
       if (!currentOrgMember)
@@ -214,10 +283,21 @@ const resolvers = {
           "You need to be approved member of this event or org admin to view EventMembers"
         );
 
-      return EventMember.find({
-        eventId,
-        ...(typeof isApproved === "boolean" && { isApproved }),
-      });
+      const eventMembersWithExtra = [
+        ...(await EventMember.find(
+          {
+            eventId,
+            ...(typeof isApproved === "boolean" && { isApproved }),
+          },
+          null,
+          { skip: offset, limit: limit + 1 }
+        )),
+      ];
+
+      return {
+        moreExist: eventMembersWithExtra.length > limit,
+        members: eventMembersWithExtra.slice(0, limit),
+      };
     },
     categories: async (parent, args, { currentOrg, currentOrgMember }) => {
       if (!currentOrg.discourse) {
@@ -843,6 +923,65 @@ const resolvers = {
 
       return dream.save();
     },
+    addTag: async (
+      parent,
+      { dreamId, tagId, tagValue },
+      { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      if (tagId) {
+        dream.tags.push(tagId);
+        await dream.save();
+      } else if (tagValue) {
+        const tag = await new Tag({
+          value: tagValue,
+          eventId: dream.eventId,
+          organizationId: currentOrg.id,
+        }).save();
+        dream.tags.push(tag.id);
+        await dream.save();
+      } else {
+        throw new Error("You need to provide either tag id or tag value");
+      }
+      return dream;
+    },
+    removeTag: async (
+      _,
+      { dreamId, tagId },
+      { currentOrgMember, models: { EventMember, Dream } }
+    ) => {
+      const dream = await Dream.findOne({ _id: dreamId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (
+        !eventMember ||
+        (!dream.cocreators.includes(eventMember.id) &&
+          !eventMember.isAdmin &&
+          !eventMember.isGuide)
+      )
+        throw new Error("You are not a cocreator of this dream.");
+
+      dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
+      return dream.save();
+    },
     editDreamCustomField: async (
       parent,
       { dreamId, customField },
@@ -1377,7 +1516,7 @@ const resolvers = {
         });
 
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id });
+          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
           if (orgMember) {
             const eventMember = await EventMember.findOne({
               orgMemberId: orgMember.id,
@@ -1473,7 +1612,7 @@ const resolvers = {
           email: email.trim(),
         });
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id });
+          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
           if (!orgMember) {
             newOrgMembers.push(
               await new OrgMember({
@@ -1786,9 +1925,30 @@ const resolvers = {
       }
 
       // Check that it is not more than is allowed per dream (if this number is set)
+
+      const [
+        { contributionsFromUserToThisDream } = {
+          contributionsFromUserToThisDream: 0,
+        },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
+            dreamId: mongoose.Types.ObjectId(dreamId),
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            contributionsFromUserToThisDream: { $sum: "$amount" },
+          },
+        },
+      ]);
+
       if (
         event.maxAmountToDreamPerUser &&
-        amount > event.maxAmountToDreamPerUser
+        amount + contributionsFromUserToThisDream >
+          event.maxAmountToDreamPerUser
       ) {
         throw new Error(
           `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
@@ -2227,15 +2387,12 @@ const resolvers = {
     info: (event) => {
       return event.info && event.info.length
         ? event.info
-        : `# Welcome to ${event.title}'s dream page`;
+        : `# Welcome to ${event.title}`;
     },
     about: (event) => {
       return event.about && event.about.length
         ? event.about
         : `# About ${event.title}`;
-    },
-    dreams: async (event, args, { models: { Dream } }) => {
-      return Dream.find({ eventId: event.id });
     },
     numberOfApprovedMembers: async (
       event,
@@ -2350,6 +2507,9 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    tags: async (event, args, { models: { Tag } }) => {
+      return Tag.find({ eventId: event.id });
+    },
   },
   Dream: {
     cocreators: async (dream, args, { models: { EventMember } }) => {
@@ -2415,6 +2575,9 @@ const resolvers = {
       if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
 
       return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+    },
+    tags: async (dream, args, { models: { Tag } }) => {
+      return Tag.find({ _id: { $in: dream.tags } });
     },
   },
   Transaction: {

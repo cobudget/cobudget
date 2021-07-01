@@ -1,6 +1,9 @@
 import { ApolloClient, HttpLink, split } from "@apollo/client";
 import { InMemoryCache } from "@apollo/client/cache";
-import { getMainDefinition } from "@apollo/client/utilities";
+import {
+  getMainDefinition,
+  offsetLimitPagination,
+} from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { setContext } from "@apollo/client/link/context";
 import fetch from "isomorphic-unfetch";
@@ -97,8 +100,10 @@ export default function createApolloClient(initialState, ctx) {
               merge(existing = [], incoming = [], { readField, mergeObjects }) {
                 const merged = existing.slice(0);
 
-                incoming.forEach(comment => {
-                  const current = existing.findIndex(c => readField('id', c) == readField('id', comment));
+                incoming.forEach((comment) => {
+                  const current = existing.findIndex(
+                    (c) => readField("id", c) == readField("id", comment)
+                  );
 
                   if (current === -1) {
                     merged.push(comment);
@@ -107,11 +112,37 @@ export default function createApolloClient(initialState, ctx) {
                   }
                 });
 
-                return merged.sort((c1, c2) => (
-                  readField('createdAt', c1) < readField('createdAt', c2) ? -1 : 1
-                ));
-              }
-            }
+                return merged.sort((c1, c2) =>
+                  readField("createdAt", c1) < readField("createdAt", c2)
+                    ? -1
+                    : 1
+                );
+              },
+            },
+          },
+        },
+        OrgMembersPage: {
+          fields: {
+            orgMembers: offsetLimitPagination(),
+          },
+        },
+        DreamsPage: {
+          fields: {
+            dreams: offsetLimitPagination([
+              "eventSlug",
+              "textSearchTerm",
+              "tag",
+            ]),
+          },
+        },
+        MembersPage: {
+          fields: {
+            members: offsetLimitPagination(["eventId", "isApproved"]),
+          },
+        },
+        ContributionsPage: {
+          fields: {
+            contributions: offsetLimitPagination(["eventId"]),
           },
         },
       },

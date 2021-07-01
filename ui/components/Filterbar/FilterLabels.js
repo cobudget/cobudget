@@ -2,6 +2,8 @@ import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import { Tooltip } from "react-tippy";
+import dreamName from "utils/dreamName";
+
 import stringToHslColor, { stringToColor } from "../../utils/stringToHslColor";
 import { TagIcon } from "components/Icons";
 
@@ -28,7 +30,12 @@ const StyledToggleButtonGroup = withStyles((theme) => ({
   },
 }))(ToggleButtonGroup);
 
-export default ({ customFields, filterLabels, setFilterLabels }) => {
+export default ({
+  customFields,
+  filterLabels,
+  setFilterLabels,
+  currentOrg,
+}) => {
   if (!customFields) return;
 
   const classes = useStyles();
@@ -52,7 +59,7 @@ export default ({ customFields, filterLabels, setFilterLabels }) => {
             className={`${classes.toggleButton}`}
           >
             <Tooltip
-              title={`Show the dream's ${customField.name}`}
+              title={`Show the ${dreamName(currentOrg)}'s ${customField.name}`}
               position="bottom"
               size="small"
             >

@@ -7,6 +7,7 @@ import { Modal } from "@material-ui/core";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
+import dreamName from "utils/dreamName";
 
 const CREATE_DREAM = gql`
   mutation CreateDream($eventId: ID!, $title: String!) {
@@ -17,7 +18,7 @@ const CREATE_DREAM = gql`
   }
 `;
 
-export default ({ event, handleClose }) => {
+export default ({ event, handleClose, currentOrg }) => {
   const [createDream, { loading }] = useMutation(CREATE_DREAM, {
     variables: { eventId: event.id },
     refetchQueries: ["Dreams"],
@@ -50,7 +51,7 @@ export default ({ event, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <form onSubmit={handleSubmit(onSubmitCreate)}>
-          <h1 className="text-xl font-semibold">New dream</h1>
+          <h1 className="text-xl font-semibold">New {dreamName(currentOrg)}</h1>
 
           <TextField
             className="my-3"

@@ -71,7 +71,7 @@ const DreamSchema = new Schema({
   tags: {
     type: [
       {
-        type: String,
+        type: Schema.Types.ObjectId,
         index: true,
       },
     ],
@@ -79,6 +79,12 @@ const DreamSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 }).index({ title: "text", description: "text", summary: "text" });
+
+
+DreamSchema.virtual("income").get(function () {
+  const { incomes } = calculateGoals(this.budgetItems);
+  return incomes;
+});
 
 DreamSchema.virtual("minGoal").get(function () {
   const { min } = calculateGoals(this.budgetItems);

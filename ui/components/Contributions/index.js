@@ -1,31 +1,34 @@
 import { useQuery, gql } from "@apollo/client";
 import Link from "next/link";
 
-import HappySpinner from "components/HappySpinner";
 import thousandSeparator from "utils/thousandSeparator";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
+import LoadMore from "components/LoadMore";
 dayjs.extend(LocalizedFormat);
 
 export const CONTRIBUTIONS_QUERY = gql`
-  query Contributions($eventId: ID!) {
-    contributions(eventId: $eventId) {
-      id
-      amount
-      createdAt
-      eventMember {
+  query Contributions($eventId: ID!, $offset: Int, $limit: Int) {
+    contributionsPage(eventId: $eventId, offset: $offset, limit: $limit) {
+      moreExist
+      contributions(eventId: $eventId, offset: $offset, limit: $limit) {
         id
-        orgMember {
+        amount
+        createdAt
+        eventMember {
           id
-          user {
+          orgMember {
             id
-            username
+            user {
+              id
+              username
+            }
           }
         }
-      }
-      dream {
-        id
-        title
+        dream {
+          id
+          title
+        }
       }
     }
   }
@@ -33,24 +36,21 @@ export const CONTRIBUTIONS_QUERY = gql`
 
 const Contributions = ({ event }) => {
   const {
-    data: { contributions } = { contributions: [] },
+    data: { contributionsPage: { moreExist, contributions } } = {
+      contributionsPage: { contributions: [] },
+    },
     loading,
-  } = useQuery(CONTRIBUTIONS_QUERY, { variables: { eventId: event.id } });
-
-  if (loading)
-    return (
-      <div className="page flex justify-center">
-        <HappySpinner />
-      </div>
-    );
+    fetchMore,
+  } = useQuery(CONTRIBUTIONS_QUERY, {
+    notifyOnNetworkStatusChange: true,
+    variables: { eventId: event.id, offset: 0, limit: 15 },
+  });
 
   return (
     <>
       <div className="page">
         <div className="flex justify-between mb-3 items-center">
-          <h2 className="text-xl font-semibold">
-            {contributions.length} contributions
-          </h2>
+          <h2 className="text-xl font-semibold">All transactions</h2>
         </div>
         {!!contributions.length && (
           <div className="bg-white divide-y-default divide-gray-200 py-1 rounded shadow">
@@ -77,6 +77,13 @@ const Contributions = ({ event }) => {
             ))}
           </div>
         )}
+        <LoadMore
+          moreExist={moreExist}
+          loading={loading}
+          onClick={() =>
+            fetchMore({ variables: { offset: contributions.length } })
+          }
+        />
       </div>
     </>
   );

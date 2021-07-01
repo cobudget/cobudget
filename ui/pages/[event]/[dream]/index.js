@@ -13,6 +13,7 @@ export const DREAM_QUERY = gql`
       title
       minGoal
       maxGoal
+      income
       totalContributions
       approved
       published
@@ -22,7 +23,10 @@ export const DREAM_QUERY = gql`
       fundedAt
       canceled
       canceledAt
-      tags
+      tags {
+        id
+        value
+      }
       raisedFlags {
         id
         comment

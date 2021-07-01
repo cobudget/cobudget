@@ -13,12 +13,23 @@ const schema = gql`
     events(limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
-    dreams(eventSlug: String!, textSearchTerm: String, tags: [String!]): [Dream]
+    dreamsPage(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): DreamsPage
     commentSet(dreamId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    orgMembers(limit: Int): [OrgMember]
-    members(eventId: ID!, isApproved: Boolean): [EventMember]
+    orgMembersPage(offset: Int, limit: Int): OrgMembersPage
+    membersPage(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): MembersPage
     categories: [Category!]
-    contributions(eventId: ID!): [Contribution]
+    contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
 
   type Mutation {
@@ -112,6 +123,9 @@ const schema = gql`
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
 
+    addTag(dreamId: ID!, tagId: ID, tagValue: String): Dream
+    removeTag(dreamId: ID!, tagId: ID!): Dream
+
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
     addComment(dreamId: ID!, content: String!): Comment
@@ -196,7 +210,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    dreams: [Dream!]
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     currency: String!
@@ -218,6 +231,12 @@ const schema = gql`
     totalContributionsFunded: Int
     totalInMembersBalances: Int
     discourseCategoryId: Int
+    tags: [Tag!]
+  }
+
+  type Tag {
+    id: ID!
+    value: String!
   }
 
   type Guideline {
@@ -273,6 +292,11 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
   }
 
+  type OrgMembersPage {
+    moreExist: Boolean
+    orgMembers(offset: Int, limit: Int): [OrgMember]
+  }
+
   type EventMember {
     id: ID!
     event: Event!
@@ -283,6 +307,16 @@ const schema = gql`
     createdAt: Date
     balance: Int # stored as cents
     # roles: [Role]
+  }
+
+  type MembersPage {
+    moreExist: Boolean
+    members(
+      eventId: ID!
+      isApproved: Boolean
+      offset: Int
+      limit: Int
+    ): [EventMember]
   }
 
   # enum Role {
@@ -308,9 +342,10 @@ const schema = gql`
     logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
-    tags: [String!]
+    tags: [Tag!]
     minGoal: Int
     maxGoal: Int
+    income: Int
     totalContributions: Int
     numberOfComments: Int
 
@@ -320,6 +355,17 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+  }
+
+  type DreamsPage {
+    moreExist: Boolean
+    dreams(
+      eventSlug: String!
+      textSearchTerm: String
+      tag: String
+      offset: Int
+      limit: Int
+    ): [Dream]
   }
 
   type Comment {
@@ -401,6 +447,11 @@ const schema = gql`
     amount: Int!
     createdAt: Date
     dream: Dream!
+  }
+
+  type ContributionsPage {
+    moreExist: Boolean
+    contributions(eventId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
   type Allocation implements Transaction {
