@@ -497,7 +497,6 @@ const resolvers = {
             description: "Describe your Dream",
             type: "MULTILINE_TEXT",
             isRequired: false,
-            isShownOnFrontPage: false,
             position: 1001,
           },
         ],
@@ -807,7 +806,6 @@ const resolvers = {
       doc.limit = customField.limit;
       doc.description = customField.description;
       doc.isRequired = customField.isRequired;
-      doc.isShownOnFrontPage = customField.isShownOnFrontPage;
 
       return event.save();
     },
@@ -2162,35 +2160,6 @@ const resolvers = {
 
       return event.save();
     },
-    toggleFavorite: async (
-      parent,
-      { dreamId },
-      { currentOrgMember, models: { Dream, EventMember } }
-    ) => {
-      const dream = await Dream.findOne({
-        _id: dreamId,
-      });
-
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
-
-      if (!currentEventMember)
-        throw new Error("You need to be a member to favorite something.");
-
-      if (currentEventMember.favorites.includes(dreamId)) {
-        currentEventMember.favorites = currentEventMember.favorites.filter(
-          (favoriteId) => favoriteId != dreamId
-        );
-        await currentEventMember.save();
-      } else {
-        currentEventMember.favorites.push(dreamId);
-        await currentEventMember.save();
-      }
-
-      return dream;
-    },
     registerForEvent: async (
       parent,
       { eventId },
@@ -2537,19 +2506,6 @@ const resolvers = {
 
       return dream.comments.length;
     },
-    favorite: async (
-      dream,
-      args,
-      { currentOrgMember, models: { EventMember } }
-    ) => {
-      if (!currentOrgMember) return false;
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
-      });
-      if (!currentEventMember) return false;
-      return currentEventMember.favorites.includes(dream.id);
-    },
     raisedFlags: async (dream) => {
       const resolveFlagIds = dream.flags
         .filter((flag) => flag.type === "RESOLVE_FLAG")
@@ -2652,19 +2608,6 @@ const resolvers = {
           createdAt: new Date(),
         };
       }
-      return eventCustomField[0];
-    },
-  },
-  CustomFieldFilterLabels: {
-    customField: async (customFieldValue, args, { models: { Event } }) => {
-      const { eventId, fieldId } = customFieldValue;
-      const event = await Event.findOne({ _id: eventId });
-      if (!event.customFields) {
-        return;
-      }
-      const eventCustomField = event.customFields.filter(
-        (eventCustomField) => eventCustomField.id == fieldId
-      );
       return eventCustomField[0];
     },
   },

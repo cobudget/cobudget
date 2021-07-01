@@ -1,28 +1,9 @@
-import { Tooltip } from "react-tippy";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { HeartOutlineIcon, CloseIcon, SearchIcon } from "../Icons";
-import debounce from "../../utils/debounce";
-import FilterLabels from "./FilterLabels";
+import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 
-const createInputString = ({ tags, textSearchTerm }) => {
-  return (
-    (tags ? `#${tags.join(" #")}` : "") +
-    (tags && textSearchTerm ? " " : "") +
-    (textSearchTerm ? textSearchTerm : "")
-  );
-};
-
-const Filterbar = ({
-  textSearchTerm,
-  customFields,
-  filterLabels,
-  setFilterLabels,
-  tag,
-  event,
-  currentOrg,
-}) => {
+const Filterbar = ({ textSearchTerm, tag, event }) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -59,15 +40,6 @@ const Filterbar = ({
 
   return (
     <div className="flex mb-5 items-stretch flex-wrap">
-      {/* <button
-        className={`bg-gray-200 hover:bg-gray-300 px-3 rounded focus:outline-none focus:ring text-gray-700 mr-2  ${
-          listView ? "bg-gray-300" : ""
-        }`}
-        onClick={toggleListView}
-      >
-        <ListIcon className="h-5 w-5" />
-      </button> */}
-
       <div
         className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${event.color} border-3 px-1 relative pr-10 mr-2 flex items-center overflow-hidden`}
       >
@@ -106,14 +78,6 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
-
-      <FilterLabels
-        customFields={customFields}
-        filterLabels={filterLabels}
-        setFilterLabels={setFilterLabels}
-        className={"mb-2 mt-2"}
-        currentOrg={currentOrg}
-      />
     </div>
   );
 };

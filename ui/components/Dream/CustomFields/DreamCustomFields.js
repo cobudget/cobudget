@@ -15,7 +15,6 @@ const CUSTOM_FIELDS_QUERY = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
       }
     }
   }

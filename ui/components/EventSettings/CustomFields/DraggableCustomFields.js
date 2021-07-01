@@ -19,7 +19,6 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
     }
@@ -46,7 +45,6 @@ const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
         limit
         isRequired
         position
-        isShownOnFrontPage
         createdAt
       }
     }
@@ -123,9 +121,6 @@ const SortableItem = sortableElement(
           <span className={css.label}>Type: {types[customField.type]}</span>
           {customField.isRequired && (
             <span className={css.label}>Is Required</span>
-          )}
-          {customField.isShownOnFrontPage && (
-            <span className={css.label}>Shown on front page</span>
           )}
         </div>
       </li>
