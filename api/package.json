@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@sensestack/plato-core": "^1.0.7",
-    "apollo-server-express": "^2.15.1",
+    "apollo-server-express": "2.25.2",
     "body-parser": "^1.19.0",
     "dayjs": "^1.8.20",
     "dotenv": "^8.2.0",
