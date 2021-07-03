@@ -349,6 +349,7 @@ const schema = gql`
     maxGoal: Int
     income: Int
     totalContributions: Int
+    totalContributionsFromCurrentMember: Int
 
     fundedAt: Date
     funded: Boolean

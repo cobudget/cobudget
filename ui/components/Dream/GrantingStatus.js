@@ -5,9 +5,7 @@ import ProgressBar from "components/ProgressBar";
 
 const GrantingStatus = ({ dream, event }) => {
   const funding = dream.totalContributions + dream.income;
-  const ratio = isNaN(funding / dream.minGoal)
-    ? 0
-    : funding / dream.minGoal;
+  const ratio = isNaN(funding / dream.minGoal) ? 0 : funding / dream.minGoal;
 
   return (
     <div className="space-y-0">
@@ -23,9 +21,18 @@ const GrantingStatus = ({ dream, event }) => {
             {thousandSeparator(funding / 100)} {event.currency}
           </p>
           <p className="text-sm text-gray-700">
-            funded of {thousandSeparator(dream.minGoal / 100)}{" "}
-            {event.currency} goal
+            funded of {thousandSeparator(dream.minGoal / 100)} {event.currency}{" "}
+            goal
           </p>
+          {!!dream.totalContributionsFromCurrentMember && (
+            <p className="mt-2 text-sm text-gray-700">
+              You have contributed{" "}
+              {thousandSeparator(
+                dream.totalContributionsFromCurrentMember / 100
+              )}{" "}
+              {event.currency}
+            </p>
+          )}
         </div>
       )}
 

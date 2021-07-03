@@ -2558,6 +2558,34 @@ const resolvers = {
       ]);
       return contributionsForDream;
     },
+    totalContributionsFromCurrentMember: async (
+      dream,
+      args,
+      { models: { Contribution, EventMember }, currentOrgMember }
+    ) => {
+      if (!currentOrgMember) {
+        return 0;
+      }
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: dream.eventId,
+      });
+
+      if (!eventMember) return 0;
+
+      const [
+        { contributionsForDream } = { contributionsForDream: 0 },
+      ] = await Contribution.aggregate([
+        {
+          $match: {
+            dreamId: mongoose.Types.ObjectId(dream.id),
+            eventMemberId: mongoose.Types.ObjectId(eventMember.id),
+          },
+        },
+        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
+      ]);
+      return contributionsForDream;
+    },
     comments: async (dream, args, { currentOrg }) => {
       if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {
         return dream.comments;
