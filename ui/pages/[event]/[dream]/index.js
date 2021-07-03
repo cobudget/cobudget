@@ -47,7 +47,6 @@ export const DREAM_QUERY = gql`
           description
           isRequired
           position
-          isShownOnFrontPage
           createdAt
         }
       }

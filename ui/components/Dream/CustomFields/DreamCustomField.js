@@ -28,7 +28,6 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
           description
           position
           isRequired
-          isShownOnFrontPage
           createdAt
         }
       }
@@ -114,17 +113,23 @@ const DreamCustomField = ({
           </div>
         </div>
         <div className="flex justify-between items-center mb-4">
-        <div className="text-sm text-gray-600 font-medium pl-4">
-            {defaultCustomField.limit ? String(defaultCustomField.limit - inputValue.length) + " characters remaining." : ""}
+          <div className="text-sm text-gray-600 font-medium pl-4">
+            {defaultCustomField.limit
+              ? String(defaultCustomField.limit - inputValue.length) +
+                " characters remaining."
+              : ""}
             <br></br>
-            <span>{" "}<a
-              href="https://www.markdownguide.org/cheat-sheet/"
-              target="_/blank"
-              className="hover:text-gray-800 border-b hover:border-gray-800"
-            >
-              Markdown formatting 
-            </a>{" "}
-            allowed.</span>
+            <span>
+              {" "}
+              <a
+                href="https://www.markdownguide.org/cheat-sheet/"
+                target="_/blank"
+                className="hover:text-gray-800 border-b hover:border-gray-800"
+              >
+                Markdown formatting
+              </a>{" "}
+              allowed.
+            </span>
           </div>
           <div className="flex">
             <Button
@@ -149,8 +154,8 @@ const DreamCustomField = ({
       <div className="flex flex-col items-start justify-between relative">
         <div className="py-2" key={customField.fieldId}>
           <h2 className="text-xl font-medium">{defaultCustomField.name}</h2>
-          {(customField.customField.type == "MULTILINE_TEXT" 
-          || customField.customField.type == "TEXT") ? (
+          {customField.customField.type == "MULTILINE_TEXT" ||
+          customField.customField.type == "TEXT" ? (
             <ReactMarkdown
               source={customField.value}
               className="markdown"
