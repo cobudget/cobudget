@@ -10,7 +10,10 @@ const { combineResolvers, skip } = require("graphql-resolvers");
 const KCRequiredActionAlias = require("keycloak-admin").requiredAction;
 const discourse = require("../lib/discourse");
 const { allocateToMember } = require("../controller");
-const { orgHasDiscourse, generateComment } = require("../subscribers/discourse.subscriber");
+const {
+  orgHasDiscourse,
+  generateComment,
+} = require("../subscribers/discourse.subscriber");
 
 const isRootAdmin = (parent, args, { currentUser }) => {
   // TODO: this is old code that doesn't really work right now
@@ -315,25 +318,39 @@ const resolvers = {
     },
     commentSet: async (
       parent,
-      { dreamId, from = 0, limit = 30, order = 'desc' },
-      { currentOrg, currentOrgMember, models: { Dream } }
+      { dreamId, from = 0, limit = 30, order = "desc" },
+      { currentOrg, models: { Dream, OrgMember } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
 
       let comments;
       if (orgHasDiscourse(currentOrg)) {
         const topic = await discourse(currentOrg.discourse).posts.get(
-          dream.discourseTopicId,
-        )
-        comments = topic.post_stream.posts
-          .filter(post => post.post_number > 1)
-          .map(post => generateComment(post, currentOrgMember))
+          dream.discourseTopicId
+        );
+
+        comments = await Promise.all(
+          topic.post_stream.posts
+            .filter((post) => post.post_number > 1)
+            .map(async (post) => {
+              const author = await OrgMember.findOne({
+                organizationId: currentOrg.id,
+                discourseUsername: post.username,
+              });
+              return generateComment(post, author);
+            })
+        );
       } else {
         comments = dream.comments;
       }
 
-      if (order === 'desc') { comments = comments.reverse(); }
-      return { total: comments.length, comments: comments.slice(from, from + limit) }
+      if (order === "desc") {
+        comments = comments.reverse();
+      }
+      return {
+        total: comments.length,
+        comments: comments.slice(from, from + limit),
+      };
     },
   },
   Mutation: {
@@ -1514,7 +1531,10 @@ const resolvers = {
         });
 
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
+          const orgMember = await OrgMember.findOne({
+            userId: user.id,
+            organizationId: currentOrg.id,
+          });
           if (orgMember) {
             const eventMember = await EventMember.findOne({
               orgMemberId: orgMember.id,
@@ -1610,7 +1630,10 @@ const resolvers = {
           email: email.trim(),
         });
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
+          const orgMember = await OrgMember.findOne({
+            userId: user.id,
+            organizationId: currentOrg.id,
+          });
           if (!orgMember) {
             newOrgMembers.push(
               await new OrgMember({
@@ -2502,7 +2525,9 @@ const resolvers = {
     },
     numberOfComments: async (dream, args, { currentOrg }) => {
       // Only display number of comments for non-Discourse orgs
-      if (orgHasDiscourse(currentOrg)) { return; }
+      if (orgHasDiscourse(currentOrg)) {
+        return;
+      }
 
       return dream.comments.length;
     },
