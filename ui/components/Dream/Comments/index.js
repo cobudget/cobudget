@@ -9,7 +9,7 @@ import LoadMore from "components/LoadMore";
 const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
   const context = useCommentContext({
     from: 0,
-    limit: 3,
+    limit: 10,
     order: "desc",
     currentOrg,
     currentOrgMember,
