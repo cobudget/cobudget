@@ -1,5 +1,11 @@
-import { createContext, useState, useEffect } from 'react';
-import { gql, useQuery, useSubscription, useMutation, NetworkStatus } from "@apollo/client";
+import { createContext, useState, useEffect } from "react";
+import {
+  gql,
+  useQuery,
+  useSubscription,
+  useMutation,
+  NetworkStatus,
+} from "@apollo/client";
 
 export default createContext();
 
@@ -13,8 +19,8 @@ export const useCommentContext = (initialInput) => {
   const COMMENTS_QUERY = gql`
     query Comments($dreamId: ID!, $from: Int, $limit: Int, $order: String) {
       commentSet(dreamId: $dreamId, from: $from, limit: $limit, order: $order) {
-        total
-        comments {
+        total(dreamId: $dreamId, order: $order)
+        comments(dreamId: $dreamId, order: $order) {
           id
           content
           htmlContent
@@ -102,54 +108,56 @@ export const useCommentContext = (initialInput) => {
     }
   `;
 
-  const {
-    data,
-    loading,
-    networkStatus,
-    updateQuery,
-  } = useQuery(COMMENTS_QUERY, {
-    variables: { dreamId: initialInput.dream.id, from, limit, order },
-    notifyOnNetworkStatusChange: true
-  });
+  const { data, loading, networkStatus, updateQuery } = useQuery(
+    COMMENTS_QUERY,
+    {
+      variables: { dreamId: initialInput.dream.id, from, limit, order },
+      notifyOnNetworkStatusChange: true,
+    }
+  );
 
   const [addComment] = useMutation(ADD_COMMENT_MUTATION, {
     onCompleted(data) {
       const commentSet = {
         comments: comments.concat(data.addComment),
-        total: total + 1
-      }
+        total: total + 1,
+      };
       updateQuery(() => ({ commentSet }));
       setComments(commentSet.comments);
       setTotal(commentSet.total);
-    }
+    },
   });
 
   const [editComment] = useMutation(EDIT_COMMENT_MUTATION, {
     onCompleted(data) {
       const commentSet = {
-        comments: comments.map(c => c.id === data.editComment.id ? data.editComment : c),
-        total
+        comments: comments.map((c) =>
+          c.id === data.editComment.id ? data.editComment : c
+        ),
+        total,
       };
       updateQuery(() => ({ commentSet }));
       setComments(commentSet.comments);
       setTotal(commentSet.total);
-    }
+    },
   });
 
   const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION, {
     onCompleted(data) {
       const commentSet = {
-        comments: comments.filter(c => c.id !== data.deleteComment.id),
+        comments: comments.filter((c) => c.id !== data.deleteComment.id),
         total: total - 1,
-      }
+      };
       updateQuery(() => ({ commentSet }));
       setComments(commentSet.comments);
       setTotal(commentSet.total);
-    }
+    },
   });
 
   useEffect(() => {
-    if (networkStatus != NetworkStatus.ready) { return; }
+    if (networkStatus != NetworkStatus.ready) {
+      return;
+    }
 
     setComments(data.commentSet.comments);
     setTotal(data.commentSet.total);
@@ -159,20 +167,22 @@ export const useCommentContext = (initialInput) => {
     variables: { dreamId: initialInput.dream.id },
     onSubscriptionData: ({
       subscriptionData: {
-        data: { commentsChanged: { comment, action } }
-      }
+        data: {
+          commentsChanged: { comment, action },
+        },
+      },
     }) => {
-      switch(action) {
-        case 'created':
+      switch (action) {
+        case "created":
           setTotal(total + 1);
           setComments(comments.concat(comment));
           break;
-        case 'edited':
-          setComments(comments.map(c => c.id === comment.id ? comment : c))
+        case "edited":
+          setComments(comments.map((c) => (c.id === comment.id ? comment : c)));
           break;
-        case 'deleted':
+        case "deleted":
           setTotal(total - 1);
-          setComments(comments.filter(c => c.id !== comment.id));
+          setComments(comments.filter((c) => c.id !== comment.id));
           break;
       }
     },
@@ -183,14 +193,17 @@ export const useCommentContext = (initialInput) => {
     event: initialInput.event,
     currentOrg: initialInput.currentOrg,
     currentOrgMember: initialInput.currentOrgMember,
-    from, setFrom,
-    limit, setLimit,
-    order, setOrder,
+    from,
+    setFrom,
+    limit,
+    setLimit,
+    order,
+    setOrder,
     addComment,
     editComment,
     deleteComment,
     comments,
     total,
     loading,
-  }
-}
+  };
+};

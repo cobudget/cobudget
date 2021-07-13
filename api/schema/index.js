@@ -375,8 +375,8 @@ const schema = gql`
   }
 
   type CommentSet {
-    total: Int
-    comments: [Comment]
+    total(dreamId: ID!, order: String): Int
+    comments(dreamId: ID!, order: String): [Comment]
   }
 
   type CommentAction {

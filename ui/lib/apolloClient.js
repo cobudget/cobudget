@@ -97,6 +97,7 @@ export default function createApolloClient(initialState, ctx) {
         CommentSet: {
           fields: {
             comments: {
+              keyArgs: true,
               merge(existing = [], incoming = [], { readField, mergeObjects }) {
                 const merged = existing.slice(0);
 
