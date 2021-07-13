@@ -15,6 +15,7 @@ export const DREAM_QUERY = gql`
       maxGoal
       income
       totalContributions
+      totalContributionsFromCurrentMember
       approved
       published
       completed

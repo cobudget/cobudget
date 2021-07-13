@@ -11,6 +11,7 @@ const CONTRIBUTE_MUTATION = gql`
     contribute(eventId: $eventId, dreamId: $dreamId, amount: $amount) {
       id
       totalContributions
+      totalContributionsFromCurrentMember
     }
   }
 `;

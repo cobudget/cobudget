@@ -104,7 +104,6 @@ const DreamSidebar = ({
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
-  const [editingTags, setEditingTags] = useState(false);
 
   const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
@@ -128,10 +127,6 @@ const DreamSidebar = ({
       },
     ],
   });
-  const [editTags] = useMutation(EDIT_TAGS_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const { handleSubmit, register } = useForm();
 
   const isEventAdminOrGuide =
     currentOrgMember?.currentEventMembership?.isAdmin ||
