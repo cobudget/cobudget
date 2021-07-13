@@ -332,6 +332,7 @@ const resolvers = {
         comments = await Promise.all(
           topic.post_stream.posts
             .filter((post) => post.post_number > 1)
+            .filter((post) => !post.user_deleted)
             .map(async (post) => {
               const author = await OrgMember.findOne({
                 organizationId: currentOrg.id,
