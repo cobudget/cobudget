@@ -257,6 +257,42 @@ const resolvers = {
         orgMembers: orgMembersWithExtra.slice(0, limit),
       };
     },
+    members: async (
+      parent,
+      { eventId, isApproved },
+      { currentOrgMember, models: { EventMember, Event } }
+    ) => {
+      if (!currentOrgMember)
+        throw new Error("You need to be a member of this org");
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      const event = await Event.findOne({ _id: eventId });
+
+      if (
+        currentOrgMember.organizationId.toString() !==
+        event.organizationId.toString()
+      )
+        throw new Error("Wrong org..");
+
+      if (
+        !(
+          (currentEventMember && currentEventMember.isApproved) ||
+          currentOrgMember.isOrgAdmin
+        )
+      )
+        throw new Error(
+          "You need to be approved member of this event or org admin to view EventMembers"
+        );
+
+      return await EventMember.find({
+        eventId,
+        ...(typeof isApproved === "boolean" && { isApproved }),
+      });
+    },
     membersPage: async (
       parent,
       { eventId, isApproved, offset, limit },
@@ -1541,7 +1577,10 @@ const resolvers = {
         });
 
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
+          const orgMember = await OrgMember.findOne({
+            userId: user.id,
+            organizationId: currentOrg.id,
+          });
           if (orgMember) {
             const eventMember = await EventMember.findOne({
               orgMemberId: orgMember.id,
@@ -1637,7 +1676,10 @@ const resolvers = {
           email: email.trim(),
         });
         if (user) {
-          const orgMember = await OrgMember.findOne({ userId: user.id, organizationId: currentOrg.id });
+          const orgMember = await OrgMember.findOne({
+            userId: user.id,
+            organizationId: currentOrg.id,
+          });
           if (!orgMember) {
             newOrgMembers.push(
               await new OrgMember({
