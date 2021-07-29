@@ -2597,8 +2597,13 @@ const resolvers = {
       ]);
       return contributionsForDream;
     },
-    contributions: async (dream, args, { models: { Contribution } }) => {
-      return await Contribution.find({ dreamId: dream.id });
+    latestContributions: async (dream, args, { models: { Contribution } }) => {
+      return await Contribution.find({ dreamId: dream.id })
+        .sort({ createdAt: -1 })
+        .limit(10);
+    },
+    noOfContributions: async (dream, args, { models: { Contribution } }) => {
+      return await Contribution.countDocuments({ dreamId: dream.id });
     },
     comments: async (dream, args, { currentOrg }) => {
       if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {

@@ -24,7 +24,8 @@ export const DREAM_QUERY = gql`
       fundedAt
       canceled
       canceledAt
-      contributions {
+      noOfContributions
+      latestContributions {
         id
         amount
         createdAt

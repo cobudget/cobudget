@@ -25,29 +25,38 @@ const GrantingStatus = ({ dream, event, currentOrgMember }) => {
             goal
           </p>
 
+          {!!dream.totalContributionsFromCurrentMember && (
+            <p className="my-2 text-sm text-gray-700">
+              You have contributed{" "}
+              {thousandSeparator(
+                dream.totalContributionsFromCurrentMember / 100
+              )}{" "}
+              {event.currency}
+            </p>
+          )}
+
           {/* list of contributors... if less than 6, otherwise, just say how many. coolio */}
-          {!!dream.contributions.length &&
-            dream.contributions.length < 10 &&
-            dream.contributions.map((contribution) => (
-              <p className="mt-1 text-sm text-gray-700" key={contribution.id}>
-                {contribution.eventMember.orgMember.user.username}{" "}
-                {contribution.eventMember.orgMember.id ===
-                  currentOrgMember.id && "(you)"}{" "}
-                contributed {thousandSeparator(contribution.amount / 100)}{" "}
-                {event.currency}
-              </p>
-            ))}
-          {!!dream.contributions.length &&
-            dream.contributions.length >= 10 &&
-            !!dream.totalContributionsFromCurrentMember && (
-              <p className="mt-2 text-sm text-gray-700">
-                You have contributed{" "}
-                {thousandSeparator(
-                  dream.totalContributionsFromCurrentMember / 100
-                )}{" "}
-                {event.currency}
-              </p>
-            )}
+          {!!dream.latestContributions.length && (
+            <>
+              <div>
+                {dream.latestContributions.map((contribution) => (
+                  <p
+                    className="mt-1 text-sm text-gray-700"
+                    key={contribution.id}
+                  >
+                    {contribution.eventMember.orgMember.user.username}{" "}
+                    contributed {thousandSeparator(contribution.amount / 100)}{" "}
+                    {event.currency}
+                  </p>
+                ))}
+              </div>
+              {dream.noOfContributions > 10 && (
+                <p className="my-1 text-sm text-gray-700">
+                  and {dream.noOfContributions - 10} more contributions
+                </p>
+              )}
+            </>
+          )}
         </div>
       )}
 

@@ -12,7 +12,8 @@ const CONTRIBUTE_MUTATION = gql`
       id
       totalContributions
       totalContributionsFromCurrentMember
-      contributions {
+      noOfContributions
+      latestContributions {
         id
         amount
         createdAt
