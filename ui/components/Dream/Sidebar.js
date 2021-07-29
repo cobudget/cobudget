@@ -161,7 +161,11 @@ const DreamSidebar = ({
     <>
       {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus dream={dream} event={event} />
+          <GrantingStatus
+            dream={dream}
+            event={event}
+            currentOrgMember={currentOrgMember}
+          />
           {showFundButton && (
             <>
               <Button

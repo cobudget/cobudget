@@ -2597,6 +2597,9 @@ const resolvers = {
       ]);
       return contributionsForDream;
     },
+    contributions: async (dream, args, { models: { Contribution } }) => {
+      return await Contribution.find({ dreamId: dream.id });
+    },
     comments: async (dream, args, { currentOrg }) => {
       if (!dream.discourseTopicId || !orgHasDiscourse(currentOrg)) {
         return dream.comments;

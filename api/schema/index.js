@@ -347,6 +347,7 @@ const schema = gql`
     income: Int
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
+    contributions: [Contribution!]
 
     fundedAt: Date
     funded: Boolean
