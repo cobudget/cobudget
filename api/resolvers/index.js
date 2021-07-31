@@ -1202,13 +1202,26 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrg, currentOrgMember, models: { Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { Dream, Event, EventMember },
+        eventHub,
+      }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: event.id,
+      });
 
       if (!currentOrgMember)
         throw new Error("You need to be an org member to post comments.");
+
+      if (!eventMember) {
+        throw new Error("You need to be a member of the collection to post comments.");
+      }
 
       if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey)
         throw new Error(
