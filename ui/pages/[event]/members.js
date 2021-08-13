@@ -6,13 +6,8 @@ const EventMembersPage = ({ event, currentOrgMember }) => {
   const isEventMember =
     currentOrgMember?.currentEventMembership ||
     currentOrgMember?.isOrgAdmin;
-  if (!isEventMember || !event) return (
-    <div className="flex-1">
-      <SubMenu currentOrgMember={currentOrgMember} event={event} />
-      <Members event={event} />
-    </div>
-  );
-  return (
+  if (!event) return null;
+  if (!isEventMember) return (
     <div className="flex-1">
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
       <PageHero>
@@ -22,6 +17,12 @@ const EventMembersPage = ({ event, currentOrgMember }) => {
           </h2>
         </div>
       </PageHero>
+    </div>
+  );
+  return (
+    <div className="flex-1">
+      <SubMenu currentOrgMember={currentOrgMember} event={event} />
+      <Members event={event} />
     </div>
   );
 };
