@@ -1,10 +1,10 @@
 import Members from "components/EventMembers";
 import SubMenu from "components/SubMenu";
 const EventMembersPage = ({ event, currentOrgMember }) => {
-  const isAdmin =
-    currentOrgMember?.currentEventMembership?.isAdmin ||
+  const isEventMember =
+    currentOrgMember?.currentEventMembership? ||
     currentOrgMember?.isOrgAdmin;
-  if (!isAdmin || !event) return null;
+  if (!isEventMember || !event) return null;
   return (
     <div className="flex-1">
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
