@@ -52,9 +52,11 @@ model CollectionMember {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  Bucket   Bucket?   @relation(fields: [bucketId], references: [id])
-  bucketId String?
-  Comment  Comment[]
+  Buckets       Bucket[] //should it be explicit or implicit?
+  Allocations   Allocation[]
+  Contributions Contribution[]
+  Comments      Comment[]
+
   @@unique([orgMemberId, collectionId])
 }
 
@@ -101,6 +103,8 @@ model Collection {
 
   CollectionMember CollectionMember[]
   Bucket           Bucket[]
+  Allocations      Allocation[]
+  Contributions    Contribution[]
   @@unique([organizationId, slug])
 }
 
@@ -139,7 +143,7 @@ model Field {
   position     Int // TODO: position double check.
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  collection   Collection   @relation(fields: [collectionId], references: [id])
+  Collection   Collection   @relation(fields: [collectionId], references: [id])
   collectionId String
   FieldValue   FieldValue[]
 }
@@ -165,10 +169,10 @@ model Bucket {
   title            String
   description      String?
   summary          String?
-  images           Image[]
-  cocreators       CollectionMember[]
-  budgetItems      BudgetItem[]
-  fieldValues      FieldValue[]
+  Images           Image[]
+  Cocreators       CollectionMember[] //implicit enough?
+  BudgetItems      BudgetItem[]
+  FieldValues      FieldValue[]
   comments         Comment[]
   approvedAt       DateTime?
   publishedAt      DateTime?
@@ -176,10 +180,11 @@ model Bucket {
   canceledAt       DateTime?
   completedAt      DateTime?
   discourseTopicId Int
-  flags            Flag[]
-  tags             Tag[]
+  Flags            Flag[]
+  Tags             Tag[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
+  Contributions    Contribution[]
 }
 
 model Image {
@@ -247,6 +252,28 @@ enum FlagType {
   RAISE_FLAG
   RESOLVE_FLAG
   ALL_GOOD_FLAG
+}
+
+model Allocation {
+  id                 String           @id @default(cuid())
+  collection         Collection       @relation(fields: [collectionId], references: [id])
+  collectionId       String
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String
+  amount             Int
+  createdAt          DateTime         @default(now())
+}
+
+model Contribution {
+  id                 String           @id @default(cuid())
+  collection         Collection       @relation(fields: [collectionId], references: [id])
+  collectionId       String
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String
+  bucket             Bucket           @relation(fields: [bucketId], references: [id])
+  bucketId           String
+  amount             Int
+  createdAt          DateTime         @default(now())
 }
 
 model DiscourseConfig {
