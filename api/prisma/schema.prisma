@@ -20,6 +20,7 @@ model User {
   accounts       Account[]
   sessions       Session[]
   orgMemberships OrgMember[]
+  Flag           Flag[]
 }
 
 model OrgMember {
@@ -51,6 +52,9 @@ model CollectionMember {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  Bucket   Bucket?   @relation(fields: [bucketId], references: [id])
+  bucketId String?
+  Comment  Comment[]
   @@unique([orgMemberId, collectionId])
 }
 
@@ -96,6 +100,7 @@ model Collection {
   updatedAt DateTime @updatedAt
 
   CollectionMember CollectionMember[]
+  Bucket           Bucket[]
   @@unique([organizationId, slug])
 }
 
@@ -107,6 +112,8 @@ model Tag {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
+  Bucket   Bucket? @relation(fields: [bucketId], references: [id])
+  bucketId String?
   @@unique([collectionId, value])
 }
 
@@ -119,20 +126,22 @@ model Guideline {
   collectionId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  Flag         Flag[]
 }
 
 model Field {
-  id           String     @id @default(cuid())
+  id           String       @id @default(cuid())
   name         String
   description  String
   type         FieldType
   limit        Int?
   isRequired   Boolean
   position     Int // TODO: position double check.
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  collection   Collection @relation(fields: [collectionId], references: [id])
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  collection   Collection   @relation(fields: [collectionId], references: [id])
   collectionId String
+  FieldValue   FieldValue[]
 }
 
 enum FieldType {
@@ -147,6 +156,97 @@ enum RegistrationPolicy {
   OPEN
   REQUEST_TO_JOIN
   INVITE_ONLY
+}
+
+model Bucket {
+  id               String             @id @default(cuid())
+  collection       Collection         @relation(fields: [collectionId], references: [id])
+  collectionId     String
+  title            String
+  description      String?
+  summary          String?
+  images           Image[]
+  cocreators       CollectionMember[]
+  budgetItems      BudgetItem[]
+  fieldValues      FieldValue[]
+  comments         Comment[]
+  approvedAt       DateTime?
+  publishedAt      DateTime?
+  fundedAt         DateTime?
+  canceledAt       DateTime?
+  completedAt      DateTime?
+  discourseTopicId Int
+  flags            Flag[]
+  tags             Tag[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+}
+
+model Image {
+  id       String  @id @default(cuid())
+  small    String?
+  large    String?
+  bucket   Bucket? @relation(fields: [bucketId], references: [id])
+  bucketId String?
+}
+
+model BudgetItem {
+  id          String         @id @default(cuid())
+  description String
+  min         Int
+  max         Int?
+  type        BudgetItemType
+  Bucket      Bucket?        @relation(fields: [bucketId], references: [id])
+  bucketId    String?
+}
+
+enum BudgetItemType {
+  INCOME
+  EXPENSE
+}
+
+model FieldValue {
+  id       String @id @default(cuid())
+  field    Field  @relation(fields: [fieldId], references: [id])
+  fieldId  String
+  //collectionId? original schema has eventId..
+  value    Json
+  Bucket   Bucket @relation(fields: [bucketId], references: [id])
+  bucketId String
+}
+
+model Comment {
+  id                 String           @id @default(cuid())
+  content            String
+  isLog              Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id]) //TODO: check what this is in current platform
+  collectionMemberId String
+  Bucket             Bucket?          @relation(fields: [bucketId], references: [id])
+  bucketId           String?
+}
+
+model Flag {
+  id              String    @id @default(cuid())
+  guideline       Guideline @relation(fields: [guidelineId], references: [id])
+  guidelineId     String
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  type            FlagType
+  resolvingFlag   Flag?     @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
+  resolvedBy      Flag?     @relation("FlagToFlag")
+  resolvingFlagId String?
+  Bucket          Bucket?   @relation(fields: [bucketId], references: [id])
+  bucketId        String?
+}
+
+enum FlagType {
+  RAISE_FLAG
+  RESOLVE_FLAG
+  ALL_GOOD_FLAG
 }
 
 model DiscourseConfig {
