@@ -32,6 +32,7 @@
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "prisma": "^2.30.3"
   }
 }
