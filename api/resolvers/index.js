@@ -335,15 +335,10 @@ const resolvers = {
           dream.discourseTopicId
         );
 
-        const log = (i) => {
-          console.log(i);
-          return i;
-        };
         comments = await Promise.all(
           topic.post_stream.posts
             .filter((post) => post.post_number > 1)
             .filter((post) => !post.user_deleted)
-            .map(log)
             // filter out empty system comments, e.g. when a thread is moved
             .filter(
               (comment) =>

@@ -1,5 +1,4 @@
 import React, { useState, useContext } from "react";
-import { gql, useMutation } from "@apollo/client";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";

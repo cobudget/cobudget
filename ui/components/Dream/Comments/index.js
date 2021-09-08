@@ -1,15 +1,13 @@
-import { useState, useEffect, useContext } from "react";
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
-import HappySpinner from "components/HappySpinner";
 import Context, { useCommentContext } from "contexts/comment";
 import LoadMore from "components/LoadMore";
 
 const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
   const context = useCommentContext({
     from: 0,
-    limit: 2,
+    limit: 10,
     order: "desc",
     currentOrg,
     currentOrgMember,
