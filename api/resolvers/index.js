@@ -2620,7 +2620,7 @@ const resolvers = {
   Comment: {
     isLog: (comment) => {
       if (comment.isLog) return comment.isLog;
-      if (comment.username === "system") return true;
+      if (comment.authorId === undefined) return true; // system user
       return false;
     },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
