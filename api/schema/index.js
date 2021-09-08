@@ -370,6 +370,7 @@ const schema = gql`
     orgMember: OrgMember
     createdAt: Date!
     updatedAt: Date
+    isLog: Boolean
     content: String!
     htmlContent: String
   }

@@ -1348,6 +1348,7 @@ const resolvers = {
         dream.comments.push({
           authorId: currentOrgMember.id,
           content: logContent,
+          isLog: true,
         });
       }
 
@@ -2617,7 +2618,15 @@ const resolvers = {
     },
   },
   Comment: {
+    isLog: (comment) => {
+      if (comment.isLog) return comment.isLog;
+      if (comment.username === "system") return true;
+      return false;
+    },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+      // make logs anonymous
+      if (post.isLog) return null;
+
       if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
     },
   },

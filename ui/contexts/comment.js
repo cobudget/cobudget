@@ -25,6 +25,7 @@ export const useCommentContext = (initialInput) => {
           content
           htmlContent
           createdAt
+          isLog
           orgMember {
             id
             user {
