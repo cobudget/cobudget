@@ -329,10 +329,16 @@ const resolvers = {
           dream.discourseTopicId
         );
 
+        const log = (i) => {
+          console.log(i);
+          return i;
+        };
         comments = await Promise.all(
           topic.post_stream.posts
             .filter((post) => post.post_number > 1)
             .filter((post) => !post.user_deleted)
+            .map(log)
+            // filter comments by system user?
             .map(async (post) => {
               const author = await OrgMember.findOne({
                 organizationId: currentOrg.id,
@@ -342,6 +348,7 @@ const resolvers = {
             })
         );
       } else {
+        console.log(dream.comments);
         comments = dream.comments;
       }
 

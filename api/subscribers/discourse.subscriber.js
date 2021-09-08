@@ -9,7 +9,7 @@ module.exports = {
     return {
       id: post.id,
       createdAt: new Date(post.created_at),
-      authorId: orgMember.id,
+      authorId: orgMember?.id,
       content: post.raw,
       htmlContent: post.cooked,
     };

@@ -17,10 +17,7 @@ const LogIcon = () => (
   </div>
 );
 
-const Comment = ({
-  comment,
-  showBorderBottom,
-}) => {
+const Comment = ({ comment, showBorderBottom }) => {
   const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
   const { deleteComment, currentOrgMember, dream } = useContext(Context);
@@ -30,13 +27,18 @@ const Comment = ({
     (currentOrgMember?.id === comment.orgMember?.id ||
       currentOrgMember?.currentEventMembership?.isAdmin);
 
+  console.log("comment render", comment);
   return (
     <div className="flex my-4">
       <div className="mr-4">
         {comment.isLog ? (
           <LogIcon />
         ) : (
-          <Avatar user={comment.orgMember?.user} />
+          <Avatar
+            user={
+              comment.orgMember?.user ?? { username: comment.discourseUsername }
+            }
+          />
         )}
       </div>
       <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
@@ -72,11 +74,15 @@ const Comment = ({
             {canEdit && (
               <div className="flex">
                 <button
-                  onClick={() => (
-                    confirm("Are you sure you would like to delete this comment?") && (
-                      deleteComment({ variables: { dreamId: dream.id, commentId: comment.id } }) && setSubmitting(true)
-                    )
-                  )}
+                  onClick={() =>
+                    confirm(
+                      "Are you sure you would like to delete this comment?"
+                    ) &&
+                    deleteComment({
+                      variables: { dreamId: dream.id, commentId: comment.id },
+                    }) &&
+                    setSubmitting(true)
+                  }
                   className="mt-4 py-1 px-2 mr-2 flex items-center bg-gray-100 hover:bg-gray-200 text-sm text-gray-600 hover:text-gray-700 focus:outline-none rounded-md focus:ring"
                 >
                   {submitting ? (
