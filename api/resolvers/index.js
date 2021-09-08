@@ -261,6 +261,42 @@ const resolvers = {
         orgMembers: orgMembersWithExtra.slice(0, limit),
       };
     },
+    members: async (
+      parent,
+      { eventId, isApproved },
+      { currentOrgMember, models: { EventMember, Event } }
+    ) => {
+      if (!currentOrgMember)
+        throw new Error("You need to be a member of this org");
+
+      const currentEventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      const event = await Event.findOne({ _id: eventId });
+
+      if (
+        currentOrgMember.organizationId.toString() !==
+        event.organizationId.toString()
+      )
+        throw new Error("Wrong org..");
+
+      if (
+        !(
+          (currentEventMember && currentEventMember.isApproved) ||
+          currentOrgMember.isOrgAdmin
+        )
+      )
+        throw new Error(
+          "You need to be approved member of this event or org admin to view EventMembers"
+        );
+
+      return await EventMember.find({
+        eventId,
+        ...(typeof isApproved === "boolean" && { isApproved }),
+      });
+    },
     membersPage: async (
       parent,
       { eventId, isApproved, offset, limit },
@@ -2571,6 +2607,14 @@ const resolvers = {
       }
 
       return dream.comments.length;
+    },
+    latestContributions: async (dream, args, { models: { Contribution } }) => {
+      return await Contribution.find({ dreamId: dream.id })
+        .sort({ createdAt: -1 })
+        .limit(10);
+    },
+    noOfContributions: async (dream, args, { models: { Contribution } }) => {
+      return await Contribution.countDocuments({ dreamId: dream.id });
     },
     raisedFlags: async (dream) => {
       const resolveFlagIds = dream.flags

@@ -28,6 +28,7 @@ const schema = gql`
       offset: Int
       limit: Int
     ): MembersPage
+    members(eventId: ID!, isApproved: Boolean): [EventMember]
     categories: [Category!]
     contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
@@ -345,7 +346,8 @@ const schema = gql`
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
     numberOfComments: Int
-
+    latestContributions: [Contribution!]
+    noOfContributions: Int
     fundedAt: Date
     funded: Boolean
     completedAt: Date

@@ -12,6 +12,24 @@ const CONTRIBUTE_MUTATION = gql`
       id
       totalContributions
       totalContributionsFromCurrentMember
+      noOfContributions
+      latestContributions {
+        id
+        amount
+        createdAt
+
+        eventMember {
+          id
+          orgMember {
+            id
+            user {
+              id
+              name
+              username
+            }
+          }
+        }
+      }
     }
   }
 `;

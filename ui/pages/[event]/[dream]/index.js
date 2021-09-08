@@ -24,6 +24,24 @@ export const DREAM_QUERY = gql`
       fundedAt
       canceled
       canceledAt
+      noOfContributions
+      latestContributions {
+        id
+        amount
+        createdAt
+
+        eventMember {
+          id
+          orgMember {
+            id
+            user {
+              id
+              name
+              username
+            }
+          }
+        }
+      }
       tags {
         id
         value
