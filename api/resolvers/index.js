@@ -29,6 +29,12 @@ const isMemberOfOrg = (parent, { id }, { kauth, currentOrgMember }) => {
   return skip;
 };
 
+const commentIsLog = (comment) => {
+  if (comment.isLog) return comment.isLog;
+  if (comment.authorId === undefined) return true; // system user
+  return false;
+};
+
 // const canEditEvent = (parent, args, { currentOrgMember, models }) => {
 //   // args: eventId
 //   //and you are either a orgAdmin or eventAdmin..
@@ -338,7 +344,11 @@ const resolvers = {
             .filter((post) => post.post_number > 1)
             .filter((post) => !post.user_deleted)
             .map(log)
-            // filter comments by system user?
+            // filter out empty system comments, e.g. when a thread is moved
+            .filter(
+              (comment) =>
+                !(comment.username === "system" && comment.raw === "")
+            )
             .map(async (post) => {
               const author = await OrgMember.findOne({
                 organizationId: currentOrg.id,
@@ -348,7 +358,6 @@ const resolvers = {
             })
         );
       } else {
-        console.log(dream.comments);
         comments = dream.comments;
       }
 
@@ -2619,9 +2628,7 @@ const resolvers = {
   },
   Comment: {
     isLog: (comment) => {
-      if (comment.isLog) return comment.isLog;
-      if (comment.authorId === undefined) return true; // system user
-      return false;
+      return commentIsLog(comment);
     },
     orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
       // make logs anonymous
