@@ -12,6 +12,7 @@
     "node": "14.x"
   },
   "dependencies": {
+    "@prisma/client": "^3.0.2",
     "@sensestack/plato-core": "^1.0.7",
     "apollo-server-express": "2.25.2",
     "body-parser": "^1.19.0",
@@ -33,6 +34,6 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.4",
-    "prisma": "^2.30.3"
+    "prisma": "^3.0.2"
   }
 }
