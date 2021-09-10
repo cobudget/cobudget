@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { Tooltip } from "react-tippy";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";

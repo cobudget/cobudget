@@ -1254,12 +1254,7 @@ const resolvers = {
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { EventMember, Dream, Event },
-        eventHub,
-      }
+      { currentOrg, currentOrgMember, models: { Dream, Event }, eventHub }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
@@ -1267,11 +1262,6 @@ const resolvers = {
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
-
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: event.id,
-      });
 
       if (!orgHasDiscourse(currentOrg)) {
         console.log(dream.comments);
@@ -2635,7 +2625,7 @@ const resolvers = {
         .filter(({ post_type }) => post_type === 1)
         .filter(({ post_number }) => post_number !== 1);
     },
-    numberOfComments: async (dream, args, { currentOrg }) => {
+    numberOfComments: async (dream) => {
       return dream.comments.length;
     },
     raisedFlags: async (dream) => {
@@ -2726,7 +2716,7 @@ const resolvers = {
 
       return event.guidelines.id(flag.guidelineId);
     },
-    user: async (parent, args, { models: { EventMember, Dream } }) => {
+    user: async () => {
       // if not org admin or event admin or guide
       return null;
     },
@@ -2773,7 +2763,7 @@ const resolvers = {
   },
   Log: {
     details: (log) => log,
-    user: async (log, args, { models: { User } }) => {
+    user: async () => {
       return null;
       // TODO:  only show for admins
       // return User.findOne({ _id: log.userId });

@@ -1,3 +1,5 @@
+// TODO: remove disable
+/* eslint-disable no-unused-vars */
 module.exports = {
   initialize(eventHub, models) {
     if (!process.env.LOOMIO_API_URL) {

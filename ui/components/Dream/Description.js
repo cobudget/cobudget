@@ -23,7 +23,7 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
     variables: { dreamId },
   });
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(description ?? "");
@@ -86,7 +86,7 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
           className="markdown"
           renderers={{
             link: (props) => (
-              <a href={props.href} target="_blank">
+              <a href={props.href} target="_blank" rel="noreferrer">
                 {props.children}
               </a>
             ),

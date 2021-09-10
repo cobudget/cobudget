@@ -1,7 +1,7 @@
 import { useState } from "react";
 import thousandSeparator from "utils/thousandSeparator";
 import IconButton from "components/IconButton";
-import { EditIcon, AddIcon } from "components/Icons";
+import { EditIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 
 import EditBudgetModal from "./EditBudgetModal";

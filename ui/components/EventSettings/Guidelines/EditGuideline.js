@@ -69,7 +69,7 @@ export default ({
     }
   );
 
-  const { control, handleSubmit, register, errors } = useForm({
+  const { handleSubmit, register, errors } = useForm({
     resolver: yupResolver(schema),
   });
 

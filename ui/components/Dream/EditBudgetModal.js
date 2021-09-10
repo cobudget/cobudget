@@ -82,7 +82,7 @@ const EditBudgetModal = ({
             editDream({
               variables: { budgetItems: [...(variables.budgetItems ?? [])] },
             })
-              .then((data) => {
+              .then(() => {
                 handleClose();
               })
               .catch((err) => alert(err.message));
@@ -218,6 +218,7 @@ const EditBudgetModal = ({
                 <a
                   href={`/${event.slug}/about#guidelines`}
                   target="_blank"
+                  rel="noreferrer"
                   className="text-sm text-gray-600 font-medium hover:text-gray-800"
                 >
                   See funding guidelines

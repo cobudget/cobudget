@@ -2,7 +2,7 @@ import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
 
-const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
+const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
   return (
     <div>
       {(dream.comments.length > 0 ||
@@ -13,7 +13,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
             {dream.comments.length === 1 ? "comment" : "comments"}
           </h2>
           {dream.discourseTopicUrl && (
-            <a target="_blank" href={dream.discourseTopicUrl}>
+            <a target="_blank" rel="noreferrer" href={dream.discourseTopicUrl}>
               View on Discourse
             </a>
           )}
