@@ -1220,7 +1220,9 @@ const resolvers = {
         throw new Error("You need to be an org member to post comments.");
 
       if (!eventMember) {
-        throw new Error("You need to be a member of the collection to post comments.");
+        throw new Error(
+          "You need to be a member of the collection to post comments."
+        );
       }
 
       if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey)

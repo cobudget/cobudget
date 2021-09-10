@@ -300,7 +300,9 @@ module.exports = {
         );
       }
 
-      content.push(`Total funding goal: ${dream.minGoal/100} ${event.currency}`);
+      content.push(
+        `Total funding goal: ${dream.minGoal / 100} ${event.currency}`
+      );
     }
 
     if (dream.images && dream.images.length > 0) {

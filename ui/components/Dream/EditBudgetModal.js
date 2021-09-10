@@ -151,7 +151,9 @@ const EditBudgetModal = ({
             </Button>
           </div>
 
-          <h2 className="text-lg font-semibold my-2">Existing funding and resources</h2>
+          <h2 className="text-lg font-semibold my-2">
+            Existing funding and resources
+          </h2>
 
           {incomeItems.map(({ id, description, type, min }, index) => {
             return (

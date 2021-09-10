@@ -40,8 +40,9 @@ const LandingPage = () => {
             </Button>
           </Link>
           <p className="text-sm text-gray-800">
-            Plato is in open beta. Organizations already use it, but we are still working on getting things just right. 
-             If you need Plato for a mission-critical project, please get in touch at{" "}
+            Plato is in open beta. Organizations already use it, but we are
+            still working on getting things just right. If you need Plato for a
+            mission-critical project, please get in touch at{" "}
             <a
               className="text-black underline"
               href="mailto:info@platoproject.org"
