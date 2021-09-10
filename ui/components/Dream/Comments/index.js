@@ -51,7 +51,9 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
           />
         );
       })}
-      {currentOrgMember && <AddComment />}
+      {currentOrgMember && currentOrgMember?.currentEventMembership && (
+        <AddComment />
+      )}
     </Context.Provider>
   );
 };

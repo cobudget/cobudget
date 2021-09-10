@@ -1244,13 +1244,45 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      { currentOrg, currentOrgMember, models: { Dream, Event }, eventHub }
+      {
+        currentOrg,
+        currentOrgMember,
+        models: { Dream, Event, EventMember },
+        eventHub,
+      }
     ) => {
-      if (!currentOrgMember)
+      if (!currentOrgMember) {
         throw new Error("You need to be an org member to post comments.");
+      }
 
       const dream = await Dream.findOne({ _id: dreamId });
       const event = await Event.findOne({ _id: dream.eventId });
+
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId: event.id,
+      });
+
+      if (!eventMember) {
+        throw new Error(
+          "You need to be a member of the collection to post comments."
+        );
+      }
+
+      if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
+        throw new Error(
+          "You need to have a discourse account connected, go to /connect-discourse"
+        );
+      }
+
+      if (content.length < (currentOrg.discourse?.minPostLength || 3)) {
+        throw new Error(
+          `Your post needs to be at least ${
+            currentOrg.discourse?.minPostLength || 3
+          } characters long!`
+        );
+      }
+
       const comment = { content, authorId: currentOrgMember.id };
 
       const { discourse, mongodb } = await eventHub.publish("create-comment", {
