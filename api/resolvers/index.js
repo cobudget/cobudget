@@ -2763,7 +2763,7 @@ const resolvers = {
   },
   Log: {
     details: (log) => log,
-    user: async () => {
+    user: async (asdf) => {
       return null;
       // TODO:  only show for admins
       // return User.findOne({ _id: log.userId });
