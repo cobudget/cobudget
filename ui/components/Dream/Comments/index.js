@@ -32,7 +32,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event, logs }) => {
           />
         );
       })}
-      {currentOrgMember && (
+      {currentOrgMember && currentOrgMember?.currentEventMembership && (
         <AddComment
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
