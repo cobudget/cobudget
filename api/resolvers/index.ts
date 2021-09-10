@@ -160,8 +160,8 @@ const resolvers = {
       const tagQuery = {
         ...(tag
           ? {
-              tags: mongoose.Types.ObjectId(tag._id),
-            }
+            tags: mongoose.Types.ObjectId(tag._id),
+          }
           : null),
       };
 
@@ -190,11 +190,11 @@ const resolvers = {
 
       const query =
         currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide)
+          (currentEventMember.isAdmin || currentEventMember.isGuide)
           ? adminQuery
           : currentEventMember
-          ? memberQuery
-          : othersQuery;
+            ? memberQuery
+            : othersQuery;
 
       const userSeed = currentOrgMember
         ? new Date(currentOrgMember.createdAt).getTime() % 1000
@@ -1230,8 +1230,7 @@ const resolvers = {
 
       if (content.length < (currentOrg.discourse?.minPostLength || 3))
         throw new Error(
-          `Your post needs to be at least ${
-            currentOrg.discourse?.minPostLength || 3
+          `Your post needs to be at least ${currentOrg.discourse?.minPostLength || 3
           } characters long!`
         );
 
@@ -1370,11 +1369,10 @@ const resolvers = {
           ).posts.create(
             {
               title: dream.title,
-              raw: `https://${
-                currentOrg.customDomain
-                  ? currentOrg.customDomain
-                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${event.slug}/${dream.id}`,
+              raw: `https://${currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+                }/${event.slug}/${dream.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
@@ -1447,11 +1445,10 @@ const resolvers = {
           ).posts.create(
             {
               title: dream.title,
-              raw: `https://${
-                currentOrg.customDomain
-                  ? currentOrg.customDomain
-                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${event.slug}/${dream.id}`,
+              raw: `https://${currentOrg.customDomain
+                ? currentOrg.customDomain
+                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+                }/${event.slug}/${dream.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
@@ -1499,7 +1496,7 @@ const resolvers = {
       if (!eventMember || !eventMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (const flag in dream.flags) {
+      for (const flag of dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
           flag.type === "ALL_GOOD_FLAG"
@@ -1644,13 +1641,11 @@ const resolvers = {
               KCRequiredActionAlias.UPDATE_PASSWORD,
             ],
             clientId: "dreams",
-            redirectUri: `${
-              process.env.NODE_ENV === "production" ? "https" : "http"
-            }://${
-              currentOrg.customDomain
+            redirectUri: `${process.env.NODE_ENV === "production" ? "https" : "http"
+              }://${currentOrg.customDomain
                 ? currentOrg.customDomain
                 : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-            }/${event.slug}`,
+              }/${event.slug}`,
           });
 
           const orgMember = await new OrgMember({
@@ -1720,13 +1715,11 @@ const resolvers = {
               KCRequiredActionAlias.UPDATE_PASSWORD,
             ],
             clientId: "dreams",
-            redirectUri: `${
-              process.env.NODE_ENV === "production" ? "https" : "http"
-            }://${
-              currentOrg.customDomain
+            redirectUri: `${process.env.NODE_ENV === "production" ? "https" : "http"
+              }://${currentOrg.customDomain
                 ? currentOrg.customDomain
                 : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-            }/`,
+              }/`,
           });
 
           newOrgMembers.push(
@@ -2028,11 +2021,10 @@ const resolvers = {
       if (
         event.maxAmountToDreamPerUser &&
         amount + contributionsFromUserToThisDream >
-          event.maxAmountToDreamPerUser
+        event.maxAmountToDreamPerUser
       ) {
         throw new Error(
-          `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
-            event.currency
+          `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${event.currency
           } to one dream`
         );
       }
@@ -2276,6 +2268,7 @@ const resolvers = {
         isAdmin: false,
         eventId,
         orgMemberId: orgMember.id,
+        isApproved: null,
       };
 
       if (orgMember.isOrgAdmin) {
@@ -2805,4 +2798,4 @@ const resolvers = {
   },
 };
 
-module.exports = resolvers;
+export default resolvers;
