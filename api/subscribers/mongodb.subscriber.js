@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { orgHasDiscourse } = require("./discourse.subscriber");
 const liveUpdate = require("../services/liveUpdate.service");
 const MIN_POST_LENGTH = 3;
@@ -7,9 +8,7 @@ module.exports = {
     eventHub.subscribe(
       "create-dream",
       "mongodb",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-
-      }
+      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {}
     );
 
     eventHub.subscribe(
@@ -19,13 +18,15 @@ module.exports = {
         dream.published = !unpublish;
         return dream.save();
       }
-    )
+    );
 
     eventHub.subscribe(
       "create-comment",
       "mongodb",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        if (orgHasDiscourse(currentOrg)) { return; }
+        if (orgHasDiscourse(currentOrg)) {
+          return;
+        }
 
         if (comment.content.length < MIN_POST_LENGTH)
           throw new Error(
@@ -36,7 +37,9 @@ module.exports = {
         dream.save();
 
         const created = dream.comments.reverse()[0];
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: created, action: 'created' } });
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment: created, action: "created" },
+        });
 
         return created;
       }
@@ -45,15 +48,24 @@ module.exports = {
     eventHub.subscribe(
       "edit-comment",
       "mongodb",
-      async ({ currentOrg, currentOrgMember, event, eventMember, dream, comment }) => {
-        if (orgHasDiscourse(currentOrg)) { return; }
+      async ({
+        currentOrg,
+        currentOrgMember,
+        event,
+        eventMember,
+        dream,
+        comment,
+      }) => {
+        if (orgHasDiscourse(currentOrg)) {
+          return;
+        }
 
-        const updated = dream.comments.find(c => (
-          c._id.toString() === comment.id && (
-            c.authorId.toString() === currentOrgMember.id.toString() ||
-            eventMember?.isAdmin
-          )
-        ));
+        const updated = dream.comments.find(
+          (c) =>
+            c._id.toString() === comment.id &&
+            (c.authorId.toString() === currentOrgMember.id.toString() ||
+              eventMember?.isAdmin)
+        );
 
         if (!updated)
           throw new Error(
@@ -64,7 +76,9 @@ module.exports = {
         updated.updatedAt = new Date();
         dream.save();
 
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: updated, action: 'edited' } });
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment: updated, action: "edited" },
+        });
 
         return updated;
       }
@@ -74,13 +88,17 @@ module.exports = {
       "delete-comment",
       "mongodb",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        if (orgHasDiscourse(currentOrg)) { return; }
+        if (orgHasDiscourse(currentOrg)) {
+          return;
+        }
 
         const deleted = dream.comments.find(({ id }) => id === comment.id);
         dream.comments = dream.comments.filter(({ id }) => id !== comment.id);
         dream.save();
 
-        liveUpdate.publish("commentsChanged", { commentsChanged: { comment: deleted, action: 'deleted' } });
+        liveUpdate.publish("commentsChanged", {
+          commentsChanged: { comment: deleted, action: "deleted" },
+        });
 
         return deleted;
       }
