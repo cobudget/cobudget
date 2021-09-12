@@ -20,6 +20,7 @@ const schema = gql`
       offset: Int
       limit: Int
     ): DreamsPage
+    commentSet(dreamId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembersPage(offset: Int, limit: Int): OrgMembersPage
     membersPage(
       eventId: ID!
@@ -128,9 +129,9 @@ const schema = gql`
 
     publishDream(dreamId: ID!, unpublish: Boolean): Dream
 
-    addComment(dreamId: ID!, content: String!): Dream
-    editComment(dreamId: ID!, commentId: ID!, content: String!): Dream
-    deleteComment(dreamId: ID!, commentId: ID!): Dream
+    addComment(dreamId: ID!, content: String!): Comment
+    editComment(dreamId: ID!, commentId: ID!, content: String!): Comment
+    deleteComment(dreamId: ID!, commentId: ID!): Comment
 
     raiseFlag(dreamId: ID!, guidelineId: ID!, comment: String!): Dream
     resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
@@ -331,9 +332,6 @@ const schema = gql`
     cocreators: [EventMember]!
     budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
-    comments: [Comment]
-    numberOfComments: Int
-
     approved: Boolean
     published: Boolean
     flags: [Flag]
@@ -347,6 +345,7 @@ const schema = gql`
     income: Int
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
+    numberOfComments: Int
     latestContributions: [Contribution!]
     noOfContributions: Int
     fundedAt: Date
@@ -373,10 +372,19 @@ const schema = gql`
     orgMember: OrgMember
     createdAt: Date!
     updatedAt: Date
-    content: String
-    cooked: String
-    discourseUsername: String
     isLog: Boolean
+    content: String!
+    htmlContent: String
+  }
+
+  type CommentSet {
+    total(dreamId: ID!, order: String): Int
+    comments(dreamId: ID!, order: String): [Comment]
+  }
+
+  type CommentAction {
+    comment: Comment!
+    action: String
   }
 
   type Category {
@@ -546,7 +554,7 @@ const schema = gql`
   }
 
   type Subscription {
-    commentsChanged(dreamID: ID!): Dream
+    commentsChanged(dreamId: ID!): CommentAction!
   }
 
   union LogDetails = FlagRaisedDetails | FlagResolvedDetails
