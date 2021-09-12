@@ -1,16 +1,25 @@
 const discourse = require("../lib/discourse");
 const liveUpdate = require("../services/liveUpdate.service");
 
-const orgHasDiscourse = (org) => org.discourse.url && org.discourse.apiKey;
-
 module.exports = {
+  orgHasDiscourse(org) {
+    return org.discourse.url && org.discourse.apiKey;
+  },
+  generateComment(post, orgMember) {
+    return {
+      id: post.id,
+      createdAt: new Date(post.created_at),
+      authorId: orgMember?.id,
+      content: post.raw,
+      htmlContent: post.cooked,
+    };
+  },
   initialize(eventHub, { Dream }) {
-    console.log(`Integrating with Discourse...`);
-
     eventHub.subscribe(
       "create-dream",
+      "discourse",
       async ({ currentOrg, currentOrgMember, event, dream }) => {
-        if (!orgHasDiscourse(currentOrg)) {
+        if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
 
@@ -48,8 +57,9 @@ module.exports = {
 
     eventHub.subscribe(
       "edit-dream",
+      "discourse",
       async ({ currentOrg, currentOrgMember, event, dream }) => {
-        if (!orgHasDiscourse(currentOrg)) {
+        if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
 
@@ -93,9 +103,16 @@ module.exports = {
 
     eventHub.subscribe(
       "publish-dream",
-      async ({ currentOrg, currentOrgMember, event, dream }) => {
+      "discourse",
+      async ({ currentOrg, currentOrgMember, event, dream, unpublish }) => {
+        if (!this.orgHasDiscourse(currentOrg)) {
+          return;
+        }
+
         console.log(
-          `Setting visibility of dream ${dream.id} to ${dream.published} on Discourse...`
+          `Setting visibility of dream ${
+            dream.id
+          } to ${!unpublish} on Discourse...`
         );
 
         if (!dream.discourseTopicId) {
@@ -112,7 +129,7 @@ module.exports = {
           {
             id: dream.discourseTopicId,
             status: "visible",
-            enabled: !!dream.published,
+            enabled: !unpublish,
           },
           {
             username: "system",
@@ -124,13 +141,20 @@ module.exports = {
 
     eventHub.subscribe(
       "create-comment",
+      "discourse",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        if (!orgHasDiscourse(currentOrg)) {
+        if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
+
         if (!currentOrgMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
+          );
+
+        if (comment.content.length < currentOrg.discourse.minPostLength)
+          throw new Error(
+            `Your post needs to be at least ${currentOrg.discourse.minPostLength} characters long!`
           );
 
         console.log(`Publishing comment in dream ${dream.id} to discourse...`);
@@ -157,17 +181,23 @@ module.exports = {
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
-
+        const created = this.generateComment(
+          { ...post, raw: comment.content },
+          currentOrgMember
+        );
         liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
+          commentsChanged: { comment: created, action: "created" },
         });
+
+        return created;
       }
     );
 
     eventHub.subscribe(
       "edit-comment",
+      "discourse",
       async ({ currentOrg, currentOrgMember, dream, comment }) => {
-        if (!orgHasDiscourse(currentOrg)) {
+        if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
         if (!currentOrgMember.discourseApiKey)
@@ -193,16 +223,23 @@ module.exports = {
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
+        const updated = this.generateComment(
+          { ...post, raw: comment.content },
+          currentOrgMember
+        );
         liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
+          commentsChanged: { comment: updated, action: "edited" },
         });
+
+        return updated;
       }
     );
 
     eventHub.subscribe(
       "delete-comment",
-      async ({ currentOrg, currentOrgMember, dream, comment }) => {
-        if (!orgHasDiscourse(currentOrg)) {
+      "discourse",
+      async ({ currentOrg, currentOrgMember, comment }) => {
+        if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
         if (!currentOrgMember.discourseApiKey)
@@ -220,8 +257,10 @@ module.exports = {
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
 
         liveUpdate.publish("commentsChanged", {
-          commentsChanged: { id: dream.id },
+          commentsChanged: { comment, action: "deleted" },
         });
+
+        return comment;
       }
     );
   },

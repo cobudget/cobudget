@@ -1,6 +1,10 @@
 class EventHub {
-  static subscribe(channel, fn) {
-    this.subscriptions[channel] = this.subscriptions[channel].concat(fn);
+  static subscribe(channel, namespace, fn) {
+    this.subscriptions[channel] = this.subscriptions[channel].concat(
+      async (...args) => ({
+        [namespace]: await fn(...args),
+      })
+    );
   }
 }
 
@@ -14,24 +18,30 @@ EventHub.subscriptions = new Proxy(
 );
 
 EventHub.publish = async (channel, event) => {
-  const errors = await this.subscriptions[channel].reduce(
-    async (result, fn) => {
+  const results = await Promise.all(
+    this.subscriptions[channel].map(async (fn) => {
       try {
-        await fn(event);
-        return result;
-      } catch (err) {
-        console.error(err);
-        if (result.concat) return result.concat(err);
-        return result;
+        return await fn(event);
+      } catch (error) {
+        return { error };
       }
-    },
-    []
+    })
   );
+
+  const errors = results.map((result) => result.error).filter((error) => error);
 
   if (errors.length) {
     errors.map(console.error);
     throw new Error(errors.join(", "));
   }
+
+  return results.reduce(
+    (hash, result) => ({
+      ...result,
+      ...hash,
+    }),
+    {}
+  );
 };
 
 module.exports = EventHub;
