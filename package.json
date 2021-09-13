@@ -1,4 +1,5 @@
 {
+  "name": "dreams",
   "scripts": {
     "dev": "run-p db:up api:start ui:dev",
     "api:start": "cd api && npm run start",
