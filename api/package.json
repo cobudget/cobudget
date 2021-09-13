@@ -4,7 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "test:run": "better-npm-run test:run"
+  },
+  "betterScripts": {
+    "test:run": {
+      "command": "node index.js",
+      "env": {
+        "KEYCLOAK_SERVER_URL": "https://auth.platoproject.org/auth/",
+        "KEYCLOAK_REALM": "platotest",
+        "KEYCLOAK_CLIENT": "realitiestest",
+        "MONGO_URL": "mongodb://localhost:28017/platotest",
+        "PORT": "4001"
+      }
+    }
   },
   "author": "",
   "license": "ISC",
@@ -32,6 +45,7 @@
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
+    "better-npm-run": "0.1.1",
     "nodemon": "^2.0.4"
   }
 }
