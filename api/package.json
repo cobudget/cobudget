@@ -14,6 +14,7 @@
   "dependencies": {
     "@prisma/client": "^3.0.2",
     "@sensestack/plato-core": "^1.0.7",
+    "@sensestack/cobudget-core": "1.0.3",
     "apollo-server-express": "2.25.2",
     "body-parser": "^1.19.0",
     "dayjs": "^1.8.20",
