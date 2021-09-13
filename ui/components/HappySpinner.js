@@ -1,10 +1,8 @@
 import { HappyEmojiIcon } from "./Icons";
 
-const HappySpinner = ({ size = 12 }) => {
+const HappySpinner = () => {
   return (
-    <HappyEmojiIcon
-      className={`w-${size} h-${size} text-gray-500 animation-spin`}
-    />
+    <HappyEmojiIcon className={"w-12 h-12 text-gray-500 animation-spin"} />
   );
 };
 

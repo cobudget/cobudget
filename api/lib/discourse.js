@@ -122,9 +122,12 @@ const discourse = ({ url, apiKey } = {}) => {
         return post;
       },
       get: async (id) => {
-        const res = await fetch(`${url}/t/${id}.json?include_raw=true`, {
-          headers,
-        });
+        const res = await fetch(
+          `${url}/t/${id}.json?include_raw=true&print=true`,
+          {
+            headers,
+          }
+        );
         return await res.json();
       },
       getSingle: async (id) => {
