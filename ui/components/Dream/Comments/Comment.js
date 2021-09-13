@@ -26,7 +26,6 @@ const Comment = ({ comment, showBorderBottom }) => {
     (currentOrgMember?.id === comment.orgMember?.id ||
       currentOrgMember?.currentEventMembership?.isAdmin);
 
-  console.log("comment render", comment);
   return (
     <div className="flex my-4">
       <div className="mr-4">
@@ -44,6 +43,8 @@ const Comment = ({ comment, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           {comment.isLog ? (
             <h5>Log</h5>
+          ) : comment.orgMember === null ? (
+            <h5>A discourse user</h5>
           ) : (
             <h5>{comment.orgMember?.user.username}</h5>
           )}
