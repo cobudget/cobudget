@@ -10,6 +10,7 @@ module.exports = {
       id: post.id,
       createdAt: new Date(post.created_at),
       authorId: orgMember?.id,
+      isLog: post.username === "system",
       content: post.raw,
       htmlContent: post.cooked,
     };
