@@ -80,7 +80,6 @@ const discourse = ({ url, apiKey } = {}) => {
           archetype, // required for private message, value: "private_message"
           created_at, // pick a date other than the default current time
           unlist_topic,
-
         },
         { username, userApiKey } = {}
       ) => {
@@ -123,9 +122,12 @@ const discourse = ({ url, apiKey } = {}) => {
         return post;
       },
       get: async (id) => {
-        const res = await fetch(`${url}/t/${id}.json?include_raw=true`, {
-          headers,
-        });
+        const res = await fetch(
+          `${url}/t/${id}.json?include_raw=true&print=true`,
+          {
+            headers,
+          }
+        );
         return await res.json();
       },
       getSingle: async (id) => {
@@ -157,12 +159,15 @@ const discourse = ({ url, apiKey } = {}) => {
             ...(userApiKey
               ? { "User-Api-Key": userApiKey }
               : { "Api-Key": apiKey }),
-          }
+          },
         });
 
         return await res.json();
       },
-      updateStatus: async ({ id, status, enabled }, { username, userApiKey, apiKey }) => {
+      updateStatus: async (
+        { id, status, enabled },
+        { username, userApiKey, apiKey }
+      ) => {
         const res = await fetch(`${url}/t/${id}/status.json`, {
           headers: {
             ...defaultHeaders,
@@ -180,7 +185,7 @@ const discourse = ({ url, apiKey } = {}) => {
 
         return await res.json();
       },
-    }
+    },
   };
 };
 
