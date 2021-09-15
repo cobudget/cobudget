@@ -9,7 +9,7 @@
   },
   "betterScripts": {
     "test:run": {
-      "command": "node index.js",
+      "command": "nodemon index.js",
       "env": {
         "MAILGUN_API_KEY": "xxx",
         "MAILGUN_DOMAIN": "xxx",

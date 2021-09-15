@@ -8,7 +8,7 @@
 // }
 
 describe("Test basic functionality", () => {
-  it("Opens the app successfully", () => {
+  it("Onboards successfully", () => {
     // const userEmail = "realitiestester@example.com";
     // const userPass = "password123";
     // const orgName = "Test org";
