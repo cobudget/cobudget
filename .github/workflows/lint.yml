@@ -1,0 +1,13 @@
+name: Formatting and linting
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install modules
+        run: npm ci
+      - name: Run formatting and lint checks
+        run: npm run lint

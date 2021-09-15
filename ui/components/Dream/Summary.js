@@ -22,7 +22,7 @@ const DreamSummary = ({ summary, canEdit, dreamId }) => {
     variables: { dreamId },
   });
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(summary ?? "");

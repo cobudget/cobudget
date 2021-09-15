@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
-import { styled as muiStyled } from "@material-ui/core/styles";
 
-import { FormControl, InputLabel, Modal } from "@material-ui/core";
+import { Modal } from "@material-ui/core";
 
 import Button from "components/Button";
 
@@ -59,12 +58,6 @@ const EDIT_IMAGES_MUTATION = gql`
   }
 `;
 
-const StyledLabel = muiStyled(InputLabel)({
-  background: "white",
-  padding: "0 10px",
-  marginLeft: -5,
-});
-
 // prevent saving null values to images.
 const removeNullValues = (images) =>
   images.map(({ small, large }) => ({
@@ -84,7 +77,7 @@ const EditImagesModal = ({
     variables: { dreamId },
   });
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit } = useForm();
 
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -123,7 +116,7 @@ const EditImagesModal = ({
             images.forEach((image) => delete image.__typename); // apollo complains otherwise..
 
             editDream({ variables: { images } })
-              .then((data) => {
+              .then(() => {
                 handleClose();
               })
               .catch((err) => alert(err.message));
@@ -134,7 +127,7 @@ const EditImagesModal = ({
             {images.length > 0 &&
               images.map((image, i) => (
                 <div className="image" key={image.small}>
-                  <a href={image.large} target="_blank">
+                  <a href={image.large} target="_blank" rel="noreferrer">
                     <img src={image.small} alt="Preview" />
                   </a>
                   <button

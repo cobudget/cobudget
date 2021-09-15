@@ -1,4 +1,5 @@
 module.exports = {
+  // eslint-disable-next-line no-unused-vars
   async up(db, client) {
     await db
       .collection("eventmembers")
@@ -9,6 +10,7 @@ module.exports = {
     // await db.collection('albums').updateOne({artist: 'The Beatles'}, {$set: {blacklisted: true}});
   },
 
+  // eslint-disable-next-line no-unused-vars
   async down(db, client) {
     await db
       .collection("eventmembers")
