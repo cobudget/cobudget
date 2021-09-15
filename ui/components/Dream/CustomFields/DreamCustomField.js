@@ -165,6 +165,11 @@ const DreamCustomField = ({
                     {props.children}
                   </a>
                 ),
+                code: (props) => (
+                  <code className="whitespace-pre-wrap" {...props}>
+                    {props.value}
+                  </code>
+                ),
               }}
             />
           ) : (

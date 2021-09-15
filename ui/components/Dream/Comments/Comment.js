@@ -43,6 +43,8 @@ const Comment = ({ comment, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           {comment.isLog ? (
             <h5>Log</h5>
+          ) : comment.orgMember === null ? (
+            <h5>A discourse user</h5>
           ) : (
             <h5>{comment.orgMember?.user.username}</h5>
           )}

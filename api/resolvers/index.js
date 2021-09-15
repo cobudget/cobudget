@@ -29,12 +29,6 @@ const isMemberOfOrg = (parent, { id }, { kauth, currentOrgMember }) => {
   return skip;
 };
 
-const commentIsLog = (comment) => {
-  if (comment.isLog) return comment.isLog;
-  if (comment.authorId === undefined) return true; // system user
-  return false;
-};
-
 // const canEditEvent = (parent, args, { currentOrgMember, models }) => {
 //   // args: eventId
 //   //and you are either a orgAdmin or eventAdmin..
@@ -2698,9 +2692,6 @@ const resolvers = {
     },
   },
   Comment: {
-    isLog: (comment) => {
-      return commentIsLog(comment);
-    },
     orgMember: async (post, args, { models: { OrgMember } }) => {
       // make logs anonymous
       if (post.isLog) return null;
