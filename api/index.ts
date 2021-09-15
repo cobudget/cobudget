@@ -12,7 +12,7 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const pretixWebhook = require("./webhooks/pretix");
 const schema = require("./schema");
-import resolvers from "./resolvers"
+import resolvers from "./resolvers";
 const { getModels } = require("./database/models");
 const EventHub = require("./services/eventHub.service");
 const {
