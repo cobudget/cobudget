@@ -1515,7 +1515,7 @@ const resolvers = {
       if (!eventMember || !eventMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (const flag in dream.flags) {
+      for (const flag of dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
           flag.type === "ALL_GOOD_FLAG"
@@ -2292,6 +2292,7 @@ const resolvers = {
         isAdmin: false,
         eventId,
         orgMemberId: orgMember.id,
+        isApproved: null,
       };
 
       if (orgMember.isOrgAdmin) {
@@ -2786,4 +2787,4 @@ const resolvers = {
   },
 };
 
-module.exports = resolvers;
+export default resolvers;
