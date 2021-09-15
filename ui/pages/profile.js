@@ -44,7 +44,7 @@ const DELETE_GRANT_MUTATION = gql`
   }
 `;
 
-export default ({ currentUser, event }) => {
+export default () => {
   const { data } = useQuery(PROFILE_QUERY);
 
   const [deleteGrant] = useMutation(DELETE_GRANT_MUTATION, {

@@ -8,6 +8,10 @@ export default (propKey, wait) => (WrappedComponent) => {
       this.state = {
         debouncedProp: props[propKey],
       };
+
+      this.handlePropUpdateDebounced = _.debounce((prop) => {
+        this.setState({ debouncedProp: prop });
+      }, wait);
     }
 
     componentDidUpdate(prevProps) {
@@ -25,10 +29,6 @@ export default (propKey, wait) => (WrappedComponent) => {
     componentWillUnmount() {
       this.handlePropUpdateDebounced.cancel();
     }
-
-    handlePropUpdateDebounced = _.debounce((prop) => {
-      this.setState({ debouncedProp: prop });
-    }, wait);
 
     render() {
       return (

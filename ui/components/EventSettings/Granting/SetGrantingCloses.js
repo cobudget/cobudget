@@ -24,10 +24,9 @@ const SetGrantingCloses = ({ closeModal, event }) => {
         <h1 className="text-3xl">Set granting close date</h1>
 
         <form
-          onSubmit={handleSubmit((variables) => {
+          onSubmit={handleSubmit(() => {
             updateGranting({ variables: { grantingCloses: selectedDate } })
-              .then(({ data }) => {
-                // console.log({ data });
+              .then(() => {
                 closeModal();
               })
               .catch((err) => {

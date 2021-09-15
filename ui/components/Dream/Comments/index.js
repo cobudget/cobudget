@@ -14,7 +14,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
     event,
     dream,
   });
-  const { comments, from, setFrom, limit, total, loading } = context;
+  const { comments, setFrom, limit, total, loading } = context;
 
   return (
     <Context.Provider value={context}>
@@ -28,7 +28,11 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
             </h2>
 
             {dream.discourseTopicUrl && (
-              <a target="_blank" href={dream.discourseTopicUrl}>
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={dream.discourseTopicUrl}
+              >
                 View on Discourse
               </a>
             )}

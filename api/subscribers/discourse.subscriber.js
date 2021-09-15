@@ -26,9 +26,6 @@ module.exports = {
 
         console.log(`Publishing dream ${dream.id} to discourse...`);
 
-        const domain =
-          currentOrg.customDomain ||
-          [currentOrg.subdomain, process.env.DEPLOY_URL].join(".");
         const post = await discourse(currentOrg.discourse).posts.create(
           {
             title: dream.title,
@@ -129,7 +126,7 @@ module.exports = {
           dream = Dream.findOne({ _id: dream.id });
         }
 
-        const post = await discourse(currentOrg.discourse).topics.updateStatus(
+        await discourse(currentOrg.discourse).topics.updateStatus(
           {
             id: dream.discourseTopicId,
             status: "visible",
@@ -200,7 +197,7 @@ module.exports = {
     eventHub.subscribe(
       "edit-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      async ({ currentOrg, currentOrgMember, dream, comment }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -242,7 +239,7 @@ module.exports = {
     eventHub.subscribe(
       "delete-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      async ({ currentOrg, currentOrgMember, comment }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }

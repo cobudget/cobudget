@@ -164,7 +164,7 @@ const DreamPage = ({
   return (
     <div className="flex-grow flex flex-col justify-center items-center">
       <span className="text-4xl">🛌</span>
-      <h1 className="text-2xl">Can't recall this dream...</h1>
+      <h1 className="text-2xl">Can&apos;t recall this dream...</h1>
     </div>
   );
 };

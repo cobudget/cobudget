@@ -17,6 +17,7 @@ const TypeaheadResults = ({
     <ListGroup flush>
       {results.map((item, index) => (
         <ListGroupItem
+          key={item.nodeId}
           {...getItemProps({
             key: item.nodeId,
             item,

@@ -2,7 +2,6 @@ import { Tooltip } from "react-tippy";
 import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import Router from "next/router";
-import { useForm } from "react-hook-form";
 
 import Dropdown from "components/Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "components/Icons";
@@ -76,15 +75,6 @@ const DELETE_DREAM_MUTATION = gql`
   mutation DeleteDream($dreamId: ID!) {
     deleteDream(dreamId: $dreamId) {
       id
-    }
-  }
-`;
-
-const EDIT_TAGS_MUTATION = gql`
-  mutation EditTags($dreamId: ID!, $tags: [String!]) {
-    editDream(dreamId: $dreamId, tags: $tags) {
-      id
-      tags
     }
   }
 `;

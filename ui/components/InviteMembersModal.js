@@ -7,8 +7,6 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import Banner from "components/Banner";
 
-// import { MEMBERS_QUERY } from ".";
-
 const INVITE_ORG_MEMBERS_MUTATION = gql`
   mutation InviteOrgMembers($emails: String!) {
     inviteOrgMembers(emails: $emails) {
@@ -86,8 +84,8 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
               People added here should be expecting to be added to the platform.
             </li>
             <li className="mt-2">
-              People without Plato accounts will get an anonymous "Welcome to
-              Plato" email to complete their signup.
+              People without Plato accounts will get an anonymous &quot;Welcome
+              to Plato&quot; email to complete their signup.
             </li>
             <li className="mt-2">
               People with Plato accounts will get no notification or email.
@@ -97,7 +95,7 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             inviteMembers({ variables })
-              .then((data) => {
+              .then(() => {
                 reset();
                 handleClose();
               })

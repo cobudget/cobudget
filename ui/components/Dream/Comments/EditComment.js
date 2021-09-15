@@ -13,7 +13,9 @@ const EditComment = ({ comment, handleDone }) => {
     <form
       onSubmit={handleSubmit(({ content }) => {
         setSubmitting(true);
-        editComment({ variables: { dreamId: dream.id, commentId: comment.id, content } })
+        editComment({
+          variables: { dreamId: dream.id, commentId: comment.id, content },
+        })
           .then(() => handleDone())
           .finally(() => setSubmitting(false))
           .catch((err) => alert(err.message));

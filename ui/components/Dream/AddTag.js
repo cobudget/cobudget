@@ -39,7 +39,6 @@ const AddTag = ({ items: eventTags, dream }) => {
         isOpen,
         inputValue,
         highlightedIndex,
-        selectedItem,
         getRootProps,
         openMenu,
         clearSelection,

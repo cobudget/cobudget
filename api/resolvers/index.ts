@@ -1295,7 +1295,7 @@ const resolvers = {
       {
         currentOrg,
         currentOrgMember,
-        models: { EventMember, Dream, Event },
+        models: { Dream, Event, EventMember },
         eventHub,
       }
     ) => {
@@ -2685,7 +2685,7 @@ const resolvers = {
     },
   },
   Comment: {
-    orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+    orgMember: async (post, args, { models: { OrgMember } }) => {
       // make logs anonymous
       if (post.isLog) return null;
 
@@ -2698,7 +2698,7 @@ const resolvers = {
 
       return event.guidelines.id(flag.guidelineId);
     },
-    user: async (parent, args, { models: { EventMember, Dream } }) => {
+    user: async () => {
       // if not org admin or event admin or guide
       return null;
     },
@@ -2745,7 +2745,7 @@ const resolvers = {
   },
   Log: {
     details: (log) => log,
-    user: async (log, args, { models: { User } }) => {
+    user: async () => {
       return null;
       // TODO:  only show for admins
       // return User.findOne({ _id: log.userId });
