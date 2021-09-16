@@ -18,9 +18,12 @@ module.exports = async (req, res) => {
   }
   const { body } = req;
 
+  let pretixRes;
+  let order;
+
   switch (body.action) {
     case "pretix.event.order.paid":
-      const pretixRes = await fetch(
+      pretixRes = await fetch(
         `${process.env.PRETIX_URL}/api/v1/organizers/${body.organizer}/events/${body.event}/orders/${body.code}/`,
         {
           headers: {
@@ -29,7 +32,7 @@ module.exports = async (req, res) => {
         }
       );
 
-      const order = await pretixRes.json();
+      order = await pretixRes.json();
 
       if (order.status === "p") {
         const db = await getConnection();

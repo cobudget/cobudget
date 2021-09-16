@@ -20,9 +20,7 @@ export default ({ event, currentOrg }) => {
   const {
     handleSubmit,
     register,
-    setValue,
     formState: { isDirty },
-    errors,
   } = useForm();
 
   return (

@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-const GrantingStatus = ({ dream, event, currentOrgMember }) => {
+const GrantingStatus = ({ dream, event }) => {
   const funding = dream.totalContributions + dream.income;
   const ratio = isNaN(funding / dream.minGoal) ? 0 : funding / dream.minGoal;
 

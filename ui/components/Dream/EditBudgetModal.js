@@ -82,7 +82,7 @@ const EditBudgetModal = ({
             editDream({
               variables: { budgetItems: [...(variables.budgetItems ?? [])] },
             })
-              .then((data) => {
+              .then(() => {
                 handleClose();
               })
               .catch((err) => alert(err.message));
@@ -151,7 +151,9 @@ const EditBudgetModal = ({
             </Button>
           </div>
 
-          <h2 className="text-lg font-semibold my-2">Existing funding and resources</h2>
+          <h2 className="text-lg font-semibold my-2">
+            Existing funding and resources
+          </h2>
 
           {incomeItems.map(({ id, description, type, min }, index) => {
             return (
@@ -216,6 +218,7 @@ const EditBudgetModal = ({
                 <a
                   href={`/${event.slug}/about#guidelines`}
                   target="_blank"
+                  rel="noreferrer"
                   className="text-sm text-gray-600 font-medium hover:text-gray-800"
                 >
                   See funding guidelines

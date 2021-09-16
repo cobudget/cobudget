@@ -32,7 +32,7 @@ const CREATE_EVENT = gql`
 `;
 
 export default function NewCollectionPage({ currentOrg }) {
-  const [createEvent, { data, error }] = useMutation(CREATE_EVENT);
+  const [createEvent] = useMutation(CREATE_EVENT);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 

@@ -1296,7 +1296,7 @@ const resolvers = {
       {
         currentOrg,
         currentOrgMember,
-        models: { EventMember, Dream, Event },
+        models: { Dream, Event, EventMember },
         eventHub,
       }
     ) => {
@@ -1515,7 +1515,7 @@ const resolvers = {
       if (!eventMember || !eventMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (const flag in dream.flags) {
+      for (const flag of dream.flags) {
         if (
           flag.userId === currentOrgMember.id &&
           flag.type === "ALL_GOOD_FLAG"
@@ -2292,6 +2292,7 @@ const resolvers = {
         isAdmin: false,
         eventId,
         orgMemberId: orgMember.id,
+        isApproved: null,
       };
 
       if (orgMember.isOrgAdmin) {
@@ -2692,7 +2693,7 @@ const resolvers = {
     },
   },
   Comment: {
-    orgMember: async (post, args, { currentOrg, models: { OrgMember } }) => {
+    orgMember: async (post, args, { models: { OrgMember } }) => {
       // make logs anonymous
       if (post.isLog) return null;
 
@@ -2705,7 +2706,7 @@ const resolvers = {
 
       return event.guidelines.id(flag.guidelineId);
     },
-    user: async (parent, args, { models: { EventMember, Dream } }) => {
+    user: async () => {
       // if not org admin or event admin or guide
       return null;
     },
@@ -2752,7 +2753,7 @@ const resolvers = {
   },
   Log: {
     details: (log) => log,
-    user: async (log, args, { models: { User } }) => {
+    user: async () => {
       return null;
       // TODO:  only show for admins
       // return User.findOne({ _id: log.userId });
@@ -2786,4 +2787,4 @@ const resolvers = {
   },
 };
 
-module.exports = resolvers;
+export default resolvers;
