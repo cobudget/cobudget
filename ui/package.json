@@ -8,7 +8,7 @@
     "start": "next start",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "test:run": "next dev -p 3001"
+    "test:run": "NODE_ENV=test next dev -p 3001"
   },
   "engines": {
     "node": "14.x"
