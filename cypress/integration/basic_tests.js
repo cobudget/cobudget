@@ -1,6 +1,3 @@
-// todo: add an exception for jest globals
-/* eslint-disable no-undef */
-
 //import crypto from "crypto";
 
 // function randomString() {
@@ -12,8 +9,8 @@
 
 describe("Test basic functionality", () => {
   it("Onboards successfully", () => {
-    // const userEmail = "realitiestester@example.com";
-    // const userPass = "password123";
+    const userEmail = "realitiestester@example.com";
+    const userPass = "password123";
     // const orgName = "Test org";
     // const needName = randomString();
     // const respName = randomString();
