@@ -14,6 +14,7 @@ module.exports = (phase) => {
     GRAPHQL_SUBSCRIPTIONS_URL: process.env.GRAPHQL_SUBSCRIPTIONS_URL,
     IS_PROD: isProd,
     DEPLOY_URL: process.env.DEPLOY_URL,
+    KEYCLOAK_REALM: process.env.KEYCLOAK_REALM,
     REALITIES_DEPLOY_URL: process.env.REALITIES_DEPLOY_URL,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     // these are for realities
