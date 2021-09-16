@@ -7,6 +7,9 @@
 //   return crypto.randomBytes(10).toString("hex");
 // }
 
+// TODO: a lot of this is copy pasted from realities, we should use it
+// for inspiration and then remove it
+
 describe("Test basic functionality", () => {
   it("Onboards successfully", () => {
     // const userEmail = "realitiestester@example.com";
@@ -15,29 +18,24 @@ describe("Test basic functionality", () => {
     // const needName = randomString();
     // const respName = randomString();
 
-    cy.visit("localhost:3001").contains(
-      "Digital tools for participant-driven culture"
-    );
-    // TODO: the rest of this is copy pasted from realities, we should use it
-    // for inspiration and then remove it
+    cy.visit("localhost:3001")
+      .contains("Digital tools for participant-driven culture")
 
-    // .root()
-    // .contains("Login")
-    // .click()
+      .root()
+      .contains("Login")
+      .click()
 
-    // // login page on keycloak
-    // // see comment in cypress.json about how this is against best practices
-    // // TODO: handle cases where user is already logged in
-    // // should be enough to click logout if already logged in
-    // .get("#username")
-    // .type(userEmail)
-    // .get("#password")
-    // .type(userPass)
-    // .get("#kc-form-login")
-    // .submit()
-    // .root()
-    // // waiting to get back to the homepage
-    // .contains("Pick an organization")
+      // login page on keycloak
+      // see comment in cypress.json about how this is against best practices
+      .get("#username")
+      .type(userEmail)
+      .get("#password")
+      .type(userPass)
+      .get("#kc-form-login")
+      .submit()
+      .root()
+      // waiting to get back to the homepage
+      .contains("Digital tools for participant-driven culture");
 
     // .root()
     // .contains(orgName)
