@@ -134,7 +134,12 @@ const Header = ({
                 </div>
               </>
             ) : (
-              <NavItem href="/api/login" external eventColor={color} primary>
+              <NavItem
+                href="/api/auth/signin"
+                external
+                eventColor={color}
+                primary
+              >
                 Login or Sign up
               </NavItem>
             )}
