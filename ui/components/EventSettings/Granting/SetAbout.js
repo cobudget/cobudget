@@ -18,7 +18,7 @@ export default ({ closeModal, event }) => {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   return (
     <Card>

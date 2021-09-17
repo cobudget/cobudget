@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 
 import { Box, Button } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
@@ -15,7 +14,7 @@ const SetAllowStretchGoals = ({ closeModal, event }) => {
       eventId: event.id,
     },
   });
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
 
   return (
     <Card>

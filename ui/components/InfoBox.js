@@ -2,7 +2,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import ExpandButton from "components/ExpandButton";
 
-const InfoBox = ({ markdown, close }) => {
+const InfoBox = ({ markdown }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (

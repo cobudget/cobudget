@@ -106,7 +106,7 @@ const PreOrPostFundModal = ({ open, handleClose, dream, event }) => {
                   value: Number(variables.value),
                 },
               })
-                .then((data) => {
+                .then(() => {
                   // Add "Snackbar" success message from material UI
                   handleClose();
                 })

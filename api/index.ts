@@ -12,7 +12,7 @@ require("dotenv").config();
 const bodyParser = require("body-parser");
 const pretixWebhook = require("./webhooks/pretix");
 const schema = require("./schema");
-const resolvers = require("./resolvers");
+import resolvers from "./resolvers";
 const { getModels } = require("./database/models");
 const EventHub = require("./services/eventHub.service");
 const {
@@ -46,10 +46,10 @@ const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   subscriptions: { path: "/subscriptions" },
-  formatError: (err) => {
+  formatError: (err: any) => {
     return process.env.NODE_ENV === "production" ? new Error(err.message) : err;
   },
-  context: async ({ req }) => {
+  context: async ({ req }: { req: any }) => {
     let kauth;
     try {
       kauth = new KeycloakContext({ req });
@@ -108,7 +108,7 @@ subscribers.initialize(EventHub);
 
 const appWithSockets = createServer(app);
 appWithSockets.listen(port, () => {
-  delete resolvers.Upload; // Where did Upload come from?
+  delete (resolvers as any).Upload; // Where did Upload come from?
   new SubscriptionServer(
     {
       execute,

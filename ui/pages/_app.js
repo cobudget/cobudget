@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { withApollo } from "lib/apollo";
 import { useQuery, gql } from "@apollo/client";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
@@ -110,7 +110,7 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const theme = createMuiTheme({
+const theme = createTheme({
   overrides: {
     MuiButton: {
       contained: {

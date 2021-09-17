@@ -53,8 +53,7 @@ const EditProfile = ({
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
               updateUser({ variables: dirtyValues(dirtyFields, variables) })
-                .then(({ data }) => {
-                  // console.log({ data });
+                .then(() => {
                   closeModal();
                 })
                 .catch((err) => {

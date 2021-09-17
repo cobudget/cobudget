@@ -44,7 +44,7 @@ const DreamCustomField = ({
 }) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register } = useForm();
   const [inputValue, setInputValue] = useState(defaultValue ?? "");
   const [editCustomFieldMutation, { loading }] = useMutation(
     EDIT_DREAM_CUSTOM_FIELD_MUTATION,
@@ -161,9 +161,14 @@ const DreamCustomField = ({
               className="markdown"
               renderers={{
                 link: (props) => (
-                  <a href={props.href} target="_blank">
+                  <a href={props.href} target="_blank" rel="noreferrer">
                     {props.children}
                   </a>
+                ),
+                code: (props) => (
+                  <code className="whitespace-pre-wrap" {...props}>
+                    {props.value}
+                  </code>
                 ),
               }}
             />

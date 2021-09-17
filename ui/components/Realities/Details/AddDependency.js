@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { gql, useMutation } from "@apollo/client";
-import { FormGroup, Label } from "reactstrap";
+import { FormGroup } from "reactstrap";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import TypeaheadInput from "./TypeaheadInput";
 import TypeBadge from "./TypeBadge";
@@ -26,7 +26,7 @@ const ADD_DEPENDENCY = gql`
   }
 `;
 
-const AddDependency = ({ nodeType, nodeId }) => {
+const AddDependency = ({ nodeId }) => {
   const realitiesApollo = getRealitiesApollo();
   const [
     addDependency,

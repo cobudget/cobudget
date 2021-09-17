@@ -1,4 +1,4 @@
-import { useQuery, useSubscription, gql } from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
 import Head from "next/head";
 
 import Dream from "../../../components/Dream";
@@ -84,24 +84,7 @@ export const DREAM_QUERY = gql`
         small
         large
       }
-      comments {
-        id
-        discourseUsername
-        cooked
-        content
-        createdAt
-        isLog
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
       discourseTopicUrl
-      numberOfComments
       logs {
         createdAt
         type
@@ -138,30 +121,11 @@ const DreamPage = ({
   currentOrg,
   router,
 }) => {
-  const COMMENTS_CHANGED = gql`
-    subscription OnCommentChanged($dreamID: ID!) {
-      commentsChanged(dreamID: $dreamID) {
-        id
-      }
-    }
-  `;
-
   const {
     data: { dream } = { dream: null },
     loading,
     error,
-    refetch,
-  } = useQuery(DREAM_QUERY, {
-    onCompleted: console.log,
-    variables: { id: router.query.dream },
-  });
-  useSubscription(COMMENTS_CHANGED, {
-    variables: { dreamID: dream?.id },
-    onSubscriptionData: () => {
-      console.log("refetching...");
-      refetch();
-    },
-  });
+  } = useQuery(DREAM_QUERY, { variables: { id: router.query.dream } });
 
   if (dream)
     return (
@@ -200,7 +164,7 @@ const DreamPage = ({
   return (
     <div className="flex-grow flex flex-col justify-center items-center">
       <span className="text-4xl">🛌</span>
-      <h1 className="text-2xl">Can't recall this dream...</h1>
+      <h1 className="text-2xl">Can&apos;t recall this dream...</h1>
     </div>
   );
 };

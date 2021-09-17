@@ -17,7 +17,7 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 const ActionsDropdown = ({
   onlyOneAdmin,
   updateOrgMember,
-  deleteMember,
+  //deleteMember,
   member,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);

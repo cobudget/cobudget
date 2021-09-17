@@ -40,7 +40,7 @@ const AllocateModal = ({ member, event, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage @{member.orgMember.user.username}'s balance
+          Manage @{member.orgMember.user.username}&apos;s balance
         </h1>
         <Switch
           options={["Add", "Set"]}

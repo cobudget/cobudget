@@ -1,5 +1,5 @@
 import React from "react";
-import stringToHslColor, { stringToColor } from "../utils/stringToHslColor";
+import { stringToColor } from "../utils/stringToHslColor";
 
 export default React.forwardRef((props, ref) => {
   const { user } = props;
