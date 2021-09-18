@@ -44,7 +44,7 @@ export default function SubMenu({ event, currentOrgMember }) {
 
   return (
     <div className="space-x-2 bg-white border-b border-b-default">
-      <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-scroll">
+      <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
         {items.map((item) => {
           return (
             <Link href={item.href} key={item.href}>
