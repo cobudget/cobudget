@@ -3,6 +3,8 @@ import prisma from "../../server/prisma";
 import { getRequestOrigin } from "../../server/get-request-origin";
 import schema from "../../server/graphql/schema";
 import resolvers from "../../server/graphql/resolvers";
+import EventHub from "../../server/services/eventHub.service";
+import { getSession } from "next-auth/client";
 
 export const config = {
   api: {
@@ -13,12 +15,37 @@ export const config = {
 const apolloServer = new ApolloServer({
   typeDefs: schema,
   resolvers,
-  context: ({ req }) => {
-    console.log({ req });
+  context: async ({ req }) => {
+    const session = await getSession({ req });
+
+    let currentOrg = null;
+    let currentOrgMember;
+
+    const subdomain = req.headers["dreams-subdomain"];
+    const customDomain = req.headers["dreams-customdomain"];
+
+    if (customDomain) {
+      currentOrg = await prisma.organization.findUnique({
+        where: { customDomain },
+      });
+    } else if (subdomain) {
+      currentOrg = await prisma.organization.findUnique({
+        where: { slug: subdomain },
+      });
+    }
+
+    if (currentOrg && session) {
+      // currentOrgMember = await prisma.orgmember.findUnique({
+      //   where: {},
+      // });
+    }
+
     return {
-      user: req.user,
+      user: session?.user,
       origin: getRequestOrigin(req),
       prisma,
+      eventHub: EventHub,
+      currentOrg,
     };
   },
 });

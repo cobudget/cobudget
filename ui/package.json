@@ -76,7 +76,8 @@
     "postcss-preset-env": "^6.7.0",
     "prisma": "^3.0.2",
     "tailwindcss": "^2.1.0",
-    "tailwindcss-font-inter": "2.0.2"
+    "tailwindcss-font-inter": "2.0.2",
+    "typescript": "^4.4.3"
   },
   "resolutions": {
     "graphql": "14.7.0",

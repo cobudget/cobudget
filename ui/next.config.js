@@ -15,7 +15,7 @@ module.exports = (phase) => {
 
   const env = {
     GRAPHQL_URL: isDev
-      ? "http://localhost:4000/graphql"
+      ? "http://localhost:3000/api"
       : `https://api.dreams.wtf/graphql`,
     GRAPHQL_SUBSCRIPTIONS_URL: isDev
       ? "ws://localhost:4000/subscriptions"
