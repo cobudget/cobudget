@@ -1,23 +1,23 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const orgItems = ({ currentOrgMember }) => {
+const orgItems = ({ currentOrgMember, orgSlug }) => {
   return [
-    { label: "Overview", href: "/" },
+    { label: "Overview", href: `/${orgSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: "/members" },
-    { label: "Settings", href: "/settings", admin: true },
+    { label: "Members", href: `/${orgSlug}/members` },
+    { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));
 };
 
-export const eventItems = ({ currentOrgMember, event }) => {
+export const eventItems = ({ orgSlug, currentOrgMember, event }) => {
   const isAdmin =
     currentOrgMember?.isOrgAdmin ||
     currentOrgMember?.currentEventMembership?.isAdmin;
   return [
-    { label: "Overview", href: `/${event.slug}` },
-    { label: "About", href: `/${event.slug}/about` },
-    { label: "Members", href: `/${event.slug}/members` },
+    { label: "Overview", href: `/${orgSlug}/${event.slug}` },
+    { label: "About", href: `/${orgSlug}/${event.slug}/about` },
+    { label: "Members", href: `/${orgSlug}/${event.slug}/members` },
     {
       label: "Transactions",
       href: `/${event.slug}/transactions`,
@@ -27,15 +27,16 @@ export const eventItems = ({ currentOrgMember, event }) => {
   ].filter((i) => (i.admin ? isAdmin : true));
 };
 
-export default function SubMenu({ event, currentOrgMember }) {
+export default function SubMenu({ event, currentOrgMember, orgSlug }) {
   const router = useRouter();
 
   const items = event
     ? eventItems({
         event,
         currentOrgMember,
+        orgSlug,
       })
-    : orgItems({ currentOrgMember });
+    : orgItems({ currentOrgMember, orgSlug });
 
   const color = event?.color ?? "anthracit";
 

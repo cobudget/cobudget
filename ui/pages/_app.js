@@ -194,6 +194,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
+
   return (
     <UserProvider value={{ user, loading }}>
       <ThemeProvider theme={theme}>

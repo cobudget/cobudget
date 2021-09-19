@@ -13,12 +13,12 @@ export default function createApolloClient(initialState, ctx) {
   // The `ctx` (NextPageContext) will only be present on the server.
   // use it to extract auth headers (ctx.req) or similar.
 
-  const wsLink = process.browser
-    ? new WebSocketLink({
-        uri: process.env.GRAPHQL_SUBSCRIPTIONS_URL,
-        options: { reconnect: true },
-      })
-    : null;
+  // const wsLink = process.browser
+  //   ? new WebSocketLink({
+  //       uri: process.env.GRAPHQL_SUBSCRIPTIONS_URL,
+  //       options: { reconnect: true },
+  //     })
+  //   : null;
 
   const httpLink = new HttpLink({
     uri: process.env.GRAPHQL_URL, // Server URL (must be absolute)
@@ -26,16 +26,7 @@ export default function createApolloClient(initialState, ctx) {
     fetch,
   });
 
-  const appLink = process.browser
-    ? split(
-        ({ query }) => {
-          const { kind, operation } = getMainDefinition(query);
-          return kind === "OperationDefinition" && operation === "subscription";
-        },
-        wsLink,
-        httpLink
-      )
-    : httpLink;
+  const appLink = httpLink;
 
   const authLink = setContext(async (graphqlRequest, { headers }) => {
     let token;

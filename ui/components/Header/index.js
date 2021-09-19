@@ -7,6 +7,7 @@ import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
+import { signIn, signOut, useSession } from "next-auth/client";
 
 const css = {
   mobileProfileItem:
@@ -49,6 +50,8 @@ const Header = ({
     refetchQueries: ["TopLevelQuery"],
   });
   const color = event?.color ?? "anthracit";
+  const [session, loading] = useSession();
+  console.log({ session, loading });
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4 max-w-screen-xl mx-auto">
@@ -93,7 +96,7 @@ const Header = ({
           } sm:bg-transparent`}
         >
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
-            {currentUser ? (
+            {session ? (
               <>
                 {currentOrg && (
                   <>
@@ -134,12 +137,7 @@ const Header = ({
                 </div>
               </>
             ) : (
-              <NavItem
-                href="/api/auth/signin"
-                external
-                eventColor={color}
-                primary
-              >
+              <NavItem onClick={signIn} eventColor={color} primary>
                 Login or Sign up
               </NavItem>
             )}
