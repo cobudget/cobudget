@@ -18,22 +18,6 @@ const apolloServer = new ApolloServer({
   context: async ({ req }) => {
     const session = await getSession({ req });
 
-    let currentOrg = null;
-    let currentOrgMember;
-
-    const subdomain = req.headers["dreams-subdomain"];
-    const customDomain = req.headers["dreams-customdomain"];
-
-    if (customDomain) {
-      currentOrg = await prisma.organization.findFirst({
-        where: { customDomain },
-      });
-    } else if (subdomain) {
-      currentOrg = await prisma.organization.findUnique({
-        where: { slug: subdomain },
-      });
-    }
-
     const user = session
       ? await prisma.user.findUnique({
           where: {
@@ -42,20 +26,11 @@ const apolloServer = new ApolloServer({
         })
       : null;
 
-    if (currentOrg && session) {
-      currentOrgMember = await prisma.orgMember.findFirst({
-        where: { userId: user.id },
-      });
-    }
-    console.log({ currentOrgMember, subdomain, currentOrg });
-
     return {
       user,
       origin: getRequestOrigin(req),
       prisma,
       eventHub: EventHub,
-      currentOrg,
-      currentOrgMember,
     };
   },
 });

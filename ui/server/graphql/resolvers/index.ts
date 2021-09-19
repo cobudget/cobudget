@@ -43,8 +43,13 @@ const isMemberOfOrg = (parent, { id }, { kauth, currentOrgMember }) => {
 
 const resolvers = {
   Query: {
-    currentUser: (parent, args, { kauth }) => (kauth ? { ...kauth } : null),
-    currentOrg: (parent, args, { currentOrg }) => currentOrg,
+    currentUser: (parent, args, { user }) => {
+      console.log({ user });
+      return user ? { ...user } : null;
+    },
+    currentOrg: (parent, { slug }, { prisma }) => {
+      return prisma.organization.findFirst({ where: { slug } });
+    },
     currentOrgMember: (parent, args, { currentOrgMember }) => currentOrgMember,
     organization: combineResolvers(
       isMemberOfOrg,
@@ -58,34 +63,24 @@ const resolvers = {
         return Organization.find();
       }
     ),
-    events: async (
-      parent,
-      { limit },
-      { currentOrg, currentOrgMember, models: { Event } }
-    ) => {
-      if (!currentOrg) {
-        throw new Error("No organization found");
-      }
+    events: async (parent, { limit, orgSlug }, { prisma, user }) => {
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: { userId: user.id, organization: { slug: orgSlug } },
+      });
 
-      // if admin or guide, show all events (current or archived)
+      // if admin show all events (current or archived)
       if (currentOrgMember && currentOrgMember.isOrgAdmin) {
-        return Event.find(
-          {
-            organizationId: currentOrg.id,
-          },
-          null,
-          { limit }
-        );
+        return prisma.collection.findMany({
+          where: { organization: { slug: orgSlug }, limit },
+        });
       }
-
-      return Event.find(
-        {
-          organizationId: currentOrg.id,
+      return prisma.collection.findMany({
+        where: {
+          organization: { slug: orgSlug },
           archived: { $ne: true },
+          limit,
         },
-        null,
-        { limit }
-      );
+      });
     },
     event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
       if (!currentOrg) return null;
@@ -2369,12 +2364,12 @@ const resolvers = {
   },
   OrgMember: {
     hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,
-    user: async (orgMember, args, { kcAdminClient }) => {
-      const user = await kcAdminClient.users.findOne({
-        id: orgMember.userId,
-      });
-      return user;
-    },
+    // user: async (orgMember, args, { kcAdminClient }) => {
+    //   const user = await kcAdminClient.users.findOne({
+    //     id: orgMember.userId,
+    //   });
+    //   return user;
+    // },
     eventMemberships: async (orgMember, args, { models: { EventMember } }) => {
       return EventMember.find({ orgMemberId: orgMember.id });
     },
@@ -2401,26 +2396,24 @@ const resolvers = {
   User: {
     currentOrgMember: async (user, args, { currentOrgMember }) => {
       if (!currentOrgMember) return null;
-      return user.sub === currentOrgMember.userId ? currentOrgMember : null;
+      return user.id === currentOrgMember.userId ? currentOrgMember : null;
     },
-    orgMemberships: async (user, args, { models: { OrgMember } }) => {
-      return OrgMember.find({ userId: user.id });
+    orgMemberships: async (user, args, { prisma: { orgmember } }) => {
+      return await orgmember.findMany({ where: { user: { id: user.id } } });
     },
-    id: (user) => (user.sub ? user.sub : user.id),
-    username: (user) =>
-      user.username ? user.username : user.preferred_username,
-    name: (user) => {
-      const firstName = user.firstName ? user.firstName : user.given_name;
-      const lastName = user.lastName ? user.lastName : user.family_name;
+    // id: (user) => (user.sub ? user.sub : user.id),
+    // username: (user) =>
+    //   user.username ? user.username : user.preferred_username,
+    // // name: (user) => {
+    //   const firstName = user.firstName ? user.firstName : user.given_name;
+    //   const lastName = user.lastName ? user.lastName : user.family_name;
 
-      if (firstName || lastName)
-        return `${firstName ? firstName : ""} ${lastName ? lastName : ""}`;
-      return null;
-    },
-    firstName: (user) => (user.firstName ? user.firstName : user.given_name),
-    lastName: (user) => (user.lastName ? user.lastName : user.family_name),
-    createdAt: (user) => user.createdTimestamp,
-    verifiedEmail: (user) => user.emailVerified,
+    //   if (firstName || lastName)
+    //     return `${firstName ? firstName : ""} ${lastName ? lastName : ""}`;
+    //   return null;
+    // },
+    // createdAt: (user) => user.createdTimestamp,
+    // verifiedEmail: (user) => user.emailVerified,
     // email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
     //   if (currentOrgMember && currentOrgMember.isOrgAdmin) {
     //     const orgMember = await OrgMember.findOne({ userId: user.id });

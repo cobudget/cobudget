@@ -6,11 +6,11 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    currentOrgMember: OrgMember
-    currentOrg: Organization
+    currentOrgMember(slug: String): OrgMember
+    currentOrg(slug: String): Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events(limit: Int): [Event!]
+    events(slug: String!, limit: Int): [Event!]
     event(slug: String): Event
     dream(id: ID!): Dream
     dreamsPage(
@@ -193,6 +193,7 @@ const schema = gql`
     id: ID!
     name: String!
     subdomain: String
+    slug: String
     customDomain: String
     logo: String
     events: [Event]
@@ -264,11 +265,9 @@ const schema = gql`
 
   type User {
     id: ID
-    username: String!
+    username: String
     email: String
     name: String
-    firstName: String
-    lastName: String
     verifiedEmail: Boolean!
     isRootAdmin: Boolean
     orgMemberships: [OrgMember!]

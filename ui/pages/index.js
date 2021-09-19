@@ -82,9 +82,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
   const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
 
   // TODO - perhaps a redirect to organization pages instead
-  if (!currentOrg) {
-    return <LandingPage />;
-  }
+  return <LandingPage />;
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
