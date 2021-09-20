@@ -6,8 +6,8 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    currentOrgMember(slug: String): OrgMember
-    currentOrg(slug: String): Organization
+    currentOrgMember(slug: String!): OrgMember
+    currentOrg(slug: String!): Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
     events(slug: String!, limit: Int): [Event!]
