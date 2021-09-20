@@ -7,7 +7,6 @@ import { AddIcon } from "components/Icons";
 import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
-import dreamName from "utils/dreamName";
 
 const EVENTS_QUERY = gql`
   query Events($slug: String!) {
@@ -24,6 +23,7 @@ const EVENTS_QUERY = gql`
     }
     currentOrg(slug: $slug) {
       id
+      slug
       finishedTodos
     }
   }
@@ -100,8 +100,7 @@ const IndexPage = ({ router }) => {
         >
           {events.map((event) => (
             <Link
-              href="/[event]"
-              as={`/${event.slug}`}
+              href={`/${currentOrg.slug}/${event.slug}`}
               key={event.slug}
               passHref
             >
