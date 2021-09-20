@@ -54,8 +54,6 @@ export const TOP_LEVEL_QUERY = gql`
     }
     currentUser {
       id
-      firstName
-      lastName
       username
       avatar
       email
@@ -72,8 +70,6 @@ export const TOP_LEVEL_QUERY = gql`
       hasDiscourseApiKey
       user {
         id
-        firstName
-        lastName
         username
         email
       }
