@@ -56,7 +56,7 @@ const IndexPage = ({ router }) => {
       currentOrg: null,
     },
   } = useQuery(EVENTS_QUERY, {
-    variables: { orgSlug: router.query.organization },
+    variables: { slug: router.query.organization },
   });
   //   // TODO - perhaps a redirect to organization pages instead
   //   if (!currentOrg) {
