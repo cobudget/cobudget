@@ -1,5 +1,6 @@
 import slugify from "../../utils/slugify";
 import liveUpdate from "../../services/liveUpdate.service";
+import prisma from "../../prisma";
 import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLJSONObject } from "graphql-type-json";
@@ -47,10 +48,17 @@ const resolvers = {
       console.log({ user });
       return user ? { ...user } : null;
     },
-    currentOrg: (parent, { slug }, { prisma }) => {
+    currentOrg: async (parent, { slug }, { prisma }) => {
       return prisma.organization.findFirst({ where: { slug } });
     },
-    currentOrgMember: (parent, args, { currentOrgMember }) => currentOrgMember,
+    currentOrgMember: async (parent, { slug }, ctx) => {
+      return prisma.orgMember.findFirst({
+        where: {
+          organization: { slug },
+          userId: ctx.user.id,
+        },
+      });
+    },
     organization: combineResolvers(
       isMemberOfOrg,
       async (parent, { id }, { models: { Organization } }) => {
@@ -2445,6 +2453,7 @@ const resolvers = {
     },
   },
   Event: {
+    color: (event) => event.color ?? "anthracit",
     info: (event) => {
       return event.info && event.info.length
         ? event.info
