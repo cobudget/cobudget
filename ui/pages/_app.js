@@ -10,8 +10,8 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($slug: String) {
-    event(slug: $slug) {
+  query TopLevelQuery($slug: String!, $orgSlug: String!) {
+    event(slug: $slug, orgSlug: $orgSlug) {
       id
       slug
       info
@@ -62,7 +62,7 @@ export const TOP_LEVEL_QUERY = gql`
         bio
       }
     }
-    currentOrgMember {
+    currentOrgMember(slug: $orgSlug) {
       id
       bio
       isOrgAdmin
@@ -94,7 +94,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg {
+    currentOrg(slug: $orgSlug) {
       id
       name
       info
@@ -179,7 +179,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   const {
     data: { currentUser, currentOrg, currentOrgMember, event } = {},
   } = useQuery(TOP_LEVEL_QUERY, {
-    variables: { slug: router.query.event },
+    variables: { slug: router.query.event, orgSlug: router.query.organization },
   });
 
   const [modal, setModal] = useState(null);
