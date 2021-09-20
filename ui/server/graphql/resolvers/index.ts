@@ -90,9 +90,10 @@ const resolvers = {
         },
       });
     },
-    event: async (parent, { slug }, { currentOrg, models: { Event } }) => {
-      if (!currentOrg) return null;
-      return Event.findOne({ slug, organizationId: currentOrg.id });
+    event: async (parent, { slug, orgSlug }) => {
+      return await prisma.collection.findFirst({
+        where: { slug, organization: { slug: orgSlug } },
+      });
     },
     contributionsPage: async (
       parent,
@@ -2452,133 +2453,100 @@ const resolvers = {
       return org.finishedTodos;
     },
   },
-  Event: {
-    color: (event) => event.color ?? "anthracit",
-    info: (event) => {
-      return event.info && event.info.length
-        ? event.info
-        : `# Welcome to ${event.title}`;
+  Collection: {
+    color: (collection) => collection.color ?? "anthracit",
+    info: (collection) => {
+      return collection.info && collection.info.length
+        ? collection.info
+        : `# Welcome to ${collection.title}`;
     },
-    about: (event) => {
-      return event.about && event.about.length
-        ? event.about
-        : `# About ${event.title}`;
+    about: (collection) => {
+      return collection.about && collection.about.length
+        ? collection.about
+        : `# About ${collection.title}`;
     },
-    numberOfApprovedMembers: async (
-      event,
-      args,
-      { models: { EventMember } }
-    ) => {
-      return EventMember.countDocuments({
-        eventId: event.id,
-        isApproved: true,
+    numberOfApprovedMembers: async (collection) => {
+      return prisma.collectionMember.count({
+        where: { collectionId: collection.id, isApproved: true },
       });
     },
-    totalAllocations: async (event, args, { models: { Allocation } }) => {
-      const [
-        { totalAllocations } = { totalAllocations: 0 },
-      ] = await Allocation.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-          },
-        },
-        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-      ]);
-      return totalAllocations;
+    totalAllocations: async (collection) => {
+      return prisma.allocation.aggregate({
+        where: { collectionId: collection.id },
+        _sum: { amount: true },
+      });
     },
-    totalContributions: async (event, args, { models: { Contribution } }) => {
-      const [
-        { totalContributions } = { totalContributions: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-          },
-        },
-        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-      ]);
-      return totalContributions;
+    totalContributions: async (collection) => {
+      return prisma.contribution.aggregate({
+        where: { collectionId: collection.id },
+        _sum: { amount: true },
+      });
     },
     totalContributionsFunding: async (
-      event,
+      collection,
       args,
       { models: { Contribution, Dream } }
     ) => {
-      const fundingNowDreamIds = await Dream.distinct("_id", {
-        eventId: event.id,
-        fundedAt: null,
+      const fundingBuckets = await prisma.bucket.findMany({
+        where: { collectionId: collection.id, fundedAt: null },
+        select: { id: true },
+      });
+      const fundingBucketIds = fundingBuckets.map((bucket) => bucket.id);
+
+      const {
+        _sum: { amount: totalContributionsFunded },
+      } = await prisma.contribution.aggregate({
+        _sum: { amount: true },
+        where: {
+          collectionId: collection.id,
+          bucketId: { in: fundingBucketIds },
+        },
       });
 
-      const [
-        { totalContributions } = { totalContributions: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-            dreamId: { $in: fundingNowDreamIds },
-          },
-        },
-        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-      ]);
-
-      return totalContributions;
+      return totalContributionsFunded;
     },
     totalContributionsFunded: async (
-      event,
+      collection,
       args,
       { models: { Contribution, Dream } }
     ) => {
-      const fundedDreamIds = await Dream.distinct("_id", {
-        eventId: event.id,
-        fundedAt: { $ne: null },
+      const fundedBuckets = await prisma.bucket.findMany({
+        where: { collectionId: collection.id, fundedAt: { not: null } },
+        select: { id: true },
+      });
+      const fundedBucketIds = fundedBuckets.map((bucket) => bucket.id);
+
+      const {
+        _sum: { amount: totalContributionsFunded },
+      } = await prisma.contribution.aggregate({
+        _sum: { amount: true },
+        where: {
+          collectionId: collection.id,
+          bucketId: { in: fundedBucketIds },
+        },
       });
 
-      const [
-        { totalContributions } = { totalContributions: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-            dreamId: { $in: fundedDreamIds },
-          },
-        },
-        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-      ]);
-
-      return totalContributions;
+      return totalContributionsFunded;
     },
-    totalInMembersBalances: async (
-      event,
-      args,
-      { models: { Contribution, Allocation } }
-    ) => {
-      const [
-        { totalAllocations } = { totalAllocations: 0 },
-      ] = await Allocation.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-          },
-        },
-        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-      ]);
+    totalInMembersBalances: async (collection) => {
+      const {
+        _sum: { amount: totalAllocations },
+      } = await prisma.allocation.aggregate({
+        where: { collectionId: collection.id },
+        _sum: { amount: true },
+      });
 
-      const [
-        { totalContributions } = { totalContributions: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventId: mongoose.Types.ObjectId(event.id),
-          },
-        },
-        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: totalContributions },
+      } = await prisma.contribution.aggregate({
+        where: { collectionId: collection.id },
+        _sum: { amount: true },
+      });
 
       return totalAllocations - totalContributions;
     },
-    tags: async (event, args, { models: { Tag } }) => {
-      return Tag.find({ eventId: event.id });
+    tags: async (collection) => {
+      return prisma.tag.findMany({ where: { collectionId: collection.id } });
     },
   },
   Dream: {
