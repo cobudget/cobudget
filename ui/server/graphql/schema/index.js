@@ -10,8 +10,8 @@ const schema = gql`
     currentOrg(slug: String!): Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events(slug: String!, limit: Int): [Event!]
-    event(slug: String): Event
+    events(slug: String!, limit: Int): [Collection!]
+    event(slug: String!, orgSlug: String!): Collection
     dream(id: ID!): Dream
     dreamsPage(
       eventSlug: String!
@@ -54,7 +54,7 @@ const schema = gql`
       currency: String!
       description: String
       registrationPolicy: RegistrationPolicy!
-    ): Event!
+    ): Collection!
     editEvent(
       eventId: ID!
       slug: String
@@ -66,34 +66,34 @@ const schema = gql`
       about: String
       dreamReviewIsOpen: Boolean
       discourseCategoryId: Int
-    ): Event!
-    deleteEvent(eventId: ID!): Event
+    ): Collection!
+    deleteEvent(eventId: ID!): Collection
 
-    addGuideline(eventId: ID!, guideline: GuidelineInput!): Event!
+    addGuideline(eventId: ID!, guideline: GuidelineInput!): Collection!
     editGuideline(
       eventId: ID!
       guidelineId: ID!
       guideline: GuidelineInput!
-    ): Event!
+    ): Collection!
     setGuidelinePosition(
       eventId: ID!
       guidelineId: ID!
       newPosition: Float
-    ): Event!
-    deleteGuideline(eventId: ID!, guidelineId: ID!): Event!
+    ): Collection!
+    deleteGuideline(eventId: ID!, guidelineId: ID!): Collection!
 
-    addCustomField(eventId: ID!, customField: CustomFieldInput!): Event!
+    addCustomField(eventId: ID!, customField: CustomFieldInput!): Collection!
     editCustomField(
       eventId: ID!
       fieldId: ID!
       customField: CustomFieldInput!
-    ): Event!
+    ): Collection!
     setCustomFieldPosition(
       eventId: ID!
       fieldId: ID!
       newPosition: Float
-    ): Event!
-    deleteCustomField(eventId: ID!, fieldId: ID!): Event!
+    ): Collection!
+    deleteCustomField(eventId: ID!, fieldId: ID!): Collection!
 
     editDreamCustomField(
       dreamId: ID!
@@ -168,7 +168,7 @@ const schema = gql`
       grantingCloses: Date
       dreamCreationCloses: Date
       allowStretchGoals: Boolean
-    ): Event
+    ): Collection
 
     allocate(
       eventMemberId: ID!
@@ -196,12 +196,12 @@ const schema = gql`
     slug: String
     customDomain: String
     logo: String
-    events: [Event]
+    events: [Collection]
     discourseUrl: String
     finishedTodos: Boolean
   }
 
-  type Event {
+  type Collection {
     id: ID!
     slug: String!
     title: String!
@@ -296,7 +296,7 @@ const schema = gql`
 
   type EventMember {
     id: ID!
-    event: Event!
+    event: Collection!
     orgMember: OrgMember!
     isAdmin: Boolean!
     isGuide: Boolean
@@ -323,7 +323,7 @@ const schema = gql`
 
   type Dream {
     id: ID!
-    event: Event!
+    event: Collection!
     title: String!
     description: String
     summary: String
@@ -433,7 +433,7 @@ const schema = gql`
 
   interface Transaction {
     id: ID!
-    event: Event!
+    event: Collection!
     eventMember: EventMember!
     amount: Int!
     createdAt: Date
@@ -441,7 +441,7 @@ const schema = gql`
 
   type Contribution implements Transaction {
     id: ID!
-    event: Event!
+    event: Collection!
     eventMember: EventMember!
     amount: Int!
     createdAt: Date
@@ -455,7 +455,7 @@ const schema = gql`
 
   type Allocation implements Transaction {
     id: ID!
-    event: Event!
+    event: Collection!
     eventMember: EventMember!
     amount: Int!
     createdAt: Date
@@ -537,7 +537,7 @@ const schema = gql`
     createdAt: Date
     user: User
     dream: Dream
-    event: Event
+    event: Collection
     details: LogDetails
     type: String
   }
