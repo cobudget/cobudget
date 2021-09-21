@@ -9,11 +9,21 @@
     "storybook": "cd ui && start-storybook -p 6006",
     "postinstall": "cd ui && npm i && cd ../api && npm i",
     "lint": "prettier --ignore-path .gitignore --check . && eslint .",
-    "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix"
+    "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",
+    "test:run:mongo": "sudo docker rm -fv mongo-dreams-test ; sudo docker run --name mongo-dreams-test --publish=28017:27017 mongo:4.4.3",
+    "test:run:app": "concurrently --kill-others \"npm run test:run --prefix api\" \"./scripts/wait.sh 4001 && npm run test:run --prefix ui\"",
+    "test:run:servers": "sudo pwd && concurrently \"npm run test:run:mongo\" \"npm run test:run:app\"",
+    "test:open": "cypress open",
+    "test:run": "cypress run",
+    "test": "./scripts/wait.sh 3001 && npm run test:run"
   },
   "devDependencies": {
+    "concurrently": "3.5.1",
+    "cypress": "6.3.0",
+    "cypress-terminal-report": "2.4.0",
     "eslint": "7.21.0",
     "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-cypress": "2.12.1",
     "eslint-plugin-react": "7.22.0",
     "eslint-plugin-react-hooks": "4.2.0",
     "npm-run-all": "^4.1.5",
