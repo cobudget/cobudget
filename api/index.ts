@@ -29,7 +29,7 @@ const app = express();
 const keycloak = new Keycloak(
   {},
   {
-    realm: process.env.KEYCLOAK_REALM,
+    realm: "plato",
     "auth-server-url": process.env.KEYCLOAK_AUTH_SERVER,
     "ssl-required": "external",
     resource: "dreams",

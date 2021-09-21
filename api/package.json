@@ -4,23 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.ts",
-    "test:run": "better-npm-run test:run"
-  },
-  "betterScripts": {
-    "test:run": {
-      "command": "nodemon index.ts",
-      "env": {
-        "MAILGUN_API_KEY": "xxx",
-        "MAILGUN_DOMAIN": "xxx",
-        "MAILGUN_HOST": "api.eu.mailgun.net",
-        "KEYCLOAK_SERVER_URL": "https://auth.platoproject.org/auth/",
-        "KEYCLOAK_REALM": "platotest",
-        "KEYCLOAK_CLIENT_ID": "realitiestest",
-        "MONGO_URL": "mongodb://localhost:28017/platotest",
-        "PORT": "4001"
-      }
-    }
+    "start": "nodemon index.ts"
   },
   "author": "",
   "license": "ISC",
@@ -48,7 +32,6 @@
     "node-fetch": "^2.6.0"
   },
   "devDependencies": {
-    "better-npm-run": "0.1.1",
     "nodemon": "^2.0.4",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3"
