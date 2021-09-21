@@ -124,24 +124,34 @@ const resolvers = {
         contributions: contributionsWithExtra.slice(0, limit),
       };
     },
-    dream: async (parent, { id }, { models: { Dream } }) => {
-      return Dream.findOne({ _id: id });
+    dream: async (parent, { id }) => {
+      return prisma.bucket.findUnique({ where: { id } });
     },
     dreamsPage: async (
       parent,
       { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
-      {
-        currentOrgMember,
-        currentOrg,
-        models: { Event, Dream, EventMember, Tag },
-      }
+      { user }
     ) => {
-      let currentEventMember;
-
-      const event = await Event.findOne({
-        slug: eventSlug,
-        organizationId: currentOrg.id,
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: {
+          organization: { collections: { some: { slug: eventSlug } } },
+          userId: user.id,
+        },
+        select: {
+          id: true,
+          isOrgAdmin: true,
+          createdAt: true,
+          collectionMemberships: {
+            where: { collection: { slug: eventSlug } },
+            select: { isAdmin: true, isGuide: true },
+          },
+        },
       });
+
+      // const event = await Event.findOne({
+      //   slug: eventSlug,
+      //   organizationId: currentOrg.id,
+      // });
 
       if (currentOrgMember) {
         currentEventMember = await EventMember.findOne({
@@ -2550,97 +2560,107 @@ const resolvers = {
     },
   },
   Dream: {
-    cocreators: async (dream, args, { models: { EventMember } }) => {
-      return EventMember.find({ _id: { $in: dream.cocreators } });
+    cocreators: async (bucket) => {
+      // TODO check whether this works...
+      return prisma.collectionMember.findMany({
+        where: { id: { in: bucket.cocreators } },
+      });
     },
-    event: async (dream, args, { models: { Event } }) => {
-      return Event.findOne({ _id: dream.eventId });
+    event: async (bucket) => {
+      return prisma.collection.findUnique({
+        where: { id: bucket.collectionId },
+      });
     },
-    totalContributions: async (dream, args, { models: { Contribution } }) => {
-      const [
-        { contributionsForDream } = { contributionsForDream: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            dreamId: mongoose.Types.ObjectId(dream.id),
-          },
+    totalContributions: async (bucket) => {
+      const {
+        _sum: { amount },
+      } = await prisma.contribution.aggregate({
+        _sum: { amount: true },
+        where: {
+          bucketId: bucket.id,
         },
-        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
-      ]);
-      return contributionsForDream;
+      });
+      return amount;
     },
-    totalContributionsFromCurrentMember: async (
-      dream,
-      args,
-      { models: { Contribution, EventMember }, currentOrgMember }
-    ) => {
+    totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: {
+          organization: { collections: { some: { id: bucket.collectionId } } },
+          userId: user.id,
+        },
+      });
       if (!currentOrgMember) {
         return 0;
       }
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findFirst({
+        where: {
+          orgMemberId: currentOrgMember.id,
+          collectionId: bucket.collectionId,
+        },
       });
 
-      if (!eventMember) return 0;
+      if (!collectionMember) return 0;
 
-      const [
-        { contributionsForDream } = { contributionsForDream: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            dreamId: mongoose.Types.ObjectId(dream.id),
-            eventMemberId: mongoose.Types.ObjectId(eventMember.id),
-          },
+      // TODO: should it be initialized at 0 like below?
+      const {
+        _sum: { amount = 0 },
+      } = await prisma.contribution.aggregate({
+        _sum: { amount: true },
+        where: {
+          bucketId: bucket.id,
+          collectionMemberId: collectionMember.id,
         },
-        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
-      ]);
-      return contributionsForDream;
+      });
+      return amount;
     },
-    numberOfComments: async (dream, args, { currentOrg }) => {
+    numberOfComments: async (bucket) => {
+      // TODO: fix discourse check
       // Only display number of comments for non-Discourse orgs
-      if (orgHasDiscourse(currentOrg)) {
-        return;
-      }
+      // if (orgHasDiscourse(currentOrg)) {
+      //   return;
+      // }
 
-      return dream.comments.length;
+      return prisma.comment.count({ where: { bucketId: bucket.id } });
     },
-    latestContributions: async (dream, args, { models: { Contribution } }) => {
-      return await Contribution.find({ dreamId: dream.id })
-        .sort({ createdAt: -1 })
-        .limit(10);
-    },
-    noOfContributions: async (dream, args, { models: { Contribution } }) => {
-      return await Contribution.countDocuments({ dreamId: dream.id });
-    },
-    raisedFlags: async (dream) => {
-      const resolveFlagIds = dream.flags
-        .filter((flag) => flag.type === "RESOLVE_FLAG")
-        .map((flag) => flag.resolvingFlagId);
-
-      return dream.flags.filter(
-        (flag) =>
-          flag.type === "RAISE_FLAG" && !resolveFlagIds.includes(flag.id)
-      );
-    },
-    logs: async (
-      dream,
-      args,
-      {
-        models: {
-          logs: { Log },
+    latestContributions: async (bucket) => {
+      return await prisma.contribution.findMany({
+        where: { bucketId: bucket.id },
+        take: 10,
+        orderBy: {
+          createdAt: "desc",
         },
-      }
-    ) => {
-      return Log.find({ dreamId: dream.id });
+      });
     },
-    discourseTopicUrl: (dream, args, { currentOrg }) => {
-      if (!dream.discourseTopicId || !currentOrg.discourse?.url) return null;
+    noOfContributions: async (bucket) => {
+      return await prisma.contribution.count({
+        where: { bucketId: bucket.id },
+      });
+    },
+    raisedFlags: async (bucket) => {
+      const resolveFlags = await prisma.flag.findMany({
+        where: { bucketId: bucket.id, type: "RESOLVE_FLAG" },
+        select: { resolvingFlagId: true },
+      });
+      const resolveFlagIds = resolveFlags.map((flag) => flag.resolvingFlagId);
 
-      return `${currentOrg.discourse.url}/t/${dream.discourseTopicId}`;
+      return await prisma.flag.findMany({
+        where: {
+          bucketId: bucket.id,
+          type: "RAISE_FLAG",
+          id: { notIn: resolveFlagIds },
+        },
+      });
     },
-    tags: async (dream, args, { models: { Tag } }) => {
-      return Tag.find({ _id: { $in: dream.tags } });
+    discourseTopicUrl: (bucket, args, { currentOrg }) => {
+      if (!bucket.discourseTopicId || !currentOrg?.discourse?.url) return null;
+
+      return `${currentOrg.discourse.url}/t/${bucket.discourseTopicId}`;
+    },
+    tags: async (bucket) => {
+      // TODO: verify
+      return prisma.tag.findMany({
+        where: { buckets: { some: { id: bucket.id } } },
+      });
     },
   },
   Transaction: {

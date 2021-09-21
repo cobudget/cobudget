@@ -52,7 +52,7 @@ model CollectionMember {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  Buckets       Bucket[] //should it be explicit or implicit?
+  buckets       Bucket[] //should it be explicit or implicit?
   Allocations   Allocation[]
   Contributions Contribution[]
   Comments      Comment[]
@@ -109,15 +109,14 @@ model Collection {
 }
 
 model Tag {
-  id           String     @id @default(cuid()) //cuid or uuid? do I need @id when I have composite key?
+  id           String     @id @default(cuid())
   value        String
   collection   Collection @relation(fields: [collectionId], references: [id])
   collectionId String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  Bucket   Bucket? @relation(fields: [bucketId], references: [id])
-  bucketId String?
+  buckets Bucket[]
   @@unique([collectionId, value])
 }
 
@@ -170,7 +169,7 @@ model Bucket {
   description      String?
   summary          String?
   Images           Image[]
-  Cocreators       CollectionMember[] //implicit enough?
+  cocreators       CollectionMember[] //implicit enough?
   BudgetItems      BudgetItem[]
   FieldValues      FieldValue[]
   comments         Comment[]
@@ -181,7 +180,7 @@ model Bucket {
   completedAt      DateTime?
   discourseTopicId Int
   Flags            Flag[]
-  Tags             Tag[]
+  tags             Tag[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   Contributions    Contribution[]
