@@ -22,17 +22,23 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
         <Link href="/">
           <a
             className={
-              "px-2 py-1 rounded-md flex items-center group " +
+              "px-2 py-1 rounded-md flex items-center group space-x-2 " +
               `text-white hover:bg-${color}-dark`
             }
           >
             {currentOrg.logo && (
               <img
-                className="h-7 w-7 object-cover rounded overflow-hidden mr-2 opacity-75 group-hover:opacity-100 transition-opacity -ml-2 -mt-1 -mb-1"
+                className="h-7 w-7 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
                 src={currentOrg?.logo}
               />
             )}
-            <h1 className="text-white block font-medium">{currentOrg.name}</h1>
+            <h1
+              className={`text-white ${
+                currentOrg.logo ? "hidden sm:block" : "block"
+              } font-medium`}
+            >
+              {currentOrg.name}
+            </h1>
           </a>
         </Link>
       ) : (
