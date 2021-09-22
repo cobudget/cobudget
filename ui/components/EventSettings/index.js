@@ -30,8 +30,8 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
   const handleClose = () => null;
   return (
     <div className="page">
-      <div className=" grid grid-cols-6">
-        <div className="flex flex-col">
+      <div className="grid sm:grid-cols-6">
+        <div className="flex flex-col mb-4">
           {tabs.map((tab, i) => (
             <button
               key={tab.name}
