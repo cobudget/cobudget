@@ -1,3 +1,4 @@
+import SeededShuffle from "seededshuffle";
 import slugify from "../../utils/slugify";
 import liveUpdate from "../../services/liveUpdate.service";
 import prisma from "../../prisma";
@@ -145,58 +146,55 @@ const resolvers = {
             where: { collection: { slug: eventSlug } },
             select: { isAdmin: true, isGuide: true },
           },
+          organization: true,
         },
       });
 
-      // const event = await Event.findOne({
-      //   slug: eventSlug,
-      //   organizationId: currentOrg.id,
-      // });
+      const collection = await prisma.collection.findFirst({
+        where: {
+          slug: eventSlug,
+          organizationId: currentOrgMember.organization.id,
+        },
+      });
 
+      let currentEventMember;
       if (currentOrgMember) {
-        currentEventMember = await EventMember.findOne({
-          orgMemberId: currentOrgMember.id,
-          eventId: event.id,
-        });
-      }
-
-      let tag;
-
-      if (tagValue) {
-        tag = await Tag.findOne({
-          eventId: event.id,
-          value: tagValue,
+        currentEventMember = await prisma.collectionMember.findFirst({
+          where: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: collection.id,
+          },
         });
       }
 
       const tagQuery = {
-        ...(tag
+        ...(tagValue
           ? {
-              tags: mongoose.Types.ObjectId(tag._id),
+              tags: { some: { value: tagValue } },
             }
           : null),
       };
 
       const adminQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
-        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        collectionId: collection.id,
+        ...(textSearchTerm && { title: { search: textSearchTerm } }),
         ...tagQuery,
       };
       // todo: create appropriate index for this query
       // if event member, show dreams that are publisehd AND dreams where member is cocreator
       const memberQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
+        collectionId: collection.id,
         $or: [
-          { published: true },
+          { publishedAt: { not: null } },
           { cocreators: mongoose.Types.ObjectId(currentEventMember?.id) },
         ],
-        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        ...(textSearchTerm && { title: { search: textSearchTerm } }),
         ...tagQuery,
       };
       const othersQuery = {
-        eventId: mongoose.Types.ObjectId(event.id),
-        published: true,
-        ...(textSearchTerm && { $text: { $search: textSearchTerm } }),
+        collectionId: collection.id,
+        publishedAt: { not: null },
+        ...(textSearchTerm && { title: { search: textSearchTerm } }),
         ...tagQuery,
       };
 
@@ -208,41 +206,17 @@ const resolvers = {
           ? memberQuery
           : othersQuery;
 
-      const userSeed = currentOrgMember
-        ? new Date(currentOrgMember.createdAt).getTime() % 1000
-        : 1;
-
-      const dreamsWithExtra = [
-        ...(await Dream.aggregate([{ $match: query }])
-          .addFields({
-            position: {
-              $mod: [
-                {
-                  $multiply: [
-                    {
-                      $mod: [
-                        { $toDouble: { $ifNull: ["$createdAt", 1] } },
-                        1000,
-                      ],
-                    },
-                    userSeed,
-                  ],
-                },
-                1000,
-              ],
-            },
-          })
-          .sort({
-            position: 1,
-            _id: 1,
-          })
-          .skip(offset)
-          .limit(limit + 1)),
-      ].map((dream) => Dream(dream));
+      const todaySeed = dayjs().format("YYYY-MM-DD");
+      const buckets = await prisma.bucket.findMany({ where: query });
+      const shuffledBuckets = SeededShuffle.shuffle(
+        buckets,
+        user?.id ?? todaySeed
+      );
+      //todo: add skip
 
       return {
-        moreExist: dreamsWithExtra.length > limit,
-        dreams: dreamsWithExtra.slice(0, limit),
+        moreExist: shuffledBuckets.length > limit,
+        dreams: shuffledBuckets.slice(0, limit),
       };
     },
     orgMembersPage: async (
