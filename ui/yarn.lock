@@ -5412,6 +5412,11 @@ schema-utils@^2.6.5:
     ajv "^6.12.4"
     ajv-keywords "^3.5.2"
 
+seededshuffle@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/seededshuffle/-/seededshuffle-0.2.0.tgz#f0df7eb606e1a339d3c64e1c85ae4755d1b051a9"
+  integrity sha512-PHDs2DFmQjhrrpCryB3NJfzfQmNO3cYrgxsrMSESnI8tVU08VTxzHmK5atsNukvJKsRE4ro1UfBtBbKz7TeJsQ==
+
 semver@^5.1.0, semver@^5.4.1, semver@^5.6.0:
   version "5.7.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.7.1.tgz#a954f931aeba508d307bbf069eff0c01c96116f7"
