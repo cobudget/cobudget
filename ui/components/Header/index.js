@@ -123,7 +123,6 @@ const Header = ({
                     )}
                   </>
                 )}
-
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
@@ -132,6 +131,7 @@ const Header = ({
                     event={event}
                   />
                 </div>
+                <div data-cy="user-is-logged-in" />
               </>
             ) : (
               <NavItem href="/api/login" external eventColor={color} primary>

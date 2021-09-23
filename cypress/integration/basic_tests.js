@@ -32,7 +32,10 @@ describe("Test basic functionality", () => {
       .submit()
       .root()
       // waiting to get back to the homepage
-      .contains("Digital tools for participant-driven culture");
+      .contains("Digital tools for participant-driven culture")
+      .root()
+      // element that renders in the top right when the user is logged in
+      .get("[data-cy=user-is-logged-in]");
 
     // .root()
     // .contains(orgName)
