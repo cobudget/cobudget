@@ -26,13 +26,14 @@ const { KeycloakContext } = require("keycloak-connect-graphql");
 const subscribers = require("./subscribers/index");
 
 const app = express();
+
 const keycloak = new Keycloak(
   {},
   {
     realm: process.env.KEYCLOAK_REALM,
     "auth-server-url": process.env.KEYCLOAK_AUTH_SERVER,
     "ssl-required": "external",
-    resource: "dreams",
+    resource: process.env.KEYCLOAK_CLIENT_ID,
     credentials: {
       secret: process.env.KEYCLOAK_CLIENT_SECRET,
     },
@@ -47,6 +48,7 @@ const server = new ApolloServer({
   resolvers,
   subscriptions: { path: "/subscriptions" },
   formatError: (err: any) => {
+    // TODO: when we're testing in ci the full error shouldn't be sent either
     return process.env.NODE_ENV === "production" ? new Error(err.message) : err;
   },
   context: async ({ req }: { req: any }) => {
@@ -54,7 +56,7 @@ const server = new ApolloServer({
     try {
       kauth = new KeycloakContext({ req });
     } catch (err) {
-      console.log(err);
+      console.log("Keycloak Context creation failed:", err);
     }
 
     const db = await getConnection(process.env.MONGO_URL);
@@ -80,7 +82,7 @@ const server = new ApolloServer({
       });
     }
 
-    const kcAdminClient = await initKcAdminClient();
+    //const kcAdminClient = await initKcAdminClient();
 
     return {
       models,
@@ -88,7 +90,7 @@ const server = new ApolloServer({
       kauth: currentUser,
       currentOrg,
       currentOrgMember,
-      kcAdminClient,
+      //kcAdminClient,
       // kauth,
     };
   },
