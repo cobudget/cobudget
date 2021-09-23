@@ -20,11 +20,12 @@ describe("Test basic functionality", () => {
 
       .root()
       .contains("Login")
-      .click()
+      .click();
 
-      // login page on keycloak
-      // see comment in cypress.json about how this is against best practices
-      .get("#username")
+    cy.intercept("/api/profile").as("profile");
+    // login page on keycloak
+    // see comment in cypress.json about how this is against best practices
+    cy.get("#username")
       .type(userEmail)
       .get("#password")
       .type(userPass)
@@ -33,6 +34,11 @@ describe("Test basic functionality", () => {
       .root()
       // waiting to get back to the homepage
       .contains("Digital tools for participant-driven culture")
+
+      .wait("@profile")
+      .its("response.statusCode")
+      .should("eq", 200)
+
       .root()
       // element that renders in the top right when the user is logged in
       .get("[data-cy=user-is-logged-in]");
