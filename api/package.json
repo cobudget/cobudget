@@ -14,7 +14,7 @@
         "MAILGUN_API_KEY": "xxx",
         "MAILGUN_DOMAIN": "xxx",
         "MAILGUN_HOST": "api.eu.mailgun.net",
-        "KEYCLOAK_SERVER_URL": "https://auth.platoproject.org/auth/",
+        "KEYCLOAK_AUTH_SERVER": "https://auth.platoproject.org/auth/",
         "KEYCLOAK_REALM": "platotest",
         "KEYCLOAK_CLIENT_ID": "realitiestest",
         "MONGO_URL": "mongodb://localhost:28017/platotest",

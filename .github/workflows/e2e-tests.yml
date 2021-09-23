@@ -3,7 +3,7 @@ name: Run e2e tests
 on: [push, pull_request]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,8 +23,6 @@ jobs:
           npm run test:run:servers &
           npm test
       - uses: actions/upload-artifact@v2
-        # comment this next line if you want it to upload video of successes
-        if: failure()
         with:
           name: cypress-artifacts
           path: |
