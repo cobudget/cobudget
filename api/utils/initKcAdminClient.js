@@ -7,7 +7,9 @@ module.exports = async function () {
     !process.env.KEYCLOAK_ADMIN_PASSWORD ||
     !process.env.KEYCLOAK_REALM
   ) {
-    throw new Error("Missing required keycloak admin env var");
+    throw new Error(
+      `Missing required keycloak admin env var ${process.env.KEYCLOAK_AUTH_SERVER} ${process.env.KEYCLOAK_ADMIN_USERNAME} ${process.env.KEYCLOAK_ADMIN_PASSWORD?.[0]} ${process.env.KEYCLOAK_REALM}`
+    );
   }
   const kcAdminClient = new KcAdminClient({
     baseUrl: process.env.KEYCLOAK_AUTH_SERVER,

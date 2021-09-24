@@ -51,14 +51,17 @@ const keycloak = new Keycloak(
 
 app.use("/graphql", keycloak.middleware());
 
+const safeError = (err) =>
+  process.env.NODE_ENV === "production" || process.env.CI
+    ? new Error(err.message)
+    : err;
+
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   subscriptions: { path: "/subscriptions" },
   formatError: (err: any) => {
-    return process.env.NODE_ENV === "production" || process.env.CI
-      ? new Error(err.message)
-      : err;
+    return safeError(err);
   },
   context: async ({ req }: { req: any }) => {
     try {
@@ -104,7 +107,7 @@ const server = new ApolloServer({
         // kauth,
       };
     } catch (err) {
-      console.error("Failed to create context:", err);
+      console.error("Failed to create context:", safeError(err));
       throw err;
     }
   },
