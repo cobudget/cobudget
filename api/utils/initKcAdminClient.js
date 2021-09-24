@@ -1,6 +1,14 @@
 const KcAdminClient = require("keycloak-admin").default;
 
 module.exports = async function () {
+  if (
+    !process.env.KEYCLOAK_AUTH_SERVER ||
+    !process.env.KEYCLOAK_ADMIN_USERNAME ||
+    !process.env.KEYCLOAK_ADMIN_PASSWORD ||
+    !process.env.KEYCLOAK_REALM
+  ) {
+    throw new Error("Missing required keycloak admin env var");
+  }
   const kcAdminClient = new KcAdminClient({
     baseUrl: process.env.KEYCLOAK_AUTH_SERVER,
     realmName: "master",
@@ -19,7 +27,7 @@ module.exports = async function () {
   });
 
   kcAdminClient.setConfig({
-    realmName: "plato",
+    realmName: process.env.KEYCLOAK_REALM,
   });
 
   return kcAdminClient;

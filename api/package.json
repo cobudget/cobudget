@@ -18,6 +18,7 @@
         "KEYCLOAK_REALM": "platotest",
         "KEYCLOAK_ADMIN_USERNAME": "admin",
         "KEYCLOAK_CLIENT_ID": "realitiestest",
+        "KEYCLOAK_CLIENT_SECRET": "asdf",
         "MONGO_URL": "mongodb://localhost:28017/platotest",
         "PORT": "4001"
       }

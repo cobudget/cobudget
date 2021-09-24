@@ -27,6 +27,14 @@ const subscribers = require("./subscribers/index");
 
 const app = express();
 
+if (
+  !process.env.KEYCLOAK_REALM ||
+  !process.env.KEYCLOAK_AUTH_SERVER ||
+  !process.env.KEYCLOAK_CLIENT_ID ||
+  !process.env.KEYCLOAK_CLIENT_SECRET
+) {
+  throw new Error("Missing required keycloak env var");
+}
 const keycloak = new Keycloak(
   {},
   {
