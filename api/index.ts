@@ -83,7 +83,7 @@ const server = new ApolloServer({
       });
     }
 
-    //const kcAdminClient = await initKcAdminClient();
+    const kcAdminClient = await initKcAdminClient();
 
     return {
       models,
@@ -91,7 +91,7 @@ const server = new ApolloServer({
       kauth: currentUser,
       currentOrg,
       currentOrgMember,
-      //kcAdminClient,
+      kcAdminClient,
       // kauth,
     };
   },
