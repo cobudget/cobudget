@@ -49,7 +49,10 @@ const server = new ApolloServer({
   subscriptions: { path: "/subscriptions" },
   formatError: (err: any) => {
     // TODO: when we're testing in ci the full error shouldn't be sent either
-    return process.env.NODE_ENV === "production" ? new Error(err.message) : err;
+    console.log("env CI", process.env.CI);
+    return process.env.NODE_ENV === "production" || process.env.CI
+      ? new Error(err.message)
+      : err;
   },
   context: async ({ req }: { req: any }) => {
     let kauth;
