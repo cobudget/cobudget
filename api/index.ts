@@ -61,47 +61,52 @@ const server = new ApolloServer({
       : err;
   },
   context: async ({ req }: { req: any }) => {
-    let kauth;
     try {
-      kauth = new KeycloakContext({ req });
+      let kauth;
+      try {
+        kauth = new KeycloakContext({ req });
+      } catch (err) {
+        console.log("Keycloak Context creation failed:", err);
+      }
+
+      const db = await getConnection(process.env.MONGO_URL);
+      const models = getModels(db);
+
+      let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
+
+      let currentOrg = null;
+      let currentOrgMember;
+
+      const subdomain = req.headers["dreams-subdomain"];
+      const customDomain = req.headers["dreams-customdomain"];
+      if (customDomain) {
+        currentOrg = await models.Organization.findOne({ customDomain });
+      } else if (subdomain) {
+        currentOrg = await models.Organization.findOne({ subdomain });
+      }
+
+      if (currentOrg && currentUser) {
+        currentOrgMember = await models.OrgMember.findOne({
+          organizationId: currentOrg.id,
+          userId: currentUser.sub,
+        });
+      }
+
+      const kcAdminClient = await initKcAdminClient();
+
+      return {
+        models,
+        eventHub: EventHub,
+        kauth: currentUser,
+        currentOrg,
+        currentOrgMember,
+        kcAdminClient,
+        // kauth,
+      };
     } catch (err) {
-      console.log("Keycloak Context creation failed:", err);
+      console.error("Failed to create context:", err);
+      throw err;
     }
-
-    const db = await getConnection(process.env.MONGO_URL);
-    const models = getModels(db);
-
-    let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
-
-    let currentOrg = null;
-    let currentOrgMember;
-
-    const subdomain = req.headers["dreams-subdomain"];
-    const customDomain = req.headers["dreams-customdomain"];
-    if (customDomain) {
-      currentOrg = await models.Organization.findOne({ customDomain });
-    } else if (subdomain) {
-      currentOrg = await models.Organization.findOne({ subdomain });
-    }
-
-    if (currentOrg && currentUser) {
-      currentOrgMember = await models.OrgMember.findOne({
-        organizationId: currentOrg.id,
-        userId: currentUser.sub,
-      });
-    }
-
-    const kcAdminClient = await initKcAdminClient();
-
-    return {
-      models,
-      eventHub: EventHub,
-      kauth: currentUser,
-      currentOrg,
-      currentOrgMember,
-      kcAdminClient,
-      // kauth,
-    };
   },
   playground: true,
   introspection: true,
