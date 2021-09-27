@@ -1,4 +1,1 @@
-{
-  "chromeWebSecurityCOMMENT": "when disabling this we're allowed to visit multiple sites. we do this to be able to do the keycloak login. *don't* abuse this too much, it goes against cypress best practices to jump around on different sites. TODO: remove this when we've migrated away from keycloak",
-  "chromeWebSecurity": false
-}
+{}

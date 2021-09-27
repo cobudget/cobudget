@@ -9,8 +9,8 @@
 
 describe("Test basic functionality", () => {
   it("Onboards successfully", () => {
-    const userEmail = "realitiestester@example.com";
-    const userPass = "password123";
+    // const userEmail = "realitiestester@example.com";
+    // const userPass = "password123";
     // const orgName = "Test org";
     // const needName = randomString();
     // const respName = randomString();
@@ -22,26 +22,26 @@ describe("Test basic functionality", () => {
       .contains("Login")
       .click();
 
-    cy.intercept("/api/profile").as("profile");
-    // login page on keycloak
-    // see comment in cypress.json about how this is against best practices
-    cy.get("#username")
-      .type(userEmail)
-      .get("#password")
-      .type(userPass)
-      .get("#kc-form-login")
-      .submit()
-      .root()
-      // waiting to get back to the homepage
-      .contains("Digital tools for participant-driven culture")
+    // cy.intercept("/api/profile").as("profile");
+    // // login page on keycloak
+    // // see comment in cypress.json about how this is against best practices
+    // cy.get("#username")
+    //   .type(userEmail)
+    //   .get("#password")
+    //   .type(userPass)
+    //   .get("#kc-form-login")
+    //   .submit()
+    //   .root()
+    //   // waiting to get back to the homepage
+    //   .contains("Digital tools for participant-driven culture")
 
-      .wait("@profile")
-      .its("response.statusCode")
-      .should("eq", 200)
+    //   .wait("@profile")
+    //   .its("response.statusCode")
+    //   .should("eq", 200)
 
-      .root()
-      // element that renders in the top right when the user is logged in
-      .get("[data-cy=user-is-logged-in]");
+    //   .root()
+    //   // element that renders in the top right when the user is logged in
+    //   .get("[data-cy=user-is-logged-in]");
 
     // .root()
     // .contains(orgName)
