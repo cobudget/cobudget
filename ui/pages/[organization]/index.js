@@ -7,57 +7,27 @@ import { AddIcon } from "components/Icons";
 import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
-import dreamName from "utils/dreamName";
 
 const EVENTS_QUERY = gql`
-  query Events {
-    events {
+  query Events($slug: String!) {
+    events(slug: $slug) {
       id
       slug
       title
       archived
       color
     }
+    currentOrgMember(slug: $slug) {
+      id
+      isOrgAdmin
+    }
+    currentOrg(slug: $slug) {
+      id
+      slug
+      finishedTodos
+    }
   }
 `;
-
-const LandingPage = () => {
-  return (
-    <div className="page">
-      <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-12">
-        <div className="space-y-8">
-          <h1 className="text-6xl font-medium">
-            Digital tools for participant-driven culture
-          </h1>
-          <p className="text-xl text-gray-800">
-            Plato tools help you gather ideas, take decisions, map needs,
-            budgets and areas of responsibility, and provide a socially focused
-            digital meeting place for the participants.
-          </p>
-          <Link href="/organizations/create">
-            <Button color="anthracit" size="large">
-              Create a Community
-            </Button>
-          </Link>
-          <p className="text-sm text-gray-800">
-            Plato is in open beta. Organizations already use it, but we are
-            still working on getting things just right. If you need Plato for a
-            mission-critical project, please get in touch at{" "}
-            <a
-              className="text-black underline"
-              href="mailto:info@platoproject.org"
-            >
-              info@platoproject.org
-            </a>
-            . Plato is currently free for small non-profits. If you need Plato
-            for your business or large organization, let’s talk!
-          </p>
-        </div>
-        <img className="" src="/frihamnstorget.jpeg" />
-      </div>
-    </div>
-  );
-};
 
 const LinkCard = forwardRef((props, ref) => {
   const { color, className, children } = props;
@@ -78,21 +48,33 @@ const LinkCard = forwardRef((props, ref) => {
   );
 });
 
-const IndexPage = ({ currentOrg, currentOrgMember }) => {
-  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
-
-  // TODO - perhaps a redirect to organization pages instead
-  return <LandingPage />;
+const IndexPage = ({ router }) => {
+  const {
+    data: { events, currentOrgMember, currentOrg } = {
+      events: [],
+      currentOrgMember: null,
+      currentOrg: null,
+    },
+  } = useQuery(EVENTS_QUERY, {
+    variables: { slug: router.query.organization },
+  });
+  //   // TODO - perhaps a redirect to organization pages instead
+  //   if (!currentOrg) {
+  //     return <LandingPage />;
+  //   }
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (
     <>
-      <SubMenu currentOrgMember={currentOrgMember} />
+      <SubMenu
+        currentOrgMember={currentOrgMember}
+        orgSlug={router.query.organization}
+      />
       <PageHero>
         <div className="flex justify-between">
           <h2 className="text-2xl font-semibold">
-            {events.length} {dreamName(currentOrg)}{" "}
+            {events.length} bucket{" "}
             {events.length === 1 ? "collection" : "collections"}
           </h2>
           {currentOrgMember?.isOrgAdmin && (
@@ -118,8 +100,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
         >
           {events.map((event) => (
             <Link
-              href="/[event]"
-              as={`/${event.slug}`}
+              href={`/${currentOrg.slug}/${event.slug}`}
               key={event.slug}
               passHref
             >

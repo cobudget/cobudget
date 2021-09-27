@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { withApollo } from "lib/apollo";
 import { useQuery, gql } from "@apollo/client";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
@@ -10,8 +10,8 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($slug: String) {
-    event(slug: $slug) {
+  query TopLevelQuery($slug: String!, $orgSlug: String!) {
+    event(slug: $slug, orgSlug: $orgSlug) {
       id
       slug
       info
@@ -54,8 +54,6 @@ export const TOP_LEVEL_QUERY = gql`
     }
     currentUser {
       id
-      firstName
-      lastName
       username
       avatar
       email
@@ -64,7 +62,7 @@ export const TOP_LEVEL_QUERY = gql`
         bio
       }
     }
-    currentOrgMember {
+    currentOrgMember(slug: $orgSlug) {
       id
       bio
       isOrgAdmin
@@ -72,8 +70,6 @@ export const TOP_LEVEL_QUERY = gql`
       hasDiscourseApiKey
       user {
         id
-        firstName
-        lastName
         username
         email
       }
@@ -98,7 +94,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg {
+    currentOrg(slug: $orgSlug) {
       id
       name
       logo
@@ -110,7 +106,7 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const theme = createMuiTheme({
+const theme = createTheme({
   overrides: {
     MuiButton: {
       contained: {
@@ -182,7 +178,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   const {
     data: { currentUser, currentOrg, currentOrgMember, event } = {},
   } = useQuery(TOP_LEVEL_QUERY, {
-    variables: { slug: router.query.event },
+    variables: { slug: router.query.event, orgSlug: router.query.organization },
   });
 
   const [modal, setModal] = useState(null);
@@ -194,6 +190,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
+
   return (
     <UserProvider value={{ user, loading }}>
       <ThemeProvider theme={theme}>

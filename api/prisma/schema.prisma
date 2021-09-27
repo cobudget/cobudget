@@ -1,0 +1,325 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String      @id @default(cuid())
+  username       String      @unique
+  email          String?     @unique
+  name           String?
+  verifiedEmail  Boolean     @default(false) //renamed from verifiedEmail
+  emailVerified  DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  image          String?
+  accounts       Account[]
+  sessions       Session[]
+  orgMemberships OrgMember[]
+  Flag           Flag[]
+}
+
+model OrgMember {
+  id                    String             @id @default(cuid())
+  organization          Organization       @relation(fields: [organizationId], references: [id])
+  organizationId        String
+  user                  User               @relation(fields: [userId], references: [id])
+  userId                String
+  isOrgAdmin            Boolean            @default(false)
+  bio                   String?
+  discourseUsername     String?
+  discourseApiKey       String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  collectionMemberships CollectionMember[]
+
+  @@unique([organizationId, userId])
+}
+
+model CollectionMember {
+  id           String     @id @default(cuid())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  orgMember    OrgMember  @relation(fields: [orgMemberId], references: [id])
+  orgMemberId  String
+  isAdmin      Boolean    @default(false)
+  isGuide      Boolean    @default(false)
+  isApproved   Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  Buckets       Bucket[] //should it be explicit or implicit?
+  Allocations   Allocation[]
+  Contributions Contribution[]
+  Comments      Comment[]
+
+  @@unique([orgMemberId, collectionId])
+}
+
+model Organization {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  name         String
+  logo         String?
+  customDomain String?
+  orgMembers   OrgMember[]
+  collections  Collection[]
+  discourse    DiscourseConfig?
+
+  finishedTodos Boolean @default(false)
+}
+
+model Collection {
+  id                 String             @id @default(cuid())
+  slug               String
+  organization       Organization       @relation(fields: [organizationId], references: [id])
+  organizationId     String
+  title              String
+  archived           Boolean            @default(false)
+  info               String? //rename?
+  about              String? //rename?
+  color              String?
+  registrationPolicy RegistrationPolicy
+  currency           String
+
+  maxAmountToDreamPerUser Int?
+  dreamCreationCloses     DateTime?
+  grantingOpens           DateTime? //rename
+  grantingCloses          DateTime? //rename
+  allowStretchGoals       Boolean?
+  dreamReviewIsOpen       Boolean? //rename
+  discourseCategoryId     Int?
+
+  tags       Tag[]
+  guidelines Guideline[]
+  fields     Field[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  CollectionMember CollectionMember[]
+  Bucket           Bucket[]
+  Allocations      Allocation[]
+  Contributions    Contribution[]
+  @@unique([organizationId, slug])
+}
+
+model Tag {
+  id           String     @id @default(cuid()) //cuid or uuid? do I need @id when I have composite key?
+  value        String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  Bucket   Bucket? @relation(fields: [bucketId], references: [id])
+  bucketId String?
+  @@unique([collectionId, value])
+}
+
+model Guideline {
+  id           String     @id @default(cuid())
+  title        String
+  description  String
+  position     Int // TODO: double check whether it should be a float or int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Flag         Flag[]
+}
+
+model Field {
+  id           String       @id @default(cuid())
+  name         String
+  description  String
+  type         FieldType
+  limit        Int?
+  isRequired   Boolean
+  position     Int // TODO: position double check.
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  Collection   Collection   @relation(fields: [collectionId], references: [id])
+  collectionId String
+  FieldValue   FieldValue[]
+}
+
+enum FieldType {
+  TEXT
+  MULTILINE_TEXT
+  BOOLEAN
+  ENUM
+  FILE
+}
+
+enum RegistrationPolicy {
+  OPEN
+  REQUEST_TO_JOIN
+  INVITE_ONLY
+}
+
+model Bucket {
+  id               String             @id @default(cuid())
+  collection       Collection         @relation(fields: [collectionId], references: [id])
+  collectionId     String
+  title            String
+  description      String?
+  summary          String?
+  Images           Image[]
+  Cocreators       CollectionMember[] //implicit enough?
+  BudgetItems      BudgetItem[]
+  FieldValues      FieldValue[]
+  comments         Comment[]
+  approvedAt       DateTime?
+  publishedAt      DateTime?
+  fundedAt         DateTime?
+  canceledAt       DateTime?
+  completedAt      DateTime?
+  discourseTopicId Int
+  Flags            Flag[]
+  Tags             Tag[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  Contributions    Contribution[]
+}
+
+model Image {
+  id       String  @id @default(cuid())
+  small    String?
+  large    String?
+  bucket   Bucket? @relation(fields: [bucketId], references: [id])
+  bucketId String?
+}
+
+model BudgetItem {
+  id          String         @id @default(cuid())
+  description String
+  min         Int
+  max         Int?
+  type        BudgetItemType
+  Bucket      Bucket?        @relation(fields: [bucketId], references: [id])
+  bucketId    String?
+}
+
+enum BudgetItemType {
+  INCOME
+  EXPENSE
+}
+
+model FieldValue {
+  id       String @id @default(cuid())
+  field    Field  @relation(fields: [fieldId], references: [id])
+  fieldId  String
+  //collectionId? original schema has eventId..
+  value    Json
+  Bucket   Bucket @relation(fields: [bucketId], references: [id])
+  bucketId String
+}
+
+model Comment {
+  id                 String           @id @default(cuid())
+  content            String
+  isLog              Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id]) //TODO: check what this is in current platform
+  collectionMemberId String
+  Bucket             Bucket?          @relation(fields: [bucketId], references: [id])
+  bucketId           String?
+}
+
+model Flag {
+  id              String    @id @default(cuid())
+  guideline       Guideline @relation(fields: [guidelineId], references: [id])
+  guidelineId     String
+  user            User      @relation(fields: [userId], references: [id])
+  userId          String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  type            FlagType
+  resolvingFlag   Flag?     @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
+  resolvedBy      Flag?     @relation("FlagToFlag")
+  resolvingFlagId String?
+  Bucket          Bucket?   @relation(fields: [bucketId], references: [id])
+  bucketId        String?
+}
+
+enum FlagType {
+  RAISE_FLAG
+  RESOLVE_FLAG
+  ALL_GOOD_FLAG
+}
+
+model Allocation {
+  id                 String           @id @default(cuid())
+  collection         Collection       @relation(fields: [collectionId], references: [id])
+  collectionId       String
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String
+  amount             Int
+  createdAt          DateTime         @default(now())
+}
+
+model Contribution {
+  id                 String           @id @default(cuid())
+  collection         Collection       @relation(fields: [collectionId], references: [id])
+  collectionId       String
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String
+  bucket             Bucket           @relation(fields: [bucketId], references: [id])
+  bucketId           String
+  amount             Int
+  createdAt          DateTime         @default(now())
+}
+
+model DiscourseConfig {
+  id               String       @id @default(cuid())
+  url              String
+  apiKey           String
+  dreamsCategoryId Int
+  minPostLength    Int
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  organizationId   String
+}
+
+model Account {
+  id                 String    @id @default(cuid())
+  userId             String
+  providerType       String
+  providerId         String
+  providerAccountId  String
+  refreshToken       String?
+  accessToken        String?
+  accessTokenExpires DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([providerId, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  expires      DateTime
+  sessionToken String   @unique
+  accessToken  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model VerificationRequest {
+  id         String   @id @default(cuid())
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+}
