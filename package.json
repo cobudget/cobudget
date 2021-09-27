@@ -11,8 +11,9 @@
     "lint": "prettier --ignore-path .gitignore --check . && eslint .",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",
     "test:run:mongo": "sudo docker rm -fv mongo-dreams-test ; sudo docker run --name mongo-dreams-test --publish=28017:27017 mongo:4.4.3",
-    "test:run:app": "concurrently --kill-others \"npm run test:run --prefix api\" \"./scripts/wait.sh 4001 && npm run test:run --prefix ui\"",
-    "test:run:servers": "sudo pwd && concurrently \"npm run test:run:mongo\" \"npm run test:run:app\"",
+    "test:run:postgres": "cd ui/ && sudo docker-compose up",
+    "test:run:app": "npm run test:run --prefix ui",
+    "test:run:servers": "sudo pwd && concurrently \"npm run test:run:postgres\" \"npm run test:run:app\"",
     "test:open": "cypress open",
     "test:run": "cypress run",
     "test": "./scripts/wait.sh 3001 && npm run test:run"
