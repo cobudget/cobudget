@@ -117,7 +117,7 @@ const DreamBudget = ({
               </div>
             </>
           )}
-          <div className="text-lg font-medium mb-2 space-x-4 space-y-2 flex flex-wrap justify-between">
+          <div className="text-lg font-medium mb-2 gap-x-4 gap-y-2 flex flex-wrap justify-between">
             <div>
               <div className="font-bold">Funding goal:</div>
               <div className="text-base">= Costs - Existing funds</div>
