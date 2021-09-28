@@ -54,8 +54,8 @@ const Header = ({
   console.log({ session, loading });
   return (
     <header className={`bg-${color} shadow-md w-full`}>
-      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 px-2 md:px-4 max-w-screen-xl mx-auto">
-        <div className="flex items-center justify-between py-2 sm:p-0">
+      <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
+        <div className="flex items-center justify-between py-2 px-2 sm:p-0">
           <div className="flex items-center">
             <OrganizationAndEventHeader
               currentOrg={currentOrg}
@@ -91,7 +91,7 @@ const Header = ({
         <nav
           className={` ${
             isMenuOpen ? "block" : "hidden"
-          } -ml-3 -mr-3 min-w-full sm:m-0 sm:min-w-0 sm:block bg-${
+          } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${
             event?.color ? event.color : "gray-100"
           } sm:bg-transparent`}
         >
@@ -126,7 +126,6 @@ const Header = ({
                     )}
                   </>
                 )}
-
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
@@ -135,6 +134,7 @@ const Header = ({
                     event={event}
                   />
                 </div>
+                <div data-cy="user-is-logged-in" />
               </>
             ) : (
               <NavItem onClick={signIn} eventColor={color} primary>
