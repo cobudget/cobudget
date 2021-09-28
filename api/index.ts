@@ -26,13 +26,22 @@ const { KeycloakContext } = require("keycloak-connect-graphql");
 const subscribers = require("./subscribers/index");
 
 const app = express();
+
+if (
+  !process.env.KEYCLOAK_REALM ||
+  !process.env.KEYCLOAK_AUTH_SERVER ||
+  !process.env.KEYCLOAK_CLIENT_ID ||
+  !process.env.KEYCLOAK_CLIENT_SECRET
+) {
+  throw new Error("Missing required keycloak env var");
+}
 const keycloak = new Keycloak(
   {},
   {
-    realm: "plato",
+    realm: process.env.KEYCLOAK_REALM,
     "auth-server-url": process.env.KEYCLOAK_AUTH_SERVER,
     "ssl-required": "external",
-    resource: "dreams",
+    resource: process.env.KEYCLOAK_CLIENT_ID,
     credentials: {
       secret: process.env.KEYCLOAK_CLIENT_SECRET,
     },
@@ -42,55 +51,65 @@ const keycloak = new Keycloak(
 
 app.use("/graphql", keycloak.middleware());
 
+const safeError = (err) =>
+  process.env.NODE_ENV === "production" || process.env.CI
+    ? new Error(err.message)
+    : err;
+
 const server = new ApolloServer({
   typeDefs: schema,
   resolvers,
   subscriptions: { path: "/subscriptions" },
   formatError: (err: any) => {
-    return process.env.NODE_ENV === "production" ? new Error(err.message) : err;
+    return safeError(err);
   },
   context: async ({ req }: { req: any }) => {
-    let kauth;
     try {
-      kauth = new KeycloakContext({ req });
+      let kauth;
+      try {
+        kauth = new KeycloakContext({ req });
+      } catch (err) {
+        console.log("Keycloak Context creation failed:", err);
+      }
+
+      const db = await getConnection(process.env.MONGO_URL);
+      const models = getModels(db);
+
+      let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
+
+      let currentOrg = null;
+      let currentOrgMember;
+
+      const subdomain = req.headers["dreams-subdomain"];
+      const customDomain = req.headers["dreams-customdomain"];
+      if (customDomain) {
+        currentOrg = await models.Organization.findOne({ customDomain });
+      } else if (subdomain) {
+        currentOrg = await models.Organization.findOne({ subdomain });
+      }
+
+      if (currentOrg && currentUser) {
+        currentOrgMember = await models.OrgMember.findOne({
+          organizationId: currentOrg.id,
+          userId: currentUser.sub,
+        });
+      }
+
+      const kcAdminClient = await initKcAdminClient();
+
+      return {
+        models,
+        eventHub: EventHub,
+        kauth: currentUser,
+        currentOrg,
+        currentOrgMember,
+        kcAdminClient,
+        // kauth,
+      };
     } catch (err) {
-      console.log(err);
+      console.error("Failed to create context:", safeError(err));
+      throw err;
     }
-
-    const db = await getConnection(process.env.MONGO_URL);
-    const models = getModels(db);
-
-    let currentUser = kauth && kauth.accessToken && kauth.accessToken.content;
-
-    let currentOrg = null;
-    let currentOrgMember;
-
-    const subdomain = req.headers["dreams-subdomain"];
-    const customDomain = req.headers["dreams-customdomain"];
-    if (customDomain) {
-      currentOrg = await models.Organization.findOne({ customDomain });
-    } else if (subdomain) {
-      currentOrg = await models.Organization.findOne({ subdomain });
-    }
-
-    if (currentOrg && currentUser) {
-      currentOrgMember = await models.OrgMember.findOne({
-        organizationId: currentOrg.id,
-        userId: currentUser.sub,
-      });
-    }
-
-    const kcAdminClient = await initKcAdminClient();
-
-    return {
-      models,
-      eventHub: EventHub,
-      kauth: currentUser,
-      currentOrg,
-      currentOrgMember,
-      kcAdminClient,
-      // kauth,
-    };
   },
   playground: true,
   introspection: true,
