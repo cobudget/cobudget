@@ -18,6 +18,8 @@ const DreamBudget = ({
 }) => {
   const [editing, setEditing] = useState(false);
   const incomeItems = budgetItems.filter((item) => item.type === "INCOME");
+  const monetaryIncome = incomeItems.filter((item) => item.min > 0);
+  const nonMonetaryIncome = incomeItems.filter((item) => item.min === 0);
   const expenseItems = budgetItems.filter((item) => item.type === "EXPENSE");
   return (
     <>
@@ -70,21 +72,44 @@ const DreamBudget = ({
               </div>
             </>
           )}
-          {incomeItems.length > 0 && (
+          {monetaryIncome.length > 0 && (
+            <>
+              <h3 className="font-lg font-medium mb-2">Existing funds</h3>
+
+              <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
+                <table className="table-fixed w-full">
+                  <tbody>
+                    {monetaryIncome.map((budgetItem) => (
+                      <tr
+                        key={budgetItem.id}
+                        className="bg-gray-100 even:bg-white"
+                      >
+                        <td className="px-4 py-2">{budgetItem.description}</td>
+                        <td className="px-4 py-2">
+                          {thousandSeparator(budgetItem.min)} {currency}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+          {nonMonetaryIncome.length > 0 && (
             <>
               <h3 className="font-lg font-medium mb-2">
-                Existing funding and resources
+                Non-monetary contributions
               </h3>
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">
                   <tbody>
-                    {incomeItems.map((budgetItem, i) => (
-                      <tr key={i} className="bg-gray-100 even:bg-white">
+                    {nonMonetaryIncome.map((budgetItem) => (
+                      <tr
+                        key={budgetItem.id}
+                        className="bg-gray-100 even:bg-white"
+                      >
                         <td className="px-4 py-2">{budgetItem.description}</td>
-                        <td className="px-4 py-2">
-                          {thousandSeparator(budgetItem.min)} {currency}
-                        </td>
                       </tr>
                     ))}
                   </tbody>
