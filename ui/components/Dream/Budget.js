@@ -21,6 +21,13 @@ const DreamBudget = ({
   const monetaryIncome = incomeItems.filter((item) => item.min > 0);
   const nonMonetaryIncome = incomeItems.filter((item) => item.min === 0);
   const expenseItems = budgetItems.filter((item) => item.type === "EXPENSE");
+
+  const expenseTotalMin = minGoal / 100;
+  const expenseTotalMax = maxGoal / 100;
+  const incomeTotal = monetaryIncome.map((e) => e.min).reduce((a, b) => a + b);
+  const goalTotalMin = expenseTotalMin - incomeTotal;
+  const goalTotalMax = expenseTotalMax - incomeTotal;
+
   return (
     <>
       {editing && (
@@ -67,6 +74,16 @@ const DreamBudget = ({
                         </td>
                       </tr>
                     ))}
+                    <tr
+                      key="total"
+                      className="bg-gray-200 border-t-2 border-gray-300"
+                    >
+                      <td className="px-4 py-2">Total</td>
+                      <td className="px-4 py-2">
+                        {thousandSeparator(expenseTotalMin)} -{" "}
+                        {thousandSeparator(expenseTotalMax)} {currency}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -90,6 +107,15 @@ const DreamBudget = ({
                         </td>
                       </tr>
                     ))}
+                    <tr
+                      key="total"
+                      className="bg-gray-200 border-t-2 border-gray-300"
+                    >
+                      <td className="px-4 py-2">Total</td>
+                      <td className="px-4 py-2">
+                        {thousandSeparator(incomeTotal)} {currency}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -124,14 +150,14 @@ const DreamBudget = ({
             </div>
             <div className="self-end">
               <span className="font-bold">
-                {thousandSeparator(minGoal / 100)} {currency}
+                {thousandSeparator(goalTotalMin)} {currency}
               </span>
               {maxGoal > 0 && (
                 <>
                   {" "}
                   (stretch goal:{" "}
                   <span className="font-bold">
-                    {thousandSeparator(maxGoal / 100)} {currency}
+                    {thousandSeparator(goalTotalMax)} {currency}
                   </span>
                   )
                 </>
