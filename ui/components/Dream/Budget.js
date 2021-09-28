@@ -117,14 +117,27 @@ const DreamBudget = ({
               </div>
             </>
           )}
-          <p className="font-lg font-medium mb-2">
-            Total funding goal: {thousandSeparator(minGoal / 100)} {currency}{" "}
-            {maxGoal > 0 && (
-              <>
-                (stretch goal: {thousandSeparator(maxGoal / 100)} {currency})
-              </>
-            )}
-          </p>
+          <div className="text-lg font-medium mb-2 space-x-4 space-y-2 flex flex-wrap justify-between">
+            <div>
+              <div className="font-bold">Funding goal:</div>
+              <div className="text-base">= Costs - Existing funds</div>
+            </div>
+            <div className="self-end">
+              <span className="font-bold">
+                {thousandSeparator(minGoal / 100)} {currency}
+              </span>
+              {maxGoal > 0 && (
+                <>
+                  {" "}
+                  (stretch goal:{" "}
+                  <span className="font-bold">
+                    {thousandSeparator(maxGoal / 100)} {currency}
+                  </span>
+                  )
+                </>
+              )}
+            </div>
+          </div>
         </div>
       ) : canEdit ? (
         <button
