@@ -49,7 +49,7 @@ const DreamBudget = ({
           </div>
           {expenseItems.length > 0 && (
             <>
-              <h3 className="font-lg font-medium mb-2">Expenses</h3>
+              <h3 className="font-lg font-medium mb-2">Costs</h3>
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">
