@@ -5,9 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "start": "next start"
   },
   "engines": {
     "node": "14.x"
@@ -57,10 +55,6 @@
   "devDependencies": {
     "@babel/core": "7.10.2",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
-    "@storybook/addon-actions": "5.3.19",
-    "@storybook/addon-links": "5.3.19",
-    "@storybook/addons": "5.3.19",
-    "@storybook/react": "5.3.19",
     "babel-loader": "8.1.0",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
