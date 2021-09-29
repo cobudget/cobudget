@@ -13,7 +13,6 @@ module.exports = {
   globals: {
     Atomics: "readonly",
     SharedArrayBuffer: "readonly",
-    React: "readonly",
   },
   parserOptions: {
     ecmaFeatures: {
@@ -30,12 +29,5 @@ module.exports = {
     "react/prop-types": "off",
     // don't require components to have a display name
     "react/display-name": "off",
-    // allows to use globals like 'React' in jsx
-    "react/jsx-no-undef": [
-      "error",
-      {
-        allowGlobals: true,
-      },
-    ],
   },
 };
