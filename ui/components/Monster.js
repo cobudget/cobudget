@@ -1,7 +1,6 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useMutation, gql } from "@apollo/client";
-import AutoScroll from "@brianmcallister/react-auto-scroll";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
@@ -348,10 +347,7 @@ const Monster = ({ event, dream, currentOrg }) => {
           </div>
           <div className="relative h-full">
             <div className="absolute inset-0">
-              <AutoScroll
-                showOption={false}
-                className="h-full overflow-y-scroll"
-              >
+              <div className="h-full overflow-y-scroll">
                 {chatItems.map((item, i) => renderChatItem(item, i))}
 
                 {chatItems[chatItems.length - 1].actions && (
@@ -383,7 +379,7 @@ const Monster = ({ event, dream, currentOrg }) => {
                     color={event.color}
                   />
                 )}
-              </AutoScroll>
+              </div>
             </div>
           </div>
         </div>

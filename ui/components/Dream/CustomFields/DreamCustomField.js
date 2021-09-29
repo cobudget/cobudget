@@ -165,7 +165,8 @@ const DreamCustomField = ({
                     {props.children}
                   </a>
                 ),
-                code: (props) => (
+                // eslint-disable-next-line no-unused-vars
+                code: ({ node, ...props }) => (
                   <code className="whitespace-pre-wrap" {...props}>
                     {props.value}
                   </code>
