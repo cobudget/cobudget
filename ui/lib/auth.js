@@ -10,7 +10,7 @@ const auth = (req) => {
     baseURL: `${protocol}://${host}`,
     clientID: process.env.KEYCLOAK_CLIENT_ID,
     clientSecret: process.env.KEYCLOAK_CLIENT_SECRET,
-    issuerBaseURL: "https://auth.platoproject.org/auth/realms/plato",
+    issuerBaseURL: `https://auth.platoproject.org/auth/realms/${process.env.KEYCLOAK_REALM}`,
     routes: {
       callback: "/api/callback",
       postLogoutRedirectUri: "/",
