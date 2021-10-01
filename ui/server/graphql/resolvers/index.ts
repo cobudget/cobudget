@@ -2363,114 +2363,92 @@ const resolvers = {
     },
   },
   EventMember: {
-    event: async (member, args, { models: { Event } }) => {
-      return Event.findOne({ _id: member.eventId });
+    event: async (member) => {
+      return await prisma.collection.findUnique({
+        where: { id: member.collectionId },
+      });
     },
     orgMember: async (member, args, { models: { OrgMember } }) => {
-      return OrgMember.findOne({ _id: member.orgMemberId });
+      return await prisma.orgMember.findUnique({
+        where: { id: member.orgMemberId },
+      });
     },
     balance: async (member, args, { models: { Allocation, Contribution } }) => {
-      const [
-        { totalAllocations } = { totalAllocations: 0 },
-      ] = await Allocation.aggregate([
-        {
-          $match: {
-            eventMemberId: mongoose.Types.ObjectId(member.id),
-          },
-        },
-        { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: totalAllocations },
+      } = await prisma.allocation.aggregate({
+        where: { collectionMemberId: member.id },
+        _sum: { amount: true },
+      });
 
-      const [
-        { totalContributions } = { totalContributions: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventMemberId: mongoose.Types.ObjectId(member.id),
-          },
-        },
-        { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: totalContributions },
+      } = await prisma.contribution.aggregate({
+        where: { collectionMemberId: member.id },
+        _sum: { amount: true },
+      });
 
       return totalAllocations - totalContributions;
     },
   },
   OrgMember: {
     hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,
-    // user: async (orgMember, args, { kcAdminClient }) => {
-    //   const user = await kcAdminClient.users.findOne({
-    //     id: orgMember.userId,
-    //   });
-    //   return user;
-    // },
-    eventMemberships: async (orgMember, args, { models: { EventMember } }) => {
-      return EventMember.find({ orgMemberId: orgMember.id });
+    user: async (orgMember) => {
+      return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
-    currentEventMembership: async (
-      orgMember,
-      { slug },
-      { currentOrgMember, models: { EventMember, Event } }
-    ) => {
-      if (!slug || !currentOrgMember) return null;
-      if (orgMember.id.toString() !== currentOrgMember.id.toString())
-        return null;
-
-      const event = await Event.findOne({
-        organizationId: currentOrgMember.organizationId,
-        slug,
+    eventMemberships: async (orgMember) => {
+      return await prisma.collectionMember.findMany({
+        where: { orgMemberId: orgMember.id },
       });
+    },
+    currentEventMembership: async (orgMember, { slug }, { user }) => {
+      if (!user) return null;
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: { userId: user.id, id: orgMember.id },
+      });
+      if (!slug || !currentOrgMember) return null;
 
-      return EventMember.findOne({
-        orgMemberId: orgMember.id,
-        eventId: event.id,
+      return await prisma.collectionMember.findFirst({
+        where: { orgMemberId: orgMember.id, collection: { slug } },
       });
     },
   },
   User: {
-    currentOrgMember: async (user, args, { currentOrgMember }) => {
-      if (!currentOrgMember) return null;
-      return user.id === currentOrgMember.userId ? currentOrgMember : null;
-    },
-    orgMemberships: async (user, args, { prisma: { orgmember } }) => {
-      return await orgmember.findMany({ where: { user: { id: user.id } } });
-    },
-    // id: (user) => (user.sub ? user.sub : user.id),
-    // username: (user) =>
-    //   user.username ? user.username : user.preferred_username,
-    // // name: (user) => {
-    //   const firstName = user.firstName ? user.firstName : user.given_name;
-    //   const lastName = user.lastName ? user.lastName : user.family_name;
-
-    //   if (firstName || lastName)
-    //     return `${firstName ? firstName : ""} ${lastName ? lastName : ""}`;
+    // currentOrgMember: async (user, { orgSlug }, { user: currentUser }) => {
     //   return null;
+    //   const currentOrgMember = await prisma.orgMember.findFirst({
+    //     where: { organization: { slug: orgSlug }, userId: currentUser.id },
+    //   });
+    //   if (!currentOrgMember) return null;
+    //   return user.id === currentOrgMember.userId ? currentOrgMember : null;
     // },
-    // createdAt: (user) => user.createdTimestamp,
-    // verifiedEmail: (user) => user.emailVerified,
-    // email: async (user, args, { currentOrgMember, models: { OrgMember } }) => {
-    //   if (currentOrgMember && currentOrgMember.isOrgAdmin) {
-    //     const orgMember = await OrgMember.findOne({ userId: user.id });
-
-    //     if (
-    //       orgMember &&
-    //       orgMember.organizationId.toString() ==
-    //         currentOrgMember.organizationId.toString()
-    //     )
-    //       return user.email;
-    //   }
-    //   return null;
-    // },
-    isRootAdmin: () => false, //TODO: add something in keycloak that lets us define root admins
-    avatar: () => null, //TODO: what about avatars in keycloak?
+    orgMemberships: async (user) => {
+      return await prisma.orgMember.findMany({ where: { userId: user.id } });
+    },
+    isRootAdmin: () => false, //TODO: add field in prisma
+    avatar: () => null, //TODO: add avatars
   },
   Organization: {
-    events: async (organization, args, { models: { Event } }) => {
-      return Event.find({ organizationId: organization.id });
+    events: async (org) => {
+      return await prisma.collection.findMany({
+        where: { organizationId: org.id },
+      });
     },
-    discourseUrl: (organization) => organization.discourse?.url,
-    finishedTodos: (org, args, { currentOrgMember }) => {
+    discourseUrl: async (org) => {
+      const { url } = await prisma.discourseConfig.findFirst({
+        where: { organizationId: org.id },
+      });
+      return url;
+    },
+    finishedTodos: async (org, args, { user }) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
+        where: {
+          organizationId_userId: { organizationId: org.id, userId: user.id },
+        },
+      });
+
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
-        // You need to be logged in as organization admin
+        // You need to be logged in as org admin
         return false;
       }
 
@@ -2665,10 +2643,16 @@ const resolvers = {
         },
       });
     },
-    discourseTopicUrl: (bucket, args, { currentOrg }) => {
-      if (!bucket.discourseTopicId || !currentOrg?.discourse?.url) return null;
+    discourseTopicUrl: async (bucket) => {
+      const org = await prisma.organization.findFirst({
+        where: {
+          collections: { some: { Bucket: { some: { id: bucket.id } } } },
+        },
+        include: { discourse: true },
+      });
+      if (!bucket.discourseTopicId || !org?.discourse?.url) return null;
 
-      return `${currentOrg.discourse.url}/t/${bucket.discourseTopicId}`;
+      return `${org.discourse.url}/t/${bucket.discourseTopicId}`;
     },
     tags: async (bucket) => {
       // TODO: verify
@@ -2679,38 +2663,50 @@ const resolvers = {
   },
   Transaction: {
     __resolveType(transaction) {
-      if (transaction.dreamId) {
+      if (transaction.bucketId) {
         return "Contribution";
       }
       return "Allocation"; // GraphQLError is thrown
     },
   },
   Contribution: {
-    dream: async (contribution, args, { models: { Dream } }) => {
-      return Dream.findOne({ _id: contribution.dreamId });
+    dream: async (contribution) => {
+      return prisma.bucket.findUnique({
+        where: { id: contribution.bucketId },
+      });
     },
-    event: async (contribution, args, { models: { Event } }) => {
-      return Event.findOne({ _id: contribution.eventId });
+    event: async (contribution) => {
+      return prisma.collection.findUnique({
+        where: { id: contribution.collectionId },
+      });
     },
-    eventMember: async (contribution, args, { models: { EventMember } }) => {
-      return EventMember.findOne({ _id: contribution.eventMemberId });
+    eventMember: async (contribution) => {
+      return prisma.collectionMember.findUnique({
+        where: { id: contribution.collectionMemberId },
+      });
     },
   },
   Comment: {
-    orgMember: async (post, args, { models: { OrgMember } }) => {
+    orgMember: async (comment) => {
       // make logs anonymous
-      if (post.isLog) return null;
+      if (comment.isLog) return null;
 
-      if (post.authorId) return OrgMember.findOne({ _id: post.authorId });
+      // TODO: fix this to be either colllectionMember or orgMember..
+      if (comment.collectionMemberId)
+        return prisma.orgMember.findFirst({
+          where: {
+            collectionMemberships: { some: { id: comment.collectionMemberId } },
+          },
+        });
     },
   },
   Flag: {
-    guideline: async (flag, args, { models: { Event } }) => {
-      const event = await Event.findOne({ _id: flag.parent().eventId });
-
-      return event.guidelines.id(flag.guidelineId);
+    guideline: async (flag) => {
+      if (!flag.guidelineId) return null;
+      return prisma.guideline.findUnique({ where: { id: flag.guidelineId } });
     },
     user: async () => {
+      // see who left a flag
       // if not org admin or event admin or guide
       return null;
     },
@@ -2734,16 +2730,14 @@ const resolvers = {
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue: {
-    customField: async (customFieldValue, args, { models: { Event } }) => {
-      const { eventId, fieldId } = customFieldValue;
-      const event = await Event.findOne({ _id: eventId });
-      const eventCustomField = event.customFields.filter(
-        (eventCustomField) => eventCustomField.id == fieldId
-      );
+    customField: async (fieldValue) => {
+      const field = await prisma.field.findUnique({
+        where: { id: fieldValue.fieldId },
+      });
 
-      if (!eventCustomField || eventCustomField.length == 0) {
+      if (!field) {
         return {
-          id: fieldId,
+          id: fieldValue.fieldId,
           name: "⚠️ Missing custom field ⚠️",
           description: "Custom field was removed",
           type: "TEXT",
@@ -2752,43 +2746,43 @@ const resolvers = {
           createdAt: new Date(),
         };
       }
-      return eventCustomField[0];
+      return field;
     },
   },
-  Log: {
-    details: (log) => log,
-    user: async () => {
-      return null;
-      // TODO:  only show for admins
-      // return User.findOne({ _id: log.userId });
-    },
-    type: (log) => log.__t,
-    dream: async (log, args, { models: { Dream } }) => {
-      return Dream.findOne({ _id: log.dreamId });
-    },
-    event: async (log, args, { models: { Event } }) => {
-      return Event.findOne({ _id: log.eventId });
-    },
-  },
-  LogDetails: {
-    __resolveType: async (obj) => {
-      if (obj.__t == "FlagRaised") return "FlagRaisedDetails";
-      if (obj.__t == "FlagResolved") return "FlagResolvedDetails";
-      return null;
-    },
-  },
-  FlagRaisedDetails: {
-    guideline: async (log, args, { models: { Event } }) => {
-      const event = await Event.findOne({ _id: log.eventId });
-      return event.guidelines.id(log.guidelineId);
-    },
-  },
-  FlagResolvedDetails: {
-    guideline: async (log, args, { models: { Event } }) => {
-      const event = await Event.findOne({ _id: log.eventId });
-      return event.guidelines.id(log.guidelineId);
-    },
-  },
+  // Log: {
+  //   details: (log) => log,
+  //   user: async () => {
+  //     return null;
+  //     // TODO:  only show for admins
+  //     // return User.findOne({ _id: log.userId });
+  //   },
+  //   type: (log) => log.__t,
+  //   dream: async (log, args, { models: { Dream } }) => {
+  //     return Dream.findOne({ _id: log.dreamId });
+  //   },
+  //   event: async (log, args, { models: { Event } }) => {
+  //     return Event.findOne({ _id: log.eventId });
+  //   },
+  // },
+  // LogDetails: {
+  //   __resolveType: async (obj) => {
+  //     if (obj.__t == "FlagRaised") return "FlagRaisedDetails";
+  //     if (obj.__t == "FlagResolved") return "FlagResolvedDetails";
+  //     return null;
+  //   },
+  // },
+  // FlagRaisedDetails: {
+  //   guideline: async (log, args, { models: { Event } }) => {
+  //     const event = await Event.findOne({ _id: log.eventId });
+  //     return event.guidelines.id(log.guidelineId);
+  //   },
+  // },
+  // FlagResolvedDetails: {
+  //   guideline: async (log, args, { models: { Event } }) => {
+  //     const event = await Event.findOne({ _id: log.eventId });
+  //     return event.guidelines.id(log.guidelineId);
+  //   },
+  // },
 };
 
 export default resolvers;
