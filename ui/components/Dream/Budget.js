@@ -24,7 +24,9 @@ const DreamBudget = ({
 
   const expenseTotalMin = minGoal / 100;
   const expenseTotalMax = maxGoal / 100;
-  const incomeTotal = monetaryIncome.map((e) => e.min).reduce((a, b) => a + b);
+  const incomeTotal = monetaryIncome
+    .map((e) => e.min)
+    .reduce((a, b) => a + b, 0);
   const goalTotalMin = expenseTotalMin - incomeTotal;
   const goalTotalMax = expenseTotalMax - incomeTotal;
 
