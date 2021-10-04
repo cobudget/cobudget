@@ -6,6 +6,8 @@ import ProgressBar from "components/ProgressBar";
 const GrantingStatus = ({ dream, event }) => {
   const funding = dream.totalContributions + dream.income;
   const ratio = isNaN(funding / dream.minGoal) ? 0 : funding / dream.minGoal;
+  const userName = (nameOrEmail) =>
+    nameOrEmail.match(/@/) === null ? nameOrEmail : "Somebody";
 
   return (
     <div className="space-y-0">
@@ -35,7 +37,6 @@ const GrantingStatus = ({ dream, event }) => {
             </p>
           )}
 
-          {/* list of contributors... if less than 6, otherwise, just say how many. coolio */}
           {!!dream.latestContributions.length && (
             <>
               <div>
@@ -44,7 +45,7 @@ const GrantingStatus = ({ dream, event }) => {
                     className="mt-1 text-sm text-gray-700"
                     key={contribution.id}
                   >
-                    {contribution.eventMember.orgMember.user.username}{" "}
+                    {userName(contribution.eventMember.orgMember.user.username)}{" "}
                     contributed {thousandSeparator(contribution.amount / 100)}{" "}
                     {event.currency}
                   </p>
