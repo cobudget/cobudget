@@ -82,8 +82,11 @@ const DreamBudget = ({
                     >
                       <td className="px-4 py-2">Total</td>
                       <td className="px-4 py-2">
-                        {thousandSeparator(expenseTotalMin)} -{" "}
-                        {thousandSeparator(expenseTotalMax)} {currency}
+                        {thousandSeparator(expenseTotalMin)}
+                        {expenseTotalMax > 0
+                          ? " - " + thousandSeparator(expenseTotalMax)
+                          : ""}{" "}
+                        {currency}
                       </td>
                     </tr>
                   </tbody>
