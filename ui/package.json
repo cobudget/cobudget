@@ -29,6 +29,7 @@
     "@prisma/client": "^3.0.2",
     "@sensestack/plato-core": "1.0.5",
     "apollo-server-micro": "^3.3.0",
+    "@urql/devtools": "^2.0.3",
     "autoprefixer": "^10.2.5",
     "bootstrap": "4.6.0",
     "dayjs": "^1.8.20",
@@ -50,6 +51,7 @@
     "next-connect": "^0.10.2",
     "next-cookies": "^2.0.3",
     "next-fonts": "^0.19.0",
+    "next-urql": "^3.2.1",
     "node-forge": "^0.10.0",
     "postcss": "^8.2.10",
     "prop-types": "^15.7.2",
@@ -67,6 +69,7 @@
     "styled-components": "5.3.0",
     "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss-animations": "^2.0.0",
+    "urql": "^2.0.5",
     "yup": "^0.29.3"
   },
   "devDependencies": {
