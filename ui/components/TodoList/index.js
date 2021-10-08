@@ -1,6 +1,6 @@
 import { useEffect, useState, forwardRef } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
 import Link from "next/link";
+import { useQuery, useMutation, gql } from "urql";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
@@ -8,8 +8,10 @@ import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
   query TodoInfo {
-    orgMembers(limit: 2) {
-      id
+    orgMembersPage(limit: 2) {
+      orgMembers {
+        id
+      }
     }
 
     events(limit: 1) {
@@ -21,6 +23,7 @@ const GET_TODO_INFO = gql`
 const SET_TODOS_FINISHED = gql`
   mutation SetTodosFinished {
     setTodosFinished {
+      __typename
       id
       finishedTodos
     }
@@ -58,10 +61,14 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
 });
 
 const TodoList = ({ subdomain }) => {
-  const { data, loading, error } = useQuery(GET_TODO_INFO);
-  const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
+  const { data, fetching: loading, error } = useQuery({
+    query: GET_TODO_INFO,
+  });
+  const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
+    SET_TODOS_FINISHED
+  );
   const [allDone, setAllDone] = useState(false);
-
+  console.log({ todoData, todoError });
   const rawTodos = [
     {
       title: "Create community",
@@ -98,9 +105,9 @@ const TodoList = ({ subdomain }) => {
     if (index === 0) {
       done = true;
     } else if (index === 1) {
-      done = data.orgMembers.length > 1;
+      done = data?.orgMembers.length > 1;
     } else if (index === 2) {
-      done = data.events.length > 0;
+      done = data?.events.length > 0;
     }
 
     return {

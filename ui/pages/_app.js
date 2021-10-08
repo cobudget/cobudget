@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { withApollo } from "lib/apollo";
-import { useQuery, gql } from "@apollo/client";
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { gql } from "@apollo/client";
 import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
