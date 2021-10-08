@@ -2432,10 +2432,10 @@ const resolvers = {
       });
     },
     discourseUrl: async (org) => {
-      const { url } = await prisma.discourseConfig.findFirst({
+      const discourseConfig = await prisma.discourseConfig.findFirst({
         where: { organizationId: org.id },
       });
-      return url;
+      return discourseConfig?.url ?? null;
     },
     finishedTodos: async (org, args, { user }) => {
       const currentOrgMember = await prisma.orgMember.findUnique({

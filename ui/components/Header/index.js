@@ -41,17 +41,17 @@ const Header = ({
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
-  const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
-    refetchQueries: ["TopLevelQuery"],
-  });
+  // const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
+  //   refetchQueries: ["TopLevelQuery"],
+  // });
 
-  const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
-    variables: { eventId: event?.id },
-    refetchQueries: ["TopLevelQuery"],
-  });
+  // const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
+  //   variables: { eventId: event?.id },
+  //   refetchQueries: ["TopLevelQuery"],
+  // });
   const color = event?.color ?? "anthracit";
-  const [session, loading] = useSession();
-  console.log({ session, loading });
+  // const [session, loading] = useSession();
+  // console.log({ session, loading });
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
@@ -96,7 +96,7 @@ const Header = ({
           } sm:bg-transparent`}
         >
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
-            {session ? (
+            {false ? (
               <>
                 {currentOrg && (
                   <>
