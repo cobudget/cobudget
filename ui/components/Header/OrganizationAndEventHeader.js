@@ -11,10 +11,10 @@ const DREAM_QUERY = gql`
 `;
 
 const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
-  const { data: { dream } = { dream: null } } = useQuery(DREAM_QUERY, {
-    variables: { id: router.query.dream },
-    skip: !router.query.dream,
-  });
+  // const { data: { dream } = { dream: null } } = useQuery(DREAM_QUERY, {
+  //   variables: { id: router.query.dream },
+  //   skip: !router.query.dream,
+  // });
 
   return (
     <div className="space-x-2 flex items-center">
