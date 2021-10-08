@@ -66,7 +66,7 @@ function AddComment() {
           {content.length > 0 && (
             <div className="flex justify-end">
               <Button
-                onClick={() => setContent("")}
+                onClick={() => inputRef.current.setMarkdown("")}
                 variant="secondary"
                 color={event.color}
                 className="mr-2"

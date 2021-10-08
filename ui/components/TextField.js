@@ -44,22 +44,15 @@ const TextField = ({
           ) : (
             <Editor
               usageStatistics={false}
-              //initialEditType="wysiwyg"
+              initialEditType="wysiwyg"
               autoFocus={autoFocus}
               initialValue={defaultValue}
               ref={(el) => {
                 wysiwygRef.current = el?.getInstance();
                 inputRef?.(el?.getInstance());
               }}
-              //events={{
-              //  change: (e) => {
-              //    console.log("in change with", e);
-              //    inputProps?.onChange?.(e);
-              //  },
-              //}}
               onChange={() => {
                 // TODO: debounce, getMarkdown is a heavy function
-                console.log("wysiref", wysiwygRef.current);
                 inputProps?.onChange?.({
                   target: {
                     value: wysiwygRef.current?.getMarkdown() ?? "",
