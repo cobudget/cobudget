@@ -1,6 +1,7 @@
 import { dedupExchange, fetchExchange } from "urql";
 import { NextUrqlContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
+import { cacheExchange } from "@urql/exchange-graphcache";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -21,7 +22,13 @@ export const client = (
 ) => {
   return {
     url: getUrl(),
-    exchanges: [devtoolsExchange, dedupExchange, ssrExchange, fetchExchange],
+    exchanges: [
+      devtoolsExchange,
+      dedupExchange,
+      cacheExchange({}),
+      ssrExchange,
+      fetchExchange,
+    ],
     fetchOptions: {
       headers: {
         ...ctx?.req?.headers,
