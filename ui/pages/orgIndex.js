@@ -112,7 +112,7 @@ const IndexPage = ({ router }) => {
               </LinkCard>
             </Link>
           ))}
-          {currentOrgMember?.isOrgAdmin && (
+          {/* {currentOrgMember?.isOrgAdmin && (
             <Link href="/new-collection">
               <button
                 type="button"
@@ -121,7 +121,7 @@ const IndexPage = ({ router }) => {
                 <AddIcon className="p-8" />
               </button>
             </Link>
-          )}
+          )} */}
         </div>
         {showTodos && (
           <div className="col-span-2">

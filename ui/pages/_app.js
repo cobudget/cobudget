@@ -12,7 +12,7 @@ import Modal from "../components/Modal";
 import * as Urql from "urql";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($slug: String!) {
+  query TopLevelQuery($slug: String) {
     event(slug: $slug) {
       id
       slug
@@ -92,7 +92,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg(slug: $orgSlug) {
+    currentOrg {
       id
       name
       logo
