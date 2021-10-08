@@ -222,30 +222,30 @@ model FieldValue {
 }
 
 model Comment {
-  id                 String           @id @default(cuid())
+  id                 String            @id @default(cuid())
   content            String
-  isLog              Boolean          @default(false)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
-  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id]) //TODO: check what this is in current platform
-  collectionMemberId String
-  Bucket             Bucket?          @relation(fields: [bucketId], references: [id])
+  isLog              Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  collectionMember   CollectionMember? @relation(fields: [collectionMemberId], references: [id]) //TODO: check what this is in current platform
+  collectionMemberId String?
+  Bucket             Bucket?           @relation(fields: [bucketId], references: [id])
   bucketId           String?
 }
 
 model Flag {
-  id              String    @id @default(cuid())
-  guideline       Guideline @relation(fields: [guidelineId], references: [id])
-  guidelineId     String
-  user            User      @relation(fields: [userId], references: [id])
+  id              String     @id @default(cuid())
+  guideline       Guideline? @relation(fields: [guidelineId], references: [id])
+  guidelineId     String?
+  user            User       @relation(fields: [userId], references: [id])
   userId          String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
   type            FlagType
-  resolvingFlag   Flag?     @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
-  resolvedBy      Flag?     @relation("FlagToFlag")
+  resolvingFlag   Flag?      @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
+  resolvedBy      Flag?      @relation("FlagToFlag")
   resolvingFlagId String?
-  Bucket          Bucket?   @relation(fields: [bucketId], references: [id])
+  Bucket          Bucket?    @relation(fields: [bucketId], references: [id])
   bucketId        String?
 }
 
