@@ -54,59 +54,54 @@ const resolvers = {
       console.log({ user });
       return user ? { ...user } : null;
     },
-    currentOrg: async (parent, { slug }) => {
-      return prisma.organization.findFirst({ where: { slug } });
-    },
-    currentOrgMember: async (parent, { slug }, { user }) => {
-      const org = await prisma.organization.findFirst({ where: { slug } });
-      if (!user || !slug) return null;
-      return prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: org.id,
-            userId: user.id,
-          },
-        },
-      });
-    },
+    currentOrg: (parent, args, { currentOrg }) => currentOrg,
+    currentOrgMember: (parent, args, { currentOrgMember }) => currentOrgMember,
     organization: combineResolvers(isMemberOfOrg, async (parent, { id }) => {
       return prisma.organization.findUnique({ where: { id } });
     }),
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    events: async (parent, { limit, orgSlug }, { user }) => {
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: { userId: user?.id, organization: { slug: orgSlug } },
-      });
+    events: async (
+      parent,
+      { limit },
+      { user, currentOrg, currentOrgMember }
+    ) => {
+      if (!currentOrg) return null;
 
       // if admin show all events (current or archived)
       if (currentOrgMember && currentOrgMember.isOrgAdmin) {
         return prisma.collection.findMany({
-          where: { organization: { slug: orgSlug } },
+          where: { organizationId: currentOrg.id },
           take: limit,
         });
       }
 
       return prisma.collection.findMany({
         where: {
-          organization: { slug: orgSlug },
+          organizationId: currentOrg.id,
           archived: { not: true },
         },
         take: limit,
       });
     },
-    event: async (parent, { slug, orgSlug }) => {
-      if (!slug || !orgSlug) return null;
-      return await prisma.collection.findFirst({
-        where: { slug, organization: { slug: orgSlug } },
+    event: async (parent, { slug }, { currentOrg }) => {
+      if (!slug || !currentOrg) return null;
+      return await prisma.collection.findUnique({
+        where: { organizationId_slug: { organizationId: currentOrg.id, slug } },
       });
     },
-    contributionsPage: async (parent, { eventId, offset, limit }, { user }) => {
-      const currentOrgMember = await prisma.orgMember.findFirst({
+    contributionsPage: async (
+      parent,
+      { eventId, offset, limit },
+      { user, currentOrg }
+    ) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
-          userId: user.id,
-          organization: { collections: { some: { id: eventId } } },
+          organizationId_userId: {
+            organizationId: currentOrg.id,
+            userId: user.id,
+          },
         },
       });
 
@@ -153,12 +148,14 @@ const resolvers = {
     dreamsPage: async (
       parent,
       { eventSlug, textSearchTerm, tag: tagValue, offset, limit },
-      { user }
+      { user, currentOrg }
     ) => {
-      const currentOrgMember = await prisma.orgMember.findFirst({
+      const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
-          organization: { collections: { some: { slug: eventSlug } } },
-          userId: user.id,
+          organizationId_userId: {
+            organizationId: currentOrg.id,
+            userId: user.id,
+          },
         },
         select: {
           id: true,
@@ -172,19 +169,24 @@ const resolvers = {
         },
       });
 
-      const collection = await prisma.collection.findFirst({
+      const collection = await prisma.collection.findUnique({
         where: {
-          slug: eventSlug,
-          organizationId: currentOrgMember.organization.id,
+          organizationId_slug: {
+            organizationId: currentOrg.id,
+            slug: eventSlug,
+          },
         },
       });
 
       let currentEventMember;
+
       if (currentOrgMember) {
-        currentEventMember = await prisma.collectionMember.findFirst({
+        currentEventMember = await prisma.collectionMember.findUnique({
           where: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: collection.id,
+            orgMemberId_collectionId: {
+              orgMemberId: currentOrg.id,
+              collectionId: collection.id,
+            },
           },
         });
       }
@@ -241,15 +243,15 @@ const resolvers = {
         dreams: shuffledBuckets.slice(0, limit),
       };
     },
-    orgMembersPage: async (parent, { orgSlug, offset, limit }, { user }) => {
-      const org = await prisma.organization.findUnique({
-        where: { slug: orgSlug },
-      });
-      if (!org) return null;
+    orgMembersPage: async (parent, { offset, limit }, { user, currentOrg }) => {
+      if (!currentOrg) return null;
 
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
-          organizationId_userId: { organizationId: org.id, userId: user.id },
+          organizationId_userId: {
+            organizationId: currentOrg.id,
+            userId: user.id,
+          },
         },
       });
 
@@ -258,7 +260,7 @@ const resolvers = {
 
       // TODO: Why is it limit + 1?
       const orgMembersWithExtra = await prisma.orgMember.findMany({
-        where: { organizationId: org.id },
+        where: { organizationId: currentOrg.id },
         skip: offset,
         take: limit + 1,
       });
@@ -306,23 +308,18 @@ const resolvers = {
     membersPage: async (
       parent,
       { eventId, isApproved, offset, limit },
-      { user }
+      { user, currentOrgMember }
     ) => {
-      const org = await prisma.organization.findFirst({
-        where: { collections: { some: { id: eventId } } },
-      });
-
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId: org.id, userId: user.id },
-        },
-      });
-
       if (!currentOrgMember)
         throw new Error("You need to be a member of this org");
 
-      const currentCollectionMember = await prisma.collectionMember.findFirst({
-        where: { collectionId: eventId, orgMemberId: currentOrgMember.id },
+      const currentCollectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
 
       if (
@@ -351,9 +348,9 @@ const resolvers = {
         members: collectionMembersWithExtra.slice(0, limit),
       };
     },
-    categories: async (parent, { orgSlug }) => {
+    categories: async (parent, { orgSlug }, { currentOrg }) => {
       const org = await prisma.organization.findUnique({
-        where: { slug: orgSlug },
+        where: { id: currentOrg.id },
         include: { discourse: true },
       });
 
@@ -370,7 +367,7 @@ const resolvers = {
     commentSet: async (
       parent,
       { dreamId, from = 0, limit = 30, order = "desc" },
-      { user }
+      { user, currentOrg }
     ) => {
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },
@@ -380,8 +377,8 @@ const resolvers = {
 
       let comments;
 
-      const org = await prisma.organization.findFirst({
-        where: { collections: { some: { Bucket: { some: { id: dreamId } } } } },
+      const org = await prisma.organization.findUnique({
+        where: { id: currentOrg.id },
         include: { discourse: true },
       });
 

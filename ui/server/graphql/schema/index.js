@@ -6,12 +6,12 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    currentOrgMember(slug: String!): OrgMember
-    currentOrg(slug: String!): Organization
+    currentOrgMember: OrgMember
+    currentOrg: Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events(slug: String!, limit: Int): [Collection!]
-    event(slug: String!, orgSlug: String!): Collection
+    events(slug: String, limit: Int): [Collection!]
+    event(slug: String): Collection
     dream(id: ID!): Dream
     dreamsPage(
       eventSlug: String!
@@ -273,7 +273,7 @@ const schema = gql`
     orgMemberships: [OrgMember!]
     avatar: String
     createdAt: Date
-    currentOrgMember: OrgMember
+    # currentOrgMember: OrgMember
   }
 
   type OrgMember {
@@ -335,7 +335,7 @@ const schema = gql`
     published: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
-    logs: [Log]
+    # logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
     tags: [Tag!]
@@ -533,30 +533,30 @@ const schema = gql`
     createdAt: Date
   }
 
-  type Log {
-    createdAt: Date
-    user: User
-    dream: Dream
-    event: Collection
-    details: LogDetails
-    type: String
-  }
+  # type Log {
+  #   createdAt: Date
+  #   user: User
+  #   dream: Dream
+  #   event: Collection
+  #   details: LogDetails
+  #   type: String
+  # }
 
-  type FlagRaisedDetails {
-    guideline: Guideline
-    comment: String
-  }
+  # type FlagRaisedDetails {
+  #   guideline: Guideline
+  #   comment: String
+  # }
 
-  type FlagResolvedDetails {
-    guideline: Guideline
-    comment: String
-  }
+  # type FlagResolvedDetails {
+  #   guideline: Guideline
+  #   comment: String
+  # }
 
   type Subscription {
     commentsChanged(dreamId: ID!): CommentAction!
   }
 
-  union LogDetails = FlagRaisedDetails | FlagResolvedDetails
+  # union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
   # type QuestionAnswer {
   #   question: Question

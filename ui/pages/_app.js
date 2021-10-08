@@ -12,8 +12,8 @@ import Modal from "../components/Modal";
 import * as Urql from "urql";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($slug: String!, $orgSlug: String!) {
-    event(slug: $slug, orgSlug: $orgSlug) {
+  query TopLevelQuery($slug: String!) {
+    event(slug: $slug) {
       id
       slug
       info
@@ -59,12 +59,8 @@ export const TOP_LEVEL_QUERY = gql`
       username
       avatar
       email
-      currentOrgMember {
-        id
-        bio
-      }
     }
-    currentOrgMember(slug: $orgSlug) {
+    currentOrgMember {
       id
       bio
       isOrgAdmin
@@ -109,32 +105,26 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-export const CURRENT_USER_QUERY = gql`
-  {
-    currentUser {
-      id
-      username
-      email
-    }
-  }
-`;
-
-export function useGetCurrentUserQuery(options = {}) {
-  return Urql.useQuery({ query: CURRENT_USER_QUERY, ...options });
-}
-
 const MyApp = ({ Component, pageProps, router }) => {
   // const { user, loading } = useFetchUser();
   const [
-    { data: { currentUser } = { currentUser: null }, fetching },
-  ] = useGetCurrentUserQuery();
-  console.log({ currentUser, fetching });
+    {
+      data: { currentUser, currentOrg, currentOrgMember, event } = {},
+      fetching,
+      error,
+    },
+  ] = Urql.useQuery({
+    query: TOP_LEVEL_QUERY,
+    variables: { slug: router.query.event },
+  });
+  console.log({ currentUser, currentOrg, fetching, error });
+
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
       jssStyles.parentNode.removeChild(jssStyles);
   });
-  let currentOrg, currentOrgMember, event;
+  //let currentOrg, currentOrgMember, event;
   // const {
   //   data: { currentUser, currentOrg, currentOrgMember, event } = {},
   // } = useQuery(TOP_LEVEL_QUERY, {
