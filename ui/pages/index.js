@@ -79,15 +79,16 @@ const LinkCard = forwardRef((props, ref) => {
 });
 
 const IndexPage = ({ currentOrg, currentOrgMember }) => {
-  const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
-
+  // const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
+  let events = [];
   // TODO - perhaps a redirect to organization pages instead
-  return <LandingPage />;
+  if (!currentOrg) return <LandingPage />;
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (
     <>
+      {/* orgSlug to subMenu? */}
       <SubMenu currentOrgMember={currentOrgMember} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -153,7 +154,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
               </LinkCard>
             </Link>
           ))}
-          {currentOrgMember?.isOrgAdmin && (
+          {/* {currentOrgMember?.isOrgAdmin && (
             <Link href="/new-collection">
               <button
                 type="button"
@@ -162,7 +163,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
                 <AddIcon className="p-8" />
               </button>
             </Link>
-          )}
+          )} */}
         </div>
         {showTodos && (
           <div className="col-span-2">
