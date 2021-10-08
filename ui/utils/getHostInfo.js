@@ -27,3 +27,26 @@ export default function getHostInfo(req) {
     protocol,
   };
 }
+
+export function getNewHostInfo(host) {
+  let protocol, subdomain;
+
+  if (typeof window !== "undefined") {
+    host = window.location.host;
+  }
+
+  if (host) {
+    const hostParts = host.split(".");
+    if (
+      hostParts.length ===
+      (host.includes("localhost:") ? 2 : host.includes("staging") ? 4 : 3)
+    ) {
+      subdomain = hostParts[0];
+    }
+  }
+
+  return {
+    subdomain,
+    host,
+  };
+}
