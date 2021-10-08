@@ -30,6 +30,7 @@
     "@sensestack/plato-core": "1.0.5",
     "apollo-server-micro": "^3.3.0",
     "@urql/devtools": "^2.0.3",
+    "@urql/exchange-graphcache": "^4.3.5",
     "autoprefixer": "^10.2.5",
     "bootstrap": "4.6.0",
     "dayjs": "^1.8.20",
