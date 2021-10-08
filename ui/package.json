@@ -21,6 +21,8 @@
     "@material-ui/pickers": "^3.2.10",
     "@next/bundle-analyzer": "^9.1.6",
     "@sensestack/plato-core": "1.0.5",
+    "@toast-ui/editor": "3.1.0",
+    "@toast-ui/react-editor": "3.1.0",
     "autoprefixer": "^10.2.5",
     "bootstrap": "4.6.0",
     "dayjs": "^1.8.20",

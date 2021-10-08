@@ -31,7 +31,7 @@ function AddComment() {
         addComment({ variables: { dreamId: dream.id, content } })
           .then(() => {
             inputRef.current.blur();
-            setContent("");
+            inputRef.current.setMarkdown("");
           })
           .finally(() => setSubmitting(false))
           .catch((err) => alert(err.message));
@@ -60,6 +60,7 @@ function AddComment() {
                 inputRef.current = e;
               }}
               color={event.color}
+              wysiwyg
             />
           </div>
           {content.length > 0 && (
