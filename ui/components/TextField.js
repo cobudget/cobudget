@@ -1,5 +1,6 @@
 import "@toast-ui/editor/dist/toastui-editor.css";
 import { useRef } from "react";
+import { debounce } from "lodash";
 const Editor =
   typeof window === "undefined" ? (
     <div />
@@ -51,14 +52,13 @@ const TextField = ({
                 wysiwygRef.current = el?.getInstance();
                 inputRef?.(el?.getInstance());
               }}
-              onChange={() => {
-                // TODO: debounce, getMarkdown is a heavy function
+              onChange={debounce(() => {
                 inputProps?.onChange?.({
                   target: {
                     value: wysiwygRef.current?.getMarkdown() ?? "",
                   },
                 });
-              }}
+              }, 250)}
             />
           )
         ) : (
