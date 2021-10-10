@@ -575,42 +575,54 @@ const resolvers = {
         dreamReviewIsOpen,
         discourseCategoryId,
       },
-      { currentOrg, currentOrgMember, models: { Event, EventMember }, eventHub }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
 
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
+      const collection = await prisma.collection.findUnique({
+        where: { id: eventId },
       });
-      if (!event)
-        throw new Error("Can't find event in your organization to edit");
+
+      if (!collection)
+        throw new Error("Can't find collection in your organization to edit");
 
       if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
+        !(
+          (collectionMember && collectionMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
       )
-        throw new Error("You need to be admin of this event.");
+        throw new Error("You need to be admin of this collection.");
 
-      if (slug) event.slug = slugify(slug);
-      if (title) event.title = title;
-      if (typeof archived !== "undefined") event.archived = archived;
-      if (registrationPolicy) event.registrationPolicy = registrationPolicy;
-      if (typeof info !== "undefined") event.info = info;
-      if (typeof about !== "undefined") event.about = about;
-      if (color) event.color = color;
+      if (slug) collection.slug = slugify(slug);
+      if (title) collection.title = title;
+      if (typeof archived !== "undefined") collection.archived = archived;
+      if (registrationPolicy)
+        collection.registrationPolicy = registrationPolicy;
+      if (typeof info !== "undefined") collection.info = info;
+      if (typeof about !== "undefined") collection.about = about;
+      if (color) collection.color = color;
       if (typeof dreamReviewIsOpen !== "undefined")
-        event.dreamReviewIsOpen = dreamReviewIsOpen;
-      if (discourseCategoryId) event.discourseCategoryId = discourseCategoryId;
+        collection.dreamReviewIsOpen = dreamReviewIsOpen;
+      if (discourseCategoryId)
+        collection.discourseCategoryId = discourseCategoryId;
 
       await eventHub.publish("edit-event", {
         currentOrg,
         currentOrgMember,
-        event,
+        event: collection,
       });
-      return event.save();
+      return prisma.collection.update({
+        where: { id: eventId },
+        data: { ...collection },
+      });
     },
     deleteEvent: async (
       parent,
