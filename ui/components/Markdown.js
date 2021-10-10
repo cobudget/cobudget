@@ -1,11 +1,13 @@
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import remarkGfm from "remark-gfm";
 
 const Markdown = ({ source, className = "" }) => {
   return (
     <ReactMarkdown
       source={source}
       className={"markdown " + className}
+      plugins={[remarkGfm]}
       renderers={{
         link: (props) => {
           if (props.href.includes("http"))
