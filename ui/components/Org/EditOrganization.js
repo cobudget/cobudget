@@ -2,7 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Button from "../Button";
 import TextField from "../TextField";
 import ImageUpload from "components/ImageUpload";
@@ -49,10 +49,13 @@ const EditOrganization = ({ organization, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
-  const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
-  const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
-    variables: { organizationId: organization?.id },
-  });
+  const [{ fetching: loading }, createOrganization] = useMutation(
+    CREATE_ORGANIZATION
+  );
+  const [{ fetching: editLoading, error }, editOrganization] = useMutation(
+    EDIT_ORGANIZATION
+  );
+
   const { handleSubmit, register, errors, reset } = useForm();
 
   const [slugValue, setSlugValue] = useState(organization?.subdomain ?? "");
@@ -63,12 +66,13 @@ const EditOrganization = ({ organization, currentUser }) => {
     try {
       variables = {
         ...variables,
+        organizationId: organization.id,
         logo: logoImage,
       };
       if (isNew) {
-        await createOrganization({ variables });
+        await createOrganization(variables);
       } else {
-        await editOrganization({ variables });
+        await editOrganization(variables);
       }
       let message = isNew
         ? "Organization created successfully."

@@ -2,6 +2,7 @@ import { dedupExchange, fetchExchange } from "urql";
 import { NextUrqlContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
+import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -25,7 +26,34 @@ export const client = (
     exchanges: [
       devtoolsExchange,
       dedupExchange,
-      cacheExchange({}),
+      cacheExchange({
+        updates: {
+          Mutation: {
+            inviteOrgMembers(result: any, _args, cache) {
+              if (result.inviteOrgMembers) {
+                cache.updateQuery(
+                  {
+                    query: ORG_MEMBERS_QUERY,
+                    variables: { offset: 0, limit: 10 },
+                  },
+                  (data: any) => {
+                    return {
+                      ...data,
+                      orgMembersPage: {
+                        ...data.orgMembersPage,
+                        orgMembers: [
+                          ...result.inviteOrgMembers,
+                          ...data.orgMembersPage.orgMembers,
+                        ],
+                      },
+                    };
+                  }
+                );
+              }
+            },
+          },
+        },
+      }),
       ssrExchange,
       fetchExchange,
     ],

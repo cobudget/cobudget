@@ -482,68 +482,29 @@ const resolvers = {
     editOrganization: async (
       parent,
       { organizationId, name, subdomain: dirtySubdomain, logo },
-      {
-        currentUser,
-        kcAdminClient,
-        currentOrgMember,
-        models: { Organization },
-        eventHub,
-      }
+      { user: currentUser, currentOrgMember, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
       if (
-        organizationId !== currentOrgMember.organizationId.toString() &&
+        organizationId !== currentOrgMember.organizationId &&
         !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
 
       const subdomain = slugify(dirtySubdomain);
 
-      const organization = await Organization.findOne({
-        _id: organizationId,
+      const organization = await prisma.organization.update({
+        where: {
+          id: organizationId,
+        },
+        data: { name, logo, slug: subdomain },
       });
 
-      const isUpdatingRedirectUris = subdomain !== organization.subdomain;
-      let newRedirectUris;
-
-      const clientId = "dreams";
-
-      const [client] = await kcAdminClient.clients.findOne({
-        clientId,
-      });
-
-      if (isUpdatingRedirectUris) {
-        const { redirectUris } = client;
-
-        const oldRedirectUri = `https://${organization.subdomain}.dreams.wtf/*`;
-
-        newRedirectUris = [
-          ...redirectUris.filter((uri) => uri !== oldRedirectUri),
-          `https://${subdomain}.dreams.wtf/*`,
-        ];
-      }
-
-      organization.name = name;
-      organization.logo = logo;
-      organization.subdomain = subdomain;
-      // organization.customDomain = customDomain;
-
-      await organization.save();
-
-      if (isUpdatingRedirectUris)
-        await kcAdminClient.clients.update(
-          { id: client.id },
-          {
-            clientId,
-            redirectUris: newRedirectUris,
-          }
-        );
-
-      await eventHub.publish("edit-organization", {
-        currentOrg: organization,
-        currentOrgMember,
-      });
+      // await eventHub.publish("edit-organization", {
+      //   currentOrg: organization,
+      //   currentOrgMember,
+      // });
       return organization;
     },
     setTodosFinished: async (
