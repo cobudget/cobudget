@@ -2,13 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@apollo/client";
 import { Tooltip } from "react-tippy";
-import ReactMarkdown from "react-markdown";
-import Link from "next/link";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
+import Markdown from "./Markdown";
 
 const EditableField = ({
   value,
@@ -75,25 +74,7 @@ const EditableField = ({
   if (value)
     return (
       <div className="relative">
-        <ReactMarkdown
-          source={value}
-          className="markdown"
-          renderers={{
-            link: (props) => {
-              if (props.href.includes("http"))
-                return (
-                  <a href={props.href} target="_blank" rel="noreferrer">
-                    {props.children}
-                  </a>
-                );
-              return (
-                <Link href={props.href}>
-                  <a>{props.children}</a>
-                </Link>
-              );
-            },
-          }}
-        />
+        <Markdown source={value} />
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip title={`Edit ${name}`} position="bottom" size="small">
@@ -109,7 +90,7 @@ const EditableField = ({
   return (
     <>
       {value ? (
-        <ReactMarkdown source={value} className="markdown" />
+        <Markdown source={value} />
       ) : (
         <button
           onClick={() => null}

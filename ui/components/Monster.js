@@ -1,11 +1,11 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import { useMutation, gql } from "@apollo/client";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
 import dreamName from "utils/dreamName";
+import Markdown from "./Markdown";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -23,10 +23,7 @@ const GuidelineComponent = ({ guideline }) => {
         className={expanded ? "" : "line-clamp-2"}
         style={{ minHeight: "36px" }}
       >
-        <ReactMarkdown
-          source={guideline.description}
-          className="markdown text-sm"
-        />
+        <Markdown source={guideline.description} className="text-sm" />
       </div>
 
       <ExpandButton expanded={expanded} setExpanded={setExpanded} />
