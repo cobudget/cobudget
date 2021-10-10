@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 
 import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
@@ -47,13 +47,14 @@ const UPDATE_ORG_MEMBER = gql`
 // `;
 
 const OrgMembers = () => {
-  const { data, loading, error, fetchMore } = useQuery(ORG_MEMBERS_QUERY, {
-    notifyOnNetworkStatusChange: true,
+  const [{ data, fetching: loading, error, fetchMore }] = useQuery({
+    query: ORG_MEMBERS_QUERY,
     variables: { offset: 0, limit: 10 },
   });
+
   const moreExist = data?.orgMembersPage.moreExist;
   const orgMembers = data?.orgMembersPage.orgMembers ?? [];
-  const [updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
+  const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
   //   variables: { eventId: event.id },

@@ -51,10 +51,8 @@ const ActionsDropdown = ({
           disabled={onlyOneAdmin && member.isOrgAdmin}
           onClick={() => {
             updateOrgMember({
-              variables: {
-                memberId: member.id,
-                isOrgAdmin: !member.isOrgAdmin,
-              },
+              memberId: member.id,
+              isOrgAdmin: !member.isOrgAdmin,
             }).then(() => {
               handleClose();
             });
