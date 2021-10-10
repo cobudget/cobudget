@@ -515,10 +515,11 @@ const resolvers = {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
 
-      currentOrg.finishedTodos = true;
-      await currentOrg.save();
-
-      return currentOrg;
+      const org = await prisma.organization.update({
+        where: { id: currentOrg.id },
+        data: { finishedTodos: true },
+      });
+      return org;
     },
     createEvent: async (
       parent,
