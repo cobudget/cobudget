@@ -1600,19 +1600,19 @@ const resolvers = {
     inviteEventMembers: async (
       parent,
       { emails: emailsString, eventId },
-      {
-        currentOrgMember,
-        currentOrg,
-        kcAdminClient,
-        models: { OrgMember, EventMember, Event },
-      }
+      { currentOrgMember, currentOrg }
     ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const currentEventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: { collection: true },
       });
 
-      const event = await Event.findOne({ _id: eventId });
+      //const event = await Event.findOne({ _id: eventId });
 
       if (!currentEventMember || !currentEventMember.isAdmin)
         throw new Error("You need to be admin to invite new members");
@@ -1622,98 +1622,87 @@ const resolvers = {
       if (emails.length > 1000)
         throw new Error("You can only invite 1000 people at a time");
 
-      // let newOrgMembers = [];
-      const newEventMembers = [];
+      const invitedCollectionMembers = [];
 
       for (const email of emails) {
-        const [user] = await kcAdminClient.users.findOne({
-          email: email.trim(),
+        const user = await prisma.user.findUnique({
+          where: { email: email.trim() },
         });
 
         if (user) {
-          const orgMember = await OrgMember.findOne({
-            userId: user.id,
-            organizationId: currentOrg.id,
+          const orgMember = await prisma.orgMember.findUnique({
+            where: {
+              organizationId_userId: {
+                userId: user.id,
+                organizationId: currentOrg.id,
+              },
+            },
           });
           if (orgMember) {
-            const eventMember = await EventMember.findOne({
-              orgMemberId: orgMember.id,
-              eventId,
-            });
-            if (eventMember) {
-              eventMember.isApproved = true;
-              await eventMember.save();
-            } else {
-              newEventMembers.push(
-                await new EventMember({
+            const eventMember = await prisma.collectionMember.upsert({
+              where: {
+                orgMemberId_collectionId: {
                   orgMemberId: orgMember.id,
-                  eventId,
-                  isApproved: true,
-                }).save()
-              );
-            }
-          } else {
-            const orgMember = await new OrgMember({
-              userId: user.id,
-              organizationId: currentOrgMember.organizationId,
-            }).save();
-
-            newEventMembers.push(
-              await new EventMember({
+                  collectionId: eventId,
+                },
+              },
+              create: {
                 orgMemberId: orgMember.id,
-                eventId,
+                collectionId: eventId,
                 isApproved: true,
-              }).save()
-            );
+              },
+              update: {
+                isApproved: true,
+              },
+            });
+            invitedCollectionMembers.push(eventMember);
+          } else {
+            const orgMember = await prisma.orgMember.create({
+              data: {
+                userId: user.id,
+                organizationId: currentOrgMember.organizationId,
+                collectionMemberships: {
+                  create: { collectionId: eventId, isApproved: true },
+                },
+              },
+              include: {
+                collectionMemberships: true,
+              },
+            });
+
+            invitedCollectionMembers.push(orgMember.collectionMemberships[0]);
           }
         } else {
-          const user = await kcAdminClient.users.create({
-            username: email.trim(),
-            email: email.trim(),
-            requiredActions: [
-              requiredAction.UPDATE_PROFILE,
-              requiredAction.UPDATE_PASSWORD,
-            ],
-            enabled: true,
+          const user = await prisma.user.create({
+            data: {
+              email: email.trim(),
+              orgMemberships: {
+                create: {
+                  organizationId: currentOrg.id,
+                  collectionMemberships: {
+                    create: { collectionId: eventId, isApproved: true },
+                  },
+                },
+              },
+            },
+            include: {
+              orgMemberships: {
+                include: { collectionMemberships: true },
+              },
+            },
           });
 
-          await kcAdminClient.users.executeActionsEmail({
-            id: user.id,
-            lifespan: 60 * 60 * 24 * 90,
-            actions: [
-              requiredAction.UPDATE_PROFILE,
-              requiredAction.UPDATE_PASSWORD,
-            ],
-            clientId: "dreams",
-            redirectUri: `${
-              process.env.NODE_ENV === "production" ? "https" : "http"
-            }://${
-              currentOrg.customDomain
-                ? currentOrg.customDomain
-                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-            }/${event.slug}`,
-          });
-
-          const orgMember = await new OrgMember({
-            userId: user.id,
-            organizationId: currentOrgMember.organizationId,
-          }).save();
-
-          newEventMembers.push(
-            await new EventMember({
-              orgMemberId: orgMember.id,
-              eventId,
-              isApproved: true,
-            }).save()
+          invitedCollectionMembers.push(
+            user.orgMemberships[0].collectionMemberships[0]
           );
         }
       }
-      return newEventMembers;
+      return invitedCollectionMembers;
     },
     inviteOrgMembers: async (
       parent,
       { emails: emailsString },
-      { currentOrgMember, currentOrg, kcAdminClient, models: { OrgMember } }
+      { currentOrgMember, currentOrg }
     ) => {
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org. admin to invite members.");
@@ -1726,56 +1715,38 @@ const resolvers = {
       let newOrgMembers = [];
 
       for (const email of emails) {
-        const [user] = await kcAdminClient.users.findOne({
-          email: email.trim(),
+        const user = await prisma.user.findUnique({
+          where: { email: email.trim() },
         });
         if (user) {
-          const orgMember = await OrgMember.findOne({
-            userId: user.id,
-            organizationId: currentOrg.id,
+          const orgMember = await prisma.orgMember.findUnique({
+            where: {
+              organizationId_userId: {
+                userId: user.id,
+                organizationId: currentOrg.id,
+              },
+            },
           });
           if (!orgMember) {
             newOrgMembers.push(
-              await new OrgMember({
-                userId: user.id,
-                organizationId: currentOrgMember.organizationId,
-              }).save()
+              await prisma.orgMember.create({
+                data: {
+                  userId: user.id,
+                  organizationId: currentOrgMember.organizationId,
+                },
+              })
             );
           }
         } else {
-          const user = await kcAdminClient.users.create({
-            username: email.trim(),
-            email: email.trim(),
-            requiredActions: [
-              requiredAction.UPDATE_PROFILE,
-              requiredAction.UPDATE_PASSWORD,
-            ],
-            enabled: true,
+          const user = await prisma.user.create({
+            data: {
+              email: email.trim(),
+              orgMemberships: { create: { organizationId: currentOrg.id } },
+            },
+            include: { orgMemberships: true },
           });
 
-          await kcAdminClient.users.executeActionsEmail({
-            id: user.id,
-            lifespan: 60 * 60 * 24 * 90,
-            actions: [
-              requiredAction.UPDATE_PROFILE,
-              requiredAction.UPDATE_PASSWORD,
-            ],
-            clientId: "dreams",
-            redirectUri: `${
-              process.env.NODE_ENV === "production" ? "https" : "http"
-            }://${
-              currentOrg.customDomain
-                ? currentOrg.customDomain
-                : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-            }/`,
-          });
-
-          newOrgMembers.push(
-            await new OrgMember({
-              userId: user.id,
-              organizationId: currentOrgMember.organizationId,
-            }).save()
-          );
+          newOrgMembers.push(user.orgMemberships[0]);
         }
       }
 
