@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 import { Tooltip } from "react-tippy";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
@@ -20,9 +20,7 @@ const EditableField = ({
   variables,
   className = "",
 }) => {
-  const [mutation, { loading }] = useMutation(MUTATION, {
-    variables,
-  });
+  const [{ fetching: loading }, mutation] = useMutation(MUTATION);
   const { handleSubmit, register } = useForm();
 
   const [editing, setEditing] = useState(false);
@@ -30,8 +28,8 @@ const EditableField = ({
   if (editing)
     return (
       <form
-        onSubmit={handleSubmit((variables) =>
-          mutation({ variables })
+        onSubmit={handleSubmit((vars) =>
+          mutation({ ...variables, ...vars })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message))
         )}
