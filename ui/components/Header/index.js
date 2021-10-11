@@ -1,13 +1,12 @@
 import { useState } from "react";
 import Link from "next/link";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
-import { signIn, signOut, useSession } from "next-auth/client";
 
 const css = {
   mobileProfileItem:
@@ -41,17 +40,11 @@ const Header = ({
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
-  // const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
-  //   refetchQueries: ["TopLevelQuery"],
-  // });
+  const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
 
-  // const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
-  //   variables: { eventId: event?.id },
-  //   refetchQueries: ["TopLevelQuery"],
-  // });
+  const [, joinEvent] = useMutation(JOIN_EVENT_MUTATION);
   const color = event?.color ?? "anthracit";
-  // const [session, loading] = useSession();
-  // console.log({ session, loading });
+
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
@@ -96,7 +89,7 @@ const Header = ({
           } sm:bg-transparent`}
         >
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
-            {false ? (
+            {currentUser ? (
               <>
                 {currentOrg && (
                   <>
@@ -108,7 +101,7 @@ const Header = ({
                         <NavItem
                           primary
                           eventColor={color}
-                          onClick={() => joinEvent()}
+                          onClick={() => joinEvent({ eventId: event?.id })}
                         >
                           {event.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
@@ -137,7 +130,7 @@ const Header = ({
                 <div data-cy="user-is-logged-in" />
               </>
             ) : (
-              <NavItem onClick={signIn} eventColor={color} primary>
+              <NavItem href={`/login`} eventColor={color} primary>
                 Login or Sign up
               </NavItem>
             )}
@@ -211,7 +204,7 @@ const Header = ({
                 >
                   Edit profile
                 </button>
-                <a href={"/api/logout"} className={css.mobileProfileItem}>
+                <a href={"/api/auth/logout"} className={css.mobileProfileItem}>
                   Sign out
                 </a>
               </div>

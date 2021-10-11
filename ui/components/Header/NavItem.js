@@ -3,7 +3,6 @@ import Link from "next/link";
 const NavItem = ({
   onClick,
   href,
-  as,
   currentPath = "",
   className,
   children,
@@ -46,7 +45,7 @@ const NavItem = ({
     );
   }
   return (
-    <Link href={href} as={as}>
+    <Link href={href}>
       <a className={classes}>{children}</a>
     </Link>
   );
