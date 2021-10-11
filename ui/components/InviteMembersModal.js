@@ -53,7 +53,7 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     eventId ? INVITE_EVENT_MEMBERS_MUTATION : INVITE_ORG_MEMBERS_MUTATION
   );
-
+  console.log({ eventId });
   return (
     <>
       <Modal
@@ -91,7 +91,7 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
           </Banner>
           <form
             onSubmit={handleSubmit((variables) => {
-              inviteMembers(variables)
+              inviteMembers({ ...variables, ...(eventId && { eventId }) })
                 .then(() => {
                   reset();
                   handleClose();
