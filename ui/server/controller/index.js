@@ -1,52 +1,41 @@
-const mongoose = require("mongoose");
+import prisma from "../prisma";
 
-const allocateToMember = async (
-  { eventMemberId, eventId, organizationId, amount, type },
-  { Allocation, Contribution }
-) => {
-  const [
-    { totalAllocations } = { totalAllocations: 0 },
-  ] = await Allocation.aggregate([
-    {
-      $match: {
-        eventMemberId: mongoose.Types.ObjectId(eventMemberId),
-      },
-    },
-    { $group: { _id: null, totalAllocations: { $sum: "$amount" } } },
-  ]);
+export const allocateToMember = async ({
+  collectionMemberId,
+  eventId,
+  organizationId,
+  amount,
+  type,
+}) => {
+  const {
+    _sum: { amount: totalAllocations },
+  } = await prisma.allocation.aggregate({
+    where: { collectionMemberId },
+    _sum: { amount: true },
+  });
 
-  const [
-    { totalContributions } = { totalContributions: 0 },
-  ] = await Contribution.aggregate([
-    {
-      $match: {
-        eventMemberId: mongoose.Types.ObjectId(eventMemberId),
-      },
-    },
-    { $group: { _id: null, totalContributions: { $sum: "$amount" } } },
-  ]);
+  const {
+    _sum: { amount: totalContributions },
+  } = await prisma.contribution.aggregate({
+    where: { collectionMemberId: member.id },
+    _sum: { amount: true },
+  });
 
   const balance = totalAllocations - totalContributions;
-
+  let adjustedAmount;
   if (type === "ADD") {
-    const adjustedAmount = balance + amount >= 0 ? amount : -balance;
-    await new Allocation({
-      organizationId,
-      eventId,
-      eventMemberId,
-      amount: adjustedAmount,
-    }).save();
+    adjustedAmount = balance + amount >= 0 ? amount : -balance;
   } else if (type === "SET") {
     if (amount < 0) throw new Error("Can't set negative values");
 
-    const adjustment = amount - balance;
-    await new Allocation({
-      organizationId,
-      eventId,
-      eventMemberId,
-      amount: adjustment,
-    }).save();
+    adjustedAmount = amount - balance;
   }
+  await prisma.allocation.create({
+    data: {
+      organizationId,
+      collectionId: eventId,
+      collectionMemberId,
+      amount: adjustedAmount,
+    },
+  });
 };
-
-module.exports = { allocateToMember };
