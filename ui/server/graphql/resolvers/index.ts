@@ -243,17 +243,12 @@ const resolvers = {
         dreams: shuffledBuckets.slice(0, limit),
       };
     },
-    orgMembersPage: async (parent, { offset, limit }, { user, currentOrg }) => {
+    orgMembersPage: async (
+      parent,
+      { offset, limit },
+      { user, currentOrg, currentOrgMember }
+    ) => {
       if (!currentOrg) return null;
-
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: currentOrg.id,
-            userId: user.id,
-          },
-        },
-      });
 
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
@@ -307,7 +302,7 @@ const resolvers = {
     },
     membersPage: async (
       parent,
-      { eventId, isApproved, offset, limit },
+      { eventId, isApproved, offset = 0, limit = 10 },
       { user, currentOrgMember }
     ) => {
       if (!currentOrgMember)
@@ -424,15 +419,9 @@ const resolvers = {
     createOrganization: async (
       parent,
       { name, subdomain: dirtySubdomain, logo },
-      {
-        kauth,
-        kcAdminClient,
-        currentOrgMember,
-        models: { Organization, OrgMember },
-        eventHub,
-      }
+      { user, eventHub }
     ) => {
-      if (!kauth) throw new Error("You need to be logged in!");
+      if (!user) throw new Error("You need to be logged in!");
       const subdomain = slugify(dirtySubdomain);
 
       const organization = new Organization({
