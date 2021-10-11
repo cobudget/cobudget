@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { gql } from "@apollo/client";
-import { UserProvider, useFetchUser } from "lib/user";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 import { withUrqlClient, initUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
-import * as Urql from "urql";
+import { useQuery, gql } from "urql";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($slug: String) {
@@ -55,6 +53,7 @@ export const TOP_LEVEL_QUERY = gql`
     currentUser {
       id
       username
+      name
       avatar
       email
     }
@@ -66,6 +65,7 @@ export const TOP_LEVEL_QUERY = gql`
       hasDiscourseApiKey
       user {
         id
+        name
         username
         email
       }
@@ -91,6 +91,7 @@ export const TOP_LEVEL_QUERY = gql`
     }
 
     currentOrg {
+      __typename
       id
       name
       info
@@ -111,11 +112,11 @@ const MyApp = ({ Component, pageProps, router }) => {
       fetching,
       error,
     },
-  ] = Urql.useQuery({
+  ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: { slug: router.query.event },
   });
-  console.log({ currentUser, currentOrg, fetching, error });
+  // console.log({ currentUser, currentOrg, fetching, error });
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");

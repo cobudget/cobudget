@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import Link from "next/link";
 import Button from "components/Button";
 import TodoList from "components/TodoList";
@@ -79,8 +79,10 @@ const LinkCard = forwardRef((props, ref) => {
 });
 
 const IndexPage = ({ currentOrg, currentOrgMember }) => {
-  // const { data: { events } = { events: [] } } = useQuery(EVENTS_QUERY);
-  let events = [];
+  const [{ data: { events } = { events: [] } }] = useQuery({
+    query: EVENTS_QUERY,
+  });
+
   // TODO - perhaps a redirect to organization pages instead
   if (!currentOrg) return <LandingPage />;
 

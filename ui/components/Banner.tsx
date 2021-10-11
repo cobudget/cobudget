@@ -4,12 +4,12 @@ import ErrorIcon from "@material-ui/icons/ErrorOutline";
 import WarningIcon from "@material-ui/icons/WarningOutlined";
 import CheckCircleIcon from "@material-ui/icons/CheckCircleOutline";
 
-export default ({
+const Banner = ({
   children,
   variant = "success",
   className,
-  loading,
-  title,
+  loading = false,
+  title = "",
   disabled,
   ...props
 }) => {
@@ -51,3 +51,5 @@ export default ({
     </div>
   );
 };
+
+export default Banner;
