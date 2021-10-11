@@ -648,92 +648,114 @@ const resolvers = {
     },
     addGuideline: async (
       parent,
-      { eventId, guideline },
-      { currentOrgMember, models: { Event, EventMember } }
+      { eventId, guideline: { title, description } },
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { guidelines: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to delete.");
 
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
         throw new Error("You need to be admin to add a guideline");
 
+      const guidelines = await prisma.guideline.findMany({
+        where: { collectionId: eventId },
+      });
+
       const position =
-        event.guidelines
-          .map((gl) => gl.position)
+        guidelines
+          .map((g) => g.position)
           .reduce((a, b) => Math.max(a, b), 1000) + 1;
 
-      event.guidelines.push({ ...guideline, position });
-
-      return event.save();
+      const guideline = await prisma.guideline.create({
+        data: { collectionId: eventId, title, description, position },
+        include: { collection: true },
+      });
+      return guideline.collection;
     },
     editGuideline: async (
       parent,
-      { eventId, guidelineId, guideline },
-      { currentOrgMember, models: { Event, EventMember } }
+      { eventId, guidelineId, guideline: { title, description } },
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { guidelines: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
         throw new Error("You need to be admin to edit a guideline");
 
-      let doc = event.guidelines.id(guidelineId);
+      if (
+        !eventMember.collection.guidelines
+          .map((g) => g.id)
+          .includes(guidelineId)
+      )
+        throw new Error("This guideline is not part of this collection");
 
-      doc.title = guideline.title;
-      doc.description = guideline.description;
+      const guideline = await prisma.guideline.update({
+        where: { id: guidelineId },
+        data: { title, description },
+        include: { collection: true },
+      });
 
-      return event.save();
+      return guideline.collection;
     },
     setGuidelinePosition: async (
       parent,
       { eventId, guidelineId, newPosition },
-      { currentOrgMember, models: { Event, EventMember } }
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { guidelines: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
         throw new Error("You need to be admin to edit a guideline");
 
-      let doc = event.guidelines.id(guidelineId);
-      doc.position = newPosition;
-      return event.save();
+      if (
+        !eventMember.collection.guidelines
+          .map((g) => g.id)
+          .includes(guidelineId)
+      )
+        throw new Error("This guideline is not part of this collection");
+
+      const guideline = await prisma.guideline.update({
+        where: { id: guidelineId },
+        data: { position: newPosition },
+        include: { collection: true },
+      });
+
+      return guideline.collection;
     },
     deleteGuideline: async (
       parent,
@@ -765,63 +787,82 @@ const resolvers = {
     },
     addCustomField: async (
       parent,
-      { eventId, customField },
-      { currentOrgMember, models: { EventMember, Event } }
+      { eventId, customField: { name, description, type, limit, isRequired } },
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { guidelines: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
         throw new Error("You need to be admin to add a custom field");
 
+      const customFields = await prisma.field.findMany({
+        where: { collectionId: eventId },
+      });
+
       const position =
-        event.customFields
-          .map((cf) => cf.position)
+        customFields
+          .map((g) => g.position)
           .reduce((a, b) => Math.max(a, b), 1000) + 1;
 
-      event.customFields.push({ ...customField, position });
-
-      return event.save();
+      const customField = await prisma.field.create({
+        data: {
+          collectionId: eventId,
+          name,
+          description,
+          type,
+          limit,
+          isRequired,
+          position,
+        },
+        include: { Collection: true },
+      });
+      return customField.Collection;
     },
     // Based on https://softwareengineering.stackexchange.com/a/195317/54663
     setCustomFieldPosition: async (
       parent,
       { eventId, fieldId, newPosition },
-      { currentOrgMember, models: { EventMember, Event } }
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { fields: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
         !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
-        throw new Error("You need to be admin to edit a custom field");
+        throw new Error("You need to be admin to edit a field");
 
-      let doc = event.customFields.id(fieldId);
-      doc.position = newPosition;
-      return event.save();
+      if (!eventMember.collection.fields.map((g) => g.id).includes(fieldId))
+        throw new Error("This field is not part of this collection");
+
+      const field = await prisma.field.update({
+        where: { id: fieldId },
+        data: { position: newPosition },
+        include: { Collection: true },
+      });
+
+      return field.Collection;
     },
     editCustomField: async (
       parent,
