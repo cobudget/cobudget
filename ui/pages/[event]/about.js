@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from "urql";
 
 import About from "components/About";
 import SubMenu from "components/SubMenu";

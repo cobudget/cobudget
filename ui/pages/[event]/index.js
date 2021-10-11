@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import Link from "next/link";
 import DreamCard from "components/DreamCard";
 import Filterbar from "components/Filterbar";
@@ -74,14 +74,17 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
 
   const { tag, s } = router.query;
 
-  let {
-    data: { dreamsPage: { moreExist, dreams } } = {
-      dreamsPage: { dreams: [] },
+  const [
+    {
+      data: { dreamsPage: { moreExist, dreams } } = {
+        dreamsPage: { dreams: [] },
+      },
+      fetching: loading,
+      error,
+      fetchMore,
     },
-    loading,
-    error,
-    fetchMore,
-  } = useQuery(DREAMS_QUERY, {
+  ] = useQuery({
+    query: DREAMS_QUERY,
     variables: {
       eventSlug: router.query.event,
       offset: 0,
@@ -93,6 +96,8 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
     fetchPolicy: "cache-and-network",
     nextFetchPolicy: "cache-first",
   });
+
+  console.log({ dreams });
 
   if (error) {
     console.error(error);

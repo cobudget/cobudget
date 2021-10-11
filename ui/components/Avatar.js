@@ -19,7 +19,9 @@ export default React.forwardRef((props, ref) => {
         ...props.style,
       }}
     >
-      {user?.username ? user.username.charAt(0).toUpperCase() : ""}
+      {user?.username
+        ? user.username.charAt(0).toUpperCase()
+        : user.email?.charAt(0).toUpperCase() ?? ""}
     </div>
   );
 });

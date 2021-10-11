@@ -9,7 +9,7 @@ const DreamCard = ({ dream, event }) => {
     (dream.minGoal || dream.maxGoal) && dream.approved && !dream.canceled;
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
-      {dream.images.length ? (
+      {dream.images?.length ? (
         <img
           src={dream.images[0].small}
           className="w-full h-48 object-cover object-center"
