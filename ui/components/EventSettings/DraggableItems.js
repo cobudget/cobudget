@@ -78,20 +78,21 @@ const DraggableItems = ({
       useDragHandle
       helperClass={classes.sorting}
     >
-      {localItems
-        // lol this sort actually mutates localItems, which turns out to be
-        // central to the functioning of this
-        .sort((a, b) => a.position - b.position)
-        .map((item, index) => (
-          <SortableItem
-            key={item.id}
-            index={index}
-            item={item}
-            setEditingItem={setEditingItem}
-            eventId={event.id}
-            currentOrg={currentOrg}
-          />
-        ))}
+      {localItems &&
+        localItems
+          // lol this sort actually mutates localItems, which turns out to be
+          // central to the functioning of this
+          .sort((a, b) => a.position - b.position)
+          .map((item, index) => (
+            <SortableItem
+              key={item.id}
+              index={index}
+              item={item}
+              setEditingItem={setEditingItem}
+              eventId={event.id}
+              currentOrg={currentOrg}
+            />
+          ))}
     </SortableContainer>
   );
 };

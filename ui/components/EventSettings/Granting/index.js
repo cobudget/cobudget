@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal, List, Divider } from "@material-ui/core";
-import { gql } from "@apollo/client";
+import { gql } from "urql";
 
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
@@ -126,7 +126,7 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
 
           <SettingsListItem
             primary="Allow stretch goals"
-            secondary={event.allowStretchGoals.toString()}
+            secondary={event.allowStretchGoals?.toString() ?? "false"}
             isSet={typeof event.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}

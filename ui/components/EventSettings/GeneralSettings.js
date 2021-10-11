@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "../SelectInput";
@@ -40,7 +40,7 @@ export default function GeneralSettings({
   currentOrg,
   currentOrgMember,
 }) {
-  const [editEvent, { loading }] = useMutation(EDIT_EVENT);
+  const [{ loading }, editEvent] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
@@ -60,16 +60,14 @@ export default function GeneralSettings({
       <form
         onSubmit={handleSubmit((variables) => {
           editEvent({
-            variables: {
-              ...variables,
-              eventId: event.id,
-              totalBudget: Number(variables.totalBudget),
-              grantValue: Number(variables.grantValue),
-              grantsPerMember: Number(variables.grantsPerMember),
-              dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
-              archived: variables.archived === "true",
-              color,
-            },
+            ...variables,
+            eventId: event.id,
+            totalBudget: Number(variables.totalBudget),
+            grantValue: Number(variables.grantValue),
+            grantsPerMember: Number(variables.grantsPerMember),
+            dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
+            archived: variables.archived === "true",
+            color,
           })
             .then(() => alert("Settings updated!"))
             .catch((error) => alert(error.message));
