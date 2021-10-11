@@ -1,8 +1,9 @@
-import { dedupExchange, fetchExchange } from "urql";
+import { dedupExchange, fetchExchange, errorExchange } from "urql";
 import { NextUrqlContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers";
+import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -24,9 +25,19 @@ export const client = (
   return {
     url: getUrl(),
     exchanges: [
+      errorExchange({
+        onError: (error) => {
+          console.error(error.message.replace("[GraphQL]", "Server error:"));
+        },
+      }),
       devtoolsExchange,
       dedupExchange,
       cacheExchange({
+        keys: {
+          OrgMembersPage: () => null,
+          MembersPage: () => null,
+          ContributionsPage: () => null,
+        },
         updates: {
           Mutation: {
             inviteOrgMembers(result: any, _args, cache) {
@@ -44,6 +55,31 @@ export const client = (
                         orgMembers: [
                           ...result.inviteOrgMembers,
                           ...data.orgMembersPage.orgMembers,
+                        ],
+                      },
+                    };
+                  }
+                );
+              }
+            },
+            inviteEventMembers(result: any, { eventId }, cache) {
+              if (result.inviteEventMembers) {
+                cache.updateQuery(
+                  {
+                    query: EVENT_MEMBERS_QUERY,
+                    variables: { eventId, offset: 0, limit: 1000 },
+                  },
+                  (data: any) => {
+                    console.log({
+                      data,
+                    });
+                    return {
+                      ...data,
+                      approvedMembersPage: {
+                        ...data.approvedMembersPage,
+                        approvedMembers: [
+                          ...result.inviteEventMembers,
+                          ...data.approvedMembersPage?.approvedMembers,
                         ],
                       },
                     };
