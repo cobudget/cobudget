@@ -1,4 +1,4 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import Link from "next/link";
 
 import thousandSeparator from "utils/thousandSeparator";
@@ -35,13 +35,16 @@ export const CONTRIBUTIONS_QUERY = gql`
 `;
 
 const Contributions = ({ event }) => {
-  const {
-    data: { contributionsPage: { moreExist, contributions } } = {
-      contributionsPage: { contributions: [] },
+  const [
+    {
+      data: { contributionsPage: { moreExist, contributions } } = {
+        contributionsPage: { contributions: [] },
+      },
+      fetching: loading,
+      fetchMore,
     },
-    loading,
-    fetchMore,
-  } = useQuery(CONTRIBUTIONS_QUERY, {
+  ] = useQuery({
+    query: CONTRIBUTIONS_QUERY,
     notifyOnNetworkStatusChange: true,
     variables: { eventId: event.id, offset: 0, limit: 15 },
   });
@@ -50,7 +53,9 @@ const Contributions = ({ event }) => {
     <>
       <div className="page">
         <div className="flex justify-between mb-3 items-center">
-          <h2 className="text-xl font-semibold">All transactions</h2>
+          <h2 className="text-xl font-semibold">
+            {contributions.length == 0 ? 0 : "All"} transactions
+          </h2>
         </div>
         {!!contributions.length && (
           <div className="bg-white divide-y-default divide-gray-200 py-1 rounded shadow">
