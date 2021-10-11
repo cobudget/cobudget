@@ -1,6 +1,6 @@
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
 import ExpandButton from "components/ExpandButton";
+import Markdown from "./Markdown";
 
 const InfoBox = ({ markdown }) => {
   const [expanded, setExpanded] = useState(false);
@@ -12,7 +12,7 @@ const InfoBox = ({ markdown }) => {
       }
     >
       <div className={"relative markdown" + " " + (!expanded && "max-h-32")}>
-        <ReactMarkdown source={markdown} />
+        <Markdown source={markdown} />
 
         <div className="-mx-2">
           <ExpandButton expanded={expanded} setExpanded={setExpanded} />
