@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 
 import Button from "components/Button";
 import TextField from "components/TextField";
@@ -21,9 +21,9 @@ const BulkAllocateModal = ({ event, handleClose }) => {
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
 
-  const [bulkAllocate, { loading }] = useMutation(BULK_ALLOCATE_MUTATION, {
-    variables: { eventId: event.id, amount, type: type.toUpperCase() },
-  });
+  const [{ fetching: loading }, bulkAllocate] = useMutation(
+    BULK_ALLOCATE_MUTATION
+  );
 
   const disabled = inputValue === "" || (!amount && type === "Add");
   const total = amount * event.numberOfApprovedMembers;
@@ -46,7 +46,11 @@ const BulkAllocateModal = ({ event, handleClose }) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            bulkAllocate()
+            bulkAllocate({
+              eventId: event.id,
+              amount,
+              type: type.toUpperCase(),
+            })
               .then(() => handleClose())
               .catch((err) => alert(err.message));
           }}
