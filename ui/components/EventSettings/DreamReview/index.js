@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import dreamName from "utils/dreamName";
@@ -13,10 +13,8 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ event, currentOrg }) => {
-  const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
-    variables: { eventId: event.id },
-  });
+const DreamReview = ({ event, currentOrg }) => {
+  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
   const {
     handleSubmit,
     register,
@@ -35,10 +33,9 @@ export default ({ event, currentOrg }) => {
       <form
         onSubmit={handleSubmit((variables) => {
           editEvent({
-            variables: {
-              ...variables,
-              dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
-            },
+            ...variables,
+            eventId: event.id,
+            dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
           })
             //.then(() => null)
             .catch((error) => alert(error.message));
@@ -91,3 +88,4 @@ export default ({ event, currentOrg }) => {
     </div>
   );
 };
+export default DreamReview;

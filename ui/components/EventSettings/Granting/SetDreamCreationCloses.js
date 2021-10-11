@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
@@ -9,12 +9,8 @@ import dreamName from "utils/dreamName";
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingCloses = ({ closeModal, event, currentOrg }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
+  const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(
@@ -30,7 +26,10 @@ const SetGrantingCloses = ({ closeModal, event, currentOrg }) => {
 
         <form
           onSubmit={handleSubmit(() => {
-            updateGranting({ variables: { dreamCreationCloses: selectedDate } })
+            updateGranting({
+              dreamCreationCloses: selectedDate,
+              eventId: event.id,
+            })
               .then(() => {
                 // console.log({ data });
                 closeModal();
@@ -73,7 +72,10 @@ const SetGrantingCloses = ({ closeModal, event, currentOrg }) => {
                 color="secondary"
                 className="ml-2"
                 onClick={() => {
-                  updateGranting({ variables: { dreamCreationCloses: null } })
+                  updateGranting({
+                    eventId: event.id,
+                    dreamCreationCloses: null,
+                  })
                     .then(() => {
                       closeModal();
                     })
@@ -93,4 +95,4 @@ const SetGrantingCloses = ({ closeModal, event, currentOrg }) => {
   );
 };
 
-export default SetGrantingCloses;
+export default SetDreamCreationCloses;

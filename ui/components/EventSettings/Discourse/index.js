@@ -23,7 +23,7 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-export default ({ event, currentOrg }) => {
+const Discourse = ({ event, currentOrg }) => {
   const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
     variables: { eventId: event.id },
   });
@@ -88,3 +88,5 @@ export default ({ event, currentOrg }) => {
     </div>
   );
 };
+
+export default Discourse;

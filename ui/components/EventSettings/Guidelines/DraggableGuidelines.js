@@ -1,4 +1,4 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import ReactMarkdown from "react-markdown";
 import { DraggableIcon } from "components/Icons";
@@ -50,12 +50,10 @@ const DragHandle = sortableHandle(() => (
 
 const SortableItem = sortableElement(
   ({ item: guideline, setEditingItem: setEditingGuideline, eventId }) => {
-    const [deleteGuideline, { loading: deleting }] = useMutation(
-      DELETE_GUIDELINE_MUTATION,
-      {
-        variables: { eventId, guidelineId: guideline.id },
-      }
-    );
+    const [{ loading: deleting }, deleteGuideline] = useMutation({
+      query: DELETE_GUIDELINE_MUTATION,
+      variables: { eventId, guidelineId: guideline.id },
+    });
 
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
@@ -96,18 +94,14 @@ const SortableItem = sortableElement(
 );
 
 const DraggableGuidelines = ({ event, items, setEditingItem }) => {
-  const [setGuidelinePosition, { loading }] = useMutation(
-    SET_GUIDELINE_POSITION_MUTATION,
-    {
-      variables: { eventId: event.id },
-    }
+  const [{ fetching: loading }, setGuidelinePosition] = useMutation(
+    SET_GUIDELINE_POSITION_MUTATION
   );
   const setItemPosition = (guidelineId, newPosition) => {
     setGuidelinePosition({
-      variables: {
-        guidelineId,
-        newPosition,
-      },
+      eventId: event.id,
+      guidelineId,
+      newPosition,
     });
   };
 
