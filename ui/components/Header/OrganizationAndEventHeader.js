@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import { ChevronArrowRightIcon } from "components/Icons";
 
 const DREAM_QUERY = gql`
@@ -11,10 +11,11 @@ const DREAM_QUERY = gql`
 `;
 
 const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
-  // const { data: { dream } = { dream: null } } = useQuery(DREAM_QUERY, {
-  //   variables: { id: router.query.dream },
-  //   skip: !router.query.dream,
-  // });
+  const [{ data: { dream } = { dream: null } }] = useQuery({
+    query: DREAM_QUERY,
+    variables: { id: router.query.dream },
+    pause: !router.query.dream,
+  });
 
   return (
     <div className="space-x-2 flex items-center">
