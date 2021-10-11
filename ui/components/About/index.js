@@ -1,7 +1,7 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import ReactMarkdown from "react-markdown";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
@@ -35,7 +35,8 @@ export const EVENT_QUERY = gql`
 `;
 
 export default function AboutPage({ router, currentOrg }) {
-  const { data: { event } = {}, loading } = useQuery(EVENT_QUERY, {
+  const [{ data: { event } = {}, fetching: loading }] = useQuery({
+    query: EVENT_QUERY,
     variables: { slug: router.query.event },
   });
 
@@ -48,7 +49,7 @@ export default function AboutPage({ router, currentOrg }) {
 
   return (
     <div className="max-w-screen-md">
-      {Boolean(event.guidelines.length) && (
+      {Boolean(event.guidelines?.length) && (
         <>
           <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines
@@ -94,7 +95,7 @@ export default function AboutPage({ router, currentOrg }) {
           <ListItem>
             <ListItemText
               primary="Allow stretch goals"
-              secondary={event.allowStretchGoals.toString()}
+              secondary={event.allowStretchGoals?.toString() ?? "false"}
             />
           </ListItem>
 
