@@ -1,4 +1,4 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import { useRouter } from "next/router";
 
 import DreamCustomField from "./DreamCustomField";
@@ -22,7 +22,8 @@ const CUSTOM_FIELDS_QUERY = gql`
 
 const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
   const router = useRouter();
-  const { data } = useQuery(CUSTOM_FIELDS_QUERY, {
+  const [{ data }] = useQuery({
+    query: CUSTOM_FIELDS_QUERY,
     variables: { slug: router.query.event },
   });
 

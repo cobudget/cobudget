@@ -1,4 +1,4 @@
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import Head from "next/head";
 
 import Dream from "../../../components/Dream";
@@ -85,24 +85,7 @@ export const DREAM_QUERY = gql`
         large
       }
       discourseTopicUrl
-      logs {
-        createdAt
-        type
-        details {
-          ... on FlagRaisedDetails {
-            comment
-            guideline {
-              title
-            }
-          }
-          ... on FlagResolvedDetails {
-            comment
-            guideline {
-              title
-            }
-          }
-        }
-      }
+
       budgetItems {
         id
         description
@@ -121,11 +104,9 @@ const DreamPage = ({
   currentOrg,
   router,
 }) => {
-  const {
-    data: { dream } = { dream: null },
-    loading,
-    error,
-  } = useQuery(DREAM_QUERY, { variables: { id: router.query.dream } });
+  const [
+    { data: { dream } = { dream: null }, fetching: loading, error },
+  ] = useQuery({ query: DREAM_QUERY, variables: { id: router.query.dream } });
 
   if (dream)
     return (

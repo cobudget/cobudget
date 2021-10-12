@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 import Avatar from "../Avatar";
 import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
@@ -95,12 +95,10 @@ const SearchMembersResult = ({
   eventId,
   addCocreator,
 }) => {
-  const { data: { members } = { members: [] } } = useQuery(
-    SEARCH_MEMBERS_QUERY,
-    {
-      variables: { eventId, isApproved: true },
-    }
-  );
+  const [{ data: { members } = { members: [] } }] = useQuery({
+    query: SEARCH_MEMBERS_QUERY,
+    variables: { eventId, isApproved: true },
+  });
 
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
 

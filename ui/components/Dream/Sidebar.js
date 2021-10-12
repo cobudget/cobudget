@@ -1,6 +1,6 @@
 import { Tooltip } from "react-tippy";
 import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Router from "next/router";
 
 import Dropdown from "components/Dropdown";
@@ -95,20 +95,20 @@ const DreamSidebar = ({
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
 
-  const [approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
-  const [publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
+  const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
+  const [, publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
   });
-  const [markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION, {
+  const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION, {
     variables: { dreamId: dream.id },
   });
-  const [acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION, {
+  const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION, {
     variables: { dreamId: dream.id },
   });
-  const [cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION, {
+  const [, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION, {
     variables: { dreamId: dream.id },
   });
-  const [deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
+  const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
     variables: { dreamId: dream.id },
     refetchQueries: [
       {
@@ -146,7 +146,7 @@ const DreamSidebar = ({
     isEventAdminOrGuide && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
   const showCancelFundingButton = dream.approved && !dream.canceled && canEdit;
-
+  console.log({ cocreators: dream.cocreators });
   return (
     <>
       {(dream.minGoal || canEdit) && (
@@ -196,7 +196,8 @@ const DreamSidebar = ({
               color={event.color}
               onClick={() =>
                 publishDream({
-                  variables: { unpublish: dream.published },
+                  dreamId: dream.id,
+                  unpublish: dream.published,
                 })
               }
               fullWidth
@@ -210,10 +211,8 @@ const DreamSidebar = ({
               fullWidth
               onClick={() =>
                 approveForGranting({
-                  variables: {
-                    dreamId: dream.id,
-                    approved: true,
-                  },
+                  dreamId: dream.id,
+                  approved: true,
                 }).catch((err) => alert(err.message))
               }
             >
@@ -229,7 +228,10 @@ const DreamSidebar = ({
                   `Are you sure you would like to mark this ${dreamName(
                     currentOrg
                   )} as completed? This can't be undone.`
-                ) && markAsCompleted().catch((err) => alert(err.message))
+                ) &&
+                markAsCompleted({ dreamId: dream.id }).catch((err) =>
+                  alert(err.message)
+                )
               }
             >
               Mark as completed
@@ -254,7 +256,8 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       publishDream({
-                        variables: { unpublish: true },
+                        dreamId: dream.id,
+                        unpublish: true,
                       }).then(() => setActionsDropdownOpen(false))
                     }
                   >
@@ -268,7 +271,7 @@ const DreamSidebar = ({
                       confirm(
                         "Are you sure you would like to cancel funding? This is irreversible and will return all contributions to those that have contributed."
                       ) &&
-                      cancelFunding()
+                      cancelFunding({ dreamId: dream.id })
                         .then(() => setActionsDropdownOpen(false))
                         .catch((err) => alert(err.message))
                     }
@@ -281,10 +284,8 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       approveForGranting({
-                        variables: {
-                          dreamId: dream.id,
-                          approved: false,
-                        },
+                        dreamId: dream.id,
+                        approved: false,
                       })
                         .then(() => setActionsDropdownOpen(false))
                         .catch((err) => alert(err.message))
@@ -302,7 +303,7 @@ const DreamSidebar = ({
                           currentOrg
                         )}?`
                       ) &&
-                      deleteDream()
+                      deleteDream({ dreamId: dream.id })
                         .then(() => {
                           setActionsDropdownOpen(false);
                           Router.push("/[event]", `/${event.slug}`);

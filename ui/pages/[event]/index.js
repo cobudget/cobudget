@@ -97,8 +97,6 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
     nextFetchPolicy: "cache-first",
   });
 
-  console.log({ dreams });
-
   if (error) {
     console.error(error);
   }

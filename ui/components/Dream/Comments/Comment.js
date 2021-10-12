@@ -79,7 +79,8 @@ const Comment = ({ comment, showBorderBottom }) => {
                       "Are you sure you would like to delete this comment?"
                     ) &&
                     deleteComment({
-                      variables: { dreamId: dream.id, commentId: comment.id },
+                      dreamId: dream.id,
+                      commentId: comment.id,
                     }) &&
                     setSubmitting(true)
                   }
