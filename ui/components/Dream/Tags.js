@@ -1,4 +1,4 @@
-import { gql, useMutation } from "@apollo/client";
+import { gql, useMutation } from "urql";
 import Link from "next/link";
 import { CloseIcon } from "components/Icons";
 import AddTag from "./AddTag";
@@ -16,7 +16,7 @@ const REMOVE_TAG_MUTATION = gql`
 `;
 
 export default ({ dream, event, canEdit }) => {
-  const [removeTag] = useMutation(REMOVE_TAG_MUTATION);
+  const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
   return (
     <div className="">
@@ -33,9 +33,7 @@ export default ({ dream, event, canEdit }) => {
             </Link>
             {canEdit && (
               <button
-                onClick={() =>
-                  removeTag({ variables: { dreamId: dream.id, tagId: tag.id } })
-                }
+                onClick={() => removeTag({ dreamId: dream.id, tagId: tag.id })}
                 className="rounded-full bg-gray-400 hover:bg-black"
               >
                 <CloseIcon className="w-3 h-3 text-white" />

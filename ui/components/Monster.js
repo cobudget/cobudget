@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import AutoScroll from "@brianmcallister/react-auto-scroll";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
@@ -109,7 +109,7 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -123,10 +123,9 @@ const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
           )} creators.`,
           sideEffect: (answer) => {
             raiseFlag({
-              variables: {
-                guidelineId: guideline.id,
-                comment: answer,
-              },
+              dreamId,
+              guidelineId: guideline.id,
+              comment: answer,
             }).then((data) => console.log({ data }));
           },
           chatItems: [
@@ -141,17 +140,16 @@ const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
   },
 ];
 
-const resolveFlagFlow = (flagId, resolveFlag) => [
+const resolveFlagFlow = ({ flagId, resolveFlag, dreamId }) => [
   {
     type: INPUT,
     message:
       "You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
     sideEffect: (answer) => {
       resolveFlag({
-        variables: {
-          flagId,
-          comment: answer,
-        },
+        dreamId,
+        flagId,
+        comment: answer,
       }).then((data) => console.log({ data }));
     },
     chatItems: [
@@ -169,15 +167,9 @@ const Monster = ({ event, dream, currentOrg }) => {
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const closeBubble = () => setBubbleOpen(false);
 
-  const [raiseFlag] = useMutation(RAISE_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
+  const [, raiseFlag] = useMutation(RAISE_FLAG_MUTATION);
+  const [, resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION);
+  const [, allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION);
 
   const { raisedFlags } = dream;
 
@@ -185,6 +177,8 @@ const Monster = ({ event, dream, currentOrg }) => {
     type: GUIDELINE,
     guideline,
   }));
+
+  if (!guidelines) return null;
 
   let items;
 
@@ -219,16 +213,17 @@ const Monster = ({ event, dream, currentOrg }) => {
         actions: [
           {
             label: "It is breaking another guideline",
-            chatItems: raiseFlagFlow(
-              event.guidelines.filter(
+            chatItems: raiseFlagFlow({
+              guidelines: event.guidelines.filter(
                 (guideline) =>
                   !raisedFlags
                     .map((flag) => flag.guideline.id)
                     .includes(guideline.id)
               ),
               raiseFlag,
-              currentOrg
-            ),
+              currentOrg,
+              dreamId: dream.id,
+            }),
           },
           raisedFlags.length > 1
             ? {
@@ -239,14 +234,22 @@ const Monster = ({ event, dream, currentOrg }) => {
                     message: "Which one?",
                     actions: raisedFlags.map((raisedFlag) => ({
                       label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
-                      chatItems: resolveFlagFlow(raisedFlag.id, resolveFlag),
+                      chatItems: resolveFlagFlow({
+                        flagId: raisedFlag.id,
+                        resolveFlag,
+                        dreamId: dream.id,
+                      }),
                     })),
                   },
                 ],
               }
             : {
                 label: "I'd like to resolve the flag",
-                chatItems: resolveFlagFlow(raisedFlags[0].id, resolveFlag),
+                chatItems: resolveFlagFlow({
+                  flagId: raisedFlags[0].id,
+                  resolveFlag,
+                  dreamId: dream.id,
+                }),
               },
         ],
       },
@@ -281,7 +284,10 @@ const Monster = ({ event, dream, currentOrg }) => {
             },
             {
               label: "No, it's breaking a guideline",
-              chatItems: raiseFlagFlow(event.guidelines, raiseFlag),
+              chatItems: raiseFlagFlow({
+                guidelines: event.guidelines,
+                raiseFlag,
+              }),
             },
           ],
         },

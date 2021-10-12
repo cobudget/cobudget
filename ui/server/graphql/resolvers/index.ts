@@ -968,46 +968,52 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary, images, budgetItems, tags },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { EventMember, Dream, Event },
-        eventHub,
-      }
+      { dreamId, title, description, summary },
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      const event = await Event.findOne({ _id: dream.eventId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true, collection: true },
+      });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
         !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
+        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
         throw new Error("You are not a cocreator of this dream.");
 
-      if (title) dream.title = title;
-      if (typeof description !== "undefined") dream.description = description;
-      if (typeof summary !== "undefined") dream.summary = summary;
-      if (typeof images !== "undefined") dream.images = images;
-      if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
-      if (typeof tags !== "undefined")
-        dream.tags = tags.map((tag) => slugify(tag));
+      const updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: { title, description, summary },
+      });
+      // if (title) dream.title = title;
+      // if (typeof description !== "undefined") dream.description = description;
+      // if (typeof summary !== "undefined") dream.summary = summary;
+      // if (typeof images !== "undefined") dream.images = images;
+      // if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
+      // if (typeof tags !== "undefined")
+      //   dream.tags = tags.map((tag) => slugify(tag));
 
+      // TODO: behöver den här event ak.a collection?
       await eventHub.publish("edit-dream", {
         currentOrg,
         currentOrgMember,
-        event,
-        dream,
+        event: bucket.collection,
+        dream: updated,
       });
 
-      return dream.save();
+      return updated;
     },
     addTag: async (
       parent,
@@ -2446,22 +2452,25 @@ const resolvers = {
       });
     },
     totalAllocations: async (collection) => {
-      return prisma.allocation.aggregate({
+      const {
+        _sum: { amount },
+      } = await prisma.allocation.aggregate({
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
+      return amount;
     },
     totalContributions: async (collection) => {
-      return prisma.contribution.aggregate({
+      const {
+        _sum: { amount },
+      } = await prisma.contribution.aggregate({
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
+
+      return amount;
     },
-    totalContributionsFunding: async (
-      collection,
-      args,
-      { models: { Contribution, Dream } }
-    ) => {
+    totalContributionsFunding: async (collection) => {
       const fundingBuckets = await prisma.bucket.findMany({
         where: { collectionId: collection.id, fundedAt: null },
         select: { id: true },
@@ -2480,11 +2489,7 @@ const resolvers = {
 
       return totalContributionsFunded;
     },
-    totalContributionsFunded: async (
-      collection,
-      args,
-      { models: { Contribution, Dream } }
-    ) => {
+    totalContributionsFunded: async (collection) => {
       const fundedBuckets = await prisma.bucket.findMany({
         where: { collectionId: collection.id, fundedAt: { not: null } },
         select: { id: true },
@@ -2526,10 +2531,15 @@ const resolvers = {
   },
   Dream: {
     cocreators: async (bucket) => {
-      // TODO check whether this works...
-      return prisma.collectionMember.findMany({
-        where: { id: { in: bucket.cocreators } },
+      // const { cocreators } = await prisma.bucket.findUnique({
+      //   where: { id: bucket.id },
+      //   include: { cocreators: true },
+      // });
+
+      const cocreators = await prisma.collectionMember.findMany({
+        where: { buckets: { some: { id: bucket.id } } },
       });
+      return cocreators;
     },
     event: async (bucket) => {
       return prisma.collection.findUnique({

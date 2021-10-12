@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { useState } from "react";
 import { Tooltip } from "react-tippy";
 import ReactMarkdown from "react-markdown";
@@ -46,11 +46,8 @@ const DreamCustomField = ({
   const [editing, setEditing] = useState(false);
   const { handleSubmit, register } = useForm();
   const [inputValue, setInputValue] = useState(defaultValue ?? "");
-  const [editCustomFieldMutation, { loading }] = useMutation(
-    EDIT_DREAM_CUSTOM_FIELD_MUTATION,
-    {
-      variables: { dreamId },
-    }
+  const [{ fetching: loading }, editCustomFieldMutation] = useMutation(
+    EDIT_DREAM_CUSTOM_FIELD_MUTATION
   );
   const fieldName = "customField";
 
@@ -58,7 +55,7 @@ const DreamCustomField = ({
     return (
       <form
         onSubmit={handleSubmit((variables) => {
-          return editCustomFieldMutation({ variables })
+          return editCustomFieldMutation({ dreamId, ...variables })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message));
         })}
