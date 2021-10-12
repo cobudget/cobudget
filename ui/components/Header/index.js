@@ -109,7 +109,7 @@ const Header = ({
                         >
                           {event.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
-                            : "Join event"}
+                            : "Join collection"}
                         </NavItem>
                       )}
                     {!currentOrgMember && !event && (
