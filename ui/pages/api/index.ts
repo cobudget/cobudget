@@ -7,22 +7,29 @@ import resolvers from "../../server/graphql/resolvers";
 import EventHub from "../../server/services/eventHub.service";
 import handler from "../../server/api-handler";
 import { getNewHostInfo } from "utils/getHostInfo";
+import subscribers from "../../server/subscribers";
+
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
-// export interface GraphQLContext {
-//   user?: Express.User;
-//   prisma: typeof prisma;
-//   origin: string;
-// }
+export interface GraphQLContext {
+  user?: Express.User;
+  prisma: typeof prisma;
+  origin: string;
+  eventHub?: any;
+  currentOrg?: any;
+  currentOrgMember?: any;
+}
 
 const corsOptions = {
   origin: "*",
   credentials: "include",
 };
+
+subscribers.initialize(EventHub);
 
 export default handler()
   .use(cors(corsOptions))
@@ -66,6 +73,7 @@ export default handler()
                   userId: user.id,
                 },
               },
+              include: { user: true },
             });
           }
         }
