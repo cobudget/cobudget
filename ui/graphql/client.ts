@@ -4,7 +4,7 @@ import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers";
 import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
-
+import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
 
@@ -40,6 +40,62 @@ export const client = (
         },
         updates: {
           Mutation: {
+            addComment(result: any, { content, dreamId }, cache) {
+              console.log({ result });
+              if (result.addComment) {
+                cache.updateQuery(
+                  {
+                    query: COMMENTS_QUERY,
+                    variables: {
+                      dreamId,
+                      from: 0,
+                      limit: 10,
+                      order: "desc",
+                    },
+                  },
+                  (data) => {
+                    console.log({ data });
+                    return {
+                      ...data,
+                      commentSet: {
+                        ...data?.commentSet,
+                        comments: data?.commentSet?.comments.concat(
+                          result.addComment
+                        ),
+                      },
+                    };
+                  }
+                );
+              }
+            },
+            deleteComment(result: any, { commentId, dreamId }, cache) {
+              console.log({ result });
+              if (result.deleteComment) {
+                cache.updateQuery(
+                  {
+                    query: COMMENTS_QUERY,
+                    variables: {
+                      dreamId,
+                      from: 0,
+                      limit: 10,
+                      order: "desc",
+                    },
+                  },
+                  (data) => {
+                    console.log({ data });
+                    return {
+                      ...data,
+                      commentSet: {
+                        ...data?.commentSet,
+                        comments: data?.commentSet?.comments.filter(
+                          ({ id }) => id !== commentId
+                        ),
+                      },
+                    };
+                  }
+                );
+              }
+            },
             inviteOrgMembers(result: any, _args, cache) {
               if (result.inviteOrgMembers) {
                 cache.updateQuery(

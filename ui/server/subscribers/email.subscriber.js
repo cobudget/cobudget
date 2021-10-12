@@ -1,22 +1,16 @@
-const EmailService = require("../services/EmailService/email.service");
-const initKcAdminClient = require("../utils/initKcAdminClient");
-
-module.exports = {
-  initialize(eventHub, models) {
+import EmailService from "../services/EmailService/email.service";
+export default {
+  initialize(eventHub) {
     eventHub.subscribe(
       "create-comment",
       "email",
       async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        const kcAdminClient = await initKcAdminClient();
-
         await EmailService.sendCommentNotification({
           currentOrg,
           currentOrgMember,
           dream,
           event,
           comment,
-          models,
-          kcAdminClient,
         });
       }
     );

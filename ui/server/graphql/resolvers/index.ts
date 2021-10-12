@@ -51,7 +51,6 @@ const isMemberOfOrg = async (parent, { id }, { user }) => {
 const resolvers = {
   Query: {
     currentUser: (parent, args, { user }) => {
-      console.log({ user });
       return user ? { ...user } : null;
     },
     currentOrg: (parent, args, { currentOrg }) => currentOrg,
@@ -403,15 +402,21 @@ const resolvers = {
             })
         );
       } else {
-        comments = bucket.comments;
+        comments = await prisma.comment.findMany({
+          where: { bucketId: dreamId },
+          orderBy: { createdAt: "desc" },
+        });
       }
 
+      let shown = comments.slice(0, from + limit);
+
       if (order === "desc") {
-        comments = comments.reverse();
+        shown = shown.reverse();
       }
+
       return {
         total: comments.length,
-        comments: comments.slice(from, from + limit),
+        comments: shown,
       };
     },
   },
@@ -1273,26 +1278,27 @@ const resolvers = {
     addComment: async (
       parent,
       { content, dreamId },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { Dream, Event, EventMember },
-        eventHub,
-      }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
       if (!currentOrgMember) {
         throw new Error("You need to be an org member to post comments.");
       }
 
-      const dream = await Dream.findOne({ _id: dreamId });
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: event.id,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { collection: true },
       });
 
-      if (!eventMember) {
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collection.id,
+          },
+        },
+      });
+
+      if (!collectionMember) {
         throw new Error(
           "You need to be a member of the collection to post comments."
         );
@@ -1314,45 +1320,52 @@ const resolvers = {
 
       const comment = { content, authorId: currentOrgMember.id };
 
-      const { discourse, mongodb } = await eventHub.publish("create-comment", {
-        currentOrg,
-        currentOrgMember,
-        dream,
-        event,
-        comment,
-      });
+      const { discourse, prisma: prismaResult } = await eventHub.publish(
+        "create-comment",
+        {
+          currentOrg,
+          currentOrgMember,
+          dream: bucket,
+          event: bucket.collection,
+          comment,
+        }
+      );
 
-      return discourse || mongodb;
+      return discourse || prismaResult;
     },
 
     deleteComment: async (
       parent,
       { dreamId, commentId },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { Dream, Event, EventMember },
-        eventHub,
-      }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      const event = await Event.findOne({ _id: dream.eventId });
-      const comment = { id: commentId };
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { collection: true },
+      });
+
+      const comment = await prisma.comment.findUnique({
+        where: { id: commentId },
+      });
 
       if (!currentOrgMember)
         throw new Error("You need to be member of the org to delete comments");
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: event.id,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collection.id,
+          },
+        },
       });
 
       await eventHub.publish("delete-comment", {
         currentOrg,
         currentOrgMember,
-        event,
+        event: bucket.collection,
         eventMember,
-        dream,
+        dream: bucket,
         comment,
       });
 
@@ -1361,24 +1374,37 @@ const resolvers = {
     editComment: async (
       parent,
       { dreamId, commentId, content },
-      { currentOrg, currentOrgMember, models: { EventMember, Dream }, eventHub }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      const comment = { id: commentId, content };
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      let comment = await prisma.comment.findUnique({
+        where: { id: commentId },
+        include: { Bucket: { include: { collection: true } } },
+      });
+      comment = { ...comment, content };
+
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: comment.Bucket.collection.id,
+          },
+        },
+        include: { orgMember: true },
       });
 
-      const { discourse, mongodb } = await eventHub.publish("edit-comment", {
-        currentOrg,
-        currentOrgMember,
-        eventMember,
-        dream,
-        comment,
-      });
-
-      return discourse || mongodb;
+      // TODO: permissions?
+      //if (!eventMember || comment.orgMemberId !== currentOrgMember)
+      const { discourse, prisma: prismaResult } = await eventHub.publish(
+        "edit-comment",
+        {
+          currentOrg,
+          currentOrgMember,
+          eventMember,
+          dream: comment.Bucket,
+          comment,
+        }
+      );
+      return discourse || prismaResult;
     },
     raiseFlag: async (
       parent,

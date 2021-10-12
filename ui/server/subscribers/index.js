@@ -1,17 +1,13 @@
-const { getModels } = require("../database/models");
-const { db } = require("@sensestack/plato-core");
+import prismaSubscriber from "./prisma.subscriber";
+import discourseSubscriber from "./discourse.subscriber";
+import loomioSubscriber from "./loomio.subscriber";
+import emailSubscriber from "./email.subscriber";
 
-const mongodbSubscriber = require("./mongodb.subscriber");
-const discourseSubscriber = require("./discourse.subscriber");
-const loomioSubscriber = require("./loomio.subscriber");
-const emailSubscriber = require("./email.subscriber");
-module.exports = {
-  initialize: async (eventHub) => {
-    const models = getModels(await db.getConnection(process.env.MONGO_URL));
-
-    mongodbSubscriber.initialize(eventHub, models);
-    discourseSubscriber.initialize(eventHub, models);
-    loomioSubscriber.initialize(eventHub, models);
-    emailSubscriber.initialize(eventHub, models);
+export default {
+  initialize: async (eventHub, prisma) => {
+    prismaSubscriber.initialize(eventHub, prisma);
+    discourseSubscriber.initialize(eventHub);
+    loomioSubscriber.initialize(eventHub);
+    emailSubscriber.initialize(eventHub);
   },
 };
