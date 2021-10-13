@@ -20,6 +20,7 @@ const AddTag = ({ items: eventTags, dream }) => {
   const [input, setInput] = useState("");
   return (
     <Downshift
+      id="tags"
       onChange={(tag) => {
         if (!tag) return;
         const variables = tag.id ? { tagId: tag.id } : { tagValue: tag.value };
