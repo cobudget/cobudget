@@ -5,6 +5,7 @@ import { ChevronArrowRightIcon } from "components/Icons";
 const DREAM_QUERY = gql`
   query Dream($id: ID!) {
     dream(id: $id) {
+      id
       title
     }
   }
