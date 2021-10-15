@@ -456,7 +456,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain: dirtySubdomain, logo },
+      { organizationId, name, info, subdomain: dirtySubdomain, logo },
       {
         currentUser,
         kcAdminClient,
@@ -472,14 +472,19 @@ const resolvers = {
         !currentUser?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+      if (name?.length === 0) throw new Error("Org name cannot be blank");
+      if (dirtySubdomain?.length === 0)
+        throw new Error("Org subdomain cannot be blank");
 
-      const subdomain = slugify(dirtySubdomain);
+      const subdomain =
+        dirtySubdomain !== undefined ? slugify(dirtySubdomain) : undefined;
 
       const organization = await Organization.findOne({
         _id: organizationId,
       });
 
-      const isUpdatingRedirectUris = subdomain !== organization.subdomain;
+      const isUpdatingRedirectUris =
+        subdomain !== undefined && subdomain !== organization.subdomain;
       let newRedirectUris;
 
       const clientId = "dreams";
@@ -499,9 +504,10 @@ const resolvers = {
         ];
       }
 
-      organization.name = name;
-      organization.logo = logo;
-      organization.subdomain = subdomain;
+      if (name) organization.name = name;
+      if (info) organization.info = info;
+      if (logo) organization.logo = logo;
+      if (subdomain) organization.subdomain = subdomain;
       // organization.customDomain = customDomain;
 
       await organization.save();
@@ -2438,6 +2444,11 @@ const resolvers = {
     avatar: () => null, //TODO: what about avatars in keycloak?
   },
   Organization: {
+    info: (org) => {
+      return org.info && org.info.length
+        ? org.info
+        : `# Welcome to ${org.name}`;
+    },
     events: async (organization, args, { models: { Event } }) => {
       return Event.find({ organizationId: organization.id });
     },

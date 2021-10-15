@@ -90,6 +90,7 @@ const EditableField = ({
   return (
     <>
       {value ? (
+        // this code is never reached?
         <Markdown source={value} />
       ) : (
         <button

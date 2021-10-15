@@ -8,6 +8,7 @@ import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
 import dreamName from "utils/dreamName";
+import EditableField from "components/EditableField";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -93,6 +94,23 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
       <SubMenu currentOrgMember={currentOrgMember} />
       <PageHero>
         <div className="flex justify-between">
+          <EditableField
+            value={currentOrg.info}
+            label="Add message"
+            placeholder={`# Welcome to ${currentOrg.name}'s page`}
+            canEdit={currentOrgMember?.isOrgAdmin}
+            name="info"
+            className="h-10"
+            MUTATION={gql`
+              mutation EditOrgInfo($organizationId: ID!, $info: String) {
+                editOrganization(organizationId: $organizationId, info: $info) {
+                  id
+                  info
+                }
+              }
+            `}
+            variables={{ organizationId: currentOrg.id }}
+          />
           <h2 className="text-2xl font-semibold">
             {events.length} {dreamName(currentOrg)}{" "}
             {events.length === 1 ? "collection" : "collections"}
