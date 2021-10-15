@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "@apollo/client";
 import { Tooltip } from "react-tippy";
-import ReactMarkdown from "react-markdown";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
+import Markdown from "components/Markdown";
 
 const EDIT_DESCRIPTION_MUTATION = gql`
   mutation EditDescription($dreamId: ID!, $description: String) {
@@ -81,17 +81,7 @@ const DreamDescription = ({ description, dreamId, canEdit }) => {
   if (description)
     return (
       <div className="relative pb-4">
-        <ReactMarkdown
-          source={description}
-          className="markdown"
-          renderers={{
-            link: (props) => (
-              <a href={props.href} target="_blank" rel="noreferrer">
-                {props.children}
-              </a>
-            ),
-          }}
-        />
+        <Markdown source={description} />
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip title="Edit description" position="bottom" size="small">
