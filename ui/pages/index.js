@@ -93,35 +93,42 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
     <>
       <SubMenu currentOrgMember={currentOrgMember} />
       <PageHero>
-        <div className="flex justify-between">
-          <EditableField
-            value={currentOrg.info}
-            label="Add message"
-            placeholder={`# Welcome to ${currentOrg.name}'s page`}
-            canEdit={currentOrgMember?.isOrgAdmin}
-            name="info"
-            className="h-10"
-            MUTATION={gql`
-              mutation EditOrgInfo($organizationId: ID!, $info: String) {
-                editOrganization(organizationId: $organizationId, info: $info) {
-                  id
-                  info
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <EditableField
+              value={currentOrg.info}
+              label="Add message"
+              placeholder={`# Welcome to ${currentOrg.name}'s page`}
+              canEdit={currentOrgMember?.isOrgAdmin}
+              name="info"
+              className="h-10"
+              MUTATION={gql`
+                mutation EditOrgInfo($organizationId: ID!, $info: String) {
+                  editOrganization(
+                    organizationId: $organizationId
+                    info: $info
+                  ) {
+                    id
+                    info
+                  }
                 }
-              }
-            `}
-            variables={{ organizationId: currentOrg.id }}
-          />
-          <h2 className="text-2xl font-semibold">
-            {events.length} {dreamName(currentOrg)}{" "}
-            {events.length === 1 ? "collection" : "collections"}
-          </h2>
-          {currentOrgMember?.isOrgAdmin && (
-            <Link href={`/new-collection`}>
-              <Button size="large" color="anthracit">
-                New collection
-              </Button>
-            </Link>
-          )}
+              `}
+              variables={{ organizationId: currentOrg.id }}
+            />
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold mb-6 text-right">
+              {events.length} {dreamName(currentOrg)}{" "}
+              {events.length === 1 ? "collection" : "collections"}
+            </h2>
+            {currentOrgMember?.isOrgAdmin && (
+              <Link href={`/new-collection`}>
+                <Button size="large" color="anthracit" className="float-right">
+                  New collection
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </PageHero>
       <div

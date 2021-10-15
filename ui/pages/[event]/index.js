@@ -103,51 +103,49 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
     <>
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
       <PageHero>
-        <div className="flex-1">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="col-span-2">
-              <EditableField
-                value={event.info}
-                label="Add homepage message"
-                placeholder={`# Welcome to ${event.title}'s dream page`}
-                canEdit={
-                  currentOrgMember?.isOrgAdmin ||
-                  currentOrgMember?.currentEventMembership?.isAdmin
-                }
-                name="info"
-                className="h-10"
-                MUTATION={gql`
-                  mutation EditHomepageMessage($eventId: ID!, $info: String) {
-                    editEvent(eventId: $eventId, info: $info) {
-                      id
-                      info
-                    }
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <EditableField
+              value={event.info}
+              label="Add homepage message"
+              placeholder={`# Welcome to ${event.title}'s dream page`}
+              canEdit={
+                currentOrgMember?.isOrgAdmin ||
+                currentOrgMember?.currentEventMembership?.isAdmin
+              }
+              name="info"
+              className="h-10"
+              MUTATION={gql`
+                mutation EditHomepageMessage($eventId: ID!, $info: String) {
+                  editEvent(eventId: $eventId, info: $info) {
+                    id
+                    info
                   }
-                `}
-                variables={{ eventId: event.id }}
-              />
-            </div>
-            <div className="flex justify-end items-start">
-              {event.dreamCreationIsOpen &&
-                currentOrgMember?.currentEventMembership?.isApproved && (
-                  <>
-                    <Button
-                      size="large"
-                      color={event.color}
-                      onClick={() => setNewDreamModalOpen(true)}
-                    >
-                      New {dreamName(currentOrg)}
-                    </Button>
-                    {newDreamModalOpen && (
-                      <NewDreamModal
-                        event={event}
-                        handleClose={() => setNewDreamModalOpen(false)}
-                        currentOrg={currentOrg}
-                      />
-                    )}
-                  </>
-                )}
-            </div>
+                }
+              `}
+              variables={{ eventId: event.id }}
+            />
+          </div>
+          <div className="flex justify-end items-start">
+            {event.dreamCreationIsOpen &&
+              currentOrgMember?.currentEventMembership?.isApproved && (
+                <>
+                  <Button
+                    size="large"
+                    color={event.color}
+                    onClick={() => setNewDreamModalOpen(true)}
+                  >
+                    New {dreamName(currentOrg)}
+                  </Button>
+                  {newDreamModalOpen && (
+                    <NewDreamModal
+                      event={event}
+                      handleClose={() => setNewDreamModalOpen(false)}
+                      currentOrg={currentOrg}
+                    />
+                  )}
+                </>
+              )}
           </div>
         </div>
       </PageHero>
