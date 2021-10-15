@@ -506,7 +506,7 @@ const resolvers = {
 
       if (name) organization.name = name;
       if (info) organization.info = info;
-      if (logo) organization.logo = logo;
+      if (logo !== undefined) organization.logo = logo;
       if (subdomain) organization.subdomain = subdomain;
       // organization.customDomain = customDomain;
 
