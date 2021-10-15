@@ -5,6 +5,7 @@ import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
 import DreamReview from "./DreamReview";
+import Tags from "./Tags";
 import Discourse from "./Discourse";
 
 const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
@@ -16,6 +17,7 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
     { name: `${dreamName(currentOrg, true)} Review`, component: DreamReview },
     { name: "Questions", component: CustomFields },
     { name: "Granting", component: Granting },
+    { name: "Tags", component: Tags },
   ];
 
   const tabs = useMemo(
