@@ -124,6 +124,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
                 }
               `}
               variables={{ eventId: event.id }}
+              required
             />
           </div>
           <div className="flex justify-end items-start">
