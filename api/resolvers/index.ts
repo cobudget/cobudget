@@ -475,6 +475,7 @@ const resolvers = {
       if (name?.length === 0) throw new Error("Org name cannot be blank");
       if (dirtySubdomain?.length === 0)
         throw new Error("Org subdomain cannot be blank");
+      if (info?.length > 500) throw new Error("Org info too long");
 
       const subdomain =
         dirtySubdomain !== undefined ? slugify(dirtySubdomain) : undefined;

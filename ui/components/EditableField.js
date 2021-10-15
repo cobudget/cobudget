@@ -50,7 +50,7 @@ const EditableField = ({
             <a
               href="https://www.markdownguide.org/cheat-sheet/"
               target="_/blank"
-              className="hover:text-gray-800 border-b hover:border-gray-800"
+              className="text-blue-600 hover:text-blue-800"
             >
               Markdown
             </a>{" "}
