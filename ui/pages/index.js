@@ -114,6 +114,7 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
                 }
               `}
               variables={{ organizationId: currentOrg.id }}
+              maxLength={500}
             />
           </div>
           <div>

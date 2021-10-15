@@ -17,6 +17,7 @@ const EditableField = ({
   name,
   placeholder,
   variables,
+  maxLength,
   className = "",
 }) => {
   const [mutation, { loading }] = useMutation(MUTATION, {
@@ -43,6 +44,7 @@ const EditableField = ({
           rows={3}
           defaultValue={value}
           autoFocus
+          maxLength={maxLength}
           className="mb-2"
         />
         <div className="flex justify-between items-center mb-4">
