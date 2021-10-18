@@ -1,6 +1,6 @@
 import SeededShuffle from "seededshuffle";
 import slugify from "../../utils/slugify";
-import liveUpdate from "../../services/liveUpdate.service";
+//import liveUpdate from "../../services/liveUpdate.service";
 import prisma from "../../prisma";
 import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
@@ -765,30 +765,30 @@ const resolvers = {
     deleteGuideline: async (
       parent,
       { eventId, guidelineId },
-      { currentOrgMember, models: { Event, EventMember } }
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
+        !(
+          (collectionMember && collectionMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
       )
-        throw new Error("You need to be admin to remove a guideline");
+        throw new Error("You need to be admin to delete a guideline");
 
-      let doc = event.guidelines.id(guidelineId);
-      doc.remove();
-
-      return event.save();
+      const collection = await prisma.collection.update({
+        where: { id: eventId },
+        data: { guidelines: { delete: { id: guidelineId } } },
+      });
+      return collection;
     },
     addCustomField: async (
       parent,
@@ -831,9 +831,9 @@ const resolvers = {
           isRequired,
           position,
         },
-        include: { Collection: true },
+        include: { collection: true },
       });
-      return customField.Collection;
+      return customField.collection;
     },
     // Based on https://softwareengineering.stackexchange.com/a/195317/54663
     setCustomFieldPosition: async (
@@ -864,71 +864,80 @@ const resolvers = {
       const field = await prisma.field.update({
         where: { id: fieldId },
         data: { position: newPosition },
-        include: { Collection: true },
+        include: { collection: true },
       });
 
-      return field.Collection;
+      return field.collection;
     },
     editCustomField: async (
       parent,
-      { eventId, fieldId, customField },
-      { currentOrgMember, models: { EventMember, Event } }
-    ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
+      {
         eventId,
+        fieldId,
+        customField: { name, description, type, limit, isRequired },
+      },
+      { currentOrgMember }
+    ) => {
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { fields: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
+        !(
+          (collectionMember && collectionMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
       )
-        throw new Error("You need to be admin to edit a custom field");
+        throw new Error("You need to be admin to edit a field");
 
-      let doc = event.customFields.id(fieldId);
-      // doc = { ...doc, ...customField };
-      doc.name = customField.name;
-      doc.type = customField.type;
-      doc.limit = customField.limit;
-      doc.description = customField.description;
-      doc.isRequired = customField.isRequired;
+      if (
+        !collectionMember.collection.fields.map((g) => g.id).includes(fieldId)
+      )
+        throw new Error("This field is not part of this collection");
 
-      return event.save();
+      const field = await prisma.field.update({
+        where: { id: fieldId },
+        data: { name, description, type, limit, isRequired },
+        include: { collection: true },
+      });
+
+      return field.collection;
     },
     deleteCustomField: async (
       parent,
       { eventId, fieldId },
-      { currentOrgMember, models: { EventMember, Event } }
+      { currentOrgMember }
     ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit.");
 
       if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
+        !(
+          (collectionMember && collectionMember.isAdmin) ||
+          currentOrgMember.isOrgAdmin
+        )
       )
-        throw new Error("You need to be admin to delete a custom field");
+        throw new Error("You need to be admin to delete a field");
 
-      let doc = event.customFields.id(fieldId);
-      doc.remove();
-
-      return event.save();
+      const collection = await prisma.collection.update({
+        where: { id: eventId },
+        data: { fields: { delete: { id: fieldId } } },
+      });
+      return collection;
     },
     createDream: async (
       parent,
