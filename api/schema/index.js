@@ -42,9 +42,10 @@ const schema = gql`
 
     editOrganization(
       organizationId: ID!
-      name: String!
+      name: String
+      info: String
       logo: String
-      subdomain: String!
+      subdomain: String
     ): Organization!
     setTodosFinished: Organization
 
@@ -192,6 +193,7 @@ const schema = gql`
   type Organization {
     id: ID!
     name: String!
+    info: String
     subdomain: String
     customDomain: String
     logo: String

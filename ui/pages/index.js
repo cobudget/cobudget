@@ -8,6 +8,7 @@ import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
 import dreamName from "utils/dreamName";
+import EditableField from "components/EditableField";
 
 const EVENTS_QUERY = gql`
   query Events {
@@ -92,18 +93,40 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
     <>
       <SubMenu currentOrgMember={currentOrgMember} />
       <PageHero>
-        <div className="flex justify-between">
-          <h2 className="text-2xl font-semibold">
-            {events.length} {dreamName(currentOrg)}{" "}
-            {events.length === 1 ? "collection" : "collections"}
-          </h2>
-          {currentOrgMember?.isOrgAdmin && (
-            <Link href={`/new-collection`}>
-              <Button size="large" color="anthracit">
-                New collection
-              </Button>
-            </Link>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <EditableField
+              value={currentOrg.info}
+              label="Add message"
+              placeholder={`# Welcome to ${currentOrg.name}'s page`}
+              canEdit={currentOrgMember?.isOrgAdmin}
+              name="info"
+              className="h-10"
+              MUTATION={gql`
+                mutation EditOrgInfo($organizationId: ID!, $info: String) {
+                  editOrganization(
+                    organizationId: $organizationId
+                    info: $info
+                  ) {
+                    id
+                    info
+                  }
+                }
+              `}
+              variables={{ organizationId: currentOrg.id }}
+              maxLength={500}
+              required
+            />
+          </div>
+          <div>
+            {currentOrgMember?.isOrgAdmin && (
+              <Link href={`/new-collection`}>
+                <Button size="large" color="anthracit" className="float-right">
+                  New collection
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </PageHero>
       <div

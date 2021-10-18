@@ -17,6 +17,8 @@ const EditableField = ({
   name,
   placeholder,
   variables,
+  maxLength,
+  required,
   className = "",
 }) => {
   const [mutation, { loading }] = useMutation(MUTATION, {
@@ -43,6 +45,8 @@ const EditableField = ({
           rows={3}
           defaultValue={value}
           autoFocus
+          maxLength={maxLength}
+          required={required}
           className="mb-2"
         />
         <div className="flex justify-between items-center mb-4">
@@ -50,7 +54,7 @@ const EditableField = ({
             <a
               href="https://www.markdownguide.org/cheat-sheet/"
               target="_/blank"
-              className="hover:text-gray-800 border-b hover:border-gray-800"
+              className="text-blue-600 hover:text-blue-800"
             >
               Markdown
             </a>{" "}
@@ -90,6 +94,7 @@ const EditableField = ({
   return (
     <>
       {value ? (
+        // this code is never reached?
         <Markdown source={value} />
       ) : (
         <button
