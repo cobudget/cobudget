@@ -18,7 +18,7 @@ export const EVENT_QUERY = gql`
         description
         position
       }
-      maxAmountToDreamPerUser
+      maxAmountToBucketPerUser
       allowStretchGoals
       dreamCreationCloses
       grantingOpens
@@ -75,7 +75,7 @@ export default function AboutPage({ router, currentOrg }) {
             <ListItemText primary={"Currency"} secondary={event.currency} />
           </ListItem>
 
-          {!!event.maxAmountToDreamPerUser && (
+          {!!event.maxAmountToBucketPerUser && (
             <>
               <Divider />
               <ListItem>
@@ -84,7 +84,7 @@ export default function AboutPage({ router, currentOrg }) {
                     currentOrg
                   )} per user`}
                   secondary={`${thousandSeparator(
-                    event.maxAmountToDreamPerUser / 100
+                    event.maxAmountToBucketPerUser / 100
                   )} ${event.currency}`}
                 />
               </ListItem>

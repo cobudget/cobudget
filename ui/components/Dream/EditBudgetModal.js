@@ -1,4 +1,4 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers";
 import { Modal } from "@material-ui/core";
@@ -16,7 +16,9 @@ const EDIT_BUDGET_MUTATION = gql`
       id
       minGoal
       maxGoal
+      income
       budgetItems {
+        id
         description
         min
         max
@@ -52,9 +54,7 @@ const EditBudgetModal = ({
   handleClose,
   open,
 }) => {
-  const [editDream, { loading }] = useMutation(EDIT_BUDGET_MUTATION, {
-    variables: { dreamId },
-  });
+  const [{ fetching: loading }, editDream] = useMutation(EDIT_BUDGET_MUTATION);
 
   const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
@@ -64,6 +64,7 @@ const EditBudgetModal = ({
   const { fields, append, insert, remove } = useFieldArray({
     control,
     name: "budgetItems",
+    keyName: "fieldId",
   });
 
   const incomeItems = fields.filter((field) => field.type === "INCOME");
@@ -80,7 +81,14 @@ const EditBudgetModal = ({
         <form
           onSubmit={handleSubmit((variables) => {
             editDream({
-              variables: { budgetItems: [...(variables.budgetItems ?? [])] },
+              dreamId,
+              budgetItems: [
+                ...(variables.budgetItems.map((item) => ({
+                  ...item,
+                  min: Math.round(item.min * 100),
+                  ...(item.max && { max: Math.round(item.max * 100) }),
+                })) ?? []),
+              ],
             })
               .then(() => {
                 handleClose();
@@ -90,10 +98,10 @@ const EditBudgetModal = ({
         >
           <h2 className="text-lg font-semibold mb-2">Expenses</h2>
 
-          {expenseItems.map(({ id, description, type, min, max }, i) => {
+          {expenseItems.map(({ fieldId, description, type, min, max }, i) => {
             const index = i + incomeItems.length;
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <TextField
                     placeholder="Description"
@@ -113,7 +121,7 @@ const EditBudgetModal = ({
                   <TextField
                     placeholder={allowStretchGoals ? "Min amount" : "Amount"}
                     name={`budgetItems[${index}].min`}
-                    defaultValue={min}
+                    defaultValue={typeof min !== "undefined" ? min / 100 : null}
                     inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
                     endAdornment={<span>{currency}</span>}
@@ -125,7 +133,9 @@ const EditBudgetModal = ({
                     <TextField
                       placeholder="Max amount"
                       name={`budgetItems[${index}].max`}
-                      defaultValue={max}
+                      defaultValue={
+                        typeof max !== "undefined" ? max / 100 : null
+                      }
                       inputProps={{ type: "number", min: 0 }}
                       inputRef={register()}
                       endAdornment={<span>{currency}</span>}
@@ -155,9 +165,9 @@ const EditBudgetModal = ({
             Existing funding and resources
           </h2>
 
-          {incomeItems.map(({ id, description, type, min }, index) => {
+          {incomeItems.map(({ fieldId, description, type, min }, index) => {
             return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={id}>
+              <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <TextField
                     placeholder="Description"
@@ -178,8 +188,8 @@ const EditBudgetModal = ({
                   <TextField
                     placeholder={"Amount"}
                     name={`budgetItems[${index}].min`}
-                    defaultValue={min}
-                    inputProps={{ type: "number" }}
+                    defaultValue={typeof min !== "undefined" ? min / 100 : null}
+                    inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
                     endAdornment={<span>{currency}</span>}
                   />
