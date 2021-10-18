@@ -21,8 +21,8 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
           onSubmit={handleSubmit((variables) => {
             updateGranting({
               eventId: event.id,
-              maxAmountToDreamPerUser: Math.round(
-                variables.maxAmountToDreamPerUser * 100
+              maxAmountToBucketPerUser: Math.round(
+                variables.maxAmountToBucketPerUser * 100
               ),
             })
               .then(() => closeModal())
@@ -34,9 +34,9 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="maxAmountToDreamPerUser"
+              name="maxAmountToBucketPerUser"
               label={`Max. amount to one ${dreamName(currentOrg)} per user`}
-              defaultValue={event.maxAmountToDreamPerUser / 100}
+              defaultValue={event.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}
               InputProps={{

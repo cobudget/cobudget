@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { Modal } from "@material-ui/core";
 import Button from "components/Button";
 import TextField from "components/TextField";
@@ -38,40 +38,39 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
   const [inputValue, setInputValue] = useState("");
   const amount = Math.round(inputValue * 100);
 
-  const [contribute, { loading }] = useMutation(CONTRIBUTE_MUTATION, {
-    variables: { eventId: event.id, dreamId: dream.id, amount },
-    update(cache) {
-      const topLevelQueryData = cache.readQuery({
-        query: TOP_LEVEL_QUERY,
-        variables: { slug: event.slug },
-      });
-
-      cache.writeQuery({
-        query: TOP_LEVEL_QUERY,
-        variables: { slug: event.slug },
-        data: {
-          ...topLevelQueryData,
-          currentOrgMember: {
-            ...topLevelQueryData.currentOrgMember,
-            currentEventMembership: {
-              ...topLevelQueryData.currentOrgMember.currentEventMembership,
-              balance:
-                topLevelQueryData.currentOrgMember.currentEventMembership
-                  .balance - amount,
-            },
-          },
-        },
-      });
-    },
-  });
+  const [{ fetching: loading }, contribute] = useMutation(
+    CONTRIBUTE_MUTATION
+    // update(cache) {
+    //   const topLevelQueryData = cache.readQuery({
+    //     query: TOP_LEVEL_QUERY,
+    //     variables: { slug: event.slug },
+    //   });
+    //   cache.writeQuery({
+    //     query: TOP_LEVEL_QUERY,
+    //     variables: { slug: event.slug },
+    //     data: {
+    //       ...topLevelQueryData,
+    //       currentOrgMember: {
+    //         ...topLevelQueryData.currentOrgMember,
+    //         currentEventMembership: {
+    //           ...topLevelQueryData.currentOrgMember.currentEventMembership,
+    //           balance:
+    //             topLevelQueryData.currentOrgMember.currentEventMembership
+    //               .balance - amount,
+    //         },
+    //       },
+    //     },
+    //   });
+    // },
+  );
 
   const amountToMaxGoal =
     Math.max(dream.minGoal, dream.maxGoal) - dream.totalContributions;
 
   const memberBalance = currentOrgMember.currentEventMembership.balance;
 
-  const max = event.maxAmountToDreamPerUser
-    ? Math.min(amountToMaxGoal, memberBalance, event.maxAmountToDreamPerUser)
+  const max = event.maxAmountToBucketPerUser
+    ? Math.min(amountToMaxGoal, memberBalance, event.maxAmountToBucketPerUser)
     : Math.min(amountToMaxGoal, memberBalance);
 
   return (
@@ -89,16 +88,16 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
           {currentOrgMember.currentEventMembership.balance / 100}{" "}
           {event.currency}
         </p>
-        {event.maxAmountToDreamPerUser && (
+        {event.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {event.maxAmountToDreamPerUser / 100} {event.currency} to one
-            dream
+            Max. {event.maxAmountToBucketPerUser / 100} {event.currency} to one
+            bucket
           </p>
         )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            contribute()
+            contribute({ eventId: event.id, dreamId: dream.id, amount })
               .then(() => handleClose())
               .catch((err) => alert(err.message));
           }}

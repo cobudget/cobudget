@@ -973,7 +973,7 @@ const resolvers = {
     },
     editDream: async (
       parent,
-      { dreamId, title, description, summary },
+      { dreamId, title, description, summary, images, budgetItems },
       { currentOrg, currentOrgMember, eventHub }
     ) => {
       const bucket = await prisma.bucket.findUnique({
@@ -1000,7 +1000,17 @@ const resolvers = {
 
       const updated = await prisma.bucket.update({
         where: { id: dreamId },
-        data: { title, description, summary },
+        data: {
+          title,
+          description,
+          summary,
+          ...(typeof budgetItems !== "undefined" && {
+            BudgetItems: { deleteMany: {}, createMany: { data: budgetItems } },
+          }),
+          ...(typeof images !== "undefined" && {
+            Images: { deleteMany: {}, createMany: { data: images } },
+          }),
+        },
       });
       // if (title) dream.title = title;
       // if (typeof description !== "undefined") dream.description = description;
@@ -1081,49 +1091,53 @@ const resolvers = {
     },
     editDreamCustomField: async (
       parent,
-      { dreamId, customField },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { EventMember, Dream, Event },
-        eventHub,
-      }
+      { dreamId, customField: { fieldId, value } },
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
       });
 
-      const event = await Event.findOne({ _id: dream.eventId });
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
+      });
 
       if (
         !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
+        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
         throw new Error("You are not a cocreator of this dream.");
 
-      const existingField = dream.customFields.filter((field) => {
-        return field.fieldId == customField.fieldId;
+      const updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          FieldValues: {
+            upsert: {
+              where: { bucketId_fieldId: { bucketId: dreamId, fieldId } },
+              create: { fieldId, value },
+              update: { value },
+            },
+          },
+        },
+        include: { collection: true },
       });
-
-      if (existingField.length > 0) {
-        existingField[0].value = customField.value;
-      } else {
-        dream.customFields.push(customField);
-      }
 
       await eventHub.publish("edit-dream", {
         currentOrg,
         currentOrgMember,
-        event,
-        dream,
+        event: updated.collection,
+        dream: updated,
       });
 
-      return dream.save();
+      return updated;
     },
     deleteDream: async (
       parent,
@@ -1242,38 +1256,41 @@ const resolvers = {
     publishDream: async (
       parent,
       { dreamId, unpublish },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { EventMember, Dream, Event },
-        eventHub,
-      }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      const event = await Event.findOne({ _id: dream.eventId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { collection: true, cocreators: true },
+      });
+      // const dream = await Dream.findOne({ _id: dreamId });
+      // const event = await Event.findOne({ _id: dream.eventId });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
         !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
+        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
           !eventMember.isAdmin &&
           !eventMember.isGuide)
       )
         throw new Error("You are not a cocreator of this dream.");
 
-      const { mongodb } = await eventHub.publish("publish-dream", {
+      const { prisma: prismaResult } = await eventHub.publish("publish-dream", {
         currentOrg,
         currentOrgMember,
-        event,
-        dream,
+        event: bucket.collection,
+        dream: bucket,
         unpublish,
       });
 
-      return mongodb;
+      return prismaResult;
     },
     addComment: async (
       parent,
@@ -1648,9 +1665,7 @@ const resolvers = {
         include: { collection: true },
       });
 
-      //const event = await Event.findOne({ _id: eventId });
-
-      if (!currentEventMember || !currentEventMember.isAdmin)
+      if (!(currentOrgMember.isOrgAdmin || currentEventMember?.isAdmin))
         throw new Error("You need to be admin to invite new members");
 
       const emails = emailsString.split(",");
@@ -1662,7 +1677,7 @@ const resolvers = {
 
       for (const email of emails) {
         const user = await prisma.user.findUnique({
-          where: { email: email.trim() },
+          where: { email: email.trim().toLowerCase() },
         });
 
         if (user) {
@@ -1711,7 +1726,7 @@ const resolvers = {
         } else {
           const user = await prisma.user.create({
             data: {
-              email: email.trim(),
+              email: email.trim().toLowerCase(),
               orgMemberships: {
                 create: {
                   organizationId: currentOrg.id,
@@ -1752,7 +1767,7 @@ const resolvers = {
 
       for (const email of emails) {
         const user = await prisma.user.findUnique({
-          where: { email: email.trim() },
+          where: { email: email.trim().toLowerCase() },
         });
         if (user) {
           const orgMember = await prisma.orgMember.findUnique({
@@ -1776,7 +1791,7 @@ const resolvers = {
         } else {
           const user = await prisma.user.create({
             data: {
-              email: email.trim(),
+              email: email.trim().toLowerCase(),
               orgMemberships: { create: { organizationId: currentOrg.id } },
             },
             include: { orgMemberships: true },
@@ -1907,93 +1922,105 @@ const resolvers = {
     approveForGranting: async (
       parent,
       { dreamId, approved },
-      { currentOrgMember, models: { Dream, EventMember } }
+      { currentOrgMember }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true, collection: true },
+      });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !currentEventMember ||
-        (!currentEventMember.isAdmin && !currentEventMember.isGuide)
+        !collectionMember ||
+        (!collectionMember.isAdmin && !collectionMember.isGuide)
       )
         throw new Error(
           "You need to be admin or guide to approve for granting"
         );
 
-      dream.approved = approved;
-      if (approved) {
-        dream.canceledAt = null;
-      }
+      const updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          approvedAt: approved ? new Date() : null,
+          ...(approved && { canceledAt: null }),
+        },
+      });
 
-      return dream.save();
+      return updated;
     },
     allocate: async (
       _,
       { eventMemberId, amount, type },
-      { currentOrgMember, models: { EventMember, Allocation, Contribution } }
+      { currentOrgMember }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in.");
 
-      const targetEventMember = await EventMember.findOne({
-        _id: eventMemberId,
+      const targetCollectionMember = await prisma.collectionMember.findUnique({
+        where: { id: eventMemberId },
       });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: targetEventMember.eventId,
-      });
-
-      if (!currentEventMember?.isAdmin)
-        throw new Error("You need to be event admin to allocate funds.");
-
-      await allocateToMember(
-        {
-          eventMemberId,
-          eventId: targetEventMember.eventId,
-          organizationId: currentOrgMember.organizationId,
-          amount,
-          type,
+      const currentCollectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: targetCollectionMember.collectionId,
+          },
         },
-        { Allocation, Contribution }
-      );
+      });
 
-      return targetEventMember;
+      if (!currentCollectionMember?.isAdmin)
+        throw new Error("You need to be collection admin to allocate funds.");
+
+      await allocateToMember({
+        collectionMemberId: eventMemberId,
+        collectionId: targetCollectionMember.collectionId,
+        amount,
+        type,
+      });
+
+      return targetCollectionMember;
     },
     bulkAllocate: async (
       _,
       { eventId, amount, type },
-      { currentOrgMember, models: { EventMember, Allocation, Contribution } }
+      { currentOrgMember }
     ) => {
       if (!currentOrgMember) throw new Error("You need to be logged in.");
 
-      const eventMembers = await EventMember.find({
-        eventId,
-        isApproved: true,
+      const eventMembers = await prisma.collectionMember.findMany({
+        where: {
+          collectionId: eventId,
+          isApproved: true,
+        },
       });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const currentEventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
 
       if (!currentEventMember?.isAdmin)
         throw new Error("You need to be event admin to allocate funds.");
 
       for (const member of eventMembers) {
-        await allocateToMember(
-          {
-            eventMemberId: member.id,
-            organizationId: currentOrgMember.organizationId,
-            eventId,
-            amount,
-            type,
-          },
-          { Allocation, Contribution }
-        );
+        await allocateToMember({
+          collectionMemberId: member.id,
+          collectionId: eventId,
+          amount,
+          type,
+        });
       }
 
       return eventMembers;
@@ -2001,148 +2028,163 @@ const resolvers = {
     contribute: async (
       _,
       { eventId, dreamId, amount },
-      {
-        currentOrgMember,
-        models: { Dream, Event, EventMember, Allocation, Contribution },
-      }
+      { currentOrgMember }
     ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const currentCollectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: { collection: true },
       });
 
-      if (!currentEventMember || !currentEventMember.isApproved)
+      const { collection } = currentCollectionMember;
+
+      if (!currentCollectionMember || !currentCollectionMember.isApproved)
         throw new Error(
           "You need to be a logged in approved member to fund things"
         );
 
       if (amount <= 0) throw new Error("Value needs to be more than zero");
 
-      const event = await Event.findOne({ _id: eventId });
+      // const event = await Event.findOne({ _id: eventId });
 
       // Check that granting is open
-      if (!event.grantingIsOpen) throw new Error("Granting is not open");
+      const now = dayjs();
+      const grantingHasOpened = collection.grantingOpens
+        ? dayjs(collection.grantingOpens).isBefore(now)
+        : true;
+      const grantingHasClosed = collection.grantingCloses
+        ? dayjs(collection.grantingCloses).isBefore(now)
+        : false;
+      const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
+      if (!grantingIsOpen) throw new Error("Granting is not open");
 
-      const dream = await Dream.findOne({ _id: dreamId, eventId });
+      let bucket = await prisma.bucket.findUnique({ where: { id: dreamId } });
 
-      if (!dream.approved)
-        throw new Error("Dream is not approved for granting");
+      if (bucket.collectionId !== eventId)
+        throw new Error("Bucket not in collection");
 
-      if (dream.canceled)
-        throw new Error("Funding has been canceled for dream");
+      if (!bucket.approvedAt)
+        throw new Error("Bucket is not approved for granting");
 
-      if (dream.funded) throw new Error("Dream has been funded");
+      if (bucket.canceledAt)
+        throw new Error("Funding has been canceled for bucket");
 
-      if (dream.completed) throw new Error("Dream is already completed");
+      if (bucket.fundedAt) throw new Error("Bucket has been funded");
+
+      if (bucket.completedAt) throw new Error("Bucket is already completed");
 
       // Check that the max goal of the dream is not exceeded
-      const [
-        { contributionsForDream } = { contributionsForDream: 0 },
-      ] = await Contribution.aggregate([
-        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: contributionsForBucket },
+      } = await prisma.contribution.aggregate({
+        where: { bucketId: bucket.id },
+        _sum: { amount: true },
+      });
 
-      const maxGoal = Math.max(dream.maxGoal, dream.minGoal);
+      const budgetItems = await prisma.budgetItem.findMany({
+        where: { bucketId: bucket.id, type: "EXPENSE" },
+      });
 
-      if (contributionsForDream + amount > maxGoal)
-        throw new Error("You can't overfund this dream.");
+      const maxGoal = budgetItems.reduce(
+        (acc, item) => acc + (item.max ? item.max : item.min),
+        0
+      );
+
+      if (contributionsForBucket + amount > maxGoal)
+        throw new Error("You can't overfund this bucket.");
 
       // mark dream as funded if it has reached its max goal
-      if (contributionsForDream + amount === maxGoal) {
-        dream.fundedAt = Date.now();
+      if (contributionsForBucket + amount === maxGoal) {
+        bucket = await prisma.bucket.update({
+          where: { id: dreamId },
+          data: { fundedAt: new Date() },
+        });
       }
 
       // Check that it is not more than is allowed per dream (if this number is set)
-
-      const [
-        { contributionsFromUserToThisDream } = {
-          contributionsFromUserToThisDream: 0,
+      const {
+        _sum: { amount: contributionsFromUserToThisBucket },
+      } = await prisma.contribution.aggregate({
+        where: {
+          bucketId: bucket.id,
+          collectionMemberId: currentCollectionMember.id,
         },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
-            dreamId: mongoose.Types.ObjectId(dreamId),
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            contributionsFromUserToThisDream: { $sum: "$amount" },
-          },
-        },
-      ]);
+        _sum: { amount: true },
+      });
 
       if (
-        event.maxAmountToDreamPerUser &&
-        amount + contributionsFromUserToThisDream >
-          event.maxAmountToDreamPerUser
+        collection.maxAmountToBucketPerUser &&
+        amount + contributionsFromUserToThisBucket >
+          collection.maxAmountToBucketPerUser
       ) {
         throw new Error(
-          `You can give a maximum of ${event.maxAmountToDreamPerUser / 100} ${
-            event.currency
-          } to one dream`
+          `You can give a maximum of ${
+            collection.maxAmountToBucketPerUser / 100
+          } ${collection.currency} to one dream`
         );
       }
 
       // Check that user has not spent more tokens than he has
-      const [
-        { contributionsFromUser } = { contributionsFromUser: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
-          },
+      const {
+        _sum: { amount: contributionsFromUser },
+      } = await prisma.contribution.aggregate({
+        where: {
+          collectionMemberId: currentCollectionMember.id,
         },
-        { $group: { _id: null, contributionsFromUser: { $sum: "$amount" } } },
-      ]);
+        _sum: { amount: true },
+      });
 
-      const [
-        { allocationsForUser } = { allocationsForUser: 0 },
-      ] = await Allocation.aggregate([
-        {
-          $match: {
-            eventMemberId: mongoose.Types.ObjectId(currentEventMember.id),
-          },
+      const {
+        _sum: { amount: allocationsForUser },
+      } = await prisma.allocation.aggregate({
+        where: {
+          collectionMemberId: currentCollectionMember.id,
         },
-        { $group: { _id: null, allocationsForUser: { $sum: "$amount" } } },
-      ]);
+        _sum: { amount: true },
+      });
 
       if (contributionsFromUser + amount > allocationsForUser)
         throw new Error("You are trying to spend more than what you have.");
 
-      await new Contribution({
-        organizationId: currentOrgMember.organizationId,
-        eventId,
-        eventMemberId: currentEventMember.id,
-        dreamId,
-        amount,
-      }).save();
+      await prisma.contribution.create({
+        data: {
+          collectionId: collection.id,
+          collectionMemberId: currentCollectionMember.id,
+          amount,
+          bucketId: bucket.id,
+        },
+      });
 
-      return dream;
+      return bucket;
     },
-    markAsCompleted: async (
-      _,
-      { dreamId },
-      { currentOrgMember, models: { Dream, EventMember } }
-    ) => {
+    markAsCompleted: async (_, { dreamId }, { currentOrgMember }) => {
       if (!currentOrgMember) {
         throw new Error("You need to be logged in.");
       }
-      const dream = await Dream.findOne({ _id: dreamId });
+      const bucket = await prisma.bucket.findUnique({ where: { id: dreamId } });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const currentCollectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
-      if (!currentEventMember?.isAdmin)
+      if (!currentCollectionMember?.isAdmin)
         throw new Error(
-          "You need to be event admin to mark a dream as completed"
+          "You need to be event admin to mark a bucket as completed"
         );
 
-      dream.completedAt = Date.now();
-      return dream.save();
+      const updated = await prisma.bucket.update({
+        where: { id: bucket.id },
+        data: { completedAt: new Date() },
+      });
+      return updated;
     },
     acceptFunding: async (
       _,
@@ -2152,144 +2194,167 @@ const resolvers = {
       if (!currentOrgMember) {
         throw new Error("You need to be logged in.");
       }
-      const dream = await Dream.findOne({ _id: dreamId });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
+      });
+
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !currentEventMember ||
-        (!dream.cocreators.includes(currentEventMember.id) &&
-          !currentEventMember.isAdmin)
+        !collectionMember ||
+        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin)
       )
-        throw new Error("You are not an admin or cocreator of this dream.");
+        throw new Error("You are not an admin or cocreator of this bucket.");
 
-      const [
-        { contributionsForDream } = { contributionsForDream: 0 },
-      ] = await Contribution.aggregate([
-        {
-          $match: {
-            dreamId: dream._id,
-          },
-        },
-        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: contributionsForBucket },
+      } = await prisma.contribution.aggregate({
+        where: { bucketId: bucket.id },
+        _sum: { amount: true },
+      });
 
-      if (contributionsForDream < dream.minGoal)
-        throw new Error("Dream has not reached its minimum goal yet.");
+      const {
+        _sum: { min: minExpenses },
+      } = await prisma.budgetItem.aggregate({
+        where: { bucketId: bucket.id, type: "EXPENSE" },
+        _sum: { min: true },
+      });
 
-      dream.fundedAt = Date.now();
-      return dream.save();
+      const {
+        _sum: { min: minIncome },
+      } = await prisma.budgetItem.aggregate({
+        where: { bucketId: bucket.id, type: "INCOME" },
+        _sum: { min: true },
+      });
+
+      const minGoal = minIncome - minExpenses;
+
+      if (contributionsForBucket < minGoal)
+        throw new Error("Bucket has not reached its minimum goal yet.");
+
+      return prisma.bucket.update({
+        where: { id: dreamId },
+        data: { fundedAt: new Date() },
+      });
     },
-    cancelFunding: async (
-      _,
-      { dreamId },
-      { currentOrgMember, models: { Dream, EventMember, Contribution } }
-    ) => {
+    cancelFunding: async (_, { dreamId }, { currentOrgMember }) => {
       if (!currentOrgMember) {
         throw new Error("You need to be logged in.");
       }
-      const dream = await Dream.findOne({ _id: dreamId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
+      });
 
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !currentEventMember ||
-        (!dream.cocreators.includes(currentEventMember.id) &&
-          !currentEventMember.isAdmin)
+        !collectionMember ||
+        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin)
       )
-        throw new Error("You are not an admin or cocreator of this dream.");
+        throw new Error("You are not an admin or cocreator of this bucket.");
 
-      if (dream.completed)
+      if (bucket.completedAt)
         throw new Error(
-          "This dream has already been marked completed, can't cancel funding."
+          "This bucket has already been marked completed, can't cancel funding."
         );
 
-      dream.fundedAt = null;
-      dream.approved = false;
-      dream.canceledAt = Date.now();
-
-      // delete all contributions
-      await Contribution.deleteMany({ dreamId });
+      const updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          fundedAt: null,
+          approvedAt: null,
+          canceledAt: new Date(),
+          Contributions: { deleteMany: {} },
+        },
+      });
 
       // TODO: notify contribuors that they have been "re-imbursed"
 
-      return dream.save();
+      return updated;
     },
     updateGrantingSettings: async (
       parent,
       {
         eventId,
         currency,
-        maxAmountToDreamPerUser,
+        maxAmountToBucketPerUser,
         dreamCreationCloses,
         grantingOpens,
         grantingCloses,
         allowStretchGoals,
       },
-      { currentOrgMember, models: { Event, EventMember } }
+      { currentOrgMember }
     ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const eventMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
+        include: {
+          collection: { include: { guidelines: true } },
+        },
       });
-
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
-      });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to edit");
 
       if (
-        !(
-          (currentEventMember && currentEventMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
+        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
+      )
+        throw new Error("You need to be admin to edit a guideline");
+
+      if (
+        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
       )
         throw new Error("You need to be admin to update granting settings.");
 
-      const dreamCreationHasClosed = dayjs(event.dreamCreationCloses).isBefore(
-        dayjs()
-      );
+      const grantingHasOpened = dayjs(
+        eventMember.collection.grantingOpens
+      ).isBefore(dayjs());
 
-      if (currency) {
-        // granting can't have started to change currency
-        if (dreamCreationHasClosed) {
-          throw new Error(
-            "You can't change currency after dream creation closes"
-          );
-        }
-        event.currency = currency;
+      if (currency && grantingHasOpened) {
+        throw new Error("You can't change currency after granting has started");
       }
 
-      if (typeof maxAmountToDreamPerUser !== "undefined") {
-        event.maxAmountToDreamPerUser = maxAmountToDreamPerUser;
-      }
-
-      if (typeof dreamCreationCloses !== "undefined") {
-        event.dreamCreationCloses = dreamCreationCloses;
-      }
-
-      if (typeof grantingOpens !== "undefined") {
-        event.grantingOpens = grantingOpens;
-      }
-
-      if (typeof grantingCloses !== "undefined") {
-        event.grantingCloses = grantingCloses;
-      }
-
-      if (typeof allowStretchGoals !== "undefined") {
-        event.allowStretchGoals = allowStretchGoals;
-      }
-
-      return event.save();
+      return prisma.collection.update({
+        where: { id: eventId },
+        data: {
+          ...(currency && { currency }),
+          ...(typeof maxAmountToBucketPerUser !== "undefined" && {
+            maxAmountToBucketPerUser,
+          }),
+          ...(typeof dreamCreationCloses !== "undefined" && {
+            dreamCreationCloses,
+          }),
+          ...(typeof grantingOpens !== "undefined" && {
+            grantingOpens,
+          }),
+          ...(typeof grantingCloses !== "undefined" && {
+            grantingCloses,
+          }),
+          ...(typeof allowStretchGoals !== "undefined" && {
+            allowStretchGoals,
+          }),
+        },
+      });
     },
     registerForEvent: async (
       parent,
@@ -2373,12 +2438,12 @@ const resolvers = {
         where: { id: member.collectionId },
       });
     },
-    orgMember: async (member, args, { models: { OrgMember } }) => {
+    orgMember: async (member) => {
       return await prisma.orgMember.findUnique({
         where: { id: member.orgMemberId },
       });
     },
-    balance: async (member, args, { models: { Allocation, Contribution } }) => {
+    balance: async (member) => {
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2427,13 +2492,13 @@ const resolvers = {
     //   if (!currentOrgMember) return null;
     //   return user.id === currentOrgMember.userId ? currentOrgMember : null;
     // },
-    orgMemberships: async (user) => {
-      return await prisma.orgMember.findMany({ where: { userId: user.id } });
-    },
+    orgMemberships: async (user) =>
+      prisma.orgMember.findMany({ where: { userId: user.id } }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
   },
   Organization: {
+    subdomain: (org) => org.slug,
     events: async (org) => {
       return await prisma.collection.findMany({
         where: { organizationId: org.id },
@@ -2554,6 +2619,26 @@ const resolvers = {
     tags: async (collection) => {
       return prisma.tag.findMany({ where: { collectionId: collection.id } });
     },
+    guidelines: async (collection) =>
+      prisma.guideline.findMany({ where: { collectionId: collection.id } }),
+    customFields: async (collection) =>
+      prisma.field.findMany({ where: { collectionId: collection.id } }),
+    grantingIsOpen: (collection) => {
+      const now = dayjs();
+      const grantingHasOpened = collection.grantingOpens
+        ? dayjs(collection.grantingOpens).isBefore(now)
+        : true;
+      const grantingHasClosed = collection.grantingCloses
+        ? dayjs(collection.grantingCloses).isBefore(now)
+        : false;
+      const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
+      return grantingIsOpen;
+    },
+    grantingHasClosed: (collection) => {
+      return collection.grantingCloses
+        ? dayjs(collection.grantingCloses).isBefore(dayjs())
+        : false;
+    },
   },
   Dream: {
     cocreators: async (bucket) => {
@@ -2669,6 +2754,63 @@ const resolvers = {
         where: { buckets: { some: { id: bucket.id } } },
       });
     },
+    images: async (bucket) =>
+      prisma.image.findMany({ where: { bucketId: bucket.id } }),
+    customFields: async (bucket) =>
+      prisma.fieldValue.findMany({ where: { bucketId: bucket.id } }),
+    budgetItems: async (bucket) =>
+      prisma.budgetItem.findMany({ where: { bucketId: bucket.id } }),
+    published: (bucket) => !!bucket.publishedAt,
+    approved: (bucket) => !!bucket.approvedAt,
+    canceled: (bucket) => !!bucket.canceledAt,
+    funded: (bucket) => !!bucket.fundedAt,
+    completed: (bucket) => !!bucket.completedAt,
+    income: async (bucket) => {
+      const {
+        _sum: { min },
+      } = await prisma.budgetItem.aggregate({
+        _sum: { min: true },
+        where: {
+          bucketId: bucket.id,
+          type: "INCOME",
+        },
+      });
+      return min;
+    },
+    minGoal: async (bucket) => {
+      const {
+        _sum: { min },
+      } = await prisma.budgetItem.aggregate({
+        _sum: { min: true },
+        where: {
+          bucketId: bucket.id,
+          type: "EXPENSE",
+        },
+      });
+      return min > 0 ? min : 0;
+    },
+    maxGoal: async (bucket) => {
+      const {
+        _sum: { min },
+      } = await prisma.budgetItem.aggregate({
+        _sum: { min: true },
+        where: {
+          bucketId: bucket.id,
+          type: "EXPENSE",
+        },
+      });
+
+      const budgetItems = await prisma.budgetItem.findMany({
+        where: { bucketId: bucket.id, type: "EXPENSE" },
+      });
+
+      const maxGoal = budgetItems.reduce(
+        (acc, item) => acc + (item.max ? item.max : item.min),
+        0
+      );
+
+      return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
+    },
   },
   Transaction: {
     __resolveType(transaction) {
@@ -2758,40 +2900,6 @@ const resolvers = {
       return field;
     },
   },
-  // Log: {
-  //   details: (log) => log,
-  //   user: async () => {
-  //     return null;
-  //     // TODO:  only show for admins
-  //     // return User.findOne({ _id: log.userId });
-  //   },
-  //   type: (log) => log.__t,
-  //   dream: async (log, args, { models: { Dream } }) => {
-  //     return Dream.findOne({ _id: log.dreamId });
-  //   },
-  //   event: async (log, args, { models: { Event } }) => {
-  //     return Event.findOne({ _id: log.eventId });
-  //   },
-  // },
-  // LogDetails: {
-  //   __resolveType: async (obj) => {
-  //     if (obj.__t == "FlagRaised") return "FlagRaisedDetails";
-  //     if (obj.__t == "FlagResolved") return "FlagResolvedDetails";
-  //     return null;
-  //   },
-  // },
-  // FlagRaisedDetails: {
-  //   guideline: async (log, args, { models: { Event } }) => {
-  //     const event = await Event.findOne({ _id: log.eventId });
-  //     return event.guidelines.id(log.guidelineId);
-  //   },
-  // },
-  // FlagResolvedDetails: {
-  //   guideline: async (log, args, { models: { Event } }) => {
-  //     const event = await Event.findOne({ _id: log.eventId });
-  //     return event.guidelines.id(log.guidelineId);
-  //   },
-  // },
 };
 
 export default resolvers;

@@ -69,9 +69,11 @@ const DreamBudget = ({
                       <tr key={i} className="bg-gray-100 even:bg-white">
                         <td className="px-4 py-2">{budgetItem.description}</td>
                         <td className="px-4 py-2">
-                          {thousandSeparator(budgetItem.min)}
+                          {thousandSeparator(budgetItem.min / 100)}
                           {budgetItem.max &&
-                            ` - ${thousandSeparator(budgetItem.max)}`}{" "}
+                            ` - ${thousandSeparator(
+                              budgetItem.max / 100
+                            )}`}{" "}
                           {currency}
                         </td>
                       </tr>
@@ -108,7 +110,7 @@ const DreamBudget = ({
                       >
                         <td className="px-4 py-2">{budgetItem.description}</td>
                         <td className="px-4 py-2">
-                          {thousandSeparator(budgetItem.min)} {currency}
+                          {thousandSeparator(budgetItem.min / 100)} {currency}
                         </td>
                       </tr>
                     ))}

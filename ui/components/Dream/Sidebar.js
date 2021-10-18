@@ -130,7 +130,7 @@ const DreamSidebar = ({
     !dream.funded &&
     !dream.canceled &&
     hasNotReachedMaxGoal &&
-    !!currentOrgMember?.currentEventMembership?.balance;
+    event.grantingIsOpen;
   const showAcceptFundingButton =
     dream.approved &&
     !dream.funded &&

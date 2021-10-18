@@ -74,7 +74,7 @@ const DreamSummary = ({ summary, canEdit, dreamId }) => {
       <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group">
         {summary}
         {canEdit && (
-          <div className="absolute top-0 right-0 invisible group-hover:visible">
+          <div className="absolute top-0 right-0">
             <Tooltip title="Edit summary" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />

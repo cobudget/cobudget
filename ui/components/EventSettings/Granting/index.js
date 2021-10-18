@@ -43,7 +43,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
     $eventId: ID!
     $currency: String
-    $maxAmountToDreamPerUser: Int
+    $maxAmountToBucketPerUser: Int
     $grantingOpens: Date
     $grantingCloses: Date
     $dreamCreationCloses: Date
@@ -52,7 +52,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     updateGrantingSettings(
       eventId: $eventId
       currency: $currency
-      maxAmountToDreamPerUser: $maxAmountToDreamPerUser
+      maxAmountToBucketPerUser: $maxAmountToBucketPerUser
       grantingOpens: $grantingOpens
       grantingCloses: $grantingCloses
       dreamCreationCloses: $dreamCreationCloses
@@ -60,7 +60,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     ) {
       id
       currency
-      maxAmountToDreamPerUser
+      maxAmountToBucketPerUser
       grantingOpens
       grantingCloses
       grantingIsOpen
@@ -138,13 +138,13 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <SettingsListItem
             primary={`Max. amount to one ${dreamName(currentOrg)} per user`}
             secondary={
-              event.maxAmountToDreamPerUser
-                ? `${thousandSeparator(event.maxAmountToDreamPerUser / 100)} ${
+              event.maxAmountToBucketPerUser
+                ? `${thousandSeparator(event.maxAmountToBucketPerUser / 100)} ${
                     event.currency
                   }`
                 : "Not set"
             }
-            isSet={!!event.maxAmountToDreamPerUser}
+            isSet={!!event.maxAmountToBucketPerUser}
             openModal={() => handleOpen("SET_MAX_AMOUNT_TO_DREAM")}
             canEdit={canEditSettings}
             eventColor={event.color}

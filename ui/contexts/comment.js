@@ -198,8 +198,8 @@ export const useCommentContext = (initialInput) => {
     addComment,
     editComment,
     deleteComment,
-    comments: data.commentSet.comments,
-    total: data.commentSet.total,
+    comments: data?.commentSet.comments ?? [],
+    total: data?.commentSet.total ?? 0,
     loading,
   };
 };

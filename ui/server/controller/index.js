@@ -2,8 +2,7 @@ import prisma from "../prisma";
 
 export const allocateToMember = async ({
   collectionMemberId,
-  eventId,
-  organizationId,
+  collectionId,
   amount,
   type,
 }) => {
@@ -17,7 +16,7 @@ export const allocateToMember = async ({
   const {
     _sum: { amount: totalContributions },
   } = await prisma.contribution.aggregate({
-    where: { collectionMemberId: member.id },
+    where: { collectionMemberId },
     _sum: { amount: true },
   });
 
@@ -32,8 +31,7 @@ export const allocateToMember = async ({
   }
   await prisma.allocation.create({
     data: {
-      organizationId,
-      collectionId: eventId,
+      collectionId,
       collectionMemberId,
       amount: adjustedAmount,
     },
