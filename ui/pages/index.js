@@ -119,10 +119,6 @@ const IndexPage = ({ currentOrg, currentOrgMember }) => {
             />
           </div>
           <div>
-            <h2 className="text-2xl font-semibold mb-6 text-right">
-              {events.length} {dreamName(currentOrg)}{" "}
-              {events.length === 1 ? "collection" : "collections"}
-            </h2>
             {currentOrgMember?.isOrgAdmin && (
               <Link href={`/new-collection`}>
                 <Button size="large" color="anthracit" className="float-right">
