@@ -987,6 +987,33 @@ const resolvers = {
 
       return dream.save();
     },
+    createTag: async (
+      parent,
+      { eventId, tagValue },
+      { currentOrg, currentOrgMember, models: { Event, EventMember, Tag } }
+    ) => {
+      const eventMember = await EventMember.findOne({
+        orgMemberId: currentOrgMember.id,
+        eventId,
+      });
+
+      if (
+        !eventMember?.isAdmin &&
+        !eventMember?.isGuide &&
+        !currentOrgMember?.isOrgAdmin
+      )
+        throw new Error("You are not an admin or guide of this collection.");
+
+      await new Tag({
+        value: tagValue,
+        eventId,
+        organizationId: currentOrg.id,
+      }).save();
+
+      return await Event.findOne({
+        _id: eventId,
+      });
+    },
     addTag: async (
       parent,
       { dreamId, tagId, tagValue },
