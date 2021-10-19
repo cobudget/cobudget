@@ -101,6 +101,7 @@ export const TOP_LEVEL_QUERY = gql`
     currentOrg {
       id
       name
+      info
       logo
       subdomain
       customDomain
