@@ -44,7 +44,6 @@ function AddComment() {
         <div className="flex-grow">
           <div className="mb-2">
             <TextField
-              name="content"
               placeholder="Add comment"
               multiline
               rows={1}
