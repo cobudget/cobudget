@@ -1016,7 +1016,7 @@ const resolvers = {
     },
     addTag: async (
       parent,
-      { dreamId, tagId, tagValue },
+      { dreamId, tagId },
       { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
     ) => {
       const dream = await Dream.findOne({ _id: dreamId });
@@ -1037,16 +1037,8 @@ const resolvers = {
       if (tagId) {
         dream.tags.push(tagId);
         await dream.save();
-      } else if (tagValue) {
-        const tag = await new Tag({
-          value: tagValue,
-          eventId: dream.eventId,
-          organizationId: currentOrg.id,
-        }).save();
-        dream.tags.push(tag.id);
-        await dream.save();
       } else {
-        throw new Error("You need to provide either tag id or tag value");
+        throw new Error("You need to provide tag id");
       }
       return dream;
     },
