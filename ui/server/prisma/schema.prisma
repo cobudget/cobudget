@@ -38,6 +38,7 @@ model OrgMember {
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   collectionMemberships CollectionMember[]
+  comments              Comment[]
 
   @@unique([organizationId, userId])
 }
@@ -57,7 +58,6 @@ model CollectionMember {
   buckets       Bucket[] //should it be explicit or implicit?
   Allocations   Allocation[]
   Contributions Contribution[]
-  Comments      Comment[]
 
   @@unique([orgMemberId, collectionId])
 }
@@ -88,13 +88,13 @@ model Collection {
   registrationPolicy RegistrationPolicy
   currency           String
 
-  maxAmountToDreamPerUser Int?
-  dreamCreationCloses     DateTime?
-  grantingOpens           DateTime? //rename
-  grantingCloses          DateTime? //rename
-  allowStretchGoals       Boolean?
-  dreamReviewIsOpen       Boolean? //rename
-  discourseCategoryId     Int?
+  maxAmountToBucketPerUser Int?
+  bucketCreationCloses     DateTime?
+  grantingOpens            DateTime? //rename
+  grantingCloses           DateTime? //rename
+  allowStretchGoals        Boolean?
+  dreamReviewIsOpen        Boolean? //rename
+  discourseCategoryId      Int?
 
   tags       Tag[]
   guidelines Guideline[]
@@ -126,7 +126,7 @@ model Guideline {
   id           String     @id @default(cuid())
   title        String
   description  String
-  position     Int // TODO: double check whether it should be a float or int
+  position     Float
   collection   Collection @relation(fields: [collectionId], references: [id])
   collectionId String
   createdAt    DateTime   @default(now())
@@ -141,12 +141,23 @@ model Field {
   type         FieldType
   limit        Int?
   isRequired   Boolean
-  position     Int // TODO: position double check.
+  position     Float
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  Collection   Collection   @relation(fields: [collectionId], references: [id])
+  collection   Collection   @relation(fields: [collectionId], references: [id])
   collectionId String
-  FieldValue   FieldValue[]
+  fieldValue   FieldValue[]
+}
+
+model FieldValue {
+  id       String  @id @default(cuid())
+  field    Field?  @relation(fields: [fieldId], references: [id])
+  fieldId  String?
+  value    Json
+  Bucket   Bucket  @relation(fields: [bucketId], references: [id])
+  bucketId String
+
+  @@unique([bucketId, fieldId])
 }
 
 enum FieldType {
@@ -171,7 +182,7 @@ model Bucket {
   description      String?
   summary          String?
   Images           Image[]
-  cocreators       CollectionMember[] //implicit enough?
+  cocreators       CollectionMember[]
   BudgetItems      BudgetItem[]
   FieldValues      FieldValue[]
   comments         Comment[]
@@ -180,7 +191,7 @@ model Bucket {
   fundedAt         DateTime?
   canceledAt       DateTime?
   completedAt      DateTime?
-  discourseTopicId Int
+  discourseTopicId Int?
   Flags            Flag[]
   tags             Tag[]
   createdAt        DateTime           @default(now())
@@ -211,26 +222,17 @@ enum BudgetItemType {
   EXPENSE
 }
 
-model FieldValue {
-  id       String @id @default(cuid())
-  field    Field  @relation(fields: [fieldId], references: [id])
-  fieldId  String
-  //collectionId? original schema has eventId..
-  value    Json
-  Bucket   Bucket @relation(fields: [bucketId], references: [id])
-  bucketId String
-}
-
 model Comment {
-  id                 String            @id @default(cuid())
-  content            String
-  isLog              Boolean           @default(false)
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  collectionMember   CollectionMember? @relation(fields: [collectionMemberId], references: [id]) //TODO: check what this is in current platform
-  collectionMemberId String?
-  Bucket             Bucket?           @relation(fields: [bucketId], references: [id])
-  bucketId           String?
+  id          String     @id @default(cuid())
+  content     String
+  isLog       Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  orgMember   OrgMember? @relation(fields: [orgMemberId], references: [id])
+  orgMemberId String?
+  Bucket      Bucket?    @relation(fields: [bucketId], references: [id])
+  bucketId    String?
+
 }
 
 model Flag {
