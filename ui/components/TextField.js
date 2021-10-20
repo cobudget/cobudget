@@ -23,6 +23,8 @@ const TextField = ({
   rows,
   size,
   autoFocus,
+  maxLength,
+  required,
   startAdornment,
   endAdornment,
   color = "blue",
@@ -73,6 +75,8 @@ const TextField = ({
             defaultValue={defaultValue}
             rows={rows}
             autoFocus={autoFocus}
+            maxLength={maxLength}
+            required={required}
             {...inputProps}
           />
         )
