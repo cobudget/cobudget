@@ -22,7 +22,7 @@ const TextField = ({
   multiline,
   rows,
   size,
-  autoFocus,
+  autoFocus = false,
   maxLength,
   required,
   startAdornment,
@@ -49,7 +49,7 @@ const TextField = ({
               usageStatistics={false}
               height={`${(rows ?? 2) + 8}em`}
               initialEditType="wysiwyg"
-              autoFocus={autoFocus}
+              autofocus={autoFocus}
               initialValue={defaultValue}
               ref={(el) => {
                 wysiwygRef.current = el?.getInstance();
