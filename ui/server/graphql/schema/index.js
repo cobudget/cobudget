@@ -100,16 +100,7 @@ const schema = gql`
       customField: CustomFieldValueInput!
     ): Dream!
 
-    createDream(
-      eventId: ID!
-      title: String!
-      description: String
-      summary: String
-      minGoal: Int
-      maxGoal: Int
-      images: [ImageInput]
-      budgetItems: [BudgetItemInput]
-    ): Dream
+    createDream(eventId: ID!, title: String!): Dream
     editDream(
       dreamId: ID!
       title: String
@@ -120,6 +111,9 @@ const schema = gql`
       tags: [String!]
     ): Dream
     deleteDream(dreamId: ID!): Dream
+
+    addImage(dreamId: ID!, image: ImageInput!): Dream
+    deleteImage(dreamId: ID!, imageId: ID!): Dream
 
     addCocreator(dreamId: ID!, memberId: ID!): Dream
     removeCocreator(dreamId: ID!, memberId: ID!): Dream
@@ -139,12 +133,7 @@ const schema = gql`
 
     joinOrg: OrgMember
 
-    updateProfile(
-      username: String
-      firstName: String
-      lastName: String
-      bio: String
-    ): User
+    updateProfile(username: String, name: String, bio: String): User
     inviteEventMembers(emails: String!, eventId: ID!): [EventMember]
     inviteOrgMembers(emails: String!): [OrgMember]
     updateOrgMember(memberId: ID!, isOrgAdmin: Boolean): OrgMember
@@ -163,10 +152,10 @@ const schema = gql`
     updateGrantingSettings(
       eventId: ID!
       currency: String
-      maxAmountToDreamPerUser: Int
+      maxAmountToBucketPerUser: Int
       grantingOpens: Date
       grantingCloses: Date
-      dreamCreationCloses: Date
+      bucketCreationCloses: Date
       allowStretchGoals: Boolean
     ): Collection
 
@@ -213,12 +202,13 @@ const schema = gql`
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     currency: String!
-    maxAmountToDreamPerUser: Int
-    dreamCreationCloses: Date
-    dreamCreationIsOpen: Boolean
+    maxAmountToBucketPerUser: Int
+    bucketCreationCloses: Date
+    bucketCreationIsOpen: Boolean
     grantingOpens: Date
     grantingCloses: Date
     grantingIsOpen: Boolean
+    grantingHasClosed: Boolean
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
