@@ -47,6 +47,7 @@ const TextField = ({
           ) : (
             <Editor
               usageStatistics={false}
+              height={`${(rows ?? 2) + 8}em`}
               initialEditType="wysiwyg"
               autoFocus={autoFocus}
               initialValue={defaultValue}
