@@ -18,6 +18,7 @@ const ADD_TAG_MUTATION = gql`
 const AddTag = ({ items: eventTags, dream }) => {
   const [addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
+
   return (
     <Downshift
       onChange={(tag) => {

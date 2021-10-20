@@ -18,6 +18,8 @@ const REMOVE_TAG_MUTATION = gql`
 export default ({ dream, event, canEdit }) => {
   const [removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
+  if (!event.tags?.length) return null;
+
   return (
     <div className="">
       <h2 className="mb-2 font-medium hidden md:block relative">Tags</h2>
