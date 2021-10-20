@@ -4,8 +4,8 @@ import { useMutation, gql } from "@apollo/client";
 import Downshift from "downshift";
 
 const ADD_TAG_MUTATION = gql`
-  mutation AddTag($dreamId: ID!, $tagId: ID, $tagValue: String) {
-    addTag(dreamId: $dreamId, tagId: $tagId, tagValue: $tagValue) {
+  mutation AddTag($dreamId: ID!, $tagId: ID!) {
+    addTag(dreamId: $dreamId, tagId: $tagId) {
       id
       tags {
         id
@@ -22,10 +22,9 @@ const AddTag = ({ items: eventTags, dream }) => {
     <Downshift
       onChange={(tag) => {
         if (!tag) return;
-        const variables = tag.id ? { tagId: tag.id } : { tagValue: tag.value };
 
         addTag({
-          variables: { dreamId: dream.id, ...variables },
+          variables: { dreamId: dream.id, tagId: tag.id },
         }).then(() => setInput(""));
       }}
       onInputValueChange={(value) => setInput(value)}
@@ -50,15 +49,6 @@ const AddTag = ({ items: eventTags, dream }) => {
               !inputValue ||
               item.value.toLowerCase().includes(inputValue.toLowerCase())
           );
-
-        const inputValueAlreadyDefined = filtered.reduce(
-          (previous, current) => previous + (current.value === inputValue),
-          false
-        );
-
-        if (inputValue.length && !inputValueAlreadyDefined) {
-          filtered = [{ value: inputValue }, ...filtered];
-        }
 
         return (
           <div>
