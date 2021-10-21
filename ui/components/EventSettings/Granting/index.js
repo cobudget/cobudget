@@ -5,12 +5,11 @@ import { gql } from "urql";
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
-import dreamName from "utils/dreamName";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
 import SetMaxAmountToDream from "./SetMaxAmountToDream";
-import SetDreamCreationCloses from "./SetDreamCreationCloses";
+import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
@@ -31,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
 
 const modals = {
   SET_CURRENCY: SetCurrency,
-  SET_DREAM_CREATION_CLOSES: SetDreamCreationCloses,
+  SET_DREAM_CREATION_CLOSES: SetBucketCreationCloses,
   SET_GRANTING_OPENS: SetGrantingOpens,
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_MAX_AMOUNT_TO_DREAM: SetMaxAmountToDream,
@@ -46,7 +45,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $maxAmountToBucketPerUser: Int
     $grantingOpens: Date
     $grantingCloses: Date
-    $dreamCreationCloses: Date
+    $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
   ) {
     updateGrantingSettings(
@@ -55,7 +54,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
       grantingOpens: $grantingOpens
       grantingCloses: $grantingCloses
-      dreamCreationCloses: $dreamCreationCloses
+      bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
     ) {
       id
@@ -64,8 +63,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingOpens
       grantingCloses
       grantingIsOpen
-      dreamCreationCloses
-      dreamCreationIsOpen
+      bucketCreationCloses
+      bucketCreationIsOpen
       allowStretchGoals
     }
   }
@@ -115,7 +114,7 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
             primary="Currency"
             secondary={event.currency}
             isSet={event.currency}
-            disabled={!event.dreamCreationIsOpen}
+            disabled={!event.bucketCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
             eventColor={event.color}
@@ -136,7 +135,7 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <Divider />
 
           <SettingsListItem
-            primary={`Max. amount to one ${dreamName(currentOrg)} per user`}
+            primary={`Max. amount to one bucket per user`}
             secondary={
               event.maxAmountToBucketPerUser
                 ? `${thousandSeparator(event.maxAmountToBucketPerUser / 100)} ${
@@ -153,15 +152,15 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <Divider />
 
           <SettingsListItem
-            primary={`${dreamName(currentOrg, true)} creation closes`}
+            primary={`Bucket creation closes`}
             secondary={
-              event.dreamCreationCloses
-                ? dayjs(event.dreamCreationCloses).format(
+              event.bucketCreationCloses
+                ? dayjs(event.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )
                 : "Not set"
             }
-            isSet={event.dreamCreationCloses}
+            isSet={event.bucketCreationCloses}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
             eventColor={event.color}

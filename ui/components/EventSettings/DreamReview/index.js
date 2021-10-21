@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
-import dreamName from "utils/dreamName";
 
 const EDIT_EVENT = gql`
   mutation editEvent($eventId: ID!, $dreamReviewIsOpen: Boolean) {
@@ -23,12 +22,10 @@ const DreamReview = ({ event, currentOrg }) => {
 
   return (
     <div className="px-6">
-      <h2 className="text-2xl font-semibold mb-2">
-        {dreamName(currentOrg, true)} Review
-      </h2>
+      <h2 className="text-2xl font-semibold mb-2">Bucket Review</h2>
       <p className="text-gray-700 mb-4">
         If you have set up guidelines you can allow users to review each others{" "}
-        {dreamName(currentOrg)}s according to them.
+        buckets according to them.
       </p>
       <form
         onSubmit={handleSubmit((variables) => {

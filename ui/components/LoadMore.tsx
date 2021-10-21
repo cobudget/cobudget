@@ -1,7 +1,17 @@
 import HappySpinner from "components/HappySpinner";
 import { CheveronDownIcon } from "components/Icons";
 
-const LoadMore = ({ moreExist, loading, reverse, onClick }) => {
+const LoadMore = ({
+  moreExist,
+  loading,
+  reverse,
+  onClick,
+}: {
+  moreExist: boolean;
+  loading: boolean;
+  reverse?: boolean;
+  onClick: () => void;
+}) => {
   return (
     <div className="mt-7">
       {loading ? (

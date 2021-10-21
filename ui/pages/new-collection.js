@@ -10,7 +10,6 @@ import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
-import dreamName from "utils/dreamName";
 
 const CREATE_EVENT = gql`
   mutation CreateEvent(
@@ -32,12 +31,12 @@ const CREATE_EVENT = gql`
 `;
 
 export default function NewCollectionPage({ currentOrg }) {
-  const [createEvent] = useMutation(CREATE_EVENT);
+  const [, createEvent] = useMutation(CREATE_EVENT);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createEvent({ variables })
+    createEvent(variables)
       .then(({ data }) => {
         Router.push("/[event]", `/${data.createEvent.slug}`);
       })
@@ -49,9 +48,7 @@ export default function NewCollectionPage({ currentOrg }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">
-          New {dreamName(currentOrg)} collection
-        </h1>
+        <h1 className="text-2xl mb-2 font-semibold">New bucket collection</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"

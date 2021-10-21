@@ -4,8 +4,6 @@ import { Modal } from "@material-ui/core";
 import Button from "components/Button";
 import TextField from "components/TextField";
 
-import { TOP_LEVEL_QUERY } from "../../pages/_app";
-
 const CONTRIBUTE_MUTATION = gql`
   mutation Contribute($eventId: ID!, $dreamId: ID!, $amount: Int!) {
     contribute(eventId: $eventId, dreamId: $dreamId, amount: $amount) {

@@ -103,7 +103,7 @@ model Collection {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  CollectionMember CollectionMember[]
+  collectionMember CollectionMember[]
   Bucket           Bucket[]
   Allocations      Allocation[]
   Contributions    Contribution[]

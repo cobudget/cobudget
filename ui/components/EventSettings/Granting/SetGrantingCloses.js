@@ -63,7 +63,7 @@ const SetGrantingCloses = ({ closeModal, event }) => {
                 color="secondary"
                 className="ml-2"
                 onClick={() => {
-                  updateGranting({ variables: { grantingCloses: null } })
+                  updateGranting({ eventId: event.id, grantingCloses: null })
                     .then(() => {
                       closeModal();
                     })

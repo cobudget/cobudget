@@ -89,33 +89,36 @@ const Page = ({
     },
   });
 
+  const moreExist = data?.dreamsPage.moreExist;
+  const buckets = data?.dreamsPage.dreams ?? [];
+
   if (error) {
     console.error(error);
   }
 
   return (
     <>
-      {data?.dreamsPage?.dreams.map((bucket) => (
+      {buckets.map((bucket) => (
         <Link href={`/${event.slug}/${bucket.id}`} key={bucket.id}>
           <a className="flex focus:outline-none focus:ring rounded-lg">
             <DreamCard dream={bucket} event={event} />
           </a>
         </Link>
       ))}
-      {isFirstPage && data.dreamsPage.dreams.length === 0 && !fetching && (
+      {isFirstPage && buckets.length === 0 && !fetching && (
         <div className="absolute w-full flex justify-center items-center h-64">
           <h1 className="text-3xl text-gray-500 text-center ">No buckets...</h1>
         </div>
       )}
-      {isLastPage && data?.dreamsPage.moreExist && (
+      {isLastPage && moreExist && (
         <div className="absolute bottom-0 justify-center flex w-full">
           <LoadMore
-            moreExist={data?.dreamsPage.moreExist}
+            moreExist={moreExist}
             loading={fetching}
             onClick={() =>
               onLoadMore({
                 limit: variables.limit,
-                offset: variables.offset + data?.dreamsPage.dreams.length,
+                offset: variables.offset + buckets.length,
               })
             }
           />{" "}
@@ -127,7 +130,9 @@ const Page = ({
 
 const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-  const [pageVariables, setPageVariables] = useState([{ limit: 3, offset: 0 }]);
+  const [pageVariables, setPageVariables] = useState([
+    { limit: 12, offset: 0 },
+  ]);
   const { tag, s } = router.query;
 
   if (!event) return null;

@@ -94,6 +94,7 @@ const SearchMembersResult = ({
   cocreators,
   eventId,
   addCocreator,
+  bucket,
 }) => {
   const [{ data: { members } = { members: [] } }] = useQuery({
     query: SEARCH_MEMBERS_QUERY,
@@ -120,9 +121,10 @@ const SearchMembersResult = ({
           key={member.id}
           member={member}
           add={() =>
-            addCocreator({ variables: { memberId: member.id } }).catch((err) =>
-              alert(err.message)
-            )
+            addCocreator({
+              dreamId: bucket.id,
+              memberId: member.id,
+            }).catch((err) => alert(err.message))
           }
         />
       ))}
@@ -140,13 +142,9 @@ const EditCocreatorsModal = ({
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
-  const [addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [removeCocreator] = useMutation(REMOVE_CO_CREATOR_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-
+  const [, addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION);
+  const [, removeCocreator] = useMutation(REMOVE_CO_CREATOR_MUTATION);
+  console.log({ currentOrgMember });
   return (
     <Modal
       open={open}
@@ -168,7 +166,8 @@ const EditCocreatorsModal = ({
                   )
                 ) {
                   removeCocreator({
-                    variables: { memberId: member.id },
+                    dreamId: dream.id,
+                    memberId: member.id,
                   }).catch((err) => alert(err.message));
                 }
               }}
@@ -189,6 +188,7 @@ const EditCocreatorsModal = ({
               addCocreator={addCocreator}
               cocreators={cocreators}
               eventId={event.id}
+              bucket={dream}
             />
           </div>
         </div>

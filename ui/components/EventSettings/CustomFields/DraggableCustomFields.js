@@ -5,7 +5,6 @@ import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
-import dreamName from "utils/dreamName";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
@@ -98,9 +97,7 @@ const SortableItem = sortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    `Deleting a custom field would delete it from all the ${dreamName(
-                      currentOrg
-                    )}s that use it. Are you sure?`
+                    `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
                   ) && deleteCustomField({ eventId, fieldId: customField.id })
                 }
               >

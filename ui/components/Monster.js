@@ -6,7 +6,6 @@ import AutoScroll from "@brianmcallister/react-auto-scroll";
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
-import dreamName from "utils/dreamName";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -118,9 +117,7 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
       chatItems: [
         {
           type: INPUT,
-          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${dreamName(
-            currentOrg
-          )} creators.`,
+          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the bucket creators.`,
           sideEffect: (answer) => {
             raiseFlag({
               dreamId,
@@ -186,24 +183,16 @@ const Monster = ({ event, dream, currentOrg }) => {
     items = [
       {
         type: MESSAGE,
-        message: `This ${dreamName(
-          currentOrg
-        )} has been flagged for breaking guidelines. Please help review it!`,
+        message: `This bucket has been flagged for breaking guidelines. Please help review it!`,
       },
       {
         type: MESSAGE,
-        message: `Here are the guidelines that ${dreamName(
-          currentOrg
-        )}s need to follow:`,
+        message: `Here are the guidelines that buckets need to follow:`,
       },
       ...guidelines,
       ...raisedFlags.map((raisedFlag) => ({
         type: MESSAGE,
-        message: `Someone flagged this ${dreamName(
-          currentOrg
-        )} for breaking the "${
-          raisedFlag.guideline.title
-        }" guideline with this comment:
+        message: `Someone flagged this bucket for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
 
           "${raisedFlag.comment}"`,
       })),
@@ -259,22 +248,18 @@ const Monster = ({ event, dream, currentOrg }) => {
       ...[
         {
           type: MESSAGE,
-          message: `Please help review this ${dreamName(currentOrg)}!`,
+          message: `Please help review this bucket!`,
         },
         {
           type: MESSAGE,
-          message: `Here are the guidelines that ${dreamName(
-            currentOrg
-          )}s need to follow:`,
+          message: `Here are the guidelines that buckets need to follow:`,
         },
       ],
       ...guidelines,
       ...[
         {
           type: ACTION,
-          message: `Does this ${dreamName(
-            currentOrg
-          )} comply with the guidelines?`,
+          message: `Does this bucket comply with the guidelines?`,
           actions: [
             {
               label: "Yes, looks good to me!",
