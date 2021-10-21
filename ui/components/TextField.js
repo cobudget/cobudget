@@ -58,7 +58,13 @@ const TextField = ({
               onChange={debounce(() => {
                 inputProps?.onChange?.({
                   target: {
-                    value: wysiwygRef.current?.getMarkdown() ?? "",
+                    value:
+                      wysiwygRef.current
+                        ?.getMarkdown()
+                        // toastui editor isn't entirely gfm compliant and
+                        // outputs <br> sometimes
+                        // https://github.com/nhn/tui.editor/issues/485#issuecomment-947844068
+                        .replaceAll(/<br\s*\/*>/gi, "\n\n") ?? "",
                   },
                 });
               }, 250)}
