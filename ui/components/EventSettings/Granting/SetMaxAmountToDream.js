@@ -2,7 +2,6 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 import { Box, Button, TextField } from "@material-ui/core";
 import Card from "components/styled/Card";
-import dreamName from "utils/dreamName";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
@@ -13,9 +12,7 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">
-          Set max. amount to one {dreamName(currentOrg)} per user
-        </h1>
+        <h1 className="text-3xl">Set max. amount to one bucket per user</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
@@ -35,7 +32,7 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
           <Box m="15px 0">
             <TextField
               name="maxAmountToBucketPerUser"
-              label={`Max. amount to one ${dreamName(currentOrg)} per user`}
+              label={`Max. amount to one bucket per user`}
               defaultValue={event.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}

@@ -4,30 +4,27 @@ import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
-import dreamName from "utils/dreamName";
 
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
+const SetBucketCreationCloses = ({ closeModal, event, currentOrg }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(
-    event.dreamCreationCloses
+    event.bucketCreationCloses
   );
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">
-          Set {dreamName(currentOrg)} creation closes date
-        </h1>
+        <h1 className="text-3xl">Set bucket creation closes date</h1>
 
         <form
           onSubmit={handleSubmit(() => {
             updateGranting({
-              dreamCreationCloses: selectedDate,
+              bucketCreationCloses: selectedDate,
               eventId: event.id,
             })
               .then(() => {
@@ -43,12 +40,12 @@ const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label={`${dreamName(currentOrg, true)} creation close date`}
+                label={`Bucket creation close date`}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}
                 inputVariant="outlined"
-                name="dreamCreationCloses"
+                name="bucketCreationCloses"
                 inputRef={register}
                 fullWidth
               />
@@ -64,7 +61,7 @@ const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
             >
               Save
             </Button>
-            {event.dreamCreationCloses && (
+            {event.bucketCreationCloses && (
               <Button
                 type="button"
                 size="large"
@@ -74,7 +71,7 @@ const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
                 onClick={() => {
                   updateGranting({
                     eventId: event.id,
-                    dreamCreationCloses: null,
+                    bucketCreationCloses: null,
                   })
                     .then(() => {
                       closeModal();
@@ -95,4 +92,4 @@ const SetDreamCreationCloses = ({ closeModal, event, currentOrg }) => {
   );
 };
 
-export default SetDreamCreationCloses;
+export default SetBucketCreationCloses;

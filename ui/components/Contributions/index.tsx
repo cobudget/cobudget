@@ -45,7 +45,6 @@ const Contributions = ({ event }) => {
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
-    notifyOnNetworkStatusChange: true,
     variables: { eventId: event.id, offset: 0, limit: 15 },
   });
 

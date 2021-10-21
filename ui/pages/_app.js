@@ -19,8 +19,8 @@ export const TOP_LEVEL_QUERY = gql`
       currency
       registrationPolicy
       maxAmountToBucketPerUser
-      dreamCreationCloses
-      dreamCreationIsOpen
+      bucketCreationCloses
+      bucketCreationIsOpen
       grantingOpens
       grantingCloses
       grantingIsOpen

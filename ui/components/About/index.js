@@ -4,7 +4,6 @@ import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
-import dreamName from "utils/dreamName";
 import Markdown from "components/Markdown";
 
 export const EVENT_QUERY = gql`
@@ -20,7 +19,7 @@ export const EVENT_QUERY = gql`
       }
       maxAmountToBucketPerUser
       allowStretchGoals
-      dreamCreationCloses
+      bucketCreationCloses
       grantingOpens
       grantingCloses
       color
@@ -77,9 +76,7 @@ export default function AboutPage({ router, currentOrg }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`Max. amount to one ${dreamName(
-                    currentOrg
-                  )} per user`}
+                  primary={`Max. amount to one bucket per user`}
                   secondary={`${thousandSeparator(
                     event.maxAmountToBucketPerUser / 100
                   )} ${event.currency}`}
@@ -96,13 +93,13 @@ export default function AboutPage({ router, currentOrg }) {
             />
           </ListItem>
 
-          {event.dreamCreationCloses && (
+          {event.bucketCreationCloses && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`${dreamName(currentOrg, true)} creation closes`}
-                  secondary={dayjs(event.dreamCreationCloses).format(
+                  primary={`Bucket creation closes`}
+                  secondary={dayjs(event.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
                 />
@@ -173,9 +170,7 @@ export default function AboutPage({ router, currentOrg }) {
           <Divider />
           <ListItem>
             <ListItemText
-              primary={`Total contributions in funding now ${dreamName(
-                currentOrg
-              )}s`}
+              primary={`Total contributions in funding now buckets`}
               secondary={`${thousandSeparator(
                 event.totalContributionsFunding / 100
               )} ${event.currency}`}
@@ -185,9 +180,7 @@ export default function AboutPage({ router, currentOrg }) {
           <Divider />
           <ListItem>
             <ListItemText
-              primary={`Total contributions in funded ${dreamName(
-                currentOrg
-              )}s`}
+              primary={`Total contributions in funded buckets`}
               secondary={`${thousandSeparator(
                 event.totalContributionsFunded / 100
               )} ${event.currency}`}

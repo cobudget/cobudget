@@ -74,6 +74,7 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                             )
                               updateMember({
                                 variables: {
+                                  eventId: event.id,
                                   memberId: member.id,
                                   isApproved: true,
                                 },
