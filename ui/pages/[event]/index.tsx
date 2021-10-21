@@ -9,7 +9,6 @@ import Button from "components/Button";
 import NewDreamModal from "components/NewDreamModal";
 import EditableField from "components/EditableField";
 import LoadMore from "components/LoadMore";
-import dreamName from "utils/dreamName";
 
 export const DREAMS_QUERY = gql`
   query Dreams(
@@ -69,41 +68,72 @@ export const DREAMS_QUERY = gql`
   }
 `;
 
-const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
-  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
-
+const Page = ({
+  variables,
+  isLastPage,
+  isFirstPage,
+  onLoadMore,
+  router,
+  event,
+}) => {
   const { tag, s } = router.query;
 
-  const [
-    {
-      data: { dreamsPage: { moreExist, dreams } } = {
-        dreamsPage: { dreams: [] },
-      },
-      fetching: loading,
-      error,
-      fetchMore,
-    },
-  ] = useQuery({
+  const [{ data, fetching, error }] = useQuery({
     query: DREAMS_QUERY,
     variables: {
       eventSlug: router.query.event,
-      offset: 0,
-      limit: 9,
+      offset: variables.offset,
+      limit: variables.limit,
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
-    notifyOnNetworkStatusChange: true,
-    fetchPolicy: "cache-and-network",
-    nextFetchPolicy: "cache-first",
   });
 
   if (error) {
     console.error(error);
   }
-  if (!event) return null;
 
   return (
     <>
+      {data?.dreamsPage?.dreams.map((bucket) => (
+        <Link href={`/${event.slug}/${bucket.id}`} key={bucket.id}>
+          <a className="flex focus:outline-none focus:ring rounded-lg">
+            <DreamCard dream={bucket} event={event} />
+          </a>
+        </Link>
+      ))}
+      {isFirstPage && data.dreamsPage.dreams.length === 0 && !fetching && (
+        <div className="absolute w-full flex justify-center items-center h-64">
+          <h1 className="text-3xl text-gray-500 text-center ">No buckets...</h1>
+        </div>
+      )}
+      {isLastPage && data?.dreamsPage.moreExist && (
+        <div className="absolute bottom-0 justify-center flex w-full">
+          <LoadMore
+            moreExist={data?.dreamsPage.moreExist}
+            loading={fetching}
+            onClick={() =>
+              onLoadMore({
+                limit: variables.limit,
+                offset: variables.offset + data?.dreamsPage.dreams.length,
+              })
+            }
+          />{" "}
+        </div>
+      )}
+    </>
+  );
+};
+
+const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
+  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
+  const [pageVariables, setPageVariables] = useState([{ limit: 3, offset: 0 }]);
+  const { tag, s } = router.query;
+
+  if (!event) return null;
+
+  return (
+    <div>
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -131,7 +161,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
             />
           </div>
           <div className="flex justify-end items-start">
-            {event.dreamCreationIsOpen &&
+            {event.bucketCreationIsOpen &&
               currentOrgMember?.currentEventMembership?.isApproved && (
                 <>
                   <Button
@@ -139,7 +169,7 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
                     color={event.color}
                     onClick={() => setNewDreamModalOpen(true)}
                   >
-                    New {dreamName(currentOrg)}
+                    New bucket
                   </Button>
                   {newDreamModalOpen && (
                     <NewDreamModal
@@ -155,41 +185,27 @@ const EventPage = ({ currentOrgMember, event, router, currentOrg }) => {
       </PageHero>
 
       <div className="page flex-1">
-        <Filterbar
-          textSearchTerm={s}
-          currentOrgMember={currentOrgMember}
-          tag={tag}
-          event={event}
-        />
-        {dreams.length ? (
-          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            {dreams.map((dream) => (
-              <Link
-                href="/[event]/[dream]"
-                as={`/${event.slug}/${dream.id}`}
-                key={dream.id}
-              >
-                <a className="flex focus:outline-none focus:ring rounded-lg">
-                  <DreamCard dream={dream} event={event} />
-                </a>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="flex-grow flex flex-col justify-center items-center h-64">
-            <h1 className="text-3xl text-gray-500 text-center ">
-              No {dreamName(currentOrg)}s...
-            </h1>
-          </div>
-        )}
-        <LoadMore
-          moreExist={moreExist}
-          loading={loading}
-          onClick={() => fetchMore({ variables: { offset: dreams.length } })}
-        />
+        <Filterbar textSearchTerm={s} tag={tag} event={event} />
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
+          {pageVariables.map((variables, i) => {
+            return (
+              <Page
+                router={router}
+                event={event}
+                key={"" + variables.limit + i}
+                variables={variables}
+                isFirstPage={i === 0}
+                isLastPage={i === pageVariables.length - 1}
+                onLoadMore={({ limit, offset }) => {
+                  setPageVariables([...pageVariables, { limit, offset }]);
+                }}
+              />
+            );
+          })}
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default EventPage;
+export default CollectionPage;

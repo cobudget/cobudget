@@ -17,7 +17,7 @@ const EditableField = ({
   name,
   placeholder,
   variables,
-  maxLength,
+  maxLength = undefined,
   required,
   className = "",
 }) => {
