@@ -1,5 +1,5 @@
 import "@toast-ui/editor/dist/toastui-editor.css";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { debounce } from "lodash";
 const Editor =
   typeof window === "undefined" ? (
@@ -33,6 +33,26 @@ const TextField = ({
   const wysiwygRef = useRef();
   const LabelComponent = labelComponent;
 
+  useEffect(() => {
+    const oldClass = "toastui-editor-contents";
+    const prose = "ProseMirror";
+    const newClass = "markdown";
+
+    const els = Array.from(document.getElementsByClassName(oldClass));
+
+    els.forEach((el) => {
+      if (el.classList.contains(oldClass)) {
+        el.classList.remove(oldClass);
+      }
+      if (el.classList.contains(prose)) {
+        el.style.fontSize = "unset";
+      }
+      if (!el.classList.contains(newClass)) {
+        el.classList.add(newClass);
+      }
+    });
+  });
+
   return (
     <div className={`flex flex-col ${className}`}>
       {(label || labelComponent) && (
@@ -47,7 +67,7 @@ const TextField = ({
           ) : (
             <Editor
               usageStatistics={false}
-              height={`${(rows ?? 2) + 8}em`}
+              height={`${(rows ?? 2) * 2 + 8}em`}
               initialEditType="wysiwyg"
               autofocus={autoFocus}
               initialValue={defaultValue}
