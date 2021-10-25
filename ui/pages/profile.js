@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 import Link from "next/link";
 
 const PROFILE_QUERY = gql`
@@ -45,50 +45,50 @@ const DELETE_GRANT_MUTATION = gql`
 `;
 
 export default () => {
-  const { data } = useQuery(PROFILE_QUERY);
+  const [{ data }] = useQuery({ query: PROFILE_QUERY });
 
-  const [deleteGrant] = useMutation(DELETE_GRANT_MUTATION, {
-    update(cache, { data: { deleteGrant } }) {
-      const { currentUser } = cache.readQuery({ query: PROFILE_QUERY });
-      cache.writeQuery({
-        query: PROFILE_QUERY,
-        data: {
-          currentUser: {
-            ...currentUser,
-            memberships: [
-              ...currentUser.memberships.map((membership) => {
-                if (membership.event.id === deleteGrant.dream.event.id) {
-                  return {
-                    ...membership,
-                    givenGrants: membership.givenGrants.filter(
-                      (grant) => grant.id !== deleteGrant.id
-                    ),
-                  };
-                }
-                return membership;
-              }),
-            ],
-          },
-        },
-      });
-      // const topLevelQueryData = cache.readQuery({
-      //   query: TOP_LEVEL_QUERY,
-      //   variables: { slug: event.slug },
-      // });
-      // cache.writeQuery({
-      //   query: TOP_LEVEL_QUERY,
-      //   data: {
-      //     ...topLevelQueryData,
-      //     currentMember: {
-      //       ...topLevelQueryData.currentMember,
-      //       availableGrants:
-      //         topLevelQueryData.currentMember.availableGrants +
-      //         deleteGrant.value,
-      //     },
-      //   },
-      // });
-    },
-  });
+  const [, deleteGrant] = useMutation(
+    DELETE_GRANT_MUTATION
+    // update(cache, { data: { deleteGrant } }) {
+    //   const { currentUser } = cache.readQuery({ query: PROFILE_QUERY });
+    //   cache.writeQuery({
+    //     query: PROFILE_QUERY,
+    //     data: {
+    //       currentUser: {
+    //         ...currentUser,
+    //         memberships: [
+    //           ...currentUser.memberships.map((membership) => {
+    //             if (membership.event.id === deleteGrant.dream.event.id) {
+    //               return {
+    //                 ...membership,
+    //                 givenGrants: membership.givenGrants.filter(
+    //                   (grant) => grant.id !== deleteGrant.id
+    //                 ),
+    //               };
+    //             }
+    //             return membership;
+    //           }),
+    //         ],
+    //       },
+    //     },
+    //   });
+    // const topLevelQueryData = cache.readQuery({
+    //   query: TOP_LEVEL_QUERY,
+    //   variables: { slug: event.slug },
+    // });
+    // cache.writeQuery({
+    //   query: TOP_LEVEL_QUERY,
+    //   data: {
+    //     ...topLevelQueryData,
+    //     currentMember: {
+    //       ...topLevelQueryData.currentMember,
+    //       availableGrants:
+    //         topLevelQueryData.currentMember.availableGrants +
+    //         deleteGrant.value,
+    //     },
+    //   },
+    // });
+  );
 
   return (
     <div>

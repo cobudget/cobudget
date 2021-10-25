@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery, gql } from "@apollo/client";
+import { useMutation, useQuery, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
@@ -23,13 +23,11 @@ export const CATEGORIES_QUERY = gql`
 `;
 
 const Discourse = ({ event, currentOrg }) => {
-  const [editEvent, { loading }] = useMutation(EDIT_EVENT, {
-    variables: { eventId: event.id },
-  });
+  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
 
-  const { data: { categories } = { categories: [] } } = useQuery(
-    CATEGORIES_QUERY
-  );
+  const [{ data: { categories } = { categories: [] } }] = useQuery({
+    query: CATEGORIES_QUERY,
+  });
 
   const {
     handleSubmit,
@@ -47,10 +45,9 @@ const Discourse = ({ event, currentOrg }) => {
       <form
         onSubmit={handleSubmit((variables) => {
           editEvent({
-            variables: {
-              ...variables,
-              discourseCategoryId: parseInt(variables.discourseCategoryId),
-            },
+            ...variables,
+            eventId: event.id,
+            discourseCategoryId: parseInt(variables.discourseCategoryId),
           })
             //.then(() => handleClose())
             .catch((error) => alert(error.message));

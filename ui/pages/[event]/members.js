@@ -1,6 +1,6 @@
-import Members from "components/EventMembers";
-import SubMenu from "components/SubMenu";
-import PageHero from "components/PageHero";
+import Members from "../../components/EventMembers";
+import SubMenu from "../../components/SubMenu";
+import PageHero from "../../components/PageHero";
 
 const EventMembersPage = ({ event, currentOrgMember }) => {
   const isEventMember =

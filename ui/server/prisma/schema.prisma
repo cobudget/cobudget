@@ -22,7 +22,6 @@ model User {
   accounts       Account[]
   sessions       Session[]
   orgMemberships OrgMember[]
-  Flag           Flag[]
 }
 
 model OrgMember {
@@ -39,6 +38,7 @@ model OrgMember {
   updatedAt             DateTime           @updatedAt
   collectionMemberships CollectionMember[]
   comments              Comment[]
+  flags                 Flag[]
 
   @@unique([organizationId, userId])
 }
@@ -76,12 +76,14 @@ model Organization {
 }
 
 model Collection {
-  id                 String             @id @default(cuid())
-  slug               String
-  organization       Organization       @relation(fields: [organizationId], references: [id])
-  organizationId     String
-  title              String
-  archived           Boolean            @default(false)
+  id             String       @id @default(cuid())
+  slug           String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId String
+  title          String
+  archived       Boolean      @default(false)
+  deleted        Boolean      @default(false)
+
   info               String? //rename?
   about              String? //rename?
   color              String?
@@ -192,7 +194,7 @@ model Bucket {
   canceledAt       DateTime?
   completedAt      DateTime?
   discourseTopicId Int?
-  Flags            Flag[]
+  flags            Flag[]
   tags             Tag[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
@@ -239,16 +241,17 @@ model Flag {
   id              String     @id @default(cuid())
   guideline       Guideline? @relation(fields: [guidelineId], references: [id])
   guidelineId     String?
-  user            User       @relation(fields: [userId], references: [id])
-  userId          String
+  comment         String?
+  orgMember       OrgMember  @relation(fields: [orgMemberId], references: [id])
+  orgMemberId     String
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   type            FlagType
   resolvingFlag   Flag?      @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
   resolvedBy      Flag?      @relation("FlagToFlag")
-  resolvingFlagId String?
-  Bucket          Bucket?    @relation(fields: [bucketId], references: [id])
-  bucketId        String?
+  resolvingFlagId String?    @unique
+  bucket          Bucket     @relation(fields: [bucketId], references: [id])
+  bucketId        String
 }
 
 enum FlagType {
@@ -286,7 +289,7 @@ model DiscourseConfig {
   dreamsCategoryId Int
   minPostLength    Int
   organization     Organization @relation(fields: [organizationId], references: [id])
-  organizationId   String
+  organizationId   String       @unique
 }
 
 model Account {

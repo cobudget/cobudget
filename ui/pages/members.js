@@ -1,4 +1,4 @@
-import OrgMembers from "components/Org/OrgMembers";
+import OrgMembers from "../components/Org/OrgMembers";
 import SubMenu from "components/SubMenu";
 
 const OrgMembersPage = ({ currentOrgMember }) => {

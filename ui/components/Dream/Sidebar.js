@@ -8,7 +8,6 @@ import { EditIcon, DotsHorizontalIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import IconButton from "components/IconButton";
 import Button from "components/Button";
-import dreamName from "utils/dreamName";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
@@ -146,7 +145,7 @@ const DreamSidebar = ({
     isEventAdminOrGuide && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
   const showCancelFundingButton = dream.approved && !dream.canceled && canEdit;
-  console.log({ cocreators: dream.cocreators });
+
   return (
     <>
       {(dream.minGoal || canEdit) && (
@@ -181,10 +180,11 @@ const DreamSidebar = ({
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to accept and finalize funding for this ${dreamName(
-                    currentOrg
-                  )}? This can't be undone.`
-                ) && acceptFunding().catch((err) => alert(err.message))
+                  `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
+                ) &&
+                acceptFunding({ dreamId: dream.id }).catch((err) =>
+                  alert(err.message)
+                )
               }
             >
               Accept funding
@@ -225,9 +225,7 @@ const DreamSidebar = ({
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to mark this ${dreamName(
-                    currentOrg
-                  )} as completed? This can't be undone.`
+                  `Are you sure you would like to mark this bucket as completed? This can't be undone.`
                 ) &&
                 markAsCompleted({ dreamId: dream.id }).catch((err) =>
                   alert(err.message)
@@ -299,9 +297,7 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        `Are you sure you would like to delete this ${dreamName(
-                          currentOrg
-                        )}?`
+                        `Are you sure you would like to delete this bucket?`
                       ) &&
                       deleteDream({ dreamId: dream.id })
                         .then(() => {
