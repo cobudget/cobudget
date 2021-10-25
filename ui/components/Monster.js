@@ -268,6 +268,7 @@ const Monster = ({ event, dream, currentOrg }) => {
               chatItems: raiseFlagFlow({
                 guidelines: event.guidelines,
                 raiseFlag,
+                dreamId: dream.id,
               }),
             },
           ],

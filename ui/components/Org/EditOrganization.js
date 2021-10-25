@@ -46,13 +46,14 @@ const EDIT_ORGANIZATION = gql`
 `;
 
 const EditOrganization = ({ organization, currentUser }) => {
+  console.log({ currentUser, organization });
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
   const [{ fetching: loading }, createOrganization] = useMutation(
     CREATE_ORGANIZATION
   );
-  const [{ fetching: editLoading, error }, editOrganization] = useMutation(
+  const [{ fetching: editLoading }, editOrganization] = useMutation(
     EDIT_ORGANIZATION
   );
 
@@ -64,15 +65,13 @@ const EditOrganization = ({ organization, currentUser }) => {
 
   const onSubmit = async (variables) => {
     try {
-      variables = {
-        ...variables,
-        organizationId: organization.id,
-        logo: logoImage,
-      };
       if (isNew) {
-        await createOrganization(variables);
+        await createOrganization({ ...variables, logo: logoImage });
       } else {
-        await editOrganization(variables);
+        await editOrganization({
+          ...variables,
+          organizationId: organization.id,
+        });
       }
       let message = isNew
         ? "Organization created successfully."
@@ -104,12 +103,12 @@ const EditOrganization = ({ organization, currentUser }) => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto space-y-4">
         <h1 className="text-2xl font-semibold">
-          {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
+          {isNew ? `👋 Welcome, ${currentUser.name}` : "Edit organization"}
         </h1>
         <TextField
           name="name"
           label="Name your community"
-          placeholder={`${currentUser.firstName}'s community`}
+          placeholder={`${currentUser.name}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
           error={errors.name}
@@ -119,7 +118,7 @@ const EditOrganization = ({ organization, currentUser }) => {
         <TextField
           name="subdomain"
           label={fromRealities ? "Link" : "Subdomain"}
-          placeholder={slugify(`${currentUser.firstName}'s community`)}
+          placeholder={slugify(`${currentUser.name}'s community`)}
           inputRef={register({ required: "Required" })}
           error={errors.subdomain}
           inputProps={{

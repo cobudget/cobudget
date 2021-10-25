@@ -189,6 +189,7 @@ const resolvers = {
           },
         });
       }
+      console.log({ currentOrgMember, currentEventMember });
 
       const tagQuery = {
         ...(tagValue
@@ -424,55 +425,30 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain: dirtySubdomain, logo },
+      { name, subdomain, logo },
       { user, eventHub }
     ) => {
       if (!user) throw new Error("You need to be logged in!");
-      const subdomain = slugify(dirtySubdomain);
+      const slug = slugify(subdomain);
 
-      const organization = new Organization({
-        name,
-        subdomain,
-        logo,
+      const org = await prisma.organization.create({
+        data: {
+          name,
+          slug,
+          logo,
+          orgMembers: { create: { userId: user.id, isOrgAdmin: true } },
+        },
+        include: {
+          orgMembers: true,
+        },
       });
-
-      const orgMember = new OrgMember({
-        userId: kauth.sub,
-        organizationId: organization.id,
-        isOrgAdmin: true,
-      });
-
-      const [savedOrg] = await Promise.all([
-        organization.save(),
-        orgMember.save(),
-      ]);
-
-      const clientId = "dreams";
-
-      const [client] = await kcAdminClient.clients.findOne({
-        clientId,
-      });
-
-      if (client.redirectUris) {
-        const newRedirectUris = [
-          ...client.redirectUris,
-          `https://${subdomain}.dreams.wtf/*`,
-        ];
-
-        await kcAdminClient.clients.update(
-          { id: client.id },
-          {
-            clientId,
-            redirectUris: newRedirectUris,
-          }
-        );
-      }
 
       await eventHub.publish("create-organization", {
-        currentOrganization: savedOrg,
-        currentOrgMember,
+        currentOrganization: org,
+        currentOrgMember: org.orgMembers[0],
       });
-      return savedOrg;
+
+      return org;
     },
     editOrganization: async (
       parent,
@@ -624,34 +600,23 @@ const resolvers = {
     deleteEvent: async (
       parent,
       { eventId },
-      {
-        currentOrgMember,
-        currentOrg,
-        models: { Event, Grant, Dream, EventMember },
-        eventHub,
-      }
+      { currentOrgMember, currentOrg, eventHub }
     ) => {
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be org. admin to delete event");
 
-      const event = await Event.findOne({
-        _id: eventId,
-        organizationId: currentOrgMember.organizationId,
+      const collection = await prisma.collection.updateMany({
+        where: { id: eventId, organizationId: currentOrgMember.id },
+        data: { deleted: true },
       });
-
-      if (!event)
-        throw new Error("Can't find event in your organization to delete.");
-
-      await Grant.deleteMany({ eventId });
-      await Dream.deleteMany({ eventId });
-      await EventMember.deleteMany({ eventId });
 
       await eventHub.publish("delete-event", {
         currentOrg,
         currentOrgMember,
-        event,
+        event: collection,
       });
-      return event.remove();
+
+      return collection;
     },
     addGuideline: async (
       parent,
@@ -1025,13 +990,6 @@ const resolvers = {
           }),
         },
       });
-      // if (title) dream.title = title;
-      // if (typeof description !== "undefined") dream.description = description;
-      // if (typeof summary !== "undefined") dream.summary = summary;
-      // if (typeof images !== "undefined") dream.images = images;
-      // if (typeof budgetItems !== "undefined") dream.budgetItems = budgetItems;
-      // if (typeof tags !== "undefined")
-      //   dream.tags = tags.map((tag) => slugify(tag));
 
       // TODO: behöver den här event ak.a collection?
       await eventHub.publish("edit-dream", {
@@ -1046,61 +1004,72 @@ const resolvers = {
     addTag: async (
       parent,
       { dreamId, tagId, tagValue },
-      { currentOrg, currentOrgMember, models: { EventMember, Tag, Dream } }
+      { currentOrgMember }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
+      });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
+        !collectionMember ||
+        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin &&
+          !collectionMember.isGuide)
       )
-        throw new Error("You are not a cocreator of this dream.");
+        throw new Error("You are not a cocreator of this bucket.");
 
-      if (tagId) {
-        dream.tags.push(tagId);
-        await dream.save();
-      } else if (tagValue) {
-        const tag = await new Tag({
-          value: tagValue,
-          eventId: dream.eventId,
-          organizationId: currentOrg.id,
-        }).save();
-        dream.tags.push(tag.id);
-        await dream.save();
-      } else {
-        throw new Error("You need to provide either tag id or tag value");
-      }
-      return dream;
+      if (!tagId || !tagValue)
+        throw new Error("You need to provide tag id or value");
+
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          tags: {
+            connectOrCreate: {
+              where: { id: tagId },
+              create: { value: tagValue, collectionId: bucket.collectionId },
+            },
+          },
+        },
+      });
     },
-    removeTag: async (
-      _,
-      { dreamId, tagId },
-      { currentOrgMember, models: { EventMember, Dream } }
-    ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
+    removeTag: async (_, { dreamId, tagId }, { currentOrgMember }) => {
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
+      });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
+        !collectionMember ||
+        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin &&
+          !collectionMember.isGuide)
       )
-        throw new Error("You are not a cocreator of this dream.");
+        throw new Error("You are not a cocreator of this bucket.");
 
-      dream.tags = dream.tags.filter((id) => id.toString() !== tagId);
-      return dream.save();
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: { tags: { disconnect: { id: tagId } } },
+      });
     },
     editDreamCustomField: async (
       parent,
@@ -1155,36 +1124,38 @@ const resolvers = {
     deleteDream: async (
       parent,
       { dreamId },
-      {
-        currentOrg,
-        currentOrgMember,
-        models: { Dream, EventMember, Contribution, Event },
-        eventHub,
-      }
+      { currentOrg, currentOrgMember, eventHub }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
-      const event = await Event.findOne({ _id: dream.eventId });
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true, collection: true },
+      });
+
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !eventMember ||
-        (!dream.cocreators.includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
+        !collectionMember ||
+        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin &&
+          !collectionMember.isGuide)
       )
-        throw new Error("You are not a cocreator of this dream.");
+        throw new Error("You are not a cocreator of this bucket.");
 
-      const [
-        { contributionsForDream } = { contributionsForDream: 0 },
-      ] = await Contribution.aggregate([
-        { $match: { dreamId: mongoose.Types.ObjectId(dreamId) } },
-        { $group: { _id: null, contributionsForDream: { $sum: "$amount" } } },
-      ]);
+      const {
+        _sum: { amount: contributionsForBucket },
+      } = await prisma.contribution.aggregate({
+        where: { bucketId: bucket.id },
+        _sum: { amount: true },
+      });
 
-      if (contributionsForDream > 0) {
+      if (contributionsForBucket > 0) {
         throw new Error(
           "You cant delete a Dream that has received contributions"
         );
@@ -1193,10 +1164,10 @@ const resolvers = {
       await eventHub.publish("delete-dream", {
         currentOrg,
         currentOrgMember,
-        event,
-        dream,
+        event: bucket.collection,
+        dream: bucket,
       });
-      return dream.remove();
+      return bucket;
     },
     addCocreator: async (
       parent,
@@ -1223,7 +1194,7 @@ const resolvers = {
           !collectionMember.isAdmin &&
           !collectionMember.isGuide)
       )
-        throw new Error("You are not a cocreator of this dream.");
+        throw new Error("You are not a cocreator of this bucket.");
 
       const updated = await prisma.bucket.update({
         where: { id: dreamId },
@@ -1239,35 +1210,34 @@ const resolvers = {
     removeCocreator: async (
       parent,
       { dreamId, memberId },
-      { currentOrgMember, models: { EventMember, Dream } }
+      { currentOrgMember }
     ) => {
-      const dream = await Dream.findOne({ _id: dreamId });
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: { cocreators: true },
+      });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
       if (
-        !eventMember.isAdmin &&
-        !eventMember.isGuide &&
-        !dream.cocreators.includes(eventMember.id)
+        !collectionMember ||
+        (!bucket.cocreators.map((m) => m.id).includes(collectionMember.id) &&
+          !collectionMember.isAdmin &&
+          !collectionMember.isGuide)
       )
-        throw new Error("You need to be a cocreator to remove co-creators.");
+        throw new Error("You are not a cocreator of this bucket.");
 
-      // check that added memberId is not already part of the thing
-      if (!dream.cocreators.includes(memberId))
-        throw new Error("Member is not a co-creator of this dream.");
-
-      // can't remove last person
-      if (dream.cocreators.length === 1)
-        throw new Error("Can't remove last co-creator.");
-
-      dream.cocreators = dream.cocreators.filter(
-        (id) => id.toString() !== memberId
-      );
-
-      return dream.save();
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: { cocreators: { disconnect: { id: memberId } } },
+      });
     },
     publishDream: async (
       parent,
@@ -1442,49 +1412,60 @@ const resolvers = {
     raiseFlag: async (
       parent,
       { dreamId, guidelineId, comment },
-      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
+      { currentOrg, currentOrgMember }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
-
-      const dream = await Dream.findOne({
-        _id: dreamId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: {
+          collection: {
+            include: { guidelines: { where: { id: guidelineId } } },
+          },
+        },
       });
 
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      const guideline = event.guidelines.id(guidelineId);
-
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collection.id,
+          },
+        },
       });
 
-      if (!eventMember || !eventMember.isApproved)
+      if (!collectionMember || !collectionMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      dream.flags.push({
-        guidelineId,
-        comment,
-        type: "RAISE_FLAG",
-        userId: currentOrgMember.id,
+      let updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          flags: {
+            create: {
+              guidelineId,
+              type: "RAISE_FLAG",
+              orgMemberId: currentOrgMember.id,
+              comment,
+            },
+          },
+        },
       });
 
-      const logContent = `Someone flagged this dream for the **${guideline.title}** guideline: \n> ${comment}`;
+      const logContent = `Someone flagged this dream for the **${bucket.collection.guidelines[0].title}** guideline: \n> ${comment}`;
 
       if (orgHasDiscourse(currentOrg)) {
-        if (!dream.discourseTopicId) {
+        if (!bucket.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
           ).posts.create(
             {
-              title: dream.title,
+              title: bucket.title,
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
                   : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${event.slug}/${dream.id}`,
+              }/${bucket.collection.slug}/${dream.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
@@ -1493,75 +1474,93 @@ const resolvers = {
               username: "system",
             }
           );
-
-          dream.discourseTopicId = discoursePost.topic_id;
+          updated = await prisma.bucket.update({
+            where: { id: dreamId },
+            data: { discourseTopicId: discoursePost.topic_id },
+          });
         }
 
         await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: dream.discourseTopicId,
+            topic_id: updated.discourseTopicId,
             raw: logContent,
           },
           { username: "system" }
         );
       } else {
-        dream.comments.push({
-          authorId: currentOrgMember.id,
-          content: logContent,
-          isLog: true,
+        await prisma.comment.create({
+          data: {
+            content: logContent,
+            isLog: true,
+            orgMemberId: currentOrgMember.id,
+          },
         });
       }
 
-      return dream.save();
+      return updated;
     },
     resolveFlag: async (
       parent,
       { dreamId, flagId, comment },
-      { currentOrg, currentOrgMember, models: { Dream, Event, EventMember } }
+      { currentOrg, currentOrgMember }
     ) => {
       // check dreamReviewIsOpen
       // check not already left a flag?
 
-      const dream = await Dream.findOne({
-        _id: dreamId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: {
+          collection: true,
+          flags: {
+            where: { id: flagId },
+            include: { guideline: true },
+          },
+        },
       });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collection.id,
+          },
+        },
       });
 
-      if (!eventMember || !eventMember.isApproved)
+      if (!collectionMember || !collectionMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      dream.flags.push({
-        resolvingFlagId: flagId,
-        comment,
-        type: "RESOLVE_FLAG",
-        userId: currentOrgMember.id,
+      let updated = await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          flags: {
+            create: {
+              resolvingFlagId: flagId,
+              type: "RESOLVE_FLAG",
+              orgMemberId: currentOrgMember.id,
+              comment,
+            },
+          },
+        },
       });
 
-      const resolvedFlag = dream.flags.id(flagId);
+      const resolvedFlagGuideline = bucket.flags[0].guideline;
 
-      const event = await Event.findOne({ _id: dream.eventId });
-
-      const guideline = event.guidelines.id(resolvedFlag.guidelineId);
-
-      const logContent = `Someone resolved a flag for the **${guideline.title}** guideline: \n> ${comment}`;
+      const logContent = `Someone resolved a flag for the **${resolvedFlagGuideline.title}** guideline: \n> ${comment}`;
 
       if (orgHasDiscourse(currentOrg)) {
-        if (!dream.discourseTopicId) {
+        if (!bucket.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
           ).posts.create(
             {
-              title: dream.title,
+              title: bucket.title,
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
                   : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${event.slug}/${dream.id}`,
+              }/${bucket.collection.slug}/${bucket.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),
@@ -1570,101 +1569,97 @@ const resolvers = {
               username: "system",
             }
           );
-
-          dream.discourseTopicId = discoursePost.topic_id;
+          updated = await prisma.bucket.update({
+            where: { id: dreamId },
+            data: { discourseTopicId: discoursePost.topic_id },
+          });
         }
         await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: dream.discourseTopicId,
+            topic_id: updated.discourseTopicId,
             raw: logContent,
           },
           { username: "system" }
         );
       } else {
-        dream.comments.push({
-          authorId: currentOrgMember.id,
-          content: logContent,
-          isLog: true,
+        await prisma.comment.create({
+          data: {
+            content: logContent,
+            isLog: true,
+            orgMemberId: currentOrgMember.id,
+          },
         });
       }
 
-      return dream.save();
+      return updated;
     },
-    allGoodFlag: async (
-      parent,
-      { dreamId },
-      { currentOrgMember, models: { Dream, EventMember } }
-    ) => {
+    allGoodFlag: async (parent, { dreamId }, { currentOrgMember }) => {
       // check dreamReviewIsOpen
       // check have not left one of these flags already
-      const dream = await Dream.findOne({
-        _id: dreamId,
+      const bucket = await prisma.bucket.findUnique({
+        where: { id: dreamId },
+        include: {
+          flags: {
+            where: { orgMemberId: currentOrgMember.id, type: "ALL_GOOD_FLAG" },
+          },
+        },
       });
 
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId: dream.eventId,
+      if (bucket.flags.length)
+        throw new Error("You have already left an all good flag");
+
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: bucket.collectionId,
+          },
+        },
       });
 
-      if (!eventMember || !eventMember.isApproved)
+      if (!collectionMember || !collectionMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      for (const flag of dream.flags) {
-        if (
-          flag.userId === currentOrgMember.id &&
-          flag.type === "ALL_GOOD_FLAG"
-        )
-          throw new Error("You have already left an all good flag");
-      }
-
-      dream.flags.push({
-        type: "ALL_GOOD_FLAG",
-        userId: currentOrgMember.id,
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          flags: {
+            create: { type: "ALL_GOOD_FLAG", orgMemberId: currentOrgMember.id },
+          },
+        },
       });
-
-      return dream.save();
     },
 
-    joinOrg: async (
-      parent,
-      args,
-      { kauth, currentOrg, models: { OrgMember } }
-    ) => {
-      if (!kauth) throw new Error("You need to be logged in.");
+    joinOrg: async (parent, args, { user, currentOrg }) => {
+      if (!user) throw new Error("You need to be logged in.");
 
-      return new OrgMember({
-        userId: kauth.sub,
-        organizationId: currentOrg.id,
-      }).save();
+      return await prisma.orgMember.create({
+        data: { userId: user.id, organizationId: currentOrg.id },
+      });
     },
     updateProfile: async (
       parent,
-      { firstName, lastName, username, bio },
-      { kauth, currentOrgMember, kcAdminClient }
+      { name, username, bio },
+      { currentOrgMember, user }
     ) => {
-      if (!kauth) throw new Error("You need to be logged in..");
+      if (!user) throw new Error("You need to be logged in..");
 
-      if (firstName || lastName || username) {
-        try {
-          await kcAdminClient.users.update(
-            { id: kauth.sub },
-            {
-              ...(typeof firstName !== "undefined" && { firstName }),
-              ...(typeof lastName !== "undefined" && { lastName }),
-              ...(typeof username !== "undefined" && { username }),
-            }
-          );
-        } catch (error) {
-          throw new Error(error);
-        }
-      }
+      const updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          ...(typeof name !== "undefined" && { name }),
+          ...(typeof username !== "undefined" && { username }),
+          ...(typeof bio !== "undefined" && {
+            orgMemberships: {
+              update: { where: { id: currentOrgMember.id }, data: { bio } },
+            },
+          }),
+        },
+      });
 
-      if (currentOrgMember && bio) {
-        currentOrgMember.bio = bio;
-        await currentOrgMember.save();
-      }
+      console.log({ updatedUser });
 
-      return kcAdminClient.users.findOne({ id: kauth.sub });
+      return updatedUser;
     },
     inviteEventMembers: async (
       parent,
@@ -1870,74 +1865,61 @@ const resolvers = {
       )
         throw new Error("You need to be admin to update member");
 
-      const member = await EventMember.findOne({
-        _id: memberId,
-        eventId,
+      const member = await prisma.collectionMember.update({
+        where: { id: memberId },
+        data: {
+          ...(typeof isApproved !== "undefined" && { isApproved }),
+          ...(typeof isAdmin !== "undefined" && { isAdmin }),
+          ...(typeof isGuide !== "undefined" && { isGuide }),
+        },
       });
 
-      if (!member) throw new Error("No member to update found");
-
-      if (typeof isApproved !== "undefined") {
-        member.isApproved = isApproved;
-      } // send notification on approving?
-      if (typeof isAdmin !== "undefined") {
-        member.isAdmin = isAdmin;
-      }
-      if (typeof isGuide !== "undefined") {
-        member.isGuide = isGuide;
-      }
-      return member.save();
+      return member;
     },
     deleteMember: async (
       parent,
       { eventId, memberId },
-      { currentOrgMember, models: { EventMember } }
+      { currentOrgMember }
     ) => {
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          orgMemberId_collectionId: {
+            orgMemberId: currentOrgMember.id,
+            collectionId: eventId,
+          },
+        },
       });
 
       if (
         !(
-          (currentEventMember && currentEventMember.isAdmin) ||
+          (collectionMember && collectionMember.isAdmin) ||
           currentOrgMember.isOrgAdmin
         )
       )
         throw new Error("You need to be admin to delete member");
 
-      const member = await EventMember.findOneAndDelete({
-        _id: memberId,
-        eventId,
+      return await prisma.collectionMember.deleteMany({
+        where: { id: memberId, collectionId: eventId },
       });
-
-      return member;
     },
     deleteOrganization: async (
       parent,
       { organizationId },
-      { currentUser, currentOrgMember, models: { Organization } }
+      { user, currentOrgMember }
     ) => {
       if (
         !(
-          (currentOrgMember && currentOrgMember.isOrgAdmin) ||
-          currentUser.isRootAdmin
+          (currentOrgMember &&
+            currentOrgMember.isOrgAdmin &&
+            organizationId == currentOrgMember.organizationId) ||
+          user.isRootAdmin
         )
       )
         throw new Error(
           "You need to be org. or root admin to delete an organization"
         );
 
-      const organization = await Organization.findOne({
-        _id: organizationId,
-      });
-
-      if (!organization)
-        throw new Error(`Cant find organization by id ${organizationId}`);
-
-      return await Organization.findOneAndDelete({
-        _id: organizationId,
-      });
+      return prisma.organization.delete({ where: { id: organizationId } });
     },
     approveForGranting: async (
       parent,
@@ -2375,77 +2357,44 @@ const resolvers = {
     registerForEvent: async (
       parent,
       { eventId },
-      {
-        kauth,
-        currentOrg,
-        currentOrgMember,
-        models: { EventMember, Event, OrgMember },
-      }
+      { user, currentOrg, currentOrgMember }
     ) => {
-      if (!kauth) throw new Error("You need to be logged in.");
+      if (!user) throw new Error("You need to be logged in.");
+      if (!currentOrg) throw new Error("There needs to be an org");
 
-      let orgMember = currentOrgMember;
-
-      if (!orgMember) {
-        orgMember = await new OrgMember({
-          userId: kauth.sub,
-          organizationId: currentOrg.id,
-        }).save();
-      }
-
-      const currentEventMember = await EventMember.findOne({
-        orgMemberId: orgMember.id,
-        eventId,
+      const collection = await prisma.collection.findUnique({
+        where: { id: eventId },
       });
 
-      if (currentEventMember) throw new Error("You are already a member");
+      if (collection.registrationPolicy === "INVITE_ONLY")
+        throw new Error("This collection is invite only");
 
-      const event = await Event.findOne({ _id: eventId });
+      const collectionMember = await prisma.collectionMember.create({
+        data: {
+          collection: { connect: { id: eventId } },
+          orgMember: {
+            connectOrCreate: {
+              where: {
+                organizationId_userId: {
+                  organizationId: currentOrg.id,
+                  userId: user.id,
+                },
+              },
+              create: { organizationId: currentOrg.id, userId: user.id },
+            },
+          },
+          isApproved:
+            currentOrgMember?.isOrgAdmin ||
+            collection.registrationPolicy === "OPEN",
+        },
+      });
 
-      let newMember = {
-        isAdmin: false,
-        eventId,
-        orgMemberId: orgMember.id,
-        isApproved: null,
-      };
-
-      if (orgMember.isOrgAdmin) {
-        newMember.isApproved = true;
-      } else {
-        switch (event.registrationPolicy) {
-          case "OPEN":
-            newMember.isApproved = true;
-            break;
-          case "REQUEST_TO_JOIN":
-            newMember.isApproved = false;
-
-            // TODO: need to fix this.. no emails saved in orgmembers
-            // // send request to join notification emails
-            // const admins = await EventMember.find({
-            //   eventId,
-            //   isAdmin: true,
-            // }).populate('orgMemberId');
-
-            // const adminEmails = admins.map((member) => member.orgMemberId.email);
-            // await EmailService.sendRequestToJoinNotifications(
-            //   currentOrg,
-            //   currentUser,
-            //   event,
-            //   adminEmails
-            // );
-            break;
-
-          case "INVITE_ONLY":
-            throw new Error("This event is invite only");
-        }
-      }
-
-      return new EventMember(newMember).save();
+      return collectionMember;
     },
   },
   Subscription: {
     commentsChanged: {
-      subscribe: () => liveUpdate.asyncIterator(["commentsChanged"]),
+      subscribe: () => {}, //liveUpdate.asyncIterator(["commentsChanged"]),
     },
   },
   EventMember: {

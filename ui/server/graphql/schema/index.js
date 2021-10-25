@@ -52,7 +52,6 @@ const schema = gql`
       slug: String!
       title: String!
       currency: String!
-      description: String
       registrationPolicy: RegistrationPolicy!
     ): Collection!
     editEvent(

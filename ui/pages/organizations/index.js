@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 import OrganizationsTable from "../../components/Org/OrganizationsTable";
 import HappySpinner from "../../components/HappySpinner";
 import Router from "next/router";
@@ -24,28 +24,31 @@ const DELETE_ORGANIZATION = gql`
 `;
 
 export default () => {
-  const {
-    data: { organizations } = { organizations: [] },
-    loading,
-    error,
-  } = useQuery(ORGANIZATIONS_QUERY, {});
-
-  const [deleteOrganization] = useMutation(DELETE_ORGANIZATION, {
-    update(cache, { data: { deleteOrganization } }) {
-      const { organizations } = cache.readQuery({
-        query: ORGANIZATIONS_QUERY,
-      });
-
-      cache.writeQuery({
-        query: ORGANIZATIONS_QUERY,
-        data: {
-          organizations: organizations.filter(
-            (organization) => organization.id !== deleteOrganization.id
-          ),
-        },
-      });
+  const [
+    {
+      data: { organizations } = { organizations: [] },
+      fetching: loading,
+      error,
     },
-  });
+  ] = useQuery({ query: ORGANIZATIONS_QUERY });
+
+  const [, deleteOrganization] = useMutation(
+    DELETE_ORGANIZATION
+    // update(cache, { data: { deleteOrganization } }) {
+    //   const { organizations } = cache.readQuery({
+    //     query: ORGANIZATIONS_QUERY,
+    //   });
+
+    //   cache.writeQuery({
+    //     query: ORGANIZATIONS_QUERY,
+    //     data: {
+    //       organizations: organizations.filter(
+    //         (organization) => organization.id !== deleteOrganization.id
+    //       ),
+    //     },
+    //   });
+    // },
+  );
 
   const updateOrganization = async ({ organizationId }) => {
     Router.push(

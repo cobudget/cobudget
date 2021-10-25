@@ -1,4 +1,4 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
@@ -16,15 +16,13 @@ const DELETE_EVENT_MUTATION = gql`
 
 export default ({ event, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
-  const [deleteEvent, { loading }] = useMutation(DELETE_EVENT_MUTATION, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [{ fetching: loading }, deleteEvent] = useMutation(
+    DELETE_EVENT_MUTATION
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    deleteEvent(event)
+    deleteEvent({ eventId: event.id })
       .then(() => {
         handleClose();
         Router.push("/");

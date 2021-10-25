@@ -122,7 +122,7 @@ const EventMembers = ({ event }) => {
     //notifyOnNetworkStatusChange: true,
     variables: { eventId: event.id, offset: 0, limit: 1000 },
   });
-  console.log({ event });
+
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
   const [, deleteMember] = useMutation(DELETE_MEMBER, {
