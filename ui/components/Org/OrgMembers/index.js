@@ -24,7 +24,7 @@ const UPDATE_ORG_MEMBER = gql`
 //   }
 // `;
 
-const OrgMembers = () => {
+const OrgMembers = ({ currentOrg }) => {
   const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
@@ -59,7 +59,10 @@ const OrgMembers = () => {
         </div>
       </div>
 
-      <OrgMembersTable updateOrgMember={updateOrgMember} />
+      <OrgMembersTable
+        updateOrgMember={updateOrgMember}
+        currentOrg={currentOrg}
+      />
     </div>
   );
 };

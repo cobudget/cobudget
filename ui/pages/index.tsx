@@ -27,7 +27,10 @@ const LandingPage = () => {
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-12">
         <div className="space-y-8">
           <h1 className="text-6xl font-medium">
-            Digital tools for participant-driven culture
+            Digital tools for participant-driven culture{" "}
+            <Link href="/blivande">
+              <a>Blivande</a>
+            </Link>
           </h1>
           <p className="text-xl text-gray-800">
             Plato tools help you gather ideas, take decisions, map needs,
@@ -78,13 +81,15 @@ const LinkCard = forwardRef((props, ref) => {
   );
 });
 
-const IndexPage = ({ currentOrg, currentOrgMember }) => {
+const IndexPage = ({ currentOrg, currentOrgMember, router }) => {
+  return <LandingPage />;
+
   const [{ data: { events } = { events: [] } }] = useQuery({
     query: EVENTS_QUERY,
   });
 
   // TODO - perhaps a redirect to organization pages instead
-  if (!currentOrg) return <LandingPage />;
+  return <LandingPage />;
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 

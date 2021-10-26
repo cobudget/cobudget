@@ -81,7 +81,7 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: DREAMS_QUERY,
     variables: {
-      eventSlug: router.query.event,
+      eventSlug: router.query.collection,
       offset: variables.offset,
       limit: variables.limit,
       ...(!!s && { textSearchTerm: s }),

@@ -9,16 +9,12 @@ import ImageUpload from "components/ImageUpload";
 import slugify from "utils/slugify";
 
 const CREATE_ORGANIZATION = gql`
-  mutation CreateOrganization(
-    $name: String!
-    $logo: String
-    $subdomain: String!
-  ) {
-    createOrganization(name: $name, logo: $logo, subdomain: $subdomain) {
+  mutation CreateOrganization($name: String!, $logo: String, $slug: String!) {
+    createOrganization(name: $name, logo: $logo, slug: $slug) {
       id
       name
       logo
-      subdomain
+      slug
     }
   }
 `;
@@ -28,25 +24,24 @@ const EDIT_ORGANIZATION = gql`
     $organizationId: ID!
     $name: String!
     $logo: String
-    $subdomain: String!
+    $slug: String!
   ) {
     editOrganization(
       organizationId: $organizationId
       name: $name
       logo: $logo
-      subdomain: $subdomain
+      slug: $slug
     ) {
       id
       name
       logo
-      subdomain
+      slug
       customDomain
     }
   }
 `;
 
 const EditOrganization = ({ organization, currentUser }) => {
-  console.log({ currentUser, organization });
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
@@ -59,7 +54,7 @@ const EditOrganization = ({ organization, currentUser }) => {
 
   const { handleSubmit, register, errors, reset } = useForm();
 
-  const [slugValue, setSlugValue] = useState(organization?.subdomain ?? "");
+  const [slugValue, setSlugValue] = useState(organization?.slug ?? "");
 
   const isNew = !organization;
 
@@ -116,22 +111,27 @@ const EditOrganization = ({ organization, currentUser }) => {
         />
 
         <TextField
-          name="subdomain"
-          label={fromRealities ? "Link" : "Subdomain"}
+          name="slug"
+          label="URL"
           placeholder={slugify(`${currentUser.name}'s community`)}
           inputRef={register({ required: "Required" })}
-          error={errors.subdomain}
+          error={errors.slug}
           inputProps={{
             value: slugValue,
-            onChange: (e) => setSlugValue(e.target.value),
+            onChange: (e) => {
+              // console.log("onChange");
+              // console.log({ slugValue, targetValue: e.target.value });
+              setSlugValue(e.target.value);
+            },
             onBlur: (e) => setSlugValue(slugify(e.target.value)),
           }}
           helperText={errors.subdomain?.message}
           startAdornment={
-            fromRealities && <span>{process.env.REALITIES_DEPLOY_URL}/</span>
-          }
-          endAdornment={
-            !fromRealities && <span>.{process.env.DEPLOY_URL}</span>
+            fromRealities ? (
+              <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+            ) : (
+              <span>{process.env.DEPLOY_URL}/</span>
+            )
           }
         />
 

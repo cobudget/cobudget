@@ -36,7 +36,7 @@ export const EVENT_QUERY = gql`
 export default function AboutPage({ router, currentOrg }) {
   const [{ data: { event } = {}, fetching: loading }] = useQuery({
     query: EVENT_QUERY,
-    variables: { slug: router.query.event },
+    variables: { slug: router.query.collection },
   });
 
   if (loading)

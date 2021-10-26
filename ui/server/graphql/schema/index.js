@@ -6,12 +6,12 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    currentOrgMember: OrgMember
-    currentOrg: Organization
+    currentOrgMember(orgSlug: String): OrgMember
+    currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events(slug: String, limit: Int): [Collection!]
-    event(slug: String): Collection
+    events(orgSlug: String!, limit: Int): [Collection!]
+    event(orgSlug: String, collectionSlug: String): Collection
     dream(id: ID!): Dream
     dreamsPage(
       eventSlug: String!
@@ -21,7 +21,7 @@ const schema = gql`
       limit: Int
     ): DreamsPage
     commentSet(dreamId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    orgMembersPage(offset: Int, limit: Int): OrgMembersPage
+    orgMembersPage(orgSlug: String!, offset: Int, limit: Int): OrgMembersPage
     membersPage(
       eventId: ID!
       isApproved: Boolean
@@ -37,14 +37,14 @@ const schema = gql`
     createOrganization(
       name: String!
       logo: String
-      subdomain: String!
+      slug: String!
     ): Organization!
 
     editOrganization(
       organizationId: ID!
       name: String!
       logo: String
-      subdomain: String!
+      slug: String!
     ): Organization!
     setTodosFinished: Organization
 
@@ -272,7 +272,7 @@ const schema = gql`
     isOrgAdmin: Boolean
     bio: String #what do we do with this one?
     createdAt: Date
-    currentEventMembership(slug: String): EventMember #this is weird syntax...
+    currentEventMembership(collectionSlug: String): EventMember #this is weird syntax...
     eventMemberships: [EventMember!]
     discourseUsername: String
     hasDiscourseApiKey: Boolean
@@ -280,7 +280,7 @@ const schema = gql`
 
   type OrgMembersPage {
     moreExist: Boolean
-    orgMembers(offset: Int, limit: Int): [OrgMember]
+    orgMembers: [OrgMember]
   }
 
   type EventMember {

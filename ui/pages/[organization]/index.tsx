@@ -1,30 +1,21 @@
 import { forwardRef } from "react";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import Link from "next/link";
-import Button from "components/Button";
-import TodoList from "components/TodoList";
-import { AddIcon } from "components/Icons";
-import Label from "components/Label";
-import SubMenu from "components/SubMenu";
-import PageHero from "components/PageHero";
+import Button from "../../components/Button";
+import TodoList from "../../components/TodoList";
+import { AddIcon } from "../../components/Icons";
+import Label from "../../components/Label";
+import SubMenu from "../../components/SubMenu";
+import PageHero from "../../components/PageHero";
 
 const EVENTS_QUERY = gql`
-  query Events($slug: String!) {
-    events(slug: $slug) {
+  query Events($orgSlug: String!) {
+    events(orgSlug: $orgSlug) {
       id
       slug
       title
       archived
       color
-    }
-    currentOrgMember(slug: $slug) {
-      id
-      isOrgAdmin
-    }
-    currentOrg(slug: $slug) {
-      id
-      slug
-      finishedTodos
     }
   }
 `;
@@ -48,29 +39,25 @@ const LinkCard = forwardRef((props, ref) => {
   );
 });
 
-const IndexPage = ({ router }) => {
-  const {
-    data: { events, currentOrgMember, currentOrg } = {
-      events: [],
-      currentOrgMember: null,
-      currentOrg: null,
+const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
+  const [
+    {
+      data: { events } = {
+        events: [],
+      },
     },
-  } = useQuery(EVENTS_QUERY, {
-    variables: { slug: router.query.organization },
+  ] = useQuery({
+    query: EVENTS_QUERY,
+    variables: { orgSlug: router.query.organization },
   });
-  //   // TODO - perhaps a redirect to organization pages instead
-  //   if (!currentOrg) {
-  //     return <LandingPage />;
-  //   }
+
+  console.log({ ooorg: currentOrg, currentOrgMember });
 
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (
     <>
-      <SubMenu
-        currentOrgMember={currentOrgMember}
-        orgSlug={router.query.organization}
-      />
+      <SubMenu currentOrgMember={currentOrgMember} />
       <PageHero>
         <div className="flex justify-between">
           <h2 className="text-2xl font-semibold">
@@ -112,21 +99,10 @@ const IndexPage = ({ router }) => {
               </LinkCard>
             </Link>
           ))}
-          {/* {currentOrgMember?.isOrgAdmin && (
-            <Link href="/new-collection">
-              <button
-                type="button"
-                className="self-center flex items-center justify-center h-32 w-32 border-dashed border-3 rounded bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-500 transition-colors ease-in-out duration-200 pointer-cursor z-10 relative focus:outline-none focus:border-green"
-              >
-                <AddIcon className="p-8" />
-              </button>
-            </Link>
-          )} */}
         </div>
         {showTodos && (
           <div className="col-span-2">
-            {/* <div className="text-sm font-semibold mb-10 block">Get Going</div> */}
-            <TodoList subdomain={currentOrg.subdomain} />
+            <TodoList currentOrg={currentOrg} />
           </div>
         )}
       </div>

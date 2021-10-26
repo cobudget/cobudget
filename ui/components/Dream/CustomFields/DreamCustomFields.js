@@ -24,7 +24,7 @@ const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
   const router = useRouter();
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,
-    variables: { slug: router.query.event },
+    variables: { slug: router.query.collection },
   });
 
   if (!data) {

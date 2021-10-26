@@ -53,41 +53,61 @@ const resolvers = {
     currentUser: (parent, args, { user }) => {
       return user ? { ...user } : null;
     },
-    currentOrg: (parent, args, { currentOrg }) => currentOrg,
-    currentOrgMember: (parent, args, { currentOrgMember }) => currentOrgMember,
+    currentOrg: async (parent, { orgSlug }) => {
+      if (!orgSlug) return null;
+      return prisma.organization.findUnique({ where: { slug: orgSlug } });
+    },
+    currentOrgMember: async (parent, { orgSlug: slug }, { user }) => {
+      if (!user || !slug) return null;
+
+      const orgMember = await prisma.orgMember.findFirst({
+        where: { organization: { slug }, userId: user.id },
+      });
+
+      // const org = await prisma.organization.findUnique({ where: { slug } });
+
+      // const orgMember = await prisma.orgMember.findUnique({
+      //   where: {
+      //     organizationId_userId: { organizationId: org.id, userId: user.id },
+      //   },
+      // });
+      return orgMember;
+    },
     organization: combineResolvers(isMemberOfOrg, async (parent, { id }) => {
       return prisma.organization.findUnique({ where: { id } });
     }),
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    events: async (
-      parent,
-      { limit },
-      { user, currentOrg, currentOrgMember }
-    ) => {
-      if (!currentOrg) return null;
+    events: async (parent, { limit, orgSlug }, { user }) => {
+      if (!orgSlug) return null;
+
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: { organization: { slug: orgSlug }, userId: user.id },
+      });
+
 
       // if admin show all events (current or archived)
       if (currentOrgMember && currentOrgMember.isOrgAdmin) {
         return prisma.collection.findMany({
-          where: { organizationId: currentOrg.id },
+          where: { organization: { slug: orgSlug } },
           take: limit,
         });
       }
 
       return prisma.collection.findMany({
         where: {
-          organizationId: currentOrg.id,
+          organization: { slug: orgSlug },
           archived: { not: true },
         },
         take: limit,
       });
     },
-    event: async (parent, { slug }, { currentOrg }) => {
-      if (!slug || !currentOrg) return null;
-      return await prisma.collection.findUnique({
-        where: { organizationId_slug: { organizationId: currentOrg.id, slug } },
+    event: async (parent, { orgSlug, collectionSlug }) => {
+      if (!orgSlug || !collectionSlug) return null;
+
+      return await prisma.collection.findFirst({
+        where: { slug: collectionSlug, organization: { slug: orgSlug } },
       });
     },
     contributionsPage: async (
@@ -246,17 +266,21 @@ const resolvers = {
     },
     orgMembersPage: async (
       parent,
-      { offset, limit },
-      { user, currentOrg, currentOrgMember }
+      { offset = 0, limit, orgSlug },
+      { user }
     ) => {
-      if (!currentOrg) return null;
+      if (!orgSlug) return null;
+
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: { organization: { slug: orgSlug }, userId: user.id },
+      });
 
       if (!currentOrgMember?.isOrgAdmin)
         throw new Error("You need to be org admin to view this");
 
       // TODO: Why is it limit + 1?
       const orgMembersWithExtra = await prisma.orgMember.findMany({
-        where: { organizationId: currentOrg.id },
+        where: { organization: { slug: orgSlug } },
         skip: offset,
         take: limit + 1,
       });
@@ -425,16 +449,15 @@ const resolvers = {
   Mutation: {
     createOrganization: async (
       parent,
-      { name, subdomain, logo },
+      { name, slug, logo },
       { user, eventHub }
     ) => {
       if (!user) throw new Error("You need to be logged in!");
-      const slug = slugify(subdomain);
 
       const org = await prisma.organization.create({
         data: {
           name,
-          slug,
+          slug: slugify(slug),
           logo,
           orgMembers: { create: { userId: user.id, isOrgAdmin: true } },
         },
@@ -452,26 +475,31 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, subdomain: dirtySubdomain, logo },
-      { user: currentUser, currentOrgMember, eventHub }
+      { organizationId, name, slug, logo },
+      { user, eventHub }
     ) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
+        where: {
+          organizationId_userId: { organizationId, userId: user.id },
+        },
+      });
+
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be logged in as organization admin.");
       if (
         organizationId !== currentOrgMember.organizationId &&
-        !currentUser?.isRootAdmin
+        !user?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
-
-      const subdomain = slugify(dirtySubdomain);
 
       const organization = await prisma.organization.update({
         where: {
           id: organizationId,
         },
-        data: { name, logo, slug: subdomain },
+        data: { name, logo, slug: slugify(slug) },
       });
 
+      // TODO: add back
       // await eventHub.publish("edit-organization", {
       //   currentOrg: organization,
       //   currentOrgMember,

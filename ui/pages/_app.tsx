@@ -8,8 +8,8 @@ import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($slug: String) {
-    event(slug: $slug) {
+  query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
+    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       slug
       info
@@ -57,7 +57,7 @@ export const TOP_LEVEL_QUERY = gql`
       avatar
       email
     }
-    currentOrgMember {
+    currentOrgMember(orgSlug: $orgSlug) {
       id
       bio
       isOrgAdmin
@@ -77,7 +77,7 @@ export const TOP_LEVEL_QUERY = gql`
           slug
         }
       }
-      currentEventMembership(slug: $slug) {
+      currentEventMembership(collectionSlug: $collectionSlug) {
         id
         isAdmin
         isGuide
@@ -90,12 +90,12 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg {
+    currentOrg(orgSlug: $orgSlug) {
       __typename
       id
       name
       logo
-      subdomain
+      slug
       customDomain
       discourseUrl
       finishedTodos
@@ -105,18 +105,28 @@ export const TOP_LEVEL_QUERY = gql`
 
 const MyApp = ({ Component, pageProps, router }) => {
   // const { user, loading } = useFetchUser();
+  console.log({ router });
   const [
     {
-      data: { currentUser, currentOrg, currentOrgMember, event } = {},
+      data: { currentUser, currentOrg, currentOrgMember, event } = {
+        currentUser: null,
+        currentOrg: null,
+        currentOrgMember: null,
+        event: null,
+      },
       fetching,
       error,
     },
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
-    variables: { slug: router.query.event },
+    variables: {
+      orgSlug: router.query.organization,
+      collectionSlug: router.query.collection,
+    },
   });
-  // console.log({ currentUser, currentOrg, fetching, error });
-
+  //console.log({ currentUser, currentOrg, currentOrgMember, error, router });
+  //console.log({ error });
+  console.log({ currentOrg });
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
@@ -126,7 +136,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   // const {
   //   data: { currentUser, currentOrg, currentOrgMember, event } = {},
   // } = useQuery(TOP_LEVEL_QUERY, {
-  //   variables: { slug: router.query.event },
+  //   variables: { slug: router.query.collection },
   // });
 
   const [modal, setModal] = useState(null);
