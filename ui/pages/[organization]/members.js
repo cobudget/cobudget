@@ -1,7 +1,7 @@
-import OrgMembers from "../components/Org/OrgMembers";
-import SubMenu from "components/SubMenu";
+import OrgMembers from "../../components/Org/OrgMembers";
+import SubMenu from "../../components/SubMenu";
 
-const OrgMembersPage = ({ currentOrgMember }) => {
+const OrgMembersPage = ({ currentOrgMember, currentOrg }) => {
   const isAdmin = currentOrgMember?.isOrgAdmin;
   if (!isAdmin) return null;
 
@@ -10,7 +10,7 @@ const OrgMembersPage = ({ currentOrgMember }) => {
       <SubMenu currentOrgMember={currentOrgMember} />
 
       <div className="page">
-        <OrgMembers />
+        <OrgMembers currentOrg={currentOrg} />
       </div>
     </>
   );

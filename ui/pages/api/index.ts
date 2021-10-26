@@ -18,7 +18,7 @@ export const config = {
 export interface GraphQLContext {
   user?: Express.User;
   prisma: typeof prisma;
-  origin: string;
+  //origin: string;
   eventHub?: any;
   currentOrg?: any;
   currentOrgMember?: any;
@@ -39,54 +39,54 @@ export default handler()
       resolvers,
       context: async ({ req }): Promise<GraphQLContext> => {
         const { user } = req;
-        let currentOrg = null;
-        let currentOrgMember = null;
+        // let currentOrg = null;
+        // let currentOrgMember = null;
 
-        if (req.headers.host) {
-          let customDomain;
-          let { host, subdomain } = getNewHostInfo(req.headers.host);
-          if (
-            !(
-              host.endsWith(process.env.DEPLOY_URL) ||
-              host.endsWith("localhost:3000") ||
-              host.endsWith("staging.dreams.wtf")
-            )
-          ) {
-            customDomain = host;
-            subdomain = null;
-          }
+        // if (req.headers.host) {
+        //   let customDomain;
+        //   let { host, subdomain } = getNewHostInfo(req.headers.host);
+        //   if (
+        //     !(
+        //       host.endsWith(process.env.DEPLOY_URL) ||
+        //       host.endsWith("localhost:3000") ||
+        //       host.endsWith("staging.dreams.wtf")
+        //     )
+        //   ) {
+        //     customDomain = host;
+        //     subdomain = null;
+        //   }
 
-          if (customDomain) {
-            currentOrg = await prisma.organization.findFirst({
-              where: { customDomain },
-            });
-          } else if (subdomain) {
-            currentOrg = await prisma.organization.findUnique({
-              where: { slug: subdomain },
-            });
-          }
-          if (currentOrg && user) {
-            currentOrgMember = await prisma.orgMember.findUnique({
-              where: {
-                organizationId_userId: {
-                  organizationId: currentOrg.id,
-                  userId: user.id,
-                },
-              },
-              include: { user: true },
-            });
-          }
-        }
+        //   if (customDomain) {
+        //     currentOrg = await prisma.organization.findFirst({
+        //       where: { customDomain },
+        //     });
+        //   } else if (subdomain) {
+        //     currentOrg = await prisma.organization.findUnique({
+        //       where: { slug: subdomain },
+        //     });
+        //   }
+        //   if (currentOrg && user) {
+        //     currentOrgMember = await prisma.orgMember.findUnique({
+        //       where: {
+        //         organizationId_userId: {
+        //           organizationId: currentOrg.id,
+        //           userId: user.id,
+        //         },
+        //       },
+        //       include: { user: true },
+        //     });
+        //   }
+        // }
 
-        const origin = getRequestOrigin(req);
+        //const origin = getRequestOrigin(req);
 
         return {
           user,
-          origin,
+          //origin,
           prisma,
           eventHub: EventHub,
-          currentOrg,
-          currentOrgMember,
+          //currentOrg,
+          //currentOrgMember,
         };
       },
     }).createHandler({

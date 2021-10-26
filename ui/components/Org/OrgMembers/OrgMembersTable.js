@@ -20,10 +20,10 @@ import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
 export const ORG_MEMBERS_QUERY = gql`
-  query OrgMembers($offset: Int, $limit: Int) {
-    orgMembersPage(offset: $offset, limit: $limit) {
+  query OrgMembers($orgSlug: String!, $offset: Int, $limit: Int) {
+    orgMembersPage(orgSlug: $orgSlug, offset: $offset, limit: $limit) {
       moreExist
-      orgMembers(offset: $offset, limit: $limit) {
+      orgMembers {
         id
         isOrgAdmin
         bio
@@ -124,14 +124,19 @@ const Page = ({
   onLoadMore,
   deleteMember,
   updateOrgMember,
+  currentOrg,
 }) => {
   const [{ data, fetching, error }] = useQuery({
     query: ORG_MEMBERS_QUERY,
-    variables: { offset: variables.offset, limit: variables.limit },
+    variables: {
+      orgSlug: currentOrg.slug,
+      offset: variables.offset,
+      limit: variables.limit,
+    },
   });
 
-  const moreExist = data?.orgMembersPage.moreExist;
-  const orgMembers = data?.orgMembersPage.orgMembers ?? [];
+  const moreExist = data?.orgMembersPage?.moreExist;
+  const orgMembers = data?.orgMembersPage?.orgMembers ?? [];
 
   if (error) {
     console.error(error);
@@ -192,7 +197,7 @@ const Page = ({
   );
 };
 
-const OrgMembersTable = ({ updateOrgMember, deleteMember }) => {
+const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
   ]);
@@ -224,6 +229,7 @@ const OrgMembersTable = ({ updateOrgMember, deleteMember }) => {
                     }}
                     deleteMember={deleteMember}
                     updateOrgMember={updateOrgMember}
+                    currentOrg={currentOrg}
                   />
                 );
               })}
