@@ -4,7 +4,7 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-import "@remirror/styles/all.css";
+//import "@remirror/styles/all.css";
 
 import { useCallback } from "react";
 import { ExtensionPriority } from "remirror";
@@ -21,6 +21,8 @@ import {
   ListItemExtension,
   MarkdownExtension,
   OrderedListExtension,
+  TaskListExtension,
+  TaskListItemExtension,
   PlaceholderExtension,
   StrikeExtension,
   TableExtension,
@@ -57,6 +59,10 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
         priority: ExtensionPriority.High,
         enableCollapsible: true,
       }),
+      new TaskListExtension(),
+      // TODO: unclear if needed
+      // what's with the css?
+      //new TaskListItemExtension(),
       new CodeExtension(),
       new CodeBlockExtension({ supportedLanguages: [] }),
       new TrailingNodeExtension(),
@@ -194,6 +200,33 @@ const toolbarItems = [
       {
         type: ComponentItem.ToolbarCommandButton,
         commandName: "toggleCodeBlock",
+        display: "icon",
+      },
+    ],
+    separator: "end",
+  },
+  {
+    type: ComponentItem.ToolbarGroup,
+    label: "Lists",
+    items: [
+      {
+        type: ComponentItem.ToolbarCommandButton,
+        commandName: "toggleBulletList",
+        display: "icon",
+      },
+      {
+        type: ComponentItem.ToolbarCommandButton,
+        commandName: "toggleOrderedList",
+        display: "icon",
+      },
+      {
+        type: ComponentItem.ToolbarCommandButton,
+        commandName: "toggleTaskList",
+        display: "icon",
+      },
+      {
+        type: ComponentItem.ToolbarCommandButton,
+        commandName: "createTable",
         display: "icon",
       },
     ],
