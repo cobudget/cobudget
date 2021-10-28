@@ -32,7 +32,10 @@ const TextField = ({
       )}
       {multiline ? (
         wysiwyg ? (
-          <Wysiwyg />
+          <Wysiwyg
+            defaultValue={defaultValue}
+            onChange={inputProps?.onChange}
+          />
         ) : (
           <textarea
             className={`block  px-4 py-3 rounded-md  bg-gray-100 focus:bg-white focus:outline-none border-3 ${
