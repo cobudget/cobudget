@@ -60,6 +60,7 @@ function AddComment() {
                 inputRef.current = e;
               }}
               color={event.color}
+              wysiwyg
             />
           </div>
           {content.length > 0 && (
