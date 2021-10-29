@@ -3,7 +3,7 @@ const liveUpdate = require("../services/liveUpdate.service");
 
 module.exports = {
   orgHasDiscourse(org) {
-    return org.discourse.url && org.discourse.apiKey;
+    return org.discourse?.url && org.discourse?.apiKey;
   },
   generateComment(post, orgMember) {
     return {
@@ -15,7 +15,7 @@ module.exports = {
       htmlContent: post.cooked,
     };
   },
-  initialize(eventHub, { Dream }) {
+  initialize(eventHub) {
     eventHub.subscribe(
       "create-dream",
       "discourse",
@@ -71,7 +71,7 @@ module.exports = {
             event,
             dream,
           });
-          dream = Dream.findOne({ _id: dream.id });
+          //dream = Dream.findOne({ _id: dream.id });
         }
 
         console.log(`Updating dream ${dream.id} on discourse`);
@@ -123,7 +123,7 @@ module.exports = {
             event,
             dream,
           });
-          dream = Dream.findOne({ _id: dream.id });
+          //dream = Dream.findOne({ _id: dream.id });
         }
 
         await discourse(currentOrg.discourse).topics.updateStatus(
@@ -167,7 +167,7 @@ module.exports = {
             event,
             dream,
           });
-          dream = Dream.findOne({ _id: dream.id });
+          //dream = Dream.findOne({ _id: dream.id });
         }
 
         const post = await discourse(currentOrg.discourse).posts.create(
@@ -257,9 +257,9 @@ module.exports = {
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
 
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { comment, action: "deleted" },
-        });
+        // liveUpdate.publish("commentsChanged", {
+        //   commentsChanged: { comment, action: "deleted" },
+        // });
 
         return comment;
       }
@@ -275,7 +275,7 @@ module.exports = {
         org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`;
       const dreamUrl = `${protocol}://${domain}/${event.slug}/${dream.id}`;
       content.push(
-        "View and edit this post on the Dreams platform: ",
+        "View and edit this post on the Cobudget platform: ",
         dreamUrl
       );
     }

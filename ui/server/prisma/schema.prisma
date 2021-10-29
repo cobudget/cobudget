@@ -109,6 +109,7 @@ model Collection {
   Bucket           Bucket[]
   Allocations      Allocation[]
   Contributions    Contribution[]
+
   @@unique([organizationId, slug])
 }
 
