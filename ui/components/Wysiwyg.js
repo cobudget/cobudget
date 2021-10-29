@@ -26,10 +26,13 @@ import {
   TableExtension,
   TrailingNodeExtension,
 } from "remirror/extensions";
+// switch to this one for react tables
+//import { TableExtension } from "@remirror/extension-react-tables";
 import {
   ComponentItem,
   EditorComponent,
   Remirror,
+  //ReactComponentExtension,
   ThemeProvider,
   Toolbar,
   useRemirror,
@@ -64,6 +67,8 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
       new CodeExtension(),
       new CodeBlockExtension({ supportedLanguages: [] }),
       new TrailingNodeExtension(),
+      // for react tables
+      //new ReactComponentExtension(),
       new TableExtension(),
       new MarkdownExtension({ copyAsMarkdown: false }),
       /**
@@ -194,11 +199,13 @@ const toolbarItems = [
         commandName: "toggleTaskList",
         display: "icon",
       },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "createTable",
-        display: "icon",
-      },
+      // tables are a bit buggy so far
+      // https://github.com/remirror/remirror/issues/1356
+      //{
+      //  type: ComponentItem.ToolbarCommandButton,
+      //  commandName: "createTable",
+      //  display: "icon",
+      //},
     ],
     separator: "end",
   },
@@ -215,12 +222,6 @@ const toolbarItems = [
         type: ComponentItem.ToolbarCommandButton,
         commandName: "redo",
         display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleColumns",
-        display: "icon",
-        attrs: { count: 2 },
       },
     ],
     separator: "none",

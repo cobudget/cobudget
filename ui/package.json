@@ -22,6 +22,7 @@
     "@material-ui/lab": "^4.0.0-alpha.39",
     "@material-ui/pickers": "^3.2.10",
     "@next/bundle-analyzer": "^9.1.6",
+    "@remirror/extension-react-tables": "1.0.13",
     "@remirror/pm": "1.0.4",
     "@remirror/react": "1.0.13",
     "@remirror/styles": "1.1.2",
