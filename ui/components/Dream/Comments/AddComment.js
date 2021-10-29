@@ -41,7 +41,7 @@ function AddComment() {
         <div className="mr-4">
           <Avatar user={currentOrgMember.user} />
         </div>
-        <div className="flex-grow">
+        <div className="min-w-0">
           <div className="mb-2">
             <TextField
               name="content"

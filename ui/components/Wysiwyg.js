@@ -97,17 +97,15 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
             });
           }, 250)}
         >
-          <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
+          <div className="overflow-auto">
+            <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
+          </div>
           <EditorComponent />
         </Remirror>
       </ThemeProvider>
     </AllStyledComponent>
   );
 };
-
-//const Wysiwyg = () => {
-//
-//}
 
 const toolbarItems = [
   {
