@@ -4,8 +4,6 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-//import "@remirror/styles/all.css";
-
 import { useCallback } from "react";
 import { ExtensionPriority } from "remirror";
 import {
@@ -152,36 +150,10 @@ const toolbarItems = [
         attrs: { level: 2 },
       },
       {
-        type: ComponentItem.ToolbarMenu,
-
-        items: [
-          {
-            type: ComponentItem.MenuGroup,
-            role: "radio",
-            items: [
-              {
-                type: ComponentItem.MenuCommandPane,
-                commandName: "toggleHeading",
-                attrs: { level: 3 },
-              },
-              {
-                type: ComponentItem.MenuCommandPane,
-                commandName: "toggleHeading",
-                attrs: { level: 4 },
-              },
-              {
-                type: ComponentItem.MenuCommandPane,
-                commandName: "toggleHeading",
-                attrs: { level: 5 },
-              },
-              {
-                type: ComponentItem.MenuCommandPane,
-                commandName: "toggleHeading",
-                attrs: { level: 6 },
-              },
-            ],
-          },
-        ],
+        type: ComponentItem.ToolbarCommandButton,
+        commandName: "toggleHeading",
+        display: "icon",
+        attrs: { level: 3 },
       },
     ],
     separator: "end",
