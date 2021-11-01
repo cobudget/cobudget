@@ -56,6 +56,9 @@ h5 {
 .markdown li {
   @apply list-inside;
 }
+.markdown li > * {
+  display: inline-block;
+}
 .markdown ul {
   @apply list-disc;
 }

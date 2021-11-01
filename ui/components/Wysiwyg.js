@@ -20,7 +20,7 @@ import {
   MarkdownExtension,
   OrderedListExtension,
   TaskListExtension,
-  TaskListItemExtension,
+  //TaskListItemExtension,
   PlaceholderExtension,
   StrikeExtension,
   TableExtension,
