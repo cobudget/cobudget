@@ -19,11 +19,11 @@ import {
   ListItemExtension,
   MarkdownExtension,
   OrderedListExtension,
-  TaskListExtension,
+  //TaskListExtension,
   //TaskListItemExtension,
   PlaceholderExtension,
   StrikeExtension,
-  TableExtension,
+  //TableExtension,
   TrailingNodeExtension,
 } from "remirror/extensions";
 // switch to this one for react tables
@@ -60,7 +60,7 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
         priority: ExtensionPriority.High,
         enableCollapsible: true,
       }),
-      new TaskListExtension(),
+      //new TaskListExtension(),
       // TODO: unclear if needed
       // what's with the css?
       //new TaskListItemExtension(),
@@ -69,7 +69,7 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
       new TrailingNodeExtension(),
       // for react tables
       //new ReactComponentExtension(),
-      new TableExtension(),
+      //new TableExtension(),
       new MarkdownExtension({ copyAsMarkdown: false }),
       /**
        * `HardBreakExtension` allows us to create a newline inside paragraphs.
@@ -194,11 +194,13 @@ const toolbarItems = [
         commandName: "toggleOrderedList",
         display: "icon",
       },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleTaskList",
-        display: "icon",
-      },
+      // task lists don't work with md yet
+      // https://github.com/remirror/remirror/issues/1357
+      //{
+      //  type: ComponentItem.ToolbarCommandButton,
+      //  commandName: "toggleTaskList",
+      //  display: "icon",
+      //},
       // tables are a bit buggy so far
       // https://github.com/remirror/remirror/issues/1356
       //{
