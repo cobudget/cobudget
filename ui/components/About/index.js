@@ -7,8 +7,8 @@ import HappySpinner from "components/HappySpinner";
 import thousandSeparator from "utils/thousandSeparator";
 
 export const EVENT_QUERY = gql`
-  query EventQuery($slug: String) {
-    event(slug: $slug) {
+  query EventQuery($orgSlug: String!, $collectionSlug: String!) {
+    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       about
       guidelines {
@@ -34,9 +34,12 @@ export const EVENT_QUERY = gql`
 `;
 
 export default function AboutPage({ router, currentOrg }) {
-  const [{ data: { event } = {}, fetching: loading }] = useQuery({
+  const [{ data: { event } = {}, fetching: loading, error }] = useQuery({
     query: EVENT_QUERY,
-    variables: { slug: router.query.collection },
+    variables: {
+      orgSlug: router.query.org,
+      collectionSlug: router.query.collection,
+    },
   });
 
   if (loading)

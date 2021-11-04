@@ -1,9 +1,9 @@
 import { gql } from "urql";
 
-import About from "components/About";
-import SubMenu from "components/SubMenu";
-import PageHero from "components/PageHero";
-import EditableField from "components/EditableField";
+import About from "../../../components/About";
+import SubMenu from "../../../components/SubMenu";
+import PageHero from "../../../components/PageHero";
+import EditableField from "../../../components/EditableField";
 
 export default function AboutPage({
   router,
@@ -29,14 +29,18 @@ export default function AboutPage({
               name="about"
               className="h-10"
               MUTATION={gql`
-                mutation EditEventAbout($eventId: ID!, $about: String) {
-                  editEvent(eventId: $eventId, about: $about) {
+                mutation EditEventAbout(
+                  $orgId: ID!
+                  $eventId: ID!
+                  $about: String
+                ) {
+                  editEvent(orgId: $orgId, eventId: $eventId, about: $about) {
                     id
                     about
                   }
                 }
               `}
-              variables={{ eventId: event.id }}
+              variables={{ orgId: currentOrg.id, eventId: event.id }}
             />
           </div>
         </div>

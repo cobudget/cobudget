@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, gql } from "urql";
 
-import Button from "components/Button";
-import InviteMembersModal from "components/InviteMembersModal";
-import LoadMore from "components/LoadMore";
+import Button from "../Button";
+import InviteMembersModal from "../InviteMembersModal";
+import LoadMore from "../LoadMore";
 
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";

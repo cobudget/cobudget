@@ -1,8 +1,8 @@
 import { useQuery, gql } from "urql";
 import Head from "next/head";
 
-import Dream from "../../../components/Dream";
-import HappySpinner from "../../../components/HappySpinner";
+import Dream from "../../../../components/Dream";
+import HappySpinner from "../../../../components/HappySpinner";
 
 export const DREAM_QUERY = gql`
   query Dream($id: ID!) {
@@ -106,7 +106,7 @@ const DreamPage = ({
 }) => {
   const [
     { data: { dream } = { dream: null }, fetching: loading, error },
-  ] = useQuery({ query: DREAM_QUERY, variables: { id: router.query.dream } });
+  ] = useQuery({ query: DREAM_QUERY, variables: { id: router.query.bucket } });
 
   if (dream)
     return (
@@ -144,8 +144,8 @@ const DreamPage = ({
 
   return (
     <div className="flex-grow flex flex-col justify-center items-center">
-      <span className="text-4xl">🛌</span>
-      <h1 className="text-2xl">Can&apos;t recall this dream...</h1>
+      <span className="text-4xl">404</span>
+      <h1 className="text-2xl">Can&apos;t find this bucket...</h1>
     </div>
   );
 };
