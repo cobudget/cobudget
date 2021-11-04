@@ -39,11 +39,36 @@ import {
 } from "@remirror/react";
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
+import styled from "styled-components";
+
+const EditorCss = styled.div`
+  /* to make lists render correctly in the editor (they're missing the
+     dots/numbers for some reason) */
+  .remirror-editor ul li.remirror-list-item-with-custom-mark {
+    margin-left: 1.2em !important;
+    list-style: disc !important;
+  }
+
+  .remirror-editor ol li.remirror-list-item-with-custom-mark {
+    margin-left: 1.5em !important;
+    list-style: num !important;
+  }
+
+  .remirror-editor .remirror-list-item-marker-container {
+    display: none !important;
+  }
+
+  /* outline on highlighted editor */
+  .ProseMirror:focus {
+    box-shadow: ${({ highlightColor }) =>
+      highlightColor ? `${highlightColor} 0px 0px 0px 0.2em !important` : ""};
+  }
+`;
 
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
-const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
+const Wysiwyg = ({ placeholder, defaultValue, onChange, highlightColor }) => {
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
@@ -88,23 +113,25 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange }) => {
   return (
     <AllStyledComponent>
       <ThemeProvider>
-        <Remirror
-          manager={manager}
-          autoFocus
-          initialContent={defaultValue}
-          onChange={debounce((param) => {
-            onChange?.({
-              target: {
-                value: param.helpers.getMarkdown(),
-              },
-            });
-          }, 250)}
-        >
-          <div className="overflow-auto">
-            <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
-          </div>
-          <EditorComponent />
-        </Remirror>
+        <EditorCss highlightColor={highlightColor}>
+          <Remirror
+            manager={manager}
+            autoFocus
+            initialContent={defaultValue}
+            onChange={debounce((param) => {
+              onChange?.({
+                target: {
+                  value: param.helpers.getMarkdown(),
+                },
+              });
+            }, 250)}
+          >
+            <div className="overflow-auto">
+              <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
+            </div>
+            <EditorComponent />
+          </Remirror>
+        </EditorCss>
       </ThemeProvider>
     </AllStyledComponent>
   );

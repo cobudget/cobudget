@@ -36,6 +36,7 @@ const TextField = ({
             placeholder={placeholder}
             defaultValue={defaultValue}
             onChange={inputProps?.onChange}
+            highlightColor={color}
           />
         ) : (
           <textarea
