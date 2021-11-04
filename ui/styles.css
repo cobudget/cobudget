@@ -97,3 +97,15 @@ h5 {
 .markdown a.mention {
   @apply pointer-events-none cursor-default;
 }
+
+.remirror-editor ul li.remirror-list-item-with-custom-mark {
+  margin-left: 1.2em !important;
+  list-style: disc !important;
+}
+.remirror-editor ol li.remirror-list-item-with-custom-mark {
+  margin-left: 1.5em !important;
+  list-style: num !important;
+}
+.remirror-editor .remirror-list-item-marker-container {
+  display: none !important;
+}
