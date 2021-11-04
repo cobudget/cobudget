@@ -12,6 +12,7 @@ import LoadMore from "components/LoadMore";
 
 export const DREAMS_QUERY = gql`
   query Dreams(
+    $orgSlug: String!
     $eventSlug: String!
     $textSearchTerm: String
     $tag: String
@@ -19,6 +20,7 @@ export const DREAMS_QUERY = gql`
     $limit: Int
   ) {
     dreamsPage(
+      orgSlug: $orgSlug
       eventSlug: $eventSlug
       textSearchTerm: $textSearchTerm
       tag: $tag
@@ -26,13 +28,7 @@ export const DREAMS_QUERY = gql`
       limit: $limit
     ) {
       moreExist
-      dreams(
-        eventSlug: $eventSlug
-        textSearchTerm: $textSearchTerm
-        tag: $tag
-        offset: $offset
-        limit: $limit
-      ) {
+      dreams {
         id
         description
         summary
@@ -75,12 +71,14 @@ const Page = ({
   onLoadMore,
   router,
   event,
+  org,
 }) => {
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
     query: DREAMS_QUERY,
     variables: {
+      orgSlug: router.query.org,
       eventSlug: router.query.collection,
       offset: variables.offset,
       limit: variables.limit,
@@ -99,7 +97,7 @@ const Page = ({
   return (
     <>
       {buckets.map((bucket) => (
-        <Link href={`/${event.slug}/${bucket.id}`} key={bucket.id}>
+        <Link href={`/${org.slug}/${event.slug}/${bucket.id}`} key={bucket.id}>
           <a className="flex focus:outline-none focus:ring rounded-lg">
             <DreamCard dream={bucket} event={event} />
           </a>
@@ -154,14 +152,18 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
               name="info"
               className="h-10"
               MUTATION={gql`
-                mutation EditHomepageMessage($eventId: ID!, $info: String) {
-                  editEvent(eventId: $eventId, info: $info) {
+                mutation EditHomepageMessage(
+                  $orgId: ID!
+                  $eventId: ID!
+                  $info: String
+                ) {
+                  editEvent(orgId: $orgId, eventId: $eventId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ eventId: event.id }}
+              variables={{ orgId: currentOrg.id, eventId: event.id }}
               required
             />
           </div>
@@ -195,6 +197,7 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
+                org={currentOrg}
                 router={router}
                 event={event}
                 key={"" + variables.limit + i}

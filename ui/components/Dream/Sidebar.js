@@ -13,7 +13,7 @@ import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
-import { DREAMS_QUERY } from "pages/[event]";
+import { DREAMS_QUERY } from "../../pages/[org]/[collection]";
 import Tags from "./Tags";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`

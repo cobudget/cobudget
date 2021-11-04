@@ -21,7 +21,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
   return (
     <div className="space-x-2 flex items-center">
       {currentOrg ? (
-        <Link href="/">
+        <Link href={`/${currentOrg.slug}`}>
           <a
             className={
               "px-2 py-1 rounded-md flex items-center group space-x-2 " +
@@ -44,7 +44,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
           </a>
         </Link>
       ) : (
-        <h1 className="text-white block font-medium">Plato</h1>
+        <h1 className="text-white block font-medium">Cobudget</h1>
       )}
 
       {event && (
@@ -52,7 +52,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
           <ChevronArrowRightIcon className={`w-4 h-4 text-white opacity-50`} />
 
           <div className="group flex items-center">
-            <Link href="/[event]" as={`/${event.slug}`}>
+            <Link href={`/${currentOrg.slug}/${event.slug}`}>
               <a
                 className={`hover:bg-${color}-dark px-2 py-1 text-white rounded-md mx-0 font-medium`}
               >

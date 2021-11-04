@@ -97,7 +97,7 @@ const ProfileDropdown = ({
             >
               Edit profile
             </button>
-            <a href="/api/logout" className={css.button}>
+            <a href="/api/auth/logout" className={css.button}>
               Sign out
             </a>
           </div>

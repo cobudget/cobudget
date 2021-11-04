@@ -6,6 +6,7 @@ import { client } from "../graphql/client";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
+import { Toaster } from "react-hot-toast";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
@@ -121,13 +122,12 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.organization,
+      orgSlug: router.query.org,
       collectionSlug: router.query.collection,
     },
   });
   //console.log({ currentUser, currentOrg, currentOrgMember, error, router });
   //console.log({ error });
-  console.log({ currentOrg });
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
@@ -173,7 +173,7 @@ const MyApp = ({ Component, pageProps, router }) => {
             ? event
               ? `${event.title} | ${currentOrg.name}`
               : currentOrg.name
-            : "Plato"
+            : "Cobudget"
         }
       >
         <Component
@@ -185,6 +185,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           openModal={openModal}
           router={router}
         />
+        <Toaster />
       </Layout>
     </>
     // </ThemeProvider>

@@ -40,19 +40,12 @@ const LinkCard = forwardRef((props, ref) => {
 });
 
 const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
-  const [
-    {
-      data: { events } = {
-        events: [],
-      },
-    },
-  ] = useQuery({
+  const [{ data }] = useQuery({
     query: EVENTS_QUERY,
-    variables: { orgSlug: router.query.organization },
+    variables: { orgSlug: router.query.org },
   });
 
-  console.log({ ooorg: currentOrg, currentOrgMember });
-
+  const events = data?.events ?? [];
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (

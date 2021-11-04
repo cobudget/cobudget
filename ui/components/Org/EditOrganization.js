@@ -7,6 +7,7 @@ import Button from "../Button";
 import TextField from "../TextField";
 import ImageUpload from "components/ImageUpload";
 import slugify from "utils/slugify";
+import toast from "react-hot-toast";
 
 const CREATE_ORGANIZATION = gql`
   mutation CreateOrganization($name: String!, $logo: String, $slug: String!) {
@@ -61,32 +62,31 @@ const EditOrganization = ({ organization, currentUser }) => {
   const onSubmit = async (variables) => {
     try {
       if (isNew) {
-        await createOrganization({ ...variables, logo: logoImage });
+        await createOrganization({ ...variables, logo: logoImage }).then(
+          ({ error }) => {
+            if (error) {
+              toast.error(error.message.replace("[GraphQL]", ""));
+            } else {
+              toast.success("Organization created successfully");
+              router.replace(`/${variables.slug}/settings`);
+              router.push(`/${variables.slug}`);
+            }
+          }
+        );
       } else {
-        await editOrganization({
+        editOrganization({
           ...variables,
           organizationId: organization.id,
+        }).then(({ error }) => {
+          if (error) {
+            toast.error(error.message.replace("[GraphQL]", ""));
+          } else {
+            toast.success("Organization updated successfully");
+            router.replace(`/${variables.slug}/settings`);
+          }
         });
       }
-      let message = isNew
-        ? "Organization created successfully."
-        : "Organization updated successfully.";
 
-      if (isNew) {
-        const dreamsUrl = process.env.IS_PROD
-          ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
-          : `http://${variables.subdomain}.localhost:3000`;
-
-        const realitiesUrl = `http${process.env.IS_PROD ? "s" : ""}://${
-          process.env.REALITIES_DEPLOY_URL
-        }/${variables.subdomain}`;
-
-        const url = fromRealities ? realitiesUrl : dreamsUrl;
-
-        window.location.assign(url);
-      } else {
-        alert(message);
-      }
       reset();
     } catch (err) {
       console.error(err);

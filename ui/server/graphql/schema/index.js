@@ -14,6 +14,7 @@ const schema = gql`
     event(orgSlug: String, collectionSlug: String): Collection
     dream(id: ID!): Dream
     dreamsPage(
+      orgSlug: String!
       eventSlug: String!
       textSearchTerm: String
       tag: String
@@ -55,6 +56,7 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy!
     ): Collection!
     editEvent(
+      orgId: ID!
       eventId: ID!
       slug: String
       title: String
@@ -346,13 +348,7 @@ const schema = gql`
 
   type DreamsPage {
     moreExist: Boolean
-    dreams(
-      eventSlug: String!
-      textSearchTerm: String
-      tag: String
-      offset: Int
-      limit: Int
-    ): [Dream]
+    dreams: [Dream]
   }
 
   type Comment {

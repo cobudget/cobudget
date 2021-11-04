@@ -144,7 +144,7 @@ const EditCocreatorsModal = ({
 
   const [, addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION);
   const [, removeCocreator] = useMutation(REMOVE_CO_CREATOR_MUTATION);
-  console.log({ currentOrgMember });
+
   return (
     <Modal
       open={open}
