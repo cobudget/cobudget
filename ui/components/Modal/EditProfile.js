@@ -6,8 +6,13 @@ import Card from "../styled/Card";
 import dirtyValues from "utils/dirtyValues";
 
 const UPDATE_PROFILE_QUERY = gql`
-  mutation updateProfile($username: String, $name: String, $bio: String) {
-    updateProfile(username: $username, name: $name, bio: $bio) {
+  mutation updateProfile(
+    $orgID: ID
+    $username: String
+    $name: String
+    $bio: String
+  ) {
+    updateProfile(orgId: $orgId, username: $username, name: $name, bio: $bio) {
       id
       email
       avatar
@@ -41,7 +46,10 @@ const EditProfile = ({
         <form
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
-              updateUser(dirtyValues(dirtyFields, variables))
+              updateUser({
+                ...(currentOrg && { orgId: currentOrg.id }),
+                ...dirtyValues(dirtyFields, variables),
+              })
                 .then(() => {
                   closeModal();
                 })

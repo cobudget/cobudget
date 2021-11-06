@@ -14,8 +14,8 @@ const EDIT_EVENT = gql`
 `;
 
 export const CATEGORIES_QUERY = gql`
-  query Categories {
-    categories {
+  query Categories($orgId: ID!) {
+    categories(orgId: $orgId) {
       id
       name
     }
@@ -27,6 +27,7 @@ const Discourse = ({ event, currentOrg }) => {
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,
+    variables: { orgId: currentOrg.id },
   });
 
   const {

@@ -8,8 +8,8 @@ import Button from "components/Button";
 import Banner from "components/Banner";
 
 const INVITE_ORG_MEMBERS_MUTATION = gql`
-  mutation InviteOrgMembers($emails: String!) {
-    inviteOrgMembers(emails: $emails) {
+  mutation InviteOrgMembers($orgId: ID!, $emails: String!) {
+    inviteOrgMembers(orgId: $orgId, emails: $emails) {
       id
       isOrgAdmin
       bio
@@ -48,7 +48,7 @@ const INVITE_EVENT_MEMBERS_MUTATION = gql`
   }
 `;
 
-const InviteMembersModal = ({ handleClose, eventId }) => {
+const InviteMembersModal = ({ handleClose, eventId, currentOrg }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     eventId ? INVITE_EVENT_MEMBERS_MUTATION : INVITE_ORG_MEMBERS_MUTATION
@@ -91,7 +91,10 @@ const InviteMembersModal = ({ handleClose, eventId }) => {
           </Banner>
           <form
             onSubmit={handleSubmit((variables) => {
-              inviteMembers({ ...variables, ...(eventId && { eventId }) })
+              inviteMembers({
+                ...variables,
+                ...(eventId ? { eventId } : { orgId: currentOrg.id }),
+              })
                 .then(() => {
                   reset();
                   handleClose();

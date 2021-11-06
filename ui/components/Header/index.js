@@ -14,8 +14,8 @@ const css = {
 };
 
 const JOIN_ORG_MUTATION = gql`
-  mutation JoinOrg {
-    joinOrg {
+  mutation JoinOrg($orgId: ID!) {
+    joinOrg(orgId: $orgId) {
       id
       bio
     }
@@ -112,7 +112,7 @@ const Header = ({
                       <NavItem
                         primary
                         eventColor={color}
-                        onClick={() => joinOrg()}
+                        onClick={() => joinOrg({ orgId: currentOrg.id })}
                       >
                         Join org
                       </NavItem>

@@ -21,8 +21,8 @@ const GET_TODO_INFO = gql`
 `;
 
 const SET_TODOS_FINISHED = gql`
-  mutation SetTodosFinished {
-    setTodosFinished {
+  mutation SetTodosFinished(orgId: ID!) {
+    setTodosFinished(orgId: $orgId) {
       __typename
       id
       finishedTodos
@@ -90,7 +90,7 @@ const TodoList = ({ currentOrg }) => {
 
   useEffect(() => {
     if (allDone) {
-      setTodosFinished();
+      setTodosFinished({ orgId: currentOrg.id });
     }
   }, [allDone, setTodosFinished]);
 

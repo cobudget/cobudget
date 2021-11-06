@@ -7,8 +7,12 @@ import InviteMembersModal from "components/InviteMembersModal";
 import OrgMembersTable from "./OrgMembersTable";
 
 const UPDATE_ORG_MEMBER = gql`
-  mutation UpdateOrgMember($memberId: ID!, $isOrgAdmin: Boolean) {
-    updateOrgMember(memberId: $memberId, isOrgAdmin: $isOrgAdmin) {
+  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isOrgAdmin: Boolean) {
+    updateOrgMember(
+      orgId: $orgId
+      memberId: $memberId
+      isOrgAdmin: $isOrgAdmin
+    ) {
       id
       isOrgAdmin
     }
@@ -54,7 +58,10 @@ const OrgMembers = ({ currentOrg }) => {
             Invite members
           </Button>
           {inviteModalOpen && (
-            <InviteMembersModal handleClose={() => setInviteModalOpen(false)} />
+            <InviteMembersModal
+              currentOrg={currentOrg}
+              handleClose={() => setInviteModalOpen(false)}
+            />
           )}
         </div>
       </div>

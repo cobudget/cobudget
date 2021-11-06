@@ -2,9 +2,12 @@ import { dedupExchange, fetchExchange, errorExchange } from "urql";
 import { NextUrqlContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
-import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers";
+import { simplePagination } from "@urql/exchange-graphcache/extras";
+
+import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
 import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
+
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
 
@@ -25,11 +28,13 @@ export const client = (
   return {
     url: getUrl(),
     exchanges: [
-      errorExchange({
-        onError: (error) => {
-          console.error(error.message.replace("[GraphQL]", "Server error:"));
-        },
-      }),
+      // errorExchange({
+      //   // onError: (error) => {
+      //   //   throw new Error(error.message);
+      //   //   console.error(error.message.replace("[GraphQL]", "Server error:"));
+      //   //   console.error(error);
+      //   // },
+      // }),
       devtoolsExchange,
       dedupExchange,
       cacheExchange({
@@ -37,7 +42,17 @@ export const client = (
           OrgMembersPage: () => null,
           MembersPage: () => null,
           ContributionsPage: () => null,
+          CommentSet: () => null,
         },
+        // resolvers: {
+        //   Query: {
+        //     dreamsPage: simplePagination({
+        //       // offsetArgument: "offset",
+        //       // limitArgument: "limit",
+        //       // mergeMode: "after",
+        //     }),
+        //   },
+        // },
         updates: {
           Mutation: {
             addComment(result: any, { content, dreamId }, cache) {
@@ -101,7 +116,7 @@ export const client = (
                 cache.updateQuery(
                   {
                     query: ORG_MEMBERS_QUERY,
-                    variables: { offset: 0, limit: 10 },
+                    variables: { offset: 0, limit: 30 },
                   },
                   (data: any) => {
                     return {
