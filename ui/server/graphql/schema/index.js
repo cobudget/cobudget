@@ -30,7 +30,7 @@ const schema = gql`
       limit: Int
     ): MembersPage
     members(eventId: ID!, isApproved: Boolean): [EventMember]
-    categories: [Category!]
+    categories(orgId: ID!): [Category!]
     contributionsPage(eventId: ID!, offset: Int, limit: Int): ContributionsPage
   }
 
@@ -47,9 +47,10 @@ const schema = gql`
       logo: String
       slug: String!
     ): Organization!
-    setTodosFinished: Organization
+    setTodosFinished(orgId: ID!): Organization
 
     createEvent(
+      orgId: ID!
       slug: String!
       title: String!
       currency: String!
@@ -132,12 +133,12 @@ const schema = gql`
     resolveFlag(dreamId: ID!, flagId: ID!, comment: String!): Dream
     allGoodFlag(dreamId: ID!): Dream
 
-    joinOrg: OrgMember
+    joinOrg(orgId: ID!): OrgMember
 
-    updateProfile(username: String, name: String, bio: String): User
-    inviteEventMembers(emails: String!, eventId: ID!): [EventMember]
-    inviteOrgMembers(emails: String!): [OrgMember]
-    updateOrgMember(memberId: ID!, isOrgAdmin: Boolean): OrgMember
+    updateProfile(orgId: ID, username: String, name: String, bio: String): User
+    inviteEventMembers(eventId: ID!, emails: String!): [EventMember]
+    inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
+    updateOrgMember(orgId: ID!, memberId: ID!, isOrgAdmin: Boolean): OrgMember
     updateMember(
       eventId: ID!
       memberId: ID!
@@ -161,7 +162,8 @@ const schema = gql`
     ): Collection
 
     allocate(
-      eventMemberId: ID!
+      collectionId: ID!
+      collectionMemberId: ID!
       amount: Int!
       type: AllocationType!
     ): EventMember

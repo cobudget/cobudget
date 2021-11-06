@@ -6,14 +6,21 @@ import Switch from "components/Switch";
 import Button from "components/Button";
 import TextField from "components/TextField";
 import thousandSeparator from "utils/thousandSeparator";
+import toast from "react-hot-toast";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
-    $eventMemberId: ID!
+    $collectionId: ID!
+    $collectionMemberId: ID!
     $amount: Int!
     $type: AllocationType!
   ) {
-    allocate(eventMemberId: $eventMemberId, amount: $amount, type: $type) {
+    allocate(
+      collectionId: $collectionId
+      collectionMemberId: $collectionMemberId
+      amount: $amount
+      type: $type
+    ) {
       id
       balance
     }
@@ -51,12 +58,18 @@ const AllocateModal = ({ member, event, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             allocate({
-              eventMemberId: member.id,
+              collectionId: event.id,
+              collectionMemberId: member.id,
               amount,
               type: type.toUpperCase(),
-            })
-              .then(() => handleClose())
-              .catch((err) => alert(err.message));
+            }).then(({ error }) => {
+              if (error) {
+                toast.error(error.message);
+              } else {
+                //TODO: add success toast
+                handleClose();
+              }
+            });
           }}
         >
           <TextField

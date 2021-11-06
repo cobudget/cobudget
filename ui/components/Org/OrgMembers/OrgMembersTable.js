@@ -43,6 +43,7 @@ export const ORG_MEMBERS_QUERY = gql`
 const ActionsDropdown = ({
   updateOrgMember,
   //deleteMember,
+  currentOrg,
   member,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -74,6 +75,7 @@ const ActionsDropdown = ({
         <MenuItem
           onClick={() => {
             updateOrgMember({
+              orgId: currentOrg.id,
               memberId: member.id,
               isOrgAdmin: !member.isOrgAdmin,
             }).then(() => {
@@ -174,6 +176,7 @@ const Page = ({
               member={member}
               deleteMember={deleteMember}
               updateOrgMember={updateOrgMember}
+              currentOrg={currentOrg}
             />
           </TableCell>
         </TableRow>

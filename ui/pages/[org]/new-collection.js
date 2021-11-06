@@ -13,12 +13,14 @@ import { QuestionMarkIcon } from "components/Icons";
 
 const CREATE_EVENT = gql`
   mutation CreateEvent(
+    $orgId: ID!
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
     createEvent(
+      orgId: $orgId
       title: $title
       slug: $slug
       currency: $currency
@@ -36,7 +38,7 @@ export default function NewCollectionPage({ currentOrg }) {
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createEvent(variables)
+    createEvent({ ...variables, orgId: currentOrg.id })
       .then(({ data }) => {
         Router.push("/[event]", `/${data.createEvent.slug}`);
       })

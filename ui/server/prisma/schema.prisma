@@ -106,7 +106,7 @@ model Collection {
   updatedAt DateTime @updatedAt
 
   collectionMember CollectionMember[]
-  Bucket           Bucket[]
+  buckets          Bucket[]
   Allocations      Allocation[]
   Contributions    Contribution[]
 
