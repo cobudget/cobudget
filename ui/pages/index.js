@@ -7,7 +7,6 @@ import { AddIcon } from "components/Icons";
 import Label from "components/Label";
 import SubMenu from "components/SubMenu";
 import PageHero from "components/PageHero";
-import dreamName from "utils/dreamName";
 import EditableField from "components/EditableField";
 
 const EVENTS_QUERY = gql`
