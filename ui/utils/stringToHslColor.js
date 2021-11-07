@@ -1,4 +1,4 @@
-import colors from "./colors";
+import { colors } from "./colors";
 
 export default (str, s = 90, l = 70) => {
   var hash = 0;
