@@ -40,7 +40,7 @@ import {
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
 import styled from "styled-components";
-import { namedColorWithAlpha } from "utils/colors";
+import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -59,16 +59,18 @@ const EditorCss = styled.div`
     display: none !important;
   }
 
-  /* outline on highlighted editor */
-  .ProseMirror:focus {
-    box-shadow: ${({ highlightColor }) =>
-      highlightColor
-        ? `${namedColorWithAlpha(
-            highlightColor,
-            "40%"
-          )} 0px 0px 0px 0.2em !important`
-        : ""};
-  }
+  /* correct color on outline and toolbar buttons */
+  ${({ highlightColor }) =>
+    highlightColor
+      ? `--rmr-color-outline: ${namedColorWithAlpha(
+          highlightColor,
+          "40%"
+        )} !important;
+        --rmr-color-primary: ${namedColorToHsl(highlightColor)} !important;
+        --rmr-color-hover-primary: ${namedColorToHsl(
+          highlightColor
+        )} !important;`
+      : ""}
 `;
 
 /**

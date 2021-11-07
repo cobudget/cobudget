@@ -93,3 +93,7 @@ for (let [colorName, colorVariants] of Object.entries(hslColorValues)) {
 module.exports.namedColorWithAlpha = (colorName, alpha) => {
   return `hsla(${hslColorValues[colorName].DEFAULT}, ${alpha})`;
 };
+
+module.exports.namedColorToHsl = (colorName) => {
+  return `hsl(${hslColorValues[colorName].DEFAULT})`;
+};
