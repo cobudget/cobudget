@@ -21,7 +21,7 @@ const GET_TODO_INFO = gql`
 `;
 
 const SET_TODOS_FINISHED = gql`
-  mutation SetTodosFinished(orgId: ID!) {
+  mutation SetTodosFinished($orgId: ID!) {
     setTodosFinished(orgId: $orgId) {
       __typename
       id
