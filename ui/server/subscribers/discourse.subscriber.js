@@ -324,7 +324,7 @@ module.exports = {
       }
 
       if (expenses.length) {
-        content.push("#### Expenses");
+        content.push("#### Costs");
         content.push(
           [
             `|Description|Amount|`,

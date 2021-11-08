@@ -506,7 +506,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, slug, logo },
+      { organizationId, name, info, slug, logo },
       { user, eventHub }
     ) => {
       const currentOrgMember = await prisma.orgMember.findUnique({
@@ -522,12 +522,15 @@ const resolvers = {
         !user?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+      if (name?.length === 0) throw new Error("Org name cannot be blank");
+      if (slug?.length === 0) throw new Error("Org subdomain cannot be blank");
+      if (info?.length > 500) throw new Error("Org info too long");
 
       const organization = await prisma.organization.update({
         where: {
           id: organizationId,
         },
-        data: { name, logo, slug: slugify(slug) },
+        data: { name, info, logo, slug: slugify(slug) },
       });
 
       // TODO: add back

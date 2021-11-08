@@ -184,6 +184,7 @@ const schema = gql`
   type Organization {
     id: ID!
     name: String!
+    info: String
     subdomain: String
     slug: String
     customDomain: String
