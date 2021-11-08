@@ -26,7 +26,7 @@
     "@material-ui/pickers": "^3.2.10",
     "@next-auth/prisma-adapter": "^0.5.4",
     "@next/bundle-analyzer": "^9.1.6",
-    "@prisma/client": "^3.0.2",
+    "@prisma/client": "^3.4.1",
     "@sensestack/plato-core": "1.0.5",
     "@urql/devtools": "^2.0.3",
     "@urql/exchange-graphcache": "^4.3.5",
@@ -85,7 +85,7 @@
     "babel-loader": "8.1.0",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
-    "prisma": "^3.0.2",
+    "prisma": "^3.4.1",
     "tailwindcss": "^2.1.0",
     "tailwindcss-font-inter": "2.0.2",
     "typescript": "^4.4.3"
