@@ -39,6 +39,7 @@ export default handler()
       resolvers,
       context: async ({ req }): Promise<GraphQLContext> => {
         const { user } = req;
+        // TODO: fetch user from Prisma?
         // let currentOrg = null;
         // let currentOrgMember = null;
 
