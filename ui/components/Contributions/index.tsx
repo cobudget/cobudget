@@ -38,10 +38,9 @@ const Contributions = ({ event }) => {
   const [
     {
       data: { contributionsPage: { moreExist, contributions } } = {
-        contributionsPage: { contributions: [] },
+        contributionsPage: { contributions: [], moreExist: false },
       },
       fetching: loading,
-      fetchMore,
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
@@ -81,13 +80,13 @@ const Contributions = ({ event }) => {
             ))}
           </div>
         )}
-        <LoadMore
+        {/* <LoadMore
           moreExist={moreExist}
           loading={loading}
-          onClick={() =>
-            fetchMore({ variables: { offset: contributions.length } })
-          }
-        />
+          // onClick={() =>
+          //   // fetchMore({ variables: { offset: contributions.length } })
+          // }
+        /> */}
       </div>
     </>
   );
