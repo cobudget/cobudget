@@ -166,6 +166,7 @@ export const client = (
     ],
     fetchOptions: {
       headers: {
+        //@ts-ignore
         ...ctx?.req?.headers,
       },
       credentials: "include",
