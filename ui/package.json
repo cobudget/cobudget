@@ -50,7 +50,6 @@
     "lodash": "^4.17.21",
     "micro": "^9.3.4",
     "next": "^10.0.9",
-    "next-auth": "3.29.0",
     "next-connect": "^0.10.2",
     "next-cookies": "^2.0.3",
     "next-fonts": "^0.19.0",
