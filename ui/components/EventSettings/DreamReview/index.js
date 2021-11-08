@@ -4,10 +4,10 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($eventId: ID!, $dreamReviewIsOpen: Boolean) {
-    editEvent(eventId: $eventId, dreamReviewIsOpen: $dreamReviewIsOpen) {
+  mutation editEvent($eventId: ID!, $bucketReviewIsOpen: Boolean) {
+    editEvent(eventId: $eventId, bucketReviewIsOpen: $bucketReviewIsOpen) {
       id
-      dreamReviewIsOpen
+      bucketReviewIsOpen
     }
   }
 `;
@@ -32,16 +32,16 @@ const DreamReview = ({ event, currentOrg }) => {
           editEvent({
             ...variables,
             eventId: event.id,
-            dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
+            bucketReviewIsOpen: variables.bucketReviewIsOpen === "true",
           })
             //.then(() => null)
             .catch((error) => alert(error.message));
         })}
       >
         <SelectField
-          name="dreamReviewIsOpen"
+          name="bucketReviewIsOpen"
           label="Show Review Prompt"
-          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
@@ -50,9 +50,9 @@ const DreamReview = ({ event, currentOrg }) => {
         </SelectField>
 
         {/* <SelectField
-          name="dreamReviewIsOpen"
+          name="bucketReviewIsOpen"
           label="Who see's review monster"
-          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
@@ -61,9 +61,9 @@ const DreamReview = ({ event, currentOrg }) => {
         </SelectField>
 
         <SelectField
-          name="dreamReviewIsOpen"
+          name="bucketReviewIsOpen"
           label="Who can resolve a flag"
-          defaultValue={event.dreamReviewIsOpen ? "true" : "false"}
+          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >

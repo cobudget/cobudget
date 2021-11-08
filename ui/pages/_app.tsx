@@ -28,7 +28,7 @@ export const TOP_LEVEL_QUERY = gql`
       numberOfApprovedMembers
       about
       allowStretchGoals
-      dreamReviewIsOpen
+      bucketReviewIsOpen
       discourseCategoryId
       guidelines {
         id

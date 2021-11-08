@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Guideline" ALTER COLUMN "position" SET DATA TYPE DOUBLE PRECISION;
