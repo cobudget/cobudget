@@ -614,7 +614,7 @@ const resolvers = {
         info,
         color,
         about,
-        dreamReviewIsOpen,
+        bucketReviewIsOpen,
         discourseCategoryId,
       },
       { user, eventHub }
@@ -656,8 +656,8 @@ const resolvers = {
       if (typeof info !== "undefined") collection.info = info;
       if (typeof about !== "undefined") collection.about = about;
       if (color) collection.color = color;
-      if (typeof dreamReviewIsOpen !== "undefined")
-        collection.dreamReviewIsOpen = dreamReviewIsOpen;
+      if (typeof bucketReviewIsOpen !== "undefined")
+        collection.bucketReviewIsOpen = bucketReviewIsOpen;
       if (discourseCategoryId)
         collection.discourseCategoryId = discourseCategoryId;
 
@@ -1567,7 +1567,7 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check dreamReviewIsOpen
+      // check bucketReviewIsOpen
       // check not already left a flag?
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },
@@ -1657,7 +1657,7 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check dreamReviewIsOpen
+      // check bucketReviewIsOpen
       // check not already left a flag?
 
       const bucket = await prisma.bucket.findUnique({
@@ -1751,7 +1751,7 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check dreamReviewIsOpen
+      // check bucketReviewIsOpen
       // check have not left one of these flags already
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },

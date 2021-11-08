@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Field" ALTER COLUMN "position" SET DATA TYPE DOUBLE PRECISION;

@@ -19,8 +19,6 @@ model User {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   image          String?
-  accounts       Account[]
-  sessions       Session[]
   orgMemberships OrgMember[]
 }
 
@@ -96,7 +94,7 @@ model Collection {
   grantingOpens            DateTime? //rename
   grantingCloses           DateTime? //rename
   allowStretchGoals        Boolean?
-  dreamReviewIsOpen        Boolean? //rename
+  bucketReviewIsOpen       Boolean? //rename
   discourseCategoryId      Int?
 
   tags       Tag[]
@@ -292,42 +290,4 @@ model DiscourseConfig {
   minPostLength    Int
   organization     Organization @relation(fields: [organizationId], references: [id])
   organizationId   String       @unique
-}
-
-model Account {
-  id                 String    @id @default(cuid())
-  userId             String
-  providerType       String
-  providerId         String
-  providerAccountId  String
-  refreshToken       String?
-  accessToken        String?
-  accessTokenExpires DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  user               User      @relation(fields: [userId], references: [id])
-
-  @@unique([providerId, providerAccountId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  userId       String
-  expires      DateTime
-  sessionToken String   @unique
-  accessToken  String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
-}
-
-model VerificationRequest {
-  id         String   @id @default(cuid())
-  identifier String
-  token      String   @unique
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@unique([identifier, token])
 }

@@ -22,7 +22,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {currentOrgMember?.currentEventMembership &&
-        event.dreamReviewIsOpen &&
+        event.bucketReviewIsOpen &&
         event.guidelines.length > 0 && (
           <Monster event={event} dream={dream} currentOrg={currentOrg} />
         )}

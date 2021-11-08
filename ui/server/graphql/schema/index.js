@@ -66,7 +66,7 @@ const schema = gql`
       info: String
       color: String
       about: String
-      dreamReviewIsOpen: Boolean
+      bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
     ): Collection!
     deleteEvent(eventId: ID!): Collection
@@ -217,7 +217,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     customFields: [CustomField]
-    dreamReviewIsOpen: Boolean
+    bucketReviewIsOpen: Boolean
     totalAllocations: Int
     totalContributions: Int
     totalContributionsFunding: Int
