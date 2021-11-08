@@ -22,8 +22,8 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "pages/api/index.ts"  ],
+    "**/*.tsx", "components/InviteMembersModal.js", "components/Org/OrgMembers/index.js", 
+  ],
   "exclude": [
     "node_modules"
   ]
