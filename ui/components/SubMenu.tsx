@@ -5,7 +5,7 @@ const orgItems = ({ currentOrgMember, orgSlug }) => {
   return [
     { label: "Overview", href: `/${orgSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${orgSlug}/members` },
+    { label: "Members", href: `/${orgSlug}/members`, member: true },
     { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));
 };
@@ -21,7 +21,11 @@ export const collectionItems = ({
   return [
     { label: "Overview", href: `/${orgSlug}/${collectionSlug}` },
     { label: "About", href: `/${orgSlug}/${collectionSlug}/about` },
-    { label: "Members", href: `/${orgSlug}/${collectionSlug}/members` },
+    {
+      label: "Members",
+      href: `/${orgSlug}/${collectionSlug}/members`,
+      member: true,
+    },
     {
       label: "Transactions",
       href: `/${orgSlug}/${collectionSlug}/transactions`,
@@ -48,9 +52,9 @@ export default function SubMenu({
     ? collectionItems({
         currentOrgMember,
         collectionSlug: router.query.collection,
-        orgSlug: router.query.organization,
+        orgSlug: router.query.org,
       })
-    : orgItems({ currentOrgMember, orgSlug: router.query.organization });
+    : orgItems({ currentOrgMember, orgSlug: router.query.org });
 
   const color = event?.color ?? "anthracit";
 
