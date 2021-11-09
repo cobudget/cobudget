@@ -57,6 +57,14 @@ export const TOP_LEVEL_QUERY = gql`
       name
       avatar
       email
+      orgMemberships {
+        id
+        organization {
+          id
+          name
+          slug
+        }
+      }
     }
     currentOrgMember(orgSlug: $orgSlug) {
       id

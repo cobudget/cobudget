@@ -17,6 +17,10 @@ const EVENTS_QUERY = gql`
       title
       archived
       color
+      organization {
+        id
+        slug
+      }
     }
   }
 `;
@@ -41,12 +45,12 @@ const LinkCard = forwardRef((props: any, ref) => {
 });
 
 const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
-  const [{ data }] = useQuery({
+  const [{ data, error }] = useQuery({
     query: EVENTS_QUERY,
     variables: { orgSlug: router.query.org },
   });
 
-  const events = data?.events ?? [];
+  const collections = data?.events ?? [];
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (
@@ -80,7 +84,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
           </div>
           <div>
             {currentOrgMember?.isOrgAdmin && (
-              <Link href={`/new-collection`}>
+              <Link href={`/${currentOrg.slug}/new-collection`}>
                 <Button size="large" color="anthracit" className="float-right">
                   New collection
                 </Button>
@@ -101,15 +105,15 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
               : "grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4"
           }`}
         >
-          {events.map((event) => (
+          {collections.map((collection) => (
             <Link
-              href={`/${currentOrg.slug}/${event.slug}`}
-              key={event.slug}
+              href={`/${collection.organization.slug}/${collection.slug}`}
+              key={collection.slug}
               passHref
             >
-              <LinkCard color={event.color}>
-                {event.title}
-                {event.archived && (
+              <LinkCard color={collection.color}>
+                {collection.title}
+                {collection.archived && (
                   <Label className="right-0 m-2">Archived</Label>
                 )}
               </LinkCard>
