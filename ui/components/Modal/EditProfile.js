@@ -32,7 +32,6 @@ const EditProfile = ({
   currentOrgMember,
   currentOrg,
 }) => {
-  console.log({ currentOrg });
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
@@ -108,15 +107,24 @@ const EditProfile = ({
               />
             </div>
           )}
-
-          <Button
-            type="submit"
-            size="large"
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
+          <div className="space-x-2 flex">
+            <Button
+              size="large"
+              variant="contained"
+              // color="secondary"
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="large"
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          </div>
         </form>
       </div>
     </Card>
