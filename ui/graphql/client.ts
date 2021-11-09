@@ -1,5 +1,5 @@
 import { dedupExchange, fetchExchange, errorExchange } from "urql";
-import { NextUrqlContext, SSRExchange } from "next-urql";
+import { NextUrqlContext, NextUrqlPageContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";

@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
-import DreamCard from "components/DreamCard";
-import Filterbar from "components/Filterbar";
-import SubMenu from "components/SubMenu";
-import PageHero from "components/PageHero";
-import Button from "components/Button";
-import NewDreamModal from "components/NewDreamModal";
-import EditableField from "components/EditableField";
-import LoadMore from "components/LoadMore";
+import DreamCard from "../../../components/DreamCard";
+import Filterbar from "../../../components/Filterbar";
+import SubMenu from "../../../components/SubMenu";
+import PageHero from "../../../components/PageHero";
+import Button from "../../../components/Button";
+import NewDreamModal from "../../../components/NewDreamModal";
+import EditableField from "../../../components/EditableField";
+import LoadMore from "../../../components/LoadMore";
 
 export const DREAMS_QUERY = gql`
   query Dreams(

@@ -1,6 +1,6 @@
-const fetch = require("node-fetch");
+import fetch from "node-fetch";
 
-const discourse = ({ url, apiKey } = {}) => {
+const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
   const headers = {
     "Api-Key": apiKey,
     "Api-Username": "system",
@@ -80,8 +80,8 @@ const discourse = ({ url, apiKey } = {}) => {
           archetype, // required for private message, value: "private_message"
           created_at, // pick a date other than the default current time
           unlist_topic,
-        },
-        { username, userApiKey } = {}
+        }: any,
+        { username, userApiKey }: any = {}
       ) => {
         const res = await fetch(`${url}/posts`, {
           method: "post",
@@ -105,7 +105,11 @@ const discourse = ({ url, apiKey } = {}) => {
         });
         return res.json();
       },
-      update: async (id, { title, raw }, { username, userApiKey } = {}) => {
+      update: async (
+        id,
+        { title, raw },
+        { username, userApiKey }: any = {}
+      ) => {
         const res = await fetch(`${url}/posts/${id}`, {
           method: "put",
           headers: {
@@ -189,4 +193,4 @@ const discourse = ({ url, apiKey } = {}) => {
   };
 };
 
-module.exports = discourse;
+export default discourse;

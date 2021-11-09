@@ -14,10 +14,24 @@ const Button = forwardRef(
       color = "blue",
       fullWidth = false,
       href,
+      onClick,
       nextJsLink,
       ...props
+    }: {
+      children: React.ReactChildren | string;
+      disabled?: boolean;
+      loading?: boolean;
+      size?: string;
+      variant?: string;
+      className?: string;
+      type?: "button" | "submit" | "reset";
+      color?: string;
+      fullWidth?: boolean;
+      href?: string;
+      onClick?: () => void;
+      nextJsLink?: boolean;
     },
-    ref
+    ref: any
   ) => {
     const classes = `
   font-medium transition-colors transition-opacity duration-100 rounded-md 
@@ -54,6 +68,7 @@ const Button = forwardRef(
     return (
       <button
         {...props}
+        onClick={onClick}
         disabled={disabled || loading}
         type={type}
         className={classes}
