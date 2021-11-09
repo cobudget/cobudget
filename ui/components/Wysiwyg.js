@@ -86,7 +86,7 @@ const ImperativeHandle = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     blur: commands.blur,
-    clear: clearContent,
+    clear: () => clearContent({ triggerChange: true }),
   }));
 
   return <></>;
