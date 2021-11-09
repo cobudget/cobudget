@@ -37,6 +37,7 @@ const TextField = ({
             placeholder={placeholder}
             autoFocus={autoFocus}
             defaultValue={defaultValue}
+            rows={rows}
             onChange={inputProps?.onChange}
             highlightColor={color}
           />

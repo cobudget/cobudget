@@ -72,6 +72,11 @@ const EditorCss = styled.div`
           highlightColor
         )} !important;`
       : ""}
+
+  /* editor height */
+  .ProseMirror {
+    min-height: ${({ rows }) => `${rows * 2.5}em !important`};
+  }
 `;
 
 const ImperativeHandle = forwardRef((props, ref) => {
@@ -95,6 +100,7 @@ const Wysiwyg = ({
   placeholder,
   autoFocus,
   defaultValue,
+  rows = 2,
   onChange,
   highlightColor,
 }) => {
@@ -142,7 +148,7 @@ const Wysiwyg = ({
   return (
     <AllStyledComponent>
       <ThemeProvider>
-        <EditorCss highlightColor={highlightColor}>
+        <EditorCss highlightColor={highlightColor} rows={rows}>
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
