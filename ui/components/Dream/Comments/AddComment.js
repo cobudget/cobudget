@@ -31,7 +31,7 @@ function AddComment() {
         addComment({ variables: { dreamId: dream.id, content } })
           .then(() => {
             inputRef.current.blur();
-            setContent("");
+            inputRef.current.clear();
           })
           .finally(() => setSubmitting(false))
           .catch((err) => alert(err.message));
@@ -66,7 +66,7 @@ function AddComment() {
           {content.length > 0 && (
             <div className="flex justify-end">
               <Button
-                onClick={() => setContent("")}
+                onClick={() => inputRef.current.clear()}
                 variant="secondary"
                 color={event.color}
                 className="mr-2"

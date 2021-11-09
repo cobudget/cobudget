@@ -33,6 +33,7 @@ const TextField = ({
       {multiline ? (
         wysiwyg ? (
           <Wysiwyg
+            inputRef={inputRef}
             placeholder={placeholder}
             defaultValue={defaultValue}
             onChange={inputProps?.onChange}

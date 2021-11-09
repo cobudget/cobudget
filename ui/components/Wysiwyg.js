@@ -4,7 +4,7 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-import { useCallback } from "react";
+import { forwardRef, useCallback, useImperativeHandle } from "react";
 import { ExtensionPriority } from "remirror";
 import {
   BlockquoteExtension,
@@ -36,6 +36,7 @@ import {
   ThemeProvider,
   Toolbar,
   useRemirror,
+  useRemirrorContext,
 } from "@remirror/react";
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
@@ -73,10 +74,29 @@ const EditorCss = styled.div`
       : ""}
 `;
 
+const ImperativeHandle = forwardRef((props, ref) => {
+  const { commands, clearContent } = useRemirrorContext({
+    autoUpdate: true,
+  });
+
+  useImperativeHandle(ref, () => ({
+    blur: commands.blur,
+    clear: clearContent,
+  }));
+
+  return <></>;
+});
+
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
-const Wysiwyg = ({ placeholder, defaultValue, onChange, highlightColor }) => {
+const Wysiwyg = ({
+  inputRef,
+  placeholder,
+  defaultValue,
+  onChange,
+  highlightColor,
+}) => {
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
@@ -134,6 +154,7 @@ const Wysiwyg = ({ placeholder, defaultValue, onChange, highlightColor }) => {
               });
             }, 250)}
           >
+            <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
               <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
             </div>
