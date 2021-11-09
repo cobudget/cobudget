@@ -1,5 +1,7 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
+import TextField from "./TextField";
+import Button from "./Button";
 
 export default function AuthenticationForm() {
   const [email, setEmail] = useState("");
@@ -29,13 +31,20 @@ export default function AuthenticationForm() {
           });
       }}
     >
-      <input
-        type="email"
+      {/* @ts-ignore */}
+      <TextField
+        inputProps={{
+          type: "email",
+          value: email,
+          onChange: (evt) => setEmail(evt.target.value),
+        }}
+        label="Email"
+        className="mb-4"
         placeholder="me@hello.com"
-        value={email}
-        onChange={(evt) => setEmail(evt.target.value)}
       />
-      <button type="submit">Let's go!</button>
+      <Button type="submit" fullWidth disabled={!email?.length}>
+        Send magic link
+      </Button>
     </form>
   );
 }

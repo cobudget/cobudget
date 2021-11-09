@@ -130,9 +130,14 @@ const Header = ({
                 <div data-cy="user-is-logged-in" />
               </>
             ) : (
-              <NavItem href={`/login`} eventColor={color} primary>
-                Login or Sign up
-              </NavItem>
+              <>
+                <NavItem href={`/login`} eventColor={color}>
+                  Log in
+                </NavItem>
+                <NavItem href={`/signup`} eventColor={color} primary>
+                  Sign up
+                </NavItem>
+              </>
             )}
           </div>
 
