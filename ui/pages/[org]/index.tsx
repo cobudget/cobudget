@@ -20,7 +20,7 @@ const EVENTS_QUERY = gql`
   }
 `;
 
-const LinkCard = forwardRef((props, ref) => {
+const LinkCard = forwardRef((props: any, ref) => {
   const { color, className, children } = props;
   return (
     <a

@@ -1615,7 +1615,7 @@ const resolvers = {
                 currentOrg.customDomain
                   ? currentOrg.customDomain
                   : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
-              }/${bucket.collection.slug}/${dream.id}`,
+              }/${bucket.collection.slug}/${bucket.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
               }),

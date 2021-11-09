@@ -105,8 +105,6 @@ export const TOP_LEVEL_QUERY = gql`
 `;
 
 const MyApp = ({ Component, pageProps, router }) => {
-  // const { user, loading } = useFetchUser();
-  console.log({ router });
   const [
     {
       data: { currentUser, currentOrg, currentOrgMember, event } = {
@@ -125,19 +123,12 @@ const MyApp = ({ Component, pageProps, router }) => {
       collectionSlug: router.query.collection,
     },
   });
-  //console.log({ currentUser, currentOrg, currentOrgMember, error, router });
-  //console.log({ error });
+
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
       jssStyles.parentNode.removeChild(jssStyles);
   });
-  //let currentOrg, currentOrgMember, event;
-  // const {
-  //   data: { currentUser, currentOrg, currentOrgMember, event } = {},
-  // } = useQuery(TOP_LEVEL_QUERY, {
-  //   variables: { slug: router.query.collection },
-  // });
 
   const [modal, setModal] = useState(null);
 
@@ -150,8 +141,6 @@ const MyApp = ({ Component, pageProps, router }) => {
   };
 
   return (
-    // <UserProvider value={{ user, loading }}>
-    // <ThemeProvider theme={theme}>
     <>
       <Modal
         active={modal}
@@ -187,11 +176,8 @@ const MyApp = ({ Component, pageProps, router }) => {
         <Toaster />
       </Layout>
     </>
-    // </ThemeProvider>
-    // </UserProvider>
   );
 };
 
-export default withUrqlClient(client, { ssr: true })(MyApp);
-
-//export default withApollo({ ssr: true })(MyApp);
+//@ts-ignore
+export default withUrqlClient(client, { ssr: true })(MyApp as any);
