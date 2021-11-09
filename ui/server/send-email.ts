@@ -19,15 +19,13 @@ export const sendEmail = (input: SendEmailInput) => {
     return;
   }
 
-  if (!process.env.POSTMARK_API_TOKEN || !process.env.POSTMARK_FROM_EMAIL) {
-    console.error(
-      `Add POSTMARK_FROM_EMAIL and POSTMARK_API_TOKEN env variables.`
-    );
+  if (!process.env.POSTMARK_API_TOKEN || !process.env.FROM_EMAIL) {
+    console.error(`Add FROM_EMAIL and POSTMARK_API_TOKEN env variables.`);
     return;
   }
 
   return client.sendEmail({
-    From: process.env.POSTMARK_FROM_EMAIL,
+    From: process.env.FROM_EMAIL,
     To: input.to,
     Subject: input.subject,
     TextBody: input.text,
