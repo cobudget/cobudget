@@ -58,7 +58,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
             {events.length === 1 ? "collection" : "collections"}
           </h2>
           {currentOrgMember?.isOrgAdmin && (
-            <Link href={`/new-collection`}>
+            <Link href={`/${currentOrg.slug}/new-collection`}>
               <Button size="large" color="anthracit">
                 New collection
               </Button>

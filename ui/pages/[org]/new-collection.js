@@ -40,7 +40,10 @@ export default function NewCollectionPage({ currentOrg }) {
   const onSubmit = (variables) => {
     createEvent({ ...variables, orgId: currentOrg.id })
       .then(({ data }) => {
-        Router.push("/[event]", `/${data.createEvent.slug}`);
+        Router.push(
+          "/[org]/[collection]",
+          `/${currentOrg.slug}/${data.createEvent.slug}`
+        );
       })
       .catch((err) => {
         alert(err.message);
