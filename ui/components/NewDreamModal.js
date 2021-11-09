@@ -29,8 +29,8 @@ export default ({ event, handleClose, currentOrg }) => {
     createDream({ ...variables, eventId: event.id })
       .then(({ data }) => {
         Router.push(
-          "/[event]/[dream]",
-          `/${event.slug}/${data.createDream.id}`
+          "/[org]/[collection]/[bucket]",
+          `/${currentOrg.slug}/${event.slug}/${data.createDream.id}`
         );
         handleClose();
       })
