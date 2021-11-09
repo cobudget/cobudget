@@ -7,7 +7,7 @@ import dirtyValues from "utils/dirtyValues";
 
 const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile(
-    $orgID: ID
+    $orgId: ID
     $username: String
     $name: String
     $bio: String
@@ -32,6 +32,7 @@ const EditProfile = ({
   currentOrgMember,
   currentOrg,
 }) => {
+  console.log({ currentOrg });
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
