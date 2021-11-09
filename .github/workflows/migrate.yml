@@ -19,9 +19,9 @@ jobs:
           node-version: "14"
 
       - name: Install
-        run: yarn install --frozen-lockfile --silent
+        run: cd ui && yarn install --frozen-lockfile --silent
 
       - name: Run migrations
-        run: yarn prisma migrate deploy
+        run: cd ui && yarn prisma migrate deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
