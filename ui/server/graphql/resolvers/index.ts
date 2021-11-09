@@ -2638,6 +2638,10 @@ const resolvers = {
       console.log({ collectionMember });
       return collectionMember;
     },
+    organization: async (orgMember) =>
+      prisma.organization.findUnique({
+        where: { id: orgMember.organizationId },
+      }),
   },
   User: {
     // currentOrgMember: async (user, { orgSlug }, { user: currentUser }) => {
@@ -2804,6 +2808,10 @@ const resolvers = {
 
       return now.isBefore(bucketCreationCloses);
     },
+    organization: async (collection) =>
+      await prisma.organization.findUnique({
+        where: { id: collection.organizationId },
+      }),
   },
   Dream: {
     cocreators: async (bucket) => {
