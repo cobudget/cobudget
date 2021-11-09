@@ -1,10 +1,10 @@
 import AuthenticationForm from "../components/AuthenticationForm";
 
-function Login() {
+function Signup() {
   return (
     <div className="page">
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
-        Login to Cobudget
+        Sign up to Cobudget
       </h1>
 
       <div className="max-w-sm bg-white mx-auto my-6 p-6 shadow rounded">
@@ -14,4 +14,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Signup;

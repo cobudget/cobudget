@@ -1,7 +1,7 @@
 import { info } from "next/dist/build/output/log";
 import { Client } from "postmark";
 
-//const client = new Client(process.env.POSTMARK_API_TOKEN);
+const client = new Client(process.env.POSTMARK_API_TOKEN);
 
 interface SendEmailInput {
   to: string;
@@ -26,10 +26,10 @@ export const sendEmail = (input: SendEmailInput) => {
     return;
   }
 
-  // return client.sendEmail({
-  //   From: process.env.POSTMARK_FROM_EMAIL,
-  //   To: input.to,
-  //   Subject: input.subject,
-  //   TextBody: input.text,
-  // });
+  return client.sendEmail({
+    From: process.env.POSTMARK_FROM_EMAIL,
+    To: input.to,
+    Subject: input.subject,
+    TextBody: input.text,
+  });
 };

@@ -53,7 +53,7 @@ const InviteMembersModal = ({ handleClose, eventId, currentOrg }) => {
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     eventId ? INVITE_EVENT_MEMBERS_MUTATION : INVITE_ORG_MEMBERS_MUTATION
   );
-  console.log({ eventId });
+
   return (
     <>
       <Modal
@@ -81,11 +81,11 @@ const InviteMembersModal = ({ handleClose, eventId, currentOrg }) => {
                 platform.
               </li>
               <li className="mt-2">
-                People without Plato accounts will get an anonymous
-                &quot;Welcome to Plato&quot; email to complete their signup.
+                People without Cobudget accounts will get an anonymous
+                &quot;Welcome to Cobudget&quot; email to complete their signup.
               </li>
               <li className="mt-2">
-                People with Plato accounts will get no notification or email.
+                People with Cobudget accounts will get no notification or email.
               </li>
             </ul>
           </Banner>
