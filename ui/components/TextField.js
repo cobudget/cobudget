@@ -35,6 +35,7 @@ const TextField = ({
           <Wysiwyg
             inputRef={inputRef}
             placeholder={placeholder}
+            autoFocus={autoFocus}
             defaultValue={defaultValue}
             onChange={inputProps?.onChange}
             highlightColor={color}

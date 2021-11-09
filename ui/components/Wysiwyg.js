@@ -93,6 +93,7 @@ const ImperativeHandle = forwardRef((props, ref) => {
 const Wysiwyg = ({
   inputRef,
   placeholder,
+  autoFocus,
   defaultValue,
   onChange,
   highlightColor,
@@ -144,7 +145,7 @@ const Wysiwyg = ({
         <EditorCss highlightColor={highlightColor}>
           <Remirror
             manager={manager}
-            autoFocus
+            autoFocus={autoFocus}
             initialContent={defaultValue}
             onChange={debounce((param) => {
               onChange?.({
