@@ -1,6 +1,7 @@
 import MagicLoginStrategy from "passport-magic-login";
 import { getRequestOrigin } from "../get-request-origin";
 import { sendEmail } from "../send-email";
+import prisma from "../prisma";
 
 if (!process.env.MAGIC_LINK_SECRET)
   throw new Error(`Add MAGIC_LINK_SECRET environment variable`);
@@ -18,11 +19,21 @@ const magicLink = new MagicLoginStrategy({
     });
   },
   verify: (payload, callback) => {
-    callback(undefined, {
-      ...payload,
-      email: payload.destination,
-      provider: "mail",
-    });
+    prisma.user
+      .upsert({
+        create: {
+          email: payload.destination,
+          verifiedEmail: true,
+        },
+        update: {
+          verifiedEmail: true,
+        },
+        where: {
+          email: payload.destination,
+        },
+      })
+      .then((user) => callback(null, user))
+      .catch((err) => callback(err));
   },
 });
 
