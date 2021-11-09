@@ -1,13 +1,7 @@
 import fetch from "isomorphic-unfetch";
 import forge from "node-forge";
 import prisma from "../../server/prisma";
-import jwt from "jsonwebtoken";
-import platoCore from "@sensestack/plato-core";
 import getHostInfo from "utils/getHostInfo";
-
-const {
-  db: { getConnection, getModels },
-} = platoCore;
 
 const atob = (a) => Buffer.from(a, "base64").toString("binary");
 
