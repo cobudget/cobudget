@@ -23,7 +23,6 @@ const GET_TODO_INFO = gql`
 const SET_TODOS_FINISHED = gql`
   mutation SetTodosFinished($orgId: ID!) {
     setTodosFinished(orgId: $orgId) {
-      __typename
       id
       finishedTodos
     }
@@ -89,10 +88,10 @@ const TodoList = ({ currentOrg }) => {
   ];
 
   useEffect(() => {
-    if (allDone) {
+    if (allDone && currentOrg) {
       setTodosFinished({ orgId: currentOrg.id });
     }
-  }, [allDone, setTodosFinished]);
+  }, [allDone, setTodosFinished, currentOrg]);
 
   if (error) {
     console.error("Couldn't check todo status", error);
@@ -145,7 +144,7 @@ const TodoList = ({ currentOrg }) => {
         <NavItem
           onClick={() =>
             window.confirm("Are you sure you want skip this introduction?") &&
-            setTodosFinished()
+            setTodosFinished({ orgId: currentOrg.id })
           }
           className="text-xs opacity-70 ml-auto"
         >
