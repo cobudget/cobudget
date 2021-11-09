@@ -1,4 +1,4 @@
-import EditOrganization from "../../components/Org/EditOrganization";
+import EditOrganization from "../components/Org/EditOrganization";
 
 const CreateOrganizationPage = ({ currentUser }) => {
   if (!currentUser) {

@@ -51,8 +51,10 @@ const isMemberOfOrg = async (parent, { id }, { user }) => {
 
 const resolvers = {
   Query: {
-    currentUser: (parent, args, { user }) => {
-      return user ? { ...user } : null;
+    currentUser: async (parent, args, { user }) => {
+      return user
+        ? await prisma.user.findUnique({ where: { id: user.id } })
+        : null;
     },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug) return null;
