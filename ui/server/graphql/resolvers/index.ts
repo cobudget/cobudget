@@ -1300,7 +1300,7 @@ const resolvers = {
 
       if (contributionsForBucket > 0) {
         throw new Error(
-          "You cant delete a Dream that has received contributions"
+          "You cant delete a bucket that has received contributions"
         );
       }
 
@@ -1310,6 +1310,9 @@ const resolvers = {
         event: bucket.collection,
         dream: bucket,
       });
+
+      await prisma.bucket.delete({ where: { id: dreamId } });
+
       return bucket;
     },
     addCocreator: async (parent, { dreamId, memberId }, { user }) => {
