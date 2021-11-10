@@ -192,6 +192,7 @@ model Bucket {
   fundedAt         DateTime?
   canceledAt       DateTime?
   completedAt      DateTime?
+  deleted          Boolean            @default(false)
   discourseTopicId Int?
   flags            Flag[]
   tags             Tag[]

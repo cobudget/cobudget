@@ -158,7 +158,9 @@ const resolvers = {
       };
     },
     dream: async (parent, { id }) => {
-      return prisma.bucket.findUnique({ where: { id } });
+      const bucket = await prisma.bucket.findUnique({ where: { id } });
+      if (bucket.deleted) return null;
+      return bucket;
     },
     dreamsPage: async (
       parent,
@@ -235,44 +237,27 @@ const resolvers = {
         collection,
       });
 
-      const tagQuery = {
-        ...(tagValue
-          ? {
-              tags: { some: { value: tagValue } },
-            }
-          : null),
-      };
-
-      const adminQuery = {
-        collectionId: collection.id,
-        ...(textSearchTerm && { title: { search: textSearchTerm } }),
-        ...tagQuery,
-      };
-      // todo: create appropriate index for this query
-      // if event member, show dreams that are publisehd AND dreams where member is cocreator
-      // const memberQuery = ;
-      const othersQuery = {
-        collectionId: collection.id,
-        publishedAt: { not: null },
-        ...(textSearchTerm && { title: { search: textSearchTerm } }),
-        ...tagQuery,
-      };
-
-      const query =
+      const isAdminOrGuide =
         currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide)
-          ? adminQuery
-          : currentEventMember
-          ? {
-              collectionId: collection.id,
-              OR: [
-                { publishedAt: { not: null } },
-                { cocreators: { some: { id: currentEventMember.id } } },
-              ],
-              ...(textSearchTerm && { title: { search: textSearchTerm } }),
-              ...tagQuery,
-            }
-          : othersQuery;
+        (currentEventMember.isAdmin || currentEventMember.isGuide);
+
+      const query = {
+        collectionId: collection.id,
+        deleted: { not: true },
+        ...(textSearchTerm && { title: { search: textSearchTerm } }),
+        ...(tagValue && {
+          tags: { some: { value: tagValue } },
+        }),
+        ...(!isAdminOrGuide &&
+          (currentEventMember
+            ? {
+                OR: [
+                  { publishedAt: { not: null } },
+                  { cocreators: { some: { id: currentEventMember.id } } },
+                ],
+              }
+            : { publishedAt: { not: null } })),
+      };
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
       const buckets = await prisma.bucket.findMany({
@@ -280,7 +265,7 @@ const resolvers = {
       });
       const shuffledBuckets = SeededShuffle.shuffle(
         buckets,
-        user?.id ?? todaySeed
+        user ? user.id + todaySeed : todaySeed
       );
 
       return {
@@ -1308,7 +1293,10 @@ const resolvers = {
         dream: bucket,
       });
 
-      await prisma.bucket.delete({ where: { id: dreamId } });
+      await prisma.bucket.update({
+        where: { id: dreamId },
+        data: { deleted: true },
+      });
 
       return bucket;
     },
@@ -2829,6 +2817,11 @@ const resolvers = {
       return cocreators;
     },
     event: async (bucket) => {
+      return prisma.collection.findUnique({
+        where: { id: bucket.collectionId },
+      });
+    },
+    collection: async (bucket) => {
       return prisma.collection.findUnique({
         where: { id: bucket.collectionId },
       });

@@ -346,6 +346,7 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+    collection: Collection!
   }
 
   type DreamsPage {

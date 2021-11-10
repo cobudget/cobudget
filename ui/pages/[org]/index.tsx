@@ -3,7 +3,6 @@ import { useQuery, gql } from "urql";
 import Link from "next/link";
 import Button from "../../components/Button";
 import TodoList from "../../components/TodoList";
-import { AddIcon } from "../../components/Icons";
 import Label from "../../components/Label";
 import SubMenu from "../../components/SubMenu";
 import PageHero from "../../components/PageHero";
