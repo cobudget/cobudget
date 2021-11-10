@@ -7,6 +7,7 @@ import { simplePagination } from "@urql/exchange-graphcache/extras";
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
 import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
+import { DREAMS_QUERY } from "pages/[org]/[collection]";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -43,6 +44,7 @@ export const client = (
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
+          DreamsPage: () => null,
         },
         // resolvers: {
         //   Query: {
@@ -55,6 +57,30 @@ export const client = (
         // },
         updates: {
           Mutation: {
+            deleteDream(result: any, { dreamId }, cache) {
+              const fields = cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "dreamsPage")
+                .forEach((field) => {
+                  cache.updateQuery(
+                    {
+                      query: DREAMS_QUERY,
+                      variables: {
+                        offset: field.arguments.offset,
+                        limit: field.arguments.limit,
+                        eventSlug: field.arguments.eventSlug,
+                        orgSlug: field.arguments.orgSlug,
+                      },
+                    },
+                    (data) => {
+                      data.dreamsPage.dreams = data.dreamsPage.dreams.filter(
+                        (dream) => dream.id !== dreamId
+                      );
+                      return data;
+                    }
+                  );
+                });
+            },
             addComment(result: any, { content, dreamId }, cache) {
               console.log({ result });
               if (result.addComment) {

@@ -15,6 +15,7 @@ import GrantingStatus from "./GrantingStatus";
 
 import { DREAMS_QUERY } from "../../pages/[org]/[collection]";
 import Tags from "./Tags";
+import toast from "react-hot-toast";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
@@ -74,6 +75,14 @@ const DELETE_DREAM_MUTATION = gql`
   mutation DeleteDream($dreamId: ID!) {
     deleteDream(dreamId: $dreamId) {
       id
+      collection {
+        id
+        slug
+        organization {
+          id
+          slug
+        }
+      }
     }
   }
 `;
@@ -95,27 +104,11 @@ const DreamSidebar = ({
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
 
   const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
-  const [, publishDream] = useMutation(PUBLISH_DREAM_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION, {
-    variables: { dreamId: dream.id },
-    refetchQueries: [
-      {
-        query: DREAMS_QUERY,
-        variables: { eventSlug: event.slug },
-      },
-    ],
-  });
+  const [, publishDream] = useMutation(PUBLISH_DREAM_MUTATION);
+  const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION);
+  const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
+  const [, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
+  const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const isEventAdminOrGuide =
     currentOrgMember?.currentEventMembership?.isAdmin ||
@@ -227,8 +220,10 @@ const DreamSidebar = ({
                 confirm(
                   `Are you sure you would like to mark this bucket as completed? This can't be undone.`
                 ) &&
-                markAsCompleted({ dreamId: dream.id }).catch((err) =>
-                  alert(err.message)
+                markAsCompleted({ dreamId: dream.id }).then(
+                  ({ data, error }) => {
+                    if (error) toast.error(error.message);
+                  }
                 )
               }
             >
@@ -299,12 +294,18 @@ const DreamSidebar = ({
                       confirm(
                         `Are you sure you would like to delete this bucket?`
                       ) &&
-                      deleteDream({ dreamId: dream.id })
-                        .then(() => {
+                      deleteDream({ dreamId: dream.id }).then(({ error }) => {
+                        if (error) {
+                          toast.error(error.message);
+                        } else {
                           setActionsDropdownOpen(false);
-                          Router.push("/[event]", `/${event.slug}`);
-                        })
-                        .catch((err) => alert(err.message))
+                          Router.push(
+                            "/[org]/[collection]",
+                            `/${currentOrg.slug}/${event.slug}`
+                          );
+                          toast.success("Bucket deleted");
+                        }
+                      })
                     }
                   >
                     Delete

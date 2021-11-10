@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Button from "components/Button";
 
-const LandingPage = ({ currentUser }) => {
-  console.log({ currentUser });
+const IndexPage = ({ currentUser }) => {
   return (
     <div className="page">
       <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -27,10 +26,6 @@ const LandingPage = ({ currentUser }) => {
       </div>
     </div>
   );
-};
-
-const IndexPage = ({ currentUser }) => {
-  return <LandingPage currentUser={currentUser} />;
 };
 
 export default IndexPage;
