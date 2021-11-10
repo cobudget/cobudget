@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 
-import Dropdown from "components/Dropdown";
-import { EditIcon, DotsHorizontalIcon } from "components/Icons";
-import Avatar from "components/Avatar";
-import IconButton from "components/IconButton";
-import Button from "components/Button";
+import Dropdown from "../Dropdown";
+import { EditIcon, DotsHorizontalIcon } from "../Icons";
+import Avatar from "../Avatar";
+import IconButton from "../IconButton";
+import Button from "../Button";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
@@ -143,11 +143,7 @@ const DreamSidebar = ({
     <>
       {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus
-            dream={dream}
-            event={event}
-            currentOrgMember={currentOrgMember}
-          />
+          <GrantingStatus dream={dream} event={event} />
           {showFundButton && (
             <>
               <Button
