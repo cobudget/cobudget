@@ -8,6 +8,7 @@ import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable"
 import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { DREAMS_QUERY } from "pages/[org]/[collection]";
+import { COLLECTIONS_QUERY } from "pages/[org]";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -57,6 +58,27 @@ export const client = (
         // },
         updates: {
           Mutation: {
+            deleteCollection(result: any, { collectionId }, cache) {
+              const fields = cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "collections")
+                .forEach((field) => {
+                  cache.updateQuery(
+                    {
+                      query: COLLECTIONS_QUERY,
+                      variables: {
+                        orgSlug: field.arguments.orgSlug,
+                      },
+                    },
+                    (data) => {
+                      data.collections = data.collections.filter(
+                        (collection) => collection.id !== collectionId
+                      );
+                      return data;
+                    }
+                  );
+                });
+            },
             deleteDream(result: any, { dreamId }, cache) {
               const fields = cache
                 .inspectFields("Query")
