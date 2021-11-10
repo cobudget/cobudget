@@ -10,7 +10,7 @@ const schema = gql`
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(id: ID!): Organization!
-    events(orgSlug: String!, limit: Int): [Collection!]
+    collections(orgSlug: String!, limit: Int): [Collection!]
     event(orgSlug: String, collectionSlug: String): Collection
     dream(id: ID!): Dream
     dreamsPage(
@@ -69,7 +69,7 @@ const schema = gql`
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
     ): Collection!
-    deleteEvent(eventId: ID!): Collection
+    deleteCollection(collectionId: ID!): Collection
 
     addGuideline(eventId: ID!, guideline: GuidelineInput!): Collection!
     editGuideline(

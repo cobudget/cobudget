@@ -82,7 +82,7 @@ const resolvers = {
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    events: async (parent, { limit, orgSlug }, { user }) => {
+    collections: async (parent, { limit, orgSlug }, { user }) => {
       if (!orgSlug) return null;
 
       const currentOrgMember = user
@@ -94,7 +94,7 @@ const resolvers = {
       // if admin show all events (current or archived)
       if (currentOrgMember && currentOrgMember.isOrgAdmin) {
         return prisma.collection.findMany({
-          where: { organization: { slug: orgSlug } },
+          where: { organization: { slug: orgSlug }, deleted: { not: true } },
           take: limit,
         });
       }
@@ -103,6 +103,7 @@ const resolvers = {
         where: {
           organization: { slug: orgSlug },
           archived: { not: true },
+          deleted: { not: true },
         },
         take: limit,
       });
@@ -111,7 +112,11 @@ const resolvers = {
       if (!orgSlug || !collectionSlug) return null;
 
       return await prisma.collection.findFirst({
-        where: { slug: collectionSlug, organization: { slug: orgSlug } },
+        where: {
+          slug: collectionSlug,
+          organization: { slug: orgSlug },
+          deleted: { not: true },
+        },
       });
     },
     contributionsPage: async (parent, { eventId, offset, limit }, { user }) => {
@@ -655,17 +660,17 @@ const resolvers = {
         data: { ...collection },
       });
     },
-    deleteEvent: async (parent, { eventId }, { user, eventHub }) => {
+    deleteCollection: async (parent, { collectionId }, { user, eventHub }) => {
       const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId: eventId,
+        collectionId,
         user,
       });
 
       if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
         throw new Error("You need to be org. admin to delete event");
 
-      const collection = await prisma.collection.updateMany({
-        where: { id: eventId, organizationId: currentOrgMember.id },
+      const collection = await prisma.collection.update({
+        where: { id: collectionId },
         data: { deleted: true },
       });
 

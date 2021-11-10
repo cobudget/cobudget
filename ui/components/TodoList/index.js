@@ -14,7 +14,7 @@ const GET_TODO_INFO = gql`
       }
     }
 
-    events(limit: 1, orgSlug: $orgSlug) {
+    collections(limit: 1, orgSlug: $orgSlug) {
       id
     }
   }
@@ -107,7 +107,7 @@ const TodoList = ({ currentOrg }) => {
     } else if (index === 1) {
       done = data?.orgMembers?.length > 1;
     } else if (index === 2) {
-      done = data?.events.length > 0;
+      done = data?.collections.length > 0;
     }
 
     return {

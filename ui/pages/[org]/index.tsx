@@ -7,9 +7,9 @@ import Label from "../../components/Label";
 import SubMenu from "../../components/SubMenu";
 import PageHero from "../../components/PageHero";
 
-const EVENTS_QUERY = gql`
-  query Events($orgSlug: String!) {
-    events(orgSlug: $orgSlug) {
+export const COLLECTIONS_QUERY = gql`
+  query Collections($orgSlug: String!) {
+    collections(orgSlug: $orgSlug) {
       id
       slug
       title
@@ -44,11 +44,11 @@ const LinkCard = forwardRef((props: any, ref) => {
 
 const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
   const [{ data, error }] = useQuery({
-    query: EVENTS_QUERY,
+    query: COLLECTIONS_QUERY,
     variables: { orgSlug: router.query.org },
   });
 
-  const collections = data?.events ?? [];
+  const collections = data?.collections ?? [];
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
   return (

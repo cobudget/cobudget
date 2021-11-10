@@ -75,14 +75,6 @@ const DELETE_DREAM_MUTATION = gql`
   mutation DeleteDream($dreamId: ID!) {
     deleteDream(dreamId: $dreamId) {
       id
-      collection {
-        id
-        slug
-        organization {
-          id
-          slug
-        }
-      }
     }
   }
 `;
