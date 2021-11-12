@@ -75,7 +75,6 @@ export default function GeneralSettings({
               toast.success("Settings updated!");
               router.replace(`/${currentOrg.slug}/${variables.slug}/settings`);
             }
-            reset();
           });
         })}
       >
