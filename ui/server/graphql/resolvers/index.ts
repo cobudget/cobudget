@@ -2997,13 +2997,11 @@ const resolvers = {
       // make logs anonymous
       if (comment.isLog) return null;
 
-      // TODO: fix this to be either colllectionMember or orgMember..
-      if (comment.collectionMemberId)
-        return prisma.orgMember.findFirst({
-          where: {
-            collectionMemberships: { some: { id: comment.collectionMemberId } },
-          },
-        });
+      return prisma.orgMember.findUnique({
+        where: {
+          id: comment.orgMemberId,
+        },
+      });
     },
   },
   Flag: {
