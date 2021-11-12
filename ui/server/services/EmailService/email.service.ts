@@ -3,14 +3,8 @@
 //   domain: process.env.MAILGUN_DOMAIN,
 //   host: process.env.MAILGUN_HOST,
 // });
+import { sendEmail } from "server/send-email";
 import prisma from "../../prisma";
-
-const mailgun = null;
-
-const createDomain = (org) =>
-  org.customDomain
-    ? `https://${org.customDomain}`
-    : `https://${org.subdomain}.${process.env.DEPLOY_URL}`;
 
 export default class EmailService {
   static async sendCommentNotification({
@@ -51,11 +45,11 @@ export default class EmailService {
     //   id: currentOrgMember.userId,
     // });
 
-    const link = `${createDomain(currentOrg)}/${event.slug}/${dream.id}`;
+    const link = `https://${process.env.DEPLOY_URL}/${currentOrg.slug}/${event.slug}/${dream.id}`;
     const subject = `${currentOrgMember.user.username} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
-
-    await this.sendEmail(emails, subject, text);
+    await sendEmail({ to: emails, subject, text });
+    //await this.sendEmail(emails, subject, text);
   }
 
   static async sendEmail(emails, subject, text) {

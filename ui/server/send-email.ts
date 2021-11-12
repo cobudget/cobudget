@@ -4,7 +4,7 @@ import { Client } from "postmark";
 const client = new Client(process.env.POSTMARK_API_TOKEN);
 
 interface SendEmailInput {
-  to: string;
+  to: string | string[];
   subject: string;
   text: string;
 }
@@ -24,10 +24,21 @@ export const sendEmail = (input: SendEmailInput) => {
     return;
   }
 
-  return client.sendEmail({
-    From: process.env.FROM_EMAIL,
-    To: input.to,
-    Subject: input.subject,
-    TextBody: input.text,
-  });
+  if (typeof input.to === "string") {
+    return client.sendEmail({
+      From: process.env.FROM_EMAIL,
+      To: input.to,
+      Subject: input.subject,
+      TextBody: input.text,
+    });
+  }
+
+  return client.sendEmailBatch(
+    input.to.map((to) => ({
+      From: process.env.FROM_EMAIL,
+      To: to,
+      Subject: input.subject,
+      TextBody: input.text,
+    }))
+  );
 };

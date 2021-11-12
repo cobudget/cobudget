@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import DreamCustomField from "./DreamCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
-  query CustomFields($slug: String!) {
-    event(slug: $slug) {
+  query CustomFields($orgSlug: String!, $collectionSlug: String!) {
+    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       customFields {
         id
@@ -24,7 +24,10 @@ const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
   const router = useRouter();
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,
-    variables: { slug: router.query.collection },
+    variables: {
+      orgSlug: router.query.org,
+      collectionSlug: router.query.collection,
+    },
   });
 
   if (!data) {
