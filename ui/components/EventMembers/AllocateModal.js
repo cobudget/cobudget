@@ -66,8 +66,8 @@ const AllocateModal = ({ member, event, handleClose }) => {
               if (error) {
                 toast.error(error.message);
               } else {
-                //TODO: add success toast
                 handleClose();
+                toast.success("Allocated funds successfully");
               }
             });
           }}
