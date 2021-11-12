@@ -2,7 +2,7 @@ import { stringToColor } from "utils/stringToHslColor";
 import { isMemberOfDream } from "utils/helpers";
 
 import Label from "components/Label";
-import Monster from "components/Monster";
+import Monster from "../Monster";
 
 import Images from "./Images";
 import Comments from "./Comments";
@@ -18,14 +18,15 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
     currentOrgMember?.currentEventMembership?.isAdmin ||
     currentOrgMember?.currentEventMembership?.isGuide ||
     isMemberOfDream(currentOrgMember, dream);
-
+  const showBucketReview =
+    currentOrgMember?.currentEventMembership &&
+    event.bucketReviewIsOpen &&
+    event.guidelines.length > 0;
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-      {currentOrgMember?.currentEventMembership &&
-        event.bucketReviewIsOpen &&
-        event.guidelines.length > 0 && (
-          <Monster event={event} dream={dream} currentOrg={currentOrg} />
-        )}
+      {showBucketReview && (
+        <Monster event={event} dream={dream} currentOrg={currentOrg} />
+      )}
 
       {!dream.published && (
         <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>

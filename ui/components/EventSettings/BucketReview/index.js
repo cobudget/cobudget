@@ -4,8 +4,12 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($eventId: ID!, $bucketReviewIsOpen: Boolean) {
-    editEvent(eventId: $eventId, bucketReviewIsOpen: $bucketReviewIsOpen) {
+  mutation editEvent($orgId: ID!, $eventId: ID!, $bucketReviewIsOpen: Boolean) {
+    editEvent(
+      orgId: $orgId
+      eventId: $eventId
+      bucketReviewIsOpen: $bucketReviewIsOpen
+    ) {
       id
       bucketReviewIsOpen
     }
@@ -31,6 +35,7 @@ const DreamReview = ({ event, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           editEvent({
             ...variables,
+            orgId: currentOrg.id,
             eventId: event.id,
             bucketReviewIsOpen: variables.bucketReviewIsOpen === "true",
           })

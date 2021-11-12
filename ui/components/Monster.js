@@ -264,7 +264,9 @@ const Monster = ({ event, dream, currentOrg }) => {
             {
               label: "Yes, looks good to me!",
               sideEffect: () =>
-                allGoodFlag().then((data) => console.log({ data })),
+                allGoodFlag({ dreamId: dream.id }).then((data) =>
+                  console.log({ data })
+                ),
               chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
             },
             {
