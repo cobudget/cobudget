@@ -14,7 +14,9 @@ export async function getCurrentOrgAndMember({
   let currentOrg = null;
 
   const include = {
-    ...(user && { orgMembers: { where: { userId: user.id } } }),
+    ...(user && {
+      orgMembers: { where: { userId: user.id }, include: { user: true } },
+    }),
     discourse: true,
   };
 
