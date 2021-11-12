@@ -99,7 +99,7 @@ const Page = ({
       {buckets.map((bucket) => (
         <Link href={`/${org.slug}/${event.slug}/${bucket.id}`} key={bucket.id}>
           <a className="flex focus:outline-none focus:ring rounded-lg">
-            <DreamCard dream={bucket} event={event} />
+            <DreamCard dream={bucket} event={event} currentOrg={org} />
           </a>
         </Link>
       ))}
@@ -192,7 +192,12 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
       </PageHero>
 
       <div className="page flex-1">
-        <Filterbar textSearchTerm={s} tag={tag} event={event} />
+        <Filterbar
+          textSearchTerm={s}
+          tag={tag}
+          event={event}
+          currentOrg={currentOrg}
+        />
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
           {pageVariables.map((variables, i) => {
             return (

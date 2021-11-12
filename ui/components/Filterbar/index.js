@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 
-const Filterbar = ({ textSearchTerm, tag, event }) => {
+const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -16,9 +16,10 @@ const Filterbar = ({ textSearchTerm, tag, event }) => {
     e.preventDefault();
 
     router.push({
-      pathname: "/[event]",
+      pathname: "/[org]/[collection]",
       query: {
-        event: event.slug,
+        org: currentOrg.slug,
+        collection: event.slug,
         s: input,
         ...(tag && { tag }),
       },
@@ -29,9 +30,10 @@ const Filterbar = ({ textSearchTerm, tag, event }) => {
     const tag = e.target.value === "All tags" ? null : e.target.value;
 
     router.push({
-      pathname: "/[event]",
+      pathname: "/[org]/[collection]",
       query: {
-        event: event.slug,
+        org: currentOrg.slug,
+        collection: event.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
       },
