@@ -5,7 +5,7 @@ const orgItems = ({ currentOrgMember, orgSlug }) => {
   return [
     { label: "Overview", href: `/${orgSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${orgSlug}/members`, member: true },
+    { label: "Members", href: `/${orgSlug}/members`, admin: true },
     { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));
 };

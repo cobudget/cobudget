@@ -1,7 +1,9 @@
 import { info } from "next/dist/build/output/log";
 import { Client } from "postmark";
 
-const client = new Client(process.env.POSTMARK_API_TOKEN);
+const client =
+  process.env.NODE_ENV !== "development" &&
+  new Client(process.env.POSTMARK_API_TOKEN);
 
 interface SendEmailInput {
   to: string | string[];
