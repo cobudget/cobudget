@@ -86,8 +86,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           }
         });
       }
-
-      reset();
     } catch (err) {
       console.error(err);
       alert(err.message);
