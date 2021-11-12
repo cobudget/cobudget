@@ -6,6 +6,7 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 import Switch from "components/Switch";
 import thousandSeparator from "utils/thousandSeparator";
+import toast from "react-hot-toast";
 
 const BULK_ALLOCATE_MUTATION = gql`
   mutation BulkAllocate($eventId: ID!, $amount: Int!, $type: AllocationType!) {
@@ -50,9 +51,14 @@ const BulkAllocateModal = ({ event, handleClose }) => {
               eventId: event.id,
               amount,
               type: type.toUpperCase(),
-            })
-              .then(() => handleClose())
-              .catch((err) => alert(err.message));
+            }).then(({ error }) => {
+              if (error) {
+                toast.error(error.message);
+              } else {
+                handleClose();
+                toast.success("Allocated funds successfully");
+              }
+            });
           }}
         >
           <TextField
