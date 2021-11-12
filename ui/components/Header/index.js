@@ -125,6 +125,7 @@ const Header = ({
                     currentOrgMember={currentOrgMember}
                     openModal={openModal}
                     event={event}
+                    currentOrg={currentOrg}
                   />
                 </div>
                 <div data-cy="user-is-logged-in" />
@@ -189,8 +190,8 @@ const Header = ({
                   }
                   return (
                     <Link
-                      href="/[event]"
-                      as={`/${membership.event.slug}`}
+                      href="/[org]/[collection]"
+                      as={`/${currentOrg.slug}/${membership.event.slug}`}
                       key={membership.id}
                     >
                       <a className={css.mobileProfileItem}>
