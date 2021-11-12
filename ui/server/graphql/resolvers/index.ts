@@ -17,6 +17,7 @@ import {
   generateComment,
 } from "../../subscribers/discourse.subscriber";
 import { getCurrentOrgAndMember } from "./helpers";
+import { sendEmail } from "server/send-email";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -195,46 +196,7 @@ const resolvers = {
       const currentOrgMember = currentOrg.orgMembers?.[0];
       const currentEventMember = currentOrgMember?.collectionMemberships?.[0];
       const collection = currentOrg.collections?.[0];
-      // const currentOrgMember = user
-      //   ? await prisma.orgMember.findFirst({
-      //       where: {
-      //         organization: { slug: orgSlug },
-      //         userId: user.id,
-      //       },
-      //       select: {
-      //         id: true,
-      //         isOrgAdmin: true,
-      //         createdAt: true,
-      //         collectionMemberships: {
-      //           where: { collection: { slug: eventSlug } },
-      //           select: { isAdmin: true, isGuide: true },
-      //         },
-      //         organization: true,
-      //       },
-      //     })
-      //   : null;
 
-      // const collection = await prisma.collection.findUnique({
-      //   where: {
-      //     organizationId_slug: {
-      //       organizationId: currentOrgMember.organization.id,
-      //       slug: eventSlug,
-      //     },
-      //   },
-      // });
-
-      // let currentEventMember;
-
-      // if (currentOrgMember) {
-      //   currentEventMember = await prisma.collectionMember.findUnique({
-      //     where: {
-      //       orgMemberId_collectionId: {
-      //         orgMemberId: currentOrgMember.id,
-      //         collectionId: collection.id,
-      //       },
-      //     },
-      //   });
-      // }
       console.log({
         currentOrgMember,
         currentEventMember,
@@ -1822,11 +1784,11 @@ const resolvers = {
     inviteEventMembers: async (
       parent,
       { emails: emailsString, eventId },
-      { user }
+      { user: currentUser }
     ) => {
       const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
         collectionId: eventId,
-        user,
+        user: currentUser,
       });
 
       const currentEventMember = await prisma.collectionMember.findUnique({
@@ -1849,9 +1811,16 @@ const resolvers = {
 
       const invitedCollectionMembers = [];
 
-      for (const email of emails) {
+      for (let email of emails) {
+        email = email.trim().toLowerCase();
         const user = await prisma.user.findUnique({
-          where: { email: email.trim().toLowerCase() },
+          where: { email },
+        });
+
+        await sendEmail({
+          to: email,
+          subject: `${currentUser.name} invited you to ${currentOrg.name}'s ${currentEventMember.collection.title} collection on Cobudget`,
+          text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}/${currentEventMember.collection.slug}`,
         });
 
         if (user) {
@@ -1864,7 +1833,7 @@ const resolvers = {
             },
           });
           if (orgMember) {
-            const eventMember = await prisma.collectionMember.upsert({
+            const collectionMember = await prisma.collectionMember.upsert({
               where: {
                 orgMemberId_collectionId: {
                   orgMemberId: orgMember.id,
@@ -1880,7 +1849,7 @@ const resolvers = {
                 isApproved: true,
               },
             });
-            invitedCollectionMembers.push(eventMember);
+            invitedCollectionMembers.push(collectionMember);
           } else {
             const orgMember = await prisma.orgMember.create({
               data: {
@@ -1927,11 +1896,11 @@ const resolvers = {
     inviteOrgMembers: async (
       parent,
       { orgId, emails: emailsString },
-      { user }
+      { user: currentUser }
     ) => {
       const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
         orgId,
-        user,
+        user: currentUser,
       });
 
       if (!currentOrgMember?.isOrgAdmin)
@@ -1944,10 +1913,19 @@ const resolvers = {
 
       let newOrgMembers = [];
 
-      for (const email of emails) {
+      for (let email of emails) {
+        email = email.trim().toLowerCase();
+
         const user = await prisma.user.findUnique({
-          where: { email: email.trim().toLowerCase() },
+          where: { email },
         });
+
+        await sendEmail({
+          to: email,
+          subject: `${currentUser.name} invited you to ${currentOrg.name} on Cobudget`,
+          text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}`,
+        });
+
         if (user) {
           const orgMember = await prisma.orgMember.findUnique({
             where: {
