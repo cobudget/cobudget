@@ -119,7 +119,7 @@ export default function GeneralSettings({
         {currentOrgMember.isOrgAdmin && (
           <SelectField
             name="archived"
-            label="Archive event"
+            label="Archive collection"
             defaultValue={event.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
@@ -137,7 +137,7 @@ export default function GeneralSettings({
               variant="secondary"
               color="red"
             >
-              Delete this event
+              Delete this collection
             </Button>
           </>
         )}
