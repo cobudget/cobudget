@@ -52,29 +52,29 @@ export default class EmailService {
     //await this.sendEmail(emails, subject, text);
   }
 
-  static async sendEmail(emails, subject, text) {
-    if (process.env.NODE_ENV === "production" && emails.length) {
-      const data = {
-        from: `${process.env.EMAIL_SENDER}`,
-        to: emails,
-        subject,
-        text,
-      };
-      return mailgun
-        .messages()
-        .send(data)
-        .then(() => {
-          console.log("Successfully sent emails");
-          return true;
-        })
-        .catch((error) => {
-          console.error({ error });
-          throw new Error(error.message);
-        });
-    } else {
-      console.log(`In development, not sending ${emails.length} emails`);
-    }
-  }
+  // static async sendEmail(emails, subject, text) {
+  //   if (process.env.NODE_ENV === "production" && emails.length) {
+  //     const data = {
+  //       from: `${process.env.EMAIL_SENDER}`,
+  //       to: emails,
+  //       subject,
+  //       text,
+  //     };
+  //     return mailgun
+  //       .messages()
+  //       .send(data)
+  //       .then(() => {
+  //         console.log("Successfully sent emails");
+  //         return true;
+  //       })
+  //       .catch((error) => {
+  //         console.error({ error });
+  //         throw new Error(error.message);
+  //       });
+  //   } else {
+  //     console.log(`In development, not sending ${emails.length} emails`);
+  //   }
+  // }
 
   static async sendRequestToJoinNotifications(
     organization,
