@@ -354,7 +354,12 @@ const DreamSidebar = ({
             currentOrgMember={currentOrgMember}
           />
         </div>
-        <Tags dream={dream} event={event} canEdit={canEdit} />
+        <Tags
+          currentOrg={currentOrg}
+          dream={dream}
+          event={event}
+          canEdit={canEdit}
+        />
       </div>
     </>
   );

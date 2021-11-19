@@ -1118,17 +1118,6 @@ const resolvers = {
       if (!tagId && !tagValue)
         throw new Error("You need to provide tag id or value");
 
-      //return await prisma.bucket.update({
-      //  where: { id: dreamId },
-      //  data: {
-      //    tags: {
-      //      connectOrCreate: {
-      //        where: { id: tagId ?? "abc" },
-      //        create: { value: tagValue, collectionId: bucket.collectionId },
-      //      },
-      //    },
-      //  },
-      //});
       if (tagId) {
         return await prisma.bucket.update({
           where: { id: dreamId },
