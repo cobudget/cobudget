@@ -1115,20 +1115,44 @@ const resolvers = {
       )
         throw new Error("You are not a cocreator of this bucket.");
 
-      if (!tagId || !tagValue)
+      if (!tagId && !tagValue)
         throw new Error("You need to provide tag id or value");
 
-      return await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          tags: {
-            connectOrCreate: {
-              where: { id: tagId },
-              create: { value: tagValue, collectionId: bucket.collectionId },
+      //return await prisma.bucket.update({
+      //  where: { id: dreamId },
+      //  data: {
+      //    tags: {
+      //      connectOrCreate: {
+      //        where: { id: tagId ?? "abc" },
+      //        create: { value: tagValue, collectionId: bucket.collectionId },
+      //      },
+      //    },
+      //  },
+      //});
+      if (tagId) {
+        return await prisma.bucket.update({
+          where: { id: dreamId },
+          data: {
+            tags: {
+              connect: {
+                id: tagId,
+              },
             },
           },
-        },
-      });
+        });
+      } else {
+        return await prisma.bucket.update({
+          where: { id: dreamId },
+          data: {
+            tags: {
+              create: {
+                value: tagValue,
+                collectionId: bucket.collectionId,
+              },
+            },
+          },
+        });
+      }
     },
     removeTag: async (_, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({
