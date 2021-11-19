@@ -7,7 +7,7 @@
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
     "storybook": "cd ui && start-storybook -p 6006",
-    "postinstall": "cd ui && npm i && cd ../api && npm i",
+    "postinstall": "cd ui && yarn",
     "lint": "prettier --ignore-path .gitignore --check . && eslint .",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
