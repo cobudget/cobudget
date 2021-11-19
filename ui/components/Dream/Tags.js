@@ -15,7 +15,7 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-export default ({ dream, event, canEdit }) => {
+export default ({ currentOrg, dream, event, canEdit }) => {
   const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
   return (
@@ -28,7 +28,7 @@ export default ({ dream, event, canEdit }) => {
             key={tag.id}
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
-            <Link href={`/${event.slug}?tag=${tag.value}`}>
+            <Link href={`/${currentOrg.slug}/${event.slug}?tag=${tag.value}`}>
               <a className="text-gray-500 hover:text-black mr-2">{tag.value}</a>
             </Link>
             {canEdit && (
