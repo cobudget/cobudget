@@ -43,9 +43,10 @@ const schema = gql`
 
     editOrganization(
       organizationId: ID!
-      name: String!
+      name: String
+      info: String
       logo: String
-      slug: String!
+      slug: String
     ): Organization!
     setTodosFinished(orgId: ID!): Organization
 

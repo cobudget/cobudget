@@ -6,10 +6,8 @@ import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLJSONObject } from "graphql-type-json";
 import { Kind } from "graphql/language";
-import mongoose from "mongoose";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
-import { requiredAction } from "keycloak-admin";
 import discourse from "../../lib/discourse";
 import { allocateToMember } from "../../controller";
 import {
@@ -442,6 +440,7 @@ const resolvers = {
       const org = await prisma.organization.create({
         data: {
           name,
+          info: "",
           slug: slugify(slug),
           logo,
           orgMembers: { create: { userId: user.id, isOrgAdmin: true } },
@@ -484,7 +483,12 @@ const resolvers = {
         where: {
           id: organizationId,
         },
-        data: { name, info, logo, slug: slugify(slug) },
+        data: {
+          name,
+          info,
+          logo,
+          slug: slug !== undefined ? slugify(slug) : undefined,
+        },
       });
 
       // TODO: add back
@@ -2648,6 +2652,11 @@ const resolvers = {
     avatar: () => null, //TODO: add avatars
   },
   Organization: {
+    info: (org) => {
+      return org.info && org.info.length
+        ? org.info
+        : `# Welcome to ${org.name}`;
+    },
     subdomain: (org) => org.slug,
     events: async (org) => {
       return await prisma.collection.findMany({
