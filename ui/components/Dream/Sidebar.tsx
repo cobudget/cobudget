@@ -13,7 +13,6 @@ import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
-import { DREAMS_QUERY } from "../../pages/[org]/[collection]";
 import Tags from "./Tags";
 import toast from "react-hot-toast";
 
