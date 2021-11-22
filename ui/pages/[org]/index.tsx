@@ -59,9 +59,9 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              value={currentOrg.info}
+              value={currentOrg?.info}
               label="Add message"
-              placeholder={`# Welcome to ${currentOrg.name}'s page`}
+              placeholder={`# Welcome to ${currentOrg?.name}'s page`}
               canEdit={currentOrgMember?.isOrgAdmin}
               name="info"
               className="h-10"
