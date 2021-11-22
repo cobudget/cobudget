@@ -1,12 +1,12 @@
 import React, { useState, useContext } from "react";
 import dayjs from "dayjs";
-import ReactMarkdown from "react-markdown";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Avatar from "../../Avatar";
 import { DeleteIcon, EditIcon, FlagIcon } from "components/Icons";
 import EditComment from "./EditComment";
 import Context from "contexts/comment";
 import { LoaderIcon } from "../../Icons";
+import Markdown from "components/Markdown";
 
 dayjs.extend(relativeTime);
 
@@ -68,7 +68,7 @@ const Comment = ({ comment, showBorderBottom }) => {
                 dangerouslySetInnerHTML={{ __html: comment.htmlContent }}
               />
             ) : (
-              <ReactMarkdown source={comment.content} className="markdown" />
+              <Markdown source={comment.content} />
             )}
 
             {canEdit && (

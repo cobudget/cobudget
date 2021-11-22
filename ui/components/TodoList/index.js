@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, gql } from "urql";
 import { CheckIcon } from "components/Icons";
@@ -38,7 +38,7 @@ const LoadingBar = ({ ratio }) => {
   );
 };
 
-const TodoItem = React.forwardRef(({ onClick, href, todo, index }, ref) => {
+const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
   return (
     <a
       className={`py-2 flex space-x-2 rounded ${

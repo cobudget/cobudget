@@ -2,10 +2,10 @@ import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { CardBody, CardText } from "reactstrap";
-import ReactMarkdown from "react-markdown";
 import Dependencies from "./Dependencies";
 import RealizersMissingIcon from "../RealizersMissingIcon";
 import Deliberations from "./Deliberations";
+import Markdown from "components/Markdown";
 
 const LabelSpan = styled.span`
   font-weight: bold;
@@ -40,7 +40,7 @@ const DetailViewBody = ({ node, isResp }) => (
     <CardSection>
       <LabelSpan>Description:</LabelSpan>
       <div>
-        <ReactMarkdown source={node.description} />
+        <Markdown source={node.description} />
       </div>
     </CardSection>
 

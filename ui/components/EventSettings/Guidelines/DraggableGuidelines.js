@@ -1,11 +1,11 @@
 import { useMutation, gql } from "urql";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
-import ReactMarkdown from "react-markdown";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
+import Markdown from "components/Markdown";
 
 const DELETE_GUIDELINE_MUTATION = gql`
   mutation DeleteGuideline($eventId: ID!, $guidelineId: ID!) {
@@ -87,7 +87,7 @@ const SortableItem = sortableElement(
             </Tooltip>
           </div>
         </div>
-        <ReactMarkdown source={guideline.description} className="markdown" />
+        <Markdown source={guideline.description} />
       </li>
     );
   }

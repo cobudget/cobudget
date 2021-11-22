@@ -6,7 +6,6 @@
     "ui:dev": "cd ui && npm run dev",
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
-    "storybook": "cd ui && start-storybook -p 6006",
     "postinstall": "cd ui && yarn",
     "lint": "prettier --ignore-path .gitignore --check . && eslint .",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",

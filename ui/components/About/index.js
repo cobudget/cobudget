@@ -1,10 +1,10 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
-import ReactMarkdown from "react-markdown";
 import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 
 import thousandSeparator from "utils/thousandSeparator";
+import Markdown from "components/Markdown";
 
 export const EVENT_QUERY = gql`
   query EventQuery($orgSlug: String!, $collectionSlug: String!) {
@@ -60,10 +60,7 @@ export default function AboutPage({ router, currentOrg }) {
             {event.guidelines.map((guideline) => (
               <div key={guideline.id} className="p-4">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
-                <ReactMarkdown
-                  className="markdown"
-                  source={guideline.description}
-                />
+                <Markdown source={guideline.description} />
               </div>
             ))}
           </div>

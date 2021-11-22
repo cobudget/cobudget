@@ -6,10 +6,8 @@ import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLJSONObject } from "graphql-type-json";
 import { Kind } from "graphql/language";
-import mongoose from "mongoose";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
-import { requiredAction } from "keycloak-admin";
 import discourse from "../../lib/discourse";
 import { allocateToMember } from "../../controller";
 import {
@@ -460,7 +458,7 @@ const resolvers = {
     },
     editOrganization: async (
       parent,
-      { organizationId, name, slug, logo },
+      { organizationId, name, info, slug, logo },
       { user, eventHub }
     ) => {
       const currentOrgMember = await prisma.orgMember.findUnique({
@@ -476,12 +474,20 @@ const resolvers = {
         !user?.isRootAdmin
       )
         throw new Error("You are not a member of this organization.");
+      if (name?.length === 0) throw new Error("Org name cannot be blank");
+      if (slug?.length === 0) throw new Error("Org subdomain cannot be blank");
+      if (info?.length > 500) throw new Error("Org info too long");
 
       const organization = await prisma.organization.update({
         where: {
           id: organizationId,
         },
-        data: { name, logo, slug: slugify(slug) },
+        data: {
+          name,
+          info,
+          logo,
+          slug: slug !== undefined ? slugify(slug) : undefined,
+        },
       });
 
       // TODO: add back
@@ -2645,6 +2651,11 @@ const resolvers = {
     avatar: () => null, //TODO: add avatars
   },
   Organization: {
+    info: (org) => {
+      return org.info && org.info.length
+        ? org.info
+        : `# Welcome to ${org.name}`;
+    },
     subdomain: (org) => org.slug,
     events: async (org) => {
       return await prisma.collection.findMany({

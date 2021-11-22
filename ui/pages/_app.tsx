@@ -103,6 +103,7 @@ export const TOP_LEVEL_QUERY = gql`
       __typename
       id
       name
+      info
       logo
       slug
       customDomain

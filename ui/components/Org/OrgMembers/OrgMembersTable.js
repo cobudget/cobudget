@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Table,
@@ -13,7 +14,6 @@ import {
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
-import { useState } from "react";
 import ReactDOM from "react-dom";
 import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
@@ -45,7 +45,7 @@ const ActionsDropdown = ({
   currentOrg,
   member,
 }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {

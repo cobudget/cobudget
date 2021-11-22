@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { useState } from "react";
 import { Tooltip } from "react-tippy";
-import ReactMarkdown from "react-markdown";
+import Markdown from "../../Markdown";
 import IconButton from "../../IconButton";
 import { EditIcon } from "../../Icons";
 import TextField from "../../TextField";
@@ -153,22 +153,7 @@ const DreamCustomField = ({
           <h2 className="text-xl font-medium">{defaultCustomField.name}</h2>
           {customField.customField.type == "MULTILINE_TEXT" ||
           customField.customField.type == "TEXT" ? (
-            <ReactMarkdown
-              source={customField.value}
-              className="markdown"
-              renderers={{
-                link: (props) => (
-                  <a href={props.href} target="_blank" rel="noreferrer">
-                    {props.children}
-                  </a>
-                ),
-                code: (props) => (
-                  <code className="whitespace-pre-wrap" {...props}>
-                    {props.value}
-                  </code>
-                ),
-              }}
-            />
+            <Markdown source={customField.value} />
           ) : (
             <span
               dangerouslySetInnerHTML={{

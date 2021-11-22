@@ -64,6 +64,7 @@ model Organization {
   id           String           @id @default(cuid())
   slug         String           @unique
   name         String
+  info         String?
   logo         String?
   customDomain String?
   orgMembers   OrgMember[]

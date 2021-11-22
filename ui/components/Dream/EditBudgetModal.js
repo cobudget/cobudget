@@ -96,7 +96,7 @@ const EditBudgetModal = ({
               .catch((err) => alert(err.message));
           })}
         >
-          <h2 className="text-lg font-semibold mb-2">Expenses</h2>
+          <h2 className="text-lg font-semibold mb-2">Costs</h2>
 
           {expenseItems.map(({ fieldId, description, type, min, max }, i) => {
             const index = i + incomeItems.length;
