@@ -440,7 +440,6 @@ const resolvers = {
       const org = await prisma.organization.create({
         data: {
           name,
-          info: "",
           slug: slugify(slug),
           logo,
           orgMembers: { create: { userId: user.id, isOrgAdmin: true } },
