@@ -1,10 +1,9 @@
 import { useState, useMemo } from "react";
-import dreamName from "utils/dreamName";
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
-import DreamReview from "./DreamReview";
+import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
 const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
@@ -13,7 +12,7 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
   const defaultTabs = [
     { name: "General", component: GeneralSettings },
     { name: "Guidelines", component: Guidelines },
-    { name: `${dreamName(currentOrg, true)} Review`, component: DreamReview },
+    { name: "Bucket Review", component: BucketReview },
     { name: "Questions", component: CustomFields },
     { name: "Granting", component: Granting },
   ];

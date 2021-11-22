@@ -28,7 +28,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ variables: { dreamId: dream.id, content } })
+        addComment({ dreamId: dream.id, content })
           .then(() => {
             inputRef.current.blur();
             inputRef.current.clear();

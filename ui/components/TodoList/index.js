@@ -1,26 +1,28 @@
 import { useEffect, useState, forwardRef } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
 import Link from "next/link";
+import { useQuery, useMutation, gql } from "urql";
 import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
-  query TodoInfo {
-    orgMembers(limit: 2) {
-      id
+  query TodoInfo($orgSlug: String!) {
+    orgMembersPage(limit: 2, orgSlug: $orgSlug) {
+      orgMembers {
+        id
+      }
     }
 
-    events(limit: 1) {
+    collections(limit: 1, orgSlug: $orgSlug) {
       id
     }
   }
 `;
 
 const SET_TODOS_FINISHED = gql`
-  mutation SetTodosFinished {
-    setTodosFinished {
+  mutation SetTodosFinished($orgId: ID!) {
+    setTodosFinished(orgId: $orgId) {
       id
       finishedTodos
     }
@@ -41,7 +43,7 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
     <a
       className={`py-2 flex space-x-2 rounded ${
         todo.link ? "hover:bg-gray-300 cursor-pointer" : ""
-      } ${todo.done ? "opacity-60" : ""}`}
+      } ${todo.done ? "opacity-50" : ""}`}
       onClick={onClick}
       href={href}
       ref={ref}
@@ -57,34 +59,39 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
   );
 });
 
-const TodoList = ({ subdomain }) => {
-  const { data, loading, error } = useQuery(GET_TODO_INFO);
-  const [setTodosFinished] = useMutation(SET_TODOS_FINISHED);
+const TodoList = ({ currentOrg }) => {
+  const [{ data, fetching: loading, error }] = useQuery({
+    query: GET_TODO_INFO,
+    variables: { orgSlug: currentOrg.slug },
+  });
+  const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
+    SET_TODOS_FINISHED
+  );
   const [allDone, setAllDone] = useState(false);
-
+  console.log({ data, error, todoData, todoError });
   const rawTodos = [
     {
       title: "Create community",
-      desc: `This is your own home on the Plato platform, now available under ${subdomain}.${process.env.DEPLOY_URL}`,
+      desc: `This is your own home on the Cobudget platform, now available under ${process.env.DEPLOY_URL}/${currentOrg.slug}`,
       link: null,
     },
     {
       title: "Invite members",
       desc: "Invite your community members by email",
-      link: "/members",
+      link: `/${currentOrg.slug}/members`,
     },
     {
       title: "Create first collection",
       desc: "A collection is a page for gathering ideas from the community",
-      link: "/new-collection",
+      link: `/${currentOrg.slug}/new-collection`,
     },
   ];
 
   useEffect(() => {
-    if (allDone) {
-      setTodosFinished();
+    if (allDone && currentOrg) {
+      setTodosFinished({ orgId: currentOrg.id });
     }
-  }, [allDone, setTodosFinished]);
+  }, [allDone, setTodosFinished, currentOrg]);
 
   if (error) {
     console.error("Couldn't check todo status", error);
@@ -98,9 +105,9 @@ const TodoList = ({ subdomain }) => {
     if (index === 0) {
       done = true;
     } else if (index === 1) {
-      done = data.orgMembers.length > 1;
+      done = data?.orgMembers?.length > 1;
     } else if (index === 2) {
-      done = data.events.length > 0;
+      done = data?.collections.length > 0;
     }
 
     return {
@@ -137,7 +144,7 @@ const TodoList = ({ subdomain }) => {
         <NavItem
           onClick={() =>
             window.confirm("Are you sure you want skip this introduction?") &&
-            setTodosFinished()
+            setTodosFinished({ orgId: currentOrg.id })
           }
           className="text-xs opacity-70 ml-auto"
         >

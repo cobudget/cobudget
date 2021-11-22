@@ -14,7 +14,7 @@ const Guidelines = ({ event }) => {
     <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">Guidelines</h1>
       <p className="text-gray-700 mb-4">
-        Set up the guidelines that dreams should follow.
+        Set up the guidelines that buckets should follow.
       </p>
 
       <DraggableGuidelines

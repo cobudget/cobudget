@@ -1,19 +1,26 @@
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 
 import Switch from "components/Switch";
 import Button from "components/Button";
 import TextField from "components/TextField";
 import thousandSeparator from "utils/thousandSeparator";
+import toast from "react-hot-toast";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
-    $eventMemberId: ID!
+    $collectionId: ID!
+    $collectionMemberId: ID!
     $amount: Int!
     $type: AllocationType!
   ) {
-    allocate(eventMemberId: $eventMemberId, amount: $amount, type: $type) {
+    allocate(
+      collectionId: $collectionId
+      collectionMemberId: $collectionMemberId
+      amount: $amount
+      type: $type
+    ) {
       id
       balance
     }
@@ -25,9 +32,7 @@ const AllocateModal = ({ member, event, handleClose }) => {
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
 
-  const [allocate, { loading }] = useMutation(ALLOCATE_MUTATION, {
-    variables: { eventMemberId: member.id, amount, type: type.toUpperCase() },
-  });
+  const [{ fetching: loading }, allocate] = useMutation(ALLOCATE_MUTATION);
 
   const total = amount + member.balance;
   const disabled = total < 0 || inputValue == "" || (!amount && type === "Add");
@@ -52,9 +57,19 @@ const AllocateModal = ({ member, event, handleClose }) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            allocate()
-              .then(() => handleClose())
-              .catch((err) => alert(err.message));
+            allocate({
+              collectionId: event.id,
+              collectionMemberId: member.id,
+              amount,
+              type: type.toUpperCase(),
+            }).then(({ error }) => {
+              if (error) {
+                toast.error(error.message);
+              } else {
+                handleClose();
+                toast.success("Allocated funds successfully");
+              }
+            });
           }}
         >
           <TextField

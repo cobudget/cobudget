@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 
@@ -13,11 +13,7 @@ const EDIT_EVENT = gql`
 `;
 
 export default ({ closeModal, event }) => {
-  const [editEvent] = useMutation(EDIT_EVENT, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [, editEvent] = useMutation(EDIT_EVENT);
   const { handleSubmit, register } = useForm();
 
   return (
@@ -26,7 +22,7 @@ export default ({ closeModal, event }) => {
         <h1 className="text-3xl">Set about</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editEvent({ variables })
+            editEvent({ ...variables, eventId: event.id })
               .then(() => {
                 closeModal();
               })

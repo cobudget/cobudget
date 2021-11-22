@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 
 import { Box, Button } from "@material-ui/core";
 
@@ -9,11 +9,7 @@ import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetAllowStretchGoals = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   return (
@@ -24,9 +20,8 @@ const SetAllowStretchGoals = ({ closeModal, event }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: {
-                allowStretchGoals: variables.allowStretchGoals === "true",
-              },
+              eventId: event.id,
+              allowStretchGoals: variables.allowStretchGoals === "true",
             })
               .then(({ data }) => {
                 console.log({ data });

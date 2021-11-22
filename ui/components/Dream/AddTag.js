@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 
 import Downshift from "downshift";
 
@@ -16,16 +16,18 @@ const ADD_TAG_MUTATION = gql`
 `;
 
 const AddTag = ({ items: eventTags, dream }) => {
-  const [addTag] = useMutation(ADD_TAG_MUTATION);
+  const [, addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
   return (
     <Downshift
+      id="tags"
       onChange={(tag) => {
         if (!tag) return;
         const variables = tag.id ? { tagId: tag.id } : { tagValue: tag.value };
 
         addTag({
-          variables: { dreamId: dream.id, ...variables },
+          dreamId: dream.id,
+          ...variables,
         }).then(() => setInput(""));
       }}
       onInputValueChange={(value) => setInput(value)}

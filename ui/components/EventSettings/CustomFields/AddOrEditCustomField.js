@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
@@ -84,14 +84,8 @@ export default ({
   const editing = Boolean(customField.id);
   const [typeInputValue, setTypeInputValue] = useState("TEXT");
 
-  const [addOrEditCustomField, { loading }] = useMutation(
-    editing ? EDIT_CUSTOM_FIELD_MUTATION : ADD_CUSTOM_FIELD_MUTATION,
-    {
-      variables: {
-        eventId: event.id,
-        ...(editing && { fieldId: customField.id }),
-      },
-    }
+  const [{ fetching: loading }, addOrEditCustomField] = useMutation(
+    editing ? EDIT_CUSTOM_FIELD_MUTATION : ADD_CUSTOM_FIELD_MUTATION
   );
 
   const { control, handleSubmit, register, errors } = useForm({
@@ -115,7 +109,11 @@ export default ({
         <form
           onSubmit={handleSubmit((variables) => {
             variables.customField.isRequired = isRequired;
-            return addOrEditCustomField({ variables })
+            return addOrEditCustomField({
+              ...variables,
+              eventId: event.id,
+              ...(editing && { fieldId: customField.id }),
+            })
               .then(() => handleClose())
               .catch((err) => alert(err.message));
           })}

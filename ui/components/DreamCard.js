@@ -4,12 +4,12 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 
-const DreamCard = ({ dream, event }) => {
+const DreamCard = ({ dream, event, currentOrg }) => {
   const showFundingStats =
     (dream.minGoal || dream.maxGoal) && dream.approved && !dream.canceled;
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
-      {dream.images.length ? (
+      {dream.images?.length ? (
         <img
           src={dream.images[0].small}
           className="w-full h-48 object-cover object-center"
@@ -52,8 +52,8 @@ const DreamCard = ({ dream, event }) => {
 
             {parseInt(dream.numberOfComments) > 0 && (
               <Link
-                href="/[event]/[dream]#comments"
-                as={`/${event.slug}/${dream.id}#comments`}
+                href="/[org]/[collection]/[bucket]#comments"
+                as={`/${currentOrg.slug}/${event.slug}/${dream.id}#comments`}
               >
                 <div className="flex items-center text-gray-700">
                   <CommentIcon className="w-5 h-5" />

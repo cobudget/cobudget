@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 import Avatar from "../Avatar";
 import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
@@ -94,13 +94,12 @@ const SearchMembersResult = ({
   cocreators,
   eventId,
   addCocreator,
+  bucket,
 }) => {
-  const { data: { members } = { members: [] } } = useQuery(
-    SEARCH_MEMBERS_QUERY,
-    {
-      variables: { eventId, isApproved: true },
-    }
-  );
+  const [{ data: { members } = { members: [] } }] = useQuery({
+    query: SEARCH_MEMBERS_QUERY,
+    variables: { eventId, isApproved: true },
+  });
 
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
 
@@ -122,9 +121,10 @@ const SearchMembersResult = ({
           key={member.id}
           member={member}
           add={() =>
-            addCocreator({ variables: { memberId: member.id } }).catch((err) =>
-              alert(err.message)
-            )
+            addCocreator({
+              dreamId: bucket.id,
+              memberId: member.id,
+            }).catch((err) => alert(err.message))
           }
         />
       ))}
@@ -142,12 +142,8 @@ const EditCocreatorsModal = ({
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
-  const [addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [removeCocreator] = useMutation(REMOVE_CO_CREATOR_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
+  const [, addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION);
+  const [, removeCocreator] = useMutation(REMOVE_CO_CREATOR_MUTATION);
 
   return (
     <Modal
@@ -170,7 +166,8 @@ const EditCocreatorsModal = ({
                   )
                 ) {
                   removeCocreator({
-                    variables: { memberId: member.id },
+                    dreamId: dream.id,
+                    memberId: member.id,
                   }).catch((err) => alert(err.message));
                 }
               }}
@@ -191,6 +188,7 @@ const EditCocreatorsModal = ({
               addCocreator={addCocreator}
               cocreators={cocreators}
               eventId={event.id}
+              bucket={dream}
             />
           </div>
         </div>

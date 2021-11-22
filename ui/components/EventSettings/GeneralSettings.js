@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "../SelectInput";
 import ColorPicker from "../ColorPicker";
 import slugify from "../../utils/slugify";
 import DeleteEventModal from "./DeleteEventModal";
+import toast from "react-hot-toast";
+import router from "next/router";
 
 const EDIT_EVENT = gql`
   mutation editEvent(
+    $orgId: ID!
     $eventId: ID!
     $slug: String
     $title: String
@@ -18,6 +21,7 @@ const EDIT_EVENT = gql`
     $color: String
   ) {
     editEvent(
+      orgId: $orgId
       eventId: $eventId
       slug: $slug
       title: $title
@@ -40,19 +44,18 @@ export default function GeneralSettings({
   currentOrg,
   currentOrgMember,
 }) {
-  const [editEvent, { loading }] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
     handleSubmit,
     register,
     setValue,
+    reset,
     formState: { isDirty },
   } = useForm();
 
-  const startUrl = currentOrg.customDomain
-    ? currentOrg.customDomain + "/"
-    : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}/`;
+  const startUrl = `${process.env.DEPLOY_URL}/${currentOrg.slug}/`;
 
   return (
     <div className="px-6">
@@ -60,19 +63,19 @@ export default function GeneralSettings({
       <form
         onSubmit={handleSubmit((variables) => {
           editEvent({
-            variables: {
-              ...variables,
-              eventId: event.id,
-              totalBudget: Number(variables.totalBudget),
-              grantValue: Number(variables.grantValue),
-              grantsPerMember: Number(variables.grantsPerMember),
-              dreamReviewIsOpen: variables.dreamReviewIsOpen === "true",
-              archived: variables.archived === "true",
-              color,
-            },
-          })
-            .then(() => alert("Settings updated!"))
-            .catch((error) => alert(error.message));
+            ...variables,
+            orgId: currentOrg.id,
+            eventId: event.id,
+            archived: variables.archived === "true",
+            color,
+          }).then(({ error }) => {
+            if (error) {
+              toast.error(error.message.replace("[GraphQL]", ""));
+            } else {
+              toast.success("Settings updated!");
+              router.replace(`/${currentOrg.slug}/${variables.slug}/settings`);
+            }
+          });
         })}
       >
         <TextField
@@ -116,7 +119,7 @@ export default function GeneralSettings({
         {currentOrgMember.isOrgAdmin && (
           <SelectField
             name="archived"
-            label="Archive event"
+            label="Archive collection"
             defaultValue={event.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
@@ -134,7 +137,7 @@ export default function GeneralSettings({
               variant="secondary"
               color="red"
             >
-              Delete this event
+              Delete this collection
             </Button>
           </>
         )}

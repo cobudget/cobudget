@@ -1,17 +1,12 @@
 import fetch from "isomorphic-unfetch";
 import forge from "node-forge";
-import auth from "lib/auth";
-import jwt from "jsonwebtoken";
-import platoCore from "@sensestack/plato-core";
+import prisma from "../../server/prisma";
 import getHostInfo from "utils/getHostInfo";
-
-const {
-  db: { getConnection, getModels },
-} = platoCore;
 
 const atob = (a) => Buffer.from(a, "base64").toString("binary");
 
 export default async function (req, res) {
+  return null;
   const { query } = req;
   const { payload } = query;
   const pem = process.env.PRIVATE_TOKEN_KEY;
@@ -24,11 +19,11 @@ export default async function (req, res) {
 
   const { key: discourseApiKey } = parsedPayload;
 
-  const { accessToken } = await auth(req).getAccessToken(req, res);
-  const { sub: userId } = jwt.decode(accessToken);
+  // const { accessToken } = await auth(req).getAccessToken(req, res);
+  // const { sub: userId } = jwt.decode(accessToken);
 
-  const db = await getConnection(process.env.MONGO_URL);
-  const { OrgMember, Organization } = getModels(db);
+  // const db = await getConnection(process.env.MONGO_URL);
+  // const { OrgMember, Organization } = getModels(db);
 
   const { subdomain, host } = getHostInfo(req);
 
@@ -36,11 +31,11 @@ export default async function (req, res) {
 
   let currentOrg;
 
-  if (host.includes(process.env.DEPLOY_URL)) {
-    currentOrg = await Organization.findOne({ subdomain });
-  } else {
-    currentOrg = await Organization.findOne({ customDomain: host });
-  }
+  // if (host.includes(process.env.DEPLOY_URL)) {
+  //   currentOrg = await Organization.findOne({ subdomain });
+  // } else {
+  //   currentOrg = await Organization.findOne({ customDomain: host });
+  // }
 
   if (!currentOrg.discourse) throw new Error("Missing discourse config");
 

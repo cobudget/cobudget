@@ -1,34 +1,26 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 import { Box, Button, TextField } from "@material-ui/core";
 import Card from "components/styled/Card";
-import dreamName from "utils/dreamName";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">
-          Set max. amount to one {dreamName(currentOrg)} per user
-        </h1>
+        <h1 className="text-3xl">Set max. amount to one bucket per user</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              variables: {
-                maxAmountToDreamPerUser: Math.round(
-                  variables.maxAmountToDreamPerUser * 100
-                ),
-              },
+              eventId: event.id,
+              maxAmountToBucketPerUser: Math.round(
+                variables.maxAmountToBucketPerUser * 100
+              ),
             })
               .then(() => closeModal())
               .catch((err) => {
@@ -39,9 +31,9 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="maxAmountToDreamPerUser"
-              label={`Max. amount to one ${dreamName(currentOrg)} per user`}
-              defaultValue={event.maxAmountToDreamPerUser / 100}
+              name="maxAmountToBucketPerUser"
+              label={`Max. amount to one bucket per user`}
+              defaultValue={event.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}
               InputProps={{

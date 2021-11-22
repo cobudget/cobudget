@@ -21,7 +21,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
 
-const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
+const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -51,10 +51,10 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              variables: {
-                memberId: member.id,
-                isAdmin: !member.isAdmin,
-              },
+              eventId,
+
+              memberId: member.id,
+              isAdmin: !member.isAdmin,
             }).then(() => {
               handleClose();
             });
@@ -65,10 +65,9 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              variables: {
-                memberId: member.id,
-                isGuide: !member.isGuide,
-              },
+              eventId,
+              memberId: member.id,
+              isGuide: !member.isGuide,
             }).then(() => {
               handleClose();
             });
@@ -84,9 +83,7 @@ const ActionsDropdown = ({ updateMember, deleteMember, member }) => {
                 `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
               )
             )
-              deleteMember({
-                variables: { memberId: member.id },
-              });
+              deleteMember({ eventId, memberId: member.id });
           }}
         >
           <Box color="error.main">Delete</Box>
@@ -156,6 +153,7 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
           member={member}
           deleteMember={deleteMember}
           updateMember={updateMember}
+          eventId={event.id}
         />
       </TableCell>
     </TableRow>

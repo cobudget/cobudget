@@ -1,4 +1,4 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
@@ -59,14 +59,8 @@ export default ({
 }) => {
   const editing = Boolean(guideline.id);
 
-  const [addOrEditGuideline, { loading }] = useMutation(
-    editing ? EDIT_GUIDELINE_MUTATION : ADD_GUIDELINE_MUTATION,
-    {
-      variables: {
-        eventId: event.id,
-        ...(editing && { guidelineId: guideline.id }),
-      },
-    }
+  const [{ fetching: loading }, addOrEditGuideline] = useMutation(
+    editing ? EDIT_GUIDELINE_MUTATION : ADD_GUIDELINE_MUTATION
   );
 
   const { handleSubmit, register, errors } = useForm({
@@ -85,7 +79,11 @@ export default ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) =>
-            addOrEditGuideline({ variables })
+            addOrEditGuideline({
+              ...variables,
+              eventId: event.id,
+              ...(editing && { guidelineId: guideline.id }),
+            })
               .then(() => handleClose())
               .catch((err) => alert(err.message))
           )}
@@ -99,6 +97,7 @@ export default ({
               error={errors.guideline?.title}
               helperText={errors.guideline?.title?.message}
               color={event.color}
+              autoFocus
             />
             <TextField
               placeholder="Description"

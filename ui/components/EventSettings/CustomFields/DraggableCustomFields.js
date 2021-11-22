@@ -1,11 +1,10 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
-import dreamName from "utils/dreamName";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
@@ -75,11 +74,8 @@ const SortableItem = sortableElement(
     eventId,
     currentOrg,
   }) => {
-    const [deleteCustomField, { loading: deleting }] = useMutation(
-      DELETE_CUSTOM_FIELD_MUTATION,
-      {
-        variables: { eventId, fieldId: customField.id },
-      }
+    const [{ fetching: deleting }, deleteCustomField] = useMutation(
+      DELETE_CUSTOM_FIELD_MUTATION
     );
 
     return (
@@ -101,10 +97,8 @@ const SortableItem = sortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    `Deleting a custom field would delete it from all the ${dreamName(
-                      currentOrg
-                    )}s that use it. Are you sure?`
-                  ) && deleteCustomField()
+                    `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
+                  ) && deleteCustomField({ eventId, fieldId: customField.id })
                 }
               >
                 <DeleteIcon className="h-6 w-6" />
@@ -134,19 +128,15 @@ const DraggableCustomFields = ({
   setEditingItem,
   currentOrg,
 }) => {
-  const [setCustomFieldPosition, { loading }] = useMutation(
-    SET_CUSTOM_FIELD_POSITION_MUTATION,
-    {
-      variables: { eventId: event.id },
-    }
+  const [{ fetching: loading }, setCustomFieldPosition] = useMutation(
+    SET_CUSTOM_FIELD_POSITION_MUTATION
   );
 
   const setItemPosition = (customFieldId, newPosition) => {
     setCustomFieldPosition({
-      variables: {
-        fieldId: customFieldId,
-        newPosition,
-      },
+      eventId: event.id,
+      fieldId: customFieldId,
+      newPosition,
     });
   };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 
@@ -73,9 +73,7 @@ const EditImagesModal = ({
 }) => {
   const [images, setImages] = useState(removeNullValues(initialImages));
 
-  const [editDream, { loading }] = useMutation(EDIT_IMAGES_MUTATION, {
-    variables: { dreamId },
-  });
+  const [{ fetching: loading }, editDream] = useMutation(EDIT_IMAGES_MUTATION);
 
   const { handleSubmit } = useForm();
 
@@ -115,7 +113,7 @@ const EditImagesModal = ({
           onSubmit={handleSubmit(() => {
             images.forEach((image) => delete image.__typename); // apollo complains otherwise..
 
-            editDream({ variables: { images } })
+            editDream({ images, dreamId })
               .then(() => {
                 handleClose();
               })

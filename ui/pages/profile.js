@@ -1,4 +1,4 @@
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 import Link from "next/link";
 
 const PROFILE_QUERY = gql`
@@ -45,50 +45,50 @@ const DELETE_GRANT_MUTATION = gql`
 `;
 
 export default () => {
-  const { data } = useQuery(PROFILE_QUERY);
+  const [{ data }] = useQuery({ query: PROFILE_QUERY });
 
-  const [deleteGrant] = useMutation(DELETE_GRANT_MUTATION, {
-    update(cache, { data: { deleteGrant } }) {
-      const { currentUser } = cache.readQuery({ query: PROFILE_QUERY });
-      cache.writeQuery({
-        query: PROFILE_QUERY,
-        data: {
-          currentUser: {
-            ...currentUser,
-            memberships: [
-              ...currentUser.memberships.map((membership) => {
-                if (membership.event.id === deleteGrant.dream.event.id) {
-                  return {
-                    ...membership,
-                    givenGrants: membership.givenGrants.filter(
-                      (grant) => grant.id !== deleteGrant.id
-                    ),
-                  };
-                }
-                return membership;
-              }),
-            ],
-          },
-        },
-      });
-      // const topLevelQueryData = cache.readQuery({
-      //   query: TOP_LEVEL_QUERY,
-      //   variables: { slug: event.slug },
-      // });
-      // cache.writeQuery({
-      //   query: TOP_LEVEL_QUERY,
-      //   data: {
-      //     ...topLevelQueryData,
-      //     currentMember: {
-      //       ...topLevelQueryData.currentMember,
-      //       availableGrants:
-      //         topLevelQueryData.currentMember.availableGrants +
-      //         deleteGrant.value,
-      //     },
-      //   },
-      // });
-    },
-  });
+  const [, deleteGrant] = useMutation(
+    DELETE_GRANT_MUTATION
+    // update(cache, { data: { deleteGrant } }) {
+    //   const { currentUser } = cache.readQuery({ query: PROFILE_QUERY });
+    //   cache.writeQuery({
+    //     query: PROFILE_QUERY,
+    //     data: {
+    //       currentUser: {
+    //         ...currentUser,
+    //         memberships: [
+    //           ...currentUser.memberships.map((membership) => {
+    //             if (membership.event.id === deleteGrant.dream.event.id) {
+    //               return {
+    //                 ...membership,
+    //                 givenGrants: membership.givenGrants.filter(
+    //                   (grant) => grant.id !== deleteGrant.id
+    //                 ),
+    //               };
+    //             }
+    //             return membership;
+    //           }),
+    //         ],
+    //       },
+    //     },
+    //   });
+    // const topLevelQueryData = cache.readQuery({
+    //   query: TOP_LEVEL_QUERY,
+    //   variables: { slug: event.slug },
+    // });
+    // cache.writeQuery({
+    //   query: TOP_LEVEL_QUERY,
+    //   data: {
+    //     ...topLevelQueryData,
+    //     currentMember: {
+    //       ...topLevelQueryData.currentMember,
+    //       availableGrants:
+    //         topLevelQueryData.currentMember.availableGrants +
+    //         deleteGrant.value,
+    //     },
+    //   },
+    // });
+  );
 
   return (
     <div>
@@ -99,7 +99,7 @@ export default () => {
       {data &&
         data.currentUser.memberships.map((membership) => (
           <div key={membership.id} className="shadow bg-white mb-5 rounded p-5">
-            <Link href="/[event]" as={`/${membership.event.slug}`}>
+            <Link href={`/${currentOrg.slug}/${membership.event.slug}`}>
               <a>
                 <h2 className="text-xl">{membership.event.title}</h2>
               </a>
@@ -112,8 +112,7 @@ export default () => {
                   {membership.givenGrants.map((grant) => (
                     <li key={grant.id}>
                       <Link
-                        href="/[event]/[dream]"
-                        as={`/${membership.event.slug}/${grant.dream.id}`}
+                        href={`/${currentOrg.slug}/${membership.event.slug}/${grant.dream.id}`}
                       >
                         <a>{grant.dream.title}</a>
                       </Link>{" "}

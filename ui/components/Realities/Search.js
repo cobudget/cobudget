@@ -14,6 +14,7 @@ const Search = () => {
 
   return (
     <Downshift
+      id="search"
       onChange={(node, { reset, clearSelection }) => {
         clearSelection();
         reset();

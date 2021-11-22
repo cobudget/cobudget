@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
-import dreamName from "utils/dreamName";
 import Markdown from "./Markdown";
 
 const GUIDELINE = "GUIDELINE";
@@ -105,7 +104,7 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -114,15 +113,12 @@ const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
       chatItems: [
         {
           type: INPUT,
-          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${dreamName(
-            currentOrg
-          )} creators.`,
+          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the bucket creators.`,
           sideEffect: (answer) => {
             raiseFlag({
-              variables: {
-                guidelineId: guideline.id,
-                comment: answer,
-              },
+              dreamId,
+              guidelineId: guideline.id,
+              comment: answer,
             }).then((data) => console.log({ data }));
           },
           chatItems: [
@@ -137,17 +133,16 @@ const raiseFlagFlow = (guidelines, raiseFlag, currentOrg) => [
   },
 ];
 
-const resolveFlagFlow = (flagId, resolveFlag) => [
+const resolveFlagFlow = ({ flagId, resolveFlag, dreamId }) => [
   {
     type: INPUT,
     message:
       "You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
     sideEffect: (answer) => {
       resolveFlag({
-        variables: {
-          flagId,
-          comment: answer,
-        },
+        dreamId,
+        flagId,
+        comment: answer,
       }).then((data) => console.log({ data }));
     },
     chatItems: [
@@ -165,15 +160,9 @@ const Monster = ({ event, dream, currentOrg }) => {
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const closeBubble = () => setBubbleOpen(false);
 
-  const [raiseFlag] = useMutation(RAISE_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
-  const [allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION, {
-    variables: { dreamId: dream.id },
-  });
+  const [, raiseFlag] = useMutation(RAISE_FLAG_MUTATION);
+  const [, resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION);
+  const [, allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION);
 
   const { raisedFlags } = dream;
 
@@ -182,30 +171,24 @@ const Monster = ({ event, dream, currentOrg }) => {
     guideline,
   }));
 
+  if (!guidelines) return null;
+
   let items;
 
   if (raisedFlags.length > 0) {
     items = [
       {
         type: MESSAGE,
-        message: `This ${dreamName(
-          currentOrg
-        )} has been flagged for breaking guidelines. Please help review it!`,
+        message: `This bucket has been flagged for breaking guidelines. Please help review it!`,
       },
       {
         type: MESSAGE,
-        message: `Here are the guidelines that ${dreamName(
-          currentOrg
-        )}s need to follow:`,
+        message: `Here are the guidelines that buckets need to follow:`,
       },
       ...guidelines,
       ...raisedFlags.map((raisedFlag) => ({
         type: MESSAGE,
-        message: `Someone flagged this ${dreamName(
-          currentOrg
-        )} for breaking the "${
-          raisedFlag.guideline.title
-        }" guideline with this comment:
+        message: `Someone flagged this bucket for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
 
           "${raisedFlag.comment}"`,
       })),
@@ -215,16 +198,17 @@ const Monster = ({ event, dream, currentOrg }) => {
         actions: [
           {
             label: "It is breaking another guideline",
-            chatItems: raiseFlagFlow(
-              event.guidelines.filter(
+            chatItems: raiseFlagFlow({
+              guidelines: event.guidelines.filter(
                 (guideline) =>
                   !raisedFlags
                     .map((flag) => flag.guideline.id)
                     .includes(guideline.id)
               ),
               raiseFlag,
-              currentOrg
-            ),
+              currentOrg,
+              dreamId: dream.id,
+            }),
           },
           raisedFlags.length > 1
             ? {
@@ -235,14 +219,22 @@ const Monster = ({ event, dream, currentOrg }) => {
                     message: "Which one?",
                     actions: raisedFlags.map((raisedFlag) => ({
                       label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
-                      chatItems: resolveFlagFlow(raisedFlag.id, resolveFlag),
+                      chatItems: resolveFlagFlow({
+                        flagId: raisedFlag.id,
+                        resolveFlag,
+                        dreamId: dream.id,
+                      }),
                     })),
                   },
                 ],
               }
             : {
                 label: "I'd like to resolve the flag",
-                chatItems: resolveFlagFlow(raisedFlags[0].id, resolveFlag),
+                chatItems: resolveFlagFlow({
+                  flagId: raisedFlags[0].id,
+                  resolveFlag,
+                  dreamId: dream.id,
+                }),
               },
         ],
       },
@@ -252,32 +244,34 @@ const Monster = ({ event, dream, currentOrg }) => {
       ...[
         {
           type: MESSAGE,
-          message: `Please help review this ${dreamName(currentOrg)}!`,
+          message: `Please help review this bucket!`,
         },
         {
           type: MESSAGE,
-          message: `Here are the guidelines that ${dreamName(
-            currentOrg
-          )}s need to follow:`,
+          message: `Here are the guidelines that buckets need to follow:`,
         },
       ],
       ...guidelines,
       ...[
         {
           type: ACTION,
-          message: `Does this ${dreamName(
-            currentOrg
-          )} comply with the guidelines?`,
+          message: `Does this bucket comply with the guidelines?`,
           actions: [
             {
               label: "Yes, looks good to me!",
               sideEffect: () =>
-                allGoodFlag().then((data) => console.log({ data })),
+                allGoodFlag({ dreamId: dream.id }).then((data) =>
+                  console.log({ data })
+                ),
               chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
             },
             {
               label: "No, it's breaking a guideline",
-              chatItems: raiseFlagFlow(event.guidelines, raiseFlag),
+              chatItems: raiseFlagFlow({
+                guidelines: event.guidelines,
+                raiseFlag,
+                dreamId: dream.id,
+              }),
             },
           ],
         },

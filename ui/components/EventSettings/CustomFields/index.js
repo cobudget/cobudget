@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import Button from "components/Button";
 import { AddIcon } from "components/Icons";
-import dreamName from "utils/dreamName";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
 
@@ -14,9 +13,7 @@ const CustomFields = ({ event, currentOrg }) => {
     <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">Questions</h1>
 
-      <p className="text-gray-700 mb-4">
-        Add questions for {dreamName(currentOrg)}s to answer.
-      </p>
+      <p className="text-gray-700 mb-4">Add questions for buckets to answer.</p>
 
       <DraggableCustomField
         event={event}

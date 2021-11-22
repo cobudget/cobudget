@@ -1,7 +1,7 @@
 import AddComment from "./AddComment";
 import Comment from "./Comment";
 import Log from "./Log";
-import Context, { useCommentContext } from "contexts/comment";
+import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
 const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
