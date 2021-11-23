@@ -48,7 +48,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
     query: COLLECTIONS_QUERY,
     variables: { orgSlug: router.query.org },
   });
-
+  if (!currentOrg) return null;
   const collections = data?.collections ?? [];
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
