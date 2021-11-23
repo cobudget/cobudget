@@ -25,7 +25,7 @@ const TextField = ({
 }: {
   inputRef: any;
   inputProps: any;
-  name: string;
+  name?: string;
   placeholder: string;
   label?: string;
   labelComponent?: ComponentType;
@@ -34,7 +34,7 @@ const TextField = ({
   helperText: string;
   className?: string;
   multiline: boolean;
-  rows: number;
+  rows?: number;
   size?: string;
   autoFocus?: boolean;
   maxLength?: number;
