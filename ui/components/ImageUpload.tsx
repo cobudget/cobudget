@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { CloseIcon, LoaderIcon } from "components/Icons";
-import uploadImageFiles from "utils/uploadImageFile";
+import uploadImageFiles from "utils/uploadImageFiles";
 
 const ImageUpload = ({
   label,
