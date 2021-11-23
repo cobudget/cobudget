@@ -12,9 +12,13 @@ function AddComment() {
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
   const inputRef = useRef<any>();
-  const { addComment, dream, event, currentOrg, currentOrgMember } = useContext(
-    Context
-  );
+  const {
+    addComment,
+    dream,
+    event,
+    currentOrg,
+    currentOrgMember,
+  } = useContext<any>(Context);
   if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
     return (
       <Link href={"/connect-discourse"} passHref>

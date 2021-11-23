@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect } from "react";
-import { gql, useQuery, useSubscription, useMutation } from "urql";
+import { createContext, useState } from "react";
+import { gql, useQuery, useMutation } from "urql";
 
-export default createContext();
+export default createContext({});
 
 export const DELETE_COMMENT_MUTATION = gql`
   mutation DeleteComment($dreamId: ID!, $commentId: ID!) {
@@ -78,27 +78,27 @@ const EDIT_COMMENT_MUTATION = gql`
   }
 `;
 
-const COMMENTS_CHANGED_SUBSCRIPTION = gql`
-  subscription OnCommentChanged($dreamId: ID!) {
-    commentsChanged(dreamId: $dreamId) {
-      action
-      comment {
-        id
-        content
-        htmlContent
-        createdAt
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-    }
-  }
-`;
+//const COMMENTS_CHANGED_SUBSCRIPTION = gql`
+//  subscription OnCommentChanged($dreamId: ID!) {
+//    commentsChanged(dreamId: $dreamId) {
+//      action
+//      comment {
+//        id
+//        content
+//        htmlContent
+//        createdAt
+//        orgMember {
+//          id
+//          user {
+//            id
+//            username
+//            avatar
+//          }
+//        }
+//      }
+//    }
+//  }
+//`;
 
 export const useCommentContext = (initialInput) => {
   const [from, setFrom] = useState(initialInput.from);

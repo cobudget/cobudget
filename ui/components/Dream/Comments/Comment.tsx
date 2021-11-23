@@ -19,7 +19,7 @@ const LogIcon = () => (
 const Comment = ({ comment, showBorderBottom }) => {
   const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
-  const { deleteComment, currentOrgMember, dream } = useContext(Context);
+  const { deleteComment, currentOrgMember, dream } = useContext<any>(Context);
 
   const canEdit =
     currentOrgMember &&

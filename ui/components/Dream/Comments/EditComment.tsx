@@ -8,7 +8,7 @@ const EditComment = ({ comment, handleDone }) => {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, dream, event } = useContext(Context);
+  const { editComment, dream, event } = useContext<any>(Context);
 
   return (
     <form
