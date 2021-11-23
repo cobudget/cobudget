@@ -5,6 +5,7 @@ import Button from "./Button";
 
 export default function AuthenticationForm() {
   const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { r } = router.query;
   const redirect = r?.toString();
@@ -13,6 +14,7 @@ export default function AuthenticationForm() {
     <form
       onSubmit={(evt) => {
         evt.preventDefault();
+        setLoading(true);
         fetch(`/api/auth/magiclink`, {
           method: `POST`,
           body: JSON.stringify({
@@ -27,6 +29,7 @@ export default function AuthenticationForm() {
               router.push(
                 `/check-mailbox?e=${encodeURIComponent(email)}&c=${json.code}`
               );
+              setLoading(false);
             }
           });
       }}
@@ -42,7 +45,12 @@ export default function AuthenticationForm() {
         className="mb-4"
         placeholder="me@hello.com"
       />
-      <Button type="submit" fullWidth disabled={!email?.length}>
+      <Button
+        type="submit"
+        fullWidth
+        disabled={!email?.length}
+        loading={loading}
+      >
         Send magic link
       </Button>
     </form>
