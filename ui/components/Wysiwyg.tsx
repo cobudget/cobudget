@@ -4,7 +4,12 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-import { forwardRef, useCallback, useImperativeHandle } from "react";
+import {
+  forwardRef,
+  ReactChild,
+  useCallback,
+  useImperativeHandle,
+} from "react";
 import { ExtensionPriority } from "remirror";
 import {
   BlockquoteExtension,
@@ -36,6 +41,7 @@ import {
   //ReactComponentExtension,
   ThemeProvider,
   Toolbar,
+  ToolbarItemUnion,
   useRemirror,
   useRemirrorContext,
 } from "@remirror/react";
@@ -109,11 +115,11 @@ const Wysiwyg = ({
     () => [
       new PlaceholderExtension({ placeholder }),
       new LinkExtension({ autoLink: true }),
-      new BoldExtension(),
+      new BoldExtension({}),
       new StrikeExtension(),
       new ItalicExtension(),
-      new HeadingExtension(),
-      new LinkExtension(),
+      new HeadingExtension({}),
+      new LinkExtension({}),
       new ImageExtension(),
       new BlockquoteExtension(),
       new BulletListExtension({ enableSpine: true }),
@@ -175,7 +181,7 @@ const Wysiwyg = ({
   );
 };
 
-const toolbarItems = [
+const toolbarItems: ToolbarItemUnion[] = [
   {
     type: ComponentItem.ToolbarGroup,
     label: "Simple Formatting",
