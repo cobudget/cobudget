@@ -4,13 +4,9 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-import {
-  forwardRef,
-  ReactChild,
-  useCallback,
-  useImperativeHandle,
-} from "react";
+import { forwardRef, useCallback, useImperativeHandle } from "react";
 import { ExtensionPriority } from "remirror";
+import { DelayedPromiseCreator } from "@remirror/core";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -31,6 +27,7 @@ import {
   StrikeExtension,
   //TableExtension,
   TrailingNodeExtension,
+  ImageAttributes,
 } from "remirror/extensions";
 // switch to this one for react tables
 //import { TableExtension } from "@remirror/extension-react-tables";
@@ -99,6 +96,19 @@ const ImperativeHandle = forwardRef((props, ref) => {
   return <></>;
 });
 
+type SetProgress = (progress: number) => void;
+
+interface FileWithProgress {
+  file: File;
+  progress: SetProgress;
+}
+
+type DelayedImage = DelayedPromiseCreator<ImageAttributes>;
+
+const imageUploadHandler = (files: FileWithProgress[]): DelayedImage[] => {
+  return;
+};
+
 /**
  * The editor which is used to create the annotation. Supports formatting.
  */
@@ -120,7 +130,10 @@ const Wysiwyg = ({
       new ItalicExtension(),
       new HeadingExtension({}),
       new LinkExtension({}),
-      new ImageExtension(),
+      new ImageExtension({
+        enableResizing: false,
+        uploadHandler: imageUploadHandler,
+      }),
       new BlockquoteExtension(),
       new BulletListExtension({ enableSpine: true }),
       new OrderedListExtension(),
