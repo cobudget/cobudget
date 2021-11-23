@@ -76,7 +76,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
                   }
                 }
               `}
-              variables={{ organizationId: currentOrg.id }}
+              variables={{ organizationId: currentOrg?.id }}
               maxLength={500}
               required
             />
