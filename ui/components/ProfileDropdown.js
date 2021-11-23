@@ -69,7 +69,7 @@ const ProfileDropdown = ({
                 )}
               </div>
             )}
-            {currentOrgMember?.eventMemberships.map((membership) => {
+            {currentOrgMember?.collectionMemberships.map((membership) => {
               if (
                 currentOrgMember.currentEventMembership &&
                 currentOrgMember.currentEventMembership.id === membership.id

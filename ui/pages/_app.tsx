@@ -78,8 +78,11 @@ export const TOP_LEVEL_QUERY = gql`
         username
         email
       }
-      eventMemberships {
+      collectionMemberships {
         id
+        isAdmin
+        isGuide
+        isApproved
         event {
           id
           title

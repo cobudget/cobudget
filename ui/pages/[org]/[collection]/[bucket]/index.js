@@ -113,7 +113,7 @@ const DreamPage = ({
       <div className="page">
         <Head>
           <title>
-            {dream.title} | {event.title}
+            {dream.title} | {event?.title}
           </title>
         </Head>
         <Dream

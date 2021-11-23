@@ -18,14 +18,50 @@ const JOIN_ORG_MUTATION = gql`
     joinOrg(orgId: $orgId) {
       id
       bio
+      isOrgAdmin
+      discourseUsername
+      hasDiscourseApiKey
+      user {
+        id
+        name
+        username
+        email
+      }
+      collectionMemberships {
+        id
+        isAdmin
+        isGuide
+        isApproved
+        event {
+          id
+          title
+          slug
+        }
+      }
+      organization {
+        id
+        slug
+      }
     }
   }
 `;
 
-const JOIN_EVENT_MUTATION = gql`
-  mutation RegisterForEvent($eventId: ID!) {
-    registerForEvent(eventId: $eventId) {
+const JOIN_COLLECTION_MUTATION = gql`
+  mutation JoinCollection($collectionId: ID!) {
+    joinCollection(collectionId: $collectionId) {
+      id
+      isAdmin
+      isGuide
       isApproved
+      event {
+        id
+        title
+        slug
+        organization {
+          id
+          slug
+        }
+      }
     }
   }
 `;
@@ -42,8 +78,11 @@ const Header = ({
 
   const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
 
-  const [, joinEvent] = useMutation(JOIN_EVENT_MUTATION);
+  const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
   const color = event?.color ?? "anthracit";
+  const currentCollectionMembership = currentOrgMember?.collectionMemberships.filter(
+    (member) => member.event.id === event?.id
+  )?.[0];
 
   return (
     <header className={`bg-${color} shadow-md w-full`}>
@@ -93,15 +132,16 @@ const Header = ({
               <>
                 {currentOrg && (
                   <>
-                    {(!currentOrgMember ||
-                      !currentOrgMember.currentEventMembership) &&
+                    {!currentCollectionMembership &&
                       event &&
                       (event.registrationPolicy !== "INVITE_ONLY" ||
                         currentOrgMember?.isOrgAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
-                          onClick={() => joinEvent({ eventId: event?.id })}
+                          onClick={() =>
+                            joinCollection({ collectionId: event?.id })
+                          }
                         >
                           {event.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
@@ -181,7 +221,7 @@ const Header = ({
                     )}
                   </div>
                 )}
-                {currentOrgMember.eventMemberships.map((membership) => {
+                {currentOrgMember.collectionMemberships.map((membership) => {
                   if (
                     currentOrgMember.currentEventMembership &&
                     currentOrgMember.currentEventMembership.id === membership.id
