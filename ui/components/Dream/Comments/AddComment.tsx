@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, ReactNode } from "react";
 import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
@@ -11,7 +11,7 @@ function AddComment() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const inputRef = useRef();
+  const inputRef = useRef<any>();
   const { addComment, dream, event, currentOrg, currentOrgMember } = useContext(
     Context
   );
@@ -50,7 +50,6 @@ function AddComment() {
               rows={1}
               error={Boolean(errors.content)}
               helperText={errors.content?.message}
-              value={content}
               inputProps={{
                 value: content,
                 onChange: (e) => setContent(e.target.value),
