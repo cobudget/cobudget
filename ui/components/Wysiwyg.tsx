@@ -46,6 +46,7 @@ import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
 import styled from "styled-components";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
+import uploadImageFiles from "utils/uploadImageFiles";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -105,8 +106,31 @@ interface FileWithProgress {
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>;
 
-const imageUploadHandler = (files: FileWithProgress[]): DelayedImage[] => {
-  return;
+const imageUploadHandler = (
+  filesWithProgress: FileWithProgress[]
+): DelayedImage[] => {
+  const files = filesWithProgress.map((fwp) => fwp.file);
+
+  const setProgression = filesWithProgress
+    .map((fwp) => fwp.progress)
+    .map((setProgress) => (isUploading: boolean) =>
+      // timeout needed because a variable in the lib isn't init'ed yet
+      // see `uploads` here
+      // https://github.com/remirror/remirror/blob/3d62a9b937e48169fbe8c13871f882bfac74832f/packages/remirror__extension-image/src/image-extension.ts#L209-L214
+      setTimeout(() => setProgress(isUploading ? 0.4 : 1.0), 0)
+    );
+
+  return uploadImageFiles({
+    files,
+    setUploadingImages: setProgression,
+    cloudinaryPreset: "organization_logos", //TODO: get new preset
+  }).map((imgPromise) => () =>
+    imgPromise.then(
+      (imgUrl: string): ImageAttributes => {
+        return { src: imgUrl };
+      }
+    )
+  );
 };
 
 /**
