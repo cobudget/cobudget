@@ -22,14 +22,14 @@ const magicLink = new MagicLoginStrategy({
     prisma.user
       .upsert({
         create: {
-          email: payload.destination,
+          email: payload.destination.toLowerCase().trim(),
           verifiedEmail: true,
         },
         update: {
           verifiedEmail: true,
         },
         where: {
-          email: payload.destination,
+          email: payload.destination.toLowerCase().trim(),
         },
       })
       .then((user) => callback(null, user))
