@@ -2668,21 +2668,6 @@ const resolvers = {
       });
       return discourseConfig?.url ?? null;
     },
-    finishedTodos: async (org, args, { user }) => {
-      return false;
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId: org.id, userId: user.id },
-        },
-      });
-
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
-        // You need to be logged in as org admin
-        return false;
-      }
-
-      return org.finishedTodos;
-    },
   },
   Collection: {
     color: (collection) => collection.color ?? "anthracit",
