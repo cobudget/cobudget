@@ -47,6 +47,7 @@ import { debounce } from "lodash";
 import styled from "styled-components";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
+import ImagePickerExtension from "utils/remirrorImagePickerExtension";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -88,6 +89,8 @@ const ImperativeHandle = forwardRef((props, ref) => {
   const { commands, clearContent } = useRemirrorContext({
     autoUpdate: true,
   });
+
+  //commands.pickImages();
 
   useImperativeHandle(ref, () => ({
     blur: commands.blur,
@@ -158,6 +161,7 @@ const Wysiwyg = ({
         enableResizing: false,
         uploadHandler: imageUploadHandler,
       }),
+      new ImagePickerExtension(),
       new BlockquoteExtension(),
       new BulletListExtension({ enableSpine: true }),
       new OrderedListExtension(),
@@ -185,15 +189,161 @@ const Wysiwyg = ({
     [placeholder]
   );
 
-  const { manager } = useRemirror({
+  const { manager, getContext } = useRemirror({
     extensions,
     stringHandler: "markdown",
   });
+
+  const toolbarItems = useCallback(
+    (): ToolbarItemUnion[] => [
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "Simple Formatting",
+        items: [
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleBold",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleItalic",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleStrike",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleCode",
+            display: "icon",
+          },
+        ],
+        separator: "end",
+      },
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "Heading Formatting",
+        items: [
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleHeading",
+            display: "icon",
+            attrs: { level: 1 },
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleHeading",
+            display: "icon",
+            attrs: { level: 2 },
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleHeading",
+            display: "icon",
+            attrs: { level: 3 },
+          },
+        ],
+        separator: "end",
+      },
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "Simple Formatting",
+        items: [
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleBlockquote",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleCodeBlock",
+            display: "icon",
+          },
+        ],
+        separator: "end",
+      },
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "Embed",
+        items: [
+          {
+            type: ComponentItem.ToolbarButton,
+            onClick: (ev) => {
+              console.log("clicking new button", ev);
+              getContext().commands.pickImages();
+            },
+            key: "hi",
+            icon: "imageAddLine",
+          },
+        ],
+        separator: "end",
+      },
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "Lists",
+        items: [
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleBulletList",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "toggleOrderedList",
+            display: "icon",
+          },
+          // task lists don't work with md yet
+          // https://github.com/remirror/remirror/issues/1357
+          //{
+          //  type: ComponentItem.ToolbarCommandButton,
+          //  commandName: "toggleTaskList",
+          //  display: "icon",
+          //},
+          // tables are a bit buggy so far
+          // https://github.com/remirror/remirror/issues/1356
+          //{
+          //  type: ComponentItem.ToolbarCommandButton,
+          //  commandName: "createTable",
+          //  display: "icon",
+          //},
+        ],
+        separator: "end",
+      },
+      {
+        type: ComponentItem.ToolbarGroup,
+        label: "History",
+        items: [
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "undo",
+            display: "icon",
+          },
+          {
+            type: ComponentItem.ToolbarCommandButton,
+            commandName: "redo",
+            display: "icon",
+          },
+        ],
+        separator: "none",
+      },
+    ],
+    [getContext]
+  );
 
   return (
     <AllStyledComponent>
       <ThemeProvider>
         <EditorCss highlightColor={highlightColor} rows={rows}>
+          <input
+            className="filepicker"
+            type="file"
+            accept="image/*"
+            multiple
+            style={{ display: "none" }}
+          />
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
@@ -208,7 +358,11 @@ const Wysiwyg = ({
           >
             <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
-              <Toolbar items={toolbarItems} refocusEditor label="Top Toolbar" />
+              <Toolbar
+                items={toolbarItems()}
+                refocusEditor
+                label="Top Toolbar"
+              />
             </div>
             <EditorComponent />
           </Remirror>
@@ -217,125 +371,5 @@ const Wysiwyg = ({
     </AllStyledComponent>
   );
 };
-
-const toolbarItems: ToolbarItemUnion[] = [
-  {
-    type: ComponentItem.ToolbarGroup,
-    label: "Simple Formatting",
-    items: [
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleBold",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleItalic",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleStrike",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleCode",
-        display: "icon",
-      },
-    ],
-    separator: "end",
-  },
-  {
-    type: ComponentItem.ToolbarGroup,
-    label: "Heading Formatting",
-    items: [
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleHeading",
-        display: "icon",
-        attrs: { level: 1 },
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleHeading",
-        display: "icon",
-        attrs: { level: 2 },
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleHeading",
-        display: "icon",
-        attrs: { level: 3 },
-      },
-    ],
-    separator: "end",
-  },
-  {
-    type: ComponentItem.ToolbarGroup,
-    label: "Simple Formatting",
-    items: [
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleBlockquote",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleCodeBlock",
-        display: "icon",
-      },
-    ],
-    separator: "end",
-  },
-  {
-    type: ComponentItem.ToolbarGroup,
-    label: "Lists",
-    items: [
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleBulletList",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "toggleOrderedList",
-        display: "icon",
-      },
-      // task lists don't work with md yet
-      // https://github.com/remirror/remirror/issues/1357
-      //{
-      //  type: ComponentItem.ToolbarCommandButton,
-      //  commandName: "toggleTaskList",
-      //  display: "icon",
-      //},
-      // tables are a bit buggy so far
-      // https://github.com/remirror/remirror/issues/1356
-      //{
-      //  type: ComponentItem.ToolbarCommandButton,
-      //  commandName: "createTable",
-      //  display: "icon",
-      //},
-    ],
-    separator: "end",
-  },
-  {
-    type: ComponentItem.ToolbarGroup,
-    label: "History",
-    items: [
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "undo",
-        display: "icon",
-      },
-      {
-        type: ComponentItem.ToolbarCommandButton,
-        commandName: "redo",
-        display: "icon",
-      },
-    ],
-    separator: "none",
-  },
-];
 
 export default Wysiwyg;
