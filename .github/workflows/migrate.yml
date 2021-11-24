@@ -3,7 +3,7 @@ name: Migrate
 on:
   push:
     branches:
-      - cobudget
+      - main
 
 jobs:
   production:

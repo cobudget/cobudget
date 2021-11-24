@@ -9,6 +9,7 @@ import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { DREAMS_QUERY } from "pages/[org]/[collection]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
+import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
   if (process.browser) return `/api`;
@@ -58,6 +59,52 @@ export const client = (
         // },
         updates: {
           Mutation: {
+            joinCollection(result: any, args, cache) {
+              if (result.joinCollection) {
+                cache.updateQuery(
+                  {
+                    query: TOP_LEVEL_QUERY,
+                    variables: {
+                      orgSlug: result.joinCollection.event.organization.slug,
+                      collectionSlug: result.joinCollection.event.slug,
+                    },
+                  },
+                  (data) => {
+                    console.log({ deeeeta: data });
+                    return {
+                      ...data,
+                      currentOrgMember: {
+                        ...data.currentOrgMember,
+                        collectionMemberships: [
+                          ...data.currentOrgMember.collectionMemberships,
+                          result.joinCollection,
+                        ],
+                      },
+                    };
+                  }
+                );
+              }
+            },
+            joinOrg(result: any, args, cache) {
+              if (result.joinOrg) {
+                cache.updateQuery(
+                  {
+                    query: TOP_LEVEL_QUERY,
+                    variables: {
+                      orgSlug: result.joinOrg.organization.slug,
+                      collectionSlug: undefined,
+                    },
+                  },
+                  (data) => {
+                    console.log({ deeeeta: data });
+                    return {
+                      ...data,
+                      currentOrgMember: result.joinOrg,
+                    };
+                  }
+                );
+              }
+            },
             deleteCollection(result: any, { collectionId }, cache) {
               const fields = cache
                 .inspectFields("Query")

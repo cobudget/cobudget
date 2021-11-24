@@ -48,7 +48,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
     query: COLLECTIONS_QUERY,
     variables: { orgSlug: router.query.org },
   });
-
+  if (!currentOrg) return null;
   const collections = data?.collections ?? [];
   const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
 
@@ -59,9 +59,9 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              value={currentOrg.info}
+              value={currentOrg?.info}
               label="Add message"
-              placeholder={`# Welcome to ${currentOrg.name}'s page`}
+              placeholder={`# Welcome to ${currentOrg?.name}'s page`}
               canEdit={currentOrgMember?.isOrgAdmin}
               name="info"
               className="h-10"
@@ -76,7 +76,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
                   }
                 }
               `}
-              variables={{ organizationId: currentOrg.id }}
+              variables={{ organizationId: currentOrg?.id }}
               maxLength={500}
               required
             />

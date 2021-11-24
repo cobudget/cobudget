@@ -2534,13 +2534,13 @@ const resolvers = {
         },
       });
     },
-    registerForEvent: async (parent, { eventId }, { user }) => {
+    joinCollection: async (parent, { collectionId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
       const currentOrg = await prisma.organization.findFirst({
-        where: { collections: { some: { id: eventId } } },
+        where: { collections: { some: { id: collectionId } } },
         include: {
-          collections: { where: { id: eventId } },
+          collections: { where: { id: collectionId } },
           orgMembers: { where: { userId: user.id } },
         },
       });
@@ -2555,7 +2555,7 @@ const resolvers = {
 
       const collectionMember = await prisma.collectionMember.create({
         data: {
-          collection: { connect: { id: eventId } },
+          collection: { connect: { id: collectionId } },
           orgMember: {
             connectOrCreate: {
               where: {
@@ -2571,11 +2571,6 @@ const resolvers = {
       });
 
       return collectionMember;
-    },
-  },
-  Subscription: {
-    commentsChanged: {
-      subscribe: () => {}, //liveUpdate.asyncIterator(["commentsChanged"]),
     },
   },
   EventMember: {
@@ -2612,7 +2607,7 @@ const resolvers = {
     user: async (orgMember) => {
       return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
-    eventMemberships: async (orgMember) => {
+    collectionMemberships: async (orgMember) => {
       return await prisma.collectionMember.findMany({
         where: { orgMemberId: orgMember.id },
       });
@@ -2637,14 +2632,6 @@ const resolvers = {
       }),
   },
   User: {
-    // currentOrgMember: async (user, { orgSlug }, { user: currentUser }) => {
-    //   return null;
-    //   const currentOrgMember = await prisma.orgMember.findFirst({
-    //     where: { organization: { slug: orgSlug }, userId: currentUser.id },
-    //   });
-    //   if (!currentOrgMember) return null;
-    //   return user.id === currentOrgMember.userId ? currentOrgMember : null;
-    // },
     orgMemberships: async (user) =>
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     isRootAdmin: () => false, //TODO: add field in prisma
@@ -2667,21 +2654,6 @@ const resolvers = {
         where: { organizationId: org.id },
       });
       return discourseConfig?.url ?? null;
-    },
-    finishedTodos: async (org, args, { user }) => {
-      return false;
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId: org.id, userId: user.id },
-        },
-      });
-
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin)) {
-        // You need to be logged in as org admin
-        return false;
-      }
-
-      return org.finishedTodos;
     },
   },
   Collection: {

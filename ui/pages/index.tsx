@@ -12,7 +12,7 @@ const IndexPage = ({ currentUser }) => {
           </Button>
           <ul>
             {currentUser?.orgMemberships && <p>Your communities: </p>}
-            {currentUser?.orgMemberships.map((orgMember) => {
+            {currentUser?.orgMemberships?.map((orgMember) => {
               return (
                 <li key={orgMember.id}>
                   <Link href={`/${orgMember.organization.slug}`}>

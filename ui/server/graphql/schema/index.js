@@ -179,7 +179,7 @@ const schema = gql`
     acceptFunding(dreamId: ID!): Dream
     markAsCompleted(dreamId: ID!): Dream
 
-    registerForEvent(eventId: ID!): EventMember
+    joinCollection(collectionId: ID!): EventMember
   }
 
   type Organization {
@@ -279,7 +279,7 @@ const schema = gql`
     bio: String #what do we do with this one?
     createdAt: Date
     currentEventMembership(collectionSlug: String): EventMember #this is weird syntax...
-    eventMemberships: [EventMember!]
+    collectionMemberships: [EventMember!]
     discourseUsername: String
     hasDiscourseApiKey: Boolean
   }
@@ -542,9 +542,9 @@ const schema = gql`
   #   comment: String
   # }
 
-  type Subscription {
-    commentsChanged(dreamId: ID!): CommentAction!
-  }
+  # type Subscription {
+  #   commentsChanged(dreamId: ID!): CommentAction!
+  # }
 
   # union LogDetails = FlagRaisedDetails | FlagResolvedDetails
 
