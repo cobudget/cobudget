@@ -53,7 +53,6 @@ import { debounce } from "lodash";
 import styled from "styled-components";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
-import ImagePickerExtension from "utils/remirrorImagePickerExtension";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -115,6 +114,8 @@ interface FileWithProgress {
 
 type DelayedImage = DelayedPromiseCreator<ImageAttributes>;
 
+// glue function that connects the remirror image embed logic with our
+// image upload function
 const imageUploadHandler = (
   filesWithProgress: FileWithProgress[]
 ): DelayedImage[] => {
@@ -162,9 +163,9 @@ const Wysiwyg = ({
       new LinkExtension({}),
       new ImageExtension({
         enableResizing: false,
+        // for when the user dragndrops or pastes images
         uploadHandler: imageUploadHandler,
       }),
-      new ImagePickerExtension(),
       new BlockquoteExtension(),
       new BulletListExtension({ enableSpine: true }),
       new OrderedListExtension(),
