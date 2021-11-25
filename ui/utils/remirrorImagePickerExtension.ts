@@ -1,31 +1,21 @@
-import {
-  command,
-  CommandFunction,
-  extension,
-  PlainExtension,
-  PrimitiveSelection,
-} from "@remirror/core";
-
-const pickImagesOptions: Remirror.CommandDecoratorOptions = {
-  icon: "bold",
-  label: () => "Image picker",
-  description: () => "Select images to embed",
-};
+import { CommandFunction, extension, PlainExtension } from "@remirror/core";
 
 class ImageExtension extends PlainExtension {
-  //decoratedHelpers = {
-  //  pickImages: pickImagesOptions,
-  //};
-
   get name() {
     return "ImagePicker" as const;
   }
 
+  onView() {}
+
   createCommands() {
     return {
-      pickImages: (): CommandFunction => ({ tr }) => {
-        const input = document.getElementsByClassName("filepicker")[0];
-        (input as HTMLInputElement).click();
+      pickImages: ({
+        filePicker,
+      }: {
+        filePicker: HTMLInputElement;
+      }): CommandFunction => ({ tr, dispatch }) => {
+        filePicker.click();
+        //dispatch()
 
         // TODO: add onchange handler
 
@@ -33,20 +23,6 @@ class ImageExtension extends PlainExtension {
       },
     };
   }
-
-  //@command(pickImagesOptions)
-  //pickImages(selection?: PrimitiveSelection): CommandFunction {
-  //  return ({tr}) => {
-  //    return true;
-  //  };
-  //}
-
-  //@command(toggleBoldOptions)
-  //toggleBold(selection?: PrimitiveSelection): CommandFunction {
-  //  return toggleMark({ type: this.type, selection });
-  //}
 }
-
-//(ImageExtension.decoratedHelpers ??= {}).pickImages = options;
 
 export default extension({ defaultOptions: {} })(ImageExtension);

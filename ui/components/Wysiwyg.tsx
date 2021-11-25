@@ -4,7 +4,13 @@
 // https://github.com/remirror/remirror/issues/1349
 // and because we want to customize it
 
-import { forwardRef, useCallback, useImperativeHandle } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
 import { ExtensionPriority } from "remirror";
 import { DelayedPromiseCreator } from "@remirror/core";
 import {
@@ -136,9 +142,6 @@ const imageUploadHandler = (
   );
 };
 
-/**
- * The editor which is used to create the annotation. Supports formatting.
- */
 const Wysiwyg = ({
   inputRef,
   placeholder,
@@ -193,6 +196,48 @@ const Wysiwyg = ({
     extensions,
     stringHandler: "markdown",
   });
+
+  // function mostly copied from this link because that one is private
+  // https://github.com/remirror/remirror/blob/3d62a9b937e48169fbe8c13871f882bfac74832f/packages/remirror__extension-image/src/image-extension.ts#L205-L223
+  const fileUploadFileHandler = useCallback(
+    (files: File[]) => {
+      const { commands, chain } = getContext();
+      const filesWithProgress: FileWithProgress[] = files.map(
+        (file, index) => ({
+          file,
+          progress: (progress) => {
+            commands.updatePlaceholder(uploads[index], progress);
+          },
+        })
+      );
+
+      const uploads = imageUploadHandler(filesWithProgress);
+
+      for (const upload of uploads) {
+        chain.uploadImage(upload);
+      }
+
+      chain.run();
+
+      return true;
+    },
+    [getContext]
+  );
+
+  const filePicker = useRef<HTMLInputElement>();
+
+  useEffect(() => {
+    // detects the user picking new images after clicking the image embed button
+    // in the editor toolbar, and sends them to the image upload and embed functions
+    const detectFileUpload = () => {
+      fileUploadFileHandler(Array.from(filePicker.current.files));
+    };
+
+    filePicker.current.addEventListener("change", detectFileUpload);
+
+    return () =>
+      filePicker.current?.removeEventListener("change", detectFileUpload);
+  }, [filePicker]);
 
   const toolbarItems = useCallback(
     (): ToolbarItemUnion[] => [
@@ -271,11 +316,9 @@ const Wysiwyg = ({
         items: [
           {
             type: ComponentItem.ToolbarButton,
-            onClick: (ev) => {
-              console.log("clicking new button", ev);
-              getContext().commands.pickImages();
+            onClick: () => {
+              filePicker.current.click();
             },
-            key: "hi",
             icon: "imageAddLine",
           },
         ],
@@ -330,7 +373,7 @@ const Wysiwyg = ({
         separator: "none",
       },
     ],
-    [getContext]
+    [filePicker]
   );
 
   return (
@@ -343,6 +386,7 @@ const Wysiwyg = ({
             accept="image/*"
             multiple
             style={{ display: "none" }}
+            ref={filePicker}
           />
           <Remirror
             manager={manager}
