@@ -29,6 +29,7 @@ export const EVENT_MEMBERS_QUERY = gql`
         isApproved
         createdAt
         balance
+        email
         orgMember {
           id
           bio
@@ -36,7 +37,6 @@ export const EVENT_MEMBERS_QUERY = gql`
             id
             name
             username
-            email
             verifiedEmail
             avatar
           }
@@ -51,6 +51,7 @@ export const EVENT_MEMBERS_QUERY = gql`
         isApproved
         createdAt
         balance
+        email
         orgMember {
           id
           bio
@@ -58,7 +59,6 @@ export const EVENT_MEMBERS_QUERY = gql`
             id
             name
             username
-            email
             verifiedEmail
             avatar
           }

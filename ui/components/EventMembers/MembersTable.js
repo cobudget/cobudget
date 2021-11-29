@@ -112,7 +112,7 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p>{member.orgMember.user.email}</p>
+        <p>{member.email}</p>
         {!member.orgMember.user.verifiedEmail && (
           <p className="text-sm text-gray-500">(not verified)</p>
         )}
