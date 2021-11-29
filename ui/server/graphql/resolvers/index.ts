@@ -1510,7 +1510,7 @@ const resolvers = {
       });
       let comment = await prisma.comment.findUnique({
         where: { id: commentId },
-        include: { Bucket: { include: { collection: true } } },
+        include: { bucket: { include: { collection: true } } },
       });
       comment = { ...comment, content };
 
@@ -1518,7 +1518,7 @@ const resolvers = {
         where: {
           orgMemberId_collectionId: {
             orgMemberId: currentOrgMember.id,
-            collectionId: comment.Bucket.collection.id,
+            collectionId: comment.bucket.collection.id,
           },
         },
         include: { orgMember: true },
@@ -1532,7 +1532,7 @@ const resolvers = {
           currentOrg,
           currentOrgMember,
           eventMember,
-          dream: comment.Bucket,
+          dream: comment.bucket,
           comment,
         }
       );
@@ -1622,6 +1622,7 @@ const resolvers = {
             content: logContent,
             isLog: true,
             orgMemberId: currentOrgMember.id,
+            bucketId: dreamId,
           },
         });
       }
@@ -1716,6 +1717,7 @@ const resolvers = {
             content: logContent,
             isLog: true,
             orgMemberId: currentOrgMember.id,
+            bucketId: dreamId,
           },
         });
       }

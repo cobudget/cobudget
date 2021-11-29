@@ -43,8 +43,6 @@ export async function getCurrentOrgAndMember({
       where: { collections: { some: { buckets: { some: { id: bucketId } } } } },
       include,
     });
-  } else {
-    throw new Error("You need to provide either orgId or collectionId");
   }
 
   const currentOrgMember = currentOrg?.orgMembers?.[0];

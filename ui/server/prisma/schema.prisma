@@ -233,8 +233,8 @@ model Comment {
   updatedAt   DateTime   @updatedAt
   orgMember   OrgMember? @relation(fields: [orgMemberId], references: [id])
   orgMemberId String?
-  Bucket      Bucket?    @relation(fields: [bucketId], references: [id])
-  bucketId    String?
+  bucket      Bucket     @relation(fields: [bucketId], references: [id])
+  bucketId    String
 
 }
 

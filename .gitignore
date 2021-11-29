@@ -6,6 +6,7 @@ node_modules
 .vscode
 .vercel
 .idea
+ui/.env
 
 # dependencies
 ui/.pnp
