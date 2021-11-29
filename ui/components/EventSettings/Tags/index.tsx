@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import TextField from "components/TextField";
 import Button from "components/Button";
 
@@ -23,7 +23,7 @@ const Tags = ({ event }) => {
     register,
     formState: { isDirty },
   } = useForm();
-  const [createTag, { loading }] = useMutation(CREATE_TAG);
+  const [{ fetching: loading }, createTag] = useMutation(CREATE_TAG);
 
   return (
     <div className="mx-6">
