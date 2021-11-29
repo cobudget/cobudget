@@ -1090,32 +1090,74 @@ const resolvers = {
 
       return updated;
     },
-    createTag: async (
-      parent,
-      { eventId, tagValue },
-      { currentOrg, currentOrgMember, models: { Event, EventMember, Tag } }
-    ) => {
-      const eventMember = await EventMember.findOne({
-        orgMemberId: currentOrgMember.id,
-        eventId,
+    createTag: async (parent, { eventId, tagValue }) => {
+      //const eventMember = await EventMember.findOne({
+      //  orgMemberId: currentOrgMember.id,
+      //  eventId,
+      //});
+
+      const {
+        currentOrgMember,
+        collectionMember,
+      } = await getCurrentOrgAndMember({
+        collectionId: eventId,
       });
 
+      console.log("createtag members", currentOrgMember, collectionMember);
+
       if (
-        !eventMember?.isAdmin &&
-        !eventMember?.isGuide &&
+        !collectionMember?.isAdmin &&
+        !collectionMember?.isGuide &&
         !currentOrgMember?.isOrgAdmin
       )
         throw new Error("You are not an admin or guide of this collection.");
 
-      await new Tag({
-        value: tagValue,
-        eventId,
-        organizationId: currentOrg.id,
-      }).save();
+      //return await prisma.bucket.update({
+      //  where: { id: dreamId },
+      //  data: {
+      //    tags: {
+      //      create: {
+      //        value: tagValue,
+      //        collectionId: bucket.collectionId,
+      //      },
+      //    },
+      //  },
+      //});
 
-      return await Event.findOne({
-        _id: eventId,
+      return await prisma.collection.update({
+        where: { id: eventId },
+        data: {
+          tags: {
+            create: {
+              value: tagValue,
+            },
+          },
+        },
       });
+      //await prisma.tag.create({
+      //  data: {
+      //    value: tagValue,
+      //    collectionId: eventId,
+      //  },
+      //});
+      //await new Tag({
+      //  value: tagValue,
+      //  eventId,
+      //  organizationId: currentOrg.id,
+      //}).save();
+      //const bucket = await prisma.bucket.create({
+      //  data: {
+      //    collection: { connect: { id: eventId } },
+      //    title,
+      //    cocreators: { connect: { id: collectionMember.id } },
+      //  },
+      //});
+
+      //return await prisma.collection.
+
+      //return await Event.findOne({
+      //  _id: eventId,
+      //});
     },
     addTag: async (parent, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({
@@ -1145,20 +1187,18 @@ const resolvers = {
       )
         throw new Error("You are not a cocreator of this bucket.");
 
-      if (!tagId)
-        throw new Error("You need to provide tag id");
+      if (!tagId) throw new Error("You need to provide tag id");
 
-      
-        return await prisma.bucket.update({
-          where: { id: dreamId },
-          data: {
-            tags: {
-              connect: {
-                id: tagId,
-              },
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          tags: {
+            connect: {
+              id: tagId,
             },
           },
-        });
+        },
+      });
     },
     removeTag: async (_, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({

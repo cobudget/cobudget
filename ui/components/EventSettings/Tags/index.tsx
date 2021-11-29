@@ -16,7 +16,7 @@ const CREATE_TAG = gql`
   }
 `;
 
-const Tags = ({ event }) => {
+const Tags = ({ event, currentOrg }) => {
   const {
     handleSubmit,
     reset,
@@ -35,7 +35,7 @@ const Tags = ({ event }) => {
             key={tag.id}
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
-            <Link href={`/${event.slug}?tag=${tag.value}`}>
+            <Link href={`/${currentOrg.slug}/${event.slug}?tag=${tag.value}`}>
               <a className="text-gray-500 hover:text-black">{tag.value}</a>
             </Link>
           </div>
@@ -45,10 +45,8 @@ const Tags = ({ event }) => {
       <form
         onSubmit={handleSubmit((variables) => {
           createTag({
-            variables: {
-              ...variables,
-              eventId: event.id,
-            },
+            ...variables,
+            eventId: event.id,
           })
             .then(() => reset())
             .catch((error) => alert(error.message));

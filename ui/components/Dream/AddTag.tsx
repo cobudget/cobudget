@@ -19,6 +19,8 @@ const AddTag = ({ items: eventTags, dream }) => {
   const [, addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
 
+  console.log("in addtag", dream.id);
+
   return (
     <Downshift
       id="tags"
@@ -26,7 +28,8 @@ const AddTag = ({ items: eventTags, dream }) => {
         if (!tag) return;
 
         addTag({
-          variables: { dreamId: dream.id, tagId: tag.id },
+          dreamId: dream.id,
+          tagId: tag.id,
         }).then(() => setInput(""));
       }}
       onInputValueChange={(value) => setInput(value)}
