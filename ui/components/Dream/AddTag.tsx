@@ -58,7 +58,7 @@ const AddTag = ({ items: eventTags, dream }) => {
             <div
               className=""
               //style={{ display: "inline-block" }}
-              {...getRootProps({}, { suppressRefError: true })}
+              {...getRootProps({} as any, { suppressRefError: true })}
             >
               <input
                 {...getInputProps({ onFocus: openMenu })}
