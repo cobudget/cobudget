@@ -30,12 +30,12 @@ export const EVENT_MEMBERS_QUERY = gql`
         createdAt
         balance
         email
+        name
         orgMember {
           id
           bio
           user {
             id
-            name
             username
             verifiedEmail
             avatar
@@ -52,12 +52,12 @@ export const EVENT_MEMBERS_QUERY = gql`
         createdAt
         balance
         email
+        name
         orgMember {
           id
           bio
           user {
             id
-            name
             username
             verifiedEmail
             avatar
@@ -99,7 +99,7 @@ const DELETE_MEMBER = gql`
   }
 `;
 
-const EventMembers = ({ event }) => {
+const EventMembers = ({ event, currentOrgMember }) => {
   const [
     {
       data: {
@@ -164,6 +164,10 @@ const EventMembers = ({ event }) => {
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
+  const isAdmin =
+    currentOrgMember?.isOrgAdmin ||
+    currentOrgMember?.currentEventMembership?.isAdmin;
+
   if (error) {
     console.error(error);
     return null;
@@ -180,17 +184,19 @@ const EventMembers = ({ event }) => {
 
         <div className="flex justify-between mb-3 items-center">
           <h2 className="text-xl font-semibold">All collection members</h2>
-          <div className="flex items-center space-x-2">
-            <Button onClick={() => setInviteModalOpen(true)}>
-              Invite members
-            </Button>
-            {inviteModalOpen && (
-              <InviteMembersModal
-                handleClose={() => setInviteModalOpen(false)}
-                eventId={event.id}
-              />
-            )}
-          </div>
+          {isAdmin && (
+            <div className="flex items-center space-x-2">
+              <Button onClick={() => setInviteModalOpen(true)}>
+                Invite members
+              </Button>
+              {inviteModalOpen && (
+                <InviteMembersModal
+                  handleClose={() => setInviteModalOpen(false)}
+                  eventId={event.id}
+                />
+              )}
+            </div>
+          )}
         </div>
 
         <MembersTable
@@ -198,6 +204,7 @@ const EventMembers = ({ event }) => {
           updateMember={updateMember}
           deleteMember={deleteMember}
           event={event}
+          isAdmin={isAdmin}
         />
 
         <LoadMore

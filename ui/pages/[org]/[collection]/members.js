@@ -22,7 +22,7 @@ const EventMembersPage = ({ event, currentOrgMember }) => {
   return (
     <div className="flex-1">
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
-      <Members event={event} />
+      <Members event={event} currentOrgMember={currentOrgMember} />
     </div>
   );
 };

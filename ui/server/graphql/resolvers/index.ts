@@ -2610,7 +2610,6 @@ const resolvers = {
           collectionId: member.collectionId,
         },
       });
-      console.log({ currentCollMember, member });
 
       if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
         return null;
@@ -2623,6 +2622,26 @@ const resolvers = {
         },
       });
       return u.email;
+    },
+    name: async (member, _, { user }) => {
+      const currentCollMember = await prisma.collectionMember.findFirst({
+        where: {
+          orgMember: { userId: user.id },
+          collectionId: member.collectionId,
+        },
+      });
+
+      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { collectionMemberships: { some: { id: member.id } } },
+          },
+        },
+      });
+      return u.name;
     },
   },
   OrgMember: {
@@ -2671,6 +2690,28 @@ const resolvers = {
       });
       return u.email;
     },
+    name: async (member, _, { user }) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
+        where: {
+          organizationId_userId: {
+            organizationId: member.organiationId,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (!(currentOrgMember?.isOrgAdmin || currentOrgMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { id: member.id },
+          },
+        },
+      });
+      return u.name;
+    },
     organization: async (orgMember) =>
       prisma.organization.findUnique({
         where: { id: orgMember.organizationId },
@@ -2681,9 +2722,13 @@ const resolvers = {
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
-    email: async (parent, _, { user }) => {
+    email: (parent, _, { user }) => {
       if (parent.id !== user.id) return null;
       return parent.email;
+    },
+    name: (parent, _, { user }) => {
+      if (parent.id !== user.id) return null;
+      return parent.name;
     },
   },
   Organization: {

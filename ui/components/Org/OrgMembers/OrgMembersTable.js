@@ -153,7 +153,7 @@ const Page = ({
             {member.user.username}
           </TableCell>
           <TableCell component="th" scope="row">
-            {member.user.name}
+            {member.name}
           </TableCell>
           <TableCell>
             <Box display="flex" alignItems="center">

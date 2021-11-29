@@ -283,6 +283,7 @@ const schema = gql`
     discourseUsername: String
     hasDiscourseApiKey: Boolean
     email: String
+    name: String
   }
 
   type OrgMembersPage {
@@ -300,6 +301,7 @@ const schema = gql`
     createdAt: Date
     balance: Int # stored as cents
     email: String
+    name: String
     # roles: [Role]
   }
 
