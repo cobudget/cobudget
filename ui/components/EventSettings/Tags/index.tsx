@@ -23,7 +23,7 @@ const Tags = ({ event, currentOrg }) => {
     register,
     formState: { isDirty },
   } = useForm();
-  const [{ fetching: loading }, createTag] = useMutation(CREATE_TAG);
+  const [{ fetching }, createTag] = useMutation(CREATE_TAG);
 
   return (
     <div className="mx-6">
@@ -65,7 +65,7 @@ const Tags = ({ event, currentOrg }) => {
             color={event.color}
             type="submit"
             disabled={!isDirty}
-            loading={loading}
+            loading={fetching}
           >
             Create
           </Button>
