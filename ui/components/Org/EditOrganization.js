@@ -2,23 +2,20 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Button from "../Button";
 import TextField from "../TextField";
 import ImageUpload from "components/ImageUpload";
 import slugify from "utils/slugify";
+import toast from "react-hot-toast";
 
 const CREATE_ORGANIZATION = gql`
-  mutation CreateOrganization(
-    $name: String!
-    $logo: String
-    $subdomain: String!
-  ) {
-    createOrganization(name: $name, logo: $logo, subdomain: $subdomain) {
+  mutation CreateOrganization($name: String!, $logo: String, $slug: String!) {
+    createOrganization(name: $name, logo: $logo, slug: $slug) {
       id
       name
       logo
-      subdomain
+      slug
     }
   }
 `;
@@ -28,18 +25,18 @@ const EDIT_ORGANIZATION = gql`
     $organizationId: ID!
     $name: String!
     $logo: String
-    $subdomain: String!
+    $slug: String!
   ) {
     editOrganization(
       organizationId: $organizationId
       name: $name
       logo: $logo
-      subdomain: $subdomain
+      slug: $slug
     ) {
       id
       name
       logo
-      subdomain
+      slug
       customDomain
     }
   }
@@ -49,47 +46,46 @@ const EditOrganization = ({ organization, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(organization?.logo);
-  const [createOrganization, { loading }] = useMutation(CREATE_ORGANIZATION);
-  const [editOrganization, { editLoading }] = useMutation(EDIT_ORGANIZATION, {
-    variables: { organizationId: organization?.id },
-  });
+  const [{ fetching: loading }, createOrganization] = useMutation(
+    CREATE_ORGANIZATION
+  );
+  const [{ fetching: editLoading }, editOrganization] = useMutation(
+    EDIT_ORGANIZATION
+  );
+
   const { handleSubmit, register, errors, reset } = useForm();
 
-  const [slugValue, setSlugValue] = useState(organization?.subdomain ?? "");
+  const [slugValue, setSlugValue] = useState(organization?.slug ?? "");
 
   const isNew = !organization;
 
   const onSubmit = async (variables) => {
     try {
-      variables = {
-        ...variables,
-        logo: logoImage,
-      };
       if (isNew) {
-        await createOrganization({ variables });
+        await createOrganization({ ...variables, logo: logoImage }).then(
+          ({ error }) => {
+            if (error) {
+              toast.error(error.message.replace("[GraphQL]", ""));
+            } else {
+              toast.success("Organization created successfully");
+              router.replace(`/${variables.slug}/settings`);
+              router.push(`/${variables.slug}`);
+            }
+          }
+        );
       } else {
-        await editOrganization({ variables });
+        editOrganization({
+          ...variables,
+          organizationId: organization.id,
+        }).then(({ error }) => {
+          if (error) {
+            toast.error(error.message.replace("[GraphQL]", ""));
+          } else {
+            toast.success("Organization updated successfully");
+            router.replace(`/${variables.slug}/settings`);
+          }
+        });
       }
-      let message = isNew
-        ? "Organization created successfully."
-        : "Organization updated successfully.";
-
-      if (isNew) {
-        const dreamsUrl = process.env.IS_PROD
-          ? `https://${variables.subdomain}.${process.env.DEPLOY_URL}`
-          : `http://${variables.subdomain}.localhost:3000`;
-
-        const realitiesUrl = `http${process.env.IS_PROD ? "s" : ""}://${
-          process.env.REALITIES_DEPLOY_URL
-        }/${variables.subdomain}`;
-
-        const url = fromRealities ? realitiesUrl : dreamsUrl;
-
-        window.location.assign(url);
-      } else {
-        alert(message);
-      }
-      reset();
     } catch (err) {
       console.error(err);
       alert(err.message);
@@ -100,12 +96,12 @@ const EditOrganization = ({ organization, currentUser }) => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto space-y-4">
         <h1 className="text-2xl font-semibold">
-          {isNew ? `👋 Welcome, ${currentUser.firstName}` : "Edit organization"}
+          {isNew ? `👋 Welcome, ${currentUser.name}` : "Edit organization"}
         </h1>
         <TextField
           name="name"
           label="Name your community"
-          placeholder={`${currentUser.firstName}'s community`}
+          placeholder={`${currentUser.name}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}
           error={errors.name}
@@ -113,22 +109,27 @@ const EditOrganization = ({ organization, currentUser }) => {
         />
 
         <TextField
-          name="subdomain"
-          label={fromRealities ? "Link" : "Subdomain"}
-          placeholder={slugify(`${currentUser.firstName}'s community`)}
+          name="slug"
+          label="URL"
+          placeholder={slugify(`${currentUser.name}'s community`)}
           inputRef={register({ required: "Required" })}
-          error={errors.subdomain}
+          error={errors.slug}
           inputProps={{
             value: slugValue,
-            onChange: (e) => setSlugValue(e.target.value),
+            onChange: (e) => {
+              // console.log("onChange");
+              // console.log({ slugValue, targetValue: e.target.value });
+              setSlugValue(e.target.value);
+            },
             onBlur: (e) => setSlugValue(slugify(e.target.value)),
           }}
           helperText={errors.subdomain?.message}
           startAdornment={
-            fromRealities && <span>{process.env.REALITIES_DEPLOY_URL}/</span>
-          }
-          endAdornment={
-            !fromRealities && <span>.{process.env.DEPLOY_URL}</span>
+            fromRealities ? (
+              <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+            ) : (
+              <span>{process.env.DEPLOY_URL}/</span>
+            )
           }
         />
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
 
 import TextField from "components/TextField";
@@ -18,9 +18,7 @@ const EDIT_TITLE_MUTATION = gql`
 `;
 
 const DreamTitle = ({ title, canEdit, dreamId }) => {
-  const [editDream, { loading }] = useMutation(EDIT_TITLE_MUTATION, {
-    variables: { dreamId },
-  });
+  const [{ fetching: loading }, editDream] = useMutation(EDIT_TITLE_MUTATION);
   const { handleSubmit, register, errors } = useForm();
 
   const [editing, setEditing] = useState(false);
@@ -29,7 +27,7 @@ const DreamTitle = ({ title, canEdit, dreamId }) => {
       <>
         <form
           onSubmit={handleSubmit((variables) =>
-            editDream({ variables })
+            editDream({ dreamId, ...variables })
               .then(() => setEditing(false))
               .catch((err) => alert(err.message))
           )}

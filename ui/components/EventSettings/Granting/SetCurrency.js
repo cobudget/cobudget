@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 
 import { Box, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab";
@@ -11,11 +11,7 @@ import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetCurrency = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   return (
@@ -28,7 +24,7 @@ const SetCurrency = ({ closeModal, event }) => {
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({ variables })
+            updateGranting({ ...variables, eventId: event.id })
               .then(() => {
                 closeModal();
               })

@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useMutation } from "@apollo/client";
+import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
 import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import DayjsUtils from "@date-io/dayjs";
@@ -9,11 +9,7 @@ import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetGrantingCloses = ({ closeModal, event }) => {
-  const [updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(event.grantingCloses);
@@ -25,7 +21,7 @@ const SetGrantingCloses = ({ closeModal, event }) => {
 
         <form
           onSubmit={handleSubmit(() => {
-            updateGranting({ variables: { grantingCloses: selectedDate } })
+            updateGranting({ grantingCloses: selectedDate, eventId: event.id })
               .then(() => {
                 closeModal();
               })
@@ -67,7 +63,7 @@ const SetGrantingCloses = ({ closeModal, event }) => {
                 color="secondary"
                 className="ml-2"
                 onClick={() => {
-                  updateGranting({ variables: { grantingCloses: null } })
+                  updateGranting({ eventId: event.id, grantingCloses: null })
                     .then(() => {
                       closeModal();
                     })

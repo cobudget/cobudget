@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 
 import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
@@ -7,24 +7,18 @@ import dirtyValues from "utils/dirtyValues";
 
 const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile(
+    $orgId: ID
     $username: String
-    $firstName: String
-    $lastName: String
+    $name: String
     $bio: String
   ) {
-    updateProfile(
-      username: $username
-      firstName: $firstName
-      lastName: $lastName
-      bio: $bio
-    ) {
+    updateProfile(orgId: $orgId, username: $username, name: $name, bio: $bio) {
       id
       email
       avatar
       username
-      firstName
-      lastName
-      currentOrgMember {
+      name
+      orgMemberships {
         id
         bio
       }
@@ -38,7 +32,7 @@ const EditProfile = ({
   currentOrgMember,
   currentOrg,
 }) => {
-  const [updateUser] = useMutation(UPDATE_PROFILE_QUERY);
+  const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
     register,
@@ -52,7 +46,10 @@ const EditProfile = ({
         <form
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
-              updateUser({ variables: dirtyValues(dirtyFields, variables) })
+              updateUser({
+                ...(currentOrg && { orgId: currentOrg.id }),
+                ...dirtyValues(dirtyFields, variables),
+              })
                 .then(() => {
                   closeModal();
                 })
@@ -67,26 +64,12 @@ const EditProfile = ({
         >
           <div className="my-4">
             <TextField
-              name="firstName"
-              label="First name"
+              name="name"
+              label="Name"
               variant="outlined"
-              defaultValue={currentUser.firstName}
-              error={Boolean(errors.firstName)}
-              helperText={errors.firstName?.message}
-              fullWidth
-              inputRef={register({
-                required: "Required",
-              })}
-            />
-          </div>
-          <div className="my-4">
-            <TextField
-              name="lastName"
-              label="Last name"
-              variant="outlined"
-              defaultValue={currentUser.lastName}
-              error={Boolean(errors.lastName)}
-              helperText={errors.lastName?.message}
+              defaultValue={currentUser.name}
+              error={Boolean(errors.name)}
+              helperText={errors.name?.message}
               fullWidth
               inputRef={register({
                 required: "Required",
@@ -124,15 +107,24 @@ const EditProfile = ({
               />
             </div>
           )}
-
-          <Button
-            type="submit"
-            size="large"
-            variant="contained"
-            color="primary"
-          >
-            Save
-          </Button>
+          <div className="space-x-2 flex">
+            <Button
+              size="large"
+              variant="contained"
+              // color="secondary"
+              onClick={closeModal}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="large"
+              variant="contained"
+              color="primary"
+            >
+              Save
+            </Button>
+          </div>
         </form>
       </div>
     </Card>

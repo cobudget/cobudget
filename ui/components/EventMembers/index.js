@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "urql";
 
-import Button from "components/Button";
-import InviteMembersModal from "components/InviteMembersModal";
-import LoadMore from "components/LoadMore";
+import Button from "../Button";
+import InviteMembersModal from "../InviteMembersModal";
+import LoadMore from "../LoadMore";
 
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
@@ -100,31 +100,32 @@ const DELETE_MEMBER = gql`
 `;
 
 const EventMembers = ({ event }) => {
-  const {
-    data: {
-      approvedMembersPage: { moreExist, approvedMembers },
-      requestsToJoinPage: { requestsToJoin },
-    } = {
-      approvedMembersPage: {
-        approvedMembers: [],
+  const [
+    {
+      data: {
+        approvedMembersPage: { moreExist, approvedMembers },
+        requestsToJoinPage: { requestsToJoin },
+      } = {
+        approvedMembersPage: {
+          approvedMembers: [],
+        },
+        requestsToJoinPage: {
+          requestsToJoin: [],
+        },
       },
-      requestsToJoinPage: {
-        requestsToJoin: [],
-      },
+      fetching: loading,
+      error,
+      fetchMore,
     },
-    loading,
-    error,
-    fetchMore,
-  } = useQuery(EVENT_MEMBERS_QUERY, {
-    notifyOnNetworkStatusChange: true,
+  ] = useQuery({
+    query: EVENT_MEMBERS_QUERY,
+    //notifyOnNetworkStatusChange: true,
     variables: { eventId: event.id, offset: 0, limit: 1000 },
   });
 
-  const [updateMember] = useMutation(UPDATE_MEMBER, {
-    variables: { eventId: event.id },
-  });
+  const [, updateMember] = useMutation(UPDATE_MEMBER);
 
-  const [deleteMember] = useMutation(DELETE_MEMBER, {
+  const [, deleteMember] = useMutation(DELETE_MEMBER, {
     variables: { eventId: event.id },
     update(cache, { data: { deleteMember } }) {
       const {

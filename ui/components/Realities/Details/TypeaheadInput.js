@@ -27,6 +27,7 @@ const TypeaheadInput = ({
   autoFocus,
 }) => (
   <Downshift
+    id="typeahead"
     selectedItem={selectedItem}
     onChange={onChange}
     itemToString={itemToString}

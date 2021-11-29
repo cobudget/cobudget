@@ -3,7 +3,6 @@ import Link from "next/link";
 const NavItem = ({
   onClick,
   href,
-  as,
   currentPath = "",
   className,
   children,
@@ -13,11 +12,11 @@ const NavItem = ({
 }) => {
   const active = currentPath === href;
 
-  const regularClasses = `border-transparent text-gray-800 hover:bg-gray-300`;
-  const primaryClasses = `border-anthracit hover:bg-anthracit-dark hover:text-gray-200`;
-  const regularEventClasses = `border-transparent text-white hover:bg-${eventColor}-dark`;
-  const primaryEventClasses = `border-white text-white hover:bg-white hover:text-${eventColor}`;
-  const eventActiveClasses = `border-transparent bg-${eventColor}-dark text-white`;
+  const regularClasses = `ring-transparent text-gray-800 hover:bg-gray-300`;
+  const primaryClasses = `ring-anthracit hover:bg-anthracit-dark hover:text-gray-200`;
+  const regularEventClasses = `ring-transparent text-white hover:bg-${eventColor}-dark`;
+  const primaryEventClasses = `ring-white text-white hover:bg-white hover:text-${eventColor}`;
+  const eventActiveClasses = `ring-transparent bg-${eventColor}-dark text-white`;
 
   const colorsClasses = eventColor
     ? primary
@@ -29,7 +28,7 @@ const NavItem = ({
     ? primaryClasses
     : regularClasses;
 
-  const classes = `my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 border-2 ${colorsClasses} ${className}`;
+  const classes = `my-1 mx-1 px-3 py-1 sm:my-0 block rounded focus:outline-none font-medium transitions-colors transitions-opacity duration-75 ring-2 ring-inset ${colorsClasses} ${className}`;
 
   if (onClick) {
     return (
@@ -46,7 +45,7 @@ const NavItem = ({
     );
   }
   return (
-    <Link href={href} as={as}>
+    <Link href={href}>
       <a className={classes}>{children}</a>
     </Link>
   );

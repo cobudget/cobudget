@@ -14,6 +14,7 @@ const ProfileDropdown = ({
   currentOrgMember,
   openModal,
   event,
+  currentOrg,
 }) => {
   const [open, setOpen] = React.useState(false);
 
@@ -68,7 +69,7 @@ const ProfileDropdown = ({
                 )}
               </div>
             )}
-            {currentOrgMember?.eventMemberships.map((membership) => {
+            {currentOrgMember?.collectionMemberships.map((membership) => {
               if (
                 currentOrgMember.currentEventMembership &&
                 currentOrgMember.currentEventMembership.id === membership.id
@@ -77,8 +78,8 @@ const ProfileDropdown = ({
               }
               return (
                 <Link
-                  href="/[event]"
-                  as={`/${membership.event.slug}`}
+                  href="/[org]/[collection]"
+                  as={`/${currentOrg.slug}/${membership.event.slug}`}
                   key={membership.event.slug}
                 >
                   <a className={css.button}>{membership.event.title}</a>
@@ -97,7 +98,7 @@ const ProfileDropdown = ({
             >
               Edit profile
             </button>
-            <a href="/api/logout" className={css.button}>
+            <a href="/api/auth/logout" className={css.button}>
               Sign out
             </a>
           </div>

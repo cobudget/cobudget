@@ -1,15 +1,15 @@
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { useState } from "react";
 import { Modal } from "@material-ui/core";
-import dreamName from "utils/dreamName";
+import toast from "react-hot-toast";
 import TextField from "../TextField";
 import Button from "../Button";
 import Banner from "../Banner";
 
 const DELETE_EVENT_MUTATION = gql`
-  mutation DeleteEvent($eventId: ID!) {
-    deleteEvent(eventId: $eventId) {
+  mutation DeleteEvent($collectionId: ID!) {
+    deleteCollection(collectionId: $collectionId) {
       id
     }
   }
@@ -17,23 +17,21 @@ const DELETE_EVENT_MUTATION = gql`
 
 export default ({ event, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
-  const [deleteEvent, { loading }] = useMutation(DELETE_EVENT_MUTATION, {
-    variables: {
-      eventId: event.id,
-    },
-  });
+  const [{ fetching: loading }, deleteCollection] = useMutation(
+    DELETE_EVENT_MUTATION
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    deleteEvent(event)
-      .then(() => {
+    deleteCollection({ collectionId: event.id }).then(({ error }) => {
+      if (error) {
+        toast.error(error.message);
+      } else {
         handleClose();
-        Router.push("/");
-      })
-      .catch((err) => {
-        console.log(err);
-        alert(err.message);
-      });
+        Router.push(`/${currentOrg.slug}/`);
+        toast.success("Collection deleted");
+      }
+    });
   };
 
   const checkIfTextMatched = (e) => {
@@ -58,8 +56,8 @@ export default ({ event, handleClose, currentOrg }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{event.title}</b> collection, {dreamName(currentOrg)}s, questions,
-          comments and remove all collaborators.{" "}
+          <b>{event.title}</b> collection, buckets, questions, comments and
+          remove all collaborators.{" "}
         </p>
         <p className="mb-4">
           Please type <b>{event.slug}</b> to confirm.

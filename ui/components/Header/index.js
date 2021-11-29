@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Link from "next/link";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation, gql } from "urql";
 import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -14,18 +14,54 @@ const css = {
 };
 
 const JOIN_ORG_MUTATION = gql`
-  mutation JoinOrg {
-    joinOrg {
+  mutation JoinOrg($orgId: ID!) {
+    joinOrg(orgId: $orgId) {
       id
       bio
+      isOrgAdmin
+      discourseUsername
+      hasDiscourseApiKey
+      user {
+        id
+        name
+        username
+        email
+      }
+      collectionMemberships {
+        id
+        isAdmin
+        isGuide
+        isApproved
+        event {
+          id
+          title
+          slug
+        }
+      }
+      organization {
+        id
+        slug
+      }
     }
   }
 `;
 
-const JOIN_EVENT_MUTATION = gql`
-  mutation RegisterForEvent($eventId: ID!) {
-    registerForEvent(eventId: $eventId) {
+const JOIN_COLLECTION_MUTATION = gql`
+  mutation JoinCollection($collectionId: ID!) {
+    joinCollection(collectionId: $collectionId) {
+      id
+      isAdmin
+      isGuide
       isApproved
+      event {
+        id
+        title
+        slug
+        organization {
+          id
+          slug
+        }
+      }
     }
   }
 `;
@@ -40,15 +76,14 @@ const Header = ({
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
-  const [joinOrg] = useMutation(JOIN_ORG_MUTATION, {
-    refetchQueries: ["TopLevelQuery"],
-  });
+  const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
 
-  const [joinEvent] = useMutation(JOIN_EVENT_MUTATION, {
-    variables: { eventId: event?.id },
-    refetchQueries: ["TopLevelQuery"],
-  });
+  const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
   const color = event?.color ?? "anthracit";
+  const currentCollectionMembership = currentOrgMember?.collectionMemberships.filter(
+    (member) => member.event.id === event?.id
+  )?.[0];
+
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
@@ -97,15 +132,16 @@ const Header = ({
               <>
                 {currentOrg && (
                   <>
-                    {(!currentOrgMember ||
-                      !currentOrgMember.currentEventMembership) &&
+                    {!currentCollectionMembership &&
                       event &&
                       (event.registrationPolicy !== "INVITE_ONLY" ||
                         currentOrgMember?.isOrgAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
-                          onClick={() => joinEvent()}
+                          onClick={() =>
+                            joinCollection({ collectionId: event?.id })
+                          }
                         >
                           {event.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
@@ -116,27 +152,33 @@ const Header = ({
                       <NavItem
                         primary
                         eventColor={color}
-                        onClick={() => joinOrg()}
+                        onClick={() => joinOrg({ orgId: currentOrg.id })}
                       >
                         Join org
                       </NavItem>
                     )}
                   </>
                 )}
-
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
                     currentOrgMember={currentOrgMember}
                     openModal={openModal}
                     event={event}
+                    currentOrg={currentOrg}
                   />
                 </div>
+                <div data-cy="user-is-logged-in" />
               </>
             ) : (
-              <NavItem href="/api/login" external eventColor={color} primary>
-                Login or Sign up
-              </NavItem>
+              <>
+                <NavItem href={`/login`} eventColor={color}>
+                  Log in
+                </NavItem>
+                <NavItem href={`/signup`} eventColor={color} primary>
+                  Sign up
+                </NavItem>
+              </>
             )}
           </div>
 
@@ -179,7 +221,7 @@ const Header = ({
                     )}
                   </div>
                 )}
-                {currentOrgMember.eventMemberships.map((membership) => {
+                {currentOrgMember.collectionMemberships.map((membership) => {
                   if (
                     currentOrgMember.currentEventMembership &&
                     currentOrgMember.currentEventMembership.id === membership.id
@@ -188,8 +230,8 @@ const Header = ({
                   }
                   return (
                     <Link
-                      href="/[event]"
-                      as={`/${membership.event.slug}`}
+                      href="/[org]/[collection]"
+                      as={`/${currentOrg.slug}/${membership.event.slug}`}
                       key={membership.id}
                     >
                       <a className={css.mobileProfileItem}>
@@ -208,7 +250,7 @@ const Header = ({
                 >
                   Edit profile
                 </button>
-                <a href={"/api/logout"} className={css.mobileProfileItem}>
+                <a href={"/api/auth/logout"} className={css.mobileProfileItem}>
                   Sign out
                 </a>
               </div>
