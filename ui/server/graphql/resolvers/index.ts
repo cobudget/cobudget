@@ -2552,7 +2552,10 @@ const resolvers = {
 
       if (!currentOrg) throw new Error("There needs to be an org");
 
-      if (collection.registrationPolicy === "INVITE_ONLY")
+      if (
+        !currentOrgMember?.isOrgAdmin &&
+        collection.registrationPolicy === "INVITE_ONLY"
+      )
         throw new Error("This collection is invite only");
 
       const collectionMember = await prisma.collectionMember.create({
@@ -2672,7 +2675,7 @@ const resolvers = {
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
-            organizationId: member.organiationId,
+            organizationId: member.organizationId,
             userId: user.id,
           },
         },
@@ -2694,7 +2697,7 @@ const resolvers = {
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
-            organizationId: member.organiationId,
+            organizationId: member.organizationId,
             userId: user.id,
           },
         },
