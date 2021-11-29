@@ -19,8 +19,6 @@ const AddTag = ({ items: eventTags, dream }) => {
   const [, addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
 
-  console.log("in addtag", dream.id);
-
   return (
     <Downshift
       id="tags"
