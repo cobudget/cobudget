@@ -1564,7 +1564,7 @@ const resolvers = {
       });
       let comment = await prisma.comment.findUnique({
         where: { id: commentId },
-        include: { Bucket: { include: { collection: true } } },
+        include: { bucket: { include: { collection: true } } },
       });
       comment = { ...comment, content };
 
@@ -1572,7 +1572,7 @@ const resolvers = {
         where: {
           orgMemberId_collectionId: {
             orgMemberId: currentOrgMember.id,
-            collectionId: comment.Bucket.collection.id,
+            collectionId: comment.bucket.collection.id,
           },
         },
         include: { orgMember: true },
@@ -1586,7 +1586,7 @@ const resolvers = {
           currentOrg,
           currentOrgMember,
           eventMember,
-          dream: comment.Bucket,
+          dream: comment.bucket,
           comment,
         }
       );
@@ -1676,6 +1676,7 @@ const resolvers = {
             content: logContent,
             isLog: true,
             orgMemberId: currentOrgMember.id,
+            bucketId: dreamId,
           },
         });
       }
@@ -1770,6 +1771,7 @@ const resolvers = {
             content: logContent,
             isLog: true,
             orgMemberId: currentOrgMember.id,
+            bucketId: dreamId,
           },
         });
       }
@@ -2604,7 +2606,10 @@ const resolvers = {
 
       if (!currentOrg) throw new Error("There needs to be an org");
 
-      if (collection.registrationPolicy === "INVITE_ONLY")
+      if (
+        !currentOrgMember?.isOrgAdmin &&
+        collection.registrationPolicy === "INVITE_ONLY"
+      )
         throw new Error("This collection is invite only");
 
       const collectionMember = await prisma.collectionMember.create({
@@ -2655,6 +2660,46 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    email: async (member, _, { user }) => {
+      const currentCollMember = await prisma.collectionMember.findFirst({
+        where: {
+          orgMember: { userId: user.id },
+          collectionId: member.collectionId,
+        },
+      });
+
+      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { collectionMemberships: { some: { id: member.id } } },
+          },
+        },
+      });
+      return u.email;
+    },
+    name: async (member, _, { user }) => {
+      const currentCollMember = await prisma.collectionMember.findFirst({
+        where: {
+          orgMember: { userId: user.id },
+          collectionId: member.collectionId,
+        },
+      });
+
+      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { collectionMemberships: { some: { id: member.id } } },
+          },
+        },
+      });
+      return u.name;
+    },
   },
   OrgMember: {
     hasDiscourseApiKey: (orgMember) => !!orgMember.discourseApiKey,
@@ -2680,6 +2725,50 @@ const resolvers = {
       console.log({ collectionMember });
       return collectionMember;
     },
+    email: async (member, _, { user }) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
+        where: {
+          organizationId_userId: {
+            organizationId: member.organizationId,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (!(currentOrgMember?.isOrgAdmin || currentOrgMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { id: member.id },
+          },
+        },
+      });
+      return u.email;
+    },
+    name: async (member, _, { user }) => {
+      const currentOrgMember = await prisma.orgMember.findUnique({
+        where: {
+          organizationId_userId: {
+            organizationId: member.organizationId,
+            userId: user.id,
+          },
+        },
+      });
+
+      if (!(currentOrgMember?.isOrgAdmin || currentOrgMember.id == member.id))
+        return null;
+
+      const u = await prisma.user.findFirst({
+        where: {
+          orgMemberships: {
+            some: { id: member.id },
+          },
+        },
+      });
+      return u.name;
+    },
     organization: async (orgMember) =>
       prisma.organization.findUnique({
         where: { id: orgMember.organizationId },
@@ -2690,6 +2779,14 @@ const resolvers = {
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
+    email: (parent, _, { user }) => {
+      if (parent.id !== user.id) return null;
+      return parent.email;
+    },
+    name: (parent, _, { user }) => {
+      if (parent.id !== user.id) return null;
+      return parent.name;
+    },
   },
   Organization: {
     info: (org) => {

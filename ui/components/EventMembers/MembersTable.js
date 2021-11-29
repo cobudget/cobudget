@@ -93,7 +93,7 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
   );
 };
 
-const Row = ({ member, deleteMember, updateMember, event }) => {
+const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
   const [allocateModalOpen, setAllocateModalOpen] = useState(false);
 
   return (
@@ -102,9 +102,7 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
         <div className="flex space-x-3">
           <Avatar user={member.orgMember.user} />
           <div>
-            <p className="font-medium text-base">
-              {member.orgMember.user.name}
-            </p>
+            <p className="font-medium text-base">{member.name}</p>
             <p className="text-gray-700 text-sm">
               @{member.orgMember.user.username}
             </p>
@@ -112,7 +110,7 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p>{member.orgMember.user.email}</p>
+        <p>{member.email}</p>
         {!member.orgMember.user.verifiedEmail && (
           <p className="text-sm text-gray-500">(not verified)</p>
         )}
@@ -133,12 +131,19 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
         {member.isGuide && <p>Guide</p>}
       </TableCell>
       <TableCell align="right">
-        <button
-          className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
-          onClick={() => setAllocateModalOpen(true)}
-        >
-          {thousandSeparator(member.balance / 100)} {event.currency}
-        </button>
+        {isAdmin ? (
+          <button
+            className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
+            onClick={() => setAllocateModalOpen(true)}
+          >
+            {thousandSeparator(member.balance / 100)} {event.currency}
+          </button>
+        ) : (
+          <span>
+            {thousandSeparator(member.balance / 100)} {event.currency}
+          </span>
+        )}
+
         {allocateModalOpen && (
           <AllocateModal
             open={allocateModalOpen}
@@ -148,14 +153,16 @@ const Row = ({ member, deleteMember, updateMember, event }) => {
           />
         )}
       </TableCell>
-      <TableCell align="right" padding="none">
-        <ActionsDropdown
-          member={member}
-          deleteMember={deleteMember}
-          updateMember={updateMember}
-          eventId={event.id}
-        />
-      </TableCell>
+      {isAdmin && (
+        <TableCell align="right" padding="none">
+          <ActionsDropdown
+            member={member}
+            deleteMember={deleteMember}
+            updateMember={updateMember}
+            eventId={event.id}
+          />
+        </TableCell>
+      )}
     </TableRow>
   );
 };
@@ -165,6 +172,7 @@ const EventMembersTable = ({
   updateMember,
   deleteMember,
   event,
+  isAdmin,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
 
@@ -181,15 +189,19 @@ const EventMembersTable = ({
               <TableCell align="right">
                 <div className="flex items-center justify-end space-x-1">
                   <span className="block">Balance</span>{" "}
-                  <Tooltip
-                    title="Allocate to all members"
-                    position="bottom-center"
-                    size="small"
-                  >
-                    <IconButton onClick={() => setBulkAllocateModalOpen(true)}>
-                      <AddIcon className="h-4 w-4" />
-                    </IconButton>
-                  </Tooltip>
+                  {isAdmin && (
+                    <Tooltip
+                      title="Allocate to all members"
+                      position="bottom-center"
+                      size="small"
+                    >
+                      <IconButton
+                        onClick={() => setBulkAllocateModalOpen(true)}
+                      >
+                        <AddIcon className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </div>
                 {bulkAllocateModalOpen && (
                   <BulkAllocateModal
@@ -198,7 +210,7 @@ const EventMembersTable = ({
                   />
                 )}
               </TableCell>
-              <TableCell align="right">Actions</TableCell>
+              {isAdmin && <TableCell align="right">Actions</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -209,6 +221,7 @@ const EventMembersTable = ({
                 event={event}
                 deleteMember={deleteMember}
                 updateMember={updateMember}
+                isAdmin={isAdmin}
               />
             ))}
           </TableBody>

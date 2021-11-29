@@ -26,6 +26,7 @@ export const ORG_MEMBERS_QUERY = gql`
         id
         isOrgAdmin
         bio
+        email
         user {
           id
           name
@@ -152,11 +153,11 @@ const Page = ({
             {member.user.username}
           </TableCell>
           <TableCell component="th" scope="row">
-            {member.user.name}
+            {member.name}
           </TableCell>
           <TableCell>
             <Box display="flex" alignItems="center">
-              <Box m="0 8px 0">{member.user.email}</Box>
+              <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
                 <Tooltip title="Email not verified" placement="right">
                   <HelpOutlineOutlinedIcon fontSize="small" />
