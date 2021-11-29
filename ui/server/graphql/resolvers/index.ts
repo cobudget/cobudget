@@ -1090,20 +1090,14 @@ const resolvers = {
 
       return updated;
     },
-    createTag: async (parent, { eventId, tagValue }) => {
-      //const eventMember = await EventMember.findOne({
-      //  orgMemberId: currentOrgMember.id,
-      //  eventId,
-      //});
-
+    createTag: async (parent, { eventId, tagValue }, { user }) => {
       const {
         currentOrgMember,
         collectionMember,
       } = await getCurrentOrgAndMember({
         collectionId: eventId,
+        user,
       });
-
-      console.log("createtag members", currentOrgMember, collectionMember);
 
       if (
         !collectionMember?.isAdmin &&
@@ -1111,18 +1105,6 @@ const resolvers = {
         !currentOrgMember?.isOrgAdmin
       )
         throw new Error("You are not an admin or guide of this collection.");
-
-      //return await prisma.bucket.update({
-      //  where: { id: dreamId },
-      //  data: {
-      //    tags: {
-      //      create: {
-      //        value: tagValue,
-      //        collectionId: bucket.collectionId,
-      //      },
-      //    },
-      //  },
-      //});
 
       return await prisma.collection.update({
         where: { id: eventId },
@@ -1134,30 +1116,6 @@ const resolvers = {
           },
         },
       });
-      //await prisma.tag.create({
-      //  data: {
-      //    value: tagValue,
-      //    collectionId: eventId,
-      //  },
-      //});
-      //await new Tag({
-      //  value: tagValue,
-      //  eventId,
-      //  organizationId: currentOrg.id,
-      //}).save();
-      //const bucket = await prisma.bucket.create({
-      //  data: {
-      //    collection: { connect: { id: eventId } },
-      //    title,
-      //    cocreators: { connect: { id: collectionMember.id } },
-      //  },
-      //});
-
-      //return await prisma.collection.
-
-      //return await Event.findOne({
-      //  _id: eventId,
-      //});
     },
     addTag: async (parent, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({
