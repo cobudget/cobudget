@@ -27,6 +27,7 @@ export const ORG_MEMBERS_QUERY = gql`
         isOrgAdmin
         bio
         email
+        name
         user {
           id
           name

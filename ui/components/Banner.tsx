@@ -12,7 +12,7 @@ const Banner = ({
   title = "",
   disabled,
   ...props
-}) => {
+}: any) => {
   return (
     <div
       {...props}

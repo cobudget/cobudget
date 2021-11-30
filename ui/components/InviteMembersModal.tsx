@@ -13,6 +13,8 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
       id
       isOrgAdmin
       bio
+      name
+      email
       user {
         id
         name
@@ -33,6 +35,8 @@ const INVITE_EVENT_MEMBERS_MUTATION = gql`
       isGuide
       isApproved
       createdAt
+      name
+      email
       orgMember {
         bio
         user {
@@ -48,7 +52,15 @@ const INVITE_EVENT_MEMBERS_MUTATION = gql`
   }
 `;
 
-const InviteMembersModal = ({ handleClose, eventId, currentOrg }) => {
+const InviteMembersModal = ({
+  handleClose,
+  eventId,
+  currentOrg,
+}: {
+  handleClose: () => void;
+  eventId?: string;
+  currentOrg?: any;
+}) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     eventId ? INVITE_EVENT_MEMBERS_MUTATION : INVITE_ORG_MEMBERS_MUTATION

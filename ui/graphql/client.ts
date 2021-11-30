@@ -105,6 +105,41 @@ export const client = (
                 );
               }
             },
+            // deleteMember(result:any, args, cache) {
+            //   const {deleteMember} = result
+            //   const {
+            //       approvedMembersPage: { approvedMembers },
+            //       requestsToJoinPage: { requestsToJoin },
+            //     } = cache.readQuery({
+            //       query: EVENT_MEMBERS_QUERY,
+            //       variables: { eventId: event.id },
+            //     });
+
+            //     cache.writeQuery({
+            //       query: EVENT_MEMBERS_QUERY,
+            //       variables: { eventId: event.id },
+            //       data: {
+            //         approvedMembersPage: {
+            //           approvedMembers: approvedMembers.filter(
+            //             (member) => member.id !== deleteMember.id
+            //           ),
+            //         },
+            //       },
+            //     });
+
+            //     cache.writeQuery({
+            //       query: EVENT_MEMBERS_QUERY,
+            //       variables: { eventId: event.id },
+            //       data: {
+            //         requestsToJoinPage: {
+            //           requestsToJoin: requestsToJoin.filter(
+            //             (member) => member.id !== deleteMember.id
+            //           ),
+            //         },
+            //       },
+            //     });
+
+            // },
             deleteCollection(result: any, { collectionId }, cache) {
               const fields = cache
                 .inspectFields("Query")

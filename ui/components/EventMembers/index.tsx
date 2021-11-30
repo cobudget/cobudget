@@ -103,7 +103,10 @@ const EventMembers = ({ event, currentOrgMember }) => {
   const [
     {
       data: {
-        approvedMembersPage: { moreExist, approvedMembers },
+        approvedMembersPage: { moreExist, approvedMembers } = {
+          moreExist: false,
+          approvedMembers: [],
+        },
         requestsToJoinPage: { requestsToJoin },
       } = {
         approvedMembersPage: {
@@ -115,52 +118,15 @@ const EventMembers = ({ event, currentOrgMember }) => {
       },
       fetching: loading,
       error,
-      fetchMore,
     },
   ] = useQuery({
     query: EVENT_MEMBERS_QUERY,
-    //notifyOnNetworkStatusChange: true,
     variables: { eventId: event.id, offset: 0, limit: 1000 },
   });
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
-  const [, deleteMember] = useMutation(DELETE_MEMBER, {
-    variables: { eventId: event.id },
-    update(cache, { data: { deleteMember } }) {
-      const {
-        approvedMembersPage: { approvedMembers },
-        requestsToJoinPage: { requestsToJoin },
-      } = cache.readQuery({
-        query: EVENT_MEMBERS_QUERY,
-        variables: { eventId: event.id },
-      });
-
-      cache.writeQuery({
-        query: EVENT_MEMBERS_QUERY,
-        variables: { eventId: event.id },
-        data: {
-          approvedMembersPage: {
-            approvedMembers: approvedMembers.filter(
-              (member) => member.id !== deleteMember.id
-            ),
-          },
-        },
-      });
-
-      cache.writeQuery({
-        query: EVENT_MEMBERS_QUERY,
-        variables: { eventId: event.id },
-        data: {
-          requestsToJoinPage: {
-            requestsToJoin: requestsToJoin.filter(
-              (member) => member.id !== deleteMember.id
-            ),
-          },
-        },
-      });
-    },
-  });
+  const [, deleteMember] = useMutation(DELETE_MEMBER);
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
@@ -180,6 +146,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
           requestsToJoin={requestsToJoin}
           updateMember={updateMember}
           deleteMember={deleteMember}
+          event={event}
         />
 
         <div className="flex justify-between mb-3 items-center">
@@ -210,8 +177,9 @@ const EventMembers = ({ event, currentOrgMember }) => {
         <LoadMore
           moreExist={moreExist}
           loading={loading}
-          onClick={() =>
-            fetchMore({ variables: { offset: approvedMembers.length } })
+          onClick={
+            () => {}
+            //fetchMore({ variables: { offset: approvedMembers.length } })
           }
         />
       </div>

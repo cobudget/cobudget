@@ -9,7 +9,12 @@ import {
   TableRow,
 } from "@material-ui/core";
 
-const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
+const RequestToJoinTable = ({
+  requestsToJoin,
+  updateMember,
+  deleteMember,
+  event,
+}) => {
   if (requestsToJoin.length === 0) return null;
 
   return (
@@ -37,9 +42,9 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                       {member.orgMember.user.username}
                     </TableCell>
                     <TableCell component="th" scope="row">
-                      {member.orgMember.user.name}
+                      {member.name}
                     </TableCell>
-                    <TableCell>{member.orgMember.user.email}</TableCell>
+                    <TableCell>{member.email}</TableCell>
                     <TableCell component="th" scope="row">
                       {member.orgMember.bio}
                     </TableCell>
@@ -56,7 +61,7 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                                 )
                               )
                                 deleteMember({
-                                  variables: { memberId: member.id },
+                                  memberId: member.id,
                                 });
                             }}
                           >
@@ -73,11 +78,9 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                               confirm("Are you sure you would like to approve?")
                             )
                               updateMember({
-                                variables: {
-                                  eventId: event.id,
-                                  memberId: member.id,
-                                  isApproved: true,
-                                },
+                                eventId: event.id,
+                                memberId: member.id,
+                                isApproved: true,
                               });
                           }}
                         >

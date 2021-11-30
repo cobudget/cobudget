@@ -2041,9 +2041,9 @@ const resolvers = {
       const member = await prisma.collectionMember.update({
         where: { id: memberId },
         data: {
-          ...(typeof isApproved !== "undefined" && { isApproved }),
-          ...(typeof isAdmin !== "undefined" && { isAdmin }),
-          ...(typeof isGuide !== "undefined" && { isGuide }),
+          isAdmin,
+          isApproved,
+          isGuide,
         },
       });
 

@@ -18,7 +18,7 @@ const TextField = ({
   startAdornment,
   endAdornment,
   color = "blue",
-}) => {
+}: any) => {
   const LabelComponent = labelComponent;
   return (
     <div className={`flex flex-col ${className}`}>
