@@ -9,8 +9,6 @@
     "build": "next build",
     "start": "next start",
     "start:ci": "INSECURE_AUTH=true yarn run start",
-    "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook",
     "test:run": "NODE_ENV=test next dev -p 3001",
     "generate": "yarn run generate:prisma",
     "generate:prisma": "prisma generate",

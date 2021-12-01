@@ -15,8 +15,10 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-export default ({ currentOrg, dream, event, canEdit }) => {
+const Tags = ({ currentOrg, dream, event, canEdit }) => {
   const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
+
+  if (!event.tags?.length) return null;
 
   return (
     <div className="">
@@ -46,3 +48,5 @@ export default ({ currentOrg, dream, event, canEdit }) => {
     </div>
   );
 };
+
+export default Tags;

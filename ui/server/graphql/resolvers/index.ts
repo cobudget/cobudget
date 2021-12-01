@@ -1090,7 +1090,34 @@ const resolvers = {
 
       return updated;
     },
-    addTag: async (parent, { dreamId, tagId, tagValue }, { user }) => {
+    createTag: async (parent, { eventId, tagValue }, { user }) => {
+      const {
+        currentOrgMember,
+        collectionMember,
+      } = await getCurrentOrgAndMember({
+        collectionId: eventId,
+        user,
+      });
+
+      if (
+        !collectionMember?.isAdmin &&
+        !collectionMember?.isGuide &&
+        !currentOrgMember?.isOrgAdmin
+      )
+        throw new Error("You are not an admin or guide of this collection.");
+
+      return await prisma.collection.update({
+        where: { id: eventId },
+        data: {
+          tags: {
+            create: {
+              value: tagValue,
+            },
+          },
+        },
+      });
+    },
+    addTag: async (parent, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({
         bucketId: dreamId,
         user,
@@ -1118,33 +1145,18 @@ const resolvers = {
       )
         throw new Error("You are not a cocreator of this bucket.");
 
-      if (!tagId && !tagValue)
-        throw new Error("You need to provide tag id or value");
+      if (!tagId) throw new Error("You need to provide tag id");
 
-      if (tagId) {
-        return await prisma.bucket.update({
-          where: { id: dreamId },
-          data: {
-            tags: {
-              connect: {
-                id: tagId,
-              },
+      return await prisma.bucket.update({
+        where: { id: dreamId },
+        data: {
+          tags: {
+            connect: {
+              id: tagId,
             },
           },
-        });
-      } else {
-        return await prisma.bucket.update({
-          where: { id: dreamId },
-          data: {
-            tags: {
-              create: {
-                value: tagValue,
-                collectionId: bucket.collectionId,
-              },
-            },
-          },
-        });
-      }
+        },
+      });
     },
     removeTag: async (_, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({

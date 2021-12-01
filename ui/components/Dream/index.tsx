@@ -93,7 +93,6 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               currentOrg={currentOrg}
               dream={dream}
               event={event}
-              logs={dream.logs}
             />
           </div>
           <div className="order-first md:order-last">
