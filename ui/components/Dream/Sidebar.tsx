@@ -113,7 +113,8 @@ const DreamSidebar = ({
     !dream.funded &&
     !dream.canceled &&
     hasNotReachedMaxGoal &&
-    event.grantingIsOpen;
+    event.grantingIsOpen &&
+    currentOrgMember?.currentEventMembership;
   const showAcceptFundingButton =
     dream.approved &&
     !dream.funded &&

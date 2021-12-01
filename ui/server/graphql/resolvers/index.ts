@@ -2668,7 +2668,7 @@ const resolvers = {
           collection: { slug: collectionSlug },
         },
       });
-      console.log({ collectionMember });
+
       return collectionMember;
     },
     email: async (member, _, { user }) => {
