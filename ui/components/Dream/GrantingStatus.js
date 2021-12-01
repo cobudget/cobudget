@@ -7,7 +7,7 @@ const GrantingStatus = ({ dream, event }) => {
   const funding = dream.totalContributions + dream.income;
   const ratio = isNaN(funding / dream.minGoal) ? 0 : funding / dream.minGoal;
   const userName = (nameOrEmail) =>
-    nameOrEmail.match(/@/) === null ? nameOrEmail : "Somebody";
+    (nameOrEmail ?? "Somebody").match(/@/) === null ? nameOrEmail : "Somebody";
 
   return (
     <div className="space-y-0">
