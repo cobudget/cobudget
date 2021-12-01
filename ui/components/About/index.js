@@ -2,9 +2,8 @@ import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
-
-import thousandSeparator from "utils/thousandSeparator";
 import Markdown from "components/Markdown";
+import thousandSeparator from "utils/thousandSeparator";
 
 export const EVENT_QUERY = gql`
   query EventQuery($orgSlug: String!, $collectionSlug: String!) {

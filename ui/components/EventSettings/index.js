@@ -3,6 +3,7 @@ import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
+import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
@@ -15,6 +16,7 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
     { name: "Bucket Review", component: BucketReview },
     { name: "Questions", component: CustomFields },
     { name: "Granting", component: Granting },
+    { name: "Tags", component: Tags },
   ];
 
   const tabs = useMemo(
