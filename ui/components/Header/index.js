@@ -123,9 +123,7 @@ const Header = ({
         <nav
           className={` ${
             isMenuOpen ? "block" : "hidden"
-          } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${
-            event?.color ? event.color : "gray-100"
-          } sm:bg-transparent`}
+          } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${color} sm:bg-transparent`}
         >
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
