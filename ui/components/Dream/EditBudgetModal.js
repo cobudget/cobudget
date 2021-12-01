@@ -83,7 +83,7 @@ const EditBudgetModal = ({
             editDream({
               dreamId,
               budgetItems: [
-                ...(variables.budgetItems.map((item) => ({
+                ...(variables.budgetItems?.map((item) => ({
                   ...item,
                   min: Math.round(item.min * 100),
                   ...(item.max && { max: Math.round(item.max * 100) }),
