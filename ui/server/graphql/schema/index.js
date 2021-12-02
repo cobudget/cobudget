@@ -123,6 +123,7 @@ const schema = gql`
 
     createTag(eventId: ID!, tagValue: String!): Collection
     addTag(dreamId: ID!, tagId: ID!): Dream
+    deleteTag(collectionId: ID!, tagId: ID!): Collection
     removeTag(dreamId: ID!, tagId: ID!): Dream
 
     publishDream(dreamId: ID!, unpublish: Boolean): Dream

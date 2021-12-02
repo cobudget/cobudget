@@ -1158,6 +1158,45 @@ const resolvers = {
         },
       });
     },
+    // removes a tag from all buckets it's added to, and then deletes it
+    deleteTag: async (_, { collectionId, tagId }, { user }) => {
+      const {
+        currentOrgMember,
+        collectionMember,
+      } = await getCurrentOrgAndMember({
+        collectionId,
+        user,
+      });
+
+      if (
+        !collectionMember?.isAdmin &&
+        !collectionMember?.isGuide &&
+        !currentOrgMember?.isOrgAdmin
+      )
+        throw new Error("You are not an admin or guide of this collection.");
+
+      await prisma.tag.delete({
+        where: { id: tagId, collectionId_value: collectionId },
+      });
+
+      //return await prisma.collectionMember.deleteMany({
+      //  where: { id: memberId, collectionId: eventId },
+      //});
+
+      //return prisma.organization.delete({ where: { id: organizationId } });
+
+      //const collection = await prisma.collection.update({
+      //  where: { id: collectionId },
+      //  data: { deleted: true },
+      //});
+      //return collection;
+
+      return await prisma.collection.findUnique({
+        where: { id: collectionId },
+        include: { tags: true },
+      });
+    },
+    // removes a tag from a specific bucket
     removeTag: async (_, { dreamId, tagId }, { user }) => {
       const { currentOrgMember } = await getCurrentOrgAndMember({
         bucketId: dreamId,
