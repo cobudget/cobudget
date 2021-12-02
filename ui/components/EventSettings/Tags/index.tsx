@@ -16,6 +16,18 @@ const CREATE_TAG = gql`
   }
 `;
 
+const DELETE_TAG = gql`
+  mutation deleteTag($collectionId: ID!, $tagId: ID!) {
+    deleteTag(collectionId: $collectionId, tagId: $tagId) {
+      id
+      tags {
+        id
+        value
+      }
+    }
+  }
+`;
+
 const Tags = ({ event, currentOrg }) => {
   const {
     handleSubmit,
@@ -24,6 +36,7 @@ const Tags = ({ event, currentOrg }) => {
     formState: { isDirty },
   } = useForm();
   const [{ fetching }, createTag] = useMutation(CREATE_TAG);
+  const [{ fetching: fetchingDelete }, deleteTag] = useMutation(DELETE_TAG);
 
   return (
     <div className="mx-6">
@@ -38,6 +51,17 @@ const Tags = ({ event, currentOrg }) => {
             <Link href={`/${currentOrg.slug}/${event.slug}?tag=${tag.value}`}>
               <a className="text-gray-500 hover:text-black">{tag.value}</a>
             </Link>
+            <button
+              disabled={fetchingDelete}
+              onClick={() =>
+                confirm(
+                  "Are you sure you want to permanently delete this tag?"
+                ) && deleteTag({ collectionId: event.id, tagId: tag.id })
+              }
+              className="ml-2 px-2 rounded-md bg-gray-400 hover:bg-gray-700 hover:text-gray-100"
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>

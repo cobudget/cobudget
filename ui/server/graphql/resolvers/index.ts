@@ -1175,21 +1175,18 @@ const resolvers = {
       )
         throw new Error("You are not an admin or guide of this collection.");
 
-      await prisma.tag.delete({
-        where: { id: tagId, collectionId_value: collectionId },
+      // verify that the tag is part of this collection
+      const tag = await prisma.tag.findUnique({
+        where: {
+          id: tagId,
+        },
       });
+      if (tag?.collectionId !== collectionId)
+        throw new Error("Incorrect collection");
 
-      //return await prisma.collectionMember.deleteMany({
-      //  where: { id: memberId, collectionId: eventId },
-      //});
-
-      //return prisma.organization.delete({ where: { id: organizationId } });
-
-      //const collection = await prisma.collection.update({
-      //  where: { id: collectionId },
-      //  data: { deleted: true },
-      //});
-      //return collection;
+      await prisma.tag.delete({
+        where: { id: tagId },
+      });
 
       return await prisma.collection.findUnique({
         where: { id: collectionId },
