@@ -100,11 +100,10 @@ const DreamCustomField = ({
                 defaultValue={defaultValue}
                 inputRef={register}
                 fullWidth
-                autoFocus
               >
                 <option value={""}></option>
-                <option value={true}>Yes</option>
-                <option value={false}>No</option>
+                <option value={"true"}>Yes</option>
+                <option value={"false"}>No</option>
               </SelectInput>
             ) : null}
           </div>

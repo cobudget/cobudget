@@ -31,31 +31,35 @@ const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
   });
 
   if (!data) {
-    return <></>;
+    return null;
   }
 
   // TODO: can use the custom fields already fetched in the event query in _app
   const { customFields: defaultCustomFields } = data.event;
 
-  return [...defaultCustomFields]
-    .sort((a, b) => a.position - b.position)
-    .map((defaultCustomField) => {
-      const customField = customFields.filter(
-        (field) => field.customField?.id == defaultCustomField.id
-      );
-      return (
-        <DreamCustomField
-          key={defaultCustomField.id}
-          defaultCustomField={defaultCustomField}
-          customField={
-            customField && customField.length > 0 ? customField[0] : null
-          }
-          eventId={eventId}
-          dreamId={dreamId}
-          canEdit={canEdit}
-        />
-      );
-    });
+  return (
+    <div>
+      {[...defaultCustomFields]
+        .sort((a, b) => a.position - b.position)
+        .map((defaultCustomField) => {
+          const customField = customFields.filter(
+            (field) => field.customField?.id == defaultCustomField.id
+          );
+          return (
+            <DreamCustomField
+              key={defaultCustomField.id}
+              defaultCustomField={defaultCustomField}
+              customField={
+                customField && customField.length > 0 ? customField[0] : null
+              }
+              eventId={eventId}
+              dreamId={dreamId}
+              canEdit={canEdit}
+            />
+          );
+        })}
+    </div>
+  );
 };
 
 export default DreamCustomFields;

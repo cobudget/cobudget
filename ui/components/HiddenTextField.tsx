@@ -4,7 +4,7 @@ const HiddenTextField = ({
   name,
   placeholder,
   defaultValue,
-}) => {
+}: any) => {
   return (
     <input
       className={`invisible`}
