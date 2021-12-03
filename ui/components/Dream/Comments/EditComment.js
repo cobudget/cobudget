@@ -14,7 +14,7 @@ const EditComment = ({ comment, handleDone }) => {
       onSubmit={handleSubmit(({ content }) => {
         setSubmitting(true);
         editComment({
-          dreamId: dream.id,
+          bucketId: dream.id,
           commentId: comment.id,
           content,
         })

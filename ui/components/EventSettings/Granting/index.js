@@ -40,7 +40,7 @@ const modals = {
 
 export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
-    $eventId: ID!
+    $collectionId: ID!
     $currency: String
     $maxAmountToBucketPerUser: Int
     $grantingOpens: Date
@@ -49,7 +49,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $allowStretchGoals: Boolean
   ) {
     updateGrantingSettings(
-      eventId: $eventId
+      collectionId: $collectionId
       currency: $currency
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
       grantingOpens: $grantingOpens

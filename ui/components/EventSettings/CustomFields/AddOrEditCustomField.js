@@ -11,8 +11,8 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
-  mutation AddCustomField($eventId: ID!, $customField: CustomFieldInput!) {
-    addCustomField(eventId: $eventId, customField: $customField) {
+  mutation AddCustomField($collectionId: ID!, $customField: CustomFieldInput!) {
+    addCustomField(collectionId: $collectionId, customField: $customField) {
       id
       customFields {
         id
@@ -30,12 +30,12 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
 
 const EDIT_CUSTOM_FIELD_MUTATION = gql`
   mutation EditCustomField(
-    $eventId: ID!
+    $collectionId: ID!
     $fieldId: ID!
     $customField: CustomFieldInput!
   ) {
     editCustomField(
-      eventId: $eventId
+      collectionId: $collectionId
       fieldId: $fieldId
       customField: $customField
     ) {
@@ -111,7 +111,7 @@ export default ({
             variables.customField.isRequired = isRequired;
             return addOrEditCustomField({
               ...variables,
-              eventId: event.id,
+              collectionId: event.id,
               ...(editing && { fieldId: customField.id }),
             })
               .then(() => handleClose())

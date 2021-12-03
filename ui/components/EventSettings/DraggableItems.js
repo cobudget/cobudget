@@ -89,7 +89,7 @@ const DraggableItems = ({
               index={index}
               item={item}
               setEditingItem={setEditingItem}
-              eventId={event.id}
+              collectionId={event.id}
               currentOrg={currentOrg}
             />
           ))}

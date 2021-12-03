@@ -29,6 +29,7 @@ export default {
       async ({
         currentOrg,
         currentOrgMember,
+        currentCollMember,
         event,
         dream,
         comment: { content },
@@ -46,7 +47,7 @@ export default {
           data: {
             bucketId: dream.id,
             content,
-            orgMemberId: currentOrgMember.id,
+            collMemberId: currentCollMember.id,
           },
         });
 
@@ -89,13 +90,13 @@ export default {
     eventHub.subscribe(
       "delete-comment",
       "prisma",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      async ({ currentOrg, currentCollMember, event, dream, comment }) => {
         if (!currentOrgMember || orgHasDiscourse(currentOrg)) {
           return;
         }
         if (!comment) return;
 
-        if (comment.orgMemberId !== currentOrgMember.id) return;
+        if (comment.collMemberId !== currentCollMember.id) return;
         const deleted = await prisma.comment.delete({
           where: { id: comment.id },
         });

@@ -9,8 +9,12 @@ import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 
 const BULK_ALLOCATE_MUTATION = gql`
-  mutation BulkAllocate($eventId: ID!, $amount: Int!, $type: AllocationType!) {
-    bulkAllocate(eventId: $eventId, amount: $amount, type: $type) {
+  mutation BulkAllocate(
+    $collectionId: ID!
+    $amount: Int!
+    $type: AllocationType!
+  ) {
+    bulkAllocate(collectionId: $collectionId, amount: $amount, type: $type) {
       id
       balance
     }
@@ -48,7 +52,7 @@ const BulkAllocateModal = ({ event, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             bulkAllocate({
-              eventId: event.id,
+              collectionId: event.id,
               amount,
               type: type.toUpperCase(),
             }).then(({ error }) => {

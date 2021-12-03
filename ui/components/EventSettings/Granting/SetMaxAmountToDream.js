@@ -17,7 +17,7 @@ const SetMaxAmountToDream = ({ closeModal, event, currentOrg }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              eventId: event.id,
+              collectionId: event.id,
               maxAmountToBucketPerUser: Math.round(
                 variables.maxAmountToBucketPerUser * 100
               ),

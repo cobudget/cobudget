@@ -9,8 +9,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const CREATE_DREAM = gql`
-  mutation CreateDream($eventId: ID!, $title: String!) {
-    createDream(eventId: $eventId, title: $title) {
+  mutation CreateDream($collectionId: ID!, $title: String!) {
+    createDream(collectionId: $collectionId, title: $title) {
       id
       title
     }
@@ -26,7 +26,7 @@ export default ({ event, handleClose, currentOrg }) => {
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmitCreate = (variables) => {
-    createDream({ ...variables, eventId: event.id })
+    createDream({ ...variables, collectionId: event.id })
       .then(({ data }) => {
         Router.push(
           "/[org]/[collection]/[bucket]",

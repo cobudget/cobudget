@@ -31,8 +31,8 @@ const PROFILE_QUERY = gql`
 `;
 
 const DELETE_GRANT_MUTATION = gql`
-  mutation DeleteGrant($eventId: ID!, $grantId: ID!) {
-    deleteGrant(eventId: $eventId, grantId: $grantId) {
+  mutation DeleteGrant($collectionId: ID!, $grantId: ID!) {
+    deleteGrant(collectionId: $collectionId, grantId: $grantId) {
       id
       value
       dream {
@@ -122,7 +122,7 @@ export default () => {
                           deleteGrant({
                             variables: {
                               grantId: grant.id,
-                              eventId: membership.event.id,
+                              collectionId: membership.event.id,
                             },
                           })
                         }

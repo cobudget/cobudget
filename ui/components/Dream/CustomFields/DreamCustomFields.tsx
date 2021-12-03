@@ -5,7 +5,7 @@ import DreamCustomField from "./DreamCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
   query CustomFields($orgSlug: String!, $collectionSlug: String!) {
-    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       customFields {
         id
@@ -20,7 +20,12 @@ const CUSTOM_FIELDS_QUERY = gql`
   }
 `;
 
-const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
+const DreamCustomFields = ({
+  customFields,
+  canEdit,
+  collectionId,
+  bucketId,
+}) => {
   const router = useRouter();
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,
@@ -52,8 +57,8 @@ const DreamCustomFields = ({ customFields, canEdit, eventId, dreamId }) => {
               customField={
                 customField && customField.length > 0 ? customField[0] : null
               }
-              eventId={eventId}
-              dreamId={dreamId}
+              collectionId={collectionId}
+              bucketId={bucketId}
               canEdit={canEdit}
             />
           );

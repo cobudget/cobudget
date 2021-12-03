@@ -5,8 +5,12 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 
 const CONTRIBUTE_MUTATION = gql`
-  mutation Contribute($eventId: ID!, $dreamId: ID!, $amount: Int!) {
-    contribute(eventId: $eventId, dreamId: $dreamId, amount: $amount) {
+  mutation Contribute($collectionId: ID!, $bucketId: ID!, $amount: Int!) {
+    contribute(
+      collectionId: $collectionId
+      bucketId: $bucketId
+      amount: $amount
+    ) {
       id
       totalContributions
       totalContributionsFromCurrentMember
@@ -95,7 +99,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            contribute({ eventId: event.id, dreamId: dream.id, amount })
+            contribute({ collectionId: event.id, bucketId: dream.id, amount })
               .then(() => handleClose())
               .catch((err) => alert(err.message));
           }}

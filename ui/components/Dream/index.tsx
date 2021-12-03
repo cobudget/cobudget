@@ -16,7 +16,7 @@ import Sidebar from "./Sidebar";
 const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
   const canEdit =
     currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isGuide ||
+    currentOrgMember?.currentEventMembership?.isModerator ||
     isMemberOfDream(currentOrgMember, dream);
   const showBucketReview =
     currentOrgMember?.currentEventMembership &&
@@ -45,9 +45,9 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
       <div className="p-4 lg:p-6">
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
-            <Title title={dream.title} dreamId={dream.id} canEdit={canEdit} />
+            <Title title={dream.title} bucketId={dream.id} canEdit={canEdit} />
             <Summary
-              dreamId={dream.id}
+              bucketId={dream.id}
               summary={dream.summary}
               canEdit={canEdit}
             />
@@ -56,7 +56,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               images={dream.images}
               size={100}
               canEdit={canEdit}
-              dreamId={dream.id}
+              bucketId={dream.id}
             />
 
             {dream.description && (
@@ -64,20 +64,20 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
                 // We no longer use this field for new dreams.
                 // Eventually we will migrate all current descriptions to custom fields.
                 description={dream.description}
-                dreamId={dream.id}
+                bucketId={dream.id}
                 canEdit={canEdit}
               />
             )}
 
             <DreamCustomFields
-              eventId={event.id}
-              dreamId={dream.id}
+              collectionId={event.id}
+              bucketId={dream.id}
               customFields={dream.customFields}
               canEdit={canEdit}
             />
 
             <Budget
-              dreamId={dream.id}
+              bucketId={dream.id}
               budgetItems={dream.budgetItems}
               canEdit={canEdit}
               currency={event.currency}

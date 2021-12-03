@@ -24,7 +24,7 @@ const SetCurrency = ({ closeModal, event }) => {
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({ ...variables, eventId: event.id })
+            updateGranting({ ...variables, collectionId: event.id })
               .then(() => {
                 closeModal();
               })

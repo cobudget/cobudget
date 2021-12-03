@@ -65,8 +65,12 @@ const InputAction = ({ item, setChatItems, chatItems, color }) => {
 };
 
 const RAISE_FLAG_MUTATION = gql`
-  mutation RaiseFlag($dreamId: ID!, $guidelineId: ID!, $comment: String!) {
-    raiseFlag(dreamId: $dreamId, guidelineId: $guidelineId, comment: $comment) {
+  mutation RaiseFlag($bucketId: ID!, $guidelineId: ID!, $comment: String!) {
+    raiseFlag(
+      bucketId: $bucketId
+      guidelineId: $guidelineId
+      comment: $comment
+    ) {
       id
       raisedFlags {
         id
@@ -81,8 +85,8 @@ const RAISE_FLAG_MUTATION = gql`
 `;
 
 const RESOLVE_FLAG_MUTATION = gql`
-  mutation ResolveFlag($dreamId: ID!, $flagId: ID!, $comment: String!) {
-    resolveFlag(dreamId: $dreamId, flagId: $flagId, comment: $comment) {
+  mutation ResolveFlag($bucketId: ID!, $flagId: ID!, $comment: String!) {
+    resolveFlag(bucketId: $bucketId, flagId: $flagId, comment: $comment) {
       id
       raisedFlags {
         id
@@ -97,14 +101,14 @@ const RESOLVE_FLAG_MUTATION = gql`
 `;
 
 const ALL_GOOD_FLAG_MUTATION = gql`
-  mutation AllGoodFlag($dreamId: ID!) {
-    allGoodFlag(dreamId: $dreamId) {
+  mutation AllGoodFlag($bucketId: ID!) {
+    allGoodFlag(bucketId: $bucketId) {
       id
     }
   }
 `;
 
-const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, bucketId }) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -116,7 +120,7 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
           message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the bucket creators.`,
           sideEffect: (answer) => {
             raiseFlag({
-              dreamId,
+              bucketId,
               guidelineId: guideline.id,
               comment: answer,
             }).then((data) => console.log({ data }));
@@ -133,14 +137,14 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, dreamId }) => [
   },
 ];
 
-const resolveFlagFlow = ({ flagId, resolveFlag, dreamId }) => [
+const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   {
     type: INPUT,
     message:
       "You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
     sideEffect: (answer) => {
       resolveFlag({
-        dreamId,
+        bucketId,
         flagId,
         comment: answer,
       }).then((data) => console.log({ data }));
@@ -207,7 +211,7 @@ const Monster = ({ event, dream, currentOrg }) => {
               ),
               raiseFlag,
               currentOrg,
-              dreamId: dream.id,
+              bucketId: dream.id,
             }),
           },
           raisedFlags.length > 1
@@ -222,7 +226,7 @@ const Monster = ({ event, dream, currentOrg }) => {
                       chatItems: resolveFlagFlow({
                         flagId: raisedFlag.id,
                         resolveFlag,
-                        dreamId: dream.id,
+                        bucketId: dream.id,
                       }),
                     })),
                   },
@@ -233,7 +237,7 @@ const Monster = ({ event, dream, currentOrg }) => {
                 chatItems: resolveFlagFlow({
                   flagId: raisedFlags[0].id,
                   resolveFlag,
-                  dreamId: dream.id,
+                  bucketId: dream.id,
                 }),
               },
         ],
@@ -260,7 +264,7 @@ const Monster = ({ event, dream, currentOrg }) => {
             {
               label: "Yes, looks good to me!",
               sideEffect: () =>
-                allGoodFlag({ dreamId: dream.id }).then((data) =>
+                allGoodFlag({ bucketId: dream.id }).then((data) =>
                   console.log({ data })
                 ),
               chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
@@ -270,7 +274,7 @@ const Monster = ({ event, dream, currentOrg }) => {
               chatItems: raiseFlagFlow({
                 guidelines: event.guidelines,
                 raiseFlag,
-                dreamId: dream.id,
+                bucketId: dream.id,
               }),
             },
           ],

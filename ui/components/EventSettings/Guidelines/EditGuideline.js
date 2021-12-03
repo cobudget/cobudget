@@ -8,8 +8,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const ADD_GUIDELINE_MUTATION = gql`
-  mutation AddGuideline($eventId: ID!, $guideline: GuidelineInput!) {
-    addGuideline(eventId: $eventId, guideline: $guideline) {
+  mutation AddGuideline($collectionId: ID!, $guideline: GuidelineInput!) {
+    addGuideline(collectionId: $collectionId, guideline: $guideline) {
       id
       guidelines {
         id
@@ -23,12 +23,12 @@ const ADD_GUIDELINE_MUTATION = gql`
 
 const EDIT_GUIDELINE_MUTATION = gql`
   mutation EditGuideline(
-    $eventId: ID!
+    $collectionId: ID!
     $guidelineId: ID!
     $guideline: GuidelineInput!
   ) {
     editGuideline(
-      eventId: $eventId
+      collectionId: $collectionId
       guidelineId: $guidelineId
       guideline: $guideline
     ) {
@@ -81,7 +81,7 @@ export default ({
           onSubmit={handleSubmit((variables) =>
             addOrEditGuideline({
               ...variables,
-              eventId: event.id,
+              collectionId: event.id,
               ...(editing && { guidelineId: guideline.id }),
             })
               .then(() => handleClose())

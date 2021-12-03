@@ -21,7 +21,10 @@ const SetGrantingCloses = ({ closeModal, event }) => {
 
         <form
           onSubmit={handleSubmit(() => {
-            updateGranting({ grantingCloses: selectedDate, eventId: event.id })
+            updateGranting({
+              grantingCloses: selectedDate,
+              collectionId: event.id,
+            })
               .then(() => {
                 closeModal();
               })
@@ -63,7 +66,10 @@ const SetGrantingCloses = ({ closeModal, event }) => {
                 color="secondary"
                 className="ml-2"
                 onClick={() => {
-                  updateGranting({ eventId: event.id, grantingCloses: null })
+                  updateGranting({
+                    collectionId: event.id,
+                    grantingCloses: null,
+                  })
                     .then(() => {
                       closeModal();
                     })

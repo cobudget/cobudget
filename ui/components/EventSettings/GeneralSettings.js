@@ -11,18 +11,18 @@ import toast from "react-hot-toast";
 import router from "next/router";
 
 const EDIT_EVENT = gql`
-  mutation editEvent(
+  mutation editCollection(
     $orgId: ID!
-    $eventId: ID!
+    $collectionId: ID!
     $slug: String
     $title: String
     $archived: Boolean
     $registrationPolicy: RegistrationPolicy
     $color: String
   ) {
-    editEvent(
+    editCollection(
       orgId: $orgId
-      eventId: $eventId
+      collectionId: $collectionId
       slug: $slug
       title: $title
       archived: $archived
@@ -44,7 +44,7 @@ export default function GeneralSettings({
   currentOrg,
   currentOrgMember,
 }) {
-  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
   const [color, setColor] = useState(event.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
@@ -62,10 +62,10 @@ export default function GeneralSettings({
       <h2 className="text-2xl font-semibold">General</h2>
       <form
         onSubmit={handleSubmit((variables) => {
-          editEvent({
+          editCollection({
             ...variables,
             orgId: currentOrg.id,
-            eventId: event.id,
+            collectionId: event.id,
             archived: variables.archived === "true",
             color,
           }).then(({ error }) => {

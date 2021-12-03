@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
-    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       slug
       info
@@ -81,7 +81,7 @@ export const TOP_LEVEL_QUERY = gql`
       collectionMemberships {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         event {
           id
@@ -92,7 +92,7 @@ export const TOP_LEVEL_QUERY = gql`
       currentEventMembership(collectionSlug: $collectionSlug) {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         balance
         event {

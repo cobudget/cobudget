@@ -4,10 +4,14 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($orgId: ID!, $eventId: ID!, $bucketReviewIsOpen: Boolean) {
-    editEvent(
+  mutation editCollection(
+    $orgId: ID!
+    $collectionId: ID!
+    $bucketReviewIsOpen: Boolean
+  ) {
+    editCollection(
       orgId: $orgId
-      eventId: $eventId
+      collectionId: $collectionId
       bucketReviewIsOpen: $bucketReviewIsOpen
     ) {
       id
@@ -17,7 +21,7 @@ const EDIT_EVENT = gql`
 `;
 
 const DreamReview = ({ event, currentOrg }) => {
-  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
   const {
     handleSubmit,
     register,
@@ -33,10 +37,10 @@ const DreamReview = ({ event, currentOrg }) => {
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
-          editEvent({
+          editCollection({
             ...variables,
             orgId: currentOrg.id,
-            eventId: event.id,
+            collectionId: event.id,
             bucketReviewIsOpen: variables.bucketReviewIsOpen === "true",
           })
             //.then(() => null)

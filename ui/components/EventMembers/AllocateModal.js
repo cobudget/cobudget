@@ -10,13 +10,11 @@ import toast from "react-hot-toast";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
-    $collectionId: ID!
     $collectionMemberId: ID!
     $amount: Int!
     $type: AllocationType!
   ) {
     allocate(
-      collectionId: $collectionId
       collectionMemberId: $collectionMemberId
       amount: $amount
       type: $type
@@ -58,7 +56,6 @@ const AllocateModal = ({ member, event, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             allocate({
-              collectionId: event.id,
               collectionMemberId: member.id,
               amount,
               type: type.toUpperCase(),

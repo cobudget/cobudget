@@ -11,8 +11,8 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import * as yup from "yup";
 
 const EDIT_BUDGET_MUTATION = gql`
-  mutation EditBudget($dreamId: ID!, $budgetItems: [BudgetItemInput]) {
-    editDream(dreamId: $dreamId, budgetItems: $budgetItems) {
+  mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
+    editDream(bucketId: $bucketId, budgetItems: $budgetItems) {
       id
       minGoal
       maxGoal
@@ -46,7 +46,7 @@ const schema = yup.object().shape({
 });
 
 const EditBudgetModal = ({
-  dreamId,
+  bucketId,
   budgetItems,
   event,
   currency,
@@ -81,7 +81,7 @@ const EditBudgetModal = ({
         <form
           onSubmit={handleSubmit((variables) => {
             editDream({
-              dreamId,
+              bucketId,
               budgetItems: [
                 ...(variables.budgetItems?.map((item) => ({
                   ...item,

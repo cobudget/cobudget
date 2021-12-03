@@ -8,8 +8,8 @@ import DraggableItems from "../DraggableItems";
 import Markdown from "components/Markdown";
 
 const DELETE_GUIDELINE_MUTATION = gql`
-  mutation DeleteGuideline($eventId: ID!, $guidelineId: ID!) {
-    deleteGuideline(eventId: $eventId, guidelineId: $guidelineId) {
+  mutation DeleteGuideline($collectionId: ID!, $guidelineId: ID!) {
+    deleteGuideline(collectionId: $collectionId, guidelineId: $guidelineId) {
       id
       guidelines {
         id
@@ -22,12 +22,12 @@ const DELETE_GUIDELINE_MUTATION = gql`
 
 const SET_GUIDELINE_POSITION_MUTATION = gql`
   mutation SetGuidelinePosition(
-    $eventId: ID!
+    $collectionId: ID!
     $guidelineId: ID!
     $newPosition: Float
   ) {
     setGuidelinePosition(
-      eventId: $eventId
+      collectionId: $collectionId
       guidelineId: $guidelineId
       newPosition: $newPosition
     ) {
@@ -49,10 +49,10 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({ item: guideline, setEditingItem: setEditingGuideline, eventId }) => {
+  ({ item: guideline, setEditingItem: setEditingGuideline, collectionId }) => {
     const [{ loading: deleting }, deleteGuideline] = useMutation({
       query: DELETE_GUIDELINE_MUTATION,
-      variables: { eventId, guidelineId: guideline.id },
+      variables: { collectionId, guidelineId: guideline.id },
     });
 
     return (
@@ -99,7 +99,7 @@ const DraggableGuidelines = ({ event, items, setEditingItem }) => {
   );
   const setItemPosition = (guidelineId, newPosition) => {
     setGuidelinePosition({
-      eventId: event.id,
+      collectionId: event.id,
       guidelineId,
       newPosition,
     });

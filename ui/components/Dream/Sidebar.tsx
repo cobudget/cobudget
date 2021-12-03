@@ -17,8 +17,8 @@ import Tags from "./Tags";
 import toast from "react-hot-toast";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
-  mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
-    approveForGranting(dreamId: $dreamId, approved: $approved) {
+  mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
+    approveForGranting(bucketId: $bucketId, approved: $approved) {
       id
       approved
       canceled
@@ -28,8 +28,8 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
 `;
 
 const PUBLISH_DREAM_MUTATION = gql`
-  mutation PublishDream($dreamId: ID!, $unpublish: Boolean) {
-    publishDream(dreamId: $dreamId, unpublish: $unpublish) {
+  mutation PublishDream($bucketId: ID!, $unpublish: Boolean) {
+    publishDream(bucketId: $bucketId, unpublish: $unpublish) {
       id
       published
     }
@@ -37,8 +37,8 @@ const PUBLISH_DREAM_MUTATION = gql`
 `;
 
 const MARK_AS_COMPLETED_MUTATION = gql`
-  mutation MarkAsCompleted($dreamId: ID!) {
-    markAsCompleted(dreamId: $dreamId) {
+  mutation MarkAsCompleted($bucketId: ID!) {
+    markAsCompleted(bucketId: $bucketId) {
       id
       completedAt
       completed
@@ -47,8 +47,8 @@ const MARK_AS_COMPLETED_MUTATION = gql`
 `;
 
 const ACCEPT_FUNDING_MUTATION = gql`
-  mutation AcceptFunding($dreamId: ID!) {
-    acceptFunding(dreamId: $dreamId) {
+  mutation AcceptFunding($bucketId: ID!) {
+    acceptFunding(bucketId: $bucketId) {
       id
       fundedAt
       funded
@@ -57,8 +57,8 @@ const ACCEPT_FUNDING_MUTATION = gql`
 `;
 
 const CANCEL_FUNDING_MUTATION = gql`
-  mutation CancelFunding($dreamId: ID!) {
-    cancelFunding(dreamId: $dreamId) {
+  mutation CancelFunding($bucketId: ID!) {
+    cancelFunding(bucketId: $bucketId) {
       id
       fundedAt
       funded
@@ -71,8 +71,8 @@ const CANCEL_FUNDING_MUTATION = gql`
 `;
 
 const DELETE_DREAM_MUTATION = gql`
-  mutation DeleteDream($dreamId: ID!) {
-    deleteDream(dreamId: $dreamId) {
+  mutation DeleteDream($bucketId: ID!) {
+    deleteDream(bucketId: $bucketId) {
       id
     }
   }
@@ -103,7 +103,7 @@ const DreamSidebar = ({
 
   const isEventAdminOrGuide =
     currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isGuide;
+    currentOrgMember?.currentEventMembership?.isModerator;
   const hasNotReachedMaxGoal =
     dream.totalContributions < Math.max(dream.minGoal, dream.maxGoal);
   const hasReachedMinGoal = dream.totalContributions > dream.minGoal;
@@ -163,7 +163,7 @@ const DreamSidebar = ({
                 confirm(
                   `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
                 ) &&
-                acceptFunding({ dreamId: dream.id }).catch((err) =>
+                acceptFunding({ bucketId: dream.id }).catch((err) =>
                   alert(err.message)
                 )
               }
@@ -177,7 +177,7 @@ const DreamSidebar = ({
               color={event.color}
               onClick={() =>
                 publishDream({
-                  dreamId: dream.id,
+                  bucketId: dream.id,
                   unpublish: dream.published,
                 })
               }
@@ -192,7 +192,7 @@ const DreamSidebar = ({
               fullWidth
               onClick={() =>
                 approveForGranting({
-                  dreamId: dream.id,
+                  bucketId: dream.id,
                   approved: true,
                 }).catch((err) => alert(err.message))
               }
@@ -208,7 +208,7 @@ const DreamSidebar = ({
                 confirm(
                   `Are you sure you would like to mark this bucket as completed? This can't be undone.`
                 ) &&
-                markAsCompleted({ dreamId: dream.id }).then(
+                markAsCompleted({ bucketId: dream.id }).then(
                   ({ data, error }) => {
                     if (error) toast.error(error.message);
                   }
@@ -237,7 +237,7 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       publishDream({
-                        dreamId: dream.id,
+                        bucketId: dream.id,
                         unpublish: true,
                       }).then(() => setActionsDropdownOpen(false))
                     }
@@ -252,7 +252,7 @@ const DreamSidebar = ({
                       confirm(
                         "Are you sure you would like to cancel funding? This is irreversible and will return all contributions to those that have contributed."
                       ) &&
-                      cancelFunding({ dreamId: dream.id })
+                      cancelFunding({ bucketId: dream.id })
                         .then(() => setActionsDropdownOpen(false))
                         .catch((err) => alert(err.message))
                     }
@@ -265,7 +265,7 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       approveForGranting({
-                        dreamId: dream.id,
+                        bucketId: dream.id,
                         approved: false,
                       })
                         .then(() => setActionsDropdownOpen(false))
@@ -282,7 +282,7 @@ const DreamSidebar = ({
                       confirm(
                         `Are you sure you would like to delete this bucket?`
                       ) &&
-                      deleteDream({ dreamId: dream.id }).then(({ error }) => {
+                      deleteDream({ bucketId: dream.id }).then(({ error }) => {
                         if (error) {
                           toast.error(error.message);
                         } else {

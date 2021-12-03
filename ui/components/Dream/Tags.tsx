@@ -4,8 +4,8 @@ import { CloseIcon } from "components/Icons";
 import AddTag from "./AddTag";
 
 const REMOVE_TAG_MUTATION = gql`
-  mutation RemoveTag($dreamId: ID!, $tagId: ID!) {
-    removeTag(dreamId: $dreamId, tagId: $tagId) {
+  mutation RemoveTag($bucketId: ID!, $tagId: ID!) {
+    removeTag(bucketId: $bucketId, tagId: $tagId) {
       id
       tags {
         id
@@ -35,7 +35,7 @@ const Tags = ({ currentOrg, dream, event, canEdit }) => {
             </Link>
             {canEdit && (
               <button
-                onClick={() => removeTag({ dreamId: dream.id, tagId: tag.id })}
+                onClick={() => removeTag({ bucketId: dream.id, tagId: tag.id })}
                 className="rounded-full bg-gray-400 hover:bg-black"
               >
                 <CloseIcon className="w-3 h-3 text-white" />

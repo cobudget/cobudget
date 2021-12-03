@@ -5,8 +5,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const CREATE_TAG = gql`
-  mutation createTag($eventId: ID!, $tagValue: String!) {
-    createTag(eventId: $eventId, tagValue: $tagValue) {
+  mutation createTag($collectionId: ID!, $tagValue: String!) {
+    createTag(collectionId: $collectionId, tagValue: $tagValue) {
       id
       tags {
         id
@@ -46,7 +46,7 @@ const Tags = ({ event, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           createTag({
             ...variables,
-            eventId: event.id,
+            collectionId: event.id,
           })
             .then(() => reset())
             .catch((error) => alert(error.message));

@@ -19,8 +19,8 @@ import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
 export const ORG_MEMBERS_QUERY = gql`
-  query OrgMembers($orgSlug: String!, $offset: Int, $limit: Int) {
-    orgMembersPage(orgSlug: $orgSlug, offset: $offset, limit: $limit) {
+  query OrgMembers($orgId: ID!, $offset: Int, $limit: Int) {
+    orgMembersPage(orgId: $orgId, offset: $offset, limit: $limit) {
       moreExist
       orgMembers {
         id
@@ -132,7 +132,7 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: ORG_MEMBERS_QUERY,
     variables: {
-      orgSlug: currentOrg.slug,
+      orgId: currentOrg.id,
       offset: variables.offset,
       limit: variables.limit,
     },

@@ -8,24 +8,24 @@ import LoadMore from "../LoadMore";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 
-export const EVENT_MEMBERS_QUERY = gql`
-  query Members($eventId: ID!, $offset: Int, $limit: Int) {
+export const COLLECTION_MEMBERS_QUERY = gql`
+  query Members($collectionId: ID!, $offset: Int, $limit: Int) {
     approvedMembersPage: membersPage(
-      eventId: $eventId
+      collectionId: $collectionId
       isApproved: true
       offset: $offset
       limit: $limit
     ) {
       moreExist
       approvedMembers: members(
-        eventId: $eventId
+        collectionId: $collectionId
         isApproved: true
         offset: $offset
         limit: $limit
       ) {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         createdAt
         balance
@@ -43,11 +43,14 @@ export const EVENT_MEMBERS_QUERY = gql`
         }
       }
     }
-    requestsToJoinPage: membersPage(eventId: $eventId, isApproved: false) {
-      requestsToJoin: members(eventId: $eventId, isApproved: false) {
+    requestsToJoinPage: membersPage(
+      collectionId: $collectionId
+      isApproved: false
+    ) {
+      requestsToJoin: members(collectionId: $collectionId, isApproved: false) {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         createdAt
         balance
@@ -71,29 +74,29 @@ export const EVENT_MEMBERS_QUERY = gql`
 const UPDATE_MEMBER = gql`
   mutation UpdateMember(
     $memberId: ID!
-    $eventId: ID!
+    $collectionId: ID!
     $isAdmin: Boolean
     $isApproved: Boolean
-    $isGuide: Boolean
+    $isModerator: Boolean
   ) {
     updateMember(
       memberId: $memberId
-      eventId: $eventId
+      collectionId: $collectionId
       isAdmin: $isAdmin
       isApproved: $isApproved
-      isGuide: $isGuide
+      isModerator: $isModerator
     ) {
       id
       isAdmin
       isApproved
-      isGuide
+      isModerator
     }
   }
 `;
 
 const DELETE_MEMBER = gql`
-  mutation UpdateMember($memberId: ID!, $eventId: ID!) {
-    deleteMember(memberId: $memberId, eventId: $eventId) {
+  mutation UpdateMember($memberId: ID!, $collectionId: ID!) {
+    deleteMember(memberId: $memberId, collectionId: $collectionId) {
       id
     }
   }
@@ -120,8 +123,8 @@ const EventMembers = ({ event, currentOrgMember }) => {
       error,
     },
   ] = useQuery({
-    query: EVENT_MEMBERS_QUERY,
-    variables: { eventId: event.id, offset: 0, limit: 1000 },
+    query: COLLECTION_MEMBERS_QUERY,
+    variables: { collectionId: event.id, offset: 0, limit: 1000 },
   });
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
@@ -159,7 +162,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
               {inviteModalOpen && (
                 <InviteMembersModal
                   handleClose={() => setInviteModalOpen(false)}
-                  eventId={event.id}
+                  collectionId={event.id}
                 />
               )}
             </div>

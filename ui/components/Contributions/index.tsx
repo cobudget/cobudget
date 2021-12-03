@@ -8,10 +8,18 @@ import LoadMore from "components/LoadMore";
 dayjs.extend(LocalizedFormat);
 
 export const CONTRIBUTIONS_QUERY = gql`
-  query Contributions($eventId: ID!, $offset: Int, $limit: Int) {
-    contributionsPage(eventId: $eventId, offset: $offset, limit: $limit) {
+  query Contributions($collectionId: ID!, $offset: Int, $limit: Int) {
+    contributionsPage(
+      collectionId: $collectionId
+      offset: $offset
+      limit: $limit
+    ) {
       moreExist
-      contributions(eventId: $eventId, offset: $offset, limit: $limit) {
+      contributions(
+        collectionId: $collectionId
+        offset: $offset
+        limit: $limit
+      ) {
         id
         amount
         createdAt
@@ -44,7 +52,7 @@ const Contributions = ({ event }) => {
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
-    variables: { eventId: event.id, offset: 0, limit: 15 },
+    variables: { collectionId: event.id, offset: 0, limit: 15 },
   });
 
   return (

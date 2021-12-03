@@ -31,16 +31,20 @@ export default function AboutPage({
               MUTATION={gql`
                 mutation EditEventAbout(
                   $orgId: ID!
-                  $eventId: ID!
+                  $collectionId: ID!
                   $about: String
                 ) {
-                  editEvent(orgId: $orgId, eventId: $eventId, about: $about) {
+                  editCollection(
+                    orgId: $orgId
+                    collectionId: $collectionId
+                    about: $about
+                  ) {
                     id
                     about
                   }
                 }
               `}
-              variables={{ orgId: currentOrg.id, eventId: event.id }}
+              variables={{ orgId: currentOrg.id, collectionId: event.id }}
             />
           </div>
         </div>

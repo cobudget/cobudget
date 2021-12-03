@@ -78,7 +78,7 @@ const RequestToJoinTable = ({
                               confirm("Are you sure you would like to approve?")
                             )
                               updateMember({
-                                eventId: event.id,
+                                collectionId: event.id,
                                 memberId: member.id,
                                 isApproved: true,
                               });

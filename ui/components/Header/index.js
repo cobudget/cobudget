@@ -30,7 +30,7 @@ const JOIN_ORG_MUTATION = gql`
       collectionMemberships {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         event {
           id
@@ -51,7 +51,7 @@ const JOIN_COLLECTION_MUTATION = gql`
     joinCollection(collectionId: $collectionId) {
       id
       isAdmin
-      isGuide
+      isModerator
       isApproved
       event {
         id

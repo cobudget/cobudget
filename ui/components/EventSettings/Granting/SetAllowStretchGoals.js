@@ -20,7 +20,7 @@ const SetAllowStretchGoals = ({ closeModal, event }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              eventId: event.id,
+              collectionId: event.id,
               allowStretchGoals: variables.allowStretchGoals === "true",
             })
               .then(({ data }) => {

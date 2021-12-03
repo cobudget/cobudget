@@ -5,8 +5,11 @@ import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($eventId: ID!, $discourseCategoryId: Int) {
-    editEvent(eventId: $eventId, discourseCategoryId: $discourseCategoryId) {
+  mutation editCollection($collectionId: ID!, $discourseCategoryId: Int) {
+    editCollection(
+      collectionId: $collectionId
+      discourseCategoryId: $discourseCategoryId
+    ) {
       id
       discourseCategoryId
     }
@@ -23,7 +26,7 @@ export const CATEGORIES_QUERY = gql`
 `;
 
 const Discourse = ({ event, currentOrg }) => {
-  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,
@@ -45,9 +48,9 @@ const Discourse = ({ event, currentOrg }) => {
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
-          editEvent({
+          editCollection({
             ...variables,
-            eventId: event.id,
+            collectionId: event.id,
             discourseCategoryId: parseInt(variables.discourseCategoryId),
           })
             //.then(() => handleClose())

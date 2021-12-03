@@ -21,7 +21,12 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
 
-const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
+const ActionsDropdown = ({
+  collectionId,
+  updateMember,
+  deleteMember,
+  member,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -51,7 +56,7 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              eventId,
+              collectionId,
 
               memberId: member.id,
               isAdmin: !member.isAdmin,
@@ -65,15 +70,15 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              eventId,
+              collectionId,
               memberId: member.id,
-              isGuide: !member.isGuide,
+              isModerator: !member.isModerator,
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isGuide ? "Remove guide" : "Make guide"}
+          {member.isModerator ? "Remove guide" : "Make guide"}
         </MenuItem>
         <MenuItem
           color="error.main"
@@ -83,7 +88,7 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
                 `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
               )
             )
-              deleteMember({ eventId, memberId: member.id });
+              deleteMember({ collectionId, memberId: member.id });
           }}
         >
           <Box color="error.main">Delete</Box>
@@ -128,7 +133,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
       </TableCell>
       <TableCell align="right" className="flex space-x-2">
         {member.isAdmin && <p>Admin</p>}
-        {member.isGuide && <p>Guide</p>}
+        {member.isModerator && <p>Guide</p>}
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (
@@ -159,7 +164,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
             member={member}
             deleteMember={deleteMember}
             updateMember={updateMember}
-            eventId={event.id}
+            collectionId={event.id}
           />
         </TableCell>
       )}

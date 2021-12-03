@@ -25,7 +25,7 @@ const SetBucketCreationCloses = ({ closeModal, event, currentOrg }) => {
           onSubmit={handleSubmit(() => {
             updateGranting({
               bucketCreationCloses: selectedDate,
-              eventId: event.id,
+              collectionId: event.id,
             })
               .then(() => {
                 // console.log({ data });
@@ -70,7 +70,7 @@ const SetBucketCreationCloses = ({ closeModal, event, currentOrg }) => {
                 className="ml-2"
                 onClick={() => {
                   updateGranting({
-                    eventId: event.id,
+                    collectionId: event.id,
                     bucketCreationCloses: null,
                   })
                     .then(() => {

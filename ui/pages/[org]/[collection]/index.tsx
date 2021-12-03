@@ -154,16 +154,20 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
               MUTATION={gql`
                 mutation EditHomepageMessage(
                   $orgId: ID!
-                  $eventId: ID!
+                  $collectionId: ID!
                   $info: String
                 ) {
-                  editEvent(orgId: $orgId, eventId: $eventId, info: $info) {
+                  editCollection(
+                    orgId: $orgId
+                    collectionId: $collectionId
+                    info: $info
+                  ) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ orgId: currentOrg.id, eventId: event.id }}
+              variables={{ orgId: currentOrg.id, collectionId: event.id }}
               required
             />
           </div>

@@ -28,7 +28,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ dreamId: dream.id, content })
+        addComment({ bucketId: dream.id, content })
           .then(() => {
             inputRef.current.blur();
             setContent("");
