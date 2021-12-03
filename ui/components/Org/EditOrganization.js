@@ -76,6 +76,7 @@ const EditOrganization = ({ organization, currentUser }) => {
       } else {
         editOrganization({
           ...variables,
+          logo: logoImage,
           organizationId: organization.id,
         }).then(({ error }) => {
           if (error) {
