@@ -34,7 +34,7 @@ export const CONTRIBUTIONS_QUERY = gql`
   }
 `;
 
-const Contributions = ({ event }) => {
+const Contributions = ({ event, currentOrg }) => {
   const [
     {
       data: { contributionsPage: { moreExist, contributions } } = {
@@ -67,7 +67,9 @@ const Contributions = ({ event }) => {
                     {dayjs(c.createdAt).format("LLL")}
                   </span>
                   @{c.eventMember.orgMember.user.username} funded{" "}
-                  <Link href={`/${event.slug}/${c.dream.id}`}>
+                  <Link
+                    href={`/${currentOrg.slug}/${event.slug}/${c.dream.id}`}
+                  >
                     <a className="font-semibold hover:underline">
                       {c.dream.title}
                     </a>

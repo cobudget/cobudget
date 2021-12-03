@@ -1,7 +1,7 @@
 import SubMenu from "components/SubMenu";
 import Contributions from "components/Contributions";
 
-const ContributionsPage = ({ event, currentOrgMember }) => {
+const ContributionsPage = ({ event, currentOrg, currentOrgMember }) => {
   const isAdmin =
     currentOrgMember?.currentEventMembership?.isAdmin ||
     currentOrgMember?.isOrgAdmin;
@@ -9,7 +9,7 @@ const ContributionsPage = ({ event, currentOrgMember }) => {
   return (
     <div className="">
       <SubMenu currentOrgMember={currentOrgMember} event={event} />
-      <Contributions event={event} />
+      <Contributions event={event} currentOrg={currentOrg} />
     </div>
   );
 };
