@@ -112,7 +112,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
               value: inputValue,
               onChange: (e) => setInputValue(e.target.value),
               type: "number",
-              min: "0",
+              min: "0.01",
               max: `${max / 100}`,
               step: 0.01,
             }}
@@ -123,7 +123,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
             fullWidth
             color={event.color}
             loading={loading}
-            disabled={amount <= 0}
+            disabled={inputValue === ""}
             className="my-2"
           >
             Fund
