@@ -8,6 +8,7 @@ import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable"
 import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { DREAMS_QUERY } from "pages/[org]/[collection]";
+import { DREAM_QUERY } from "pages/[org]/[collection]/[bucket]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
@@ -155,6 +156,25 @@ export const client = (
                     (data) => {
                       data.collections = data.collections.filter(
                         (collection) => collection.id !== collectionId
+                      );
+                      return data;
+                    }
+                  );
+                });
+            },
+            deleteTag(result: any, { tagId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "dream")
+                .forEach((field) => {
+                  cache.updateQuery(
+                    {
+                      query: DREAM_QUERY,
+                      variables: field.arguments,
+                    },
+                    (data) => {
+                      data.dream.tags = data.dream.tags.filter(
+                        (tag) => tag.id !== tagId
                       );
                       return data;
                     }
