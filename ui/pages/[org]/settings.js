@@ -2,7 +2,7 @@ import EditOrganization from "../../components/Org/EditOrganization";
 import SubMenu from "../../components/SubMenu";
 
 const OrgSettingsPage = ({ currentOrg, currentOrgMember, currentUser }) => {
-  const isAdmin = currentOrgMember?.isOrgAdmin;
+  const isAdmin = currentOrgMember?.isAdmin;
   if (!isAdmin) return null;
 
   return (

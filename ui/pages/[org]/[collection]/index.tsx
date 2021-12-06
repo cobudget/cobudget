@@ -152,7 +152,7 @@ const CollectionPage = ({
               label="Add homepage message"
               placeholder={`# Welcome to ${event.title}'s dream page`}
               canEdit={
-                currentOrgMember?.isOrgAdmin ||
+                currentOrgMember?.isAdmin ||
                 currentOrgMember?.currentEventMembership?.isAdmin
               }
               name="info"

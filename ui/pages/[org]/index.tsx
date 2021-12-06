@@ -50,7 +50,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
   });
   if (!currentOrg) return null;
   const collections = data?.collections ?? [];
-  const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
+  const showTodos = currentOrgMember?.isAdmin && !currentOrg.finishedTodos;
 
   return (
     <>
@@ -62,7 +62,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
               value={currentOrg?.info}
               label="Add message"
               placeholder={`# Welcome to ${currentOrg?.name}'s page`}
-              canEdit={currentOrgMember?.isOrgAdmin}
+              canEdit={currentOrgMember?.isAdmin}
               name="info"
               className="h-10"
               MUTATION={gql`
@@ -82,7 +82,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
             />
           </div>
           <div>
-            {currentOrgMember?.isOrgAdmin && (
+            {currentOrgMember?.isAdmin && (
               <Link href={`/${currentOrg.slug}/new-collection`}>
                 <Button size="large" color="anthracit" className="float-right">
                   New collection

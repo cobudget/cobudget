@@ -24,7 +24,7 @@ export const ORG_MEMBERS_QUERY = gql`
       moreExist
       orgMembers {
         id
-        isOrgAdmin
+        isAdmin
         bio
         email
         name
@@ -78,13 +78,13 @@ const ActionsDropdown = ({
             updateOrgMember({
               orgId: currentOrg.id,
               memberId: member.id,
-              isOrgAdmin: !member.isOrgAdmin,
+              isAdmin: !member.isAdmin,
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isOrgAdmin ? "Remove admin" : "Make admin"}
+          {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
         {/* how to also remove the user's event memberships when their org
             membership is removed?
@@ -170,7 +170,7 @@ const Page = ({
             {member.bio}
           </TableCell>
           <TableCell align="right">
-            {member.isOrgAdmin && <span className="mr-2">Admin</span>}
+            {member.isAdmin && <span className="mr-2">Admin</span>}
           </TableCell>
           <TableCell align="right" padding="none">
             <ActionsDropdown

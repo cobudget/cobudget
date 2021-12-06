@@ -51,14 +51,17 @@ export const TOP_LEVEL_QUERY = gql`
         value
       }
     }
+
     currentUser {
       id
       username
       name
       avatar
       email
+
       orgMemberships {
         id
+        isAdmin
         organization {
           id
           name
@@ -67,6 +70,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
       collectionMemberships {
         id
+        isAdmin
         collection {
           id
           title
@@ -77,7 +81,7 @@ export const TOP_LEVEL_QUERY = gql`
     # currentOrgMember(orgSlug: $orgSlug) {
     #   id
     #   bio
-    #   isOrgAdmin
+    #   isAdmin
     #   discourseUsername
     #   hasDiscourseApiKey
     #   user {

@@ -4,7 +4,7 @@ import SubMenu from "components/SubMenu";
 const EventSettingsPage = ({ event, currentOrgMember, currentOrg }) => {
   const isAdmin =
     currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.isOrgAdmin;
+    currentOrgMember?.isAdmin;
   if (!isAdmin || !event) return null;
   return (
     <div className="flex-1">

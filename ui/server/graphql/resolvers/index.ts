@@ -1490,22 +1490,22 @@ const resolvers = {
     ),
     updateOrgMember: combineResolvers(
       isOrgAdmin,
-      async (parent, { orgId, memberId, isOrgAdmin }, { user }) => {
+      async (parent, { orgId, memberId, isAdmin }, { user }) => {
         const orgMember = await prisma.orgMember.findFirst({
           where: { id: memberId, organizationId: orgId },
         });
 
         if (!orgMember) throw new Error("No member to update found");
 
-        if (typeof isOrgAdmin !== "undefined") {
-          if (isOrgAdmin === false) {
+        if (typeof isAdmin !== "undefined") {
+          if (isAdmin === false) {
             const orgAdmins = await prisma.orgMember.findMany({
               where: { organizationId: orgId, isAdmin: true },
             });
             if (orgAdmins.length <= 1)
               throw new Error("You need at least 1 org admin");
           }
-          orgMember.isAdmin = isOrgAdmin;
+          orgMember.isAdmin = isAdmin;
         }
         return await prisma.orgMember.update({
           where: { id: orgMember.id },
@@ -1558,7 +1558,7 @@ const resolvers = {
     //   if (
     //     !(
     //       (currentOrgMember &&
-    //         currentOrgMember.isOrgAdmin &&
+    //         currentOrgMember.isAdmin &&
     //         organizationId == currentOrgMember.organizationId) ||
     //       user.isRootAdmin
     //     )

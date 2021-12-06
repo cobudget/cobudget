@@ -116,7 +116,7 @@ export default function GeneralSettings({
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
 
-        {currentOrgMember.isOrgAdmin && (
+        {currentOrgMember.isAdmin && (
           <SelectField
             name="archived"
             label="Archive collection"
@@ -129,7 +129,7 @@ export default function GeneralSettings({
           </SelectField>
         )}
 
-        {currentOrgMember.isOrgAdmin && (
+        {currentOrgMember.isAdmin && (
           <>
             <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
             <Button

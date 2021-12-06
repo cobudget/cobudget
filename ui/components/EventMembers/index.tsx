@@ -126,7 +126,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const isAdmin =
-    currentOrgMember?.isOrgAdmin ||
+    currentOrgMember?.isAdmin ||
     currentOrgMember?.currentEventMembership?.isAdmin;
 
   if (error) {

@@ -7,14 +7,10 @@ import InviteMembersModal from "components/InviteMembersModal";
 import OrgMembersTable from "./OrgMembersTable";
 
 const UPDATE_ORG_MEMBER = gql`
-  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isOrgAdmin: Boolean) {
-    updateOrgMember(
-      orgId: $orgId
-      memberId: $memberId
-      isOrgAdmin: $isOrgAdmin
-    ) {
+  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isAdmin: Boolean) {
+    updateOrgMember(orgId: $orgId, memberId: $memberId, isAdmin: $isAdmin) {
       id
-      isOrgAdmin
+      isAdmin
     }
   }
 `;

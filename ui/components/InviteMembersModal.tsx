@@ -11,7 +11,7 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
   mutation InviteOrgMembers($orgId: ID!, $emails: String!) {
     inviteOrgMembers(orgId: $orgId, emails: $emails) {
       id
-      isOrgAdmin
+      isAdmin
       bio
       name
       email

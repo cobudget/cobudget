@@ -151,7 +151,7 @@ const schema = gql`
       emails: String!
     ): [CollectionMember]
     inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
-    updateOrgMember(orgId: ID!, memberId: ID!, isOrgAdmin: Boolean): OrgMember
+    updateOrgMember(orgId: ID!, memberId: ID!, isAdmin: Boolean): OrgMember
     updateMember(
       collectionId: ID!
       memberId: ID!
@@ -293,7 +293,7 @@ const schema = gql`
     id: ID!
     organization: Organization!
     user: User!
-    isOrgAdmin: Boolean
+    isAdmin: Boolean
     bio: String #what do we do with this one?
     createdAt: Date
     currentCollectionMembership(collectionSlug: String): CollectionMember #this is weird syntax...

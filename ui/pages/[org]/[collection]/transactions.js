@@ -4,7 +4,7 @@ import Contributions from "components/Contributions";
 const ContributionsPage = ({ event, currentOrgMember }) => {
   const isAdmin =
     currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.isOrgAdmin;
+    currentOrgMember?.isAdmin;
   if (!isAdmin || !event) return null;
   return (
     <div className="">

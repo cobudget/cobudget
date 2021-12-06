@@ -18,7 +18,7 @@ const JOIN_ORG_MUTATION = gql`
     joinOrg(orgId: $orgId) {
       id
       bio
-      isOrgAdmin
+      isAdmin
       discourseUsername
       hasDiscourseApiKey
       user {
@@ -133,7 +133,7 @@ const Header = ({
                     {!currentCollectionMembership &&
                       event &&
                       (event.registrationPolicy !== "INVITE_ONLY" ||
-                        currentOrgMember?.isOrgAdmin) && (
+                        currentOrgMember?.isAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}

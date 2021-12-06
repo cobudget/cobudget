@@ -7,7 +7,7 @@ const orgItems = ({ currentOrgMember, orgSlug }) => {
     // { label: "Realities", href: "/realities" },
     { label: "Members", href: `/${orgSlug}/members`, admin: true },
     { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
-  ].filter((i) => (i.admin ? currentOrgMember?.isOrgAdmin : true));
+  ].filter((i) => (i.admin ? currentOrgMember?.isAdmin : true));
 };
 
 export const collectionItems = ({
@@ -16,7 +16,7 @@ export const collectionItems = ({
   collectionSlug,
 }) => {
   const isAdmin =
-    currentOrgMember?.isOrgAdmin ||
+    currentOrgMember?.isAdmin ||
     currentOrgMember?.currentEventMembership?.isAdmin;
   return [
     { label: "Overview", href: `/${orgSlug}/${collectionSlug}` },

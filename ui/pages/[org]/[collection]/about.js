@@ -23,7 +23,7 @@ export default function AboutPage({
               label="Add about text"
               placeholder={`# About ${event.title}`}
               canEdit={
-                currentOrgMember?.isOrgAdmin ||
+                currentOrgMember?.isAdmin ||
                 currentOrgMember?.currentEventMembership?.isAdmin
               }
               name="about"

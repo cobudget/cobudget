@@ -2,7 +2,7 @@ import OrgMembers from "../../components/Org/OrgMembers";
 import SubMenu from "../../components/SubMenu";
 
 const OrgMembersPage = ({ currentOrgMember, currentOrg }) => {
-  const isAdmin = currentOrgMember?.isOrgAdmin;
+  const isAdmin = currentOrgMember?.isAdmin;
   if (!isAdmin) return null;
 
   return (
