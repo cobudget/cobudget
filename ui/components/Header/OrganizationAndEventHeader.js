@@ -24,7 +24,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
         <a
           className={`hover:bg-${color}-dark px-1 py-1 text-white rounded-md font-medium flex space-x-4`}
         >
-          <img src="/cobudget-logo.png" className="h-6" />
+          <img src="/cobudget-logo.png" className="h-6 max-w-none" />
           {!currentOrg && <h1>Cobudget</h1>}
         </a>
       </Link>
