@@ -5,9 +5,8 @@ import Header from "./Header";
 const Layout = ({
   children,
   currentUser,
-  currentOrgMember,
   currentOrg,
-  event,
+  collection,
   title,
   openModal,
   router,
@@ -23,9 +22,8 @@ const Layout = ({
       </Head>
       <div>
         <Header
-          event={event}
+          collection={collection}
           currentUser={currentUser}
-          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           router={router}

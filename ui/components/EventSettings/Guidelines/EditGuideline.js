@@ -50,7 +50,7 @@ const schema = yup.object().shape({
 });
 
 export default ({
-  event,
+  collection,
   handleClose,
   guideline = {
     title: "",
@@ -81,7 +81,7 @@ export default ({
           onSubmit={handleSubmit((variables) =>
             addOrEditGuideline({
               ...variables,
-              collectionId: event.id,
+              collectionId: collection.id,
               ...(editing && { guidelineId: guideline.id }),
             })
               .then(() => handleClose())
@@ -96,7 +96,7 @@ export default ({
               inputRef={register}
               error={errors.guideline?.title}
               helperText={errors.guideline?.title?.message}
-              color={event.color}
+              color={collection.color}
               autoFocus
             />
             <TextField
@@ -108,7 +108,7 @@ export default ({
               inputRef={register}
               error={errors.guideline?.description}
               helperText={errors.guideline?.description?.message}
-              color={event.color}
+              color={collection.color}
             />
           </div>
 
@@ -118,11 +118,11 @@ export default ({
                 variant="secondary"
                 onClick={handleClose}
                 className="mr-2"
-                color={event.color}
+                color={collection.color}
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading} color={event.color}>
+              <Button type="submit" loading={loading} color={collection.color}>
                 Save
               </Button>
             </div>

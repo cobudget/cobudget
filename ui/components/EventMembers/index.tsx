@@ -94,7 +94,7 @@ const DELETE_MEMBER = gql`
   }
 `;
 
-const EventMembers = ({ event, currentOrgMember }) => {
+const EventMembers = ({ collection, currentUser }) => {
   const [
     {
       data: {
@@ -116,7 +116,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
     },
   ] = useQuery({
     query: COLLECTION_MEMBERS_QUERY,
-    variables: { collectionId: event.id, offset: 0, limit: 1000 },
+    variables: { collectionId: collection.id, offset: 0, limit: 1000 },
   });
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
@@ -126,8 +126,8 @@ const EventMembers = ({ event, currentOrgMember }) => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const isAdmin =
-    currentOrgMember?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isAdmin;
+    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentCollMember?.isAdmin;
 
   if (error) {
     console.error(error);
@@ -141,7 +141,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
           requestsToJoin={requestsToJoin}
           updateMember={updateMember}
           deleteMember={deleteMember}
-          event={event}
+          collection={collection}
         />
 
         <div className="flex justify-between mb-3 items-center">
@@ -154,7 +154,7 @@ const EventMembers = ({ event, currentOrgMember }) => {
               {inviteModalOpen && (
                 <InviteMembersModal
                   handleClose={() => setInviteModalOpen(false)}
-                  collectionId={event.id}
+                  collectionId={collection.id}
                 />
               )}
             </div>
@@ -165,10 +165,10 @@ const EventMembers = ({ event, currentOrgMember }) => {
           approvedMembers={approvedMembers}
           updateMember={updateMember}
           deleteMember={deleteMember}
-          event={event}
+          collection={collection}
           isAdmin={isAdmin}
         />
-
+        {/* TODO:fix */}
         <LoadMore
           moreExist={moreExist}
           loading={loading}

@@ -25,7 +25,7 @@ const ALLOCATE_MUTATION = gql`
   }
 `;
 
-const AllocateModal = ({ member, event, handleClose }) => {
+const AllocateModal = ({ member, collection, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
@@ -43,7 +43,7 @@ const AllocateModal = ({ member, event, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage @{member.orgMember.user.username}&apos;s balance
+          Manage @{member.user.username}&apos;s balance
         </h1>
         <Switch
           options={["Add", "Set"]}
@@ -82,16 +82,17 @@ const AllocateModal = ({ member, event, handleClose }) => {
           <p className="text-center mb-4 text-sm text-gray-800">
             {type === "Add" ? (
               <>
-                Adding {thousandSeparator(amount / 100)} {event.currency} to{" "}
-                {thousandSeparator(member.balance / 100)} {event.currency}{" "}
-                <br />({total / 100} {event.currency} in total)
+                Adding {thousandSeparator(amount / 100)} {collection.currency}{" "}
+                to {thousandSeparator(member.balance / 100)}{" "}
+                {collection.currency} <br />({total / 100} {collection.currency}{" "}
+                in total)
               </>
             ) : (
               <>
                 Set balance to {thousandSeparator(amount / 100)}{" "}
-                {event.currency} <br />
+                {collection.currency} <br />
                 (previously {thousandSeparator(member.balance / 100)}{" "}
-                {event.currency})
+                {collection.currency})
               </>
             )}
           </p>

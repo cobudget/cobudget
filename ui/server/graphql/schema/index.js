@@ -6,15 +6,13 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    # currentOrgMember(orgId: ID): OrgMember
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
     collections(orgSlug: String!, limit: Int): [Collection!]
     collection(orgSlug: String, collectionSlug: String): Collection
-    dream(id: ID!): Bucket
+    bucket(id: ID!): Bucket
     bucketsPage(
-      # orgId: ID!
       collectionId: ID!
       textSearchTerm: String
       tag: String
@@ -286,7 +284,8 @@ const schema = gql`
     collectionMemberships: [CollectionMember!]
     avatar: String
     createdAt: Date
-    # currentOrgMember: OrgMember
+    currentOrgMember(orgSlug: String): OrgMember
+    currentCollMember(orgSlug: String, collectionSlug: String): CollectionMember
   }
 
   type OrgMember {
@@ -380,7 +379,7 @@ const schema = gql`
 
   type Comment {
     id: ID!
-    orgMember: OrgMember
+    collectionMember: CollectionMember
     createdAt: Date!
     updatedAt: Date
     isLog: Boolean
@@ -445,19 +444,19 @@ const schema = gql`
 
   interface Transaction {
     id: ID!
-    event: Collection!
-    eventMember: CollectionMember!
+    collection: Collection!
+    collectionMember: CollectionMember!
     amount: Int!
     createdAt: Date
   }
 
   type Contribution implements Transaction {
     id: ID!
-    event: Collection!
-    eventMember: CollectionMember!
+    collection: Collection!
+    collectionMember: CollectionMember!
     amount: Int!
     createdAt: Date
-    dream: Bucket!
+    bucket: Bucket!
   }
 
   type ContributionsPage {
@@ -467,8 +466,8 @@ const schema = gql`
 
   type Allocation implements Transaction {
     id: ID!
-    event: Collection!
-    eventMember: CollectionMember!
+    collection: Collection!
+    collectionMember: CollectionMember!
     amount: Int!
     createdAt: Date
   }

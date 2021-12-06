@@ -13,7 +13,7 @@ const RequestToJoinTable = ({
   requestsToJoin,
   updateMember,
   deleteMember,
-  event,
+  collection,
 }) => {
   if (requestsToJoin.length === 0) return null;
 
@@ -39,14 +39,14 @@ const RequestToJoinTable = ({
                 {requestsToJoin.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell component="th" scope="row">
-                      {member.orgMember.user.username}
+                      {member.user.username}
                     </TableCell>
                     <TableCell component="th" scope="row">
                       {member.name}
                     </TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell component="th" scope="row">
-                      {member.orgMember.bio}
+                      {member.bio}
                     </TableCell>
                     <TableCell align="right" padding="none">
                       <Box p="0 15px" display="flex" justifyContent="flex-end">
@@ -78,7 +78,7 @@ const RequestToJoinTable = ({
                               confirm("Are you sure you would like to approve?")
                             )
                               updateMember({
-                                collectionId: event.id,
+                                collectionId: collection.id,
                                 memberId: member.id,
                                 isApproved: true,
                               });

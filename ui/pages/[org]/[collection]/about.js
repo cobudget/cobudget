@@ -7,24 +7,24 @@ import EditableField from "../../../components/EditableField";
 
 export default function AboutPage({
   router,
-  event,
-  currentOrgMember,
+  collection,
+  currentUser,
   currentOrg,
 }) {
-  if (!event) return null;
+  if (!collection) return null;
   return (
     <>
-      <SubMenu currentOrgMember={currentOrgMember} event={event} />
+      <SubMenu currentUser={currentUser} collection={collection} />
       <PageHero>
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-3">
           <div className="col-span-2">
             <EditableField
-              value={event.about}
+              value={collection.about}
               label="Add about text"
-              placeholder={`# About ${event.title}`}
+              placeholder={`# About ${collection.title}`}
               canEdit={
-                currentOrgMember?.isAdmin ||
-                currentOrgMember?.currentEventMembership?.isAdmin
+                currentUser?.currentOrgMember?.isAdmin ||
+                currentUser?.currentCollMember?.isAdmin
               }
               name="about"
               className="h-10"
@@ -39,7 +39,7 @@ export default function AboutPage({
                   }
                 }
               `}
-              variables={{ collectionId: event.id }}
+              variables={{ collectionId: collection.id }}
             />
           </div>
         </div>

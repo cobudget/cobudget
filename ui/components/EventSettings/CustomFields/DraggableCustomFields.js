@@ -72,7 +72,6 @@ const SortableItem = sortableElement(
     item: customField,
     setEditingItem: setEditingCustomField,
     collectionId,
-    currentOrg,
   }) => {
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
@@ -123,19 +122,14 @@ const SortableItem = sortableElement(
   }
 );
 
-const DraggableCustomFields = ({
-  event,
-  items,
-  setEditingItem,
-  currentOrg,
-}) => {
+const DraggableCustomFields = ({ collection, items, setEditingItem }) => {
   const [{ fetching: loading }, setCustomFieldPosition] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION
   );
 
   const setItemPosition = (customFieldId, newPosition) => {
     setCustomFieldPosition({
-      collectionId: event.id,
+      collectionId: collection.id,
       fieldId: customFieldId,
       newPosition,
     });
@@ -143,13 +137,12 @@ const DraggableCustomFields = ({
 
   return (
     <DraggableItems
-      event={event}
+      collection={collection}
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}
       SortableItem={SortableItem}
       setEditingItem={setEditingItem}
-      currentOrg={currentOrg}
     />
   );
 };

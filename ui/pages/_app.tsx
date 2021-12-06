@@ -71,48 +71,49 @@ export const TOP_LEVEL_QUERY = gql`
       collectionMemberships {
         id
         isAdmin
+        isApproved
         collection {
           id
           title
           slug
         }
       }
+      currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+        id
+        isAdmin
+        isModerator
+        isApproved
+        balance
+        collection {
+          id
+          title
+        }
+      }
+      currentOrgMember(orgSlug: $orgSlug) {
+        id
+        bio
+        isAdmin
+        discourseUsername
+        hasDiscourseApiKey
+        # user {
+        #   id
+        #   name
+        #   username
+        #   email
+        # }
+        # collectionMemberships {
+        #   id
+        #   isAdmin
+        #   isModerator
+        #   isApproved
+        #   collection {
+        #     id
+        #     title
+        #     slug
+        #   }
+        # }
+      }
     }
-    # currentOrgMember(orgSlug: $orgSlug) {
-    #   id
-    #   bio
-    #   isAdmin
-    #   discourseUsername
-    #   hasDiscourseApiKey
-    #   user {
-    #     id
-    #     name
-    #     username
-    #     email
-    #   }
-    #   collectionMemberships {
-    #     id
-    #     isAdmin
-    #     isModerator
-    #     isApproved
-    #     event {
-    #       id
-    #       title
-    #       slug
-    #     }
-    #   }
-    #   currentEventMembership(collectionSlug: $collectionSlug) {
-    #     id
-    #     isAdmin
-    #     isModerator
-    #     isApproved
-    #     balance
-    #     event {
-    #       id
-    #       title
-    #     }
-    #   }
-    # }
 
     currentOrg(orgSlug: $orgSlug) {
       __typename
@@ -131,10 +132,9 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, currentOrgMember, collection } = {
+      data: { currentUser, currentOrg, collection } = {
         currentUser: null,
         currentOrg: null,
-        currentOrgMember: null,
         collection: null,
       },
       fetching,
@@ -148,7 +148,12 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
   });
 
-  console.log({ currentUser, currentOrg, currentOrgMember, collection, error });
+  console.log({
+    currentUser,
+    currentOrg,
+    collection,
+    error,
+  });
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -171,16 +176,14 @@ const MyApp = ({ Component, pageProps, router }) => {
       <Modal
         active={modal}
         closeModal={closeModal}
-        currentOrgMember={currentOrgMember}
         currentUser={currentUser}
         currentOrg={currentOrg}
       />
       <Layout
         currentUser={currentUser}
-        currentOrgMember={currentOrgMember}
         currentOrg={currentOrg}
         openModal={openModal}
-        event={collection}
+        collection={collection}
         router={router}
         title={
           currentOrg
@@ -192,9 +195,8 @@ const MyApp = ({ Component, pageProps, router }) => {
       >
         <Component
           {...pageProps}
-          event={collection}
+          collection={collection}
           currentUser={currentUser}
-          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           router={router}

@@ -16,7 +16,7 @@ const CREATE_TAG = gql`
   }
 `;
 
-const Tags = ({ event, currentOrg }) => {
+const Tags = ({ collection, currentOrg }) => {
   const {
     handleSubmit,
     reset,
@@ -30,12 +30,14 @@ const Tags = ({ event, currentOrg }) => {
       <h1 className="text-2xl font-semibold mb-6">Tags</h1>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
-        {event.tags.map((tag) => (
+        {collection.tags.map((tag) => (
           <div
             key={tag.id}
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
-            <Link href={`/${currentOrg.slug}/${event.slug}?tag=${tag.value}`}>
+            <Link
+              href={`/${currentOrg.slug}/${collection.slug}?tag=${tag.value}`}
+            >
               <a className="text-gray-500 hover:text-black">{tag.value}</a>
             </Link>
           </div>
@@ -46,7 +48,7 @@ const Tags = ({ event, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           createTag({
             ...variables,
-            collectionId: event.id,
+            collectionId: collection.id,
           })
             .then(() => reset())
             .catch((error) => alert(error.message));
@@ -62,7 +64,7 @@ const Tags = ({ event, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={event.color}
+            color={collection.color}
             type="submit"
             disabled={!isDirty}
             loading={fetching}

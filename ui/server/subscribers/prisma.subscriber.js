@@ -91,7 +91,7 @@ export default {
       "delete-comment",
       "prisma",
       async ({ currentOrg, currentCollMember, event, dream, comment }) => {
-        if (!currentOrgMember || orgHasDiscourse(currentOrg)) {
+        if (orgHasDiscourse(currentOrg)) {
           return;
         }
         if (!comment) return;
@@ -100,10 +100,6 @@ export default {
         const deleted = await prisma.comment.delete({
           where: { id: comment.id },
         });
-
-        // liveUpdate.publish("commentsChanged", {
-        //   commentsChanged: { comment: deleted, action: "deleted" },
-        // });
 
         return deleted;
       }

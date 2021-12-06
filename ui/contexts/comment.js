@@ -22,7 +22,7 @@ export const COMMENTS_QUERY = gql`
         htmlContent
         createdAt
         isLog
-        orgMember {
+        collectionMember {
           id
           user {
             id
@@ -44,7 +44,7 @@ const ADD_COMMENT_MUTATION = gql`
       htmlContent
       createdAt
       updatedAt
-      orgMember {
+      collectionMember {
         id
         user {
           id
@@ -65,7 +65,7 @@ const EDIT_COMMENT_MUTATION = gql`
       htmlContent
       createdAt
       updatedAt
-      orgMember {
+      collectionMember {
         id
         user {
           id
@@ -74,28 +74,6 @@ const EDIT_COMMENT_MUTATION = gql`
         }
       }
       __typename
-    }
-  }
-`;
-
-const COMMENTS_CHANGED_SUBSCRIPTION = gql`
-  subscription OnCommentChanged($bucketId: ID!) {
-    commentsChanged(bucketId: $bucketId) {
-      action
-      comment {
-        id
-        content
-        htmlContent
-        createdAt
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
     }
   }
 `;
@@ -186,9 +164,9 @@ export const useCommentContext = (initialInput) => {
 
   return {
     dream: initialInput.dream,
-    event: initialInput.event,
+    collection: initialInput.collection,
     currentOrg: initialInput.currentOrg,
-    currentOrgMember: initialInput.currentOrgMember,
+    currentUser: initialInput.currentUser,
     from,
     setFrom,
     limit,

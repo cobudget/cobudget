@@ -32,7 +32,7 @@ const JOIN_ORG_MUTATION = gql`
         isAdmin
         isModerator
         isApproved
-        event {
+        collection {
           id
           title
           slug
@@ -53,7 +53,7 @@ const JOIN_COLLECTION_MUTATION = gql`
       isAdmin
       isModerator
       isApproved
-      event {
+      collection {
         id
         title
         slug
@@ -66,23 +66,13 @@ const JOIN_COLLECTION_MUTATION = gql`
   }
 `;
 
-const Header = ({
-  event,
-  currentUser,
-  currentOrgMember,
-  currentOrg,
-  openModal,
-  router,
-}) => {
+const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
 
   const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
-  const color = event?.color ?? "anthracit";
-  const currentCollectionMembership = currentOrgMember?.collectionMemberships.filter(
-    (member) => member.event.id === event?.id
-  )?.[0];
+  const color = collection?.color ?? "anthracit";
 
   return (
     <header className={`bg-${color} shadow-md w-full`}>
@@ -91,9 +81,9 @@ const Header = ({
           <div className="flex items-center">
             <OrganizationAndEventHeader
               currentOrg={currentOrg}
-              event={event}
+              collection={collection}
               color={color}
-              currentOrgMember={currentOrgMember}
+              currentUser={currentUser}
               router={router}
             />
           </div>
@@ -130,23 +120,23 @@ const Header = ({
               <>
                 {currentOrg && (
                   <>
-                    {!currentCollectionMembership &&
-                      event &&
-                      (event.registrationPolicy !== "INVITE_ONLY" ||
+                    {!currentUser.currentCollMember &&
+                      collection &&
+                      (collection.registrationPolicy !== "INVITE_ONLY" ||
                         currentOrgMember?.isAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
                           onClick={() =>
-                            joinCollection({ collectionId: event?.id })
+                            joinCollection({ collectionId: collection?.id })
                           }
                         >
-                          {event.registrationPolicy === "REQUEST_TO_JOIN"
+                          {collection.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
                             : "Join collection"}
                         </NavItem>
                       )}
-                    {!currentOrgMember && !event && (
+                    {!currentUser.currentOrgMember && !collection && (
                       <NavItem
                         primary
                         eventColor={color}
@@ -160,10 +150,7 @@ const Header = ({
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
-                    currentOrgMember={currentOrgMember}
                     openModal={openModal}
-                    event={event}
-                    currentOrg={currentOrg}
                   />
                 </div>
                 <div data-cy="user-is-logged-in" />
@@ -181,13 +168,13 @@ const Header = ({
           </div>
 
           {/* Mobile view of profile dropdown contents above (i.e. all profile dropdown items are declared twice!)*/}
-          {currentOrgMember && (
+          {currentUser && (
             <div className="pt-4 pb-1 sm:hidden bg-white mb-4 border-gray-300">
               <div className="flex items-center px-3">
-                <Avatar user={currentOrgMember.user} />
+                <Avatar user={currentUser} />
                 <div className="ml-4">
                   <span className="font-semibold text-gray-600">
-                    {currentOrgMember.user.name}
+                    {currentUser.name}
                   </span>
                 </div>
               </div>
@@ -196,7 +183,7 @@ const Header = ({
                 {/* <Link href="/profile">
                 <a className={css.mobileProfileItem}>Profile</a>
               </Link> */}
-                <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
+                {/* <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
                   Memberships
                 </h2>
                 {currentOrgMember.currentEventMembership && (
@@ -238,7 +225,7 @@ const Header = ({
                     </Link>
                   );
                 })}
-                <hr className="my-2" />
+                <hr className="my-2" /> */}
 
                 <button
                   onClick={() => {

@@ -23,17 +23,14 @@ export const CONTRIBUTIONS_QUERY = gql`
         id
         amount
         createdAt
-        eventMember {
+        collectionMember {
           id
-          orgMember {
+          user {
             id
-            user {
-              id
-              username
-            }
+            username
           }
         }
-        dream {
+        bucket {
           id
           title
         }
@@ -42,7 +39,7 @@ export const CONTRIBUTIONS_QUERY = gql`
   }
 `;
 
-const Contributions = ({ event }) => {
+const Contributions = ({ collection }) => {
   const [
     {
       data: { contributionsPage: { moreExist, contributions } } = {
@@ -52,7 +49,7 @@ const Contributions = ({ event }) => {
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
-    variables: { collectionId: event.id, offset: 0, limit: 15 },
+    variables: { collectionId: collection.id, offset: 0, limit: 15 },
   });
 
   return (
@@ -74,15 +71,15 @@ const Contributions = ({ event }) => {
                   <span className="text-gray-500 mr-4">
                     {dayjs(c.createdAt).format("LLL")}
                   </span>
-                  @{c.eventMember.orgMember.user.username} funded{" "}
-                  <Link href={`/${event.slug}/${c.dream.id}`}>
+                  @{c.collectionMember.user.username} funded{" "}
+                  <Link href={`/${collection.slug}/${c.bucket.id}`}>
                     <a className="font-semibold hover:underline">
-                      {c.dream.title}
+                      {c.bucket.title}
                     </a>
                   </Link>
                 </div>
                 <span className="text-green-700 font-semibold">
-                  {thousandSeparator(c.amount / 100)} {event.currency}
+                  {thousandSeparator(c.amount / 100)} {collection.currency}
                 </span>
               </div>
             ))}

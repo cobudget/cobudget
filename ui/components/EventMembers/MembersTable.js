@@ -98,7 +98,7 @@ const ActionsDropdown = ({
   );
 };
 
-const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
+const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
   const [allocateModalOpen, setAllocateModalOpen] = useState(false);
 
   return (
@@ -127,7 +127,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
       </TableCell>
       <TableCell align="right" className="flex space-x-2">
         {member.isAdmin && <p>Admin</p>}
-        {member.isModerator && <p>Guide</p>}
+        {member.isModerator && <p>Moderator</p>}
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (
@@ -135,11 +135,11 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setAllocateModalOpen(true)}
           >
-            {thousandSeparator(member.balance / 100)} {event.currency}
+            {thousandSeparator(member.balance / 100)} {collection.currency}
           </button>
         ) : (
           <span>
-            {thousandSeparator(member.balance / 100)} {event.currency}
+            {thousandSeparator(member.balance / 100)} {collection.currency}
           </span>
         )}
 
@@ -147,7 +147,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
           <AllocateModal
             open={allocateModalOpen}
             member={member}
-            event={event}
+            collection={collection}
             handleClose={() => setAllocateModalOpen(false)}
           />
         )}
@@ -158,7 +158,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
             member={member}
             deleteMember={deleteMember}
             updateMember={updateMember}
-            collectionId={event.id}
+            collectionId={collection.id}
           />
         </TableCell>
       )}
@@ -170,7 +170,7 @@ const EventMembersTable = ({
   approvedMembers,
   updateMember,
   deleteMember,
-  event,
+  collection,
   isAdmin,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
@@ -204,7 +204,7 @@ const EventMembersTable = ({
                 </div>
                 {bulkAllocateModalOpen && (
                   <BulkAllocateModal
-                    event={event}
+                    collection={collection}
                     handleClose={() => setBulkAllocateModalOpen(false)}
                   />
                 )}
@@ -217,7 +217,7 @@ const EventMembersTable = ({
               <Row
                 key={member.id}
                 member={member}
-                event={event}
+                collection={collection}
                 deleteMember={deleteMember}
                 updateMember={updateMember}
                 isAdmin={isAdmin}

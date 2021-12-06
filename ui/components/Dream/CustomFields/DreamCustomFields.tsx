@@ -40,7 +40,7 @@ const DreamCustomFields = ({
   }
 
   // TODO: can use the custom fields already fetched in the event query in _app
-  const { customFields: defaultCustomFields } = data.event;
+  const { customFields: defaultCustomFields } = data.collection;
 
   return (
     <div>

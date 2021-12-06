@@ -85,8 +85,8 @@ const css = {
 
 const DreamSidebar = ({
   dream,
-  event,
-  currentOrgMember,
+  collection,
+  currentUser,
   canEdit,
   currentOrg,
 }) => {
@@ -102,8 +102,8 @@ const DreamSidebar = ({
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const isEventAdminOrGuide =
-    currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isModerator;
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator;
   const hasNotReachedMaxGoal =
     dream.totalContributions < Math.max(dream.minGoal, dream.maxGoal);
   const hasReachedMinGoal = dream.totalContributions > dream.minGoal;
@@ -113,8 +113,8 @@ const DreamSidebar = ({
     !dream.funded &&
     !dream.canceled &&
     hasNotReachedMaxGoal &&
-    event.grantingIsOpen &&
-    currentOrgMember?.currentEventMembership;
+    collection.grantingIsOpen &&
+    currentUser?.currentCollMember;
   const showAcceptFundingButton =
     dream.approved &&
     !dream.funded &&
@@ -125,7 +125,7 @@ const DreamSidebar = ({
   const showMarkAsCompletedButton =
     isEventAdminOrGuide && dream.funded && !dream.completed;
   const showApproveButton =
-    isEventAdminOrGuide && !event.grantingHasClosed && !dream.approved;
+    isEventAdminOrGuide && !collection.grantingHasClosed && !dream.approved;
   const showUnapproveButton =
     isEventAdminOrGuide && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
@@ -135,11 +135,11 @@ const DreamSidebar = ({
     <>
       {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus dream={dream} event={event} />
+          <GrantingStatus dream={dream} collection={collection} />
           {showFundButton && (
             <>
               <Button
-                color={event.color}
+                color={collection.color}
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
@@ -149,15 +149,15 @@ const DreamSidebar = ({
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
                   dream={dream}
-                  event={event}
-                  currentOrgMember={currentOrgMember}
+                  collection={collection}
+                  currentUser={currentUser}
                 />
               )}
             </>
           )}
           {showAcceptFundingButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 confirm(
@@ -174,7 +174,7 @@ const DreamSidebar = ({
 
           {showPublishButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               onClick={() =>
                 publishDream({
                   bucketId: dream.id,
@@ -188,7 +188,7 @@ const DreamSidebar = ({
           )}
           {showApproveButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 approveForGranting({
@@ -202,7 +202,7 @@ const DreamSidebar = ({
           )}
           {showMarkAsCompletedButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 confirm(
@@ -289,7 +289,7 @@ const DreamSidebar = ({
                           setActionsDropdownOpen(false);
                           Router.push(
                             "/[org]/[collection]",
-                            `/${currentOrg.slug}/${event.slug}`
+                            `/${currentOrg?.slug ?? "c"}/${collection.slug}`
                           );
                           toast.success("Bucket deleted");
                         }
@@ -327,12 +327,12 @@ const DreamSidebar = ({
             {dream.cocreators.map((member) => (
               // <Tooltip key={member.user.id} title={member.user.name}>
               <div
-                key={member.orgMember.user.id}
+                key={member.user.id}
                 className="flex items-center mr-2 md:mr-3 sm:mb-2"
               >
-                <Avatar user={member.orgMember.user} />{" "}
+                <Avatar user={member.user} />{" "}
                 <span className="ml-2 text-gray-700 hidden md:block">
-                  {member.orgMember.user.username}
+                  {member.user.username}
                 </span>
               </div>
               // </Tooltip>
@@ -349,15 +349,15 @@ const DreamSidebar = ({
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
             cocreators={dream.cocreators}
-            event={event}
+            collection={collection}
             dream={dream}
-            currentOrgMember={currentOrgMember}
+            currentUser={currentUser}
           />
         </div>
         <Tags
           currentOrg={currentOrg}
           dream={dream}
-          event={event}
+          collection={collection}
           canEdit={canEdit}
         />
       </div>

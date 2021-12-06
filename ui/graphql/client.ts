@@ -267,7 +267,7 @@ export const client = (
               if (result.inviteCollectionMembers) {
                 cache.updateQuery(
                   {
-                    query: EVENT_MEMBERS_QUERY,
+                    query: COLLECTION_MEMBERS_QUERY,
                     variables: { collectionId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {

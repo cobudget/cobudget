@@ -4,13 +4,8 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const EDIT_EVENT = gql`
-  mutation editCollection(
-    $orgId: ID!
-    $collectionId: ID!
-    $bucketReviewIsOpen: Boolean
-  ) {
+  mutation editCollection($collectionId: ID!, $bucketReviewIsOpen: Boolean) {
     editCollection(
-      orgId: $orgId
       collectionId: $collectionId
       bucketReviewIsOpen: $bucketReviewIsOpen
     ) {
@@ -20,7 +15,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-const DreamReview = ({ event, currentOrg }) => {
+const DreamReview = ({ collection }) => {
   const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
   const {
     handleSubmit,
@@ -39,8 +34,7 @@ const DreamReview = ({ event, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           editCollection({
             ...variables,
-            orgId: currentOrg.id,
-            collectionId: event.id,
+            collectionId: collection.id,
             bucketReviewIsOpen: variables.bucketReviewIsOpen === "true",
           })
             //.then(() => null)
@@ -50,7 +44,7 @@ const DreamReview = ({ event, currentOrg }) => {
         <SelectField
           name="bucketReviewIsOpen"
           label="Show Review Prompt"
-          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
+          defaultValue={collection.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
@@ -82,7 +76,7 @@ const DreamReview = ({ event, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={event.color}
+            color={collection.color}
             type="submit"
             disabled={!isDirty}
             loading={loading}

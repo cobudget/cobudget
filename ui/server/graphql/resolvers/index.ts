@@ -44,15 +44,16 @@ const isMemberOfOrg = async (parent, { orgId }, { user }) => {
   return skip;
 };
 
-const isCollMember = async (parent, { collectionId }, { user }) => {
+const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  // const collectionMember = await getCollectionMember({
-  //   userId: user.id,
-  //   collectionId,
-  // });
-  const collectionMember = await prisma.collectionMember.findUnique({
-    where: { userId_collectionId: { userId: user.id, collectionId } },
+  const collectionMember = await getCollectionMember({
+    userId: user.id,
+    collectionId,
+    bucketId,
   });
+  // const collectionMember = await prisma.collectionMember.findUnique({
+  //   where: { userId_collectionId: { userId: user.id, collectionId } },
+  // });
   if (!collectionMember) {
     throw new Error("Collection member does not exist");
   } else if (!collectionMember.isApproved) {
@@ -175,15 +176,6 @@ const resolvers = {
       if (!orgSlug) return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
     },
-    // currentOrgMember: async (parent, { orgId }, { user }) => {
-    //   if (!user || !orgId) return null;
-
-    //   return await prisma.orgMember.findUnique({
-    //     where: {
-    //       organizationId_userId: { organizationId: orgId, userId: user.id },
-    //     },
-    //   });
-    // },
     organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
       return prisma.organization.findUnique({ where: { id: orgId } });
     }),
@@ -254,7 +246,7 @@ const resolvers = {
         };
       }
     ),
-    dream: async (parent, { id }) => {
+    bucket: async (parent, { id }) => {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
       if (bucket.deleted) return null;
       return bucket;
@@ -404,10 +396,17 @@ const resolvers = {
                 !(comment.username === "system" && comment.raw === "")
             )
             .map(async (post) => {
-              const author = await prisma.orgMember.findFirst({
+              const author = await prisma.collectionMember.findFirst({
                 where: {
-                  organizationId: org.id,
-                  discourseUsername: post.username,
+                  collectionId: bucket.collectionId,
+                  user: {
+                    orgMemberships: {
+                      some: {
+                        discourseUsername: post.username,
+                        organizationId: org.id,
+                      },
+                    },
+                  },
                 },
               });
 
@@ -1027,7 +1026,7 @@ const resolvers = {
           );
         }
 
-        if (content.length < (currentOrg.discourse?.minPostLength || 3)) {
+        if (content.length < (currentOrg?.discourse?.minPostLength || 3)) {
           throw new Error(
             `Your post needs to be at least ${
               currentOrg.discourse?.minPostLength || 3
@@ -1035,7 +1034,7 @@ const resolvers = {
           );
         }
 
-        const comment = { content, authorId: currentOrgMember.id };
+        const comment = { content, collMemberId: currentCollMember.id };
 
         const { discourse, prisma: prismaResult } = await eventHub.publish(
           "create-comment",
@@ -1043,11 +1042,14 @@ const resolvers = {
             currentOrg,
             currentOrgMember,
             currentCollMember,
+            currentUser: user,
             dream: bucket,
             event: bucket.collection,
             comment,
           }
         );
+
+        console.log({ comment, prismaResult, currentCollMember });
 
         return discourse || prismaResult;
       }
@@ -1594,7 +1596,7 @@ const resolvers = {
         },
       });
 
-      if (currentCollMember?.isAdmin)
+      if (!currentCollMember?.isAdmin)
         throw new Error("You are not admin for this collection");
 
       await allocateToMember({
@@ -1971,26 +1973,6 @@ const resolvers = {
     user: async (orgMember) => {
       return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
-    // eventMemberships: async (orgMember) => {
-    //   return await prisma.collectionMember.findMany({
-    //     where: { orgMemberId: orgMember.id },
-    //   });
-    // },
-
-    // currentEventMembership: async (orgMember, { collectionSlug }, { user }) => {
-    //   if (!user) return null;
-
-    //   if (!collectionSlug) return null;
-
-    //   const collectionMember = await prisma.collectionMember.findFirst({
-    //     where: {
-    //       orgMember: { userId: user.id, id: orgMember.id },
-    //       collection: { slug: collectionSlug },
-    //     },
-    //   });
-
-    //   return collectionMember;
-    // },
     email: async (member, _, { user }) => {
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
@@ -2041,14 +2023,31 @@ const resolvers = {
       }),
   },
   User: {
-    // currentOrgMember: async (user, { orgSlug }, { user: currentUser }) => {
-    //   return null;
-    //   const currentOrgMember = await prisma.orgMember.findFirst({
-    //     where: { organization: { slug: orgSlug }, userId: currentUser.id },
-    //   });
-    //   if (!currentOrgMember) return null;
-    //   return user.id === currentOrgMember.userId ? currentOrgMember : null;
-    // },
+    currentOrgMember: async (parent, { orgSlug }, { user }) => {
+      if (user?.id !== parent.id) return null;
+      if (!orgSlug) return null;
+      return prisma.orgMember.findFirst({
+        where: { organization: { slug: orgSlug }, userId: user.id },
+      });
+    },
+    currentCollMember: async (
+      parent,
+      { orgSlug, collectionSlug },
+      { user }
+    ) => {
+      if (user?.id !== parent.id) return null;
+      if (!collectionSlug) return null;
+      return prisma.collectionMember.findFirst({
+        where: {
+          collection: {
+            slug: collectionSlug,
+            ...(orgSlug &&
+              orgSlug !== "c" && { organization: { slug: orgSlug } }),
+          },
+          userId: user.id,
+        },
+      });
+    },
     orgMemberships: async (user) =>
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     collectionMemberships: async (user) =>
@@ -2391,30 +2390,30 @@ const resolvers = {
     },
   },
   Contribution: {
-    dream: async (contribution) => {
+    bucket: async (contribution) => {
       return prisma.bucket.findUnique({
         where: { id: contribution.bucketId },
       });
     },
-    event: async (contribution) => {
+    collection: async (contribution) => {
       return prisma.collection.findUnique({
         where: { id: contribution.collectionId },
       });
     },
-    eventMember: async (contribution) => {
+    collectionMember: async (contribution) => {
       return prisma.collectionMember.findUnique({
         where: { id: contribution.collectionMemberId },
       });
     },
   },
   Comment: {
-    orgMember: async (comment) => {
+    collectionMember: async (comment) => {
       // make logs anonymous
       if (comment.isLog) return null;
 
-      return prisma.orgMember.findUnique({
+      return prisma.collectionMember.findUnique({
         where: {
-          id: comment.orgMemberId,
+          id: comment.collMemberId,
         },
       });
     },

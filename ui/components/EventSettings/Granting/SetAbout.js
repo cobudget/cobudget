@@ -12,7 +12,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-export default ({ closeModal, event }) => {
+export default ({ closeModal, collection }) => {
   const [, editCollection] = useMutation(EDIT_EVENT);
   const { handleSubmit, register } = useForm();
 
@@ -22,7 +22,7 @@ export default ({ closeModal, event }) => {
         <h1 className="text-3xl">Set about</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editCollection({ ...variables, collectionId: event.id })
+            editCollection({ ...variables, collectionId: collection.id })
               .then(() => {
                 closeModal();
               })
@@ -36,7 +36,7 @@ export default ({ closeModal, event }) => {
             <TextField
               name="about"
               label="About (markdown)"
-              defaultValue={event.about}
+              defaultValue={collection.about}
               inputRef={register}
               fullWidth
               multiline

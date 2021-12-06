@@ -10,7 +10,8 @@ const DreamBudget = ({
   budgetItems,
   bucketId,
   canEdit,
-  event,
+  collection,
+  currentOrg,
   currency,
   allowStretchGoals,
   minGoal,
@@ -41,7 +42,8 @@ const DreamBudget = ({
           allowStretchGoals={allowStretchGoals}
           handleClose={() => setEditing(false)}
           open={editing}
-          event={event}
+          collection={collection}
+          currentOrg={currentOrg}
         />
       )}
 

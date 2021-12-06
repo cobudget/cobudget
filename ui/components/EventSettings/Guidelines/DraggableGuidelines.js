@@ -93,13 +93,13 @@ const SortableItem = sortableElement(
   }
 );
 
-const DraggableGuidelines = ({ event, items, setEditingItem }) => {
+const DraggableGuidelines = ({ collection, items, setEditingItem }) => {
   const [{ fetching: loading }, setGuidelinePosition] = useMutation(
     SET_GUIDELINE_POSITION_MUTATION
   );
   const setItemPosition = (guidelineId, newPosition) => {
     setGuidelinePosition({
-      collectionId: event.id,
+      collectionId: collection.id,
       guidelineId,
       newPosition,
     });
@@ -107,7 +107,7 @@ const DraggableGuidelines = ({ event, items, setEditingItem }) => {
 
   return (
     <DraggableItems
-      event={event}
+      collection={collection}
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}

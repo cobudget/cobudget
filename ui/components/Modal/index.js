@@ -22,13 +22,7 @@ const modalComponents = {
   EDIT_PROFILE: EditProfile,
 };
 
-const Modal = ({
-  active,
-  closeModal,
-  currentOrgMember,
-  currentOrg,
-  currentUser,
-}) => {
+const Modal = ({ active, closeModal, currentOrg, currentUser }) => {
   const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
@@ -43,7 +37,6 @@ const Modal = ({
           <ModalComponent
             currentOrg={currentOrg}
             closeModal={closeModal}
-            currentOrgMember={currentOrgMember}
             currentUser={currentUser}
           />
         )}

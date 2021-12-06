@@ -9,13 +9,10 @@ const SEARCH_MEMBERS_QUERY = gql`
     members(collectionId: $collectionId, isApproved: $isApproved) {
       id
       isApproved
-      orgMember {
+      user {
         id
-        user {
-          id
-          username
-          avatar
-        }
+        username
+        avatar
       }
     }
   }
@@ -27,13 +24,10 @@ const ADD_CO_CREATOR_MUTATION = gql`
       id
       cocreators {
         id
-        orgMember {
+        user {
           id
-          user {
-            id
-            username
-            avatar
-          }
+          username
+          avatar
         }
       }
     }
@@ -46,12 +40,10 @@ const REMOVE_CO_CREATOR_MUTATION = gql`
       id
       cocreators {
         id
-        orgMember {
-          user {
-            id
-            username
-            avatar
-          }
+        user {
+          id
+          username
+          avatar
         }
       }
     }
@@ -136,9 +128,9 @@ const EditCocreatorsModal = ({
   open,
   handleClose,
   dream,
-  event,
+  collection,
   cocreators,
-  currentOrgMember,
+  currentUser,
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
@@ -160,7 +152,7 @@ const EditCocreatorsModal = ({
               member={member}
               remove={() => {
                 if (
-                  member.id !== currentOrgMember.currentEventMembership.id ||
+                  member.id !== currentUser?.currentCollMember.id ||
                   confirm(
                     "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
                   )
@@ -187,7 +179,7 @@ const EditCocreatorsModal = ({
               searchInput={searchInput}
               addCocreator={addCocreator}
               cocreators={cocreators}
-              collectionId={event.id}
+              collectionId={collection.id}
               bucket={dream}
             />
           </div>

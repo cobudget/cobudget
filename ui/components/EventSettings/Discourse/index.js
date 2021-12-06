@@ -25,7 +25,8 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-const Discourse = ({ event, currentOrg }) => {
+const Discourse = ({ collection, currentOrg }) => {
+  if (!currentOrg) return null;
   const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
@@ -50,7 +51,7 @@ const Discourse = ({ event, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           editCollection({
             ...variables,
-            collectionId: event.id,
+            collectionId: collection.id,
             discourseCategoryId: parseInt(variables.discourseCategoryId),
           })
             //.then(() => handleClose())
@@ -60,7 +61,7 @@ const Discourse = ({ event, currentOrg }) => {
         {categories.length > 0 ? (
           <SelectField
             name="discourseCategoryId"
-            defaultValue={event.discourseCategoryId}
+            defaultValue={collection.discourseCategoryId}
             inputRef={register}
             className="my-4"
           >
@@ -76,7 +77,7 @@ const Discourse = ({ event, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={event.color}
+            color={collection.color}
             type="submit"
             disabled={!isDirty}
             loading={loading}

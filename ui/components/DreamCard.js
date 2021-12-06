@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 
-const DreamCard = ({ dream, event, currentOrg }) => {
+const DreamCard = ({ dream, collection, currentOrg }) => {
   const showFundingStats =
     (dream.minGoal || dream.maxGoal) && dream.approved && !dream.canceled;
   return (
@@ -29,7 +29,7 @@ const DreamCard = ({ dream, event, currentOrg }) => {
         <div>
           {showFundingStats && (
             <ProgressBar
-              color={event.color}
+              color={collection.color}
               ratio={(dream.totalContributions + dream.income) / dream.minGoal}
               className="mt-2 mb-3"
             />
@@ -52,8 +52,9 @@ const DreamCard = ({ dream, event, currentOrg }) => {
 
             {parseInt(dream.numberOfComments) > 0 && (
               <Link
-                href="/[org]/[collection]/[bucket]#comments"
-                as={`/${currentOrg.slug}/${event.slug}/${dream.id}#comments`}
+                href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+                  dream.id
+                }#comments`}
               >
                 <div className="flex items-center text-gray-700">
                   <CommentIcon className="w-5 h-5" />

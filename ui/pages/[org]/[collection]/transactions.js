@@ -1,15 +1,15 @@
 import SubMenu from "components/SubMenu";
-import Contributions from "components/Contributions";
+import Contributions from "../../../components/Contributions";
 
-const ContributionsPage = ({ event, currentOrgMember }) => {
+const ContributionsPage = ({ collection, currentUser }) => {
   const isAdmin =
-    currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.isAdmin;
-  if (!isAdmin || !event) return null;
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentOrgMember?.isAdmin;
+  if (!isAdmin || !collection) return null;
   return (
     <div className="">
-      <SubMenu currentOrgMember={currentOrgMember} event={event} />
-      <Contributions event={event} />
+      <SubMenu currentUser={currentUser} collection={collection} />
+      <Contributions collection={collection} />
     </div>
   );
 };

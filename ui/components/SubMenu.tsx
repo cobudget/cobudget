@@ -1,23 +1,19 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const orgItems = ({ currentOrgMember, orgSlug }) => {
+const orgItems = ({ currentUser, orgSlug }) => {
   return [
     { label: "Overview", href: `/${orgSlug}` },
     // { label: "Realities", href: "/realities" },
     { label: "Members", href: `/${orgSlug}/members`, admin: true },
     { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
-  ].filter((i) => (i.admin ? currentOrgMember?.isAdmin : true));
+  ].filter((i) => (i.admin ? currentUser?.currentOrgMember?.isAdmin : true));
 };
 
-export const collectionItems = ({
-  currentOrgMember,
-  orgSlug,
-  collectionSlug,
-}) => {
+export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
   const isAdmin =
-    currentOrgMember?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isAdmin;
+    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentCollMember?.isAdmin;
   return [
     { label: "Overview", href: `/${orgSlug}/${collectionSlug}` },
     { label: "About", href: `/${orgSlug}/${collectionSlug}/about` },
@@ -40,23 +36,23 @@ export const collectionItems = ({
 };
 
 export default function SubMenu({
-  event,
-  currentOrgMember,
+  collection,
+  currentUser,
 }: {
-  event?: any;
-  currentOrgMember: any;
+  collection?: any;
+  currentUser: any;
 }) {
   const router = useRouter();
 
-  const items = event
+  const items = collection
     ? collectionItems({
-        currentOrgMember,
+        currentUser,
         collectionSlug: router.query.collection,
         orgSlug: router.query.org,
       })
-    : orgItems({ currentOrgMember, orgSlug: router.query.org });
+    : orgItems({ currentUser, orgSlug: router.query.org });
 
-  const color = event?.color ?? "anthracit";
+  const color = collection?.color ?? "anthracit";
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;

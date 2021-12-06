@@ -20,15 +20,12 @@ const CONTRIBUTE_MUTATION = gql`
         amount
         createdAt
 
-        eventMember {
+        collectionMember {
           id
-          orgMember {
+          user {
             id
-            user {
-              id
-              name
-              username
-            }
+            name
+            username
           }
         }
       }
@@ -36,7 +33,7 @@ const CONTRIBUTE_MUTATION = gql`
   }
 `;
 
-const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
+const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
   const [inputValue, setInputValue] = useState("");
   const amount = Math.round(inputValue * 100);
 
@@ -69,10 +66,14 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
   const amountToMaxGoal =
     Math.max(dream.minGoal, dream.maxGoal) - dream.totalContributions;
 
-  const memberBalance = currentOrgMember.currentEventMembership.balance;
+  const memberBalance = currentUser.currentCollMember.balance;
 
-  const max = event.maxAmountToBucketPerUser
-    ? Math.min(amountToMaxGoal, memberBalance, event.maxAmountToBucketPerUser)
+  const max = collection.maxAmountToBucketPerUser
+    ? Math.min(
+        amountToMaxGoal,
+        memberBalance,
+        collection.maxAmountToBucketPerUser
+      )
     : Math.min(amountToMaxGoal, memberBalance);
 
   return (
@@ -86,20 +87,23 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
           Contribute to {dream.title}
         </h1>
         <p className="text-gray-800">
-          Available balance:{" "}
-          {currentOrgMember.currentEventMembership.balance / 100}{" "}
-          {event.currency}
+          Available balance: {currentUser.currentCollMember.balance / 100}{" "}
+          {collection.currency}
         </p>
-        {event.maxAmountToBucketPerUser && (
+        {collection.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {event.maxAmountToBucketPerUser / 100} {event.currency} to one
-            bucket
+            Max. {collection.maxAmountToBucketPerUser / 100}{" "}
+            {collection.currency} to one bucket
           </p>
         )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            contribute({ collectionId: event.id, bucketId: dream.id, amount })
+            contribute({
+              collectionId: collection.id,
+              bucketId: dream.id,
+              amount,
+            })
               .then(() => handleClose())
               .catch((err) => alert(err.message));
           }}
@@ -109,9 +113,9 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
             className="my-3"
             autoFocus
             placeholder="0"
-            endAdornment={event.currency}
+            endAdornment={collection.currency}
             size="large"
-            color={event.color}
+            color={collection.color}
             inputProps={{
               value: inputValue,
               onChange: (e) => setInputValue(e.target.value),
@@ -125,7 +129,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
             type="submit"
             size="large"
             fullWidth
-            color={event.color}
+            color={collection.color}
             loading={loading}
             disabled={amount <= 0}
             className="my-2"
@@ -136,7 +140,7 @@ const ContributeModal = ({ handleClose, dream, event, currentOrgMember }) => {
             size="large"
             fullWidth
             variant="secondary"
-            color={event.color}
+            color={collection.color}
             onClick={handleClose}
           >
             Cancel
