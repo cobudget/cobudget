@@ -85,7 +85,7 @@ const ActionsDropdown = ({
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
+                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
               )
             )
               deleteMember({ collectionId, memberId: member.id });
@@ -105,29 +105,23 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
     <TableRow>
       <TableCell component="th" scope="row">
         <div className="flex space-x-3">
-          <Avatar user={member.orgMember.user} />
+          <Avatar user={member.user} />
           <div>
             <p className="font-medium text-base">{member.name}</p>
-            <p className="text-gray-700 text-sm">
-              @{member.orgMember.user.username}
-            </p>
+            <p className="text-gray-700 text-sm">@{member.user.username}</p>
           </div>
         </div>
       </TableCell>
       <TableCell>
         <p>{member.email}</p>
-        {!member.orgMember.user.verifiedEmail && (
+        {!member.user.verifiedEmail && (
           <p className="text-sm text-gray-500">(not verified)</p>
         )}
       </TableCell>
       <TableCell component="th" scope="row">
-        {member.orgMember.bio && (
-          <Tooltip
-            position="bottom-start"
-            size="small"
-            title={member.orgMember.bio}
-          >
-            <p className="truncate max-w-xs">{member.orgMember.bio}</p>
+        {member.bio && (
+          <Tooltip position="bottom-start" size="small" title={member.bio}>
+            <p className="truncate max-w-xs">{member.bio}</p>
           </Tooltip>
         )}
       </TableCell>

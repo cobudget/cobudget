@@ -122,7 +122,7 @@ const isCollModOrAdmin = async (parent, { bucketId }, { user }) => {
 
 const isOrgAdmin = async (parent, { orgId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  if (!orgId) throw new Error("You need to provide orgId");
+  if (!orgId) return skip;
   const orgMember = await getOrgMember({
     userId: user.id,
     orgId,
@@ -175,15 +175,15 @@ const resolvers = {
       if (!orgSlug) return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
     },
-    currentOrgMember: async (parent, { orgId }, { user }) => {
-      if (!user || !orgId) return null;
+    // currentOrgMember: async (parent, { orgId }, { user }) => {
+    //   if (!user || !orgId) return null;
 
-      return await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId: orgId, userId: user.id },
-        },
-      });
-    },
+    //   return await prisma.orgMember.findUnique({
+    //     where: {
+    //       organizationId_userId: { organizationId: orgId, userId: user.id },
+    //     },
+    //   });
+    // },
     organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
       return prisma.organization.findUnique({ where: { id: orgId } });
     }),
@@ -222,7 +222,7 @@ const resolvers = {
       return await prisma.collection.findFirst({
         where: {
           slug: collectionSlug,
-          ...(orgSlug && { organization: { slug: orgSlug } }),
+          ...(orgSlug !== "c" && { organization: { slug: orgSlug } }),
           deleted: { not: true },
         },
       });
@@ -259,9 +259,9 @@ const resolvers = {
       if (bucket.deleted) return null;
       return bucket;
     },
-    dreamsPage: async (
+    bucketsPage: async (
       parent,
-      { collectionId, orgId, textSearchTerm, tag: tagValue, offset = 0, limit },
+      { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
       { user }
     ) => {
       const currentMember = await getCollectionMember({
@@ -301,7 +301,7 @@ const resolvers = {
 
       return {
         moreExist: shuffledBuckets.length > limit + offset,
-        dreams: shuffledBuckets.slice(offset, limit + offset),
+        buckets: shuffledBuckets.slice(offset, limit + offset),
       };
     },
     orgMembersPage: combineResolvers(
@@ -1895,17 +1895,15 @@ const resolvers = {
       return collectionMember;
     },
   },
-  EventMember: {
-    event: async (member) => {
-      return await prisma.collection.findUnique({
+  CollectionMember: {
+    collection: async (member) =>
+      prisma.collection.findUnique({
         where: { id: member.collectionId },
-      });
-    },
-    orgMember: async (member) => {
-      return await prisma.orgMember.findUnique({
-        where: { id: member.orgMemberId },
-      });
-    },
+      }),
+    user: async (member) =>
+      prisma.user.findUnique({
+        where: { id: member.userId },
+      }),
     balance: async (member) => {
       const {
         _sum: { amount: totalAllocations },
@@ -2054,7 +2052,9 @@ const resolvers = {
     orgMemberships: async (user) =>
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     collectionMemberships: async (user) =>
-      prisma.collectionMember.findMany({ where: { userId: user.id } }),
+      prisma.collectionMember.findMany({
+        where: { userId: user.id, collection: { organization: null } },
+      }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
     email: (parent, _, { user }) => {
@@ -2073,7 +2073,7 @@ const resolvers = {
         : `# Welcome to ${org.name}`;
     },
     subdomain: (org) => org.slug,
-    events: async (org) => {
+    collections: async (org) => {
       return await prisma.collection.findMany({
         where: { organizationId: org.id },
       });
@@ -2212,7 +2212,7 @@ const resolvers = {
         where: { id: collection.organizationId },
       }),
   },
-  Dream: {
+  Bucket: {
     cocreators: async (bucket) => {
       // const { cocreators } = await prisma.bucket.findUnique({
       //   where: { id: bucket.id },

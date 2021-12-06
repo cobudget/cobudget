@@ -7,7 +7,7 @@ import { simplePagination } from "@urql/exchange-graphcache/extras";
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
 import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { DREAMS_QUERY } from "pages/[org]/[collection]";
+import { BUCKETS_QUERY } from "pages/[org]/[collection]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
@@ -46,11 +46,11 @@ export const client = (
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
-          DreamsPage: () => null,
+          BucketsPage: () => null,
         },
         // resolvers: {
         //   Query: {
-        //     dreamsPage: simplePagination({
+        //     bucketsPage: simplePagination({
         //       // offsetArgument: "offset",
         //       // limitArgument: "limit",
         //       // mergeMode: "after",
@@ -164,11 +164,11 @@ export const client = (
             deleteDream(result: any, { bucketId }, cache) {
               const fields = cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "dreamsPage")
+                .filter((field) => field.fieldName === "bucketsPage")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: DREAMS_QUERY,
+                      query: BUCKETS_QUERY,
                       variables: {
                         offset: field.arguments.offset,
                         limit: field.arguments.limit,
@@ -177,8 +177,8 @@ export const client = (
                       },
                     },
                     (data) => {
-                      data.dreamsPage.dreams = data.dreamsPage.dreams.filter(
-                        (dream) => dream.id !== bucketId
+                      data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
+                        (bucket) => bucket.id !== bucketId
                       );
                       return data;
                     }

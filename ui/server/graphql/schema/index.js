@@ -6,21 +6,21 @@ const schema = gql`
 
   type Query {
     currentUser: User
-    currentOrgMember(orgId: ID): OrgMember
+    # currentOrgMember(orgId: ID): OrgMember
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
     collections(orgSlug: String!, limit: Int): [Collection!]
     collection(orgSlug: String, collectionSlug: String): Collection
-    dream(id: ID!): Dream
-    dreamsPage(
-      orgSlug: String!
-      eventSlug: String!
+    dream(id: ID!): Bucket
+    bucketsPage(
+      # orgId: ID!
+      collectionId: ID!
       textSearchTerm: String
       tag: String
       offset: Int
       limit: Int
-    ): DreamsPage
+    ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembersPage(orgId: ID!, offset: Int, limit: Int): OrgMembersPage
     membersPage(
@@ -29,7 +29,7 @@ const schema = gql`
       offset: Int
       limit: Int
     ): MembersPage
-    members(collectionId: ID!, isApproved: Boolean): [EventMember]
+    members(collectionId: ID!, isApproved: Boolean): [CollectionMember]
     categories(orgId: ID!): [Category!]
     contributionsPage(
       collectionId: ID!
@@ -55,7 +55,7 @@ const schema = gql`
     setTodosFinished(orgId: ID!): Organization
 
     createCollection(
-      orgId: ID!
+      orgId: ID
       slug: String!
       title: String!
       currency: String!
@@ -107,9 +107,9 @@ const schema = gql`
     editDreamCustomField(
       bucketId: ID!
       customField: CustomFieldValueInput!
-    ): Dream!
+    ): Bucket!
 
-    createDream(collectionId: ID!, title: String!): Dream
+    createDream(collectionId: ID!, title: String!): Bucket
     editDream(
       bucketId: ID!
       title: String
@@ -118,35 +118,38 @@ const schema = gql`
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
       tags: [String!]
-    ): Dream
-    deleteDream(bucketId: ID!): Dream
+    ): Bucket
+    deleteDream(bucketId: ID!): Bucket
 
-    addImage(bucketId: ID!, image: ImageInput!): Dream
-    deleteImage(bucketId: ID!, imageId: ID!): Dream
+    addImage(bucketId: ID!, image: ImageInput!): Bucket
+    deleteImage(bucketId: ID!, imageId: ID!): Bucket
 
-    addCocreator(bucketId: ID!, memberId: ID!): Dream
-    removeCocreator(bucketId: ID!, memberId: ID!): Dream
+    addCocreator(bucketId: ID!, memberId: ID!): Bucket
+    removeCocreator(bucketId: ID!, memberId: ID!): Bucket
 
     createTag(collectionId: ID!, tagValue: String!): Collection
-    addTag(bucketId: ID!, tagId: ID!): Dream
-    removeTag(bucketId: ID!, tagId: ID!): Dream
+    addTag(bucketId: ID!, tagId: ID!): Bucket
+    removeTag(bucketId: ID!, tagId: ID!): Bucket
 
-    publishDream(bucketId: ID!, unpublish: Boolean): Dream
+    publishDream(bucketId: ID!, unpublish: Boolean): Bucket
 
     addComment(bucketId: ID!, content: String!): Comment
     editComment(bucketId: ID!, commentId: ID!, content: String!): Comment
     deleteComment(bucketId: ID!, commentId: ID!): Comment
 
-    raiseFlag(bucketId: ID!, guidelineId: ID!, comment: String!): Dream
-    resolveFlag(bucketId: ID!, flagId: ID!, comment: String!): Dream
-    allGoodFlag(bucketId: ID!): Dream
+    raiseFlag(bucketId: ID!, guidelineId: ID!, comment: String!): Bucket
+    resolveFlag(bucketId: ID!, flagId: ID!, comment: String!): Bucket
+    allGoodFlag(bucketId: ID!): Bucket
 
     joinOrg(orgId: ID!): OrgMember
 
     updateProfile(username: String, name: String): User
-    updateBio(collMemberId: ID!, bio: String): EventMember
+    updateBio(collMemberId: ID!, bio: String): CollectionMember
 
-    inviteCollectionMembers(collectionId: ID!, emails: String!): [EventMember]
+    inviteCollectionMembers(
+      collectionId: ID!
+      emails: String!
+    ): [CollectionMember]
     inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
     updateOrgMember(orgId: ID!, memberId: ID!, isOrgAdmin: Boolean): OrgMember
     updateMember(
@@ -155,12 +158,12 @@ const schema = gql`
       isApproved: Boolean
       isAdmin: Boolean
       isModerator: Boolean
-    ): EventMember
-    deleteMember(collectionId: ID!, memberId: ID!): EventMember
+    ): CollectionMember
+    deleteMember(collectionId: ID!, memberId: ID!): CollectionMember
 
     deleteOrganization(organizationId: ID!): Organization
 
-    approveForGranting(bucketId: ID!, approved: Boolean!): Dream
+    approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
     updateGrantingSettings(
       collectionId: ID!
       currency: String
@@ -175,19 +178,19 @@ const schema = gql`
       collectionMemberId: ID!
       amount: Int!
       type: AllocationType!
-    ): EventMember
+    ): CollectionMember
     bulkAllocate(
       collectionId: ID!
       amount: Int!
       type: AllocationType!
-    ): [EventMember]
-    contribute(collectionId: ID!, bucketId: ID!, amount: Int!): Dream
+    ): [CollectionMember]
+    contribute(collectionId: ID!, bucketId: ID!, amount: Int!): Bucket
 
-    cancelFunding(bucketId: ID!): Dream
-    acceptFunding(bucketId: ID!): Dream
-    markAsCompleted(bucketId: ID!): Dream
+    cancelFunding(bucketId: ID!): Bucket
+    acceptFunding(bucketId: ID!): Bucket
+    markAsCompleted(bucketId: ID!): Bucket
 
-    joinCollection(collectionId: ID!): EventMember
+    joinCollection(collectionId: ID!): CollectionMember
   }
 
   type Organization {
@@ -199,6 +202,8 @@ const schema = gql`
     customDomain: String
     logo: String
     collections: [Collection]
+    discourseUrl: String
+    finishedTodos: Boolean
   }
 
   enum CollectionType {
@@ -278,6 +283,7 @@ const schema = gql`
     verifiedEmail: Boolean!
     isRootAdmin: Boolean
     orgMemberships: [OrgMember!]
+    collectionMemberships: [CollectionMember!]
     avatar: String
     createdAt: Date
     # currentOrgMember: OrgMember
@@ -290,8 +296,8 @@ const schema = gql`
     isOrgAdmin: Boolean
     bio: String #what do we do with this one?
     createdAt: Date
-    currentEventMembership(collectionSlug: String): EventMember #this is weird syntax...
-    collectionMemberships: [EventMember!]
+    currentCollectionMembership(collectionSlug: String): CollectionMember #this is weird syntax...
+    collectionMemberships: [CollectionMember!]
     discourseUsername: String
     hasDiscourseApiKey: Boolean
     email: String
@@ -303,10 +309,10 @@ const schema = gql`
     orgMembers: [OrgMember]
   }
 
-  type EventMember {
+  type CollectionMember {
     id: ID!
-    event: Collection!
-    orgMember: OrgMember!
+    collection: Collection!
+    user: User!
     isAdmin: Boolean!
     isModerator: Boolean
     isApproved: Boolean!
@@ -324,7 +330,7 @@ const schema = gql`
       isApproved: Boolean
       offset: Int
       limit: Int
-    ): [EventMember]
+    ): [CollectionMember]
   }
 
   # enum Role {
@@ -332,14 +338,14 @@ const schema = gql`
   #   GUIDE
   # }
 
-  type Dream {
+  type Bucket {
     id: ID!
     event: Collection!
     title: String!
     description: String
     summary: String
     images: [Image!]
-    cocreators: [EventMember]!
+    cocreators: [CollectionMember]!
     budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
     approved: Boolean
@@ -367,9 +373,9 @@ const schema = gql`
     collection: Collection!
   }
 
-  type DreamsPage {
+  type BucketsPage {
     moreExist: Boolean
-    dreams: [Dream]
+    buckets: [Bucket]
   }
 
   type Comment {
@@ -440,7 +446,7 @@ const schema = gql`
   interface Transaction {
     id: ID!
     event: Collection!
-    eventMember: EventMember!
+    eventMember: CollectionMember!
     amount: Int!
     createdAt: Date
   }
@@ -448,10 +454,10 @@ const schema = gql`
   type Contribution implements Transaction {
     id: ID!
     event: Collection!
-    eventMember: EventMember!
+    eventMember: CollectionMember!
     amount: Int!
     createdAt: Date
-    dream: Dream!
+    dream: Bucket!
   }
 
   type ContributionsPage {
@@ -462,7 +468,7 @@ const schema = gql`
   type Allocation implements Transaction {
     id: ID!
     event: Collection!
-    eventMember: EventMember!
+    eventMember: CollectionMember!
     amount: Int!
     createdAt: Date
   }
@@ -542,7 +548,7 @@ const schema = gql`
   # type Log {
   #   createdAt: Date
   #   user: User
-  #   dream: Dream
+  #   dream: Bucket
   #   event: Collection
   #   details: LogDetails
   #   type: String

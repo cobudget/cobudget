@@ -25,7 +25,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
           className={`hover:bg-${color}-dark px-1 py-1 text-white rounded-md font-medium flex space-x-4`}
         >
           <img src="/cobudget-logo.png" className="h-6" />
-          {!currentOrg && <h1>Cobudget</h1>}
+          {!currentOrg && !event && <h1>Cobudget</h1>}
         </a>
       </Link>
       {currentOrg && (
@@ -62,7 +62,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
           <ChevronArrowRightIcon className={`w-4 h-4 text-white opacity-50`} />
 
           <div className="group flex items-center">
-            <Link href={`/${currentOrg.slug}/${event.slug}`}>
+            <Link href={`/${currentOrg?.slug ?? "c"}/${event.slug}`}>
               <a
                 className={`hover:bg-${color}-dark px-2 py-1 text-white rounded-md mx-0 font-medium`}
               >

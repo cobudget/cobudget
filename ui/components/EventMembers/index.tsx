@@ -31,15 +31,11 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         balance
         email
         name
-        orgMember {
+        user {
           id
-          bio
-          user {
-            id
-            username
-            verifiedEmail
-            avatar
-          }
+          username
+          verifiedEmail
+          avatar
         }
       }
     }
@@ -56,15 +52,11 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         balance
         email
         name
-        orgMember {
+        user {
           id
-          bio
-          user {
-            id
-            username
-            verifiedEmail
-            avatar
-          }
+          username
+          verifiedEmail
+          avatar
         }
       }
     }

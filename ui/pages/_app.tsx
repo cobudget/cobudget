@@ -65,42 +65,50 @@ export const TOP_LEVEL_QUERY = gql`
           slug
         }
       }
-    }
-    currentOrgMember(orgSlug: $orgSlug) {
-      id
-      bio
-      isOrgAdmin
-      discourseUsername
-      hasDiscourseApiKey
-      user {
-        id
-        name
-        username
-        email
-      }
       collectionMemberships {
         id
-        isAdmin
-        isModerator
-        isApproved
-        event {
+        collection {
           id
           title
           slug
         }
       }
-      currentEventMembership(collectionSlug: $collectionSlug) {
-        id
-        isAdmin
-        isModerator
-        isApproved
-        balance
-        event {
-          id
-          title
-        }
-      }
     }
+    # currentOrgMember(orgSlug: $orgSlug) {
+    #   id
+    #   bio
+    #   isOrgAdmin
+    #   discourseUsername
+    #   hasDiscourseApiKey
+    #   user {
+    #     id
+    #     name
+    #     username
+    #     email
+    #   }
+    #   collectionMemberships {
+    #     id
+    #     isAdmin
+    #     isModerator
+    #     isApproved
+    #     event {
+    #       id
+    #       title
+    #       slug
+    #     }
+    #   }
+    #   currentEventMembership(collectionSlug: $collectionSlug) {
+    #     id
+    #     isAdmin
+    #     isModerator
+    #     isApproved
+    #     balance
+    #     event {
+    #       id
+    #       title
+    #     }
+    #   }
+    # }
 
     currentOrg(orgSlug: $orgSlug) {
       __typename
@@ -119,11 +127,11 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, currentOrgMember, event } = {
+      data: { currentUser, currentOrg, currentOrgMember, collection } = {
         currentUser: null,
         currentOrg: null,
         currentOrgMember: null,
-        event: null,
+        collection: null,
       },
       fetching,
       error,
@@ -131,10 +139,12 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      orgSlug: router.query.org === "c" ? undefined : router.query.org,
       collectionSlug: router.query.collection,
     },
   });
+
+  console.log({ currentUser, currentOrg, currentOrgMember, collection, error });
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -166,19 +176,19 @@ const MyApp = ({ Component, pageProps, router }) => {
         currentOrgMember={currentOrgMember}
         currentOrg={currentOrg}
         openModal={openModal}
-        event={event}
+        event={collection}
         router={router}
         title={
           currentOrg
-            ? event
-              ? `${event.title} | ${currentOrg.name}`
+            ? collection
+              ? `${collection.title} | ${currentOrg.name}`
               : currentOrg.name
             : "Cobudget"
         }
       >
         <Component
           {...pageProps}
-          event={event}
+          event={collection}
           currentUser={currentUser}
           currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}

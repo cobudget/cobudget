@@ -11,12 +11,21 @@ const IndexPage = ({ currentUser }) => {
             Create community
           </Button>
           <ul>
-            {currentUser?.orgMemberships && <p>Your communities: </p>}
+            {currentUser && <p>Your communities: </p>}
             {currentUser?.orgMemberships?.map((orgMember) => {
               return (
                 <li key={orgMember.id}>
                   <Link href={`/${orgMember.organization.slug}`}>
                     <a className="underline">{orgMember.organization.name}</a>
+                  </Link>
+                </li>
+              );
+            })}
+            {currentUser?.collectionMemberships?.map((collMember) => {
+              return (
+                <li key={collMember.id}>
+                  <Link href={`/c/${collMember.collection.slug}`}>
+                    <a className="underline">{collMember.collection.title}</a>
                   </Link>
                 </li>
               );

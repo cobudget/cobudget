@@ -29,22 +29,17 @@ export default function AboutPage({
               name="about"
               className="h-10"
               MUTATION={gql`
-                mutation EditEventAbout(
-                  $orgId: ID!
+                mutation EditCollectionAbout(
                   $collectionId: ID!
                   $about: String
                 ) {
-                  editCollection(
-                    orgId: $orgId
-                    collectionId: $collectionId
-                    about: $about
-                  ) {
+                  editCollection(collectionId: $collectionId, about: $about) {
                     id
                     about
                   }
                 }
               `}
-              variables={{ orgId: currentOrg.id, collectionId: event.id }}
+              variables={{ collectionId: event.id }}
             />
           </div>
         </div>

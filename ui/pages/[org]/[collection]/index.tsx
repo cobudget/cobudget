@@ -10,25 +10,25 @@ import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 
-export const DREAMS_QUERY = gql`
-  query Dreams(
-    $orgSlug: String!
-    $eventSlug: String!
+export const BUCKETS_QUERY = gql`
+  query Buckets(
+    # $orgSlug: String!
+    $collectionId: ID!
     $textSearchTerm: String
     $tag: String
     $offset: Int
     $limit: Int
   ) {
-    dreamsPage(
-      orgSlug: $orgSlug
-      eventSlug: $eventSlug
+    bucketsPage(
+      # orgSlug: $orgSlug
+      collectionId: $collectionId
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
       limit: $limit
     ) {
       moreExist
-      dreams {
+      buckets {
         id
         description
         summary
@@ -76,10 +76,10 @@ const Page = ({
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
-    query: DREAMS_QUERY,
+    query: BUCKETS_QUERY,
     variables: {
-      orgSlug: router.query.org,
-      eventSlug: router.query.collection,
+      // orgId: org?.id,
+      collectionId: event.id,
       offset: variables.offset,
       limit: variables.limit,
       ...(!!s && { textSearchTerm: s }),
@@ -87,8 +87,8 @@ const Page = ({
     },
   });
 
-  const moreExist = data?.dreamsPage.moreExist;
-  const buckets = data?.dreamsPage.dreams ?? [];
+  const moreExist = data?.bucketsPage.moreExist;
+  const buckets = data?.bucketsPage.buckets ?? [];
 
   if (error) {
     console.error(error);
@@ -126,7 +126,13 @@ const Page = ({
   );
 };
 
-const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
+const CollectionPage = ({
+  currentOrgMember,
+  event,
+  router,
+  currentOrg,
+  currentUser,
+}) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
@@ -153,21 +159,16 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
               className="h-10"
               MUTATION={gql`
                 mutation EditHomepageMessage(
-                  $orgId: ID!
                   $collectionId: ID!
                   $info: String
                 ) {
-                  editCollection(
-                    orgId: $orgId
-                    collectionId: $collectionId
-                    info: $info
-                  ) {
+                  editCollection(collectionId: $collectionId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ orgId: currentOrg.id, collectionId: event.id }}
+              variables={{ collectionId: event.id }}
               required
             />
           </div>
