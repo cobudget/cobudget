@@ -1555,8 +1555,8 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
+
+      // todo: check not already left a flag?
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },
         include: {
@@ -1565,6 +1565,11 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
 
       const collectionMember = await prisma.collectionMember.findUnique({
         where: {
@@ -1646,9 +1651,8 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
 
+      // todo: check not already left a flag?
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },
         include: {
@@ -1659,6 +1663,11 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
 
       const collectionMember = await prisma.collectionMember.findUnique({
         where: {
@@ -1741,16 +1750,21 @@ const resolvers = {
         bucketId: dreamId,
         user,
       });
-      // check bucketReviewIsOpen
-      // check have not left one of these flags already
+
       const bucket = await prisma.bucket.findUnique({
         where: { id: dreamId },
         include: {
+          collection: true,
           flags: {
             where: { orgMemberId: currentOrgMember.id, type: "ALL_GOOD_FLAG" },
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
 
       if (bucket.flags.length)
         throw new Error("You have already left an all good flag");
