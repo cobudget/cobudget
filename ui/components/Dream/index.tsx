@@ -21,7 +21,8 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
   const showBucketReview =
     currentOrgMember?.currentEventMembership &&
     event.bucketReviewIsOpen &&
-    event.guidelines.length > 0;
+    event.guidelines.length > 0 &&
+    dream.published;
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {showBucketReview && (
