@@ -13,7 +13,7 @@ import LoadMore from "../../../components/LoadMore";
 export const DREAMS_QUERY = gql`
   query Dreams(
     $orgSlug: String!
-    $eventSlug: String!
+    $eventId: ID!
     $textSearchTerm: String
     $tag: String
     $offset: Int
@@ -21,7 +21,7 @@ export const DREAMS_QUERY = gql`
   ) {
     dreamsPage(
       orgSlug: $orgSlug
-      eventSlug: $eventSlug
+      eventId: $eventId
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
@@ -79,7 +79,7 @@ const Page = ({
     query: DREAMS_QUERY,
     variables: {
       orgSlug: router.query.org,
-      eventSlug: router.query.collection,
+      eventId: event.id,
       offset: variables.offset,
       limit: variables.limit,
       ...(!!s && { textSearchTerm: s }),

@@ -161,20 +161,29 @@ export const client = (
                   );
                 });
             },
+            createDream(result: any, { eventId }, cache) {
+              // normally when adding a thing to a cached list we just want
+              // to prepend the new item. but the bucket list on the coll
+              // page has a weird shuffle, so we'll instead invalidate the
+              // cache so that the list is refetched next time
+
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "dreamsPage")
+                .filter((field) => field.arguments.eventId === eventId)
+                .forEach((field) => {
+                  cache.invalidate("Query", "dreamsPage", field.arguments);
+                });
+            },
             deleteDream(result: any, { dreamId }, cache) {
-              const fields = cache
+              cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "dreamsPage")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
                       query: DREAMS_QUERY,
-                      variables: {
-                        offset: field.arguments.offset,
-                        limit: field.arguments.limit,
-                        eventSlug: field.arguments.eventSlug,
-                        orgSlug: field.arguments.orgSlug,
-                      },
+                      variables: field.arguments,
                     },
                     (data) => {
                       data.dreamsPage.dreams = data.dreamsPage.dreams.filter(

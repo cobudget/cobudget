@@ -168,13 +168,13 @@ const resolvers = {
     },
     dreamsPage: async (
       parent,
-      { eventSlug, orgSlug, textSearchTerm, tag: tagValue, offset = 0, limit },
+      { eventId, orgSlug, textSearchTerm, tag: tagValue, offset = 0, limit },
       { user }
     ) => {
       const currentOrg = await prisma.organization.findUnique({
         where: { slug: orgSlug },
         include: {
-          collections: { where: { slug: eventSlug } },
+          collections: { where: { id: eventId } },
           ...(user && {
             orgMembers: {
               where: { userId: user.id },
@@ -182,7 +182,7 @@ const resolvers = {
                 id: true,
                 isOrgAdmin: true,
                 collectionMemberships: {
-                  where: { collection: { slug: eventSlug } },
+                  where: { collection: { id: eventId } },
                   select: { id: true, isAdmin: true, isGuide: true },
                 },
               },

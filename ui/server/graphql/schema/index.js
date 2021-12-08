@@ -15,7 +15,7 @@ const schema = gql`
     dream(id: ID!): Dream
     dreamsPage(
       orgSlug: String!
-      eventSlug: String!
+      eventId: ID!
       textSearchTerm: String
       tag: String
       offset: Int
