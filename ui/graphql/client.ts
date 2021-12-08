@@ -48,15 +48,6 @@ export const client = (
           CommentSet: () => null,
           DreamsPage: () => null,
         },
-        // resolvers: {
-        //   Query: {
-        //     dreamsPage: simplePagination({
-        //       // offsetArgument: "offset",
-        //       // limitArgument: "limit",
-        //       // mergeMode: "after",
-        //     }),
-        //   },
-        // },
         updates: {
           Mutation: {
             joinCollection(result: any, args, cache) {

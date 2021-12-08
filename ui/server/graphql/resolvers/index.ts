@@ -195,13 +195,6 @@ const resolvers = {
       const currentEventMember = currentOrgMember?.collectionMemberships?.[0];
       const collection = currentOrg.collections?.[0];
 
-      console.log({
-        currentOrgMember,
-        currentEventMember,
-        currentOrg,
-        collection,
-      });
-
       const isAdminOrGuide =
         currentEventMember &&
         (currentEventMember.isAdmin || currentEventMember.isGuide);
