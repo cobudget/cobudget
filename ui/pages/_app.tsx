@@ -148,13 +148,6 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
   });
 
-  console.log({
-    currentUser,
-    currentOrg,
-    collection,
-    error,
-  });
-
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)

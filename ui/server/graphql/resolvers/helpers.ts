@@ -74,9 +74,9 @@ export async function isAndGetCollMemberOrOrgAdmin({
 }
 
 export async function getOrgMember({ orgId, userId }) {
-  return await prisma.orgMember.findUnique({
+  return prisma.orgMember.findUnique({
     where: {
-      organizationId_userId: { userId, organizationId: orgId },
+      organizationId_userId: { organizationId: orgId, userId },
     },
   });
 }

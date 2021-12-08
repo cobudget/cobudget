@@ -9,7 +9,7 @@ const schema = gql`
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
-    collections(orgSlug: String!, limit: Int): [Collection!]
+    collections(orgId: ID!, limit: Int): [Collection!]
     collection(orgSlug: String, collectionSlug: String): Collection
     bucket(id: ID!): Bucket
     bucketsPage(

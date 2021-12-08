@@ -70,7 +70,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
                     return {
                       ...data,
                       currentOrgMember: {
@@ -96,7 +95,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
                     return {
                       ...data,
                       currentOrgMember: result.joinOrg,
@@ -186,7 +184,6 @@ export const client = (
                 });
             },
             addComment(result: any, { content, bucketId }, cache) {
-              console.log({ result });
               if (result.addComment) {
                 cache.updateQuery(
                   {
@@ -199,7 +196,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -214,7 +210,6 @@ export const client = (
               }
             },
             deleteComment(result: any, { commentId, bucketId }, cache) {
-              console.log({ result });
               if (result.deleteComment) {
                 cache.updateQuery(
                   {
@@ -227,7 +222,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -271,9 +265,6 @@ export const client = (
                     variables: { collectionId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {
-                    console.log({
-                      data,
-                    });
                     return {
                       ...data,
                       approvedMembersPage: {

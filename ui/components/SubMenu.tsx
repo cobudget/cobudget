@@ -14,6 +14,7 @@ export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
   const isAdmin =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
+
   return [
     { label: "Overview", href: `/${orgSlug}/${collectionSlug}` },
     { label: "About", href: `/${orgSlug}/${collectionSlug}/about` },

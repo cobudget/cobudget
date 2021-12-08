@@ -35,7 +35,7 @@ const isMemberOfOrg = async (parent, { orgId }, { user }) => {
 
   const currentOrgMember = await prisma.orgMember.findUnique({
     where: {
-      organizationId_userId: { userId: user.id, organizationId: orgId },
+      organizationId_userId: { organizationId: orgId, userId: user.id },
     },
   });
 
@@ -124,11 +124,12 @@ const isCollModOrAdmin = async (parent, { bucketId }, { user }) => {
 const isOrgAdmin = async (parent, { orgId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
   if (!orgId) return skip;
-  const orgMember = await getOrgMember({
-    userId: user.id,
-    orgId,
+  const orgMember = await prisma.orgMember.findUnique({
+    where: {
+      organizationId_userId: { organizationId: orgId, userId: user.id },
+    },
   });
-  if (!orgMember.isAdmin) throw new Error("You need to be org admin");
+  if (!orgMember?.isAdmin) throw new Error("You need to be org admin");
   return skip;
 };
 
@@ -182,26 +183,28 @@ const resolvers = {
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    collections: async (parent, { limit, orgSlug }, { user }) => {
-      if (!orgSlug) return null;
+    collections: async (parent, { limit, orgId }, { user }) => {
+      if (!orgId) return null;
 
       const currentOrgMember = user
-        ? await prisma.orgMember.findFirst({
-            where: { organization: { slug: orgSlug }, userId: user.id },
+        ? await prisma.orgMember.findUnique({
+            where: {
+              organizationId_userId: { organizationId: orgId, userId: user.id },
+            },
           })
         : null;
 
       // if admin show all events (current or archived)
       if (currentOrgMember && currentOrgMember.isAdmin) {
         return prisma.collection.findMany({
-          where: { organization: { slug: orgSlug }, deleted: { not: true } },
+          where: { organizationId: orgId, deleted: { not: true } },
           take: limit,
         });
       }
 
       return prisma.collection.findMany({
         where: {
-          organization: { slug: orgSlug },
+          organizationId: orgId,
           archived: { not: true },
           deleted: { not: true },
         },
@@ -1460,6 +1463,7 @@ const resolvers = {
             },
             create: {
               orgMemberships: { create: { organizationId: orgId } },
+              email,
             },
             update: {
               orgMemberships: {
