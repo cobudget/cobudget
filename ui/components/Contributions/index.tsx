@@ -39,7 +39,7 @@ export const CONTRIBUTIONS_QUERY = gql`
   }
 `;
 
-const Contributions = ({ collection }) => {
+const Contributions = ({ collection, currentOrg }) => {
   const [
     {
       data: { contributionsPage: { moreExist, contributions } } = {
@@ -49,7 +49,7 @@ const Contributions = ({ collection }) => {
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
-    variables: { collectionId: collection.id, offset: 0, limit: 15 },
+    variables: { collectionId: collection.id, offset: 0, limit: 500 },
   });
 
   return (
@@ -72,7 +72,11 @@ const Contributions = ({ collection }) => {
                     {dayjs(c.createdAt).format("LLL")}
                   </span>
                   @{c.collectionMember.user.username} funded{" "}
-                  <Link href={`/${collection.slug}/${c.bucket.id}`}>
+                  <Link
+                    href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+                      c.bucket.id
+                    }`}
+                  >
                     <a className="font-semibold hover:underline">
                       {c.bucket.title}
                     </a>

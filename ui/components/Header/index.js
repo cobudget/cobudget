@@ -111,7 +111,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
         </div>
 
         <nav
-          className={` ${
+          className={`${
             isMenuOpen ? "block" : "hidden"
           } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${color} sm:bg-transparent`}
         >
@@ -178,55 +178,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                   </span>
                 </div>
               </div>
-
               <div className="mt-2 flex flex-col items-stretch">
-                {/* <Link href="/profile">
-                <a className={css.mobileProfileItem}>Profile</a>
-              </Link> */}
-                {/* <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
-                  Memberships
-                </h2>
-                {currentOrgMember.currentEventMembership && (
-                  <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                    {currentOrgMember.currentEventMembership.event.title}
-                    {Boolean(
-                      currentOrgMember.currentEventMembership.balance
-                    ) && (
-                      <p className=" text-gray-800 text-sm">
-                        You have{" "}
-                        <span className="text-black font-medium">
-                          {thousandSeparator(
-                            currentOrgMember.currentEventMembership.balance /
-                              100
-                          )}{" "}
-                          {event.currency}
-                        </span>{" "}
-                        to contribute
-                      </p>
-                    )}
-                  </div>
-                )}
-                {currentOrgMember.collectionMemberships.map((membership) => {
-                  if (
-                    currentOrgMember.currentEventMembership &&
-                    currentOrgMember.currentEventMembership.id === membership.id
-                  ) {
-                    return null;
-                  }
-                  return (
-                    <Link
-                      href="/[org]/[collection]"
-                      as={`/${currentOrg.slug}/${membership.event.slug}`}
-                      key={membership.id}
-                    >
-                      <a className={css.mobileProfileItem}>
-                        {membership.event.title}
-                      </a>
-                    </Link>
-                  );
-                })}
-                <hr className="my-2" /> */}
-
                 <button
                   onClick={() => {
                     openModal(modals.EDIT_PROFILE);
