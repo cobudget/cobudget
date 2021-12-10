@@ -45,12 +45,14 @@ model OrgMember {
   organizationId    String
   user              User         @relation(fields: [userId], references: [id])
   userId            String
+  bio               String?
   isAdmin           Boolean      @default(false)
   discourseUsername String?
   discourseApiKey   String?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
+  CollectionMember CollectionMember[]
   @@unique([organizationId, userId])
 }
 
@@ -58,8 +60,10 @@ model CollectionMember {
   id           String     @id @default(cuid())
   collection   Collection @relation(fields: [collectionId], references: [id])
   collectionId String
-  user         User       @relation(fields: [userId], references: [id])
-  userId       String
+  user         User?      @relation(fields: [userId], references: [id])
+  userId       String?
+  orgMember    OrgMember  @relation(fields: [orgMemberId], references: [id])
+  orgMemberId  String
   isAdmin      Boolean    @default(false)
   isModerator  Boolean    @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
   bio          String?
@@ -74,7 +78,7 @@ model CollectionMember {
   comments      Comment[]
   flags         Flag[]
 
-  @@unique([userId, collectionId])
+  //@@unique([userId, collectionId])
 }
 
 model Organization {
