@@ -9,15 +9,15 @@ import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 
 const EDIT_SUMMARY_MUTATION = gql`
-  mutation EditSummary($dreamId: ID!, $summary: String) {
-    editDream(dreamId: $dreamId, summary: $summary) {
+  mutation EditSummary($bucketId: ID!, $summary: String) {
+    editDream(bucketId: $bucketId, summary: $summary) {
       id
       summary
     }
   }
 `;
 
-const DreamSummary = ({ summary, canEdit, dreamId }) => {
+const DreamSummary = ({ summary, canEdit, bucketId }) => {
   const [{ fetching: loading }, editDream] = useMutation(EDIT_SUMMARY_MUTATION);
 
   const { handleSubmit, register } = useForm();
@@ -29,7 +29,7 @@ const DreamSummary = ({ summary, canEdit, dreamId }) => {
       <>
         <form
           onSubmit={handleSubmit((variables) =>
-            editDream({ dreamId, ...variables })
+            editDream({ bucketId, ...variables })
               .then(() => setEditing(false))
               .catch((err) => alert(err.message))
           )}

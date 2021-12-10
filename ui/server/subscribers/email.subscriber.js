@@ -4,10 +4,18 @@ export default {
     eventHub.subscribe(
       "create-comment",
       "email",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      async ({
+        currentOrg,
+        currentCollMember,
+        currentUser,
+        event,
+        dream,
+        comment,
+      }) => {
         await EmailService.sendCommentNotification({
           currentOrg,
-          currentOrgMember,
+          currentCollMember,
+          currentUser,
           dream,
           event,
           comment,

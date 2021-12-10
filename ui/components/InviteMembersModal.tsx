@@ -11,7 +11,7 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
   mutation InviteOrgMembers($orgId: ID!, $emails: String!) {
     inviteOrgMembers(orgId: $orgId, emails: $emails) {
       id
-      isOrgAdmin
+      isAdmin
       bio
       name
       email
@@ -27,12 +27,12 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
   }
 `;
 
-const INVITE_EVENT_MEMBERS_MUTATION = gql`
-  mutation InviteEventMembers($emails: String!, $eventId: ID!) {
-    inviteEventMembers(emails: $emails, eventId: $eventId) {
+const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
+  mutation InviteCollectionMembers($emails: String!, $collectionId: ID!) {
+    inviteCollectionMembers(emails: $emails, collectionId: $collectionId) {
       id
       isAdmin
-      isGuide
+      isModerator
       isApproved
       createdAt
       name
@@ -54,16 +54,18 @@ const INVITE_EVENT_MEMBERS_MUTATION = gql`
 
 const InviteMembersModal = ({
   handleClose,
-  eventId,
+  collectionId,
   currentOrg,
 }: {
   handleClose: () => void;
-  eventId?: string;
+  collectionId?: string;
   currentOrg?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
-    eventId ? INVITE_EVENT_MEMBERS_MUTATION : INVITE_ORG_MEMBERS_MUTATION
+    collectionId
+      ? INVITE_COLLECTION_MEMBERS_MUTATION
+      : INVITE_ORG_MEMBERS_MUTATION
   );
 
   return (
@@ -75,7 +77,7 @@ const InviteMembersModal = ({
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h1 className="text-xl font-semibold mb-2">
-            Invite {eventId ? "event " : ""}members
+            Invite {collectionId ? "collection " : ""}members
           </h1>
           <Banner
             className={"mb-4"}
@@ -85,8 +87,8 @@ const InviteMembersModal = ({
             <ul className="list-disc ml-5">
               <li className="mt-2">
                 This is currently more of a quick way of adding people as
-                members of the organization and/or event, rather than a proper
-                invite functionality.
+                members of the organization and/or collection, rather than a
+                proper invite functionality.
               </li>
               <li className="mt-2">
                 People added here should be expecting to be added to the
@@ -105,7 +107,7 @@ const InviteMembersModal = ({
             onSubmit={handleSubmit((variables) => {
               inviteMembers({
                 ...variables,
-                ...(eventId ? { eventId } : { orgId: currentOrg.id }),
+                ...(collectionId ? { collectionId } : { orgId: currentOrg.id }),
               })
                 .then(() => {
                   reset();

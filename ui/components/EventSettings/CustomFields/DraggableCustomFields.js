@@ -7,8 +7,8 @@ import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
-  mutation DeleteCustomField($eventId: ID!, $fieldId: ID!) {
-    deleteCustomField(eventId: $eventId, fieldId: $fieldId) {
+  mutation DeleteCustomField($collectionId: ID!, $fieldId: ID!) {
+    deleteCustomField(collectionId: $collectionId, fieldId: $fieldId) {
       id
       customFields {
         id
@@ -26,12 +26,12 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 
 const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
   mutation SetCustomFieldPosition(
-    $eventId: ID!
+    $collectionId: ID!
     $fieldId: ID!
     $newPosition: Float
   ) {
     setCustomFieldPosition(
-      eventId: $eventId
+      collectionId: $collectionId
       fieldId: $fieldId
       newPosition: $newPosition
     ) {
@@ -71,8 +71,7 @@ const SortableItem = sortableElement(
   ({
     item: customField,
     setEditingItem: setEditingCustomField,
-    eventId,
-    currentOrg,
+    collectionId,
   }) => {
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
@@ -98,7 +97,8 @@ const SortableItem = sortableElement(
                 onClick={() =>
                   confirm(
                     `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
-                  ) && deleteCustomField({ eventId, fieldId: customField.id })
+                  ) &&
+                  deleteCustomField({ collectionId, fieldId: customField.id })
                 }
               >
                 <DeleteIcon className="h-6 w-6" />
@@ -122,19 +122,14 @@ const SortableItem = sortableElement(
   }
 );
 
-const DraggableCustomFields = ({
-  event,
-  items,
-  setEditingItem,
-  currentOrg,
-}) => {
+const DraggableCustomFields = ({ collection, items, setEditingItem }) => {
   const [{ fetching: loading }, setCustomFieldPosition] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION
   );
 
   const setItemPosition = (customFieldId, newPosition) => {
     setCustomFieldPosition({
-      eventId: event.id,
+      collectionId: collection.id,
       fieldId: customFieldId,
       newPosition,
     });
@@ -142,13 +137,12 @@ const DraggableCustomFields = ({
 
   return (
     <DraggableItems
-      event={event}
+      collection={collection}
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}
       SortableItem={SortableItem}
       setEditingItem={setEditingItem}
-      currentOrg={currentOrg}
     />
   );
 };

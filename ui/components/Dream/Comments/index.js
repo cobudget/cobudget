@@ -4,21 +4,21 @@ import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
-const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
+const Comments = ({ currentUser, currentOrg, dream, collection }) => {
   const context = useCommentContext({
     from: 0,
     limit: 10,
     order: "desc",
     currentOrg,
-    currentOrgMember,
-    event,
+    currentUser,
+    collection,
     dream,
   });
   const { comments, setFrom, limit, total, loading } = context;
 
   return (
     <Context.Provider value={context}>
-      {(comments.length > 0 || currentOrgMember?.currentEventMembership) && (
+      {(comments.length > 0 || currentUser?.currentCollMember) && (
         <>
           <div className="flex justify-between items-center">
             <h2 className="mb-4 text-2xl font-medium" id="comments">
@@ -55,9 +55,7 @@ const Comments = ({ currentOrgMember, currentOrg, dream, event }) => {
           />
         );
       })}
-      {currentOrgMember && currentOrgMember?.currentEventMembership && (
-        <AddComment />
-      )}
+      {currentUser?.currentCollMember && <AddComment />}
     </Context.Provider>
   );
 };

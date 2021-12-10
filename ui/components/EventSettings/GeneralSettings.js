@@ -11,18 +11,16 @@ import toast from "react-hot-toast";
 import router from "next/router";
 
 const EDIT_EVENT = gql`
-  mutation editEvent(
-    $orgId: ID!
-    $eventId: ID!
+  mutation editCollection(
+    $collectionId: ID!
     $slug: String
     $title: String
     $archived: Boolean
     $registrationPolicy: RegistrationPolicy
     $color: String
   ) {
-    editEvent(
-      orgId: $orgId
-      eventId: $eventId
+    editCollection(
+      collectionId: $collectionId
       slug: $slug
       title: $title
       archived: $archived
@@ -40,12 +38,12 @@ const EDIT_EVENT = gql`
 `;
 
 export default function GeneralSettings({
-  event,
+  collection,
   currentOrg,
-  currentOrgMember,
+  currentUser,
 }) {
-  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
-  const [color, setColor] = useState(event.color);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
+  const [color, setColor] = useState(collection.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
     handleSubmit,
@@ -55,17 +53,18 @@ export default function GeneralSettings({
     formState: { isDirty },
   } = useForm();
 
-  const startUrl = `${process.env.DEPLOY_URL}/${currentOrg.slug}/`;
-
+  const startUrl = `${process.env.DEPLOY_URL}/${currentOrg?.slug ?? "c"}/`;
+  const isAdmin =
+    currentUser.currentOrgMember?.isAdmin ||
+    currentUser.currentCollMember?.isAdmin;
   return (
     <div className="px-6">
       <h2 className="text-2xl font-semibold">General</h2>
       <form
         onSubmit={handleSubmit((variables) => {
-          editEvent({
+          editCollection({
             ...variables,
-            orgId: currentOrg.id,
-            eventId: event.id,
+            collectionId: collection.id,
             archived: variables.archived === "true",
             color,
           }).then(({ error }) => {
@@ -73,7 +72,9 @@ export default function GeneralSettings({
               toast.error(error.message.replace("[GraphQL]", ""));
             } else {
               toast.success("Settings updated!");
-              router.replace(`/${currentOrg.slug}/${variables.slug}/settings`);
+              router.replace(
+                `/${currentOrg?.slug ?? "c"}/${variables.slug}/settings`
+              );
             }
           });
         })}
@@ -82,7 +83,7 @@ export default function GeneralSettings({
           name="title"
           label="Title"
           placeholder="Title"
-          defaultValue={event.title}
+          defaultValue={collection.title}
           inputRef={register}
           className="my-4"
         />
@@ -91,7 +92,7 @@ export default function GeneralSettings({
           name="slug"
           label="URL"
           placeholder="Slug"
-          defaultValue={event.slug}
+          defaultValue={collection.slug}
           inputRef={register}
           startAdornment={startUrl}
           inputProps={{
@@ -105,7 +106,7 @@ export default function GeneralSettings({
         <SelectField
           name="registrationPolicy"
           label="Registration policy"
-          defaultValue={event.registrationPolicy}
+          defaultValue={collection.registrationPolicy}
           inputRef={register}
           className="my-4"
         >
@@ -116,11 +117,11 @@ export default function GeneralSettings({
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
 
-        {currentOrgMember.isOrgAdmin && (
+        {isAdmin && (
           <SelectField
             name="archived"
             label="Archive collection"
-            defaultValue={event.archived ? "true" : "false"}
+            defaultValue={collection.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
           >
@@ -129,7 +130,7 @@ export default function GeneralSettings({
           </SelectField>
         )}
 
-        {currentOrgMember.isOrgAdmin && (
+        {isAdmin && (
           <>
             <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
             <Button
@@ -146,7 +147,7 @@ export default function GeneralSettings({
           <Button
             color={color}
             type="submit"
-            disabled={!(isDirty || event.color !== color)}
+            disabled={!(isDirty || collection.color !== color)}
             loading={loading}
           >
             Save
@@ -156,7 +157,7 @@ export default function GeneralSettings({
 
       {isDeleteModalOpened && (
         <DeleteEventModal
-          event={event}
+          collection={collection}
           handleClose={() => {
             setIsDeleteModalOpened(false);
           }}

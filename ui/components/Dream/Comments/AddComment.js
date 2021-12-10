@@ -12,13 +12,16 @@ function AddComment() {
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
   const inputRef = useRef();
-  const { addComment, dream, event, currentOrg, currentOrgMember } = useContext(
+  const { addComment, dream, collection, currentOrg, currentUser } = useContext(
     Context
   );
-  if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
+  if (
+    currentOrg?.discourseUrl &&
+    !currentUser.currentOrgMember?.hasDiscourseApiKey
+  ) {
     return (
       <Link href={"/connect-discourse"} passHref>
-        <Button color={event.color} nextJsLink className="my-2">
+        <Button color={collection.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
       </Link>
@@ -28,7 +31,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ dreamId: dream.id, content })
+        addComment({ bucketId: dream.id, content })
           .then(() => {
             inputRef.current.blur();
             setContent("");
@@ -39,7 +42,7 @@ function AddComment() {
     >
       <div className="flex">
         <div className="mr-4">
-          <Avatar user={currentOrgMember.user} />
+          <Avatar user={currentUser} />
         </div>
         <div className="flex-grow">
           <div className="mb-2">
@@ -59,7 +62,7 @@ function AddComment() {
                 register({ required: "Required" });
                 inputRef.current = e;
               }}
-              color={event.color}
+              color={collection.color}
             />
           </div>
           {content.length > 0 && (
@@ -67,7 +70,7 @@ function AddComment() {
               <Button
                 onClick={() => setContent("")}
                 variant="secondary"
-                color={event.color}
+                color={collection.color}
                 className="mr-2"
               >
                 Cancel
@@ -75,7 +78,7 @@ function AddComment() {
               <Button
                 type="submit"
                 disabled={content.length === 0}
-                color={event.color}
+                color={collection.color}
                 loading={submitting}
               >
                 Submit

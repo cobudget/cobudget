@@ -40,7 +40,7 @@ const modals = {
 
 export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
-    $eventId: ID!
+    $collectionId: ID!
     $currency: String
     $maxAmountToBucketPerUser: Int
     $grantingOpens: Date
@@ -49,7 +49,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $allowStretchGoals: Boolean
   ) {
     updateGrantingSettings(
-      eventId: $eventId
+      collectionId: $collectionId
       currency: $currency
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
       grantingOpens: $grantingOpens
@@ -70,7 +70,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const EventSettingsModalGranting = ({ event, currentOrg }) => {
+const EventSettingsModalGranting = ({ collection, currentOrg }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -99,7 +99,7 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
         <div className={classes.innerModal}>
           {open && (
             <ModalContent
-              event={event}
+              collection={collection}
               closeModal={handleClose}
               currentOrg={currentOrg}
             />
@@ -112,12 +112,12 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
         <List>
           <SettingsListItem
             primary="Currency"
-            secondary={event.currency}
-            isSet={event.currency}
-            disabled={!event.bucketCreationIsOpen}
+            secondary={collection.currency}
+            isSet={collection.currency}
+            disabled={!collection.bucketCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
             classes="px-6"
           />
 
@@ -125,11 +125,11 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
 
           <SettingsListItem
             primary="Allow stretch goals"
-            secondary={event.allowStretchGoals?.toString() ?? "false"}
-            isSet={typeof event.allowStretchGoals !== "undefined"}
+            secondary={collection.allowStretchGoals?.toString() ?? "false"}
+            isSet={typeof collection.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
           />
 
           <Divider />
@@ -137,16 +137,16 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <SettingsListItem
             primary={`Max. amount to one bucket per user`}
             secondary={
-              event.maxAmountToBucketPerUser
-                ? `${thousandSeparator(event.maxAmountToBucketPerUser / 100)} ${
-                    event.currency
-                  }`
+              collection.maxAmountToBucketPerUser
+                ? `${thousandSeparator(
+                    collection.maxAmountToBucketPerUser / 100
+                  )} ${collection.currency}`
                 : "Not set"
             }
-            isSet={!!event.maxAmountToBucketPerUser}
+            isSet={!!collection.maxAmountToBucketPerUser}
             openModal={() => handleOpen("SET_MAX_AMOUNT_TO_DREAM")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
           />
 
           <Divider />
@@ -154,16 +154,16 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <SettingsListItem
             primary={`Bucket creation closes`}
             secondary={
-              event.bucketCreationCloses
-                ? dayjs(event.bucketCreationCloses).format(
+              collection.bucketCreationCloses
+                ? dayjs(collection.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )
                 : "Not set"
             }
-            isSet={event.bucketCreationCloses}
+            isSet={collection.bucketCreationCloses}
             openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
           />
 
           <Divider />
@@ -171,14 +171,16 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <SettingsListItem
             primary="Granting opens"
             secondary={
-              event.grantingOpens
-                ? dayjs(event.grantingOpens).format("MMMM D, YYYY - h:mm a")
+              collection.grantingOpens
+                ? dayjs(collection.grantingOpens).format(
+                    "MMMM D, YYYY - h:mm a"
+                  )
                 : "Not set"
             }
-            isSet={event.grantingOpens}
+            isSet={collection.grantingOpens}
             openModal={() => handleOpen("SET_GRANTING_OPENS")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
           />
 
           <Divider />
@@ -186,14 +188,16 @@ const EventSettingsModalGranting = ({ event, currentOrg }) => {
           <SettingsListItem
             primary="Granting closes"
             secondary={
-              event.grantingCloses
-                ? dayjs(event.grantingCloses).format("MMMM D, YYYY - h:mm a")
+              collection.grantingCloses
+                ? dayjs(collection.grantingCloses).format(
+                    "MMMM D, YYYY - h:mm a"
+                  )
                 : "Not set"
             }
-            isSet={event.grantingCloses}
+            isSet={collection.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             canEdit={canEditSettings}
-            eventColor={event.color}
+            eventColor={collection.color}
           />
         </List>
       </div>

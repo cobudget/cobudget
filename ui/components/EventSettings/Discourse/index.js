@@ -5,8 +5,11 @@ import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
 
 const EDIT_EVENT = gql`
-  mutation editEvent($eventId: ID!, $discourseCategoryId: Int) {
-    editEvent(eventId: $eventId, discourseCategoryId: $discourseCategoryId) {
+  mutation editCollection($collectionId: ID!, $discourseCategoryId: Int) {
+    editCollection(
+      collectionId: $collectionId
+      discourseCategoryId: $discourseCategoryId
+    ) {
       id
       discourseCategoryId
     }
@@ -22,8 +25,9 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-const Discourse = ({ event, currentOrg }) => {
-  const [{ fetching: loading }, editEvent] = useMutation(EDIT_EVENT);
+const Discourse = ({ collection, currentOrg }) => {
+  if (!currentOrg) return null;
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,
@@ -45,9 +49,9 @@ const Discourse = ({ event, currentOrg }) => {
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
-          editEvent({
+          editCollection({
             ...variables,
-            eventId: event.id,
+            collectionId: collection.id,
             discourseCategoryId: parseInt(variables.discourseCategoryId),
           })
             //.then(() => handleClose())
@@ -57,7 +61,7 @@ const Discourse = ({ event, currentOrg }) => {
         {categories.length > 0 ? (
           <SelectField
             name="discourseCategoryId"
-            defaultValue={event.discourseCategoryId}
+            defaultValue={collection.discourseCategoryId}
             inputRef={register}
             className="my-4"
           >
@@ -73,7 +77,7 @@ const Discourse = ({ event, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={event.color}
+            color={collection.color}
             type="submit"
             disabled={!isDirty}
             loading={loading}

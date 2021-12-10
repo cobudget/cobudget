@@ -14,7 +14,13 @@ import {
   orgHasDiscourse,
   generateComment,
 } from "../../subscribers/discourse.subscriber";
-import { getCurrentOrgAndMember } from "./helpers";
+import {
+  getCollectionMember,
+  getCurrentOrgAndMember,
+  getOrgMember,
+  isAndGetCollMember,
+  isAndGetCollMemberOrOrgAdmin,
+} from "./helpers";
 import { sendEmail } from "server/send-email";
 
 const isRootAdmin = (parent, args, { user }) => {
@@ -24,11 +30,13 @@ const isRootAdmin = (parent, args, { user }) => {
     : new Error("You need to be root admin");
 };
 
-const isMemberOfOrg = async (parent, { id }, { user }) => {
+const isMemberOfOrg = async (parent, { orgId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
 
   const currentOrgMember = await prisma.orgMember.findUnique({
-    where: { organizationId_userId: { userId: user.id, organizationId: id } },
+    where: {
+      organizationId_userId: { organizationId: orgId, userId: user.id },
+    },
   });
 
   if (!currentOrgMember)
@@ -36,17 +44,127 @@ const isMemberOfOrg = async (parent, { id }, { user }) => {
   return skip;
 };
 
-// const canEditEvent = (parent, args, { currentOrgMember, models }) => {
-//   // args: eventId
-//   //and you are either a orgAdmin or eventAdmin..
-// };
+const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
+  if (!user) throw new Error("You need to be logged in");
+  const collectionMember = await getCollectionMember({
+    userId: user.id,
+    collectionId,
+    bucketId,
+  });
+  // const collectionMember = await prisma.collectionMember.findUnique({
+  //   where: { userId_collectionId: { userId: user.id, collectionId } },
+  // });
+  if (!collectionMember) {
+    throw new Error("Collection member does not exist");
+  } else if (!collectionMember.isApproved) {
+    throw new Error("Collection member is not approved");
+  }
 
-// const canEditDream = (parent, args, { currentOrgMember, models }) => {
-//   // args: eventId
-//   //and you are either a orgAdmin or eventAdmin..
-// };
+  return skip;
+};
 
-// const canEditOrg = (parent, args, { currentOrgMember, currentUser }) => {};
+const isCollMemberOrOrgAdmin = async (parent, { collectionId }, { user }) => {
+  if (!user) throw new Error("You need to be logged in");
+  const collectionMember = await getCollectionMember({
+    userId: user.id,
+    collectionId,
+  });
+  let orgMember = null;
+  if (!collectionMember) {
+    const org = await prisma.organization.findFirst({
+      where: { collections: { some: { id: collectionId } } },
+    });
+    orgMember = await getOrgMember({
+      userId: user.id,
+      orgId: org.id,
+    });
+  }
+
+  if (!(collectionMember?.isApproved || orgMember?.isAdmin))
+    throw new Error(
+      "You need to be approved member of this collection or org admin to view collection members"
+    );
+  return skip;
+};
+
+const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
+  if (!user) throw new Error("You need to be logged in");
+  const collectionMember = await getCollectionMember({
+    userId: user.id,
+    collectionId,
+  });
+  let orgMember = null;
+  if (!collectionMember?.isAdmin) {
+    const org = await prisma.organization.findFirst({
+      where: { collections: { some: { id: collectionId } } },
+    });
+    orgMember = await getOrgMember({
+      userId: user.id,
+      orgId: org.id,
+    });
+  }
+
+  if (!(collectionMember?.isAdmin || orgMember?.isAdmin))
+    throw new Error("You need to be admin of the collection or the org");
+  return skip;
+};
+
+const isCollModOrAdmin = async (parent, { bucketId }, { user }) => {
+  if (!user) throw new Error("You need to be logged in");
+  const collectionMember = await getCollectionMember({
+    userId: user.id,
+    bucketId,
+  });
+
+  if (!(collectionMember?.isModerator || collectionMember?.isAdmin))
+    throw new Error("You need to be admin or moderator of the collection");
+  return skip;
+};
+
+const isOrgAdmin = async (parent, { orgId }, { user }) => {
+  if (!user) throw new Error("You need to be logged in");
+  if (!orgId) return skip;
+  const orgMember = await prisma.orgMember.findUnique({
+    where: {
+      organizationId_userId: { organizationId: orgId, userId: user.id },
+    },
+  });
+  if (!orgMember?.isAdmin) throw new Error("You need to be org admin");
+  return skip;
+};
+
+const isBucketCocreatorOrCollAdminOrMod = async (
+  parent,
+  { bucketId },
+  { user }
+) => {
+  if (!user) throw new Error("You need to be logged in");
+  if (!bucketId) throw new Error("You need to provide bucketId");
+
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: bucketId },
+    include: { cocreators: true, collection: true },
+  });
+
+  const collectionMember = await prisma.collectionMember.findUnique({
+    where: {
+      userId_collectionId: {
+        userId: user.id,
+        collectionId: bucket.collectionId,
+      },
+    },
+  });
+
+  if (
+    !collectionMember ||
+    (!bucket.cocreators.map((m) => m.id).includes(collectionMember.id) &&
+      !collectionMember.isAdmin &&
+      !collectionMember.isModerator)
+  )
+    throw new Error("You are not a cocreator of this bucket.");
+
+  return skip;
+};
 
 const resolvers = {
   Query: {
@@ -59,166 +177,109 @@ const resolvers = {
       if (!orgSlug) return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
     },
-    currentOrgMember: async (parent, { orgSlug: slug }, { user }) => {
-      if (!user || !slug) return null;
-
-      const orgMember = await prisma.orgMember.findFirst({
-        where: { organization: { slug }, userId: user.id },
-      });
-
-      // const org = await prisma.organization.findUnique({ where: { slug } });
-
-      // const orgMember = await prisma.orgMember.findUnique({
-      //   where: {
-      //     organizationId_userId: { organizationId: org.id, userId: user.id },
-      //   },
-      // });
-      return orgMember;
-    },
-    organization: combineResolvers(isMemberOfOrg, async (parent, { id }) => {
-      return prisma.organization.findUnique({ where: { id } });
+    organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
+      return prisma.organization.findUnique({ where: { id: orgId } });
     }),
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    collections: async (parent, { limit, orgSlug }, { user }) => {
-      if (!orgSlug) return null;
+    collections: async (parent, { limit, orgId }, { user }) => {
+      if (!orgId) return null;
 
       const currentOrgMember = user
-        ? await prisma.orgMember.findFirst({
-            where: { organization: { slug: orgSlug }, userId: user.id },
+        ? await prisma.orgMember.findUnique({
+            where: {
+              organizationId_userId: { organizationId: orgId, userId: user.id },
+            },
           })
         : null;
 
       // if admin show all events (current or archived)
-      if (currentOrgMember && currentOrgMember.isOrgAdmin) {
+      if (currentOrgMember && currentOrgMember.isAdmin) {
         return prisma.collection.findMany({
-          where: { organization: { slug: orgSlug }, deleted: { not: true } },
+          where: { organizationId: orgId, deleted: { not: true } },
           take: limit,
         });
       }
 
       return prisma.collection.findMany({
         where: {
-          organization: { slug: orgSlug },
+          organizationId: orgId,
           archived: { not: true },
           deleted: { not: true },
         },
         take: limit,
       });
     },
-    event: async (parent, { orgSlug, collectionSlug }) => {
-      if (!orgSlug || !collectionSlug) return null;
+    collection: async (parent, { orgSlug, collectionSlug }) => {
+      if (!collectionSlug) return null;
 
       return await prisma.collection.findFirst({
         where: {
           slug: collectionSlug,
-          organization: { slug: orgSlug },
+          ...(orgSlug !== "c" && { organization: { slug: orgSlug } }),
           deleted: { not: true },
         },
       });
     },
-    contributionsPage: async (parent, { eventId, offset, limit }, { user }) => {
-      if (!user) throw new Error("You need to be logged in");
+    contributionsPage: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (parent, { collectionId, offset, limit }) => {
+        // const contributionsWithExtra = [
+        //   ...(await Contribution.find({ collectionId }, null, {
+        //     skip: offset,
+        //     limit: limit + 1,
+        //   }).sort({
+        //     createdAt: -1,
+        //   })),
+        // ];
 
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: { where: { collectionId: eventId } },
-        },
-      });
+        const contributionsWithExtra = await prisma.contribution.findMany({
+          where: { collectionId },
+          take: limit,
+          skip: offset,
+          orderBy: {
+            createdAt: "desc",
+          },
+        });
 
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (!currentOrgMember) throw new Error("You need to be an org member");
-
-      if (!(currentOrgMember?.isOrgAdmin || collectionMember?.isAdmin))
-        throw new Error("You need to be org or collection admin to view this");
-
-      // const contributionsWithExtra = [
-      //   ...(await Contribution.find({ eventId }, null, {
-      //     skip: offset,
-      //     limit: limit + 1,
-      //   }).sort({
-      //     createdAt: -1,
-      //   })),
-      // ];
-
-      const contributionsWithExtra = await prisma.contribution.findMany({
-        where: { collectionId: eventId },
-        take: limit,
-        skip: offset,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-      return {
-        moreExist: contributionsWithExtra.length > limit,
-        contributions: contributionsWithExtra.slice(0, limit),
-      };
-    },
-    dream: async (parent, { id }) => {
+        return {
+          moreExist: contributionsWithExtra.length > limit,
+          contributions: contributionsWithExtra.slice(0, limit),
+        };
+      }
+    ),
+    bucket: async (parent, { id }) => {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
       if (bucket.deleted) return null;
       return bucket;
     },
-    dreamsPage: async (
+    bucketsPage: async (
       parent,
-      { eventSlug, orgSlug, textSearchTerm, tag: tagValue, offset = 0, limit },
+      { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
       { user }
     ) => {
-      const currentOrg = await prisma.organization.findUnique({
-        where: { slug: orgSlug },
-        include: {
-          collections: { where: { slug: eventSlug } },
-          ...(user && {
-            orgMembers: {
-              where: { userId: user.id },
-              select: {
-                id: true,
-                isOrgAdmin: true,
-                collectionMemberships: {
-                  where: { collection: { slug: eventSlug } },
-                  select: { id: true, isAdmin: true, isGuide: true },
-                },
-              },
-            },
-          }),
-        },
+      const currentMember = await getCollectionMember({
+        userId: user.id,
+        collectionId,
       });
-
-      const currentOrgMember = currentOrg.orgMembers?.[0];
-      const currentEventMember = currentOrgMember?.collectionMemberships?.[0];
-      const collection = currentOrg.collections?.[0];
-
-      console.log({
-        currentOrgMember,
-        currentEventMember,
-        currentOrg,
-        collection,
-      });
-
+      // const collection = prisma.collection.findUnique({ where: {organizationId_slug: {}}})
       const isAdminOrGuide =
-        currentEventMember &&
-        (currentEventMember.isAdmin || currentEventMember.isGuide);
+        currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
       const query = {
-        collectionId: collection.id,
+        collectionId,
         deleted: { not: true },
         ...(textSearchTerm && { title: { search: textSearchTerm } }),
         ...(tagValue && {
           tags: { some: { value: tagValue } },
         }),
         ...(!isAdminOrGuide &&
-          (currentEventMember
+          (currentMember
             ? {
                 OR: [
                   { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentEventMember.id } } },
+                  { cocreators: { some: { id: currentMember.id } } },
                 ],
               }
             : { publishedAt: { not: null } })),
@@ -235,121 +296,60 @@ const resolvers = {
 
       return {
         moreExist: shuffledBuckets.length > limit + offset,
-        dreams: shuffledBuckets.slice(offset, limit + offset),
+        buckets: shuffledBuckets.slice(offset, limit + offset),
       };
     },
-    orgMembersPage: async (
-      parent,
-      { offset = 0, limit, orgSlug },
-      { user }
-    ) => {
-      if (!orgSlug) return null;
+    orgMembersPage: combineResolvers(
+      isOrgAdmin,
+      async (parent, { offset = 0, limit, orgId }, { user }) => {
+        // TODO: Why is it limit + 1?
+        const orgMembersWithExtra = await prisma.orgMember.findMany({
+          where: { organizationId: orgId },
+          skip: offset,
+          take: limit + 1,
+        });
 
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: { organization: { slug: orgSlug }, userId: user.id },
-      });
-
-      if (!currentOrgMember?.isOrgAdmin)
-        throw new Error("You need to be org admin to view this");
-
-      // TODO: Why is it limit + 1?
-      const orgMembersWithExtra = await prisma.orgMember.findMany({
-        where: { organization: { slug: orgSlug } },
-        skip: offset,
-        take: limit + 1,
-      });
-
-      return {
-        moreExist: orgMembersWithExtra.length > limit,
-        orgMembers: orgMembersWithExtra.slice(0, limit),
-      };
-    },
-    members: async (parent, { eventId, isApproved }, { user }) => {
-      const org = await prisma.organization.findFirst({
-        where: { collections: { some: { id: eventId } } },
-      });
-
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId: org.id, userId: user.id },
-        },
-      });
-
-      if (!currentOrgMember)
-        throw new Error("You need to be a member of this org");
-
-      const currentCollectionMember = await prisma.collectionMember.findFirst({
-        where: { collectionId: eventId, orgMemberId: currentOrgMember.id },
-      });
-
-      if (
-        !(
-          (currentCollectionMember && currentCollectionMember.isApproved) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error(
-          "You need to be approved member of this collection or org admin to view collection members"
-        );
-
-      return await prisma.collectionMember.findMany({
-        where: {
-          collectionId: eventId,
-          ...(typeof isApproved === "boolean" && { isApproved }),
-        },
-      });
-    },
-    membersPage: async (
-      parent,
-      { eventId, isApproved, offset = 0, limit = 10 },
-      { user }
-    ) => {
-      const currentOrgMember = user
-        ? await prisma.orgMember.findFirst({
-            where: {
-              organization: { collections: { some: { id: eventId } } },
-              userId: user.id,
-            },
-          })
-        : null;
-      if (!currentOrgMember)
-        throw new Error("You need to be a member of this org");
-
-      const currentCollectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: eventId,
-          },
-        },
-      });
-
-      if (
-        !(
-          (currentCollectionMember && currentCollectionMember.isApproved) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error(
-          "You need to be approved member of this collection or org admin to view collection members"
-        );
-
-      const collectionMembersWithExtra = await prisma.collectionMember.findMany(
-        {
+        return {
+          moreExist: orgMembersWithExtra.length > limit,
+          orgMembers: orgMembersWithExtra.slice(0, limit),
+        };
+      }
+    ),
+    members: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (parent, { collectionId, isApproved }, { user }) => {
+        return await prisma.collectionMember.findMany({
           where: {
-            collectionId: eventId,
+            collectionId,
             ...(typeof isApproved === "boolean" && { isApproved }),
           },
-          take: limit + 1,
-          skip: offset,
-        }
-      );
+        });
+      }
+    ),
+    membersPage: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (
+        parent,
+        { collectionId, isApproved, offset = 0, limit = 10 },
+        { user }
+      ) => {
+        const collectionMembersWithExtra = await prisma.collectionMember.findMany(
+          {
+            where: {
+              collectionId,
+              ...(typeof isApproved === "boolean" && { isApproved }),
+            },
+            take: limit + 1,
+            skip: offset,
+          }
+        );
 
-      return {
-        moreExist: collectionMembersWithExtra.length > limit,
-        members: collectionMembersWithExtra.slice(0, limit),
-      };
-    },
+        return {
+          moreExist: collectionMembersWithExtra.length > limit,
+          members: collectionMembersWithExtra.slice(0, limit),
+        };
+      }
+    ),
     categories: async (parent, { orgId }) => {
       const org = await prisma.organization.findUnique({
         where: { id: orgId },
@@ -368,11 +368,10 @@ const resolvers = {
     },
     commentSet: async (
       parent,
-      { dreamId, from = 0, limit = 30, order = "desc" },
-      { user }
+      { bucketId, from = 0, limit = 30, order = "desc" }
     ) => {
       const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
+        where: { id: bucketId },
         include: {
           comments: true,
           collection: {
@@ -380,7 +379,7 @@ const resolvers = {
           },
         },
       });
-      // const dream = await Dream.findOne({ _id: dreamId });
+      // const dream = await Dream.findOne({ _id: bucketId });
 
       let comments;
       const org = bucket.collection.organization;
@@ -400,10 +399,17 @@ const resolvers = {
                 !(comment.username === "system" && comment.raw === "")
             )
             .map(async (post) => {
-              const author = await prisma.orgMember.findFirst({
+              const author = await prisma.collectionMember.findFirst({
                 where: {
-                  organizationId: org.id,
-                  discourseUsername: post.username,
+                  collectionId: bucket.collectionId,
+                  user: {
+                    orgMemberships: {
+                      some: {
+                        discourseUsername: post.username,
+                        organizationId: org.id,
+                      },
+                    },
+                  },
                 },
               });
 
@@ -412,7 +418,7 @@ const resolvers = {
         );
       } else {
         comments = await prisma.comment.findMany({
-          where: { bucketId: dreamId },
+          where: { bucketId: bucketId },
           orderBy: { createdAt: "desc" },
         });
       }
@@ -442,7 +448,7 @@ const resolvers = {
           name,
           slug: slugify(slug),
           logo,
-          orgMembers: { create: { userId: user.id, isOrgAdmin: true } },
+          orgMembers: { create: { userId: user.id, isAdmin: true } },
         },
         include: {
           orgMembers: true,
@@ -456,1144 +462,722 @@ const resolvers = {
 
       return org;
     },
-    editOrganization: async (
-      parent,
-      { organizationId, name, info, slug, logo },
-      { user, eventHub }
-    ) => {
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: { organizationId, userId: user.id },
-        },
-      });
+    editOrganization: combineResolvers(
+      isOrgAdmin,
+      async (parent, { orgId, name, info, slug, logo }, { user, eventHub }) => {
+        if (name?.length === 0) throw new Error("Org name cannot be blank");
+        if (slug?.length === 0)
+          throw new Error("Org subdomain cannot be blank");
+        if (info?.length > 500) throw new Error("Org info too long");
 
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error("You need to be logged in as organization admin.");
-      if (
-        organizationId !== currentOrgMember.organizationId &&
-        !user?.isRootAdmin
-      )
-        throw new Error("You are not a member of this organization.");
-      if (name?.length === 0) throw new Error("Org name cannot be blank");
-      if (slug?.length === 0) throw new Error("Org subdomain cannot be blank");
-      if (info?.length > 500) throw new Error("Org info too long");
+        const organization = await prisma.organization.update({
+          where: {
+            id: orgId,
+          },
+          data: {
+            name,
+            info,
+            logo,
+            slug: slug !== undefined ? slugify(slug) : undefined,
+          },
+        });
 
-      const organization = await prisma.organization.update({
-        where: {
-          id: organizationId,
-        },
-        data: {
-          name,
-          info,
-          logo,
-          slug: slug !== undefined ? slugify(slug) : undefined,
-        },
-      });
+        // TODO: add back
+        // await eventHub.publish("edit-organization", {
+        //   currentOrg: organization,
+        //   currentOrgMember,
+        // });
+        return organization;
+      }
+    ),
+    setTodosFinished: combineResolvers(
+      isOrgAdmin,
+      async (parent, { orgId }) => {
+        const org = await prisma.organization.update({
+          where: { id: orgId },
+          data: { finishedTodos: true },
+        });
+        return org;
+      }
+    ),
+    createCollection: combineResolvers(
+      isOrgAdmin,
+      async (
+        parent,
+        { orgId, slug, title, currency, registrationPolicy },
+        { user }
+      ) => {
+        const collection = await prisma.collection.create({
+          data: {
+            slug,
+            title,
+            currency,
+            registrationPolicy,
+            organizationId: orgId,
+            collectionMember: {
+              create: {
+                userId: user.id,
+                isAdmin: true,
+                isApproved: true,
+              },
+            },
+            fields: {
+              create: {
+                name: "Description",
+                description: "Describe your bucket",
+                type: "MULTILINE_TEXT",
+                isRequired: false,
+                position: 1001,
+              },
+            },
+          },
+        });
 
-      // TODO: add back
-      // await eventHub.publish("edit-organization", {
-      //   currentOrg: organization,
-      //   currentOrgMember,
-      // });
-      return organization;
-    },
-    setTodosFinished: async (parent, { orgId }, { user }) => {
-      const { currentOrgMember, currentOrg } = await getCurrentOrgAndMember({
-        orgId,
-        user,
-      });
+        // await eventHub.publish("create-event", {
+        //   currentOrg,
+        //   currentOrgMember,
+        //   event: collection,
+        // });
 
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error("You need to be logged in as organization admin.");
-
-      const org = await prisma.organization.update({
-        where: { id: currentOrg.id },
-        data: { finishedTodos: true },
-      });
-      return org;
-    },
-    createEvent: async (
-      parent,
-      { orgId, slug, title, currency, registrationPolicy },
-      { eventHub, user }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        orgId,
-        user,
-      });
-
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error("You need to be logged in as organisation admin.");
-
-      const collection = await prisma.collection.create({
-        data: {
+        return collection;
+      }
+    ),
+    editCollection: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
+        {
+          collectionId,
           slug,
           title,
-          currency,
+          archived,
           registrationPolicy,
-          organizationId: currentOrg.id,
-          collectionMember: {
-            create: {
-              orgMemberId: currentOrgMember.id,
-              isAdmin: true,
-              isApproved: true,
-            },
+          info,
+          color,
+          about,
+          bucketReviewIsOpen,
+          discourseCategoryId,
+        }
+      ) => {
+        return prisma.collection.update({
+          where: { id: collectionId },
+          data: {
+            ...(slug && { slug: slugify(slug) }),
+            title,
+            archived,
+            registrationPolicy,
+            info,
+            about,
+            color,
+            bucketReviewIsOpen,
+            discourseCategoryId,
           },
-          fields: {
-            create: {
-              name: "Description",
-              description: "Describe your bucket",
-              type: "MULTILINE_TEXT",
-              isRequired: false,
-              position: 1001,
-            },
-          },
-        },
-      });
-
-      await eventHub.publish("create-event", {
-        currentOrg,
-        currentOrgMember,
-        event: collection,
-      });
-
-      return collection;
-    },
-    editEvent: async (
-      parent,
-      {
-        orgId,
-        eventId,
-        slug,
-        title,
-        archived,
-        registrationPolicy,
-        info,
-        color,
-        about,
-        bucketReviewIsOpen,
-        discourseCategoryId,
-      },
-      { user, eventHub }
-    ) => {
-      const currentOrgMember = await prisma.orgMember.findUnique({
-        where: {
-          organizationId_userId: {
-            organizationId: orgId,
-            userId: user.id,
-          },
-        },
-        include: {
-          organization: true,
-          collectionMemberships: { where: { collectionId: eventId } },
-        },
-      });
-
-      const collectionMember = currentOrgMember.collectionMemberships[0];
-
-      const collection = await prisma.collection.findUnique({
-        where: { id: eventId },
-      });
-      if (!collection)
-        throw new Error("Can't find collection in your organization to edit");
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin of this collection.");
-
-      if (slug) collection.slug = slugify(slug);
-      if (title) collection.title = title;
-      if (typeof archived !== "undefined") collection.archived = archived;
-      if (registrationPolicy)
-        collection.registrationPolicy = registrationPolicy;
-      if (typeof info !== "undefined") collection.info = info;
-      if (typeof about !== "undefined") collection.about = about;
-      if (color) collection.color = color;
-      if (typeof bucketReviewIsOpen !== "undefined")
-        collection.bucketReviewIsOpen = bucketReviewIsOpen;
-      if (discourseCategoryId)
-        collection.discourseCategoryId = discourseCategoryId;
-
-      await eventHub.publish("edit-event", {
-        currentOrg: currentOrgMember.organization,
-        currentOrgMember,
-        event: collection,
-      });
-      return prisma.collection.update({
-        where: { id: eventId },
-        data: { ...collection },
-      });
-    },
-    deleteCollection: async (parent, { collectionId }, { user, eventHub }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId,
-        user,
-      });
-
-      if (!(currentOrgMember && currentOrgMember.isOrgAdmin))
-        throw new Error("You need to be org. admin to delete event");
-
-      const collection = await prisma.collection.update({
-        where: { id: collectionId },
-        data: { deleted: true },
-      });
-
-      await eventHub.publish("delete-event", {
-        currentOrg,
-        currentOrgMember,
-        event: collection,
-      });
-
-      return collection;
-    },
-    addGuideline: async (
-      parent,
-      { eventId, guideline: { title, description } },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: { where: { collectionId: eventId } },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to add a guideline");
-
-      const guidelines = await prisma.guideline.findMany({
-        where: { collectionId: eventId },
-      });
-
-      const position =
-        guidelines
-          .map((g) => g.position)
-          .reduce((a, b) => Math.max(a, b), 1000) + 1;
-
-      const guideline = await prisma.guideline.create({
-        data: { collectionId: eventId, title, description, position },
-        include: { collection: true },
-      });
-      return guideline.collection;
-    },
-    editGuideline: async (
-      parent,
-      { eventId, guidelineId, guideline: { title, description } },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-            include: { collection: { include: { guidelines: true } } },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to edit a guideline");
-
-      if (
-        !collectionMember.collection.guidelines
-          .map((g) => g.id)
-          .includes(guidelineId)
-      )
-        throw new Error("This guideline is not part of this collection");
-
-      const guideline = await prisma.guideline.update({
-        where: { id: guidelineId },
-        data: { title, description },
-        include: { collection: true },
-      });
-
-      return guideline.collection;
-    },
-    setGuidelinePosition: async (
-      parent,
-      { eventId, guidelineId, newPosition },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-            include: { collection: { include: { guidelines: true } } },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to edit a guideline");
-
-      if (
-        !collectionMember.collection.guidelines
-          .map((g) => g.id)
-          .includes(guidelineId)
-      )
-        throw new Error("This guideline is not part of this collection");
-
-      const guideline = await prisma.guideline.update({
-        where: { id: guidelineId },
-        data: { position: newPosition },
-        include: { collection: true },
-      });
-
-      return guideline.collection;
-    },
-    deleteGuideline: async (parent, { eventId, guidelineId }, { user }) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to delete a guideline");
-
-      const collection = await prisma.collection.update({
-        where: { id: eventId },
-        data: { guidelines: { delete: { id: guidelineId } } },
-      });
-      return collection;
-    },
-    addCustomField: async (
-      parent,
-      { eventId, customField: { name, description, type, limit, isRequired } },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to add a custom field");
-
-      const customFields = await prisma.field.findMany({
-        where: { collectionId: eventId },
-      });
-
-      const position =
-        customFields
-          .map((g) => g.position)
-          .reduce((a, b) => Math.max(a, b), 1000) + 1;
-
-      const customField = await prisma.field.create({
-        data: {
-          collectionId: eventId,
-          name,
-          description,
-          type,
-          limit,
-          isRequired,
-          position,
-        },
-        include: { collection: true },
-      });
-      return customField.collection;
-    },
-    // Based on https://softwareengineering.stackexchange.com/a/195317/54663
-    setCustomFieldPosition: async (
-      parent,
-      { eventId, fieldId, newPosition },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-            include: { collection: { include: { fields: true } } },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to edit a field");
-
-      if (
-        !collectionMember.collection.fields.map((g) => g.id).includes(fieldId)
-      )
-        throw new Error("This field is not part of this collection");
-
-      const field = await prisma.field.update({
-        where: { id: fieldId },
-        data: { position: newPosition },
-        include: { collection: true },
-      });
-
-      return field.collection;
-    },
-    editCustomField: async (
-      parent,
-      {
-        eventId,
-        fieldId,
-        customField: { name, description, type, limit, isRequired },
-      },
-      { user }
-    ) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-            include: { collection: { include: { fields: true } } },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to edit a field");
-
-      if (
-        !collectionMember.collection.fields.map((g) => g.id).includes(fieldId)
-      )
-        throw new Error("This field is not part of this collection");
-
-      const field = await prisma.field.update({
-        where: { id: fieldId },
-        data: { name, description, type, limit, isRequired },
-        include: { collection: true },
-      });
-
-      return field.collection;
-    },
-    deleteCustomField: async (parent, { eventId, fieldId }, { user }) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          collectionMemberships: {
-            where: { collectionId: eventId },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to delete a field");
-
-      const collection = await prisma.collection.update({
-        where: { id: eventId },
-        data: { fields: { delete: { id: fieldId } } },
-      });
-      return collection;
-    },
-    createDream: async (parent, { eventId, title }, { user, eventHub }) => {
-      if (!user) throw new Error("You need to be logged in");
-
-      const currentOrgMember = await prisma.orgMember.findFirst({
-        where: {
-          organization: { collections: { some: { id: eventId } } },
-          userId: user.id,
-        },
-        include: {
-          organization: true,
-          collectionMemberships: {
-            where: { collectionId: eventId },
-            include: { collection: true },
-          },
-        },
-      });
-
-      const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-
-      if (!collectionMember || !collectionMember.isApproved)
-        throw new Error("You need to be logged in and/or approved");
-
-      const { collection } = collectionMember;
-
-      const bucketCreationIsOpen = collection.bucketCreationCloses
-        ? dayjs().isBefore(dayjs(collection.bucketCreationCloses))
-        : true;
-
-      if (!bucketCreationIsOpen) throw new Error("Bucket creation is not open");
-
-      const bucket = await prisma.bucket.create({
-        data: {
-          collection: { connect: { id: eventId } },
-          title,
-          cocreators: { connect: { id: collectionMember.id } },
-        },
-      });
-
-      await eventHub.publish("create-dream", {
-        currentOrg: currentOrgMember.organization,
-        currentOrgMember,
-        dream: bucket,
-        event: collection,
-      });
-
-      return bucket;
-    },
-    editDream: async (
-      parent,
-      { dreamId, title, description, summary, images, budgetItems },
-      { user, eventHub }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true, collection: true },
-      });
-
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !eventMember ||
-        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this dream.");
-
-      const updated = await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          title,
-          description,
-          summary,
-          ...(typeof budgetItems !== "undefined" && {
-            BudgetItems: { deleteMany: {}, createMany: { data: budgetItems } },
-          }),
-          ...(typeof images !== "undefined" && {
-            Images: { deleteMany: {}, createMany: { data: images } },
-          }),
-        },
-      });
-
-      // TODO: behöver den här event ak.a collection?
-      await eventHub.publish("edit-dream", {
-        currentOrg,
-        currentOrgMember,
-        event: bucket.collection,
-        dream: updated,
-      });
-
-      return updated;
-    },
-    createTag: async (parent, { eventId, tagValue }, { user }) => {
-      const {
-        currentOrgMember,
-        collectionMember,
-      } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-
-      if (
-        !collectionMember?.isAdmin &&
-        !collectionMember?.isGuide &&
-        !currentOrgMember?.isOrgAdmin
-      )
-        throw new Error("You are not an admin or guide of this collection.");
-
-      return await prisma.collection.update({
-        where: { id: eventId },
-        data: {
-          tags: {
-            create: {
-              value: tagValue,
-            },
-          },
-        },
-      });
-    },
-    addTag: async (parent, { dreamId, tagId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin &&
-          !collectionMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this bucket.");
-
-      if (!tagId) throw new Error("You need to provide tag id");
-
-      return await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          tags: {
-            connect: {
-              id: tagId,
-            },
-          },
-        },
-      });
-    },
-    removeTag: async (_, { dreamId, tagId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin &&
-          !collectionMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this bucket.");
-
-      return await prisma.bucket.update({
-        where: { id: dreamId },
-        data: { tags: { disconnect: { id: tagId } } },
-      });
-    },
-    editDreamCustomField: async (
-      parent,
-      { dreamId, customField: { fieldId, value } },
-      { user, eventHub }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !eventMember ||
-        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this dream.");
-
-      const updated = await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          FieldValues: {
-            upsert: {
-              where: { bucketId_fieldId: { bucketId: dreamId, fieldId } },
-              create: { fieldId, value },
-              update: { value },
-            },
-          },
-        },
-        include: { collection: true },
-      });
-
-      await eventHub.publish("edit-dream", {
-        currentOrg,
-        currentOrgMember,
-        event: updated.collection,
-        dream: updated,
-      });
-
-      return updated;
-    },
-    deleteDream: async (parent, { dreamId }, { user, eventHub }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true, collection: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin &&
-          !collectionMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this bucket.");
-
-      const {
-        _sum: { amount: contributionsForBucket },
-      } = await prisma.contribution.aggregate({
-        where: { bucketId: bucket.id },
-        _sum: { amount: true },
-      });
-
-      if (contributionsForBucket > 0) {
-        throw new Error(
-          "You cant delete a bucket that has received contributions"
-        );
+        });
       }
+    ),
+    deleteCollection: combineResolvers(
+      isOrgAdmin,
+      async (parent, { collectionId }) =>
+        prisma.collection.update({
+          where: { id: collectionId },
+          data: { deleted: true },
+        })
+    ),
+    addGuideline: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, guideline: { title, description } }) => {
+        const guidelines = await prisma.guideline.findMany({
+          where: { collectionId: collectionId },
+        });
 
-      await eventHub.publish("delete-dream", {
-        currentOrg,
-        currentOrgMember,
-        event: bucket.collection,
-        dream: bucket,
-      });
+        const position =
+          guidelines
+            .map((g) => g.position)
+            .reduce((a, b) => Math.max(a, b), 1000) + 1;
 
-      await prisma.bucket.update({
-        where: { id: dreamId },
-        data: { deleted: true },
-      });
-
-      return bucket;
-    },
-    addCocreator: async (parent, { dreamId, memberId }, { user }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((m) => m.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin &&
-          !collectionMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this bucket.");
-
-      const updated = await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          cocreators: {
-            connect: { id: memberId },
-          },
-        },
-      });
-
-      return updated;
-    },
-    removeCocreator: async (parent, { dreamId, memberId }, { user }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((m) => m.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin &&
-          !collectionMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this bucket.");
-
-      return await prisma.bucket.update({
-        where: { id: dreamId },
-        data: { cocreators: { disconnect: { id: memberId } } },
-      });
-    },
-    publishDream: async (
-      parent,
-      { dreamId, unpublish },
-      { user, eventHub }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { collection: true, cocreators: true },
-      });
-      // const dream = await Dream.findOne({ _id: dreamId });
-      // const event = await Event.findOne({ _id: dream.eventId });
-
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !eventMember ||
-        (!bucket.cocreators.map((m) => m.id).includes(eventMember.id) &&
-          !eventMember.isAdmin &&
-          !eventMember.isGuide)
-      )
-        throw new Error("You are not a cocreator of this dream.");
-
-      const { prisma: prismaResult } = await eventHub.publish("publish-dream", {
-        currentOrg,
-        currentOrgMember,
-        event: bucket.collection,
-        dream: bucket,
-        unpublish,
-      });
-
-      return prismaResult;
-    },
-    addComment: async (parent, { content, dreamId }, { user, eventHub }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      if (!currentOrgMember) {
-        throw new Error("You need to be an org member to post comments.");
+        const guideline = await prisma.guideline.create({
+          data: { collectionId: collectionId, title, description, position },
+          include: { collection: true },
+        });
+        return guideline.collection;
       }
+    ),
+    editGuideline: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
+        { collectionId, guidelineId, guideline: { title, description } }
+      ) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { guidelines: true },
+        });
 
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { collection: true },
-      });
+        if (!collection.guidelines.map((g) => g.id).includes(guidelineId))
+          throw new Error("This guideline is not part of this collection");
 
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collection.id,
-          },
-        },
-      });
+        const guideline = await prisma.guideline.update({
+          where: { id: guidelineId },
+          data: { title, description },
+          include: { collection: true },
+        });
 
-      if (!collectionMember) {
-        throw new Error(
-          "You need to be a member of the collection to post comments."
-        );
+        return guideline.collection;
       }
+    ),
+    setGuidelinePosition: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, guidelineId, newPosition }, { user }) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { guidelines: true },
+        });
 
-      if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
-        throw new Error(
-          "You need to have a discourse account connected, go to /connect-discourse"
-        );
+        if (!collection.guidelines.map((g) => g.id).includes(guidelineId))
+          throw new Error("This guideline is not part of this collection");
+
+        const guideline = await prisma.guideline.update({
+          where: { id: guidelineId },
+          data: { position: newPosition },
+          include: { collection: true },
+        });
+
+        return guideline.collection;
       }
-
-      if (content.length < (currentOrg.discourse?.minPostLength || 3)) {
-        throw new Error(
-          `Your post needs to be at least ${
-            currentOrg.discourse?.minPostLength || 3
-          } characters long!`
-        );
-      }
-
-      const comment = { content, authorId: currentOrgMember.id };
-
-      const { discourse, prisma: prismaResult } = await eventHub.publish(
-        "create-comment",
+    ),
+    deleteGuideline: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, guidelineId }) =>
+        prisma.collection.update({
+          where: { id: collectionId },
+          data: { guidelines: { delete: { id: guidelineId } } },
+        })
+    ),
+    addCustomField: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
         {
-          currentOrg,
+          collectionId,
+          customField: { name, description, type, limit, isRequired },
+        }
+      ) => {
+        const customFields = await prisma.field.findMany({
+          where: { collectionId: collectionId },
+        });
+
+        const position =
+          customFields
+            .map((g) => g.position)
+            .reduce((a, b) => Math.max(a, b), 1000) + 1;
+
+        const customField = await prisma.field.create({
+          data: {
+            collectionId: collectionId,
+            name,
+            description,
+            type,
+            limit,
+            isRequired,
+            position,
+          },
+          include: { collection: true },
+        });
+        return customField.collection;
+      }
+    ),
+    // Based on https://softwareengineering.stackexchange.com/a/195317/54663
+    setCustomFieldPosition: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, fieldId, newPosition }) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { fields: true },
+        });
+        if (!collection.fields.map((g) => g.id).includes(fieldId))
+          throw new Error("This field is not part of this collection");
+
+        const field = await prisma.field.update({
+          where: { id: fieldId },
+          data: { position: newPosition },
+          include: { collection: true },
+        });
+
+        return field.collection;
+      }
+    ),
+    editCustomField: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
+        {
+          collectionId,
+          fieldId,
+          customField: { name, description, type, limit, isRequired },
+        }
+      ) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { fields: true },
+        });
+        if (!collection.fields.map((g) => g.id).includes(fieldId))
+          throw new Error("This field is not part of this collection");
+
+        const field = await prisma.field.update({
+          where: { id: fieldId },
+          data: { name, description, type, limit, isRequired },
+          include: { collection: true },
+        });
+
+        return field.collection;
+      }
+    ),
+    deleteCustomField: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, fieldId }) =>
+        prisma.collection.update({
+          where: { id: collectionId },
+          data: { fields: { delete: { id: fieldId } } },
+        })
+    ),
+    createDream: combineResolvers(
+      isCollMember,
+      async (parent, { collectionId, title }, { user, eventHub }) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: {
+            organization: {
+              include: { orgMembers: { where: { userId: user.id } } },
+            },
+          },
+        });
+
+        const currentOrgMember = collection?.organization?.orgMembers?.[0];
+
+        const bucketCreationIsOpen = collection.bucketCreationCloses
+          ? dayjs().isBefore(dayjs(collection.bucketCreationCloses))
+          : true;
+
+        if (!bucketCreationIsOpen)
+          throw new Error("Bucket creation is not open");
+
+        const bucket = await prisma.bucket.create({
+          data: {
+            collection: { connect: { id: collectionId } },
+            title,
+            cocreators: {
+              connect: {
+                userId_collectionId: { userId: user.id, collectionId },
+              },
+            },
+          },
+        });
+
+        await eventHub.publish("create-dream", {
+          currentOrg: collection.organization,
           currentOrgMember,
           dream: bucket,
-          event: bucket.collection,
-          comment,
+          event: collection,
+        });
+
+        return bucket;
+      }
+    ),
+    editDream: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (
+        parent,
+        { bucketId, title, description, summary, images, budgetItems },
+        { user, eventHub }
+      ) => {
+        const updated = await prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            title,
+            description,
+            summary,
+            ...(typeof budgetItems !== "undefined" && {
+              BudgetItems: {
+                deleteMany: {},
+                createMany: { data: budgetItems },
+              },
+            }),
+            ...(typeof images !== "undefined" && {
+              Images: { deleteMany: {}, createMany: { data: images } },
+            }),
+          },
+          include: {
+            collection: {
+              include: {
+                organization: {
+                  include: { orgMembers: { where: { userId: user.id } } },
+                },
+              },
+            },
+          },
+        });
+
+        await eventHub.publish("edit-dream", {
+          currentOrg: updated.collection.organization,
+          currentOrgMember: updated.collection.organization?.orgMembers?.[0],
+          event: updated.collection,
+          dream: updated,
+        });
+
+        return updated;
+      }
+    ),
+    addTag: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (parent, { bucketId, tagId, tagValue }, { user }) => {
+        const bucket = await prisma.bucket.findUnique({
+          where: { id: bucketId },
+        });
+
+        if (!tagId && !tagValue)
+          throw new Error("You need to provide tag id or value");
+
+        if (tagId) {
+          return await prisma.bucket.update({
+            where: { id: bucketId },
+            data: {
+              tags: {
+                connect: {
+                  id: tagId,
+                },
+              },
+            },
+          });
+        } else {
+          return await prisma.bucket.update({
+            where: { id: bucketId },
+            data: {
+              tags: {
+                create: {
+                  value: tagValue,
+                  collectionId: bucket.collectionId,
+                },
+              },
+            },
+          });
         }
-      );
-
-      return discourse || prismaResult;
-    },
-
-    deleteComment: async (
-      parent,
-      { dreamId, commentId },
-      { user, eventHub }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { collection: true },
-      });
-
-      const comment = await prisma.comment.findUnique({
-        where: { id: commentId },
-      });
-
-      if (!currentOrgMember)
-        throw new Error("You need to be member of the org to delete comments");
-
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collection.id,
+      }
+    ),
+    removeTag: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId, tagId }, { user }) =>
+        prisma.bucket.update({
+          where: { id: bucketId },
+          data: { tags: { disconnect: { id: tagId } } },
+        })
+    ),
+    editDreamCustomField: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (
+        parent,
+        { bucketId, customField: { fieldId, value } },
+        { user, eventHub }
+      ) => {
+        const updated = await prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            FieldValues: {
+              upsert: {
+                where: { bucketId_fieldId: { bucketId: bucketId, fieldId } },
+                create: { fieldId, value },
+                update: { value },
+              },
+            },
           },
-        },
-      });
-
-      await eventHub.publish("delete-comment", {
-        currentOrg,
-        currentOrgMember,
-        event: bucket.collection,
-        eventMember,
-        dream: bucket,
-        comment,
-      });
-
-      return comment;
-    },
-    editComment: async (
-      parent,
-      { dreamId, commentId, content },
-      { user, eventHub }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      let comment = await prisma.comment.findUnique({
-        where: { id: commentId },
-        include: { bucket: { include: { collection: true } } },
-      });
-      comment = { ...comment, content };
-
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: comment.bucket.collection.id,
+          include: {
+            collection: {
+              include: {
+                organization: {
+                  include: { orgMembers: { where: { userId: user.id } } },
+                },
+              },
+            },
           },
-        },
-        include: { orgMember: true },
-      });
+        });
 
-      // TODO: permissions?
-      //if (!eventMember || comment.orgMemberId !== currentOrgMember)
-      const { discourse, prisma: prismaResult } = await eventHub.publish(
-        "edit-comment",
-        {
+        await eventHub.publish("edit-dream", {
+          currentOrg: updated.collection.organization,
+          currentOrgMember: updated.collection.organization?.orgMembers?.[0],
+          event: updated.collection,
+          dream: updated,
+        });
+
+        return updated;
+      }
+    ),
+    deleteDream: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId }, { user, eventHub }) => {
+        const {
+          _sum: { amount: contributionsForBucket },
+        } = await prisma.contribution.aggregate({
+          where: { bucketId },
+          _sum: { amount: true },
+        });
+
+        if (contributionsForBucket > 0) {
+          throw new Error(
+            "You cant delete a bucket that has received contributions"
+          );
+        }
+
+        const bucket = await prisma.bucket.update({
+          where: { id: bucketId },
+          data: { deleted: true },
+          include: {
+            collection: {
+              include: {
+                organization: {
+                  include: { orgMembers: { where: { userId: user.id } } },
+                },
+              },
+            },
+          },
+        });
+
+        await eventHub.publish("delete-dream", {
+          currentOrg: bucket.collection.organization,
+          currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
+          event: bucket.collection,
+          dream: bucket,
+        });
+
+        return bucket;
+      }
+    ),
+    addCocreator: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (parent, { bucketId, memberId }) =>
+        prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            cocreators: {
+              connect: { id: memberId },
+            },
+          },
+        })
+    ),
+    removeCocreator: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId, memberId }) =>
+        prisma.bucket.update({
+          where: { id: bucketId },
+          data: { cocreators: { disconnect: { id: memberId } } },
+        })
+    ),
+    publishDream: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId, unpublish }, { user, eventHub }) => {
+        const bucket = await prisma.bucket.findUnique({
+          where: { id: bucketId },
+          include: {
+            collection: {
+              include: {
+                organization: {
+                  include: { orgMembers: { where: { userId: user.id } } },
+                },
+              },
+            },
+          },
+        });
+
+        const { prisma: prismaResult } = await eventHub.publish(
+          "publish-dream",
+          {
+            currentOrg: bucket.collection.organization,
+            currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
+            event: bucket.collection,
+            dream: bucket,
+            unpublish,
+          }
+        );
+
+        return prismaResult;
+      }
+    ),
+    addComment: combineResolvers(
+      isCollMember,
+      async (_, { content, bucketId }, { user, eventHub }) => {
+        const bucket = await prisma.bucket.findUnique({
+          where: { id: bucketId },
+          include: {
+            collection: {
+              include: {
+                collectionMember: { where: { userId: user.id } },
+                organization: {
+                  include: {
+                    discourse: true,
+                    orgMembers: { where: { userId: user.id } },
+                  },
+                },
+              },
+            },
+          },
+        });
+        const currentOrg = bucket.collection.organization;
+        const currentOrgMember = currentOrg?.orgMembers?.[0];
+        const currentCollMember = bucket.collection.collectionMember?.[0];
+
+        if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
+          throw new Error(
+            "You need to have a discourse account connected, go to /connect-discourse"
+          );
+        }
+
+        if (content.length < (currentOrg?.discourse?.minPostLength || 3)) {
+          throw new Error(
+            `Your post needs to be at least ${
+              currentOrg.discourse?.minPostLength || 3
+            } characters long!`
+          );
+        }
+
+        const comment = { content, collMemberId: currentCollMember.id };
+
+        const { discourse, prisma: prismaResult } = await eventHub.publish(
+          "create-comment",
+          {
+            currentOrg,
+            currentOrgMember,
+            currentCollMember,
+            currentUser: user,
+            dream: bucket,
+            event: bucket.collection,
+            comment,
+          }
+        );
+
+        console.log({ comment, prismaResult, currentCollMember });
+
+        return discourse || prismaResult;
+      }
+    ),
+
+    deleteComment: combineResolvers(
+      isCollMember,
+      async (_, { bucketId, commentId }, { user, eventHub }) => {
+        const bucket = await prisma.bucket.findUnique({
+          where: { id: bucketId },
+          include: {
+            comments: { where: { id: commentId } },
+            collection: {
+              include: {
+                collectionMember: { where: { userId: user.id } },
+                organization: {
+                  include: {
+                    orgMembers: { where: { userId: user.id } },
+                  },
+                },
+              },
+            },
+          },
+        });
+        const currentOrg = bucket.collection.organization;
+        const currentOrgMember = currentOrg?.orgMembers?.[0];
+        const currentCollMember = bucket.collection.collectionMember?.[0];
+        const comment = bucket.comments?.[0];
+
+        await eventHub.publish("delete-comment", {
           currentOrg,
           currentOrgMember,
-          eventMember,
-          dream: comment.bucket,
+          event: bucket.collection,
+          currentCollMember,
+          dream: bucket,
           comment,
-        }
-      );
-      return discourse || prismaResult;
-    },
-    raiseFlag: async (parent, { dreamId, guidelineId, comment }, { user }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
+        });
+
+        return comment;
+      }
+    ),
+    editComment: combineResolvers(
+      isCollMember,
+      async (parent, { bucketId, commentId, content }, { user, eventHub }) => {
+        let comment = await prisma.comment.findUnique({
+          where: { id: commentId },
+          include: { bucket: { include: { collection: true } } },
+        });
+        comment = { ...comment, content };
+
+        const currentCollMember = await prisma.collectionMember.findUnique({
+          where: {
+            userId_collectionId: {
+              userId: user.id,
+              collectionId: comment.bucket.collection.id,
+            },
+          },
+          include: {
+            user: true,
+            collection: {
+              include: {
+                organization: {
+                  include: { orgMembers: { where: { userId: user.id } } },
+                },
+              },
+            },
+          },
+        });
+
+        // TODO: permissions?
+        //if (!collectionMember || comment.orgMemberId !== currentOrgMember)
+        const { discourse, prisma: prismaResult } = await eventHub.publish(
+          "edit-comment",
+          {
+            currentOrg: currentCollMember.collection.organization,
+            currentOrgMember:
+              currentCollMember.collection.organization?.orgMembers?.[0],
+            currentCollMember,
+            dream: comment.bucket,
+            comment,
+          }
+        );
+        return discourse || prismaResult;
+      }
+    ),
+    raiseFlag: async (parent, { bucketId, guidelineId, comment }, { user }) => {
+      const currentCollMember = await isAndGetCollMember({
+        bucketId,
+        userId: user.id,
       });
       // check bucketReviewIsOpen
       // check not already left a flag?
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: {
-          collection: {
-            include: { guidelines: { where: { id: guidelineId } } },
-          },
-        },
-      });
+      // const bucket = await prisma.bucket.findUnique({
+      //   where: { id: bucketId },
+      //   include: {
+      //     collection: {
+      //       include: { guidelines: { where: { id: guidelineId } } },
+      //     },
+      //   },
+      // });
 
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collection.id,
-          },
-        },
-      });
-
-      if (!collectionMember || !collectionMember.isApproved)
-        throw new Error("You need to be logged in and/or approved");
-
-      let updated = await prisma.bucket.update({
-        where: { id: dreamId },
+      let bucket = await prisma.bucket.update({
+        where: { id: bucketId },
         data: {
           flags: {
             create: {
               guidelineId,
               type: "RAISE_FLAG",
-              orgMemberId: currentOrgMember.id,
+              collMemberId: currentCollMember.id,
               comment,
+            },
+          },
+        },
+        include: {
+          collection: {
+            include: {
+              guidelines: { where: { id: guidelineId } },
+              organization: { include: { discourse: true } },
             },
           },
         },
       });
 
       const logContent = `Someone flagged this dream for the **${bucket.collection.guidelines[0].title}** guideline: \n> ${comment}`;
-
+      const currentOrg = bucket.collection.organization;
       if (orgHasDiscourse(currentOrg)) {
         if (!bucket.discourseTopicId) {
           // TODO: break out create thread into separate function
@@ -1605,7 +1189,7 @@ const resolvers = {
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
-                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+                  : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
               }/${bucket.collection.slug}/${bucket.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
@@ -1615,15 +1199,23 @@ const resolvers = {
               username: "system",
             }
           );
-          updated = await prisma.bucket.update({
-            where: { id: dreamId },
+          bucket = await prisma.bucket.update({
+            where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
+            include: {
+              collection: {
+                include: {
+                  guidelines: { where: { id: guidelineId } },
+                  organization: { include: { discourse: true } },
+                },
+              },
+            },
           });
         }
 
         await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: updated.discourseTopicId,
+            topic_id: bucket.discourseTopicId,
             raw: logContent,
           },
           { username: "system" }
@@ -1633,24 +1225,24 @@ const resolvers = {
           data: {
             content: logContent,
             isLog: true,
-            orgMemberId: currentOrgMember.id,
-            bucketId: dreamId,
+            collMemberId: currentCollMember.id,
+            bucketId,
           },
         });
       }
 
-      return updated;
+      return bucket;
     },
-    resolveFlag: async (parent, { dreamId, flagId, comment }, { user }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
+    resolveFlag: async (parent, { bucketId, flagId, comment }, { user }) => {
+      const currentCollMember = await isAndGetCollMember({
+        bucketId,
+        userId: user.id,
       });
       // check bucketReviewIsOpen
       // check not already left a flag?
 
       const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
+        where: { id: bucketId },
         include: {
           collection: true,
           flags: {
@@ -1660,32 +1252,25 @@ const resolvers = {
         },
       });
 
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collection.id,
-          },
-        },
-      });
-
-      if (!collectionMember || !collectionMember.isApproved)
-        throw new Error("You need to be logged in and/or approved");
-
       let updated = await prisma.bucket.update({
-        where: { id: dreamId },
+        where: { id: bucketId },
         data: {
           flags: {
             create: {
               resolvingFlagId: flagId,
               type: "RESOLVE_FLAG",
-              orgMemberId: currentOrgMember.id,
+              collMemberId: currentCollMember.id,
               comment,
             },
           },
         },
+        include: {
+          collection: {
+            include: { organization: { include: { discourse: true } } },
+          },
+        },
       });
-
+      const currentOrg = updated.collection.organization;
       const resolvedFlagGuideline = bucket.flags[0].guideline;
 
       const logContent = `Someone resolved a flag for the **${resolvedFlagGuideline.title}** guideline: \n> ${comment}`;
@@ -1701,7 +1286,7 @@ const resolvers = {
               raw: `https://${
                 currentOrg.customDomain
                   ? currentOrg.customDomain
-                  : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+                  : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
               }/${bucket.collection.slug}/${bucket.id}`,
               ...(currentOrg.discourse.dreamsCategoryId && {
                 category: currentOrg.discourse.dreamsCategoryId,
@@ -1712,8 +1297,13 @@ const resolvers = {
             }
           );
           updated = await prisma.bucket.update({
-            where: { id: dreamId },
+            where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
+            include: {
+              collection: {
+                include: { organization: { include: { discourse: true } } },
+              },
+            },
           });
         }
         await discourse(currentOrg.discourse).posts.create(
@@ -1728,26 +1318,29 @@ const resolvers = {
           data: {
             content: logContent,
             isLog: true,
-            orgMemberId: currentOrgMember.id,
-            bucketId: dreamId,
+            collMemberId: currentCollMember.id,
+            bucketId: bucket.id,
           },
         });
       }
 
       return updated;
     },
-    allGoodFlag: async (parent, { dreamId }, { user }) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
+    allGoodFlag: async (parent, { bucketId }, { user }) => {
+      const currentCollMember = await isAndGetCollMember({
+        bucketId,
+        userId: user.id,
       });
       // check bucketReviewIsOpen
       // check have not left one of these flags already
       const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
+        where: { id: bucketId },
         include: {
           flags: {
-            where: { orgMemberId: currentOrgMember.id, type: "ALL_GOOD_FLAG" },
+            where: {
+              collMemberId: currentCollMember.id,
+              type: "ALL_GOOD_FLAG",
+            },
           },
         },
       });
@@ -1755,412 +1348,260 @@ const resolvers = {
       if (bucket.flags.length)
         throw new Error("You have already left an all good flag");
 
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (!collectionMember || !collectionMember.isApproved)
-        throw new Error("You need to be logged in and/or approved");
-
       return await prisma.bucket.update({
-        where: { id: dreamId },
+        where: { id: bucketId },
         data: {
           flags: {
-            create: { type: "ALL_GOOD_FLAG", orgMemberId: currentOrgMember.id },
+            create: {
+              type: "ALL_GOOD_FLAG",
+              collMemberId: currentCollMember.id,
+            },
           },
         },
       });
     },
 
-    joinOrg: async (parent, { orgId }, { user }) => {
+    joinOrg: async (_, { orgId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        orgId,
-        user,
-      });
-
       return await prisma.orgMember.create({
-        data: { userId: user.id, organizationId: currentOrg.id },
+        data: { userId: user.id, organizationId: orgId },
       });
     },
-    updateProfile: async (parent, { orgId, name, username, bio }, { user }) => {
+    updateProfile: async (_, { name, username }, { user }) => {
       if (!user) throw new Error("You need to be logged in..");
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        orgId,
-        user,
-      });
-      const updatedUser = await prisma.user.update({
+
+      return prisma.user.update({
         where: { id: user.id },
         data: {
-          ...(typeof name !== "undefined" && { name }),
-          ...(typeof username !== "undefined" && { username }),
-          ...(typeof bio !== "undefined" &&
-            currentOrgMember && {
-              orgMemberships: {
-                update: { where: { id: currentOrgMember.id }, data: { bio } },
-              },
-            }),
+          name,
+          username,
         },
       });
-
-      return updatedUser;
     },
-    inviteEventMembers: async (
-      parent,
-      { emails: emailsString, eventId },
-      { user: currentUser }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user: currentUser,
-      });
+    updateBio: async (_, { collectionId, bio }, { user }) => {
+      if (!user) throw new Error("You need to be logged in..");
 
-      const currentEventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: eventId,
-          },
+      return prisma.collectionMember.update({
+        where: { userId_collectionId: { userId: user.id, collectionId } },
+        data: {
+          bio,
         },
-        include: { collection: true },
       });
-
-      if (!(currentOrgMember.isOrgAdmin || currentEventMember?.isAdmin))
-        throw new Error("You need to be admin to invite new members");
-
-      const emails = emailsString.split(",");
-
-      if (emails.length > 1000)
-        throw new Error("You can only invite 1000 people at a time");
-
-      const invitedCollectionMembers = [];
-
-      for (let email of emails) {
-        email = email.trim().toLowerCase();
-        const user = await prisma.user.findUnique({
-          where: { email },
+    },
+    inviteCollectionMembers: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        _,
+        { emails: emailsString, collectionId },
+        { user: currentUser }
+      ) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { organization: true },
         });
+        const emails = emailsString.split(",");
 
-        await sendEmail({
-          to: email,
-          subject: `${currentUser.name} invited you to ${currentOrg.name}'s ${currentEventMember.collection.title} collection on Cobudget`,
-          text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}/${currentEventMember.collection.slug}`,
-        });
+        if (emails.length > 1000)
+          throw new Error("You can only invite 1000 people at a time");
 
-        if (user) {
-          const orgMember = await prisma.orgMember.findUnique({
-            where: {
-              organizationId_userId: {
-                userId: user.id,
-                organizationId: currentOrg.id,
+        const invitedCollectionMembers = [];
+
+        for (let email of emails) {
+          email = email.trim().toLowerCase();
+
+          const user = await prisma.user.findUnique({
+            where: { email },
+          });
+
+          const updated = await prisma.user.upsert({
+            where: { email },
+            create: {
+              collMemberships: { create: { isApproved: true, collectionId } },
+            },
+            update: {
+              collMemberships: {
+                connectOrCreate: {
+                  create: { isApproved: true, collectionId },
+                  where: {
+                    userId_collectionId: { userId: user.id, collectionId },
+                  },
+                },
               },
             },
+            include: { collMemberships: { where: { collectionId } } },
           });
-          if (orgMember) {
-            const collectionMember = await prisma.collectionMember.upsert({
-              where: {
-                orgMemberId_collectionId: {
-                  orgMemberId: orgMember.id,
-                  collectionId: eventId,
-                },
-              },
-              create: {
-                orgMemberId: orgMember.id,
-                collectionId: eventId,
-                isApproved: true,
-              },
-              update: {
-                isApproved: true,
-              },
-            });
-            invitedCollectionMembers.push(collectionMember);
-          } else {
-            const orgMember = await prisma.orgMember.create({
-              data: {
-                userId: user.id,
-                organizationId: currentOrgMember.organizationId,
-                collectionMemberships: {
-                  create: { collectionId: eventId, isApproved: true },
-                },
-              },
-              include: {
-                collectionMemberships: true,
-              },
-            });
 
-            invitedCollectionMembers.push(orgMember.collectionMemberships[0]);
-          }
-        } else {
-          const user = await prisma.user.create({
-            data: {
-              email: email.trim().toLowerCase(),
+          await sendEmail({
+            to: email,
+            subject: `${currentUser.name} invited you to "${collection.title}" on Cobudget`,
+            text: `View and login here: https://${process.env.DEPLOY_URL}/${
+              collection.organization?.slug ?? "c"
+            }/${collection.slug}`,
+          });
+          invitedCollectionMembers.push(updated.collMemberships?.[0]);
+        }
+        return invitedCollectionMembers;
+      }
+    ),
+    inviteOrgMembers: combineResolvers(
+      isOrgAdmin,
+      async (_, { orgId, emails: emailsString }, { user: currentUser }) => {
+        const emails = emailsString.split(",");
+
+        if (emails.length > 1000)
+          throw new Error("You can only invite 1000 people at a time");
+
+        let newOrgMembers = [];
+
+        for (let email of emails) {
+          email = email.trim().toLowerCase();
+
+          const user = await prisma.user.upsert({
+            where: {
+              email,
+            },
+            create: {
+              orgMemberships: { create: { organizationId: orgId } },
+              email,
+            },
+            update: {
               orgMemberships: {
                 create: {
-                  organizationId: currentOrg.id,
-                  collectionMemberships: {
-                    create: { collectionId: eventId, isApproved: true },
-                  },
+                  organizationId: orgId,
                 },
               },
             },
             include: {
               orgMemberships: {
-                include: { collectionMemberships: true },
+                where: { organizationId: orgId },
+                include: { organization: true },
               },
             },
           });
+          const orgMembership = user.orgMemberships?.[0];
+          const currentOrg = orgMembership.organization;
 
-          invitedCollectionMembers.push(
-            user.orgMemberships[0].collectionMemberships[0]
-          );
+          await sendEmail({
+            to: email,
+            subject: `${currentUser.name} invited you to "${currentOrg.name}" on Cobudget`,
+            text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}`,
+          });
+
+          newOrgMembers.push(orgMembership);
         }
+
+        return newOrgMembers;
       }
-      return invitedCollectionMembers;
-    },
-    inviteOrgMembers: async (
-      parent,
-      { orgId, emails: emailsString },
-      { user: currentUser }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        orgId,
-        user: currentUser,
-      });
-
-      if (!currentOrgMember?.isOrgAdmin)
-        throw new Error("You need to be org. admin to invite members.");
-
-      const emails = emailsString.split(",");
-
-      if (emails.length > 1000)
-        throw new Error("You can only invite 1000 people at a time");
-
-      let newOrgMembers = [];
-
-      for (let email of emails) {
-        email = email.trim().toLowerCase();
-
-        const user = await prisma.user.findUnique({
-          where: { email },
+    ),
+    updateOrgMember: combineResolvers(
+      isOrgAdmin,
+      async (parent, { orgId, memberId, isAdmin }, { user }) => {
+        const orgMember = await prisma.orgMember.findFirst({
+          where: { id: memberId, organizationId: orgId },
         });
 
-        await sendEmail({
-          to: email,
-          subject: `${currentUser.name} invited you to ${currentOrg.name} on Cobudget`,
-          text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}`,
-        });
+        if (!orgMember) throw new Error("No member to update found");
 
-        if (user) {
-          const orgMember = await prisma.orgMember.findUnique({
-            where: {
-              organizationId_userId: {
-                userId: user.id,
-                organizationId: currentOrg.id,
-              },
-            },
-          });
-          if (!orgMember) {
-            newOrgMembers.push(
-              await prisma.orgMember.create({
-                data: {
-                  userId: user.id,
-                  organizationId: currentOrgMember.organizationId,
-                },
-              })
-            );
+        if (typeof isAdmin !== "undefined") {
+          if (isAdmin === false) {
+            const orgAdmins = await prisma.orgMember.findMany({
+              where: { organizationId: orgId, isAdmin: true },
+            });
+            if (orgAdmins.length <= 1)
+              throw new Error("You need at least 1 org admin");
           }
-        } else {
-          const user = await prisma.user.create({
-            data: {
-              email: email.trim().toLowerCase(),
-              orgMemberships: { create: { organizationId: currentOrg.id } },
-            },
-            include: { orgMemberships: true },
-          });
-
-          newOrgMembers.push(user.orgMemberships[0]);
+          orgMember.isAdmin = isAdmin;
         }
+        return await prisma.orgMember.update({
+          where: { id: orgMember.id },
+          data: { ...orgMember },
+        });
       }
+    ),
+    updateMember: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
+        { collectionId, memberId, isApproved, isAdmin, isModerator }
+      ) => {
+        const collectionMember = await prisma.collectionMember.findFirst({
+          where: { collectionId, id: memberId },
+        });
+        if (!collectionMember)
+          throw new Error("This member does not exist in this collection");
 
-      return newOrgMembers;
-    },
-    updateOrgMember: async (
-      parent,
-      { orgId, memberId, isOrgAdmin },
-      { user }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        orgId,
-        user,
-      });
-
-      if (!currentOrgMember?.isOrgAdmin)
-        throw new Error("You need to be org admin to update member");
-
-      const orgMember = await prisma.orgMember.findFirst({
-        where: { id: memberId, organizationId: currentOrg.id },
-      });
-
-      if (!orgMember) throw new Error("No member to update found");
-
-      if (typeof isOrgAdmin !== "undefined") {
-        if (isOrgAdmin === false) {
-          const orgAdmins = await prisma.orgMember.findMany({
-            where: { organizationId: currentOrg.id, isOrgAdmin: true },
-          });
-          if (orgAdmins.length <= 1)
-            throw new Error("You need at least 1 org admin");
-        }
-        orgMember.isOrgAdmin = isOrgAdmin;
+        return prisma.collectionMember.update({
+          where: { id: memberId },
+          data: {
+            isApproved,
+            isAdmin,
+            isModerator,
+          },
+        });
       }
-      return await prisma.orgMember.update({
-        where: { id: orgMember.id },
-        data: { ...orgMember },
-      });
-    },
-    updateMember: async (
-      parent,
-      { eventId, memberId, isApproved, isAdmin, isGuide },
-      { user }
-    ) => {
-      const { currentOrg, currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-      const currentEventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: eventId,
+    ),
+    deleteMember: combineResolvers(
+      isCollOrOrgAdmin,
+      async (parent, { collectionId, memberId }, { user }) => {
+        const collectionMember = await prisma.collectionMember.findFirst({
+          where: { collectionId, id: memberId },
+        });
+        if (!collectionMember)
+          throw new Error("This member does not exist in this collection");
+
+        return prisma.collectionMember.delete({
+          where: { id: memberId },
+        });
+      }
+    ),
+    // deleteOrganization: async (parent, { organizationId }, { user }) => {
+    //   const { currentOrgMember } = await getCurrentOrgAndMember({
+    //     orgId: organizationId,
+    //     user,
+    //   });
+
+    //   if (
+    //     !(
+    //       (currentOrgMember &&
+    //         currentOrgMember.isAdmin &&
+    //         organizationId == currentOrgMember.organizationId) ||
+    //       user.isRootAdmin
+    //     )
+    //   )
+    //     throw new Error(
+    //       "You need to be org. or root admin to delete an organization"
+    //     );
+    //   //TODO: turn into soft delete
+    //   return prisma.organization.delete({ where: { id: organizationId } });
+    // },
+    approveForGranting: combineResolvers(
+      isCollModOrAdmin,
+      async (_, { bucketId, approved }) =>
+        prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            approvedAt: approved ? new Date() : null,
+            ...(approved && { canceledAt: null }),
           },
-        },
-      });
-
-      if (
-        !(
-          (currentEventMember && currentEventMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to update member");
-
-      const member = await prisma.collectionMember.update({
-        where: { id: memberId },
-        data: {
-          isAdmin,
-          isApproved,
-          isGuide,
-        },
-      });
-
-      return member;
-    },
-    deleteMember: async (parent, { eventId, memberId }, { user }) => {
-      const {
-        currentOrg,
-        currentOrgMember,
-        collectionMember,
-      } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-
-      if (
-        !(
-          (collectionMember && collectionMember.isAdmin) ||
-          currentOrgMember.isOrgAdmin
-        )
-      )
-        throw new Error("You need to be admin to delete member");
-
-      return await prisma.collectionMember.deleteMany({
-        where: { id: memberId, collectionId: eventId },
-      });
-    },
-    deleteOrganization: async (parent, { organizationId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        orgId: organizationId,
-        user,
-      });
-
-      if (
-        !(
-          (currentOrgMember &&
-            currentOrgMember.isOrgAdmin &&
-            organizationId == currentOrgMember.organizationId) ||
-          user.isRootAdmin
-        )
-      )
-        throw new Error(
-          "You need to be org. or root admin to delete an organization"
-        );
-      //TODO: turn into soft delete
-      return prisma.organization.delete({ where: { id: organizationId } });
-    },
-    approveForGranting: async (parent, { dreamId, approved }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true, collection: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!collectionMember.isAdmin && !collectionMember.isGuide)
-      )
-        throw new Error(
-          "You need to be admin or guide to approve for granting"
-        );
-
-      const updated = await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          approvedAt: approved ? new Date() : null,
-          ...(approved && { canceledAt: null }),
-        },
-      });
-
-      return updated;
-    },
-    allocate: async (
-      _,
-      { collectionId, collectionMemberId, amount, type },
-      { user }
-    ) => {
-      const {
-        currentOrgMember,
-        collectionMember: currentCollectionMember,
-      } = await getCurrentOrgAndMember({
-        collectionId,
-        user,
-      });
-      if (!currentOrgMember) throw new Error("You need to be logged in.");
-
+        })
+    ),
+    allocate: async (_, { collectionMemberId, amount, type }, { user }) => {
       const targetCollectionMember = await prisma.collectionMember.findUnique({
         where: { id: collectionMemberId },
       });
 
-      if (!currentCollectionMember?.isAdmin)
-        throw new Error("You need to be collection admin to allocate funds.");
+      const currentCollMember = await prisma.collectionMember.findUnique({
+        where: {
+          userId_collectionId: {
+            userId: user.id,
+            collectionId: targetCollectionMember.collectionId,
+          },
+        },
+      });
+
+      if (!currentCollMember?.isAdmin)
+        throw new Error("You are not admin for this collection");
 
       await allocateToMember({
         collectionMemberId,
@@ -2171,62 +1612,40 @@ const resolvers = {
 
       return targetCollectionMember;
     },
-    bulkAllocate: async (_, { eventId, amount, type }, { user }) => {
-      const {
-        currentOrgMember,
-        collectionMember,
-      } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-      if (!currentOrgMember) throw new Error("You need to be logged in.");
-
-      const eventMembers = await prisma.collectionMember.findMany({
-        where: {
-          collectionId: eventId,
-          isApproved: true,
-        },
-      });
-
-      if (!collectionMember?.isAdmin)
-        throw new Error("You need to be collection admin to allocate funds.");
-
-      for (const member of eventMembers) {
-        await allocateToMember({
-          collectionMemberId: member.id,
-          collectionId: eventId,
-          amount,
-          type,
-        });
-      }
-
-      return eventMembers;
-    },
-    contribute: async (_, { eventId, dreamId, amount }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-      const currentCollectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: eventId,
+    bulkAllocate: combineResolvers(
+      isCollOrOrgAdmin,
+      async (_, { collectionId, amount, type }, { user }) => {
+        const collectionMembers = await prisma.collectionMember.findMany({
+          where: {
+            collectionId: collectionId,
+            isApproved: true,
           },
-        },
+        });
+
+        for (const member of collectionMembers) {
+          await allocateToMember({
+            collectionMemberId: member.id,
+            collectionId: collectionId,
+            amount,
+            type,
+          });
+        }
+
+        return collectionMembers;
+      }
+    ),
+    contribute: async (_, { collectionId, bucketId, amount }, { user }) => {
+      const collectionMember = await getCollectionMember({
+        collectionId,
+        userId: user.id,
         include: { collection: true },
       });
 
-      const { collection } = currentCollectionMember;
-
-      if (!currentCollectionMember || !currentCollectionMember.isApproved)
-        throw new Error(
-          "You need to be a logged in approved member to fund things"
-        );
+      const { collection } = collectionMember;
 
       if (amount <= 0) throw new Error("Value needs to be more than zero");
 
-      // const event = await Event.findOne({ _id: eventId });
+      // const event = await Event.findOne({ _id: collectionId });
 
       // Check that granting is open
       const now = dayjs();
@@ -2239,9 +1658,9 @@ const resolvers = {
       const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
       if (!grantingIsOpen) throw new Error("Granting is not open");
 
-      let bucket = await prisma.bucket.findUnique({ where: { id: dreamId } });
+      let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
 
-      if (bucket.collectionId !== eventId)
+      if (bucket.collectionId !== collectionId)
         throw new Error("Bucket not in collection");
 
       if (!bucket.approvedAt)
@@ -2277,7 +1696,7 @@ const resolvers = {
       // mark dream as funded if it has reached its max goal
       if (contributionsForBucket + amount === maxGoal) {
         bucket = await prisma.bucket.update({
-          where: { id: dreamId },
+          where: { id: bucketId },
           data: { fundedAt: new Date() },
         });
       }
@@ -2288,7 +1707,7 @@ const resolvers = {
       } = await prisma.contribution.aggregate({
         where: {
           bucketId: bucket.id,
-          collectionMemberId: currentCollectionMember.id,
+          collectionMemberId: collectionMember.id,
         },
         _sum: { amount: true },
       });
@@ -2310,7 +1729,7 @@ const resolvers = {
         _sum: { amount: contributionsFromUser },
       } = await prisma.contribution.aggregate({
         where: {
-          collectionMemberId: currentCollectionMember.id,
+          collectionMemberId: collectionMember.id,
         },
         _sum: { amount: true },
       });
@@ -2319,7 +1738,7 @@ const resolvers = {
         _sum: { amount: allocationsForUser },
       } = await prisma.allocation.aggregate({
         where: {
-          collectionMemberId: currentCollectionMember.id,
+          collectionMemberId: collectionMember.id,
         },
         _sum: { amount: true },
       });
@@ -2329,8 +1748,8 @@ const resolvers = {
 
       await prisma.contribution.create({
         data: {
-          collectionId: collection.id,
-          collectionMemberId: currentCollectionMember.id,
+          collectionId,
+          collectionMemberId: collectionMember.id,
           amount,
           bucketId: bucket.id,
         },
@@ -2338,251 +1757,143 @@ const resolvers = {
 
       return bucket;
     },
-    markAsCompleted: async (_, { dreamId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      if (!currentOrgMember) {
-        throw new Error("You need to be logged in.");
-      }
-      const bucket = await prisma.bucket.findUnique({ where: { id: dreamId } });
+    markAsCompleted: combineResolvers(
+      isCollModOrAdmin,
+      async (_, { bucketId }) =>
+        prisma.bucket.update({
+          where: { id: bucketId },
+          data: { completedAt: new Date() },
+        })
+    ),
+    acceptFunding: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId }) => {
+        const {
+          _sum: { amount: contributionsForBucket },
+        } = await prisma.contribution.aggregate({
+          where: { bucketId },
+          _sum: { amount: true },
+        });
 
-      const currentCollectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
+        const {
+          _sum: { min: minExpenses },
+        } = await prisma.budgetItem.aggregate({
+          where: { bucketId, type: "EXPENSE" },
+          _sum: { min: true },
+        });
+
+        const {
+          _sum: { min: minIncome },
+        } = await prisma.budgetItem.aggregate({
+          where: { bucketId, type: "INCOME" },
+          _sum: { min: true },
+        });
+
+        const minGoal = minIncome - minExpenses;
+
+        if (contributionsForBucket < minGoal)
+          throw new Error("Bucket has not reached its minimum goal yet.");
+
+        return prisma.bucket.update({
+          where: { id: bucketId },
+          data: { fundedAt: new Date() },
+        });
+      }
+    ),
+    cancelFunding: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (_, { bucketId }, { user }) => {
+        const bucket = await prisma.bucket.findUnique({
+          where: { id: bucketId },
+          include: { cocreators: true },
+        });
+
+        if (bucket.completedAt)
+          throw new Error(
+            "This bucket has already been marked completed, can't cancel funding."
+          );
+
+        const updated = await prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            fundedAt: null,
+            approvedAt: null,
+            canceledAt: new Date(),
+            Contributions: { deleteMany: {} },
           },
-        },
-      });
-      if (
-        !(currentCollectionMember?.isAdmin || currentCollectionMember?.isGuide)
-      )
-        throw new Error(
-          "You need to be collection admin or guide to mark a bucket as completed"
+        });
+
+        // TODO: notify contribuors that they have been "re-imbursed"
+
+        return updated;
+      }
+    ),
+    updateGrantingSettings: combineResolvers(
+      isCollOrOrgAdmin,
+      async (
+        parent,
+        {
+          collectionId,
+          currency,
+          maxAmountToBucketPerUser,
+          bucketCreationCloses,
+          grantingOpens,
+          grantingCloses,
+          allowStretchGoals,
+        }
+      ) => {
+        const collection = await prisma.collection.findUnique({
+          where: { id: collectionId },
+        });
+        const grantingHasOpened = dayjs(collection.grantingOpens).isBefore(
+          dayjs()
         );
 
-      const updated = await prisma.bucket.update({
-        where: { id: bucket.id },
-        data: { completedAt: new Date() },
-      });
-      return updated;
-    },
-    acceptFunding: async (_, { dreamId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
+        if (currency && grantingHasOpened) {
+          throw new Error(
+            "You can't change currency after granting has started"
+          );
+        }
 
-      if (!currentOrgMember) {
-        throw new Error("You need to be logged in.");
-      }
-
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin)
-      )
-        throw new Error("You are not an admin or cocreator of this bucket.");
-
-      const {
-        _sum: { amount: contributionsForBucket },
-      } = await prisma.contribution.aggregate({
-        where: { bucketId: bucket.id },
-        _sum: { amount: true },
-      });
-
-      const {
-        _sum: { min: minExpenses },
-      } = await prisma.budgetItem.aggregate({
-        where: { bucketId: bucket.id, type: "EXPENSE" },
-        _sum: { min: true },
-      });
-
-      const {
-        _sum: { min: minIncome },
-      } = await prisma.budgetItem.aggregate({
-        where: { bucketId: bucket.id, type: "INCOME" },
-        _sum: { min: true },
-      });
-
-      const minGoal = minIncome - minExpenses;
-
-      if (contributionsForBucket < minGoal)
-        throw new Error("Bucket has not reached its minimum goal yet.");
-
-      return prisma.bucket.update({
-        where: { id: dreamId },
-        data: { fundedAt: new Date() },
-      });
-    },
-    cancelFunding: async (_, { dreamId }, { user }) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        bucketId: dreamId,
-        user,
-      });
-      if (!currentOrgMember) {
-        throw new Error("You need to be logged in.");
-      }
-      const bucket = await prisma.bucket.findUnique({
-        where: { id: dreamId },
-        include: { cocreators: true },
-      });
-
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: bucket.collectionId,
-          },
-        },
-      });
-
-      if (
-        !collectionMember ||
-        (!bucket.cocreators.map((c) => c.id).includes(collectionMember.id) &&
-          !collectionMember.isAdmin)
-      )
-        throw new Error("You are not an admin or cocreator of this bucket.");
-
-      if (bucket.completedAt)
-        throw new Error(
-          "This bucket has already been marked completed, can't cancel funding."
-        );
-
-      const updated = await prisma.bucket.update({
-        where: { id: dreamId },
-        data: {
-          fundedAt: null,
-          approvedAt: null,
-          canceledAt: new Date(),
-          Contributions: { deleteMany: {} },
-        },
-      });
-
-      // TODO: notify contribuors that they have been "re-imbursed"
-
-      return updated;
-    },
-    updateGrantingSettings: async (
-      parent,
-      {
-        eventId,
-        currency,
-        maxAmountToBucketPerUser,
-        bucketCreationCloses,
-        grantingOpens,
-        grantingCloses,
-        allowStretchGoals,
-      },
-      { user }
-    ) => {
-      const { currentOrgMember } = await getCurrentOrgAndMember({
-        collectionId: eventId,
-        user,
-      });
-      const eventMember = await prisma.collectionMember.findUnique({
-        where: {
-          orgMemberId_collectionId: {
-            orgMemberId: currentOrgMember.id,
-            collectionId: eventId,
-          },
-        },
-        include: {
-          collection: { include: { guidelines: true } },
-        },
-      });
-
-      if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
-      )
-        throw new Error("You need to be admin to edit a guideline");
-
-      if (
-        !((eventMember && eventMember.isAdmin) || currentOrgMember.isOrgAdmin)
-      )
-        throw new Error("You need to be admin to update granting settings.");
-
-      const grantingHasOpened = dayjs(
-        eventMember.collection.grantingOpens
-      ).isBefore(dayjs());
-
-      if (currency && grantingHasOpened) {
-        throw new Error("You can't change currency after granting has started");
-      }
-
-      return prisma.collection.update({
-        where: { id: eventId },
-        data: {
-          ...(currency && { currency }),
-          ...(typeof maxAmountToBucketPerUser !== "undefined" && {
+        return prisma.collection.update({
+          where: { id: collectionId },
+          data: {
+            currency,
             maxAmountToBucketPerUser,
-          }),
-          ...(typeof bucketCreationCloses !== "undefined" && {
             bucketCreationCloses,
-          }),
-          ...(typeof grantingOpens !== "undefined" && {
             grantingOpens,
-          }),
-          ...(typeof grantingCloses !== "undefined" && {
             grantingCloses,
-          }),
-          ...(typeof allowStretchGoals !== "undefined" && {
             allowStretchGoals,
-          }),
-        },
-      });
-    },
+          },
+        });
+      }
+    ),
     joinCollection: async (parent, { collectionId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
-      const currentOrg = await prisma.organization.findFirst({
-        where: { collections: { some: { id: collectionId } } },
-        include: {
-          collections: { where: { id: collectionId } },
-          orgMembers: { where: { userId: user.id } },
+      const currentOrgMember = await prisma.orgMember.findFirst({
+        where: {
+          userId: user.id,
+          organization: { collections: { some: { id: collectionId } } },
         },
       });
 
-      const collection = currentOrg.collections[0];
-      const currentOrgMember = currentOrg.orgMembers?.[0];
-
-      if (!currentOrg) throw new Error("There needs to be an org");
+      const collection = await prisma.collection.findUnique({
+        where: { id: collectionId },
+      });
 
       if (
-        !currentOrgMember?.isOrgAdmin &&
+        !currentOrgMember?.isAdmin &&
         collection.registrationPolicy === "INVITE_ONLY"
       )
         throw new Error("This collection is invite only");
 
       const collectionMember = await prisma.collectionMember.create({
         data: {
-          collection: { connect: { id: collectionId } },
-          orgMember: {
-            connectOrCreate: {
-              where: {
-                id: currentOrgMember.id,
-              },
-              create: { organizationId: currentOrg.id, userId: user.id },
-            },
-          },
+          collectionId,
+          userId: user.id,
           isApproved:
-            currentOrgMember?.isOrgAdmin ||
+            currentOrgMember?.isAdmin ||
             collection.registrationPolicy === "OPEN",
         },
       });
@@ -2590,17 +1901,15 @@ const resolvers = {
       return collectionMember;
     },
   },
-  EventMember: {
-    event: async (member) => {
-      return await prisma.collection.findUnique({
+  CollectionMember: {
+    collection: async (member) =>
+      prisma.collection.findUnique({
         where: { id: member.collectionId },
-      });
-    },
-    orgMember: async (member) => {
-      return await prisma.orgMember.findUnique({
-        where: { id: member.orgMemberId },
-      });
-    },
+      }),
+    user: async (member) =>
+      prisma.user.findUnique({
+        where: { id: member.userId },
+      }),
     balance: async (member) => {
       const {
         _sum: { amount: totalAllocations },
@@ -2619,10 +1928,12 @@ const resolvers = {
       return totalAllocations - totalContributions;
     },
     email: async (member, _, { user }) => {
-      const currentCollMember = await prisma.collectionMember.findFirst({
+      const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
-          orgMember: { userId: user.id },
-          collectionId: member.collectionId,
+          userId_collectionId: {
+            userId: user.id,
+            collectionId: member.collectionId,
+          },
         },
       });
 
@@ -2631,18 +1942,20 @@ const resolvers = {
 
       const u = await prisma.user.findFirst({
         where: {
-          orgMemberships: {
-            some: { collectionMemberships: { some: { id: member.id } } },
+          collMemberships: {
+            some: { id: member.id },
           },
         },
       });
       return u.email;
     },
     name: async (member, _, { user }) => {
-      const currentCollMember = await prisma.collectionMember.findFirst({
+      const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
-          orgMember: { userId: user.id },
-          collectionId: member.collectionId,
+          userId_collectionId: {
+            userId: user.id,
+            collectionId: member.collectionId,
+          },
         },
       });
 
@@ -2651,8 +1964,8 @@ const resolvers = {
 
       const u = await prisma.user.findFirst({
         where: {
-          orgMemberships: {
-            some: { collectionMemberships: { some: { id: member.id } } },
+          collMemberships: {
+            some: { id: member.id },
           },
         },
       });
@@ -2664,25 +1977,6 @@ const resolvers = {
     user: async (orgMember) => {
       return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
-    collectionMemberships: async (orgMember) => {
-      return await prisma.collectionMember.findMany({
-        where: { orgMemberId: orgMember.id },
-      });
-    },
-    currentEventMembership: async (orgMember, { collectionSlug }, { user }) => {
-      if (!user) return null;
-
-      if (!collectionSlug) return null;
-
-      const collectionMember = await prisma.collectionMember.findFirst({
-        where: {
-          orgMember: { userId: user.id, id: orgMember.id },
-          collection: { slug: collectionSlug },
-        },
-      });
-
-      return collectionMember;
-    },
     email: async (member, _, { user }) => {
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
@@ -2693,7 +1987,7 @@ const resolvers = {
         },
       });
 
-      if (!(currentOrgMember?.isOrgAdmin || currentOrgMember.id == member.id))
+      if (!(currentOrgMember?.isAdmin || currentOrgMember.id == member.id))
         return null;
 
       const u = await prisma.user.findFirst({
@@ -2715,7 +2009,7 @@ const resolvers = {
         },
       });
 
-      if (!(currentOrgMember?.isOrgAdmin || currentOrgMember.id == member.id))
+      if (!(currentOrgMember?.isAdmin || currentOrgMember.id == member.id))
         return null;
 
       const u = await prisma.user.findFirst({
@@ -2733,8 +2027,37 @@ const resolvers = {
       }),
   },
   User: {
+    currentOrgMember: async (parent, { orgSlug }, { user }) => {
+      if (user?.id !== parent.id) return null;
+      if (!orgSlug) return null;
+      return prisma.orgMember.findFirst({
+        where: { organization: { slug: orgSlug }, userId: user.id },
+      });
+    },
+    currentCollMember: async (
+      parent,
+      { orgSlug, collectionSlug },
+      { user }
+    ) => {
+      if (user?.id !== parent.id) return null;
+      if (!collectionSlug) return null;
+      return prisma.collectionMember.findFirst({
+        where: {
+          collection: {
+            slug: collectionSlug,
+            ...(orgSlug &&
+              orgSlug !== "c" && { organization: { slug: orgSlug } }),
+          },
+          userId: user.id,
+        },
+      });
+    },
     orgMemberships: async (user) =>
       prisma.orgMember.findMany({ where: { userId: user.id } }),
+    collectionMemberships: async (user) =>
+      prisma.collectionMember.findMany({
+        where: { userId: user.id, collection: { organization: null } },
+      }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
     email: (parent, _, { user }) => {
@@ -2753,7 +2076,7 @@ const resolvers = {
         : `# Welcome to ${org.name}`;
     },
     subdomain: (org) => org.slug,
-    events: async (org) => {
+    collections: async (org) => {
       return await prisma.collection.findMany({
         where: { organizationId: org.id },
       });
@@ -2892,7 +2215,7 @@ const resolvers = {
         where: { id: collection.organizationId },
       }),
   },
-  Dream: {
+  Bucket: {
     cocreators: async (bucket) => {
       // const { cocreators } = await prisma.bucket.findUnique({
       //   where: { id: bucket.id },
@@ -2926,19 +2249,12 @@ const resolvers = {
       return amount;
     },
     totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
-      const currentOrgMember = await prisma.orgMember.findFirst({
+      const collectionMember = await prisma.collectionMember.findUnique({
         where: {
-          organization: { collections: { some: { id: bucket.collectionId } } },
-          userId: user.id,
-        },
-      });
-      if (!currentOrgMember) {
-        return 0;
-      }
-      const collectionMember = await prisma.collectionMember.findFirst({
-        where: {
-          orgMemberId: currentOrgMember.id,
-          collectionId: bucket.collectionId,
+          userId_collectionId: {
+            userId: user.id,
+            collectionId: bucket.collectionId,
+          },
         },
       });
 
@@ -3078,30 +2394,30 @@ const resolvers = {
     },
   },
   Contribution: {
-    dream: async (contribution) => {
+    bucket: async (contribution) => {
       return prisma.bucket.findUnique({
         where: { id: contribution.bucketId },
       });
     },
-    event: async (contribution) => {
+    collection: async (contribution) => {
       return prisma.collection.findUnique({
         where: { id: contribution.collectionId },
       });
     },
-    eventMember: async (contribution) => {
+    collectionMember: async (contribution) => {
       return prisma.collectionMember.findUnique({
         where: { id: contribution.collectionMemberId },
       });
     },
   },
   Comment: {
-    orgMember: async (comment) => {
+    collectionMember: async (comment) => {
       // make logs anonymous
       if (comment.isLog) return null;
 
-      return prisma.orgMember.findUnique({
+      return prisma.collectionMember.findUnique({
         where: {
-          id: comment.orgMemberId,
+          id: comment.collMemberId,
         },
       });
     },
