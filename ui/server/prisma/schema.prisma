@@ -14,7 +14,7 @@ model User {
   username        String?            @unique
   email           String?            @unique
   name            String?
-  verifiedEmail   Boolean            @default(false) //renamed from verifiedEmail
+  verifiedEmail   Boolean            @default(false)
   emailVerified   DateTime?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
@@ -22,22 +22,6 @@ model User {
   orgMemberships  OrgMember[]
   collMemberships CollectionMember[]
 }
-
-// model Member {
-//   id                String       @id @default(cuid())
-//   organization      Organization @relation(fields: [organizationId], references: [id])
-//   organizationId    String
-//   user              User         @relation(fields: [userId], references: [id])
-//   userId            String
-//   isOrgAdmin        Boolean      @default(false)
-//   discourseUsername String?
-//   discourseApiKey   String?
-//   createdAt         DateTime     @default(now())
-//   updatedAt         DateTime     @updatedAt
-//   // collectionMemberships CollectionMember[]
-//   comments          Comment[]
-//   flags             Flag[]
-// }
 
 model OrgMember {
   id                String       @id @default(cuid())
@@ -52,7 +36,6 @@ model OrgMember {
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
 
-  CollectionMember CollectionMember[]
   @@unique([organizationId, userId])
 }
 
@@ -60,25 +43,24 @@ model CollectionMember {
   id           String     @id @default(cuid())
   collection   Collection @relation(fields: [collectionId], references: [id])
   collectionId String
-  user         User?      @relation(fields: [userId], references: [id])
-  userId       String?
-  orgMember    OrgMember  @relation(fields: [orgMemberId], references: [id])
-  orgMemberId  String
-  isAdmin      Boolean    @default(false)
-  isModerator  Boolean    @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
-  bio          String?
+  user         User       @relation(fields: [userId], references: [id])
+  userId       String
+
+  isAdmin     Boolean @default(false)
+  isModerator Boolean @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
+  bio         String?
 
   isApproved Boolean  @default(false) //switch to approvedAt
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  buckets       Bucket[] //should it be explicit or implicit?
+  buckets       Bucket[]
   allocations   Allocation[]
   contributions Contribution[]
   comments      Comment[]
   flags         Flag[]
 
-  //@@unique([userId, collectionId])
+  @@unique([userId, collectionId])
 }
 
 model Organization {
@@ -104,18 +86,18 @@ model Collection {
   archived       Boolean       @default(false)
   deleted        Boolean       @default(false)
 
-  info               String? //rename?
-  about              String? //rename?
+  info               String?
+  about              String?
   color              String?
   registrationPolicy RegistrationPolicy
   currency           String
 
   maxAmountToBucketPerUser Int?
   bucketCreationCloses     DateTime?
-  grantingOpens            DateTime? //rename
-  grantingCloses           DateTime? //rename
+  grantingOpens            DateTime?
+  grantingCloses           DateTime?
   allowStretchGoals        Boolean?
-  bucketReviewIsOpen       Boolean? //rename
+  bucketReviewIsOpen       Boolean?
   discourseCategoryId      Int?
 
   tags       Tag[]
