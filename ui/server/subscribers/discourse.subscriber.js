@@ -3,13 +3,13 @@ const liveUpdate = require("../services/liveUpdate.service");
 
 module.exports = {
   orgHasDiscourse(org) {
-    return org.discourse?.url && org.discourse?.apiKey;
+    return org?.discourse?.url && org?.discourse?.apiKey;
   },
-  generateComment(post, orgMember) {
+  generateComment(post, collMember) {
     return {
       id: post.id,
       createdAt: new Date(post.created_at),
-      authorId: orgMember?.id,
+      collMemberId: collMember?.id,
       isLog: post.username === "system",
       content: post.raw,
       htmlContent: post.cooked,
@@ -19,7 +19,13 @@ module.exports = {
     eventHub.subscribe(
       "create-dream",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream }) => {
+      async ({
+        currentOrg,
+        currentOrgMember,
+        currentCollMember,
+        event,
+        dream,
+      }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -45,6 +51,7 @@ module.exports = {
           eventHub.publish("create-comment", {
             currentOrg,
             currentOrgMember,
+            currentCollMember,
             event,
             dream,
             comment,

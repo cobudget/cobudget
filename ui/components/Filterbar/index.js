@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 
-const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
+const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -19,7 +19,7 @@ const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
       pathname: "/[org]/[collection]",
       query: {
         org: currentOrg.slug,
-        collection: event.slug,
+        collection: collection.slug,
         s: input,
         ...(tag && { tag }),
       },
@@ -33,7 +33,7 @@ const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
       pathname: "/[org]/[collection]",
       query: {
         org: currentOrg.slug,
-        collection: event.slug,
+        collection: collection.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
       },
@@ -43,7 +43,7 @@ const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
   return (
     <div className="flex mb-5 items-stretch flex-wrap">
       <div
-        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${event.color} border-3 px-1 relative pr-10 mr-2 flex items-center overflow-hidden`}
+        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 mr-2 flex items-center overflow-hidden`}
       >
         <form onSubmit={onSubmitSearch}>
           <input
@@ -57,7 +57,7 @@ const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
             className={
               `h-full absolute inset-y-0 right-0 flex items-center p-3 focus:outline-none transition-colors` +
               " " +
-              (changed ? `bg-${event.color} text-white` : "text-gray-400")
+              (changed ? `bg-${collection.color} text-white` : "text-gray-400")
             }
           >
             <SearchIcon className="h-5 w-5" />
@@ -67,14 +67,14 @@ const Filterbar = ({ textSearchTerm, tag, event, currentOrg }) => {
 
       <SelectField
         className="bg-white"
-        color={event.color}
+        color={collection.color}
         inputProps={{
           value: tag || "All tags",
           onChange: onChangeTag,
         }}
       >
         <option value="All tags">All tags</option>
-        {event.tags.map((tag) => (
+        {collection.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
             {tag.value}
           </option>

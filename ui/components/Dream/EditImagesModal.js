@@ -47,8 +47,8 @@ const Images = styled.div`
 `;
 
 const EDIT_IMAGES_MUTATION = gql`
-  mutation EDIT_IMAGES($dreamId: ID!, $images: [ImageInput]) {
-    editDream(dreamId: $dreamId, images: $images) {
+  mutation EDIT_IMAGES($bucketId: ID!, $images: [ImageInput]) {
+    editDream(bucketId: $bucketId, images: $images) {
       id
       images {
         small
@@ -66,7 +66,7 @@ const removeNullValues = (images) =>
   }));
 
 const EditImagesModal = ({
-  dreamId,
+  bucketId,
   initialImages = [],
   open,
   handleClose,
@@ -113,7 +113,7 @@ const EditImagesModal = ({
           onSubmit={handleSubmit(() => {
             images.forEach((image) => delete image.__typename); // apollo complains otherwise..
 
-            editDream({ images, dreamId })
+            editDream({ images, bucketId })
               .then(() => {
                 handleClose();
               })

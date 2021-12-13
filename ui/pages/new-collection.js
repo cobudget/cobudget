@@ -10,10 +10,11 @@ import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
+import toast from "react-hot-toast";
 
 const CREATE_COLLECTION = gql`
   mutation CreateCollection(
-    $orgId: ID!
+    $orgId: ID
     $title: String!
     $slug: String!
     $currency: String!
@@ -38,16 +39,13 @@ export default function NewCollectionPage({ currentOrg }) {
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createCollection({ ...variables, orgId: currentOrg.id })
-      .then(({ data }) => {
-        Router.push(
-          "/[org]/[collection]",
-          `/${currentOrg.slug}/${data.createCollection.slug}`
-        );
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
+    createCollection(variables).then(({ data, error }) => {
+      if (error) {
+        toast.error(error.message);
+      } else {
+        Router.push("/[org]/[collection]", `/c/${data.createCollection.slug}`);
+      }
+    });
   };
 
   return (

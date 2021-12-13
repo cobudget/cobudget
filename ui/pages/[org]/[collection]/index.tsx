@@ -10,25 +10,23 @@ import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 
-export const DREAMS_QUERY = gql`
-  query Dreams(
-    $orgSlug: String!
-    $eventSlug: String!
+export const BUCKETS_QUERY = gql`
+  query Buckets(
+    $collectionId: ID!
     $textSearchTerm: String
     $tag: String
     $offset: Int
     $limit: Int
   ) {
-    dreamsPage(
-      orgSlug: $orgSlug
-      eventSlug: $eventSlug
+    bucketsPage(
+      collectionId: $collectionId
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
       limit: $limit
     ) {
       moreExist
-      dreams {
+      buckets {
         id
         description
         summary
@@ -70,16 +68,15 @@ const Page = ({
   isFirstPage,
   onLoadMore,
   router,
-  event,
+  collection,
   org,
 }) => {
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
-    query: DREAMS_QUERY,
+    query: BUCKETS_QUERY,
     variables: {
-      orgSlug: router.query.org,
-      eventSlug: router.query.collection,
+      collectionId: collection.id,
       offset: variables.offset,
       limit: variables.limit,
       ...(!!s && { textSearchTerm: s }),
@@ -87,8 +84,8 @@ const Page = ({
     },
   });
 
-  const moreExist = data?.dreamsPage.moreExist;
-  const buckets = data?.dreamsPage.dreams ?? [];
+  const moreExist = data?.bucketsPage.moreExist;
+  const buckets = data?.bucketsPage.buckets ?? [];
 
   if (error) {
     console.error(error);
@@ -97,9 +94,16 @@ const Page = ({
   return (
     <>
       {buckets.map((bucket) => (
-        <Link href={`/${org.slug}/${event.slug}/${bucket.id}`} key={bucket.id}>
+        <Link
+          href={`/${org?.slug ?? "c"}/${collection.slug}/${bucket.id}`}
+          key={bucket.id}
+        >
           <a className="flex focus:outline-none focus:ring rounded-lg">
-            <DreamCard dream={bucket} event={event} currentOrg={org} />
+            <DreamCard
+              dream={bucket}
+              collection={collection}
+              currentOrg={org}
+            />
           </a>
         </Link>
       ))}
@@ -126,61 +130,59 @@ const Page = ({
   );
 };
 
-const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
+const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
   const { tag, s } = router.query;
 
-  if (!event) return null;
-
+  if (!collection) return null;
+  const canEdit =
+    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentCollMember?.isAdmin;
   return (
     <div>
-      <SubMenu currentOrgMember={currentOrgMember} event={event} />
+      <SubMenu currentUser={currentUser} collection={collection} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              value={event.info}
+              value={collection.info}
               label="Add homepage message"
-              placeholder={`# Welcome to ${event.title}'s dream page`}
-              canEdit={
-                currentOrgMember?.isOrgAdmin ||
-                currentOrgMember?.currentEventMembership?.isAdmin
-              }
+              placeholder={`# Welcome to ${collection.title}'s dream page`}
+              canEdit={canEdit}
               name="info"
               className="h-10"
               MUTATION={gql`
                 mutation EditHomepageMessage(
-                  $orgId: ID!
-                  $eventId: ID!
+                  $collectionId: ID!
                   $info: String
                 ) {
-                  editEvent(orgId: $orgId, eventId: $eventId, info: $info) {
+                  editCollection(collectionId: $collectionId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ orgId: currentOrg.id, eventId: event.id }}
+              variables={{ collectionId: collection.id }}
               required
             />
           </div>
           <div className="flex justify-end items-start">
-            {event.bucketCreationIsOpen &&
-              currentOrgMember?.currentEventMembership?.isApproved && (
+            {collection.bucketCreationIsOpen &&
+              currentUser?.currentCollMember?.isApproved && (
                 <>
                   <Button
                     size="large"
-                    color={event.color}
+                    color={collection.color}
                     onClick={() => setNewDreamModalOpen(true)}
                   >
                     New bucket
                   </Button>
                   {newDreamModalOpen && (
                     <NewDreamModal
-                      event={event}
+                      collection={collection}
                       handleClose={() => setNewDreamModalOpen(false)}
                       currentOrg={currentOrg}
                     />
@@ -195,7 +197,7 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
         <Filterbar
           textSearchTerm={s}
           tag={tag}
-          event={event}
+          collection={collection}
           currentOrg={currentOrg}
         />
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
@@ -204,7 +206,7 @@ const CollectionPage = ({ currentOrgMember, event, router, currentOrg }) => {
               <Page
                 org={currentOrg}
                 router={router}
-                event={event}
+                collection={collection}
                 key={"" + variables.limit + i}
                 variables={variables}
                 isFirstPage={i === 0}

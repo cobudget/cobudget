@@ -7,7 +7,7 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
-const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
+const EventSettings = ({ collection, currentOrg, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const defaultTabs = [
@@ -21,10 +21,10 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
 
   const tabs = useMemo(
     () =>
-      currentOrg.discourseUrl
+      currentOrg?.discourseUrl
         ? defaultTabs.concat({ name: "Discourse", component: Discourse })
         : defaultTabs,
-    [currentOrg.discourseUrl]
+    [currentOrg?.discourseUrl]
   );
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -49,10 +49,10 @@ const EventSettings = ({ event, currentOrg, currentOrgMember }) => {
         <div className="py-6 col-span-4 bg-white rounded-lg shadow overflow-hidden">
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
-            event={event}
+            collection={collection}
             handleClose={handleClose}
             currentOrg={currentOrg}
-            currentOrgMember={currentOrgMember}
+            currentUser={currentUser}
           />
         </div>
       </div>

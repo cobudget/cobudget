@@ -1,8 +1,3 @@
-// const mailgun = require("mailgun-js")({
-//   apiKey: process.env.MAILGUN_API_KEY,
-//   domain: process.env.MAILGUN_DOMAIN,
-//   host: process.env.MAILGUN_HOST,
-// });
 import { sendEmail } from "server/send-email";
 import prisma from "../../prisma";
 
@@ -11,45 +6,28 @@ export default class EmailService {
     dream,
     event,
     currentOrg,
-    currentOrgMember,
+    currentCollMember,
+    currentUser,
     comment,
   }) {
     const cocreators = await prisma.collectionMember.findMany({
       where: { buckets: { some: { id: dream.id } } },
-      include: { orgMember: { include: { user: true } } },
+      include: { user: true },
     });
 
-    // const cocreatorEventMemberIds = dream.cocreators;
-
-    // const eventMembers = await EventMember.find({
-    //   _id: { $in: cocreatorEventMemberIds },
-    // });
-
-    // const orgMemberIds = eventMembers.map((member) => member.orgMemberId);
-    // const orgMembers = await OrgMember.find({ _id: { $in: orgMemberIds } });
-
+    console.log({ inEmailNotification: currentCollMember });
     const emails = cocreators
       .filter(
-        (collectionMember) =>
-          collectionMember.orgMemberId !== currentOrgMember.id
+        (collectionMember) => collectionMember.id !== currentCollMember.id
       )
-      .map((collectionMember) => collectionMember.orgMember.user.email);
-    // orgMembers.forEach(async (orgMember) => {
-    //   const { email } = await kcAdminClient.users.findOne({
-    //     id: orgMember.userId,
-    //   });
-    //   if (orgMember.id !== currentOrgMember.id) emails.push(email);
-    // });
+      .map((collectionMember) => currentUser.email);
 
-    // const { username } = await kcAdminClient.users.findOne({
-    //   id: currentOrgMember.userId,
-    // });
-
-    const link = `https://${process.env.DEPLOY_URL}/${currentOrg.slug}/${event.slug}/${dream.id}`;
-    const subject = `${currentOrgMember.user.username} commented on ${dream.title}`;
+    const link = `https://${process.env.DEPLOY_URL}/${
+      currentOrg?.slug ?? "c"
+    }/${event.slug}/${dream.id}`;
+    const subject = `${currentUser.username} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
     await sendEmail({ to: emails, subject, text });
-    //await this.sendEmail(emails, subject, text);
   }
 
   // static async sendEmail(emails, subject, text) {

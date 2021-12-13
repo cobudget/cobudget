@@ -1,37 +1,23 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-
+import toast from "react-hot-toast";
 import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
 import dirtyValues from "utils/dirtyValues";
 
 const UPDATE_PROFILE_QUERY = gql`
-  mutation updateProfile(
-    $orgId: ID
-    $username: String
-    $name: String
-    $bio: String
-  ) {
-    updateProfile(orgId: $orgId, username: $username, name: $name, bio: $bio) {
+  mutation updateProfile($username: String, $name: String) {
+    updateProfile(username: $username, name: $name) {
       id
       email
       avatar
       username
       name
-      orgMemberships {
-        id
-        bio
-      }
     }
   }
 `;
 
-const EditProfile = ({
-  closeModal,
-  currentUser,
-  currentOrgMember,
-  currentOrg,
-}) => {
+const EditProfile = ({ closeModal, currentUser, currentOrg }) => {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
@@ -49,14 +35,13 @@ const EditProfile = ({
               updateUser({
                 ...(currentOrg && { orgId: currentOrg.id }),
                 ...dirtyValues(dirtyFields, variables),
-              })
-                .then(() => {
+              }).then(({ error }) => {
+                if (error) {
+                  toast.error(error.message);
+                } else {
                   closeModal();
-                })
-                .catch((err) => {
-                  console.log({ err });
-                  alert(err.message);
-                });
+                }
+              });
             } else {
               closeModal();
             }
@@ -91,7 +76,7 @@ const EditProfile = ({
               })}
             />
           </div>
-          {currentOrgMember && (
+          {/* {currentUser.currentOrgMember && (
             <div className="my-4">
               <TextField
                 name="bio"
@@ -99,14 +84,14 @@ const EditProfile = ({
                 multiline
                 rows={5}
                 variant="outlined"
-                defaultValue={currentOrgMember.bio}
+                defaultValue={currentUser.currentOrgMember.bio}
                 error={Boolean(errors.bio)}
                 helperText={errors.bio && errors.bio.message}
                 fullWidth
                 inputRef={register()}
               />
             </div>
-          )}
+          )} */}
           <div className="space-x-2 flex">
             <Button
               size="large"

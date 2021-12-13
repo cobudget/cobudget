@@ -2,20 +2,25 @@ import Link from "next/link";
 import { useQuery, gql } from "urql";
 import { ChevronArrowRightIcon } from "components/Icons";
 
-const DREAM_QUERY = gql`
-  query Dream($id: ID!) {
-    dream(id: $id) {
+const BUCKET_QUERY = gql`
+  query Bucket($id: ID!) {
+    bucket(id: $id) {
       id
       title
     }
   }
 `;
 
-const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
-  const [{ data: { dream } = { dream: null } }] = useQuery({
-    query: DREAM_QUERY,
-    variables: { id: router.query.dream },
-    pause: !router.query.dream,
+const OrganizationAndEventHeader = ({
+  currentOrg,
+  collection,
+  router,
+  color,
+}) => {
+  const [{ data: { bucket } = { bucket: null } }] = useQuery({
+    query: BUCKET_QUERY,
+    variables: { id: router.query.bucket },
+    pause: !router.query.bucket,
   });
 
   return (
@@ -25,7 +30,7 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
           className={`hover:bg-${color}-dark px-1 py-1 text-white rounded-md font-medium flex space-x-4`}
         >
           <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-          {!currentOrg && <h1>Cobudget</h1>}
+          {!currentOrg && !collection && <h1>Cobudget</h1>}
         </a>
       </Link>
       {currentOrg && (
@@ -57,25 +62,25 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
         </>
       )}
 
-      {event && (
+      {collection && (
         <>
           <ChevronArrowRightIcon className={`w-4 h-4 text-white opacity-50`} />
 
           <div className="group flex items-center">
-            <Link href={`/${currentOrg.slug}/${event.slug}`}>
+            <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
               <a
                 className={`hover:bg-${color}-dark px-2 py-1 text-white rounded-md mx-0 font-medium`}
               >
                 <h1>
-                  {event.title.length <= 30
-                    ? event.title
-                    : event.title.substr(0, 30) + "..."}
+                  {collection.title.length <= 30
+                    ? collection.title
+                    : collection.title.substr(0, 30) + "..."}
                 </h1>
               </a>
             </Link>
 
             {/* We need to check both the dream and the router to prevent caching to appear */}
-            {dream && router.query?.dream && (
+            {bucket && router.query?.bucket && (
               <>
                 <ChevronArrowRightIcon
                   className={`w-4 h-4 text-white opacity-50`}
@@ -84,9 +89,9 @@ const OrganizationAndEventHeader = ({ currentOrg, event, router, color }) => {
                   className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}
                 >
                   <h1>
-                    {dream.title.length <= 30
-                      ? dream.title
-                      : dream.title.substr(0, 30) + "..."}
+                    {bucket.title.length <= 30
+                      ? bucket.title
+                      : bucket.title.substr(0, 30) + "..."}
                   </h1>
                 </span>
               </>

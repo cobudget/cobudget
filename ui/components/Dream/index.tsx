@@ -13,20 +13,21 @@ import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
 import Sidebar from "./Sidebar";
 
-const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
+const Dream = ({ dream, collection, currentUser, currentOrg }) => {
   const canEdit =
-    currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isGuide ||
-    isMemberOfDream(currentOrgMember, dream);
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator ||
+    isMemberOfDream(currentUser, dream);
   const showBucketReview =
-    currentOrgMember?.currentEventMembership &&
-    event.bucketReviewIsOpen &&
-    event.guidelines.length > 0 &&
+    currentUser?.currentCollMember?.isApproved &&
+    collection.bucketReviewIsOpen &&
+    collection.guidelines.length > 0 &&
     dream.published;
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {showBucketReview && (
-        <Monster event={event} dream={dream} currentOrg={currentOrg} />
+        <Monster event={collection} dream={dream} currentOrg={currentOrg} />
       )}
 
       {!dream.published && (
@@ -46,9 +47,9 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
       <div className="p-4 lg:p-6">
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
           <div>
-            <Title title={dream.title} dreamId={dream.id} canEdit={canEdit} />
+            <Title title={dream.title} bucketId={dream.id} canEdit={canEdit} />
             <Summary
-              dreamId={dream.id}
+              bucketId={dream.id}
               summary={dream.summary}
               canEdit={canEdit}
             />
@@ -57,7 +58,7 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
               images={dream.images}
               size={100}
               canEdit={canEdit}
-              dreamId={dream.id}
+              bucketId={dream.id}
             />
 
             {dream.description && (
@@ -65,42 +66,43 @@ const Dream = ({ dream, event, currentOrgMember, currentOrg }) => {
                 // We no longer use this field for new dreams.
                 // Eventually we will migrate all current descriptions to custom fields.
                 description={dream.description}
-                dreamId={dream.id}
+                bucketId={dream.id}
                 canEdit={canEdit}
               />
             )}
 
             <DreamCustomFields
-              eventId={event.id}
-              dreamId={dream.id}
+              collectionId={collection.id}
+              bucketId={dream.id}
               customFields={dream.customFields}
               canEdit={canEdit}
             />
 
             <Budget
-              dreamId={dream.id}
+              bucketId={dream.id}
               budgetItems={dream.budgetItems}
               canEdit={canEdit}
-              currency={event.currency}
-              allowStretchGoals={event.allowStretchGoals}
-              event={event}
+              currency={collection.currency}
+              allowStretchGoals={collection.allowStretchGoals}
+              collection={collection}
+              currentOrg={currentOrg}
               minGoal={dream.minGoal}
               maxGoal={dream.maxGoal}
             />
 
             <hr className="mb-4 mt-1" />
             <Comments
-              currentOrgMember={currentOrgMember}
+              currentUser={currentUser}
               currentOrg={currentOrg}
               dream={dream}
-              event={event}
+              collection={collection}
             />
           </div>
           <div className="order-first md:order-last">
             <Sidebar
               dream={dream}
-              event={event}
-              currentOrgMember={currentOrgMember}
+              collection={collection}
+              currentUser={currentUser}
               canEdit={canEdit}
               currentOrg={currentOrg}
             />

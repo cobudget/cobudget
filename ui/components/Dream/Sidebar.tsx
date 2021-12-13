@@ -17,8 +17,8 @@ import Tags from "./Tags";
 import toast from "react-hot-toast";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
-  mutation ApproveForGranting($dreamId: ID!, $approved: Boolean!) {
-    approveForGranting(dreamId: $dreamId, approved: $approved) {
+  mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
+    approveForGranting(bucketId: $bucketId, approved: $approved) {
       id
       approved
       canceled
@@ -28,8 +28,8 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
 `;
 
 const PUBLISH_DREAM_MUTATION = gql`
-  mutation PublishDream($dreamId: ID!, $unpublish: Boolean) {
-    publishDream(dreamId: $dreamId, unpublish: $unpublish) {
+  mutation PublishDream($bucketId: ID!, $unpublish: Boolean) {
+    publishDream(bucketId: $bucketId, unpublish: $unpublish) {
       id
       published
     }
@@ -37,8 +37,8 @@ const PUBLISH_DREAM_MUTATION = gql`
 `;
 
 const MARK_AS_COMPLETED_MUTATION = gql`
-  mutation MarkAsCompleted($dreamId: ID!) {
-    markAsCompleted(dreamId: $dreamId) {
+  mutation MarkAsCompleted($bucketId: ID!) {
+    markAsCompleted(bucketId: $bucketId) {
       id
       completedAt
       completed
@@ -47,8 +47,8 @@ const MARK_AS_COMPLETED_MUTATION = gql`
 `;
 
 const ACCEPT_FUNDING_MUTATION = gql`
-  mutation AcceptFunding($dreamId: ID!) {
-    acceptFunding(dreamId: $dreamId) {
+  mutation AcceptFunding($bucketId: ID!) {
+    acceptFunding(bucketId: $bucketId) {
       id
       fundedAt
       funded
@@ -57,8 +57,8 @@ const ACCEPT_FUNDING_MUTATION = gql`
 `;
 
 const CANCEL_FUNDING_MUTATION = gql`
-  mutation CancelFunding($dreamId: ID!) {
-    cancelFunding(dreamId: $dreamId) {
+  mutation CancelFunding($bucketId: ID!) {
+    cancelFunding(bucketId: $bucketId) {
       id
       fundedAt
       funded
@@ -71,8 +71,8 @@ const CANCEL_FUNDING_MUTATION = gql`
 `;
 
 const DELETE_DREAM_MUTATION = gql`
-  mutation DeleteDream($dreamId: ID!) {
-    deleteDream(dreamId: $dreamId) {
+  mutation DeleteDream($bucketId: ID!) {
+    deleteDream(bucketId: $bucketId) {
       id
     }
   }
@@ -85,8 +85,8 @@ const css = {
 
 const DreamSidebar = ({
   dream,
-  event,
-  currentOrgMember,
+  collection,
+  currentUser,
   canEdit,
   currentOrg,
 }) => {
@@ -102,8 +102,8 @@ const DreamSidebar = ({
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const isEventAdminOrGuide =
-    currentOrgMember?.currentEventMembership?.isAdmin ||
-    currentOrgMember?.currentEventMembership?.isGuide;
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator;
   const hasNotReachedMaxGoal =
     dream.totalContributions < Math.max(dream.minGoal, dream.maxGoal);
   const hasReachedMinGoal = dream.totalContributions > dream.minGoal;
@@ -113,8 +113,8 @@ const DreamSidebar = ({
     !dream.funded &&
     !dream.canceled &&
     hasNotReachedMaxGoal &&
-    event.grantingIsOpen &&
-    currentOrgMember?.currentEventMembership;
+    collection.grantingIsOpen &&
+    currentUser?.currentCollMember;
   const showAcceptFundingButton =
     dream.approved &&
     !dream.funded &&
@@ -125,7 +125,7 @@ const DreamSidebar = ({
   const showMarkAsCompletedButton =
     isEventAdminOrGuide && dream.funded && !dream.completed;
   const showApproveButton =
-    isEventAdminOrGuide && !event.grantingHasClosed && !dream.approved;
+    isEventAdminOrGuide && !collection.grantingHasClosed && !dream.approved;
   const showUnapproveButton =
     isEventAdminOrGuide && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
@@ -135,11 +135,11 @@ const DreamSidebar = ({
     <>
       {(dream.minGoal || canEdit) && (
         <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus dream={dream} event={event} />
+          <GrantingStatus dream={dream} collection={collection} />
           {showFundButton && (
             <>
               <Button
-                color={event.color}
+                color={collection.color}
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
@@ -149,21 +149,21 @@ const DreamSidebar = ({
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
                   dream={dream}
-                  event={event}
-                  currentOrgMember={currentOrgMember}
+                  collection={collection}
+                  currentUser={currentUser}
                 />
               )}
             </>
           )}
           {showAcceptFundingButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 confirm(
                   `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
                 ) &&
-                acceptFunding({ dreamId: dream.id }).catch((err) =>
+                acceptFunding({ bucketId: dream.id }).catch((err) =>
                   alert(err.message)
                 )
               }
@@ -174,10 +174,10 @@ const DreamSidebar = ({
 
           {showPublishButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               onClick={() =>
                 publishDream({
-                  dreamId: dream.id,
+                  bucketId: dream.id,
                   unpublish: dream.published,
                 })
               }
@@ -188,11 +188,11 @@ const DreamSidebar = ({
           )}
           {showApproveButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 approveForGranting({
-                  dreamId: dream.id,
+                  bucketId: dream.id,
                   approved: true,
                 }).catch((err) => alert(err.message))
               }
@@ -202,13 +202,13 @@ const DreamSidebar = ({
           )}
           {showMarkAsCompletedButton && (
             <Button
-              color={event.color}
+              color={collection.color}
               fullWidth
               onClick={() =>
                 confirm(
                   `Are you sure you would like to mark this bucket as completed? This can't be undone.`
                 ) &&
-                markAsCompleted({ dreamId: dream.id }).then(
+                markAsCompleted({ bucketId: dream.id }).then(
                   ({ data, error }) => {
                     if (error) toast.error(error.message);
                   }
@@ -237,7 +237,7 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       publishDream({
-                        dreamId: dream.id,
+                        bucketId: dream.id,
                         unpublish: true,
                       }).then(() => setActionsDropdownOpen(false))
                     }
@@ -252,7 +252,7 @@ const DreamSidebar = ({
                       confirm(
                         "Are you sure you would like to cancel funding? This is irreversible and will return all contributions to those that have contributed."
                       ) &&
-                      cancelFunding({ dreamId: dream.id })
+                      cancelFunding({ bucketId: dream.id })
                         .then(() => setActionsDropdownOpen(false))
                         .catch((err) => alert(err.message))
                     }
@@ -265,7 +265,7 @@ const DreamSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       approveForGranting({
-                        dreamId: dream.id,
+                        bucketId: dream.id,
                         approved: false,
                       })
                         .then(() => setActionsDropdownOpen(false))
@@ -282,14 +282,14 @@ const DreamSidebar = ({
                       confirm(
                         `Are you sure you would like to delete this bucket?`
                       ) &&
-                      deleteDream({ dreamId: dream.id }).then(({ error }) => {
+                      deleteDream({ bucketId: dream.id }).then(({ error }) => {
                         if (error) {
                           toast.error(error.message);
                         } else {
                           setActionsDropdownOpen(false);
                           Router.push(
                             "/[org]/[collection]",
-                            `/${currentOrg.slug}/${event.slug}`
+                            `/${currentOrg?.slug ?? "c"}/${collection.slug}`
                           );
                           toast.success("Bucket deleted");
                         }
@@ -327,12 +327,12 @@ const DreamSidebar = ({
             {dream.cocreators.map((member) => (
               // <Tooltip key={member.user.id} title={member.user.name}>
               <div
-                key={member.orgMember.user.id}
+                key={member.user.id}
                 className="flex items-center mr-2 md:mr-3 sm:mb-2"
               >
-                <Avatar user={member.orgMember.user} />{" "}
+                <Avatar user={member.user} />{" "}
                 <span className="ml-2 text-gray-700 hidden md:block">
-                  {member.orgMember.user.username}
+                  {member.user.username}
                 </span>
               </div>
               // </Tooltip>
@@ -349,15 +349,15 @@ const DreamSidebar = ({
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
             cocreators={dream.cocreators}
-            event={event}
+            collection={collection}
             dream={dream}
-            currentOrgMember={currentOrgMember}
+            currentUser={currentUser}
           />
         </div>
         <Tags
           currentOrg={currentOrg}
           dream={dream}
-          event={event}
+          collection={collection}
           canEdit={canEdit}
         />
       </div>

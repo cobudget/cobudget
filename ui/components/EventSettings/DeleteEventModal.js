@@ -15,7 +15,7 @@ const DELETE_EVENT_MUTATION = gql`
   }
 `;
 
-export default ({ event, handleClose, currentOrg }) => {
+export default ({ collection, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
   const [{ fetching: loading }, deleteCollection] = useMutation(
     DELETE_EVENT_MUTATION
@@ -23,12 +23,12 @@ export default ({ event, handleClose, currentOrg }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    deleteCollection({ collectionId: event.id }).then(({ error }) => {
+    deleteCollection({ collectionId: collection.id }).then(({ error }) => {
       if (error) {
         toast.error(error.message);
       } else {
         handleClose();
-        Router.push(`/${currentOrg.slug}/`);
+        Router.push(`/${currentOrg?.slug ?? "c"}/`);
         toast.success("Collection deleted");
       }
     });
@@ -36,7 +36,7 @@ export default ({ event, handleClose, currentOrg }) => {
 
   const checkIfTextMatched = (e) => {
     const text = e.target.value;
-    setAllowDelete(text === event.slug);
+    setAllowDelete(text === collection.slug);
   };
 
   return (
@@ -56,11 +56,11 @@ export default ({ event, handleClose, currentOrg }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{event.title}</b> collection, buckets, questions, comments and
+          <b>{collection.title}</b> collection, buckets, questions, comments and
           remove all collaborators.{" "}
         </p>
         <p className="mb-4">
-          Please type <b>{event.slug}</b> to confirm.
+          Please type <b>{collection.slug}</b> to confirm.
         </p>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
@@ -79,7 +79,7 @@ export default ({ event, handleClose, currentOrg }) => {
                 disabled={!allowDelete}
                 color="red"
               >
-                I understand the consequences, delete this event
+                I understand the consequences, delete this collection
               </Button>
             </div>
           </div>
