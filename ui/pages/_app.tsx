@@ -10,7 +10,7 @@ import { Toaster } from "react-hot-toast";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
-    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       slug
       info
@@ -51,54 +51,67 @@ export const TOP_LEVEL_QUERY = gql`
         value
       }
     }
+
     currentUser {
       id
       username
       name
       avatar
       email
+
       orgMemberships {
         id
+        isAdmin
         organization {
           id
           name
           slug
         }
       }
-    }
-    currentOrgMember(orgSlug: $orgSlug) {
-      id
-      bio
-      isOrgAdmin
-      discourseUsername
-      hasDiscourseApiKey
-      user {
-        id
-        name
-        username
-        email
-      }
       collectionMemberships {
         id
         isAdmin
-        isGuide
         isApproved
-        event {
+        collection {
           id
           title
           slug
         }
       }
-      currentEventMembership(collectionSlug: $collectionSlug) {
+      currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         balance
-        event {
+        collection {
           id
           title
         }
+      }
+      currentOrgMember(orgSlug: $orgSlug) {
+        id
+        bio
+        isAdmin
+        discourseUsername
+        hasDiscourseApiKey
+        # user {
+        #   id
+        #   name
+        #   username
+        #   email
+        # }
+        # collectionMemberships {
+        #   id
+        #   isAdmin
+        #   isModerator
+        #   isApproved
+        #   collection {
+        #     id
+        #     title
+        #     slug
+        #   }
+        # }
       }
     }
 
@@ -119,11 +132,10 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, currentOrgMember, event } = {
+      data: { currentUser, currentOrg, collection } = {
         currentUser: null,
         currentOrg: null,
-        currentOrgMember: null,
-        event: null,
+        collection: null,
       },
       fetching,
       error,
@@ -131,7 +143,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      orgSlug: router.query.org === "c" ? undefined : router.query.org,
       collectionSlug: router.query.collection,
     },
   });
@@ -157,30 +169,27 @@ const MyApp = ({ Component, pageProps, router }) => {
       <Modal
         active={modal}
         closeModal={closeModal}
-        currentOrgMember={currentOrgMember}
         currentUser={currentUser}
         currentOrg={currentOrg}
       />
       <Layout
         currentUser={currentUser}
-        currentOrgMember={currentOrgMember}
         currentOrg={currentOrg}
         openModal={openModal}
-        event={event}
+        collection={collection}
         router={router}
         title={
           currentOrg
-            ? event
-              ? `${event.title} | ${currentOrg.name}`
+            ? collection
+              ? `${collection.title} | ${currentOrg.name}`
               : currentOrg.name
             : "Cobudget"
         }
       >
         <Component
           {...pageProps}
-          event={event}
+          collection={collection}
           currentUser={currentUser}
-          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           router={router}

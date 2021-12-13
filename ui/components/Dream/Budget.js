@@ -8,9 +8,10 @@ import EditBudgetModal from "./EditBudgetModal";
 
 const DreamBudget = ({
   budgetItems,
-  dreamId,
+  bucketId,
   canEdit,
-  event,
+  collection,
+  currentOrg,
   currency,
   allowStretchGoals,
   minGoal,
@@ -35,13 +36,14 @@ const DreamBudget = ({
     <>
       {editing && (
         <EditBudgetModal
-          dreamId={dreamId}
+          bucketId={bucketId}
           budgetItems={budgetItems}
           currency={currency}
           allowStretchGoals={allowStretchGoals}
           handleClose={() => setEditing(false)}
           open={editing}
-          event={event}
+          collection={collection}
+          currentOrg={currentOrg}
         />
       )}
 

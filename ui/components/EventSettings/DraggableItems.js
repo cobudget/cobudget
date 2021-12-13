@@ -16,7 +16,7 @@ const SortableContainer = sortableContainer(({ children }) => {
 });
 
 const DraggableItems = ({
-  event,
+  collection,
   items,
   setItemPosition,
   setPositionLoading,
@@ -89,7 +89,7 @@ const DraggableItems = ({
               index={index}
               item={item}
               setEditingItem={setEditingItem}
-              eventId={event.id}
+              collectionId={collection.id}
               currentOrg={currentOrg}
             />
           ))}

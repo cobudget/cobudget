@@ -7,14 +7,14 @@ import Context from "contexts/comment";
 const EditComment = ({ comment, handleDone }) => {
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, dream, event } = useContext(Context);
+  const { editComment, dream, collection } = useContext(Context);
 
   return (
     <form
       onSubmit={handleSubmit(({ content }) => {
         setSubmitting(true);
         editComment({
-          dreamId: dream.id,
+          bucketId: dream.id,
           commentId: comment.id,
           content,
         })
@@ -33,18 +33,18 @@ const EditComment = ({ comment, handleDone }) => {
         defaultValue={comment.content}
         inputRef={register({ required: "Required" })}
         autoFocus
-        color={event.color}
+        color={collection.color}
       />
       <div className="flex justify-end">
         <Button
           onClick={handleDone}
           className="mr-2"
           variant="secondary"
-          color={event.color}
+          color={collection.color}
         >
           Cancel
         </Button>
-        <Button type="submit" loading={submitting} color={event.color}>
+        <Button type="submit" loading={submitting} color={collection.color}>
           Save
         </Button>
       </div>

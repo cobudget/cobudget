@@ -4,8 +4,8 @@ import { gql, useQuery, useSubscription, useMutation } from "urql";
 export default createContext();
 
 export const DELETE_COMMENT_MUTATION = gql`
-  mutation DeleteComment($dreamId: ID!, $commentId: ID!) {
-    deleteComment(dreamId: $dreamId, commentId: $commentId) {
+  mutation DeleteComment($bucketId: ID!, $commentId: ID!) {
+    deleteComment(bucketId: $bucketId, commentId: $commentId) {
       id
       __typename
     }
@@ -13,16 +13,16 @@ export const DELETE_COMMENT_MUTATION = gql`
 `;
 
 export const COMMENTS_QUERY = gql`
-  query Comments($dreamId: ID!, $from: Int, $limit: Int, $order: String) {
-    commentSet(dreamId: $dreamId, from: $from, limit: $limit, order: $order) {
-      total(dreamId: $dreamId, order: $order)
-      comments(dreamId: $dreamId, order: $order) {
+  query Comments($bucketId: ID!, $from: Int, $limit: Int, $order: String) {
+    commentSet(bucketId: $bucketId, from: $from, limit: $limit, order: $order) {
+      total(bucketId: $bucketId, order: $order)
+      comments(bucketId: $bucketId, order: $order) {
         id
         content
         htmlContent
         createdAt
         isLog
-        orgMember {
+        collectionMember {
           id
           user {
             id
@@ -37,14 +37,14 @@ export const COMMENTS_QUERY = gql`
 `;
 
 const ADD_COMMENT_MUTATION = gql`
-  mutation addComment($content: String!, $dreamId: ID!) {
-    addComment(content: $content, dreamId: $dreamId) {
+  mutation addComment($content: String!, $bucketId: ID!) {
+    addComment(content: $content, bucketId: $bucketId) {
       id
       content
       htmlContent
       createdAt
       updatedAt
-      orgMember {
+      collectionMember {
         id
         user {
           id
@@ -58,14 +58,14 @@ const ADD_COMMENT_MUTATION = gql`
 `;
 
 const EDIT_COMMENT_MUTATION = gql`
-  mutation EditComment($dreamId: ID!, $commentId: ID!, $content: String!) {
-    editComment(dreamId: $dreamId, commentId: $commentId, content: $content) {
+  mutation EditComment($bucketId: ID!, $commentId: ID!, $content: String!) {
+    editComment(bucketId: $bucketId, commentId: $commentId, content: $content) {
       id
       content
       htmlContent
       createdAt
       updatedAt
-      orgMember {
+      collectionMember {
         id
         user {
           id
@@ -78,28 +78,6 @@ const EDIT_COMMENT_MUTATION = gql`
   }
 `;
 
-const COMMENTS_CHANGED_SUBSCRIPTION = gql`
-  subscription OnCommentChanged($dreamId: ID!) {
-    commentsChanged(dreamId: $dreamId) {
-      action
-      comment {
-        id
-        content
-        htmlContent
-        createdAt
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-    }
-  }
-`;
-
 export const useCommentContext = (initialInput) => {
   const [from, setFrom] = useState(initialInput.from);
   const [limit, setLimit] = useState(initialInput.limit);
@@ -107,7 +85,7 @@ export const useCommentContext = (initialInput) => {
 
   const [{ data, fetching: loading }] = useQuery({
     query: COMMENTS_QUERY,
-    variables: { dreamId: initialInput.dream.id, from, limit, order },
+    variables: { bucketId: initialInput.dream.id, from, limit, order },
     //notifyOnNetworkStatusChange: true,
   });
 
@@ -160,7 +138,7 @@ export const useCommentContext = (initialInput) => {
 
   // useSubscription({
   //   query: COMMENTS_CHANGED_SUBSCRIPTION,
-  //   variables: { dreamId: initialInput.dream.id },
+  //   variables: { bucketId: initialInput.dream.id },
   //   // onSubscriptionData: ({
   //   //   subscriptionData: {
   //   //     data: {
@@ -186,9 +164,9 @@ export const useCommentContext = (initialInput) => {
 
   return {
     dream: initialInput.dream,
-    event: initialInput.event,
+    collection: initialInput.collection,
     currentOrg: initialInput.currentOrg,
-    currentOrgMember: initialInput.currentOrgMember,
+    currentUser: initialInput.currentUser,
     from,
     setFrom,
     limit,

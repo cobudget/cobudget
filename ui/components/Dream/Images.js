@@ -42,7 +42,7 @@ const Image = styled.img`
   max-width: calc(100vw - 60px);
 `;
 
-const DreamImages = ({ dreamId, images, size, canEdit }) => {
+const DreamImages = ({ bucketId, images, size, canEdit }) => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   return (
     <>
@@ -50,7 +50,7 @@ const DreamImages = ({ dreamId, images, size, canEdit }) => {
         open={editModalOpen}
         initialImages={images}
         handleClose={() => setEditModalOpen(false)}
-        dreamId={dreamId}
+        bucketId={bucketId}
       />
       {images.length > 0 ? (
         <div className="relative">
