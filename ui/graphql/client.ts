@@ -5,9 +5,9 @@ import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
-import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
+import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { DREAMS_QUERY } from "pages/[org]/[collection]";
+import { BUCKETS_QUERY } from "pages/[org]/[collection]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
@@ -46,7 +46,7 @@ export const client = (
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
-          DreamsPage: () => null,
+          BucketsPage: () => null,
         },
         updates: {
           Mutation: {
@@ -61,7 +61,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
                     return {
                       ...data,
                       currentOrgMember: {
@@ -87,7 +86,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
                     return {
                       ...data,
                       currentOrgMember: result.joinOrg,
@@ -166,40 +164,38 @@ export const client = (
                   cache.invalidate("Query", "dreamsPage", field.arguments);
                 });
             },
-            deleteDream(result: any, { dreamId }, cache) {
+            deleteDream(result: any, { bucketId }, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "dreamsPage")
+                .filter((field) => field.fieldName === "bucketsPage")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: DREAMS_QUERY,
+                      query: BUCKETS_QUERY,
                       variables: field.arguments,
                     },
                     (data) => {
-                      data.dreamsPage.dreams = data.dreamsPage.dreams.filter(
-                        (dream) => dream.id !== dreamId
+                      data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
+                        (bucket) => bucket.id !== bucketId
                       );
                       return data;
                     }
                   );
                 });
             },
-            addComment(result: any, { content, dreamId }, cache) {
-              console.log({ result });
+            addComment(result: any, { content, bucketId }, cache) {
               if (result.addComment) {
                 cache.updateQuery(
                   {
                     query: COMMENTS_QUERY,
                     variables: {
-                      dreamId,
+                      bucketId,
                       from: 0,
                       limit: 10,
                       order: "desc",
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -213,21 +209,19 @@ export const client = (
                 );
               }
             },
-            deleteComment(result: any, { commentId, dreamId }, cache) {
-              console.log({ result });
+            deleteComment(result: any, { commentId, bucketId }, cache) {
               if (result.deleteComment) {
                 cache.updateQuery(
                   {
                     query: COMMENTS_QUERY,
                     variables: {
-                      dreamId,
+                      bucketId,
                       from: 0,
                       limit: 10,
                       order: "desc",
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -263,23 +257,20 @@ export const client = (
                 );
               }
             },
-            inviteEventMembers(result: any, { eventId }, cache) {
-              if (result.inviteEventMembers) {
+            inviteCollectionMembers(result: any, { collectionId }, cache) {
+              if (result.inviteCollectionMembers) {
                 cache.updateQuery(
                   {
-                    query: EVENT_MEMBERS_QUERY,
-                    variables: { eventId, offset: 0, limit: 1000 },
+                    query: COLLECTION_MEMBERS_QUERY,
+                    variables: { collectionId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {
-                    console.log({
-                      data,
-                    });
                     return {
                       ...data,
                       approvedMembersPage: {
                         ...data.approvedMembersPage,
                         approvedMembers: [
-                          ...result.inviteEventMembers,
+                          ...result.inviteCollectionMembers,
                           ...data.approvedMembersPage?.approvedMembers,
                         ],
                       },

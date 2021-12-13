@@ -21,7 +21,12 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
 
-const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
+const ActionsDropdown = ({
+  collectionId,
+  updateMember,
+  deleteMember,
+  member,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -51,7 +56,7 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              eventId,
+              collectionId,
 
               memberId: member.id,
               isAdmin: !member.isAdmin,
@@ -65,25 +70,25 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
         <MenuItem
           onClick={() => {
             updateMember({
-              eventId,
+              collectionId,
               memberId: member.id,
-              isGuide: !member.isGuide,
+              isModerator: !member.isModerator,
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isGuide ? "Remove guide" : "Make guide"}
+          {member.isModerator ? "Remove guide" : "Make guide"}
         </MenuItem>
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.orgMember.user.email}?`
+                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
               )
             )
-              deleteMember({ eventId, memberId: member.id });
+              deleteMember({ collectionId, memberId: member.id });
           }}
         >
           <Box color="error.main">Delete</Box>
@@ -93,42 +98,36 @@ const ActionsDropdown = ({ eventId, updateMember, deleteMember, member }) => {
   );
 };
 
-const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
+const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
   const [allocateModalOpen, setAllocateModalOpen] = useState(false);
 
   return (
     <TableRow>
       <TableCell component="th" scope="row">
         <div className="flex space-x-3">
-          <Avatar user={member.orgMember.user} />
+          <Avatar user={member.user} />
           <div>
             <p className="font-medium text-base">{member.name}</p>
-            <p className="text-gray-700 text-sm">
-              @{member.orgMember.user.username}
-            </p>
+            <p className="text-gray-700 text-sm">@{member.user.username}</p>
           </div>
         </div>
       </TableCell>
       <TableCell>
         <p>{member.email}</p>
-        {!member.orgMember.user.verifiedEmail && (
+        {!member.user.verifiedEmail && (
           <p className="text-sm text-gray-500">(not verified)</p>
         )}
       </TableCell>
       <TableCell component="th" scope="row">
-        {member.orgMember.bio && (
-          <Tooltip
-            position="bottom-start"
-            size="small"
-            title={member.orgMember.bio}
-          >
-            <p className="truncate max-w-xs">{member.orgMember.bio}</p>
+        {member.bio && (
+          <Tooltip position="bottom-start" size="small" title={member.bio}>
+            <p className="truncate max-w-xs">{member.bio}</p>
           </Tooltip>
         )}
       </TableCell>
       <TableCell align="right" className="flex space-x-2">
         {member.isAdmin && <p>Admin</p>}
-        {member.isGuide && <p>Guide</p>}
+        {member.isModerator && <p>Moderator</p>}
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (
@@ -136,11 +135,11 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setAllocateModalOpen(true)}
           >
-            {thousandSeparator(member.balance / 100)} {event.currency}
+            {thousandSeparator(member.balance / 100)} {collection.currency}
           </button>
         ) : (
           <span>
-            {thousandSeparator(member.balance / 100)} {event.currency}
+            {thousandSeparator(member.balance / 100)} {collection.currency}
           </span>
         )}
 
@@ -148,7 +147,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
           <AllocateModal
             open={allocateModalOpen}
             member={member}
-            event={event}
+            collection={collection}
             handleClose={() => setAllocateModalOpen(false)}
           />
         )}
@@ -159,7 +158,7 @@ const Row = ({ member, deleteMember, updateMember, event, isAdmin }) => {
             member={member}
             deleteMember={deleteMember}
             updateMember={updateMember}
-            eventId={event.id}
+            collectionId={collection.id}
           />
         </TableCell>
       )}
@@ -171,7 +170,7 @@ const EventMembersTable = ({
   approvedMembers,
   updateMember,
   deleteMember,
-  event,
+  collection,
   isAdmin,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
@@ -205,7 +204,7 @@ const EventMembersTable = ({
                 </div>
                 {bulkAllocateModalOpen && (
                   <BulkAllocateModal
-                    event={event}
+                    collection={collection}
                     handleClose={() => setBulkAllocateModalOpen(false)}
                   />
                 )}
@@ -218,7 +217,7 @@ const EventMembersTable = ({
               <Row
                 key={member.id}
                 member={member}
-                event={event}
+                collection={collection}
                 deleteMember={deleteMember}
                 updateMember={updateMember}
                 isAdmin={isAdmin}

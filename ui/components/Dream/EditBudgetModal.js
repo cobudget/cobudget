@@ -11,8 +11,8 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import * as yup from "yup";
 
 const EDIT_BUDGET_MUTATION = gql`
-  mutation EditBudget($dreamId: ID!, $budgetItems: [BudgetItemInput]) {
-    editDream(dreamId: $dreamId, budgetItems: $budgetItems) {
+  mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
+    editDream(bucketId: $bucketId, budgetItems: $budgetItems) {
       id
       minGoal
       maxGoal
@@ -46,9 +46,10 @@ const schema = yup.object().shape({
 });
 
 const EditBudgetModal = ({
-  dreamId,
+  bucketId,
   budgetItems,
-  event,
+  collection,
+  currentOrg,
   currency,
   allowStretchGoals,
   handleClose,
@@ -81,7 +82,7 @@ const EditBudgetModal = ({
         <form
           onSubmit={handleSubmit((variables) => {
             editDream({
-              dreamId,
+              bucketId,
               budgetItems: [
                 ...(variables.budgetItems?.map((item) => ({
                   ...item,
@@ -153,7 +154,7 @@ const EditBudgetModal = ({
           <div className="flex mb-4">
             <Button
               variant="secondary"
-              color={event.color}
+              color={collection.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
@@ -206,7 +207,7 @@ const EditBudgetModal = ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
-              color={event.color}
+              color={collection.color}
               onClick={() =>
                 insert(fields.filter((f) => f.type === "INCOME").length, {
                   type: "INCOME",
@@ -224,9 +225,11 @@ const EditBudgetModal = ({
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
-              {Boolean(event.guidelines.length) && (
+              {Boolean(collection.guidelines.length) && (
                 <a
-                  href={`/${event.slug}/about#guidelines`}
+                  href={`/${currentOrg?.slug ?? "c"}/${
+                    collection.slug
+                  }/about#guidelines`}
                   target="_blank"
                   rel="noreferrer"
                   className="text-sm text-gray-600 font-medium hover:text-gray-800"

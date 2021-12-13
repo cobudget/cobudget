@@ -6,16 +6,10 @@ import thousandSeparator from "utils/thousandSeparator";
 
 const css = {
   button:
-    "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
+    "text-left block px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({
-  currentUser,
-  currentOrgMember,
-  openModal,
-  event,
-  currentOrg,
-}) => {
+const ProfileDropdown = ({ currentUser, openModal }) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
@@ -48,19 +42,19 @@ const ProfileDropdown = ({
             className="z-10 fixed inset-0 h-full w-full cursor-default"
           ></button>
 
-          <div className="z-20 mt-2 py-2 absolute right-0 w-48 bg-white rounded-lg shadow-2xl flex flex-col flex-stretch">
-            <h2 className="px-4 text-xs my-1 font-semibold text-gray-500 uppercase tracking-wider">
+          <div className="z-20 mt-2 p-2 space-y-1 absolute right-0 w-36 bg-white rounded-lg shadow-2xl flex flex-col flex-stretch">
+            {/* <h2 className="px-4 text-xs my-1 font-semibold text-gray-500 uppercase tracking-wider">
               Memberships
             </h2>
-            {currentOrgMember?.currentEventMembership && (
+            {currentUser.currentCollMember && (
               <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                {currentOrgMember.currentEventMembership.event.title}
-                {Boolean(currentOrgMember.currentEventMembership.balance) && (
+                {currentUser.currentCollMember.collection.title}
+                {Boolean(currentUser.currentCollMember.balance) && (
                   <p className="mt-1 text-gray-800 text-sm">
                     You have{" "}
                     <span className="text-black font-medium">
                       {thousandSeparator(
-                        currentOrgMember.currentEventMembership.balance / 100
+                        currentUser.currentCollMember.balance / 100
                       )}{" "}
                       {event.currency}
                     </span>{" "}
@@ -87,7 +81,7 @@ const ProfileDropdown = ({
               );
             })}
 
-            <hr className="my-2" />
+            <hr className="my-2" /> */}
 
             <button
               onClick={() => {

@@ -22,17 +22,12 @@ const CREATE_ORGANIZATION = gql`
 
 const EDIT_ORGANIZATION = gql`
   mutation EditOrganization(
-    $organizationId: ID!
+    $orgId: ID!
     $name: String!
     $logo: String
     $slug: String!
   ) {
-    editOrganization(
-      organizationId: $organizationId
-      name: $name
-      logo: $logo
-      slug: $slug
-    ) {
+    editOrganization(orgId: $orgId, name: $name, logo: $logo, slug: $slug) {
       id
       name
       logo
@@ -77,7 +72,7 @@ const EditOrganization = ({ organization, currentUser }) => {
         editOrganization({
           ...variables,
           logo: logoImage,
-          organizationId: organization.id,
+          orgId: organization.id,
         }).then(({ error }) => {
           if (error) {
             toast.error(error.message.replace("[GraphQL]", ""));
@@ -118,8 +113,6 @@ const EditOrganization = ({ organization, currentUser }) => {
           inputProps={{
             value: slugValue,
             onChange: (e) => {
-              // console.log("onChange");
-              // console.log({ slugValue, targetValue: e.target.value });
               setSlugValue(e.target.value);
             },
             onBlur: (e) => setSlugValue(slugify(e.target.value)),

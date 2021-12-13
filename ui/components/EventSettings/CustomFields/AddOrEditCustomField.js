@@ -11,8 +11,8 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
-  mutation AddCustomField($eventId: ID!, $customField: CustomFieldInput!) {
-    addCustomField(eventId: $eventId, customField: $customField) {
+  mutation AddCustomField($collectionId: ID!, $customField: CustomFieldInput!) {
+    addCustomField(collectionId: $collectionId, customField: $customField) {
       id
       customFields {
         id
@@ -30,12 +30,12 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
 
 const EDIT_CUSTOM_FIELD_MUTATION = gql`
   mutation EditCustomField(
-    $eventId: ID!
+    $collectionId: ID!
     $fieldId: ID!
     $customField: CustomFieldInput!
   ) {
     editCustomField(
-      eventId: $eventId
+      collectionId: $collectionId
       fieldId: $fieldId
       customField: $customField
     ) {
@@ -70,8 +70,8 @@ const schema = yup.object().shape({
   }),
 });
 
-export default ({
-  event,
+export default function AddOrEditCustomField({
+  collection,
   handleClose,
   customField = {
     name: "",
@@ -80,7 +80,7 @@ export default ({
     limit: null,
     isRequired: false,
   },
-}) => {
+}) {
   const editing = Boolean(customField.id);
   const [typeInputValue, setTypeInputValue] = useState("TEXT");
 
@@ -111,7 +111,7 @@ export default ({
             variables.customField.isRequired = isRequired;
             return addOrEditCustomField({
               ...variables,
-              eventId: event.id,
+              collectionId: collection.id,
               ...(editing && { fieldId: customField.id }),
             })
               .then(() => handleClose())
@@ -126,7 +126,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
-              color={event.color}
+              color={collection.color}
             />
             <TextField
               placeholder="Description"
@@ -135,7 +135,7 @@ export default ({
               inputRef={register}
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
-              color={event.color}
+              color={collection.color}
             />
             <div className="flex">
               <SelectField
@@ -143,7 +143,7 @@ export default ({
                 defaultValue={customField.type}
                 inputRef={register}
                 className="mr-4"
-                color={event.color}
+                color={collection.color}
                 inputProps={{
                   value: typeInputValue,
                   onChange: (e) => setTypeInputValue(e.target.value),
@@ -162,7 +162,7 @@ export default ({
                   inputRef={register}
                   error={errors.customField?.limit}
                   helperText={errors.customField?.limit?.message}
-                  color={event.color}
+                  color={collection.color}
                   inputProps={{
                     type: "number",
                     min: "1",
@@ -199,13 +199,13 @@ export default ({
             <div className="flex">
               <Button
                 variant="secondary"
-                color={event.color}
+                color={collection.color}
                 onClick={handleClose}
                 className="mr-2"
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading} color={event.color}>
+              <Button type="submit" loading={loading} color={collection.color}>
                 Save
               </Button>
             </div>
@@ -214,4 +214,4 @@ export default ({
       </div>
     </Modal>
   );
-};
+}

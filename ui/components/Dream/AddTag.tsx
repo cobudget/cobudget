@@ -4,8 +4,8 @@ import { useMutation, gql } from "urql";
 import Downshift from "downshift";
 
 const ADD_TAG_MUTATION = gql`
-  mutation AddTag($dreamId: ID!, $tagId: ID!) {
-    addTag(dreamId: $dreamId, tagId: $tagId) {
+  mutation AddTag($bucketId: ID!, $tagId: ID!) {
+    addTag(bucketId: $bucketId, tagId: $tagId) {
       id
       tags {
         id
@@ -26,7 +26,7 @@ const AddTag = ({ items: eventTags, dream }) => {
         if (!tag) return;
 
         addTag({
-          dreamId: dream.id,
+          bucketId: dream.id,
           tagId: tag.id,
         }).then(() => setInput(""));
       }}

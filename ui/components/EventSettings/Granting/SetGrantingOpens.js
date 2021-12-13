@@ -8,11 +8,13 @@ import DayjsUtils from "@date-io/dayjs";
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingOpens = ({ closeModal, event }) => {
+const SetGrantingOpens = ({ closeModal, collection }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
-  const [selectedDate, handleDateChange] = React.useState(event.grantingOpens);
+  const [selectedDate, handleDateChange] = React.useState(
+    collection.grantingOpens
+  );
 
   return (
     <Card>
@@ -21,7 +23,10 @@ const SetGrantingOpens = ({ closeModal, event }) => {
 
         <form
           onSubmit={handleSubmit(() => {
-            updateGranting({ grantingOpens: selectedDate, eventId: event.id })
+            updateGranting({
+              grantingOpens: selectedDate,
+              collectionId: collection.id,
+            })
               .then(() => {
                 // console.log({ data });
                 closeModal();
@@ -57,7 +62,7 @@ const SetGrantingOpens = ({ closeModal, event }) => {
               Save
             </Button>
 
-            {event.grantingOpens && (
+            {collection.grantingOpens && (
               <Button
                 type="button"
                 size="large"
@@ -65,7 +70,10 @@ const SetGrantingOpens = ({ closeModal, event }) => {
                 color="secondary"
                 className="ml-2"
                 onClick={() => {
-                  updateGranting({ eventId: event.id, grantingOpens: null })
+                  updateGranting({
+                    collectionId: collection.id,
+                    grantingOpens: null,
+                  })
                     .then(() => {
                       // console.log({ data });
                       closeModal();

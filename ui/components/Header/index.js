@@ -18,7 +18,7 @@ const JOIN_ORG_MUTATION = gql`
     joinOrg(orgId: $orgId) {
       id
       bio
-      isOrgAdmin
+      isAdmin
       discourseUsername
       hasDiscourseApiKey
       user {
@@ -30,9 +30,9 @@ const JOIN_ORG_MUTATION = gql`
       collectionMemberships {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
-        event {
+        collection {
           id
           title
           slug
@@ -51,9 +51,9 @@ const JOIN_COLLECTION_MUTATION = gql`
     joinCollection(collectionId: $collectionId) {
       id
       isAdmin
-      isGuide
+      isModerator
       isApproved
-      event {
+      collection {
         id
         title
         slug
@@ -66,23 +66,13 @@ const JOIN_COLLECTION_MUTATION = gql`
   }
 `;
 
-const Header = ({
-  event,
-  currentUser,
-  currentOrgMember,
-  currentOrg,
-  openModal,
-  router,
-}) => {
+const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
 
   const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
-  const color = event?.color ?? "anthracit";
-  const currentCollectionMembership = currentOrgMember?.collectionMemberships.filter(
-    (member) => member.event.id === event?.id
-  )?.[0];
+  const color = collection?.color ?? "anthracit";
 
   return (
     <header className={`bg-${color} shadow-md w-full`}>
@@ -91,9 +81,9 @@ const Header = ({
           <div className="flex items-center">
             <OrganizationAndEventHeader
               currentOrg={currentOrg}
-              event={event}
+              collection={collection}
               color={color}
-              currentOrgMember={currentOrgMember}
+              currentUser={currentUser}
               router={router}
             />
           </div>
@@ -121,7 +111,7 @@ const Header = ({
         </div>
 
         <nav
-          className={` ${
+          className={`${
             isMenuOpen ? "block" : "hidden"
           } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${color} sm:bg-transparent`}
         >
@@ -130,23 +120,23 @@ const Header = ({
               <>
                 {currentOrg && (
                   <>
-                    {!currentCollectionMembership &&
-                      event &&
-                      (event.registrationPolicy !== "INVITE_ONLY" ||
-                        currentOrgMember?.isOrgAdmin) && (
+                    {!currentUser.currentCollMember &&
+                      collection &&
+                      (collection.registrationPolicy !== "INVITE_ONLY" ||
+                        currentOrgMember?.isAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
                           onClick={() =>
-                            joinCollection({ collectionId: event?.id })
+                            joinCollection({ collectionId: collection?.id })
                           }
                         >
-                          {event.registrationPolicy === "REQUEST_TO_JOIN"
+                          {collection.registrationPolicy === "REQUEST_TO_JOIN"
                             ? "Request to join"
                             : "Join collection"}
                         </NavItem>
                       )}
-                    {!currentOrgMember && !event && (
+                    {!currentUser.currentOrgMember && !collection && (
                       <NavItem
                         primary
                         eventColor={color}
@@ -160,10 +150,7 @@ const Header = ({
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
-                    currentOrgMember={currentOrgMember}
                     openModal={openModal}
-                    event={event}
-                    currentOrg={currentOrg}
                   />
                 </div>
                 <div data-cy="user-is-logged-in" />
@@ -183,69 +170,15 @@ const Header = ({
           {/* Mobile view of profile dropdown contents above (i.e. all profile dropdown items are declared twice!)*/}
           {currentUser && (
             <div className="pt-4 pb-1 sm:hidden bg-white mb-4 border-gray-300">
-              {currentOrgMember && (
-                <div className="flex items-center px-3">
-                  <Avatar user={currentOrgMember.user} />
-                  <div className="ml-4">
-                    <span className="font-semibold text-gray-600">
-                      {currentOrgMember.user.name}
-                    </span>
-                  </div>
+              <div className="flex items-center px-3">
+                <Avatar user={currentUser} />
+                <div className="ml-4">
+                  <span className="font-semibold text-gray-600">
+                    {currentUser.name}
+                  </span>
                 </div>
-              )}
-
+              </div>
               <div className="mt-2 flex flex-col items-stretch">
-                {currentOrgMember && (
-                  <>
-                    <h2 className="px-4 text-xs my-1 font-semibold text-gray-600 uppercase tracking-wider">
-                      Memberships
-                    </h2>
-                    {currentOrgMember.currentEventMembership && (
-                      <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                        {currentOrgMember.currentEventMembership.event.title}
-                        {Boolean(
-                          currentOrgMember.currentEventMembership.balance
-                        ) && (
-                          <p className=" text-gray-800 text-sm">
-                            You have{" "}
-                            <span className="text-black font-medium">
-                              {thousandSeparator(
-                                currentOrgMember.currentEventMembership
-                                  .balance / 100
-                              )}{" "}
-                              {event.currency}
-                            </span>{" "}
-                            to contribute
-                          </p>
-                        )}
-                      </div>
-                    )}
-                    {currentOrgMember.collectionMemberships.map(
-                      (membership) => {
-                        if (
-                          currentOrgMember.currentEventMembership &&
-                          currentOrgMember.currentEventMembership.id ===
-                            membership.id
-                        ) {
-                          return null;
-                        }
-                        return (
-                          <Link
-                            href="/[org]/[collection]"
-                            as={`/${currentOrg.slug}/${membership.event.slug}`}
-                            key={membership.id}
-                          >
-                            <a className={css.mobileProfileItem}>
-                              {membership.event.title}
-                            </a>
-                          </Link>
-                        );
-                      }
-                    )}
-                    <hr className="my-2" />
-                  </>
-                )}
-
                 <button
                   onClick={() => {
                     openModal(modals.EDIT_PROFILE);

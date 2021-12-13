@@ -7,14 +7,14 @@ import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
-  query TodoInfo($orgSlug: String!) {
-    orgMembersPage(limit: 2, orgSlug: $orgSlug) {
+  query TodoInfo($orgId: ID!) {
+    orgMembersPage(limit: 2, orgId: $orgId) {
       orgMembers {
         id
       }
     }
 
-    collections(limit: 1, orgSlug: $orgSlug) {
+    collections(limit: 1, orgId: $orgId) {
       id
     }
   }
@@ -62,13 +62,13 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
 const TodoList = ({ currentOrg }) => {
   const [{ data, fetching: loading, error }] = useQuery({
     query: GET_TODO_INFO,
-    variables: { orgSlug: currentOrg.slug },
+    variables: { orgId: currentOrg.id },
   });
   const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
     SET_TODOS_FINISHED
   );
   const [allDone, setAllDone] = useState(false);
-  console.log({ data, error, todoData, todoError });
+
   const rawTodos = [
     {
       title: "Create community",

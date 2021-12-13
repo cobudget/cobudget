@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-const GrantingStatus = ({ dream, event }) => {
+const GrantingStatus = ({ dream, collection }) => {
   const funding = dream.totalContributions + dream.income;
   const ratio = isNaN(funding / dream.minGoal) ? 0 : funding / dream.minGoal;
   const userName = (nameOrEmail) =>
@@ -17,14 +17,14 @@ const GrantingStatus = ({ dream, event }) => {
             ratio={ratio}
             className="mb-2"
             size="large"
-            color={event.color}
+            color={collection.color}
           />
-          <p className={`text-xl font-semibold text-${event.color}-dark`}>
-            {thousandSeparator(funding / 100)} {event.currency}
+          <p className={`text-xl font-semibold text-${collection.color}-dark`}>
+            {thousandSeparator(funding / 100)} {collection.currency}
           </p>
           <p className="text-sm text-gray-700 mb-2">
-            funded of {thousandSeparator(dream.minGoal / 100)} {event.currency}{" "}
-            goal
+            funded of {thousandSeparator(dream.minGoal / 100)}{" "}
+            {collection.currency} goal
           </p>
 
           {!!dream.totalContributionsFromCurrentMember && (
@@ -33,7 +33,7 @@ const GrantingStatus = ({ dream, event }) => {
               {thousandSeparator(
                 dream.totalContributionsFromCurrentMember / 100
               )}{" "}
-              {event.currency}
+              {collection.currency}
             </p>
           )}
 
@@ -45,9 +45,9 @@ const GrantingStatus = ({ dream, event }) => {
                     className="mt-1 text-sm text-gray-700"
                     key={contribution.id}
                   >
-                    {userName(contribution.eventMember.orgMember.user.username)}{" "}
+                    {userName(contribution.collectionMember.user.username)}{" "}
                     contributed {thousandSeparator(contribution.amount / 100)}{" "}
-                    {event.currency}
+                    {collection.currency}
                   </p>
                 ))}
               </div>
