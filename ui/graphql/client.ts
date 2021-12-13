@@ -150,7 +150,7 @@ export const client = (
                   );
                 });
             },
-            createDream(result: any, { eventId }, cache) {
+            createDream(result: any, { collectionId }, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -158,10 +158,12 @@ export const client = (
 
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "dreamsPage")
-                .filter((field) => field.arguments.eventId === eventId)
+                .filter((field) => field.fieldName === "bucketsPage")
+                .filter(
+                  (field) => field.arguments.collectionId === collectionId
+                )
                 .forEach((field) => {
-                  cache.invalidate("Query", "dreamsPage", field.arguments);
+                  cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
             },
             deleteDream(result: any, { bucketId }, cache) {
