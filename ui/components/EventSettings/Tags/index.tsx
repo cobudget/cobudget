@@ -49,7 +49,9 @@ const Tags = ({ collection, currentOrg }) => {
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${currentOrg.slug}/${collection.slug}?tag=${tag.value}`}
+              href={`/${currentOrg?.slug ?? "c"}/${collection.slug}?tag=${
+                tag.value
+              }`}
             >
               <a className="text-gray-500 hover:text-black">{tag.value}</a>
             </Link>

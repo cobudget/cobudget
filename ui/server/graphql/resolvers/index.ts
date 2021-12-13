@@ -109,11 +109,16 @@ const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
   return skip;
 };
 
-const isCollModOrAdmin = async (parent, { bucketId }, { user }) => {
+const isCollModOrAdmin = async (
+  parent,
+  { bucketId, collectionId },
+  { user }
+) => {
   if (!user) throw new Error("You need to be logged in");
   const collectionMember = await getCollectionMember({
     userId: user.id,
     bucketId,
+    collectionId,
   });
 
   if (!(collectionMember?.isModerator || collectionMember?.isAdmin))
