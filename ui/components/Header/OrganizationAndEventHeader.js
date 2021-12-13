@@ -17,11 +17,13 @@ const OrganizationAndEventHeader = ({
   router,
   color,
 }) => {
-  const [{ data: { bucket } = { bucket: null } }] = useQuery({
+  const [{ data }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
     pause: !router.query.bucket,
   });
+
+  const { bucket } = data ?? { bucket: null };
 
   return (
     <div className="space-x-1 flex items-center">

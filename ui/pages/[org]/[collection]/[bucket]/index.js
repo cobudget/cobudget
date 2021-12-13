@@ -94,9 +94,12 @@ export const BUCKET_QUERY = gql`
 `;
 
 const DreamPage = ({ collection, currentUser, currentOrg, router }) => {
-  const [
-    { data: { bucket } = { bucket: null }, fetching: loading, error },
-  ] = useQuery({ query: BUCKET_QUERY, variables: { id: router.query.bucket } });
+  const [{ data, fetching: loading, error }] = useQuery({
+    query: BUCKET_QUERY,
+    variables: { id: router.query.bucket },
+  });
+
+  const { bucket } = data ?? { bucket: null };
 
   if (bucket)
     return (
