@@ -1,4 +1,4 @@
-import { dedupExchange, fetchExchange, errorExchange } from "urql";
+import { dedupExchange, fetchExchange, errorExchange, gql } from "urql";
 import { NextUrqlContext, NextUrqlPageContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
@@ -280,6 +280,27 @@ export const client = (
                   }
                 );
               }
+            },
+            contribute(result, args, cache) {
+              const queryFields = cache.inspectFields("Query");
+
+              queryFields
+                .filter((field) => field.fieldName === "contributionsPage")
+                .forEach((field) => {
+                  console.log("contrib invalidating", field);
+                  cache.invalidate(
+                    "Query",
+                    "contributionsPage",
+                    field.arguments
+                  );
+                });
+
+              queryFields
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  console.log("members invalidating", field);
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
             },
           },
         },
