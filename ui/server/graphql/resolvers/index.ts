@@ -1143,18 +1143,24 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
-      // const bucket = await prisma.bucket.findUnique({
-      //   where: { id: bucketId },
-      //   include: {
-      //     collection: {
-      //       include: { guidelines: { where: { id: guidelineId } } },
-      //     },
-      //   },
-      // });
 
-      let bucket = await prisma.bucket.update({
+      // todo: check not already left a flag?
+      let bucket = await prisma.bucket.findUnique({
+        where: { id: bucketId },
+        include: {
+          collection: true,
+        },
+      });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
+
+      if (!currentCollMember || !currentCollMember.isApproved)
+        throw new Error("You need to be logged in and/or approved");
+
+      bucket = await prisma.bucket.update({
         where: { id: bucketId },
         data: {
           flags: {
@@ -1238,9 +1244,8 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
 
+      // todo: check not already left a flag?
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
@@ -1251,6 +1256,14 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
+
+      if (!currentCollMember || !currentCollMember.isApproved)
+        throw new Error("You need to be logged in and/or approved");
 
       let updated = await prisma.bucket.update({
         where: { id: bucketId },
@@ -1331,11 +1344,11 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check have not left one of these flags already
+
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
+          collection: true,
           flags: {
             where: {
               collMemberId: currentCollMember.id,
@@ -1344,6 +1357,11 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
 
       if (bucket.flags.length)
         throw new Error("You have already left an all good flag");
