@@ -21,7 +21,9 @@ const Dream = ({ dream, collection, currentUser, currentOrg }) => {
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
     collection.bucketReviewIsOpen &&
-    collection.guidelines.length > 0;
+    collection.guidelines.length > 0 &&
+    dream.published;
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
       {showBucketReview && (

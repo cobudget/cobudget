@@ -109,11 +109,16 @@ const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
   return skip;
 };
 
-const isCollModOrAdmin = async (parent, { bucketId }, { user }) => {
+const isCollModOrAdmin = async (
+  parent,
+  { bucketId, collectionId },
+  { user }
+) => {
   if (!user) throw new Error("You need to be logged in");
   const collectionMember = await getCollectionMember({
     userId: user.id,
     bucketId,
+    collectionId,
   });
 
   if (!(collectionMember?.isModerator || collectionMember?.isAdmin))
@@ -826,45 +831,65 @@ const resolvers = {
         return updated;
       }
     ),
-    addTag: combineResolvers(
-      isBucketCocreatorOrCollAdminOrMod,
-      async (parent, { bucketId, tagId, tagValue }, { user }) => {
-        const bucket = await prisma.bucket.findUnique({
-          where: { id: bucketId },
+    createTag: combineResolvers(
+      isCollModOrAdmin,
+      async (parent, { collectionId, tagValue }) => {
+        return await prisma.collection.update({
+          where: { id: collectionId },
+          data: {
+            tags: {
+              create: {
+                value: tagValue,
+              },
+            },
+          },
         });
-
-        if (!tagId && !tagValue)
-          throw new Error("You need to provide tag id or value");
-
-        if (tagId) {
-          return await prisma.bucket.update({
-            where: { id: bucketId },
-            data: {
-              tags: {
-                connect: {
-                  id: tagId,
-                },
-              },
-            },
-          });
-        } else {
-          return await prisma.bucket.update({
-            where: { id: bucketId },
-            data: {
-              tags: {
-                create: {
-                  value: tagValue,
-                  collectionId: bucket.collectionId,
-                },
-              },
-            },
-          });
-        }
       }
     ),
+    addTag: combineResolvers(
+      isBucketCocreatorOrCollAdminOrMod,
+      async (parent, { bucketId, tagId }) => {
+        if (!tagId) throw new Error("You need to provide tag id");
+
+        return await prisma.bucket.update({
+          where: { id: bucketId },
+          data: {
+            tags: {
+              connect: {
+                id: tagId,
+              },
+            },
+          },
+        });
+      }
+    ),
+    // removes a tag from all buckets it's added to, and then deletes it
+    deleteTag: combineResolvers(
+      isCollModOrAdmin,
+      async (_, { collectionId, tagId }) => {
+        // verify that the tag is part of this collection
+        const tag = await prisma.tag.findUnique({
+          where: {
+            id: tagId,
+          },
+        });
+        if (tag?.collectionId !== collectionId)
+          throw new Error("Incorrect collection");
+
+        await prisma.tag.delete({
+          where: { id: tagId },
+        });
+
+        return await prisma.collection.findUnique({
+          where: { id: collectionId },
+          include: { tags: true },
+        });
+      }
+    ),
+    // removes a tag from a specific bucket
     removeTag: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
-      async (_, { bucketId, tagId }, { user }) =>
+      async (_, { bucketId, tagId }) =>
         prisma.bucket.update({
           where: { id: bucketId },
           data: { tags: { disconnect: { id: tagId } } },
@@ -1142,18 +1167,24 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
-      // const bucket = await prisma.bucket.findUnique({
-      //   where: { id: bucketId },
-      //   include: {
-      //     collection: {
-      //       include: { guidelines: { where: { id: guidelineId } } },
-      //     },
-      //   },
-      // });
 
-      let bucket = await prisma.bucket.update({
+      // todo: check not already left a flag?
+      let bucket = await prisma.bucket.findUnique({
+        where: { id: bucketId },
+        include: {
+          collection: true,
+        },
+      });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
+
+      if (!currentCollMember || !currentCollMember.isApproved)
+        throw new Error("You need to be logged in and/or approved");
+
+      bucket = await prisma.bucket.update({
         where: { id: bucketId },
         data: {
           flags: {
@@ -1237,9 +1268,8 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check not already left a flag?
 
+      // todo: check not already left a flag?
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
@@ -1250,6 +1280,14 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
+
+      if (!currentCollMember || !currentCollMember.isApproved)
+        throw new Error("You need to be logged in and/or approved");
 
       let updated = await prisma.bucket.update({
         where: { id: bucketId },
@@ -1330,11 +1368,11 @@ const resolvers = {
         bucketId,
         userId: user.id,
       });
-      // check bucketReviewIsOpen
-      // check have not left one of these flags already
+
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
+          collection: true,
           flags: {
             where: {
               collMemberId: currentCollMember.id,
@@ -1343,6 +1381,11 @@ const resolvers = {
           },
         },
       });
+
+      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+        throw new Error(
+          "You can only review buckets when bucket review is open and the bucket is published"
+        );
 
       if (bucket.flags.length)
         throw new Error("You have already left an all good flag");

@@ -8,6 +8,7 @@ import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable"
 import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[org]/[collection]";
+import { BUCKET_QUERY } from "pages/[org]/[collection]/[bucket]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
@@ -144,6 +145,25 @@ export const client = (
                     (data) => {
                       data.collections = data.collections.filter(
                         (collection) => collection.id !== collectionId
+                      );
+                      return data;
+                    }
+                  );
+                });
+            },
+            deleteTag(result: any, { tagId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "bucket")
+                .forEach((field) => {
+                  cache.updateQuery(
+                    {
+                      query: BUCKET_QUERY,
+                      variables: field.arguments,
+                    },
+                    (data) => {
+                      data.bucket.tags = data.bucket.tags.filter(
+                        (tag) => tag.id !== tagId
                       );
                       return data;
                     }
