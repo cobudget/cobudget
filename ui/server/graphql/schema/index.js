@@ -127,6 +127,7 @@ const schema = gql`
 
     createTag(collectionId: ID!, tagValue: String!): Collection
     addTag(bucketId: ID!, tagId: ID!): Bucket
+    deleteTag(collectionId: ID!, tagId: ID!): Collection
     removeTag(bucketId: ID!, tagId: ID!): Bucket
 
     publishDream(bucketId: ID!, unpublish: Boolean): Bucket
