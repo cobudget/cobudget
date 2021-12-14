@@ -257,6 +257,25 @@ export const client = (
                 );
               }
             },
+            raiseFlag(result, { bucketId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "commentSet")
+                .filter((field) => field.arguments.bucketId === bucketId)
+                .forEach((field) => {
+                  cache.invalidate("Query", "commentSet", field.arguments);
+                });
+            },
+            resolveFlag(result, { bucketId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "commentSet")
+                .filter((field) => field.arguments.bucketId === bucketId)
+                .forEach((field) => {
+                  cache.invalidate("Query", "commentSet", field.arguments);
+                });
+            },
+            //allGood?
             inviteOrgMembers(result: any, _args, cache) {
               if (result.inviteOrgMembers) {
                 cache.updateQuery(
@@ -307,7 +326,6 @@ export const client = (
               queryFields
                 .filter((field) => field.fieldName === "contributionsPage")
                 .forEach((field) => {
-                  console.log("contrib invalidating", field);
                   cache.invalidate(
                     "Query",
                     "contributionsPage",
@@ -318,7 +336,6 @@ export const client = (
               queryFields
                 .filter((field) => field.fieldName === "membersPage")
                 .forEach((field) => {
-                  console.log("members invalidating", field);
                   cache.invalidate("Query", "membersPage", field.arguments);
                 });
             },
