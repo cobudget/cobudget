@@ -275,7 +275,6 @@ export const client = (
                   cache.invalidate("Query", "commentSet", field.arguments);
                 });
             },
-            //allGood?
             inviteOrgMembers(result: any, _args, cache) {
               if (result.inviteOrgMembers) {
                 cache.updateQuery(
