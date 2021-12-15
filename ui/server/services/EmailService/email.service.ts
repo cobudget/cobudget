@@ -1,6 +1,12 @@
 import { sendEmail } from "server/send-email";
 import prisma from "../../prisma";
 
+/** path including leading slash */
+function appLink(path: string): string {
+  const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
+  return `${protocol}://${process.env.DEPLOY_URL}${path}`;
+}
+
 export default class EmailService {
   static async sendCommentNotification({
     dream,
@@ -21,9 +27,9 @@ export default class EmailService {
       )
       .map((collectionMember) => collectionMember.user.email);
 
-    const link = `https://${process.env.DEPLOY_URL}/${
-      currentOrg?.slug ?? "c"
-    }/${event.slug}/${dream.id}`;
+    const link = appLink(
+      `/${currentOrg?.slug ?? "c"}/${event.slug}/${dream.id}`
+    );
     const subject = `${currentUser.username} commented on ${dream.title}`;
     const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
     await sendEmail({ to: emails, subject, text });
