@@ -1,4 +1,4 @@
-import { sendEmail } from "server/send-email";
+import { sendEmail, SendEmailInput, sendEmails } from "server/send-email";
 import prisma from "../../prisma";
 
 /** path including leading slash */
@@ -21,18 +21,35 @@ export default class EmailService {
       include: { user: true },
     });
 
-    const emails = cocreators
+    const bucketLink = appLink(
+      `/${currentOrg?.slug ?? "c"}/${event.slug}/${dream.id}`
+    );
+
+    const emails: SendEmailInput[] = cocreators
       .filter(
         (collectionMember) => collectionMember.id !== currentCollMember.id
       )
-      .map((collectionMember) => collectionMember.user.email);
+      .map(
+        (collectionMember): SendEmailInput => ({
+          to: collectionMember.user.email,
+          subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
+          text: `Hey ${collectionMember.user.name}!
 
-    const link = appLink(
-      `/${currentOrg?.slug ?? "c"}/${event.slug}/${dream.id}`
-    );
-    const subject = `${currentUser.username} commented on ${dream.title}`;
-    const text = `"${comment.content}"\n\nGo here to reply: ${link}`;
-    await sendEmail({ to: emails, subject, text });
+          Your bucket “${dream.title}” received a new comment. This could be a question or feedback regarding your idea.
+
+          "${comment.content}"
+
+          Have a look ${bucketLink}
+
+          Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. Discover how it works: https://guide.cobudget.co/
+          `,
+          // TODO: last line cursive and embedded link
+          // i guess do html somehow (look up email provider docs)
+          // make sure to sanitize
+        })
+      );
+
+    await sendEmails(emails);
   }
 
   static async sendRequestToJoinNotifications(

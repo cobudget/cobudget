@@ -1488,7 +1488,7 @@ const resolvers = {
     inviteOrgMembers: combineResolvers(
       isOrgAdmin,
       async (_, { orgId, emails: emailsString }, { user: currentUser }) => {
-        const emails = emailsString.split(",");
+        const emails: string[] = emailsString.split(",");
 
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
