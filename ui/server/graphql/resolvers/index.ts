@@ -1077,8 +1077,6 @@ const resolvers = {
           }
         );
 
-        console.log({ comment, prismaResult, currentCollMember });
-
         return discourse || prismaResult;
       }
     ),
