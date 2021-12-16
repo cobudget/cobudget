@@ -33,7 +33,7 @@ export default class EmailService {
         (collectionMember): SendEmailInput => ({
           to: collectionMember.user.email,
           subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
-          text: `Hey ${collectionMember.user.name}!
+          html: `Hey ${collectionMember.user.name}!
 
           Your bucket “${dream.title}” received a new comment. This could be a question or feedback regarding your idea.
 
@@ -41,11 +41,9 @@ export default class EmailService {
 
           Have a look ${bucketLink}
 
-          Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. Discover how it works: https://guide.cobudget.co/
+          <i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>
           `,
-          // TODO: last line cursive and embedded link
-          // i guess do html somehow (look up email provider docs)
-          // make sure to sanitize
+          // TODO: sanitize username etc
         })
       );
 

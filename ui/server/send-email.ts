@@ -8,14 +8,17 @@ const client =
 export interface SendEmailInput {
   to: string;
   subject: string;
-  text: string;
+  text?: string;
+  html?: string;
 }
 
 export const sendEmail = (input: SendEmailInput) => {
   if (process.env.NODE_ENV === `development`) {
     info(`Logging email not sent:`);
     console.log(
-      `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${input.text}\n`
+      `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${
+        input.text ?? input.html
+      }\n`
     );
 
     return;
@@ -31,6 +34,7 @@ export const sendEmail = (input: SendEmailInput) => {
     To: input.to,
     Subject: input.subject,
     TextBody: input.text,
+    HtmlBody: input.html,
   });
 };
 
@@ -39,7 +43,9 @@ export const sendEmails = (inputs: SendEmailInput[]) => {
     info(`Logging emails not sent:`);
     inputs.forEach((input) => {
       console.log(
-        `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${input.text}\n`
+        `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${
+          input.text ?? input.html
+        }\n`
       );
     });
 
@@ -57,6 +63,7 @@ export const sendEmails = (inputs: SendEmailInput[]) => {
       To: input.to,
       Subject: input.subject,
       TextBody: input.text,
+      HtmlBody: input.html,
     }))
   );
 };
