@@ -77,16 +77,15 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
-        <div className="flex items-center justify-between py-2 px-2 sm:p-0">
-          <div className="flex items-center">
-            <OrganizationAndEventHeader
-              currentOrg={currentOrg}
-              collection={collection}
-              color={color}
-              currentUser={currentUser}
-              router={router}
-            />
-          </div>
+        <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative">
+          <OrganizationAndEventHeader
+            currentOrg={currentOrg}
+            collection={collection}
+            color={color}
+            currentUser={currentUser}
+            router={router}
+            currentUser={currentUser}
+          />
 
           <div className="sm:hidden">
             <button
