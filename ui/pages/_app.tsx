@@ -190,6 +190,8 @@ const MyApp = ({ Component, pageProps, router }) => {
             ? collection
               ? `${collection.title} | ${currentOrg.name}`
               : currentOrg.name
+            : collection
+            ? collection.title
             : "Cobudget"
         }
       >
