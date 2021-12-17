@@ -1184,7 +1184,7 @@ const resolvers = {
       });
 
       // todo: check not already left a flag?
-      let bucket = await prisma.bucket.findUnique({
+      const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
           collection: true,
@@ -1199,7 +1199,7 @@ const resolvers = {
       if (!currentCollMember || !currentCollMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      bucket = await prisma.bucket.update({
+      let updated = await prisma.bucket.update({
         where: { id: bucketId },
         data: {
           flags: {
@@ -1221,10 +1221,10 @@ const resolvers = {
         },
       });
 
-      const logContent = `Someone flagged this dream for the **${bucket.collection.guidelines[0].title}** guideline: \n> ${comment}`;
-      const currentOrg = bucket.collection.organization;
+      const logContent = `Someone flagged this dream for the **${updated.collection.guidelines[0].title}** guideline: \n> ${comment}`;
+      const currentOrg = updated.collection.organization;
       if (orgHasDiscourse(currentOrg)) {
-        if (!bucket.discourseTopicId) {
+        if (!updated.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
@@ -1244,7 +1244,7 @@ const resolvers = {
               username: "system",
             }
           );
-          bucket = await prisma.bucket.update({
+          updated = await prisma.bucket.update({
             where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
             include: {
@@ -1260,7 +1260,7 @@ const resolvers = {
 
         await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: bucket.discourseTopicId,
+            topic_id: updated.discourseTopicId,
             raw: logContent,
           },
           { username: "system" }
@@ -1276,7 +1276,7 @@ const resolvers = {
         });
       }
 
-      return bucket;
+      return updated;
     },
     resolveFlag: async (parent, { bucketId, flagId, comment }, { user }) => {
       const currentCollMember = await isAndGetCollMember({
