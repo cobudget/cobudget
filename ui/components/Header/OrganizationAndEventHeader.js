@@ -101,12 +101,12 @@ const OrganizationAndEventHeader = ({
       {bucket && router.query?.bucket && (
         <>
           <SlashIcon
-            className={`w-7 h-7 text-white opacity-25 hidden sm:visible`}
+            className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
           />
 
           <span
             className={
-              "px-2 py-1 text-white rounded-md mx-0 font-medium truncate hidden sm:visible"
+              "px-2 py-1 text-white rounded-md mx-0 font-medium truncate hidden sm:block"
             }
           >
             {bucket.title.length <= 30
