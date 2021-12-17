@@ -100,7 +100,7 @@ const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
     });
     orgMember = await getOrgMember({
       userId: user.id,
-      orgId: org.id,
+      orgId: org?.id,
     });
   }
 
@@ -1474,6 +1474,7 @@ const resolvers = {
           const updated = await prisma.user.upsert({
             where: { email },
             create: {
+              email,
               collMemberships: { create: { isApproved: true, collectionId } },
             },
             update: {
@@ -1481,7 +1482,10 @@ const resolvers = {
                 connectOrCreate: {
                   create: { isApproved: true, collectionId },
                   where: {
-                    userId_collectionId: { userId: user.id, collectionId },
+                    userId_collectionId: {
+                      userId: user?.id ?? "undefined",
+                      collectionId,
+                    },
                   },
                 },
               },
@@ -1985,6 +1989,7 @@ const resolvers = {
       return totalAllocations - totalContributions;
     },
     email: async (member, _, { user }) => {
+      if (!user) return null;
       const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -2007,6 +2012,7 @@ const resolvers = {
       return u.email;
     },
     name: async (member, _, { user }) => {
+      if (!user) return null;
       const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -2035,6 +2041,7 @@ const resolvers = {
       return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
     email: async (member, _, { user }) => {
+      if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
@@ -2057,6 +2064,7 @@ const resolvers = {
       return u.email;
     },
     name: async (member, _, { user }) => {
+      if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
@@ -2117,10 +2125,12 @@ const resolvers = {
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
     email: (parent, _, { user }) => {
+      if (!user) return null;
       if (parent.id !== user.id) return null;
       return parent.email;
     },
     name: (parent, _, { user }) => {
+      if (!user) return null;
       if (parent.id !== user.id) return null;
       return parent.name;
     },
