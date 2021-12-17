@@ -123,7 +123,9 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, bucketId }) => [
               bucketId,
               guidelineId: guideline.id,
               comment: answer,
-            }).then((data) => console.log({ data }));
+            }).then(({ error }) => {
+              if (error) throw new Error(error.message);
+            });
           },
           chatItems: [
             {
@@ -147,7 +149,9 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
         bucketId,
         flagId,
         comment: answer,
-      }).then((data) => console.log({ data }));
+      }).then(({ error }) => {
+        if (error) throw new Error(error.message);
+      });
     },
     chatItems: [
       {
@@ -264,9 +268,9 @@ const Monster = ({ event, dream, currentOrg }) => {
             {
               label: "Yes, looks good to me!",
               sideEffect: () =>
-                allGoodFlag({ bucketId: dream.id }).then((data) =>
-                  console.log({ data })
-                ),
+                allGoodFlag({ bucketId: dream.id }).then(({ error }) => {
+                  if (error) throw new Error(error.message);
+                }),
               chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
             },
             {
