@@ -264,10 +264,15 @@ const resolvers = {
       { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
       { user }
     ) => {
-      const currentMember = await getCollectionMember({
-        userId: user.id,
-        collectionId,
+      const currentMember = await prisma.collectionMember.findUnique({
+        where: {
+          userId_collectionId: {
+            userId: user?.id ?? "undefined",
+            collectionId,
+          },
+        },
       });
+
       // const collection = prisma.collection.findUnique({ where: {organizationId_slug: {}}})
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
