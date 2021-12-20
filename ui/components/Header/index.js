@@ -122,7 +122,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                     {!currentUser.currentCollMember &&
                       collection &&
                       (collection.registrationPolicy !== "INVITE_ONLY" ||
-                        currentOrgMember?.isAdmin) && (
+                        currentUser.currentOrgMember?.isAdmin) && (
                         <NavItem
                           primary
                           eventColor={color}
