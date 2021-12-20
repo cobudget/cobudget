@@ -171,6 +171,11 @@ const MyApp = ({ Component, pageProps, router }) => {
     setModal(null);
   };
 
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
+
   return (
     <>
       <Modal
