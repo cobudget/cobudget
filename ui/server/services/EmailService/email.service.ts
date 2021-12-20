@@ -34,13 +34,13 @@ export default class EmailService {
           to: collectionMember.user.email,
           subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
           html: `Hey ${collectionMember.user.name}!
-
+          <br/><br/>
           Your bucket “${dream.title}” received a new comment. This could be a question or feedback regarding your idea.
-
+          <br/><br/>
           "${comment.content}"
-
-          Have a look ${bucketLink}
-
+          <br/><br/>
+          <a href="${bucketLink}">Have a look</a>
+          <br/><br/>
           <i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>
           `,
           // TODO: sanitize username etc
