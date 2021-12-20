@@ -1,9 +1,13 @@
 import { info } from "next/dist/build/output/log";
 import { Client } from "postmark";
+import nodemailer from "nodemailer";
 
-const client =
-  process.env.NODE_ENV !== "development" &&
-  new Client(process.env.POSTMARK_API_TOKEN);
+//let testAccount = null;
+//
+//const getTestAccount = async () => {
+//  if (!testAccount) testAccount = await nodemailer.createTestAccount();
+//  return testAccount;
+//};
 
 export interface SendEmailInput {
   to: string;
@@ -12,58 +16,58 @@ export interface SendEmailInput {
   html?: string;
 }
 
-export const sendEmail = (input: SendEmailInput) => {
-  if (process.env.NODE_ENV === `development`) {
-    info(`Logging email not sent:`);
+const client =
+  process.env.NODE_ENV === "development"
+    ? nodemailer.createTransport({
+        host: "localhost",
+        port: 1025,
+        secure: false,
+      })
+    : null;
+
+const send = async (mail: SendEmailInput) => {
+  if (process.env.NODE_ENV === "development") {
     console.log(
-      `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${
-        input.text ?? input.html
+      `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
+        mail.text ?? mail.html
       }\n`
     );
 
-    return;
+    // also sending over local smtp, set up an app like Mailhog to catch it
+    await client.sendMail({
+      from: process.env.FROM_EMAIL,
+      to: mail.to,
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+    });
+  } else {
+    // TODO: prod
   }
-
-  if (!process.env.POSTMARK_API_TOKEN || !process.env.FROM_EMAIL) {
-    console.error(`Add FROM_EMAIL and POSTMARK_API_TOKEN env variables.`);
-    return;
-  }
-
-  return client.sendEmail({
-    From: process.env.FROM_EMAIL,
-    To: input.to,
-    Subject: input.subject,
-    TextBody: input.text,
-    HtmlBody: input.html,
-  });
 };
 
-export const sendEmails = (inputs: SendEmailInput[]) => {
-  if (process.env.NODE_ENV === `development`) {
-    info(`Logging emails not sent:`);
-    inputs.forEach((input) => {
-      console.log(
-        `\nTo: ${input.to}\nSubject: ${input.subject}\n\n${
-          input.text ?? input.html
-        }\n`
-      );
-    });
+//const client =
+//  process.env.NODE_ENV !== "development" &&
+//  new Client(process.env.POSTMARK_API_TOKEN);
 
-    return;
+const checkEnv = () => {
+  if (!process.env.FROM_EMAIL) {
+    throw new Error("Add FROM_EMAIL env variable.");
   }
-
-  if (!process.env.POSTMARK_API_TOKEN || !process.env.FROM_EMAIL) {
-    console.error(`Add FROM_EMAIL and POSTMARK_API_TOKEN env variables.`);
-    return;
+  if (
+    process.env.NODE_ENV !== "development" &&
+    !process.env.POSTMARK_API_TOKEN
+  ) {
+    throw new Error("Add POSTMARK_API_TOKEN env variable in production");
   }
+};
 
-  return client.sendEmailBatch(
-    inputs.map((input) => ({
-      From: process.env.FROM_EMAIL,
-      To: input.to,
-      Subject: input.subject,
-      TextBody: input.text,
-      HtmlBody: input.html,
-    }))
-  );
+export const sendEmail = async (input: SendEmailInput) => {
+  checkEnv();
+  await send(input);
+};
+
+export const sendEmails = async (inputs: SendEmailInput[]) => {
+  checkEnv();
+  await Promise.all(inputs.map((mail) => send(mail)));
 };
