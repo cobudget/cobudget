@@ -1,13 +1,5 @@
-import { info } from "next/dist/build/output/log";
-import { Client } from "postmark";
 import nodemailer from "nodemailer";
-
-//let testAccount = null;
-//
-//const getTestAccount = async () => {
-//  if (!testAccount) testAccount = await nodemailer.createTestAccount();
-//  return testAccount;
-//};
+import postmarkTransport from "nodemailer-postmark-transport";
 
 export interface SendEmailInput {
   to: string;
@@ -16,6 +8,7 @@ export interface SendEmailInput {
   html?: string;
 }
 
+// in dev we send over local smtp, set up an app like Mailhog to catch it
 const client =
   process.env.NODE_ENV === "development"
     ? nodemailer.createTransport({
@@ -23,7 +16,13 @@ const client =
         port: 1025,
         secure: false,
       })
-    : null;
+    : nodemailer.createTransport(
+        postmarkTransport({
+          auth: {
+            apiKey: process.env.POSTMARK_API_TOKEN,
+          },
+        })
+      );
 
 const send = async (mail: SendEmailInput) => {
   if (process.env.NODE_ENV === "development") {
@@ -32,23 +31,16 @@ const send = async (mail: SendEmailInput) => {
         mail.text ?? mail.html
       }\n`
     );
-
-    // also sending over local smtp, set up an app like Mailhog to catch it
-    await client.sendMail({
-      from: process.env.FROM_EMAIL,
-      to: mail.to,
-      subject: mail.subject,
-      text: mail.text,
-      html: mail.html,
-    });
-  } else {
-    // TODO: prod
   }
-};
 
-//const client =
-//  process.env.NODE_ENV !== "development" &&
-//  new Client(process.env.POSTMARK_API_TOKEN);
+  await client.sendMail({
+    from: process.env.FROM_EMAIL,
+    to: mail.to,
+    subject: mail.subject,
+    text: mail.text,
+    html: mail.html,
+  });
+};
 
 const checkEnv = () => {
   if (!process.env.FROM_EMAIL) {
