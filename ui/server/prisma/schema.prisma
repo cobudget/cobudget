@@ -78,13 +78,14 @@ model Organization {
 }
 
 model Collection {
-  id             String        @id @default(cuid())
-  slug           String
-  organization   Organization? @relation(fields: [organizationId], references: [id])
-  organizationId String?
-  title          String
-  archived       Boolean       @default(false)
-  deleted        Boolean       @default(false)
+  id               String       @id @default(cuid())
+  slug             String
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  organizationId   String
+  singleCollection Boolean      @default(false)
+  title            String
+  archived         Boolean      @default(false)
+  deleted          Boolean      @default(false)
 
   info               String?
   about              String?

@@ -35,18 +35,14 @@ const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
       isModerator
       isApproved
       createdAt
-      name
+      balance
       email
-      orgMember {
-        bio
-        user {
-          id
-          name
-          username
-          email
-          verifiedEmail
-          avatar
-        }
+      name
+      user {
+        id
+        username
+        verifiedEmail
+        avatar
       }
     }
   }

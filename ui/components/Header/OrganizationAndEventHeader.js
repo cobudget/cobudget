@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { useQuery, gql } from "urql";
-import { ChevronArrowRightIcon } from "components/Icons";
+
+import { SlashIcon } from "../Icons";
+import Selector from "./Selector";
 
 const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -14,6 +16,7 @@ const BUCKET_QUERY = gql`
 const OrganizationAndEventHeader = ({
   currentOrg,
   collection,
+  currentUser,
   router,
   color,
 }) => {
@@ -24,79 +27,92 @@ const OrganizationAndEventHeader = ({
   });
 
   return (
-    <div className="space-x-1 flex items-center">
+    <div className="flex items-center max-w-screen overflow-hidden">
       <Link href="/">
-        <a
-          className={`hover:bg-${color}-dark px-1 py-1 text-white rounded-md font-medium flex space-x-4`}
-        >
+        <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
           <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-          {!currentOrg && !collection && <h1>Cobudget</h1>}
+          {!currentUser && !currentOrg && !collection && <h1>Cobudget</h1>}
         </a>
       </Link>
-      {currentOrg && (
-        <>
-          <ChevronArrowRightIcon className={`w-4 h-4 text-white opacity-50`} />
 
-          <Link href={`/${currentOrg.slug}`}>
-            <a
-              className={
-                "px-2 py-1 rounded-md flex items-center group space-x-2 " +
-                `text-white hover:bg-${color}-dark`
-              }
-            >
-              {currentOrg.logo && (
-                <img
-                  className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
-                  src={currentOrg?.logo}
-                />
-              )}
-              <h1
-                className={`text-white ${
-                  currentOrg.logo ? "hidden sm:block" : "block"
-                } font-medium`}
+      {(currentOrg || collection || currentUser) && (
+        <>
+          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+
+          {currentOrg ? (
+            <Link href={`/${currentOrg.slug}`}>
+              <a
+                className={
+                  "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
+                }
+                style={{ flex: "1 1 25%" }}
               >
-                {currentOrg.name}
-              </h1>
+                {currentOrg.logo && (
+                  <img
+                    className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
+                    src={currentOrg?.logo}
+                  />
+                )}
+                <span className={`text-white font-medium truncate`}>
+                  {currentOrg.name}
+                </span>
+              </a>
+            </Link>
+          ) : collection ? (
+            <Link href={`/c/${collection.slug}`}>
+              <a
+                className={
+                  "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
+                }
+                style={{ flex: "1 1 25%" }}
+              >
+                {collection.title}
+              </a>
+            </Link>
+          ) : null}
+          {currentUser && (
+            <Selector
+              currentUser={currentUser}
+              currentOrg={currentOrg}
+              collection={collection}
+              color={color}
+              className="max-w-none"
+            />
+          )}
+        </>
+      )}
+
+      {currentOrg && collection && (
+        <>
+          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+
+          <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
+            <a
+              className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
+              style={{ flex: "1 1 25%" }}
+            >
+              {collection.title.length <= 30
+                ? collection.title
+                : collection.title.substr(0, 30) + "..."}
             </a>
           </Link>
         </>
       )}
-
-      {collection && (
+      {bucket && router.query?.bucket && (
         <>
-          <ChevronArrowRightIcon className={`w-4 h-4 text-white opacity-50`} />
+          <SlashIcon
+            className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
+          />
 
-          <div className="group flex items-center">
-            <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
-              <a
-                className={`hover:bg-${color}-dark px-2 py-1 text-white rounded-md mx-0 font-medium`}
-              >
-                <h1>
-                  {collection.title.length <= 30
-                    ? collection.title
-                    : collection.title.substr(0, 30) + "..."}
-                </h1>
-              </a>
-            </Link>
-
-            {/* We need to check both the dream and the router to prevent caching to appear */}
-            {bucket && router.query?.bucket && (
-              <>
-                <ChevronArrowRightIcon
-                  className={`w-4 h-4 text-white opacity-50`}
-                />
-                <span
-                  className={"px-2 py-1 text-white rounded-md mx-0 font-medium"}
-                >
-                  <h1>
-                    {bucket.title.length <= 30
-                      ? bucket.title
-                      : bucket.title.substr(0, 30) + "..."}
-                  </h1>
-                </span>
-              </>
-            )}
-          </div>
+          <span
+            className={
+              "px-2 py-1 text-white rounded-md mx-0 font-medium truncate hidden sm:block"
+            }
+          >
+            {bucket.title.length <= 30
+              ? bucket.title
+              : bucket.title.substr(0, 30) + "..."}
+          </span>
         </>
       )}
     </div>
