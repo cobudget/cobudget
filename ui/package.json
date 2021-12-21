@@ -86,6 +86,7 @@
   "devDependencies": {
     "@babel/core": "7.10.2",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
+    "@types/lodash": "4.14.178",
     "@types/nodemailer": "6.4.4",
     "@types/validator": "13.7.0",
     "babel-loader": "8.1.0",
