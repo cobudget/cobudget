@@ -58,7 +58,7 @@ const IndexPage = ({ currentUser }) => {
         ) : (
           <div>
             <h1 className="text-2xl mb-2 font-medium">Cobudget v2 beta</h1>
-            <p>Stable alpha launching Jan 15th 2022</p>
+            <p>Stable version launching Jan 15th 2022</p>
           </div>
         )}
       </div>
