@@ -1,10 +1,14 @@
-import { sendEmail, SendEmailInput, sendEmails } from "server/send-email";
+import { SendEmailInput, sendEmails } from "server/send-email";
+import isURL from "validator/lib/isURL";
+import escape from "validator/lib/escape";
 import prisma from "../../prisma";
 
 /** path including leading slash */
 function appLink(path: string): string {
   const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
-  return `${protocol}://${process.env.DEPLOY_URL}${path}`;
+  const url = `${protocol}://${process.env.DEPLOY_URL}${path}`;
+  if (!isURL(url)) throw new Error(`Invalid link in mail: ${url}`);
+  return url;
 }
 
 export default class EmailService {
@@ -33,17 +37,18 @@ export default class EmailService {
         (collectionMember): SendEmailInput => ({
           to: collectionMember.user.email,
           subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
-          html: `Hey ${collectionMember.user.name}!
+          html: `Hey ${escape(collectionMember.user.name)}!
           <br/><br/>
-          Your bucket “${dream.title}” received a new comment. This could be a question or feedback regarding your idea.
+          Your bucket “${escape(
+            dream.title
+          )}” received a new comment. This could be a question or feedback regarding your idea.
           <br/><br/>
-          "${comment.content}"
+          "${escape(comment.content)}"
           <br/><br/>
           <a href="${bucketLink}">Have a look</a>
           <br/><br/>
           <i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>
           `,
-          // TODO: sanitize username etc
         })
       );
 

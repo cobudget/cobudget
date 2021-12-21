@@ -80,12 +80,14 @@
     "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss-animations": "^2.0.0",
     "urql": "^2.0.5",
+    "validator": "13.7.0",
     "yup": "^0.29.3"
   },
   "devDependencies": {
     "@babel/core": "7.10.2",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
     "@types/nodemailer": "6.4.4",
+    "@types/validator": "13.7.0",
     "babel-loader": "8.1.0",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
