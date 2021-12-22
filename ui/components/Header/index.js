@@ -7,6 +7,7 @@ import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
+import toast from "react-hot-toast";
 
 const css = {
   mobileProfileItem:
@@ -53,6 +54,7 @@ const JOIN_COLLECTION_MUTATION = gql`
       isAdmin
       isModerator
       isApproved
+      balance
       collection {
         id
         title
@@ -117,35 +119,41 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {currentOrg && (
-                  <>
-                    {!currentUser.currentCollMember &&
-                      collection &&
-                      (collection.registrationPolicy !== "INVITE_ONLY" ||
-                        currentUser.currentOrgMember?.isAdmin) && (
-                        <NavItem
-                          primary
-                          eventColor={color}
-                          onClick={() =>
-                            joinCollection({ collectionId: collection?.id })
+                {!currentUser.currentCollMember &&
+                  collection &&
+                  (collection.registrationPolicy !== "INVITE_ONLY" ||
+                    currentUser.currentOrgMember?.isAdmin) && (
+                    <NavItem
+                      primary
+                      eventColor={color}
+                      onClick={() =>
+                        joinCollection({ collectionId: collection?.id }).then(
+                          ({ data, error }) => {
+                            console.log({ data });
+                            if (error) {
+                              toast.error(error.message);
+                            } else {
+                              toast.success("Request sent!");
+                            }
                           }
-                        >
-                          {collection.registrationPolicy === "REQUEST_TO_JOIN"
-                            ? "Request to join"
-                            : "Join collection"}
-                        </NavItem>
-                      )}
-                    {!currentUser.currentOrgMember && !collection && (
-                      <NavItem
-                        primary
-                        eventColor={color}
-                        onClick={() => joinOrg({ orgId: currentOrg.id })}
-                      >
-                        Join org
-                      </NavItem>
-                    )}
-                  </>
+                        )
+                      }
+                    >
+                      {collection.registrationPolicy === "REQUEST_TO_JOIN"
+                        ? "Request to join"
+                        : "Join collection"}
+                    </NavItem>
+                  )}
+                {!currentUser.currentOrgMember && !collection && currentOrg && (
+                  <NavItem
+                    primary
+                    eventColor={color}
+                    onClick={() => joinOrg({ orgId: currentOrg.id })}
+                  >
+                    Join org
+                  </NavItem>
                 )}
+
                 <div className="hidden sm:block sm:ml-4">
                   <ProfileDropdown
                     currentUser={currentUser}
