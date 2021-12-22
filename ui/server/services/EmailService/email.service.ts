@@ -22,15 +22,15 @@ function escape(input: string): string | undefined | null {
 
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
 
-export default class EmailService {
-  static async sendCommentNotification({
+export default {
+  sendCommentNotification: async ({
     dream,
     event,
     currentOrg,
     currentCollMember,
     currentUser,
     comment,
-  }) {
+  }) => {
     const cocreators = await prisma.collectionMember.findMany({
       where: { buckets: { some: { id: dream.id } } },
       include: { user: true },
@@ -105,36 +105,5 @@ export default class EmailService {
       }));
       await sendEmails(commenterEmails);
     }
-  }
-
-  static async sendRequestToJoinNotifications(
-    organization,
-    user,
-    event,
-    emails
-  ) {
-    // if (process.env.NODE_ENV === "production") {
-    //   const domain = createDomain(organization);
-
-    //   var data = {
-    //     from: `${process.env.EMAIL_SENDER}`,
-    //     to: emails,
-    //     subject: `Request to join ${event.title}`,
-    //     text: `${user.name} (${user.email}) is requesting to join ${event.title}. Go here to approve: ${domain}/${event.slug}/members`,
-    //   };
-    //   return mailgun
-    //     .messages()
-    //     .send(data)
-    //     .then(() => {
-    //       console.log("Successfully sent request to join");
-    //       return true;
-    //     })
-    //     .catch((error) => {
-    //       console.error({ error });
-    //       throw new Error(error.message);
-    //     });
-    // } else {
-    console.log("in development, not sending request to join notifications");
-    // }
-  }
-}
+  },
+};

@@ -1,4 +1,4 @@
-import EmailService from "../services/EmailService/email.service";
+import emailService from "../services/EmailService/email.service";
 export default {
   initialize(eventHub) {
     eventHub.subscribe(
@@ -12,7 +12,7 @@ export default {
         dream,
         comment,
       }) => {
-        await EmailService.sendCommentNotification({
+        await emailService.sendCommentNotification({
           currentOrg,
           currentCollMember,
           currentUser,
