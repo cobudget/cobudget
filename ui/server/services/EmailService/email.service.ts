@@ -1,4 +1,4 @@
-import { SendEmailInput, sendEmails } from "server/send-email";
+import { SendEmailInput, sendEmail, sendEmails } from "server/send-email";
 import isURL from "validator/lib/isURL";
 import escapeImport from "validator/lib/escape";
 import { uniqBy } from "lodash";
@@ -105,5 +105,40 @@ export default {
       }));
       await sendEmails(commenterEmails);
     }
+  },
+  allocateToMemberNotification: async ({
+    collectionMemberId,
+    collectionId,
+    oldAmount,
+    newAmount,
+    type,
+  }) => {
+    console.log({ oldAmount, newAmount, type });
+    if (newAmount <= oldAmount) return;
+
+    const { user } = await prisma.collectionMember.findUnique({
+      where: { id: collectionMemberId },
+      include: { user: true },
+    });
+    const collection = await prisma.collection.findUnique({
+      where: { id: collectionId },
+      include: { organization: true },
+    });
+    const org = collection.organization;
+
+    await sendEmail({
+      to: user.email,
+      subject: `${user.name}, you’ve received funds to spend in the ${collection.title} Cobudget!`,
+      html: `You have received ${(newAmount - oldAmount) / 100} ${
+        collection.currency
+      } in the ${escape(collection.title)} Cobudget.
+      <br/><br/>
+      Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+        `/${org?.slug ?? "c"}/${collection.slug}`
+      )}">${escape(collection.title)}</a>.
+      <br/><br/>
+      ${footer}
+      `,
+    });
   },
 };

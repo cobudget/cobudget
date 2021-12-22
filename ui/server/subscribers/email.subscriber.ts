@@ -22,5 +22,8 @@ export default {
         });
       }
     );
+    eventHub.subscribe("allocate-to-member", "email", async (args) => {
+      await emailService.allocateToMemberNotification(args);
+    });
   },
 };

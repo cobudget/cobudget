@@ -1,4 +1,5 @@
 import prisma from "../prisma";
+import eventHub from "server/services/eventHub.service";
 
 export const allocateToMember = async ({
   collectionMemberId,
@@ -35,5 +36,12 @@ export const allocateToMember = async ({
       collectionMemberId,
       amount: adjustedAmount,
     },
+  });
+  await eventHub.publish("allocate-to-member", {
+    collectionMemberId,
+    collectionId,
+    oldAmount: balance,
+    newAmount: balance + adjustedAmount,
+    type,
   });
 };
