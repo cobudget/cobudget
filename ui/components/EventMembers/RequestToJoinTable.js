@@ -1,13 +1,14 @@
 import {
   Box,
   Table,
-  Button,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
 } from "@material-ui/core";
+import Avatar from "../Avatar";
+import Button from "../Button";
 
 const RequestToJoinTable = ({
   requestsToJoin,
@@ -20,7 +21,7 @@ const RequestToJoinTable = ({
   return (
     <>
       <div className="mb-8">
-        <h2 className="text-xl mb-3">
+        <h2 className="text-xl mb-3 font-semibold">
           {requestsToJoin.length} requests to join
         </h2>
         <div className="bg-white rounded-lg shadow">
@@ -28,8 +29,7 @@ const RequestToJoinTable = ({
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Name</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Bio</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -39,10 +39,15 @@ const RequestToJoinTable = ({
                 {requestsToJoin.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell component="th" scope="row">
-                      {member.user.username}
-                    </TableCell>
-                    <TableCell component="th" scope="row">
-                      {member.name}
+                      <div className="flex space-x-3">
+                        <Avatar user={member.user} />
+                        <div>
+                          <p className="font-medium text-base">{member.name}</p>
+                          <p className="text-gray-700 text-sm">
+                            @{member.user.username}
+                          </p>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>{member.email}</TableCell>
                     <TableCell component="th" scope="row">
@@ -52,8 +57,7 @@ const RequestToJoinTable = ({
                       <Box p="0 15px" display="flex" justifyContent="flex-end">
                         <Box m="0 8px 0">
                           <Button
-                            color="secondary"
-                            size="small"
+                            variant="secondary"
                             onClick={() => {
                               if (
                                 confirm(
@@ -61,6 +65,7 @@ const RequestToJoinTable = ({
                                 )
                               )
                                 deleteMember({
+                                  collectionId: collection.id,
                                   memberId: member.id,
                                 });
                             }}
@@ -70,9 +75,7 @@ const RequestToJoinTable = ({
                         </Box>
 
                         <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                          // variant="primary"
                           onClick={() => {
                             if (
                               confirm("Are you sure you would like to approve?")
