@@ -4,6 +4,7 @@ import escapeImport from "validator/lib/escape";
 import { uniqBy } from "lodash";
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
+import { getRequestOrigin } from "../../get-request-origin";
 import { orgHasDiscourse } from "server/subscribers/discourse.subscriber";
 
 /** path including leading slash */
@@ -24,6 +25,39 @@ function escape(input: string): string | undefined | null {
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
 
 export default {
+  loginMagicLink: async ({ destination, href, code, req }) => {
+    const link = `${getRequestOrigin(req)}${href}`;
+
+    const hasAccountAlready = await prisma.user.findUnique({
+      where: { email: destination },
+    });
+
+    if (hasAccountAlready) {
+      await sendEmail({
+        to: destination,
+        subject: `Your Cobudget login link`,
+        html: `<a href="${link}">Click here to login</a>
+        <br/><br/>
+        Verification code: ${code}
+        <br/><br/>
+        ${footer}
+        `,
+      });
+    } else {
+      await sendEmail({
+        to: destination,
+        subject: `Welcome to Cobudget - confirm your account and get started!`,
+        html: `Welcome!
+        <br/><br/>
+        Your Cobudget account has been created! We're excited to welcome you to the community.
+        <br/><br/>
+        Please confirm your account by <a href="${link}">Clicking here</a>! Verification code: ${code}.
+        <br/><br/>
+        ${footer}
+      `,
+      });
+    }
+  },
   sendCommentNotification: async ({
     dream,
     event,
