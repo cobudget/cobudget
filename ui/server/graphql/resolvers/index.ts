@@ -1866,10 +1866,16 @@ const resolvers = {
     ),
     cancelFunding: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
-      async (_, { bucketId }, { user }) => {
+      async (_, { bucketId }, { eventHub }) => {
         const bucket = await prisma.bucket.findUnique({
           where: { id: bucketId },
-          include: { cocreators: true },
+          include: {
+            cocreators: true,
+            collection: { include: { organization: true } },
+            Contributions: {
+              include: { collectionMember: { include: { user: true } } },
+            },
+          },
         });
 
         if (bucket.completedAt)
@@ -1887,7 +1893,9 @@ const resolvers = {
           },
         });
 
-        // TODO: notify contribuors that they have been "re-imbursed"
+        await eventHub.publish("cancel-funding", {
+          bucket,
+        });
 
         return updated;
       }

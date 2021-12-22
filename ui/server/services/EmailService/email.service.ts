@@ -2,6 +2,7 @@ import { SendEmailInput, sendEmail, sendEmails } from "server/send-email";
 import isURL from "validator/lib/isURL";
 import escapeImport from "validator/lib/escape";
 import { uniqBy } from "lodash";
+import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { orgHasDiscourse } from "server/subscribers/discourse.subscriber";
 
@@ -111,9 +112,7 @@ export default {
     collectionId,
     oldAmount,
     newAmount,
-    type,
   }) => {
-    console.log({ oldAmount, newAmount, type });
     if (newAmount <= oldAmount) return;
 
     const { user } = await prisma.collectionMember.findUnique({
@@ -140,5 +139,51 @@ export default {
       ${footer}
       `,
     });
+  },
+  cancelFundingNotification: async ({
+    bucket,
+  }: {
+    bucket: Prisma.BucketCreateInput & {
+      collection: Prisma.CollectionCreateInput & {
+        organization: Prisma.OrganizationCreateInput;
+      };
+      Contributions: Array<
+        Prisma.ContributionCreateInput & {
+          collectionMember: Prisma.CollectionMemberCreateInput & {
+            user: Prisma.UserCreateInput;
+          };
+        }
+      >;
+    };
+  }) => {
+    const refundedCollMembers = uniqBy(
+      bucket.Contributions.map((contribution) => contribution.collectionMember),
+      "id"
+    );
+    const emails: SendEmailInput[] = refundedCollMembers.map((collMember) => {
+      const amount = bucket.Contributions.filter(
+        (contrib) => contrib.collectionMember.id === collMember.id
+      )
+        .map((contrib) => contrib.amount)
+        .reduce((a, b) => a + b, 0);
+
+      return {
+        to: collMember.user.email,
+        subject: `${bucket.title} was cancelled`,
+        html: `The bucket “${escape(
+          bucket.title
+        )}” you have contributed to was cancelled in ${escape(
+          bucket.collection.title
+        )}. You've been refunded ${amount / 100} ${bucket.collection.currency}.
+        <br/><br/>
+        Explore other buckets you can fund in <a href="${appLink(
+          `/${bucket.collection.organization.slug}/${bucket.collection.slug}`
+        )}">${escape(bucket.collection.title)}</a>.
+        <br/><br/>
+        ${footer}
+        `,
+      };
+    });
+    await sendEmails(emails);
   },
 };

@@ -42,6 +42,5 @@ export const allocateToMember = async ({
     collectionId,
     oldAmount: balance,
     newAmount: balance + adjustedAmount,
-    type,
   });
 };
