@@ -135,7 +135,9 @@ const EditBudgetModal = ({
                       placeholder="Max amount"
                       name={`budgetItems[${index}].max`}
                       defaultValue={
-                        typeof max !== "undefined" ? max / 100 : null
+                        typeof max === "undefined" || max === null
+                          ? null
+                          : max / 100
                       }
                       inputProps={{ type: "number", min: 0 }}
                       inputRef={register()}

@@ -96,7 +96,7 @@ export async function getCollectionMember({
 
   if (bucketId) {
     collMember = await prisma.collectionMember.findFirst({
-      where: { buckets: { some: { id: bucketId } } },
+      where: { collection: { buckets: { some: { id: bucketId } } }, userId },
       include,
     });
   } else if (collectionId) {

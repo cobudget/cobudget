@@ -100,7 +100,7 @@ const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
     });
     orgMember = await getOrgMember({
       userId: user.id,
-      orgId: org.id,
+      orgId: org?.id,
     });
   }
 
@@ -179,7 +179,7 @@ const resolvers = {
         : null;
     },
     currentOrg: async (parent, { orgSlug }) => {
-      if (!orgSlug) return null;
+      if (!orgSlug || orgSlug === "c") return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
     },
     organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
@@ -222,7 +222,7 @@ const resolvers = {
       return await prisma.collection.findFirst({
         where: {
           slug: collectionSlug,
-          ...(orgSlug !== "c" && { organization: { slug: orgSlug } }),
+          organization: { slug: orgSlug },
           deleted: { not: true },
         },
       });
@@ -264,10 +264,15 @@ const resolvers = {
       { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
       { user }
     ) => {
-      const currentMember = await getCollectionMember({
-        userId: user.id,
-        collectionId,
+      const currentMember = await prisma.collectionMember.findUnique({
+        where: {
+          userId_collectionId: {
+            userId: user?.id ?? "undefined",
+            collectionId,
+          },
+        },
       });
+
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
@@ -306,7 +311,6 @@ const resolvers = {
     orgMembersPage: combineResolvers(
       isOrgAdmin,
       async (parent, { offset = 0, limit, orgId }, { user }) => {
-        // TODO: Why is it limit + 1?
         const orgMembersWithExtra = await prisma.orgMember.findMany({
           where: { organizationId: orgId },
           skip: offset,
@@ -511,6 +515,19 @@ const resolvers = {
         { orgId, slug, title, currency, registrationPolicy },
         { user }
       ) => {
+        let singleCollection = false;
+        if (!orgId) {
+          let rootOrg = await prisma.organization.findUnique({
+            where: { slug: "c" },
+          });
+          if (!rootOrg) {
+            rootOrg = await prisma.organization.create({
+              data: { slug: "c", name: "Root" },
+            });
+          }
+          orgId = rootOrg.id;
+          singleCollection = true;
+        }
         const collection = await prisma.collection.create({
           data: {
             slug,
@@ -518,6 +535,7 @@ const resolvers = {
             currency,
             registrationPolicy,
             organizationId: orgId,
+            singleCollection,
             collectionMember: {
               create: {
                 userId: user.id,
@@ -1169,7 +1187,7 @@ const resolvers = {
       });
 
       // todo: check not already left a flag?
-      let bucket = await prisma.bucket.findUnique({
+      const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
           collection: true,
@@ -1184,7 +1202,7 @@ const resolvers = {
       if (!currentCollMember || !currentCollMember.isApproved)
         throw new Error("You need to be logged in and/or approved");
 
-      bucket = await prisma.bucket.update({
+      let updated = await prisma.bucket.update({
         where: { id: bucketId },
         data: {
           flags: {
@@ -1206,10 +1224,10 @@ const resolvers = {
         },
       });
 
-      const logContent = `Someone flagged this dream for the **${bucket.collection.guidelines[0].title}** guideline: \n> ${comment}`;
-      const currentOrg = bucket.collection.organization;
+      const logContent = `Someone flagged this dream for the **${updated.collection.guidelines[0].title}** guideline: \n> ${comment}`;
+      const currentOrg = updated.collection.organization;
       if (orgHasDiscourse(currentOrg)) {
-        if (!bucket.discourseTopicId) {
+        if (!updated.discourseTopicId) {
           // TODO: break out create thread into separate function
           const discoursePost = await discourse(
             currentOrg.discourse
@@ -1229,7 +1247,7 @@ const resolvers = {
               username: "system",
             }
           );
-          bucket = await prisma.bucket.update({
+          updated = await prisma.bucket.update({
             where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
             include: {
@@ -1245,7 +1263,7 @@ const resolvers = {
 
         await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: bucket.discourseTopicId,
+            topic_id: updated.discourseTopicId,
             raw: logContent,
           },
           { username: "system" }
@@ -1261,7 +1279,7 @@ const resolvers = {
         });
       }
 
-      return bucket;
+      return updated;
     },
     resolveFlag: async (parent, { bucketId, flagId, comment }, { user }) => {
       const currentCollMember = await isAndGetCollMember({
@@ -1462,6 +1480,7 @@ const resolvers = {
           const updated = await prisma.user.upsert({
             where: { email },
             create: {
+              email,
               collMemberships: { create: { isApproved: true, collectionId } },
             },
             update: {
@@ -1469,7 +1488,10 @@ const resolvers = {
                 connectOrCreate: {
                   create: { isApproved: true, collectionId },
                   where: {
-                    userId_collectionId: { userId: user.id, collectionId },
+                    userId_collectionId: {
+                      userId: user?.id ?? "undefined",
+                      collectionId,
+                    },
                   },
                 },
               },
@@ -1973,6 +1995,7 @@ const resolvers = {
       return totalAllocations - totalContributions;
     },
     email: async (member, _, { user }) => {
+      if (!user) return null;
       const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -1995,6 +2018,7 @@ const resolvers = {
       return u.email;
     },
     name: async (member, _, { user }) => {
+      if (!user) return null;
       const currentCollMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -2023,6 +2047,7 @@ const resolvers = {
       return await prisma.user.findUnique({ where: { id: orgMember.userId } });
     },
     email: async (member, _, { user }) => {
+      if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
@@ -2045,6 +2070,7 @@ const resolvers = {
       return u.email;
     },
     name: async (member, _, { user }) => {
+      if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
           organizationId_userId: {
@@ -2090,8 +2116,7 @@ const resolvers = {
         where: {
           collection: {
             slug: collectionSlug,
-            ...(orgSlug &&
-              orgSlug !== "c" && { organization: { slug: orgSlug } }),
+            organization: { slug: orgSlug },
           },
           userId: user.id,
         },
@@ -2101,15 +2126,17 @@ const resolvers = {
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     collectionMemberships: async (user) =>
       prisma.collectionMember.findMany({
-        where: { userId: user.id, collection: { organization: null } },
+        where: { userId: user.id, collection: { isNot: { deleted: true } } },
       }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
     email: (parent, _, { user }) => {
+      if (!user) return null;
       if (parent.id !== user.id) return null;
       return parent.email;
     },
     name: (parent, _, { user }) => {
+      if (!user) return null;
       if (parent.id !== user.id) return null;
       return parent.name;
     },
@@ -2255,10 +2282,12 @@ const resolvers = {
 
       return now.isBefore(bucketCreationCloses);
     },
-    organization: async (collection) =>
-      await prisma.organization.findUnique({
+    organization: async (collection) => {
+      if (collection.singleCollection) return null;
+      return prisma.organization.findUnique({
         where: { id: collection.organizationId },
-      }),
+      });
+    },
   },
   Bucket: {
     cocreators: async (bucket) => {

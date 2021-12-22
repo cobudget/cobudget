@@ -66,6 +66,7 @@ export const TOP_LEVEL_QUERY = gql`
           id
           name
           slug
+          logo
         }
       }
       collectionMemberships {
@@ -76,6 +77,12 @@ export const TOP_LEVEL_QUERY = gql`
           id
           title
           slug
+          organization {
+            id
+            name
+            slug
+            logo
+          }
         }
       }
       currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
@@ -143,7 +150,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org === "c" ? undefined : router.query.org,
+      orgSlug: router.query.org,
       collectionSlug: router.query.collection,
     },
   });
@@ -183,6 +190,8 @@ const MyApp = ({ Component, pageProps, router }) => {
             ? collection
               ? `${collection.title} | ${currentOrg.name}`
               : currentOrg.name
+            : collection
+            ? collection.title
             : "Cobudget"
         }
       >

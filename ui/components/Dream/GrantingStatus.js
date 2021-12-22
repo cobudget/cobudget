@@ -11,55 +11,48 @@ const GrantingStatus = ({ dream, collection }) => {
 
   return (
     <div className="space-y-0">
-      {dream.approved && (
-        <div className="mb-2">
-          <ProgressBar
-            ratio={ratio}
-            className="mb-2"
-            size="large"
-            color={collection.color}
-          />
-          <p className={`text-xl font-semibold text-${collection.color}-dark`}>
-            {thousandSeparator(funding / 100)} {collection.currency}
-          </p>
-          <p className="text-sm text-gray-700 mb-2">
-            funded of {thousandSeparator(dream.minGoal / 100)}{" "}
-            {collection.currency} goal
-          </p>
+      <div className="mb-2">
+        <ProgressBar
+          ratio={ratio}
+          className="mb-2"
+          size="large"
+          color={collection.color}
+        />
+        <p className={`text-xl font-semibold text-${collection.color}-dark`}>
+          {thousandSeparator(funding / 100)} {collection.currency}
+        </p>
+        <p className="text-sm text-gray-700 mb-2">
+          funded of {thousandSeparator(dream.minGoal / 100)}{" "}
+          {collection.currency} goal
+        </p>
 
-          {!!dream.totalContributionsFromCurrentMember && (
-            <p className="my-2 text-sm text-gray-700">
-              You have contributed{" "}
-              {thousandSeparator(
-                dream.totalContributionsFromCurrentMember / 100
-              )}{" "}
-              {collection.currency}
-            </p>
-          )}
+        {!!dream.totalContributionsFromCurrentMember && (
+          <p className="my-2 text-sm text-gray-700">
+            You have contributed{" "}
+            {thousandSeparator(dream.totalContributionsFromCurrentMember / 100)}{" "}
+            {collection.currency}
+          </p>
+        )}
 
-          {!!dream.latestContributions.length && (
-            <>
-              <div>
-                {dream.latestContributions.map((contribution) => (
-                  <p
-                    className="mt-1 text-sm text-gray-700"
-                    key={contribution.id}
-                  >
-                    {userName(contribution.collectionMember.user.username)}{" "}
-                    contributed {thousandSeparator(contribution.amount / 100)}{" "}
-                    {collection.currency}
-                  </p>
-                ))}
-              </div>
-              {dream.noOfContributions > 10 && (
-                <p className="my-1 text-sm text-gray-700">
-                  and {dream.noOfContributions - 10} more contributions
+        {!!dream.latestContributions.length && (
+          <>
+            <div>
+              {dream.latestContributions.map((contribution) => (
+                <p className="mt-1 text-sm text-gray-700" key={contribution.id}>
+                  {userName(contribution.collectionMember.user.username)}{" "}
+                  contributed {thousandSeparator(contribution.amount / 100)}{" "}
+                  {collection.currency}
                 </p>
-              )}
-            </>
-          )}
-        </div>
-      )}
+              ))}
+            </div>
+            {dream.noOfContributions > 10 && (
+              <p className="my-1 text-sm text-gray-700">
+                and {dream.noOfContributions - 10} more contributions
+              </p>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="text-sm text-gray-700 space-y-2">
         {dream.funded && (

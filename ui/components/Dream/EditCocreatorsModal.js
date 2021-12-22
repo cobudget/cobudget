@@ -54,10 +54,8 @@ const Member = ({ member, add, remove }) => {
   return (
     <div className="flex items-center justify-between mb-2 overflow-y-scroll ">
       <div className="flex items-center">
-        <Avatar user={member.orgMember.user} size="small" />
-        <span className="ml-2 text-gray-800">
-          {member.orgMember.user.username}
-        </span>
+        <Avatar user={member.user} size="small" />
+        <span className="ml-2 text-gray-800">{member.user.username}</span>
       </div>
       <div className="flex items-center">
         {Boolean(add) && (
@@ -100,9 +98,7 @@ const SearchMembersResult = ({
 
   if (searchInput) {
     result = result.filter((member) =>
-      member.orgMember.user.username
-        ?.toLowerCase()
-        .includes(searchInput.toLowerCase())
+      member.user.username?.toLowerCase().includes(searchInput.toLowerCase())
     );
   }
 
