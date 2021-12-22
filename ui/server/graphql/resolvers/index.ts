@@ -2123,7 +2123,7 @@ const resolvers = {
       prisma.orgMember.findMany({ where: { userId: user.id } }),
     collectionMemberships: async (user) =>
       prisma.collectionMember.findMany({
-        where: { userId: user.id },
+        where: { userId: user.id, collection: { isNot: { deleted: true } } },
       }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars

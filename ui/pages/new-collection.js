@@ -41,7 +41,11 @@ export default function NewCollectionPage({ currentOrg }) {
   const onSubmit = (variables) => {
     createCollection(variables).then(({ data, error }) => {
       if (error) {
-        toast.error(error.message);
+        toast.error(
+          error.message.includes("Unique constraint")
+            ? "Slug is already taken"
+            : error.message
+        );
       } else {
         Router.push("/[org]/[collection]", `/c/${data.createCollection.slug}`);
       }
@@ -51,7 +55,7 @@ export default function NewCollectionPage({ currentOrg }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">New bucket collection</h1>
+        <h1 className="text-2xl mb-2 font-semibold">Create group</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"
