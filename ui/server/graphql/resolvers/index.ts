@@ -22,6 +22,7 @@ import {
   isAndGetCollMemberOrOrgAdmin,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
+import emailService from "server/services/EmailService/email.service";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -1497,13 +1498,8 @@ const resolvers = {
             include: { collMemberships: { where: { collectionId } } },
           });
 
-          await sendEmail({
-            to: email,
-            subject: `${currentUser.name} invited you to "${collection.title}" on Cobudget`,
-            text: `View and login here: https://${process.env.DEPLOY_URL}/${
-              collection.organization?.slug ?? "c"
-            }/${collection.slug}`,
-          });
+          emailService.inviteMember({ email, currentUser, collection });
+
           invitedCollectionMembers.push(updated.collMemberships?.[0]);
         }
         return invitedCollectionMembers;
@@ -1547,11 +1543,7 @@ const resolvers = {
           const orgMembership = user.orgMemberships?.[0];
           const currentOrg = orgMembership.organization;
 
-          await sendEmail({
-            to: email,
-            subject: `${currentUser.name} invited you to "${currentOrg.name}" on Cobudget`,
-            text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}`,
-          });
+          emailService.inviteMember({ email, currentUser, currentOrg });
 
           newOrgMembers.push(orgMembership);
         }

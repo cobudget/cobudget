@@ -25,6 +25,33 @@ function escape(input: string): string | undefined | null {
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
 
 export default {
+  inviteMember: async ({
+    email,
+    currentUser,
+    collection,
+    currentOrg,
+  }: {
+    email: string;
+    currentUser: { name: string };
+    collection?: {
+      title: string;
+      slug: string;
+      organization: { slug: string };
+    };
+    currentOrg?: { slug: string; name: string };
+  }) => {
+    await sendEmail({
+      to: email,
+      subject: `${currentUser.name} invited you to "${
+        currentOrg?.name ?? collection.title
+      }" on Cobudget`,
+      text: `View and login here: ${appLink(
+        `/${currentOrg?.slug ?? collection.organization.slug}/${
+          collection.slug
+        }`
+      )}`,
+    });
+  },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;
 
