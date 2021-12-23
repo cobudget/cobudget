@@ -12,44 +12,13 @@ const CREATE_DREAM = gql`
   mutation CreateDream($collectionId: ID!, $title: String!) {
     createDream(collectionId: $collectionId, title: $title) {
       id
-      description
-      summary
       title
-      minGoal
-      maxGoal
-      income
-      totalContributions
-      numberOfComments
-      published
-      approved
-      canceled
-      customFields {
-        value
-        customField {
-          id
-          name
-          type
-          limit
-          description
-          isRequired
-          position
-          createdAt
-        }
-      }
-      images {
-        id
-        small
-        large
-      }
     }
   }
 `;
 
 const NewDreamModal = ({ collection, handleClose, currentOrg }) => {
-  const [{ fetching: loading }, createDream] = useMutation(
-    CREATE_DREAM
-    // refetchQueries: ["Dreams"],
-  );
+  const [{ fetching: loading }, createDream] = useMutation(CREATE_DREAM);
 
   const { handleSubmit, register, errors } = useForm();
 
