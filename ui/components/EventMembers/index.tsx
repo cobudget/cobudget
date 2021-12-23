@@ -87,7 +87,7 @@ const UPDATE_MEMBER = gql`
 `;
 
 const DELETE_MEMBER = gql`
-  mutation UpdateMember($memberId: ID!, $collectionId: ID!) {
+  mutation DeleteMember($memberId: ID!, $collectionId: ID!) {
     deleteMember(memberId: $memberId, collectionId: $collectionId) {
       id
     }

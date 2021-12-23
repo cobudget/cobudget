@@ -53,21 +53,26 @@ export const client = (
           Mutation: {
             joinCollection(result: any, args, cache) {
               if (result.joinCollection) {
+                console.log({ result });
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug: result.joinCollection.event.organization.slug,
-                      collectionSlug: result.joinCollection.event.slug,
+                      orgSlug:
+                        result.joinCollection.collection.organization?.slug ??
+                        "c",
+                      collectionSlug: result.joinCollection.collection.slug,
                     },
                   },
                   (data) => {
+                    console.log({ data });
                     return {
                       ...data,
-                      currentOrgMember: {
-                        ...data.currentOrgMember,
+                      currentUser: {
+                        ...data.currentUser,
+                        currentCollMember: result.joinCollection,
                         collectionMemberships: [
-                          ...data.currentOrgMember.collectionMemberships,
+                          ...data.currentUser.collectionMemberships,
                           result.joinCollection,
                         ],
                       },
@@ -95,41 +100,59 @@ export const client = (
                 );
               }
             },
-            // deleteMember(result:any, args, cache) {
-            //   const {deleteMember} = result
-            //   const {
-            //       approvedMembersPage: { approvedMembers },
-            //       requestsToJoinPage: { requestsToJoin },
-            //     } = cache.readQuery({
-            //       query: EVENT_MEMBERS_QUERY,
-            //       variables: { eventId: event.id },
-            //     });
+            updateMember(result: any, { isApproved }, cache) {
+              // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
+              if (isApproved)
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "membersPage")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "membersPage", field.arguments);
+                  });
+            },
 
-            //     cache.writeQuery({
-            //       query: EVENT_MEMBERS_QUERY,
-            //       variables: { eventId: event.id },
-            //       data: {
-            //         approvedMembersPage: {
-            //           approvedMembers: approvedMembers.filter(
-            //             (member) => member.id !== deleteMember.id
-            //           ),
-            //         },
-            //       },
-            //     });
+            deleteMember(result: any, { memberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
 
-            //     cache.writeQuery({
-            //       query: EVENT_MEMBERS_QUERY,
-            //       variables: { eventId: event.id },
-            //       data: {
-            //         requestsToJoinPage: {
-            //           requestsToJoin: requestsToJoin.filter(
-            //             (member) => member.id !== deleteMember.id
-            //           ),
-            //         },
-            //       },
-            //     });
-
-            // },
+              // cache
+              //   .inspectFields("Query")
+              //   .filter((field) => field.fieldName === "membersPage")
+              //   .forEach((field) => {
+              //     if (!field.arguments.limit) return null;
+              //     cache.updateQuery(
+              //       {
+              //         query: COLLECTION_MEMBERS_QUERY,
+              //         variables: {
+              //           collectionId: field.arguments.collectionId,
+              //           offset: field.arguments.offset,
+              //           limit: field.arguments.limit,
+              //         },
+              //       },
+              //       (data) => {
+              //         return {
+              //           ...data,
+              //           approvedMembersPage: {
+              //             ...data.approvedMembersPage,
+              //             approvedMembers: data.approvedMembersPage.approvedMembers.filter(
+              //               (member) => member.id !== memberId
+              //             ),
+              //           },
+              //           requestsToJoinPage: {
+              //             ...data.requestsToJoinPage,
+              //             requestsToJoin: data.requestsToJoinPage.requestsToJoin.filter(
+              //               (member) => member.id !== memberId
+              //             ),
+              //           },
+              //         };
+              //       }
+              //     );
+              //   });
+            },
             deleteCollection(result: any, { collectionId }, cache) {
               const fields = cache
                 .inspectFields("Query")
