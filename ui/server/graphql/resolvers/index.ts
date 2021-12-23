@@ -273,7 +273,6 @@ const resolvers = {
         },
       });
 
-      // const collection = prisma.collection.findUnique({ where: {organizationId_slug: {}}})
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
@@ -312,7 +311,6 @@ const resolvers = {
     orgMembersPage: combineResolvers(
       isOrgAdmin,
       async (parent, { offset = 0, limit, orgId }, { user }) => {
-        // TODO: Why is it limit + 1?
         const orgMembersWithExtra = await prisma.orgMember.findMany({
           where: { organizationId: orgId },
           skip: offset,
@@ -1407,8 +1405,11 @@ const resolvers = {
           "You can only review buckets when bucket review is open and the bucket is published"
         );
 
-      if (bucket.flags.length)
-        throw new Error("You have already left an all good flag");
+      if (bucket.flags.length) {
+        return bucket;
+        // TODO: update the ui to stop the user from doing this. in what way?
+        //throw new Error("You have already left an all good flag");
+      }
 
       return await prisma.bucket.update({
         where: { id: bucketId },
