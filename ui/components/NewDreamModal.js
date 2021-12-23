@@ -17,11 +17,8 @@ const CREATE_DREAM = gql`
   }
 `;
 
-export default ({ collection, handleClose, currentOrg }) => {
-  const [{ fetching: loading }, createDream] = useMutation(
-    CREATE_DREAM
-    // refetchQueries: ["Dreams"],
-  );
+const NewDreamModal = ({ collection, handleClose, currentOrg }) => {
+  const [{ fetching: loading }, createDream] = useMutation(CREATE_DREAM);
 
   const { handleSubmit, register, errors } = useForm();
 
@@ -90,3 +87,5 @@ export default ({ collection, handleClose, currentOrg }) => {
     </Modal>
   );
 };
+
+export default NewDreamModal;

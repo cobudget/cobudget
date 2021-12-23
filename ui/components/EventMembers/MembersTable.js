@@ -78,7 +78,7 @@ const ActionsDropdown = ({
             });
           }}
         >
-          {member.isModerator ? "Remove guide" : "Make guide"}
+          {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
         <MenuItem
           color="error.main"
