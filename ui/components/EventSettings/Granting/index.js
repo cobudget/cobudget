@@ -12,6 +12,7 @@ import SetMaxAmountToDream from "./SetMaxAmountToDream";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
+import SetRequireBucketApproval from './SetRequireBucketApproval';
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 
@@ -35,6 +36,7 @@ const modals = {
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_MAX_AMOUNT_TO_DREAM: SetMaxAmountToDream,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
+  SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_ABOUT: SetAbout,
 };
 
@@ -47,6 +49,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $grantingCloses: Date
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
+    $requireBucketApproval: Boolean
   ) {
     updateGrantingSettings(
       collectionId: $collectionId
@@ -56,6 +59,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingCloses: $grantingCloses
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
+      requireBucketApproval: $requireBucketApproval
     ) {
       id
       currency
@@ -66,6 +70,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
+      requireBucketApproval
     }
   }
 `;
@@ -128,6 +133,17 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             secondary={collection.allowStretchGoals?.toString() ?? "false"}
             isSet={typeof collection.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
+            canEdit={canEditSettings}
+            eventColor={collection.color}
+          />
+
+          <Divider />
+
+          <SettingsListItem
+            primary="Require bucket approval"
+            secondary={collection.requireBucketApproval?.toString() ?? "false"}
+            isSet={typeof collection.requireBucketApproval !== "undefined"}
+            openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
             canEdit={canEditSettings}
             eventColor={collection.color}
           />

@@ -32,6 +32,7 @@ const EventSchema = new Schema({
     }),
   ],
   allowStretchGoals: { type: Boolean, default: false },
+  requireBucketApproval: { type: Boolean, default: false },
   color: { type: String, default: "anthracit" },
   about: { type: String },
   organizationId: { type: Schema.Types.ObjectId, required: true },
