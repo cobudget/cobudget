@@ -15,7 +15,7 @@ const SetRequireBucketApproval = ({ closeModal, collection }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Allow stretch goals</h1>
+        <h1 className="text-3xl">Require bucket approval</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
