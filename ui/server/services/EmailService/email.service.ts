@@ -2,6 +2,13 @@ import { SendEmailInput, sendEmail, sendEmails } from "server/send-email";
 import isURL from "validator/lib/isURL";
 import escapeImport from "validator/lib/escape";
 import { uniqBy } from "lodash";
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import remarkGfm from "remark-gfm";
+import remarkRehype from "remark-rehype";
+import rehypeSanitize from "rehype-sanitize";
+import rehypeStringify from "rehype-stringify";
+
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
@@ -36,9 +43,10 @@ export default {
     collection?: {
       title: string;
       slug: string;
+      info?: string;
       organization: { slug: string };
     };
-    currentOrg?: { slug: string; name: string };
+    currentOrg?: { slug: string; name: string; info?: string };
   }) => {
     const invitedUser = await prisma.user.findUnique({
       where: {
@@ -53,7 +61,17 @@ export default {
     const orgCollName = currentOrg?.name ?? collection.title;
 
     // todo: take org/coll purpose/info and convert the md into html
-    const purpose = "";
+    const mdPurpose = currentOrg?.info ?? collection.info ?? "";
+
+    const htmlPurpose = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkGfm)
+        .use(remarkRehype)
+        .use(rehypeSanitize) // sanitization done here
+        .use(rehypeStringify)
+        .process(mdPurpose)
+    );
 
     await sendEmail({
       to: email,
@@ -64,8 +82,12 @@ export default {
         orgCollName
       )} on Cobudget.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
-      <br/><br/>
-      ${purpose}
+      ${
+        htmlPurpose
+          ? `<br/><br/>
+            ${htmlPurpose}`
+          : ""
+      }
       <br/><br/>
       ${footer}
       `,
