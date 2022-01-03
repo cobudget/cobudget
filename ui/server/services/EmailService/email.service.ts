@@ -40,16 +40,35 @@ export default {
     };
     currentOrg?: { slug: string; name: string };
   }) => {
+    const invitedUser = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    const inviteLink = appLink(
+      `/${currentOrg?.slug ?? collection.organization.slug}/${collection.slug}`
+    );
+
+    const orgCollName = currentOrg?.name ?? collection.title;
+
+    // todo: take org/coll purpose/info and convert the md into html
+    const purpose = "";
+
     await sendEmail({
       to: email,
-      subject: `${currentUser.name} invited you to "${
-        currentOrg?.name ?? collection.title
-      }" on Cobudget`,
-      text: `View and login here: ${appLink(
-        `/${currentOrg?.slug ?? collection.organization.slug}/${
-          collection.slug
-        }`
-      )}`,
+      subject: `${currentUser.name} invited you to join "${orgCollName}" on Cobudget!`,
+      html: `Hi${invitedUser ? ` ${escape(invitedUser.name)}` : ""}!
+      <br/><br/>
+      You have been invited by ${escape(currentUser.name)} to ${escape(
+        orgCollName
+      )} on Cobudget.
+      Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
+      <br/><br/>
+      ${purpose}
+      <br/><br/>
+      ${footer}
+      `,
     });
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
@@ -112,9 +131,7 @@ export default {
           subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
           html: `Hey ${escape(collectionMember.user.name)}!
           <br/><br/>
-          Your bucket “${escape(
-            dream.title
-          )}” received a new comment. This could be a question or feedback regarding your idea.
+          Your bucket “${escape(dream.title)}” received a new comment.
           <br/><br/>
           "${escape(comment.content)}"
           <br/><br/>
@@ -188,13 +205,13 @@ export default {
 
     await sendEmail({
       to: user.email,
-      subject: `${user.name}, you’ve received funds to spend in the ${collection.title} Cobudget!`,
+      subject: `${user.name}, you’ve received funds to spend in ${collection.title}!`,
       html: `You have received ${(newAmount - oldAmount) / 100} ${
         collection.currency
-      } in the ${escape(collection.title)} Cobudget.
+      } in ${escape(collection.title)}.
       <br/><br/>
       Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
-        `/${org?.slug ?? "c"}/${collection.slug}`
+        `/${org.slug}/${collection.slug}`
       )}">${escape(collection.title)}</a>.
       <br/><br/>
       ${footer}
