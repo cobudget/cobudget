@@ -15,8 +15,8 @@ const UPDATE_PROFILE_QUERY = gql`
 `;
 export default function FinishSignup({ isOpen, currentUser }) {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
-  const [username, setUsername] = useState(currentUser.username ?? "");
-  const [name, setName] = useState(currentUser.name ?? "");
+  const [username, setUsername] = useState(currentUser?.username ?? "");
+  const [name, setName] = useState(currentUser?.name ?? "");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   return (
