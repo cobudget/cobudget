@@ -127,6 +127,13 @@ export default {
       });
     }
   },
+  welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {
+    await sendEmail({
+      to: newUser.email,
+      subject: "Welcome to Cobudget!",
+      html: `asdfasdf TODO`,
+    });
+  },
   sendCommentNotification: async ({
     dream,
     event,
