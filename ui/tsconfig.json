@@ -17,12 +17,15 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx", "components/InviteMembersModal.js", "components/Org/OrgMembers/index.js", 
+    "**/*.tsx",
+    "components/InviteMembersModal.js",
+    "components/Org/OrgMembers/index.js"
   ],
   "exclude": [
     "node_modules"
