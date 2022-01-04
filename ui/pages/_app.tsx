@@ -154,6 +154,11 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
+  
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
 
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
