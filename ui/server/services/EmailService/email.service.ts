@@ -55,13 +55,14 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentOrg?.slug ?? collection.organization.slug}/${collection.slug}`
+      `/${currentOrg?.slug ?? collection.organization.slug}/${
+        collection?.slug ?? ""
+      }`
     );
 
     const orgCollName = currentOrg?.name ?? collection.title;
 
-    // todo: take org/coll purpose/info and convert the md into html
-    const mdPurpose = currentOrg?.info ?? collection.info ?? "";
+    const mdPurpose = currentOrg?.info ?? collection?.info ?? "";
 
     const htmlPurpose = String(
       await unified()
@@ -76,7 +77,7 @@ export default {
     await sendEmail({
       to: email,
       subject: `${currentUser.name} invited you to join "${orgCollName}" on Cobudget!`,
-      html: `Hi${invitedUser ? ` ${escape(invitedUser.name)}` : ""}!
+      html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
         orgCollName
