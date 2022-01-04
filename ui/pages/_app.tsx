@@ -165,7 +165,7 @@ const MyApp = ({ Component, pageProps, router }) => {
         currentUser={currentUser}
         currentOrg={currentOrg}
       />
-      <FinishSignup isOpen={showFinishSignupModal} />
+      <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
         currentOrg={currentOrg}
