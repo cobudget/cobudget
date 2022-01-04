@@ -1,7 +1,5 @@
 import { useState } from "react";
-import Link from "next/link";
 import { useMutation, gql } from "urql";
-import thousandSeparator from "utils/thousandSeparator";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
