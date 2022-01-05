@@ -1029,18 +1029,21 @@ const resolvers = {
           },
         });
 
-        const { prisma: prismaResult } = await eventHub.publish(
-          "publish-dream",
-          {
-            currentOrg: bucket.collection.organization,
-            currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-            event: bucket.collection,
-            dream: bucket,
-            unpublish,
-          }
-        );
+        const publishedAt = unpublish ? null : new Date();
+        const resultBucket = await prisma.bucket.update({
+          where: { id: bucket.id },
+          data: { publishedAt },
+        });
 
-        return prismaResult;
+        await eventHub.publish("publish-dream", {
+          currentOrg: bucket.collection.organization,
+          currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
+          event: bucket.collection,
+          dream: bucket,
+          unpublish,
+        });
+
+        return resultBucket;
       }
     ),
     addComment: combineResolvers(

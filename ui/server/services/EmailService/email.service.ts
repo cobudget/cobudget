@@ -294,4 +294,47 @@ export default {
     });
     await sendEmails(emails);
   },
+  bucketPublishedNotification: async ({
+    currentOrg,
+    currentOrgMember,
+    event,
+    dream,
+    unpublish,
+  }) => {
+    if (unpublish) return;
+
+    const {
+      collectionMember: collMembers,
+    } = await prisma.collection.findUnique({
+      where: { id: event.id },
+      include: { collectionMember: { include: { user: true } } },
+    });
+
+    const { cocreators } = await prisma.bucket.findUnique({
+      where: { id: dream.id },
+      include: { cocreators: true },
+    });
+
+    // send to all coll members who aren't cocreators to the bucket
+    const usersToNotify = collMembers
+      .filter(
+        (collMember) => !cocreators.map((co) => co.id).includes(collMember.id)
+      )
+      .map((collMember) => collMember.user);
+
+    const collLink = appLink(`/${currentOrg.slug}/${event.slug}`);
+
+    const emails = usersToNotify.map((user) => ({
+      to: user.email,
+      subject: `There is a new bucket in ${escape(event.title)}!`,
+      html: `Creativity is flowing in ${escape(
+        event.title
+      )}! <a href="${collLink}">Have a look at the new buckets in this collection.</a>
+      <br/><br/>
+      ${footer}
+      `,
+    }));
+
+    await sendEmails(emails);
+  },
 };
