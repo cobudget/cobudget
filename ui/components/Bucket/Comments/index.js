@@ -4,7 +4,7 @@ import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
-const Comments = ({ currentUser, currentOrg, dream, collection }) => {
+const Comments = ({ currentUser, currentOrg, bucket, collection }) => {
   const context = useCommentContext({
     from: 0,
     limit: 10,
@@ -12,7 +12,7 @@ const Comments = ({ currentUser, currentOrg, dream, collection }) => {
     currentOrg,
     currentUser,
     collection,
-    dream,
+    bucket,
   });
   const { comments, setFrom, limit, total, loading } = context;
 
@@ -27,11 +27,11 @@ const Comments = ({ currentUser, currentOrg, dream, collection }) => {
               }`}
             </h2>
 
-            {dream.discourseTopicUrl && (
+            {bucket.discourseTopicUrl && (
               <a
                 target="_blank"
                 rel="noreferrer"
-                href={dream.discourseTopicUrl}
+                href={bucket.discourseTopicUrl}
               >
                 View on Discourse
               </a>

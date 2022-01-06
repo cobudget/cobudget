@@ -85,7 +85,7 @@ export const useCommentContext = (initialInput) => {
 
   const [{ data, fetching: loading }] = useQuery({
     query: COMMENTS_QUERY,
-    variables: { bucketId: initialInput.dream.id, from, limit, order },
+    variables: { bucketId: initialInput.bucket.id, from, limit, order },
     //notifyOnNetworkStatusChange: true,
   });
 
@@ -138,7 +138,7 @@ export const useCommentContext = (initialInput) => {
 
   // useSubscription({
   //   query: COMMENTS_CHANGED_SUBSCRIPTION,
-  //   variables: { bucketId: initialInput.dream.id },
+  //   variables: { bucketId: initialInput.bucket.id },
   //   // onSubscriptionData: ({
   //   //   subscriptionData: {
   //   //     data: {
@@ -163,7 +163,7 @@ export const useCommentContext = (initialInput) => {
   // });
 
   return {
-    dream: initialInput.dream,
+    bucket: initialInput.bucket,
     collection: initialInput.collection,
     currentOrg: initialInput.currentOrg,
     currentUser: initialInput.currentUser,
