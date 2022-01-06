@@ -24,12 +24,13 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
 
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(summary ?? "");
+
   if (editing)
     return (
       <>
         <form
-          onSubmit={handleSubmit((variables) =>
-            editDream({ bucketId, ...variables })
+          onSubmit={handleSubmit(() =>
+            editDream({ bucketId, summary: inputValue })
               .then(() => setEditing(false))
               .catch((err) => alert(err.message))
           )}
@@ -37,15 +38,15 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
           <TextField
             className="mb-2"
             multiline
-            name="summary"
             placeholder="Summary"
+            defaultValue={inputValue}
             inputRef={register}
             inputProps={{
               maxLength: 160,
-              value: inputValue,
               onChange: (e) => setInputValue(e.target.value),
             }}
             autoFocus
+            wysiwyg
           />
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-600 font-medium pl-4">

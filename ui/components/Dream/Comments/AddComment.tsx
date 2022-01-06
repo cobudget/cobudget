@@ -20,7 +20,10 @@ function AddComment() {
     currentUser,
   } = useContext<any>(Context);
 
-  if (currentOrg?.discourseUrl && !currentUser.currentOrgMember?.hasDiscourseApiKey) {
+  if (
+    currentOrg?.discourseUrl &&
+    !currentUser.currentOrgMember?.hasDiscourseApiKey
+  ) {
     return (
       <Link href={"/connect-discourse"} passHref>
         <Button color={collection.color} nextJsLink className="my-2">
@@ -57,7 +60,6 @@ function AddComment() {
               error={Boolean(errors.content)}
               helperText={errors.content?.message}
               inputProps={{
-                value: content,
                 onChange: (e) => setContent(e.target.value),
               }}
               inputRef={(e) => {
