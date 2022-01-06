@@ -46,7 +46,7 @@ module.exports = {
     extend: {
       gridTemplateColumns: {
         // Dream page layout
-        sidebar: "1fr 300px",
+        sidebar: "1fr 350px",
       },
       height: {
         88: "22rem",

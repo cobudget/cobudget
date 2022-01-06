@@ -3,6 +3,11 @@ import Head from "next/head";
 
 import Dream from "../../../../components/Dream";
 import HappySpinner from "../../../../components/HappySpinner";
+import SubMenu from "../../../../components/SubMenu";
+import PageHero from "../../../../components/PageHero";
+import Sidebar from "../../../../components/Dream/Sidebar";
+import { isMemberOfDream } from "utils/helpers";
+import Overview from "../../../../components/Dream/Overview";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -101,44 +106,24 @@ const DreamPage = ({ collection, currentUser, currentOrg, router }) => {
 
   const { bucket } = data ?? { bucket: null };
 
-  if (bucket)
-    return (
-      <div className="page">
-        <Head>
-          <title>
-            {bucket.title} | {collection?.title}
-          </title>
-        </Head>
-        <Dream
-          dream={bucket}
-          collection={collection}
-          currentUser={currentUser}
-          currentOrg={currentOrg}
-        />
-      </div>
-    );
-
-  if (loading)
-    return (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
-    );
-
-  if (error) {
-    console.error(error);
-    return (
-      <div className="flex-grow flex justify-center items-center">
-        {error.message}
-      </div>
-    );
-  }
-
   return (
-    <div className="flex-grow flex flex-col justify-center items-center">
-      <span className="text-4xl">404</span>
-      <h1 className="text-2xl">Can&apos;t find this bucket...</h1>
-    </div>
+    <>
+      <Overview
+        router={router}
+        currentUser={currentUser}
+        currentOrg={currentOrg}
+        collection={collection}
+      />
+
+      <SubMenu bucket={bucket} />
+
+      <Dream
+        dream={bucket}
+        collection={collection}
+        currentUser={currentUser}
+        currentOrg={currentOrg}
+      />
+    </>
   );
 };
 

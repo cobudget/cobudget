@@ -20,13 +20,13 @@ const OrganizationAndEventHeader = ({
   router,
   color,
 }) => {
-  const [{ data }] = useQuery({
-    query: BUCKET_QUERY,
-    variables: { id: router.query.bucket },
-    pause: !router.query.bucket,
-  });
+  // const [{ data }] = useQuery({
+  //   query: BUCKET_QUERY,
+  //   variables: { id: router.query.bucket },
+  //   pause: !router.query.bucket,
+  // });
 
-  const { bucket } = data ?? { bucket: null };
+  // const { bucket } = data ?? { bucket: null };
 
   return (
     <div className="flex items-center max-w-screen overflow-hidden">
@@ -100,7 +100,7 @@ const OrganizationAndEventHeader = ({
           </Link>
         </>
       )}
-      {bucket && router.query?.bucket && (
+      {/* {bucket && router.query?.bucket && (
         <>
           <SlashIcon
             className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
@@ -116,7 +116,7 @@ const OrganizationAndEventHeader = ({
               : bucket.title.substr(0, 30) + "..."}
           </span>
         </>
-      )}
+      )} */}
     </div>
   );
 };

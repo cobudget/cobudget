@@ -33,25 +33,6 @@ const GrantingStatus = ({ dream, collection }) => {
             {collection.currency}
           </p>
         )}
-
-        {!!dream.latestContributions.length && (
-          <>
-            <div>
-              {dream.latestContributions.map((contribution) => (
-                <p className="mt-1 text-sm text-gray-700" key={contribution.id}>
-                  {userName(contribution.collectionMember.user.username)}{" "}
-                  contributed {thousandSeparator(contribution.amount / 100)}{" "}
-                  {collection.currency}
-                </p>
-              ))}
-            </div>
-            {dream.noOfContributions > 10 && (
-              <p className="my-1 text-sm text-gray-700">
-                and {dream.noOfContributions - 10} more contributions
-              </p>
-            )}
-          </>
-        )}
       </div>
 
       <div className="text-sm text-gray-700 space-y-2">

@@ -25,35 +25,13 @@ const Dream = ({ dream, collection, currentUser, currentOrg }) => {
     dream.published;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-      {showBucketReview && (
-        <Monster event={collection} dream={dream} currentOrg={currentOrg} />
-      )}
-
-      {!dream.published && (
-        <Label className="absolute right-0 m-5 text-sm">Unpublished</Label>
-      )}
-      {dream.images.length > 0 ? (
-        <img
-          className="h-64 md:h-88 w-full object-cover object-center"
-          src={dream.images[0].large ?? dream.images[0].small}
-        />
-      ) : (
-        <div
-          className={`h-64 md:h-88 w-full bg-${stringToColor(dream.title)}`}
-        />
-      )}
-
-      <div className="p-4 lg:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-2 md:gap-6 relative">
-          <div>
-            <Title title={dream.title} bucketId={dream.id} canEdit={canEdit} />
-            <Summary
-              bucketId={dream.id}
-              summary={dream.summary}
-              canEdit={canEdit}
-            />
-
+    <div className="bg-white border-b-default">
+      <div className="page relative">
+        {showBucketReview && (
+          <Monster event={collection} dream={dream} currentOrg={currentOrg} />
+        )}
+        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
+          <div className="py-2">
             <Images
               images={dream.images}
               size={100}
@@ -90,15 +68,15 @@ const Dream = ({ dream, collection, currentUser, currentOrg }) => {
               maxGoal={dream.maxGoal}
             />
 
-            <hr className="mb-4 mt-1" />
+            {/* <hr className="mb-4 mt-1" />
             <Comments
               currentUser={currentUser}
               currentOrg={currentOrg}
               dream={dream}
               collection={collection}
-            />
+            /> */}
           </div>
-          <div className="order-first md:order-last">
+          {/* <div className="order-first md:order-last">
             <Sidebar
               dream={dream}
               collection={collection}
@@ -106,7 +84,7 @@ const Dream = ({ dream, collection, currentUser, currentOrg }) => {
               canEdit={canEdit}
               currentOrg={currentOrg}
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

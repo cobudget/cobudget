@@ -1,6 +1,20 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
+const bucketItems = ({ orgSlug, collectionSlug, bucketId }) => {
+  return [
+    { label: "Bucket", href: `/${orgSlug}/${collectionSlug}/${bucketId}` },
+    {
+      label: "Comments (7)",
+      href: `/${orgSlug}/${collectionSlug}/${bucketId}/comments`,
+    },
+    {
+      label: "Funders (5)",
+      href: `/${orgSlug}/${collectionSlug}/${bucketId}/funders`,
+    },
+  ];
+};
+
 const orgItems = ({ currentUser, orgSlug }) => {
   return [
     { label: "Overview", href: `/${orgSlug}` },
@@ -37,15 +51,23 @@ export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
 };
 
 export default function SubMenu({
+  bucket,
   collection,
   currentUser,
 }: {
+  bucket?: any;
   collection?: any;
   currentUser: any;
 }) {
   const router = useRouter();
 
-  const items = collection
+  const items = bucket
+    ? bucketItems({
+        collectionSlug: router.query.collection,
+        orgSlug: router.query.org,
+        bucketId: router.query.bucket,
+      })
+    : collection
     ? collectionItems({
         currentUser,
         collectionSlug: router.query.collection,
