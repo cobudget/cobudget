@@ -12,10 +12,10 @@ import Button from "../../Button";
 
 const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
   mutation EditDreamCustomField(
-    $dreamId: ID!
+    $bucketId: ID!
     $customField: CustomFieldValueInput!
   ) {
-    editDreamCustomField(dreamId: $dreamId, customField: $customField) {
+    editDreamCustomField(bucketId: $bucketId, customField: $customField) {
       id
       customFields {
         id
@@ -38,8 +38,8 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
 const DreamCustomField = ({
   defaultCustomField,
   customField,
-  eventId,
-  dreamId,
+  collectionId,
+  bucketId,
   canEdit,
 }) => {
   const defaultValue = customField ? customField.value : null;
@@ -55,7 +55,7 @@ const DreamCustomField = ({
     return (
       <form
         onSubmit={handleSubmit((variables) => {
-          return editCustomFieldMutation({ dreamId, ...variables })
+          return editCustomFieldMutation({ bucketId, ...variables })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message));
         })}
@@ -71,8 +71,8 @@ const DreamCustomField = ({
             inputRef={register()}
           />
           <HiddenTextField
-            name={`${fieldName}.eventId`}
-            defaultValue={eventId}
+            name={`${fieldName}.collectionId`}
+            defaultValue={collectionId}
             inputRef={register()}
           />
           <div className="my-2">
@@ -100,11 +100,10 @@ const DreamCustomField = ({
                 defaultValue={defaultValue}
                 inputRef={register}
                 fullWidth
-                autoFocus
               >
                 <option value={""}></option>
-                <option value={true}>Yes</option>
-                <option value={false}>No</option>
+                <option value={"true"}>Yes</option>
+                <option value={"false"}>No</option>
               </SelectInput>
             ) : null}
           </div>

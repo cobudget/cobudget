@@ -1,13 +1,14 @@
-import { dedupExchange, fetchExchange, errorExchange } from "urql";
+import { dedupExchange, fetchExchange, errorExchange, gql } from "urql";
 import { NextUrqlContext, NextUrqlPageContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
-import { EVENT_MEMBERS_QUERY } from "../components/EventMembers";
+import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { DREAMS_QUERY } from "pages/[org]/[collection]";
+import { BUCKETS_QUERY } from "pages/[org]/[collection]";
+import { BUCKET_QUERY } from "pages/[org]/[collection]/[bucket]";
 import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
@@ -46,37 +47,32 @@ export const client = (
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
-          DreamsPage: () => null,
+          BucketsPage: () => null,
         },
-        // resolvers: {
-        //   Query: {
-        //     dreamsPage: simplePagination({
-        //       // offsetArgument: "offset",
-        //       // limitArgument: "limit",
-        //       // mergeMode: "after",
-        //     }),
-        //   },
-        // },
         updates: {
           Mutation: {
             joinCollection(result: any, args, cache) {
               if (result.joinCollection) {
+                console.log({ result });
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug: result.joinCollection.event.organization.slug,
-                      collectionSlug: result.joinCollection.event.slug,
+                      orgSlug:
+                        result.joinCollection.collection.organization?.slug ??
+                        "c",
+                      collectionSlug: result.joinCollection.collection.slug,
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
+                    console.log({ data });
                     return {
                       ...data,
-                      currentOrgMember: {
-                        ...data.currentOrgMember,
+                      currentUser: {
+                        ...data.currentUser,
+                        currentCollMember: result.joinCollection,
                         collectionMemberships: [
-                          ...data.currentOrgMember.collectionMemberships,
+                          ...data.currentUser.collectionMemberships,
                           result.joinCollection,
                         ],
                       },
@@ -96,7 +92,6 @@ export const client = (
                     },
                   },
                   (data) => {
-                    console.log({ deeeeta: data });
                     return {
                       ...data,
                       currentOrgMember: result.joinOrg,
@@ -104,6 +99,59 @@ export const client = (
                   }
                 );
               }
+            },
+            updateMember(result: any, { isApproved }, cache) {
+              // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
+              if (isApproved)
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "membersPage")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "membersPage", field.arguments);
+                  });
+            },
+
+            deleteMember(result: any, { memberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
+
+              // cache
+              //   .inspectFields("Query")
+              //   .filter((field) => field.fieldName === "membersPage")
+              //   .forEach((field) => {
+              //     if (!field.arguments.limit) return null;
+              //     cache.updateQuery(
+              //       {
+              //         query: COLLECTION_MEMBERS_QUERY,
+              //         variables: {
+              //           collectionId: field.arguments.collectionId,
+              //           offset: field.arguments.offset,
+              //           limit: field.arguments.limit,
+              //         },
+              //       },
+              //       (data) => {
+              //         return {
+              //           ...data,
+              //           approvedMembersPage: {
+              //             ...data.approvedMembersPage,
+              //             approvedMembers: data.approvedMembersPage.approvedMembers.filter(
+              //               (member) => member.id !== memberId
+              //             ),
+              //           },
+              //           requestsToJoinPage: {
+              //             ...data.requestsToJoinPage,
+              //             requestsToJoin: data.requestsToJoinPage.requestsToJoin.filter(
+              //               (member) => member.id !== memberId
+              //             ),
+              //           },
+              //         };
+              //       }
+              //     );
+              //   });
             },
             deleteCollection(result: any, { collectionId }, cache) {
               const fields = cache
@@ -126,45 +174,73 @@ export const client = (
                   );
                 });
             },
-            deleteDream(result: any, { dreamId }, cache) {
-              const fields = cache
+            deleteTag(result: any, { tagId }, cache) {
+              cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "dreamsPage")
+                .filter((field) => field.fieldName === "bucket")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: DREAMS_QUERY,
-                      variables: {
-                        offset: field.arguments.offset,
-                        limit: field.arguments.limit,
-                        eventSlug: field.arguments.eventSlug,
-                        orgSlug: field.arguments.orgSlug,
-                      },
+                      query: BUCKET_QUERY,
+                      variables: field.arguments,
                     },
                     (data) => {
-                      data.dreamsPage.dreams = data.dreamsPage.dreams.filter(
-                        (dream) => dream.id !== dreamId
+                      data.bucket.tags = data.bucket.tags.filter(
+                        (tag) => tag.id !== tagId
                       );
                       return data;
                     }
                   );
                 });
             },
-            addComment(result: any, { content, dreamId }, cache) {
-              console.log({ result });
+            createDream(result: any, { collectionId }, cache) {
+              // normally when adding a thing to a cached list we just want
+              // to prepend the new item. but the bucket list on the coll
+              // page has a weird shuffle, so we'll instead invalidate the
+              // cache so that the list is refetched next time
+
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "bucketsPage")
+                .filter(
+                  (field) => field.arguments.collectionId === collectionId
+                )
+                .forEach((field) => {
+                  cache.invalidate("Query", "bucketsPage", field.arguments);
+                });
+            },
+            deleteDream(result: any, { bucketId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "bucketsPage")
+                .forEach((field) => {
+                  cache.updateQuery(
+                    {
+                      query: BUCKETS_QUERY,
+                      variables: field.arguments,
+                    },
+                    (data) => {
+                      data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
+                        (bucket) => bucket.id !== bucketId
+                      );
+                      return data;
+                    }
+                  );
+                });
+            },
+            addComment(result: any, { content, bucketId }, cache) {
               if (result.addComment) {
                 cache.updateQuery(
                   {
                     query: COMMENTS_QUERY,
                     variables: {
-                      dreamId,
+                      bucketId,
                       from: 0,
                       limit: 10,
                       order: "desc",
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -178,21 +254,19 @@ export const client = (
                 );
               }
             },
-            deleteComment(result: any, { commentId, dreamId }, cache) {
-              console.log({ result });
+            deleteComment(result: any, { commentId, bucketId }, cache) {
               if (result.deleteComment) {
                 cache.updateQuery(
                   {
                     query: COMMENTS_QUERY,
                     variables: {
-                      dreamId,
+                      bucketId,
                       from: 0,
                       limit: 10,
                       order: "desc",
                     },
                   },
                   (data) => {
-                    console.log({ data });
                     return {
                       ...data,
                       commentSet: {
@@ -205,6 +279,24 @@ export const client = (
                   }
                 );
               }
+            },
+            raiseFlag(result, { bucketId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "commentSet")
+                .filter((field) => field.arguments.bucketId === bucketId)
+                .forEach((field) => {
+                  cache.invalidate("Query", "commentSet", field.arguments);
+                });
+            },
+            resolveFlag(result, { bucketId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "commentSet")
+                .filter((field) => field.arguments.bucketId === bucketId)
+                .forEach((field) => {
+                  cache.invalidate("Query", "commentSet", field.arguments);
+                });
             },
             inviteOrgMembers(result: any, _args, cache) {
               if (result.inviteOrgMembers) {
@@ -228,23 +320,20 @@ export const client = (
                 );
               }
             },
-            inviteEventMembers(result: any, { eventId }, cache) {
-              if (result.inviteEventMembers) {
+            inviteCollectionMembers(result: any, { collectionId }, cache) {
+              if (result.inviteCollectionMembers) {
                 cache.updateQuery(
                   {
-                    query: EVENT_MEMBERS_QUERY,
-                    variables: { eventId, offset: 0, limit: 1000 },
+                    query: COLLECTION_MEMBERS_QUERY,
+                    variables: { collectionId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {
-                    console.log({
-                      data,
-                    });
                     return {
                       ...data,
                       approvedMembersPage: {
                         ...data.approvedMembersPage,
                         approvedMembers: [
-                          ...result.inviteEventMembers,
+                          ...result.inviteCollectionMembers,
                           ...data.approvedMembersPage?.approvedMembers,
                         ],
                       },
@@ -252,6 +341,25 @@ export const client = (
                   }
                 );
               }
+            },
+            contribute(result, args, cache) {
+              const queryFields = cache.inspectFields("Query");
+
+              queryFields
+                .filter((field) => field.fieldName === "contributionsPage")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "contributionsPage",
+                    field.arguments
+                  );
+                });
+
+              queryFields
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
             },
           },
         },

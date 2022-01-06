@@ -8,9 +8,10 @@ import EditBudgetModal from "./EditBudgetModal";
 
 const DreamBudget = ({
   budgetItems,
-  dreamId,
+  bucketId,
   canEdit,
-  event,
+  collection,
+  currentOrg,
   currency,
   allowStretchGoals,
   minGoal,
@@ -22,8 +23,9 @@ const DreamBudget = ({
   const nonMonetaryIncome = incomeItems.filter((item) => item.min === 0);
   const expenseItems = budgetItems.filter((item) => item.type === "EXPENSE");
 
-  const expenseTotalMin = minGoal / 100;
-  const expenseTotalMax = maxGoal / 100;
+  // All the below is in cents so needs to be divided by 100 when rendering
+  const expenseTotalMin = minGoal;
+  const expenseTotalMax = maxGoal;
   const incomeTotal = monetaryIncome
     .map((e) => e.min)
     .reduce((a, b) => a + b, 0);
@@ -34,13 +36,14 @@ const DreamBudget = ({
     <>
       {editing && (
         <EditBudgetModal
-          dreamId={dreamId}
+          bucketId={bucketId}
           budgetItems={budgetItems}
           currency={currency}
           allowStretchGoals={allowStretchGoals}
           handleClose={() => setEditing(false)}
           open={editing}
-          event={event}
+          collection={collection}
+          currentOrg={currentOrg}
         />
       )}
 
@@ -84,9 +87,9 @@ const DreamBudget = ({
                     >
                       <td className="px-4 py-2">Total</td>
                       <td className="px-4 py-2">
-                        {thousandSeparator(expenseTotalMin)}
+                        {thousandSeparator(expenseTotalMin / 100)}
                         {expenseTotalMax > 0
-                          ? " - " + thousandSeparator(expenseTotalMax)
+                          ? " - " + thousandSeparator(expenseTotalMax / 100)
                           : ""}{" "}
                         {currency}
                       </td>
@@ -120,7 +123,7 @@ const DreamBudget = ({
                     >
                       <td className="px-4 py-2">Total</td>
                       <td className="px-4 py-2">
-                        {thousandSeparator(incomeTotal)} {currency}
+                        {thousandSeparator(incomeTotal / 100)} {currency}
                       </td>
                     </tr>
                   </tbody>
@@ -157,14 +160,14 @@ const DreamBudget = ({
             </div>
             <div className="self-end">
               <span className="font-bold">
-                {thousandSeparator(goalTotalMin)} {currency}
+                {thousandSeparator(goalTotalMin / 100)} {currency}
               </span>
               {maxGoal > 0 && (
                 <>
                   {" "}
                   (stretch goal:{" "}
                   <span className="font-bold">
-                    {thousandSeparator(goalTotalMax)} {currency}
+                    {thousandSeparator(goalTotalMax / 100)} {currency}
                   </span>
                   )
                 </>

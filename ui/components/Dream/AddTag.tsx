@@ -4,8 +4,8 @@ import { useMutation, gql } from "urql";
 import Downshift from "downshift";
 
 const ADD_TAG_MUTATION = gql`
-  mutation AddTag($dreamId: ID!, $tagId: ID, $tagValue: String) {
-    addTag(dreamId: $dreamId, tagId: $tagId, tagValue: $tagValue) {
+  mutation AddTag($bucketId: ID!, $tagId: ID!) {
+    addTag(bucketId: $bucketId, tagId: $tagId) {
       id
       tags {
         id
@@ -18,16 +18,16 @@ const ADD_TAG_MUTATION = gql`
 const AddTag = ({ items: eventTags, dream }) => {
   const [, addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
+
   return (
     <Downshift
       id="tags"
       onChange={(tag) => {
         if (!tag) return;
-        const variables = tag.id ? { tagId: tag.id } : { tagValue: tag.value };
 
         addTag({
-          dreamId: dream.id,
-          ...variables,
+          bucketId: dream.id,
+          tagId: tag.id,
         }).then(() => setInput(""));
       }}
       onInputValueChange={(value) => setInput(value)}
@@ -53,22 +53,13 @@ const AddTag = ({ items: eventTags, dream }) => {
               item.value.toLowerCase().includes(inputValue.toLowerCase())
           );
 
-        const inputValueAlreadyDefined = filtered.reduce(
-          (previous, current) => previous + (current.value === inputValue),
-          false
-        );
-
-        if (inputValue.length && !inputValueAlreadyDefined) {
-          filtered = [{ value: inputValue }, ...filtered];
-        }
-
         return (
           <div>
             {/* <label {...getLabelProps()}>Add a tag</label> */}
             <div
               className=""
               //style={{ display: "inline-block" }}
-              {...getRootProps({}, { suppressRefError: true })}
+              {...getRootProps({} as any, { suppressRefError: true })}
             >
               <input
                 {...getInputProps({ onFocus: openMenu })}

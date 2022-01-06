@@ -8,14 +8,14 @@ const EditComment = ({ comment, handleDone }) => {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, dream, event } = useContext<any>(Context);
+  const { editComment, dream, collection } = useContext<any>(Context);
 
   return (
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
         editComment({
-          dreamId: dream.id,
+          bucketId: dream.id,
           commentId: comment.id,
           content,
         })
@@ -36,7 +36,7 @@ const EditComment = ({ comment, handleDone }) => {
         }}
         inputRef={register({ required: "Required" })}
         autoFocus
-        color={event.color}
+        color={collection.color}
         wysiwyg
       />
       <div className="flex justify-end">
@@ -44,11 +44,11 @@ const EditComment = ({ comment, handleDone }) => {
           onClick={handleDone}
           className="mr-2"
           variant="secondary"
-          color={event.color}
+          color={collection.color}
         >
           Cancel
         </Button>
-        <Button type="submit" loading={submitting} color={event.color}>
+        <Button type="submit" loading={submitting} color={collection.color}>
           Save
         </Button>
       </div>

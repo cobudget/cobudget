@@ -36,6 +36,7 @@ export default function AuthenticationForm() {
     >
       {/* @ts-ignore */}
       <TextField
+        name="email"
         inputProps={{
           type: "email",
           value: email,

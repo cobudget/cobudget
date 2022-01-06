@@ -35,7 +35,7 @@ const Button = forwardRef(
   ) => {
     const classes = `
   font-medium transition-colors transition-opacity duration-100 rounded-md 
-  relative flex justify-center items-center 
+  relative justify-center items-center 
   focus:outline-none focus:ring ${
     (size === "large"
       ? "text-xl px-5 py-3"
@@ -44,6 +44,8 @@ const Button = forwardRef(
       : "px-5 py-2") +
     " " +
     (fullWidth ? "w-full" : "") +
+    " " +
+    (href ? "inline-block" : "flex") +
     " " +
     (disabled || loading ? "cursor-default" : "") +
     " " +

@@ -24,6 +24,7 @@ module.exports = {
       safelist: [
         ...classes,
         ...classes.map((c) => `hover:${c}`),
+        ...classes.map((c) => `group-hover:${c}`),
         ...classes.map((c) => `focus:${c}`),
         ...classes.map((c) => `focus-within:${c}`),
       ],
@@ -98,7 +99,14 @@ module.exports = {
     },
   },
   variants: {
-    backgroundColor: ["responsive", "hover", "focus", "even", "focus-within"],
+    backgroundColor: [
+      "responsive",
+      "hover",
+      "group-hover",
+      "focus",
+      "even",
+      "focus-within",
+    ],
     textColor: ["responsive", "hover", "focus", "group-hover", "last"],
     shadowOutline: ["focus", "hover"],
     visibility: ["responsive", "group-hover"],

@@ -5,11 +5,24 @@ import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
 
 const SEARCH_MEMBERS_QUERY = gql`
-  query SearchMembers($eventId: ID!, $isApproved: Boolean) {
-    members(eventId: $eventId, isApproved: $isApproved) {
+  query SearchMembers($collectionId: ID!, $isApproved: Boolean) {
+    members(collectionId: $collectionId, isApproved: $isApproved) {
       id
       isApproved
-      orgMember {
+      user {
+        id
+        username
+        avatar
+      }
+    }
+  }
+`;
+
+const ADD_CO_CREATOR_MUTATION = gql`
+  mutation AddCocreator($bucketId: ID!, $memberId: ID!) {
+    addCocreator(bucketId: $bucketId, memberId: $memberId) {
+      id
+      cocreators {
         id
         user {
           id
@@ -21,37 +34,16 @@ const SEARCH_MEMBERS_QUERY = gql`
   }
 `;
 
-const ADD_CO_CREATOR_MUTATION = gql`
-  mutation AddCocreator($dreamId: ID!, $memberId: ID!) {
-    addCocreator(dreamId: $dreamId, memberId: $memberId) {
-      id
-      cocreators {
-        id
-        orgMember {
-          id
-          user {
-            id
-            username
-            avatar
-          }
-        }
-      }
-    }
-  }
-`;
-
 const REMOVE_CO_CREATOR_MUTATION = gql`
-  mutation RemoveCocreator($dreamId: ID!, $memberId: ID!) {
-    removeCocreator(dreamId: $dreamId, memberId: $memberId) {
+  mutation RemoveCocreator($bucketId: ID!, $memberId: ID!) {
+    removeCocreator(bucketId: $bucketId, memberId: $memberId) {
       id
       cocreators {
         id
-        orgMember {
-          user {
-            id
-            username
-            avatar
-          }
+        user {
+          id
+          username
+          avatar
         }
       }
     }
@@ -62,10 +54,8 @@ const Member = ({ member, add, remove }) => {
   return (
     <div className="flex items-center justify-between mb-2 overflow-y-scroll ">
       <div className="flex items-center">
-        <Avatar user={member.orgMember.user} size="small" />
-        <span className="ml-2 text-gray-800">
-          {member.orgMember.user.username}
-        </span>
+        <Avatar user={member.user} size="small" />
+        <span className="ml-2 text-gray-800">{member.user.username}</span>
       </div>
       <div className="flex items-center">
         {Boolean(add) && (
@@ -92,13 +82,13 @@ const Member = ({ member, add, remove }) => {
 const SearchMembersResult = ({
   searchInput,
   cocreators,
-  eventId,
+  collectionId,
   addCocreator,
   bucket,
 }) => {
   const [{ data: { members } = { members: [] } }] = useQuery({
     query: SEARCH_MEMBERS_QUERY,
-    variables: { eventId, isApproved: true },
+    variables: { collectionId, isApproved: true },
   });
 
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
@@ -108,9 +98,7 @@ const SearchMembersResult = ({
 
   if (searchInput) {
     result = result.filter((member) =>
-      member.orgMember.user.username
-        ?.toLowerCase()
-        .includes(searchInput.toLowerCase())
+      member.user.username?.toLowerCase().includes(searchInput.toLowerCase())
     );
   }
 
@@ -122,7 +110,7 @@ const SearchMembersResult = ({
           member={member}
           add={() =>
             addCocreator({
-              dreamId: bucket.id,
+              bucketId: bucket.id,
               memberId: member.id,
             }).catch((err) => alert(err.message))
           }
@@ -136,9 +124,9 @@ const EditCocreatorsModal = ({
   open,
   handleClose,
   dream,
-  event,
+  collection,
   cocreators,
-  currentOrgMember,
+  currentUser,
 }) => {
   const [searchInput, setSearchInput] = useState("");
 
@@ -160,13 +148,13 @@ const EditCocreatorsModal = ({
               member={member}
               remove={() => {
                 if (
-                  member.id !== currentOrgMember.currentEventMembership.id ||
+                  member.id !== currentUser?.currentCollMember.id ||
                   confirm(
                     "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
                   )
                 ) {
                   removeCocreator({
-                    dreamId: dream.id,
+                    bucketId: dream.id,
                     memberId: member.id,
                   }).catch((err) => alert(err.message));
                 }
@@ -187,7 +175,7 @@ const EditCocreatorsModal = ({
               searchInput={searchInput}
               addCocreator={addCocreator}
               cocreators={cocreators}
-              eventId={event.id}
+              collectionId={collection.id}
               bucket={dream}
             />
           </div>

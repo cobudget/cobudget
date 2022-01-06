@@ -1,21 +1,27 @@
 import {
   Box,
   Table,
-  Button,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
 } from "@material-ui/core";
+import Avatar from "../Avatar";
+import Button from "../Button";
 
-const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
+const RequestToJoinTable = ({
+  requestsToJoin,
+  updateMember,
+  deleteMember,
+  collection,
+}) => {
   if (requestsToJoin.length === 0) return null;
 
   return (
     <>
       <div className="mb-8">
-        <h2 className="text-xl mb-3">
+        <h2 className="text-xl mb-3 font-semibold">
           {requestsToJoin.length} requests to join
         </h2>
         <div className="bg-white rounded-lg shadow">
@@ -23,8 +29,7 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Name</TableCell>
+                  <TableCell>User</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Bio</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -34,21 +39,25 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                 {requestsToJoin.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell component="th" scope="row">
-                      {member.orgMember.user.username}
+                      <div className="flex space-x-3">
+                        <Avatar user={member.user} />
+                        <div>
+                          <p className="font-medium text-base">{member.name}</p>
+                          <p className="text-gray-700 text-sm">
+                            @{member.user.username}
+                          </p>
+                        </div>
+                      </div>
                     </TableCell>
+                    <TableCell>{member.email}</TableCell>
                     <TableCell component="th" scope="row">
-                      {member.orgMember.user.name}
-                    </TableCell>
-                    <TableCell>{member.orgMember.user.email}</TableCell>
-                    <TableCell component="th" scope="row">
-                      {member.orgMember.bio}
+                      {member.bio}
                     </TableCell>
                     <TableCell align="right" padding="none">
                       <Box p="0 15px" display="flex" justifyContent="flex-end">
                         <Box m="0 8px 0">
                           <Button
-                            color="secondary"
-                            size="small"
+                            variant="secondary"
                             onClick={() => {
                               if (
                                 confirm(
@@ -56,7 +65,8 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                                 )
                               )
                                 deleteMember({
-                                  variables: { memberId: member.id },
+                                  collectionId: collection.id,
+                                  memberId: member.id,
                                 });
                             }}
                           >
@@ -65,19 +75,15 @@ const RequestToJoinTable = ({ requestsToJoin, updateMember, deleteMember }) => {
                         </Box>
 
                         <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
+                          // variant="primary"
                           onClick={() => {
                             if (
                               confirm("Are you sure you would like to approve?")
                             )
                               updateMember({
-                                variables: {
-                                  eventId: event.id,
-                                  memberId: member.id,
-                                  isApproved: true,
-                                },
+                                collectionId: collection.id,
+                                memberId: member.id,
+                                isApproved: true,
                               });
                           }}
                         >

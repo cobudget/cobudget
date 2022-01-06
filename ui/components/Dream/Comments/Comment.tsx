@@ -19,12 +19,12 @@ const LogIcon = () => (
 const Comment = ({ comment, showBorderBottom }) => {
   const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
-  const { deleteComment, currentOrgMember, dream } = useContext<any>(Context);
+  const { deleteComment, currentUser, dream } = useContext<any>(Context);
 
   const canEdit =
-    currentOrgMember &&
-    (currentOrgMember?.id === comment.orgMember?.id ||
-      currentOrgMember?.currentEventMembership?.isAdmin);
+    currentUser &&
+    (currentUser.currentCollMember?.id === comment.collectionMember?.id ||
+      currentUser.currentCollMember?.isAdmin);
 
   return (
     <div className="flex my-4">
@@ -34,7 +34,9 @@ const Comment = ({ comment, showBorderBottom }) => {
         ) : (
           <Avatar
             user={
-              comment.orgMember?.user ?? { username: comment.discourseUsername }
+              comment.collectionMember?.user ?? {
+                username: comment.discourseUsername,
+              }
             }
           />
         )}
@@ -45,10 +47,10 @@ const Comment = ({ comment, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           {comment.isLog ? (
             <h5>Log</h5>
-          ) : comment.orgMember === null ? (
+          ) : comment.collectionMember === null ? (
             <h5>A discourse user</h5>
           ) : (
-            <h5>{comment.orgMember?.user.username}</h5>
+            <h5>{comment.collectionMember?.user.username}</h5>
           )}
           <div className="flex items-center">
             <span className="font-normal mr-2">
@@ -81,7 +83,7 @@ const Comment = ({ comment, showBorderBottom }) => {
                       "Are you sure you would like to delete this comment?"
                     ) &&
                     deleteComment({
-                      dreamId: dream.id,
+                      bucketId: dream.id,
                       commentId: comment.id,
                     }) &&
                     setSubmitting(true)

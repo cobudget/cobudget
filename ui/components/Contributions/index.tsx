@@ -8,24 +8,29 @@ import LoadMore from "components/LoadMore";
 dayjs.extend(LocalizedFormat);
 
 export const CONTRIBUTIONS_QUERY = gql`
-  query Contributions($eventId: ID!, $offset: Int, $limit: Int) {
-    contributionsPage(eventId: $eventId, offset: $offset, limit: $limit) {
+  query Contributions($collectionId: ID!, $offset: Int, $limit: Int) {
+    contributionsPage(
+      collectionId: $collectionId
+      offset: $offset
+      limit: $limit
+    ) {
       moreExist
-      contributions(eventId: $eventId, offset: $offset, limit: $limit) {
+      contributions(
+        collectionId: $collectionId
+        offset: $offset
+        limit: $limit
+      ) {
         id
         amount
         createdAt
-        eventMember {
+        collectionMember {
           id
-          orgMember {
+          user {
             id
-            user {
-              id
-              username
-            }
+            username
           }
         }
-        dream {
+        bucket {
           id
           title
         }
@@ -34,7 +39,7 @@ export const CONTRIBUTIONS_QUERY = gql`
   }
 `;
 
-const Contributions = ({ event }) => {
+const Contributions = ({ collection, currentOrg }) => {
   const [
     {
       data: { contributionsPage: { moreExist, contributions } } = {
@@ -44,7 +49,7 @@ const Contributions = ({ event }) => {
     },
   ] = useQuery({
     query: CONTRIBUTIONS_QUERY,
-    variables: { eventId: event.id, offset: 0, limit: 15 },
+    variables: { collectionId: collection.id, offset: 0, limit: 500 },
   });
 
   return (
@@ -66,15 +71,19 @@ const Contributions = ({ event }) => {
                   <span className="text-gray-500 mr-4">
                     {dayjs(c.createdAt).format("LLL")}
                   </span>
-                  @{c.eventMember.orgMember.user.username} funded{" "}
-                  <Link href={`/${event.slug}/${c.dream.id}`}>
+                  @{c.collectionMember.user.username} funded{" "}
+                  <Link
+                    href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+                      c.bucket.id
+                    }`}
+                  >
                     <a className="font-semibold hover:underline">
-                      {c.dream.title}
+                      {c.bucket.title}
                     </a>
                   </Link>
                 </div>
                 <span className="text-green-700 font-semibold">
-                  {thousandSeparator(c.amount / 100)} {event.currency}
+                  {thousandSeparator(c.amount / 100)} {collection.currency}
                 </span>
               </div>
             ))}

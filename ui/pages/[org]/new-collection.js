@@ -11,15 +11,15 @@ import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
 
-const CREATE_EVENT = gql`
-  mutation CreateEvent(
+const CREATE_COLLECTION = gql`
+  mutation CreateCollection(
     $orgId: ID!
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
-    createEvent(
+    createCollection(
       orgId: $orgId
       title: $title
       slug: $slug
@@ -33,16 +33,16 @@ const CREATE_EVENT = gql`
 `;
 
 export default function NewCollectionPage({ currentOrg }) {
-  const [, createEvent] = useMutation(CREATE_EVENT);
+  const [, createCollection] = useMutation(CREATE_COLLECTION);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createEvent({ ...variables, orgId: currentOrg.id })
+    createCollection({ ...variables, orgId: currentOrg.id })
       .then(({ data }) => {
         Router.push(
           "/[org]/[collection]",
-          `/${currentOrg.slug}/${data.createEvent.slug}`
+          `/${currentOrg.slug}/${data.createCollection.slug}`
         );
       })
       .catch((err) => {

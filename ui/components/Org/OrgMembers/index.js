@@ -7,22 +7,18 @@ import InviteMembersModal from "components/InviteMembersModal";
 import OrgMembersTable from "./OrgMembersTable";
 
 const UPDATE_ORG_MEMBER = gql`
-  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isOrgAdmin: Boolean) {
-    updateOrgMember(
-      orgId: $orgId
-      memberId: $memberId
-      isOrgAdmin: $isOrgAdmin
-    ) {
+  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isAdmin: Boolean) {
+    updateOrgMember(orgId: $orgId, memberId: $memberId, isAdmin: $isAdmin) {
       id
-      isOrgAdmin
+      isAdmin
     }
   }
 `;
 
 // // TODO: change to deleting org members, not event members
 // const DELETE_MEMBER = gql`
-//   mutation UpdateMember($memberId: ID!, $eventId: ID!) {
-//     deleteMember(memberId: $memberId, eventId: $eventId) {
+//   mutation UpdateMember($memberId: ID!, $collectionId: ID!) {
+//     deleteMember(memberId: $memberId, collectionId: $collectionId) {
 //       id
 //     }
 //   }
@@ -32,16 +28,16 @@ const OrgMembers = ({ currentOrg }) => {
   const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
-  //   variables: { eventId: event.id },
+  //   variables: { collectionId: event.id },
   //   update(cache, { data: { deleteMember } }) {
   //     const { members } = cache.readQuery({
   //       query: MEMBERS_QUERY,
-  //       variables: { eventId: event.id },
+  //       variables: { collectionId: event.id },
   //     });
 
   //     cache.writeQuery({
   //       query: MEMBERS_QUERY,
-  //       variables: { eventId: event.id },
+  //       variables: { collectionId: event.id },
   //       data: {
   //         members: members.filter((member) => member.id !== deleteMember.id),
   //       },

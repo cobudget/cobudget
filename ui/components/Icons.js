@@ -324,3 +324,39 @@ export const ChevronArrowRightIcon = (props) => (
     ></path>
   </svg>
 );
+
+export const SelectorIcon = (props) => (
+  <svg
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-6 h-6"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+    ></path>
+  </svg>
+);
+
+export const SlashIcon = (props) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="32"
+    height="32"
+    stroke="currentColor"
+    strokeWidth="1"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    fill="none"
+    shapeRendering="geometricPrecision"
+    // style="color: var(--accents-2);"
+    {...props}
+  >
+    <path d="M16.88 3.549L7.12 20.451"></path>
+  </svg>
+);

@@ -7,10 +7,11 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
+import FinishSignup from "components/FinishSignup";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
-    event(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
       id
       slug
       info
@@ -51,54 +52,57 @@ export const TOP_LEVEL_QUERY = gql`
         value
       }
     }
+
     currentUser {
       id
       username
       name
       avatar
       email
+
       orgMemberships {
         id
+        isAdmin
         organization {
           id
           name
           slug
+          logo
         }
-      }
-    }
-    currentOrgMember(orgSlug: $orgSlug) {
-      id
-      bio
-      isOrgAdmin
-      discourseUsername
-      hasDiscourseApiKey
-      user {
-        id
-        name
-        username
-        email
       }
       collectionMemberships {
         id
         isAdmin
-        isGuide
         isApproved
-        event {
+        collection {
           id
           title
           slug
+          organization {
+            id
+            name
+            slug
+            logo
+          }
         }
       }
-      currentEventMembership(collectionSlug: $collectionSlug) {
+      currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
         id
         isAdmin
-        isGuide
+        isModerator
         isApproved
         balance
-        event {
+        collection {
           id
           title
         }
+      }
+      currentOrgMember(orgSlug: $orgSlug) {
+        id
+        bio
+        isAdmin
+        discourseUsername
+        hasDiscourseApiKey
       }
     }
 
@@ -119,11 +123,10 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, currentOrgMember, event } = {
+      data: { currentUser, currentOrg, collection } = {
         currentUser: null,
         currentOrg: null,
-        currentOrgMember: null,
-        event: null,
+        collection: null,
       },
       fetching,
       error,
@@ -151,36 +154,43 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
+  
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
+
+  const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
   return (
     <>
       <Modal
         active={modal}
         closeModal={closeModal}
-        currentOrgMember={currentOrgMember}
         currentUser={currentUser}
         currentOrg={currentOrg}
       />
+      <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
-        currentOrgMember={currentOrgMember}
         currentOrg={currentOrg}
         openModal={openModal}
-        event={event}
+        collection={collection}
         router={router}
         title={
           currentOrg
-            ? event
-              ? `${event.title} | ${currentOrg.name}`
+            ? collection
+              ? `${collection.title} | ${currentOrg.name}`
               : currentOrg.name
+            : collection
+            ? collection.title
             : "Cobudget"
         }
       >
         <Component
           {...pageProps}
-          event={event}
+          collection={collection}
           currentUser={currentUser}
-          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
           openModal={openModal}
           router={router}

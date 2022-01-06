@@ -4,9 +4,9 @@ import Head from "next/head";
 import Dream from "../../../../components/Dream";
 import HappySpinner from "../../../../components/HappySpinner";
 
-export const DREAM_QUERY = gql`
-  query Dream($id: ID!) {
-    dream(id: $id) {
+export const BUCKET_QUERY = gql`
+  query Bucket($id: ID!) {
+    bucket(id: $id) {
       id
       description
       summary
@@ -30,15 +30,13 @@ export const DREAM_QUERY = gql`
         amount
         createdAt
 
-        eventMember {
+        collectionMember {
           id
-          orgMember {
+
+          user {
             id
-            user {
-              id
-              name
-              username
-            }
+            name
+            username
           }
         }
       }
@@ -70,13 +68,11 @@ export const DREAM_QUERY = gql`
       }
       cocreators {
         id
-        orgMember {
+
+        user {
           id
-          user {
-            id
-            username
-            avatar
-          }
+          username
+          avatar
         }
       }
       images {
@@ -97,30 +93,26 @@ export const DREAM_QUERY = gql`
   }
 `;
 
-const DreamPage = ({
-  event,
-  currentUser,
-  currentOrgMember,
-  currentOrg,
-  router,
-}) => {
-  const [
-    { data: { dream } = { dream: null }, fetching: loading, error },
-  ] = useQuery({ query: DREAM_QUERY, variables: { id: router.query.bucket } });
+const DreamPage = ({ collection, currentUser, currentOrg, router }) => {
+  const [{ data, fetching: loading, error }] = useQuery({
+    query: BUCKET_QUERY,
+    variables: { id: router.query.bucket },
+  });
 
-  if (dream)
+  const { bucket } = data ?? { bucket: null };
+
+  if (bucket)
     return (
       <div className="page">
         <Head>
           <title>
-            {dream.title} | {event?.title}
+            {bucket.title} | {collection?.title}
           </title>
         </Head>
         <Dream
-          dream={dream}
-          event={event}
+          dream={bucket}
+          collection={collection}
           currentUser={currentUser}
-          currentOrgMember={currentOrgMember}
           currentOrg={currentOrg}
         />
       </div>

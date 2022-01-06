@@ -9,15 +9,19 @@ import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 
 const BULK_ALLOCATE_MUTATION = gql`
-  mutation BulkAllocate($eventId: ID!, $amount: Int!, $type: AllocationType!) {
-    bulkAllocate(eventId: $eventId, amount: $amount, type: $type) {
+  mutation BulkAllocate(
+    $collectionId: ID!
+    $amount: Int!
+    $type: AllocationType!
+  ) {
+    bulkAllocate(collectionId: $collectionId, amount: $amount, type: $type) {
       id
       balance
     }
   }
 `;
 
-const BulkAllocateModal = ({ event, handleClose }) => {
+const BulkAllocateModal = ({ collection, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
@@ -27,7 +31,7 @@ const BulkAllocateModal = ({ event, handleClose }) => {
   );
 
   const disabled = inputValue === "" || (!amount && type === "Add");
-  const total = amount * event.numberOfApprovedMembers;
+  const total = amount * collection.numberOfApprovedMembers;
   return (
     <Modal
       open={true}
@@ -48,7 +52,7 @@ const BulkAllocateModal = ({ event, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             bulkAllocate({
-              eventId: event.id,
+              collectionId: collection.id,
               amount,
               type: type.toUpperCase(),
             }).then(({ error }) => {
@@ -69,19 +73,19 @@ const BulkAllocateModal = ({ event, handleClose }) => {
             }}
             placeholder="0"
             autoFocus
-            endAdornment={event.currency}
+            endAdornment={collection.currency}
             className="w-36 mx-auto mt-4 mb-2"
           />
           {type === "Add" ? (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Adding {thousandSeparator(amount / 100)} {event.currency} to{" "}
-              {event.numberOfApprovedMembers} members ={" "}
-              {thousandSeparator(total / 100)} {event.currency} total
+              Adding {thousandSeparator(amount / 100)} {collection.currency} to{" "}
+              {collection.numberOfApprovedMembers} members ={" "}
+              {thousandSeparator(total / 100)} {collection.currency} total
             </p>
           ) : (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Setting {event.numberOfApprovedMembers} members balances to{" "}
-              {thousandSeparator(amount / 100)} {event.currency}
+              Setting {collection.numberOfApprovedMembers} members balances to{" "}
+              {thousandSeparator(amount / 100)} {collection.currency}
             </p>
           )}
 

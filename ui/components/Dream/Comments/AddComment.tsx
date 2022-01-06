@@ -15,24 +15,26 @@ function AddComment() {
   const {
     addComment,
     dream,
-    event,
+    collection,
     currentOrg,
-    currentOrgMember,
+    currentUser,
   } = useContext<any>(Context);
-  if (currentOrg.discourseUrl && !currentOrgMember.hasDiscourseApiKey) {
+
+  if (currentOrg?.discourseUrl && !currentUser.currentOrgMember?.hasDiscourseApiKey) {
     return (
       <Link href={"/connect-discourse"} passHref>
-        <Button color={event.color} nextJsLink className="my-2">
+        <Button color={collection.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
       </Link>
     );
   }
+
   return (
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ dreamId: dream.id, content })
+        addComment({ bucketId: dream.id, content })
           .then(() => {
             inputRef.current.blur();
             inputRef.current.clear();
@@ -43,7 +45,7 @@ function AddComment() {
     >
       <div className="flex">
         <div className="mr-4">
-          <Avatar user={currentOrgMember.user} />
+          <Avatar user={currentUser} />
         </div>
         <div className="min-w-0">
           <div className="mb-2">
@@ -62,7 +64,7 @@ function AddComment() {
                 register({ required: "Required" });
                 inputRef.current = e;
               }}
-              color={event.color}
+              color={collection.color}
               wysiwyg
             />
           </div>
@@ -71,7 +73,7 @@ function AddComment() {
               <Button
                 onClick={inputRef.current.clear}
                 variant="secondary"
-                color={event.color}
+                color={collection.color}
                 className="mr-2"
               >
                 Cancel
@@ -79,7 +81,7 @@ function AddComment() {
               <Button
                 type="submit"
                 disabled={content.length === 0}
-                color={event.color}
+                color={collection.color}
                 loading={submitting}
               >
                 Submit

@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 import Button from "../../components/Button";
@@ -7,10 +7,10 @@ import Label from "../../components/Label";
 import SubMenu from "../../components/SubMenu";
 import PageHero from "../../components/PageHero";
 import EditableField from "components/EditableField";
-
+import Router from "next/router";
 export const COLLECTIONS_QUERY = gql`
-  query Collections($orgSlug: String!) {
-    collections(orgSlug: $orgSlug) {
+  query Collections($orgId: ID!) {
+    collections(orgId: $orgId) {
       id
       slug
       title
@@ -43,18 +43,24 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
-const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
+const IndexPage = ({ router, currentOrg, currentUser }) => {
+  useEffect(() => {
+    if (router.query.org == "c") router.replace("/");
+  }, []);
+
   const [{ data, error }] = useQuery({
     query: COLLECTIONS_QUERY,
-    variables: { orgSlug: router.query.org },
+    variables: { orgId: currentOrg?.id },
   });
   if (!currentOrg) return null;
+
   const collections = data?.collections ?? [];
-  const showTodos = currentOrgMember?.isOrgAdmin && !currentOrg.finishedTodos;
+  const showTodos =
+    currentUser?.currentOrgMember?.isAdmin && !currentOrg.finishedTodos;
 
   return (
     <>
-      <SubMenu currentOrgMember={currentOrgMember} />
+      <SubMenu currentUser={currentUser} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
@@ -62,27 +68,24 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
               value={currentOrg?.info}
               label="Add message"
               placeholder={`# Welcome to ${currentOrg?.name}'s page`}
-              canEdit={currentOrgMember?.isOrgAdmin}
+              canEdit={currentUser?.currentOrgMember?.isAdmin}
               name="info"
               className="h-10"
               MUTATION={gql`
-                mutation EditOrgInfo($organizationId: ID!, $info: String) {
-                  editOrganization(
-                    organizationId: $organizationId
-                    info: $info
-                  ) {
+                mutation EditOrgInfo($orgId: ID!, $info: String) {
+                  editOrganization(orgId: $orgId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ organizationId: currentOrg?.id }}
+              variables={{ orgId: currentOrg?.id }}
               maxLength={500}
               required
             />
           </div>
           <div>
-            {currentOrgMember?.isOrgAdmin && (
+            {currentUser?.currentOrgMember?.isAdmin && (
               <Link href={`/${currentOrg.slug}/new-collection`}>
                 <Button size="large" color="anthracit" className="float-right">
                   New collection
@@ -98,7 +101,7 @@ const IndexPage = ({ router, currentOrg, currentOrgMember }) => {
         }`}
       >
         <div
-          className={`grid gap-4 ${
+          className={`grid gap-4 content-start ${
             showTodos
               ? "grid-cols-1 md:grid-cols-2 col-span-3"
               : "grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4"

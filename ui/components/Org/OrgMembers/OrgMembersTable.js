@@ -19,13 +19,15 @@ import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
 export const ORG_MEMBERS_QUERY = gql`
-  query OrgMembers($orgSlug: String!, $offset: Int, $limit: Int) {
-    orgMembersPage(orgSlug: $orgSlug, offset: $offset, limit: $limit) {
+  query OrgMembers($orgId: ID!, $offset: Int, $limit: Int) {
+    orgMembersPage(orgId: $orgId, offset: $offset, limit: $limit) {
       moreExist
       orgMembers {
         id
-        isOrgAdmin
+        isAdmin
         bio
+        email
+        name
         user {
           id
           name
@@ -76,13 +78,13 @@ const ActionsDropdown = ({
             updateOrgMember({
               orgId: currentOrg.id,
               memberId: member.id,
-              isOrgAdmin: !member.isOrgAdmin,
+              isAdmin: !member.isAdmin,
             }).then(() => {
               handleClose();
             });
           }}
         >
-          {member.isOrgAdmin ? "Remove admin" : "Make admin"}
+          {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
         {/* how to also remove the user's event memberships when their org
             membership is removed?
@@ -130,7 +132,7 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: ORG_MEMBERS_QUERY,
     variables: {
-      orgSlug: currentOrg.slug,
+      orgId: currentOrg.id,
       offset: variables.offset,
       limit: variables.limit,
     },
@@ -152,11 +154,11 @@ const Page = ({
             {member.user.username}
           </TableCell>
           <TableCell component="th" scope="row">
-            {member.user.name}
+            {member.name}
           </TableCell>
           <TableCell>
             <Box display="flex" alignItems="center">
-              <Box m="0 8px 0">{member.user.email}</Box>
+              <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
                 <Tooltip title="Email not verified" placement="right">
                   <HelpOutlineOutlinedIcon fontSize="small" />
@@ -168,7 +170,7 @@ const Page = ({
             {member.bio}
           </TableCell>
           <TableCell align="right">
-            {member.isOrgAdmin && <span className="mr-2">Admin</span>}
+            {member.isAdmin && <span className="mr-2">Admin</span>}
           </TableCell>
           <TableCell align="right" padding="none">
             <ActionsDropdown

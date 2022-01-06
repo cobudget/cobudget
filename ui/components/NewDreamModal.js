@@ -9,28 +9,27 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const CREATE_DREAM = gql`
-  mutation CreateDream($eventId: ID!, $title: String!) {
-    createDream(eventId: $eventId, title: $title) {
+  mutation CreateDream($collectionId: ID!, $title: String!) {
+    createDream(collectionId: $collectionId, title: $title) {
       id
       title
     }
   }
 `;
 
-export default ({ event, handleClose, currentOrg }) => {
-  const [{ fetching: loading }, createDream] = useMutation(
-    CREATE_DREAM
-    // refetchQueries: ["Dreams"],
-  );
+const NewDreamModal = ({ collection, handleClose, currentOrg }) => {
+  const [{ fetching: loading }, createDream] = useMutation(CREATE_DREAM);
 
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmitCreate = (variables) => {
-    createDream({ ...variables, eventId: event.id })
+    createDream({ ...variables, collectionId: collection.id })
       .then(({ data }) => {
         Router.push(
           "/[org]/[collection]/[bucket]",
-          `/${currentOrg.slug}/${event.slug}/${data.createDream.id}`
+          `/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+            data.createDream.id
+          }`
         );
         handleClose();
       })
@@ -61,7 +60,7 @@ export default ({ event, handleClose, currentOrg }) => {
             autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
-            color={event.color}
+            color={collection.color}
           />
 
           <div className="flex justify-end">
@@ -70,7 +69,7 @@ export default ({ event, handleClose, currentOrg }) => {
               variant="secondary"
               onClick={handleClose}
               className="mr-3"
-              color={event.color}
+              color={collection.color}
             >
               Cancel
             </Button>
@@ -78,7 +77,7 @@ export default ({ event, handleClose, currentOrg }) => {
               size="large"
               type="submit"
               loading={loading}
-              color={event.color}
+              color={collection.color}
             >
               Create
             </Button>
@@ -88,3 +87,5 @@ export default ({ event, handleClose, currentOrg }) => {
     </Modal>
   );
 };
+
+export default NewDreamModal;

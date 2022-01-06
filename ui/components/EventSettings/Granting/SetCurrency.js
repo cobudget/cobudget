@@ -10,7 +10,7 @@ import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetCurrency = ({ closeModal, event }) => {
+const SetCurrency = ({ closeModal, collection }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
@@ -24,7 +24,7 @@ const SetCurrency = ({ closeModal, event }) => {
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
-            updateGranting({ ...variables, eventId: event.id })
+            updateGranting({ ...variables, collectionId: collection.id })
               .then(() => {
                 closeModal();
               })
@@ -38,7 +38,7 @@ const SetCurrency = ({ closeModal, event }) => {
             <SelectInput
               name="currency"
               label="Currency"
-              defaultValue={event.currency}
+              defaultValue={collection.currency}
               inputRef={register}
               fullWidth
             >
