@@ -1694,7 +1694,11 @@ const resolvers = {
         return collectionMembers;
       }
     ),
-    contribute: async (_, { collectionId, bucketId, amount }, { user }) => {
+    contribute: async (
+      _,
+      { collectionId, bucketId, amount },
+      { user, eventHub }
+    ) => {
       const collectionMember = await getCollectionMember({
         collectionId,
         userId: user.id,
@@ -1704,8 +1708,6 @@ const resolvers = {
       const { collection } = collectionMember;
 
       if (amount <= 0) throw new Error("Value needs to be more than zero");
-
-      // const event = await Event.findOne({ _id: collectionId });
 
       // Check that granting is open
       const now = dayjs();
@@ -1813,6 +1815,13 @@ const resolvers = {
           amount,
           bucketId: bucket.id,
         },
+      });
+
+      await eventHub.publish("contribute-to-bucket", {
+        collection,
+        bucket,
+        user,
+        amount,
       });
 
       return bucket;

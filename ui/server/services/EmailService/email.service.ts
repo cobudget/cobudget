@@ -337,4 +337,43 @@ export default {
 
     await sendEmails(emails);
   },
+  contributionToBucketNotification: async ({
+    collection,
+    bucket,
+    user,
+    amount,
+  }: {
+    collection: any;
+    bucket: any;
+    user: any;
+    amount: number;
+  }) => {
+    // send to cocreators of the bucket but not the donor
+
+    const { cocreators } = await prisma.bucket.findUnique({
+      where: { id: bucket.id },
+      include: { cocreators: { include: { user: true } } },
+    });
+
+    const usersToNotify = cocreators
+      .filter((cocreator) => cocreator.userId !== user.id)
+      .map((cocreator) => cocreator.user);
+
+    const emails = usersToNotify.map((user) => ({
+      to: user.email,
+      subject: `Your bucket “${escape(bucket.title)}” received funding!`,
+      html: `Hooray - your bucket “${escape(
+        bucket.title
+      )}” just received some funds!<br/>
+      ${escape(user.name)} contributed ${amount / 100} ${
+        collection.currency
+      }<br/>
+      Your bucket is now [% of funding achieved]%${/*TODO */} funded!<br/>
+      <br/><br/>
+      ${footer}
+      `,
+    }));
+
+    await sendEmails(emails);
+  },
 };

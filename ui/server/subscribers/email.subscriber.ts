@@ -13,5 +13,8 @@ export default {
     eventHub.subscribe("publish-dream", "email", async (args) => {
       await emailService.bucketPublishedNotification(args);
     });
+    eventHub.subscribe("contribute-to-bucket", "email", async (args) => {
+      await emailService.contributionToBucketNotification(args);
+    });
   },
 };
