@@ -68,7 +68,9 @@ const DreamTitle = ({ title, canEdit, bucketId }) => {
   if (title) {
     return (
       <div className="flex items-start justify-between group relative">
-        <h1 className="mb-2 text-4xl font-medium">{title}</h1>
+        <h1 className="mb-4 text-3xl font-medium text-center flex-1">
+          {title}
+        </h1>
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip title="Edit title" position="bottom" size="small">

@@ -71,7 +71,7 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
 
   if (summary)
     return (
-      <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group">
+      <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group text-center mb-2">
         {summary}
         {canEdit && (
           <div className="absolute top-0 right-0">
