@@ -5,6 +5,9 @@ import Sidebar from "./Sidebar";
 import HappySpinner from "components/HappySpinner";
 import { isMemberOfDream } from "utils/helpers";
 import { stringToColor } from "utils/stringToHslColor";
+import Title from "./Title";
+import Summary from "./Summary";
+
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
     bucket(id: $id) {
@@ -97,25 +100,26 @@ export default function Overview({
       </Head>
       <div className="border-b border-b-default">
         <div className="max-w-screen-xl mx-auto py-14 px-2 md:px-4">
-          <h1 className="text-3xl font-medium mb-1 text-center">
-            {bucket.title}
-          </h1>
-          <p className="text-lg mb-8 text-center text-gray-800">
-            {bucket.summary}
-          </p>
+          <Title title={bucket.title} bucketId={bucket.id} canEdit={canEdit} />
+          <Summary
+            bucketId={bucket.id}
+            summary={bucket.summary}
+            canEdit={canEdit}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
-            {/* <img src={bucket.images[0].large} className="" /> */}
             {bucket.images.length > 0 ? (
               <img
                 className="h-64 md:h-88 w-full object-cover object-center"
                 src={bucket.images[0].large ?? bucket.images[0].small}
               />
             ) : (
-              <div
-                className={`h-64 md:h-88 w-full bg-${stringToColor(
-                  bucket.title
-                )}`}
-              />
+              <button
+                className={`w-full h-64 md:h-88 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100`}
+                onClick={openImageModal}
+              >
+                + Cover image
+              </button>
             )}
             <div className="">
               <Sidebar
@@ -134,10 +138,6 @@ export default function Overview({
 }
 
 {
-  /* <Title title={dream.title} bucketId={dream.id} canEdit={canEdit} />
-<Summary
-  bucketId={dream.id}
-  summary={dream.summary}
-  canEdit={canEdit}
-/> */
+  /*
+   */
 }
