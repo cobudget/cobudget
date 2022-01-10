@@ -1,15 +1,15 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const bucketItems = ({ orgSlug, collectionSlug, bucketId }) => {
+const bucketItems = ({ orgSlug, collectionSlug, bucketId, bucket }) => {
   return [
     { label: "Bucket", href: `/${orgSlug}/${collectionSlug}/${bucketId}` },
     {
-      label: "Comments (7)",
+      label: `Comments (${bucket.noOfComments})`,
       href: `/${orgSlug}/${collectionSlug}/${bucketId}/comments`,
     },
     {
-      label: "Funders (5)",
+      label: `Funders (${bucket.noOfFunders})`,
       href: `/${orgSlug}/${collectionSlug}/${bucketId}/funders`,
     },
   ];
@@ -66,6 +66,7 @@ export default function SubMenu({
         collectionSlug: router.query.collection,
         orgSlug: router.query.org,
         bucketId: router.query.bucket,
+        bucket,
       })
     : collection
     ? collectionItems({
@@ -85,7 +86,7 @@ export default function SubMenu({
       <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
         {items.map((item) => {
           return (
-            <Link href={item.href} key={item.href}>
+            <Link href={item.href} key={item.href} scroll={!bucket}>
               <a
                 className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
                   item.href === router.asPath
