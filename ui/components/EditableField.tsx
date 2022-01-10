@@ -10,11 +10,10 @@ import { EditIcon } from "components/Icons";
 import Markdown from "./Markdown";
 
 const EditableField = ({
-  value,
+  defaultValue,
   label,
   canEdit,
   MUTATION,
-  name,
   placeholder,
   variables,
   maxLength = undefined,
@@ -23,29 +22,31 @@ const EditableField = ({
 }) => {
   const [{ fetching: loading }, mutation] = useMutation(MUTATION);
   const { handleSubmit, register } = useForm();
+  const [inputValue, setInputValue] = useState(defaultValue ?? "");
 
   const [editing, setEditing] = useState(false);
 
   if (editing)
     return (
       <form
-        onSubmit={handleSubmit((vars) =>
-          mutation({ ...variables, ...vars })
+        onSubmit={handleSubmit(() =>
+          mutation({ ...variables, info: inputValue })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message))
         )}
       >
         <TextField
-          name={name}
           placeholder={placeholder}
           inputRef={register}
           multiline
           rows={3}
-          defaultValue={value}
+          defaultValue={defaultValue}
           autoFocus
           maxLength={maxLength}
+          onChange={(e) => setInputValue(e.target.value)}
           required={required}
           className="mb-2"
+          wysiwyg
         />
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-600 font-medium pl-4">
@@ -73,13 +74,13 @@ const EditableField = ({
         </div>
       </form>
     );
-  if (value)
+  if (defaultValue)
     return (
       <div className="relative">
-        <Markdown source={value} />
+        <Markdown source={defaultValue} />
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title={`Edit ${name}`} position="bottom" size="small">
+            <Tooltip title="Edit info" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
@@ -91,9 +92,9 @@ const EditableField = ({
 
   return (
     <>
-      {value ? (
+      {defaultValue ? (
         // this code is never reached?
-        <Markdown source={value} />
+        <Markdown source={defaultValue} />
       ) : (
         <button
           onClick={() => null}

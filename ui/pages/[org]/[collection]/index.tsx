@@ -148,11 +148,10 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              value={collection.info}
+              defaultValue={collection.info}
               label="Add homepage message"
               placeholder={`# Welcome to ${collection.title}'s dream page`}
               canEdit={canEdit}
-              name="info"
               className="h-10"
               MUTATION={gql`
                 mutation EditHomepageMessage(

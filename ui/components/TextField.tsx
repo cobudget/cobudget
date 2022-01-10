@@ -13,6 +13,7 @@ const TextField = ({
   helperText,
   className,
   multiline,
+  onChange,
   rows,
   size,
   autoFocus,
@@ -24,7 +25,7 @@ const TextField = ({
   wysiwyg,
 }: {
   inputRef: any;
-  inputProps: any;
+  inputProps?: any;
   name?: string;
   placeholder: string;
   label?: string;
@@ -34,6 +35,7 @@ const TextField = ({
   helperText?: string;
   className?: string;
   multiline: boolean;
+  onChange: (e: any) => void;
   rows?: number;
   size?: string;
   autoFocus?: boolean;
@@ -60,7 +62,7 @@ const TextField = ({
             autoFocus={autoFocus}
             defaultValue={defaultValue}
             rows={multiline ? rows : 1}
-            onChange={inputProps?.onChange}
+            onChange={onChange ?? inputProps?.onChange}
             highlightColor={color}
           />
         ) : (
