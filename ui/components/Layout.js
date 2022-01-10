@@ -20,19 +20,17 @@ const Layout = ({
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <div>
-        <Header
-          collection={collection}
-          currentUser={currentUser}
-          currentOrg={currentOrg}
-          openModal={openModal}
-          router={router}
-        />
-        <div className="">{children}</div>
-      </div>
 
-      {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
-      <div className="space-x-6 text-sm text-center mt-auto pt-10 pb-4 text-gray-500">
+      <Header
+        collection={collection}
+        currentUser={currentUser}
+        currentOrg={currentOrg}
+        openModal={openModal}
+        router={router}
+      />
+      {children}
+
+      <div className="space-x-6 text-sm text-center mt-auto py-8 text-gray-500">
         <a href="/privacy-policy" target="_blank" rel="noreferrer">
           Privacy Policy
         </a>
