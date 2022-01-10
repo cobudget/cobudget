@@ -3,6 +3,7 @@ import { useMutation, gql } from "urql";
 import { Modal } from "@material-ui/core";
 import Button from "components/Button";
 import TextField from "components/TextField";
+import toast from "react-hot-toast";
 
 const CONTRIBUTE_MUTATION = gql`
   mutation Contribute($collectionId: ID!, $bucketId: ID!, $amount: Int!) {
@@ -14,8 +15,8 @@ const CONTRIBUTE_MUTATION = gql`
       id
       totalContributions
       totalContributionsFromCurrentMember
-      noOfContributions
-      latestContributions {
+      noOfFunders
+      funders {
         id
         amount
         createdAt
@@ -104,7 +105,18 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
               bucketId: dream.id,
               amount,
             })
-              .then(() => handleClose())
+              .then(({ data, error }) => {
+                if (error) {
+                  toast.error(error.message);
+                } else {
+                  toast.success(
+                    `You contributed ${amount / 100} ${
+                      collection.currency
+                    } to this bucket!`
+                  );
+                }
+                handleClose();
+              })
               .catch((err) => alert(err.message));
           }}
         >
