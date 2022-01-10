@@ -55,7 +55,11 @@ const DreamCustomField = ({
     return (
       <form
         onSubmit={handleSubmit((variables) => {
-          return editCustomFieldMutation({ bucketId, ...variables })
+          return editCustomFieldMutation({
+            bucketId,
+            ...variables,
+            customField: { value: inputValue, ...variables?.customField },
+          })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message));
         })}
@@ -80,19 +84,18 @@ const DreamCustomField = ({
             defaultCustomField.type === "MULTILINE_TEXT" ? (
               <TextField
                 placeholder={defaultCustomField.name}
-                name={`${fieldName}.value`}
                 defaultValue={defaultValue}
                 autoFocus
                 multiline={defaultCustomField.type == "MULTILINE_TEXT"}
-                rows={10}
+                rows={7}
                 inputRef={register({
                   required: defaultCustomField.isRequired ? "Required" : null,
                 })}
                 inputProps={{
                   maxLength: defaultCustomField.limit,
-                  value: inputValue,
                   onChange: (e) => setInputValue(e.target.value),
                 }}
+                wysiwyg
               />
             ) : defaultCustomField.type === "BOOLEAN" ? (
               <SelectInput

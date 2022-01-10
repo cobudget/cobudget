@@ -30,8 +30,8 @@ const TextField = ({
   label?: string;
   labelComponent?: ComponentType;
   defaultValue?: string;
-  error: boolean;
-  helperText: string;
+  error?: boolean;
+  helperText?: string;
   className?: string;
   multiline: boolean;
   rows?: number;
@@ -41,7 +41,7 @@ const TextField = ({
   required?: boolean;
   startAdornment?: string;
   endAdornment?: string;
-  color: string;
+  color?: string;
   wysiwyg: boolean;
 }) => {
   const LabelComponent = labelComponent;
@@ -52,14 +52,14 @@ const TextField = ({
           {label ? label : <LabelComponent />}
         </label>
       )}
-      {multiline ? (
+      {multiline || wysiwyg ? (
         wysiwyg ? (
           <Wysiwyg
             inputRef={inputRef}
             placeholder={placeholder}
             autoFocus={autoFocus}
             defaultValue={defaultValue}
-            rows={rows}
+            rows={multiline ? rows : 1}
             onChange={inputProps?.onChange}
             highlightColor={color}
           />
