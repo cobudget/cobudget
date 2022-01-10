@@ -371,13 +371,21 @@ export default {
       ((totalContributions + income) / minGoal) * 100
     );
 
-    // TODO: links
+    const { organization } = await prisma.collection.findUnique({
+      where: { id: collection.id },
+      include: { organization: true },
+    });
+
+    const bucketLink = appLink(
+      `/${organization.slug}/${collection.slug}/${bucket.id}`
+    );
+
     const emails = usersToNotify.map((user) => ({
       to: user.email,
       subject: `Your bucket “${escape(bucket.title)}” received funding!`,
-      html: `Hooray - your bucket “${escape(
+      html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
         bucket.title
-      )}” just received some funds!<br/>
+      )}”</a> just received some funds!<br/>
       ${escape(user.name)} contributed ${amount / 100} ${
         collection.currency
       }<br/>
