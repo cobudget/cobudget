@@ -133,28 +133,45 @@ export default {
     }
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {
-    // TODO: make "create your first bucket" part dynamic, just coll if they don't have one yet
+    const { collMemberships } = await prisma.user.findUnique({
+      where: { email: newUser.email },
+      include: {
+        collMemberships: {
+          include: { collection: { include: { organization: true } } },
+        },
+      },
+    });
+
+    const createYourFirst =
+      collMemberships.length > 0
+        ? `Jump right in and <a href="${appLink(
+            `/${collMemberships[0].collection.organization.slug}/${collMemberships[0].collection.slug}`
+          )}">create your first Bucket</a>!`
+        : `Jump right in and <a href="${appLink(
+            "/new-collection"
+          )}">create your first Collection</a>!`;
+
     await sendEmail({
       to: newUser.email,
       subject: "Welcome to Cobudget!",
       html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
-
+      <br/><br/>
       Since 2014 we’ve been on a path to change the ways organizations and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
-
+      <br/><br/>
       We are thrilled to have you with us!
-
+      <br/><br/>
       <b>How to get started?</b>
       <ul>
       <li>Check out our <a href="https://guide.cobudget.co/">Cobudget guide</a> for some simple how-to’s</li>
-      <li>Jump right in and create your first bucket! [Link to the Cobudget Round]</li>
+      <li>${createYourFirst}</li>
       </ul>
-
+      <br/>
       <b>Want to learn more?</b>
       <ul>
       <li>Dig into our <a href="https://guide.cobudget.co/case-studies">case studies</a> to see how others are using the tool</li>
       <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
       </ul>
-
+      <br/>
       Ready to invite others to co-create and fund projects with you? <a href="${appLink(
         "/new-collection"
       )}">Create a Collection</a>!
