@@ -13,6 +13,11 @@ import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
 import { orgHasDiscourse } from "server/subscribers/discourse.subscriber";
+import {
+  bucketIncome,
+  bucketTotalContributions,
+  bucketMinGoal,
+} from "server/graphql/resolvers/helpers";
 
 /** path including leading slash */
 function appLink(path: string): string {
@@ -359,6 +364,14 @@ export default {
       .filter((cocreator) => cocreator.userId !== user.id)
       .map((cocreator) => cocreator.user);
 
+    const totalContributions = await bucketTotalContributions(bucket);
+    const income = await bucketIncome(bucket);
+    const minGoal = await bucketMinGoal(bucket);
+    const progressPercent = Math.floor(
+      ((totalContributions + income) / minGoal) * 100
+    );
+
+    // TODO: links
     const emails = usersToNotify.map((user) => ({
       to: user.email,
       subject: `Your bucket “${escape(bucket.title)}” received funding!`,
@@ -368,7 +381,7 @@ export default {
       ${escape(user.name)} contributed ${amount / 100} ${
         collection.currency
       }<br/>
-      Your bucket is now [% of funding achieved]%${/*TODO */} funded!<br/>
+      Your bucket is now ${progressPercent}% funded!<br/>
       <br/><br/>
       ${footer}
       `,

@@ -15,6 +15,9 @@ import {
   generateComment,
 } from "../../subscribers/discourse.subscriber";
 import {
+  bucketIncome,
+  bucketMinGoal,
+  bucketTotalContributions,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -2322,15 +2325,7 @@ const resolvers = {
       });
     },
     totalContributions: async (bucket) => {
-      const {
-        _sum: { amount },
-      } = await prisma.contribution.aggregate({
-        _sum: { amount: true },
-        where: {
-          bucketId: bucket.id,
-        },
-      });
-      return amount;
+      return bucketTotalContributions(bucket);
     },
     totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
       const collectionMember = await prisma.collectionMember.findUnique({
@@ -2423,28 +2418,10 @@ const resolvers = {
     funded: (bucket) => !!bucket.fundedAt,
     completed: (bucket) => !!bucket.completedAt,
     income: async (bucket) => {
-      const {
-        _sum: { min },
-      } = await prisma.budgetItem.aggregate({
-        _sum: { min: true },
-        where: {
-          bucketId: bucket.id,
-          type: "INCOME",
-        },
-      });
-      return min;
+      return bucketIncome(bucket);
     },
     minGoal: async (bucket) => {
-      const {
-        _sum: { min },
-      } = await prisma.budgetItem.aggregate({
-        _sum: { min: true },
-        where: {
-          bucketId: bucket.id,
-          type: "EXPENSE",
-        },
-      });
-      return min > 0 ? min : 0;
+      return bucketMinGoal(bucket);
     },
     maxGoal: async (bucket) => {
       const {
