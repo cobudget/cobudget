@@ -1,13 +1,14 @@
 import { useQuery, gql } from "urql";
 import Head from "next/head";
-
-import Dream from "../../../../components/Dream";
+import { useState } from "react";
+import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
+import Bucket from "../../../../components/Bucket";
 import HappySpinner from "../../../../components/HappySpinner";
 import SubMenu from "../../../../components/SubMenu";
 import PageHero from "../../../../components/PageHero";
-import Sidebar from "../../../../components/Dream/Sidebar";
+import Sidebar from "../../../../components/Bucket/Sidebar";
 import { isMemberOfDream } from "utils/helpers";
-import Overview from "../../../../components/Dream/Overview";
+import Overview from "../../../../components/Bucket/Overview";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -29,22 +30,8 @@ export const BUCKET_QUERY = gql`
       fundedAt
       canceled
       canceledAt
-      noOfContributions
-      latestContributions {
-        id
-        amount
-        createdAt
-
-        collectionMember {
-          id
-
-          user {
-            id
-            name
-            username
-          }
-        }
-      }
+      noOfComments
+      noOfFunders
       tags {
         id
         value
@@ -98,33 +85,43 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const DreamPage = ({ collection, currentUser, currentOrg, router }) => {
+const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
   const [{ data, fetching: loading, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
   });
+  const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
 
   const { bucket } = data ?? { bucket: null };
 
   return (
     <>
+      {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
+      <EditImagesModal
+        open={editImagesModalOpen}
+        initialImages={bucket.images}
+        handleClose={() => setEditImagesModalOpen(false)}
+        bucketId={bucket.id}
+      />
       <Overview
         router={router}
         currentUser={currentUser}
         currentOrg={currentOrg}
         collection={collection}
+        openImageModal={() => setEditImagesModalOpen(true)}
       />
 
-      <SubMenu bucket={bucket} />
+      <SubMenu bucket={bucket} currentUser={currentUser} />
 
-      <Dream
-        dream={bucket}
+      <Bucket
+        bucket={bucket}
         collection={collection}
         currentUser={currentUser}
         currentOrg={currentOrg}
+        openImageModal={() => setEditImagesModalOpen(true)}
       />
     </>
   );
 };
 
-export default DreamPage;
+export default BucketIndex;

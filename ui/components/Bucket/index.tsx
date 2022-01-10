@@ -1,19 +1,21 @@
-import { stringToColor } from "utils/stringToHslColor";
 import { isMemberOfDream } from "utils/helpers";
 
-import Label from "components/Label";
 import Monster from "../Monster";
 
 import Images from "./Images";
-import Comments from "./Comments";
 import Budget from "./Budget";
-import Summary from "./Summary";
-import Title from "./Title";
 import Description from "./Description";
 import DreamCustomFields from "./CustomFields/DreamCustomFields";
-import Sidebar from "./Sidebar";
 
-const Bucket = ({ bucket, collection, currentUser, currentOrg }) => {
+const Bucket = ({
+  bucket,
+  collection,
+  currentUser,
+  currentOrg,
+  openImageModal,
+}) => {
+  if (!bucket) return null;
+
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
@@ -23,7 +25,6 @@ const Bucket = ({ bucket, collection, currentUser, currentOrg }) => {
     collection.bucketReviewIsOpen &&
     collection.guidelines.length > 0 &&
     bucket.published;
-
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
@@ -37,6 +38,7 @@ const Bucket = ({ bucket, collection, currentUser, currentOrg }) => {
               size={100}
               canEdit={canEdit}
               bucketId={bucket.id}
+              openImageModal={openImageModal}
             />
 
             {bucket.description && (
@@ -67,24 +69,7 @@ const Bucket = ({ bucket, collection, currentUser, currentOrg }) => {
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />
-
-            {/* <hr className="mb-4 mt-1" />
-            <Comments
-              currentUser={currentUser}
-              currentOrg={currentOrg}
-              bucket={bucket}
-              collection={collection}
-            /> */}
           </div>
-          {/* <div className="order-first md:order-last">
-            <Sidebar
-              bucket={bucket}
-              collection={collection}
-              currentUser={currentUser}
-              canEdit={canEdit}
-              currentOrg={currentOrg}
-            />
-          </div> */}
         </div>
       </div>
     </div>

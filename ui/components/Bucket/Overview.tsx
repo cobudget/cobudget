@@ -53,6 +53,7 @@ export default function Overview({
   currentUser,
   currentOrg,
   router,
+  openImageModal,
 }) {
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
