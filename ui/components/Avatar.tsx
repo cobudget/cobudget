@@ -6,9 +6,10 @@ export default React.forwardRef(
     {
       user,
       size,
+      highlighted,
       style,
       ...props
-    }: { user: any; size?: string; style?: object },
+    }: { user: any; size?: string; highlighted?: boolean; style?: object },
     ref: any
   ) => {
     // const { user } = props;
@@ -19,7 +20,9 @@ export default React.forwardRef(
           size === "small" ? "h-8 w-8" : "h-10 w-10 text-xl"
         } bg-${stringToColor(
           user?.username ? user.username : "default"
-        )}-dark rounded-full text-white flex items-center justify-center select-none font-medium`}
+        )}-dark rounded-full text-white flex items-center justify-center select-none font-medium ${
+          highlighted ? "ring-4 ring-yellow-500" : ""
+        }`}
         ref={ref}
         //src={user?.avatar && user.avatar}
         {...props}

@@ -7,14 +7,14 @@ import Context from "contexts/comment";
 const EditComment = ({ comment, handleDone }) => {
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, dream, collection } = useContext(Context);
+  const { editComment, bucketId, collection } = useContext(Context);
 
   return (
     <form
       onSubmit={handleSubmit(({ content }) => {
         setSubmitting(true);
         editComment({
-          bucketId: dream.id,
+          bucketId,
           commentId: comment.id,
           content,
         })

@@ -155,7 +155,7 @@ const EditImagesModal = ({
 
           <div className="flex justify-between items-center">
             <div className=" text-sm text-gray-600 font-medium">
-              The first image will also be used as cover photo
+              The first image will be used as cover
             </div>
             <div className="flex">
               <Button
