@@ -8,14 +8,14 @@ const EditComment = ({ comment, handleDone }) => {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, dream, collection } = useContext<any>(Context);
+  const { editComment, bucketId, collection } = useContext<any>(Context);
 
   return (
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
         editComment({
-          bucketId: dream.id,
+          bucketId,
           commentId: comment.id,
           content,
         })

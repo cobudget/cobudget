@@ -2346,7 +2346,7 @@ const resolvers = {
       });
       return amount;
     },
-    numberOfComments: async (bucket) => {
+    noOfComments: async (bucket) => {
       // TODO: fix discourse check
       // Only display number of comments for non-Discourse orgs
       // if (orgHasDiscourse(currentOrg)) {
@@ -2355,10 +2355,9 @@ const resolvers = {
 
       return prisma.comment.count({ where: { bucketId: bucket.id } });
     },
-    latestContributions: async (bucket) => {
+    contributions: async (bucket) => {
       return await prisma.contribution.findMany({
         where: { bucketId: bucket.id },
-        take: 10,
         orderBy: {
           createdAt: "desc",
         },
@@ -2368,6 +2367,31 @@ const resolvers = {
       return await prisma.contribution.count({
         where: { bucketId: bucket.id },
       });
+    },
+    funders: async (bucket) => {
+      const funders = await prisma.contribution.groupBy({
+        where: { bucketId: bucket.id },
+        by: ["collectionMemberId"],
+        _sum: {
+          amount: true,
+        },
+      });
+      const contributionsFormat = funders.map((funder) => ({
+        id: funder.collectionMemberId,
+        collectionId: bucket.collectionId,
+        collectionMemberId: funder.collectionMemberId,
+        bucketId: bucket.id,
+        amount: funder._sum.amount,
+        createdAt: new Date(),
+      }));
+      return contributionsFormat;
+    },
+    noOfFunders: async (bucket) => {
+      const funders = await prisma.contribution.groupBy({
+        where: { bucketId: bucket.id },
+        by: ["collectionMemberId"],
+      });
+      return funders.length;
     },
     raisedFlags: async (bucket) => {
       const resolveFlags = await prisma.flag.findMany({
