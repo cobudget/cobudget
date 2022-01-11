@@ -35,7 +35,7 @@ export const BUCKETS_QUERY = gql`
         maxGoal
         income
         totalContributions
-        numberOfComments
+        noOfComments
         published
         approved
         canceled

@@ -42,16 +42,9 @@ const Image = styled.img`
   max-width: calc(100vw - 60px);
 `;
 
-const DreamImages = ({ bucketId, images, size, canEdit }) => {
-  const [editModalOpen, setEditModalOpen] = useState(false);
+const Images = ({ bucketId, images, size, canEdit, openImageModal }) => {
   return (
     <>
-      <EditImagesModal
-        open={editModalOpen}
-        initialImages={images}
-        handleClose={() => setEditModalOpen(false)}
-        bucketId={bucketId}
-      />
       {images.length > 0 ? (
         <div className="relative">
           <Gallery>
@@ -62,7 +55,7 @@ const DreamImages = ({ bucketId, images, size, canEdit }) => {
           {canEdit && (
             <div className="absolute top-0 right-0">
               <Tooltip title="Edit images" position="bottom" size="small">
-                <IconButton onClick={() => setEditModalOpen(true)}>
+                <IconButton onClick={openImageModal}>
                   <EditIcon className="h-6 w-6" />
                 </IconButton>
               </Tooltip>
@@ -71,7 +64,7 @@ const DreamImages = ({ bucketId, images, size, canEdit }) => {
         </div>
       ) : canEdit ? (
         <button
-          onClick={() => setEditModalOpen(true)}
+          onClick={openImageModal}
           className="h-24 w-full  text-gray-600  font-semibold rounded-lg border-3 focus:outline-none border-dashed hover:bg-gray-100 mb-4"
         >
           + Images
@@ -110,4 +103,4 @@ function GalleryItem({ image, size }) {
   );
 }
 
-export default DreamImages;
+export default Images;

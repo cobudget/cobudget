@@ -14,13 +14,16 @@ function AddComment() {
   const inputRef = useRef<any>();
   const {
     addComment,
-    dream,
+    bucketId,
     collection,
     currentOrg,
     currentUser,
   } = useContext<any>(Context);
 
-  if (currentOrg?.discourseUrl && !currentUser.currentOrgMember?.hasDiscourseApiKey) {
+  if (
+    currentOrg?.discourseUrl &&
+    !currentUser.currentOrgMember?.hasDiscourseApiKey
+  ) {
     return (
       <Link href={"/connect-discourse"} passHref>
         <Button color={collection.color} nextJsLink className="my-2">
@@ -34,7 +37,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ bucketId: dream.id, content })
+        addComment({ bucketId, content })
           .then(() => {
             inputRef.current.blur();
             inputRef.current.clear();

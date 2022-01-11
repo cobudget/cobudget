@@ -1,6 +1,20 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
+const bucketItems = ({ orgSlug, collectionSlug, bucketId, bucket }) => {
+  return [
+    { label: "Bucket", href: `/${orgSlug}/${collectionSlug}/${bucketId}` },
+    {
+      label: `Comments (${bucket.noOfComments})`,
+      href: `/${orgSlug}/${collectionSlug}/${bucketId}/comments`,
+    },
+    {
+      label: `Funders (${bucket.noOfFunders})`,
+      href: `/${orgSlug}/${collectionSlug}/${bucketId}/funders`,
+    },
+  ];
+};
+
 const orgItems = ({ currentUser, orgSlug }) => {
   return [
     { label: "Overview", href: `/${orgSlug}` },
@@ -37,15 +51,24 @@ export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
 };
 
 export default function SubMenu({
+  bucket,
   collection,
   currentUser,
 }: {
+  bucket?: any;
   collection?: any;
   currentUser: any;
 }) {
   const router = useRouter();
 
-  const items = collection
+  const items = bucket
+    ? bucketItems({
+        collectionSlug: router.query.collection,
+        orgSlug: router.query.org,
+        bucketId: router.query.bucket,
+        bucket,
+      })
+    : collection
     ? collectionItems({
         currentUser,
         collectionSlug: router.query.collection,
@@ -63,7 +86,7 @@ export default function SubMenu({
       <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
         {items.map((item) => {
           return (
-            <Link href={item.href} key={item.href}>
+            <Link href={item.href} key={item.href} scroll={!bucket}>
               <a
                 className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
                   item.href === router.asPath

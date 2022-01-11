@@ -9,7 +9,7 @@ const IndexPage = ({ currentUser }) => {
     (orgMember) => orgMember.organization.id
   );
   return (
-    <div className="page">
+    <div className="page w-full">
       <div className="py-10">
         {false ? (
           <div className="flex justify-center items-center flex-col ">

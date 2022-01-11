@@ -13,7 +13,7 @@ import { COLLECTIONS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
-  if (process.browser) return `/api`;
+  if (typeof window !== "undefined") return `/api`;
 
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}/api`;

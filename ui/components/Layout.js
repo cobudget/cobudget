@@ -28,11 +28,10 @@ const Layout = ({
           openModal={openModal}
           router={router}
         />
-        <div className="">{children}</div>
+        {children}
       </div>
 
-      {/* {process.env.IS_PROD && <DevelopmentNotice />} */}
-      <div className="space-x-6 text-sm text-center mt-auto pt-10 pb-4 text-gray-500">
+      <div className="space-x-6 text-sm text-center mt-auto py-8 text-gray-500">
         <a href="/privacy-policy" target="_blank" rel="noreferrer">
           Privacy Policy
         </a>

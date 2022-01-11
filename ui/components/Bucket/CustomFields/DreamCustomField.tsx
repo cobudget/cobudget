@@ -167,7 +167,7 @@ const DreamCustomField = ({
 
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit questions" position="bottom" size="small">
+            <Tooltip title="Edit field" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
@@ -180,7 +180,7 @@ const DreamCustomField = ({
     return (
       <button
         onClick={() => setEditing(true)}
-        className="w-full h-16 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
+        className="w-full h-24 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       >
         + {defaultCustomField.name}
       </button>

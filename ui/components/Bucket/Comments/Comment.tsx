@@ -19,7 +19,7 @@ const LogIcon = () => (
 const Comment = ({ comment, showBorderBottom }) => {
   const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
-  const { deleteComment, currentUser, dream } = useContext<any>(Context);
+  const { deleteComment, currentUser, bucketId } = useContext<any>(Context);
 
   const canEdit =
     currentUser &&
@@ -83,7 +83,7 @@ const Comment = ({ comment, showBorderBottom }) => {
                       "Are you sure you would like to delete this comment?"
                     ) &&
                     deleteComment({
-                      bucketId: dream.id,
+                      bucketId,
                       commentId: comment.id,
                     }) &&
                     setSubmitting(true)

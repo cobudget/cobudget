@@ -8,23 +8,21 @@ import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 
-const EDIT_SUMMARY_MUTATION = gql`
-  mutation EditSummary($bucketId: ID!, $summary: String) {
-    editDream(bucketId: $bucketId, summary: $summary) {
+const EDIT_TITLE_MUTATION = gql`
+  mutation EditTitle($bucketId: ID!, $title: String) {
+    editDream(bucketId: $bucketId, title: $title) {
       id
-      summary
+      title
     }
   }
 `;
 
-const DreamSummary = ({ summary, canEdit, bucketId }) => {
-  const [{ fetching: loading }, editDream] = useMutation(EDIT_SUMMARY_MUTATION);
-
-  const { handleSubmit, register } = useForm();
+const DreamTitle = ({ title, canEdit, bucketId }) => {
+  const [{ fetching: loading }, editDream] = useMutation(EDIT_TITLE_MUTATION);
+  const { handleSubmit, register, errors } = useForm();
 
   const [editing, setEditing] = useState(false);
-  const [inputValue, setInputValue] = useState(summary ?? "");
-  if (editing)
+  if (editing) {
     return (
       <>
         <form
@@ -36,21 +34,19 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
         >
           <TextField
             className="mb-2"
-            multiline
-            name="summary"
-            placeholder="Summary"
-            inputRef={register}
+            placeholder="Title"
+            name="title"
+            defaultValue={title}
+            size="large"
+            inputRef={register({ required: "Required" })}
             inputProps={{
-              maxLength: 160,
-              value: inputValue,
-              onChange: (e) => setInputValue(e.target.value),
+              maxLength: 100,
             }}
             autoFocus
+            error={Boolean(errors.title)}
+            helperText={errors.title?.message}
           />
-          <div className="flex justify-between items-center mb-4">
-            <div className="text-sm text-gray-600 font-medium pl-4">
-              {160 - inputValue.length} characters remaining
-            </div>
+          <div className="flex justify-end  mb-4">
             <div className="flex">
               <Button
                 className="mr-2"
@@ -68,14 +64,16 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
         </form>
       </>
     );
-
-  if (summary)
+  }
+  if (title) {
     return (
-      <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group">
-        {summary}
+      <div className="flex items-start justify-between group relative">
+        <h1 className="mb-4 text-3xl font-medium text-center flex-1">
+          {title}
+        </h1>
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit summary" position="bottom" size="small">
+            <Tooltip title="Edit title" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
@@ -84,18 +82,7 @@ const DreamSummary = ({ summary, canEdit, bucketId }) => {
         )}
       </div>
     );
-
-  if (canEdit)
-    return (
-      <button
-        onClick={() => setEditing(true)}
-        className="block w-full h-20 text-gray-600 font-semibold rounded-lg border-3 border-dashed hover:bg-gray-100 mb-4 focus:outline-none focus:bg-gray-100"
-      >
-        + Summary
-      </button>
-    );
-
-  return null;
+  }
 };
 
-export default DreamSummary;
+export default DreamTitle;
