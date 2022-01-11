@@ -102,13 +102,12 @@ export const BUCKET_QUERY = gql`
 `;
 
 const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
-  const [{ data }] = useQuery({
+  const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
   });
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const { bucket } = data ?? { bucket: null };
-
   return (
     <>
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
@@ -119,6 +118,9 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
         bucketId={bucket?.id}
       />
       <Overview
+        bucket={bucket}
+        fetching={fetching}
+        error={error}
         router={router}
         currentUser={currentUser}
         currentOrg={currentOrg}

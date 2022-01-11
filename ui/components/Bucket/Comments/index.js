@@ -6,6 +6,7 @@ import LoadMore from "components/LoadMore";
 import router from "next/router";
 
 const Comments = ({ currentUser, currentOrg, bucket, collection, router }) => {
+  if (!bucket) return null;
   const context = useCommentContext({
     from: 0,
     limit: 10,
