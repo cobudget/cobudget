@@ -121,7 +121,6 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
         bucket={bucket}
         fetching={fetching}
         error={error}
-        router={router}
         currentUser={currentUser}
         currentOrg={currentOrg}
         collection={collection}
