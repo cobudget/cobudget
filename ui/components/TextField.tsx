@@ -34,8 +34,8 @@ const TextField = ({
   error?: boolean;
   helperText?: string;
   className?: string;
-  multiline: boolean;
-  onChange: (e: any) => void;
+  multiline?: boolean;
+  onChange?: (e: any) => void;
   rows?: number;
   size?: string;
   autoFocus?: boolean;
@@ -44,7 +44,7 @@ const TextField = ({
   startAdornment?: string;
   endAdornment?: string;
   color?: string;
-  wysiwyg: boolean;
+  wysiwyg?: boolean;
 }) => {
   const LabelComponent = labelComponent;
   return (
