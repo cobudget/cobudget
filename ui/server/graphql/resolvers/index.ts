@@ -2328,6 +2328,7 @@ const resolvers = {
       return bucketTotalContributions(bucket);
     },
     totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
+      if (!user) return null;
       const collectionMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
