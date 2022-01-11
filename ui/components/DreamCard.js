@@ -51,18 +51,10 @@ const DreamCard = ({ dream, collection, currentOrg }) => {
             )}
 
             {parseInt(dream.noOfComments) > 0 && (
-              <Link
-                href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
-                  dream.id
-                }/comments`}
-              >
-                <div className="flex items-center text-gray-700">
-                  <CommentIcon className="w-5 h-5" />
-                  <span className="block ml-1 text-sm">
-                    {dream.noOfComments}
-                  </span>
-                </div>
-              </Link>
+              <div className="flex items-center text-gray-700">
+                <CommentIcon className="w-5 h-5" />
+                <span className="block ml-1 text-sm">{dream.noOfComments}</span>
+              </div>
             )}
           </div>
         </div>

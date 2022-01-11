@@ -1,6 +1,6 @@
 import { useQuery, gql } from "urql";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
 import Bucket from "../../../../components/Bucket";
 import HappySpinner from "../../../../components/HappySpinner";
@@ -9,7 +9,10 @@ import PageHero from "../../../../components/PageHero";
 import Sidebar from "../../../../components/Bucket/Sidebar";
 import { isMemberOfDream } from "utils/helpers";
 import Overview from "../../../../components/Bucket/Overview";
-
+import { Tab } from "@headlessui/react";
+import Funders from "components/Bucket/Funders";
+import Comments from "components/Bucket/Comments";
+import classNames from "utils/classNames";
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
     bucket(id: $id) {
@@ -32,6 +35,19 @@ export const BUCKET_QUERY = gql`
       canceledAt
       noOfComments
       noOfFunders
+      funders {
+        id
+        amount
+        createdAt
+        collectionMember {
+          id
+          user {
+            id
+            name
+            username
+          }
+        }
+      }
       tags {
         id
         value
@@ -86,12 +102,11 @@ export const BUCKET_QUERY = gql`
 `;
 
 const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
-  const [{ data, fetching: loading, error }] = useQuery({
+  const [{ data }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
   });
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
-
   const { bucket } = data ?? { bucket: null };
 
   return (
@@ -99,9 +114,9 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
       <EditImagesModal
         open={editImagesModalOpen}
-        initialImages={bucket.images}
+        initialImages={bucket?.images}
         handleClose={() => setEditImagesModalOpen(false)}
-        bucketId={bucket.id}
+        bucketId={bucket?.id}
       />
       <Overview
         router={router}
@@ -111,15 +126,76 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
         openImageModal={() => setEditImagesModalOpen(true)}
       />
 
-      <SubMenu bucket={bucket} currentUser={currentUser} />
+      <Tab.Group>
+        <div className="bg-white border-b border-b-default">
+          <Tab.List className="space-x-2 max-w-screen-xl mx-auto flex px-2 overflow-x-auto">
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  "block px-2 py-4 border-b-2 font-medium transition-colors",
+                  selected
+                    ? "border-anthracit text-anthracit"
+                    : "border-transparent text-gray-500"
+                )
+              }
+            >
+              Bucket
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  "block px-2 py-4 border-b-2 font-medium transition-colors",
+                  selected
+                    ? "border-anthracit text-anthracit"
+                    : "border-transparent text-gray-500"
+                )
+              }
+            >
+              Comments ({bucket?.noOfComments})
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  "block px-2 py-4 border-b-2 font-medium transition-colors",
+                  selected
+                    ? "border-anthracit text-anthracit"
+                    : "border-transparent text-gray-500"
+                )
+              }
+            >
+              Funders ({bucket?.noOfFunders})
+            </Tab>
+          </Tab.List>
+        </div>
 
-      <Bucket
-        bucket={bucket}
-        collection={collection}
-        currentUser={currentUser}
-        currentOrg={currentOrg}
-        openImageModal={() => setEditImagesModalOpen(true)}
-      />
+        <Tab.Panels>
+          <Tab.Panel>
+            <Bucket
+              bucket={bucket}
+              collection={collection}
+              currentUser={currentUser}
+              currentOrg={currentOrg}
+              openImageModal={() => setEditImagesModalOpen(true)}
+            />
+          </Tab.Panel>
+          <Tab.Panel>
+            <Comments
+              bucket={bucket}
+              router={router}
+              collection={collection}
+              currentUser={currentUser}
+              currentOrg={currentOrg}
+            />
+          </Tab.Panel>
+          <Tab.Panel>
+            <Funders
+              bucket={bucket}
+              collection={collection}
+              currentUser={currentUser}
+            />
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
     </>
   );
 };
