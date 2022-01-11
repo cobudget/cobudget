@@ -12,18 +12,6 @@ export default {
     );
 
     eventHub.subscribe(
-      "publish-dream",
-      "prisma",
-      async ({ dream, unpublish }) => {
-        const publishedAt = unpublish ? null : new Date();
-        return prisma.bucket.update({
-          where: { id: dream.id },
-          data: { publishedAt },
-        });
-      }
-    );
-
-    eventHub.subscribe(
       "create-comment",
       "prisma",
       async ({

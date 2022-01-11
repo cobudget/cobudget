@@ -6,6 +6,7 @@ import Link from "next/link";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
+import toast from "react-hot-toast";
 
 function AddComment() {
   const [content, setContent] = useState("");
@@ -38,12 +39,12 @@ function AddComment() {
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
         addComment({ bucketId, content })
-          .then(() => {
+          .then(({ error }) => {
+            if (error) return toast.error(error.message);
             inputRef.current.blur();
             inputRef.current.clear();
           })
-          .finally(() => setSubmitting(false))
-          .catch((err) => alert(err.message));
+          .finally(() => setSubmitting(false));
       })}
     >
       <div className="flex">
