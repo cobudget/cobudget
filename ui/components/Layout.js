@@ -20,15 +20,16 @@ const Layout = ({
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-
-      <Header
-        collection={collection}
-        currentUser={currentUser}
-        currentOrg={currentOrg}
-        openModal={openModal}
-        router={router}
-      />
-      {children}
+      <div>
+        <Header
+          collection={collection}
+          currentUser={currentUser}
+          currentOrg={currentOrg}
+          openModal={openModal}
+          router={router}
+        />
+        {children}
+      </div>
 
       <div className="space-x-6 text-sm text-center mt-auto py-8 text-gray-500">
         <a href="/privacy-policy" target="_blank" rel="noreferrer">
