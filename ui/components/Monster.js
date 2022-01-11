@@ -162,9 +162,9 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   },
 ];
 
-const Monster = ({ event, dream, currentOrg }) => {
+const Monster = ({ event, bucket, currentOrg }) => {
   const [open, setOpen] = useState(false);
-  const isAngry = dream.raisedFlags.length > 0;
+  const isAngry = bucket.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
   const closeBubble = () => setBubbleOpen(false);
 
@@ -172,7 +172,7 @@ const Monster = ({ event, dream, currentOrg }) => {
   const [, resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION);
   const [, allGoodFlag] = useMutation(ALL_GOOD_FLAG_MUTATION);
 
-  const { raisedFlags } = dream;
+  const { raisedFlags } = bucket;
 
   const guidelines = event.guidelines.map((guideline) => ({
     type: GUIDELINE,
@@ -215,7 +215,7 @@ const Monster = ({ event, dream, currentOrg }) => {
               ),
               raiseFlag,
               currentOrg,
-              bucketId: dream.id,
+              bucketId: bucket.id,
             }),
           },
           raisedFlags.length > 1
@@ -230,7 +230,7 @@ const Monster = ({ event, dream, currentOrg }) => {
                       chatItems: resolveFlagFlow({
                         flagId: raisedFlag.id,
                         resolveFlag,
-                        bucketId: dream.id,
+                        bucketId: bucket.id,
                       }),
                     })),
                   },
@@ -241,7 +241,7 @@ const Monster = ({ event, dream, currentOrg }) => {
                 chatItems: resolveFlagFlow({
                   flagId: raisedFlags[0].id,
                   resolveFlag,
-                  bucketId: dream.id,
+                  bucketId: bucket.id,
                 }),
               },
         ],
@@ -268,7 +268,7 @@ const Monster = ({ event, dream, currentOrg }) => {
             {
               label: "Yes, looks good to me!",
               sideEffect: () =>
-                allGoodFlag({ bucketId: dream.id }).then(({ error }) => {
+                allGoodFlag({ bucketId: bucket.id }).then(({ error }) => {
                   if (error) throw new Error(error.message);
                 }),
               chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
@@ -278,7 +278,7 @@ const Monster = ({ event, dream, currentOrg }) => {
               chatItems: raiseFlagFlow({
                 guidelines: event.guidelines,
                 raiseFlag,
-                bucketId: dream.id,
+                bucketId: bucket.id,
               }),
             },
           ],
