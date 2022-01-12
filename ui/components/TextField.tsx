@@ -24,10 +24,10 @@ const TextField = ({
   color = "blue",
   wysiwyg,
 }: {
-  inputRef: any;
+  inputRef?: any;
   inputProps?: any;
   name?: string;
-  placeholder: string;
+  placeholder?: string;
   label?: string;
   labelComponent?: ComponentType;
   defaultValue?: string;
@@ -48,7 +48,7 @@ const TextField = ({
 }) => {
   const LabelComponent = labelComponent;
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className={`flex flex-col min-w-0 ${className}`}>
       {(label || labelComponent) && (
         <label htmlFor={name} className="text-sm font-medium mb-1 block">
           {label ? label : <LabelComponent />}
