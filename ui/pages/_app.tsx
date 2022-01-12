@@ -162,6 +162,11 @@ const MyApp = ({ Component, pageProps, router }) => {
 
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
+
   return (
     <>
       <Modal

@@ -5,6 +5,7 @@ import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
 const Comments = ({ currentUser, currentOrg, bucket, collection, router }) => {
+  if (!bucket) return null;
   const context = useCommentContext({
     from: 0,
     limit: 10,

@@ -1,7 +1,6 @@
 import MagicLoginStrategy from "passport-magic-login";
-import { getRequestOrigin } from "../get-request-origin";
-import { sendEmail } from "../send-email";
 import prisma from "../prisma";
+import emailService from "../services/EmailService/email.service";
 
 if (!process.env.MAGIC_LINK_SECRET)
   throw new Error(`Add MAGIC_LINK_SECRET environment variable`);
@@ -10,29 +9,42 @@ const magicLink = new MagicLoginStrategy({
   secret: process.env.MAGIC_LINK_SECRET,
   callbackUrl: "/api/auth/magiclink/callback",
   sendMagicLink: async (destination, href, code, req) => {
-    const link = `${getRequestOrigin(req)}${href}`;
-
-    await sendEmail({
-      to: destination,
-      subject: `Your login link`,
-      text: `Click on this link to login: ${link}\n\nVerification code ${code}`,
-    });
+    await emailService.loginMagicLink({ destination, href, code, req });
   },
   verify: (payload, callback) => {
+    const email = payload.destination.toLowerCase().trim();
+
     prisma.user
-      .upsert({
-        create: {
-          email: payload.destination.toLowerCase().trim(),
-          verifiedEmail: true,
-        },
-        update: {
-          verifiedEmail: true,
-        },
-        where: {
-          email: payload.destination.toLowerCase().trim(),
-        },
+      .findUnique({ where: { email } })
+      .then(async (olderUser) => {
+        const newerUser = await prisma.user.upsert({
+          create: {
+            email,
+            verifiedEmail: true,
+          },
+          update: {
+            verifiedEmail: true,
+          },
+          where: {
+            email,
+          },
+        });
+
+        // the user can join the app in two ways:
+        // 1. they go to the website and sign up
+        // 2. they get an invite to an org/coll from someone (when invited,
+        // their User object is also created). that invite just
+        // links them to the org/coll . then the user signs up like in case 1.
+        // In both cases they end up here where we can send their welcome mail
+        // (note that they also end up here when simply signing in)
+
+        if (olderUser?.verifiedEmail !== newerUser.verifiedEmail) {
+          // if true then it's a new user
+          await emailService.welcomeEmail({ newUser: newerUser });
+        }
+
+        callback(null, newerUser);
       })
-      .then((user) => callback(null, user))
       .catch((err) => callback(err));
   },
 });

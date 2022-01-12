@@ -162,3 +162,43 @@ export async function getCurrentOrgAndMember({
   const collectionMember = currentOrgMember?.collectionMemberships?.[0];
   return { currentOrg, currentOrgMember, collectionMember };
 }
+
+/** contributions = donations */
+export async function bucketTotalContributions(bucket) {
+  const {
+    _sum: { amount },
+  } = await prisma.contribution.aggregate({
+    _sum: { amount: true },
+    where: {
+      bucketId: bucket.id,
+    },
+  });
+  return amount;
+}
+
+/** income = existing funding */
+export async function bucketIncome(bucket) {
+  const {
+    _sum: { min },
+  } = await prisma.budgetItem.aggregate({
+    _sum: { min: true },
+    where: {
+      bucketId: bucket.id,
+      type: "INCOME",
+    },
+  });
+  return min;
+}
+
+export async function bucketMinGoal(bucket) {
+  const {
+    _sum: { min },
+  } = await prisma.budgetItem.aggregate({
+    _sum: { min: true },
+    where: {
+      bucketId: bucket.id,
+      type: "EXPENSE",
+    },
+  });
+  return min > 0 ? min : 0;
+}

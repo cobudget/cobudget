@@ -3,6 +3,7 @@ import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
 
 export default function Funders({ bucket, collection, currentUser }) {
+  if (!bucket) return null;
   return (
     <div className="bg-white border-b-default">
       {bucket.funders.length ? (

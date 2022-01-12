@@ -15,6 +15,9 @@ import {
   generateComment,
 } from "../../subscribers/discourse.subscriber";
 import {
+  bucketIncome,
+  bucketMinGoal,
+  bucketTotalContributions,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -22,6 +25,7 @@ import {
   isAndGetCollMemberOrOrgAdmin,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
+import emailService from "server/services/EmailService/email.service";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -1028,18 +1032,21 @@ const resolvers = {
           },
         });
 
-        const { prisma: prismaResult } = await eventHub.publish(
-          "publish-dream",
-          {
-            currentOrg: bucket.collection.organization,
-            currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-            event: bucket.collection,
-            dream: bucket,
-            unpublish,
-          }
-        );
+        const publishedAt = unpublish ? null : new Date();
+        const resultBucket = await prisma.bucket.update({
+          where: { id: bucket.id },
+          data: { publishedAt },
+        });
 
-        return prismaResult;
+        await eventHub.publish("publish-dream", {
+          currentOrg: bucket.collection.organization,
+          currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
+          event: bucket.collection,
+          dream: bucket,
+          unpublish,
+        });
+
+        return resultBucket;
       }
     ),
     addComment: combineResolvers(
@@ -1093,8 +1100,6 @@ const resolvers = {
             comment,
           }
         );
-
-        console.log({ comment, prismaResult, currentCollMember });
 
         return discourse || prismaResult;
       }
@@ -1499,13 +1504,8 @@ const resolvers = {
             include: { collMemberships: { where: { collectionId } } },
           });
 
-          await sendEmail({
-            to: email,
-            subject: `${currentUser.name} invited you to "${collection.title}" on Cobudget`,
-            text: `View and login here: https://${process.env.DEPLOY_URL}/${
-              collection.organization?.slug ?? "c"
-            }/${collection.slug}`,
-          });
+          emailService.inviteMember({ email, currentUser, collection });
+
           invitedCollectionMembers.push(updated.collMemberships?.[0]);
         }
         return invitedCollectionMembers;
@@ -1514,7 +1514,7 @@ const resolvers = {
     inviteOrgMembers: combineResolvers(
       isOrgAdmin,
       async (_, { orgId, emails: emailsString }, { user: currentUser }) => {
-        const emails = emailsString.split(",");
+        const emails: string[] = emailsString.split(",");
 
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
@@ -1549,11 +1549,7 @@ const resolvers = {
           const orgMembership = user.orgMemberships?.[0];
           const currentOrg = orgMembership.organization;
 
-          await sendEmail({
-            to: email,
-            subject: `${currentUser.name} invited you to "${currentOrg.name}" on Cobudget`,
-            text: `View and login here: https://${process.env.DEPLOY_URL}/${currentOrg.slug}`,
-          });
+          emailService.inviteMember({ email, currentUser, currentOrg });
 
           newOrgMembers.push(orgMembership);
         }
@@ -1701,7 +1697,11 @@ const resolvers = {
         return collectionMembers;
       }
     ),
-    contribute: async (_, { collectionId, bucketId, amount }, { user }) => {
+    contribute: async (
+      _,
+      { collectionId, bucketId, amount },
+      { user, eventHub }
+    ) => {
       const collectionMember = await getCollectionMember({
         collectionId,
         userId: user.id,
@@ -1711,8 +1711,6 @@ const resolvers = {
       const { collection } = collectionMember;
 
       if (amount <= 0) throw new Error("Value needs to be more than zero");
-
-      // const event = await Event.findOne({ _id: collectionId });
 
       // Check that granting is open
       const now = dayjs();
@@ -1822,6 +1820,13 @@ const resolvers = {
         },
       });
 
+      await eventHub.publish("contribute-to-bucket", {
+        collection,
+        bucket,
+        user,
+        amount,
+      });
+
       return bucket;
     },
     markAsCompleted: combineResolvers(
@@ -1869,10 +1874,16 @@ const resolvers = {
     ),
     cancelFunding: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
-      async (_, { bucketId }, { user }) => {
+      async (_, { bucketId }, { eventHub }) => {
         const bucket = await prisma.bucket.findUnique({
           where: { id: bucketId },
-          include: { cocreators: true },
+          include: {
+            cocreators: true,
+            collection: { include: { organization: true } },
+            Contributions: {
+              include: { collectionMember: { include: { user: true } } },
+            },
+          },
         });
 
         if (bucket.completedAt)
@@ -1890,7 +1901,9 @@ const resolvers = {
           },
         });
 
-        // TODO: notify contribuors that they have been "re-imbursed"
+        await eventHub.publish("cancel-funding", {
+          bucket,
+        });
 
         return updated;
       }
@@ -2312,17 +2325,10 @@ const resolvers = {
       });
     },
     totalContributions: async (bucket) => {
-      const {
-        _sum: { amount },
-      } = await prisma.contribution.aggregate({
-        _sum: { amount: true },
-        where: {
-          bucketId: bucket.id,
-        },
-      });
-      return amount;
+      return bucketTotalContributions(bucket);
     },
     totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
+      if (!user) return null;
       const collectionMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -2437,28 +2443,10 @@ const resolvers = {
     funded: (bucket) => !!bucket.fundedAt,
     completed: (bucket) => !!bucket.completedAt,
     income: async (bucket) => {
-      const {
-        _sum: { min },
-      } = await prisma.budgetItem.aggregate({
-        _sum: { min: true },
-        where: {
-          bucketId: bucket.id,
-          type: "INCOME",
-        },
-      });
-      return min;
+      return bucketIncome(bucket);
     },
     minGoal: async (bucket) => {
-      const {
-        _sum: { min },
-      } = await prisma.budgetItem.aggregate({
-        _sum: { min: true },
-        where: {
-          bucketId: bucket.id,
-          type: "EXPENSE",
-        },
-      });
-      return min > 0 ? min : 0;
+      return bucketMinGoal(bucket);
     },
     maxGoal: async (bucket) => {
       const {
