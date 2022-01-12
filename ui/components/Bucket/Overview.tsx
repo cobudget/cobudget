@@ -1,66 +1,20 @@
 import Head from "next/head";
-import { useQuery, gql } from "urql";
-
 import Sidebar from "./Sidebar";
 import HappySpinner from "components/HappySpinner";
 import { isMemberOfDream } from "utils/helpers";
-import { stringToColor } from "utils/stringToHslColor";
 import Title from "./Title";
 import Summary from "./Summary";
-
-export const BUCKET_QUERY = gql`
-  query Bucket($id: ID!) {
-    bucket(id: $id) {
-      id
-      summary
-      title
-      minGoal
-      maxGoal
-      income
-      totalContributions
-      totalContributionsFromCurrentMember
-      approved
-      published
-      completed
-      completedAt
-      funded
-      fundedAt
-      canceled
-      canceledAt
-      tags {
-        id
-        value
-      }
-      cocreators {
-        id
-        user {
-          id
-          username
-          avatar
-        }
-      }
-      images {
-        id
-        small
-        large
-      }
-    }
-  }
-`;
 
 export default function Overview({
   collection,
   currentUser,
   currentOrg,
-  router,
+  fetching,
+  error,
+  bucket,
   openImageModal,
 }) {
-  const [{ data, fetching, error }] = useQuery({
-    query: BUCKET_QUERY,
-    variables: { id: router.query.bucket },
-  });
-  const { bucket } = data ?? { bucket: null };
-
+  if (!bucket) return null;
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
@@ -114,13 +68,15 @@ export default function Overview({
                 className="h-64 md:h-88 w-full object-cover object-center"
                 src={bucket.images[0].large ?? bucket.images[0].small}
               />
-            ) : (
+            ) : canEdit ? (
               <button
                 className={`w-full h-64 md:h-88 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100`}
                 onClick={openImageModal}
               >
                 + Cover image
               </button>
+            ) : (
+              <div className="w-full h-64 md:h-88 block border-3 border-dashed rounded-lg"></div>
             )}
             <div className="">
               <Sidebar
@@ -136,9 +92,4 @@ export default function Overview({
       </div>
     </>
   );
-}
-
-{
-  /*
-   */
 }
