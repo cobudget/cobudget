@@ -53,6 +53,7 @@ export default ({
   collection,
   handleClose,
   guideline = {
+    id: null,
     title: "",
     description: "",
   },
