@@ -23,17 +23,17 @@ const TextField = ({
   color = "blue",
   wysiwyg,
 }: {
-  inputRef: any;
-  inputProps: any;
+  inputRef?: any;
+  inputProps?: any;
   name?: string;
-  placeholder: string;
+  placeholder?: string;
   label?: string;
   labelComponent?: ComponentType;
   defaultValue?: string;
-  error: boolean;
-  helperText: string;
+  error?: boolean;
+  helperText?: string;
   className?: string;
-  multiline: boolean;
+  multiline?: boolean;
   rows?: number;
   size?: string;
   autoFocus?: boolean;
@@ -41,8 +41,8 @@ const TextField = ({
   required?: boolean;
   startAdornment?: string;
   endAdornment?: string;
-  color: string;
-  wysiwyg: boolean;
+  color?: string;
+  wysiwyg?: boolean;
 }) => {
   const LabelComponent = labelComponent;
   return (

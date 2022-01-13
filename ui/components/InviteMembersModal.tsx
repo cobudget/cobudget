@@ -117,7 +117,7 @@ const InviteMembersModal = ({
             <TextField
               placeholder="Comma separated emails"
               multiline
-              rows="4"
+              rows={4}
               name="emails"
               autoFocus
               error={Boolean(errors.emails)}
