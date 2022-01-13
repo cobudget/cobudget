@@ -3,7 +3,6 @@ import Comment from "./Comment";
 import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
-import router from "next/router";
 
 const Comments = ({ currentUser, currentOrg, bucket, collection, router }) => {
   if (!bucket) return null;

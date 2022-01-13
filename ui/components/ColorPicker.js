@@ -1,5 +1,5 @@
 import { CheckIcon } from "components/Icons";
-import colors from "utils/colors";
+import { colors } from "utils/colors";
 
 export default ({ setColor, color: currentColor }) => {
   return (

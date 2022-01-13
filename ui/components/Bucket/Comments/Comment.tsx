@@ -19,7 +19,7 @@ const LogIcon = () => (
 const Comment = ({ comment, showBorderBottom }) => {
   const [submitting, setSubmitting] = useState(false);
   const [isEditMode, setEditMode] = useState(false);
-  const { deleteComment, currentUser, bucketId } = useContext(Context);
+  const { deleteComment, currentUser, bucketId } = useContext<any>(Context);
 
   const canEdit =
     currentUser &&
@@ -41,7 +41,9 @@ const Comment = ({ comment, showBorderBottom }) => {
           />
         )}
       </div>
-      <div className={`flex-grow ${showBorderBottom && "border-b"} pb-4`}>
+      <div
+        className={`flex-grow ${showBorderBottom && "border-b"} pb-4 min-w-0`}
+      >
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
           {comment.isLog ? (
             <h5>Log</h5>

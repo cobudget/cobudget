@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState, useContext, ReactNode } from "react";
 import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
@@ -12,14 +12,15 @@ function AddComment() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const inputRef = useRef();
+  const inputRef = useRef<any>();
   const {
     addComment,
     bucketId,
     collection,
     currentOrg,
     currentUser,
-  } = useContext(Context);
+  } = useContext<any>(Context);
+
   if (
     currentOrg?.discourseUrl &&
     !currentUser.currentOrgMember?.hasDiscourseApiKey
@@ -32,6 +33,7 @@ function AddComment() {
       </Link>
     );
   }
+
   return (
     <form
       onSubmit={handleSubmit(() => {
@@ -40,7 +42,7 @@ function AddComment() {
           .then(({ error }) => {
             if (error) return toast.error(error.message);
             inputRef.current.blur();
-            setContent("");
+            inputRef.current.clear();
           })
           .finally(() => setSubmitting(false));
       })}
@@ -49,7 +51,7 @@ function AddComment() {
         <div className="mr-4">
           <Avatar user={currentUser} />
         </div>
-        <div className="flex-grow">
+        <div className="min-w-0">
           <div className="mb-2">
             <TextField
               name="content"
@@ -58,7 +60,6 @@ function AddComment() {
               rows={1}
               error={Boolean(errors.content)}
               helperText={errors.content?.message}
-              value={content}
               inputProps={{
                 value: content,
                 onChange: (e) => setContent(e.target.value),
@@ -68,12 +69,13 @@ function AddComment() {
                 inputRef.current = e;
               }}
               color={collection.color}
+              wysiwyg
             />
           </div>
           {content.length > 0 && (
             <div className="flex justify-end">
               <Button
-                onClick={() => setContent("")}
+                onClick={inputRef.current.clear}
                 variant="secondary"
                 color={collection.color}
                 className="mr-2"

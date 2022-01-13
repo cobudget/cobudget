@@ -5,13 +5,14 @@ import { useForm } from "react-hook-form";
 import Context from "contexts/comment";
 
 const EditComment = ({ comment, handleDone }) => {
+  const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
-  const { editComment, bucketId, collection } = useContext(Context);
+  const { editComment, bucketId, collection } = useContext<any>(Context);
 
   return (
     <form
-      onSubmit={handleSubmit(({ content }) => {
+      onSubmit={handleSubmit(() => {
         setSubmitting(true);
         editComment({
           bucketId,
@@ -24,16 +25,19 @@ const EditComment = ({ comment, handleDone }) => {
       })}
     >
       <TextField
-        name="content"
         className="mb-2"
         placeholder="Comment"
         multiline
         error={Boolean(errors.content)}
         helperText={errors.content?.message}
         defaultValue={comment.content}
+        inputProps={{
+          onChange: (e) => setContent(e.target.value),
+        }}
         inputRef={register({ required: "Required" })}
         autoFocus
         color={collection.color}
+        wysiwyg
       />
       <div className="flex justify-end">
         <Button

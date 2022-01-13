@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect } from "react";
-import { gql, useQuery, useSubscription, useMutation } from "urql";
+import { createContext, useState } from "react";
+import { gql, useQuery, useMutation } from "urql";
 
-export default createContext();
+export default createContext({});
 
 export const DELETE_COMMENT_MUTATION = gql`
   mutation DeleteComment($bucketId: ID!, $commentId: ID!) {

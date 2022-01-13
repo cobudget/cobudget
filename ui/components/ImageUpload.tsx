@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { CloseIcon, LoaderIcon } from "components/Icons";
+import uploadImageFiles from "utils/uploadImageFiles";
 
 const ImageUpload = ({
   label,
@@ -11,31 +12,6 @@ const ImageUpload = ({
   const fileInputField = useRef(null);
   const [image, setImage] = useState(initialImage);
   const [uploadingImage, setUploadingImage] = useState(false);
-
-  const uploadFile = async (e) => {
-    try {
-      setUploadingImage(true);
-      const files = e.target.files;
-      const data = new FormData();
-      data.append("file", files[0]);
-      data.append("upload_preset", cloudinaryPreset);
-
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dreamswtf/image/upload",
-        { method: "POST", body: data }
-      );
-      const file = await res.json();
-      const newImage = file.secure_url;
-      setImage(newImage);
-      setUploadingImage(false);
-      onImageUploaded(newImage);
-    } catch (error) {
-      console.log(error);
-      alert(error);
-    } finally {
-      setUploadingImage(false);
-    }
-  };
 
   return (
     <div className="mb-4">
@@ -72,7 +48,19 @@ const ImageUpload = ({
             <input
               type="file"
               ref={fileInputField}
-              onChange={uploadFile}
+              onChange={(e) =>
+                uploadImageFiles({
+                  files: [e.target.files[0]],
+                  setUploadingImages: [setUploadingImage],
+                  setImages: [
+                    (imgUrl) => {
+                      setImage(imgUrl);
+                      onImageUploaded(imgUrl);
+                    },
+                  ],
+                  cloudinaryPreset,
+                })
+              }
               title=""
               value=""
               className="w-full absolute inset-0 opacity-0 hidden focus:outline-none -z-10"

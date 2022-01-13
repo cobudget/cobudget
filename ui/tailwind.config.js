@@ -1,17 +1,5 @@
 const defaultTheme = require("tailwindcss/defaultTheme");
-
-const colors = [
-  "red",
-  "lavendel",
-  "blue",
-  "orange",
-  "purple",
-  "green",
-  "yellow",
-  "pink",
-  "aqua",
-  "anthracit",
-];
+const { colors, tailwindHsl } = require("./utils/colors");
 
 const classes = [
   ...colors.map((c) => `bg-${c}`),
@@ -46,7 +34,7 @@ module.exports = {
     extend: {
       gridTemplateColumns: {
         // Dream page layout
-        sidebar: "1fr 350px",
+        sidebar: "minmax(0,1fr) 350px",
       },
       height: {
         88: "22rem",
@@ -62,75 +50,7 @@ module.exports = {
       maxWidth: {
         "screen-2lg": "1140px",
       },
-      colors: {
-        red: {
-          100: "hsl(351, 80%, 96%)",
-          200: "hsl(351, 80%, 93%)",
-          500: "hsl(351, 80%, 69%)",
-          900: "hsl(351, 80%, 14%)",
-          DEFAULT: "hsl(351, 80%, 60%)",
-          dark: "hsl(351, 80%, 55%)",
-        },
-        lavendel: {
-          100: "hsl(257, 70%, 96%)",
-          200: "hsl(257, 70%, 93%)",
-          DEFAULT: "hsl(257, 70%, 59%)",
-          dark: "hsl(257, 70%, 54%)",
-        },
-        blue: {
-          100: "hsl(224,79%, 96%)",
-          200: "hsl(224,79%, 93%)",
-          300: "hsl(224,79%, 88%)",
-          DEFAULT: "hsl(224, 79%, 53%)",
-          dark: "hsl(224, 79%, 48%)",
-        },
-        orange: {
-          100: "hsl(20, 87%, 96%)",
-          200: "hsl(20, 87%, 93%)",
-          DEFAULT: "hsl(20, 87%, 59%)",
-          dark: "hsl(20, 87%, 54%)",
-        },
-        purple: {
-          100: "hsl(284, 60%, 96%)",
-          200: "hsl(284, 60%, 93%)",
-          DEFAULT: "hsl(284, 60%, 57%)",
-          dark: "hsl(284, 60%, 52%)",
-        },
-        green: {
-          100: "hsl(143, 62%, 96%)",
-          200: "hsl(143, 62%, 93%)",
-          500: "hsl(143, 62%, 69%)",
-          900: "hsl(143, 62%, 14%)",
-          DEFAULT: "hsl(143, 62%, 45%)",
-          dark: "hsl(143, 62%, 40%)",
-        },
-        yellow: {
-          100: "hsl(49, 91%, 96%)",
-          200: "hsl(49, 91%, 93%)",
-          500: "hsl(49, 91%, 69%)",
-          900: "hsl(49, 91%, 14%)",
-          DEFAULT: "hsl(49, 91%, 48%)",
-          dark: "hsl(49, 91%, 43%)",
-        },
-        pink: {
-          100: "hsl(317, 66%, 96%)",
-          200: "hsl(317, 66%, 93%)",
-          DEFAULT: "hsl(317, 66%, 65%)",
-          dark: "hsl(317, 66%, 60%)",
-        },
-        aqua: {
-          100: "hsl(195, 85%, 96%)",
-          200: "hsl(195, 85%, 93%)",
-          DEFAULT: "hsl(195, 85%, 49%)",
-          dark: "hsl(195, 85%, 44%)",
-        },
-        anthracit: {
-          100: "hsl(223, 3%, 96%)",
-          200: "hsl(223, 3%, 93%)",
-          DEFAULT: "hsl(223, 3%, 15%)",
-          dark: "hsl(223, 3%, 5%)",
-        },
-      },
+      colors: tailwindHsl,
       shadowOutline: {
         shadow: "0 0 0 3px",
         alpha: "1",

@@ -1,4 +1,4 @@
-import colors from "./colors";
+import { colors } from "./colors";
 
 export const stringToColor = (str) => {
   var hash = 0;
