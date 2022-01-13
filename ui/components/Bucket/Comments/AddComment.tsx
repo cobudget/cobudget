@@ -1,17 +1,27 @@
-import React, { useRef, useState, useContext, ReactNode } from "react";
+import React, {
+  useRef,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
 import toast from "react-hot-toast";
 
+const schema = yup.object().shape({
+  content: yup.string().required("Required"),
+});
+
 function AddComment() {
-  const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { handleSubmit, register, errors } = useForm();
   const inputRef = useRef<any>();
   const {
     addComment,
@@ -20,6 +30,15 @@ function AddComment() {
     currentOrg,
     currentUser,
   } = useContext<any>(Context);
+
+  const { handleSubmit, register, errors, setValue, watch } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const content = watch("content", "");
+
+  useEffect(() => {
+    register({ name: "content" });
+  }, [register]);
 
   if (
     currentOrg?.discourseUrl &&
@@ -36,9 +55,9 @@ function AddComment() {
 
   return (
     <form
-      onSubmit={handleSubmit(() => {
+      onSubmit={handleSubmit((vars) => {
         setSubmitting(true);
-        addComment({ bucketId, content })
+        addComment({ bucketId, ...vars })
           .then(({ error }) => {
             if (error) return toast.error(error.message);
             inputRef.current.blur();
@@ -54,18 +73,15 @@ function AddComment() {
         <div className="min-w-0">
           <div className="mb-2">
             <TextField
-              name="content"
               placeholder="Add comment"
               multiline
               rows={1}
               error={Boolean(errors.content)}
               helperText={errors.content?.message}
               inputProps={{
-                value: content,
-                onChange: (e) => setContent(e.target.value),
+                onChange: (e) => setValue("content", e.target.value),
               }}
               inputRef={(e) => {
-                register({ required: "Required" });
                 inputRef.current = e;
               }}
               color={collection.color}
