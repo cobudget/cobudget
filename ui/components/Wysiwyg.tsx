@@ -76,7 +76,7 @@ const EditorCss = styled.div`
     highlightColor
       ? `--rmr-color-outline: ${namedColorWithAlpha(
           highlightColor,
-          "40%"
+          "100%"
         )} !important;
         --rmr-color-primary: ${namedColorToHsl(highlightColor)} !important;
         --rmr-color-hover-primary: ${namedColorToHsl(
