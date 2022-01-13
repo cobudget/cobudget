@@ -171,16 +171,6 @@ const isBucketCocreatorOrCollAdminOrMod = async (
   return skip;
 };
 
-const canApproveBucket = async (
-  parent,
-  { collectionId }
-) => {
-  const collection = await prisma.collection.findUnique({
-    where: { id: collectionId },
-  });
-  return collection.requireBucketApproval ? isCollModOrAdmin : isBucketCocreatorOrCollAdminOrMod
-}
-
 const resolvers = {
   Query: {
     currentUser: async (parent, args, { user }) => {
@@ -1653,7 +1643,15 @@ const resolvers = {
     //   return prisma.organization.delete({ where: { id: organizationId } });
     // },
     approveForGranting: combineResolvers(
-      canApproveBucket? isBucketCocreatorOrCollAdminOrMod : isCollModOrAdmin,
+      async (parent, args, ctx) => {
+        const collection = await prisma.collection.findFirst({
+          where: { buckets: { some: { id: args.bucketId } } },
+        });
+
+        return collection.requireBucketApproval
+          ? isCollModOrAdmin(parent, args, ctx)
+          : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+      },
       async (_, { bucketId, approved }) =>
         prisma.bucket.update({
           where: { id: bucketId },
