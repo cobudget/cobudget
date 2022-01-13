@@ -311,20 +311,20 @@ const Wysiwyg = ({
         ],
         separator: "end",
       },
-      {
-        type: ComponentItem.ToolbarGroup,
-        label: "Embed",
-        items: [
-          {
-            type: ComponentItem.ToolbarButton,
-            onClick: () => {
-              filePicker.current.click();
-            },
-            icon: "imageAddLine",
-          },
-        ],
-        separator: "end",
-      },
+      // {
+      //   type: ComponentItem.ToolbarGroup,
+      //   label: "Embed",
+      //   items: [
+      //     {
+      //       type: ComponentItem.ToolbarButton,
+      //       onClick: () => {
+      //         filePicker.current.click();
+      //       },
+      //       icon: "imageAddLine",
+      //     },
+      //   ],
+      //   separator: "end",
+      // },
       {
         type: ComponentItem.ToolbarGroup,
         label: "Lists",
