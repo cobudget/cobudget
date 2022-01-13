@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tippy";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
@@ -47,15 +47,18 @@ const DreamCustomField = ({
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
 
-  // TODO: cache
-  const schema = yup.object().shape({
-    customField: yup.object().shape({
-      value: yup
-        .string()
-        .required(defaultCustomField.isRequired ? "Required" : null)
-        .max(defaultCustomField.limit, "Too long"),
-    }),
-  });
+  const schema = useMemo(
+    () =>
+      yup.object().shape({
+        customField: yup.object().shape({
+          value: yup
+            .string()
+            .required(defaultCustomField.isRequired ? "Required" : null)
+            .max(defaultCustomField.limit, "Too long"),
+        }),
+      }),
+    [defaultCustomField]
+  );
 
   const { handleSubmit, register, setValue, watch, errors } = useForm({
     resolver: yupResolver(schema),
