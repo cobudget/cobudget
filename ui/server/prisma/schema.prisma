@@ -98,6 +98,7 @@ model Collection {
   grantingOpens            DateTime?
   grantingCloses           DateTime?
   allowStretchGoals        Boolean?
+  requireBucketApproval    Boolean?
   bucketReviewIsOpen       Boolean?
   discourseCategoryId      Int?
 

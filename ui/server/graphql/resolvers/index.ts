@@ -1639,7 +1639,15 @@ const resolvers = {
     //   return prisma.organization.delete({ where: { id: organizationId } });
     // },
     approveForGranting: combineResolvers(
-      isCollModOrAdmin,
+      async (parent, args, ctx) => {
+        const collection = await prisma.collection.findFirst({
+          where: { buckets: { some: { id: args.bucketId } } },
+        });
+
+        return collection.requireBucketApproval
+          ? isCollModOrAdmin(parent, args, ctx)
+          : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+      },
       async (_, { bucketId, approved }) =>
         prisma.bucket.update({
           where: { id: bucketId },
@@ -1920,6 +1928,7 @@ const resolvers = {
           grantingOpens,
           grantingCloses,
           allowStretchGoals,
+          requireBucketApproval,
         }
       ) => {
         const collection = await prisma.collection.findUnique({
@@ -1944,6 +1953,7 @@ const resolvers = {
             grantingOpens,
             grantingCloses,
             allowStretchGoals,
+            requireBucketApproval,
           },
         });
       }

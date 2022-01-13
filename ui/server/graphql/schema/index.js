@@ -171,6 +171,7 @@ const schema = gql`
       grantingCloses: Date
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
+      requireBucketApproval: Boolean
     ): Collection
 
     allocate(
@@ -233,6 +234,7 @@ const schema = gql`
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
+    requireBucketApproval: Boolean
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int

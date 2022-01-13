@@ -29,6 +29,7 @@ export const TOP_LEVEL_QUERY = gql`
       numberOfApprovedMembers
       about
       allowStretchGoals
+      requireBucketApproval
       bucketReviewIsOpen
       discourseCategoryId
       guidelines {
