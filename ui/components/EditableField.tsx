@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 import { Tooltip } from "react-tippy";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -21,30 +23,42 @@ const EditableField = ({
   className = "",
 }) => {
   const [{ fetching: loading }, mutation] = useMutation(MUTATION);
-  const { handleSubmit, register } = useForm();
-  const [inputValue, setInputValue] = useState(defaultValue ?? "");
+
+  const schema = useMemo(() => {
+    const maxInfo = yup.string().max(maxLength ?? Infinity, "Too long");
+    return yup.object().shape({
+      info: required ? maxInfo.required("Required") : maxInfo,
+    });
+  }, [maxLength, required]);
+
+  const { handleSubmit, register, setValue, errors } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    register({ name: "info" });
+  }, [register]);
 
   if (editing)
     return (
       <form
-        onSubmit={handleSubmit(() =>
-          mutation({ ...variables, info: inputValue })
+        onSubmit={handleSubmit((vars) =>
+          mutation({ ...variables, ...vars })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message))
         )}
       >
         <TextField
           placeholder={placeholder}
-          inputRef={register}
           multiline
           rows={3}
           defaultValue={defaultValue}
           autoFocus
-          maxLength={maxLength}
-          onChange={(e) => setInputValue(e.target.value)}
-          required={required}
+          error={errors.info}
+          helperText={errors.info?.message}
+          onChange={(e) => setValue("info", e.target.value)}
           className="mb-2"
           wysiwyg
         />

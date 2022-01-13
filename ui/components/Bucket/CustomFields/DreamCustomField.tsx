@@ -47,18 +47,19 @@ const DreamCustomField = ({
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
 
-  const schema = useMemo(
-    () =>
-      yup.object().shape({
-        customField: yup.object().shape({
-          value: yup
-            .string()
-            .required(defaultCustomField.isRequired ? "Required" : null)
-            .max(defaultCustomField.limit, "Too long"),
-        }),
+  const schema = useMemo(() => {
+    const maxValue = yup
+      .string()
+      .max(defaultCustomField.limit ?? Infinity, "Too long");
+
+    return yup.object().shape({
+      customField: yup.object().shape({
+        value: defaultCustomField.isRequired
+          ? maxValue.required("Required")
+          : maxValue,
       }),
-    [defaultCustomField]
-  );
+    });
+  }, [defaultCustomField]);
 
   const { handleSubmit, register, setValue, watch, errors } = useForm({
     resolver: yupResolver(schema),
