@@ -7,6 +7,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
+import FinishSignup from "components/FinishSignup";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
@@ -103,23 +104,6 @@ export const TOP_LEVEL_QUERY = gql`
         isAdmin
         discourseUsername
         hasDiscourseApiKey
-        # user {
-        #   id
-        #   name
-        #   username
-        #   email
-        # }
-        # collectionMemberships {
-        #   id
-        #   isAdmin
-        #   isModerator
-        #   isApproved
-        #   collection {
-        #     id
-        #     title
-        #     slug
-        #   }
-        # }
       }
     }
 
@@ -171,6 +155,18 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
+  
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
+
+  const showFinishSignupModal = !!(currentUser && !currentUser.username);
+
+  if (error) {
+    console.error("Top level query failed:", error);
+    return error.message;
+  }
 
   return (
     <>
@@ -180,6 +176,7 @@ const MyApp = ({ Component, pageProps, router }) => {
         currentUser={currentUser}
         currentOrg={currentOrg}
       />
+      <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
         currentOrg={currentOrg}

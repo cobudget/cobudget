@@ -1,3 +1,23 @@
+# Licensing of Cobudget
+
+Cobudget is licensed under the GNU Affero General Public License v3.0 or later as published by the Free Software
+Foundation, Inc. (AGPL-3.0-or-later).
+
+As special exceptions the Additional Terms on the work licensed herein, pursuant to Section 7 of Affero General
+Public License are as follows:
+
+1. Pursuant to AGPLv3, Section 7 (b), you are not allowed to remove the attribution notice indicating the generated
+   website is built using Cobudget at the bottom of all generated web pages. If you run a modified version of Cobudget,
+   you are allowed to rephrase it to indicate a combined work in a form similar to "powered by <Company> based on
+   Cobudget, source code available at <location>". The word Cobudget must be a link to https://cobudget.com/
+
+2. Pursuant to AGPLv3, Section 7 (c), if you distribute a modified version in source or binary form, or if you offer
+   usage of a modified version to third parties (SaaS), it is important to be clear about what kind of modifications
+   the distributed work contains. You may not give the impression that the work being distributed or the service
+   provided is an authorized or original distribution by Cobudget.
+
+# Full text of the GNU Affero General Public License version 3
+
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

@@ -138,7 +138,7 @@ const DreamSidebar = ({
   return (
     <>
       {(dream.minGoal || canEdit) && (
-        <div className="-mt-20 bg-white rounded-lg shadow-md p-5 space-y-2">
+        <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
           <GrantingStatus dream={dream} collection={collection} />
           {showFundButton && (
             <>

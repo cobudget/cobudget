@@ -363,9 +363,11 @@ const schema = gql`
     income: Int
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
-    numberOfComments: Int
-    latestContributions: [Contribution!]
+    noOfComments: Int
     noOfContributions: Int
+    contributions: [Contribution!]
+    funders: [Contribution!] # aggregated contributions per user
+    noOfFunders: Int
     fundedAt: Date
     funded: Boolean
     completedAt: Date

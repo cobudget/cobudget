@@ -6,15 +6,20 @@ import Link from "next/link";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Avatar from "components/Avatar";
+import toast from "react-hot-toast";
 
 function AddComment() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { handleSubmit, register, errors } = useForm();
   const inputRef = useRef();
-  const { addComment, dream, collection, currentOrg, currentUser } = useContext(
-    Context
-  );
+  const {
+    addComment,
+    bucketId,
+    collection,
+    currentOrg,
+    currentUser,
+  } = useContext(Context);
   if (
     currentOrg?.discourseUrl &&
     !currentUser.currentOrgMember?.hasDiscourseApiKey
@@ -31,13 +36,13 @@ function AddComment() {
     <form
       onSubmit={handleSubmit(() => {
         setSubmitting(true);
-        addComment({ bucketId: dream.id, content })
-          .then(() => {
+        addComment({ bucketId, content })
+          .then(({ error }) => {
+            if (error) return toast.error(error.message);
             inputRef.current.blur();
             setContent("");
           })
-          .finally(() => setSubmitting(false))
-          .catch((err) => alert(err.message));
+          .finally(() => setSubmitting(false));
       })}
     >
       <div className="flex">

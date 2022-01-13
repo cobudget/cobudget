@@ -25,5 +25,8 @@ module.exports = (phase) => {
   };
   return withBundleAnalyzer({
     env,
+    eslint: {
+      ignoreDuringBuilds: true,
+    },
   });
 };

@@ -8,21 +8,23 @@ import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 
-const EDIT_TITLE_MUTATION = gql`
-  mutation EditTitle($bucketId: ID!, $title: String) {
-    editDream(bucketId: $bucketId, title: $title) {
+const EDIT_SUMMARY_MUTATION = gql`
+  mutation EditSummary($bucketId: ID!, $summary: String) {
+    editDream(bucketId: $bucketId, summary: $summary) {
       id
-      title
+      summary
     }
   }
 `;
 
-const DreamTitle = ({ title, canEdit, bucketId }) => {
-  const [{ fetching: loading }, editDream] = useMutation(EDIT_TITLE_MUTATION);
-  const { handleSubmit, register, errors } = useForm();
+const DreamSummary = ({ summary, canEdit, bucketId }) => {
+  const [{ fetching: loading }, editDream] = useMutation(EDIT_SUMMARY_MUTATION);
+
+  const { handleSubmit, register } = useForm();
 
   const [editing, setEditing] = useState(false);
-  if (editing) {
+  const [inputValue, setInputValue] = useState(summary ?? "");
+  if (editing)
     return (
       <>
         <form
@@ -34,19 +36,21 @@ const DreamTitle = ({ title, canEdit, bucketId }) => {
         >
           <TextField
             className="mb-2"
-            placeholder="Title"
-            name="title"
-            defaultValue={title}
-            size="large"
-            inputRef={register({ required: "Required" })}
+            multiline
+            name="summary"
+            placeholder="Summary"
+            inputRef={register}
             inputProps={{
-              maxLength: 100,
+              maxLength: 160,
+              value: inputValue,
+              onChange: (e) => setInputValue(e.target.value),
             }}
             autoFocus
-            error={Boolean(errors.title)}
-            helperText={errors.title?.message}
           />
-          <div className="flex justify-end  mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-sm text-gray-600 font-medium pl-4">
+              {160 - inputValue.length} characters remaining
+            </div>
             <div className="flex">
               <Button
                 className="mr-2"
@@ -64,14 +68,14 @@ const DreamTitle = ({ title, canEdit, bucketId }) => {
         </form>
       </>
     );
-  }
-  if (title) {
+
+  if (summary)
     return (
-      <div className="flex items-start justify-between group relative">
-        <h1 className="mb-2 text-4xl font-medium">{title}</h1>
+      <div className="whitespace-pre-line pb-4 text-lg text-gray-900 relative group text-center mb-2">
+        {summary}
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit title" position="bottom" size="small">
+            <Tooltip title="Edit summary" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
@@ -80,7 +84,18 @@ const DreamTitle = ({ title, canEdit, bucketId }) => {
         )}
       </div>
     );
-  }
+
+  if (canEdit)
+    return (
+      <button
+        onClick={() => setEditing(true)}
+        className="block w-full h-20 text-gray-600 font-semibold rounded-lg border-3 border-dashed hover:bg-gray-100 mb-4 focus:outline-none focus:bg-gray-100"
+      >
+        + Summary
+      </button>
+    );
+
+  return null;
 };
 
-export default DreamTitle;
+export default DreamSummary;
