@@ -1,7 +1,9 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tooltip } from "react-tippy";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 import Markdown from "../../Markdown";
 import IconButton from "../../IconButton";
 import { EditIcon } from "../../Icons";
@@ -44,12 +46,33 @@ const DreamCustomField = ({
 }) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
-  const { handleSubmit, register } = useForm();
-  const [inputValue, setInputValue] = useState(defaultValue ?? "");
+
+  // TODO: cache
+  const schema = yup.object().shape({
+    customField: yup.object().shape({
+      value: yup
+        .string()
+        .required(defaultCustomField.isRequired ? "Required" : null)
+        .max(defaultCustomField.limit, "Too long"),
+    }),
+  });
+
+  const { handleSubmit, register, setValue, watch, errors } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const inputValue = watch("customField.value", defaultValue ?? "");
+
   const [{ fetching: loading }, editCustomFieldMutation] = useMutation(
     EDIT_DREAM_CUSTOM_FIELD_MUTATION
   );
-  const fieldName = "customField";
+
+  useEffect(() => {
+    if (defaultCustomField.type !== "BOOLEAN") {
+      register({
+        name: "customField.value",
+      });
+    }
+  }, [register]);
 
   if (editing) {
     return (
@@ -58,7 +81,6 @@ const DreamCustomField = ({
           return editCustomFieldMutation({
             bucketId,
             ...variables,
-            customField: { value: inputValue, ...variables?.customField },
           })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message));
@@ -70,12 +92,12 @@ const DreamCustomField = ({
           </h3>
           <p className="my-2 text-gray-700">{defaultCustomField.description}</p>
           <HiddenTextField
-            name={`${fieldName}.fieldId`}
+            name="customField.fieldId"
             defaultValue={defaultCustomField.id}
             inputRef={register()}
           />
           <HiddenTextField
-            name={`${fieldName}.collectionId`}
+            name="customField.collectionId"
             defaultValue={collectionId}
             inputRef={register()}
           />
@@ -88,18 +110,17 @@ const DreamCustomField = ({
                 autoFocus
                 multiline={defaultCustomField.type == "MULTILINE_TEXT"}
                 rows={7}
-                inputRef={register({
-                  required: defaultCustomField.isRequired ? "Required" : null,
-                })}
+                error={errors.customField?.value}
+                helperText={errors.customField?.value?.message}
                 inputProps={{
-                  maxLength: defaultCustomField.limit,
-                  onChange: (e) => setInputValue(e.target.value),
+                  onChange: (e) =>
+                    setValue("customField.value", e.target.value),
                 }}
                 wysiwyg
               />
             ) : defaultCustomField.type === "BOOLEAN" ? (
               <SelectInput
-                name={`${fieldName}.value`}
+                name="customField.value"
                 defaultValue={defaultValue}
                 inputRef={register}
                 fullWidth
