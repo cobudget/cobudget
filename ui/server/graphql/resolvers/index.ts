@@ -220,16 +220,35 @@ const resolvers = {
         take: limit,
       });
     },
-    collection: async (parent, { orgSlug, collectionSlug }) => {
+    collection: async (parent, { orgSlug, collectionSlug }, user) => {
       if (!collectionSlug) return null;
 
-      return await prisma.collection.findFirst({
+      const collection = await prisma.collection.findFirst({
         where: {
           slug: collectionSlug,
           organization: { slug: orgSlug },
           deleted: { not: true },
         },
       });
+      if (!collection) return null;
+
+      if (collection.visibility === "PUBLIC") {
+        return collection;
+      }
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          userId_collectionId: {
+            userId: user?.id,
+            collectionId: collection.id,
+          },
+        },
+      });
+
+      if (collectionMember?.isApproved) {
+        return collection;
+      } else {
+        return null;
+      }
     },
     contributionsPage: combineResolvers(
       isCollMemberOrOrgAdmin,
