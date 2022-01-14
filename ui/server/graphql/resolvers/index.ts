@@ -220,7 +220,7 @@ const resolvers = {
         take: limit,
       });
     },
-    collection: async (parent, { orgSlug, collectionSlug }, user) => {
+    collection: async (parent, { orgSlug, collectionSlug }, { user }) => {
       if (!collectionSlug) return null;
 
       const collection = await prisma.collection.findFirst({
@@ -238,7 +238,7 @@ const resolvers = {
       const collectionMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
-            userId: user?.id,
+            userId: user?.id ?? "undefined",
             collectionId: collection.id,
           },
         },
