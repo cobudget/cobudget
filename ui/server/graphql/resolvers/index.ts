@@ -2012,12 +2012,9 @@ const resolvers = {
   },
   CollectionMember: {
     collection: async (member) => {
-      const collection = await prisma.collection.findUnique({
+      return await prisma.collection.findUnique({
         where: { id: member.collectionId },
       });
-      if (collection.visibility === "PUBLIC") return collection;
-      if (member.isApproved) return collection;
-      return null;
     },
     user: async (member) =>
       prisma.user.findUnique({
