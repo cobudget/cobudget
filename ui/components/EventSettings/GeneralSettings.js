@@ -107,6 +107,17 @@ export default function GeneralSettings({
         />
 
         <SelectField
+          name="visibility"
+          label="Visibility"
+          defaultValue={collection.visibility}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="PUBLIC">Public</option>
+          <option value="HIDDEN">Hidden</option>
+        </SelectField>
+
+        <SelectField
           name="registrationPolicy"
           label="Registration policy"
           defaultValue={collection.registrationPolicy}
@@ -116,17 +127,6 @@ export default function GeneralSettings({
           <option value="OPEN">Open</option>
           <option value="REQUEST_TO_JOIN">Request to join</option>
           <option value="INVITE_ONLY">Invite only</option>
-        </SelectField>
-
-        <SelectField
-          name="visibility"
-          label="Visibility"
-          defaultValue={collection.visibility}
-          inputRef={register}
-          className="my-4"
-        >
-          <option value="PUBLIC">Public</option>
-          <option value="HIDDEN">Hidden</option>
         </SelectField>
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
