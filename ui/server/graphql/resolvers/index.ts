@@ -2011,10 +2011,14 @@ const resolvers = {
     },
   },
   CollectionMember: {
-    collection: async (member) =>
-      prisma.collection.findUnique({
+    collection: async (member) => {
+      const collection = await prisma.collection.findUnique({
         where: { id: member.collectionId },
-      }),
+      });
+      if (collection.visibility === "PUBLIC") return collection;
+      if (member.isApproved) return collection;
+      return null;
+    },
     user: async (member) =>
       prisma.user.findUnique({
         where: { id: member.userId },
@@ -2190,9 +2194,22 @@ const resolvers = {
         : `# Welcome to ${org.name}`;
     },
     subdomain: (org) => org.slug,
-    collections: async (org) => {
+    collections: async (org, args, { user }) => {
       return await prisma.collection.findMany({
-        where: { organizationId: org.id },
+        where: {
+          OR: [
+            {
+              organizationId: org.id,
+              visibility: "PUBLIC",
+            },
+            {
+              organizationId: org.id,
+              collectionMember: {
+                some: { userId: user?.id ?? "undefined", isApproved: true },
+              },
+            },
+          ],
+        },
       });
     },
     discourseUrl: async (org) => {
