@@ -65,6 +65,7 @@ const schema = gql`
       title: String
       archived: Boolean
       registrationPolicy: RegistrationPolicy
+      visibility: Visibility
       info: String
       color: String
       about: String
