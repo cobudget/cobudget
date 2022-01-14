@@ -223,6 +223,7 @@ const schema = gql`
     numberOfApprovedMembers: Int
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
+    visibility: Visibility!
     currency: String!
     maxAmountToBucketPerUser: Int
     bucketCreationCloses: Date
@@ -269,6 +270,12 @@ const schema = gql`
     OPEN
     REQUEST_TO_JOIN
     INVITE_ONLY
+  }
+
+  enum Visibility {
+    PUBLIC
+    # PRIVATE
+    HIDDEN
   }
 
   enum AllocationType {
