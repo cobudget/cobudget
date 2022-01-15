@@ -34,7 +34,7 @@ const EditComment = ({ comment, handleDone }) => {
         inputProps={{
           onChange: (e) => setContent(e.target.value),
         }}
-        inputRef={register({ required: "Required" })}
+        //inputRef={register({ required: "Required" })}
         autoFocus
         color={collection.color}
         wysiwyg
