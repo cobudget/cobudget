@@ -20,6 +20,7 @@ export const TOP_LEVEL_QUERY = gql`
       color
       currency
       registrationPolicy
+      visibility
       maxAmountToBucketPerUser
       bucketCreationCloses
       bucketCreationIsOpen
@@ -155,7 +156,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   const closeModal = () => {
     setModal(null);
   };
-  
+
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
