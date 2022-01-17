@@ -1,5 +1,5 @@
 import { useMutation, gql } from "urql";
-import { sortableElement, sortableHandle } from "react-sortable-hoc";
+import { SortableElement, SortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
@@ -42,13 +42,13 @@ const SET_GUIDELINE_POSITION_MUTATION = gql`
   }
 `;
 
-const DragHandle = sortableHandle(() => (
+const DragHandle = SortableHandle(() => (
   <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
   </IconButton>
 ));
 
-const SortableItem = sortableElement(
+const SortableItem = SortableElement(
   ({ item: guideline, setEditingItem: setEditingGuideline, collectionId }) => {
     const [{ loading: deleting }, deleteGuideline] = useMutation({
       query: DELETE_GUIDELINE_MUTATION,
