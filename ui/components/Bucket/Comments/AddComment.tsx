@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useState,
-  useContext,
-  ReactNode,
-  useEffect,
-} from "react";
+import React, { useRef, useState, useContext, useEffect } from "react";
 import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
 import Link from "next/link";

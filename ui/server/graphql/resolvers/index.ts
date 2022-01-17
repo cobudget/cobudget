@@ -220,16 +220,35 @@ const resolvers = {
         take: limit,
       });
     },
-    collection: async (parent, { orgSlug, collectionSlug }) => {
+    collection: async (parent, { orgSlug, collectionSlug }, { user }) => {
       if (!collectionSlug) return null;
 
-      return await prisma.collection.findFirst({
+      const collection = await prisma.collection.findFirst({
         where: {
           slug: collectionSlug,
           organization: { slug: orgSlug },
           deleted: { not: true },
         },
       });
+      if (!collection) return null;
+
+      if (collection.visibility === "PUBLIC") {
+        return collection;
+      }
+      const collectionMember = await prisma.collectionMember.findUnique({
+        where: {
+          userId_collectionId: {
+            userId: user?.id ?? "undefined",
+            collectionId: collection.id,
+          },
+        },
+      });
+
+      if (collectionMember?.isApproved) {
+        return collection;
+      } else {
+        return null;
+      }
     },
     contributionsPage: combineResolvers(
       isCollMemberOrOrgAdmin,
@@ -578,6 +597,7 @@ const resolvers = {
           title,
           archived,
           registrationPolicy,
+          visibility,
           info,
           color,
           about,
@@ -592,6 +612,7 @@ const resolvers = {
             title,
             archived,
             registrationPolicy,
+            visibility,
             info,
             about,
             color,
@@ -1639,7 +1660,15 @@ const resolvers = {
     //   return prisma.organization.delete({ where: { id: organizationId } });
     // },
     approveForGranting: combineResolvers(
-      isCollModOrAdmin,
+      async (parent, args, ctx) => {
+        const collection = await prisma.collection.findFirst({
+          where: { buckets: { some: { id: args.bucketId } } },
+        });
+
+        return collection.requireBucketApproval
+          ? isCollModOrAdmin(parent, args, ctx)
+          : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+      },
       async (_, { bucketId, approved }) =>
         prisma.bucket.update({
           where: { id: bucketId },
@@ -1920,6 +1949,7 @@ const resolvers = {
           grantingOpens,
           grantingCloses,
           allowStretchGoals,
+          requireBucketApproval,
         }
       ) => {
         const collection = await prisma.collection.findUnique({
@@ -1944,6 +1974,7 @@ const resolvers = {
             grantingOpens,
             grantingCloses,
             allowStretchGoals,
+            requireBucketApproval,
           },
         });
       }
@@ -1982,10 +2013,11 @@ const resolvers = {
     },
   },
   CollectionMember: {
-    collection: async (member) =>
-      prisma.collection.findUnique({
+    collection: async (member) => {
+      return await prisma.collection.findUnique({
         where: { id: member.collectionId },
-      }),
+      });
+    },
     user: async (member) =>
       prisma.user.findUnique({
         where: { id: member.userId },
@@ -2161,9 +2193,22 @@ const resolvers = {
         : `# Welcome to ${org.name}`;
     },
     subdomain: (org) => org.slug,
-    collections: async (org) => {
+    collections: async (org, args, { user }) => {
       return await prisma.collection.findMany({
-        where: { organizationId: org.id },
+        where: {
+          OR: [
+            {
+              organizationId: org.id,
+              visibility: "PUBLIC",
+            },
+            {
+              organizationId: org.id,
+              collectionMember: {
+                some: { userId: user?.id ?? "undefined", isApproved: true },
+              },
+            },
+          ],
+        },
       });
     },
     discourseUrl: async (org) => {

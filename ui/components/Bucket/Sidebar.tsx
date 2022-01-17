@@ -101,6 +101,10 @@ const DreamSidebar = ({
   const [, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
+  const canApproveBucket =
+    !collection.requireBucketApproval && canEdit || 
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator;
   const isEventAdminOrGuide =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
@@ -125,9 +129,9 @@ const DreamSidebar = ({
   const showMarkAsCompletedButton =
     isEventAdminOrGuide && dream.funded && !dream.completed;
   const showApproveButton =
-    isEventAdminOrGuide && !collection.grantingHasClosed && !dream.approved;
+    canApproveBucket && !collection.grantingHasClosed && !dream.approved;
   const showUnapproveButton =
-    isEventAdminOrGuide && dream.approved && !dream.totalContributions;
+    canApproveBucket && dream.approved && !dream.totalContributions;
   const showDeleteButton = canEdit && !dream.totalContributions;
   const showCancelFundingButton = dream.approved && !dream.canceled && canEdit;
 

@@ -35,4 +35,4 @@ yarn dev
 
 ## License
 
-Released under the AGPLv3+ which is included in the file [LICENSE](LICENSE) in the git repository
+Released under AGPL-3.0-or-later, with some additional terms. All of which are included in the file [LICENSE](LICENSE) in the git repository.

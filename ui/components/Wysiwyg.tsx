@@ -76,7 +76,7 @@ const EditorCss = styled.div`
     highlightColor
       ? `--rmr-color-outline: ${namedColorWithAlpha(
           highlightColor,
-          "40%"
+          "100%"
         )} !important;
         --rmr-color-primary: ${namedColorToHsl(highlightColor)} !important;
         --rmr-color-hover-primary: ${namedColorToHsl(
@@ -311,20 +311,20 @@ const Wysiwyg = ({
         ],
         separator: "end",
       },
-      {
-        type: ComponentItem.ToolbarGroup,
-        label: "Embed",
-        items: [
-          {
-            type: ComponentItem.ToolbarButton,
-            onClick: () => {
-              filePicker.current.click();
-            },
-            icon: "imageAddLine",
-          },
-        ],
-        separator: "end",
-      },
+      // {
+      //   type: ComponentItem.ToolbarGroup,
+      //   label: "Embed",
+      //   items: [
+      //     {
+      //       type: ComponentItem.ToolbarButton,
+      //       onClick: () => {
+      //         filePicker.current.click();
+      //       },
+      //       icon: "imageAddLine",
+      //     },
+      //   ],
+      //   separator: "end",
+      // },
       {
         type: ComponentItem.ToolbarGroup,
         label: "Lists",

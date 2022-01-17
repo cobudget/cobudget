@@ -17,6 +17,7 @@ const EDIT_EVENT = gql`
     $title: String
     $archived: Boolean
     $registrationPolicy: RegistrationPolicy
+    $visibility: Visibility
     $color: String
   ) {
     editCollection(
@@ -25,6 +26,7 @@ const EDIT_EVENT = gql`
       title: $title
       archived: $archived
       registrationPolicy: $registrationPolicy
+      visibility: $visibility
       color: $color
     ) {
       id
@@ -32,6 +34,7 @@ const EDIT_EVENT = gql`
       slug
       archived
       registrationPolicy
+      visibility
       color
     }
   }
@@ -102,6 +105,17 @@ export default function GeneralSettings({
           }}
           className="my-4"
         />
+
+        <SelectField
+          name="visibility"
+          label="Visibility"
+          defaultValue={collection.visibility}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="PUBLIC">Public</option>
+          <option value="HIDDEN">Hidden</option>
+        </SelectField>
 
         <SelectField
           name="registrationPolicy"

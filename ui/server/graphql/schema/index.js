@@ -65,6 +65,7 @@ const schema = gql`
       title: String
       archived: Boolean
       registrationPolicy: RegistrationPolicy
+      visibility: Visibility
       info: String
       color: String
       about: String
@@ -171,6 +172,7 @@ const schema = gql`
       grantingCloses: Date
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
+      requireBucketApproval: Boolean
     ): Collection
 
     allocate(
@@ -222,6 +224,7 @@ const schema = gql`
     numberOfApprovedMembers: Int
     # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
+    visibility: Visibility!
     currency: String!
     maxAmountToBucketPerUser: Int
     bucketCreationCloses: Date
@@ -233,6 +236,7 @@ const schema = gql`
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
+    requireBucketApproval: Boolean
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int
@@ -267,6 +271,12 @@ const schema = gql`
     OPEN
     REQUEST_TO_JOIN
     INVITE_ONLY
+  }
+
+  enum Visibility {
+    PUBLIC
+    # PRIVATE
+    HIDDEN
   }
 
   enum AllocationType {

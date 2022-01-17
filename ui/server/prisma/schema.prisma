@@ -92,12 +92,14 @@ model Collection {
   color              String?
   registrationPolicy RegistrationPolicy
   currency           String
+  visibility         Visibility         @default(PUBLIC)
 
   maxAmountToBucketPerUser Int?
   bucketCreationCloses     DateTime?
   grantingOpens            DateTime?
   grantingCloses           DateTime?
   allowStretchGoals        Boolean?
+  requireBucketApproval    Boolean?
   bucketReviewIsOpen       Boolean?
   discourseCategoryId      Int?
 
@@ -178,6 +180,12 @@ enum RegistrationPolicy {
   OPEN
   REQUEST_TO_JOIN
   INVITE_ONLY
+}
+
+enum Visibility {
+  PUBLIC
+  //PRIVATE
+  HIDDEN
 }
 
 model Bucket {
