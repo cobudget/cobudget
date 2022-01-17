@@ -11,7 +11,7 @@ const IconButton = ({
 }: {
   children: Element | ReactElement;
   className?: string;
-  onClick: () => void;
+  onClick?: () => void;
   tabIndex?: number;
   loading?: boolean;
   type?: "button" | "submit" | "reset";

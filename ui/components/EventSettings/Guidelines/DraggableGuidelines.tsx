@@ -50,10 +50,9 @@ const DragHandle = SortableHandle(() => (
 
 const SortableItem = SortableElement(
   ({ item: guideline, setEditingItem: setEditingGuideline, collectionId }) => {
-    const [{ loading: deleting }, deleteGuideline] = useMutation({
-      query: DELETE_GUIDELINE_MUTATION,
-      variables: { collectionId, guidelineId: guideline.id },
-    });
+    const [{ fetching: deleting }, deleteGuideline] = useMutation(
+      DELETE_GUIDELINE_MUTATION
+    );
 
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
@@ -75,7 +74,11 @@ const SortableItem = SortableElement(
                 onClick={() =>
                   confirm(
                     "Are you sure you would like to delete this guideline?"
-                  ) && deleteGuideline()
+                  ) &&
+                  deleteGuideline({
+                    collectionId,
+                    guidelineId: guideline.id,
+                  })
                 }
               >
                 <DeleteIcon className="h-6 w-6" />

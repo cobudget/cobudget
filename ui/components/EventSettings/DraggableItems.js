@@ -22,7 +22,6 @@ const DraggableItems = ({
   setPositionLoading,
   SortableItem,
   setEditingItem,
-  currentOrg,
 }) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localItems, setLocalItems] = useState(cloneDeep(items));
@@ -90,7 +89,6 @@ const DraggableItems = ({
               item={item}
               setEditingItem={setEditingItem}
               collectionId={collection.id}
-              currentOrg={currentOrg}
             />
           ))}
     </SortableContainer>
