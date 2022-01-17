@@ -33,13 +33,19 @@ const send = async (mail: SendEmailInput) => {
     );
   }
 
-  await client.sendMail({
-    from: process.env.FROM_EMAIL,
-    to: mail.to,
-    subject: mail.subject,
-    text: mail.text,
-    html: mail.html,
-  });
+  try {
+    await client.sendMail({
+      from: process.env.FROM_EMAIL,
+      to: mail.to,
+      subject: mail.subject,
+      text: mail.text,
+      html: mail.html,
+    });
+  } catch (err) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 };
 
 const checkEnv = () => {
