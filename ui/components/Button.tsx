@@ -18,7 +18,7 @@ const Button = forwardRef(
       nextJsLink,
       ...props
     }: {
-      children: React.ReactChildren | string;
+      children: any;
       disabled?: boolean;
       loading?: boolean;
       size?: string;
