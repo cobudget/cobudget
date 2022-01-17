@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 import { Tooltip } from "react-tippy";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -10,11 +12,10 @@ import { EditIcon } from "components/Icons";
 import Markdown from "./Markdown";
 
 const EditableField = ({
-  value,
+  defaultValue,
   label,
   canEdit,
   MUTATION,
-  name,
   placeholder,
   variables,
   maxLength = undefined,
@@ -22,9 +23,23 @@ const EditableField = ({
   className = "",
 }) => {
   const [{ fetching: loading }, mutation] = useMutation(MUTATION);
-  const { handleSubmit, register } = useForm();
+
+  const schema = useMemo(() => {
+    const maxInfo = yup.string().max(maxLength ?? Infinity, "Too long");
+    return yup.object().shape({
+      info: required ? maxInfo.required("Required") : maxInfo,
+    });
+  }, [maxLength, required]);
+
+  const { handleSubmit, register, setValue, errors } = useForm({
+    resolver: yupResolver(schema),
+  });
 
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    register({ name: "info" });
+  }, [register]);
 
   if (editing)
     return (
@@ -36,16 +51,16 @@ const EditableField = ({
         )}
       >
         <TextField
-          name={name}
           placeholder={placeholder}
-          inputRef={register}
           multiline
           rows={3}
-          defaultValue={value}
+          defaultValue={defaultValue}
           autoFocus
-          maxLength={maxLength}
-          required={required}
+          error={errors.info}
+          helperText={errors.info?.message}
+          onChange={(e) => setValue("info", e.target.value)}
           className="mb-2"
+          wysiwyg
         />
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-600 font-medium pl-4">
@@ -73,13 +88,13 @@ const EditableField = ({
         </div>
       </form>
     );
-  if (value)
+  if (defaultValue)
     return (
       <div className="relative">
-        <Markdown source={value} />
+        <Markdown source={defaultValue} />
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title={`Edit ${name}`} position="bottom" size="small">
+            <Tooltip title="Edit info" position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
@@ -91,9 +106,9 @@ const EditableField = ({
 
   return (
     <>
-      {value ? (
+      {defaultValue ? (
         // this code is never reached?
-        <Markdown source={value} />
+        <Markdown source={defaultValue} />
       ) : (
         <button
           onClick={() => null}

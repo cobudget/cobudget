@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -53,6 +54,7 @@ export default ({
   collection,
   handleClose,
   guideline = {
+    id: null,
     title: "",
     description: "",
   },
@@ -63,9 +65,13 @@ export default ({
     editing ? EDIT_GUIDELINE_MUTATION : ADD_GUIDELINE_MUTATION
   );
 
-  const { handleSubmit, register, errors } = useForm({
+  const { handleSubmit, register, errors, setValue } = useForm({
     resolver: yupResolver(schema),
   });
+
+  useEffect(() => {
+    register({ name: "guideline.description" });
+  }, [register]);
 
   return (
     <Modal
@@ -101,14 +107,16 @@ export default ({
             />
             <TextField
               placeholder="Description"
-              name={"guideline.description"}
               defaultValue={guideline.description}
               multiline
               rows={4}
-              inputRef={register}
+              onChange={(e) =>
+                setValue("guideline.description", e.target.value)
+              }
               error={errors.guideline?.description}
               helperText={errors.guideline?.description?.message}
               color={collection.color}
+              wysiwyg
             />
           </div>
 

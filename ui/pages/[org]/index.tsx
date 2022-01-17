@@ -65,11 +65,10 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              value={currentOrg?.info}
+              defaultValue={currentOrg?.info}
               label="Add message"
               placeholder={`# Welcome to ${currentOrg?.name}'s page`}
               canEdit={currentUser?.currentOrgMember?.isAdmin}
-              name="info"
               className="h-10"
               MUTATION={gql`
                 mutation EditOrgInfo($orgId: ID!, $info: String) {

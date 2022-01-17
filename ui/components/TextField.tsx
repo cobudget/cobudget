@@ -13,6 +13,7 @@ const TextField = ({
   helperText,
   className,
   multiline,
+  onChange,
   rows,
   size,
   autoFocus,
@@ -34,6 +35,7 @@ const TextField = ({
   helperText?: string;
   className?: string;
   multiline?: boolean;
+  onChange?: (e: any) => void;
   rows?: number;
   size?: string;
   autoFocus?: boolean;
@@ -46,21 +48,21 @@ const TextField = ({
 }) => {
   const LabelComponent = labelComponent;
   return (
-    <div className={`flex flex-col ${className}`}>
+    <div className={`flex flex-col min-w-0 ${className}`}>
       {(label || labelComponent) && (
         <label htmlFor={name} className="text-sm font-medium mb-1 block">
           {label ? label : <LabelComponent />}
         </label>
       )}
-      {multiline ? (
+      {multiline || wysiwyg ? (
         wysiwyg ? (
           <Wysiwyg
             inputRef={inputRef}
             placeholder={placeholder}
             autoFocus={autoFocus}
             defaultValue={defaultValue}
-            rows={rows}
-            onChange={inputProps?.onChange}
+            rows={multiline ? rows : 1}
+            onChange={onChange ?? inputProps?.onChange}
             highlightColor={color}
           />
         ) : (
