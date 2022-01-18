@@ -421,7 +421,7 @@ export default {
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `Your bucket “${escape(bucket.title)}” received funding!`,
+      subject: `Your bucket “${bucket.title}” received funding!`,
       html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
         bucket.title
       )}”</a> just received some funds!<br/>
