@@ -12,6 +12,10 @@ html {
   @apply bg-gray-50;
 }
 
+body {
+  overflow-x: hidden;
+}
+
 .page {
   @apply py-5 px-2 md:px-4 max-w-screen-xl mx-auto;
 }
