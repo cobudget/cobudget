@@ -370,7 +370,7 @@ export default {
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `There is a new bucket in ${escape(event.title)}!`,
+      subject: `There is a new bucket in ${event.title}!`,
       html: `Creativity is flowing in ${escape(
         event.title
       )}! <a href="${collLink}">Have a look at the new buckets in this collection.</a>
