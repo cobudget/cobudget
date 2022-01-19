@@ -12,8 +12,10 @@ html {
   @apply bg-gray-50;
 }
 
+/* fix for overflowing Wysiyg component */
+html,
 body {
-  overflow-x: hidden;
+  @apply overflow-x-hidden relative;
 }
 
 .page {
