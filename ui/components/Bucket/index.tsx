@@ -1,7 +1,5 @@
 import { isMemberOfDream } from "utils/helpers";
 
-import Monster from "../Monster";
-
 import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
@@ -20,17 +18,9 @@ const Bucket = ({
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
     isMemberOfDream(currentUser, bucket);
-  const showBucketReview =
-    currentUser?.currentCollMember?.isApproved &&
-    collection.bucketReviewIsOpen &&
-    collection.guidelines.length > 0 &&
-    bucket.published;
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
-        {showBucketReview && (
-          <Monster event={collection} bucket={bucket} currentOrg={currentOrg} />
-        )}
         <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
           <div className="py-2">
             <Images

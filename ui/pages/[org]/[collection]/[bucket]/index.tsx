@@ -1,18 +1,15 @@
 import { useQuery, gql } from "urql";
-import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
 import Bucket from "../../../../components/Bucket";
-import HappySpinner from "../../../../components/HappySpinner";
-import SubMenu from "../../../../components/SubMenu";
-import PageHero from "../../../../components/PageHero";
-import Sidebar from "../../../../components/Bucket/Sidebar";
-import { isMemberOfDream } from "utils/helpers";
 import Overview from "../../../../components/Bucket/Overview";
 import { Tab } from "@headlessui/react";
 import Funders from "components/Bucket/Funders";
 import Comments from "components/Bucket/Comments";
+import Monster from "components/Monster";
+
 import classNames from "utils/classNames";
+
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
     bucket(id: $id) {
@@ -108,8 +105,16 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
   });
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const { bucket } = data ?? { bucket: null };
+  const showBucketReview =
+    currentUser?.currentCollMember?.isApproved &&
+    collection.bucketReviewIsOpen &&
+    collection.guidelines.length > 0 &&
+    bucket.published;
   return (
     <>
+      {showBucketReview && (
+        <Monster event={collection} bucket={bucket} currentOrg={currentOrg} />
+      )}
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
       <EditImagesModal
         open={editImagesModalOpen}
