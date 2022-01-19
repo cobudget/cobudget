@@ -131,7 +131,12 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                             if (error) {
                               toast.error(error.message);
                             } else {
-                              toast.success("Request sent!");
+                              toast.success(
+                                collection.registrationPolicy ===
+                                  "REQUEST_TO_JOIN"
+                                  ? "Request sent!"
+                                  : "You joined this collection!"
+                              );
                             }
                           }
                         )
