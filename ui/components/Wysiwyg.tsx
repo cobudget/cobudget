@@ -9,7 +9,9 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
+  useState,
 } from "react";
 import { ExtensionPriority } from "remirror";
 import { DelayedPromiseCreator } from "@remirror/core";
@@ -26,6 +28,8 @@ import {
   ImageExtension,
   ListItemExtension,
   MarkdownExtension,
+  MentionAtomExtension,
+  MentionAtomNodeAttributes,
   OrderedListExtension,
   //TaskListExtension,
   //TaskListItemExtension,
@@ -40,6 +44,8 @@ import {
 import {
   ComponentItem,
   EditorComponent,
+  MentionAtomPopupComponent,
+  MentionAtomState,
   Remirror,
   //ReactComponentExtension,
   ThemeProvider,
@@ -94,6 +100,40 @@ const EditorCss = styled.div`
     min-height: ${({ rows }) => `${rows * 2.5}em !important`};
   }
 `;
+
+function MentionComponent() {
+  const users: MentionAtomNodeAttributes[] = [
+    { id: "joe", label: "Joe" },
+    { id: "sue", label: "Sue" },
+    { id: "pat", label: "Pat" },
+    { id: "tom", label: "Tom" },
+    { id: "jim", label: "Jim" },
+  ];
+  const tags = [];
+  const [mentionState, setMentionState] = useState<MentionAtomState | null>();
+  const tagItems = useMemo(
+    () => (tags ?? []).map((tag) => ({ id: tag, label: `#${tag}` })),
+    [tags]
+  );
+  const items = useMemo(() => {
+    if (!mentionState) {
+      return [];
+    }
+
+    const allItems = mentionState.name === "at" ? users : tagItems;
+
+    if (!allItems) {
+      return [];
+    }
+
+    const query = mentionState.query.full.toLowerCase() ?? "";
+    return allItems
+      .filter((item) => item.label.toLowerCase().includes(query))
+      .sort();
+  }, [mentionState, users, tagItems]);
+
+  return <MentionAtomPopupComponent onChange={setMentionState} items={items} />;
+}
 
 const ImperativeHandle = forwardRef((props, ref) => {
   const { commands, clearContent } = useRemirrorContext({
@@ -166,6 +206,9 @@ const Wysiwyg = ({
       new ItalicExtension(),
       new HeadingExtension({}),
       new LinkExtension({}),
+      new MentionAtomExtension({
+        matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
+      }),
       new ImageExtension({
         enableResizing: false,
         // for when the user dragndrops or pastes images
@@ -399,6 +442,7 @@ const Wysiwyg = ({
             autoFocus={autoFocus}
             initialContent={defaultValue}
             onChange={debounce((param) => {
+              console.log("md", param.helpers.getMarkdown());
               onChange?.({
                 target: {
                   value: param.helpers.getMarkdown(),
@@ -415,6 +459,7 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
+            <MentionComponent />
           </Remirror>
         </EditorCss>
       </ThemeProvider>
