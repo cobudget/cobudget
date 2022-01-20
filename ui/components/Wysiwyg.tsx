@@ -71,6 +71,11 @@ const EditorCss = styled.div`
     display: none !important;
   }
 
+  /* make hyperlinks not look like plaintext */
+  a {
+    text-decoration: underline;
+  }
+
   /* correct color on outline and toolbar buttons */
   ${({ highlightColor }) =>
     highlightColor
