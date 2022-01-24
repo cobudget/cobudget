@@ -66,6 +66,7 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
           <div className="col-span-2">
             <EditableField
               defaultValue={currentOrg?.info}
+              name="info"
               label="Add message"
               placeholder={`# Welcome to ${currentOrg?.name}'s page`}
               canEdit={currentUser?.currentOrgMember?.isAdmin}
