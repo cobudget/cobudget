@@ -18,11 +18,11 @@ import {
   NodeSpecOverride,
   NodeWithPosition,
   omitExtraAttributes,
-  pick,
   ProsemirrorAttributes,
   replaceText,
   Static,
 } from "@remirror/core";
+import { pick } from "lodash";
 import type { CreateEventHandlers } from "@remirror/extension-events";
 import {
   DEFAULT_SUGGESTER,
@@ -141,9 +141,9 @@ export interface MentionAtomOptions
   handlerKeys: ["onChange", "onClick"],
   staticKeys: ["selectable", "draggable", "mentionTag", "matchers"],
 })
-export class MentionAtomExtension extends NodeExtension<MentionAtomOptions> {
+export class CustomMentionAtomExtension extends NodeExtension<MentionAtomOptions> {
   get name() {
-    return "mentionAtom" as const;
+    return "customMentionAtom" as const;
   }
 
   createTags() {
@@ -442,7 +442,7 @@ function getAppendText(
 declare global {
   namespace Remirror {
     interface AllExtensions {
-      mentionAtom: MentionAtomExtension;
+      customMentionAtom: CustomMentionAtomExtension;
     }
   }
 }

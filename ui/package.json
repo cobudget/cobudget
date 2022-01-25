@@ -97,6 +97,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.10.2",
+    "@babel/plugin-proposal-decorators": "7.16.7",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
     "@types/lodash": "4.14.178",
     "@types/nodemailer": "6.4.4",

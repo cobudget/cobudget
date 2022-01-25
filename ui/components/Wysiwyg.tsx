@@ -1,8 +1,5 @@
-// this file is largely copied (MIT) from
+// a lot of this file is copied (MIT) from
 // https://github.com/remirror/remirror/blob/cb0829780d22774d6bddbc037e5b16f6e1422d82/packages/remirror__react-editors/src/markdown/markdown-editor.tsx
-// due to
-// https://github.com/remirror/remirror/issues/1349
-// and because we want to customize it
 
 import {
   forwardRef,
@@ -28,8 +25,6 @@ import {
   ImageExtension,
   ListItemExtension,
   MarkdownExtension,
-  MentionAtomExtension,
-  MentionAtomNodeAttributes,
   OrderedListExtension,
   //TaskListExtension,
   //TaskListItemExtension,
@@ -59,6 +54,10 @@ import { debounce } from "lodash";
 import styled from "styled-components";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
+import {
+  CustomMentionAtomExtension,
+  MentionAtomNodeAttributes,
+} from "utils/mention-atom-extension";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -206,7 +205,7 @@ const Wysiwyg = ({
       new ItalicExtension(),
       new HeadingExtension({}),
       new LinkExtension({}),
-      new MentionAtomExtension({
+      new CustomMentionAtomExtension({
         matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
       }),
       new ImageExtension({
