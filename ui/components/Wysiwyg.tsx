@@ -25,6 +25,8 @@ import {
   ImageExtension,
   ListItemExtension,
   MarkdownExtension,
+  MentionAtomExtension,
+  MentionAtomNodeAttributes,
   OrderedListExtension,
   //TaskListExtension,
   //TaskListItemExtension,
@@ -56,7 +58,7 @@ import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
 import {
   CustomMentionAtomExtension,
-  MentionAtomNodeAttributes,
+  CustomMentionAtomNodeAttributes,
 } from "utils/mention-atom-extension";
 
 const EditorCss = styled.div`
@@ -102,11 +104,11 @@ const EditorCss = styled.div`
 
 function MentionComponent() {
   const users: MentionAtomNodeAttributes[] = [
-    { id: "joe", label: "Joe" },
-    { id: "sue", label: "Sue" },
-    { id: "pat", label: "Pat" },
-    { id: "tom", label: "Tom" },
-    { id: "jim", label: "Jim" },
+    { id: "joe", label: "Joe", userId: "123" },
+    { id: "sue", label: "Sue", userId: "124" },
+    { id: "pat", label: "Pat", userId: "125" },
+    { id: "tom", label: "Tom", userId: "126" },
+    { id: "jim", label: "Jim", userId: "127" },
   ];
   const tags = [];
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
@@ -205,9 +207,24 @@ const Wysiwyg = ({
       new ItalicExtension(),
       new HeadingExtension({}),
       new LinkExtension({}),
-      new CustomMentionAtomExtension({
+      new MentionAtomExtension({
+        extraAttributes: {
+          userId: {
+            default: 0,
+          },
+          href: {
+            default: "potato",
+            toDOM: (attrs) => {
+              console.log("toDOM href attrs", attrs);
+              return ["href", `https://google.com/?q=${attrs.userId}`];
+            },
+          }, //"https://google.com" },
+        },
         matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
       }),
+      //new CustomMentionAtomExtension({
+      //  matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
+      //}),
       new ImageExtension({
         enableResizing: false,
         // for when the user dragndrops or pastes images

@@ -191,7 +191,7 @@ export class CustomMentionAtomExtension extends NodeExtension<MentionAtomOptions
         const { label, id, name } = omitExtraAttributes(
           node.attrs,
           extra
-        ) as NamedMentionAtomNodeAttributes;
+        ) as CustomNamedMentionAtomNodeAttributes;
         const matcher = this.options.matchers.find(
           (matcher) => matcher.name === name
         );
@@ -227,7 +227,7 @@ export class CustomMentionAtomExtension extends NodeExtension<MentionAtomOptions
   @command()
   createMentionAtom(
     details: CreateMentionAtom,
-    attrs: MentionAtomNodeAttributes
+    attrs: CustomMentionAtomNodeAttributes
   ): CommandFunction {
     const { name, range } = details;
     const validNameExists = this.options.matchers.some(
@@ -294,7 +294,7 @@ export class CustomMentionAtomExtension extends NodeExtension<MentionAtomOptions
           const { name, range } = props;
           const { createMentionAtom } = this.store.commands;
 
-          function command(attrs: MentionAtomNodeAttributes) {
+          function command(attrs: CustomMentionAtomNodeAttributes) {
             createMentionAtom({ name, range }, attrs);
           }
 
@@ -356,7 +356,7 @@ export interface CreateMentionAtom {
  * The attrs that will be added to the node.
  * ID and label are plucked and used while attributes like href and role can be assigned as desired.
  */
-export type MentionAtomNodeAttributes = ProsemirrorAttributes<
+export type CustomMentionAtomNodeAttributes = ProsemirrorAttributes<
   OptionalMentionAtomExtensionProps & {
     /**
      * A unique identifier for the suggesters node
@@ -370,7 +370,7 @@ export type MentionAtomNodeAttributes = ProsemirrorAttributes<
   }
 >;
 
-export type NamedMentionAtomNodeAttributes = MentionAtomNodeAttributes & {
+export type CustomNamedMentionAtomNodeAttributes = CustomMentionAtomNodeAttributes & {
   /**
    * The name of the matcher used to create this mention.
    */
@@ -384,7 +384,7 @@ export type NamedMentionAtomNodeAttributes = MentionAtomNodeAttributes & {
  */
 export type MentionAtomChangeHandler = (
   handlerState: SuggestChangeHandlerProps,
-  command: (attrs: MentionAtomNodeAttributes) => void
+  command: (attrs: CustomMentionAtomNodeAttributes) => void
 ) => void;
 
 /**
