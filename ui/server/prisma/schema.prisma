@@ -54,11 +54,12 @@ model CollectionMember {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  buckets       Bucket[]
-  allocations   Allocation[]
-  contributions Contribution[]
-  comments      Comment[]
-  flags         Flag[]
+  buckets           Bucket[]
+  allocatedBy       Allocation[] @relation("allocatedBy")
+  collectionMember  Allocation[] @relation("collectionMember")
+  contributions     Contribution[]
+  comments          Comment[]
+  flags             Flag[]
 
   @@unique([userId, collectionId])
 }
@@ -188,6 +189,11 @@ enum Visibility {
   HIDDEN
 }
 
+enum AllocationType {
+  ADD
+  SET
+}
+
 model Bucket {
   id               String             @id @default(cuid())
   collection       Collection         @relation(fields: [collectionId], references: [id])
@@ -276,9 +282,13 @@ model Allocation {
   id                 String           @id @default(cuid())
   collection         Collection       @relation(fields: [collectionId], references: [id])
   collectionId       String
-  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMember   CollectionMember @relation("collectionMember", fields: [collectionMemberId], references: [id])
   collectionMemberId String
+  allocatedBy        CollectionMember @relation("allocatedBy", fields: [allocatedById], references: [id])
+  allocatedById      String
   amount             Int
+  amountBefore       Int
+  allocationType     AllocationType
   createdAt          DateTime         @default(now())
 }
 
