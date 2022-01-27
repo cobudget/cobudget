@@ -5,6 +5,7 @@ import { CloseIcon, ArrowUpIcon } from "components/Icons";
 import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
 import Markdown from "./Markdown";
+import Button from "./Button";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -326,7 +327,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
   return (
     <div
       className={
-        "fixed right-0 bottom-0 p-4 z-30 flex flex-col items-end max-w-6xl"
+        (open ? "fixed" : "md:fixed") + " right-0 bottom-0 md:p-4 z-30 flex flex-col items-end max-w-6xl"
       }
     >
       {open && (
@@ -387,7 +388,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
       {bubbleOpen && !open && (
         <>
           <div
-            className="relative bg-white text-gray-800 w-64 cursor-pointer rounded-lg p-4 shadow-lg mb-2 animation-once animation-fade-in"
+            className="relative bg-white text-gray-800 w-64 cursor-pointer rounded-lg p-4 shadow-lg mb-2 animation-once hidden md:animation-fade-in md:flex"
             onClick={() => {
               setOpen(true);
               closeBubble();
@@ -409,14 +410,27 @@ const Monster = ({ event, bucket, currentOrg }) => {
       )}
 
       {!open && (
+        <>
         <img
           onClick={() => {
             closeBubble();
             setOpen(!open);
           }}
-          className={`w-40 cursor-pointer hover:animate-none`}
+          className={`hidden md:flex w-40 cursor-pointer hover:animate-none`}
           src={isAngry ? "/angry-monster.gif" : "/calm-monster.gif"}
         />
+        <Button
+          color={event.color}
+          fullWidth
+          className={"flex md:hidden"}
+          onClick={() => {
+            closeBubble();
+            setOpen(!open);
+          }}
+        >
+          Review
+        </Button>
+        </>
       )}
     </div>
   );
