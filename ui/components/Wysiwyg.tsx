@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { ExtensionPriority } from "remirror";
-import { DelayedPromiseCreator } from "@remirror/core";
+import { DelayedPromiseCreator, isElementDomNode } from "@remirror/core";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -201,30 +201,70 @@ const Wysiwyg = ({
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
-      new LinkExtension({ autoLink: true }),
       new BoldExtension({}),
       new StrikeExtension(),
       new ItalicExtension(),
       new HeadingExtension({}),
-      new LinkExtension({}),
       new MentionAtomExtension({
+        mentionTag: "a",
+        nodeOverride: {
+          parseDOM: [
+            {
+              // TODO: narrow down selector to only user links
+              tag: "a[href]",
+              getAttrs: (node: string | Node) => {
+                if (!isElementDomNode(node)) {
+                  return false;
+                }
+
+                console.log("nodeOverride parseDOM getAttrs", node);
+
+                const id = "id";
+                const name = "name";
+                const href = node.getAttribute("href");
+                const label = node.textContent;
+                return { /*...extra.parse(node),*/ id, name, label, href };
+              },
+            },
+          ],
+        },
         extraAttributes: {
+          id: {
+            default: "1",
+            parseDOM: (dom) => {
+              console.log("id parsedom", dom);
+              return dom.getAttribute("href");
+            },
+            toDOM: (attrs) => {
+              console.log("id todom", attrs);
+              return ["data-id", "asdf"];
+            },
+          },
           userId: {
             default: 0,
           },
           href: {
             default: "potato",
+            //parseDOM: (dom) => {
+            //  console.log("dom", dom);
+            //  const href = dom.getAttribute("href");
+            //  console.log("parsed href", href);
+            //  return href;
+            //},
             toDOM: (attrs) => {
               console.log("toDOM href attrs", attrs);
               return ["href", `https://google.com/?q=${attrs.userId}`];
             },
           }, //"https://google.com" },
         },
-        matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
+        matchers: [{ name: "at", char: "@", appendText: " " }],
       }),
       //new CustomMentionAtomExtension({
       //  matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
       //}),
+      // TODO: uncomment and make sure both plaintext and markdown links work
+      //new LinkExtension({ autoLink: true }),
+      //new LinkExtension({}),
       new ImageExtension({
         enableResizing: false,
         // for when the user dragndrops or pastes images
