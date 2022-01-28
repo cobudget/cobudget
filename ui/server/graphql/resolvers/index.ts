@@ -1700,6 +1700,7 @@ const resolvers = {
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
+        allocatedBy: currentCollMember.id
       });
 
       return targetCollectionMember;
@@ -1713,6 +1714,15 @@ const resolvers = {
             isApproved: true,
           },
         });
+        //here
+        const currentCollMember = await prisma.collectionMember.findUnique({
+          where: {
+            userId_collectionId: {
+              userId: user.id,
+              collectionId: collectionId,
+            },
+          },
+        });
 
         for (const member of collectionMembers) {
           await allocateToMember({
@@ -1720,6 +1730,7 @@ const resolvers = {
             collectionId: collectionId,
             amount,
             type,
+            allocatedBy: currentCollMember.id,
           });
         }
 

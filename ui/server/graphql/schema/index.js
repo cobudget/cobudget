@@ -482,6 +482,9 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    allocatedById: Int!
+    allocationType: AllocationType!
+    amountBefore: Int!
     createdAt: Date
   }
 
