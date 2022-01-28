@@ -34,6 +34,11 @@ const schema = gql`
       offset: Int
       limit: Int
     ): ContributionsPage
+    collectionTransactions(
+      collectionId: ID!
+      offset: Int
+      limit: Int
+    ): CollectionTransactionPage
   }
 
   type Mutation {
@@ -488,6 +493,25 @@ const schema = gql`
     createdAt: Date
   }
 
+  type CollectionTransaction{
+    id: ID!
+    collection: Collection!
+    collectionMember: CollectionMember!
+    allocatedBy: CollectionMember
+    amount: Int!
+    createdAt: Date
+    bucket: Bucket
+    allocatedById: Int
+    allocationType: AllocationType
+    amountBefore: Int
+    transactionType: TransactionType
+  }
+
+  type CollectionTransactionPage {
+    moreExist: Boolean
+    transactions(collectionId: ID!, offset: Int, limit: Int): [CollectionTransaction]
+  }
+
   # enum Visibility {
   #   PUBLIC
   #   PRIVATE # only for paid
@@ -538,6 +562,11 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
+  }
+
+  enum TransactionType {
+    ALLOCATION
+    CONTRIBUTION
   }
 
   type CustomField {

@@ -36,9 +36,9 @@ export const allocateToMember = async ({
       collectionId,
       collectionMemberId,
       amount: adjustedAmount,
-      allocationType: type,
       amountBefore: balance,
-      allocatedById: allocatedBy
+      allocatedById: allocatedBy,
+      allocationType: type
     },
   });
   await eventHub.publish("allocate-to-member", {

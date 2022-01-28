@@ -271,9 +271,53 @@ const resolvers = {
           },
         });
 
+        console.log('>>>', contributionsWithExtra);
+
         return {
           moreExist: contributionsWithExtra.length > limit,
           contributions: contributionsWithExtra.slice(0, limit),
+        };
+      }
+    ),
+    //here
+    collectionTransactions: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (parent, { collectionId, offset, limit }) => {
+        const transactions:any = await prisma.$queryRaw`
+          (
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              null as "allocatedById", 
+              "amount",
+              "bucketId",
+              null as "amountBefore", 
+              null as "allocationType",
+              'CONTRIBUTION' as "transactionType",
+              "createdAt"
+            FROM "Contribution" where "collectionId" = ${collectionId}
+            
+            UNION ALL
+            
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              "allocatedById", 
+              "amount",
+              null as "bucketId",
+              "amountBefore", 
+              "allocationType",
+              'ALLOCATION' as "transactionType",
+              "createdAt"
+            FROM "Allocation" where "collectionId" = ${collectionId}
+          ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
+        `;
+
+        transactions.forEach(transaction => transaction.createdAt = new Date(transaction.createdAt));
+
+        return {
+          moreExist: transactions.length > limit,
+          transactions: transactions.slice(0, limit),
         };
       }
     ),
@@ -2549,6 +2593,33 @@ const resolvers = {
     collectionMember: async (contribution) => {
       return prisma.collectionMember.findUnique({
         where: { id: contribution.collectionMemberId },
+      });
+    },
+  },
+  CollectionTransaction: {
+    collectionMember: async (transaction) => {
+      return prisma.collectionMember.findUnique({
+        where: { id: transaction.collectionMemberId },
+      });
+    },
+    allocatedBy: async (transaction) => {
+      if (transaction.allocatedById)
+        return prisma.collectionMember.findUnique({
+          where: { id: transaction.collectionMemberId },
+        });
+      else return null;
+    },
+    bucket: async (transaction) => {
+      if (transaction.bucketId)
+        return prisma.bucket.findUnique({
+          where: { id: transaction.bucketId },
+        });
+      else
+        return null;
+    },
+    collection: async (transaction) => {
+      return prisma.collection.findUnique({
+        where: { id: transaction.collectionId },
       });
     },
   },
