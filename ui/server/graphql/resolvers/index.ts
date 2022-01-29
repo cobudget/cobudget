@@ -2605,7 +2605,7 @@ const resolvers = {
     allocatedBy: async (transaction) => {
       if (transaction.allocatedById)
         return prisma.collectionMember.findUnique({
-          where: { id: transaction.collectionMemberId },
+          where: { id: transaction.allocatedById },
         });
       else return null;
     },

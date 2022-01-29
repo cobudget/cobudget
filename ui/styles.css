@@ -103,3 +103,7 @@ h5 {
 .markdown a.mention {
   @apply pointer-events-none cursor-default;
 }
+
+.text-xxs {
+  font-size: 9px;
+}
