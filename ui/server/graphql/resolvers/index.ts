@@ -26,6 +26,7 @@ import {
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
+import { CollectionTransaction } from "server/types";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -281,7 +282,7 @@ const resolvers = {
     collectionTransactions: combineResolvers(
       isCollMemberOrOrgAdmin,
       async (parent, { collectionId, offset, limit }) => {
-        const transactions:any = await prisma.$queryRaw`
+        const transactions:[CollectionTransaction] = await prisma.$queryRaw`
           (
             SELECT 
               "id", 
