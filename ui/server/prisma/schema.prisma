@@ -301,6 +301,7 @@ model Contribution {
   bucket             Bucket           @relation(fields: [bucketId], references: [id])
   bucketId           String
   amount             Int
+  amountBefore       Int
   createdAt          DateTime         @default(now())
 }
 

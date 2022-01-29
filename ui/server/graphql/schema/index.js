@@ -473,6 +473,7 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    amountBefore: Int!
     createdAt: Date
     bucket: Bucket!
   }

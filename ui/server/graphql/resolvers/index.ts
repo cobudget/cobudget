@@ -271,8 +271,6 @@ const resolvers = {
           },
         });
 
-        console.log('>>>', contributionsWithExtra);
-
         return {
           moreExist: contributionsWithExtra.length > limit,
           contributions: contributionsWithExtra.slice(0, limit),
@@ -1901,6 +1899,7 @@ const resolvers = {
           collectionMemberId: collectionMember.id,
           amount,
           bucketId: bucket.id,
+          amountBefore: contributionsForBucket || 0,
         },
       });
 
