@@ -289,7 +289,7 @@ const resolvers = {
               null as "allocatedById", 
               "amount",
               "bucketId",
-              null as "amountBefore", 
+              "amountBefore", 
               null as "allocationType",
               'CONTRIBUTION' as "transactionType",
               "createdAt"

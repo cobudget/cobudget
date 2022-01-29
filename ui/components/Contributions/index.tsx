@@ -82,6 +82,7 @@ const Contributions = ({ collection, currentOrg }) => {
                     {dayjs(c.createdAt).format("LLL")}
                   </span>
                   @{c.collectionMember.user.username} funded{" "}
+                  {thousandSeparator((c.amount) / 100)} {collection.currency} to {" "}
                   <Link
                     href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
                       c.bucket?.id
@@ -95,7 +96,7 @@ const Contributions = ({ collection, currentOrg }) => {
                 <span>
                 <span className="block text-right">
                   <p className="text-green-700 font-semibold">
-                    {thousandSeparator((c.bucket.totalContributions) / 100)} {collection.currency}
+                    {thousandSeparator((c.amountBefore + c.amount) / 100)} {collection.currency}
                   </p>
                   <p className="text-xxs text-slate-100 font-semibold">
                     Bucket Balance
