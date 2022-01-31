@@ -13,21 +13,22 @@ import Markdown from "./Markdown";
 
 const EditableField = ({
   defaultValue,
+  name,
   label,
   canEdit,
   MUTATION,
   placeholder,
   variables,
   maxLength = undefined,
-  required,
+  required = false,
   className = "",
 }) => {
   const [{ fetching: loading }, mutation] = useMutation(MUTATION);
 
   const schema = useMemo(() => {
-    const maxInfo = yup.string().max(maxLength ?? Infinity, "Too long");
+    const maxField = yup.string().max(maxLength ?? Infinity, "Too long");
     return yup.object().shape({
-      info: required ? maxInfo.required("Required") : maxInfo,
+      [name]: required ? maxField.required("Required") : maxField,
     });
   }, [maxLength, required]);
 
@@ -38,7 +39,7 @@ const EditableField = ({
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    register({ name: "info" });
+    register({ name });
   }, [register]);
 
   if (editing)
@@ -56,9 +57,9 @@ const EditableField = ({
           rows={3}
           defaultValue={defaultValue}
           autoFocus
-          error={errors.info}
-          helperText={errors.info?.message}
-          onChange={(e) => setValue("info", e.target.value)}
+          error={errors[name]}
+          helperText={errors[name]?.message}
+          onChange={(e) => setValue(name, e.target.value)}
           className="mb-2"
           wysiwyg
         />
@@ -94,7 +95,7 @@ const EditableField = ({
         <Markdown source={defaultValue} />
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit info" position="bottom" size="small">
+            <Tooltip title={`Edit ${name}`} position="bottom" size="small">
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
