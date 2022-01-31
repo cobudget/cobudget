@@ -327,7 +327,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
   return (
     <div
       className={
-        (open ? "fixed" : "md:fixed") + " right-0 bottom-0 md:p-4 z-30 flex flex-col items-end max-w-6xl"
+        (open ? "fixed md:p-4" : "") + " right-0 bottom-0 z-30 flex flex-col items-end max-w-6xl"
       }
     >
       {open && (
@@ -385,44 +385,12 @@ const Monster = ({ event, bucket, currentOrg }) => {
         </div>
       )}
 
-      {bubbleOpen && !open && (
-        <>
-          <div
-            className="relative bg-white text-gray-800 w-64 cursor-pointer rounded-lg p-4 shadow-lg mb-2 animation-once hidden md:animation-fade-in md:flex"
-            onClick={() => {
-              setOpen(true);
-              closeBubble();
-            }}
-          >
-            {chatItems[0].message}
-            <button
-              className="absolute p-1 m-1 top-0 right-0 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeBubble();
-              }}
-              tabIndex="-1"
-            >
-              <CloseIcon className="h-4 w-4" />
-            </button>
-          </div>
-        </>
-      )}
-
       {!open && (
         <>
-        <img
-          onClick={() => {
-            closeBubble();
-            setOpen(!open);
-          }}
-          className={`hidden md:flex w-40 cursor-pointer hover:animate-none`}
-          src={isAngry ? "/angry-monster.gif" : "/calm-monster.gif"}
-        />
         <Button
           color={event.color}
           fullWidth
-          className={"flex md:hidden"}
+          className={"flex"}
           onClick={() => {
             closeBubble();
             setOpen(!open);
