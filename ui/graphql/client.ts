@@ -352,6 +352,12 @@ export const client = (
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");
+              
+              queryFields
+                  .filter((field) => field.fieldName === "collectionTransactions")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "collectionTransactions", field.arguments);
+                  });
 
               queryFields
                 .filter((field) => field.fieldName === "contributionsPage")
