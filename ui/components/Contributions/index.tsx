@@ -120,7 +120,7 @@ const Contributions = ({ collection, currentOrg }) => {
                   (
                     <>
                       { c.amount < 0 ? " deducted " : " added " } 
-                      { Math.abs(thousandSeparator(c.amount / 100)) } 
+                      { (thousandSeparator(Math.abs(c.amount) / 100)) } 
                       {" "}
                       {collection.currency} 
                       { c.amount < 0 ? " from " : " to " }
