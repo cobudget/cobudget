@@ -1,4 +1,5 @@
 import prisma from "../../prisma";
+import dayjs from "dayjs";
 
 export async function getCurrentCollMember({ collMemberId }) {}
 
@@ -201,4 +202,15 @@ export async function bucketMinGoal(bucket) {
     },
   });
   return min > 0 ? min : 0;
+}
+
+export function isGrantingOpen(collection) {
+  const now = dayjs();
+  const grantingHasOpened = collection.grantingOpens
+    ? dayjs(collection.grantingOpens).isBefore(now)
+    : true;
+  const grantingHasClosed = collection.grantingCloses
+    ? dayjs(collection.grantingCloses).isBefore(now)
+    : false;
+  return grantingHasOpened && !grantingHasClosed;
 }

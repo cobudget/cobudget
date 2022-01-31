@@ -17,6 +17,7 @@ export const BUCKETS_QUERY = gql`
     $tag: String
     $offset: Int
     $limit: Int
+    $status: StatusFilter
   ) {
     bucketsPage(
       collectionId: $collectionId
@@ -24,6 +25,7 @@ export const BUCKETS_QUERY = gql`
       tag: $tag
       offset: $offset
       limit: $limit
+      status: $status
     ) {
       moreExist
       buckets {
@@ -79,6 +81,7 @@ const Page = ({
       collectionId: collection.id,
       offset: variables.offset,
       limit: variables.limit,
+      status: { FUNDING_WILL_OPEN_SOON: true, OPEN_FOR_FUNDING: true },
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },

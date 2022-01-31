@@ -79,6 +79,7 @@ export default function Overview({
               <div className="w-full h-64 md:h-88 block border-3 border-dashed rounded-lg"></div>
             )}
             <div className="">
+              {bucket.status}
               <Sidebar
                 dream={bucket}
                 collection={collection}

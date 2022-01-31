@@ -23,6 +23,7 @@ import {
   getOrgMember,
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
+  isGrantingOpen,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
@@ -284,9 +285,17 @@ const resolvers = {
     },
     bucketsPage: async (
       parent,
-      { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
+      {
+        collectionId,
+        textSearchTerm,
+        tag: tagValue,
+        offset = 0,
+        limit,
+        status,
+      },
       { user }
     ) => {
+      console.log({ status });
       const currentMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -295,32 +304,71 @@ const resolvers = {
           },
         },
       });
+      const {
+        FUNDING_WILL_OPEN_SOON,
+        OPEN_FOR_FUNDING,
+        FUNDING_CLOSED,
+        COMPLETED,
+        ARCHIVED,
+      } = status;
+
+      const collectionIsOpen = true;
 
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-      const query = {
-        collectionId,
-        deleted: { not: true },
-        ...(textSearchTerm && { title: { search: textSearchTerm } }),
-        ...(tagValue && {
-          tags: { some: { value: tagValue } },
-        }),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
-      };
+      const now = new Date();
+
+      const buckets = await prisma.bucket.findMany({
+        where: {
+          collectionId,
+          deleted: { not: true },
+          OR: [
+            {
+              // FUNDING_WILL_OPEN_SOON
+              OR: [
+                { approvedAt: null },
+                {
+                  collection: {
+                    grantingOpens: { gte: now },
+                  },
+                  approvedAt: { not: null },
+                },
+              ], // check this date thing..
+            },
+            {
+              // OPEN_FOR_FUNDING
+              approvedAt: { not: null },
+              fundedAt: null,
+              canceledAt: null,
+            },
+            {
+              // FUNDING_CLOSED
+              completedAt: null,
+            },
+            {
+              // COMPLETED
+              completedAt: { not: null },
+            },
+          ],
+          ...(textSearchTerm && { title: { search: textSearchTerm } }),
+          ...(tagValue && {
+            tags: { some: { value: tagValue } },
+          }),
+          ...(!isAdminOrGuide &&
+            (currentMember
+              ? {
+                  OR: [
+                    { publishedAt: { not: null } },
+                    { cocreators: { some: { id: currentMember.id } } },
+                  ],
+                }
+              : { publishedAt: { not: null } })),
+        },
+      });
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
-      const buckets = await prisma.bucket.findMany({
-        where: query,
-      });
+
       const shuffledBuckets = SeededShuffle.shuffle(
         buckets,
         user ? user.id + todaySeed : todaySeed
@@ -2317,15 +2365,7 @@ const resolvers = {
     customFields: async (collection) =>
       prisma.field.findMany({ where: { collectionId: collection.id } }),
     grantingIsOpen: (collection) => {
-      const now = dayjs();
-      const grantingHasOpened = collection.grantingOpens
-        ? dayjs(collection.grantingOpens).isBefore(now)
-        : true;
-      const grantingHasClosed = collection.grantingCloses
-        ? dayjs(collection.grantingCloses).isBefore(now)
-        : false;
-      const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
-      return grantingIsOpen;
+      return isGrantingOpen(collection);
     },
     grantingHasClosed: (collection) => {
       return collection.grantingCloses
@@ -2514,6 +2554,19 @@ const resolvers = {
       );
 
       return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
+    },
+    status: async (bucket, args, ctx) => {
+
+      //if (!bucket.publishedAt) return "UNPUBLISHED";
+      if (bucket.completedAt) return "COMPLETED";
+      if (bucket.fundedAt) return "FUNDING_CLOSED";
+
+      const collection = await prisma.collection.findUnique({
+        where: { id: bucket.collectionId },
+      });
+      if (bucket.approvedAt && isGrantingOpen(collection))
+        return "OPEN_FOR_FUNDING";
+      return "FUNDING_WILL_OPEN_SOON";
     },
   },
   Transaction: {

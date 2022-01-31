@@ -32,6 +32,7 @@ export const BUCKET_QUERY = gql`
       canceledAt
       noOfComments
       noOfFunders
+      status
       funders {
         id
         amount
