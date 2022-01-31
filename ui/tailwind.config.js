@@ -36,6 +36,9 @@ module.exports = {
         // Dream page layout
         sidebar: "minmax(0,1fr) 350px",
       },
+      fontSize: {
+        "xxs": '9px',
+      },
       height: {
         88: "22rem",
         100: "25rem",
