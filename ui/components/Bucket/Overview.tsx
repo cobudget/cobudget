@@ -13,6 +13,7 @@ export default function Overview({
   error,
   bucket,
   openImageModal,
+  showBucketReview
 }) {
   if (!bucket) return null;
   const canEdit =
@@ -85,6 +86,7 @@ export default function Overview({
                 currentUser={currentUser}
                 canEdit={canEdit}
                 currentOrg={currentOrg}
+                showBucketReview={showBucketReview}
               />
             </div>
           </div>
