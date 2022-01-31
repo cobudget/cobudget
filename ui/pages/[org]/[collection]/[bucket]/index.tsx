@@ -109,7 +109,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
     currentUser?.currentCollMember?.isApproved &&
     collection.bucketReviewIsOpen &&
     collection.guidelines.length > 0 &&
-    bucket.published;
+    bucket?.published;
   return (
     <>
       {showBucketReview && (
