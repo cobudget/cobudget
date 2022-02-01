@@ -303,19 +303,19 @@ const resolvers = {
           },
         },
       });
-      
+
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-      const statusFilter = status.map(statusType => {
+      const statusFilter = status.map((statusType) => {
         switch (statusType) {
           case "PENDING_APPROVAL":
             return {
-              approvedAt: null
+              approvedAt: null,
             };
           case "OPEN_FOR_FUNDING":
             return {
-              approvedAt: {not: null},
+              approvedAt: { not: null },
               fundedAt: null,
               completedAt: null,
               canceledAt: null,
@@ -328,14 +328,14 @@ const resolvers = {
             };
           case "CANCELED":
             return {
-              canceledAt: {not:null}
+              canceledAt: { not: null },
             };
           case "COMPLETED":
             return {
-              completedAt: {not: null};
-            }
+              completedAt: { not: null },
+            };
         }
-      })
+      });
       const buckets = await prisma.bucket.findMany({
         where: {
           collectionId,
@@ -2549,8 +2549,7 @@ const resolvers = {
       if (bucket.completedAt) return "COMPLETED";
       if (bucket.canceledAt) return "CANCELED";
       if (bucket.fundedAt) return "FUNDED";
-      if (bucket.approvedAt)
-        return "OPEN_FOR_FUNDING";
+      if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
       return "PENDING_APPROVAL";
     },
   },

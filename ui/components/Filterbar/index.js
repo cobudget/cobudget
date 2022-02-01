@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
+import StatusFilter from "./StatusFilter";
 
 const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
   const router = useRouter();
@@ -18,7 +19,7 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     router.push({
       pathname: "/[org]/[collection]",
       query: {
-        org: currentOrg.slug,
+        org: currentOrg?.slug ?? "c",
         collection: collection.slug,
         s: input,
         ...(tag && { tag }),
@@ -32,7 +33,7 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     router.push({
       pathname: "/[org]/[collection]",
       query: {
-        org: currentOrg.slug,
+        org: currentOrg?.slug ?? "c",
         collection: collection.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
@@ -80,6 +81,8 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
           </option>
         ))}
       </SelectField>
+
+      <StatusFilter />
     </div>
   );
 };
