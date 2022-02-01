@@ -182,6 +182,13 @@ const resolvers = {
         ? await prisma.user.findUnique({ where: { id: user.id } })
         : null;
     },
+    user: async (parent, { userId }) => {
+      // we let the resolvers grab any extra requested fields, so we don't accidentally leak e.g. emails
+      return prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true },
+      });
+    },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug || orgSlug === "c") return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
@@ -2178,12 +2185,29 @@ const resolvers = {
     email: (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.email;
+      if (parent.email) return parent.email;
     },
-    name: (parent, _, { user }) => {
+    name: async (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.name;
+      if (parent.name) return parent.name;
+      // we end up here when requesting your own name but it's missing on the parent
+      return (
+        await prisma.user.findUnique({
+          where: { id: parent.id },
+          select: { name: true },
+        })
+      ).name;
+    },
+    username: async (parent) => {
+      if (parent.id) {
+        return (
+          await prisma.user.findUnique({
+            where: { id: parent.id },
+            select: { username: true },
+          })
+        ).username;
+      }
     },
   },
   Organization: {
