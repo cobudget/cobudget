@@ -18,7 +18,7 @@ const schema = gql`
       tag: String
       offset: Int
       limit: Int
-      status: StatusFilter
+      status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembersPage(orgId: ID!, offset: Int, limit: Int): OrgMembersPage
@@ -215,20 +215,12 @@ const schema = gql`
   }
 
   enum StatusType {
-    UNPUBLISHED
-    FUNDING_WILL_OPEN_SOON
+    PENDING_APPROVAL
     OPEN_FOR_FUNDING
-    FUNDING_CLOSED
+    FUNDED
+    CANCELED
     COMPLETED
     ARCHIVED
-  }
-
-  input StatusFilter {
-    FUNDING_WILL_OPEN_SOON: Boolean
-    OPEN_FOR_FUNDING: Boolean
-    FUNDING_CLOSED: Boolean
-    COMPLETED: Boolean
-    ARCHIVED: Boolean
   }
 
   type Collection {
@@ -240,7 +232,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     visibility: Visibility!
     currency: String!
@@ -503,12 +494,6 @@ const schema = gql`
     amount: Int!
     createdAt: Date
   }
-
-  # enum Visibility {
-  #   PUBLIC
-  #   PRIVATE # only for paid
-  #   HIDDEN # only for paid
-  # }
 
   # type GrantingPeriod {
   #   event: Event!

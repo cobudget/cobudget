@@ -295,7 +295,6 @@ const resolvers = {
       },
       { user }
     ) => {
-      console.log({ status });
       const currentMember = await prisma.collectionMember.findUnique({
         where: {
           userId_collectionId: {
@@ -304,53 +303,44 @@ const resolvers = {
           },
         },
       });
-      const {
-        FUNDING_WILL_OPEN_SOON,
-        OPEN_FOR_FUNDING,
-        FUNDING_CLOSED,
-        COMPLETED,
-        ARCHIVED,
-      } = status;
-
-      const collectionIsOpen = true;
-
+      
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-      const now = new Date();
-
+      const statusFilter = status.map(statusType => {
+        switch (statusType) {
+          case "PENDING_APPROVAL":
+            return {
+              approvedAt: null
+            };
+          case "OPEN_FOR_FUNDING":
+            return {
+              approvedAt: {not: null},
+              fundedAt: null,
+              completedAt: null,
+              canceledAt: null,
+            };
+          case "FUNDED":
+            return {
+              fundedAt: { not: null },
+              canceledAt: null,
+              completedAt: null,
+            };
+          case "CANCELED":
+            return {
+              canceledAt: {not:null}
+            };
+          case "COMPLETED":
+            return {
+              completedAt: {not: null};
+            }
+        }
+      })
       const buckets = await prisma.bucket.findMany({
         where: {
           collectionId,
           deleted: { not: true },
-          OR: [
-            {
-              // FUNDING_WILL_OPEN_SOON
-              OR: [
-                { approvedAt: null },
-                {
-                  collection: {
-                    grantingOpens: { gte: now },
-                  },
-                  approvedAt: { not: null },
-                },
-              ], // check this date thing..
-            },
-            {
-              // OPEN_FOR_FUNDING
-              approvedAt: { not: null },
-              fundedAt: null,
-              canceledAt: null,
-            },
-            {
-              // FUNDING_CLOSED
-              completedAt: null,
-            },
-            {
-              // COMPLETED
-              completedAt: { not: null },
-            },
-          ],
+          OR: statusFilter,
           ...(textSearchTerm && { title: { search: textSearchTerm } }),
           ...(tagValue && {
             tags: { some: { value: tagValue } },
@@ -2555,18 +2545,13 @@ const resolvers = {
 
       return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
     },
-    status: async (bucket, args, ctx) => {
-
-      //if (!bucket.publishedAt) return "UNPUBLISHED";
+    status: (bucket, args, ctx) => {
       if (bucket.completedAt) return "COMPLETED";
-      if (bucket.fundedAt) return "FUNDING_CLOSED";
-
-      const collection = await prisma.collection.findUnique({
-        where: { id: bucket.collectionId },
-      });
-      if (bucket.approvedAt && isGrantingOpen(collection))
+      if (bucket.canceledAt) return "CANCELED";
+      if (bucket.fundedAt) return "FUNDED";
+      if (bucket.approvedAt)
         return "OPEN_FOR_FUNDING";
-      return "FUNDING_WILL_OPEN_SOON";
+      return "PENDING_APPROVAL";
     },
   },
   Transaction: {
