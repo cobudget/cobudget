@@ -60,6 +60,7 @@ import {
   CustomMentionAtomExtension,
   CustomMentionAtomNodeAttributes,
 } from "utils/mention-atom-extension";
+import HappySpinner from "./HappySpinner";
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -103,13 +104,8 @@ const EditorCss = styled.div`
 `;
 
 function MentionComponent() {
-  const users: MentionAtomNodeAttributes[] = [
-    { id: "joe", label: "Joe", userId: "123" },
-    { id: "sue", label: "Sue", userId: "124" },
-    { id: "pat", label: "Pat", userId: "125" },
-    { id: "tom", label: "Tom", userId: "126" },
-    { id: "jim", label: "Jim", userId: "127" },
-  ];
+  const [users, setUsers] = useState<MentionAtomNodeAttributes[]>([]);
+  const [loading, setLoading] = useState(true);
   const tags = [];
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
   const tagItems = useMemo(
@@ -133,7 +129,27 @@ function MentionComponent() {
       .sort();
   }, [mentionState, users, tagItems]);
 
-  return <MentionAtomPopupComponent onChange={setMentionState} items={items} />;
+  useEffect(() => {
+    setTimeout(() => {
+      console.log("setting users");
+      setUsers([
+        { id: "joe", label: "Joe", userId: "123" },
+        { id: "sue", label: "Sue", userId: "124" },
+        { id: "pat", label: "Pat", userId: "125" },
+        { id: "tom", label: "Tom", userId: "126" },
+        { id: "jim", label: "Jim", userId: "127" },
+      ]);
+      setLoading(false);
+    }, 5000);
+  }, [setUsers, setLoading]);
+
+  return (
+    <MentionAtomPopupComponent
+      onChange={setMentionState}
+      items={items}
+      ZeroItemsComponent={() => <HappySpinner className="m-3" />}
+    />
+  );
 }
 
 const ImperativeHandle = forwardRef((props, ref) => {
