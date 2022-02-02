@@ -4,7 +4,13 @@ import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 import StatusFilter from "./StatusFilter";
 
-const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
+const Filterbar = ({
+  textSearchTerm,
+  tag,
+  collection,
+  currentOrg,
+  statusFilter,
+}) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -41,10 +47,23 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     });
   };
 
+  const onChangeStatus = (statusFilterArray) => {
+    router.push({
+      pathname: "/[org]/[collection]",
+      query: {
+        org: currentOrg?.slug ?? "c",
+        collection: collection.slug,
+        ...(tag && { tag }),
+        ...(!!input && { s: input }),
+        f: statusFilterArray,
+      },
+    });
+  };
+
   return (
-    <div className="flex mb-5 items-stretch flex-wrap">
+    <div className="flex mb-5 items-stretch flex-wrap space-x-2">
       <div
-        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 mr-2 flex items-center overflow-hidden`}
+        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 flex items-center overflow-hidden`}
       >
         <form onSubmit={onSubmitSearch}>
           <input
@@ -82,7 +101,11 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
         ))}
       </SelectField>
 
-      <StatusFilter />
+      <StatusFilter
+        onChangeStatus={onChangeStatus}
+        statusFilter={statusFilter}
+        color={collection.color}
+      />
     </div>
   );
 };
