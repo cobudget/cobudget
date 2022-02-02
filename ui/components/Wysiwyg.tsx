@@ -15,6 +15,9 @@ import {
   DelayedPromiseCreator,
   isElementDomNode,
   ExtensionPriority,
+  ApplySchemaAttributes,
+  MarkSpecOverride,
+  MarkExtensionSpec,
 } from "@remirror/core";
 import {
   BlockquoteExtension,
@@ -210,6 +213,21 @@ const imageUploadHandler = (
   );
 };
 
+class MyLinkExtension extends LinkExtension {
+  createMarkSpec(
+    extra: ApplySchemaAttributes,
+    override: MarkSpecOverride
+  ): MarkExtensionSpec {
+    const markSpec = super.createMarkSpec(extra, override);
+
+    // we want to select links except for when they're links to a user page (i.e. when it's a mention)
+    // TODO: does this include `a` tags without hrefs? we want to avoid that
+    markSpec.parseDOM[0].tag = `a:not([href^="/user/"])`;
+
+    return markSpec;
+  }
+}
+
 const Wysiwyg = ({
   inputRef,
   placeholder,
@@ -284,7 +302,17 @@ const Wysiwyg = ({
       //}),
       // TODO: uncomment and make sure both plaintext and markdown links work
       // TODO: try negative selector `a:not([href^='asdf'])` to avoid selecting user links
-      new LinkExtension({ autoLink: true }),
+      //new LinkExtension({
+      //  autoLink: true,
+      //  nodeOverride: {
+      //    parseDOM: [
+      //      {
+      //        tag: `a:not([href^="/user/"])`,
+      //      },
+      //    ],
+      //  },
+      //}),
+      new MyLinkExtension({ autoLink: true }),
       //new LinkExtension({}),
       new ImageExtension({
         enableResizing: false,
