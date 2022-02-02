@@ -72,6 +72,7 @@ const Page = ({
   router,
   collection,
   org,
+  statusFilter,
 }) => {
   const { tag, s } = router.query;
 
@@ -81,7 +82,7 @@ const Page = ({
       collectionId: collection.id,
       offset: variables.offset,
       limit: variables.limit,
-      status: ["PENDING_APPROVAL", "OPEN_FOR_FUNDING"],
+      status: statusFilter,
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -138,7 +139,14 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
-  const { tag, s } = router.query;
+  const { tag, s, f } = router.query;
+
+  let statusFilter = f ?? ["PENDING_APPROVAL", "OPEN_FOR_FUNDING"];
+
+  // if it only one filter in the query, it will not be an array, so we create an array
+  if (!(statusFilter instanceof Array)) {
+    statusFilter = [statusFilter];
+  }
 
   if (!collection) return null;
   const canEdit =
@@ -199,6 +207,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
         <Filterbar
           textSearchTerm={s}
           tag={tag}
+          statusFilter={statusFilter}
           collection={collection}
           currentOrg={currentOrg}
         />
@@ -216,6 +225,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
                 onLoadMore={({ limit, offset }) => {
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
+                statusFilter={statusFilter}
               />
             );
           })}
