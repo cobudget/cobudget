@@ -61,7 +61,7 @@ const Filterbar = ({
   };
 
   return (
-    <div className="flex mb-5 items-stretch flex-wrap space-x-2">
+    <div className="mb-5 grid sm:flex gap-2 grid-cols-2">
       <div
         className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 flex items-center overflow-hidden`}
       >
@@ -85,8 +85,15 @@ const Filterbar = ({
         </form>
       </div>
 
+      <StatusFilter
+        className="col-span-2 order-3 sm:order-2"
+        onChangeStatus={onChangeStatus}
+        statusFilter={statusFilter}
+        color={collection.color}
+      />
+
       <SelectField
-        className="bg-white"
+        className="bg-white sm:order-last"
         color={collection.color}
         inputProps={{
           value: tag || "All tags",
@@ -100,12 +107,6 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
-
-      <StatusFilter
-        onChangeStatus={onChangeStatus}
-        statusFilter={statusFilter}
-        color={collection.color}
-      />
     </div>
   );
 };
