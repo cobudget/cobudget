@@ -4,8 +4,9 @@ export default function StatusFilter({
   onChangeStatus,
   statusFilter = [],
   color,
+  className = "",
 }) {
-  const statuses = [
+  const items = [
     {
       type: "PENDING_APPROVAL",
       value: statusFilter.includes("PENDING_APPROVAL"),
@@ -34,10 +35,10 @@ export default function StatusFilter({
   ];
 
   return (
-    <div>
+    <div className={className}>
       <Popover className="relative">
         <Popover.Button
-          className={`flex items-center bg-gray-100 border-3 border-gray-100 rounded py-3 px-4 pr-8 relative focus:outline-none focus:ring focus:ring-${color}`}
+          className={`w-full flex items-center bg-gray-100 border-3 border-gray-100 rounded py-3 px-4 pr-8 relative focus:outline-none focus:ring focus:ring-${color}`}
         >
           Filter by status{" "}
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 flex items-center px-2 text-gray-700">
@@ -49,28 +50,25 @@ export default function StatusFilter({
 
         <Popover.Panel className="absolute z-10 w-52 bg-white p-4 rounded-lg shadow mt-2">
           <ul className="space-y-1">
-            {statuses.map((status) => (
-              <li key={status.type}>
+            {items.map((item) => (
+              <li key={item.type}>
                 <label>
                   <input
                     type="checkbox"
-                    checked={status.value}
+                    checked={item.value}
                     onChange={() => {
-                      if (status.value) {
-                        // remove it
-                        const newFilter = statusFilter.filter((f) => {
-                          console.log(status, status.type);
-                          return f !== status.type;
-                        });
-                        onChangeStatus(newFilter);
-                        console.log({ statusFilter, newFilter });
+                      if (item.value) {
+                        // remove from filter
+                        onChangeStatus(
+                          statusFilter.filter((status) => status !== item.type)
+                        );
                       } else {
-                        // add it
-                        onChangeStatus([...statusFilter, status.type]);
+                        // add to filter
+                        onChangeStatus([...statusFilter, item.type]);
                       }
                     }}
                   ></input>{" "}
-                  {status.placeholder}
+                  {item.placeholder}
                 </label>
               </li>
             ))}
