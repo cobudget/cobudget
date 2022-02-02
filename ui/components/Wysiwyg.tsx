@@ -10,8 +10,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { ExtensionPriority } from "remirror";
-import { DelayedPromiseCreator, isElementDomNode } from "@remirror/core";
+//import { ExtensionPriority } from "remirror";
+import {
+  DelayedPromiseCreator,
+  isElementDomNode,
+  ExtensionPriority,
+} from "@remirror/core";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -106,18 +110,14 @@ const EditorCss = styled.div`
 function MentionComponent() {
   const [users, setUsers] = useState<MentionAtomNodeAttributes[]>([]);
   const [loading, setLoading] = useState(true);
-  const tags = [];
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
-  const tagItems = useMemo(
-    () => (tags ?? []).map((tag) => ({ id: tag, label: `#${tag}` })),
-    [tags]
-  );
+
   const items = useMemo(() => {
     if (!mentionState) {
       return [];
     }
 
-    const allItems = mentionState.name === "at" ? users : tagItems;
+    const allItems = users;
 
     if (!allItems) {
       return [];
@@ -127,17 +127,18 @@ function MentionComponent() {
     return allItems
       .filter((item) => item.label.toLowerCase().includes(query))
       .sort();
-  }, [mentionState, users, tagItems]);
+  }, [mentionState, users]);
 
   useEffect(() => {
     setTimeout(() => {
       console.log("setting users");
       setUsers([
-        { id: "joe", label: "Joe", userId: "123" },
-        { id: "sue", label: "Sue", userId: "124" },
-        { id: "pat", label: "Pat", userId: "125" },
-        { id: "tom", label: "Tom", userId: "126" },
-        { id: "jim", label: "Jim", userId: "127" },
+        // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
+        { id: "joe", label: "@Joe", href: "/user/1234" },
+        { id: "sue", label: "@Sue", href: "/user/1235" },
+        { id: "pat", label: "@Pat", href: "/user/1236" },
+        { id: "tom", label: "@Tom", href: "/user/1237" },
+        { id: "jim", label: "@Jim", href: "/user/1238" },
       ]);
       setLoading(false);
     }, 5000);
@@ -147,7 +148,13 @@ function MentionComponent() {
     <MentionAtomPopupComponent
       onChange={setMentionState}
       items={items}
-      ZeroItemsComponent={() => <HappySpinner className="m-3" />}
+      ZeroItemsComponent={() =>
+        loading ? (
+          <HappySpinner className="m-3" />
+        ) : (
+          <div className="text-gray-700">No user found</div>
+        )
+      }
     />
   );
 }
@@ -156,8 +163,6 @@ const ImperativeHandle = forwardRef((props, ref) => {
   const { commands, clearContent } = useRemirrorContext({
     autoUpdate: true,
   });
-
-  //commands.pickImages();
 
   useImperativeHandle(ref, () => ({
     blur: commands.blur,
@@ -222,12 +227,13 @@ const Wysiwyg = ({
       new ItalicExtension(),
       new HeadingExtension({}),
       new MentionAtomExtension({
+        // TODO: maybe remove, unclear if this actually affects anything?
+        priority: ExtensionPriority.High,
         mentionTag: "a",
         nodeOverride: {
           parseDOM: [
             {
-              // TODO: narrow down selector to only user links
-              tag: "a[href]",
+              tag: `a[href^="/user/"]`,
               getAttrs: (node: string | Node) => {
                 if (!isElementDomNode(node)) {
                   return false;
@@ -248,11 +254,9 @@ const Wysiwyg = ({
           id: {
             default: "1",
             parseDOM: (dom) => {
-              console.log("id parsedom", dom);
               return dom.getAttribute("href");
             },
             toDOM: (attrs) => {
-              console.log("id todom", attrs);
               return ["data-id", "asdf"];
             },
           },
@@ -267,10 +271,10 @@ const Wysiwyg = ({
             //  console.log("parsed href", href);
             //  return href;
             //},
-            toDOM: (attrs) => {
-              console.log("toDOM href attrs", attrs);
-              return ["href", `https://google.com/?q=${attrs.userId}`];
-            },
+            //toDOM: (attrs) => {
+            //  console.log("toDOM href attrs", attrs);
+            //  return ["href", `https://google.com/?q=${attrs.userId}`];
+            //},
           }, //"https://google.com" },
         },
         matchers: [{ name: "at", char: "@", appendText: " " }],
@@ -279,7 +283,8 @@ const Wysiwyg = ({
       //  matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
       //}),
       // TODO: uncomment and make sure both plaintext and markdown links work
-      //new LinkExtension({ autoLink: true }),
+      // TODO: try negative selector `a:not([href^='asdf'])` to avoid selecting user links
+      new LinkExtension({ autoLink: true }),
       //new LinkExtension({}),
       new ImageExtension({
         enableResizing: false,
