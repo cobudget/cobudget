@@ -214,3 +214,35 @@ export function isGrantingOpen(collection) {
     : false;
   return grantingHasOpened && !grantingHasClosed;
 }
+
+export function statusTypeToQuery(statusType) {
+  switch (statusType) {
+    case "PENDING_APPROVAL":
+      return {
+        approvedAt: null,
+      };
+    case "OPEN_FOR_FUNDING":
+      return {
+        approvedAt: { not: null },
+        fundedAt: null,
+        completedAt: null,
+        canceledAt: null,
+      };
+    case "FUNDED":
+      return {
+        fundedAt: { not: null },
+        canceledAt: null,
+        completedAt: null,
+      };
+    case "CANCELED":
+      return {
+        canceledAt: { not: null },
+      };
+    case "COMPLETED":
+      return {
+        completedAt: { not: null },
+      };
+    default:
+      return false;
+  }
+}

@@ -255,6 +255,15 @@ const schema = gql`
     totalInMembersBalances: Int
     discourseCategoryId: Int
     tags: [Tag!]
+    bucketStatusCount: BucketStatusCount
+  }
+
+  type BucketStatusCount {
+    PENDING_APPROVAL: Int!
+    OPEN_FOR_FUNDING: Int!
+    FUNDED: Int!
+    CANCELED: Int!
+    COMPLETED: Int!
   }
 
   type Tag {

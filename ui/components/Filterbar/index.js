@@ -90,6 +90,8 @@ const Filterbar = ({
         onChangeStatus={onChangeStatus}
         statusFilter={statusFilter}
         color={collection.color}
+        collection={collection}
+        currentOrg={currentOrg}
       />
 
       <SelectField

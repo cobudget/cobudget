@@ -1,38 +1,72 @@
 import { Popover } from "@headlessui/react";
+import { gql, useQuery } from "urql";
 
+export const BUCKET_STATUS_QUERY = gql`
+  query BucketStatus($collectionSlug: String!, $orgSlug: String) {
+    collection(collectionSlug: $collectionSlug, orgSlug: $orgSlug) {
+      id
+      bucketStatusCount {
+        PENDING_APPROVAL
+        OPEN_FOR_FUNDING
+        FUNDED
+        CANCELED
+        COMPLETED
+      }
+    }
+  }
+`;
 export default function StatusFilter({
   onChangeStatus,
   statusFilter = [],
   color,
+  collection,
+  currentOrg,
   className = "",
 }) {
+  const [
+    {
+      data: { collection: { bucketStatusCount } } = {
+        collection: { bucketStatusCount: {} },
+      },
+      fetching,
+      error,
+    },
+  ] = useQuery({
+    query: BUCKET_STATUS_QUERY,
+    variables: {
+      collectionSlug: collection.slug,
+      orgSlug: currentOrg?.slug ?? "c",
+    },
+  });
+  console.log({ bucketStatusCount, error, fetching });
   const items = [
     {
       type: "PENDING_APPROVAL",
-      value: statusFilter.includes("PENDING_APPROVAL"),
-      placeholder: "Pending approval",
+      placeholder: `Pending approval`,
     },
     {
       type: "OPEN_FOR_FUNDING",
-      value: statusFilter.includes("OPEN_FOR_FUNDING"),
       placeholder: "Open for funding",
     },
     {
       type: "FUNDED",
-      value: statusFilter.includes("FUNDED"),
       placeholder: "Funded",
     },
     {
       type: "COMPLETED",
-      value: statusFilter.includes("COMPLETED"),
       placeholder: "Delivered",
     },
     {
       type: "CANCELED",
-      value: statusFilter.includes("CANCELED"),
       placeholder: "Canceled",
     },
-  ];
+  ]
+    .filter((item) => !!bucketStatusCount[item.type])
+    .map((item) => ({
+      type: item.type,
+      value: statusFilter.includes(item.type),
+      placeholder: `${item.placeholder} (${bucketStatusCount[item.type]})`,
+    }));
 
   return (
     <div className={className}>
@@ -48,7 +82,7 @@ export default function StatusFilter({
           </div>
         </Popover.Button>
 
-        <Popover.Panel className="absolute z-10 w-52 bg-white p-4 rounded-lg shadow mt-2">
+        <Popover.Panel className="absolute z-10 w-56 bg-white p-4 rounded-lg shadow mt-2">
           <ul className="space-y-1">
             {items.map((item) => (
               <li key={item.type}>

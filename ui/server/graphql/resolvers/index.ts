@@ -24,6 +24,7 @@ import {
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
   isGrantingOpen,
+  statusTypeToQuery,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
@@ -307,39 +308,7 @@ const resolvers = {
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-      const statusFilter = status
-        .map((statusType) => {
-          switch (statusType) {
-            case "PENDING_APPROVAL":
-              return {
-                approvedAt: null,
-              };
-            case "OPEN_FOR_FUNDING":
-              return {
-                approvedAt: { not: null },
-                fundedAt: null,
-                completedAt: null,
-                canceledAt: null,
-              };
-            case "FUNDED":
-              return {
-                fundedAt: { not: null },
-                canceledAt: null,
-                completedAt: null,
-              };
-            case "CANCELED":
-              return {
-                canceledAt: { not: null },
-              };
-            case "COMPLETED":
-              return {
-                completedAt: { not: null },
-              };
-            default:
-              return false;
-          }
-        })
-        .filter((s) => s);
+      const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
 
       const buckets = await prisma.bucket.findMany({
         where: {
@@ -2380,6 +2349,40 @@ const resolvers = {
       return prisma.organization.findUnique({
         where: { id: collection.organizationId },
       });
+    },
+    bucketStatusCount: async (collection) => {
+      return {
+        PENDING_APPROVAL: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("PENDING_APPROVAL"),
+          },
+        }),
+        OPEN_FOR_FUNDING: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("OPEN_FOR_FUNDING"),
+          },
+        }),
+        FUNDED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("FUNDED"),
+          },
+        }),
+        CANCELED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("CANCELED"),
+          },
+        }),
+        COMPLETED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("COMPLETED"),
+          },
+        }),
+      };
     },
   },
   Bucket: {
