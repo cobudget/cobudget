@@ -8,7 +8,9 @@ export interface SendEmailInput {
   html?: string;
 }
 
-const client = new Client(process.env.POSTMARK_API_TOKEN);
+const client =
+  process.env.NODE_ENV !== "development" &&
+  new Client(process.env.POSTMARK_API_TOKEN);
 
 const send = async (mail: SendEmailInput) => {
   if (process.env.NODE_ENV === "development") {
