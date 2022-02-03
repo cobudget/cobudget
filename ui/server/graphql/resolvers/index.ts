@@ -1525,7 +1525,7 @@ const resolvers = {
             include: { collMemberships: { where: { collectionId } } },
           });
 
-          emailService.inviteMember({ email, currentUser, collection });
+          await emailService.inviteMember({ email, currentUser, collection });
 
           invitedCollectionMembers.push(updated.collMemberships?.[0]);
         }
@@ -1570,7 +1570,7 @@ const resolvers = {
           const orgMembership = user.orgMemberships?.[0];
           const currentOrg = orgMembership.organization;
 
-          emailService.inviteMember({ email, currentUser, currentOrg });
+          await emailService.inviteMember({ email, currentUser, currentOrg });
 
           newOrgMembers.push(orgMembership);
         }
