@@ -10,6 +10,7 @@ const Filterbar = ({
   collection,
   currentOrg,
   statusFilter,
+  bucketStatusCount,
 }) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
@@ -90,8 +91,7 @@ const Filterbar = ({
         onChangeStatus={onChangeStatus}
         statusFilter={statusFilter}
         color={collection.color}
-        collection={collection}
-        currentOrg={currentOrg}
+        bucketStatusCount={bucketStatusCount}
       />
 
       <SelectField

@@ -1,48 +1,17 @@
 import { Popover } from "@headlessui/react";
 import { gql, useQuery } from "urql";
 
-export const BUCKET_STATUS_QUERY = gql`
-  query BucketStatus($collectionSlug: String!, $orgSlug: String) {
-    collection(collectionSlug: $collectionSlug, orgSlug: $orgSlug) {
-      id
-      bucketStatusCount {
-        PENDING_APPROVAL
-        OPEN_FOR_FUNDING
-        FUNDED
-        CANCELED
-        COMPLETED
-      }
-    }
-  }
-`;
 export default function StatusFilter({
   onChangeStatus,
   statusFilter = [],
   color,
-  collection,
-  currentOrg,
+  bucketStatusCount,
   className = "",
 }) {
-  const [
-    {
-      data: { collection: { bucketStatusCount } } = {
-        collection: { bucketStatusCount: {} },
-      },
-      fetching,
-      error,
-    },
-  ] = useQuery({
-    query: BUCKET_STATUS_QUERY,
-    variables: {
-      collectionSlug: collection.slug,
-      orgSlug: currentOrg?.slug ?? "c",
-    },
-  });
-  console.log({ bucketStatusCount, error, fetching });
   const items = [
     {
       type: "PENDING_APPROVAL",
-      placeholder: `Pending approval`,
+      placeholder: "Pending approval",
     },
     {
       type: "OPEN_FOR_FUNDING",
