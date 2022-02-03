@@ -149,6 +149,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
           <div className="col-span-2">
             <EditableField
               defaultValue={collection.info}
+              name="info"
               label="Add homepage message"
               placeholder={`# Welcome to ${collection.title}'s dream page`}
               canEdit={canEdit}

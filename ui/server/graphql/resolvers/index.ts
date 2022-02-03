@@ -1859,7 +1859,7 @@ const resolvers = {
       await eventHub.publish("contribute-to-bucket", {
         collection,
         bucket,
-        user,
+        contributingUser: user,
         amount,
       });
 

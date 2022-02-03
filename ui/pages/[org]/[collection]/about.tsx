@@ -19,7 +19,7 @@ export default function AboutPage({
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-3">
           <div className="col-span-2">
             <EditableField
-              value={collection.about}
+              defaultValue={collection.about}
               label="Add about text"
               placeholder={`# About ${collection.title}`}
               canEdit={

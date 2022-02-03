@@ -384,12 +384,12 @@ export default {
   contributionToBucketNotification: async ({
     collection,
     bucket,
-    user,
+    contributingUser,
     amount,
   }: {
     collection: any;
     bucket: any;
-    user: any;
+    contributingUser: any;
     amount: number;
   }) => {
     // send to cocreators of the bucket but not the donor
@@ -400,7 +400,7 @@ export default {
     });
 
     const usersToNotify = cocreators
-      .filter((cocreator) => cocreator.userId !== user.id)
+      .filter((cocreator) => cocreator.userId !== contributingUser.id)
       .map((cocreator) => cocreator.user);
 
     const totalContributions = await bucketTotalContributions(bucket);
@@ -419,13 +419,13 @@ export default {
       `/${organization.slug}/${collection.slug}/${bucket.id}`
     );
 
-    const emails = usersToNotify.map((user) => ({
-      to: user.email,
+    const emails = usersToNotify.map((mailRecipient) => ({
+      to: mailRecipient.email,
       subject: `Your bucket “${bucket.title}” received funding!`,
       html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
         bucket.title
       )}”</a> just received some funds!<br/>
-      ${escape(user.name)} contributed ${amount / 100} ${
+      ${escape(contributingUser.name)} contributed ${amount / 100} ${
         collection.currency
       }<br/>
       Your bucket is now ${progressPercent}% funded!<br/>

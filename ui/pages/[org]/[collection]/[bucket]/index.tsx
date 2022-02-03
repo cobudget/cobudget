@@ -109,12 +109,9 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
     currentUser?.currentCollMember?.isApproved &&
     collection.bucketReviewIsOpen &&
     collection.guidelines.length > 0 &&
-    bucket.published;
+    bucket?.published;
   return (
     <>
-      {showBucketReview && (
-        <Monster event={collection} bucket={bucket} currentOrg={currentOrg} />
-      )}
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
       <EditImagesModal
         open={editImagesModalOpen}
@@ -129,6 +126,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
         currentUser={currentUser}
         currentOrg={currentOrg}
         collection={collection}
+        showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
 
