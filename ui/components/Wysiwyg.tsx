@@ -10,7 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-//import { ExtensionPriority } from "remirror";
 import {
   DelayedPromiseCreator,
   isElementDomNode,
@@ -63,10 +62,6 @@ import { debounce } from "lodash";
 import styled from "styled-components";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
-import {
-  CustomMentionAtomExtension,
-  CustomMentionAtomNodeAttributes,
-} from "utils/mention-atom-extension";
 import HappySpinner from "./HappySpinner";
 
 const EditorCss = styled.div`
