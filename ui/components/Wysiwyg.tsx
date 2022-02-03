@@ -231,7 +231,11 @@ const Wysiwyg = ({
   rows = 2,
   onChange,
   highlightColor,
+  enableMentions = false,
+  mentionsCollId = null,
 }) => {
+  console.log("mentionscollid", mentionsCollId);
+
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
@@ -239,79 +243,61 @@ const Wysiwyg = ({
       new StrikeExtension(),
       new ItalicExtension(),
       new HeadingExtension({}),
-      new MentionAtomExtension({
-        // TODO: maybe remove, unclear if this actually affects anything?
-        priority: ExtensionPriority.High,
-        mentionTag: "a",
-        nodeOverride: {
-          parseDOM: [
-            {
-              tag: `a[href^="/user/"]`,
-              getAttrs: (node: string | Node) => {
-                if (!isElementDomNode(node)) {
-                  return false;
-                }
+      ...(enableMentions
+        ? [
+            new MentionAtomExtension({
+              mentionTag: "a",
+              nodeOverride: {
+                parseDOM: [
+                  {
+                    tag: `a[href^="/user/"]`,
+                    getAttrs: (node: string | Node) => {
+                      if (!isElementDomNode(node)) {
+                        return false;
+                      }
 
-                console.log("nodeOverride parseDOM getAttrs", node);
+                      console.log("nodeOverride parseDOM getAttrs", node);
 
-                const id = "id";
-                const name = "name";
-                const href = node.getAttribute("href");
-                const label = node.textContent;
-                return { /*...extra.parse(node),*/ id, name, label, href };
+                      const id = "id";
+                      const name = "name";
+                      const href = node.getAttribute("href");
+                      const label = node.textContent;
+                      return {
+                        id,
+                        name,
+                        label,
+                        href,
+                      };
+                    },
+                  },
+                ],
               },
-            },
-          ],
-        },
-        extraAttributes: {
-          id: {
-            default: "1",
-            parseDOM: (dom) => {
-              return dom.getAttribute("href");
-            },
-            toDOM: (attrs) => {
-              return ["data-id", "asdf"];
-            },
-          },
-          userId: {
-            default: 0,
-          },
-          href: {
-            default: "potato",
-            //parseDOM: (dom) => {
-            //  console.log("dom", dom);
-            //  const href = dom.getAttribute("href");
-            //  console.log("parsed href", href);
-            //  return href;
-            //},
-            //toDOM: (attrs) => {
-            //  console.log("toDOM href attrs", attrs);
-            //  return ["href", `https://google.com/?q=${attrs.userId}`];
-            //},
-          }, //"https://google.com" },
-        },
-        matchers: [{ name: "at", char: "@", appendText: " " }],
-      }),
-      //new CustomMentionAtomExtension({
-      //  matchers: [{ name: "at", char: "@", appendText: " ", mentionTag: "a" }],
-      //}),
-      // TODO: uncomment and make sure both plaintext and markdown links work
-      // TODO: try negative selector `a:not([href^='asdf'])` to avoid selecting user links
-      //new LinkExtension({
-      //  autoLink: true,
-      //  nodeOverride: {
-      //    parseDOM: [
-      //      {
-      //        tag: `a:not([href^="/user/"])`,
-      //      },
-      //    ],
-      //  },
-      //}),
-      new MyLinkExtension({ autoLink: true }),
-      //new LinkExtension({}),
+              extraAttributes: {
+                id: {
+                  default: "1",
+                  parseDOM: (dom) => {
+                    return dom.getAttribute("href");
+                  },
+                  toDOM: (attrs) => {
+                    return ["data-id", "asdf"];
+                  },
+                },
+                userId: {
+                  default: 0,
+                },
+                href: {
+                  default: "potato",
+                },
+              },
+              matchers: [{ name: "at", char: "@", appendText: " " }],
+            }),
+          ]
+        : []),
+      enableMentions
+        ? new MyLinkExtension({ autoLink: true })
+        : new LinkExtension({ autoLink: true }),
       new ImageExtension({
         enableResizing: false,
-        // for when the user dragndrops or pastes images
         uploadHandler: imageUploadHandler,
       }),
       new BlockquoteExtension(),
@@ -559,7 +545,7 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
-            <MentionComponent />
+            {enableMentions && <MentionComponent />}
           </Remirror>
         </EditorCss>
       </ThemeProvider>
