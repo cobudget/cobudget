@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 import DreamCard from "../../../components/DreamCard";
@@ -134,6 +134,11 @@ const Page = ({
   );
 };
 
+const stringOrArrayIntoArray = (stringOrArray) => {
+  if (stringOrArray instanceof Array) return stringOrArray;
+  return stringOrArray ? [stringOrArray] : [];
+};
+
 const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
@@ -141,12 +146,17 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   ]);
   const { tag, s, f } = router.query;
 
-  let statusFilter = f ?? ["PENDING_APPROVAL", "OPEN_FOR_FUNDING"];
+  const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
 
-  // if it only one filter in the query, it will not be an array, so we create an array
-  if (!(statusFilter instanceof Array)) {
-    statusFilter = [statusFilter];
-  }
+  useEffect(() => {
+    setStatusFilter(stringOrArrayIntoArray(f));
+  }, [f]);
+
+  // standard filter
+  useEffect(() => {
+    const filter = f ?? ["PENDING_APPROVAL", "OPEN_FOR_FUNDING"];
+    setStatusFilter(stringOrArrayIntoArray(filter));
+  }, []);
 
   if (!collection) return null;
   const canEdit =

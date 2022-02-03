@@ -52,7 +52,7 @@ export default function StatusFilter({
           <ul className="space-y-1">
             {items.map((item) => (
               <li key={item.type}>
-                <label>
+                <label className="flex space-x-1.5 items-center">
                   <input
                     type="checkbox"
                     checked={item.value}
@@ -67,8 +67,8 @@ export default function StatusFilter({
                         onChangeStatus([...statusFilter, item.type]);
                       }
                     }}
-                  ></input>{" "}
-                  {item.placeholder}
+                  ></input>
+                  <span>{item.placeholder}</span>
                 </label>
               </li>
             ))}
