@@ -2,6 +2,14 @@ import prisma from "../../prisma";
 
 export async function getCurrentCollMember({ collMemberId }) {}
 
+export async function isCollAdmin ({ collectionId, userId }) {
+  const collectionMember = await getCollectionMember({
+    userId: userId,
+    collectionId,
+  });
+  return !!collectionMember?.isAdmin;
+}
+
 export async function isAndGetCollMember({
   collectionId,
   userId,

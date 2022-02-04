@@ -23,6 +23,7 @@ import {
   getOrgMember,
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
+  isCollAdmin,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
@@ -367,11 +368,16 @@ const resolvers = {
         { collectionId, isApproved, offset = 0, limit = 10 },
         { user }
       ) => {
+        const isAdmin = await isCollAdmin({
+          userId: user.id,
+          collectionId
+        });
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
+              ...(!isAdmin && { hasJoined: true }),
             },
             take: limit + 1,
             skip: offset,
