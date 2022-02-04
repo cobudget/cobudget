@@ -63,6 +63,9 @@ const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
   } else if (!collectionMember.isApproved) {
     throw new Error("Collection member is not approved");
   }
+  else if (!collectionMember.hasJoined) {
+    throw new Error("Collection member has not accepted the invitation");
+  }
 
   return skip;
 };

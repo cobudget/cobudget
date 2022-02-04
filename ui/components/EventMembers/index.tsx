@@ -31,6 +31,7 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         balance
         email
         name
+        hasJoined
         user {
           id
           username

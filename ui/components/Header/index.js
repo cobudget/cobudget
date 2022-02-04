@@ -84,7 +84,6 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
             color={color}
             currentUser={currentUser}
             router={router}
-            currentUser={currentUser}
           />
 
           <div className="sm:hidden">
@@ -117,7 +116,17 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {!currentUser.currentCollMember &&
+                {
+                  currentUser.currentCollMember?.hasJoined === false ?
+                  <NavItem
+                      primary
+                      eventColor={color}
+                      onClick={() => {}}
+                  >
+                    Accept Invitation
+                  </NavItem> : null
+                }
+                {(!currentUser.currentCollMember) &&
                   collection &&
                   (collection.registrationPolicy !== "INVITE_ONLY" ||
                     currentUser.currentOrgMember?.isAdmin) && (
