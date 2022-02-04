@@ -29,6 +29,7 @@ const send = async (mail: SendEmailInput) => {
         HtmlBody: mail.html,
       });
     } catch (err) {
+      console.log(err);
       throw err;
     }
   }

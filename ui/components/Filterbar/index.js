@@ -2,8 +2,16 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
+import StatusFilter from "./StatusFilter";
 
-const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
+const Filterbar = ({
+  textSearchTerm,
+  tag,
+  collection,
+  currentOrg,
+  statusFilter,
+  bucketStatusCount,
+}) => {
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -18,7 +26,7 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     router.push({
       pathname: "/[org]/[collection]",
       query: {
-        org: currentOrg.slug,
+        org: currentOrg?.slug ?? "c",
         collection: collection.slug,
         s: input,
         ...(tag && { tag }),
@@ -32,7 +40,7 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     router.push({
       pathname: "/[org]/[collection]",
       query: {
-        org: currentOrg.slug,
+        org: currentOrg?.slug ?? "c",
         collection: collection.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
@@ -40,10 +48,23 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
     });
   };
 
+  const onChangeStatus = (statusFilterArray) => {
+    router.push({
+      pathname: "/[org]/[collection]",
+      query: {
+        org: currentOrg?.slug ?? "c",
+        collection: collection.slug,
+        ...(tag && { tag }),
+        ...(!!input && { s: input }),
+        f: statusFilterArray,
+      },
+    });
+  };
+
   return (
-    <div className="flex mb-5 items-stretch flex-wrap">
+    <div className="mb-5 grid sm:flex gap-2 grid-cols-2">
       <div
-        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 mr-2 flex items-center overflow-hidden`}
+        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 flex items-center overflow-hidden`}
       >
         <form onSubmit={onSubmitSearch}>
           <input
@@ -65,8 +86,16 @@ const Filterbar = ({ textSearchTerm, tag, collection, currentOrg }) => {
         </form>
       </div>
 
+      <StatusFilter
+        className="col-span-2 order-3 sm:order-2"
+        onChangeStatus={onChangeStatus}
+        statusFilter={statusFilter}
+        color={collection.color}
+        bucketStatusCount={bucketStatusCount}
+      />
+
       <SelectField
-        className="bg-white"
+        className="bg-white sm:order-last"
         color={collection.color}
         inputProps={{
           value: tag || "All tags",

@@ -19,6 +19,7 @@ const schema = gql`
       tag: String
       offset: Int
       limit: Int
+      status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     orgMembersPage(orgId: ID!, offset: Int, limit: Int): OrgMembersPage
@@ -214,6 +215,15 @@ const schema = gql`
     SINGLE
   }
 
+  enum StatusType {
+    PENDING_APPROVAL
+    OPEN_FOR_FUNDING
+    FUNDED
+    CANCELED
+    COMPLETED
+    ARCHIVED
+  }
+
   type Collection {
     id: ID!
     slug: String!
@@ -223,7 +233,6 @@ const schema = gql`
     info: String
     color: String
     numberOfApprovedMembers: Int
-    # visibility: Visibility
     registrationPolicy: RegistrationPolicy!
     visibility: Visibility!
     currency: String!
@@ -247,6 +256,15 @@ const schema = gql`
     totalInMembersBalances: Int
     discourseCategoryId: Int
     tags: [Tag!]
+    bucketStatusCount: BucketStatusCount
+  }
+
+  type BucketStatusCount {
+    PENDING_APPROVAL: Int!
+    OPEN_FOR_FUNDING: Int!
+    FUNDED: Int!
+    CANCELED: Int!
+    COMPLETED: Int!
   }
 
   type Tag {
@@ -363,6 +381,7 @@ const schema = gql`
     published: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
+    status: StatusType
     # logs: [Log]
     discourseTopicUrl: String
     # reactions: [Reaction]
@@ -485,12 +504,6 @@ const schema = gql`
     amount: Int!
     createdAt: Date
   }
-
-  # enum Visibility {
-  #   PUBLIC
-  #   PRIVATE # only for paid
-  #   HIDDEN # only for paid
-  # }
 
   # type GrantingPeriod {
   #   event: Event!
