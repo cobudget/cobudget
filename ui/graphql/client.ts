@@ -81,6 +81,16 @@ export const client = (
                 );
               }
             },
+            acceptInvitation(result: any, args, cache) {
+              if (result?.acceptInvitation?.hasJoined) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "membersPage")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "membersPage", field.arguments);
+                  });
+                }
+            },
             joinOrg(result: any, args, cache) {
               if (result.joinOrg) {
                 cache.updateQuery(
