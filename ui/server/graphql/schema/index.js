@@ -191,6 +191,7 @@ const schema = gql`
     acceptFunding(bucketId: ID!): Bucket
     markAsCompleted(bucketId: ID!): Bucket
 
+    acceptInvitation(collectionId: ID!): CollectionMember
     joinCollection(collectionId: ID!): CollectionMember
   }
 

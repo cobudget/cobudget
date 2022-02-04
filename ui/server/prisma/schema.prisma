@@ -49,7 +49,7 @@ model CollectionMember {
   isAdmin     Boolean @default(false)
   isModerator Boolean @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
   bio         String?
-  hasJoined   Boolean @default(false)
+  hasJoined   Boolean @default(true)
 
   isApproved Boolean  @default(false) //switch to approvedAt
   createdAt  DateTime @default(now())

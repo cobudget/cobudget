@@ -1988,6 +1988,30 @@ const resolvers = {
         });
       }
     ),
+    acceptInvitation: async (parent, { collectionId }, { user }) => {
+      if (!user) throw new Error("You need to be logged in.");
+      
+      const member = await getCollectionMember({
+        collectionId,
+        userId: user.id
+      });
+
+      if (!member) {
+        throw new Error("You are not a member of this collection");
+      }
+
+      if (member.hasJoined) {
+        throw new Error("Invitation not pending");
+      }
+
+      return prisma.collectionMember.update({
+        where: { id: member.id },
+        data: {
+          hasJoined: true
+        },
+      });
+
+    },
     joinCollection: async (parent, { collectionId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
