@@ -36,6 +36,15 @@ module.exports = {
         // Dream page layout
         sidebar: "minmax(0,1fr) 350px",
       },
+      backgroundColor: {
+        "slate-400": "rgb(223, 230, 238)",
+      },
+      paddingBottom: {
+        1: "25px"
+      },
+      borderColor: {
+        "f": "rgb(172, 182, 192)",
+      },
       height: {
         88: "22rem",
         100: "25rem",

@@ -4,6 +4,7 @@ import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
+import BillBreakdown from "components/BillBreakdown";
 
 export const COLLECTION_QUERY = gql`
   query CollectionQuery($orgSlug: String!, $collectionSlug: String!) {
@@ -140,58 +141,42 @@ export default function AboutPage({ router, currentOrg }) {
         </List>
       </div>
 
-      <h2 className="text-xl font-semibold mb-3">Granting status</h2>
+      <h2 className="text-xl font-semibold mb-3">Funding status</h2>
       <div className="bg-white rounded-lg shadow mb-6">
-        <List>
-          <ListItem>
-            <ListItemText
-              primary="Total allocations"
-              secondary={`${thousandSeparator(
-                collection.totalAllocations / 100
-              )} ${collection.currency}`}
-            />
-          </ListItem>
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Total contributions"
-              secondary={`${thousandSeparator(
+        <BillBreakdown 
+          parts={[
+            {
+              title: "Allocated funds",
+              total: `${thousandSeparator(
                 collection.totalContributions / 100
-              )} ${collection.currency}`}
-            />
-          </ListItem>
-          <Divider />
-
-          <ListItem>
-            <ListItemText
-              primary="Total in members balances (allocations - contributions)"
-              secondary={`${thousandSeparator(
+              )} ${collection.currency}`,
+              breakdown: [
+                {
+                  title: "Contributions made to bucket open for funding", 
+                  amount: `${thousandSeparator(
+                    collection.totalContributionsFunding / 100
+                  )} ${collection.currency}`
+                },
+                {
+                  title: "Contributions made to funded buckets", 
+                  amount: `${thousandSeparator(
+                  collection.totalContributionsFunded / 100
+                )} ${collection.currency}`}
+              ]
+            },
+            {
+              title: "Unallocated Funds",
+              total: `${thousandSeparator(
                 collection.totalInMembersBalances / 100
-              )} ${collection.currency}`}
-            />
-          </ListItem>
-
-          <Divider />
-          <ListItem>
-            <ListItemText
-              primary={`Total contributions in funding now buckets`}
-              secondary={`${thousandSeparator(
-                collection.totalContributionsFunding / 100
-              )} ${collection.currency}`}
-            />
-          </ListItem>
-
-          <Divider />
-          <ListItem>
-            <ListItemText
-              primary={`Total contributions in funded buckets`}
-              secondary={`${thousandSeparator(
-                collection.totalContributionsFunded / 100
-              )} ${collection.currency}`}
-            />
-          </ListItem>
-        </List>
+              )} ${collection.currency}`,
+              breakdown: []
+            }
+          ]}
+          totalTitle={"Total Funds Available"}
+          totalAmount={`${thousandSeparator(
+            collection.totalAllocations / 100
+          )} ${collection.currency}`}
+        />
       </div>
     </div>
   );
