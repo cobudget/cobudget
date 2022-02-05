@@ -137,9 +137,13 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
       </TableCell>
       <TableCell>
         <p>{member.email}</p>
-        {!member.user.verifiedEmail && (
-          <p className="text-sm text-gray-500">(not verified)</p>
-        )}
+        {
+          !member.user.verifiedEmail ? (
+            <p className="text-sm text-gray-500">(not verified)</p>
+          ) : !member.hasJoined ? (
+            <p className="text-sm text-gray-500">(invitation pending)</p>
+          ) : null
+        }
       </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (
