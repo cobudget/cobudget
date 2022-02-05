@@ -35,6 +35,7 @@ module.exports = {
       gridTemplateColumns: {
         // Dream page layout
         sidebar: "minmax(0,1fr) 350px",
+        funding: "auto minmax(100px, max-content)"
       },
       backgroundColor: {
         "slate-400": "rgb(223, 230, 238)",

@@ -11,7 +11,7 @@ function BillBreakdown({
     <div className="border-f border-2 text-sm font-semibold">
       {
         parts.map(part => (
-          <div className="border-b-2 border-f" style={{ display: "grid", gridTemplateColumns: "75% 25%" }}>
+          <div className="border-b-2 border-f grid grid-cols-funding">
             <p className="border-r-2 border-f py-2 px-4">{part.title}</p>
             <p className="text-right py-2 px-2">{part.total}</p>
             {
@@ -29,7 +29,7 @@ function BillBreakdown({
           </div>
         ))
       }
-      <div className="bg-slate-400" style={{ display: "grid", gridTemplateColumns: "75% 25%" }}>
+      <div className="bg-slate-400 grid grid-cols-funding">
         <p className="border-r-2 border-f p-4">{totalTitle}</p>
         <p className="text-right border-f py-4 px-2">{totalAmount}</p>
       </div>
