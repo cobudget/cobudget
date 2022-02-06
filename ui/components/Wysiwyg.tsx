@@ -123,7 +123,6 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
 `;
 
 function MentionComponent({ collectionId }) {
-  const [users, setUsers] = useState<MentionAtomNodeAttributes[]>([]);
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
 
   const searchString = mentionState?.query.full.toLowerCase() ?? "";
@@ -138,43 +137,25 @@ function MentionComponent({ collectionId }) {
   });
 
   const items = useMemo(() => {
-    if (!mentionState) {
+    if (fetching || !data) {
       return [];
     }
 
-    const allItems = users;
-
-    if (!allItems) {
-      return [];
-    }
-
-    return allItems
-      .filter((item) => item.label.toLowerCase().includes(searchString))
-      .sort();
-  }, [mentionState, users]);
-
-  console.log("members results", data?.members);
-
-  // TODO: skapa `users` genom att bara map'a `members` till rätt form. behöver nog ingen useeffect till just det.
+    return data.members.map((member) => ({
+      id: member.user.id,
+      label: `@${member.user.username}`,
+      // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
+      href: `/user/${member.user.id}`,
+    }));
+  }, [data, fetching]);
 
   useEffect(() => {
     if (!searchString) return;
 
     // TODO: only search if there's at least 2 characters
+    // TODO: debounce a bit
     searchMembers();
-
-    setTimeout(() => {
-      console.log("setting users");
-      setUsers([
-        // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
-        { id: "joe", label: "@Joe", href: "/user/1234" },
-        { id: "sue", label: "@Sue", href: "/user/1235" },
-        { id: "pat", label: "@Pat", href: "/user/1236" },
-        { id: "tom", label: "@Tom", href: "/user/1237" },
-        { id: "jim", label: "@Jim", href: "/user/1238" },
-      ]);
-    }, 5000);
-  }, [setUsers, searchString]);
+  }, [searchString, searchMembers]);
 
   return (
     <MentionAtomPopupComponent
