@@ -60,6 +60,7 @@ import {
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
 import styled from "styled-components";
+import { useQuery, gql } from "urql";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
@@ -105,10 +106,36 @@ const EditorCss = styled.div`
   }
 `;
 
-function MentionComponent() {
+const SEARCH_MENTION_MEMBERS_QUERY = gql`
+  query SearchMentionMembers($collectionId: ID!, $usernameStartsWith: String!) {
+    members(
+      collectionId: $collectionId
+      isApproved: true
+      usernameStartsWith: $usernameStartsWith
+    ) {
+      id
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
+
+function MentionComponent({ collectionId }) {
   const [users, setUsers] = useState<MentionAtomNodeAttributes[]>([]);
-  const [loading, setLoading] = useState(true);
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
+
+  const searchString = mentionState?.query.full.toLowerCase() ?? "";
+
+  const [{ fetching, data }, searchMembers] = useQuery({
+    query: SEARCH_MENTION_MEMBERS_QUERY,
+    variables: {
+      collectionId,
+      usernameStartsWith: searchString,
+    },
+    pause: true,
+  });
 
   const items = useMemo(() => {
     if (!mentionState) {
@@ -121,13 +148,21 @@ function MentionComponent() {
       return [];
     }
 
-    const query = mentionState.query.full.toLowerCase() ?? "";
     return allItems
-      .filter((item) => item.label.toLowerCase().includes(query))
+      .filter((item) => item.label.toLowerCase().includes(searchString))
       .sort();
   }, [mentionState, users]);
 
+  console.log("members results", data?.members);
+
+  // TODO: skapa `users` genom att bara map'a `members` till rätt form. behöver nog ingen useeffect till just det.
+
   useEffect(() => {
+    if (!searchString) return;
+
+    // TODO: only search if there's at least 2 characters
+    searchMembers();
+
     setTimeout(() => {
       console.log("setting users");
       setUsers([
@@ -138,16 +173,15 @@ function MentionComponent() {
         { id: "tom", label: "@Tom", href: "/user/1237" },
         { id: "jim", label: "@Jim", href: "/user/1238" },
       ]);
-      setLoading(false);
     }, 5000);
-  }, [setUsers, setLoading]);
+  }, [setUsers, searchString]);
 
   return (
     <MentionAtomPopupComponent
       onChange={setMentionState}
       items={items}
       ZeroItemsComponent={() =>
-        loading ? (
+        fetching ? (
           <HappySpinner className="m-3" />
         ) : (
           <div className="text-gray-700">No user found</div>
@@ -545,7 +579,9 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
-            {enableMentions && <MentionComponent />}
+            {enableMentions && (
+              <MentionComponent collectionId={mentionsCollId} />
+            )}
           </Remirror>
         </EditorCss>
       </ThemeProvider>

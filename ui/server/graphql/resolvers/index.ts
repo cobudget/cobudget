@@ -367,12 +367,16 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved }, { user }) => {
+      async (parent, { collectionId, isApproved, usernameStartsWith }) => {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
             ...(typeof isApproved === "boolean" && { isApproved }),
+            ...(usernameStartsWith && {
+              user: { username: { startsWith: usernameStartsWith } },
+            }),
           },
+          ...(usernameStartsWith && { include: { user: true } }),
         });
       }
     ),
