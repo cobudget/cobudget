@@ -126,6 +126,7 @@ function MentionComponent({ collectionId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
 
   const searchString = mentionState?.query.full.toLowerCase() ?? "";
+  const tooShortSearch = !searchString || searchString.length < 2;
 
   const [{ fetching, data }, searchMembers] = useQuery({
     query: SEARCH_MENTION_MEMBERS_QUERY,
@@ -137,7 +138,7 @@ function MentionComponent({ collectionId }) {
   });
 
   const items = useMemo(() => {
-    if (fetching || !data) {
+    if (fetching || !data || tooShortSearch) {
       return [];
     }
 
@@ -147,15 +148,14 @@ function MentionComponent({ collectionId }) {
       // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
       href: `/user/${member.user.id}`,
     }));
-  }, [data, fetching]);
+  }, [data, fetching, tooShortSearch]);
 
   useEffect(() => {
-    if (!searchString) return;
+    if (tooShortSearch) return;
 
-    // TODO: only search if there's at least 2 characters
     // TODO: debounce a bit
     searchMembers();
-  }, [searchString, searchMembers]);
+  }, [tooShortSearch, searchMembers]);
 
   return (
     <MentionAtomPopupComponent
@@ -164,8 +164,10 @@ function MentionComponent({ collectionId }) {
       ZeroItemsComponent={() =>
         fetching ? (
           <HappySpinner className="m-3" />
+        ) : tooShortSearch ? (
+          <div className="text-gray-700 m-3">Type to search for a user</div>
         ) : (
-          <div className="text-gray-700">No user found</div>
+          <div className="text-gray-700 m-3">No user found</div>
         )
       }
     />
