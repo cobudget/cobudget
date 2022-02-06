@@ -137,6 +137,10 @@ function MentionComponent({ collectionId }) {
     pause: true,
   });
 
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(searchMembers, 300, { leading: true });
+  }, [searchMembers]);
+
   const items = useMemo(() => {
     if (fetching || !data || tooShortSearch) {
       return [];
@@ -153,9 +157,8 @@ function MentionComponent({ collectionId }) {
   useEffect(() => {
     if (tooShortSearch) return;
 
-    // TODO: debounce a bit
-    searchMembers();
-  }, [tooShortSearch, searchMembers]);
+    debouncedSearchMembers();
+  }, [tooShortSearch, debouncedSearchMembers]);
 
   return (
     <MentionAtomPopupComponent
