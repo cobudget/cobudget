@@ -146,12 +146,15 @@ function MentionComponent({ collectionId }) {
       return [];
     }
 
-    return data.members.map((member) => ({
-      id: member.user.id,
-      label: `@${member.user.username}`,
+    return data.members.map((member) => {
       // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
-      href: `/user/${member.user.id}`,
-    }));
+      const userLink = `/user/${member.user.id}`;
+      return {
+        id: userLink,
+        label: `@${member.user.username}`,
+        href: userLink,
+      };
+    });
   }, [data, fetching, tooShortSearch]);
 
   useEffect(() => {
@@ -254,8 +257,6 @@ const Wysiwyg = ({
   enableMentions = false,
   mentionsCollId = null,
 }) => {
-  console.log("mentionscollid", mentionsCollId);
-
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
@@ -270,21 +271,17 @@ const Wysiwyg = ({
               nodeOverride: {
                 parseDOM: [
                   {
+                    // TODO: does this include `a` tags without hrefs? we want to avoid that
                     tag: `a[href^="/user/"]`,
                     getAttrs: (node: string | Node) => {
                       if (!isElementDomNode(node)) {
                         return false;
                       }
 
-                      console.log("nodeOverride parseDOM getAttrs", node);
-
-                      const id = "id";
-                      const name = "name";
                       const href = node.getAttribute("href");
                       const label = node.textContent;
                       return {
-                        id,
-                        name,
+                        id: href,
                         label,
                         href,
                       };
@@ -293,20 +290,8 @@ const Wysiwyg = ({
                 ],
               },
               extraAttributes: {
-                id: {
-                  default: "1",
-                  parseDOM: (dom) => {
-                    return dom.getAttribute("href");
-                  },
-                  toDOM: (attrs) => {
-                    return ["data-id", "asdf"];
-                  },
-                },
-                userId: {
-                  default: 0,
-                },
                 href: {
-                  default: "potato",
+                  default: "",
                 },
               },
               matchers: [{ name: "at", char: "@", appendText: " " }],
@@ -352,7 +337,7 @@ const Wysiwyg = ({
     stringHandler: "markdown",
   });
 
-  // function mostly copied from this link because that one is private
+  // function mostly copied from this link (MIT) because that one is private
   // https://github.com/remirror/remirror/blob/3d62a9b937e48169fbe8c13871f882bfac74832f/packages/remirror__extension-image/src/image-extension.ts#L205-L223
   const fileUploadFileHandler = useCallback(
     (files: File[]) => {
