@@ -245,8 +245,7 @@ class MyLinkExtension extends LinkExtension {
     const markSpec = super.createMarkSpec(extra, override);
 
     // we want to select links except for when they're links to a user page (i.e. when it's a mention)
-    // TODO: does this include `a` tags without hrefs? we want to avoid that
-    markSpec.parseDOM[0].tag = `a:not([href^="/user/"])`;
+    markSpec.parseDOM[0].tag = `a[href]:not([href^="/user/"])`;
 
     return markSpec;
   }
@@ -277,8 +276,7 @@ const Wysiwyg = ({
               nodeOverride: {
                 parseDOM: [
                   {
-                    // TODO: does this include `a` tags without hrefs? we want to avoid that
-                    tag: `a[href^="/user/"]`,
+                    tag: `a[href][href^="/user/"]`,
                     getAttrs: (node: string | Node) => {
                       if (!isElementDomNode(node)) {
                         return false;
