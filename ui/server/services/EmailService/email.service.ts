@@ -3,6 +3,8 @@ import escapeImport from "validator/lib/escape";
 import { appLink } from "utils/internalLinks";
 import { uniqBy } from "lodash";
 import { unified } from "unified";
+import type { Plugin as UnifiedPlugin } from "unified";
+import { visit } from "unist-util-visit";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -177,14 +179,62 @@ export default {
     currentUser,
     comment,
   }) => {
+    const mentionNodes = [];
+
+    const gatherMentions: UnifiedPlugin = () => {
+      return (tree) => {
+        visit(tree, (node) => {
+          if (node.type === "link") {
+            mentionNodes.push(node);
+          }
+        });
+      };
+    };
+
+    const parser = unified()
+      .use(remarkParse)
+      .use(remarkGfm)
+      .use(gatherMentions);
+
+    await parser.run(parser.parse(comment.content));
+
+    const userLinkStart = appLink(`/user/`);
+
+    const mentionedUserIds = mentionNodes
+      .map((link): string => link.url)
+      .filter(Boolean)
+      .filter((url) => url.startsWith(userLinkStart))
+      .map((link) => link.split(userLinkStart)[1]);
+
+    const mentionedUsers = await prisma.user.findMany({
+      where: {
+        id: { in: mentionedUserIds },
+      },
+    });
+
+    const mentionEmails: SendEmailInput[] = mentionedUsers
+      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
+      .map((mentionedUser) => ({
+        to: mentionedUser.email,
+        // TODO: better copy
+        subject: "Woa you're getting mentioned",
+        html: `This is an email telling you ${escape(
+          mentionedUser.name
+        )} about you getting mentioned! Woa
+        <br/><br/>
+        ${footer}
+        `,
+      }));
+
+    await sendEmails(mentionEmails);
+
+    // TODO: in the later batches, make sure not to send emails to the people who already got mailed about the mention
     const cocreators = await prisma.collectionMember.findMany({
       where: { buckets: { some: { id: dream.id } } },
       include: { user: true },
     });
 
-    const bucketLink = appLink(
-      `/${currentOrg?.slug ?? "c"}/${event.slug}/${dream.id}`
-    );
+    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
     const cocreatorEmails: SendEmailInput[] = cocreators
       .filter(
