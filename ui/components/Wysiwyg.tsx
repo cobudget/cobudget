@@ -104,6 +104,12 @@ const EditorCss = styled.div`
   .ProseMirror {
     min-height: ${({ rows }) => `${rows * 2.5}em !important`};
   }
+
+  /* to avoid the mention popup ending up under other elements
+     https://github.com/remirror/remirror/issues/1511 */
+  .remirror-floating-popover {
+    z-index: 10;
+  }
 `;
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
@@ -282,6 +288,7 @@ const Wysiwyg = ({
                       const label = node.textContent;
                       return {
                         id: href,
+                        name: "at",
                         label,
                         href,
                       };
@@ -290,9 +297,8 @@ const Wysiwyg = ({
                 ],
               },
               extraAttributes: {
-                href: {
-                  default: "",
-                },
+                name: { default: "at" },
+                href: { default: "" },
               },
               matchers: [{ name: "at", char: "@", appendText: " " }],
             }),
