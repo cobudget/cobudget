@@ -62,8 +62,11 @@ import { debounce } from "lodash";
 import styled from "styled-components";
 import { useQuery, gql } from "urql";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
+import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
+
+const USER_LINK_START = appLink("/user/");
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -147,20 +150,21 @@ function MentionComponent({ collectionId }) {
     return debounce(searchMembers, 300, { leading: true });
   }, [searchMembers]);
 
-  const items = useMemo(() => {
+  const items: MentionAtomNodeAttributes[] = useMemo(() => {
     if (fetching || !data || tooShortSearch) {
       return [];
     }
 
-    return data.members.map((member) => {
-      // TODO: add domain to href (should vary on dev/prod, refactor appLink from email service) so it also works in emails and discourse
-      const userLink = `/user/${member.user.id}`;
-      return {
-        id: userLink,
-        label: `@${member.user.username}`,
-        href: userLink,
-      };
-    });
+    return data.members.map(
+      (member): MentionAtomNodeAttributes => {
+        const userLink = appLink(`/user/${member.user.id}`);
+        return {
+          id: userLink,
+          label: `@${member.user.username}`,
+          href: userLink,
+        };
+      }
+    );
   }, [data, fetching, tooShortSearch]);
 
   useEffect(() => {
@@ -245,7 +249,7 @@ class MyLinkExtension extends LinkExtension {
     const markSpec = super.createMarkSpec(extra, override);
 
     // we want to select links except for when they're links to a user page (i.e. when it's a mention)
-    markSpec.parseDOM[0].tag = `a[href]:not([href^="/user/"])`;
+    markSpec.parseDOM[0].tag = `a[href]:not([href^="${USER_LINK_START}"])`;
 
     return markSpec;
   }
@@ -276,7 +280,7 @@ const Wysiwyg = ({
               nodeOverride: {
                 parseDOM: [
                   {
-                    tag: `a[href][href^="/user/"]`,
+                    tag: `a[href][href^="${USER_LINK_START}"]`,
                     getAttrs: (node: string | Node) => {
                       if (!isElementDomNode(node)) {
                         return false;

@@ -1,6 +1,6 @@
 import { SendEmailInput, sendEmail, sendEmails } from "server/send-email";
-import isURL from "validator/lib/isURL";
 import escapeImport from "validator/lib/escape";
+import { appLink } from "utils/internalLinks";
 import { uniqBy } from "lodash";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
@@ -18,15 +18,6 @@ import {
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
-
-/** path including leading slash */
-function appLink(path: string): string {
-  const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
-  const url = `${protocol}://${process.env.DEPLOY_URL}${path}`;
-  if (!isURL(url, { host_whitelist: [process.env.DEPLOY_URL.split(":")[0]] }))
-    throw new Error(`Invalid link in mail: ${url}`);
-  return url;
-}
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
