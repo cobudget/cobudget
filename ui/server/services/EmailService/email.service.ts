@@ -212,15 +212,18 @@ export default {
       "id"
     );
 
+    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
+
     const mentionEmails: SendEmailInput[] = mentionedUsers
       .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
       .map((mentionedUser) => ({
         to: mentionedUser.email,
-        // TODO: better copy
-        subject: "Woa you're getting mentioned",
-        html: `This is an email telling you ${escape(
-          mentionedUser.name
-        )} about you getting mentioned! Woa
+        subject: `You were mentioned in a comment in the bucket ${dream.title}`,
+        html: `Someone has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
+          dream.title
+        )}</a>:
+        <br/><br/>
+        "${escape(comment.content)}"
         <br/><br/>
         ${footer}
         `,
@@ -232,8 +235,6 @@ export default {
       where: { buckets: { some: { id: dream.id } } },
       include: { user: true },
     });
-
-    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
     const cocreatorEmails: SendEmailInput[] = cocreators
       .filter(
