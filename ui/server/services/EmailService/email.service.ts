@@ -20,6 +20,7 @@ import {
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
+import { namedColorToHsl, tailwindHsl } from "utils/colors";
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
@@ -36,6 +37,10 @@ const mdToHtmlConverter = unified()
 
 async function mdToHtml(md: string) {
   return String(await mdToHtmlConverter.process(md));
+}
+
+function quotedSection(html: string) {
+  return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
@@ -87,7 +92,7 @@ export default {
       ${
         htmlPurpose
           ? `<br/><br/>
-            ${htmlPurpose}`
+            ${quotedSection(htmlPurpose)}`
           : ""
       }
       <br/><br/>
@@ -217,18 +222,20 @@ export default {
 
     const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
-    const commentAsHtml = await mdToHtml(comment.content);
+    const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
     const mentionEmails: SendEmailInput[] = mentionedUsers
       .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
       .map((mentionedUser) => ({
         to: mentionedUser.email,
         subject: `You were mentioned in a comment in the bucket ${dream.title}`,
-        html: `Someone has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
+        html: `${escape(
+          currentUser.name
+        )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
           dream.title
         )}</a>:
         <br/><br/>
-        "${commentAsHtml}"
+        ${commentAsHtml}
         <br/><br/>
         ${footer}
         `,
@@ -260,7 +267,7 @@ export default {
           <br/><br/>
           Your bucket “${escape(dream.title)}” received a new comment.
           <br/><br/>
-          "${commentAsHtml}"
+          ${commentAsHtml}
           <br/><br/>
           <a href="${bucketLink}">Have a look</a>
           <br/><br/>
@@ -310,7 +317,7 @@ export default {
             dream.title
           )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
-          "${commentAsHtml}"
+          ${commentAsHtml}
           <br/><br/>
           ${footer}
         `,
