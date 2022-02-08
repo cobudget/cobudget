@@ -3,7 +3,7 @@ import Link from "next/link";
 import remarkGfm from "remark-gfm";
 import { appLink } from "utils/internalLinks";
 
-const Markdown = ({ source, className = "" }) => {
+const Markdown = ({ source, enableMentions = false, className = "" }) => {
   return (
     <ReactMarkdown
       source={source}
@@ -11,8 +11,7 @@ const Markdown = ({ source, className = "" }) => {
       plugins={[remarkGfm as any]}
       renderers={{
         link: (props: { href: string; children: any }) => {
-          // TODO: only render mentions if it's a comment
-          if (props.href.startsWith(appLink("/user/"))) {
+          if (props.href.startsWith(appLink("/user/")) && enableMentions) {
             return (
               <Link href={props.href}>
                 <a className="markdownMention">{props.children}</a>
