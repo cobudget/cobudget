@@ -179,33 +179,31 @@ export default {
     currentUser,
     comment,
   }) => {
-    const mentionNodes = [];
+    const linkNodes = [];
 
-    const gatherMentions: UnifiedPlugin = () => {
+    const gatherLinks: UnifiedPlugin = () => {
       return (tree) => {
         visit(tree, (node) => {
           if (node.type === "link") {
-            mentionNodes.push(node);
+            linkNodes.push(node);
           }
         });
       };
     };
 
-    const parser = unified()
-      .use(remarkParse)
-      .use(remarkGfm)
-      .use(gatherMentions);
+    const parser = unified().use(remarkParse).use(remarkGfm).use(gatherLinks);
 
     await parser.run(parser.parse(comment.content));
 
     const userLinkStart = appLink(`/user/`);
 
-    const mentionedUserIds = mentionNodes
+    const mentionedUserIds = linkNodes
       .map((link): string => link.url)
       .filter(Boolean)
       .filter((url) => url.startsWith(userLinkStart))
       .map((link) => link.split(userLinkStart)[1]);
 
+    // TODO: filter so we don't have duplicates
     const mentionedUsers = await prisma.user.findMany({
       where: {
         id: { in: mentionedUserIds },
@@ -228,7 +226,6 @@ export default {
 
     await sendEmails(mentionEmails);
 
-    // TODO: in the later batches, make sure not to send emails to the people who already got mailed about the mention
     const cocreators = await prisma.collectionMember.findMany({
       where: { buckets: { some: { id: dream.id } } },
       include: { user: true },
@@ -239,6 +236,13 @@ export default {
     const cocreatorEmails: SendEmailInput[] = cocreators
       .filter(
         (collectionMember) => collectionMember.id !== currentCollMember.id
+      )
+      // don't mail people here who were just mailed about being mentioned
+      .filter(
+        (cocreatorCollMember) =>
+          !mentionedUsers
+            .map((mentionedUser) => mentionedUser.id)
+            .includes(cocreatorCollMember.user.id)
       )
       .map(
         (collectionMember): SendEmailInput => ({
@@ -274,11 +278,17 @@ export default {
         comments
           .map((comment) => comment.collMember.user)
           .filter((user) => currentUser.id !== user.id)
-          // don't email the cocreators, we just emailed them above
+          // don't email the mentions nor cocreators, we just emailed them above
           .filter(
             (user) =>
               !cocreators
                 .map((cocreator) => cocreator.user.id)
+                .includes(user.id)
+          )
+          .filter(
+            (user) =>
+              !mentionedUsers
+                .map((mentionedUser) => mentionedUser.id)
                 .includes(user.id)
           ),
         "id"
