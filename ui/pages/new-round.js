@@ -60,19 +60,8 @@ export default function NewCollectionPage({ currentOrg }) {
         <h1 className="text-3xl font-semibold">New Round</h1>
       </PageHero> */}
       <div className="page">
-        <div className="mx-auto max-w-md space-y-6">
-          <Link href="/new-group">
-            <a className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
-              <span className="text-black">Create a Group</span>{" "}
-              <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
-                PRO
-              </span>{" "}
-              if you would like to manage several Rounds with the same group of
-              people.
-            </a>
-          </Link>
-
-          <div className="bg-white rounded-lg shadow-xl p-6">
+        <div className="mx-auto max-w-md space-y-8 mt-10">
+          <div className="bg-white rounded-lg shadow-lg p-6">
             <h1 className="text-2xl mb-2 font-semibold">New Round</h1>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <TextField
@@ -145,6 +134,16 @@ export default function NewCollectionPage({ currentOrg }) {
               </Button>
             </form>
           </div>
+          <Link href="/new-group">
+            <a className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
+              <span className="text-black">Create a Group</span>{" "}
+              <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
+                PRO
+              </span>{" "}
+              if you would like to manage several Rounds with the same group of
+              people.
+            </a>
+          </Link>
         </div>
       </div>
     </>
