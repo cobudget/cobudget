@@ -541,7 +541,6 @@ const Wysiwyg = ({
             autoFocus={autoFocus}
             initialContent={defaultValue}
             onChange={debounce((param) => {
-              console.log("md", param.helpers.getMarkdown());
               onChange?.({
                 target: {
                   value: param.helpers.getMarkdown(),
