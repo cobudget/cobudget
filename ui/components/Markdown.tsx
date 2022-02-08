@@ -7,7 +7,7 @@ const Markdown = ({ source, className = "" }) => {
     <ReactMarkdown
       source={source}
       className={"markdown " + className}
-      plugins={[remarkGfm]}
+      plugins={[remarkGfm as any]}
       renderers={{
         link: (props) => {
           if (props.href.includes("http"))
