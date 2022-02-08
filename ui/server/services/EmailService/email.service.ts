@@ -27,6 +27,17 @@ function escape(input: string): string | undefined | null {
   return escapeImport(input);
 }
 
+const mdToHtmlConverter = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeSanitize) // sanitization done here
+  .use(rehypeStringify);
+
+async function mdToHtml(md: string) {
+  return String(await mdToHtmlConverter.process(md));
+}
+
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
 
 export default {
@@ -62,15 +73,7 @@ export default {
 
     const mdPurpose = currentOrg?.info ?? collection?.info ?? "";
 
-    const htmlPurpose = String(
-      await unified()
-        .use(remarkParse)
-        .use(remarkGfm)
-        .use(remarkRehype)
-        .use(rehypeSanitize) // sanitization done here
-        .use(rehypeStringify)
-        .process(mdPurpose)
-    );
+    const htmlPurpose = await mdToHtml(mdPurpose);
 
     await sendEmail({
       to: email,
@@ -214,6 +217,8 @@ export default {
 
     const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
+    const commentAsHtml = await mdToHtml(comment.content);
+
     const mentionEmails: SendEmailInput[] = mentionedUsers
       .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
       .map((mentionedUser) => ({
@@ -223,7 +228,7 @@ export default {
           dream.title
         )}</a>:
         <br/><br/>
-        "${escape(comment.content)}"
+        "${commentAsHtml}"
         <br/><br/>
         ${footer}
         `,
@@ -255,7 +260,7 @@ export default {
           <br/><br/>
           Your bucket “${escape(dream.title)}” received a new comment.
           <br/><br/>
-          "${escape(comment.content)}"
+          "${commentAsHtml}"
           <br/><br/>
           <a href="${bucketLink}">Have a look</a>
           <br/><br/>
@@ -305,7 +310,7 @@ export default {
             dream.title
           )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
-          "${escape(comment.content)}"
+          "${commentAsHtml}"
           <br/><br/>
           ${footer}
         `,
