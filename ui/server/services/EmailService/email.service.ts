@@ -203,12 +203,14 @@ export default {
       .filter((url) => url.startsWith(userLinkStart))
       .map((link) => link.split(userLinkStart)[1]);
 
-    // TODO: filter so we don't have duplicates
-    const mentionedUsers = await prisma.user.findMany({
-      where: {
-        id: { in: mentionedUserIds },
-      },
-    });
+    const mentionedUsers = uniqBy(
+      await prisma.user.findMany({
+        where: {
+          id: { in: mentionedUserIds },
+        },
+      }),
+      "id"
+    );
 
     const mentionEmails: SendEmailInput[] = mentionedUsers
       .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
