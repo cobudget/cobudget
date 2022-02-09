@@ -1,5 +1,5 @@
 export interface CollectionTransaction {
-    id: number,
+    id: string,
     amount: number,
     amountBefore: number,
     collectionMemberId: string,
