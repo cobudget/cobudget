@@ -8,30 +8,28 @@ function BillBreakdown({
   totalAmount: string,
 }) {
   return (
-    <div className="border-f border-2 text-sm font-semibold">
+    <div className="shadow overflow-hidden">
       {
         parts.map(part => (
-          <div className="border-b-2 border-f grid grid-cols-funding">
-            <p className="border-r-2 border-f py-2 px-4">{part.title}</p>
-            <p className="text-right py-2 px-2">{part.total}</p>
+          <>
+            <div className="p-4 grid grid-cols-funding bg-gray-100 even:bg-white font-medium">
+              <p>{part.title}</p>
+              <p>{part.total}</p>
+            </div>
             {
               part.breakdown.map(row => (
-                <>
-                  <p className="border-r-2 border-f py-1 px-12 text-gray-400">
-                    {row.title}
-                  </p>
-                  <p className="text-right py-1 px-2 text-gray-400">
-                    {row.amount}
-                  </p>
-                </>
+                <div className="p-4 grid grid-cols-funding bg-gray-100 even:bg-white">
+                  <p>{row.title}</p>
+                  <p>{row.amount}</p>
+                </div>
               ))
             }
-          </div>
+          </>
         ))
       }
-      <div className="bg-slate-400 grid grid-cols-funding">
-        <p className="border-r-2 border-f p-4">{totalTitle}</p>
-        <p className="text-right border-f py-4 px-2">{totalAmount}</p>
+      <div className="p-4 grid grid-cols-funding bg-gray-200 font-medium">
+        <p>{totalTitle}</p>
+        <p>{totalAmount}</p>
       </div>
     </div>
   );
