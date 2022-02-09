@@ -20,7 +20,7 @@ import {
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
-import { namedColorToHsl, tailwindHsl } from "utils/colors";
+import { tailwindHsl } from "utils/colors";
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
