@@ -165,14 +165,14 @@ export default function AboutPage({ router, currentOrg }) {
               ]
             },
             {
-              title: "Unallocated Funds",
+              title: "Unallocated funds",
               total: `${thousandSeparator(
                 collection.totalInMembersBalances / 100
               )} ${collection.currency}`,
               breakdown: []
             }
           ]}
-          totalTitle={"Total Funds Available"}
+          totalTitle={"Total funds available"}
           totalAmount={`${thousandSeparator(
             collection.totalAllocations / 100
           )} ${collection.currency}`}

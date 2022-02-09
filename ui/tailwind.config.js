@@ -37,12 +37,6 @@ module.exports = {
         sidebar: "minmax(0,1fr) 350px",
         funding: "auto minmax(100px, max-content)"
       },
-      backgroundColor: {
-        "slate-400": "rgb(223, 230, 238)",
-      },
-      paddingBottom: {
-        1: "25px"
-      },
       borderColor: {
         "f": "rgb(172, 182, 192)",
       },
