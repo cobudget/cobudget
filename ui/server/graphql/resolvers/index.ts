@@ -1516,12 +1516,12 @@ const resolvers = {
             where: { email },
             create: {
               email,
-              collMemberships: { create: { isApproved: true, collectionId } },
+              collMemberships: { create: { isApproved: true, collectionId, hasJoined: false, } },
             },
             update: {
               collMemberships: {
                 connectOrCreate: {
-                  create: { isApproved: true, collectionId },
+                  create: { isApproved: true, collectionId, hasJoined: false, },
                   where: {
                     userId_collectionId: {
                       userId: user?.id ?? "undefined",
