@@ -1,4 +1,5 @@
 import prisma from "../../prisma";
+import dayjs from "dayjs";
 
 export async function getCurrentCollMember({ collMemberId }) {}
 
@@ -209,4 +210,47 @@ export async function bucketMinGoal(bucket) {
     },
   });
   return min > 0 ? min : 0;
+}
+
+export function isGrantingOpen(collection) {
+  const now = dayjs();
+  const grantingHasOpened = collection.grantingOpens
+    ? dayjs(collection.grantingOpens).isBefore(now)
+    : true;
+  const grantingHasClosed = collection.grantingCloses
+    ? dayjs(collection.grantingCloses).isBefore(now)
+    : false;
+  return grantingHasOpened && !grantingHasClosed;
+}
+
+export function statusTypeToQuery(statusType) {
+  switch (statusType) {
+    case "PENDING_APPROVAL":
+      return {
+        approvedAt: null,
+      };
+    case "OPEN_FOR_FUNDING":
+      return {
+        approvedAt: { not: null },
+        fundedAt: null,
+        completedAt: null,
+        canceledAt: null,
+      };
+    case "FUNDED":
+      return {
+        fundedAt: { not: null },
+        canceledAt: null,
+        completedAt: null,
+      };
+    case "CANCELED":
+      return {
+        canceledAt: { not: null },
+      };
+    case "COMPLETED":
+      return {
+        completedAt: { not: null },
+      };
+    default:
+      return false;
+  }
 }

@@ -1,15 +1,22 @@
 import React from "react";
 import { stringToColor } from "../utils/stringToHslColor";
 
-export default React.forwardRef(
+const Avatar = React.forwardRef(
   (
     {
       user,
       size,
       highlighted,
       style,
+      className,
       ...props
-    }: { user: any; size?: string; highlighted?: boolean; style?: object },
+    }: {
+      user: any;
+      size?: string;
+      highlighted?: boolean;
+      style?: object;
+      className?: string;
+    },
     ref: any
   ) => {
     // const { user } = props;
@@ -22,7 +29,7 @@ export default React.forwardRef(
           user?.username ? user.username : "default"
         )}-dark rounded-full text-white flex items-center justify-center select-none font-medium ${
           highlighted ? "ring-4 ring-yellow-500" : ""
-        }`}
+        } ${className}`}
         ref={ref}
         //src={user?.avatar && user.avatar}
         {...props}
@@ -37,3 +44,5 @@ export default React.forwardRef(
     );
   }
 );
+
+export default Avatar;

@@ -59,6 +59,20 @@ h5 {
   @apply text-black underline;
 }
 
+/* based on (MIT)
+ https://github.com/remirror/remirror/blob/82068597c35dfff9e81821a0f0fbac17932485d2/packages/remirror__theme/src/extension-mention-atom-theme.ts#L5-L14 */
+/* applied dynamically in Markdown.tsx */
+.markdownMention {
+  background: #e9ecef;
+  font-weight: bold;
+  font-size: 0.9em;
+  font-style: normal;
+  border-radius: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  white-space: nowrap;
+  /*color: ${getThemeVar('color', 'primary')};*/
+}
+
 .markdown li {
   @apply list-inside;
 }

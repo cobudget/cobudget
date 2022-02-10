@@ -50,6 +50,8 @@ const EditComment = ({ comment, handleDone }) => {
         autoFocus
         color={collection.color}
         wysiwyg
+        enableMentions
+        mentionsCollId={collection.id}
       />
       <div className="flex justify-end">
         <Button

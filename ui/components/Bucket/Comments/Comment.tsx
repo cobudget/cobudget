@@ -72,7 +72,7 @@ const Comment = ({ comment, showBorderBottom }) => {
                 dangerouslySetInnerHTML={{ __html: comment.htmlContent }}
               />
             ) : (
-              <Markdown source={comment.content} />
+              <Markdown source={comment.content} enableMentions />
             )}
 
             {canEdit && (

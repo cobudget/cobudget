@@ -24,6 +24,8 @@ import {
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
   isCollAdmin,
+  isGrantingOpen,
+  statusTypeToQuery,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
@@ -186,6 +188,13 @@ const resolvers = {
         ? await prisma.user.findUnique({ where: { id: user.id } })
         : null;
     },
+    user: async (parent, { userId }) => {
+      // we let the resolvers grab any extra requested fields, so we don't accidentally leak e.g. emails
+      return prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true },
+      });
+    },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug || orgSlug === "c") return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
@@ -288,7 +297,14 @@ const resolvers = {
     },
     bucketsPage: async (
       parent,
-      { collectionId, textSearchTerm, tag: tagValue, offset = 0, limit },
+      {
+        collectionId,
+        textSearchTerm,
+        tag: tagValue,
+        offset = 0,
+        limit,
+        status,
+      },
       { user }
     ) => {
       const currentMember = await prisma.collectionMember.findUnique({
@@ -303,28 +319,31 @@ const resolvers = {
       const isAdminOrGuide =
         currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-      const query = {
-        collectionId,
-        deleted: { not: true },
-        ...(textSearchTerm && { title: { search: textSearchTerm } }),
-        ...(tagValue && {
-          tags: { some: { value: tagValue } },
-        }),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
-      };
+      const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
+
+      const buckets = await prisma.bucket.findMany({
+        where: {
+          collectionId,
+          deleted: { not: true },
+          OR: statusFilter,
+          ...(textSearchTerm && { title: { search: textSearchTerm } }),
+          ...(tagValue && {
+            tags: { some: { value: tagValue } },
+          }),
+          ...(!isAdminOrGuide &&
+            (currentMember
+              ? {
+                  OR: [
+                    { publishedAt: { not: null } },
+                    { cocreators: { some: { id: currentMember.id } } },
+                  ],
+                }
+              : { publishedAt: { not: null } })),
+        },
+      });
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
-      const buckets = await prisma.bucket.findMany({
-        where: query,
-      });
+
       const shuffledBuckets = SeededShuffle.shuffle(
         buckets,
         user ? user.id + todaySeed : todaySeed
@@ -352,12 +371,16 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved }, { user }) => {
+      async (parent, { collectionId, isApproved, usernameStartsWith }) => {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
             ...(typeof isApproved === "boolean" && { isApproved }),
+            ...(usernameStartsWith && {
+              user: { username: { startsWith: usernameStartsWith } },
+            }),
           },
+          ...(usernameStartsWith && { include: { user: true } }),
         });
       }
     ),
@@ -1534,7 +1557,7 @@ const resolvers = {
             include: { collMemberships: { where: { collectionId } } },
           });
 
-          emailService.inviteMember({ email, currentUser, collection });
+          await emailService.inviteMember({ email, currentUser, collection });
 
           invitedCollectionMembers.push(updated.collMemberships?.[0]);
         }
@@ -1579,7 +1602,7 @@ const resolvers = {
           const orgMembership = user.orgMemberships?.[0];
           const currentOrg = orgMembership.organization;
 
-          emailService.inviteMember({ email, currentUser, currentOrg });
+          await emailService.inviteMember({ email, currentUser, currentOrg });
 
           newOrgMembers.push(orgMembership);
         }
@@ -2211,12 +2234,29 @@ const resolvers = {
     email: (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.email;
+      if (parent.email) return parent.email;
     },
-    name: (parent, _, { user }) => {
+    name: async (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.name;
+      if (parent.name) return parent.name;
+      // we end up here when requesting your own name but it's missing on the parent
+      return (
+        await prisma.user.findUnique({
+          where: { id: parent.id },
+          select: { name: true },
+        })
+      ).name;
+    },
+    username: async (parent) => {
+      if (parent.id) {
+        return (
+          await prisma.user.findUnique({
+            where: { id: parent.id },
+            select: { username: true },
+          })
+        ).username;
+      }
     },
   },
   Organization: {
@@ -2350,15 +2390,7 @@ const resolvers = {
     customFields: async (collection) =>
       prisma.field.findMany({ where: { collectionId: collection.id } }),
     grantingIsOpen: (collection) => {
-      const now = dayjs();
-      const grantingHasOpened = collection.grantingOpens
-        ? dayjs(collection.grantingOpens).isBefore(now)
-        : true;
-      const grantingHasClosed = collection.grantingCloses
-        ? dayjs(collection.grantingCloses).isBefore(now)
-        : false;
-      const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
-      return grantingIsOpen;
+      return isGrantingOpen(collection);
     },
     grantingHasClosed: (collection) => {
       return collection.grantingCloses
@@ -2378,6 +2410,40 @@ const resolvers = {
       return prisma.organization.findUnique({
         where: { id: collection.organizationId },
       });
+    },
+    bucketStatusCount: async (collection) => {
+      return {
+        PENDING_APPROVAL: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("PENDING_APPROVAL"),
+          },
+        }),
+        OPEN_FOR_FUNDING: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("OPEN_FOR_FUNDING"),
+          },
+        }),
+        FUNDED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("FUNDED"),
+          },
+        }),
+        CANCELED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("CANCELED"),
+          },
+        }),
+        COMPLETED: await prisma.bucket.count({
+          where: {
+            collectionId: collection.id,
+            ...statusTypeToQuery("COMPLETED"),
+          },
+        }),
+      };
     },
   },
   Bucket: {
@@ -2547,6 +2613,13 @@ const resolvers = {
       );
 
       return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
+    },
+    status: (bucket, args, ctx) => {
+      if (bucket.completedAt) return "COMPLETED";
+      if (bucket.canceledAt) return "CANCELED";
+      if (bucket.fundedAt) return "FUNDED";
+      if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
+      return "PENDING_APPROVAL";
     },
   },
   Transaction: {
