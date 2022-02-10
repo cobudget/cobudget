@@ -23,6 +23,7 @@ import {
   getOrgMember,
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
+  isCollAdmin,
   isGrantingOpen,
   statusTypeToQuery,
 } from "./helpers";
@@ -64,6 +65,9 @@ const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
     throw new Error("Collection member does not exist");
   } else if (!collectionMember.isApproved) {
     throw new Error("Collection member is not approved");
+  }
+  else if (!collectionMember.hasJoined) {
+    throw new Error("Collection member has not accepted the invitation");
   }
 
   return skip;
@@ -387,11 +391,16 @@ const resolvers = {
         { collectionId, isApproved, offset = 0, limit = 10 },
         { user }
       ) => {
+        const isAdmin = await isCollAdmin({
+          userId: user.id,
+          collectionId
+        });
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
+              ...(!isAdmin && { hasJoined: true }),
             },
             take: limit + 1,
             skip: offset,
@@ -1530,12 +1539,12 @@ const resolvers = {
             where: { email },
             create: {
               email,
-              collMemberships: { create: { isApproved: true, collectionId } },
+              collMemberships: { create: { isApproved: true, collectionId, hasJoined: false, } },
             },
             update: {
               collMemberships: {
                 connectOrCreate: {
-                  create: { isApproved: true, collectionId },
+                  create: { isApproved: true, collectionId, hasJoined: false, },
                   where: {
                     userId_collectionId: {
                       userId: user?.id ?? "undefined",
@@ -2002,6 +2011,30 @@ const resolvers = {
         });
       }
     ),
+    acceptInvitation: async (parent, { collectionId }, { user }) => {
+      if (!user) throw new Error("You need to be logged in.");
+      
+      const member = await getCollectionMember({
+        collectionId,
+        userId: user.id
+      });
+
+      if (!member) {
+        throw new Error("You are not a member of this collection");
+      }
+
+      if (member.hasJoined) {
+        throw new Error("Invitation not pending");
+      }
+
+      return prisma.collectionMember.update({
+        where: { id: member.id },
+        data: {
+          hasJoined: true
+        },
+      });
+
+    },
     joinCollection: async (parent, { collectionId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 

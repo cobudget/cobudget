@@ -242,7 +242,9 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
           </div>
           <div className="flex justify-end items-start">
             {collection.bucketCreationIsOpen &&
-              currentUser?.currentCollMember?.isApproved && (
+              currentUser?.currentCollMember?.isApproved && 
+              currentUser?.currentCollMember?.hasJoined &&
+              (
                 <>
                   <Button
                     size="large"
