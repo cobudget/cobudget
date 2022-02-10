@@ -80,6 +80,8 @@ function AddComment() {
               }}
               color={collection.color}
               wysiwyg
+              enableMentions
+              mentionsCollId={collection.id}
             />
           </div>
           {content.length > 0 && (

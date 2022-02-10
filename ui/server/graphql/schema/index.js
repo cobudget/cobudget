@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    user(userId: ID!): User!
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
@@ -28,7 +29,11 @@ const schema = gql`
       offset: Int
       limit: Int
     ): MembersPage
-    members(collectionId: ID!, isApproved: Boolean): [CollectionMember]
+    members(
+      collectionId: ID!
+      isApproved: Boolean
+      usernameStartsWith: String
+    ): [CollectionMember]
     categories(orgId: ID!): [Category!]
     contributionsPage(
       collectionId: ID!

@@ -23,6 +23,8 @@ const TextField = ({
   endAdornment,
   color = "blue",
   wysiwyg,
+  enableMentions = false,
+  mentionsCollId = null,
 }: {
   inputRef?: any;
   inputProps?: any;
@@ -45,6 +47,8 @@ const TextField = ({
   endAdornment?: string;
   color?: string;
   wysiwyg?: boolean;
+  enableMentions?: boolean;
+  mentionsCollId?: string;
 }) => {
   const LabelComponent = labelComponent;
   return (
@@ -64,6 +68,8 @@ const TextField = ({
             rows={multiline ? rows : 1}
             onChange={onChange ?? inputProps?.onChange}
             highlightColor={color}
+            enableMentions={enableMentions}
+            mentionsCollId={mentionsCollId}
           />
         ) : (
           <textarea
