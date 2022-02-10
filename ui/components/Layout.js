@@ -40,6 +40,8 @@ const Layout = ({
       </div>
 
       <div className="space-y-2 text-sm text-center mt-auto py-8 text-gray-500">
+        {/* NOTE TO PEOPLE WANTING TO EDIT THIS:
+            Please see our license in the file /LICENSE in this repo for details on how you're allowed to change this section */}
         <div>
           You are using <LinkOut href="https://cobudget.com/">Cobudget</LinkOut>
           . Source code available{" "}
