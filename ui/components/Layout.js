@@ -2,6 +2,14 @@ import React from "react";
 import Head from "next/head";
 import Header from "./Header";
 
+const LinkOut = ({ href, children }) => {
+  return (
+    <a className="underline" href={href} target="_blank" rel="noreferrer">
+      {children}
+    </a>
+  );
+};
+
 const Layout = ({
   children,
   currentUser,
@@ -31,13 +39,16 @@ const Layout = ({
         {children}
       </div>
 
-      <div className="space-x-6 text-sm text-center mt-auto py-8 text-gray-500">
-        <a href="/privacy-policy" target="_blank" rel="noreferrer">
-          Privacy Policy
-        </a>
-        <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
-          Terms and Conditions
-        </a>
+      <div className="space-y-2 text-sm text-center mt-auto py-8 text-gray-500">
+        <div>
+          You are using <LinkOut href="https://cobudget.com/">Cobudget</LinkOut>
+          . Source code available{" "}
+          <LinkOut href="https://github.com/cobudget/cobudget">online</LinkOut>.
+        </div>
+        <div className="space-x-6">
+          <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+          <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
+        </div>
       </div>
     </div>
   );
