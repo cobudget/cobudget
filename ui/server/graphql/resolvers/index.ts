@@ -360,12 +360,16 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved }, { user }) => {
+      async (parent, { collectionId, isApproved, usernameStartsWith }) => {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
             ...(typeof isApproved === "boolean" && { isApproved }),
+            ...(usernameStartsWith && {
+              user: { username: { startsWith: usernameStartsWith } },
+            }),
           },
+          ...(usernameStartsWith && { include: { user: true } }),
         });
       }
     ),
@@ -373,17 +377,22 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, offset = 0, limit = 10 },
+        { collectionId, isApproved, usernameStartsWith, offset = 0, limit = 10 },
         { user }
       ) => {
+
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
+              ...(usernameStartsWith && {
+                user: { username: { startsWith: usernameStartsWith } },
+              }),
             },
             take: limit + 1,
             skip: offset,
+            ...(usernameStartsWith && { include: { user: true } }),
           }
         );
 
@@ -2196,7 +2205,7 @@ const resolvers = {
       if (!user) return null;
       if (parent.id !== user.id) return null;
       return parent.name;
-    },
+    }
   },
   Organization: {
     info: (org) => {
