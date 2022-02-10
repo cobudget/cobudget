@@ -315,6 +315,7 @@ const schema = gql`
     createdAt: Date
     currentOrgMember(orgSlug: String): OrgMember
     currentCollMember(orgSlug: String, collectionSlug: String): CollectionMember
+    emailSettings: JSON
   }
 
   type OrgMember {

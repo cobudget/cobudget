@@ -2197,6 +2197,15 @@ const resolvers = {
       if (parent.id !== user.id) return null;
       return parent.name;
     },
+    emailSettings: async (parent, args, { user }) => {
+      if (user?.id !== parent.id) return null;
+
+      return prisma.emailSettings.upsert({
+        where: { userId: parent.id },
+        create: { userId: parent.id },
+        update: {},
+      });
+    },
   },
   Organization: {
     info: (org) => {
