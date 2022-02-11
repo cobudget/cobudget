@@ -180,19 +180,15 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
-  const [
-    {
-      data: { collection: { bucketStatusCount } } = {
-        collection: { bucketStatusCount: {} },
-      },
-    },
-  ] = useQuery({
+  const [{ data }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
       collectionSlug: collection?.slug,
       orgSlug: currentOrg?.slug ?? "c",
     },
   });
+
+  const bucketStatusCount = data?.collection?.bucketStatusCount ?? {};
 
   const { tag, s, f } = router.query;
 
@@ -242,9 +238,8 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
           </div>
           <div className="flex justify-end items-start">
             {collection.bucketCreationIsOpen &&
-              currentUser?.currentCollMember?.isApproved && 
-              currentUser?.currentCollMember?.hasJoined &&
-              (
+              currentUser?.currentCollMember?.isApproved &&
+              currentUser?.currentCollMember?.hasJoined && (
                 <>
                   <Button
                     size="large"
