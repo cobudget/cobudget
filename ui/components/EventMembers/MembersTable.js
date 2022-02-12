@@ -12,6 +12,8 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
+import { INVITE_COLLECTION_MEMBERS_MUTATION } from "../InviteMembersModal";
+import { useMutation } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
 import IconButton from "components/IconButton";
@@ -20,6 +22,7 @@ import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
+import toast from "react-hot-toast";
 
 const ActionsDropdown = ({
   collectionId,
@@ -28,6 +31,9 @@ const ActionsDropdown = ({
   member,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [, inviteAgain] = useMutation(INVITE_COLLECTION_MEMBERS_MUTATION);
+
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -67,6 +73,23 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
+        {
+          member.hasJoined ? null :
+          <MenuItem
+            onClick={() => {
+              inviteAgain({
+                collectionId,
+                emails: member.email
+              })
+              .then(() => {
+                toast.success("Invitation sent again")
+                handleClose();
+              })
+            }}
+          >
+            Invite Again
+          </MenuItem>
+        }
         <MenuItem
           onClick={() => {
             updateMember({
@@ -114,9 +137,13 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
       </TableCell>
       <TableCell>
         <p>{member.email}</p>
-        {!member.user.verifiedEmail && (
-          <p className="text-sm text-gray-500">(not verified)</p>
-        )}
+        {
+          !member.user.verifiedEmail ? (
+            <p className="text-sm text-gray-500">(not verified)</p>
+          ) : !member.hasJoined ? (
+            <p className="text-sm text-gray-500">(invitation pending)</p>
+          ) : null
+        }
       </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (

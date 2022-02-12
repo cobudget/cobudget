@@ -1,8 +1,10 @@
 import { SendEmailInput, sendEmail, sendEmails } from "server/send-email";
-import isURL from "validator/lib/isURL";
 import escapeImport from "validator/lib/escape";
+import { appLink } from "utils/internalLinks";
 import { uniqBy } from "lodash";
 import { unified } from "unified";
+import type { Plugin as UnifiedPlugin } from "unified";
+import { visit } from "unist-util-visit";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -18,20 +20,27 @@ import {
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
-
-/** path including leading slash */
-function appLink(path: string): string {
-  const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
-  const url = `${protocol}://${process.env.DEPLOY_URL}${path}`;
-  if (!isURL(url, { host_whitelist: [process.env.DEPLOY_URL.split(":")[0]] }))
-    throw new Error(`Invalid link in mail: ${url}`);
-  return url;
-}
+import { tailwindHsl } from "utils/colors";
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
   if (input === null || typeof input === "undefined") return input;
   return escapeImport(input);
+}
+
+const mdToHtmlConverter = unified()
+  .use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeSanitize) // sanitization done here
+  .use(rehypeStringify);
+
+async function mdToHtml(md: string) {
+  return String(await mdToHtmlConverter.process(md));
+}
+
+function quotedSection(html: string) {
+  return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
 const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
@@ -69,15 +78,7 @@ export default {
 
     const mdPurpose = currentOrg?.info ?? collection?.info ?? "";
 
-    const htmlPurpose = String(
-      await unified()
-        .use(remarkParse)
-        .use(remarkGfm)
-        .use(remarkRehype)
-        .use(rehypeSanitize) // sanitization done here
-        .use(rehypeStringify)
-        .process(mdPurpose)
-    );
+    const htmlPurpose = await mdToHtml(mdPurpose);
 
     await sendEmail({
       to: email,
@@ -91,7 +92,7 @@ export default {
       ${
         htmlPurpose
           ? `<br/><br/>
-            ${htmlPurpose}`
+            ${quotedSection(htmlPurpose)}`
           : ""
       }
       <br/><br/>
@@ -186,18 +187,77 @@ export default {
     currentUser,
     comment,
   }) => {
+    const linkNodes = [];
+
+    const gatherLinks: UnifiedPlugin = () => {
+      return (tree) => {
+        visit(tree, (node) => {
+          if (node.type === "link") {
+            linkNodes.push(node);
+          }
+        });
+      };
+    };
+
+    const parser = unified().use(remarkParse).use(remarkGfm).use(gatherLinks);
+
+    await parser.run(parser.parse(comment.content));
+
+    const userLinkStart = appLink(`/user/`);
+
+    const mentionedUserIds = linkNodes
+      .map((link): string => link.url)
+      .filter(Boolean)
+      .filter((url) => url.startsWith(userLinkStart))
+      .map((link) => link.split(userLinkStart)[1]);
+
+    const mentionedUsers = uniqBy(
+      await prisma.user.findMany({
+        where: {
+          id: { in: mentionedUserIds },
+        },
+      }),
+      "id"
+    );
+
+    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
+
+    const commentAsHtml = quotedSection(await mdToHtml(comment.content));
+
+    const mentionEmails: SendEmailInput[] = mentionedUsers
+      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
+      .map((mentionedUser) => ({
+        to: mentionedUser.email,
+        subject: `You were mentioned in a comment in the bucket ${dream.title}`,
+        html: `${escape(
+          currentUser.name
+        )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
+          dream.title
+        )}</a>:
+        <br/><br/>
+        ${commentAsHtml}
+        <br/><br/>
+        ${footer}
+        `,
+      }));
+
+    await sendEmails(mentionEmails);
+
     const cocreators = await prisma.collectionMember.findMany({
       where: { buckets: { some: { id: dream.id } } },
       include: { user: true },
     });
 
-    const bucketLink = appLink(
-      `/${currentOrg?.slug ?? "c"}/${event.slug}/${dream.id}`
-    );
-
     const cocreatorEmails: SendEmailInput[] = cocreators
       .filter(
         (collectionMember) => collectionMember.id !== currentCollMember.id
+      )
+      // don't mail people here who were just mailed about being mentioned
+      .filter(
+        (cocreatorCollMember) =>
+          !mentionedUsers
+            .map((mentionedUser) => mentionedUser.id)
+            .includes(cocreatorCollMember.user.id)
       )
       .map(
         (collectionMember): SendEmailInput => ({
@@ -207,7 +267,7 @@ export default {
           <br/><br/>
           Your bucket “${escape(dream.title)}” received a new comment.
           <br/><br/>
-          "${escape(comment.content)}"
+          ${commentAsHtml}
           <br/><br/>
           <a href="${bucketLink}">Have a look</a>
           <br/><br/>
@@ -233,11 +293,17 @@ export default {
         comments
           .map((comment) => comment.collMember.user)
           .filter((user) => currentUser.id !== user.id)
-          // don't email the cocreators, we just emailed them above
+          // don't email the mentions nor cocreators, we just emailed them above
           .filter(
             (user) =>
               !cocreators
                 .map((cocreator) => cocreator.user.id)
+                .includes(user.id)
+          )
+          .filter(
+            (user) =>
+              !mentionedUsers
+                .map((mentionedUser) => mentionedUser.id)
                 .includes(user.id)
           ),
         "id"
@@ -251,7 +317,7 @@ export default {
             dream.title
           )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
-          "${escape(comment.content)}"
+          ${commentAsHtml}
           <br/><br/>
           ${footer}
         `,

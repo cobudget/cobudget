@@ -1,18 +1,23 @@
-// this file is largely copied (MIT) from
+// a lot of this file is copied (MIT) from
 // https://github.com/remirror/remirror/blob/cb0829780d22774d6bddbc037e5b16f6e1422d82/packages/remirror__react-editors/src/markdown/markdown-editor.tsx
-// due to
-// https://github.com/remirror/remirror/issues/1349
-// and because we want to customize it
 
 import {
   forwardRef,
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
+  useState,
 } from "react";
-import { ExtensionPriority } from "remirror";
-import { DelayedPromiseCreator } from "@remirror/core";
+import {
+  DelayedPromiseCreator,
+  isElementDomNode,
+  ExtensionPriority,
+  ApplySchemaAttributes,
+  MarkSpecOverride,
+  MarkExtensionSpec,
+} from "@remirror/core";
 import {
   BlockquoteExtension,
   BoldExtension,
@@ -26,6 +31,8 @@ import {
   ImageExtension,
   ListItemExtension,
   MarkdownExtension,
+  MentionAtomExtension,
+  MentionAtomNodeAttributes,
   OrderedListExtension,
   //TaskListExtension,
   //TaskListItemExtension,
@@ -40,6 +47,8 @@ import {
 import {
   ComponentItem,
   EditorComponent,
+  MentionAtomPopupComponent,
+  MentionAtomState,
   Remirror,
   //ReactComponentExtension,
   ThemeProvider,
@@ -51,8 +60,13 @@ import {
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
 import styled from "styled-components";
+import { useQuery, gql } from "urql";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
+import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
+import HappySpinner from "./HappySpinner";
+
+const USER_LINK_START = appLink("/user/");
 
 const EditorCss = styled.div`
   /* to make lists render correctly in the editor (they're missing the
@@ -69,6 +83,11 @@ const EditorCss = styled.div`
 
   .remirror-editor .remirror-list-item-marker-container {
     display: none !important;
+  }
+
+  /* make hyperlinks not look like plaintext */
+  a {
+    text-decoration: underline;
   }
 
   /* correct color on outline and toolbar buttons */
@@ -88,14 +107,93 @@ const EditorCss = styled.div`
   .ProseMirror {
     min-height: ${({ rows }) => `${rows * 2.5}em !important`};
   }
+
+  /* to avoid the mention popup ending up under other elements
+     https://github.com/remirror/remirror/issues/1511 */
+  .remirror-floating-popover {
+    z-index: 10;
+  }
 `;
+
+const SEARCH_MENTION_MEMBERS_QUERY = gql`
+  query SearchMentionMembers($collectionId: ID!, $usernameStartsWith: String!) {
+    members(
+      collectionId: $collectionId
+      isApproved: true
+      usernameStartsWith: $usernameStartsWith
+    ) {
+      id
+      user {
+        id
+        username
+      }
+    }
+  }
+`;
+
+function MentionComponent({ collectionId }) {
+  const [mentionState, setMentionState] = useState<MentionAtomState | null>();
+
+  const searchString = mentionState?.query.full.toLowerCase() ?? "";
+  const tooShortSearch = !searchString || searchString.length < 2;
+
+  const [{ fetching, data }, searchMembers] = useQuery({
+    query: SEARCH_MENTION_MEMBERS_QUERY,
+    variables: {
+      collectionId,
+      usernameStartsWith: searchString,
+    },
+    pause: true,
+  });
+
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(searchMembers, 300, { leading: true });
+  }, [searchMembers]);
+
+  const items: MentionAtomNodeAttributes[] = useMemo(() => {
+    if (fetching || !data || tooShortSearch) {
+      return [];
+    }
+
+    return data.members.map(
+      (member): MentionAtomNodeAttributes => {
+        const userLink = appLink(`/user/${member.user.id}`);
+        return {
+          id: userLink,
+          label: `@${member.user.username}`,
+          href: userLink,
+        };
+      }
+    );
+  }, [data, fetching, tooShortSearch]);
+
+  useEffect(() => {
+    if (tooShortSearch) return;
+
+    debouncedSearchMembers();
+  }, [tooShortSearch, debouncedSearchMembers]);
+
+  return (
+    <MentionAtomPopupComponent
+      onChange={setMentionState}
+      items={items}
+      ZeroItemsComponent={() =>
+        fetching ? (
+          <HappySpinner className="m-3" />
+        ) : tooShortSearch ? (
+          <div className="text-gray-700 m-3">Type to search for a user</div>
+        ) : (
+          <div className="text-gray-700 m-3">No user found</div>
+        )
+      }
+    />
+  );
+}
 
 const ImperativeHandle = forwardRef((props, ref) => {
   const { commands, clearContent } = useRemirrorContext({
     autoUpdate: true,
   });
-
-  //commands.pickImages();
 
   useImperativeHandle(ref, () => ({
     blur: commands.blur,
@@ -143,6 +241,20 @@ const imageUploadHandler = (
   );
 };
 
+class MyLinkExtension extends LinkExtension {
+  createMarkSpec(
+    extra: ApplySchemaAttributes,
+    override: MarkSpecOverride
+  ): MarkExtensionSpec {
+    const markSpec = super.createMarkSpec(extra, override);
+
+    // we want to select links except for when they're links to a user page (i.e. when it's a mention)
+    markSpec.parseDOM[0].tag = `a[href]:not([href^="${USER_LINK_START}"])`;
+
+    return markSpec;
+  }
+}
+
 const Wysiwyg = ({
   inputRef,
   placeholder,
@@ -151,19 +263,54 @@ const Wysiwyg = ({
   rows = 2,
   onChange,
   highlightColor,
+  enableMentions = false,
+  mentionsCollId = null,
 }) => {
   const extensions = useCallback(
     () => [
       new PlaceholderExtension({ placeholder }),
-      new LinkExtension({ autoLink: true }),
       new BoldExtension({}),
       new StrikeExtension(),
       new ItalicExtension(),
       new HeadingExtension({}),
-      new LinkExtension({}),
+      ...(enableMentions
+        ? [
+            new MentionAtomExtension({
+              mentionTag: "a",
+              nodeOverride: {
+                parseDOM: [
+                  {
+                    tag: `a[href][href^="${USER_LINK_START}"]`,
+                    getAttrs: (node: string | Node) => {
+                      if (!isElementDomNode(node)) {
+                        return false;
+                      }
+
+                      const href = node.getAttribute("href");
+                      const label = node.textContent;
+                      return {
+                        id: href,
+                        name: "at",
+                        label,
+                        href,
+                      };
+                    },
+                  },
+                ],
+              },
+              extraAttributes: {
+                name: { default: "at" },
+                href: { default: "" },
+              },
+              matchers: [{ name: "at", char: "@", appendText: " " }],
+            }),
+          ]
+        : []),
+      enableMentions
+        ? new MyLinkExtension({ autoLink: true })
+        : new LinkExtension({ autoLink: true }),
       new ImageExtension({
         enableResizing: false,
-        // for when the user dragndrops or pastes images
         uploadHandler: imageUploadHandler,
       }),
       new BlockquoteExtension(),
@@ -198,7 +345,7 @@ const Wysiwyg = ({
     stringHandler: "markdown",
   });
 
-  // function mostly copied from this link because that one is private
+  // function mostly copied from this link (MIT) because that one is private
   // https://github.com/remirror/remirror/blob/3d62a9b937e48169fbe8c13871f882bfac74832f/packages/remirror__extension-image/src/image-extension.ts#L205-L223
   const fileUploadFileHandler = useCallback(
     (files: File[]) => {
@@ -410,6 +557,9 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
+            {enableMentions && (
+              <MentionComponent collectionId={mentionsCollId} />
+            )}
           </Remirror>
         </EditorCss>
       </ThemeProvider>

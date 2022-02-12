@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    user(userId: ID!): User!
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
@@ -197,6 +198,7 @@ const schema = gql`
     acceptFunding(bucketId: ID!): Bucket
     markAsCompleted(bucketId: ID!): Bucket
 
+    acceptInvitation(collectionId: ID!): CollectionMember
     joinCollection(collectionId: ID!): CollectionMember
   }
 
@@ -353,6 +355,7 @@ const schema = gql`
     balance: Int # stored as cents
     email: String
     name: String
+    hasJoined: Boolean
     # roles: [Role]
   }
 

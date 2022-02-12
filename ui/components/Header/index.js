@@ -45,6 +45,28 @@ const JOIN_ORG_MUTATION = gql`
   }
 `;
 
+const ACCEPT_INVITATION = gql`
+  mutation AcceptInvitation ($collectionId: ID!) {
+    acceptInvitation (collectionId: $collectionId) {
+      id
+      isAdmin
+      isModerator
+      isApproved
+      hasJoined
+      balance
+      collection {
+        id
+        title
+        slug
+        organization {
+          id
+          slug
+        }
+      }
+    }
+  }
+`;
+
 const JOIN_COLLECTION_MUTATION = gql`
   mutation JoinCollection($collectionId: ID!) {
     joinCollection(collectionId: $collectionId) {
@@ -70,6 +92,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
+  const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
   const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
   const color = collection?.color ?? "anthracit";
@@ -84,7 +107,6 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
             color={color}
             currentUser={currentUser}
             router={router}
-            currentUser={currentUser}
           />
 
           <div className="sm:hidden">
@@ -117,7 +139,29 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {!currentUser.currentCollMember &&
+                {
+                  currentUser.currentCollMember?.hasJoined === false ?
+                  <NavItem
+                      primary
+                      eventColor={color}
+                      onClick={() => {
+                        acceptInvitation({ collectionId: collection?.id })
+                        .then(
+                          ({ data, error }) => {
+                            console.log({ data });
+                            if (error) {
+                              toast.error(error.message);
+                            } else {
+                              toast.success("Invitation Accepted");
+                            }
+                          }
+                        )
+                      }}
+                  >
+                    Accept Invitation
+                  </NavItem> : null
+                }
+                {(!currentUser.currentCollMember) &&
                   collection &&
                   (collection.registrationPolicy !== "INVITE_ONLY" ||
                     currentUser.currentOrgMember?.isAdmin) && (
