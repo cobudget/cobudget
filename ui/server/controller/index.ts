@@ -6,6 +6,7 @@ export const allocateToMember = async ({
   collectionId,
   amount,
   type,
+  allocatedBy,
 }) => {
   const {
     _sum: { amount: totalAllocations },
@@ -35,6 +36,9 @@ export const allocateToMember = async ({
       collectionId,
       collectionMemberId,
       amount: adjustedAmount,
+      amountBefore: balance,
+      allocatedById: allocatedBy,
+      allocationType: type,
     },
   });
   await eventHub.publish("allocate-to-member", {

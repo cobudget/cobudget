@@ -29,6 +29,7 @@ import {
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
+import { CollectionTransaction } from "server/types";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -286,6 +287,51 @@ const resolvers = {
         return {
           moreExist: contributionsWithExtra.length > limit,
           contributions: contributionsWithExtra.slice(0, limit),
+        };
+      }
+    ),
+    //here
+    collectionTransactions: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (parent, { collectionId, offset, limit }) => {
+        const transactions: [CollectionTransaction] = await prisma.$queryRaw`
+          (
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              null as "allocatedById", 
+              "amount",
+              "bucketId",
+              "amountBefore", 
+              null as "allocationType",
+              'CONTRIBUTION' as "transactionType",
+              "createdAt"
+            FROM "Contribution" where "collectionId" = ${collectionId}
+            
+            UNION ALL
+            
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              "allocatedById", 
+              "amount",
+              null as "bucketId",
+              "amountBefore", 
+              "allocationType",
+              'ALLOCATION' as "transactionType",
+              "createdAt"
+            FROM "Allocation" where "collectionId" = ${collectionId}
+          ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
+        `;
+
+        transactions.forEach(
+          (transaction) =>
+            (transaction.createdAt = new Date(transaction.createdAt))
+        );
+
+        return {
+          moreExist: transactions.length > limit,
+          transactions: transactions.slice(0, limit),
         };
       }
     ),
@@ -1744,6 +1790,7 @@ const resolvers = {
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
+        allocatedBy: currentCollMember.id,
       });
 
       return targetCollectionMember;
@@ -1757,6 +1804,15 @@ const resolvers = {
             isApproved: true,
           },
         });
+        //here
+        const currentCollMember = await prisma.collectionMember.findUnique({
+          where: {
+            userId_collectionId: {
+              userId: user.id,
+              collectionId: collectionId,
+            },
+          },
+        });
 
         for (const member of collectionMembers) {
           await allocateToMember({
@@ -1764,6 +1820,7 @@ const resolvers = {
             collectionId: collectionId,
             amount,
             type,
+            allocatedBy: currentCollMember.id,
           });
         }
 
@@ -1890,6 +1947,7 @@ const resolvers = {
           collectionMemberId: collectionMember.id,
           amount,
           bucketId: bucket.id,
+          amountBefore: contributionsForBucket || 0,
         },
       });
 
@@ -2655,6 +2713,32 @@ const resolvers = {
     collectionMember: async (contribution) => {
       return prisma.collectionMember.findUnique({
         where: { id: contribution.collectionMemberId },
+      });
+    },
+  },
+  CollectionTransaction: {
+    collectionMember: async (transaction) => {
+      return prisma.collectionMember.findUnique({
+        where: { id: transaction.collectionMemberId },
+      });
+    },
+    allocatedBy: async (transaction) => {
+      if (transaction.allocatedById)
+        return prisma.collectionMember.findUnique({
+          where: { id: transaction.allocatedById },
+        });
+      else return null;
+    },
+    bucket: async (transaction) => {
+      if (transaction.bucketId)
+        return prisma.bucket.findUnique({
+          where: { id: transaction.bucketId },
+        });
+      else return null;
+    },
+    collection: async (transaction) => {
+      return prisma.collection.findUnique({
+        where: { id: transaction.collectionId },
       });
     },
   },

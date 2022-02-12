@@ -40,6 +40,9 @@ module.exports = {
       borderColor: {
         f: "rgb(172, 182, 192)",
       },
+      fontSize: {
+        "xxs": '9px',
+      },
       height: {
         88: "22rem",
         100: "25rem",

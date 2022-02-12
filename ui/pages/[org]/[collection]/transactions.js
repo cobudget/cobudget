@@ -1,7 +1,7 @@
 import SubMenu from "components/SubMenu";
-import Contributions from "../../../components/Contributions";
+import Transactions from "../../../components/Transactions";
 
-const ContributionsPage = ({ collection, currentUser, currentOrg }) => {
+const TransactionsPage = ({ collection, currentUser, currentOrg }) => {
   const isAdmin =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentOrgMember?.isAdmin;
@@ -9,9 +9,9 @@ const ContributionsPage = ({ collection, currentUser, currentOrg }) => {
   return (
     <div className="">
       <SubMenu currentUser={currentUser} collection={collection} />
-      <Contributions collection={collection} currentOrg={currentOrg} />
+      <Transactions collection={collection} currentOrg={currentOrg} />
     </div>
   );
 };
 
-export default ContributionsPage;
+export default TransactionsPage;

@@ -41,6 +41,11 @@ const schema = gql`
       offset: Int
       limit: Int
     ): ContributionsPage
+    collectionTransactions(
+      collectionId: ID!
+      offset: Int
+      limit: Int
+    ): CollectionTransactionPage
   }
 
   type Mutation {
@@ -496,6 +501,7 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    amountBefore: Int!
     createdAt: Date
     bucket: Bucket!
   }
@@ -510,7 +516,29 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    allocatedById: Int!
+    allocationType: AllocationType!
+    amountBefore: Int!
     createdAt: Date
+  }
+
+  type CollectionTransaction{
+    id: ID!
+    collection: Collection!
+    collectionMember: CollectionMember!
+    allocatedBy: CollectionMember
+    amount: Int!
+    createdAt: Date
+    bucket: Bucket
+    allocatedById: Int
+    allocationType: AllocationType
+    amountBefore: Int
+    transactionType: TransactionType
+  }
+
+  type CollectionTransactionPage {
+    moreExist: Boolean
+    transactions(collectionId: ID!, offset: Int, limit: Int): [CollectionTransaction]
   }
 
   # type GrantingPeriod {
@@ -557,6 +585,11 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
+  }
+
+  enum TransactionType {
+    ALLOCATION
+    CONTRIBUTION
   }
 
   type CustomField {

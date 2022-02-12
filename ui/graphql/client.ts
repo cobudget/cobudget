@@ -51,6 +51,14 @@ export const client = (
         },
         updates: {
           Mutation: {
+            allocate(result: any, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "collectionTransactions")
+                .forEach((field) => {
+                  cache.invalidate("Query", "collectionTransactions", field.arguments);
+                });
+            },
             joinCollection(result: any, args, cache) {
               if (result.joinCollection) {
                 console.log({ result });
@@ -366,6 +374,12 @@ export const client = (
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");
+              
+              queryFields
+                  .filter((field) => field.fieldName === "collectionTransactions")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "collectionTransactions", field.arguments);
+                  });
 
               queryFields
                 .filter((field) => field.fieldName === "contributionsPage")
