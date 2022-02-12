@@ -73,23 +73,21 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        {
-          member.hasJoined ? null :
+        {member.hasJoined ? null : (
           <MenuItem
             onClick={() => {
               inviteAgain({
                 collectionId,
-                emails: member.email
-              })
-              .then(() => {
-                toast.success("Invitation sent again")
+                emails: member.email,
+              }).then(() => {
+                toast.success("Invitation sent again");
                 handleClose();
-              })
+              });
             }}
           >
             Invite Again
           </MenuItem>
-        }
+        )}
         <MenuItem
           onClick={() => {
             updateMember({
@@ -137,13 +135,11 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
       </TableCell>
       <TableCell>
         <p>{member.email}</p>
-        {
-          !member.user.verifiedEmail ? (
-            <p className="text-sm text-gray-500">(not verified)</p>
-          ) : !member.hasJoined ? (
-            <p className="text-sm text-gray-500">(invitation pending)</p>
-          ) : null
-        }
+        {!member.user.verifiedEmail ? (
+          <p className="text-sm text-gray-500">(not verified)</p>
+        ) : !member.hasJoined ? (
+          <p className="text-sm text-gray-500">(invitation pending)</p>
+        ) : null}
       </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (

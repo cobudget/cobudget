@@ -89,7 +89,7 @@ export const client = (
                   .forEach((field) => {
                     cache.invalidate("Query", "membersPage", field.arguments);
                   });
-                }
+              }
             },
             joinOrg(result: any, args, cache) {
               if (result.joinOrg) {
@@ -338,18 +338,18 @@ export const client = (
                     variables: { collectionId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {
-
-                    const existingEmails = data.approvedMembersPage?.approvedMembers
-                                              ?.map(member => member.email) || [];
-                    const newInvitedMembers = result.inviteCollectionMembers
-                                              ?.filter(member => (
-                                                existingEmails.indexOf(member.email) === -1
-                                              ));
+                    const existingEmails =
+                      data.approvedMembersPage?.approvedMembers?.map(
+                        (member) => member.email
+                      ) || [];
+                    const newInvitedMembers = result.inviteCollectionMembers?.filter(
+                      (member) => existingEmails.indexOf(member.email) === -1
+                    );
 
                     if (newInvitedMembers.length === 0) {
                       return;
                     }
-                                                
+
                     return {
                       ...data,
                       approvedMembersPage: {

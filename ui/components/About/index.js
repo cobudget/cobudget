@@ -143,7 +143,7 @@ export default function AboutPage({ router, currentOrg }) {
 
       <h2 className="text-xl font-semibold mb-3">Funding status</h2>
       <div className="bg-white rounded-lg shadow mb-6">
-        <BillBreakdown 
+        <BillBreakdown
           parts={[
             {
               title: "Allocated funds",
@@ -152,25 +152,26 @@ export default function AboutPage({ router, currentOrg }) {
               )} ${collection.currency}`,
               breakdown: [
                 {
-                  title: "Contributions made to bucket open for funding", 
+                  title: "Contributions made to bucket open for funding",
                   amount: `${thousandSeparator(
                     collection.totalContributionsFunding / 100
-                  )} ${collection.currency}`
+                  )} ${collection.currency}`,
                 },
                 {
-                  title: "Contributions made to funded buckets", 
+                  title: "Contributions made to funded buckets",
                   amount: `${thousandSeparator(
-                  collection.totalContributionsFunded / 100
-                )} ${collection.currency}`}
-              ]
+                    collection.totalContributionsFunded / 100
+                  )} ${collection.currency}`,
+                },
+              ],
             },
             {
               title: "Unallocated funds",
               total: `${thousandSeparator(
                 collection.totalInMembersBalances / 100
               )} ${collection.currency}`,
-              breakdown: []
-            }
+              breakdown: [],
+            },
           ]}
           totalTitle={"Total funds available"}
           totalAmount={`${thousandSeparator(

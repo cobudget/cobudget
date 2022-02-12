@@ -327,7 +327,8 @@ const Monster = ({ event, bucket, currentOrg }) => {
   return (
     <div
       className={
-        (open ? "fixed md:p-4" : "") + " right-0 bottom-0 z-30 flex flex-col items-end max-w-6xl"
+        (open ? "fixed md:p-4" : "") +
+        " right-0 bottom-0 z-30 flex flex-col items-end max-w-6xl"
       }
     >
       {open && (
@@ -387,17 +388,17 @@ const Monster = ({ event, bucket, currentOrg }) => {
 
       {!open && (
         <>
-        <Button
-          color={event.color}
-          fullWidth
-          className={"flex"}
-          onClick={() => {
-            closeBubble();
-            setOpen(!open);
-          }}
-        >
-          Review
-        </Button>
+          <Button
+            color={event.color}
+            fullWidth
+            className={"flex"}
+            onClick={() => {
+              closeBubble();
+              setOpen(!open);
+            }}
+          >
+            Review
+          </Button>
         </>
       )}
     </div>

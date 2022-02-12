@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 
 export async function getCurrentCollMember({ collMemberId }) {}
 
-export async function isCollAdmin ({ collectionId, userId }) {
+export async function isCollAdmin({ collectionId, userId }) {
   const collectionMember = await getCollectionMember({
     userId: userId,
     collectionId,

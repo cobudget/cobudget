@@ -46,8 +46,8 @@ const JOIN_ORG_MUTATION = gql`
 `;
 
 const ACCEPT_INVITATION = gql`
-  mutation AcceptInvitation ($collectionId: ID!) {
-    acceptInvitation (collectionId: $collectionId) {
+  mutation AcceptInvitation($collectionId: ID!) {
+    acceptInvitation(collectionId: $collectionId) {
       id
       isAdmin
       isModerator
@@ -139,29 +139,27 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {
-                  currentUser.currentCollMember?.hasJoined === false ?
+                {currentUser.currentCollMember?.hasJoined === false ? (
                   <NavItem
-                      primary
-                      eventColor={color}
-                      onClick={() => {
-                        acceptInvitation({ collectionId: collection?.id })
-                        .then(
-                          ({ data, error }) => {
-                            console.log({ data });
-                            if (error) {
-                              toast.error(error.message);
-                            } else {
-                              toast.success("Invitation Accepted");
-                            }
+                    primary
+                    eventColor={color}
+                    onClick={() => {
+                      acceptInvitation({ collectionId: collection?.id }).then(
+                        ({ data, error }) => {
+                          console.log({ data });
+                          if (error) {
+                            toast.error(error.message);
+                          } else {
+                            toast.success("Invitation Accepted");
                           }
-                        )
-                      }}
+                        }
+                      );
+                    }}
                   >
                     Accept Invitation
-                  </NavItem> : null
-                }
-                {(!currentUser.currentCollMember) &&
+                  </NavItem>
+                ) : null}
+                {!currentUser.currentCollMember &&
                   collection &&
                   (collection.registrationPolicy !== "INVITE_ONLY" ||
                     currentUser.currentOrgMember?.isAdmin) && (
