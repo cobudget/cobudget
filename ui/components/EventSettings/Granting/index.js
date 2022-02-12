@@ -12,7 +12,7 @@ import SetMaxAmountToDream from "./SetMaxAmountToDream";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetRequireBucketApproval from './SetRequireBucketApproval';
+import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 

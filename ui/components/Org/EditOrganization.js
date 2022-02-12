@@ -89,14 +89,14 @@ const EditOrganization = ({ organization, currentUser }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="bg-white rounded-lg shadow p-6 flex-1 max-w-md mx-auto space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
+      <div className="bg-white rounded-lg shadow-xl p-6 flex-1 max-w-md mx-auto space-y-4">
         <h1 className="text-2xl font-semibold">
-          {isNew ? `👋 Welcome, ${currentUser.name}` : "Edit organization"}
+          {isNew ? `New Group` : "Edit Group"}
         </h1>
         <TextField
           name="name"
-          label="Name your community"
+          label="Name"
           placeholder={`${currentUser.name}'s community`}
           inputRef={register({ required: "Required" })}
           defaultValue={organization?.name}

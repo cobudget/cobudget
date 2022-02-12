@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 import DreamCard from "../../../components/DreamCard";
@@ -10,6 +10,21 @@ import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 
+export const BUCKET_STATUS_QUERY = gql`
+  query BucketStatus($collectionSlug: String!, $orgSlug: String) {
+    collection(collectionSlug: $collectionSlug, orgSlug: $orgSlug) {
+      id
+      bucketStatusCount {
+        PENDING_APPROVAL
+        OPEN_FOR_FUNDING
+        FUNDED
+        CANCELED
+        COMPLETED
+      }
+    }
+  }
+`;
+
 export const BUCKETS_QUERY = gql`
   query Buckets(
     $collectionId: ID!
@@ -17,6 +32,7 @@ export const BUCKETS_QUERY = gql`
     $tag: String
     $offset: Int
     $limit: Int
+    $status: [StatusType!]
   ) {
     bucketsPage(
       collectionId: $collectionId
@@ -24,6 +40,7 @@ export const BUCKETS_QUERY = gql`
       tag: $tag
       offset: $offset
       limit: $limit
+      status: $status
     ) {
       moreExist
       buckets {
@@ -70,6 +87,7 @@ const Page = ({
   router,
   collection,
   org,
+  statusFilter,
 }) => {
   const { tag, s } = router.query;
 
@@ -79,6 +97,7 @@ const Page = ({
       collectionId: collection.id,
       offset: variables.offset,
       limit: variables.limit,
+      status: statusFilter,
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -130,12 +149,60 @@ const Page = ({
   );
 };
 
+const stringOrArrayIntoArray = (stringOrArray) => {
+  if (stringOrArray instanceof Array) return stringOrArray;
+  return stringOrArray ? [stringOrArray] : [];
+};
+
+const getStandardFilter = (bucketStatusCount) => {
+  let stdFilter = [];
+
+  // if there is either pending or open for funding buckets, show those categories
+  if (
+    bucketStatusCount["PENDING_APPROVAL"] ||
+    bucketStatusCount["OPEN_FOR_FUNDING"]
+  ) {
+    if (bucketStatusCount["PENDING_APPROVAL"])
+      stdFilter.push("PENDING_APPROVAL");
+    if (bucketStatusCount["OPEN_FOR_FUNDING"])
+      stdFilter.push("OPEN_FOR_FUNDING");
+  } else {
+    // otherwise show every other
+    const statusNames = Object.keys(bucketStatusCount);
+    const values = Object.values(bucketStatusCount);
+    stdFilter = statusNames.filter((status, i) => !!values[i]);
+  }
+  return stdFilter;
+};
+
 const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
-  const { tag, s } = router.query;
+  const [{ data }] = useQuery({
+    query: BUCKET_STATUS_QUERY,
+    variables: {
+      collectionSlug: collection?.slug,
+      orgSlug: currentOrg?.slug ?? "c",
+    },
+  });
+
+  const bucketStatusCount = data?.collection?.bucketStatusCount ?? {};
+
+  const { tag, s, f } = router.query;
+
+  const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
+
+  useEffect(() => {
+    setStatusFilter(stringOrArrayIntoArray(f));
+  }, [f]);
+
+  // apply standard filter (hidden from URL)
+  useEffect(() => {
+    const filter = f ?? getStandardFilter(bucketStatusCount);
+    setStatusFilter(stringOrArrayIntoArray(filter));
+  }, [bucketStatusCount]);
 
   if (!collection) return null;
   const canEdit =
@@ -171,7 +238,8 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
           </div>
           <div className="flex justify-end items-start">
             {collection.bucketCreationIsOpen &&
-              currentUser?.currentCollMember?.isApproved && (
+              currentUser?.currentCollMember?.isApproved &&
+              currentUser?.currentCollMember?.hasJoined && (
                 <>
                   <Button
                     size="large"
@@ -195,10 +263,12 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
 
       <div className="page flex-1">
         <Filterbar
-          textSearchTerm={s}
-          tag={tag}
           collection={collection}
           currentOrg={currentOrg}
+          textSearchTerm={s}
+          tag={tag}
+          statusFilter={statusFilter}
+          bucketStatusCount={bucketStatusCount}
         />
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
           {pageVariables.map((variables, i) => {
@@ -214,6 +284,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
                 onLoadMore={({ limit, offset }) => {
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
+                statusFilter={statusFilter}
               />
             );
           })}

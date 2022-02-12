@@ -42,9 +42,7 @@ export default function Selector({
             className
           )}
         >
-          {!activeId && (
-            <span className="p-1 ml-1 opacity-50">Select group</span>
-          )}
+          {!activeId && <span className="p-1 mx-1 opacity-50">Select</span>}
           <div
             className={`p-1 opacity-50 group-hover:opacity-100 group-hover:bg-${color}-dark rounded`}
           >
@@ -132,11 +130,11 @@ export default function Selector({
           <Menu.Item>
             {({ active }) => (
               <LinkItem
-                href={`/new-collection`}
+                href={`/new-round`}
                 active={active}
                 className="text-gray-500 hover:text-gray-900"
               >
-                Create group
+                New Round
               </LinkItem>
             )}
           </Menu.Item>

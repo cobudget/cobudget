@@ -15,6 +15,7 @@ import GrantingStatus from "./GrantingStatus";
 
 import Tags from "./Tags";
 import toast from "react-hot-toast";
+import Monster from "components/Monster";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -89,6 +90,7 @@ const DreamSidebar = ({
   currentUser,
   canEdit,
   currentOrg,
+  showBucketReview,
 }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
@@ -102,7 +104,7 @@ const DreamSidebar = ({
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const canApproveBucket =
-    !collection.requireBucketApproval && canEdit || 
+    (!collection.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isEventAdminOrGuide =
@@ -149,6 +151,13 @@ const DreamSidebar = ({
               >
                 Fund
               </Button>
+              {showBucketReview ? (
+                <Monster
+                  event={collection}
+                  bucket={dream}
+                  currentOrg={currentOrg}
+                />
+              ) : null}
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
