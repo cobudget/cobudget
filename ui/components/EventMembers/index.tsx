@@ -10,7 +10,12 @@ import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/EventMembers/SearchBar";
 
 export const COLLECTION_MEMBERS_QUERY = gql`
-  query Members($collectionId: ID!, $usernameStartsWith: String!, $offset: Int, $limit: Int) {
+  query Members(
+    $collectionId: ID!
+    $usernameStartsWith: String!
+    $offset: Int
+    $limit: Int
+  ) {
     approvedMembersPage: membersPage(
       collectionId: $collectionId
       isApproved: true
@@ -21,7 +26,7 @@ export const COLLECTION_MEMBERS_QUERY = gql`
       moreExist
       approvedMembers: members(
         collectionId: $collectionId
-        isApproved: false
+        isApproved: true
         offset: $offset
         limit: $limit
       ) {
@@ -118,10 +123,15 @@ const EventMembers = ({ collection, currentUser }) => {
       fetching: loading,
       error,
     },
-    searchApprovedMembers
+    searchApprovedMembers,
   ] = useQuery({
     query: COLLECTION_MEMBERS_QUERY,
-    variables: { collectionId: collection.id, usernameStartsWith: searchString, offset: 0, limit: 1000 },
+    variables: {
+      collectionId: collection.id,
+      usernameStartsWith: searchString,
+      offset: 0,
+      limit: 1000,
+    },
     pause: true,
   });
 
@@ -133,7 +143,7 @@ const EventMembers = ({ collection, currentUser }) => {
     if (loading || !approvedMembers) {
       return [];
     }
-    return approvedMembers
+    return approvedMembers;
   }, [approvedMembers, loading]);
 
   useEffect(() => {
