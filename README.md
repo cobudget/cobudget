@@ -14,8 +14,6 @@ Next.js, Urql, Apollo, Prisma, PostgreSQL
 - Install dependencies in `/ui`
   - `yarn`
 - In /ui, copy `.env.local.default` to `.env.local`
-- In /ui, copy and paste DATABASE_URL string from `.env.development` to `.env.local`
-- put MAGIC_LINK_SECRET="fake" in `.env.local`
 
 ### Running the project
 
