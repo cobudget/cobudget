@@ -282,7 +282,7 @@ const resolvers = {
     collectionTransactions: combineResolvers(
       isCollMemberOrOrgAdmin,
       async (parent, { collectionId, offset, limit }) => {
-        const transactions:[CollectionTransaction] = await prisma.$queryRaw`
+        const transactions: [CollectionTransaction] = await prisma.$queryRaw`
           (
             SELECT 
               "id", 
@@ -312,7 +312,10 @@ const resolvers = {
           ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
         `;
 
-        transactions.forEach(transaction => transaction.createdAt = new Date(transaction.createdAt));
+        transactions.forEach(
+          (transaction) =>
+            (transaction.createdAt = new Date(transaction.createdAt))
+        );
 
         return {
           moreExist: transactions.length > limit,
@@ -1743,7 +1746,7 @@ const resolvers = {
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
-        allocatedBy: currentCollMember.id
+        allocatedBy: currentCollMember.id,
       });
 
       return targetCollectionMember;
@@ -2614,8 +2617,7 @@ const resolvers = {
         return prisma.bucket.findUnique({
           where: { id: transaction.bucketId },
         });
-      else
-        return null;
+      else return null;
     },
     collection: async (transaction) => {
       return prisma.collection.findUnique({

@@ -54,12 +54,13 @@ model CollectionMember {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  buckets           Bucket[]
-  allocatedBy       Allocation[] @relation("allocatedBy")
-  collectionMember  Allocation[] @relation("collectionMember")
-  contributions     Contribution[]
-  comments          Comment[]
-  flags             Flag[]
+  buckets       Bucket[]
+  allocations   Allocation[]
+  contributions Contribution[]
+  comments      Comment[]
+  flags         Flag[]
+  allocatedBy   Allocation[]   @relation("allocatedBy")
+
 
   @@unique([userId, collectionId])
 }
@@ -279,17 +280,17 @@ enum FlagType {
 }
 
 model Allocation {
-  id                 String           @id @default(cuid())
-  collection         Collection       @relation(fields: [collectionId], references: [id])
+  id                 String            @id @default(cuid())
+  collection         Collection        @relation(fields: [collectionId], references: [id])
   collectionId       String
-  collectionMember   CollectionMember @relation("collectionMember", fields: [collectionMemberId], references: [id])
+  collectionMember   CollectionMember  @relation(fields: [collectionMemberId], references: [id])
   collectionMemberId String
-  allocatedBy        CollectionMember @relation("allocatedBy", fields: [allocatedById], references: [id])
-  allocatedById      String
+  allocatedBy        CollectionMember? @relation("allocatedBy", fields: [allocatedById], references: [id])
+  allocatedById      String?
   amount             Int
-  amountBefore       Int
-  allocationType     AllocationType
-  createdAt          DateTime         @default(now())
+  amountBefore       Int?
+  allocationType     AllocationType    @default(ADD)
+  createdAt          DateTime          @default(now())
 }
 
 model Contribution {
@@ -301,7 +302,7 @@ model Contribution {
   bucket             Bucket           @relation(fields: [bucketId], references: [id])
   bucketId           String
   amount             Int
-  amountBefore       Int
+  amountBefore       Int?
   createdAt          DateTime         @default(now())
 }
 
