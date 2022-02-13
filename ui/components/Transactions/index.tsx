@@ -121,7 +121,7 @@ const Transactions = ({ collection, currentOrg }) => {
                     </span>
                     {c.allocatedBy
                       ? `@${c.allocatedBy.user.username}`
-                      : "Someone"}
+                      : "Admin"}
 
                     {c.allocationType === "ADD" ? (
                       <>
