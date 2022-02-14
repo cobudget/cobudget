@@ -117,15 +117,21 @@ const EditorCss = styled.div`
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
   query SearchMentionMembers($collectionId: ID!, $usernameStartsWith: String!) {
-    members(
+    membersPage(
       collectionId: $collectionId
       isApproved: true
       usernameStartsWith: $usernameStartsWith
     ) {
-      id
-      user {
+      members(
+        collectionId: $collectionId
+        isApproved: true
+        usernameStartsWith: $usernameStartsWith
+      ) {
         id
-        username
+        user {
+          id
+          username
+        }
       }
     }
   }
@@ -155,7 +161,7 @@ function MentionComponent({ collectionId }) {
       return [];
     }
 
-    return data.members.map(
+    return data.membersPage.members.map(
       (member): MentionAtomNodeAttributes => {
         const userLink = appLink(`/user/${member.user.id}`);
         return {
