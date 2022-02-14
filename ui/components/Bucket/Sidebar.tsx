@@ -210,7 +210,7 @@ const DreamSidebar = ({
                 }).catch((err) => alert(err.message))
               }
             >
-              Approve for granting
+              Open for funding
             </Button>
           )}
           {showMarkAsCompletedButton && (

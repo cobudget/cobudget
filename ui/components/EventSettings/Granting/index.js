@@ -140,7 +140,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Require bucket approval"
+            primary="Require moderator approval of buckets before funding"
             secondary={collection.requireBucketApproval?.toString() ?? "false"}
             isSet={typeof collection.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}

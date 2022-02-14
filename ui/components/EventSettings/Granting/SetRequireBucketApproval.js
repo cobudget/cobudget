@@ -15,7 +15,9 @@ const SetRequireBucketApproval = ({ closeModal, collection }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Require bucket approval</h1>
+        <h1 className="text-3xl">
+          Require moderator approval of buckets before funding
+        </h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
@@ -36,7 +38,7 @@ const SetRequireBucketApproval = ({ closeModal, collection }) => {
           <Box m="15px 0">
             <SelectInput
               name="requireBucketApproval"
-              label="Require bucket approval"
+              label="Require moderator approval of buckets before funding"
               defaultValue={collection.requireBucketApproval ?? false}
               inputRef={register}
               fullWidth
