@@ -416,16 +416,12 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved, usernameStartsWith }) => {
+      async (parent, { collectionId, isApproved }) => {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
             ...(typeof isApproved === "boolean" && { isApproved }),
-            ...(usernameStartsWith && {
-              user: { username: { startsWith: usernameStartsWith } },
-            }),
           },
-          ...(usernameStartsWith && { include: { user: true } }),
         });
       }
     ),
@@ -433,13 +429,7 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        {
-          collectionId,
-          isApproved,
-          usernameStartsWith,
-          offset = 0,
-          limit = 10,
-        },
+        { collectionId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
@@ -452,14 +442,31 @@ const resolvers = {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
-              ...(usernameStartsWith && {
-                user: { username: { startsWith: usernameStartsWith } },
+              ...(search && {
+                OR: [
+                  {
+                    user: {
+                      username: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
               }),
               ...(!isAdmin && { hasJoined: true }),
             },
             take: limit + 1,
             skip: offset,
-            ...(usernameStartsWith && { include: { user: true } }),
+            ...(search && { include: { user: true } }),
           }
         );
 

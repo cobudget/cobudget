@@ -26,15 +26,11 @@ const schema = gql`
     membersPage(
       collectionId: ID!
       isApproved: Boolean
-      usernameStartsWith: String
+      search: String
       offset: Int
       limit: Int
     ): MembersPage
-    members(
-      collectionId: ID!
-      isApproved: Boolean
-      usernameStartsWith: String
-    ): [CollectionMember]
+    members(collectionId: ID!, isApproved: Boolean): [CollectionMember]
     categories(orgId: ID!): [Category!]
     contributionsPage(
       collectionId: ID!
@@ -369,7 +365,7 @@ const schema = gql`
     members(
       collectionId: ID!
       isApproved: Boolean
-      usernameStartsWith: String
+      search: String
       offset: Int
       limit: Int
     ): [CollectionMember]
@@ -522,7 +518,7 @@ const schema = gql`
     createdAt: Date
   }
 
-  type CollectionTransaction{
+  type CollectionTransaction {
     id: ID!
     collection: Collection!
     collectionMember: CollectionMember!
@@ -538,7 +534,11 @@ const schema = gql`
 
   type CollectionTransactionPage {
     moreExist: Boolean
-    transactions(collectionId: ID!, offset: Int, limit: Int): [CollectionTransaction]
+    transactions(
+      collectionId: ID!
+      offset: Int
+      limit: Int
+    ): [CollectionTransaction]
   }
 
   # type GrantingPeriod {
