@@ -26,7 +26,7 @@ const schema = gql`
     membersPage(
       collectionId: ID!
       isApproved: Boolean
-      usernameStartsWith: String
+      search: String
       offset: Int
       limit: Int
     ): MembersPage
@@ -365,7 +365,7 @@ const schema = gql`
     members(
       collectionId: ID!
       isApproved: Boolean
-      usernameStartsWith: String
+      search: String
       offset: Int
       limit: Int
     ): [CollectionMember]

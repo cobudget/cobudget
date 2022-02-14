@@ -429,13 +429,7 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        {
-          collectionId,
-          isApproved,
-          usernameStartsWith,
-          offset = 0,
-          limit = 10,
-        },
+        { collectionId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
@@ -448,10 +442,10 @@ const resolvers = {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
-              ...(usernameStartsWith && {
+              ...(search && {
                 user: {
                   username: {
-                    startsWith: usernameStartsWith,
+                    contains: search,
                     mode: "insensitive",
                   },
                 },
@@ -460,7 +454,7 @@ const resolvers = {
             },
             take: limit + 1,
             skip: offset,
-            ...(usernameStartsWith && { include: { user: true } }),
+            ...(search && { include: { user: true } }),
           }
         );
 

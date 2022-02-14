@@ -12,14 +12,14 @@ import SearchBar from "components/EventMembers/SearchBar";
 export const COLLECTION_MEMBERS_QUERY = gql`
   query Members(
     $collectionId: ID!
-    $usernameStartsWith: String!
+    $search: String!
     $offset: Int
     $limit: Int
   ) {
     approvedMembersPage: membersPage(
       collectionId: $collectionId
       isApproved: true
-      usernameStartsWith: $usernameStartsWith
+      search: $search
       offset: $offset
       limit: $limit
     ) {
@@ -128,7 +128,7 @@ const EventMembers = ({ collection, currentUser }) => {
     query: COLLECTION_MEMBERS_QUERY,
     variables: {
       collectionId: collection.id,
-      usernameStartsWith: searchString,
+      search: searchString,
       offset: 0,
       limit: 1000,
     },

@@ -116,17 +116,13 @@ const EditorCss = styled.div`
 `;
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
-  query SearchMentionMembers($collectionId: ID!, $usernameStartsWith: String!) {
+  query SearchMentionMembers($collectionId: ID!, $search: String!) {
     membersPage(
       collectionId: $collectionId
       isApproved: true
-      usernameStartsWith: $usernameStartsWith
+      search: $search
     ) {
-      members(
-        collectionId: $collectionId
-        isApproved: true
-        usernameStartsWith: $usernameStartsWith
-      ) {
+      members(collectionId: $collectionId, isApproved: true, search: $search) {
         id
         user {
           id
@@ -147,7 +143,7 @@ function MentionComponent({ collectionId }) {
     query: SEARCH_MENTION_MEMBERS_QUERY,
     variables: {
       collectionId,
-      usernameStartsWith: searchString,
+      search: searchString,
     },
     pause: true,
   });
