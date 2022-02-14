@@ -443,12 +443,24 @@ const resolvers = {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
               ...(search && {
-                user: {
-                  username: {
-                    contains: search,
-                    mode: "insensitive",
+                OR: [
+                  {
+                    user: {
+                      username: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
                   },
-                },
+                  {
+                    user: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
               }),
               ...(!isAdmin && { hasJoined: true }),
             },
