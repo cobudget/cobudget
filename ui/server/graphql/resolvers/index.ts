@@ -449,7 +449,12 @@ const resolvers = {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
               ...(usernameStartsWith && {
-                user: { username: { startsWith: usernameStartsWith } },
+                user: {
+                  username: {
+                    startsWith: usernameStartsWith,
+                    mode: "insensitive",
+                  },
+                },
               }),
               ...(!isAdmin && { hasJoined: true }),
             },
