@@ -201,6 +201,8 @@ const schema = gql`
 
     acceptInvitation(collectionId: ID!): CollectionMember
     joinCollection(collectionId: ID!): CollectionMember
+
+    setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
   type Organization {

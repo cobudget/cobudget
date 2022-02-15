@@ -1,8 +1,9 @@
-import { useQuery, gql } from "urql";
+import { useQuery, gql, useMutation } from "urql";
 import { omit } from "lodash";
 import HappySpinner from "components/HappySpinner";
+import Button from "components/Button";
 
-export const USER_SETTINGS_QUERY = gql`
+const USER_SETTINGS_QUERY = gql`
   query UserSettings {
     currentUser {
       id
@@ -10,6 +11,52 @@ export const USER_SETTINGS_QUERY = gql`
     }
   }
 `;
+
+const SET_EMAIL_SETTING_MUTATION = gql`
+  mutation SetEmailSetting($settingKey: String!, $value: Boolean!) {
+    setEmailSetting(settingKey: $settingKey, value: $value) {
+      id
+      emailSettings
+    }
+  }
+`;
+
+const labels = {
+  commentMentions: "I'm mentioned in a comment",
+  commentBecauseCocreator: "A comment is made in a bucket I'm cocreating",
+  commentBecauseCommented:
+    "Another comment is made in a bucket I have previously commented in",
+  allocatedToYou: "When I'm allocated money that I can contribute to buckets",
+  refundedBecauseBucketCancelled:
+    "I get refunded money because a bucket I contributed cancelled its funding",
+  bucketPublishedInRound:
+    "A new bucket is published in a round I'm a member of",
+  contributionToYourBucket:
+    "Someone contributes money to a bucket I'm cocreating",
+};
+
+const EmailSettingItem = ({ settingKey, value }) => {
+  const [{ fetching, error }, setEmailSetting] = useMutation(
+    SET_EMAIL_SETTING_MUTATION
+  );
+
+  if (error) {
+    console.error(error);
+    return <div>{error.message}</div>;
+  }
+
+  return (
+    <div>
+      {labels[settingKey]} Value: {String(value)}
+      <Button
+        disabled={fetching}
+        onClick={() => setEmailSetting({ settingKey, value: !value })}
+      >
+        Toggle
+      </Button>
+    </div>
+  );
+};
 
 const SettingsIndex = ({ currentUser }) => {
   const [{ data, fetching, error }] = useQuery({
@@ -23,14 +70,14 @@ const SettingsIndex = ({ currentUser }) => {
 
   const emailSettings = omit(data.currentUser.emailSettings, ["id", "userId"]);
 
-  console.log("data", data);
-  console.log("emailsettings", emailSettings);
-
-  return Object.entries(emailSettings).map(([settingKey, value]) => (
+  return (
     <div>
-      key {settingKey} is {String(value)}
+      Please send me an email when:
+      {Object.entries(emailSettings).map(([settingKey, value]) => (
+        <EmailSettingItem settingKey={settingKey} value={value} />
+      ))}
     </div>
-  ));
+  );
 };
 
 export default SettingsIndex;

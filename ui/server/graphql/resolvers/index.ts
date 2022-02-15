@@ -2143,6 +2143,17 @@ const resolvers = {
 
       return collectionMember;
     },
+    setEmailSetting: async (parent, { settingKey, value }, { user }) => {
+      if (!user) throw "You need to be logged in";
+
+      await prisma.emailSettings.upsert({
+        where: { userId: user.id },
+        create: { userId: user.id, [settingKey]: value },
+        update: { [settingKey]: value },
+      });
+
+      return prisma.user.findUnique({ where: { id: user.id } });
+    },
   },
   CollectionMember: {
     collection: async (member) => {
