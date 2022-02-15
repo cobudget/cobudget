@@ -1,7 +1,7 @@
 import { useQuery, gql, useMutation } from "urql";
 import { omit } from "lodash";
+import { Checkbox } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
-import Button from "components/Button";
 
 const USER_SETTINGS_QUERY = gql`
   query UserSettings {
@@ -47,18 +47,19 @@ const EmailSettingItem = ({ settingKey, value }) => {
 
   return (
     <div>
-      {labels[settingKey]} Value: {String(value)}
-      <Button
+      {labels[settingKey]}
+      <Checkbox
+        onChange={(e) =>
+          setEmailSetting({ settingKey, value: e.target.checked })
+        }
+        checked={value}
         disabled={fetching}
-        onClick={() => setEmailSetting({ settingKey, value: !value })}
-      >
-        Toggle
-      </Button>
+      />
     </div>
   );
 };
 
-const SettingsIndex = ({ currentUser }) => {
+const SettingsIndex = () => {
   const [{ data, fetching, error }] = useQuery({
     query: USER_SETTINGS_QUERY,
   });
