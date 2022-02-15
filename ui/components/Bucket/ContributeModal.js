@@ -94,7 +94,7 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
         <h1 className="text-2xl mb-2 font-semibold">
           Contribute to {dream.title}
         </h1>
-        <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-800" }>
+        <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-600" }>
           {
             availableBalance >= 0 ?
             `Available balance: ${availableBalance} ${collection.currency}`
