@@ -23,11 +23,13 @@ import {
   getOrgMember,
   isAndGetCollMember,
   isAndGetCollMemberOrOrgAdmin,
+  isCollAdmin,
   isGrantingOpen,
   statusTypeToQuery,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
+import { CollectionTransaction } from "server/types";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -64,6 +66,8 @@ const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
     throw new Error("Collection member does not exist");
   } else if (!collectionMember.isApproved) {
     throw new Error("Collection member is not approved");
+  } else if (!collectionMember.hasJoined) {
+    throw new Error("Collection member has not accepted the invitation");
   }
 
   return skip;
@@ -184,6 +188,13 @@ const resolvers = {
         ? await prisma.user.findUnique({ where: { id: user.id } })
         : null;
     },
+    user: async (parent, { userId }) => {
+      // we let the resolvers grab any extra requested fields, so we don't accidentally leak e.g. emails
+      return prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true },
+      });
+    },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug || orgSlug === "c") return null;
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
@@ -279,6 +290,51 @@ const resolvers = {
         };
       }
     ),
+    //here
+    collectionTransactions: combineResolvers(
+      isCollMemberOrOrgAdmin,
+      async (parent, { collectionId, offset, limit }) => {
+        const transactions: [CollectionTransaction] = await prisma.$queryRaw`
+          (
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              null as "allocatedById", 
+              "amount",
+              "bucketId",
+              "amountBefore", 
+              null as "allocationType",
+              'CONTRIBUTION' as "transactionType",
+              "createdAt"
+            FROM "Contribution" where "collectionId" = ${collectionId}
+            
+            UNION ALL
+            
+            SELECT 
+              "id", 
+              "collectionMemberId", 
+              "allocatedById", 
+              "amount",
+              null as "bucketId",
+              "amountBefore", 
+              "allocationType",
+              'ALLOCATION' as "transactionType",
+              "createdAt"
+            FROM "Allocation" where "collectionId" = ${collectionId}
+          ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
+        `;
+
+        transactions.forEach(
+          (transaction) =>
+            (transaction.createdAt = new Date(transaction.createdAt))
+        );
+
+        return {
+          moreExist: transactions.length > limit,
+          transactions: transactions.slice(0, limit),
+        };
+      }
+    ),
     bucket: async (parent, { id }) => {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
       if (bucket.deleted) return null;
@@ -360,7 +416,7 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved }, { user }) => {
+      async (parent, { collectionId, isApproved }) => {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
@@ -373,17 +429,44 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, offset = 0, limit = 10 },
+        { collectionId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
+        const isAdmin = await isCollAdmin({
+          userId: user.id,
+          collectionId,
+        });
+
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
             where: {
               collectionId,
               ...(typeof isApproved === "boolean" && { isApproved }),
+              ...(search && {
+                OR: [
+                  {
+                    user: {
+                      username: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                  {
+                    user: {
+                      name: {
+                        contains: search,
+                        mode: "insensitive",
+                      },
+                    },
+                  },
+                ],
+              }),
+              ...(!isAdmin && { hasJoined: true }),
             },
             take: limit + 1,
             skip: offset,
+            ...(search && { include: { user: true } }),
           }
         );
 
@@ -1519,12 +1602,14 @@ const resolvers = {
             where: { email },
             create: {
               email,
-              collMemberships: { create: { isApproved: true, collectionId } },
+              collMemberships: {
+                create: { isApproved: true, collectionId, hasJoined: false },
+              },
             },
             update: {
               collMemberships: {
                 connectOrCreate: {
-                  create: { isApproved: true, collectionId },
+                  create: { isApproved: true, collectionId, hasJoined: false },
                   where: {
                     userId_collectionId: {
                       userId: user?.id ?? "undefined",
@@ -1712,6 +1797,7 @@ const resolvers = {
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
+        allocatedBy: currentCollMember.id,
       });
 
       return targetCollectionMember;
@@ -1725,6 +1811,15 @@ const resolvers = {
             isApproved: true,
           },
         });
+        //here
+        const currentCollMember = await prisma.collectionMember.findUnique({
+          where: {
+            userId_collectionId: {
+              userId: user.id,
+              collectionId: collectionId,
+            },
+          },
+        });
 
         for (const member of collectionMembers) {
           await allocateToMember({
@@ -1732,6 +1827,7 @@ const resolvers = {
             collectionId: collectionId,
             amount,
             type,
+            allocatedBy: currentCollMember.id,
           });
         }
 
@@ -1858,6 +1954,7 @@ const resolvers = {
           collectionMemberId: collectionMember.id,
           amount,
           bucketId: bucket.id,
+          amountBefore: contributionsForBucket || 0,
         },
       });
 
@@ -1991,6 +2088,29 @@ const resolvers = {
         });
       }
     ),
+    acceptInvitation: async (parent, { collectionId }, { user }) => {
+      if (!user) throw new Error("You need to be logged in.");
+
+      const member = await getCollectionMember({
+        collectionId,
+        userId: user.id,
+      });
+
+      if (!member) {
+        throw new Error("You are not a member of this collection");
+      }
+
+      if (member.hasJoined) {
+        throw new Error("Invitation not pending");
+      }
+
+      return prisma.collectionMember.update({
+        where: { id: member.id },
+        data: {
+          hasJoined: true,
+        },
+      });
+    },
     joinCollection: async (parent, { collectionId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
@@ -2190,12 +2310,29 @@ const resolvers = {
     email: (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.email;
+      if (parent.email) return parent.email;
     },
-    name: (parent, _, { user }) => {
+    name: async (parent, _, { user }) => {
       if (!user) return null;
       if (parent.id !== user.id) return null;
-      return parent.name;
+      if (parent.name) return parent.name;
+      // we end up here when requesting your own name but it's missing on the parent
+      return (
+        await prisma.user.findUnique({
+          where: { id: parent.id },
+          select: { name: true },
+        })
+      ).name;
+    },
+    username: async (parent) => {
+      if (parent.id) {
+        return (
+          await prisma.user.findUnique({
+            where: { id: parent.id },
+            select: { username: true },
+          })
+        ).username;
+      }
     },
     emailSettings: async (parent, args, { user }) => {
       if (user?.id !== parent.id) return null;
@@ -2592,6 +2729,32 @@ const resolvers = {
     collectionMember: async (contribution) => {
       return prisma.collectionMember.findUnique({
         where: { id: contribution.collectionMemberId },
+      });
+    },
+  },
+  CollectionTransaction: {
+    collectionMember: async (transaction) => {
+      return prisma.collectionMember.findUnique({
+        where: { id: transaction.collectionMemberId },
+      });
+    },
+    allocatedBy: async (transaction) => {
+      if (transaction.allocatedById)
+        return prisma.collectionMember.findUnique({
+          where: { id: transaction.allocatedById },
+        });
+      else return null;
+    },
+    bucket: async (transaction) => {
+      if (transaction.bucketId)
+        return prisma.bucket.findUnique({
+          where: { id: transaction.bucketId },
+        });
+      else return null;
+    },
+    collection: async (transaction) => {
+      return prisma.collection.findUnique({
+        where: { id: transaction.collectionId },
       });
     },
   },

@@ -90,7 +90,7 @@ const DreamSidebar = ({
   currentUser,
   canEdit,
   currentOrg,
-  showBucketReview
+  showBucketReview,
 }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
@@ -104,7 +104,7 @@ const DreamSidebar = ({
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const canApproveBucket =
-    !collection.requireBucketApproval && canEdit || 
+    (!collection.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isEventAdminOrGuide =
@@ -151,11 +151,13 @@ const DreamSidebar = ({
               >
                 Fund
               </Button>
-              {
-                showBucketReview ?
-                <Monster event={collection} bucket={dream} currentOrg={currentOrg} />
-                : null
-              }
+              {showBucketReview ? (
+                <Monster
+                  event={collection}
+                  bucket={dream}
+                  currentOrg={currentOrg}
+                />
+              ) : null}
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
@@ -208,7 +210,7 @@ const DreamSidebar = ({
                 }).catch((err) => alert(err.message))
               }
             >
-              Approve for granting
+              Open for funding
             </Button>
           )}
           {showMarkAsCompletedButton && (

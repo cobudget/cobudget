@@ -25,6 +25,8 @@ In `/ui`:
 docker-compose up
 ```
 
+Then, run `yarn migrate` in another terminal.
+
 ### Start development process
 
 In `/ui`
@@ -32,6 +34,8 @@ In `/ui`
 ```
 yarn dev
 ```
+
+You can login with the link shown in the terminal.
 
 ## License
 

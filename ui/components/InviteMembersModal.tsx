@@ -27,7 +27,7 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
   }
 `;
 
-const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
+export const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
   mutation InviteCollectionMembers($emails: String!, $collectionId: ID!) {
     inviteCollectionMembers(emails: $emails, collectionId: $collectionId) {
       id

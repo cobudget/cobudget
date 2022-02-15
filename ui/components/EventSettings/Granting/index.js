@@ -12,7 +12,7 @@ import SetMaxAmountToDream from "./SetMaxAmountToDream";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetRequireBucketApproval from './SetRequireBucketApproval';
+import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 
@@ -140,7 +140,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Require bucket approval"
+            primary="Require moderator approval of buckets before funding"
             secondary={collection.requireBucketApproval?.toString() ?? "false"}
             isSet={typeof collection.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}

@@ -1,18 +1,25 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, gql } from "urql";
+import { debounce } from "lodash";
 
 import Button from "../Button";
 import InviteMembersModal from "../InviteMembersModal";
 import LoadMore from "../LoadMore";
-
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
+import SearchBar from "components/EventMembers/SearchBar";
 
 export const COLLECTION_MEMBERS_QUERY = gql`
-  query Members($collectionId: ID!, $offset: Int, $limit: Int) {
+  query Members(
+    $collectionId: ID!
+    $search: String!
+    $offset: Int
+    $limit: Int
+  ) {
     approvedMembersPage: membersPage(
       collectionId: $collectionId
       isApproved: true
+      search: $search
       offset: $offset
       limit: $limit
     ) {
@@ -31,6 +38,7 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         balance
         email
         name
+        hasJoined
         user {
           id
           username
@@ -95,6 +103,7 @@ const DELETE_MEMBER = gql`
 `;
 
 const EventMembers = ({ collection, currentUser }) => {
+  const [searchString, setSearchString] = useState("");
   const [
     {
       data: {
@@ -114,10 +123,32 @@ const EventMembers = ({ collection, currentUser }) => {
       fetching: loading,
       error,
     },
+    searchApprovedMembers,
   ] = useQuery({
     query: COLLECTION_MEMBERS_QUERY,
-    variables: { collectionId: collection.id, offset: 0, limit: 1000 },
+    variables: {
+      collectionId: collection.id,
+      search: searchString,
+      offset: 0,
+      limit: 1000,
+    },
+    pause: true,
   });
+
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(searchApprovedMembers, 300, { leading: true });
+  }, [searchApprovedMembers]);
+
+  const items = useMemo(() => {
+    if (loading || !approvedMembers) {
+      return [];
+    }
+    return approvedMembers;
+  }, [approvedMembers, loading]);
+
+  useEffect(() => {
+    debouncedSearchMembers();
+  }, [debouncedSearchMembers]);
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
@@ -145,7 +176,13 @@ const EventMembers = ({ collection, currentUser }) => {
         />
 
         <div className="flex justify-between mb-3 items-center">
-          <h2 className="text-xl font-semibold">All collection members</h2>
+          <SearchBar
+            collection={collection}
+            value={searchString}
+            placeholder="Search members"
+            onChange={(e) => setSearchString(e.target.value)}
+            clearInput={() => setSearchString("")}
+          />
           {isAdmin && (
             <div className="flex items-center space-x-2">
               <Button onClick={() => setInviteModalOpen(true)}>
@@ -162,7 +199,7 @@ const EventMembers = ({ collection, currentUser }) => {
         </div>
 
         <MembersTable
-          approvedMembers={approvedMembers}
+          approvedMembers={items}
           updateMember={updateMember}
           deleteMember={deleteMember}
           collection={collection}

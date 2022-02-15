@@ -13,7 +13,7 @@ export default function Overview({
   error,
   bucket,
   openImageModal,
-  showBucketReview
+  showBucketReview,
 }) {
   if (!bucket) return null;
   const canEdit =

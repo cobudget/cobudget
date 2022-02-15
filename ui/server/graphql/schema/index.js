@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     currentUser: User
+    user(userId: ID!): User!
     currentOrg(orgSlug: String): Organization
     organizations: [Organization!]
     organization(orgId: ID!): Organization!
@@ -25,6 +26,7 @@ const schema = gql`
     membersPage(
       collectionId: ID!
       isApproved: Boolean
+      search: String
       offset: Int
       limit: Int
     ): MembersPage
@@ -35,6 +37,11 @@ const schema = gql`
       offset: Int
       limit: Int
     ): ContributionsPage
+    collectionTransactions(
+      collectionId: ID!
+      offset: Int
+      limit: Int
+    ): CollectionTransactionPage
   }
 
   type Mutation {
@@ -192,6 +199,7 @@ const schema = gql`
     acceptFunding(bucketId: ID!): Bucket
     markAsCompleted(bucketId: ID!): Bucket
 
+    acceptInvitation(collectionId: ID!): CollectionMember
     joinCollection(collectionId: ID!): CollectionMember
   }
 
@@ -349,6 +357,7 @@ const schema = gql`
     balance: Int # stored as cents
     email: String
     name: String
+    hasJoined: Boolean
     # roles: [Role]
   }
 
@@ -357,6 +366,7 @@ const schema = gql`
     members(
       collectionId: ID!
       isApproved: Boolean
+      search: String
       offset: Int
       limit: Int
     ): [CollectionMember]
@@ -488,6 +498,7 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    amountBefore: Int!
     createdAt: Date
     bucket: Bucket!
   }
@@ -502,7 +513,33 @@ const schema = gql`
     collection: Collection!
     collectionMember: CollectionMember!
     amount: Int!
+    allocatedById: Int!
+    allocationType: AllocationType!
+    amountBefore: Int!
     createdAt: Date
+  }
+
+  type CollectionTransaction {
+    id: ID!
+    collection: Collection!
+    collectionMember: CollectionMember!
+    allocatedBy: CollectionMember
+    amount: Int!
+    createdAt: Date
+    bucket: Bucket
+    allocatedById: Int
+    allocationType: AllocationType
+    amountBefore: Int
+    transactionType: TransactionType
+  }
+
+  type CollectionTransactionPage {
+    moreExist: Boolean
+    transactions(
+      collectionId: ID!
+      offset: Int
+      limit: Int
+    ): [CollectionTransaction]
   }
 
   # type GrantingPeriod {
@@ -549,6 +586,11 @@ const schema = gql`
     MULTILINE_TEXT
     BOOLEAN
     FILE
+  }
+
+  enum TransactionType {
+    ALLOCATION
+    CONTRIBUTION
   }
 
   type CustomField {
