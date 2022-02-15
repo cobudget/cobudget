@@ -94,9 +94,12 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
         <h1 className="text-2xl mb-2 font-semibold">
           Contribute to {dream.title}
         </h1>
-        <p className="text-gray-800">
-          Available balance: {availableBalance}{" "}
-          {collection.currency}
+        <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-800" }>
+          {
+            availableBalance >= 0 ?
+            `Available balance: ${availableBalance} ${collection.currency}`
+            : "Insufficient balance"
+          }
         </p>
         {collection.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
@@ -150,7 +153,7 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
             fullWidth
             color={collection.color}
             loading={loading}
-            disabled={inputValue === ""}
+            disabled={inputValue === "" || availableBalance < 0}
             className="my-2"
           >
             Fund
