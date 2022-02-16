@@ -43,7 +43,10 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
+const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+<div><a href="${appLink(
+  "/settings"
+)}">Go here</a> to change what kinds of emails notifications you receive</div>`;
 
 export default {
   inviteMember: async ({

@@ -78,7 +78,11 @@ const SettingsIndex = () => {
       <FormGroup className="max-w-xl mx-auto p-5 space-y-2 bg-white rounded-lg shadow">
         <div>Please send me an email when:</div>
         {Object.entries(emailSettings).map(([settingKey, value]) => (
-          <EmailSettingItem settingKey={settingKey} value={value} />
+          <EmailSettingItem
+            key={settingKey}
+            settingKey={settingKey}
+            value={value}
+          />
         ))}
       </FormGroup>
     </div>
