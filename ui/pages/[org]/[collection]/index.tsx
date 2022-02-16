@@ -9,6 +9,7 @@ import Button from "../../../components/Button";
 import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
+import getCurrencySymbol from "utils/getCurrencySymbol";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($collectionSlug: String!, $orgSlug: String) {
@@ -245,8 +246,8 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
                     Your Funds
                   </p>
                   <p>
-                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} €</span>{" "}
-                    <span>({currentUser.currentCollMember.amountContributed / 100} € in round)</span>
+                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
+                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
                   </p>
                   <Button
                     size="large"
