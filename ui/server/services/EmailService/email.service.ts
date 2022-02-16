@@ -359,13 +359,15 @@ export default {
 
     const { user } = await prisma.collectionMember.findUnique({
       where: { id: collectionMemberId },
-      include: { user: true },
+      include: { user: { include: { emailSettings: true } } },
     });
     const collection = await prisma.collection.findUnique({
       where: { id: collectionId },
       include: { organization: true },
     });
     const org = collection.organization;
+
+    if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
     await sendEmail({
       to: user.email,
@@ -392,31 +394,41 @@ export default {
       Contributions: Array<
         Prisma.ContributionCreateInput & {
           collectionMember: Prisma.CollectionMemberCreateInput & {
-            user: Prisma.UserCreateInput;
+            user: Prisma.UserCreateInput & {
+              emailSettings: Prisma.EmailSettingsCreateInput;
+            };
           };
         }
       >;
     };
   }) => {
-    const refundedCollMembers = uniqBy(
-      bucket.Contributions.map((contribution) => contribution.collectionMember),
+    const refundedCollMembersToEmail = uniqBy(
+      bucket.Contributions.map(
+        (contribution) => contribution.collectionMember
+      ).filter(
+        (roundMember) =>
+          roundMember.user.emailSettings?.refundedBecauseBucketCancelled ?? true
+      ),
       "id"
     );
-    const emails: SendEmailInput[] = refundedCollMembers.map((collMember) => {
-      const amount = bucket.Contributions.filter(
-        (contrib) => contrib.collectionMember.id === collMember.id
-      )
-        .map((contrib) => contrib.amount)
-        .reduce((a, b) => a + b, 0);
+    const emails: SendEmailInput[] = refundedCollMembersToEmail.map(
+      (collMember) => {
+        const amount = bucket.Contributions.filter(
+          (contrib) => contrib.collectionMember.id === collMember.id
+        )
+          .map((contrib) => contrib.amount)
+          .reduce((a, b) => a + b, 0);
 
-      return {
-        to: collMember.user.email,
-        subject: `${bucket.title} was cancelled`,
-        html: `The bucket “${escape(
-          bucket.title
-        )}” you have contributed to was cancelled in ${escape(
-          bucket.collection.title
-        )}. You've been refunded ${amount / 100} ${bucket.collection.currency}.
+        return {
+          to: collMember.user.email,
+          subject: `${bucket.title} was cancelled`,
+          html: `The bucket “${escape(
+            bucket.title
+          )}” you have contributed to was cancelled in ${escape(
+            bucket.collection.title
+          )}. You've been refunded ${amount / 100} ${
+            bucket.collection.currency
+          }.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
           `/${bucket.collection.organization.slug}/${bucket.collection.slug}`
@@ -424,8 +436,9 @@ export default {
         <br/><br/>
         ${footer}
         `,
-      };
-    });
+        };
+      }
+    );
     await sendEmails(emails);
   },
   bucketPublishedNotification: async ({
@@ -441,7 +454,11 @@ export default {
       collectionMember: collMembers,
     } = await prisma.collection.findUnique({
       where: { id: event.id },
-      include: { collectionMember: { include: { user: true } } },
+      include: {
+        collectionMember: {
+          include: { user: { include: { emailSettings: true } } },
+        },
+      },
     });
 
     const { cocreators } = await prisma.bucket.findUnique({
@@ -454,7 +471,8 @@ export default {
       .filter(
         (collMember) => !cocreators.map((co) => co.id).includes(collMember.id)
       )
-      .map((collMember) => collMember.user);
+      .map((collMember) => collMember.user)
+      .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
 
     const collLink = appLink(`/${currentOrg.slug}/${event.slug}`);
 
@@ -486,12 +504,15 @@ export default {
 
     const { cocreators } = await prisma.bucket.findUnique({
       where: { id: bucket.id },
-      include: { cocreators: { include: { user: true } } },
+      include: {
+        cocreators: { include: { user: { include: { emailSettings: true } } } },
+      },
     });
 
     const usersToNotify = cocreators
       .filter((cocreator) => cocreator.userId !== contributingUser.id)
-      .map((cocreator) => cocreator.user);
+      .map((cocreator) => cocreator.user)
+      .filter((user) => user.emailSettings?.contributionToYourBucket ?? true);
 
     const totalContributions = await bucketTotalContributions(bucket);
     const income = await bucketIncome(bucket);

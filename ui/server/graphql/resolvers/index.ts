@@ -2019,7 +2019,11 @@ const resolvers = {
             cocreators: true,
             collection: { include: { organization: true } },
             Contributions: {
-              include: { collectionMember: { include: { user: true } } },
+              include: {
+                collectionMember: {
+                  include: { user: { include: { emailSettings: true } } },
+                },
+              },
             },
           },
         });
