@@ -44,9 +44,10 @@ function quotedSection(html: string) {
 }
 
 const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+<br/>
 <div><a href="${appLink(
   "/settings"
-)}">Go here</a> to change what kinds of emails notifications you receive</div>`;
+)}">Go here</a> to change what kinds of email notifications you receive</div>`;
 
 export default {
   inviteMember: async ({
@@ -214,22 +215,28 @@ export default {
       .filter((url) => url.startsWith(userLinkStart))
       .map((link) => link.split(userLinkStart)[1]);
 
-    const mentionedUsers = uniqBy(
+    const mentionedUsersToEmail = uniqBy(
       await prisma.user.findMany({
         where: {
           id: { in: mentionedUserIds },
         },
+        include: {
+          emailSettings: true,
+        },
       }),
       "id"
-    );
+    )
+      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
+      .filter(
+        (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
+      );
 
     const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
-    const mentionEmails: SendEmailInput[] = mentionedUsers
-      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
-      .map((mentionedUser) => ({
+    const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
+      (mentionedUser) => ({
         to: mentionedUser.email,
         subject: `You were mentioned in a comment in the bucket ${dream.title}`,
         html: `${escape(
@@ -242,23 +249,30 @@ export default {
         <br/><br/>
         ${footer}
         `,
-      }));
+      })
+    );
 
     await sendEmails(mentionEmails);
 
-    const cocreators = await prisma.collectionMember.findMany({
-      where: { buckets: { some: { id: dream.id } } },
-      include: { user: true },
-    });
-
-    const cocreatorEmails: SendEmailInput[] = cocreators
+    const cocreatorsToEmail = (
+      await prisma.collectionMember.findMany({
+        where: { buckets: { some: { id: dream.id } } },
+        include: { user: { include: { emailSettings: true } } },
+      })
+    )
       .filter(
         (collectionMember) => collectionMember.id !== currentCollMember.id
       )
+      .filter(
+        (roundMember) =>
+          roundMember.user.emailSettings?.commentBecauseCocreator ?? true
+      );
+
+    const cocreatorEmails: SendEmailInput[] = cocreatorsToEmail
       // don't mail people here who were just mailed about being mentioned
       .filter(
         (cocreatorCollMember) =>
-          !mentionedUsers
+          !mentionedUsersToEmail
             .map((mentionedUser) => mentionedUser.id)
             .includes(cocreatorCollMember.user.id)
       )
@@ -287,31 +301,38 @@ export default {
         include: {
           collMember: {
             include: {
-              user: true,
+              user: {
+                include: {
+                  emailSettings: true,
+                },
+              },
             },
           },
         },
       });
-      const commenters = uniqBy(
+
+      const commentersToEmail = uniqBy(
         comments
           .map((comment) => comment.collMember.user)
           .filter((user) => currentUser.id !== user.id)
+          .filter((user) => user.emailSettings?.commentBecauseCommented ?? true)
           // don't email the mentions nor cocreators, we just emailed them above
           .filter(
             (user) =>
-              !cocreators
+              !cocreatorsToEmail
                 .map((cocreator) => cocreator.user.id)
                 .includes(user.id)
           )
           .filter(
             (user) =>
-              !mentionedUsers
+              !mentionedUsersToEmail
                 .map((mentionedUser) => mentionedUser.id)
                 .includes(user.id)
           ),
         "id"
       );
-      const commenterEmails = commenters.map((recipient) => ({
+
+      const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
         subject: `New comment by ${currentUser.name} in bucket ${dream.title}`,
         html: `Hey ${escape(recipient.name)}!

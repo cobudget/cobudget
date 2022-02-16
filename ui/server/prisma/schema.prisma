@@ -26,7 +26,7 @@ model User {
 
 model EmailSettings {
   id                             String  @id @default(cuid())
-  commentMentions                Boolean @default(true) //TODO: it's not in main yet so remember to integrate once merged
+  commentMentions                Boolean @default(true)
   commentBecauseCocreator        Boolean @default(true)
   commentBecauseCommented        Boolean @default(true)
   allocatedToYou                 Boolean @default(true)
