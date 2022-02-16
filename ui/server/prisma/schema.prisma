@@ -62,6 +62,12 @@ model CollectionMember {
   flags         Flag[]
   allocatedBy   Allocation[]   @relation("allocatedBy")
 
+  incomingAccount   Account @relation(name: "incoming", fields: [incomingAccountId], references: [id])
+  statusAccount     Account @relation(name: "status", fields: [outgoingAccountId], references: [id])
+  outgoingAccount   Account @relation(name: "outgoing", fields: [statusAccountId], references: [id])
+  incomingAccountId Int     @unique
+  outgoingAccountId Int     @unique
+  statusAccountId   Int     @unique
 
   @@unique([userId, collectionId])
 }
@@ -315,4 +321,23 @@ model DiscourseConfig {
   minPostLength    Int
   organization     Organization @relation(fields: [organizationId], references: [id])
   organizationId   String       @unique
+}
+
+model Account {
+  id Int @id @default(autoincrement())
+
+  incomingCollectionMember CollectionMember? @relation(name: "incoming")
+  outgoingCollectionMember CollectionMember? @relation(name: "outgoing")
+  statusCollectionMember   CollectionMember? @relation(name: "status")
+  fromTransactions         Transaction[]     @relation(name: "from")
+  toTransactions           Transaction[]     @relation(name: "to")
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+
+  fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
+  toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
+  fromAccountId Int
+  toAccountId   Int
 }
