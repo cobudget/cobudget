@@ -236,15 +236,23 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               required
             />
           </div>
-          <div className="flex justify-end items-start">
+          <div className="flex flex-col justify-end items-start">
             {collection.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
+                  <p className="font-bold my-0.5">
+                    Your Funds
+                  </p>
+                  <p>
+                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} €</span>{" "}
+                    <span>({currentUser.currentCollMember.amountContributed / 100} € in round)</span>
+                  </p>
                   <Button
                     size="large"
                     color={collection.color}
                     onClick={() => setNewDreamModalOpen(true)}
+                    className="mt-5"
                   >
                     New bucket
                   </Button>

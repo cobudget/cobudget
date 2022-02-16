@@ -2171,6 +2171,16 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
+    amountContributed: async (member) => {
+      const {
+        _sum: { amount: totalContributions },
+      } = await prisma.contribution.aggregate({
+        where: { collectionMemberId: member.id },
+        _sum: { amount: true },
+      });
+
+      return totalContributions;
+    },
     email: async (member, _, { user }) => {
       if (!user) return null;
       const currentCollMember = await prisma.collectionMember.findUnique({

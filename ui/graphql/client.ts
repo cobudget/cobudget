@@ -396,6 +396,13 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "membersPage", field.arguments);
                 });
+              
+              queryFields
+                .filter((field) => field.fieldName === "collection")
+                .forEach((field) => {
+                  cache.invalidate("Query", "collection", field.arguments);
+                });
+
             },
           },
         },
