@@ -340,6 +340,7 @@ model Account {
 model Transaction {
   id Int @id @default(autoincrement())
 
+  amount        Int
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
   fromAccountId Int
