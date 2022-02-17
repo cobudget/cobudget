@@ -226,6 +226,8 @@ model Bucket {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   Contributions    Contribution[]
+  account          Account            @relation(fields: [statusAccountId], references: [id])
+  statusAccountId  Int                @unique
 }
 
 model Image {
@@ -329,8 +331,10 @@ model Account {
   incomingCollectionMember CollectionMember? @relation(name: "incoming")
   outgoingCollectionMember CollectionMember? @relation(name: "outgoing")
   statusCollectionMember   CollectionMember? @relation(name: "status")
-  fromTransactions         Transaction[]     @relation(name: "from")
-  toTransactions           Transaction[]     @relation(name: "to")
+  bucket                   Bucket?
+
+  fromTransactions Transaction[] @relation(name: "from")
+  toTransactions   Transaction[] @relation(name: "to")
 }
 
 model Transaction {
