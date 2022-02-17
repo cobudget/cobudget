@@ -254,22 +254,21 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               currentUser?.currentCollMember?.hasJoined && (
                 <>
                   {
-                    grantingOpenOrStartingSoon &&
+                    grantingOpenOrStartingSoon ?
                     <>
                       <p className="font-bold my-0.5">
                         Your Funds
                       </p>
-                      <p>
+                      <p className="mb-5">
                         <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
                         <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
                       </p>
-                    </>
+                    </> : null
                   }
                   <Button
                     size="large"
                     color={collection.color}
                     onClick={() => setNewDreamModalOpen(true)}
-                    className="mt-5"
                   >
                     New bucket
                   </Button>
