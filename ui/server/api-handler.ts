@@ -8,6 +8,9 @@ interface Request extends NextApiRequest {
   // Passport adds these to the request object
   logout: () => void;
   user?: Express.User;
+  // added by cookieSession
+  sessionOptions: any;
+  session: any;
 }
 
 function handler() {
@@ -24,7 +27,6 @@ function handler() {
       cookieSession({
         name: "session",
         keys: [process.env.COOKIE_SECRET],
-        maxAge: 24 * 60 * 60 * 1000 * 30, // 30 days
         sameSite: "lax",
         secure: false,
         secureProxy:
@@ -33,6 +35,19 @@ function handler() {
           process.env.NODE_ENV !== "development" && !process.env.INSECURE_AUTH,
       })
     )
+    .use(function (req, res, next) {
+      if (!req.session.maxAge) {
+        if (req.body?.rememberMe) {
+          req.session.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+        } else {
+          req.session.maxAge = 12 * 60 * 60 * 1000; // 12 hours
+        }
+      }
+
+      req.sessionOptions.maxAge =
+        req.session.maxAge || req.sessionOptions.maxAge;
+      next();
+    })
     .use(passport.initialize())
     .use(passport.session());
 }
