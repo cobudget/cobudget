@@ -193,18 +193,6 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
 
   const { tag, s, f } = router.query;
   const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
-  // check if granting is open or starting soon
-  const [grantingOpenOrStartingSoon, setGrantingOpenOrStartingSoon] = useState(false);
-
-  useEffect(() => {
-    setGrantingOpenOrStartingSoon(
-      collection?.grantingIsOpen ||
-      (
-        collection?.grantingOpens && collection?.grantingOpens - Date.now() > 0
-        && collection?.grantingOpens - Date.now() < (7 * 24 * 60 * 60 * 1000)
-      )
-    );
-  }, [collection]);
 
   useEffect(() => {
     setStatusFilter(stringOrArrayIntoArray(f));
@@ -248,23 +236,20 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               required
             />
           </div>
-          <div className={`flex justify-end items-start ${grantingOpenOrStartingSoon && 'flex-col'}`}>
+          <div className={`flex flex-col justify-end items-start`}>
             {collection.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  {
-                    grantingOpenOrStartingSoon ?
-                    <>
-                      <p className="font-bold my-0.5">
-                        Your Funds
-                      </p>
-                      <p className="mb-5">
-                        <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
-                        <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
-                      </p>
-                    </> : null
-                  }
+                  
+                  <p className="font-bold my-0.5">
+                    Your Funds
+                  </p>
+                  <p className="mb-5">
+                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
+                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
+                  </p>
+                  
                   <Button
                     size="large"
                     color={collection.color}
