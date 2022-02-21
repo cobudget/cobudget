@@ -43,7 +43,11 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i>`;
+const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+<br/>
+<div><a href="${appLink(
+  "/settings"
+)}">Go here</a> to change what kinds of email notifications you receive</div>`;
 
 export default {
   inviteMember: async ({
@@ -211,22 +215,28 @@ export default {
       .filter((url) => url.startsWith(userLinkStart))
       .map((link) => link.split(userLinkStart)[1]);
 
-    const mentionedUsers = uniqBy(
+    const mentionedUsersToEmail = uniqBy(
       await prisma.user.findMany({
         where: {
           id: { in: mentionedUserIds },
         },
+        include: {
+          emailSettings: true,
+        },
       }),
       "id"
-    );
+    )
+      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
+      .filter(
+        (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
+      );
 
     const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
-    const mentionEmails: SendEmailInput[] = mentionedUsers
-      .filter((mentionedUser) => mentionedUser.id !== currentUser.id)
-      .map((mentionedUser) => ({
+    const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
+      (mentionedUser) => ({
         to: mentionedUser.email,
         subject: `You were mentioned in a comment in the bucket ${dream.title}`,
         html: `${escape(
@@ -239,23 +249,30 @@ export default {
         <br/><br/>
         ${footer}
         `,
-      }));
+      })
+    );
 
     await sendEmails(mentionEmails);
 
-    const cocreators = await prisma.collectionMember.findMany({
-      where: { buckets: { some: { id: dream.id } } },
-      include: { user: true },
-    });
-
-    const cocreatorEmails: SendEmailInput[] = cocreators
+    const cocreatorsToEmail = (
+      await prisma.collectionMember.findMany({
+        where: { buckets: { some: { id: dream.id } } },
+        include: { user: { include: { emailSettings: true } } },
+      })
+    )
       .filter(
         (collectionMember) => collectionMember.id !== currentCollMember.id
       )
+      .filter(
+        (roundMember) =>
+          roundMember.user.emailSettings?.commentBecauseCocreator ?? true
+      );
+
+    const cocreatorEmails: SendEmailInput[] = cocreatorsToEmail
       // don't mail people here who were just mailed about being mentioned
       .filter(
         (cocreatorCollMember) =>
-          !mentionedUsers
+          !mentionedUsersToEmail
             .map((mentionedUser) => mentionedUser.id)
             .includes(cocreatorCollMember.user.id)
       )
@@ -284,31 +301,38 @@ export default {
         include: {
           collMember: {
             include: {
-              user: true,
+              user: {
+                include: {
+                  emailSettings: true,
+                },
+              },
             },
           },
         },
       });
-      const commenters = uniqBy(
+
+      const commentersToEmail = uniqBy(
         comments
           .map((comment) => comment.collMember.user)
           .filter((user) => currentUser.id !== user.id)
+          .filter((user) => user.emailSettings?.commentBecauseCommented ?? true)
           // don't email the mentions nor cocreators, we just emailed them above
           .filter(
             (user) =>
-              !cocreators
+              !cocreatorsToEmail
                 .map((cocreator) => cocreator.user.id)
                 .includes(user.id)
           )
           .filter(
             (user) =>
-              !mentionedUsers
+              !mentionedUsersToEmail
                 .map((mentionedUser) => mentionedUser.id)
                 .includes(user.id)
           ),
         "id"
       );
-      const commenterEmails = commenters.map((recipient) => ({
+
+      const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
         subject: `New comment by ${currentUser.name} in bucket ${dream.title}`,
         html: `Hey ${escape(recipient.name)}!
@@ -335,13 +359,15 @@ export default {
 
     const { user } = await prisma.collectionMember.findUnique({
       where: { id: collectionMemberId },
-      include: { user: true },
+      include: { user: { include: { emailSettings: true } } },
     });
     const collection = await prisma.collection.findUnique({
       where: { id: collectionId },
       include: { organization: true },
     });
     const org = collection.organization;
+
+    if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
     await sendEmail({
       to: user.email,
@@ -368,31 +394,41 @@ export default {
       Contributions: Array<
         Prisma.ContributionCreateInput & {
           collectionMember: Prisma.CollectionMemberCreateInput & {
-            user: Prisma.UserCreateInput;
+            user: Prisma.UserCreateInput & {
+              emailSettings: Prisma.EmailSettingsCreateInput;
+            };
           };
         }
       >;
     };
   }) => {
-    const refundedCollMembers = uniqBy(
-      bucket.Contributions.map((contribution) => contribution.collectionMember),
+    const refundedCollMembersToEmail = uniqBy(
+      bucket.Contributions.map(
+        (contribution) => contribution.collectionMember
+      ).filter(
+        (roundMember) =>
+          roundMember.user.emailSettings?.refundedBecauseBucketCancelled ?? true
+      ),
       "id"
     );
-    const emails: SendEmailInput[] = refundedCollMembers.map((collMember) => {
-      const amount = bucket.Contributions.filter(
-        (contrib) => contrib.collectionMember.id === collMember.id
-      )
-        .map((contrib) => contrib.amount)
-        .reduce((a, b) => a + b, 0);
+    const emails: SendEmailInput[] = refundedCollMembersToEmail.map(
+      (collMember) => {
+        const amount = bucket.Contributions.filter(
+          (contrib) => contrib.collectionMember.id === collMember.id
+        )
+          .map((contrib) => contrib.amount)
+          .reduce((a, b) => a + b, 0);
 
-      return {
-        to: collMember.user.email,
-        subject: `${bucket.title} was cancelled`,
-        html: `The bucket “${escape(
-          bucket.title
-        )}” you have contributed to was cancelled in ${escape(
-          bucket.collection.title
-        )}. You've been refunded ${amount / 100} ${bucket.collection.currency}.
+        return {
+          to: collMember.user.email,
+          subject: `${bucket.title} was cancelled`,
+          html: `The bucket “${escape(
+            bucket.title
+          )}” you have contributed to was cancelled in ${escape(
+            bucket.collection.title
+          )}. You've been refunded ${amount / 100} ${
+            bucket.collection.currency
+          }.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
           `/${bucket.collection.organization.slug}/${bucket.collection.slug}`
@@ -400,8 +436,9 @@ export default {
         <br/><br/>
         ${footer}
         `,
-      };
-    });
+        };
+      }
+    );
     await sendEmails(emails);
   },
   bucketPublishedNotification: async ({
@@ -417,7 +454,11 @@ export default {
       collectionMember: collMembers,
     } = await prisma.collection.findUnique({
       where: { id: event.id },
-      include: { collectionMember: { include: { user: true } } },
+      include: {
+        collectionMember: {
+          include: { user: { include: { emailSettings: true } } },
+        },
+      },
     });
 
     const { cocreators } = await prisma.bucket.findUnique({
@@ -430,7 +471,8 @@ export default {
       .filter(
         (collMember) => !cocreators.map((co) => co.id).includes(collMember.id)
       )
-      .map((collMember) => collMember.user);
+      .map((collMember) => collMember.user)
+      .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
 
     const collLink = appLink(`/${currentOrg.slug}/${event.slug}`);
 
@@ -462,12 +504,15 @@ export default {
 
     const { cocreators } = await prisma.bucket.findUnique({
       where: { id: bucket.id },
-      include: { cocreators: { include: { user: true } } },
+      include: {
+        cocreators: { include: { user: { include: { emailSettings: true } } } },
+      },
     });
 
     const usersToNotify = cocreators
       .filter((cocreator) => cocreator.userId !== contributingUser.id)
-      .map((cocreator) => cocreator.user);
+      .map((cocreator) => cocreator.user)
+      .filter((user) => user.emailSettings?.contributionToYourBucket ?? true);
 
     const totalContributions = await bucketTotalContributions(bucket);
     const income = await bucketIncome(bucket);
