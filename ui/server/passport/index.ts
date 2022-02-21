@@ -10,7 +10,8 @@ declare global {
     interface User {
       id: string;
       email: string;
-      provider: string;
+      // TODO: made this optional since we're not actually providing it on the user object. what was this added for?
+      provider?: string;
       redirect?: string;
     }
   }
