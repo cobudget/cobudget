@@ -1,10 +1,12 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { Checkbox, FormControlLabel } from "@material-ui/core";
 import TextField from "./TextField";
 import Button from "./Button";
 
 export default function AuthenticationForm() {
   const [email, setEmail] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { r } = router.query;
@@ -20,6 +22,7 @@ export default function AuthenticationForm() {
           body: JSON.stringify({
             redirect,
             destination: email,
+            rememberMe,
           }),
           headers: { "Content-Type": "application/json" },
         })
@@ -34,7 +37,6 @@ export default function AuthenticationForm() {
           });
       }}
     >
-      {/* @ts-ignore */}
       <TextField
         name="email"
         inputProps={{
@@ -45,6 +47,15 @@ export default function AuthenticationForm() {
         label="Email"
         className="mb-4"
         placeholder="me@hello.com"
+      />
+      <FormControlLabel
+        control={
+          <Checkbox
+            value={rememberMe}
+            onChange={(evt) => setRememberMe(evt.target.checked)}
+          />
+        }
+        label="Keep me logged in"
       />
       <Button
         type="submit"

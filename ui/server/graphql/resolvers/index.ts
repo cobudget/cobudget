@@ -2019,7 +2019,11 @@ const resolvers = {
             cocreators: true,
             collection: { include: { organization: true } },
             Contributions: {
-              include: { collectionMember: { include: { user: true } } },
+              include: {
+                collectionMember: {
+                  include: { user: { include: { emailSettings: true } } },
+                },
+              },
             },
           },
         });
@@ -2142,6 +2146,17 @@ const resolvers = {
       });
 
       return collectionMember;
+    },
+    setEmailSetting: async (parent, { settingKey, value }, { user }) => {
+      if (!user) throw "You need to be logged in";
+
+      await prisma.emailSettings.upsert({
+        where: { userId: user.id },
+        create: { userId: user.id, [settingKey]: value },
+        update: { [settingKey]: value },
+      });
+
+      return prisma.user.findUnique({ where: { id: user.id } });
     },
   },
   CollectionMember: {
@@ -2343,6 +2358,15 @@ const resolvers = {
           })
         ).username;
       }
+    },
+    emailSettings: async (parent, args, { user }) => {
+      if (user?.id !== parent.id) return null;
+
+      return prisma.emailSettings.upsert({
+        where: { userId: parent.id },
+        create: { userId: parent.id },
+        update: {},
+      });
     },
   },
   Organization: {

@@ -21,6 +21,20 @@ model User {
   image           String?
   orgMemberships  OrgMember[]
   collMemberships CollectionMember[]
+  emailSettings   EmailSettings?
+}
+
+model EmailSettings {
+  id                             String  @id @default(cuid())
+  commentMentions                Boolean @default(true)
+  commentBecauseCocreator        Boolean @default(true)
+  commentBecauseCommented        Boolean @default(true)
+  allocatedToYou                 Boolean @default(true)
+  refundedBecauseBucketCancelled Boolean @default(true)
+  bucketPublishedInRound         Boolean @default(true)
+  contributionToYourBucket       Boolean @default(true)
+  user                           User    @relation(fields: [userId], references: [id])
+  userId                         String
 }
 
 model OrgMember {

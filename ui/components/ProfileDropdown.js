@@ -92,6 +92,9 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
             >
               Edit profile
             </button>
+            <Link href="/settings">
+              <a className={css.button}>Email settings</a>
+            </Link>
             <a href="/api/auth/logout" className={css.button}>
               Sign out
             </a>
