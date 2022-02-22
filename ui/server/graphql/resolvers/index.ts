@@ -18,6 +18,7 @@ import {
   bucketIncome,
   bucketMinGoal,
   bucketTotalContributions,
+  canViewRound,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -224,7 +225,7 @@ const resolvers = {
         });
       }
 
-      return prisma.collection.findMany({
+      const allColls = await prisma.collection.findMany({
         where: {
           organizationId: orgId,
           archived: { not: true },
@@ -232,6 +233,15 @@ const resolvers = {
         },
         take: limit,
       });
+
+      // filter away colls the current user shouldn't be able to view
+      return (
+        await Promise.all(
+          allColls.map(async (coll) =>
+            (await canViewRound({ round: coll, user })) ? coll : undefined
+          )
+        )
+      ).filter(Boolean);
     },
     collection: async (parent, { orgSlug, collectionSlug }, { user }) => {
       if (!collectionSlug) return null;
@@ -245,19 +255,7 @@ const resolvers = {
       });
       if (!collection) return null;
 
-      if (collection.visibility === "PUBLIC") {
-        return collection;
-      }
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          userId_collectionId: {
-            userId: user?.id ?? "undefined",
-            collectionId: collection.id,
-          },
-        },
-      });
-
-      if (collectionMember?.isApproved) {
+      if (await canViewRound({ round: collection, user })) {
         return collection;
       } else {
         return null;
