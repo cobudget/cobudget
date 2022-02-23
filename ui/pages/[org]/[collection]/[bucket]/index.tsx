@@ -111,6 +111,9 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
     collection.bucketReviewIsOpen &&
     collection.guidelines.length > 0 &&
     bucket?.published;
+
+  if (!bucket || !collection) return null;
+
   return (
     <>
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
