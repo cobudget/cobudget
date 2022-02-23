@@ -2,6 +2,7 @@ import { Tooltip } from "react-tippy";
 import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
+import { Modal } from "@material-ui/core";
 
 import Dropdown from "../Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "../Icons";
@@ -79,6 +80,50 @@ const DELETE_DREAM_MUTATION = gql`
   }
 `;
 
+const ConfirmCancelBucket = ({ open, close, bucketId }) => {
+  const [{ fetching }, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
+
+  return (
+    <Modal open={open} className="flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <div className="font-bold text-lg mb-2">
+          Are you sure you want to cancel this bucket?
+        </div>
+        <div className="mb-2">
+          If you confirm, the money that has already been given to this bucket
+          will be returned to its funders.
+        </div>
+        <div className="font-bold">Caution: This cannot be undone</div>
+        <div className="mt-4 flex justify-end items-center">
+          <div className="flex">
+            <Button
+              color="white"
+              variant="secondary"
+              onClick={() => close()}
+              disabled={fetching}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="red"
+              loading={fetching}
+              onClick={() =>
+                cancelFunding({ bucketId }).then(({ error }) => {
+                  if (error) alert(error.message);
+
+                  close();
+                })
+              }
+            >
+              Yes, cancel it
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const css = {
   dropdownButton:
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
@@ -95,12 +140,12 @@ const DreamSidebar = ({
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
+  const [confirmCancelBucketOpen, setConfirmCancelBucketOpen] = useState(false);
 
   const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [, publishDream] = useMutation(PUBLISH_DREAM_MUTATION);
   const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION);
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
-  const [, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
   const [, deleteDream] = useMutation(DELETE_DREAM_MUTATION);
 
   const canApproveBucket =
@@ -259,19 +304,22 @@ const DreamSidebar = ({
                   </button>
                 )}
                 {showCancelFundingButton && (
-                  <button
-                    className={css.dropdownButton}
-                    onClick={() =>
-                      confirm(
-                        "Are you sure you would like to cancel funding? This is irreversible and will return all contributions to those that have contributed."
-                      ) &&
-                      cancelFunding({ bucketId: dream.id })
-                        .then(() => setActionsDropdownOpen(false))
-                        .catch((err) => alert(err.message))
-                    }
-                  >
-                    Cancel funding
-                  </button>
+                  <>
+                    <ConfirmCancelBucket
+                      open={confirmCancelBucketOpen}
+                      close={() => {
+                        setConfirmCancelBucketOpen(false);
+                        setActionsDropdownOpen(false);
+                      }}
+                      bucketId={dream.id}
+                    />
+                    <button
+                      className={css.dropdownButton}
+                      onClick={() => setConfirmCancelBucketOpen(true)}
+                    >
+                      Cancel bucket
+                    </button>
+                  </>
                 )}
                 {showUnapproveButton && (
                   <button
