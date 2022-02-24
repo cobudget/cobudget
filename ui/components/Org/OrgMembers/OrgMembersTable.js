@@ -43,7 +43,7 @@ export const ORG_MEMBERS_QUERY = gql`
 
 const ActionsDropdown = ({
   updateOrgMember,
-  //deleteMember,
+  deleteGroupMember,
   currentOrg,
   member,
 }) => {
@@ -86,8 +86,6 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        {/* how to also remove the user's event memberships when their org
-            membership is removed?
         <MenuItem
           color="error.main"
           onClick={() => {
@@ -96,13 +94,13 @@ const ActionsDropdown = ({
                 `Are you sure you would like to delete org membership from user with email ${member.user.email}?`
               )
             )
-              deleteMember({
-                variables: { memberId: member.id },
+              deleteGroupMember({
+                groupMemberId: member.id,
               });
           }}
         >
           <Box color="error.main">Delete</Box>
-        </MenuItem>*/}
+        </MenuItem>
       </Menu>
     </>
   );
@@ -125,7 +123,7 @@ const Page = ({
   variables,
   isLastPage,
   onLoadMore,
-  deleteMember,
+  deleteGroupMember,
   updateOrgMember,
   currentOrg,
 }) => {
@@ -175,7 +173,7 @@ const Page = ({
           <TableCell align="right" padding="none">
             <ActionsDropdown
               member={member}
-              deleteMember={deleteMember}
+              deleteGroupMember={deleteGroupMember}
               updateOrgMember={updateOrgMember}
               currentOrg={currentOrg}
             />
@@ -201,7 +199,11 @@ const Page = ({
   );
 };
 
-const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
+const OrgMembersTable = ({
+  updateOrgMember,
+  deleteGroupMember,
+  currentOrg,
+}) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
   ]);
@@ -231,7 +233,7 @@ const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
                     onLoadMore={({ limit, offset }) => {
                       setPageVariables([...pageVariables, { limit, offset }]);
                     }}
-                    deleteMember={deleteMember}
+                    deleteGroupMember={deleteGroupMember}
                     updateOrgMember={updateOrgMember}
                     currentOrg={currentOrg}
                   />
