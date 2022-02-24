@@ -62,13 +62,14 @@ model CollectionMember {
   flags         Flag[]
   allocatedBy   Allocation[]   @relation("allocatedBy")
 
-  incomingAccount   Account @relation(name: "incoming", fields: [incomingAccountId], references: [id])
-  statusAccount     Account @relation(name: "status", fields: [outgoingAccountId], references: [id])
-  outgoingAccount   Account @relation(name: "outgoing", fields: [statusAccountId], references: [id])
-  incomingAccountId Int     @unique
-  outgoingAccountId Int     @unique
-  statusAccountId   Int     @unique
+  incomingAccount   Account? @relation(name: "incoming", fields: [incomingAccountId], references: [id])
+  statusAccount     Account? @relation(name: "status", fields: [outgoingAccountId], references: [id])
+  outgoingAccount   Account? @relation(name: "outgoing", fields: [statusAccountId], references: [id])
+  incomingAccountId String?  @unique
+  outgoingAccountId String?  @unique
+  statusAccountId   String?  @unique
 
+  transactionsCreated Transaction[]
   @@unique([userId, collectionId])
 }
 
@@ -226,8 +227,8 @@ model Bucket {
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   Contributions    Contribution[]
-  account          Account            @relation(fields: [statusAccountId], references: [id])
-  statusAccountId  Int                @unique
+  account          Account?           @relation(fields: [statusAccountId], references: [id])
+  statusAccountId  String?            @unique
 }
 
 model Image {
@@ -326,23 +327,35 @@ model DiscourseConfig {
 }
 
 model Account {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
   incomingCollectionMember CollectionMember? @relation(name: "incoming")
   outgoingCollectionMember CollectionMember? @relation(name: "outgoing")
   statusCollectionMember   CollectionMember? @relation(name: "status")
   bucket                   Bucket?
 
-  fromTransactions Transaction[] @relation(name: "from")
-  toTransactions   Transaction[] @relation(name: "to")
+  outgoingTransactions Transaction[] @relation(name: "from")
+  incomingTransactions Transaction[] @relation(name: "to")
+
+  createdAt DateTime @default(now())
 }
 
 model Transaction {
-  id Int @id @default(autoincrement())
+  id String @id @default(cuid())
 
-  amount        Int
+  type               TransactionType
+  amount             Int
+  createdAt          DateTime         @default(now())
+  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String
+
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
-  fromAccountId Int
-  toAccountId   Int
+  fromAccountId String
+  toAccountId   String
+}
+
+enum TransactionType {
+  ALLOCATION
+  CONTRIBUTION
 }

@@ -1793,7 +1793,7 @@ const resolvers = {
         throw new Error("You are not admin for this collection");
 
       await allocateToMember({
-        collectionMemberId,
+        member: targetCollectionMember,
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
@@ -1823,7 +1823,7 @@ const resolvers = {
 
         for (const member of collectionMembers) {
           await allocateToMember({
-            collectionMemberId: member.id,
+            member,
             collectionId: collectionId,
             amount,
             type,
@@ -1958,6 +1958,16 @@ const resolvers = {
         },
       });
 
+      await prisma.transaction.create({
+        data: {
+          type: "CONTRIBUTION",
+          collectionMemberId: collectionMember.id,
+          amount,
+          toAccountId: bucket.statusAccountId,
+          fromAccountId: collectionMember.statusAccountId,
+        },
+      });
+
       await eventHub.publish("contribute-to-bucket", {
         collection,
         bucket,
@@ -2036,6 +2046,9 @@ const resolvers = {
             approvedAt: null,
             canceledAt: new Date(),
             Contributions: { deleteMany: {} },
+            account: {
+              update: { incomingTransactions: { deleteMany: {} } },
+            },
           },
         });
 
@@ -2155,6 +2168,29 @@ const resolvers = {
         where: { id: member.userId },
       }),
     balance: async (member) => {
+      if (!member.statusAccountId) return 0;
+
+      console.time("memberBalanceTransactions");
+      const {
+        _sum: { amount: debit },
+      } = await prisma.transaction.aggregate({
+        where: { toAccountId: member.statusAccountId },
+        _sum: { amount: true },
+      });
+
+      const {
+        _sum: { amount: credit },
+      } = await prisma.transaction.aggregate({
+        where: { fromAccountId: member.statusAccountId },
+        _sum: { amount: true },
+      });
+
+      console.timeEnd("memberBalanceTransactions");
+
+      const debitMinusCredit = debit - credit;
+
+      console.time("memberBalanceAllocationsAndContributions");
+
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2169,7 +2205,16 @@ const resolvers = {
         _sum: { amount: true },
       });
 
-      return totalAllocations - totalContributions;
+      console.timeEnd("memberBalanceAllocationsAndContributions");
+
+      const allocationsMinusContributions =
+        totalAllocations - totalContributions;
+
+      if (debitMinusCredit !== allocationsMinusContributions) {
+        console.error("Member balance is not adding up");
+      }
+
+      return debitMinusCredit;
     },
     email: async (member, _, { user }) => {
       if (!user) return null;
@@ -2386,12 +2431,29 @@ const resolvers = {
     },
     totalAllocations: async (collection) => {
       const {
+        _sum: { amount: transactionAmount },
+      } = await prisma.transaction.aggregate({
+        where: {
+          toAccount: {
+            statusCollectionMember: { collectionId: collection.id },
+          },
+          type: "ALLOCATION",
+        },
+        _sum: { amount: true },
+      });
+
+      const {
         _sum: { amount },
       } = await prisma.allocation.aggregate({
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
-      return amount;
+
+      if (transactionAmount !== amount) {
+        console.error("total allocation amounts don't add up properly...");
+      }
+
+      return transactionAmount;
     },
     totalContributions: async (collection) => {
       const {
@@ -2442,6 +2504,35 @@ const resolvers = {
       return totalContributionsFunded;
     },
     totalInMembersBalances: async (collection) => {
+      console.time("creditMinusDebit");
+
+      const {
+        _sum: { amount: totalCredit },
+      } = await prisma.transaction.aggregate({
+        where: {
+          toAccount: {
+            statusCollectionMember: { collectionId: collection.id },
+          },
+        },
+        _sum: { amount: true },
+      });
+
+      const {
+        _sum: { amount: totalDebit },
+      } = await prisma.transaction.aggregate({
+        where: {
+          fromAccount: {
+            statusCollectionMember: { collectionId: collection.id },
+          },
+        },
+        _sum: { amount: true },
+      });
+      console.timeEnd("creditMinusDebit");
+
+      const balance = totalCredit - totalDebit;
+
+      console.time("allocationsMinusContributions");
+
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2455,6 +2546,15 @@ const resolvers = {
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
+
+      const allocationsMinusContibutions =
+        totalAllocations - totalContributions;
+
+      console.timeEnd("allocationsMinusContributions");
+
+      if (balance !== allocationsMinusContibutions) {
+        console.error("Total in members balances not adding up");
+      }
 
       return totalAllocations - totalContributions;
     },
