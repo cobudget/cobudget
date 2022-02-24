@@ -32,7 +32,6 @@ export const ORG_MEMBERS_QUERY = gql`
           id
           name
           username
-          email
           verifiedEmail
           avatar
         }
@@ -91,7 +90,7 @@ const ActionsDropdown = ({
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete org membership from user with email ${member.user.email}?`
+                `Are you sure you would like to delete org membership from user with email ${member.email}?`
               )
             )
               deleteGroupMember({
