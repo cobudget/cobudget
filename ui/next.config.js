@@ -22,11 +22,15 @@ module.exports = (phase) => {
     // these are for realities
     REACT_APP_GRAPHQL_ENDPOINT: process.env.REACT_APP_GRAPHQL_ENDPOINT,
     REACT_APP_GRAPHQL_SUBSCRIPTION: process.env.REACT_APP_GRAPHQL_SUBSCRIPTION,
+    HELPSCOUT_KEY: process.env.HELPSCOUT_KEY,
   };
   return withBundleAnalyzer({
     env,
     eslint: {
       ignoreDuringBuilds: true,
+    },
+    compiler: {
+      styledComponents: true,
     },
   });
 };

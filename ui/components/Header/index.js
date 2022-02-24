@@ -6,6 +6,7 @@ import { modals } from "components/Modal/index";
 import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 const css = {
   mobileProfileItem:
@@ -239,6 +240,9 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                 >
                   Edit profile
                 </button>
+                <Link href={"/settings"}>
+                  <a className={css.mobileProfileItem}>Email settings</a>
+                </Link>
                 <a href={"/api/auth/logout"} className={css.mobileProfileItem}>
                   Sign out
                 </a>

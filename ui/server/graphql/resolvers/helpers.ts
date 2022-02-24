@@ -254,3 +254,23 @@ export function statusTypeToQuery(statusType) {
       return false;
   }
 }
+
+export async function canViewRound({ round, user }) {
+  if (round.visibility === "PUBLIC") {
+    return true;
+  }
+  const roundMember = await prisma.collectionMember.findUnique({
+    where: {
+      userId_collectionId: {
+        userId: user?.id ?? "undefined",
+        collectionId: round.id,
+      },
+    },
+  });
+
+  if (roundMember?.isApproved) {
+    return true;
+  } else {
+    return false;
+  }
+}

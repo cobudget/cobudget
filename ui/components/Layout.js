@@ -1,6 +1,7 @@
 import React from "react";
 import Head from "next/head";
 import Header from "./Header";
+import "../lib/beacon";
 
 const LinkOut = ({ href, children }) => {
   return (
@@ -39,7 +40,7 @@ const Layout = ({
         {children}
       </div>
 
-      <div className="space-y-2 text-sm text-center mt-auto py-8 text-gray-500">
+      <div className="space-y-2 text-sm text-center mt-auto py-8 pb-20 text-gray-500">
         {/* NOTE TO PEOPLE WANTING TO EDIT THIS:
             Please see our license in the file /LICENSE in this repo for details on how you're allowed to change this section */}
         <div>

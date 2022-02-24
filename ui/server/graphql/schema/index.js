@@ -201,6 +201,8 @@ const schema = gql`
 
     acceptInvitation(collectionId: ID!): CollectionMember
     joinCollection(collectionId: ID!): CollectionMember
+
+    setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
   type Organization {
@@ -323,6 +325,7 @@ const schema = gql`
     createdAt: Date
     currentOrgMember(orgSlug: String): OrgMember
     currentCollMember(orgSlug: String, collectionSlug: String): CollectionMember
+    emailSettings: JSON
   }
 
   type OrgMember {
@@ -354,6 +357,7 @@ const schema = gql`
     isApproved: Boolean!
     createdAt: Date
     balance: Int # stored as cents
+    amountContributed: Int
     email: String
     name: String
     hasJoined: Boolean

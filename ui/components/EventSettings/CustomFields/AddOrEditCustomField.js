@@ -82,7 +82,7 @@ export default function AddOrEditCustomField({
   },
 }) {
   const editing = Boolean(customField.id);
-  const [typeInputValue, setTypeInputValue] = useState("TEXT");
+  const [typeInputValue, setTypeInputValue] = useState(customField.type);
 
   const [{ fetching: loading }, addOrEditCustomField] = useMutation(
     editing ? EDIT_CUSTOM_FIELD_MUTATION : ADD_CUSTOM_FIELD_MUTATION

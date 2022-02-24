@@ -95,6 +95,7 @@ export const TOP_LEVEL_QUERY = gql`
         isApproved
         hasJoined
         balance
+        amountContributed
         collection {
           id
           title

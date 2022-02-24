@@ -18,6 +18,7 @@ import {
   bucketIncome,
   bucketMinGoal,
   bucketTotalContributions,
+  canViewRound,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -224,7 +225,7 @@ const resolvers = {
         });
       }
 
-      return prisma.collection.findMany({
+      const allColls = await prisma.collection.findMany({
         where: {
           organizationId: orgId,
           archived: { not: true },
@@ -232,6 +233,15 @@ const resolvers = {
         },
         take: limit,
       });
+
+      // filter away colls the current user shouldn't be able to view
+      return (
+        await Promise.all(
+          allColls.map(async (coll) =>
+            (await canViewRound({ round: coll, user })) ? coll : undefined
+          )
+        )
+      ).filter(Boolean);
     },
     collection: async (parent, { orgSlug, collectionSlug }, { user }) => {
       if (!collectionSlug) return null;
@@ -245,19 +255,7 @@ const resolvers = {
       });
       if (!collection) return null;
 
-      if (collection.visibility === "PUBLIC") {
-        return collection;
-      }
-      const collectionMember = await prisma.collectionMember.findUnique({
-        where: {
-          userId_collectionId: {
-            userId: user?.id ?? "undefined",
-            collectionId: collection.id,
-          },
-        },
-      });
-
-      if (collectionMember?.isApproved) {
+      if (await canViewRound({ round: collection, user })) {
         return collection;
       } else {
         return null;
@@ -2029,7 +2027,11 @@ const resolvers = {
             cocreators: true,
             collection: { include: { organization: true } },
             Contributions: {
-              include: { collectionMember: { include: { user: true } } },
+              include: {
+                collectionMember: {
+                  include: { user: { include: { emailSettings: true } } },
+                },
+              },
             },
           },
         });
@@ -2156,6 +2158,17 @@ const resolvers = {
 
       return collectionMember;
     },
+    setEmailSetting: async (parent, { settingKey, value }, { user }) => {
+      if (!user) throw "You need to be logged in";
+
+      await prisma.emailSettings.upsert({
+        where: { userId: user.id },
+        create: { userId: user.id, [settingKey]: value },
+        update: { [settingKey]: value },
+      });
+
+      return prisma.user.findUnique({ where: { id: user.id } });
+    },
   },
   CollectionMember: {
     collection: async (member) => {
@@ -2215,6 +2228,16 @@ const resolvers = {
       }
 
       return debitMinusCredit;
+    },
+    amountContributed: async (member) => {
+      const {
+        _sum: { amount: totalContributions },
+      } = await prisma.contribution.aggregate({
+        where: { collectionMemberId: member.id },
+        _sum: { amount: true },
+      });
+
+      return totalContributions;
     },
     email: async (member, _, { user }) => {
       if (!user) return null;
@@ -2378,6 +2401,15 @@ const resolvers = {
           })
         ).username;
       }
+    },
+    emailSettings: async (parent, args, { user }) => {
+      if (user?.id !== parent.id) return null;
+
+      return prisma.emailSettings.upsert({
+        where: { userId: parent.id },
+        create: { userId: parent.id },
+        update: {},
+      });
     },
   },
   Organization: {
