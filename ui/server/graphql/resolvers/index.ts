@@ -19,6 +19,7 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   canViewRound,
+  deleteRoundMember,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -1698,6 +1699,12 @@ const resolvers = {
         });
       }
     ),
+    deleteGroupMember: combineResolvers(
+      isOrgAdmin,
+      async (parent, { groupMemberId }) => {
+        // TODO
+      }
+    ),
     updateMember: combineResolvers(
       isCollOrOrgAdmin,
       async (
@@ -1722,16 +1729,8 @@ const resolvers = {
     ),
     deleteMember: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, memberId }, { user }) => {
-        const collectionMember = await prisma.collectionMember.findFirst({
-          where: { collectionId, id: memberId },
-        });
-        if (!collectionMember)
-          throw new Error("This member does not exist in this collection");
-
-        return prisma.collectionMember.delete({
-          where: { id: memberId },
-        });
+      async (parent, { collectionId, memberId }) => {
+        return deleteRoundMember({ roundMemberId: memberId });
       }
     ),
     // deleteOrganization: async (parent, { organizationId }, { user }) => {
