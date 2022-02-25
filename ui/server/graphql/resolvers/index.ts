@@ -654,9 +654,12 @@ const resolvers = {
             singleCollection,
             collectionMember: {
               create: {
-                userId: user.id,
+                user: { connect: { id: user.id } },
                 isAdmin: true,
                 isApproved: true,
+                statusAccount: { create: {} },
+                incomingAccount: { create: {} },
+                outgoingAccount: { create: {} },
               },
             },
             fields: {
@@ -1601,13 +1604,27 @@ const resolvers = {
             create: {
               email,
               collMemberships: {
-                create: { isApproved: true, collectionId, hasJoined: false },
+                create: {
+                  isApproved: true,
+                  collection: { connect: { id: collectionId } },
+                  hasJoined: false,
+                  statusAccount: { create: {} },
+                  incomingAccount: { create: {} },
+                  outgoingAccount: { create: {} },
+                },
               },
             },
             update: {
               collMemberships: {
                 connectOrCreate: {
-                  create: { isApproved: true, collectionId, hasJoined: false },
+                  create: {
+                    isApproved: true,
+                    collection: { connect: { id: collectionId } },
+                    hasJoined: false,
+                    statusAccount: { create: {} },
+                    incomingAccount: { create: {} },
+                    outgoingAccount: { create: {} },
+                  },
                   where: {
                     userId_collectionId: {
                       userId: user?.id ?? "undefined",
@@ -1963,6 +1980,7 @@ const resolvers = {
           amount,
           toAccountId: bucket.statusAccountId,
           fromAccountId: collectionMember.statusAccountId,
+          collectionId,
         },
       });
 
@@ -2148,11 +2166,14 @@ const resolvers = {
 
       const collectionMember = await prisma.collectionMember.create({
         data: {
-          collectionId,
-          userId: user.id,
+          collection: { connect: { id: collectionId } },
+          user: { connect: { id: user.id } },
           isApproved:
             currentOrgMember?.isAdmin ||
             collection.registrationPolicy === "OPEN",
+          statusAccount: { create: {} },
+          incomingAccount: { create: {} },
+          outgoingAccount: { create: {} },
         },
       });
 
@@ -2542,9 +2563,8 @@ const resolvers = {
         _sum: { amount: totalCredit },
       } = await prisma.transaction.aggregate({
         where: {
-          toAccount: {
-            statusCollectionMember: { collectionId: collection.id },
-          },
+          collectionId: collection.id,
+          type: "ALLOCATION",
         },
         _sum: { amount: true },
       });
@@ -2553,9 +2573,8 @@ const resolvers = {
         _sum: { amount: totalDebit },
       } = await prisma.transaction.aggregate({
         where: {
-          fromAccount: {
-            statusCollectionMember: { collectionId: collection.id },
-          },
+          collectionId: collection.id,
+          type: "CONTRIBUTION",
         },
         _sum: { amount: true },
       });
