@@ -2204,26 +2204,26 @@ const resolvers = {
     balance: async (member) => {
       if (!member.statusAccountId) return 0;
 
-      console.time("memberBalanceTransactions");
-      const {
-        _sum: { amount: debit },
-      } = await prisma.transaction.aggregate({
-        where: { toAccountId: member.statusAccountId },
-        _sum: { amount: true },
-      });
+      // console.time("memberBalanceTransactions");
+      // const {
+      //   _sum: { amount: debit },
+      // } = await prisma.transaction.aggregate({
+      //   where: { toAccountId: member.statusAccountId },
+      //   _sum: { amount: true },
+      // });
 
-      const {
-        _sum: { amount: credit },
-      } = await prisma.transaction.aggregate({
-        where: { fromAccountId: member.statusAccountId },
-        _sum: { amount: true },
-      });
+      // const {
+      //   _sum: { amount: credit },
+      // } = await prisma.transaction.aggregate({
+      //   where: { fromAccountId: member.statusAccountId },
+      //   _sum: { amount: true },
+      // });
 
-      console.timeEnd("memberBalanceTransactions");
+      // console.timeEnd("memberBalanceTransactions");
 
-      const debitMinusCredit = debit - credit;
+      // const debitMinusCredit = debit - credit;
 
-      console.time("memberBalanceAllocationsAndContributions");
+      // console.time("memberBalanceAllocationsAndContributions");
 
       const {
         _sum: { amount: totalAllocations },
@@ -2239,16 +2239,13 @@ const resolvers = {
         _sum: { amount: true },
       });
 
-      console.timeEnd("memberBalanceAllocationsAndContributions");
+      // console.timeEnd("memberBalanceAllocationsAndContributions");
 
-      const allocationsMinusContributions =
-        totalAllocations - totalContributions;
+      // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
+      //   console.error("Member balance is not adding up");
+      // }
 
-      if (debitMinusCredit !== allocationsMinusContributions) {
-        console.error("Member balance is not adding up");
-      }
-
-      return debitMinusCredit;
+      return totalAllocations - totalContributions;
     },
     amountContributed: async (member) => {
       const {
@@ -2557,32 +2554,32 @@ const resolvers = {
       return totalContributionsFunded;
     },
     totalInMembersBalances: async (collection) => {
-      console.time("creditMinusDebit");
+      // console.time("creditMinusDebit");
 
-      const {
-        _sum: { amount: totalCredit },
-      } = await prisma.transaction.aggregate({
-        where: {
-          collectionId: collection.id,
-          type: "ALLOCATION",
-        },
-        _sum: { amount: true },
-      });
+      // const {
+      //   _sum: { amount: totalCredit },
+      // } = await prisma.transaction.aggregate({
+      //   where: {
+      //     collectionId: collection.id,
+      //     type: "ALLOCATION",
+      //   },
+      //   _sum: { amount: true },
+      // });
 
-      const {
-        _sum: { amount: totalDebit },
-      } = await prisma.transaction.aggregate({
-        where: {
-          collectionId: collection.id,
-          type: "CONTRIBUTION",
-        },
-        _sum: { amount: true },
-      });
-      console.timeEnd("creditMinusDebit");
+      // const {
+      //   _sum: { amount: totalDebit },
+      // } = await prisma.transaction.aggregate({
+      //   where: {
+      //     collectionId: collection.id,
+      //     type: "CONTRIBUTION",
+      //   },
+      //   _sum: { amount: true },
+      // });
+      // console.timeEnd("creditMinusDebit");
 
-      const balance = totalCredit - totalDebit;
+      // const balance = totalCredit - totalDebit;
 
-      console.time("allocationsMinusContributions");
+      // console.time("allocationsMinusContributions");
 
       const {
         _sum: { amount: totalAllocations },
@@ -2598,14 +2595,14 @@ const resolvers = {
         _sum: { amount: true },
       });
 
-      const allocationsMinusContibutions =
-        totalAllocations - totalContributions;
+      // const allocationsMinusContibutions =
+      //   totalAllocations - totalContributions;
 
-      console.timeEnd("allocationsMinusContributions");
+      //console.timeEnd("allocationsMinusContributions");
 
-      if (balance !== allocationsMinusContibutions) {
-        console.error("Total in members balances not adding up");
-      }
+      // if (balance !== allocationsMinusContibutions) {
+      //   console.error("Total in members balances not adding up");
+      // }
 
       return totalAllocations - totalContributions;
     },
