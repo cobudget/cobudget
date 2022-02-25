@@ -358,12 +358,13 @@ model Account {
 model Transaction {
   id String @id @default(cuid())
 
-  type               TransactionType
-  amount             Int
-  createdAt          DateTime         @default(now())
-  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
-  collectionMemberId String
-  collection         Collection?      @relation(fields: [collectionId], references: [id])
+  type      TransactionType
+  amount    Int
+  createdAt DateTime        @default(now())
+
+  collectionMember   CollectionMember? @relation(fields: [collectionMemberId], references: [id])
+  collectionMemberId String?
+  collection         Collection?       @relation(fields: [collectionId], references: [id])
   collectionId       String?
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
