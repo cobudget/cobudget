@@ -33,6 +33,7 @@ CREATE TABLE "Transaction" (
     "amount" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "collectionMemberId" TEXT NOT NULL,
+    "collectionId" TEXT,
     "fromAccountId" TEXT NOT NULL,
     "toAccountId" TEXT NOT NULL,
 
@@ -55,16 +56,19 @@ CREATE UNIQUE INDEX "CollectionMember_statusAccountId_key" ON "CollectionMember"
 ALTER TABLE "CollectionMember" ADD CONSTRAINT "CollectionMember_incomingAccountId_fkey" FOREIGN KEY ("incomingAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CollectionMember" ADD CONSTRAINT "CollectionMember_outgoingAccountId_fkey" FOREIGN KEY ("outgoingAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "CollectionMember" ADD CONSTRAINT "CollectionMember_statusAccountId_fkey" FOREIGN KEY ("statusAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CollectionMember" ADD CONSTRAINT "CollectionMember_statusAccountId_fkey" FOREIGN KEY ("statusAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "CollectionMember" ADD CONSTRAINT "CollectionMember_outgoingAccountId_fkey" FOREIGN KEY ("outgoingAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Bucket" ADD CONSTRAINT "Bucket_statusAccountId_fkey" FOREIGN KEY ("statusAccountId") REFERENCES "Account"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_collectionMemberId_fkey" FOREIGN KEY ("collectionMemberId") REFERENCES "CollectionMember"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_collectionId_fkey" FOREIGN KEY ("collectionId") REFERENCES "Collection"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_fromAccountId_fkey" FOREIGN KEY ("fromAccountId") REFERENCES "Account"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

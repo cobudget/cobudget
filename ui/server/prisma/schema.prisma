@@ -34,7 +34,7 @@ model EmailSettings {
   bucketPublishedInRound         Boolean @default(true)
   contributionToYourBucket       Boolean @default(true)
   user                           User    @relation(fields: [userId], references: [id])
-  userId                         String
+  userId                         String  @unique
 }
 
 model OrgMember {
@@ -77,8 +77,8 @@ model CollectionMember {
   allocatedBy   Allocation[]   @relation("allocatedBy")
 
   incomingAccount   Account? @relation(name: "incoming", fields: [incomingAccountId], references: [id])
-  statusAccount     Account? @relation(name: "status", fields: [outgoingAccountId], references: [id])
-  outgoingAccount   Account? @relation(name: "outgoing", fields: [statusAccountId], references: [id])
+  statusAccount     Account? @relation(name: "status", fields: [statusAccountId], references: [id])
+  outgoingAccount   Account? @relation(name: "outgoing", fields: [outgoingAccountId], references: [id])
   incomingAccountId String?  @unique
   outgoingAccountId String?  @unique
   statusAccountId   String?  @unique
@@ -138,6 +138,7 @@ model Collection {
   buckets          Bucket[]
   allocations      Allocation[]
   contributions    Contribution[]
+  transactions     Transaction[]
 
   @@unique([organizationId, slug])
 }
@@ -362,6 +363,8 @@ model Transaction {
   createdAt          DateTime         @default(now())
   collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
   collectionMemberId String
+  collection         Collection?      @relation(fields: [collectionId], references: [id])
+  collectionId       String?
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
