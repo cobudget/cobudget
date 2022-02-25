@@ -654,9 +654,12 @@ const resolvers = {
             singleCollection,
             collectionMember: {
               create: {
-                userId: user.id,
+                user: { connect: { id: user.id } },
                 isAdmin: true,
                 isApproved: true,
+                statusAccount: { create: {} },
+                incomingAccount: { create: {} },
+                outgoingAccount: { create: {} },
               },
             },
             fields: {
@@ -1601,13 +1604,27 @@ const resolvers = {
             create: {
               email,
               collMemberships: {
-                create: { isApproved: true, collectionId, hasJoined: false },
+                create: {
+                  isApproved: true,
+                  collection: { connect: { id: collectionId } },
+                  hasJoined: false,
+                  statusAccount: { create: {} },
+                  incomingAccount: { create: {} },
+                  outgoingAccount: { create: {} },
+                },
               },
             },
             update: {
               collMemberships: {
                 connectOrCreate: {
-                  create: { isApproved: true, collectionId, hasJoined: false },
+                  create: {
+                    isApproved: true,
+                    collection: { connect: { id: collectionId } },
+                    hasJoined: false,
+                    statusAccount: { create: {} },
+                    incomingAccount: { create: {} },
+                    outgoingAccount: { create: {} },
+                  },
                   where: {
                     userId_collectionId: {
                       userId: user?.id ?? "undefined",
@@ -1791,7 +1808,7 @@ const resolvers = {
         throw new Error("You are not admin for this collection");
 
       await allocateToMember({
-        collectionMemberId,
+        member: targetCollectionMember,
         collectionId: targetCollectionMember.collectionId,
         amount,
         type,
@@ -1821,7 +1838,7 @@ const resolvers = {
 
         for (const member of collectionMembers) {
           await allocateToMember({
-            collectionMemberId: member.id,
+            member,
             collectionId: collectionId,
             amount,
             type,
@@ -1956,6 +1973,17 @@ const resolvers = {
         },
       });
 
+      await prisma.transaction.create({
+        data: {
+          type: "CONTRIBUTION",
+          collectionMemberId: collectionMember.id,
+          amount,
+          toAccountId: bucket.statusAccountId,
+          fromAccountId: collectionMember.statusAccountId,
+          collectionId,
+        },
+      });
+
       await eventHub.publish("contribute-to-bucket", {
         collection,
         bucket,
@@ -2038,6 +2066,9 @@ const resolvers = {
             approvedAt: null,
             canceledAt: new Date(),
             Contributions: { deleteMany: {} },
+            account: {
+              update: { incomingTransactions: { deleteMany: {} } },
+            },
           },
         });
 
@@ -2135,11 +2166,14 @@ const resolvers = {
 
       const collectionMember = await prisma.collectionMember.create({
         data: {
-          collectionId,
-          userId: user.id,
+          collection: { connect: { id: collectionId } },
+          user: { connect: { id: user.id } },
           isApproved:
             currentOrgMember?.isAdmin ||
             collection.registrationPolicy === "OPEN",
+          statusAccount: { create: {} },
+          incomingAccount: { create: {} },
+          outgoingAccount: { create: {} },
         },
       });
 
@@ -2168,6 +2202,29 @@ const resolvers = {
         where: { id: member.userId },
       }),
     balance: async (member) => {
+      if (!member.statusAccountId) return 0;
+
+      // console.time("memberBalanceTransactions");
+      // const {
+      //   _sum: { amount: debit },
+      // } = await prisma.transaction.aggregate({
+      //   where: { toAccountId: member.statusAccountId },
+      //   _sum: { amount: true },
+      // });
+
+      // const {
+      //   _sum: { amount: credit },
+      // } = await prisma.transaction.aggregate({
+      //   where: { fromAccountId: member.statusAccountId },
+      //   _sum: { amount: true },
+      // });
+
+      // console.timeEnd("memberBalanceTransactions");
+
+      // const debitMinusCredit = debit - credit;
+
+      // console.time("memberBalanceAllocationsAndContributions");
+
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2181,6 +2238,12 @@ const resolvers = {
         where: { collectionMemberId: member.id },
         _sum: { amount: true },
       });
+
+      // console.timeEnd("memberBalanceAllocationsAndContributions");
+
+      // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
+      //   console.error("Member balance is not adding up");
+      // }
 
       return totalAllocations - totalContributions;
     },
@@ -2418,12 +2481,29 @@ const resolvers = {
     },
     totalAllocations: async (collection) => {
       const {
+        _sum: { amount: transactionAmount },
+      } = await prisma.transaction.aggregate({
+        where: {
+          toAccount: {
+            statusCollectionMember: { collectionId: collection.id },
+          },
+          type: "ALLOCATION",
+        },
+        _sum: { amount: true },
+      });
+
+      const {
         _sum: { amount },
       } = await prisma.allocation.aggregate({
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
-      return amount;
+
+      if (transactionAmount !== amount) {
+        console.error("total allocation amounts don't add up properly...");
+      }
+
+      return transactionAmount;
     },
     totalContributions: async (collection) => {
       const {
@@ -2474,6 +2554,33 @@ const resolvers = {
       return totalContributionsFunded;
     },
     totalInMembersBalances: async (collection) => {
+      // console.time("creditMinusDebit");
+
+      // const {
+      //   _sum: { amount: totalCredit },
+      // } = await prisma.transaction.aggregate({
+      //   where: {
+      //     collectionId: collection.id,
+      //     type: "ALLOCATION",
+      //   },
+      //   _sum: { amount: true },
+      // });
+
+      // const {
+      //   _sum: { amount: totalDebit },
+      // } = await prisma.transaction.aggregate({
+      //   where: {
+      //     collectionId: collection.id,
+      //     type: "CONTRIBUTION",
+      //   },
+      //   _sum: { amount: true },
+      // });
+      // console.timeEnd("creditMinusDebit");
+
+      // const balance = totalCredit - totalDebit;
+
+      // console.time("allocationsMinusContributions");
+
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2487,6 +2594,15 @@ const resolvers = {
         where: { collectionId: collection.id },
         _sum: { amount: true },
       });
+
+      // const allocationsMinusContibutions =
+      //   totalAllocations - totalContributions;
+
+      //console.timeEnd("allocationsMinusContributions");
+
+      // if (balance !== allocationsMinusContibutions) {
+      //   console.error("Total in members balances not adding up");
+      // }
 
       return totalAllocations - totalContributions;
     },
