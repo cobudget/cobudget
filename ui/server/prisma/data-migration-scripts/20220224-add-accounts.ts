@@ -48,6 +48,7 @@ export async function migrate() {
         type: "ALLOCATION",
         createdAt: allocation.createdAt,
         collectionMemberId: allocation.collectionMember.id,
+        collectionId: allocation.collectionMember.collectionId,
       },
     });
   }
@@ -67,6 +68,7 @@ export async function migrate() {
         type: "CONTRIBUTION",
         createdAt: contribution.createdAt,
         collectionMemberId: contribution.collectionMember.id,
+        collectionId: contribution.collectionMember.collectionId,
       },
     });
   }

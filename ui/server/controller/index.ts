@@ -49,6 +49,7 @@ export const allocateToMember = async ({
       amount: adjustedAmount,
       toAccountId: member.statusAccountId,
       fromAccountId: member.incomingAccountId,
+      collectionId,
     },
   });
 
