@@ -43,7 +43,7 @@ export default function AboutPage({ router }) {
     },
   });
 
-  if (error) return error.message;
+  if (error) return <div>error.message</div>;
 
   if (loading)
     return (
