@@ -34,7 +34,7 @@ export const COLLECTION_QUERY = gql`
 `;
 
 export default function AboutPage({ router }) {
-  const [{ data: { collection } = {}, fetching: loading, error }] = useQuery({
+  const [{ data, fetching: loading, error }] = useQuery({
     query: COLLECTION_QUERY,
     variables: {
       orgSlug: router.query.org,
@@ -50,6 +50,8 @@ export default function AboutPage({ router }) {
         <HappySpinner />
       </div>
     );
+
+  const collection = data?.collection;
 
   return (
     <div className="max-w-screen-md">
