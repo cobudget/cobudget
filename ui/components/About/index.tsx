@@ -33,7 +33,7 @@ export const COLLECTION_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ router, currentOrg }) {
+export default function AboutPage({ router }) {
   const [{ data: { collection } = {}, fetching: loading, error }] = useQuery({
     query: COLLECTION_QUERY,
     variables: {
@@ -41,6 +41,8 @@ export default function AboutPage({ router, currentOrg }) {
       collectionSlug: router.query.collection,
     },
   });
+
+  if (error) return error.message;
 
   if (loading)
     return (
