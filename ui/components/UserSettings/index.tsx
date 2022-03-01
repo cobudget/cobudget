@@ -1,5 +1,4 @@
 import { useQuery, gql, useMutation } from "urql";
-import { omit } from "lodash";
 import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
 
@@ -21,19 +20,34 @@ const SET_EMAIL_SETTING_MUTATION = gql`
   }
 `;
 
-const labels = {
-  commentMentions: "I'm mentioned in a comment",
-  commentBecauseCocreator: "A comment is made in a bucket I'm cocreating",
-  commentBecauseCommented:
-    "Another comment is made in a bucket I have previously commented in",
-  allocatedToYou: "When I'm allocated money that I can contribute to buckets",
-  refundedBecauseBucketCancelled:
-    "I get refunded money because a bucket I contributed to cancelled its funding",
-  bucketPublishedInRound:
-    "A new bucket is published in a round I'm a member of",
-  contributionToYourBucket:
-    "Someone contributes money to a bucket I'm cocreating",
-};
+const settingsMeta = [
+  { key: "commentMentions", label: "I'm mentioned in a comment" },
+  {
+    key: "commentBecauseCocreator",
+    label: "A comment is made in a bucket I'm cocreating",
+  },
+  {
+    key: "commentBecauseCommented",
+    label: "Another comment is made in a bucket I have previously commented in",
+  },
+  {
+    key: "allocatedToYou",
+    label: "When I'm allocated money that I can contribute to buckets",
+  },
+  {
+    key: "refundedBecauseBucketCancelled",
+    label:
+      "I get refunded money because a bucket I contributed to cancelled its funding",
+  },
+  {
+    key: "bucketPublishedInRound",
+    label: "A new bucket is published in a round I'm a member of",
+  },
+  {
+    key: "contributionToYourBucket",
+    label: "Someone contributes money to a bucket I'm cocreating",
+  },
+];
 
 const EmailSettingItem = ({ settingKey, value }) => {
   const [{ fetching, error }, setEmailSetting] = useMutation(
@@ -56,7 +70,7 @@ const EmailSettingItem = ({ settingKey, value }) => {
           disabled={fetching}
         />
       }
-      label={labels[settingKey]}
+      label={settingsMeta.find((setting) => setting.key === settingKey).label}
     />
   );
 };
@@ -71,17 +85,15 @@ const SettingsIndex = () => {
     return <div className="text-center">{error.message}</div>;
   }
 
-  const emailSettings = omit(data.currentUser.emailSettings, ["id", "userId"]);
-
   return (
     <div className="page">
       <FormGroup className="max-w-xl mx-auto p-5 space-y-2 bg-white rounded-lg shadow">
         <div>Please send me an email when:</div>
-        {Object.entries(emailSettings).map(([settingKey, value]) => (
+        {settingsMeta.map(({ key }) => (
           <EmailSettingItem
-            key={settingKey}
-            settingKey={settingKey}
-            value={value}
+            key={key}
+            settingKey={key}
+            value={data.currentUser.emailSettings[key]}
           />
         ))}
       </FormGroup>
