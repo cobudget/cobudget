@@ -21,31 +21,33 @@ const SET_EMAIL_SETTING_MUTATION = gql`
 `;
 
 const settingsMeta = [
-  { key: "commentMentions", label: "I'm mentioned in a comment" },
+  {
+    key: "commentMentions",
+    label: "I am mentioned in a comment",
+  },
   {
     key: "commentBecauseCocreator",
-    label: "A comment is made in a bucket I'm cocreating",
+    label: "There are comments on my bucket",
   },
   {
     key: "commentBecauseCommented",
-    label: "Another comment is made in a bucket I have previously commented in",
+    label: "A bucket I have commented on receives a new comment",
   },
   {
     key: "allocatedToYou",
-    label: "When I'm allocated money that I can contribute to buckets",
+    label: "I receive funds (to spend on buckets)",
   },
   {
     key: "refundedBecauseBucketCancelled",
-    label:
-      "I get refunded money because a bucket I contributed to cancelled its funding",
+    label: "I have been refunded (because a bucket was cancelled)",
   },
   {
     key: "bucketPublishedInRound",
-    label: "A new bucket is published in a round I'm a member of",
+    label: "A new bucket is published",
   },
   {
     key: "contributionToYourBucket",
-    label: "Someone contributes money to a bucket I'm cocreating",
+    label: "Funds have been contributed to my bucket",
   },
 ];
 
