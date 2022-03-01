@@ -34,7 +34,7 @@ const CONTRIBUTE_MUTATION = gql`
   }
 `;
 
-const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
+const ContributeModal = ({ handleClose, bucket, collection, currentUser }) => {
   const [inputValue, setInputValue] = useState("");
   const [availableBalance, setAvailableBalance] = useState(currentUser.currentCollMember.balance / 100);
   const amount = Math.round(inputValue * 100);
@@ -72,7 +72,7 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
   );
 
   const amountToMaxGoal =
-    Math.max(dream.minGoal, dream.maxGoal) - dream.totalContributions;
+    Math.max(bucket.minGoal, bucket.maxGoal) - bucket.totalContributions;
 
   const memberBalance = currentUser.currentCollMember.balance;
 
@@ -92,7 +92,7 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
         <h1 className="text-2xl mb-2 font-semibold">
-          Contribute to {dream.title}
+          Contribute to {bucket.title}
         </h1>
         <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-600" }>
           {
@@ -112,7 +112,7 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
             e.preventDefault();
             contribute({
               collectionId: collection.id,
-              bucketId: dream.id,
+              bucketId: bucket.id,
               amount,
             })
               .then(({ data, error }) => {

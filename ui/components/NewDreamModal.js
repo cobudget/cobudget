@@ -8,27 +8,27 @@ import { Modal } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 
-const CREATE_DREAM = gql`
-  mutation CreateDream($collectionId: ID!, $title: String!) {
-    createDream(collectionId: $collectionId, title: $title) {
+const CREATE_BUCKET = gql`
+  mutation CreateBucket($collectionId: ID!, $title: String!) {
+    createBucket(collectionId: $collectionId, title: $title) {
       id
       title
     }
   }
 `;
 
-const NewDreamModal = ({ collection, handleClose, currentOrg }) => {
-  const [{ fetching: loading }, createDream] = useMutation(CREATE_DREAM);
+const NewBucketModal = ({ collection, handleClose, currentOrg }) => {
+  const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmitCreate = (variables) => {
-    createDream({ ...variables, collectionId: collection.id })
+    createBucket({ ...variables, collectionId: collection.id })
       .then(({ data }) => {
         Router.push(
           "/[org]/[collection]/[bucket]",
           `/${currentOrg?.slug ?? "c"}/${collection.slug}/${
-            data.createDream.id
+            data.createBucket.id
           }`
         );
         handleClose();
@@ -88,4 +88,4 @@ const NewDreamModal = ({ collection, handleClose, currentOrg }) => {
   );
 };
 
-export default NewDreamModal;
+export default NewBucketModal;

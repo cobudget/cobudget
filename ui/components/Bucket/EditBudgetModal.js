@@ -12,7 +12,7 @@ import * as yup from "yup";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
-    editDream(bucketId: $bucketId, budgetItems: $budgetItems) {
+    editBucket(bucketId: $bucketId, budgetItems: $budgetItems) {
       id
       minGoal
       maxGoal
@@ -55,7 +55,7 @@ const EditBudgetModal = ({
   handleClose,
   open,
 }) => {
-  const [{ fetching: loading }, editDream] = useMutation(EDIT_BUDGET_MUTATION);
+  const [{ fetching: loading }, editBucket] = useMutation(EDIT_BUDGET_MUTATION);
 
   const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
@@ -81,7 +81,7 @@ const EditBudgetModal = ({
         <h1 className="text-xl font-semibold mb-4">Edit budget</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editDream({
+            editBucket({
               bucketId,
               budgetItems: [
                 ...(variables.budgetItems?.map((item) => ({

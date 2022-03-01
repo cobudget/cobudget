@@ -123,7 +123,7 @@ const SearchMembersResult = ({
 const EditCocreatorsModal = ({
   open,
   handleClose,
-  dream,
+  bucket,
   collection,
   cocreators,
   currentUser,
@@ -154,7 +154,7 @@ const EditCocreatorsModal = ({
                   )
                 ) {
                   removeCocreator({
-                    bucketId: dream.id,
+                    bucketId: bucket.id,
                     memberId: member.id,
                   }).catch((err) => alert(err.message));
                 }
@@ -176,7 +176,7 @@ const EditCocreatorsModal = ({
               addCocreator={addCocreator}
               cocreators={cocreators}
               collectionId={collection.id}
-              bucket={dream}
+              bucket={bucket}
             />
           </div>
         </div>

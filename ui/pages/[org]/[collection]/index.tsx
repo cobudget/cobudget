@@ -120,7 +120,7 @@ const Page = ({
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
             <DreamCard
-              dream={bucket}
+              bucket={bucket}
               collection={collection}
               currentOrg={org}
             />
