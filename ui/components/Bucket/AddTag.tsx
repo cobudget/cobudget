@@ -15,7 +15,7 @@ const ADD_TAG_MUTATION = gql`
   }
 `;
 
-const AddTag = ({ items: eventTags, dream }) => {
+const AddTag = ({ items: eventTags, bucket }) => {
   const [, addTag] = useMutation(ADD_TAG_MUTATION);
   const [input, setInput] = useState("");
 
@@ -26,7 +26,7 @@ const AddTag = ({ items: eventTags, dream }) => {
         if (!tag) return;
 
         addTag({
-          bucketId: dream.id,
+          bucketId: bucket.id,
           tagId: tag.id,
         }).then(() => setInput(""));
       }}
@@ -46,7 +46,7 @@ const AddTag = ({ items: eventTags, dream }) => {
         clearSelection,
       }) => {
         let filtered = eventTags
-          .filter((tag) => !dream.tags.map((t) => t.id).includes(tag.id))
+          .filter((tag) => !bucket.tags.map((t) => t.id).includes(tag.id))
           .filter(
             (item) =>
               !inputValue ||

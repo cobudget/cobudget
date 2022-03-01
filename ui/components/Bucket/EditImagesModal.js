@@ -48,7 +48,7 @@ const Images = styled.div`
 
 const EDIT_IMAGES_MUTATION = gql`
   mutation EDIT_IMAGES($bucketId: ID!, $images: [ImageInput]) {
-    editDream(bucketId: $bucketId, images: $images) {
+    editBucket(bucketId: $bucketId, images: $images) {
       id
       images {
         small
@@ -73,7 +73,7 @@ const EditImagesModal = ({
 }) => {
   const [images, setImages] = useState(removeNullValues(initialImages));
 
-  const [{ fetching: loading }, editDream] = useMutation(EDIT_IMAGES_MUTATION);
+  const [{ fetching: loading }, editBucket] = useMutation(EDIT_IMAGES_MUTATION);
 
   const { handleSubmit } = useForm();
 
@@ -113,7 +113,7 @@ const EditImagesModal = ({
           onSubmit={handleSubmit(() => {
             images.forEach((image) => delete image.__typename); // apollo complains otherwise..
 
-            editDream({ images, bucketId })
+            editBucket({ images, bucketId })
               .then(() => {
                 handleClose();
               })

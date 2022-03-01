@@ -1,7 +1,7 @@
 import { useQuery, gql } from "urql";
 import { useRouter } from "next/router";
 
-import DreamCustomField from "./DreamCustomField";
+import BucketCustomField from "./BucketCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
   query CustomFields($orgSlug: String!, $collectionSlug: String!) {
@@ -20,7 +20,7 @@ const CUSTOM_FIELDS_QUERY = gql`
   }
 `;
 
-const DreamCustomFields = ({
+const BucketCustomFields = ({
   customFields,
   canEdit,
   collectionId,
@@ -51,7 +51,7 @@ const DreamCustomFields = ({
             (field) => field.customField?.id == defaultCustomField.id
           );
           return (
-            <DreamCustomField
+            <BucketCustomField
               key={defaultCustomField.id}
               defaultCustomField={defaultCustomField}
               customField={
@@ -67,4 +67,4 @@ const DreamCustomFields = ({
   );
 };
 
-export default DreamCustomFields;
+export default BucketCustomFields;

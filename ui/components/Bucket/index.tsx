@@ -1,9 +1,9 @@
-import { isMemberOfDream } from "utils/helpers";
+import { isMemberOfBucket } from "utils/helpers";
 
 import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
-import DreamCustomFields from "./CustomFields/DreamCustomFields";
+import BucketCustomFields from "./CustomFields/BucketCustomFields";
 
 const Bucket = ({
   bucket,
@@ -17,7 +17,7 @@ const Bucket = ({
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    isMemberOfDream(currentUser, bucket);
+    isMemberOfBucket(currentUser, bucket);
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
@@ -33,7 +33,7 @@ const Bucket = ({
 
             {bucket.description && (
               <Description
-                // We no longer use this field for new dreams.
+                // We no longer use this field for new buckets.
                 // Eventually we will migrate all current descriptions to custom fields.
                 description={bucket.description}
                 bucketId={bucket.id}
@@ -41,7 +41,7 @@ const Bucket = ({
               />
             )}
 
-            <DreamCustomFields
+            <BucketCustomFields
               collectionId={collection.id}
               bucketId={bucket.id}
               customFields={bucket.customFields}

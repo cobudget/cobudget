@@ -5,7 +5,7 @@
 //   }, false);
 // };
 
-export const isMemberOfDream = (currentUser, dream) => {
+export const isMemberOfBucket = (currentUser, dream) => {
   if (!currentUser || !dream || !currentUser.currentCollMember) return false;
   return dream.cocreators.reduce((res, member) => {
     if (member.id === currentUser.currentCollMember.id) return true;

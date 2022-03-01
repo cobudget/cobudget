@@ -12,12 +12,12 @@ import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
 
-const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
-  mutation EditDreamCustomField(
+const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
+  mutation EditBucketCustomField(
     $bucketId: ID!
     $customField: CustomFieldValueInput!
   ) {
-    editDreamCustomField(bucketId: $bucketId, customField: $customField) {
+    editBucketCustomField(bucketId: $bucketId, customField: $customField) {
       id
       customFields {
         id
@@ -37,7 +37,7 @@ const EDIT_DREAM_CUSTOM_FIELD_MUTATION = gql`
   }
 `;
 
-const DreamCustomField = ({
+const BucketCustomField = ({
   defaultCustomField,
   customField,
   collectionId,
@@ -67,7 +67,7 @@ const DreamCustomField = ({
   const inputValue = watch("customField.value", defaultValue ?? "");
 
   const [{ fetching: loading }, editCustomFieldMutation] = useMutation(
-    EDIT_DREAM_CUSTOM_FIELD_MUTATION
+    EDIT_BUCKET_CUSTOM_FIELD_MUTATION
   );
 
   useEffect(() => {
@@ -221,4 +221,4 @@ const renderBooleanOrValue = (value) => {
   return value.split("\n").join("<br/>");
 };
 
-export default DreamCustomField;
+export default BucketCustomField;
