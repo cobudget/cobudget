@@ -22,18 +22,6 @@ const SET_EMAIL_SETTING_MUTATION = gql`
 
 const settingsMeta = [
   {
-    key: "commentMentions",
-    label: "I am mentioned in a comment",
-  },
-  {
-    key: "commentBecauseCocreator",
-    label: "There are comments on my bucket",
-  },
-  {
-    key: "commentBecauseCommented",
-    label: "A bucket I have commented on receives a new comment",
-  },
-  {
     key: "allocatedToYou",
     label: "I receive funds (to spend on buckets)",
   },
@@ -42,12 +30,24 @@ const settingsMeta = [
     label: "I have been refunded (because a bucket was cancelled)",
   },
   {
+    key: "contributionToYourBucket",
+    label: "Funds have been contributed to my bucket",
+  },
+  {
+    key: "commentBecauseCocreator",
+    label: "There are comments on my bucket",
+  },
+  {
+    key: "commentMentions",
+    label: "I am mentioned in a comment",
+  },
+  {
     key: "bucketPublishedInRound",
     label: "A new bucket is published",
   },
   {
-    key: "contributionToYourBucket",
-    label: "Funds have been contributed to my bucket",
+    key: "commentBecauseCommented",
+    label: "A bucket I have commented on receives a new comment",
   },
 ];
 
