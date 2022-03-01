@@ -140,6 +140,9 @@ model Collection {
   contributions    Contribution[]
   transactions     Transaction[]
 
+  statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
+  statusAccountId String?  @unique
+
   @@unique([organizationId, slug])
 }
 
@@ -219,31 +222,35 @@ enum AllocationType {
 }
 
 model Bucket {
-  id               String             @id @default(cuid())
-  collection       Collection         @relation(fields: [collectionId], references: [id])
-  collectionId     String
-  title            String
-  description      String?
-  summary          String?
-  Images           Image[]
-  cocreators       CollectionMember[]
-  BudgetItems      BudgetItem[]
-  FieldValues      FieldValue[]
-  comments         Comment[]
-  approvedAt       DateTime?
-  publishedAt      DateTime?
-  fundedAt         DateTime?
-  canceledAt       DateTime?
-  completedAt      DateTime?
-  deleted          Boolean            @default(false)
-  discourseTopicId Int?
-  flags            Flag[]
-  tags             Tag[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  Contributions    Contribution[]
-  account          Account?           @relation(fields: [statusAccountId], references: [id])
-  statusAccountId  String?            @unique
+  id           String             @id @default(cuid())
+  collection   Collection         @relation(fields: [collectionId], references: [id])
+  collectionId String
+  title        String
+  description  String?
+  summary      String?
+  Images       Image[]
+  cocreators   CollectionMember[]
+  BudgetItems  BudgetItem[]
+  FieldValues  FieldValue[]
+  comments     Comment[]
+  approvedAt   DateTime?
+  publishedAt  DateTime?
+  fundedAt     DateTime?
+  canceledAt   DateTime?
+  completedAt  DateTime?
+  archivedAt   DateTime?
+
+  deleted           Boolean        @default(false)
+  discourseTopicId  Int?
+  flags             Flag[]
+  tags              Tag[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  Contributions     Contribution[]
+  statusAccount     Account?       @relation(name: "bucketStatus", fields: [statusAccountId], references: [id])
+  statusAccountId   String?        @unique
+  outgoingAccount   Account?       @relation(name: "bucketOutgoing", fields: [outgoingAccountId], references: [id])
+  outgoingAccountId String?        @unique
 }
 
 model Image {
@@ -344,10 +351,14 @@ model DiscourseConfig {
 model Account {
   id String @id @default(cuid())
 
-  incomingCollectionMember CollectionMember? @relation(name: "incoming")
-  outgoingCollectionMember CollectionMember? @relation(name: "outgoing")
-  statusCollectionMember   CollectionMember? @relation(name: "status")
-  bucket                   Bucket?
+  collectionMemberIncoming CollectionMember? @relation(name: "incoming")
+  collectionMemberOutgoing CollectionMember? @relation(name: "outgoing")
+  collectionMemberStatus   CollectionMember? @relation(name: "status")
+
+  bucketStatus   Bucket? @relation(name: "bucketStatus")
+  bucketOutgoing Bucket? @relation(name: "bucketOutgoing")
+
+  collection Collection[]
 
   outgoingTransactions Transaction[] @relation(name: "from")
   incomingTransactions Transaction[] @relation(name: "to")

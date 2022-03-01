@@ -28,7 +28,7 @@ export async function migrate() {
     await prisma.bucket.update({
       where: { id: bucket.id },
       data: {
-        account: { create: {} },
+        statusAccount: { create: {} },
       },
     });
   }

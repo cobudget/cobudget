@@ -650,8 +650,9 @@ const resolvers = {
             title,
             currency,
             registrationPolicy,
-            organizationId: orgId,
+            organization: { connect: { id: orgId } },
             singleCollection,
+            statusAccount: { create: {} },
             collectionMember: {
               create: {
                 user: { connect: { id: user.id } },
@@ -908,6 +909,8 @@ const resolvers = {
           data: {
             collection: { connect: { id: collectionId } },
             title,
+            statusAccount: { create: {} },
+            outgoingAccount: { create: {} },
             cocreators: {
               connect: {
                 userId_collectionId: { userId: user.id, collectionId },
@@ -2066,7 +2069,7 @@ const resolvers = {
             approvedAt: null,
             canceledAt: new Date(),
             Contributions: { deleteMany: {} },
-            account: {
+            statusAccount: {
               update: { incomingTransactions: { deleteMany: {} } },
             },
           },
@@ -2485,7 +2488,7 @@ const resolvers = {
       } = await prisma.transaction.aggregate({
         where: {
           toAccount: {
-            statusCollectionMember: { collectionId: collection.id },
+            collectionMemberStatus: { collectionId: collection.id },
           },
           type: "ALLOCATION",
         },
