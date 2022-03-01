@@ -211,7 +211,7 @@ export const client = (
                   );
                 });
             },
-            createDream(result: any, { collectionId }, cache) {
+            createBucket(result: any, { collectionId }, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -227,7 +227,7 @@ export const client = (
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
             },
-            deleteDream(result: any, { bucketId }, cache) {
+            deleteBucket(result: any, { bucketId }, cache) {
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")

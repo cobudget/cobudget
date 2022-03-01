@@ -15,7 +15,7 @@ const EDIT_EVENT = gql`
   }
 `;
 
-const DreamReview = ({ collection }) => {
+const BucketReview = ({ collection }) => {
   const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
   const {
     handleSubmit,
@@ -60,7 +60,7 @@ const DreamReview = ({ collection }) => {
           className="my-4"
         >
           <option value="true">All participants</option>
-          <option value="false">Dream creators, guides & admins</option>
+          <option value="false">Bucket creators, guides & admins</option>
         </SelectField>
 
         <SelectField
@@ -71,7 +71,7 @@ const DreamReview = ({ collection }) => {
           className="my-4"
         >
           <option value="true">All participants</option>
-          <option value="false">Dream creators, guides & admins</option>
+          <option value="false">Bucket creators, guides & admins</option>
         </SelectField> */}
 
         <div className="mt-2 flex justify-end">
@@ -88,4 +88,4 @@ const DreamReview = ({ collection }) => {
     </div>
   );
 };
-export default DreamReview;
+export default BucketReview;

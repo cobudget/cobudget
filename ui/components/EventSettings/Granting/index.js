@@ -8,7 +8,7 @@ import thousandSeparator from "utils/thousandSeparator";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
-import SetMaxAmountToDream from "./SetMaxAmountToDream";
+import SetMaxAmountToBucket from "./SetMaxAmountToBucket";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
@@ -31,10 +31,10 @@ const useStyles = makeStyles((theme) => ({
 
 const modals = {
   SET_CURRENCY: SetCurrency,
-  SET_DREAM_CREATION_CLOSES: SetBucketCreationCloses,
+  SET_BUCKET_CREATION_CLOSES: SetBucketCreationCloses,
   SET_GRANTING_OPENS: SetGrantingOpens,
   SET_GRANTING_CLOSES: SetGrantingCloses,
-  SET_MAX_AMOUNT_TO_DREAM: SetMaxAmountToDream,
+  SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_ABOUT: SetAbout,
@@ -160,7 +160,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
                 : "Not set"
             }
             isSet={!!collection.maxAmountToBucketPerUser}
-            openModal={() => handleOpen("SET_MAX_AMOUNT_TO_DREAM")}
+            openModal={() => handleOpen("SET_MAX_AMOUNT_TO_BUCKET")}
             canEdit={canEditSettings}
             eventColor={collection.color}
           />
@@ -177,7 +177,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
                 : "Not set"
             }
             isSet={collection.bucketCreationCloses}
-            openModal={() => handleOpen("SET_DREAM_CREATION_CLOSES")}
+            openModal={() => handleOpen("SET_BUCKET_CREATION_CLOSES")}
             canEdit={canEditSettings}
             eventColor={collection.color}
           />

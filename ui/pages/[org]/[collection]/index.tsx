@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
-import DreamCard from "../../../components/DreamCard";
+import BucketCard from "../../../components/BucketCard";
 import Filterbar from "../../../components/Filterbar";
 import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
 import Button from "../../../components/Button";
-import NewDreamModal from "../../../components/NewDreamModal";
+import NewBucketModal from "../../../components/NewBucketModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
@@ -119,7 +119,7 @@ const Page = ({
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
-            <DreamCard
+            <BucketCard
               bucket={bucket}
               collection={collection}
               currentOrg={org}
@@ -177,7 +177,7 @@ const getStandardFilter = (bucketStatusCount) => {
 };
 
 const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
-  const [newDreamModalOpen, setNewDreamModalOpen] = useState(false);
+  const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
@@ -218,7 +218,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               defaultValue={collection.info}
               name="info"
               label="Add homepage message"
-              placeholder={`# Welcome to ${collection.title}'s dream page`}
+              placeholder={`# Welcome to ${collection.title}'s bucket page`}
               canEdit={canEdit}
               className="h-10"
               MUTATION={gql`
@@ -253,14 +253,14 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
                   <Button
                     size="large"
                     color={collection.color}
-                    onClick={() => setNewDreamModalOpen(true)}
+                    onClick={() => setNewBucketModalOpen(true)}
                   >
                     New bucket
                   </Button>
-                  {newDreamModalOpen && (
-                    <NewDreamModal
+                  {newBucketModalOpen && (
+                    <NewBucketModal
                       collection={collection}
-                      handleClose={() => setNewDreamModalOpen(false)}
+                      handleClose={() => setNewBucketModalOpen(false)}
                       currentOrg={currentOrg}
                     />
                   )}
