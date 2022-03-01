@@ -2401,20 +2401,20 @@ const resolvers = {
       if (parent.id !== user.id) return null;
       if (parent.email) return parent.email;
     },
-    name: async (parent, _, { user }) => {
-      if (!user) return null;
-      if (parent.id !== user.id) return null;
-      if (parent.name) return parent.name;
-      // we end up here when requesting your own name but it's missing on the parent
-      return (
-        await prisma.user.findUnique({
-          where: { id: parent.id },
-          select: { name: true },
-        })
-      ).name;
-    },
+    // name: async (parent, _, { user }) => {
+    //   if (!user) return null;
+    //   if (parent.id !== user.id) return null;
+    //   if (parent.name) return parent.name;
+    //   // we end up here when requesting your own name but it's missing on the parent
+    //   return (
+    //     await prisma.user.findUnique({
+    //       where: { id: parent.id },
+    //       select: { name: true },
+    //     })
+    //   ).name;
+    // },
     username: async (parent) => {
-      if (parent.id) {
+      if (!parent.username && parent.id) {
         return (
           await prisma.user.findUnique({
             where: { id: parent.id },
@@ -2422,6 +2422,7 @@ const resolvers = {
           })
         ).username;
       }
+      return parent.username;
     },
     emailSettings: async (parent, args, { user }) => {
       if (user?.id !== parent.id) return null;

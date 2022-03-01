@@ -43,7 +43,11 @@ const AllocateModal = ({ member, collection, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage @{member.user.username}&apos;s balance
+          Manage{" "}
+          {member.user.username
+            ? `@${member.user.username}'`
+            : member.user.name ?? "member"}
+          s balance
         </h1>
         <Switch
           options={["Add", "Set"]}
@@ -84,8 +88,8 @@ const AllocateModal = ({ member, collection, handleClose }) => {
               <>
                 Adding {thousandSeparator(amount / 100)} {collection.currency}{" "}
                 to {thousandSeparator(member.balance / 100)}{" "}
-                {collection.currency} <br />({total / 100} {collection.currency}{" "}
-                in total)
+                {collection.currency} <br />({thousandSeparator(total / 100)}{" "}
+                {collection.currency} in total)
               </>
             ) : (
               <>

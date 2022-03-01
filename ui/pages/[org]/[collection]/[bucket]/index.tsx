@@ -77,6 +77,7 @@ export const BUCKET_QUERY = gql`
 
         user {
           id
+          name
           username
           avatar
         }
