@@ -106,7 +106,7 @@ const ActionsDropdown = ({
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
+                `Are you sure you would like to delete membership from user with email ${member.email}?`
               )
             )
               deleteMember({ collectionId, memberId: member.id });
