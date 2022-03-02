@@ -5,9 +5,9 @@
 //   }, false);
 // };
 
-export const isMemberOfBucket = (currentUser, dream) => {
-  if (!currentUser || !dream || !currentUser.currentCollMember) return false;
-  return dream.cocreators.reduce((res, member) => {
+export const isMemberOfBucket = (currentUser, bucket) => {
+  if (!currentUser || !bucket || !currentUser.currentCollMember) return false;
+  return bucket.cocreators.reduce((res, member) => {
     if (member.id === currentUser.currentCollMember.id) return true;
     return res;
   }, false);

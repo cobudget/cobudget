@@ -17,27 +17,27 @@ module.exports = {
   },
   initialize(eventHub) {
     eventHub.subscribe(
-      "create-dream",
+      "create-bucket",
       "discourse",
       async ({
         currentOrg,
         currentOrgMember,
         currentCollMember,
         event,
-        dream,
+        bucket,
       }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
 
-        console.log(`Publishing dream ${dream.id} to discourse...`);
+        console.log(`Publishing bucket ${bucket.id} to discourse...`);
 
         const post = await discourse(currentOrg.discourse).posts.create(
           {
-            title: dream.title,
-            raw: this.generateDreamMarkdown(dream, event, currentOrg),
+            title: bucket.title,
+            raw: this.generateBucketMarkdown(bucket, event, currentOrg),
             category: event.discourseCategoryId,
-            unlist_topic: !dream.published,
+            unlist_topic: !bucket.published,
           },
           {
             username: "system",
@@ -47,45 +47,45 @@ module.exports = {
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        dream.comments.forEach((comment) => {
+        bucket.comments.forEach((comment) => {
           eventHub.publish("create-comment", {
             currentOrg,
             currentOrgMember,
             currentCollMember,
             event,
-            dream,
+            bucket,
             comment,
           });
         });
 
-        dream.discourseTopicId = post.topic_id;
-        await dream.save();
+        bucket.discourseTopicId = post.topic_id;
+        await bucket.save();
       }
     );
 
     eventHub.subscribe(
-      "edit-dream",
+      "edit-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream }) => {
+      async ({ currentOrg, currentOrgMember, event, bucket }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
             event,
-            dream,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        console.log(`Updating dream ${dream.id} on discourse`);
+        console.log(`Updating bucket ${bucket.id} on discourse`);
 
         const post = await discourse(currentOrg.discourse).topics.getSummary(
           {
-            id: dream.discourseTopicId,
+            id: bucket.discourseTopicId,
           },
           {
             username: "system",
@@ -98,8 +98,8 @@ module.exports = {
         await discourse(currentOrg.discourse).posts.update(
           post.id,
           {
-            title: dream.title,
-            raw: this.generateDreamMarkdown(dream, event, currentOrg),
+            title: bucket.title,
+            raw: this.generateBucketMarkdown(bucket, event, currentOrg),
           },
           {
             username: "system",
@@ -110,32 +110,32 @@ module.exports = {
     );
 
     eventHub.subscribe(
-      "publish-dream",
+      "publish-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, unpublish }) => {
+      async ({ currentOrg, currentOrgMember, event, bucket, unpublish }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
 
         console.log(
-          `Setting visibility of dream ${
-            dream.id
+          `Setting visibility of bucket ${
+            bucket.id
           } to ${!unpublish} on Discourse...`
         );
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
             event,
-            dream,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
         await discourse(currentOrg.discourse).topics.updateStatus(
           {
-            id: dream.discourseTopicId,
+            id: bucket.discourseTopicId,
             status: "visible",
             enabled: !unpublish,
           },
@@ -150,7 +150,7 @@ module.exports = {
     eventHub.subscribe(
       "create-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
+      async ({ currentOrg, currentOrgMember, event, bucket, comment }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -165,21 +165,21 @@ module.exports = {
             `Your post needs to be at least ${currentOrg.discourse.minPostLength} characters long!`
           );
 
-        console.log(`Publishing comment in dream ${dream.id} to discourse...`);
+        console.log(`Publishing comment in bucket ${bucket.id} to discourse...`);
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
             event,
-            dream,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
         const post = await discourse(currentOrg.discourse).posts.create(
           {
-            topic_id: dream.discourseTopicId,
+            topic_id: bucket.discourseTopicId,
             raw: comment.content,
           },
           {
@@ -204,7 +204,7 @@ module.exports = {
     eventHub.subscribe(
       "edit-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, dream, comment }) => {
+      async ({ currentOrg, currentOrgMember, bucket, comment }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -214,13 +214,13 @@ module.exports = {
           );
 
         console.log(
-          `Updating comment ${comment.id} in dream ${dream.id} to discourse...`
+          `Updating comment ${comment.id} in bucket ${bucket.id} to discourse...`
         );
 
         const post = await discourse(currentOrg.discourse).posts.update(
           comment.id,
           {
-            title: dream.title,
+            title: bucket.title,
             raw: comment.content,
           },
           {
@@ -273,32 +273,32 @@ module.exports = {
     );
   },
 
-  generateDreamMarkdown(dream, event, org) {
+  generateBucketMarkdown(bucket, event, org) {
     const content = [];
 
     if (org) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
       const domain =
         org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`;
-      const dreamUrl = `${protocol}://${domain}/${event.slug}/${dream.id}`;
+      const bucketUrl = `${protocol}://${domain}/${event.slug}/${bucket.id}`;
       content.push(
         "View and edit this post on the Cobudget platform: ",
-        dreamUrl
+        bucketUrl
       );
     }
 
-    if (dream.summary) {
+    if (bucket.summary) {
       content.push("## Summary");
-      content.push(dream.summary);
+      content.push(bucket.summary);
     }
 
-    if (dream.description) {
+    if (bucket.description) {
       content.push("## Description");
-      content.push(dream.description);
+      content.push(bucket.description);
     }
 
-    if (dream.customFields) {
-      dream.customFields.forEach((customField) => {
+    if (bucket.customFields) {
+      bucket.customFields.forEach((customField) => {
         const customFieldName = event.customFields.find(
           (customEventField) =>
             String(customEventField._id) === String(customField.fieldId)
@@ -308,9 +308,9 @@ module.exports = {
       });
     }
 
-    if (dream.budgetItems && dream.budgetItems.length > 0) {
-      const income = dream.budgetItems.filter(({ type }) => type === "INCOME");
-      const expenses = dream.budgetItems.filter(
+    if (bucket.budgetItems && bucket.budgetItems.length > 0) {
+      const income = bucket.budgetItems.filter(({ type }) => type === "INCOME");
+      const expenses = bucket.budgetItems.filter(
         ({ type }) => type === "EXPENSE"
       );
 
@@ -345,13 +345,13 @@ module.exports = {
       }
 
       content.push(
-        `Total funding goal: ${dream.minGoal / 100} ${event.currency}`
+        `Total funding goal: ${bucket.minGoal / 100} ${event.currency}`
       );
     }
 
-    if (dream.images && dream.images.length > 0) {
+    if (bucket.images && bucket.images.length > 0) {
       content.push("## Images");
-      dream.images.forEach(({ small }) => content.push(`![](${small})`));
+      bucket.images.forEach(({ small }) => content.push(`![](${small})`));
     }
 
     return content.join("\n\n");

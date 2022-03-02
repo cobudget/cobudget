@@ -184,7 +184,7 @@ export default {
     });
   },
   sendCommentNotification: async ({
-    dream,
+    bucket,
     event,
     currentOrg,
     currentCollMember,
@@ -231,18 +231,18 @@ export default {
         (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
       );
 
-    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
+    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${bucket.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
     const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
       (mentionedUser) => ({
         to: mentionedUser.email,
-        subject: `You were mentioned in a comment in the bucket ${dream.title}`,
+        subject: `You were mentioned in a comment in the bucket ${bucket.title}`,
         html: `${escape(
           currentUser.name
         )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
-          dream.title
+          bucket.title
         )}</a>:
         <br/><br/>
         ${commentAsHtml}
@@ -256,7 +256,7 @@ export default {
 
     const cocreatorsToEmail = (
       await prisma.collectionMember.findMany({
-        where: { buckets: { some: { id: dream.id } } },
+        where: { buckets: { some: { id: bucket.id } } },
         include: { user: { include: { emailSettings: true } } },
       })
     )
@@ -279,10 +279,10 @@ export default {
       .map(
         (collectionMember): SendEmailInput => ({
           to: collectionMember.user.email,
-          subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
+          subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
           html: `Hey ${escape(collectionMember.user.name)}!
           <br/><br/>
-          Your bucket “${escape(dream.title)}” received a new comment.
+          Your bucket “${escape(bucket.title)}” received a new comment.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -297,7 +297,7 @@ export default {
 
     if (!orgHasDiscourse(currentOrg)) {
       const comments = await prisma.comment.findMany({
-        where: { bucketId: dream.id },
+        where: { bucketId: bucket.id },
         include: {
           collMember: {
             include: {
@@ -334,11 +334,11 @@ export default {
 
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
-        subject: `New comment by ${currentUser.name} in bucket ${dream.title}`,
+        subject: `New comment by ${currentUser.name} in bucket ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
-            dream.title
+            bucket.title
           )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
           ${commentAsHtml}
@@ -445,7 +445,7 @@ export default {
     currentOrg,
     currentOrgMember,
     event,
-    dream,
+    bucket,
     unpublish,
   }) => {
     if (unpublish) return;
@@ -462,7 +462,7 @@ export default {
     });
 
     const { cocreators } = await prisma.bucket.findUnique({
-      where: { id: dream.id },
+      where: { id: bucket.id },
       include: { cocreators: true },
     });
 

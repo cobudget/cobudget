@@ -6,9 +6,9 @@ const MIN_POST_LENGTH = 3;
 export default {
   initialize(eventHub) {
     eventHub.subscribe(
-      "create-dream",
+      "create-bucket",
       "prisma",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {}
+      async ({ currentOrg, currentOrgMember, event, bucket, comment }) => {}
     );
 
     eventHub.subscribe(
@@ -19,7 +19,7 @@ export default {
         currentOrgMember,
         currentCollMember,
         event,
-        dream,
+        bucket,
         comment: { content },
       }) => {
         if (orgHasDiscourse(currentOrg)) {
@@ -33,7 +33,7 @@ export default {
 
         const comment = await prisma.comment.create({
           data: {
-            bucketId: dream.id,
+            bucketId: bucket.id,
             content,
             collMemberId: currentCollMember.id,
           },
@@ -55,7 +55,7 @@ export default {
         currentOrgMember,
         event,
         eventMember,
-        dream,
+        bucket,
         comment,
       }) => {
         if (orgHasDiscourse(currentOrg)) {
@@ -78,7 +78,7 @@ export default {
     eventHub.subscribe(
       "delete-comment",
       "prisma",
-      async ({ currentOrg, currentCollMember, event, dream, comment }) => {
+      async ({ currentOrg, currentCollMember, event, bucket, comment }) => {
         if (orgHasDiscourse(currentOrg)) {
           return;
         }

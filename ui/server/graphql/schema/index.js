@@ -111,13 +111,13 @@ const schema = gql`
     ): Collection!
     deleteCustomField(collectionId: ID!, fieldId: ID!): Collection!
 
-    editDreamCustomField(
+    editBucketCustomField(
       bucketId: ID!
       customField: CustomFieldValueInput!
     ): Bucket!
 
-    createDream(collectionId: ID!, title: String!): Bucket
-    editDream(
+    createBucket(collectionId: ID!, title: String!): Bucket
+    editBucket(
       bucketId: ID!
       title: String
       description: String
@@ -126,7 +126,7 @@ const schema = gql`
       budgetItems: [BudgetItemInput]
       tags: [String!]
     ): Bucket
-    deleteDream(bucketId: ID!): Bucket
+    deleteBucket(bucketId: ID!): Bucket
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
@@ -139,7 +139,7 @@ const schema = gql`
     deleteTag(collectionId: ID!, tagId: ID!): Collection
     removeTag(bucketId: ID!, tagId: ID!): Bucket
 
-    publishDream(bucketId: ID!, unpublish: Boolean): Bucket
+    publishBucket(bucketId: ID!, unpublish: Boolean): Bucket
 
     addComment(bucketId: ID!, content: String!): Comment
     editComment(bucketId: ID!, commentId: ID!, content: String!): Comment
@@ -619,7 +619,7 @@ const schema = gql`
   # type Log {
   #   createdAt: Date
   #   user: User
-  #   dream: Bucket
+  #   bucket: Bucket
   #   event: Collection
   #   details: LogDetails
   #   type: String

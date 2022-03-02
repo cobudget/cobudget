@@ -503,7 +503,7 @@ const resolvers = {
           },
         },
       });
-      // const dream = await Dream.findOne({ _id: bucketId });
+      // const bucket = await Bucket.findOne({ _id: bucketId });
 
       let comments;
       const org = bucket.collection.organization;
@@ -883,7 +883,7 @@ const resolvers = {
           data: { fields: { delete: { id: fieldId } } },
         })
     ),
-    createDream: combineResolvers(
+    createBucket: combineResolvers(
       isCollMember,
       async (parent, { collectionId, title }, { user, eventHub }) => {
         const collection = await prisma.collection.findUnique({
@@ -916,17 +916,17 @@ const resolvers = {
           },
         });
 
-        await eventHub.publish("create-dream", {
+        await eventHub.publish("create-bucket", {
           currentOrg: collection.organization,
           currentOrgMember,
-          dream: bucket,
+          bucket: bucket,
           event: collection,
         });
 
         return bucket;
       }
     ),
-    editDream: combineResolvers(
+    editBucket: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
       async (
         parent,
@@ -960,11 +960,11 @@ const resolvers = {
           },
         });
 
-        await eventHub.publish("edit-dream", {
+        await eventHub.publish("edit-bucket", {
           currentOrg: updated.collection.organization,
           currentOrgMember: updated.collection.organization?.orgMembers?.[0],
           event: updated.collection,
-          dream: updated,
+          bucket: updated,
         });
 
         return updated;
@@ -1034,7 +1034,7 @@ const resolvers = {
           data: { tags: { disconnect: { id: tagId } } },
         })
     ),
-    editDreamCustomField: combineResolvers(
+    editBucketCustomField: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
       async (
         parent,
@@ -1063,17 +1063,17 @@ const resolvers = {
           },
         });
 
-        await eventHub.publish("edit-dream", {
+        await eventHub.publish("edit-bucket", {
           currentOrg: updated.collection.organization,
           currentOrgMember: updated.collection.organization?.orgMembers?.[0],
           event: updated.collection,
-          dream: updated,
+          bucket: updated,
         });
 
         return updated;
       }
     ),
-    deleteDream: combineResolvers(
+    deleteBucket: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
       async (_, { bucketId }, { user, eventHub }) => {
         const {
@@ -1103,11 +1103,11 @@ const resolvers = {
           },
         });
 
-        await eventHub.publish("delete-dream", {
+        await eventHub.publish("delete-bucket", {
           currentOrg: bucket.collection.organization,
           currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
           event: bucket.collection,
-          dream: bucket,
+          bucket: bucket,
         });
 
         return bucket;
@@ -1133,7 +1133,7 @@ const resolvers = {
           data: { cocreators: { disconnect: { id: memberId } } },
         })
     ),
-    publishDream: combineResolvers(
+    publishBucket: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
       async (_, { bucketId, unpublish }, { user, eventHub }) => {
         const bucket = await prisma.bucket.findUnique({
@@ -1155,11 +1155,11 @@ const resolvers = {
           data: { publishedAt },
         });
 
-        await eventHub.publish("publish-dream", {
+        await eventHub.publish("publish-bucket", {
           currentOrg: bucket.collection.organization,
           currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
           event: bucket.collection,
-          dream: bucket,
+          bucket: bucket,
           unpublish,
         });
 
@@ -1212,7 +1212,7 @@ const resolvers = {
             currentOrgMember,
             currentCollMember,
             currentUser: user,
-            dream: bucket,
+            bucket: bucket,
             event: bucket.collection,
             comment,
           }
@@ -1251,7 +1251,7 @@ const resolvers = {
           currentOrgMember,
           event: bucket.collection,
           currentCollMember,
-          dream: bucket,
+          bucket: bucket,
           comment,
         });
 
@@ -1295,7 +1295,7 @@ const resolvers = {
             currentOrgMember:
               currentCollMember.collection.organization?.orgMembers?.[0],
             currentCollMember,
-            dream: comment.bucket,
+            bucket: comment.bucket,
             comment,
           }
         );
@@ -1346,7 +1346,7 @@ const resolvers = {
         },
       });
 
-      const logContent = `Someone flagged this dream for the **${updated.collection.guidelines[0].title}** guideline: \n> ${comment}`;
+      const logContent = `Someone flagged this bucket for the **${updated.collection.guidelines[0].title}** guideline: \n> ${comment}`;
       const currentOrg = updated.collection.organization;
       if (orgHasDiscourse(currentOrg)) {
         if (!updated.discourseTopicId) {
@@ -1361,8 +1361,8 @@ const resolvers = {
                   ? currentOrg.customDomain
                   : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
               }/${bucket.collection.slug}/${bucket.id}`,
-              ...(currentOrg.discourse.dreamsCategoryId && {
-                category: currentOrg.discourse.dreamsCategoryId,
+              ...(currentOrg.discourse.bucketsCategoryId && {
+                category: currentOrg.discourse.bucketsCategoryId,
               }),
             },
             {
@@ -1465,8 +1465,8 @@ const resolvers = {
                   ? currentOrg.customDomain
                   : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
               }/${bucket.collection.slug}/${bucket.id}`,
-              ...(currentOrg.discourse.dreamsCategoryId && {
-                category: currentOrg.discourse.dreamsCategoryId,
+              ...(currentOrg.discourse.bucketsCategoryId && {
+                category: currentOrg.discourse.bucketsCategoryId,
               }),
             },
             {
@@ -1890,7 +1890,7 @@ const resolvers = {
 
       if (bucket.completedAt) throw new Error("Bucket is already completed");
 
-      // Check that the max goal of the dream is not exceeded
+      // Check that the max goal of the bucket is not exceeded
       const {
         _sum: { amount: contributionsForBucket },
       } = await prisma.contribution.aggregate({
@@ -1910,7 +1910,7 @@ const resolvers = {
       if (contributionsForBucket + amount > maxGoal)
         throw new Error("You can't overfund this bucket.");
 
-      // mark dream as funded if it has reached its max goal
+      // mark bucket as funded if it has reached its max goal
       if (contributionsForBucket + amount === maxGoal) {
         bucket = await prisma.bucket.update({
           where: { id: bucketId },
@@ -1918,7 +1918,7 @@ const resolvers = {
         });
       }
 
-      // Check that it is not more than is allowed per dream (if this number is set)
+      // Check that it is not more than is allowed per bucket (if this number is set)
       const {
         _sum: { amount: contributionsFromUserToThisBucket },
       } = await prisma.contribution.aggregate({
@@ -1937,7 +1937,7 @@ const resolvers = {
         throw new Error(
           `You can give a maximum of ${
             collection.maxAmountToBucketPerUser / 100
-          } ${collection.currency} to one dream`
+          } ${collection.currency} to one bucket`
         );
       }
 

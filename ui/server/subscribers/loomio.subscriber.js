@@ -12,7 +12,7 @@ module.exports = {
       console.log("TODO: publish group to Loomio (?)");
     });
 
-    eventHub.subscribe("create-dream", ({ dream, actor }) => {
+    eventHub.subscribe("create-bucket", ({ bucket, actor }) => {
       console.log("TODO: publish discussion to Loomio");
     });
 

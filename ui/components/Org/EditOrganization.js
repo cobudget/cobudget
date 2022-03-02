@@ -137,9 +137,9 @@ const EditOrganization = ({ organization, currentUser }) => {
                 Custom Domain (optional)
                 <Tooltip
                   title={`<b>No need for http://</b><br/>
-              For example to use 'dreams.YOURDOMAIN.com' you need to<br/>
+              For example to use 'buckets.YOURDOMAIN.com' you need to<br/>
               1. Open your domain account provider<br/>
-              2. Set a new CNAME record with the name of 'dreams' and the value of ${process.env.DEPLOY_URL}`}
+              2. Set a new CNAME record with the name of 'buckets' and the value of ${process.env.DEPLOY_URL}`}
                   position="bottom"
                   size="small"
                 >
