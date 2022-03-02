@@ -1978,7 +1978,6 @@ const resolvers = {
 
       await prisma.transaction.create({
         data: {
-          type: "CONTRIBUTION",
           collectionMemberId: collectionMember.id,
           amount,
           toAccountId: bucket.statusAccountId,
