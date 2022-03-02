@@ -113,7 +113,12 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
     collection.guidelines.length > 0 &&
     bucket?.published;
 
-  if (!bucket || !collection) return null;
+  if (!bucket || !collection)
+    return (
+      <div className="text-center mt-7">
+        This bucket either doesn't exist or you don't have access to it
+      </div>
+    );
 
   return (
     <>
