@@ -7,7 +7,7 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
-const EventSettings = ({ collection, currentOrg, currentUser }) => {
+const RoundSettings = ({ collection, currentOrg, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const defaultTabs = [
@@ -60,4 +60,4 @@ const EventSettings = ({ collection, currentOrg, currentUser }) => {
   );
 };
 
-export default EventSettings;
+export default RoundSettings;

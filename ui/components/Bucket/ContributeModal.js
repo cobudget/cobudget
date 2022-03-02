@@ -50,19 +50,19 @@ const ContributeModal = ({ handleClose, bucket, collection, currentUser }) => {
     // update(cache) {
     //   const topLevelQueryData = cache.readQuery({
     //     query: TOP_LEVEL_QUERY,
-    //     variables: { slug: event.slug },
+    //     variables: { slug: round.slug },
     //   });
     //   cache.writeQuery({
     //     query: TOP_LEVEL_QUERY,
-    //     variables: { slug: event.slug },
+    //     variables: { slug: round.slug },
     //     data: {
     //       ...topLevelQueryData,
     //       currentOrgMember: {
     //         ...topLevelQueryData.currentOrgMember,
-    //         currentEventMembership: {
-    //           ...topLevelQueryData.currentOrgMember.currentEventMembership,
+    //         currentRoundMembership: {
+    //           ...topLevelQueryData.currentOrgMember.currentRoundMembership,
     //           balance:
-    //             topLevelQueryData.currentOrgMember.currentEventMembership
+    //             topLevelQueryData.currentOrgMember.currentRoundMembership
     //               .balance - amount,
     //         },
     //       },

@@ -7,8 +7,8 @@ import TextField from "../TextField";
 import Button from "../Button";
 import Banner from "../Banner";
 
-const DELETE_EVENT_MUTATION = gql`
-  mutation DeleteEvent($collectionId: ID!) {
+const DELETE_ROUND_MUTATION = gql`
+  mutation DeleteRound($collectionId: ID!) {
     deleteCollection(collectionId: $collectionId) {
       id
     }
@@ -18,7 +18,7 @@ const DELETE_EVENT_MUTATION = gql`
 export default ({ collection, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
   const [{ fetching: loading }, deleteCollection] = useMutation(
-    DELETE_EVENT_MUTATION
+    DELETE_ROUND_MUTATION
   );
 
   const handleSubmit = (e) => {

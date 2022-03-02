@@ -1,4 +1,4 @@
-import Members from "../../../components/EventMembers";
+import Members from "../../../components/RoundMembers";
 import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
 

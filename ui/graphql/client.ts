@@ -5,7 +5,7 @@ import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
-import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
+import { COLLECTION_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[org]/[collection]";
 import { BUCKET_QUERY } from "pages/[org]/[collection]/[bucket]";

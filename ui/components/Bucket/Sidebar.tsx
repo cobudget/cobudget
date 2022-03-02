@@ -152,7 +152,7 @@ const BucketSidebar = ({
     (!collection.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
-  const isEventAdminOrGuide =
+  const isRoundAdminOrGuide =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const hasNotReachedMaxGoal =
@@ -174,7 +174,7 @@ const BucketSidebar = ({
     hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
   const showMarkAsCompletedButton =
-    isEventAdminOrGuide && bucket.funded && !bucket.completed;
+    isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
     canApproveBucket && !collection.grantingHasClosed && !bucket.approved;
   const showUnapproveButton =
@@ -198,7 +198,7 @@ const BucketSidebar = ({
               </Button>
               {showBucketReview ? (
                 <Monster
-                  event={collection}
+                  round={collection}
                   bucket={bucket}
                   currentOrg={currentOrg}
                 />

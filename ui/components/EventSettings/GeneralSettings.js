@@ -6,11 +6,11 @@ import Button from "components/Button";
 import { SelectField } from "../SelectInput";
 import ColorPicker from "../ColorPicker";
 import slugify from "../../utils/slugify";
-import DeleteEventModal from "./DeleteEventModal";
+import DeleteRoundModal from "./DeleteRoundModal";
 import toast from "react-hot-toast";
 import router from "next/router";
 
-const EDIT_EVENT = gql`
+const EDIT_ROUND = gql`
   mutation editCollection(
     $collectionId: ID!
     $slug: String
@@ -45,7 +45,7 @@ export default function GeneralSettings({
   currentOrg,
   currentUser,
 }) {
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
   const [color, setColor] = useState(collection.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
@@ -170,7 +170,7 @@ export default function GeneralSettings({
       </form>
 
       {isDeleteModalOpened && (
-        <DeleteEventModal
+        <DeleteRoundModal
           collection={collection}
           handleClose={() => {
             setIsDeleteModalOpened(false);

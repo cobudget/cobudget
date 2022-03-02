@@ -75,7 +75,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const EventSettingsModalGranting = ({ collection, currentOrg }) => {
+const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -122,7 +122,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             disabled={!collection.bucketCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
             classes="px-6"
           />
 
@@ -134,7 +134,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={typeof collection.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
 
           <Divider />
@@ -145,7 +145,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={typeof collection.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
 
           <Divider />
@@ -162,7 +162,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={!!collection.maxAmountToBucketPerUser}
             openModal={() => handleOpen("SET_MAX_AMOUNT_TO_BUCKET")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
 
           <Divider />
@@ -179,7 +179,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={collection.bucketCreationCloses}
             openModal={() => handleOpen("SET_BUCKET_CREATION_CLOSES")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
 
           <Divider />
@@ -196,7 +196,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={collection.grantingOpens}
             openModal={() => handleOpen("SET_GRANTING_OPENS")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
 
           <Divider />
@@ -213,7 +213,7 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
             isSet={collection.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             canEdit={canEditSettings}
-            eventColor={collection.color}
+            roundColor={collection.color}
           />
         </List>
       </div>
@@ -221,4 +221,4 @@ const EventSettingsModalGranting = ({ collection, currentOrg }) => {
   );
 };
 
-export default EventSettingsModalGranting;
+export default RoundSettingsModalGranting;

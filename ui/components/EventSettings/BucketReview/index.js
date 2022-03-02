@@ -3,7 +3,7 @@ import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
-const EDIT_EVENT = gql`
+const EDIT_ROUND = gql`
   mutation editCollection($collectionId: ID!, $bucketReviewIsOpen: Boolean) {
     editCollection(
       collectionId: $collectionId
@@ -16,7 +16,7 @@ const EDIT_EVENT = gql`
 `;
 
 const BucketReview = ({ collection }) => {
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
   const {
     handleSubmit,
     register,
@@ -55,7 +55,7 @@ const BucketReview = ({ collection }) => {
         {/* <SelectField
           name="bucketReviewIsOpen"
           label="Who see's review monster"
-          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
+          defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
@@ -66,7 +66,7 @@ const BucketReview = ({ collection }) => {
         <SelectField
           name="bucketReviewIsOpen"
           label="Who can resolve a flag"
-          defaultValue={event.bucketReviewIsOpen ? "true" : "false"}
+          defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >

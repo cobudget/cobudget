@@ -7,7 +7,7 @@ import InviteMembersModal from "../InviteMembersModal";
 import LoadMore from "../LoadMore";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
-import SearchBar from "components/EventMembers/SearchBar";
+import SearchBar from "components/RoundMembers/SearchBar";
 
 export const COLLECTION_MEMBERS_QUERY = gql`
   query Members(
@@ -102,7 +102,7 @@ const DELETE_MEMBER = gql`
   }
 `;
 
-const EventMembers = ({ collection, currentUser }) => {
+const RoundMembers = ({ collection, currentUser }) => {
   const [searchString, setSearchString] = useState("");
   const [
     {
@@ -219,4 +219,4 @@ const EventMembers = ({ collection, currentUser }) => {
   );
 };
 
-export default EventMembers;
+export default RoundMembers;

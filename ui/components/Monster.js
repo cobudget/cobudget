@@ -163,7 +163,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   },
 ];
 
-const Monster = ({ event, bucket, currentOrg }) => {
+const Monster = ({ round, bucket, currentOrg }) => {
   const [open, setOpen] = useState(false);
   const isAngry = bucket.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
@@ -175,7 +175,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
 
   const { raisedFlags } = bucket;
 
-  const guidelines = event.guidelines.map((guideline) => ({
+  const guidelines = round.guidelines.map((guideline) => ({
     type: GUIDELINE,
     guideline,
   }));
@@ -208,7 +208,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
           {
             label: "It is breaking another guideline",
             chatItems: raiseFlagFlow({
-              guidelines: event.guidelines.filter(
+              guidelines: round.guidelines.filter(
                 (guideline) =>
                   !raisedFlags
                     .map((flag) => flag.guideline.id)
@@ -277,7 +277,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
             {
               label: "No, it's breaking a guideline",
               chatItems: raiseFlagFlow({
-                guidelines: event.guidelines,
+                guidelines: round.guidelines,
                 raiseFlag,
                 bucketId: bucket.id,
               }),
@@ -315,7 +315,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
         return (
           <div className={`mt-1 my-2 mx-3 flex justify-end`} key={i}>
             <div
-              className={`rounded-full border-2 border-${event.color} bg-${event.color} font-semibold py-2 px-3 text-white`}
+              className={`rounded-full border-2 border-${round.color} bg-${round.color} font-semibold py-2 px-3 text-white`}
               key={i}
             >
               {item.message}
@@ -333,10 +333,10 @@ const Monster = ({ event, bucket, currentOrg }) => {
     >
       {open && (
         <div
-          className={`fixed inset-0 sm:relative sm:h-148 sm:w-100 bg-gray-100 sm:rounded-lg shadow-lg border-${event.color} overflow-hidden border-3 flex flex-col`}
+          className={`fixed inset-0 sm:relative sm:h-148 sm:w-100 bg-gray-100 sm:rounded-lg shadow-lg border-${round.color} overflow-hidden border-3 flex flex-col`}
         >
           <div
-            className={`bg-${event.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
+            className={`bg-${round.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
           >
             <div className="">Review</div>
             <button
@@ -355,7 +355,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
                   <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
                     {chatItems[chatItems.length - 1].actions.map((action) => (
                       <button
-                        className={`border-2 border-${event.color} m-1 hover:bg-${event.color} text-${event.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
+                        className={`border-2 border-${round.color} m-1 hover:bg-${round.color} text-${round.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
                         key={action.label}
                         onClick={() => {
                           action.sideEffect && action.sideEffect();
@@ -377,7 +377,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
                     item={chatItems[chatItems.length - 1]}
                     chatItems={chatItems}
                     setChatItems={setChatItems}
-                    color={event.color}
+                    color={round.color}
                   />
                 )}
               </div>
@@ -389,7 +389,7 @@ const Monster = ({ event, bucket, currentOrg }) => {
       {!open && (
         <>
           <Button
-            color={event.color}
+            color={round.color}
             fullWidth
             className={"flex"}
             onClick={() => {

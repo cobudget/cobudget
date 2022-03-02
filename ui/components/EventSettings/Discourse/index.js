@@ -4,7 +4,7 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
 
-const EDIT_EVENT = gql`
+const EDIT_ROUND = gql`
   mutation editCollection($collectionId: ID!, $discourseCategoryId: Int) {
     editCollection(
       collectionId: $collectionId
@@ -27,7 +27,7 @@ export const CATEGORIES_QUERY = gql`
 
 const Discourse = ({ collection, currentOrg }) => {
   if (!currentOrg) return null;
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_EVENT);
+  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,

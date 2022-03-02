@@ -3,7 +3,7 @@ import { useMutation, gql } from "urql";
 import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 
-const EDIT_EVENT = gql`
+const EDIT_ROUND = gql`
   mutation editCollection($collectionId: ID!, $about: String) {
     editCollection(collectionId: $collectionId, about: $about) {
       id
@@ -13,7 +13,7 @@ const EDIT_EVENT = gql`
 `;
 
 export default ({ closeModal, collection }) => {
-  const [, editCollection] = useMutation(EDIT_EVENT);
+  const [, editCollection] = useMutation(EDIT_ROUND);
   const { handleSubmit, register } = useForm();
 
   return (
