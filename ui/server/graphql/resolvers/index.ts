@@ -2484,17 +2484,16 @@ const resolvers = {
       });
     },
     totalAllocations: async (collection) => {
-      const {
-        _sum: { amount: transactionAmount },
-      } = await prisma.transaction.aggregate({
-        where: {
-          toAccount: {
-            collectionMemberStatus: { collectionId: collection.id },
-          },
-          type: "ALLOCATION",
-        },
-        _sum: { amount: true },
-      });
+      // const {
+      //   _sum: { amount: transactionAmount },
+      // } = await prisma.transaction.aggregate({
+      //   where: {
+      //     toAccount: {
+      //       collectionMemberStatus: { collectionId: collection.id },
+      //     },
+      //   },
+      //   _sum: { amount: true },
+      // });
 
       const {
         _sum: { amount },
@@ -2503,11 +2502,13 @@ const resolvers = {
         _sum: { amount: true },
       });
 
-      if (transactionAmount !== amount) {
-        console.error("total allocation amounts don't add up properly...");
-      }
+      // // if (transactionAmount !== amount) {
+      // //   console.error("total allocation amounts don't add up properly...");
+      // //   console.log({ transactionAmount, allocationAmount: amount });
+      // // }
+      // console.log({ transactionAmount, allocationAmount: amount });
 
-      return transactionAmount;
+      return amount;
     },
     totalContributions: async (collection) => {
       const {

@@ -2,7 +2,7 @@ import prisma from "../index";
 
 export async function migrate() {
   // 1. add accounts to collection members
-
+  console.log("Start migration");
   const collectionMembers = await prisma.collectionMember.findMany({
     select: { id: true },
   });
@@ -29,6 +29,19 @@ export async function migrate() {
       where: { id: bucket.id },
       data: {
         statusAccount: { create: {} },
+        outgoingAccount: { create: {} },
+      },
+    });
+  }
+
+  // 3. add account to collection
+  const collections = await prisma.collection.findMany({});
+
+  for (const collection of collections) {
+    await prisma.collection.update({
+      where: { id: collection.id },
+      data: {
+        statusAccount: { create: {} },
       },
     });
   }
@@ -45,12 +58,13 @@ export async function migrate() {
         amount: allocation.amount,
         fromAccountId: allocation.collectionMember.incomingAccountId,
         toAccountId: allocation.collectionMember.statusAccountId,
-        type: "ALLOCATION",
         createdAt: allocation.createdAt,
-        collectionMemberId: allocation.collectionMember.id,
+        collectionMemberId: allocation.allocatedById,
         collectionId: allocation.collectionMember.collectionId,
+        userId: allocation.collectionMember.userId,
       },
     });
+    console.log({ transactionFromAllocation: transaction });
   }
 
   // 4. create transactions data from contributions
@@ -65,13 +79,16 @@ export async function migrate() {
         amount: contribution.amount,
         fromAccountId: contribution.collectionMember.statusAccountId,
         toAccountId: contribution.bucket.statusAccountId,
-        type: "CONTRIBUTION",
         createdAt: contribution.createdAt,
         collectionMemberId: contribution.collectionMember.id,
         collectionId: contribution.collectionMember.collectionId,
+        userId: contribution.collectionMember.userId,
       },
     });
+    console.log({ transactionFromContribution: transaction });
   }
+
+  console.log("end migration");
 }
 
 migrate();

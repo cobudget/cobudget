@@ -22,6 +22,7 @@ model User {
   orgMemberships  OrgMember[]
   collMemberships CollectionMember[]
   emailSettings   EmailSettings?
+  Transaction     Transaction[]
 }
 
 model EmailSettings {
@@ -369,22 +370,19 @@ model Account {
 model Transaction {
   id String @id @default(cuid())
 
-  type      TransactionType
   amount    Int
-  createdAt DateTime        @default(now())
+  createdAt DateTime @default(now())
 
   collectionMember   CollectionMember? @relation(fields: [collectionMemberId], references: [id])
   collectionMemberId String?
-  collection         Collection?       @relation(fields: [collectionId], references: [id])
-  collectionId       String?
+  user               User?             @relation(fields: [userId], references: [id])
+  userId             String?
+
+  collection   Collection? @relation(fields: [collectionId], references: [id])
+  collectionId String?
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
   fromAccountId String
   toAccountId   String
-}
-
-enum TransactionType {
-  ALLOCATION
-  CONTRIBUTION
 }
