@@ -1722,25 +1722,6 @@ const resolvers = {
     deleteGroupMember: combineResolvers(
       isOrgAdmin,
       async (parent, { groupMemberId }) => {
-        const groupMember = await prisma.orgMember.findUnique({
-          where: { id: groupMemberId },
-          include: { user: { include: { collMemberships: true } } },
-        });
-
-        // TODO: filter so it's only rounds part of this group
-        // maybe instead go orgMember->org->collections
-        // and then delete collMembers on the unique combination of userId, collId
-
-        const roundMembershipIds = groupMember.user.collMemberships.map(
-          (cm) => cm.id
-        );
-
-        await Promise.all(
-          roundMembershipIds.map((roundMemberId) =>
-            deleteRoundMember({ roundMemberId })
-          )
-        );
-
         return prisma.orgMember.delete({
           where: { id: groupMemberId },
         });
