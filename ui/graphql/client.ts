@@ -56,7 +56,11 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "collectionTransactions")
                 .forEach((field) => {
-                  cache.invalidate("Query", "collectionTransactions", field.arguments);
+                  cache.invalidate(
+                    "Query",
+                    "collectionTransactions",
+                    field.arguments
+                  );
                 });
             },
             joinCollection(result: any, args, cache) {
@@ -117,6 +121,14 @@ export const client = (
                   }
                 );
               }
+            },
+            deleteGroupMember(result: any, { groupMemberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "orgMembersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                });
             },
             updateMember(result: any, { isApproved }, cache) {
               // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
@@ -374,12 +386,16 @@ export const client = (
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");
-              
+
               queryFields
-                  .filter((field) => field.fieldName === "collectionTransactions")
-                  .forEach((field) => {
-                    cache.invalidate("Query", "collectionTransactions", field.arguments);
-                  });
+                .filter((field) => field.fieldName === "collectionTransactions")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "collectionTransactions",
+                    field.arguments
+                  );
+                });
 
               queryFields
                 .filter((field) => field.fieldName === "contributionsPage")
@@ -396,13 +412,12 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "membersPage", field.arguments);
                 });
-              
+
               queryFields
                 .filter((field) => field.fieldName === "collection")
                 .forEach((field) => {
                   cache.invalidate("Query", "collection", field.arguments);
                 });
-
             },
           },
         },
