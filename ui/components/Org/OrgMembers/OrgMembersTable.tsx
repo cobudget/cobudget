@@ -15,6 +15,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
+import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
@@ -92,10 +93,21 @@ const ActionsDropdown = ({
               confirm(
                 `Are you sure you would like to delete org membership from user with email ${member.email}?`
               )
-            )
+            ) {
               deleteGroupMember({
                 groupMemberId: member.id,
+              }).then(({ error }) => {
+                if (error) {
+                  console.error(error);
+                  toast.error(error.message);
+                } else {
+                  toast.success(
+                    `Deleted group member with email ${member.email}`
+                  );
+                }
+                handleClose();
               });
+            }
           }}
         >
           <Box color="error.main">Delete</Box>
