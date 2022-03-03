@@ -241,15 +241,28 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  
-                  <p className="font-bold my-0.5">
-                    Your Funds
-                  </p>
-                  <p className="mb-5">
-                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
-                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
-                  </p>
-                  
+                  <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+                    <p className="font-bold my-0.5">Funds available</p>
+                    <div>
+                      <table>
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(collection.currency)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="pr-3">In this round</td>
+                          <td className="font-bold">
+                            {collection.totalInMembersBalances / 100}
+                            {getCurrencySymbol(collection.currency)}
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+
                   <Button
                     size="large"
                     color={collection.color}

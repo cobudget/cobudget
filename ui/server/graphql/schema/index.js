@@ -357,7 +357,6 @@ const schema = gql`
     isApproved: Boolean!
     createdAt: Date
     balance: Int # stored as cents
-    amountContributed: Int
     email: String
     name: String
     hasJoined: Boolean
