@@ -5,7 +5,7 @@ import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetMaxAmountToDream = ({ closeModal, collection }) => {
+const SetMaxAmountToDream = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
@@ -17,7 +17,7 @@ const SetMaxAmountToDream = ({ closeModal, collection }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              collectionId: collection.id,
+              roundId: round.id,
               maxAmountToBucketPerUser: Math.round(
                 variables.maxAmountToBucketPerUser * 100
               ),
@@ -33,7 +33,7 @@ const SetMaxAmountToDream = ({ closeModal, collection }) => {
             <TextField
               name="maxAmountToBucketPerUser"
               label={`Max. amount to one bucket per user`}
-              defaultValue={collection.maxAmountToBucketPerUser / 100}
+              defaultValue={round.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}
               InputProps={{

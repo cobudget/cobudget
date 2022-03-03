@@ -1,16 +1,16 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const bucketItems = ({ orgSlug, collectionSlug, bucketId, bucket }) => {
+const bucketItems = ({ orgSlug, roundSlug, bucketId, bucket }) => {
   return [
-    { label: "Bucket", href: `/${orgSlug}/${collectionSlug}/${bucketId}` },
+    { label: "Bucket", href: `/${orgSlug}/${roundSlug}/${bucketId}` },
     {
       label: `Comments (${bucket.noOfComments})`,
-      href: `/${orgSlug}/${collectionSlug}/${bucketId}/comments`,
+      href: `/${orgSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
       label: `Funders (${bucket.noOfFunders})`,
-      href: `/${orgSlug}/${collectionSlug}/${bucketId}/funders`,
+      href: `/${orgSlug}/${roundSlug}/${bucketId}/funders`,
     },
   ];
 };
@@ -24,27 +24,27 @@ const orgItems = ({ currentUser, orgSlug }) => {
   ].filter((i) => (i.admin ? currentUser?.currentOrgMember?.isAdmin : true));
 };
 
-export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
+export const roundItems = ({ currentUser, orgSlug, roundSlug }) => {
   const isAdmin =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { label: "Overview", href: `/${orgSlug}/${collectionSlug}` },
-    { label: "About", href: `/${orgSlug}/${collectionSlug}/about` },
+    { label: "Overview", href: `/${orgSlug}/${roundSlug}` },
+    { label: "About", href: `/${orgSlug}/${roundSlug}/about` },
     {
       label: "Members",
-      href: `/${orgSlug}/${collectionSlug}/members`,
+      href: `/${orgSlug}/${roundSlug}/members`,
       member: true,
     },
     {
       label: "Transactions",
-      href: `/${orgSlug}/${collectionSlug}/transactions`,
+      href: `/${orgSlug}/${roundSlug}/transactions`,
       admin: true,
     },
     {
       label: "Settings",
-      href: `/${orgSlug}/${collectionSlug}/settings`,
+      href: `/${orgSlug}/${roundSlug}/settings`,
       admin: true,
     },
   ].filter((i) => (i.admin ? isAdmin : true));
@@ -52,31 +52,31 @@ export const collectionItems = ({ currentUser, orgSlug, collectionSlug }) => {
 
 export default function SubMenu({
   bucket,
-  collection,
+  round,
   currentUser,
 }: {
   bucket?: any;
-  collection?: any;
+  round?: any;
   currentUser: any;
 }) {
   const router = useRouter();
 
   const items = bucket
     ? bucketItems({
-        collectionSlug: router.query.collection,
+        roundSlug: router.query.round,
         orgSlug: router.query.org,
         bucketId: router.query.bucket,
         bucket,
       })
-    : collection
-    ? collectionItems({
+    : round
+    ? roundItems({
         currentUser,
-        collectionSlug: router.query.collection,
+        roundSlug: router.query.round,
         orgSlug: router.query.org,
       })
     : orgItems({ currentUser, orgSlug: router.query.org });
 
-  const color = collection?.color ?? "anthracit";
+  const color = round?.color ?? "anthracit";
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;

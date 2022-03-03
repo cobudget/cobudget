@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import BucketCustomField from "./BucketCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
-  query CustomFields($orgSlug: String!, $collectionSlug: String!) {
-    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+  query CustomFields($orgSlug: String!, $roundSlug: String!) {
+    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
       id
       customFields {
         id
@@ -23,7 +23,7 @@ const CUSTOM_FIELDS_QUERY = gql`
 const BucketCustomFields = ({
   customFields,
   canEdit,
-  collectionId,
+  roundId,
   bucketId,
 }) => {
   const router = useRouter();
@@ -31,7 +31,7 @@ const BucketCustomFields = ({
     query: CUSTOM_FIELDS_QUERY,
     variables: {
       orgSlug: router.query.org,
-      collectionSlug: router.query.collection,
+      roundSlug: router.query.round,
     },
   });
 
@@ -40,7 +40,7 @@ const BucketCustomFields = ({
   }
 
   // TODO: can use the custom fields already fetched in the event query in _app
-  const { customFields: defaultCustomFields } = data.collection;
+  const { customFields: defaultCustomFields } = data.round;
 
   return (
     <div>
@@ -57,7 +57,7 @@ const BucketCustomFields = ({
               customField={
                 customField && customField.length > 0 ? customField[0] : null
               }
-              collectionId={collectionId}
+              roundId={roundId}
               bucketId={bucketId}
               canEdit={canEdit}
             />

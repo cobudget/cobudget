@@ -11,8 +11,8 @@ import toast from "react-hot-toast";
 import router from "next/router";
 
 const EDIT_ROUND = gql`
-  mutation editCollection(
-    $collectionId: ID!
+  mutation editRound(
+    $roundId: ID!
     $slug: String
     $title: String
     $archived: Boolean
@@ -20,8 +20,8 @@ const EDIT_ROUND = gql`
     $visibility: Visibility
     $color: String
   ) {
-    editCollection(
-      collectionId: $collectionId
+    editRound(
+      roundId: $roundId
       slug: $slug
       title: $title
       archived: $archived
@@ -41,12 +41,12 @@ const EDIT_ROUND = gql`
 `;
 
 export default function GeneralSettings({
-  collection,
+  round,
   currentOrg,
   currentUser,
 }) {
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
-  const [color, setColor] = useState(collection.color);
+  const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
+  const [color, setColor] = useState(round.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
   const {
     handleSubmit,
@@ -65,9 +65,9 @@ export default function GeneralSettings({
       <h2 className="text-2xl font-semibold">General</h2>
       <form
         onSubmit={handleSubmit((variables) => {
-          editCollection({
+          editRound({
             ...variables,
-            collectionId: collection.id,
+            roundId: round.id,
             archived: variables.archived === "true",
             color,
           }).then(({ error }) => {
@@ -86,7 +86,7 @@ export default function GeneralSettings({
           name="title"
           label="Title"
           placeholder="Title"
-          defaultValue={collection.title}
+          defaultValue={round.title}
           inputRef={register}
           className="my-4"
         />
@@ -95,7 +95,7 @@ export default function GeneralSettings({
           name="slug"
           label="URL"
           placeholder="Slug"
-          defaultValue={collection.slug}
+          defaultValue={round.slug}
           inputRef={register}
           startAdornment={startUrl}
           inputProps={{
@@ -109,7 +109,7 @@ export default function GeneralSettings({
         <SelectField
           name="visibility"
           label="Visibility"
-          defaultValue={collection.visibility}
+          defaultValue={round.visibility}
           inputRef={register}
           className="my-4"
         >
@@ -120,7 +120,7 @@ export default function GeneralSettings({
         <SelectField
           name="registrationPolicy"
           label="Registration policy"
-          defaultValue={collection.registrationPolicy}
+          defaultValue={round.registrationPolicy}
           inputRef={register}
           className="my-4"
         >
@@ -134,8 +134,8 @@ export default function GeneralSettings({
         {isAdmin && (
           <SelectField
             name="archived"
-            label="Archive collection"
-            defaultValue={collection.archived ? "true" : "false"}
+            label="Archive round"
+            defaultValue={round.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
           >
@@ -152,7 +152,7 @@ export default function GeneralSettings({
               variant="secondary"
               color="red"
             >
-              Delete this collection
+              Delete this round
             </Button>
           </>
         )}
@@ -161,7 +161,7 @@ export default function GeneralSettings({
           <Button
             color={color}
             type="submit"
-            disabled={!(isDirty || collection.color !== color)}
+            disabled={!(isDirty || round.color !== color)}
             loading={loading}
           >
             Save
@@ -171,7 +171,7 @@ export default function GeneralSettings({
 
       {isDeleteModalOpened && (
         <DeleteRoundModal
-          collection={collection}
+          round={round}
           handleClose={() => {
             setIsDeleteModalOpened(false);
           }}

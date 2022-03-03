@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
-    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+  query TopLevelQuery($roundSlug: String, $orgSlug: String) {
+    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
       id
       slug
       info
@@ -72,11 +72,11 @@ export const TOP_LEVEL_QUERY = gql`
           logo
         }
       }
-      collectionMemberships {
+      roundMemberships {
         id
         isAdmin
         isApproved
-        collection {
+        round {
           id
           title
           slug
@@ -88,7 +88,7 @@ export const TOP_LEVEL_QUERY = gql`
           }
         }
       }
-      currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+      currentCollMember(orgSlug: $orgSlug, roundSlug: $roundSlug) {
         id
         isAdmin
         isModerator
@@ -96,7 +96,7 @@ export const TOP_LEVEL_QUERY = gql`
         hasJoined
         balance
         amountContributed
-        collection {
+        round {
           id
           title
         }
@@ -127,10 +127,10 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, collection } = {
+      data: { currentUser, currentOrg, round } = {
         currentUser: null,
         currentOrg: null,
-        collection: null,
+        round: null,
       },
       fetching,
       error,
@@ -139,7 +139,7 @@ const MyApp = ({ Component, pageProps, router }) => {
     query: TOP_LEVEL_QUERY,
     variables: {
       orgSlug: router.query.org,
-      collectionSlug: router.query.collection,
+      roundSlug: router.query.round,
     },
   });
 
@@ -184,21 +184,21 @@ const MyApp = ({ Component, pageProps, router }) => {
         currentUser={currentUser}
         currentOrg={currentOrg}
         openModal={openModal}
-        collection={collection}
+        round={round}
         router={router}
         title={
           currentOrg
-            ? collection
-              ? `${collection.title} | ${currentOrg.name}`
+            ? round
+              ? `${round.title} | ${currentOrg.name}`
               : currentOrg.name
-            : collection
-            ? collection.title
+            : round
+            ? round.title
             : "Cobudget"
         }
       >
         <Component
           {...pageProps}
-          collection={collection}
+          round={round}
           currentUser={currentUser}
           currentOrg={currentOrg}
           openModal={openModal}

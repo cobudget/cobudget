@@ -9,15 +9,15 @@ import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/RoundMembers/SearchBar";
 
-export const COLLECTION_MEMBERS_QUERY = gql`
+export const ROUND_MEMBERS_QUERY = gql`
   query Members(
-    $collectionId: ID!
+    $roundId: ID!
     $search: String!
     $offset: Int
     $limit: Int
   ) {
     approvedMembersPage: membersPage(
-      collectionId: $collectionId
+      roundId: $roundId
       isApproved: true
       search: $search
       offset: $offset
@@ -25,7 +25,7 @@ export const COLLECTION_MEMBERS_QUERY = gql`
     ) {
       moreExist
       approvedMembers: members(
-        collectionId: $collectionId
+        roundId: $roundId
         isApproved: true
         offset: $offset
         limit: $limit
@@ -48,10 +48,10 @@ export const COLLECTION_MEMBERS_QUERY = gql`
       }
     }
     requestsToJoinPage: membersPage(
-      collectionId: $collectionId
+      roundId: $roundId
       isApproved: false
     ) {
-      requestsToJoin: members(collectionId: $collectionId, isApproved: false) {
+      requestsToJoin: members(roundId: $roundId, isApproved: false) {
         id
         isAdmin
         isModerator
@@ -74,14 +74,14 @@ export const COLLECTION_MEMBERS_QUERY = gql`
 const UPDATE_MEMBER = gql`
   mutation UpdateMember(
     $memberId: ID!
-    $collectionId: ID!
+    $roundId: ID!
     $isAdmin: Boolean
     $isApproved: Boolean
     $isModerator: Boolean
   ) {
     updateMember(
       memberId: $memberId
-      collectionId: $collectionId
+      roundId: $roundId
       isAdmin: $isAdmin
       isApproved: $isApproved
       isModerator: $isModerator
@@ -95,14 +95,14 @@ const UPDATE_MEMBER = gql`
 `;
 
 const DELETE_MEMBER = gql`
-  mutation DeleteMember($memberId: ID!, $collectionId: ID!) {
-    deleteMember(memberId: $memberId, collectionId: $collectionId) {
+  mutation DeleteMember($memberId: ID!, $roundId: ID!) {
+    deleteMember(memberId: $memberId, roundId: $roundId) {
       id
     }
   }
 `;
 
-const RoundMembers = ({ collection, currentUser }) => {
+const RoundMembers = ({ round, currentUser }) => {
   const [searchString, setSearchString] = useState("");
   const [
     {
@@ -125,9 +125,9 @@ const RoundMembers = ({ collection, currentUser }) => {
     },
     searchApprovedMembers,
   ] = useQuery({
-    query: COLLECTION_MEMBERS_QUERY,
+    query: ROUND_MEMBERS_QUERY,
     variables: {
-      collectionId: collection.id,
+      roundId: round.id,
       search: searchString,
       offset: 0,
       limit: 1000,
@@ -172,12 +172,12 @@ const RoundMembers = ({ collection, currentUser }) => {
           requestsToJoin={requestsToJoin}
           updateMember={updateMember}
           deleteMember={deleteMember}
-          collection={collection}
+          round={round}
         />
 
         <div className="flex justify-between mb-3 items-center">
           <SearchBar
-            collection={collection}
+            round={round}
             value={searchString}
             placeholder="Search members"
             onChange={(e) => setSearchString(e.target.value)}
@@ -191,7 +191,7 @@ const RoundMembers = ({ collection, currentUser }) => {
               {inviteModalOpen && (
                 <InviteMembersModal
                   handleClose={() => setInviteModalOpen(false)}
-                  collectionId={collection.id}
+                  roundId={round.id}
                 />
               )}
             </div>
@@ -202,7 +202,7 @@ const RoundMembers = ({ collection, currentUser }) => {
           approvedMembers={items}
           updateMember={updateMember}
           deleteMember={deleteMember}
-          collection={collection}
+          round={round}
           isAdmin={isAdmin}
         />
         {/* TODO:fix */}

@@ -4,9 +4,9 @@ import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 
 const EDIT_ROUND = gql`
-  mutation editCollection($collectionId: ID!, $bucketReviewIsOpen: Boolean) {
-    editCollection(
-      collectionId: $collectionId
+  mutation editRound($roundId: ID!, $bucketReviewIsOpen: Boolean) {
+    editRound(
+      roundId: $roundId
       bucketReviewIsOpen: $bucketReviewIsOpen
     ) {
       id
@@ -15,8 +15,8 @@ const EDIT_ROUND = gql`
   }
 `;
 
-const BucketReview = ({ collection }) => {
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
+const BucketReview = ({ round }) => {
+  const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
   const {
     handleSubmit,
     register,
@@ -32,9 +32,9 @@ const BucketReview = ({ collection }) => {
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
-          editCollection({
+          editRound({
             ...variables,
-            collectionId: collection.id,
+            roundId: round.id,
             bucketReviewIsOpen: variables.bucketReviewIsOpen === "true",
           })
             //.then(() => null)
@@ -44,7 +44,7 @@ const BucketReview = ({ collection }) => {
         <SelectField
           name="bucketReviewIsOpen"
           label="Show Review Prompt"
-          defaultValue={collection.bucketReviewIsOpen ? "true" : "false"}
+          defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
@@ -76,7 +76,7 @@ const BucketReview = ({ collection }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={collection.color}
+            color={round.color}
             type="submit"
             disabled={!isDirty}
             loading={loading}

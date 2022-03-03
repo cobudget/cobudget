@@ -10,18 +10,18 @@ import toast from "react-hot-toast";
 
 const BULK_ALLOCATE_MUTATION = gql`
   mutation BulkAllocate(
-    $collectionId: ID!
+    $roundId: ID!
     $amount: Int!
     $type: AllocationType!
   ) {
-    bulkAllocate(collectionId: $collectionId, amount: $amount, type: $type) {
+    bulkAllocate(roundId: $roundId, amount: $amount, type: $type) {
       id
       balance
     }
   }
 `;
 
-const BulkAllocateModal = ({ collection, handleClose }) => {
+const BulkAllocateModal = ({ round, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
@@ -31,7 +31,7 @@ const BulkAllocateModal = ({ collection, handleClose }) => {
   );
 
   const disabled = inputValue === "" || (!amount && type === "Add");
-  const total = amount * collection.numberOfApprovedMembers;
+  const total = amount * round.numberOfApprovedMembers;
   return (
     <Modal
       open={true}
@@ -52,7 +52,7 @@ const BulkAllocateModal = ({ collection, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             bulkAllocate({
-              collectionId: collection.id,
+              roundId: round.id,
               amount,
               type: type.toUpperCase(),
             }).then(({ error }) => {
@@ -73,19 +73,19 @@ const BulkAllocateModal = ({ collection, handleClose }) => {
             }}
             placeholder="0"
             autoFocus
-            endAdornment={collection.currency}
+            endAdornment={round.currency}
             className="w-36 mx-auto mt-4 mb-2"
           />
           {type === "Add" ? (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Adding {thousandSeparator(amount / 100)} {collection.currency} to{" "}
-              {collection.numberOfApprovedMembers} members ={" "}
-              {thousandSeparator(total / 100)} {collection.currency} total
+              Adding {thousandSeparator(amount / 100)} {round.currency} to{" "}
+              {round.numberOfApprovedMembers} members ={" "}
+              {thousandSeparator(total / 100)} {round.currency} total
             </p>
           ) : (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Setting {collection.numberOfApprovedMembers} members balances to{" "}
-              {thousandSeparator(amount / 100)} {collection.currency}
+              Setting {round.numberOfApprovedMembers} members balances to{" "}
+              {thousandSeparator(amount / 100)} {round.currency}
             </p>
           )}
 

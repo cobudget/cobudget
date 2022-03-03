@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
-import { INVITE_COLLECTION_MEMBERS_MUTATION } from "../InviteMembersModal";
+import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
 import { useMutation } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
@@ -25,14 +25,14 @@ import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 
 const ActionsDropdown = ({
-  collectionId,
+  roundId,
   updateMember,
   deleteMember,
   member,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [, inviteAgain] = useMutation(INVITE_COLLECTION_MEMBERS_MUTATION);
+  const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_MUTATION);
 
   const open = Boolean(anchorEl);
 
@@ -62,7 +62,7 @@ const ActionsDropdown = ({
         <MenuItem
           onClick={() => {
             updateMember({
-              collectionId,
+              roundId,
 
               memberId: member.id,
               isAdmin: !member.isAdmin,
@@ -77,7 +77,7 @@ const ActionsDropdown = ({
           <MenuItem
             onClick={() => {
               inviteAgain({
-                collectionId,
+                roundId,
                 emails: member.email,
               }).then(() => {
                 toast.success("Invitation sent again");
@@ -91,7 +91,7 @@ const ActionsDropdown = ({
         <MenuItem
           onClick={() => {
             updateMember({
-              collectionId,
+              roundId,
               memberId: member.id,
               isModerator: !member.isModerator,
             }).then(() => {
@@ -109,7 +109,7 @@ const ActionsDropdown = ({
                 `Are you sure you would like to delete membership from user with email ${member.user.email}?`
               )
             )
-              deleteMember({ collectionId, memberId: member.id });
+              deleteMember({ roundId, memberId: member.id });
           }}
         >
           <Box color="error.main">Delete</Box>
@@ -119,7 +119,7 @@ const ActionsDropdown = ({
   );
 };
 
-const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
+const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
   const [allocateModalOpen, setAllocateModalOpen] = useState(false);
 
   return (
@@ -158,11 +158,11 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setAllocateModalOpen(true)}
           >
-            {thousandSeparator(member.balance / 100)} {collection.currency}
+            {thousandSeparator(member.balance / 100)} {round.currency}
           </button>
         ) : (
           <span>
-            {thousandSeparator(member.balance / 100)} {collection.currency}
+            {thousandSeparator(member.balance / 100)} {round.currency}
           </span>
         )}
 
@@ -170,7 +170,7 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
           <AllocateModal
             open={allocateModalOpen}
             member={member}
-            collection={collection}
+            round={round}
             handleClose={() => setAllocateModalOpen(false)}
           />
         )}
@@ -181,7 +181,7 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
             member={member}
             deleteMember={deleteMember}
             updateMember={updateMember}
-            collectionId={collection.id}
+            roundId={round.id}
           />
         </TableCell>
       )}
@@ -193,7 +193,7 @@ const RoundMembersTable = ({
   approvedMembers,
   updateMember,
   deleteMember,
-  collection,
+  round,
   isAdmin,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
@@ -227,7 +227,7 @@ const RoundMembersTable = ({
                 </div>
                 {bulkAllocateModalOpen && (
                   <BulkAllocateModal
-                    collection={collection}
+                    round={round}
                     handleClose={() => setBulkAllocateModalOpen(false)}
                   />
                 )}
@@ -240,7 +240,7 @@ const RoundMembersTable = ({
               <Row
                 key={member.id}
                 member={member}
-                collection={collection}
+                round={round}
                 deleteMember={deleteMember}
                 updateMember={updateMember}
                 isAdmin={isAdmin}

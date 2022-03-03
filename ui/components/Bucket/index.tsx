@@ -7,7 +7,7 @@ import BucketCustomFields from "./CustomFields/BucketCustomFields";
 
 const Bucket = ({
   bucket,
-  collection,
+  round,
   currentUser,
   currentOrg,
   openImageModal,
@@ -42,7 +42,7 @@ const Bucket = ({
             )}
 
             <BucketCustomFields
-              collectionId={collection.id}
+              roundId={round.id}
               bucketId={bucket.id}
               customFields={bucket.customFields}
               canEdit={canEdit}
@@ -52,9 +52,9 @@ const Bucket = ({
               bucketId={bucket.id}
               budgetItems={bucket.budgetItems}
               canEdit={canEdit}
-              currency={collection.currency}
-              allowStretchGoals={collection.allowStretchGoals}
-              collection={collection}
+              currency={round.currency}
+              allowStretchGoals={round.allowStretchGoals}
+              round={round}
               currentOrg={currentOrg}
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}

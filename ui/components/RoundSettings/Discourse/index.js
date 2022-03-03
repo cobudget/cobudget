@@ -5,9 +5,9 @@ import { SelectField } from "components/SelectInput";
 import HappySpinner from "../../HappySpinner";
 
 const EDIT_ROUND = gql`
-  mutation editCollection($collectionId: ID!, $discourseCategoryId: Int) {
-    editCollection(
-      collectionId: $collectionId
+  mutation editRound($roundId: ID!, $discourseCategoryId: Int) {
+    editRound(
+      roundId: $roundId
       discourseCategoryId: $discourseCategoryId
     ) {
       id
@@ -25,9 +25,9 @@ export const CATEGORIES_QUERY = gql`
   }
 `;
 
-const Discourse = ({ collection, currentOrg }) => {
+const Discourse = ({ round, currentOrg }) => {
   if (!currentOrg) return null;
-  const [{ fetching: loading }, editCollection] = useMutation(EDIT_ROUND);
+  const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,
@@ -44,14 +44,14 @@ const Discourse = ({ collection, currentOrg }) => {
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">Category</h2>
       <p className="text-gray-700 mb-4">
-        Select the discourse category that buckets in this collection will be
+        Select the discourse category that buckets in this round will be
         posted to
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
-          editCollection({
+          editRound({
             ...variables,
-            collectionId: collection.id,
+            roundId: round.id,
             discourseCategoryId: parseInt(variables.discourseCategoryId),
           })
             //.then(() => handleClose())
@@ -61,7 +61,7 @@ const Discourse = ({ collection, currentOrg }) => {
         {categories.length > 0 ? (
           <SelectField
             name="discourseCategoryId"
-            defaultValue={collection.discourseCategoryId}
+            defaultValue={round.discourseCategoryId}
             inputRef={register}
             className="my-4"
           >
@@ -77,7 +77,7 @@ const Discourse = ({ collection, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={collection.color}
+            color={round.color}
             type="submit"
             disabled={!isDirty}
             loading={loading}

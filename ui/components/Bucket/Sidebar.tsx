@@ -131,7 +131,7 @@ const css = {
 
 const BucketSidebar = ({
   bucket,
-  collection,
+  round,
   currentUser,
   canEdit,
   currentOrg,
@@ -149,7 +149,7 @@ const BucketSidebar = ({
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const canApproveBucket =
-    (!collection.requireBucketApproval && canEdit) ||
+    (!round.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isRoundAdminOrGuide =
@@ -164,7 +164,7 @@ const BucketSidebar = ({
     !bucket.funded &&
     !bucket.canceled &&
     hasNotReachedMaxGoal &&
-    collection.grantingIsOpen &&
+    round.grantingIsOpen &&
     currentUser?.currentCollMember;
   const showAcceptFundingButton =
     bucket.approved &&
@@ -176,7 +176,7 @@ const BucketSidebar = ({
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
-    canApproveBucket && !collection.grantingHasClosed && !bucket.approved;
+    canApproveBucket && !round.grantingHasClosed && !bucket.approved;
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
@@ -186,11 +186,11 @@ const BucketSidebar = ({
     <>
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus bucket={bucket} collection={collection} />
+          <GrantingStatus bucket={bucket} round={round} />
           {showFundButton && (
             <>
               <Button
-                color={collection.color}
+                color={round.color}
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
@@ -198,7 +198,7 @@ const BucketSidebar = ({
               </Button>
               {showBucketReview ? (
                 <Monster
-                  round={collection}
+                  round={round}
                   bucket={bucket}
                   currentOrg={currentOrg}
                 />
@@ -207,7 +207,7 @@ const BucketSidebar = ({
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
-                  collection={collection}
+                  round={round}
                   currentUser={currentUser}
                 />
               )}
@@ -215,7 +215,7 @@ const BucketSidebar = ({
           )}
           {showAcceptFundingButton && (
             <Button
-              color={collection.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 confirm(
@@ -232,7 +232,7 @@ const BucketSidebar = ({
 
           {showPublishButton && (
             <Button
-              color={collection.color}
+              color={round.color}
               onClick={() =>
                 publishBucket({
                   bucketId: bucket.id,
@@ -246,7 +246,7 @@ const BucketSidebar = ({
           )}
           {showApproveButton && (
             <Button
-              color={collection.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 approveForGranting({
@@ -260,7 +260,7 @@ const BucketSidebar = ({
           )}
           {showMarkAsCompletedButton && (
             <Button
-              color={collection.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 confirm(
@@ -349,8 +349,8 @@ const BucketSidebar = ({
                         } else {
                           setActionsDropdownOpen(false);
                           Router.push(
-                            "/[org]/[collection]",
-                            `/${currentOrg?.slug ?? "c"}/${collection.slug}`
+                            "/[org]/[round]",
+                            `/${currentOrg?.slug ?? "c"}/${round.slug}`
                           );
                           toast.success("Bucket deleted");
                         }
@@ -410,7 +410,7 @@ const BucketSidebar = ({
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
             cocreators={bucket.cocreators}
-            collection={collection}
+            round={round}
             bucket={bucket}
             currentUser={currentUser}
           />
@@ -418,7 +418,7 @@ const BucketSidebar = ({
         <Tags
           currentOrg={currentOrg}
           bucket={bucket}
-          collection={collection}
+          round={round}
           canEdit={canEdit}
         />
       </div>

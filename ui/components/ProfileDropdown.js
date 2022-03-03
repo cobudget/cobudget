@@ -48,7 +48,7 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
             </h2>
             {currentUser.currentCollMember && (
               <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                {currentUser.currentCollMember.collection.title}
+                {currentUser.currentCollMember.round.title}
                 {Boolean(currentUser.currentCollMember.balance) && (
                   <p className="mt-1 text-gray-800 text-sm">
                     You have{" "}
@@ -63,7 +63,7 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
                 )}
               </div>
             )}
-            {currentOrgMember?.collectionMemberships.map((membership) => {
+            {currentOrgMember?.roundMemberships.map((membership) => {
               if (
                 currentOrgMember.currentEventMembership &&
                 currentOrgMember.currentEventMembership.id === membership.id
@@ -72,7 +72,7 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
               }
               return (
                 <Link
-                  href="/[org]/[collection]"
+                  href="/[org]/[round]"
                   as={`/${currentOrg.slug}/${membership.event.slug}`}
                   key={membership.event.slug}
                 >

@@ -14,7 +14,7 @@ const GET_TODO_INFO = gql`
       }
     }
 
-    collections(limit: 1, orgId: $orgId) {
+    rounds(limit: 1, orgId: $orgId) {
       id
     }
   }
@@ -81,9 +81,9 @@ const TodoList = ({ currentOrg }) => {
       link: `/${currentOrg.slug}/members`,
     },
     {
-      title: "Create first collection",
-      desc: "A collection is a page for gathering ideas from the community",
-      link: `/${currentOrg.slug}/new-collection`,
+      title: "Create first round",
+      desc: "A round is a page for gathering ideas from the community",
+      link: `/${currentOrg.slug}/new-round`,
     },
   ];
 
@@ -107,7 +107,7 @@ const TodoList = ({ currentOrg }) => {
     } else if (index === 1) {
       done = data?.orgMembers?.length > 1;
     } else if (index === 2) {
-      done = data?.collections.length > 0;
+      done = data?.rounds.length > 0;
     }
 
     return {

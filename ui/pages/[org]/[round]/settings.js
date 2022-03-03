@@ -1,16 +1,16 @@
 import RoundSettings from "../../../components/RoundSettings";
 import SubMenu from "../../../components/SubMenu";
 
-const RoundSettingsPage = ({ collection, currentUser, currentOrg }) => {
+const RoundSettingsPage = ({ round, currentUser, currentOrg }) => {
   const isAdmin =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentOrgMember?.isAdmin;
-  if (!isAdmin || !collection) return null;
+  if (!isAdmin || !round) return null;
   return (
     <div className="flex-1">
-      <SubMenu currentUser={currentUser} collection={collection} />
+      <SubMenu currentUser={currentUser} round={round} />
       <RoundSettings
-        collection={collection}
+        round={round}
         currentOrg={currentOrg}
         currentUser={currentUser}
       />

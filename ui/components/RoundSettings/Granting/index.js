@@ -42,7 +42,7 @@ const modals = {
 
 export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
-    $collectionId: ID!
+    $roundId: ID!
     $currency: String
     $maxAmountToBucketPerUser: Int
     $grantingOpens: Date
@@ -52,7 +52,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $requireBucketApproval: Boolean
   ) {
     updateGrantingSettings(
-      collectionId: $collectionId
+      roundId: $roundId
       currency: $currency
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
       grantingOpens: $grantingOpens
@@ -75,7 +75,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
+const RoundSettingsModalGranting = ({ round, currentOrg }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -104,7 +104,7 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
         <div className={classes.innerModal}>
           {open && (
             <ModalContent
-              collection={collection}
+              round={round}
               closeModal={handleClose}
               currentOrg={currentOrg}
             />
@@ -117,12 +117,12 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
         <List>
           <SettingsListItem
             primary="Currency"
-            secondary={collection.currency}
-            isSet={collection.currency}
-            disabled={!collection.bucketCreationIsOpen}
+            secondary={round.currency}
+            isSet={round.currency}
+            disabled={!round.bucketCreationIsOpen}
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
             classes="px-6"
           />
 
@@ -130,22 +130,22 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
 
           <SettingsListItem
             primary="Allow stretch goals"
-            secondary={collection.allowStretchGoals?.toString() ?? "false"}
-            isSet={typeof collection.allowStretchGoals !== "undefined"}
+            secondary={round.allowStretchGoals?.toString() ?? "false"}
+            isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
 
           <Divider />
 
           <SettingsListItem
             primary="Require moderator approval of buckets before funding"
-            secondary={collection.requireBucketApproval?.toString() ?? "false"}
-            isSet={typeof collection.requireBucketApproval !== "undefined"}
+            secondary={round.requireBucketApproval?.toString() ?? "false"}
+            isSet={typeof round.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
 
           <Divider />
@@ -153,16 +153,16 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
           <SettingsListItem
             primary={`Max. amount to one bucket per user`}
             secondary={
-              collection.maxAmountToBucketPerUser
+              round.maxAmountToBucketPerUser
                 ? `${thousandSeparator(
-                    collection.maxAmountToBucketPerUser / 100
-                  )} ${collection.currency}`
+                    round.maxAmountToBucketPerUser / 100
+                  )} ${round.currency}`
                 : "Not set"
             }
-            isSet={!!collection.maxAmountToBucketPerUser}
+            isSet={!!round.maxAmountToBucketPerUser}
             openModal={() => handleOpen("SET_MAX_AMOUNT_TO_BUCKET")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
 
           <Divider />
@@ -170,16 +170,16 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
           <SettingsListItem
             primary={`Bucket creation closes`}
             secondary={
-              collection.bucketCreationCloses
-                ? dayjs(collection.bucketCreationCloses).format(
+              round.bucketCreationCloses
+                ? dayjs(round.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )
                 : "Not set"
             }
-            isSet={collection.bucketCreationCloses}
+            isSet={round.bucketCreationCloses}
             openModal={() => handleOpen("SET_BUCKET_CREATION_CLOSES")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
 
           <Divider />
@@ -187,16 +187,16 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
           <SettingsListItem
             primary="Granting opens"
             secondary={
-              collection.grantingOpens
-                ? dayjs(collection.grantingOpens).format(
+              round.grantingOpens
+                ? dayjs(round.grantingOpens).format(
                     "MMMM D, YYYY - h:mm a"
                   )
                 : "Not set"
             }
-            isSet={collection.grantingOpens}
+            isSet={round.grantingOpens}
             openModal={() => handleOpen("SET_GRANTING_OPENS")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
 
           <Divider />
@@ -204,16 +204,16 @@ const RoundSettingsModalGranting = ({ collection, currentOrg }) => {
           <SettingsListItem
             primary="Granting closes"
             secondary={
-              collection.grantingCloses
-                ? dayjs(collection.grantingCloses).format(
+              round.grantingCloses
+                ? dayjs(round.grantingCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )
                 : "Not set"
             }
-            isSet={collection.grantingCloses}
+            isSet={round.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
             canEdit={canEditSettings}
-            roundColor={collection.color}
+            roundColor={round.color}
           />
         </List>
       </div>

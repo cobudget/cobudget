@@ -37,7 +37,7 @@ export const BUCKET_QUERY = gql`
         id
         amount
         createdAt
-        collectionMember {
+        roundMember {
           id
           user {
             id
@@ -99,7 +99,7 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
+const BucketIndex = ({ round, currentUser, currentOrg, router }) => {
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
@@ -108,11 +108,11 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
   const { bucket } = data ?? { bucket: null };
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
-    collection.bucketReviewIsOpen &&
-    collection.guidelines.length > 0 &&
+    round.bucketReviewIsOpen &&
+    round.guidelines.length > 0 &&
     bucket?.published;
 
-  if (!bucket || !collection) return null;
+  if (!bucket || !round) return null;
 
   return (
     <>
@@ -129,7 +129,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
         error={error}
         currentUser={currentUser}
         currentOrg={currentOrg}
-        collection={collection}
+        round={round}
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
@@ -180,7 +180,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
           <Tab.Panel>
             <Bucket
               bucket={bucket}
-              collection={collection}
+              round={round}
               currentUser={currentUser}
               currentOrg={currentOrg}
               openImageModal={() => setEditImagesModalOpen(true)}
@@ -190,7 +190,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
             <Comments
               bucket={bucket}
               router={router}
-              collection={collection}
+              round={round}
               currentUser={currentUser}
               currentOrg={currentOrg}
             />
@@ -198,7 +198,7 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
           <Tab.Panel>
             <Funders
               bucket={bucket}
-              collection={collection}
+              round={round}
               currentUser={currentUser}
             />
           </Tab.Panel>

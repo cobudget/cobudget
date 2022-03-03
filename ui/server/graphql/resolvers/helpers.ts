@@ -3,53 +3,53 @@ import dayjs from "dayjs";
 
 export async function getCurrentCollMember({ collMemberId }) {}
 
-export async function isCollAdmin({ collectionId, userId }) {
-  const collectionMember = await getCollectionMember({
+export async function isCollAdmin({ roundId, userId }) {
+  const roundMember = await getRoundMember({
     userId: userId,
-    collectionId,
+    roundId,
   });
-  return !!collectionMember?.isAdmin;
+  return !!roundMember?.isAdmin;
 }
 
 export async function isAndGetCollMember({
-  collectionId,
+  roundId,
   userId,
   bucketId,
   include,
 }: {
-  collectionId?: string;
+  roundId?: string;
   bucketId?: string;
   userId?: string;
   include?: object;
 }) {
   let collMember = null;
   if (bucketId) {
-    collMember = await prisma.collectionMember.findFirst({
+    collMember = await prisma.roundMember.findFirst({
       where: { buckets: { some: { id: bucketId } } },
       include,
     });
-  } else if (collectionId) {
-    collMember = await prisma.collectionMember.findUnique({
+  } else if (roundId) {
+    collMember = await prisma.roundMember.findUnique({
       where: {
-        userId_collectionId: { userId, collectionId },
+        userId_roundId: { userId, roundId },
       },
       include,
     });
   }
 
   if (!collMember?.isApproved)
-    throw new Error("Non existing or non approved collection member");
+    throw new Error("Non existing or non approved round member");
 
   return collMember;
 }
 
 export async function isAndGetCollMemberOrOrgAdmin({
-  collectionId,
+  roundId,
   userId,
   bucketId,
   include,
 }: {
-  collectionId?: string;
+  roundId?: string;
   bucketId?: string;
   userId?: string;
   include?: object;
@@ -58,26 +58,26 @@ export async function isAndGetCollMemberOrOrgAdmin({
   let orgMember = null;
 
   if (bucketId) {
-    collMember = await prisma.collectionMember.findFirst({
+    collMember = await prisma.roundMember.findFirst({
       where: { buckets: { some: { id: bucketId } } },
       include,
     });
-  } else if (collectionId) {
-    collMember = await prisma.collectionMember.findUnique({
+  } else if (roundId) {
+    collMember = await prisma.roundMember.findUnique({
       where: {
-        userId_collectionId: { userId, collectionId },
+        userId_roundId: { userId, roundId },
       },
       include,
     });
   }
   if (!collMember) {
     orgMember = await prisma.orgMember.findFirst({
-      where: { organization: { collections: { some: { id: collectionId } } } },
+      where: { organization: { rounds: { some: { id: roundId } } } },
     });
   }
 
   if (!orgMember?.isAdmin || !collMember?.isApproved)
-    throw new Error("Not a collection member or an org admin");
+    throw new Error("Not a round member or an org admin");
 
   return { collMember, orgMember };
 }
@@ -90,13 +90,13 @@ export async function getOrgMember({ orgId, userId }) {
   });
 }
 
-export async function getCollectionMember({
-  collectionId,
+export async function getRoundMember({
+  roundId,
   userId,
   include,
   bucketId,
 }: {
-  collectionId?: string;
+  roundId?: string;
   userId: string;
   include?: object;
   bucketId?: string;
@@ -104,20 +104,20 @@ export async function getCollectionMember({
   let collMember = null;
 
   if (bucketId) {
-    collMember = await prisma.collectionMember.findFirst({
-      where: { collection: { buckets: { some: { id: bucketId } } }, userId },
+    collMember = await prisma.roundMember.findFirst({
+      where: { round: { buckets: { some: { id: bucketId } } }, userId },
       include,
     });
-  } else if (collectionId) {
-    collMember = await prisma.collectionMember.findUnique({
+  } else if (roundId) {
+    collMember = await prisma.roundMember.findUnique({
       where: {
-        userId_collectionId: { userId, collectionId },
+        userId_roundId: { userId, roundId },
       },
       include,
     });
   }
   if (!collMember?.isApproved) {
-    throw new Error("Not a collection member ");
+    throw new Error("Not a round member ");
   }
 
   return collMember;
@@ -125,12 +125,12 @@ export async function getCollectionMember({
 
 export async function getCurrentOrgAndMember({
   orgId,
-  collectionId,
+  roundId,
   bucketId,
   user,
 }: {
   orgId?: string;
-  collectionId?: string;
+  roundId?: string;
   bucketId?: string;
   user?: any;
 }) {
@@ -148,9 +148,9 @@ export async function getCurrentOrgAndMember({
       where: { id: orgId },
       include,
     });
-  } else if (collectionId) {
+  } else if (roundId) {
     currentOrg = await prisma.organization.findFirst({
-      where: { collections: { some: { id: collectionId } } },
+      where: { rounds: { some: { id: roundId } } },
       include: {
         ...(user && {
           orgMembers: {
@@ -162,14 +162,14 @@ export async function getCurrentOrgAndMember({
     });
   } else if (bucketId) {
     currentOrg = await prisma.organization.findFirst({
-      where: { collections: { some: { buckets: { some: { id: bucketId } } } } },
+      where: { rounds: { some: { buckets: { some: { id: bucketId } } } } },
       include,
     });
   }
 
   const currentOrgMember = currentOrg?.orgMembers?.[0];
-  const collectionMember = currentOrgMember?.collectionMemberships?.[0];
-  return { currentOrg, currentOrgMember, collectionMember };
+  const roundMember = currentOrgMember?.roundMemberships?.[0];
+  return { currentOrg, currentOrgMember, roundMember };
 }
 
 /** contributions = donations */
@@ -212,13 +212,13 @@ export async function bucketMinGoal(bucket) {
   return min > 0 ? min : 0;
 }
 
-export function isGrantingOpen(collection) {
+export function isGrantingOpen(round) {
   const now = dayjs();
-  const grantingHasOpened = collection.grantingOpens
-    ? dayjs(collection.grantingOpens).isBefore(now)
+  const grantingHasOpened = round.grantingOpens
+    ? dayjs(round.grantingOpens).isBefore(now)
     : true;
-  const grantingHasClosed = collection.grantingCloses
-    ? dayjs(collection.grantingCloses).isBefore(now)
+  const grantingHasClosed = round.grantingCloses
+    ? dayjs(round.grantingCloses).isBefore(now)
     : false;
   return grantingHasOpened && !grantingHasClosed;
 }
@@ -259,11 +259,11 @@ export async function canViewRound({ round, user }) {
   if (round.visibility === "PUBLIC") {
     return true;
   }
-  const roundMember = await prisma.collectionMember.findUnique({
+  const roundMember = await prisma.roundMember.findUnique({
     where: {
-      userId_collectionId: {
+      userId_roundId: {
         userId: user?.id ?? "undefined",
-        collectionId: round.id,
+        roundId: round.id,
       },
     },
   });

@@ -5,11 +5,11 @@ import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
-import { COLLECTION_MEMBERS_QUERY } from "../components/RoundMembers";
+import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { BUCKETS_QUERY } from "pages/[org]/[collection]";
-import { BUCKET_QUERY } from "pages/[org]/[collection]/[bucket]";
-import { COLLECTIONS_QUERY } from "pages/[org]";
+import { BUCKETS_QUERY } from "pages/[org]/[round]";
+import { BUCKET_QUERY } from "pages/[org]/[round]/[bucket]";
+import { ROUNDS_QUERY } from "pages/[org]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
@@ -54,22 +54,22 @@ export const client = (
             allocate(result: any, args, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "collectionTransactions")
+                .filter((field) => field.fieldName === "roundTransactions")
                 .forEach((field) => {
-                  cache.invalidate("Query", "collectionTransactions", field.arguments);
+                  cache.invalidate("Query", "roundTransactions", field.arguments);
                 });
             },
-            joinCollection(result: any, args, cache) {
-              if (result.joinCollection) {
+            joinRound(result: any, args, cache) {
+              if (result.joinRound) {
                 console.log({ result });
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
                       orgSlug:
-                        result.joinCollection.collection.organization?.slug ??
+                        result.joinRound.round.organization?.slug ??
                         "c",
-                      collectionSlug: result.joinCollection.collection.slug,
+                      roundSlug: result.joinRound.round.slug,
                     },
                   },
                   (data) => {
@@ -78,10 +78,10 @@ export const client = (
                       ...data,
                       currentUser: {
                         ...data.currentUser,
-                        currentCollMember: result.joinCollection,
-                        collectionMemberships: [
-                          ...data.currentUser.collectionMemberships,
-                          result.joinCollection,
+                        currentCollMember: result.joinRound,
+                        roundMemberships: [
+                          ...data.currentUser.roundMemberships,
+                          result.joinRound,
                         ],
                       },
                     };
@@ -106,7 +106,7 @@ export const client = (
                     query: TOP_LEVEL_QUERY,
                     variables: {
                       orgSlug: result.joinOrg.organization.slug,
-                      collectionSlug: undefined,
+                      roundSlug: undefined,
                     },
                   },
                   (data) => {
@@ -144,9 +144,9 @@ export const client = (
               //     if (!field.arguments.limit) return null;
               //     cache.updateQuery(
               //       {
-              //         query: COLLECTION_MEMBERS_QUERY,
+              //         query: ROUND_MEMBERS_QUERY,
               //         variables: {
-              //           collectionId: field.arguments.collectionId,
+              //           roundId: field.arguments.roundId,
               //           offset: field.arguments.offset,
               //           limit: field.arguments.limit,
               //         },
@@ -171,21 +171,21 @@ export const client = (
               //     );
               //   });
             },
-            deleteCollection(result: any, { collectionId }, cache) {
+            deleteRound(result: any, { roundId }, cache) {
               const fields = cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "collections")
+                .filter((field) => field.fieldName === "rounds")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: COLLECTIONS_QUERY,
+                      query: ROUNDS_QUERY,
                       variables: {
                         orgSlug: field.arguments.orgSlug,
                       },
                     },
                     (data) => {
-                      data.collections = data.collections.filter(
-                        (collection) => collection.id !== collectionId
+                      data.rounds = data.rounds.filter(
+                        (round) => round.id !== roundId
                       );
                       return data;
                     }
@@ -211,7 +211,7 @@ export const client = (
                   );
                 });
             },
-            createBucket(result: any, { collectionId }, cache) {
+            createBucket(result: any, { roundId }, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -221,7 +221,7 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
                 .filter(
-                  (field) => field.arguments.collectionId === collectionId
+                  (field) => field.arguments.roundId === roundId
                 )
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
@@ -338,19 +338,19 @@ export const client = (
                 );
               }
             },
-            inviteCollectionMembers(result: any, { collectionId }, cache) {
-              if (result.inviteCollectionMembers) {
+            inviteRoundMembers(result: any, { roundId }, cache) {
+              if (result.inviteRoundMembers) {
                 cache.updateQuery(
                   {
-                    query: COLLECTION_MEMBERS_QUERY,
-                    variables: { collectionId, offset: 0, limit: 1000 },
+                    query: ROUND_MEMBERS_QUERY,
+                    variables: { roundId, offset: 0, limit: 1000 },
                   },
                   (data: any) => {
                     const existingEmails =
                       data.approvedMembersPage?.approvedMembers?.map(
                         (member) => member.email
                       ) || [];
-                    const newInvitedMembers = result.inviteCollectionMembers?.filter(
+                    const newInvitedMembers = result.inviteRoundMembers?.filter(
                       (member) => existingEmails.indexOf(member.email) === -1
                     );
 
@@ -376,9 +376,9 @@ export const client = (
               const queryFields = cache.inspectFields("Query");
               
               queryFields
-                  .filter((field) => field.fieldName === "collectionTransactions")
+                  .filter((field) => field.fieldName === "roundTransactions")
                   .forEach((field) => {
-                    cache.invalidate("Query", "collectionTransactions", field.arguments);
+                    cache.invalidate("Query", "roundTransactions", field.arguments);
                   });
 
               queryFields
@@ -398,9 +398,9 @@ export const client = (
                 });
               
               queryFields
-                .filter((field) => field.fieldName === "collection")
+                .filter((field) => field.fieldName === "round")
                 .forEach((field) => {
-                  cache.invalidate("Query", "collection", field.arguments);
+                  cache.invalidate("Query", "round", field.arguments);
                 });
 
             },

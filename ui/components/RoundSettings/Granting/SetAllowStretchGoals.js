@@ -8,10 +8,10 @@ import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetAllowStretchGoals = ({ closeModal, collection }) => {
+const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
-  console.log({ collection });
+  console.log({ round });
   return (
     <Card>
       <Box p={3}>
@@ -20,7 +20,7 @@ const SetAllowStretchGoals = ({ closeModal, collection }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              collectionId: collection.id,
+              roundId: round.id,
               allowStretchGoals: variables.allowStretchGoals === "true",
             })
               .then(({ data }) => {
@@ -37,7 +37,7 @@ const SetAllowStretchGoals = ({ closeModal, collection }) => {
             <SelectInput
               name="allowStretchGoals"
               label="Allow stretch goals"
-              defaultValue={collection.allowStretchGoals ?? false}
+              defaultValue={round.allowStretchGoals ?? false}
               inputRef={register}
               fullWidth
             >

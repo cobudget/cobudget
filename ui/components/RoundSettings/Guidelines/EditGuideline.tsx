@@ -9,8 +9,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const ADD_GUIDELINE_MUTATION = gql`
-  mutation AddGuideline($collectionId: ID!, $guideline: GuidelineInput!) {
-    addGuideline(collectionId: $collectionId, guideline: $guideline) {
+  mutation AddGuideline($roundId: ID!, $guideline: GuidelineInput!) {
+    addGuideline(roundId: $roundId, guideline: $guideline) {
       id
       guidelines {
         id
@@ -24,12 +24,12 @@ const ADD_GUIDELINE_MUTATION = gql`
 
 const EDIT_GUIDELINE_MUTATION = gql`
   mutation EditGuideline(
-    $collectionId: ID!
+    $roundId: ID!
     $guidelineId: ID!
     $guideline: GuidelineInput!
   ) {
     editGuideline(
-      collectionId: $collectionId
+      roundId: $roundId
       guidelineId: $guidelineId
       guideline: $guideline
     ) {
@@ -51,7 +51,7 @@ const schema = yup.object().shape({
 });
 
 export default ({
-  collection,
+  round,
   handleClose,
   guideline = {
     id: null,
@@ -87,7 +87,7 @@ export default ({
           onSubmit={handleSubmit((variables) =>
             addOrEditGuideline({
               ...variables,
-              collectionId: collection.id,
+              roundId: round.id,
               ...(editing && { guidelineId: guideline.id }),
             })
               .then(() => handleClose())
@@ -102,7 +102,7 @@ export default ({
               inputRef={register}
               error={errors.guideline?.title}
               helperText={errors.guideline?.title?.message}
-              color={collection.color}
+              color={round.color}
               autoFocus
             />
             <TextField
@@ -115,7 +115,7 @@ export default ({
               }
               error={errors.guideline?.description}
               helperText={errors.guideline?.description?.message}
-              color={collection.color}
+              color={round.color}
               wysiwyg
             />
           </div>
@@ -126,11 +126,11 @@ export default ({
                 variant="secondary"
                 onClick={handleClose}
                 className="mr-2"
-                color={collection.color}
+                color={round.color}
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading} color={collection.color}>
+              <Button type="submit" loading={loading} color={round.color}>
                 Save
               </Button>
             </div>

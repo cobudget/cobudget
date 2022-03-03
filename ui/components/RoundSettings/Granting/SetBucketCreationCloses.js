@@ -8,12 +8,12 @@ import DayjsUtils from "@date-io/dayjs";
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetBucketCreationCloses = ({ closeModal, collection }) => {
+const SetBucketCreationCloses = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(
-    collection.bucketCreationCloses
+    round.bucketCreationCloses
   );
 
   return (
@@ -25,7 +25,7 @@ const SetBucketCreationCloses = ({ closeModal, collection }) => {
           onSubmit={handleSubmit(() => {
             updateGranting({
               bucketCreationCloses: selectedDate,
-              collectionId: collection.id,
+              roundId: round.id,
             })
               .then(() => {
                 // console.log({ data });
@@ -61,7 +61,7 @@ const SetBucketCreationCloses = ({ closeModal, collection }) => {
             >
               Save
             </Button>
-            {collection.bucketCreationCloses && (
+            {round.bucketCreationCloses && (
               <Button
                 type="button"
                 size="large"
@@ -70,7 +70,7 @@ const SetBucketCreationCloses = ({ closeModal, collection }) => {
                 className="ml-2"
                 onClick={() => {
                   updateGranting({
-                    collectionId: collection.id,
+                    roundId: round.id,
                     bucketCreationCloses: null,
                   })
                     .then(() => {

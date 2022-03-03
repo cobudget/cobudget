@@ -7,21 +7,21 @@ import EditableField from "../../../components/EditableField";
 
 export default function AboutPage({
   router,
-  collection,
+  round,
   currentUser,
   currentOrg,
 }) {
-  if (!collection) return null;
+  if (!round) return null;
   return (
     <>
-      <SubMenu currentUser={currentUser} collection={collection} />
+      <SubMenu currentUser={currentUser} round={round} />
       <PageHero>
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-3">
           <div className="col-span-2">
             <EditableField
-              defaultValue={collection.about}
+              defaultValue={round.about}
               label="Add about text"
-              placeholder={`# About ${collection.title}`}
+              placeholder={`# About ${round.title}`}
               canEdit={
                 currentUser?.currentOrgMember?.isAdmin ||
                 currentUser?.currentCollMember?.isAdmin
@@ -29,17 +29,17 @@ export default function AboutPage({
               name="about"
               className="h-10"
               MUTATION={gql`
-                mutation EditCollectionAbout(
-                  $collectionId: ID!
+                mutation EditRoundAbout(
+                  $roundId: ID!
                   $about: String
                 ) {
-                  editCollection(collectionId: $collectionId, about: $about) {
+                  editRound(roundId: $roundId, about: $about) {
                     id
                     about
                   }
                 }
               `}
-              variables={{ collectionId: collection.id }}
+              variables={{ roundId: round.id }}
             />
           </div>
         </div>

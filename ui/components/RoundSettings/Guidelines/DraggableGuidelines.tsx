@@ -8,8 +8,8 @@ import DraggableItems from "../DraggableItems";
 import Markdown from "components/Markdown";
 
 const DELETE_GUIDELINE_MUTATION = gql`
-  mutation DeleteGuideline($collectionId: ID!, $guidelineId: ID!) {
-    deleteGuideline(collectionId: $collectionId, guidelineId: $guidelineId) {
+  mutation DeleteGuideline($roundId: ID!, $guidelineId: ID!) {
+    deleteGuideline(roundId: $roundId, guidelineId: $guidelineId) {
       id
       guidelines {
         id
@@ -22,12 +22,12 @@ const DELETE_GUIDELINE_MUTATION = gql`
 
 const SET_GUIDELINE_POSITION_MUTATION = gql`
   mutation SetGuidelinePosition(
-    $collectionId: ID!
+    $roundId: ID!
     $guidelineId: ID!
     $newPosition: Float
   ) {
     setGuidelinePosition(
-      collectionId: $collectionId
+      roundId: $roundId
       guidelineId: $guidelineId
       newPosition: $newPosition
     ) {
@@ -49,7 +49,7 @@ const DragHandle = SortableHandle(() => (
 ));
 
 const SortableItem = SortableElement(
-  ({ item: guideline, setEditingItem: setEditingGuideline, collectionId }) => {
+  ({ item: guideline, setEditingItem: setEditingGuideline, roundId }) => {
     const [{ fetching: deleting }, deleteGuideline] = useMutation(
       DELETE_GUIDELINE_MUTATION
     );
@@ -76,7 +76,7 @@ const SortableItem = SortableElement(
                     "Are you sure you would like to delete this guideline?"
                   ) &&
                   deleteGuideline({
-                    collectionId,
+                    roundId,
                     guidelineId: guideline.id,
                   })
                 }
@@ -96,13 +96,13 @@ const SortableItem = SortableElement(
   }
 );
 
-const DraggableGuidelines = ({ collection, items, setEditingItem }) => {
+const DraggableGuidelines = ({ round, items, setEditingItem }) => {
   const [{ fetching: loading }, setGuidelinePosition] = useMutation(
     SET_GUIDELINE_POSITION_MUTATION
   );
   const setItemPosition = (guidelineId, newPosition) => {
     setGuidelinePosition({
-      collectionId: collection.id,
+      roundId: round.id,
       guidelineId,
       newPosition,
     });
@@ -110,7 +110,7 @@ const DraggableGuidelines = ({ collection, items, setEditingItem }) => {
 
   return (
     <DraggableItems
-      collection={collection}
+      round={round}
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}

@@ -9,25 +9,25 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const CREATE_BUCKET = gql`
-  mutation CreateBucket($collectionId: ID!, $title: String!) {
-    createBucket(collectionId: $collectionId, title: $title) {
+  mutation CreateBucket($roundId: ID!, $title: String!) {
+    createBucket(roundId: $roundId, title: $title) {
       id
       title
     }
   }
 `;
 
-const NewBucketModal = ({ collection, handleClose, currentOrg }) => {
+const NewBucketModal = ({ round, handleClose, currentOrg }) => {
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmitCreate = (variables) => {
-    createBucket({ ...variables, collectionId: collection.id })
+    createBucket({ ...variables, roundId: round.id })
       .then(({ data }) => {
         Router.push(
-          "/[org]/[collection]/[bucket]",
-          `/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+          "/[org]/[round]/[bucket]",
+          `/${currentOrg?.slug ?? "c"}/${round.slug}/${
             data.createBucket.id
           }`
         );
@@ -60,7 +60,7 @@ const NewBucketModal = ({ collection, handleClose, currentOrg }) => {
             autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
-            color={collection.color}
+            color={round.color}
           />
 
           <div className="flex justify-end">
@@ -69,7 +69,7 @@ const NewBucketModal = ({ collection, handleClose, currentOrg }) => {
               variant="secondary"
               onClick={handleClose}
               className="mr-3"
-              color={collection.color}
+              color={round.color}
             >
               Cancel
             </Button>
@@ -77,7 +77,7 @@ const NewBucketModal = ({ collection, handleClose, currentOrg }) => {
               size="large"
               type="submit"
               loading={loading}
-              color={collection.color}
+              color={round.color}
             >
               Create
             </Button>

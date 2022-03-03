@@ -53,12 +53,12 @@ export default {
   inviteMember: async ({
     email,
     currentUser,
-    collection,
+    round,
     currentOrg,
   }: {
     email: string;
     currentUser: { name: string };
-    collection?: {
+    round?: {
       title: string;
       slug: string;
       info?: string;
@@ -73,14 +73,14 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentOrg?.slug ?? collection.organization.slug}/${
-        collection?.slug ?? ""
+      `/${currentOrg?.slug ?? round.organization.slug}/${
+        round?.slug ?? ""
       }`
     );
 
-    const orgCollName = currentOrg?.name ?? collection.title;
+    const orgCollName = currentOrg?.name ?? round.title;
 
-    const mdPurpose = currentOrg?.info ?? collection?.info ?? "";
+    const mdPurpose = currentOrg?.info ?? round?.info ?? "";
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
@@ -142,7 +142,7 @@ export default {
       where: { email: newUser.email },
       include: {
         collMemberships: {
-          include: { collection: { include: { organization: true } } },
+          include: { round: { include: { organization: true } } },
         },
       },
     });
@@ -150,11 +150,11 @@ export default {
     const createYourFirst =
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
-            `/${collMemberships[0].collection.organization.slug}/${collMemberships[0].collection.slug}`
+            `/${collMemberships[0].round.organization.slug}/${collMemberships[0].round.slug}`
           )}">create your first Bucket</a>!`
         : `Jump right in and <a href="${appLink(
-            "/new-collection"
-          )}">create your first Collection</a>!`;
+            "/new-round"
+          )}">create your first Round</a>!`;
 
     await sendEmail({
       to: newUser.email,
@@ -178,8 +178,8 @@ export default {
       </ul>
       <br/>
       Ready to invite others to co-create and fund projects with you? <a href="${appLink(
-        "/new-collection"
-      )}">Create a Collection</a>!
+        "/new-round"
+      )}">Create a Round</a>!
       `,
     });
   },
@@ -255,13 +255,13 @@ export default {
     await sendEmails(mentionEmails);
 
     const cocreatorsToEmail = (
-      await prisma.collectionMember.findMany({
+      await prisma.roundMember.findMany({
         where: { buckets: { some: { id: bucket.id } } },
         include: { user: { include: { emailSettings: true } } },
       })
     )
       .filter(
-        (collectionMember) => collectionMember.id !== currentCollMember.id
+        (roundMember) => roundMember.id !== currentCollMember.id
       )
       .filter(
         (roundMember) =>
@@ -277,10 +277,10 @@ export default {
             .includes(cocreatorCollMember.user.id)
       )
       .map(
-        (collectionMember): SendEmailInput => ({
-          to: collectionMember.user.email,
+        (roundMember): SendEmailInput => ({
+          to: roundMember.user.email,
           subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
-          html: `Hey ${escape(collectionMember.user.name)}!
+          html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
           Your bucket “${escape(bucket.title)}” received a new comment.
           <br/><br/>
@@ -350,35 +350,35 @@ export default {
     }
   },
   allocateToMemberNotification: async ({
-    collectionMemberId,
-    collectionId,
+    roundMemberId,
+    roundId,
     oldAmount,
     newAmount,
   }) => {
     if (newAmount <= oldAmount) return;
 
-    const { user } = await prisma.collectionMember.findUnique({
-      where: { id: collectionMemberId },
+    const { user } = await prisma.roundMember.findUnique({
+      where: { id: roundMemberId },
       include: { user: { include: { emailSettings: true } } },
     });
-    const collection = await prisma.collection.findUnique({
-      where: { id: collectionId },
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
       include: { organization: true },
     });
-    const org = collection.organization;
+    const org = round.organization;
 
     if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
     await sendEmail({
       to: user.email,
-      subject: `${user.name}, you’ve received funds to spend in ${collection.title}!`,
+      subject: `${user.name}, you’ve received funds to spend in ${round.title}!`,
       html: `You have received ${(newAmount - oldAmount) / 100} ${
-        collection.currency
-      } in ${escape(collection.title)}.
+        round.currency
+      } in ${escape(round.title)}.
       <br/><br/>
       Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
-        `/${org.slug}/${collection.slug}`
-      )}">${escape(collection.title)}</a>.
+        `/${org.slug}/${round.slug}`
+      )}">${escape(round.title)}</a>.
       <br/><br/>
       ${footer}
       `,
@@ -388,12 +388,12 @@ export default {
     bucket,
   }: {
     bucket: Prisma.BucketCreateInput & {
-      collection: Prisma.CollectionCreateInput & {
+      round: Prisma.RoundCreateInput & {
         organization: Prisma.OrganizationCreateInput;
       };
       Contributions: Array<
         Prisma.ContributionCreateInput & {
-          collectionMember: Prisma.CollectionMemberCreateInput & {
+          roundMember: Prisma.RoundMemberCreateInput & {
             user: Prisma.UserCreateInput & {
               emailSettings: Prisma.EmailSettingsCreateInput;
             };
@@ -404,7 +404,7 @@ export default {
   }) => {
     const refundedCollMembersToEmail = uniqBy(
       bucket.Contributions.map(
-        (contribution) => contribution.collectionMember
+        (contribution) => contribution.roundMember
       ).filter(
         (roundMember) =>
           roundMember.user.emailSettings?.refundedBecauseBucketCancelled ?? true
@@ -414,7 +414,7 @@ export default {
     const emails: SendEmailInput[] = refundedCollMembersToEmail.map(
       (collMember) => {
         const amount = bucket.Contributions.filter(
-          (contrib) => contrib.collectionMember.id === collMember.id
+          (contrib) => contrib.roundMember.id === collMember.id
         )
           .map((contrib) => contrib.amount)
           .reduce((a, b) => a + b, 0);
@@ -425,14 +425,14 @@ export default {
           html: `The bucket “${escape(
             bucket.title
           )}” you have contributed to was cancelled in ${escape(
-            bucket.collection.title
+            bucket.round.title
           )}. You've been refunded ${amount / 100} ${
-            bucket.collection.currency
+            bucket.round.currency
           }.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
-          `/${bucket.collection.organization.slug}/${bucket.collection.slug}`
-        )}">${escape(bucket.collection.title)}</a>.
+          `/${bucket.round.organization.slug}/${bucket.round.slug}`
+        )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
         ${footer}
         `,
@@ -451,11 +451,11 @@ export default {
     if (unpublish) return;
 
     const {
-      collectionMember: collMembers,
-    } = await prisma.collection.findUnique({
+      roundMember: collMembers,
+    } = await prisma.round.findUnique({
       where: { id: round.id },
       include: {
-        collectionMember: {
+        roundMember: {
           include: { user: { include: { emailSettings: true } } },
         },
       },
@@ -481,7 +481,7 @@ export default {
       subject: `There is a new bucket in ${round.title}!`,
       html: `Creativity is flowing in ${escape(
         round.title
-      )}! <a href="${collLink}">Have a look at the new buckets in this collection.</a>
+      )}! <a href="${collLink}">Have a look at the new buckets in this round.</a>
       <br/><br/>
       ${footer}
       `,
@@ -490,12 +490,12 @@ export default {
     await sendEmails(emails);
   },
   contributionToBucketNotification: async ({
-    collection,
+    round,
     bucket,
     contributingUser,
     amount,
   }: {
-    collection: any;
+    round: any;
     bucket: any;
     contributingUser: any;
     amount: number;
@@ -521,13 +521,13 @@ export default {
       ((totalContributions + income) / minGoal) * 100
     );
 
-    const { organization } = await prisma.collection.findUnique({
-      where: { id: collection.id },
+    const { organization } = await prisma.round.findUnique({
+      where: { id: round.id },
       include: { organization: true },
     });
 
     const bucketLink = appLink(
-      `/${organization.slug}/${collection.slug}/${bucket.id}`
+      `/${organization.slug}/${round.slug}/${bucket.id}`
     );
 
     const emails = usersToNotify.map((mailRecipient) => ({
@@ -537,7 +537,7 @@ export default {
         bucket.title
       )}”</a> just received some funds!<br/>
       ${escape(contributingUser.name)} contributed ${amount / 100} ${
-        collection.currency
+        round.currency
       }<br/>
       Your bucket is now ${progressPercent}% funded!<br/>
       <br/><br/>

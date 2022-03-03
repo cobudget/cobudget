@@ -6,7 +6,7 @@ import { AddIcon } from "components/Icons";
 import AddOrEditGuideline from "./EditGuideline";
 import DraggableGuidelines from "./DraggableGuidelines";
 
-const Guidelines = ({ collection }) => {
+const Guidelines = ({ round }) => {
   const [addGuidelineModalOpen, setAddGuidelineModalOpen] = useState(false);
   const [editingGuideline, setEditingGuideline] = useState(undefined);
 
@@ -18,15 +18,15 @@ const Guidelines = ({ collection }) => {
       </p>
 
       <DraggableGuidelines
-        collection={collection}
-        items={collection.guidelines}
+        round={round}
+        items={round.guidelines}
         setEditingItem={setEditingGuideline}
       />
 
       <div className="flex my-2">
         <Button
           variant="secondary"
-          color={collection.color}
+          color={round.color}
           onClick={() => setAddGuidelineModalOpen(true)}
           className="flex-grow"
         >
@@ -35,7 +35,7 @@ const Guidelines = ({ collection }) => {
       </div>
       {(addGuidelineModalOpen || editingGuideline) && (
         <AddOrEditGuideline
-          collection={collection}
+          round={round}
           guideline={editingGuideline}
           handleClose={() => {
             setAddGuidelineModalOpen(false);

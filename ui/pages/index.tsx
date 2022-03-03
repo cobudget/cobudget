@@ -24,33 +24,33 @@ const IndexPage = ({ currentUser }) => {
                   </li>
                 );
               })}
-              {currentUser?.collectionMemberships
+              {currentUser?.roundMemberships
                 ?.filter(
                   (collMember) =>
-                    !orgIds.includes(collMember.collection.organization?.id)
+                    !orgIds.includes(collMember.round.organization?.id)
                 )
                 .map((collMember) => {
-                  if (collMember.collection.organization)
+                  if (collMember.round.organization)
                     return (
                       <li key={collMember.id} className={liStyle}>
                         <Link
-                          href={`/${collMember.collection.organization.slug}`}
+                          href={`/${collMember.round.organization.slug}`}
                         >
-                          <a>{collMember.collection.organization.name}</a>
+                          <a>{collMember.round.organization.name}</a>
                         </Link>
                       </li>
                     );
                   return (
                     <li key={collMember.id} className={liStyle}>
-                      <Link href={`/c/${collMember.collection.slug}`}>
-                        <a>{collMember.collection.title}</a>
+                      <Link href={`/c/${collMember.round.slug}`}>
+                        <a>{collMember.round.title}</a>
                       </Link>
                     </li>
                   );
                 })}
               <li className={liStyle}>
-                <Button size="large" nextJsLink href="/new-collection">
-                  Create collection
+                <Button size="large" nextJsLink href="/new-round">
+                  Create round
                 </Button>
               </li>
             </ul>

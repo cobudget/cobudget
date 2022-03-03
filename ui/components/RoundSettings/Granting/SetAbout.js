@@ -4,16 +4,16 @@ import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 
 const EDIT_ROUND = gql`
-  mutation editCollection($collectionId: ID!, $about: String) {
-    editCollection(collectionId: $collectionId, about: $about) {
+  mutation editRound($roundId: ID!, $about: String) {
+    editRound(roundId: $roundId, about: $about) {
       id
       about
     }
   }
 `;
 
-export default ({ closeModal, collection }) => {
-  const [, editCollection] = useMutation(EDIT_ROUND);
+export default ({ closeModal, round }) => {
+  const [, editRound] = useMutation(EDIT_ROUND);
   const { handleSubmit, register } = useForm();
 
   return (
@@ -22,7 +22,7 @@ export default ({ closeModal, collection }) => {
         <h1 className="text-3xl">Set about</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editCollection({ ...variables, collectionId: collection.id })
+            editRound({ ...variables, roundId: round.id })
               .then(() => {
                 closeModal();
               })
@@ -36,7 +36,7 @@ export default ({ closeModal, collection }) => {
             <TextField
               name="about"
               label="About (markdown)"
-              defaultValue={collection.about}
+              defaultValue={round.about}
               inputRef={register}
               fullWidth
               multiline

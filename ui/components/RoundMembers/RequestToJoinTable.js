@@ -14,7 +14,7 @@ const RequestToJoinTable = ({
   requestsToJoin,
   updateMember,
   deleteMember,
-  collection,
+  round,
 }) => {
   if (requestsToJoin.length === 0) return null;
 
@@ -65,7 +65,7 @@ const RequestToJoinTable = ({
                                 )
                               )
                                 deleteMember({
-                                  collectionId: collection.id,
+                                  roundId: round.id,
                                   memberId: member.id,
                                 });
                             }}
@@ -81,7 +81,7 @@ const RequestToJoinTable = ({
                               confirm("Are you sure you would like to approve?")
                             )
                               updateMember({
-                                collectionId: collection.id,
+                                roundId: round.id,
                                 memberId: member.id,
                                 isApproved: true,
                               });

@@ -1,15 +1,15 @@
 import SubMenu from "components/SubMenu";
 import Transactions from "../../../components/Transactions";
 
-const TransactionsPage = ({ collection, currentUser, currentOrg }) => {
+const TransactionsPage = ({ round, currentUser, currentOrg }) => {
   const isAdmin =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentOrgMember?.isAdmin;
-  if (!isAdmin || !collection) return null;
+  if (!isAdmin || !round) return null;
   return (
     <div className="">
-      <SubMenu currentUser={currentUser} collection={collection} />
-      <Transactions collection={collection} currentOrg={currentOrg} />
+      <SubMenu currentUser={currentUser} round={round} />
+      <Transactions round={round} currentOrg={currentOrg} />
     </div>
   );
 };

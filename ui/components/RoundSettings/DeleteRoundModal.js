@@ -8,35 +8,35 @@ import Button from "../Button";
 import Banner from "../Banner";
 
 const DELETE_ROUND_MUTATION = gql`
-  mutation DeleteRound($collectionId: ID!) {
-    deleteCollection(collectionId: $collectionId) {
+  mutation DeleteRound($roundId: ID!) {
+    deleteRound(roundId: $roundId) {
       id
     }
   }
 `;
 
-export default ({ collection, handleClose, currentOrg }) => {
+export default ({ round, handleClose, currentOrg }) => {
   const [allowDelete, setAllowDelete] = useState(false);
-  const [{ fetching: loading }, deleteCollection] = useMutation(
+  const [{ fetching: loading }, deleteRound] = useMutation(
     DELETE_ROUND_MUTATION
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    deleteCollection({ collectionId: collection.id }).then(({ error }) => {
+    deleteRound({ roundId: round.id }).then(({ error }) => {
       if (error) {
         toast.error(error.message);
       } else {
         handleClose();
         Router.push(`/${currentOrg?.slug ?? "c"}/`);
-        toast.success("Collection deleted");
+        toast.success("Round deleted");
       }
     });
   };
 
   const checkIfTextMatched = (e) => {
     const text = e.target.value;
-    setAllowDelete(text === collection.slug);
+    setAllowDelete(text === round.slug);
   };
 
   return (
@@ -56,11 +56,11 @@ export default ({ collection, handleClose, currentOrg }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{collection.title}</b> collection, buckets, questions, comments and
+          <b>{round.title}</b> round, buckets, questions, comments and
           remove all collaborators.{" "}
         </p>
         <p className="mb-4">
-          Please type <b>{collection.slug}</b> to confirm.
+          Please type <b>{round.slug}</b> to confirm.
         </p>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
@@ -79,7 +79,7 @@ export default ({ collection, handleClose, currentOrg }) => {
                 disabled={!allowDelete}
                 color="red"
               >
-                I understand the consequences, delete this collection
+                I understand the consequences, delete this round
               </Button>
             </div>
           </div>

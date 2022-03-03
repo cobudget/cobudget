@@ -7,8 +7,8 @@ import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
-  mutation DeleteCustomField($collectionId: ID!, $fieldId: ID!) {
-    deleteCustomField(collectionId: $collectionId, fieldId: $fieldId) {
+  mutation DeleteCustomField($roundId: ID!, $fieldId: ID!) {
+    deleteCustomField(roundId: $roundId, fieldId: $fieldId) {
       id
       customFields {
         id
@@ -26,12 +26,12 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
 
 const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
   mutation SetCustomFieldPosition(
-    $collectionId: ID!
+    $roundId: ID!
     $fieldId: ID!
     $newPosition: Float
   ) {
     setCustomFieldPosition(
-      collectionId: $collectionId
+      roundId: $roundId
       fieldId: $fieldId
       newPosition: $newPosition
     ) {
@@ -71,7 +71,7 @@ const SortableItem = sortableElement(
   ({
     item: customField,
     setEditingItem: setEditingCustomField,
-    collectionId,
+    roundId,
   }) => {
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
@@ -98,7 +98,7 @@ const SortableItem = sortableElement(
                   confirm(
                     `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
                   ) &&
-                  deleteCustomField({ collectionId, fieldId: customField.id })
+                  deleteCustomField({ roundId, fieldId: customField.id })
                 }
               >
                 <DeleteIcon className="h-6 w-6" />
@@ -122,14 +122,14 @@ const SortableItem = sortableElement(
   }
 );
 
-const DraggableCustomFields = ({ collection, items, setEditingItem }) => {
+const DraggableCustomFields = ({ round, items, setEditingItem }) => {
   const [{ fetching: loading }, setCustomFieldPosition] = useMutation(
     SET_CUSTOM_FIELD_POSITION_MUTATION
   );
 
   const setItemPosition = (customFieldId, newPosition) => {
     setCustomFieldPosition({
-      collectionId: collection.id,
+      roundId: round.id,
       fieldId: customFieldId,
       newPosition,
     });
@@ -137,7 +137,7 @@ const DraggableCustomFields = ({ collection, items, setEditingItem }) => {
 
   return (
     <DraggableItems
-      collection={collection}
+      round={round}
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}

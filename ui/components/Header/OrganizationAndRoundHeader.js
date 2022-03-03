@@ -15,7 +15,7 @@ const BUCKET_QUERY = gql`
 
 const OrganizationAndEventHeader = ({
   currentOrg,
-  collection,
+  round,
   currentUser,
   router,
   color,
@@ -33,11 +33,11 @@ const OrganizationAndEventHeader = ({
       <Link href="/">
         <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
           <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-          {!currentUser && !currentOrg && !collection && <h1>Cobudget</h1>}
+          {!currentUser && !currentOrg && !round && <h1>Cobudget</h1>}
         </a>
       </Link>
 
-      {(currentOrg || collection || currentUser) && (
+      {(currentOrg || round || currentUser) && (
         <>
           <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
 
@@ -60,15 +60,15 @@ const OrganizationAndEventHeader = ({
                 </span>
               </a>
             </Link>
-          ) : collection ? (
-            <Link href={`/c/${collection.slug}`}>
+          ) : round ? (
+            <Link href={`/c/${round.slug}`}>
               <a
                 className={
                   "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
                 }
                 style={{ flex: "1 1 25%" }}
               >
-                {collection.title}
+                {round.title}
               </a>
             </Link>
           ) : null}
@@ -76,7 +76,7 @@ const OrganizationAndEventHeader = ({
             <Selector
               currentUser={currentUser}
               currentOrg={currentOrg}
-              collection={collection}
+              round={round}
               color={color}
               className="max-w-none"
             />
@@ -84,18 +84,18 @@ const OrganizationAndEventHeader = ({
         </>
       )}
 
-      {currentOrg && collection && (
+      {currentOrg && round && (
         <>
           <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
 
-          <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
+          <Link href={`/${currentOrg?.slug ?? "c"}/${round.slug}`}>
             <a
               className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
               style={{ flex: "1 1 25%" }}
             >
-              {collection.title.length <= 30
-                ? collection.title
-                : collection.title.substr(0, 30) + "..."}
+              {round.title.length <= 30
+                ? round.title
+                : round.title.substr(0, 30) + "..."}
             </a>
           </Link>
         </>

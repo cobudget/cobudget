@@ -15,7 +15,7 @@ const Layout = ({
   children,
   currentUser,
   currentOrg,
-  collection,
+  round,
   title,
   openModal,
   router,
@@ -31,7 +31,7 @@ const Layout = ({
       </Head>
       <div>
         <Header
-          collection={collection}
+          round={round}
           currentUser={currentUser}
           currentOrg={currentOrg}
           openModal={openModal}

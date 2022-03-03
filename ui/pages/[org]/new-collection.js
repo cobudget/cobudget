@@ -11,15 +11,15 @@ import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
 
-const CREATE_COLLECTION = gql`
-  mutation CreateCollection(
+const CREATE_ROUND = gql`
+  mutation CreateRound(
     $orgId: ID!
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
-    createCollection(
+    createRound(
       orgId: $orgId
       title: $title
       slug: $slug
@@ -32,17 +32,17 @@ const CREATE_COLLECTION = gql`
   }
 `;
 
-export default function NewCollectionPage({ currentOrg }) {
-  const [, createCollection] = useMutation(CREATE_COLLECTION);
+export default function NewRoundPage({ currentOrg }) {
+  const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createCollection({ ...variables, orgId: currentOrg.id })
+    createRound({ ...variables, orgId: currentOrg.id })
       .then(({ data }) => {
         Router.push(
-          "/[org]/[collection]",
-          `/${currentOrg.slug}/${data.createCollection.slug}`
+          "/[org]/[round]",
+          `/${currentOrg.slug}/${data.createRound.slug}`
         );
       })
       .catch((err) => {
@@ -53,7 +53,7 @@ export default function NewCollectionPage({ currentOrg }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">New bucket collection</h1>
+        <h1 className="text-2xl mb-2 font-semibold">New bucket round</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"

@@ -5,7 +5,7 @@ import { AddIcon } from "components/Icons";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
 
-const CustomFields = ({ collection }) => {
+const CustomFields = ({ round }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
   const [editingCustomField, setEditingCustomField] = useState(undefined);
 
@@ -16,15 +16,15 @@ const CustomFields = ({ collection }) => {
       <p className="text-gray-700 mb-4">Add questions for buckets to answer.</p>
 
       <DraggableCustomField
-        collection={collection}
-        items={collection.customFields}
+        round={round}
+        items={round.customFields}
         setEditingItem={setEditingCustomField}
       />
 
       <div className="flex my-2">
         <Button
           variant="secondary"
-          color={collection.color}
+          color={round.color}
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
@@ -33,7 +33,7 @@ const CustomFields = ({ collection }) => {
       </div>
       {(addCustomFieldModalOpen || editingCustomField) && (
         <AddOrEditCustomField
-          collection={collection}
+          round={round}
           customField={editingCustomField}
           handleClose={() => {
             setAddCustomFieldModalOpen(false);

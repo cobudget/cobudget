@@ -19,7 +19,7 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   canViewRound,
-  getCollectionMember,
+  getRoundMember,
   getCurrentOrgAndMember,
   getOrgMember,
   isAndGetCollMember,
@@ -30,7 +30,7 @@ import {
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
-import { CollectionTransaction } from "server/types";
+import { RoundTransaction } from "server/types";
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -53,37 +53,37 @@ const isMemberOfOrg = async (parent, { orgId }, { user }) => {
   return skip;
 };
 
-const isCollMember = async (parent, { collectionId, bucketId }, { user }) => {
+const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  const collectionMember = await getCollectionMember({
+  const roundMember = await getRoundMember({
     userId: user.id,
-    collectionId,
+    roundId,
     bucketId,
   });
-  // const collectionMember = await prisma.collectionMember.findUnique({
-  //   where: { userId_collectionId: { userId: user.id, collectionId } },
+  // const roundMember = await prisma.roundMember.findUnique({
+  //   where: { userId_roundId: { userId: user.id, roundId } },
   // });
-  if (!collectionMember) {
-    throw new Error("Collection member does not exist");
-  } else if (!collectionMember.isApproved) {
-    throw new Error("Collection member is not approved");
-  } else if (!collectionMember.hasJoined) {
-    throw new Error("Collection member has not accepted the invitation");
+  if (!roundMember) {
+    throw new Error("Round member does not exist");
+  } else if (!roundMember.isApproved) {
+    throw new Error("Round member is not approved");
+  } else if (!roundMember.hasJoined) {
+    throw new Error("Round member has not accepted the invitation");
   }
 
   return skip;
 };
 
-const isCollMemberOrOrgAdmin = async (parent, { collectionId }, { user }) => {
+const isCollMemberOrOrgAdmin = async (parent, { roundId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  const collectionMember = await getCollectionMember({
+  const roundMember = await getRoundMember({
     userId: user.id,
-    collectionId,
+    roundId,
   });
   let orgMember = null;
-  if (!collectionMember) {
+  if (!roundMember) {
     const org = await prisma.organization.findFirst({
-      where: { collections: { some: { id: collectionId } } },
+      where: { rounds: { some: { id: roundId } } },
     });
     orgMember = await getOrgMember({
       userId: user.id,
@@ -91,23 +91,23 @@ const isCollMemberOrOrgAdmin = async (parent, { collectionId }, { user }) => {
     });
   }
 
-  if (!(collectionMember?.isApproved || orgMember?.isAdmin))
+  if (!(roundMember?.isApproved || orgMember?.isAdmin))
     throw new Error(
-      "You need to be approved member of this collection or org admin to view collection members"
+      "You need to be approved member of this round or org admin to view round members"
     );
   return skip;
 };
 
-const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
+const isCollOrOrgAdmin = async (parent, { roundId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  const collectionMember = await getCollectionMember({
+  const roundMember = await getRoundMember({
     userId: user.id,
-    collectionId,
+    roundId,
   });
   let orgMember = null;
-  if (!collectionMember?.isAdmin) {
+  if (!roundMember?.isAdmin) {
     const org = await prisma.organization.findFirst({
-      where: { collections: { some: { id: collectionId } } },
+      where: { rounds: { some: { id: roundId } } },
     });
     orgMember = await getOrgMember({
       userId: user.id,
@@ -115,25 +115,25 @@ const isCollOrOrgAdmin = async (parent, { collectionId }, { user }) => {
     });
   }
 
-  if (!(collectionMember?.isAdmin || orgMember?.isAdmin))
-    throw new Error("You need to be admin of the collection or the org");
+  if (!(roundMember?.isAdmin || orgMember?.isAdmin))
+    throw new Error("You need to be admin of the round or the org");
   return skip;
 };
 
 const isCollModOrAdmin = async (
   parent,
-  { bucketId, collectionId },
+  { bucketId, roundId },
   { user }
 ) => {
   if (!user) throw new Error("You need to be logged in");
-  const collectionMember = await getCollectionMember({
+  const roundMember = await getRoundMember({
     userId: user.id,
     bucketId,
-    collectionId,
+    roundId,
   });
 
-  if (!(collectionMember?.isModerator || collectionMember?.isAdmin))
-    throw new Error("You need to be admin or moderator of the collection");
+  if (!(roundMember?.isModerator || roundMember?.isAdmin))
+    throw new Error("You need to be admin or moderator of the round");
   return skip;
 };
 
@@ -159,23 +159,23 @@ const isBucketCocreatorOrCollAdminOrMod = async (
 
   const bucket = await prisma.bucket.findUnique({
     where: { id: bucketId },
-    include: { cocreators: true, collection: true },
+    include: { cocreators: true, round: true },
   });
 
-  const collectionMember = await prisma.collectionMember.findUnique({
+  const roundMember = await prisma.roundMember.findUnique({
     where: {
-      userId_collectionId: {
+      userId_roundId: {
         userId: user.id,
-        collectionId: bucket.collectionId,
+        roundId: bucket.roundId,
       },
     },
   });
 
   if (
-    !collectionMember ||
-    (!bucket.cocreators.map((m) => m.id).includes(collectionMember.id) &&
-      !collectionMember.isAdmin &&
-      !collectionMember.isModerator)
+    !roundMember ||
+    (!bucket.cocreators.map((m) => m.id).includes(roundMember.id) &&
+      !roundMember.isAdmin &&
+      !roundMember.isModerator)
   )
     throw new Error("You are not a cocreator of this bucket.");
 
@@ -206,7 +206,7 @@ const resolvers = {
     organizations: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.organization.findMany();
     }),
-    collections: async (parent, { limit, orgId }, { user }) => {
+    rounds: async (parent, { limit, orgId }, { user }) => {
       if (!orgId) return null;
 
       const currentOrgMember = user
@@ -219,13 +219,13 @@ const resolvers = {
 
       // if admin show all rounds (current or archived)
       if (currentOrgMember && currentOrgMember.isAdmin) {
-        return prisma.collection.findMany({
+        return prisma.round.findMany({
           where: { organizationId: orgId, deleted: { not: true } },
           take: limit,
         });
       }
 
-      const allColls = await prisma.collection.findMany({
+      const allColls = await prisma.round.findMany({
         where: {
           organizationId: orgId,
           archived: { not: true },
@@ -243,29 +243,29 @@ const resolvers = {
         )
       ).filter(Boolean);
     },
-    collection: async (parent, { orgSlug, collectionSlug }, { user }) => {
-      if (!collectionSlug) return null;
+    round: async (parent, { orgSlug, roundSlug }, { user }) => {
+      if (!roundSlug) return null;
 
-      const collection = await prisma.collection.findFirst({
+      const round = await prisma.round.findFirst({
         where: {
-          slug: collectionSlug,
+          slug: roundSlug,
           organization: { slug: orgSlug },
           deleted: { not: true },
         },
       });
-      if (!collection) return null;
+      if (!round) return null;
 
-      if (await canViewRound({ round: collection, user })) {
-        return collection;
+      if (await canViewRound({ round: round, user })) {
+        return round;
       } else {
         return null;
       }
     },
     contributionsPage: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, offset, limit }) => {
+      async (parent, { roundId, offset, limit }) => {
         // const contributionsWithExtra = [
-        //   ...(await Contribution.find({ collectionId }, null, {
+        //   ...(await Contribution.find({ roundId }, null, {
         //     skip: offset,
         //     limit: limit + 1,
         //   }).sort({
@@ -274,7 +274,7 @@ const resolvers = {
         // ];
 
         const contributionsWithExtra = await prisma.contribution.findMany({
-          where: { collectionId },
+          where: { roundId },
           take: limit,
           skip: offset,
           orderBy: {
@@ -289,14 +289,14 @@ const resolvers = {
       }
     ),
     //here
-    collectionTransactions: combineResolvers(
+    roundTransactions: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, offset, limit }) => {
-        const transactions: [CollectionTransaction] = await prisma.$queryRaw`
+      async (parent, { roundId, offset, limit }) => {
+        const transactions: [RoundTransaction] = await prisma.$queryRaw`
           (
             SELECT 
               "id", 
-              "collectionMemberId", 
+              "roundMemberId", 
               null as "allocatedById", 
               "amount",
               "bucketId",
@@ -304,13 +304,13 @@ const resolvers = {
               null as "allocationType",
               'CONTRIBUTION' as "transactionType",
               "createdAt"
-            FROM "Contribution" where "collectionId" = ${collectionId}
+            FROM "Contribution" where "roundId" = ${roundId}
             
             UNION ALL
             
             SELECT 
               "id", 
-              "collectionMemberId", 
+              "roundMemberId", 
               "allocatedById", 
               "amount",
               null as "bucketId",
@@ -318,7 +318,7 @@ const resolvers = {
               "allocationType",
               'ALLOCATION' as "transactionType",
               "createdAt"
-            FROM "Allocation" where "collectionId" = ${collectionId}
+            FROM "Allocation" where "roundId" = ${roundId}
           ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
         `;
 
@@ -341,7 +341,7 @@ const resolvers = {
     bucketsPage: async (
       parent,
       {
-        collectionId,
+        roundId,
         textSearchTerm,
         tag: tagValue,
         offset = 0,
@@ -350,11 +350,11 @@ const resolvers = {
       },
       { user }
     ) => {
-      const currentMember = await prisma.collectionMember.findUnique({
+      const currentMember = await prisma.roundMember.findUnique({
         where: {
-          userId_collectionId: {
+          userId_roundId: {
             userId: user?.id ?? "undefined",
-            collectionId,
+            roundId,
           },
         },
       });
@@ -366,7 +366,7 @@ const resolvers = {
 
       const buckets = await prisma.bucket.findMany({
         where: {
-          collectionId,
+          roundId,
           deleted: { not: true },
           OR: statusFilter,
           ...(textSearchTerm && { title: { search: textSearchTerm } }),
@@ -414,10 +414,10 @@ const resolvers = {
     ),
     members: combineResolvers(
       isCollMemberOrOrgAdmin,
-      async (parent, { collectionId, isApproved }) => {
-        return await prisma.collectionMember.findMany({
+      async (parent, { roundId, isApproved }) => {
+        return await prisma.roundMember.findMany({
           where: {
-            collectionId,
+            roundId,
             ...(typeof isApproved === "boolean" && { isApproved }),
           },
         });
@@ -427,18 +427,18 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, search, offset = 0, limit = 10 },
+        { roundId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
           userId: user.id,
-          collectionId,
+          roundId,
         });
 
-        const collectionMembersWithExtra = await prisma.collectionMember.findMany(
+        const roundMembersWithExtra = await prisma.roundMember.findMany(
           {
             where: {
-              collectionId,
+              roundId,
               ...(typeof isApproved === "boolean" && { isApproved }),
               ...(search && {
                 OR: [
@@ -469,8 +469,8 @@ const resolvers = {
         );
 
         return {
-          moreExist: collectionMembersWithExtra.length > limit,
-          members: collectionMembersWithExtra.slice(0, limit),
+          moreExist: roundMembersWithExtra.length > limit,
+          members: roundMembersWithExtra.slice(0, limit),
         };
       }
     ),
@@ -498,7 +498,7 @@ const resolvers = {
         where: { id: bucketId },
         include: {
           comments: true,
-          collection: {
+          round: {
             include: { organization: { include: { discourse: true } } },
           },
         },
@@ -506,7 +506,7 @@ const resolvers = {
       // const bucket = await Bucket.findOne({ _id: bucketId });
 
       let comments;
-      const org = bucket.collection.organization;
+      const org = bucket.round.organization;
 
       if (orgHasDiscourse(org)) {
         const topic = await discourse(org.discourse).posts.get(
@@ -523,9 +523,9 @@ const resolvers = {
                 !(comment.username === "system" && comment.raw === "")
             )
             .map(async (post) => {
-              const author = await prisma.collectionMember.findFirst({
+              const author = await prisma.roundMember.findFirst({
                 where: {
-                  collectionId: bucket.collectionId,
+                  roundId: bucket.roundId,
                   user: {
                     orgMemberships: {
                       some: {
@@ -624,14 +624,14 @@ const resolvers = {
         return org;
       }
     ),
-    createCollection: combineResolvers(
+    createRound: combineResolvers(
       isOrgAdmin,
       async (
         parent,
         { orgId, slug, title, currency, registrationPolicy },
         { user }
       ) => {
-        let singleCollection = false;
+        let singleRound = false;
         if (!orgId) {
           let rootOrg = await prisma.organization.findUnique({
             where: { slug: "c" },
@@ -642,17 +642,17 @@ const resolvers = {
             });
           }
           orgId = rootOrg.id;
-          singleCollection = true;
+          singleRound = true;
         }
-        const collection = await prisma.collection.create({
+        const round = await prisma.round.create({
           data: {
             slug,
             title,
             currency,
             registrationPolicy,
             organizationId: orgId,
-            singleCollection,
-            collectionMember: {
+            singleRound,
+            roundMember: {
               create: {
                 user: { connect: { id: user.id } },
                 isAdmin: true,
@@ -677,18 +677,18 @@ const resolvers = {
         // await eventHub.publish("create-round", {
         //   currentOrg,
         //   currentOrgMember,
-        //   round: collection,
+        //   round: round,
         // });
 
-        return collection;
+        return round;
       }
     ),
-    editCollection: combineResolvers(
+    editRound: combineResolvers(
       isCollOrOrgAdmin,
       async (
         parent,
         {
-          collectionId,
+          roundId,
           slug,
           title,
           archived,
@@ -701,8 +701,8 @@ const resolvers = {
           discourseCategoryId,
         }
       ) => {
-        return prisma.collection.update({
-          where: { id: collectionId },
+        return prisma.round.update({
+          where: { id: roundId },
           data: {
             ...(slug && { slug: slugify(slug) }),
             title,
@@ -718,19 +718,19 @@ const resolvers = {
         });
       }
     ),
-    deleteCollection: combineResolvers(
+    deleteRound: combineResolvers(
       isOrgAdmin,
-      async (parent, { collectionId }) =>
-        prisma.collection.update({
-          where: { id: collectionId },
+      async (parent, { roundId }) =>
+        prisma.round.update({
+          where: { id: roundId },
           data: { deleted: true },
         })
     ),
     addGuideline: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, guideline: { title, description } }) => {
+      async (parent, { roundId, guideline: { title, description } }) => {
         const guidelines = await prisma.guideline.findMany({
-          where: { collectionId: collectionId },
+          where: { roundId: roundId },
         });
 
         const position =
@@ -739,60 +739,60 @@ const resolvers = {
             .reduce((a, b) => Math.max(a, b), 1000) + 1;
 
         const guideline = await prisma.guideline.create({
-          data: { collectionId: collectionId, title, description, position },
-          include: { collection: true },
+          data: { roundId: roundId, title, description, position },
+          include: { round: true },
         });
-        return guideline.collection;
+        return guideline.round;
       }
     ),
     editGuideline: combineResolvers(
       isCollOrOrgAdmin,
       async (
         parent,
-        { collectionId, guidelineId, guideline: { title, description } }
+        { roundId, guidelineId, guideline: { title, description } }
       ) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: { guidelines: true },
         });
 
-        if (!collection.guidelines.map((g) => g.id).includes(guidelineId))
-          throw new Error("This guideline is not part of this collection");
+        if (!round.guidelines.map((g) => g.id).includes(guidelineId))
+          throw new Error("This guideline is not part of this round");
 
         const guideline = await prisma.guideline.update({
           where: { id: guidelineId },
           data: { title, description },
-          include: { collection: true },
+          include: { round: true },
         });
 
-        return guideline.collection;
+        return guideline.round;
       }
     ),
     setGuidelinePosition: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, guidelineId, newPosition }, { user }) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+      async (parent, { roundId, guidelineId, newPosition }, { user }) => {
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: { guidelines: true },
         });
 
-        if (!collection.guidelines.map((g) => g.id).includes(guidelineId))
-          throw new Error("This guideline is not part of this collection");
+        if (!round.guidelines.map((g) => g.id).includes(guidelineId))
+          throw new Error("This guideline is not part of this round");
 
         const guideline = await prisma.guideline.update({
           where: { id: guidelineId },
           data: { position: newPosition },
-          include: { collection: true },
+          include: { round: true },
         });
 
-        return guideline.collection;
+        return guideline.round;
       }
     ),
     deleteGuideline: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, guidelineId }) =>
-        prisma.collection.update({
-          where: { id: collectionId },
+      async (parent, { roundId, guidelineId }) =>
+        prisma.round.update({
+          where: { id: roundId },
           data: { guidelines: { delete: { id: guidelineId } } },
         })
     ),
@@ -801,12 +801,12 @@ const resolvers = {
       async (
         parent,
         {
-          collectionId,
+          roundId,
           customField: { name, description, type, limit, isRequired },
         }
       ) => {
         const customFields = await prisma.field.findMany({
-          where: { collectionId: collectionId },
+          where: { roundId: roundId },
         });
 
         const position =
@@ -816,7 +816,7 @@ const resolvers = {
 
         const customField = await prisma.field.create({
           data: {
-            collectionId: collectionId,
+            roundId: roundId,
             name,
             description,
             type,
@@ -824,29 +824,29 @@ const resolvers = {
             isRequired,
             position,
           },
-          include: { collection: true },
+          include: { round: true },
         });
-        return customField.collection;
+        return customField.round;
       }
     ),
     // Based on https://softwareengineering.stackexchange.com/a/195317/54663
     setCustomFieldPosition: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, fieldId, newPosition }) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+      async (parent, { roundId, fieldId, newPosition }) => {
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: { fields: true },
         });
-        if (!collection.fields.map((g) => g.id).includes(fieldId))
-          throw new Error("This field is not part of this collection");
+        if (!round.fields.map((g) => g.id).includes(fieldId))
+          throw new Error("This field is not part of this round");
 
         const field = await prisma.field.update({
           where: { id: fieldId },
           data: { position: newPosition },
-          include: { collection: true },
+          include: { round: true },
         });
 
-        return field.collection;
+        return field.round;
       }
     ),
     editCustomField: combineResolvers(
@@ -854,40 +854,40 @@ const resolvers = {
       async (
         parent,
         {
-          collectionId,
+          roundId,
           fieldId,
           customField: { name, description, type, limit, isRequired },
         }
       ) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: { fields: true },
         });
-        if (!collection.fields.map((g) => g.id).includes(fieldId))
-          throw new Error("This field is not part of this collection");
+        if (!round.fields.map((g) => g.id).includes(fieldId))
+          throw new Error("This field is not part of this round");
 
         const field = await prisma.field.update({
           where: { id: fieldId },
           data: { name, description, type, limit, isRequired },
-          include: { collection: true },
+          include: { round: true },
         });
 
-        return field.collection;
+        return field.round;
       }
     ),
     deleteCustomField: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, fieldId }) =>
-        prisma.collection.update({
-          where: { id: collectionId },
+      async (parent, { roundId, fieldId }) =>
+        prisma.round.update({
+          where: { id: roundId },
           data: { fields: { delete: { id: fieldId } } },
         })
     ),
     createBucket: combineResolvers(
       isCollMember,
-      async (parent, { collectionId, title }, { user, eventHub }) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+      async (parent, { roundId, title }, { user, eventHub }) => {
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: {
             organization: {
               include: { orgMembers: { where: { userId: user.id } } },
@@ -895,10 +895,10 @@ const resolvers = {
           },
         });
 
-        const currentOrgMember = collection?.organization?.orgMembers?.[0];
+        const currentOrgMember = round?.organization?.orgMembers?.[0];
 
-        const bucketCreationIsOpen = collection.bucketCreationCloses
-          ? dayjs().isBefore(dayjs(collection.bucketCreationCloses))
+        const bucketCreationIsOpen = round.bucketCreationCloses
+          ? dayjs().isBefore(dayjs(round.bucketCreationCloses))
           : true;
 
         if (!bucketCreationIsOpen)
@@ -906,21 +906,21 @@ const resolvers = {
 
         const bucket = await prisma.bucket.create({
           data: {
-            collection: { connect: { id: collectionId } },
+            round: { connect: { id: roundId } },
             title,
             cocreators: {
               connect: {
-                userId_collectionId: { userId: user.id, collectionId },
+                userId_roundId: { userId: user.id, roundId },
               },
             },
           },
         });
 
         await eventHub.publish("create-bucket", {
-          currentOrg: collection.organization,
+          currentOrg: round.organization,
           currentOrgMember,
           bucket: bucket,
-          round: collection,
+          round: round,
         });
 
         return bucket;
@@ -950,7 +950,7 @@ const resolvers = {
             }),
           },
           include: {
-            collection: {
+            round: {
               include: {
                 organization: {
                   include: { orgMembers: { where: { userId: user.id } } },
@@ -961,9 +961,9 @@ const resolvers = {
         });
 
         await eventHub.publish("edit-bucket", {
-          currentOrg: updated.collection.organization,
-          currentOrgMember: updated.collection.organization?.orgMembers?.[0],
-          round: updated.collection,
+          currentOrg: updated.round.organization,
+          currentOrgMember: updated.round.organization?.orgMembers?.[0],
+          round: updated.round,
           bucket: updated,
         });
 
@@ -972,9 +972,9 @@ const resolvers = {
     ),
     createTag: combineResolvers(
       isCollModOrAdmin,
-      async (parent, { collectionId, tagValue }) => {
-        return await prisma.collection.update({
-          where: { id: collectionId },
+      async (parent, { roundId, tagValue }) => {
+        return await prisma.round.update({
+          where: { id: roundId },
           data: {
             tags: {
               create: {
@@ -1005,22 +1005,22 @@ const resolvers = {
     // removes a tag from all buckets it's added to, and then deletes it
     deleteTag: combineResolvers(
       isCollModOrAdmin,
-      async (_, { collectionId, tagId }) => {
-        // verify that the tag is part of this collection
+      async (_, { roundId, tagId }) => {
+        // verify that the tag is part of this round
         const tag = await prisma.tag.findUnique({
           where: {
             id: tagId,
           },
         });
-        if (tag?.collectionId !== collectionId)
-          throw new Error("Incorrect collection");
+        if (tag?.roundId !== roundId)
+          throw new Error("Incorrect round");
 
         await prisma.tag.delete({
           where: { id: tagId },
         });
 
-        return await prisma.collection.findUnique({
-          where: { id: collectionId },
+        return await prisma.round.findUnique({
+          where: { id: roundId },
           include: { tags: true },
         });
       }
@@ -1053,7 +1053,7 @@ const resolvers = {
             },
           },
           include: {
-            collection: {
+            round: {
               include: {
                 organization: {
                   include: { orgMembers: { where: { userId: user.id } } },
@@ -1064,9 +1064,9 @@ const resolvers = {
         });
 
         await eventHub.publish("edit-bucket", {
-          currentOrg: updated.collection.organization,
-          currentOrgMember: updated.collection.organization?.orgMembers?.[0],
-          round: updated.collection,
+          currentOrg: updated.round.organization,
+          currentOrgMember: updated.round.organization?.orgMembers?.[0],
+          round: updated.round,
           bucket: updated,
         });
 
@@ -1093,7 +1093,7 @@ const resolvers = {
           where: { id: bucketId },
           data: { deleted: true },
           include: {
-            collection: {
+            round: {
               include: {
                 organization: {
                   include: { orgMembers: { where: { userId: user.id } } },
@@ -1104,9 +1104,9 @@ const resolvers = {
         });
 
         await eventHub.publish("delete-bucket", {
-          currentOrg: bucket.collection.organization,
-          currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-          round: bucket.collection,
+          currentOrg: bucket.round.organization,
+          currentOrgMember: bucket.round.organization?.orgMembers?.[0],
+          round: bucket.round,
           bucket: bucket,
         });
 
@@ -1139,7 +1139,7 @@ const resolvers = {
         const bucket = await prisma.bucket.findUnique({
           where: { id: bucketId },
           include: {
-            collection: {
+            round: {
               include: {
                 organization: {
                   include: { orgMembers: { where: { userId: user.id } } },
@@ -1156,9 +1156,9 @@ const resolvers = {
         });
 
         await eventHub.publish("publish-bucket", {
-          currentOrg: bucket.collection.organization,
-          currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-          round: bucket.collection,
+          currentOrg: bucket.round.organization,
+          currentOrgMember: bucket.round.organization?.orgMembers?.[0],
+          round: bucket.round,
           bucket: bucket,
           unpublish,
         });
@@ -1172,9 +1172,9 @@ const resolvers = {
         const bucket = await prisma.bucket.findUnique({
           where: { id: bucketId },
           include: {
-            collection: {
+            round: {
               include: {
-                collectionMember: { where: { userId: user.id } },
+                roundMember: { where: { userId: user.id } },
                 organization: {
                   include: {
                     discourse: true,
@@ -1185,9 +1185,9 @@ const resolvers = {
             },
           },
         });
-        const currentOrg = bucket.collection.organization;
+        const currentOrg = bucket.round.organization;
         const currentOrgMember = currentOrg?.orgMembers?.[0];
-        const currentCollMember = bucket.collection.collectionMember?.[0];
+        const currentCollMember = bucket.round.roundMember?.[0];
 
         if (orgHasDiscourse(currentOrg) && !currentOrgMember.discourseApiKey) {
           throw new Error(
@@ -1213,7 +1213,7 @@ const resolvers = {
             currentCollMember,
             currentUser: user,
             bucket: bucket,
-            round: bucket.collection,
+            round: bucket.round,
             comment,
           }
         );
@@ -1229,9 +1229,9 @@ const resolvers = {
           where: { id: bucketId },
           include: {
             comments: { where: { id: commentId } },
-            collection: {
+            round: {
               include: {
-                collectionMember: { where: { userId: user.id } },
+                roundMember: { where: { userId: user.id } },
                 organization: {
                   include: {
                     orgMembers: { where: { userId: user.id } },
@@ -1241,15 +1241,15 @@ const resolvers = {
             },
           },
         });
-        const currentOrg = bucket.collection.organization;
+        const currentOrg = bucket.round.organization;
         const currentOrgMember = currentOrg?.orgMembers?.[0];
-        const currentCollMember = bucket.collection.collectionMember?.[0];
+        const currentCollMember = bucket.round.roundMember?.[0];
         const comment = bucket.comments?.[0];
 
         await eventHub.publish("delete-comment", {
           currentOrg,
           currentOrgMember,
-          round: bucket.collection,
+          round: bucket.round,
           currentCollMember,
           bucket: bucket,
           comment,
@@ -1263,20 +1263,20 @@ const resolvers = {
       async (parent, { bucketId, commentId, content }, { user, eventHub }) => {
         let comment = await prisma.comment.findUnique({
           where: { id: commentId },
-          include: { bucket: { include: { collection: true } } },
+          include: { bucket: { include: { round: true } } },
         });
         comment = { ...comment, content };
 
-        const currentCollMember = await prisma.collectionMember.findUnique({
+        const currentCollMember = await prisma.roundMember.findUnique({
           where: {
-            userId_collectionId: {
+            userId_roundId: {
               userId: user.id,
-              collectionId: comment.bucket.collection.id,
+              roundId: comment.bucket.round.id,
             },
           },
           include: {
             user: true,
-            collection: {
+            round: {
               include: {
                 organization: {
                   include: { orgMembers: { where: { userId: user.id } } },
@@ -1287,13 +1287,13 @@ const resolvers = {
         });
 
         // TODO: permissions?
-        //if (!collectionMember || comment.orgMemberId !== currentOrgMember)
+        //if (!roundMember || comment.orgMemberId !== currentOrgMember)
         const { discourse, prisma: prismaResult } = await eventHub.publish(
           "edit-comment",
           {
-            currentOrg: currentCollMember.collection.organization,
+            currentOrg: currentCollMember.round.organization,
             currentOrgMember:
-              currentCollMember.collection.organization?.orgMembers?.[0],
+              currentCollMember.round.organization?.orgMembers?.[0],
             currentCollMember,
             bucket: comment.bucket,
             comment,
@@ -1312,11 +1312,11 @@ const resolvers = {
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
-          collection: true,
+          round: true,
         },
       });
 
-      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+      if (!bucket.round.bucketReviewIsOpen || !bucket.publishedAt)
         throw new Error(
           "You can only review buckets when bucket review is open and the bucket is published"
         );
@@ -1337,7 +1337,7 @@ const resolvers = {
           },
         },
         include: {
-          collection: {
+          round: {
             include: {
               guidelines: { where: { id: guidelineId } },
               organization: { include: { discourse: true } },
@@ -1346,8 +1346,8 @@ const resolvers = {
         },
       });
 
-      const logContent = `Someone flagged this bucket for the **${updated.collection.guidelines[0].title}** guideline: \n> ${comment}`;
-      const currentOrg = updated.collection.organization;
+      const logContent = `Someone flagged this bucket for the **${updated.round.guidelines[0].title}** guideline: \n> ${comment}`;
+      const currentOrg = updated.round.organization;
       if (orgHasDiscourse(currentOrg)) {
         if (!updated.discourseTopicId) {
           // TODO: break out create thread into separate function
@@ -1360,7 +1360,7 @@ const resolvers = {
                 currentOrg.customDomain
                   ? currentOrg.customDomain
                   : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.collection.slug}/${bucket.id}`,
+              }/${bucket.round.slug}/${bucket.id}`,
               ...(currentOrg.discourse.bucketsCategoryId && {
                 category: currentOrg.discourse.bucketsCategoryId,
               }),
@@ -1373,7 +1373,7 @@ const resolvers = {
             where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
             include: {
-              collection: {
+              round: {
                 include: {
                   guidelines: { where: { id: guidelineId } },
                   organization: { include: { discourse: true } },
@@ -1413,7 +1413,7 @@ const resolvers = {
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
-          collection: true,
+          round: true,
           flags: {
             where: { id: flagId },
             include: { guideline: true },
@@ -1421,7 +1421,7 @@ const resolvers = {
         },
       });
 
-      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+      if (!bucket.round.bucketReviewIsOpen || !bucket.publishedAt)
         throw new Error(
           "You can only review buckets when bucket review is open and the bucket is published"
         );
@@ -1442,12 +1442,12 @@ const resolvers = {
           },
         },
         include: {
-          collection: {
+          round: {
             include: { organization: { include: { discourse: true } } },
           },
         },
       });
-      const currentOrg = updated.collection.organization;
+      const currentOrg = updated.round.organization;
       const resolvedFlagGuideline = bucket.flags[0].guideline;
 
       const logContent = `Someone resolved a flag for the **${resolvedFlagGuideline.title}** guideline: \n> ${comment}`;
@@ -1464,7 +1464,7 @@ const resolvers = {
                 currentOrg.customDomain
                   ? currentOrg.customDomain
                   : `${currentOrg.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.collection.slug}/${bucket.id}`,
+              }/${bucket.round.slug}/${bucket.id}`,
               ...(currentOrg.discourse.bucketsCategoryId && {
                 category: currentOrg.discourse.bucketsCategoryId,
               }),
@@ -1477,7 +1477,7 @@ const resolvers = {
             where: { id: bucketId },
             data: { discourseTopicId: discoursePost.topic_id },
             include: {
-              collection: {
+              round: {
                 include: { organization: { include: { discourse: true } } },
               },
             },
@@ -1512,7 +1512,7 @@ const resolvers = {
       const bucket = await prisma.bucket.findUnique({
         where: { id: bucketId },
         include: {
-          collection: true,
+          round: true,
           flags: {
             where: {
               collMemberId: currentCollMember.id,
@@ -1522,7 +1522,7 @@ const resolvers = {
         },
       });
 
-      if (!bucket.collection.bucketReviewIsOpen || !bucket.publishedAt)
+      if (!bucket.round.bucketReviewIsOpen || !bucket.publishedAt)
         throw new Error(
           "You can only review buckets when bucket review is open and the bucket is published"
         );
@@ -1564,25 +1564,25 @@ const resolvers = {
         },
       });
     },
-    updateBio: async (_, { collectionId, bio }, { user }) => {
+    updateBio: async (_, { roundId, bio }, { user }) => {
       if (!user) throw new Error("You need to be logged in..");
 
-      return prisma.collectionMember.update({
-        where: { userId_collectionId: { userId: user.id, collectionId } },
+      return prisma.roundMember.update({
+        where: { userId_roundId: { userId: user.id, roundId } },
         data: {
           bio,
         },
       });
     },
-    inviteCollectionMembers: combineResolvers(
+    inviteRoundMembers: combineResolvers(
       isCollOrOrgAdmin,
       async (
         _,
-        { emails: emailsString, collectionId },
+        { emails: emailsString, roundId },
         { user: currentUser }
       ) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
           include: { organization: true },
         });
         const emails = emailsString.split(",");
@@ -1590,7 +1590,7 @@ const resolvers = {
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
 
-        const invitedCollectionMembers = [];
+        const invitedRoundMembers = [];
 
         for (let email of emails) {
           email = email.trim().toLowerCase();
@@ -1606,7 +1606,7 @@ const resolvers = {
               collMemberships: {
                 create: {
                   isApproved: true,
-                  collection: { connect: { id: collectionId } },
+                  round: { connect: { id: roundId } },
                   hasJoined: false,
                   statusAccount: { create: {} },
                   incomingAccount: { create: {} },
@@ -1619,29 +1619,29 @@ const resolvers = {
                 connectOrCreate: {
                   create: {
                     isApproved: true,
-                    collection: { connect: { id: collectionId } },
+                    round: { connect: { id: roundId } },
                     hasJoined: false,
                     statusAccount: { create: {} },
                     incomingAccount: { create: {} },
                     outgoingAccount: { create: {} },
                   },
                   where: {
-                    userId_collectionId: {
+                    userId_roundId: {
                       userId: user?.id ?? "undefined",
-                      collectionId,
+                      roundId,
                     },
                   },
                 },
               },
             },
-            include: { collMemberships: { where: { collectionId } } },
+            include: { collMemberships: { where: { roundId } } },
           });
 
-          await emailService.inviteMember({ email, currentUser, collection });
+          await emailService.inviteMember({ email, currentUser, round });
 
-          invitedCollectionMembers.push(updated.collMemberships?.[0]);
+          invitedRoundMembers.push(updated.collMemberships?.[0]);
         }
-        return invitedCollectionMembers;
+        return invitedRoundMembers;
       }
     ),
     inviteOrgMembers: combineResolvers(
@@ -1719,15 +1719,15 @@ const resolvers = {
       isCollOrOrgAdmin,
       async (
         parent,
-        { collectionId, memberId, isApproved, isAdmin, isModerator }
+        { roundId, memberId, isApproved, isAdmin, isModerator }
       ) => {
-        const collectionMember = await prisma.collectionMember.findFirst({
-          where: { collectionId, id: memberId },
+        const roundMember = await prisma.roundMember.findFirst({
+          where: { roundId, id: memberId },
         });
-        if (!collectionMember)
-          throw new Error("This member does not exist in this collection");
+        if (!roundMember)
+          throw new Error("This member does not exist in this round");
 
-        return prisma.collectionMember.update({
+        return prisma.roundMember.update({
           where: { id: memberId },
           data: {
             isApproved,
@@ -1739,14 +1739,14 @@ const resolvers = {
     ),
     deleteMember: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, memberId }, { user }) => {
-        const collectionMember = await prisma.collectionMember.findFirst({
-          where: { collectionId, id: memberId },
+      async (parent, { roundId, memberId }, { user }) => {
+        const roundMember = await prisma.roundMember.findFirst({
+          where: { roundId, id: memberId },
         });
-        if (!collectionMember)
-          throw new Error("This member does not exist in this collection");
+        if (!roundMember)
+          throw new Error("This member does not exist in this round");
 
-        return prisma.collectionMember.delete({
+        return prisma.roundMember.delete({
           where: { id: memberId },
         });
       }
@@ -1773,11 +1773,11 @@ const resolvers = {
     // },
     approveForGranting: combineResolvers(
       async (parent, args, ctx) => {
-        const collection = await prisma.collection.findFirst({
+        const round = await prisma.round.findFirst({
           where: { buckets: { some: { id: args.bucketId } } },
         });
 
-        return collection.requireBucketApproval
+        return round.requireBucketApproval
           ? isCollModOrAdmin(parent, args, ctx)
           : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
       },
@@ -1790,95 +1790,95 @@ const resolvers = {
           },
         })
     ),
-    allocate: async (_, { collectionMemberId, amount, type }, { user }) => {
-      const targetCollectionMember = await prisma.collectionMember.findUnique({
-        where: { id: collectionMemberId },
+    allocate: async (_, { roundMemberId, amount, type }, { user }) => {
+      const targetRoundMember = await prisma.roundMember.findUnique({
+        where: { id: roundMemberId },
       });
 
-      const currentCollMember = await prisma.collectionMember.findUnique({
+      const currentCollMember = await prisma.roundMember.findUnique({
         where: {
-          userId_collectionId: {
+          userId_roundId: {
             userId: user.id,
-            collectionId: targetCollectionMember.collectionId,
+            roundId: targetRoundMember.roundId,
           },
         },
       });
 
       if (!currentCollMember?.isAdmin)
-        throw new Error("You are not admin for this collection");
+        throw new Error("You are not admin for this round");
 
       await allocateToMember({
-        member: targetCollectionMember,
-        collectionId: targetCollectionMember.collectionId,
+        member: targetRoundMember,
+        roundId: targetRoundMember.roundId,
         amount,
         type,
         allocatedBy: currentCollMember.id,
       });
 
-      return targetCollectionMember;
+      return targetRoundMember;
     },
     bulkAllocate: combineResolvers(
       isCollOrOrgAdmin,
-      async (_, { collectionId, amount, type }, { user }) => {
-        const collectionMembers = await prisma.collectionMember.findMany({
+      async (_, { roundId, amount, type }, { user }) => {
+        const roundMembers = await prisma.roundMember.findMany({
           where: {
-            collectionId: collectionId,
+            roundId: roundId,
             isApproved: true,
           },
         });
         //here
-        const currentCollMember = await prisma.collectionMember.findUnique({
+        const currentCollMember = await prisma.roundMember.findUnique({
           where: {
-            userId_collectionId: {
+            userId_roundId: {
               userId: user.id,
-              collectionId: collectionId,
+              roundId: roundId,
             },
           },
         });
 
-        for (const member of collectionMembers) {
+        for (const member of roundMembers) {
           await allocateToMember({
             member,
-            collectionId: collectionId,
+            roundId: roundId,
             amount,
             type,
             allocatedBy: currentCollMember.id,
           });
         }
 
-        return collectionMembers;
+        return roundMembers;
       }
     ),
     contribute: async (
       _,
-      { collectionId, bucketId, amount },
+      { roundId, bucketId, amount },
       { user, eventHub }
     ) => {
-      const collectionMember = await getCollectionMember({
-        collectionId,
+      const roundMember = await getRoundMember({
+        roundId,
         userId: user.id,
-        include: { collection: true },
+        include: { round: true },
       });
 
-      const { collection } = collectionMember;
+      const { round } = roundMember;
 
       if (amount <= 0) throw new Error("Value needs to be more than zero");
 
       // Check that granting is open
       const now = dayjs();
-      const grantingHasOpened = collection.grantingOpens
-        ? dayjs(collection.grantingOpens).isBefore(now)
+      const grantingHasOpened = round.grantingOpens
+        ? dayjs(round.grantingOpens).isBefore(now)
         : true;
-      const grantingHasClosed = collection.grantingCloses
-        ? dayjs(collection.grantingCloses).isBefore(now)
+      const grantingHasClosed = round.grantingCloses
+        ? dayjs(round.grantingCloses).isBefore(now)
         : false;
       const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
       if (!grantingIsOpen) throw new Error("Granting is not open");
 
       let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
 
-      if (bucket.collectionId !== collectionId)
-        throw new Error("Bucket not in collection");
+      if (bucket.roundId !== roundId)
+        throw new Error("Bucket not in round");
 
       if (!bucket.approvedAt)
         throw new Error("Bucket is not approved for granting");
@@ -1924,20 +1924,20 @@ const resolvers = {
       } = await prisma.contribution.aggregate({
         where: {
           bucketId: bucket.id,
-          collectionMemberId: collectionMember.id,
+          roundMemberId: roundMember.id,
         },
         _sum: { amount: true },
       });
 
       if (
-        collection.maxAmountToBucketPerUser &&
+        round.maxAmountToBucketPerUser &&
         amount + contributionsFromUserToThisBucket >
-          collection.maxAmountToBucketPerUser
+          round.maxAmountToBucketPerUser
       ) {
         throw new Error(
           `You can give a maximum of ${
-            collection.maxAmountToBucketPerUser / 100
-          } ${collection.currency} to one bucket`
+            round.maxAmountToBucketPerUser / 100
+          } ${round.currency} to one bucket`
         );
       }
 
@@ -1946,7 +1946,7 @@ const resolvers = {
         _sum: { amount: contributionsFromUser },
       } = await prisma.contribution.aggregate({
         where: {
-          collectionMemberId: collectionMember.id,
+          roundMemberId: roundMember.id,
         },
         _sum: { amount: true },
       });
@@ -1955,7 +1955,7 @@ const resolvers = {
         _sum: { amount: allocationsForUser },
       } = await prisma.allocation.aggregate({
         where: {
-          collectionMemberId: collectionMember.id,
+          roundMemberId: roundMember.id,
         },
         _sum: { amount: true },
       });
@@ -1965,8 +1965,8 @@ const resolvers = {
 
       await prisma.contribution.create({
         data: {
-          collectionId,
-          collectionMemberId: collectionMember.id,
+          roundId,
+          roundMemberId: roundMember.id,
           amount,
           bucketId: bucket.id,
           amountBefore: contributionsForBucket || 0,
@@ -1976,16 +1976,16 @@ const resolvers = {
       await prisma.transaction.create({
         data: {
           type: "CONTRIBUTION",
-          collectionMemberId: collectionMember.id,
+          roundMemberId: roundMember.id,
           amount,
           toAccountId: bucket.statusAccountId,
-          fromAccountId: collectionMember.statusAccountId,
-          collectionId,
+          fromAccountId: roundMember.statusAccountId,
+          roundId,
         },
       });
 
       await eventHub.publish("contribute-to-bucket", {
-        collection,
+        round,
         bucket,
         contributingUser: user,
         amount,
@@ -2043,10 +2043,10 @@ const resolvers = {
           where: { id: bucketId },
           include: {
             cocreators: true,
-            collection: { include: { organization: true } },
+            round: { include: { organization: true } },
             Contributions: {
               include: {
-                collectionMember: {
+                roundMember: {
                   include: { user: { include: { emailSettings: true } } },
                 },
               },
@@ -2084,7 +2084,7 @@ const resolvers = {
       async (
         parent,
         {
-          collectionId,
+          roundId,
           currency,
           maxAmountToBucketPerUser,
           bucketCreationCloses,
@@ -2094,10 +2094,10 @@ const resolvers = {
           requireBucketApproval,
         }
       ) => {
-        const collection = await prisma.collection.findUnique({
-          where: { id: collectionId },
+        const round = await prisma.round.findUnique({
+          where: { id: roundId },
         });
-        const grantingHasOpened = dayjs(collection.grantingOpens).isBefore(
+        const grantingHasOpened = dayjs(round.grantingOpens).isBefore(
           dayjs()
         );
 
@@ -2107,8 +2107,8 @@ const resolvers = {
           );
         }
 
-        return prisma.collection.update({
-          where: { id: collectionId },
+        return prisma.round.update({
+          where: { id: roundId },
           data: {
             currency,
             maxAmountToBucketPerUser,
@@ -2121,63 +2121,63 @@ const resolvers = {
         });
       }
     ),
-    acceptInvitation: async (parent, { collectionId }, { user }) => {
+    acceptInvitation: async (parent, { roundId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
-      const member = await getCollectionMember({
-        collectionId,
+      const member = await getRoundMember({
+        roundId,
         userId: user.id,
       });
 
       if (!member) {
-        throw new Error("You are not a member of this collection");
+        throw new Error("You are not a member of this round");
       }
 
       if (member.hasJoined) {
         throw new Error("Invitation not pending");
       }
 
-      return prisma.collectionMember.update({
+      return prisma.roundMember.update({
         where: { id: member.id },
         data: {
           hasJoined: true,
         },
       });
     },
-    joinCollection: async (parent, { collectionId }, { user }) => {
+    joinRound: async (parent, { roundId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
       const currentOrgMember = await prisma.orgMember.findFirst({
         where: {
           userId: user.id,
-          organization: { collections: { some: { id: collectionId } } },
+          organization: { rounds: { some: { id: roundId } } },
         },
       });
 
-      const collection = await prisma.collection.findUnique({
-        where: { id: collectionId },
+      const round = await prisma.round.findUnique({
+        where: { id: roundId },
       });
 
       if (
         !currentOrgMember?.isAdmin &&
-        collection.registrationPolicy === "INVITE_ONLY"
+        round.registrationPolicy === "INVITE_ONLY"
       )
-        throw new Error("This collection is invite only");
+        throw new Error("This round is invite only");
 
-      const collectionMember = await prisma.collectionMember.create({
+      const roundMember = await prisma.roundMember.create({
         data: {
-          collection: { connect: { id: collectionId } },
+          round: { connect: { id: roundId } },
           user: { connect: { id: user.id } },
           isApproved:
             currentOrgMember?.isAdmin ||
-            collection.registrationPolicy === "OPEN",
+            round.registrationPolicy === "OPEN",
           statusAccount: { create: {} },
           incomingAccount: { create: {} },
           outgoingAccount: { create: {} },
         },
       });
 
-      return collectionMember;
+      return roundMember;
     },
     setEmailSetting: async (parent, { settingKey, value }, { user }) => {
       if (!user) throw "You need to be logged in";
@@ -2191,10 +2191,10 @@ const resolvers = {
       return prisma.user.findUnique({ where: { id: user.id } });
     },
   },
-  CollectionMember: {
-    collection: async (member) => {
-      return await prisma.collection.findUnique({
-        where: { id: member.collectionId },
+  RoundMember: {
+    round: async (member) => {
+      return await prisma.round.findUnique({
+        where: { id: member.roundId },
       });
     },
     user: async (member) =>
@@ -2228,14 +2228,14 @@ const resolvers = {
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
-        where: { collectionMemberId: member.id },
+        where: { roundMemberId: member.id },
         _sum: { amount: true },
       });
 
       const {
         _sum: { amount: totalContributions },
       } = await prisma.contribution.aggregate({
-        where: { collectionMemberId: member.id },
+        where: { roundMemberId: member.id },
         _sum: { amount: true },
       });
 
@@ -2251,7 +2251,7 @@ const resolvers = {
       const {
         _sum: { amount: totalContributions },
       } = await prisma.contribution.aggregate({
-        where: { collectionMemberId: member.id },
+        where: { roundMemberId: member.id },
         _sum: { amount: true },
       });
 
@@ -2259,11 +2259,11 @@ const resolvers = {
     },
     email: async (member, _, { user }) => {
       if (!user) return null;
-      const currentCollMember = await prisma.collectionMember.findUnique({
+      const currentCollMember = await prisma.roundMember.findUnique({
         where: {
-          userId_collectionId: {
+          userId_roundId: {
             userId: user.id,
-            collectionId: member.collectionId,
+            roundId: member.roundId,
           },
         },
       });
@@ -2282,11 +2282,11 @@ const resolvers = {
     },
     name: async (member, _, { user }) => {
       if (!user) return null;
-      const currentCollMember = await prisma.collectionMember.findUnique({
+      const currentCollMember = await prisma.roundMember.findUnique({
         where: {
-          userId_collectionId: {
+          userId_roundId: {
             userId: user.id,
-            collectionId: member.collectionId,
+            roundId: member.roundId,
           },
         },
       });
@@ -2370,15 +2370,15 @@ const resolvers = {
     },
     currentCollMember: async (
       parent,
-      { orgSlug, collectionSlug },
+      { orgSlug, roundSlug },
       { user }
     ) => {
       if (user?.id !== parent.id) return null;
-      if (!collectionSlug) return null;
-      return prisma.collectionMember.findFirst({
+      if (!roundSlug) return null;
+      return prisma.roundMember.findFirst({
         where: {
-          collection: {
-            slug: collectionSlug,
+          round: {
+            slug: roundSlug,
             organization: { slug: orgSlug },
           },
           userId: user.id,
@@ -2387,9 +2387,9 @@ const resolvers = {
     },
     orgMemberships: async (user) =>
       prisma.orgMember.findMany({ where: { userId: user.id } }),
-    collectionMemberships: async (user) =>
-      prisma.collectionMember.findMany({
-        where: { userId: user.id, collection: { isNot: { deleted: true } } },
+    roundMemberships: async (user) =>
+      prisma.roundMember.findMany({
+        where: { userId: user.id, round: { isNot: { deleted: true } } },
       }),
     isRootAdmin: () => false, //TODO: add field in prisma
     avatar: () => null, //TODO: add avatars
@@ -2437,8 +2437,8 @@ const resolvers = {
         : `# Welcome to ${org.name}`;
     },
     subdomain: (org) => org.slug,
-    collections: async (org, args, { user }) => {
-      return await prisma.collection.findMany({
+    rounds: async (org, args, { user }) => {
+      return await prisma.round.findMany({
         where: {
           OR: [
             {
@@ -2447,7 +2447,7 @@ const resolvers = {
             },
             {
               organizationId: org.id,
-              collectionMember: {
+              roundMember: {
                 some: { userId: user?.id ?? "undefined", isApproved: true },
               },
             },
@@ -2462,30 +2462,30 @@ const resolvers = {
       return discourseConfig?.url ?? null;
     },
   },
-  Collection: {
-    color: (collection) => collection.color ?? "anthracit",
-    info: (collection) => {
-      return collection.info && collection.info.length
-        ? collection.info
-        : `# Welcome to ${collection.title}`;
+  Round: {
+    color: (round) => round.color ?? "anthracit",
+    info: (round) => {
+      return round.info && round.info.length
+        ? round.info
+        : `# Welcome to ${round.title}`;
     },
-    about: (collection) => {
-      return collection.about && collection.about.length
-        ? collection.about
-        : `# About ${collection.title}`;
+    about: (round) => {
+      return round.about && round.about.length
+        ? round.about
+        : `# About ${round.title}`;
     },
-    numberOfApprovedMembers: async (collection) => {
-      return prisma.collectionMember.count({
-        where: { collectionId: collection.id, isApproved: true },
+    numberOfApprovedMembers: async (round) => {
+      return prisma.roundMember.count({
+        where: { roundId: round.id, isApproved: true },
       });
     },
-    totalAllocations: async (collection) => {
+    totalAllocations: async (round) => {
       const {
         _sum: { amount: transactionAmount },
       } = await prisma.transaction.aggregate({
         where: {
           toAccount: {
-            statusCollectionMember: { collectionId: collection.id },
+            statusRoundMember: { roundId: round.id },
           },
           type: "ALLOCATION",
         },
@@ -2495,7 +2495,7 @@ const resolvers = {
       const {
         _sum: { amount },
       } = await prisma.allocation.aggregate({
-        where: { collectionId: collection.id },
+        where: { roundId: round.id },
         _sum: { amount: true },
       });
 
@@ -2505,19 +2505,19 @@ const resolvers = {
 
       return transactionAmount;
     },
-    totalContributions: async (collection) => {
+    totalContributions: async (round) => {
       const {
         _sum: { amount },
       } = await prisma.contribution.aggregate({
-        where: { collectionId: collection.id },
+        where: { roundId: round.id },
         _sum: { amount: true },
       });
 
       return amount;
     },
-    totalContributionsFunding: async (collection) => {
+    totalContributionsFunding: async (round) => {
       const fundingBuckets = await prisma.bucket.findMany({
-        where: { collectionId: collection.id, fundedAt: null },
+        where: { roundId: round.id, fundedAt: null },
         select: { id: true },
       });
       const fundingBucketIds = fundingBuckets.map((bucket) => bucket.id);
@@ -2527,16 +2527,16 @@ const resolvers = {
       } = await prisma.contribution.aggregate({
         _sum: { amount: true },
         where: {
-          collectionId: collection.id,
+          roundId: round.id,
           bucketId: { in: fundingBucketIds },
         },
       });
 
       return totalContributionsFunded;
     },
-    totalContributionsFunded: async (collection) => {
+    totalContributionsFunded: async (round) => {
       const fundedBuckets = await prisma.bucket.findMany({
-        where: { collectionId: collection.id, fundedAt: { not: null } },
+        where: { roundId: round.id, fundedAt: { not: null } },
         select: { id: true },
       });
       const fundedBucketIds = fundedBuckets.map((bucket) => bucket.id);
@@ -2546,21 +2546,21 @@ const resolvers = {
       } = await prisma.contribution.aggregate({
         _sum: { amount: true },
         where: {
-          collectionId: collection.id,
+          roundId: round.id,
           bucketId: { in: fundedBucketIds },
         },
       });
 
       return totalContributionsFunded;
     },
-    totalInMembersBalances: async (collection) => {
+    totalInMembersBalances: async (round) => {
       // console.time("creditMinusDebit");
 
       // const {
       //   _sum: { amount: totalCredit },
       // } = await prisma.transaction.aggregate({
       //   where: {
-      //     collectionId: collection.id,
+      //     roundId: round.id,
       //     type: "ALLOCATION",
       //   },
       //   _sum: { amount: true },
@@ -2570,7 +2570,7 @@ const resolvers = {
       //   _sum: { amount: totalDebit },
       // } = await prisma.transaction.aggregate({
       //   where: {
-      //     collectionId: collection.id,
+      //     roundId: round.id,
       //     type: "CONTRIBUTION",
       //   },
       //   _sum: { amount: true },
@@ -2584,14 +2584,14 @@ const resolvers = {
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
-        where: { collectionId: collection.id },
+        where: { roundId: round.id },
         _sum: { amount: true },
       });
 
       const {
         _sum: { amount: totalContributions },
       } = await prisma.contribution.aggregate({
-        where: { collectionId: collection.id },
+        where: { roundId: round.id },
         _sum: { amount: true },
       });
 
@@ -2606,64 +2606,64 @@ const resolvers = {
 
       return totalAllocations - totalContributions;
     },
-    tags: async (collection) => {
-      return prisma.tag.findMany({ where: { collectionId: collection.id } });
+    tags: async (round) => {
+      return prisma.tag.findMany({ where: { roundId: round.id } });
     },
-    guidelines: async (collection) =>
-      prisma.guideline.findMany({ where: { collectionId: collection.id } }),
-    customFields: async (collection) =>
-      prisma.field.findMany({ where: { collectionId: collection.id } }),
-    grantingIsOpen: (collection) => {
-      return isGrantingOpen(collection);
+    guidelines: async (round) =>
+      prisma.guideline.findMany({ where: { roundId: round.id } }),
+    customFields: async (round) =>
+      prisma.field.findMany({ where: { roundId: round.id } }),
+    grantingIsOpen: (round) => {
+      return isGrantingOpen(round);
     },
-    grantingHasClosed: (collection) => {
-      return collection.grantingCloses
-        ? dayjs(collection.grantingCloses).isBefore(dayjs())
+    grantingHasClosed: (round) => {
+      return round.grantingCloses
+        ? dayjs(round.grantingCloses).isBefore(dayjs())
         : false;
     },
-    bucketCreationIsOpen: (collection) => {
-      if (!collection.bucketCreationCloses) return true;
+    bucketCreationIsOpen: (round) => {
+      if (!round.bucketCreationCloses) return true;
 
       const now = dayjs();
-      const bucketCreationCloses = dayjs(collection.bucketCreationCloses);
+      const bucketCreationCloses = dayjs(round.bucketCreationCloses);
 
       return now.isBefore(bucketCreationCloses);
     },
-    organization: async (collection) => {
-      if (collection.singleCollection) return null;
+    organization: async (round) => {
+      if (round.singleRound) return null;
       return prisma.organization.findUnique({
-        where: { id: collection.organizationId },
+        where: { id: round.organizationId },
       });
     },
-    bucketStatusCount: async (collection) => {
+    bucketStatusCount: async (round) => {
       return {
         PENDING_APPROVAL: await prisma.bucket.count({
           where: {
-            collectionId: collection.id,
+            roundId: round.id,
             ...statusTypeToQuery("PENDING_APPROVAL"),
           },
         }),
         OPEN_FOR_FUNDING: await prisma.bucket.count({
           where: {
-            collectionId: collection.id,
+            roundId: round.id,
             ...statusTypeToQuery("OPEN_FOR_FUNDING"),
           },
         }),
         FUNDED: await prisma.bucket.count({
           where: {
-            collectionId: collection.id,
+            roundId: round.id,
             ...statusTypeToQuery("FUNDED"),
           },
         }),
         CANCELED: await prisma.bucket.count({
           where: {
-            collectionId: collection.id,
+            roundId: round.id,
             ...statusTypeToQuery("CANCELED"),
           },
         }),
         COMPLETED: await prisma.bucket.count({
           where: {
-            collectionId: collection.id,
+            roundId: round.id,
             ...statusTypeToQuery("COMPLETED"),
           },
         }),
@@ -2677,19 +2677,19 @@ const resolvers = {
       //   include: { cocreators: true },
       // });
 
-      const cocreators = await prisma.collectionMember.findMany({
+      const cocreators = await prisma.roundMember.findMany({
         where: { buckets: { some: { id: bucket.id } } },
       });
       return cocreators;
     },
     round: async (bucket) => {
-      return prisma.collection.findUnique({
-        where: { id: bucket.collectionId },
+      return prisma.round.findUnique({
+        where: { id: bucket.roundId },
       });
     },
-    collection: async (bucket) => {
-      return prisma.collection.findUnique({
-        where: { id: bucket.collectionId },
+    round: async (bucket) => {
+      return prisma.round.findUnique({
+        where: { id: bucket.roundId },
       });
     },
     totalContributions: async (bucket) => {
@@ -2697,16 +2697,16 @@ const resolvers = {
     },
     totalContributionsFromCurrentMember: async (bucket, args, { user }) => {
       if (!user) return null;
-      const collectionMember = await prisma.collectionMember.findUnique({
+      const roundMember = await prisma.roundMember.findUnique({
         where: {
-          userId_collectionId: {
+          userId_roundId: {
             userId: user.id,
-            collectionId: bucket.collectionId,
+            roundId: bucket.roundId,
           },
         },
       });
 
-      if (!collectionMember) return 0;
+      if (!roundMember) return 0;
 
       // TODO: should it be initialized at 0 like below?
       const {
@@ -2715,7 +2715,7 @@ const resolvers = {
         _sum: { amount: true },
         where: {
           bucketId: bucket.id,
-          collectionMemberId: collectionMember.id,
+          roundMemberId: roundMember.id,
         },
       });
       return amount;
@@ -2745,15 +2745,15 @@ const resolvers = {
     funders: async (bucket) => {
       const funders = await prisma.contribution.groupBy({
         where: { bucketId: bucket.id },
-        by: ["collectionMemberId"],
+        by: ["roundMemberId"],
         _sum: {
           amount: true,
         },
       });
       const contributionsFormat = funders.map((funder) => ({
-        id: funder.collectionMemberId,
-        collectionId: bucket.collectionId,
-        collectionMemberId: funder.collectionMemberId,
+        id: funder.roundMemberId,
+        roundId: bucket.roundId,
+        roundMemberId: funder.roundMemberId,
         bucketId: bucket.id,
         amount: funder._sum.amount,
         createdAt: new Date(),
@@ -2763,7 +2763,7 @@ const resolvers = {
     noOfFunders: async (bucket) => {
       const funders = await prisma.contribution.groupBy({
         where: { bucketId: bucket.id },
-        by: ["collectionMemberId"],
+        by: ["roundMemberId"],
       });
       return funders.length;
     },
@@ -2785,7 +2785,7 @@ const resolvers = {
     discourseTopicUrl: async (bucket) => {
       const org = await prisma.organization.findFirst({
         where: {
-          collections: { some: { buckets: { some: { id: bucket.id } } } },
+          rounds: { some: { buckets: { some: { id: bucket.id } } } },
         },
         include: { discourse: true },
       });
@@ -2860,26 +2860,26 @@ const resolvers = {
         where: { id: contribution.bucketId },
       });
     },
-    collection: async (contribution) => {
-      return prisma.collection.findUnique({
-        where: { id: contribution.collectionId },
+    round: async (contribution) => {
+      return prisma.round.findUnique({
+        where: { id: contribution.roundId },
       });
     },
-    collectionMember: async (contribution) => {
-      return prisma.collectionMember.findUnique({
-        where: { id: contribution.collectionMemberId },
+    roundMember: async (contribution) => {
+      return prisma.roundMember.findUnique({
+        where: { id: contribution.roundMemberId },
       });
     },
   },
-  CollectionTransaction: {
-    collectionMember: async (transaction) => {
-      return prisma.collectionMember.findUnique({
-        where: { id: transaction.collectionMemberId },
+  RoundTransaction: {
+    roundMember: async (transaction) => {
+      return prisma.roundMember.findUnique({
+        where: { id: transaction.roundMemberId },
       });
     },
     allocatedBy: async (transaction) => {
       if (transaction.allocatedById)
-        return prisma.collectionMember.findUnique({
+        return prisma.roundMember.findUnique({
           where: { id: transaction.allocatedById },
         });
       else return null;
@@ -2891,18 +2891,18 @@ const resolvers = {
         });
       else return null;
     },
-    collection: async (transaction) => {
-      return prisma.collection.findUnique({
-        where: { id: transaction.collectionId },
+    round: async (transaction) => {
+      return prisma.round.findUnique({
+        where: { id: transaction.roundId },
       });
     },
   },
   Comment: {
-    collectionMember: async (comment) => {
+    roundMember: async (comment) => {
       // make logs anonymous
       if (comment.isLog) return null;
 
-      return prisma.collectionMember.findUnique({
+      return prisma.roundMember.findUnique({
         where: {
           id: comment.collMemberId,
         },

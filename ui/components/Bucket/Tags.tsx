@@ -15,10 +15,10 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-const Tags = ({ currentOrg, bucket, collection, canEdit }) => {
+const Tags = ({ currentOrg, bucket, round, canEdit }) => {
   const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
-  if (!collection.tags?.length) return null;
+  if (!round.tags?.length) return null;
 
   return (
     <div className="">
@@ -31,7 +31,7 @@ const Tags = ({ currentOrg, bucket, collection, canEdit }) => {
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${currentOrg?.slug ?? "c"}/${collection.slug}?tag=${
+              href={`/${currentOrg?.slug ?? "c"}/${round.slug}?tag=${
                 tag.value
               }`}
             >
@@ -48,7 +48,7 @@ const Tags = ({ currentOrg, bucket, collection, canEdit }) => {
           </div>
         ))}
       </div>
-      {canEdit && <AddTag items={collection.tags} bucket={bucket} />}
+      {canEdit && <AddTag items={round.tags} bucket={bucket} />}
     </div>
   );
 };

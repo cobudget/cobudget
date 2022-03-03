@@ -12,8 +12,8 @@ import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
 
 export const BUCKET_STATUS_QUERY = gql`
-  query BucketStatus($collectionSlug: String!, $orgSlug: String) {
-    collection(collectionSlug: $collectionSlug, orgSlug: $orgSlug) {
+  query BucketStatus($roundSlug: String!, $orgSlug: String) {
+    round(roundSlug: $roundSlug, orgSlug: $orgSlug) {
       id
       bucketStatusCount {
         PENDING_APPROVAL
@@ -28,7 +28,7 @@ export const BUCKET_STATUS_QUERY = gql`
 
 export const BUCKETS_QUERY = gql`
   query Buckets(
-    $collectionId: ID!
+    $roundId: ID!
     $textSearchTerm: String
     $tag: String
     $offset: Int
@@ -36,7 +36,7 @@ export const BUCKETS_QUERY = gql`
     $status: [StatusType!]
   ) {
     bucketsPage(
-      collectionId: $collectionId
+      roundId: $roundId
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
@@ -86,7 +86,7 @@ const Page = ({
   isFirstPage,
   onLoadMore,
   router,
-  collection,
+  round,
   org,
   statusFilter,
 }) => {
@@ -95,7 +95,7 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
-      collectionId: collection.id,
+      roundId: round.id,
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
@@ -115,13 +115,13 @@ const Page = ({
     <>
       {buckets.map((bucket) => (
         <Link
-          href={`/${org?.slug ?? "c"}/${collection.slug}/${bucket.id}`}
+          href={`/${org?.slug ?? "c"}/${round.slug}/${bucket.id}`}
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
             <BucketCard
               bucket={bucket}
-              collection={collection}
+              round={round}
               currentOrg={org}
             />
           </a>
@@ -176,7 +176,7 @@ const getStandardFilter = (bucketStatusCount) => {
   return stdFilter;
 };
 
-const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
+const RoundPage = ({ round, router, currentOrg, currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
@@ -184,12 +184,12 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [{ data }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
-      collectionSlug: collection?.slug,
+      roundSlug: round?.slug,
       orgSlug: currentOrg?.slug ?? "c",
     },
   });
 
-  const bucketStatusCount = data?.collection?.bucketStatusCount ?? {};
+  const bucketStatusCount = data?.round?.bucketStatusCount ?? {};
 
   const { tag, s, f } = router.query;
   const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
@@ -204,40 +204,40 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
-  if (!collection) return null;
+  if (!round) return null;
   const canEdit =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
   return (
     <div>
-      <SubMenu currentUser={currentUser} collection={collection} />
+      <SubMenu currentUser={currentUser} round={round} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              defaultValue={collection.info}
+              defaultValue={round.info}
               name="info"
               label="Add homepage message"
-              placeholder={`# Welcome to ${collection.title}'s bucket page`}
+              placeholder={`# Welcome to ${round.title}'s bucket page`}
               canEdit={canEdit}
               className="h-10"
               MUTATION={gql`
                 mutation EditHomepageMessage(
-                  $collectionId: ID!
+                  $roundId: ID!
                   $info: String
                 ) {
-                  editCollection(collectionId: $collectionId, info: $info) {
+                  editRound(roundId: $roundId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ collectionId: collection.id }}
+              variables={{ roundId: round.id }}
               required
             />
           </div>
           <div className={`flex flex-col justify-end items-start`}>
-            {collection.bucketCreationIsOpen &&
+            {round.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
@@ -246,20 +246,20 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
                     Your Funds
                   </p>
                   <p className="mb-5">
-                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
-                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
+                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(round.currency)}</span>{" "}
+                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(round.currency)} in round)</span>
                   </p>
                   
                   <Button
                     size="large"
-                    color={collection.color}
+                    color={round.color}
                     onClick={() => setNewBucketModalOpen(true)}
                   >
                     New bucket
                   </Button>
                   {newBucketModalOpen && (
                     <NewBucketModal
-                      collection={collection}
+                      round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
                       currentOrg={currentOrg}
                     />
@@ -272,7 +272,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
 
       <div className="page flex-1">
         <Filterbar
-          collection={collection}
+          round={round}
           currentOrg={currentOrg}
           textSearchTerm={s}
           tag={tag}
@@ -285,7 +285,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               <Page
                 org={currentOrg}
                 router={router}
-                collection={collection}
+                round={round}
                 key={"" + variables.limit + i}
                 variables={variables}
                 isFirstPage={i === 0}
@@ -303,4 +303,4 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   );
 };
 
-export default CollectionPage;
+export default RoundPage;

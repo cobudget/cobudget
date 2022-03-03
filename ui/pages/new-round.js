@@ -14,15 +14,15 @@ import { QuestionMarkIcon } from "components/Icons";
 import toast from "react-hot-toast";
 import PageHero from "../components/PageHero";
 
-const CREATE_COLLECTION = gql`
-  mutation CreateCollection(
+const CREATE_ROUND = gql`
+  mutation CreateRound(
     $orgId: ID
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
-    createCollection(
+    createRound(
       orgId: $orgId
       title: $title
       slug: $slug
@@ -35,13 +35,13 @@ const CREATE_COLLECTION = gql`
   }
 `;
 
-export default function NewCollectionPage({ currentOrg }) {
-  const [, createCollection] = useMutation(CREATE_COLLECTION);
+export default function NewRoundPage({ currentOrg }) {
+  const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createCollection(variables).then(({ data, error }) => {
+    createRound(variables).then(({ data, error }) => {
       if (error) {
         toast.error(
           error.message.includes("Unique constraint")
@@ -49,7 +49,7 @@ export default function NewCollectionPage({ currentOrg }) {
             : error.message
         );
       } else {
-        Router.push("/[org]/[collection]", `/c/${data.createCollection.slug}`);
+        Router.push("/[org]/[round]", `/c/${data.createRound.slug}`);
       }
     });
   };

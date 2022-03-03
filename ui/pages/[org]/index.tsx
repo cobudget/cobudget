@@ -8,9 +8,9 @@ import SubMenu from "../../components/SubMenu";
 import PageHero from "../../components/PageHero";
 import EditableField from "components/EditableField";
 import Router from "next/router";
-export const COLLECTIONS_QUERY = gql`
-  query Collections($orgId: ID!) {
-    collections(orgId: $orgId) {
+export const ROUNDS_QUERY = gql`
+  query Rounds($orgId: ID!) {
+    rounds(orgId: $orgId) {
       id
       slug
       title
@@ -49,12 +49,12 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
   }, []);
 
   const [{ data, error }] = useQuery({
-    query: COLLECTIONS_QUERY,
+    query: ROUNDS_QUERY,
     variables: { orgId: currentOrg?.id },
   });
   if (!currentOrg) return null;
 
-  const collections = data?.collections ?? [];
+  const rounds = data?.rounds ?? [];
   const showTodos =
     currentUser?.currentOrgMember?.isAdmin && !currentOrg.finishedTodos;
 
@@ -86,9 +86,9 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
           </div>
           <div>
             {currentUser?.currentOrgMember?.isAdmin && (
-              <Link href={`/${currentOrg.slug}/new-collection`}>
+              <Link href={`/${currentOrg.slug}/new-round`}>
                 <Button size="large" color="anthracit" className="float-right">
-                  New collection
+                  New round
                 </Button>
               </Link>
             )}
@@ -107,15 +107,15 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
               : "grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4"
           }`}
         >
-          {collections.map((collection) => (
+          {rounds.map((round) => (
             <Link
-              href={`/${collection.organization.slug}/${collection.slug}`}
-              key={collection.slug}
+              href={`/${round.organization.slug}/${round.slug}`}
+              key={round.slug}
               passHref
             >
-              <LinkCard color={collection.color}>
-                {collection.title}
-                {collection.archived && (
+              <LinkCard color={round.color}>
+                {round.title}
+                {round.archived && (
                   <Label className="right-0 m-2">Archived</Label>
                 )}
               </LinkCard>

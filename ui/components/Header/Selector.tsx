@@ -25,14 +25,14 @@ function LinkItem(props) {
 export default function Selector({
   currentUser,
   currentOrg,
-  collection,
+  round,
   color,
   className,
 }) {
   const orgIds = currentUser?.orgMemberships?.map(
     (orgMember) => orgMember.organization.id
   );
-  const activeId = currentOrg ? currentOrg.id : collection?.id;
+  const activeId = currentOrg ? currentOrg.id : round?.id;
   return (
     <Menu as="div" className="inline-block">
       <div>
@@ -86,25 +86,25 @@ export default function Selector({
                 </Menu.Item>
               );
             })}
-            {currentUser?.collectionMemberships
+            {currentUser?.roundMemberships
               ?.filter(
                 (collMember) =>
-                  !orgIds.includes(collMember.collection.organization?.id)
+                  !orgIds.includes(collMember.round.organization?.id)
               )
               .map((collMember) => {
-                if (collMember.collection.organization)
+                if (collMember.round.organization)
                   return (
                     <Menu.Item key={collMember.id}>
                       {({ active }) => (
                         <LinkItem
-                          href={`/${collMember.collection.organization.slug}`}
+                          href={`/${collMember.round.organization.slug}`}
                           active={active}
                           selected={
-                            collMember.collection.organization.id === activeId
+                            collMember.round.organization.id === activeId
                           }
                         >
                           <span className="truncate">
-                            {collMember.collection.organization.name}
+                            {collMember.round.organization.name}
                           </span>
                         </LinkItem>
                       )}
@@ -114,12 +114,12 @@ export default function Selector({
                   <Menu.Item key={collMember.id}>
                     {({ active }) => (
                       <LinkItem
-                        href={`/c/${collMember.collection.slug}`}
+                        href={`/c/${collMember.round.slug}`}
                         active={active}
-                        selected={collMember.collection.id === activeId}
+                        selected={collMember.round.id === activeId}
                       >
                         <span className="truncate">
-                          {collMember.collection.title}
+                          {collMember.round.title}
                         </span>
                       </LinkItem>
                     )}

@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 
-const BucketCard = ({ bucket, collection, currentOrg }) => {
+const BucketCard = ({ bucket, round, currentOrg }) => {
   const showFundingStats =
     (bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
   return (
@@ -29,7 +29,7 @@ const BucketCard = ({ bucket, collection, currentOrg }) => {
         <div>
           {showFundingStats && (
             <ProgressBar
-              color={collection.color}
+              color={round.color}
               ratio={(bucket.totalContributions + bucket.income) / bucket.minGoal}
               className="mt-2 mb-3"
             />

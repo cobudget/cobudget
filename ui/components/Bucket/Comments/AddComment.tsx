@@ -20,7 +20,7 @@ function AddComment() {
   const {
     addComment,
     bucketId,
-    collection,
+    round,
     currentOrg,
     currentUser,
   } = useContext<any>(Context);
@@ -40,7 +40,7 @@ function AddComment() {
   ) {
     return (
       <Link href={"/connect-discourse"} passHref>
-        <Button color={collection.color} nextJsLink className="my-2">
+        <Button color={round.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
       </Link>
@@ -78,10 +78,10 @@ function AddComment() {
               inputRef={(e) => {
                 inputRef.current = e;
               }}
-              color={collection.color}
+              color={round.color}
               wysiwyg
               enableMentions
-              mentionsCollId={collection.id}
+              mentionsCollId={round.id}
             />
           </div>
           {content.length > 0 && (
@@ -89,7 +89,7 @@ function AddComment() {
               <Button
                 onClick={inputRef.current.clear}
                 variant="secondary"
-                color={collection.color}
+                color={round.color}
                 className="mr-2"
               >
                 Cancel
@@ -97,7 +97,7 @@ function AddComment() {
               <Button
                 type="submit"
                 disabled={content.length === 0}
-                color={collection.color}
+                color={round.color}
                 loading={submitting}
               >
                 Submit

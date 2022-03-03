@@ -8,10 +8,10 @@ import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetRequireBucketApproval = ({ closeModal, collection }) => {
+const SetRequireBucketApproval = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
-  console.log({ collection });
+  console.log({ round });
   return (
     <Card>
       <Box p={3}>
@@ -22,7 +22,7 @@ const SetRequireBucketApproval = ({ closeModal, collection }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             updateGranting({
-              collectionId: collection.id,
+              roundId: round.id,
               requireBucketApproval: variables.requireBucketApproval === "true",
             })
               .then(({ data }) => {
@@ -39,7 +39,7 @@ const SetRequireBucketApproval = ({ closeModal, collection }) => {
             <SelectInput
               name="requireBucketApproval"
               label="Require moderator approval of buckets before funding"
-              defaultValue={collection.requireBucketApproval ?? false}
+              defaultValue={round.requireBucketApproval ?? false}
               inputRef={register}
               fullWidth
             >

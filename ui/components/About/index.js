@@ -6,9 +6,9 @@ import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 
-export const COLLECTION_QUERY = gql`
-  query CollectionQuery($orgSlug: String!, $collectionSlug: String!) {
-    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+export const ROUND_QUERY = gql`
+  query RoundQuery($orgSlug: String!, $roundSlug: String!) {
+    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
       id
       about
       guidelines {
@@ -34,11 +34,11 @@ export const COLLECTION_QUERY = gql`
 `;
 
 export default function AboutPage({ router, currentOrg }) {
-  const [{ data: { collection } = {}, fetching: loading, error }] = useQuery({
-    query: COLLECTION_QUERY,
+  const [{ data: { round } = {}, fetching: loading, error }] = useQuery({
+    query: ROUND_QUERY,
     variables: {
       orgSlug: router.query.org,
-      collectionSlug: router.query.collection,
+      roundSlug: router.query.round,
     },
   });
 
@@ -51,13 +51,13 @@ export default function AboutPage({ router, currentOrg }) {
 
   return (
     <div className="max-w-screen-md">
-      {Boolean(collection.guidelines?.length) && (
+      {Boolean(round.guidelines?.length) && (
         <>
           <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines
           </h2>
           <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
-            {collection.guidelines.map((guideline) => (
+            {round.guidelines.map((guideline) => (
               <div key={guideline.id} className="p-4">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <Markdown source={guideline.description} />
@@ -73,19 +73,19 @@ export default function AboutPage({ router, currentOrg }) {
           <ListItem>
             <ListItemText
               primary={"Currency"}
-              secondary={collection.currency}
+              secondary={round.currency}
             />
           </ListItem>
 
-          {!!collection.maxAmountToBucketPerUser && (
+          {!!round.maxAmountToBucketPerUser && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
                   primary={`Max. amount to one bucket per user`}
                   secondary={`${thousandSeparator(
-                    collection.maxAmountToBucketPerUser / 100
-                  )} ${collection.currency}`}
+                    round.maxAmountToBucketPerUser / 100
+                  )} ${round.currency}`}
                 />
               </ListItem>
             </>
@@ -95,43 +95,43 @@ export default function AboutPage({ router, currentOrg }) {
           <ListItem>
             <ListItemText
               primary="Allow stretch goals"
-              secondary={collection.allowStretchGoals?.toString() ?? "false"}
+              secondary={round.allowStretchGoals?.toString() ?? "false"}
             />
           </ListItem>
 
-          {collection.bucketCreationCloses && (
+          {round.bucketCreationCloses && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
                   primary={`Bucket creation closes`}
-                  secondary={dayjs(collection.bucketCreationCloses).format(
+                  secondary={dayjs(round.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
                 />
               </ListItem>
             </>
           )}
-          {collection.grantingOpens && (
+          {round.grantingOpens && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
                   primary="Granting opens"
-                  secondary={dayjs(collection.grantingOpens).format(
+                  secondary={dayjs(round.grantingOpens).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
                 />
               </ListItem>
             </>
           )}
-          {collection.grantingCloses && (
+          {round.grantingCloses && (
             <>
               <Divider />
               <ListItem>
                 <ListItemText
                   primary="Granting closes"
-                  secondary={dayjs(collection.grantingCloses).format(
+                  secondary={dayjs(round.grantingCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
                 />
@@ -148,35 +148,35 @@ export default function AboutPage({ router, currentOrg }) {
             {
               title: "Allocated funds",
               total: `${thousandSeparator(
-                collection.totalContributions / 100
-              )} ${collection.currency}`,
+                round.totalContributions / 100
+              )} ${round.currency}`,
               breakdown: [
                 {
                   title: "Contributions made to bucket open for funding",
                   amount: `${thousandSeparator(
-                    collection.totalContributionsFunding / 100
-                  )} ${collection.currency}`,
+                    round.totalContributionsFunding / 100
+                  )} ${round.currency}`,
                 },
                 {
                   title: "Contributions made to funded buckets",
                   amount: `${thousandSeparator(
-                    collection.totalContributionsFunded / 100
-                  )} ${collection.currency}`,
+                    round.totalContributionsFunded / 100
+                  )} ${round.currency}`,
                 },
               ],
             },
             {
               title: "Unallocated funds",
               total: `${thousandSeparator(
-                collection.totalInMembersBalances / 100
-              )} ${collection.currency}`,
+                round.totalInMembersBalances / 100
+              )} ${round.currency}`,
               breakdown: [],
             },
           ]}
           totalTitle={"Total funds available"}
           totalAmount={`${thousandSeparator(
-            collection.totalAllocations / 100
-          )} ${collection.currency}`}
+            round.totalAllocations / 100
+          )} ${round.currency}`}
         />
       </div>
     </div>

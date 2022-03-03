@@ -10,12 +10,12 @@ import toast from "react-hot-toast";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
-    $collectionMemberId: ID!
+    $roundMemberId: ID!
     $amount: Int!
     $type: AllocationType!
   ) {
     allocate(
-      collectionMemberId: $collectionMemberId
+      roundMemberId: $roundMemberId
       amount: $amount
       type: $type
     ) {
@@ -25,7 +25,7 @@ const ALLOCATE_MUTATION = gql`
   }
 `;
 
-const AllocateModal = ({ member, collection, handleClose }) => {
+const AllocateModal = ({ member, round, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(inputValue * 100);
@@ -56,7 +56,7 @@ const AllocateModal = ({ member, collection, handleClose }) => {
           onSubmit={(e) => {
             e.preventDefault();
             allocate({
-              collectionMemberId: member.id,
+              roundMemberId: member.id,
               amount,
               type: type.toUpperCase(),
             }).then(({ error }) => {
@@ -82,17 +82,17 @@ const AllocateModal = ({ member, collection, handleClose }) => {
           <p className="text-center mb-4 text-sm text-gray-800">
             {type === "Add" ? (
               <>
-                Adding {thousandSeparator(amount / 100)} {collection.currency}{" "}
+                Adding {thousandSeparator(amount / 100)} {round.currency}{" "}
                 to {thousandSeparator(member.balance / 100)}{" "}
-                {collection.currency} <br />({total / 100} {collection.currency}{" "}
+                {round.currency} <br />({total / 100} {round.currency}{" "}
                 in total)
               </>
             ) : (
               <>
                 Set balance to {thousandSeparator(amount / 100)}{" "}
-                {collection.currency} <br />
+                {round.currency} <br />
                 (previously {thousandSeparator(member.balance / 100)}{" "}
-                {collection.currency})
+                {round.currency})
               </>
             )}
           </p>

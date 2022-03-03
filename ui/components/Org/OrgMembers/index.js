@@ -17,8 +17,8 @@ const UPDATE_ORG_MEMBER = gql`
 
 // // TODO: change to deleting org members, not round members
 // const DELETE_MEMBER = gql`
-//   mutation UpdateMember($memberId: ID!, $collectionId: ID!) {
-//     deleteMember(memberId: $memberId, collectionId: $collectionId) {
+//   mutation UpdateMember($memberId: ID!, $roundId: ID!) {
+//     deleteMember(memberId: $memberId, roundId: $roundId) {
 //       id
 //     }
 //   }
@@ -28,16 +28,16 @@ const OrgMembers = ({ currentOrg }) => {
   const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
-  //   variables: { collectionId: round.id },
+  //   variables: { roundId: round.id },
   //   update(cache, { data: { deleteMember } }) {
   //     const { members } = cache.readQuery({
   //       query: MEMBERS_QUERY,
-  //       variables: { collectionId: round.id },
+  //       variables: { roundId: round.id },
   //     });
 
   //     cache.writeQuery({
   //       query: MEMBERS_QUERY,
-  //       variables: { collectionId: round.id },
+  //       variables: { roundId: round.id },
   //       data: {
   //         members: members.filter((member) => member.id !== deleteMember.id),
   //       },

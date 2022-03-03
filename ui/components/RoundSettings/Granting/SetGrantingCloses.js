@@ -8,12 +8,12 @@ import DayjsUtils from "@date-io/dayjs";
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
-const SetGrantingCloses = ({ closeModal, collection }) => {
+const SetGrantingCloses = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
   const [selectedDate, handleDateChange] = React.useState(
-    collection.grantingCloses
+    round.grantingCloses
   );
 
   return (
@@ -25,7 +25,7 @@ const SetGrantingCloses = ({ closeModal, collection }) => {
           onSubmit={handleSubmit(() => {
             updateGranting({
               grantingCloses: selectedDate,
-              collectionId: collection.id,
+              roundId: round.id,
             })
               .then(() => {
                 closeModal();
@@ -60,7 +60,7 @@ const SetGrantingCloses = ({ closeModal, collection }) => {
             >
               Save
             </Button>
-            {collection.grantingCloses && (
+            {round.grantingCloses && (
               <Button
                 type="button"
                 size="large"
@@ -69,7 +69,7 @@ const SetGrantingCloses = ({ closeModal, collection }) => {
                 className="ml-2"
                 onClick={() => {
                   updateGranting({
-                    collectionId: collection.id,
+                    roundId: round.id,
                     grantingCloses: null,
                   })
                     .then(() => {

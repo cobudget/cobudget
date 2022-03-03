@@ -5,8 +5,8 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 
 const CREATE_TAG = gql`
-  mutation createTag($collectionId: ID!, $tagValue: String!) {
-    createTag(collectionId: $collectionId, tagValue: $tagValue) {
+  mutation createTag($roundId: ID!, $tagValue: String!) {
+    createTag(roundId: $roundId, tagValue: $tagValue) {
       id
       tags {
         id
@@ -17,8 +17,8 @@ const CREATE_TAG = gql`
 `;
 
 const DELETE_TAG = gql`
-  mutation deleteTag($collectionId: ID!, $tagId: ID!) {
-    deleteTag(collectionId: $collectionId, tagId: $tagId) {
+  mutation deleteTag($roundId: ID!, $tagId: ID!) {
+    deleteTag(roundId: $roundId, tagId: $tagId) {
       id
       tags {
         id
@@ -28,7 +28,7 @@ const DELETE_TAG = gql`
   }
 `;
 
-const Tags = ({ collection, currentOrg }) => {
+const Tags = ({ round, currentOrg }) => {
   const {
     handleSubmit,
     reset,
@@ -43,13 +43,13 @@ const Tags = ({ collection, currentOrg }) => {
       <h1 className="text-2xl font-semibold mb-6">Tags</h1>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
-        {collection.tags.map((tag) => (
+        {round.tags.map((tag) => (
           <div
             key={tag.id}
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${currentOrg?.slug ?? "c"}/${collection.slug}?tag=${
+              href={`/${currentOrg?.slug ?? "c"}/${round.slug}?tag=${
                 tag.value
               }`}
             >
@@ -60,7 +60,7 @@ const Tags = ({ collection, currentOrg }) => {
               onClick={() =>
                 confirm(
                   "Are you sure you want to permanently delete this tag?"
-                ) && deleteTag({ collectionId: collection.id, tagId: tag.id })
+                ) && deleteTag({ roundId: round.id, tagId: tag.id })
               }
               className="ml-2 px-2 rounded-md bg-gray-400 hover:bg-gray-700 hover:text-gray-100"
             >
@@ -74,7 +74,7 @@ const Tags = ({ collection, currentOrg }) => {
         onSubmit={handleSubmit((variables) => {
           createTag({
             ...variables,
-            collectionId: collection.id,
+            roundId: round.id,
           })
             .then(() => reset())
             .catch((error) => alert(error.message));
@@ -90,7 +90,7 @@ const Tags = ({ collection, currentOrg }) => {
 
         <div className="mt-2 flex justify-end">
           <Button
-            color={collection.color}
+            color={round.color}
             type="submit"
             disabled={!isDirty}
             loading={fetching}

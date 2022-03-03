@@ -7,7 +7,7 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
-const RoundSettings = ({ collection, currentOrg, currentUser }) => {
+const RoundSettings = ({ round, currentOrg, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const defaultTabs = [
@@ -49,7 +49,7 @@ const RoundSettings = ({ collection, currentOrg, currentUser }) => {
         <div className="py-6 col-span-4 bg-white rounded-lg shadow overflow-hidden">
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
-            collection={collection}
+            round={round}
             handleClose={handleClose}
             currentOrg={currentOrg}
             currentUser={currentUser}

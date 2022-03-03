@@ -22,7 +22,7 @@ export const COMMENTS_QUERY = gql`
         htmlContent
         createdAt
         isLog
-        collectionMember {
+        roundMember {
           id
           user {
             id
@@ -44,7 +44,7 @@ const ADD_COMMENT_MUTATION = gql`
       htmlContent
       createdAt
       updatedAt
-      collectionMember {
+      roundMember {
         id
         user {
           id
@@ -65,7 +65,7 @@ const EDIT_COMMENT_MUTATION = gql`
       htmlContent
       createdAt
       updatedAt
-      collectionMember {
+      roundMember {
         id
         user {
           id
@@ -164,7 +164,7 @@ export const useCommentContext = (initialInput) => {
 
   return {
     bucketId: initialInput.bucketId,
-    collection: initialInput.collection,
+    round: initialInput.round,
     currentOrg: initialInput.currentOrg,
     currentUser: initialInput.currentUser,
     from,

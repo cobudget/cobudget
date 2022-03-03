@@ -40,7 +40,7 @@ const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
 const BucketCustomField = ({
   defaultCustomField,
   customField,
-  collectionId,
+  roundId,
   bucketId,
   canEdit,
 }) => {
@@ -101,8 +101,8 @@ const BucketCustomField = ({
             inputRef={register()}
           />
           <HiddenTextField
-            name="customField.collectionId"
-            defaultValue={collectionId}
+            name="customField.roundId"
+            defaultValue={roundId}
             inputRef={register()}
           />
           <div className="my-2">
