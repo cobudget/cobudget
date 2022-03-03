@@ -15,7 +15,6 @@ const UPDATE_ORG_MEMBER = gql`
   }
 `;
 
-// TODO: change to deleting org members, not event members
 const DELETE_GROUP_MEMBER = gql`
   mutation DeleteGroupMember($groupMemberId: ID!) {
     deleteGroupMember(groupMemberId: $groupMemberId) {
