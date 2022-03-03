@@ -189,7 +189,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
     },
   });
 
-  const [bucketStatusCount] = useState(data?.round?.bucketStatusCount ?? {});
+  const [bucketStatusCount, setBucketStatusCount] = useState(data?.round?.bucketStatusCount ?? {});
 
   const { tag, s, f } = router.query;
   const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
@@ -199,7 +199,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
   }, [f]);
 
   useEffect(() => {
-    setStatusFilter(data?.round?.bucketStatusCount ?? {});
+    setBucketStatusCount(data?.round?.bucketStatusCount ?? {});
   }, [data]);
 
   // apply standard filter (hidden from URL)
