@@ -382,7 +382,7 @@ const schema = gql`
 
   type Bucket {
     id: ID!
-    event: Collection!
+    round: Collection!
     title: String!
     description: String
     summary: String
@@ -546,7 +546,7 @@ const schema = gql`
   }
 
   # type GrantingPeriod {
-  #   event: Event!
+  #   round: Event!
   #   submissionCloses: Date
   #   grantingStarts: Date
   #   grantingCloses: Date # when this happens. all grants to non-funded projects go back into the pool
@@ -563,7 +563,7 @@ const schema = gql`
 
   # type Emoji {
   #   unicode: String!
-  #   event: Event!
+  #   round: Event!
   # }
 
   # type Reaction {
@@ -620,7 +620,7 @@ const schema = gql`
   #   createdAt: Date
   #   user: User
   #   bucket: Bucket
-  #   event: Collection
+  #   round: Collection
   #   details: LogDetails
   #   type: String
   # }

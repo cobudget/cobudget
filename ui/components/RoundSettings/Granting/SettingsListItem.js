@@ -15,7 +15,7 @@ const SettingsListItem = ({
   openModal,
   disabled,
   canEdit,
-  eventColor,
+  roundColor,
 }) => {
   return (
     <ListItem>
@@ -28,7 +28,7 @@ const SettingsListItem = ({
             </IconButton>
           ) : (
             <Button
-              color={eventColor}
+              color={roundColor}
               size="small"
               onClick={openModal}
               disabled={disabled}

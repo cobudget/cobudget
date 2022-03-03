@@ -3,7 +3,7 @@ import { useMutation, gql } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
-import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
+import OrganizationAndRoundHeader from "./OrganizationAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -102,7 +102,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative">
-          <OrganizationAndEventHeader
+          <OrganizationAndRoundHeader
             currentOrg={currentOrg}
             collection={collection}
             color={color}
@@ -143,7 +143,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                 {currentUser.currentCollMember?.hasJoined === false ? (
                   <NavItem
                     primary
-                    eventColor={color}
+                    roundColor={color}
                     onClick={() => {
                       acceptInvitation({ collectionId: collection?.id }).then(
                         ({ data, error }) => {
@@ -166,7 +166,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                     currentUser.currentOrgMember?.isAdmin) && (
                     <NavItem
                       primary
-                      eventColor={color}
+                      roundColor={color}
                       onClick={() =>
                         joinCollection({ collectionId: collection?.id }).then(
                           ({ data, error }) => {
@@ -193,7 +193,7 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                 {!currentUser.currentOrgMember && !collection && currentOrg && (
                   <NavItem
                     primary
-                    eventColor={color}
+                    roundColor={color}
                     onClick={() => joinOrg({ orgId: currentOrg.id })}
                   >
                     Join org
@@ -210,10 +210,10 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
               </>
             ) : (
               <>
-                <NavItem href={`/login`} eventColor={color}>
+                <NavItem href={`/login`} roundColor={color}>
                   Log in
                 </NavItem>
-                <NavItem href={`/signup`} eventColor={color} primary>
+                <NavItem href={`/signup`} roundColor={color} primary>
                   Sign up
                 </NavItem>
               </>

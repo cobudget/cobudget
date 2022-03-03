@@ -185,7 +185,7 @@ export default {
   },
   sendCommentNotification: async ({
     bucket,
-    event,
+    round,
     currentOrg,
     currentCollMember,
     currentUser,
@@ -231,7 +231,7 @@ export default {
         (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
       );
 
-    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${bucket.id}`);
+    const bucketLink = appLink(`/${currentOrg.slug}/${round.slug}/${bucket.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
@@ -444,7 +444,7 @@ export default {
   bucketPublishedNotification: async ({
     currentOrg,
     currentOrgMember,
-    event,
+    round,
     bucket,
     unpublish,
   }) => {
@@ -453,7 +453,7 @@ export default {
     const {
       collectionMember: collMembers,
     } = await prisma.collection.findUnique({
-      where: { id: event.id },
+      where: { id: round.id },
       include: {
         collectionMember: {
           include: { user: { include: { emailSettings: true } } },
@@ -474,13 +474,13 @@ export default {
       .map((collMember) => collMember.user)
       .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
 
-    const collLink = appLink(`/${currentOrg.slug}/${event.slug}`);
+    const collLink = appLink(`/${currentOrg.slug}/${round.slug}`);
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `There is a new bucket in ${event.title}!`,
+      subject: `There is a new bucket in ${round.title}!`,
       html: `Creativity is flowing in ${escape(
-        event.title
+        round.title
       )}! <a href="${collLink}">Have a look at the new buckets in this collection.</a>
       <br/><br/>
       ${footer}

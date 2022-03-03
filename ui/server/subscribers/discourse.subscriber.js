@@ -23,7 +23,7 @@ module.exports = {
         currentOrg,
         currentOrgMember,
         currentCollMember,
-        event,
+        round,
         bucket,
       }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
@@ -35,8 +35,8 @@ module.exports = {
         const post = await discourse(currentOrg.discourse).posts.create(
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, event, currentOrg),
-            category: event.discourseCategoryId,
+            raw: this.generateBucketMarkdown(bucket, round, currentOrg),
+            category: round.discourseCategoryId,
             unlist_topic: !bucket.published,
           },
           {
@@ -52,7 +52,7 @@ module.exports = {
             currentOrg,
             currentOrgMember,
             currentCollMember,
-            event,
+            round,
             bucket,
             comment,
           });
@@ -66,7 +66,7 @@ module.exports = {
     eventHub.subscribe(
       "edit-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, bucket }) => {
+      async ({ currentOrg, currentOrgMember, round, bucket }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -75,7 +75,7 @@ module.exports = {
           await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
-            event,
+            round,
             bucket,
           });
           //bucket = Bucket.findOne({ _id: bucket.id });
@@ -99,7 +99,7 @@ module.exports = {
           post.id,
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, event, currentOrg),
+            raw: this.generateBucketMarkdown(bucket, round, currentOrg),
           },
           {
             username: "system",
@@ -112,7 +112,7 @@ module.exports = {
     eventHub.subscribe(
       "publish-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, bucket, unpublish }) => {
+      async ({ currentOrg, currentOrgMember, round, bucket, unpublish }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -127,7 +127,7 @@ module.exports = {
           await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
-            event,
+            round,
             bucket,
           });
           //bucket = Bucket.findOne({ _id: bucket.id });
@@ -150,7 +150,7 @@ module.exports = {
     eventHub.subscribe(
       "create-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, bucket, comment }) => {
+      async ({ currentOrg, currentOrgMember, round, bucket, comment }) => {
         if (!this.orgHasDiscourse(currentOrg)) {
           return;
         }
@@ -171,7 +171,7 @@ module.exports = {
           await eventHub.publish("create-bucket", {
             currentOrg,
             currentOrgMember,
-            event,
+            round,
             bucket,
           });
           //bucket = Bucket.findOne({ _id: bucket.id });
@@ -273,14 +273,14 @@ module.exports = {
     );
   },
 
-  generateBucketMarkdown(bucket, event, org) {
+  generateBucketMarkdown(bucket, round, org) {
     const content = [];
 
     if (org) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
       const domain =
         org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`;
-      const bucketUrl = `${protocol}://${domain}/${event.slug}/${bucket.id}`;
+      const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
       content.push(
         "View and edit this post on the Cobudget platform: ",
         bucketUrl
@@ -299,7 +299,7 @@ module.exports = {
 
     if (bucket.customFields) {
       bucket.customFields.forEach((customField) => {
-        const customFieldName = event.customFields.find(
+        const customFieldName = round.customFields.find(
           (customEventField) =>
             String(customEventField._id) === String(customField.fieldId)
         ).name;
@@ -324,7 +324,7 @@ module.exports = {
             `|---|---|`,
             ...income.map(
               ({ description, min }) =>
-                `|${description}|${min} ${event.currency}|`
+                `|${description}|${min} ${round.currency}|`
             ),
           ].join("\n")
         );
@@ -338,14 +338,14 @@ module.exports = {
             `|---|---|`,
             ...expenses.map(
               ({ description, min }) =>
-                `|${description}|${min} ${event.currency}|`
+                `|${description}|${min} ${round.currency}|`
             ),
           ].join("\n")
         );
       }
 
       content.push(
-        `Total funding goal: ${bucket.minGoal / 100} ${event.currency}`
+        `Total funding goal: ${bucket.minGoal / 100} ${round.currency}`
       );
     }
 

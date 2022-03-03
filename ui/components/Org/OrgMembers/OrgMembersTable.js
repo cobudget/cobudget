@@ -86,7 +86,7 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        {/* how to also remove the user's event memberships when their org
+        {/* how to also remove the user's round memberships when their org
             membership is removed?
         <MenuItem
           color="error.main"

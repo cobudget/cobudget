@@ -8,7 +8,7 @@ export default {
     eventHub.subscribe(
       "create-bucket",
       "prisma",
-      async ({ currentOrg, currentOrgMember, event, bucket, comment }) => {}
+      async ({ currentOrg, currentOrgMember, round, bucket, comment }) => {}
     );
 
     eventHub.subscribe(
@@ -18,7 +18,7 @@ export default {
         currentOrg,
         currentOrgMember,
         currentCollMember,
-        event,
+        round,
         bucket,
         comment: { content },
       }) => {
@@ -53,8 +53,8 @@ export default {
       async ({
         currentOrg,
         currentOrgMember,
-        event,
-        eventMember,
+        round,
+        roundMember,
         bucket,
         comment,
       }) => {

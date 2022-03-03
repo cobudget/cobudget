@@ -1,7 +1,7 @@
-import EventSettings from "../../../components/EventSettings";
+import RoundSettings from "../../../components/RoundSettings";
 import SubMenu from "../../../components/SubMenu";
 
-const EventSettingsPage = ({ collection, currentUser, currentOrg }) => {
+const RoundSettingsPage = ({ collection, currentUser, currentOrg }) => {
   const isAdmin =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentOrgMember?.isAdmin;
@@ -9,7 +9,7 @@ const EventSettingsPage = ({ collection, currentUser, currentOrg }) => {
   return (
     <div className="flex-1">
       <SubMenu currentUser={currentUser} collection={collection} />
-      <EventSettings
+      <RoundSettings
         collection={collection}
         currentOrg={currentOrg}
         currentUser={currentUser}
@@ -18,4 +18,4 @@ const EventSettingsPage = ({ collection, currentUser, currentOrg }) => {
   );
 };
 
-export default EventSettingsPage;
+export default RoundSettingsPage;

@@ -189,7 +189,7 @@ const Row = ({ member, deleteMember, updateMember, collection, isAdmin }) => {
   );
 };
 
-const EventMembersTable = ({
+const RoundMembersTable = ({
   approvedMembers,
   updateMember,
   deleteMember,
@@ -253,4 +253,4 @@ const EventMembersTable = ({
   );
 };
 
-export default EventMembersTable;
+export default RoundMembersTable;
