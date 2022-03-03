@@ -217,7 +217,7 @@ const resolvers = {
           })
         : null;
 
-      // if admin show all events (current or archived)
+      // if admin show all rounds (current or archived)
       if (currentOrgMember && currentOrgMember.isAdmin) {
         return prisma.collection.findMany({
           where: { organizationId: orgId, deleted: { not: true } },
@@ -674,10 +674,10 @@ const resolvers = {
           },
         });
 
-        // await eventHub.publish("create-event", {
+        // await eventHub.publish("create-round", {
         //   currentOrg,
         //   currentOrgMember,
-        //   event: collection,
+        //   round: collection,
         // });
 
         return collection;
@@ -920,7 +920,7 @@ const resolvers = {
           currentOrg: collection.organization,
           currentOrgMember,
           bucket: bucket,
-          event: collection,
+          round: collection,
         });
 
         return bucket;
@@ -963,7 +963,7 @@ const resolvers = {
         await eventHub.publish("edit-bucket", {
           currentOrg: updated.collection.organization,
           currentOrgMember: updated.collection.organization?.orgMembers?.[0],
-          event: updated.collection,
+          round: updated.collection,
           bucket: updated,
         });
 
@@ -1066,7 +1066,7 @@ const resolvers = {
         await eventHub.publish("edit-bucket", {
           currentOrg: updated.collection.organization,
           currentOrgMember: updated.collection.organization?.orgMembers?.[0],
-          event: updated.collection,
+          round: updated.collection,
           bucket: updated,
         });
 
@@ -1106,7 +1106,7 @@ const resolvers = {
         await eventHub.publish("delete-bucket", {
           currentOrg: bucket.collection.organization,
           currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-          event: bucket.collection,
+          round: bucket.collection,
           bucket: bucket,
         });
 
@@ -1158,7 +1158,7 @@ const resolvers = {
         await eventHub.publish("publish-bucket", {
           currentOrg: bucket.collection.organization,
           currentOrgMember: bucket.collection.organization?.orgMembers?.[0],
-          event: bucket.collection,
+          round: bucket.collection,
           bucket: bucket,
           unpublish,
         });
@@ -1213,7 +1213,7 @@ const resolvers = {
             currentCollMember,
             currentUser: user,
             bucket: bucket,
-            event: bucket.collection,
+            round: bucket.collection,
             comment,
           }
         );
@@ -1249,7 +1249,7 @@ const resolvers = {
         await eventHub.publish("delete-comment", {
           currentOrg,
           currentOrgMember,
-          event: bucket.collection,
+          round: bucket.collection,
           currentCollMember,
           bucket: bucket,
           comment,
@@ -2682,7 +2682,7 @@ const resolvers = {
       });
       return cocreators;
     },
-    event: async (bucket) => {
+    round: async (bucket) => {
       return prisma.collection.findUnique({
         where: { id: bucket.collectionId },
       });
@@ -2916,7 +2916,7 @@ const resolvers = {
     },
     user: async () => {
       // see who left a flag
-      // if not org admin or event admin or guide
+      // if not org admin or round admin or guide
       return null;
     },
   },
