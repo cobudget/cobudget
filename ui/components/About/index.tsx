@@ -1,6 +1,7 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import { useQuery, gql } from "urql";
+import { sortBy } from "lodash";
 import HappySpinner from "components/HappySpinner";
 import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
@@ -33,8 +34,8 @@ export const COLLECTION_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ router, currentOrg }) {
-  const [{ data: { collection } = {}, fetching: loading, error }] = useQuery({
+export default function AboutPage({ router }) {
+  const [{ data, fetching: loading, error }] = useQuery({
     query: COLLECTION_QUERY,
     variables: {
       orgSlug: router.query.org,
@@ -42,12 +43,16 @@ export default function AboutPage({ router, currentOrg }) {
     },
   });
 
+  if (error) return <div>{error.message}</div>;
+
   if (loading)
     return (
       <div className="flex-grow flex justify-center items-center">
         <HappySpinner />
       </div>
     );
+
+  const collection = data?.collection;
 
   return (
     <div className="max-w-screen-md">
@@ -57,12 +62,14 @@ export default function AboutPage({ router, currentOrg }) {
             Guidelines
           </h2>
           <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
-            {collection.guidelines.map((guideline) => (
-              <div key={guideline.id} className="p-4">
-                <h3 className="text-lg font-medium">{guideline.title}</h3>
-                <Markdown source={guideline.description} />
-              </div>
-            ))}
+            {sortBy(collection.guidelines, (g) => g.position).map(
+              (guideline) => (
+                <div key={guideline.id} className="p-4">
+                  <h3 className="text-lg font-medium">{guideline.title}</h3>
+                  <Markdown source={guideline.description} />
+                </div>
+              )
+            )}
           </div>
         </>
       )}

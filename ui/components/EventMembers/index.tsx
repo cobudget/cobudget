@@ -37,11 +37,11 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         createdAt
         balance
         email
-        name
         hasJoined
         user {
           id
           username
+          name
           verifiedEmail
           avatar
         }
@@ -59,10 +59,10 @@ export const COLLECTION_MEMBERS_QUERY = gql`
         createdAt
         balance
         email
-        name
         user {
           id
           username
+          name
           verifiedEmail
           avatar
         }

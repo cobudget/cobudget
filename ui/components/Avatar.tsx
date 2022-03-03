@@ -26,7 +26,7 @@ const Avatar = React.forwardRef(
         className={`${
           size === "small" ? "h-8 w-8" : "h-10 w-10 text-xl"
         } bg-${stringToColor(
-          user?.username ? user.username : "default"
+          user?.username ? user.username : user.name ?? "default"
         )}-dark rounded-full text-white flex items-center justify-center select-none font-medium ${
           highlighted ? "ring-4 ring-yellow-500" : ""
         } ${className}`}
@@ -39,7 +39,7 @@ const Avatar = React.forwardRef(
       >
         {user?.username
           ? user.username.charAt(0).toUpperCase()
-          : user.email?.charAt(0).toUpperCase() ?? ""}
+          : user.name?.charAt(0).toUpperCase() ?? ""}
       </div>
     );
   }

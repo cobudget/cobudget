@@ -5,12 +5,7 @@ import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
 import EditableField from "../../../components/EditableField";
 
-export default function AboutPage({
-  router,
-  collection,
-  currentUser,
-  currentOrg,
-}) {
+export default function AboutPage({ router, collection, currentUser }) {
   if (!collection) return null;
   return (
     <>
@@ -45,7 +40,7 @@ export default function AboutPage({
         </div>
       </PageHero>
       <div className="page">
-        <About router={router} currentOrg={currentOrg} />
+        <About router={router} />
       </div>
     </>
   );

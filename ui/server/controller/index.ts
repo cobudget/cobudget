@@ -2,23 +2,23 @@ import prisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
 
 export const allocateToMember = async ({
-  collectionMemberId,
   collectionId,
   amount,
   type,
   allocatedBy,
+  member,
 }) => {
   const {
     _sum: { amount: totalAllocations },
   } = await prisma.allocation.aggregate({
-    where: { collectionMemberId },
+    where: { collectionMemberId: member.id },
     _sum: { amount: true },
   });
 
   const {
     _sum: { amount: totalContributions },
   } = await prisma.contribution.aggregate({
-    where: { collectionMemberId },
+    where: { collectionMemberId: member.id },
     _sum: { amount: true },
   });
 
@@ -34,15 +34,26 @@ export const allocateToMember = async ({
   await prisma.allocation.create({
     data: {
       collectionId,
-      collectionMemberId,
+      collectionMemberId: member.id,
       amount: adjustedAmount,
       amountBefore: balance,
       allocatedById: allocatedBy,
       allocationType: type,
     },
   });
+
+  await prisma.transaction.create({
+    data: {
+      collectionMemberId: allocatedBy,
+      amount: adjustedAmount,
+      toAccountId: member.statusAccountId,
+      fromAccountId: member.incomingAccountId,
+      collectionId,
+    },
+  });
+
   await eventHub.publish("allocate-to-member", {
-    collectionMemberId,
+    collectionMemberId: member.id,
     collectionId,
     oldAmount: balance,
     newAmount: balance + adjustedAmount,

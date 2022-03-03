@@ -26,6 +26,7 @@ export const COMMENTS_QUERY = gql`
           id
           user {
             id
+            name
             username
             avatar
           }
@@ -48,6 +49,7 @@ const ADD_COMMENT_MUTATION = gql`
         id
         user {
           id
+          name
           username
           avatar
         }
@@ -69,6 +71,7 @@ const EDIT_COMMENT_MUTATION = gql`
         id
         user {
           id
+          name
           username
           avatar
         }
