@@ -343,7 +343,7 @@ export const client = (
                 cache.updateQuery(
                   {
                     query: ROUND_MEMBERS_QUERY,
-                    variables: { roundId, offset: 0, limit: 1000 },
+                    variables: { roundId, offset: 0, limit: 1000, search: "" },
                   },
                   (data: any) => {
                     const existingEmails =
