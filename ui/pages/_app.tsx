@@ -33,6 +33,7 @@ export const TOP_LEVEL_QUERY = gql`
       requireBucketApproval
       bucketReviewIsOpen
       discourseCategoryId
+      totalInMembersBalances
       guidelines {
         id
         title
@@ -95,7 +96,6 @@ export const TOP_LEVEL_QUERY = gql`
         isApproved
         hasJoined
         balance
-        amountContributed
         collection {
           id
           title
