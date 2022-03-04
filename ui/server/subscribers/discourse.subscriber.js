@@ -2,8 +2,8 @@ const discourse = require("../lib/discourse");
 const liveUpdate = require("../services/liveUpdate.service");
 
 module.exports = {
-  orgHasDiscourse(org) {
-    return org?.discourse?.url && org?.discourse?.apiKey;
+  groupHasDiscourse(group) {
+    return group?.discourse?.url && group?.discourse?.apiKey;
   },
   generateComment(post, collMember) {
     return {
@@ -20,28 +20,28 @@ module.exports = {
       "create-bucket",
       "discourse",
       async ({
-        currentOrg,
-        currentOrgMember,
+        currentGroup,
+        currentGroupMember,
         currentCollMember,
         round,
         bucket,
       }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
         console.log(`Publishing bucket ${bucket.id} to discourse...`);
 
-        const post = await discourse(currentOrg.discourse).posts.create(
+        const post = await discourse(currentGroup.discourse).posts.create(
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentOrg),
+            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
             category: round.discourseCategoryId,
             unlist_topic: !bucket.published,
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
 
@@ -49,8 +49,8 @@ module.exports = {
 
         bucket.comments.forEach((comment) => {
           eventHub.publish("create-comment", {
-            currentOrg,
-            currentOrgMember,
+            currentGroup,
+            currentGroupMember,
             currentCollMember,
             round,
             bucket,
@@ -66,15 +66,15 @@ module.exports = {
     eventHub.subscribe(
       "edit-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, round, bucket }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, round, bucket }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
         if (!bucket.discourseTopicId) {
           await eventHub.publish("create-bucket", {
-            currentOrg,
-            currentOrgMember,
+            currentGroup,
+            currentGroupMember,
             round,
             bucket,
           });
@@ -83,27 +83,27 @@ module.exports = {
 
         console.log(`Updating bucket ${bucket.id} on discourse`);
 
-        const post = await discourse(currentOrg.discourse).topics.getSummary(
+        const post = await discourse(currentGroup.discourse).topics.getSummary(
           {
             id: bucket.discourseTopicId,
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        await discourse(currentOrg.discourse).posts.update(
+        await discourse(currentGroup.discourse).posts.update(
           post.id,
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentOrg),
+            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
       }
@@ -112,8 +112,8 @@ module.exports = {
     eventHub.subscribe(
       "publish-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, round, bucket, unpublish }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, round, bucket, unpublish }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
@@ -125,15 +125,15 @@ module.exports = {
 
         if (!bucket.discourseTopicId) {
           await eventHub.publish("create-bucket", {
-            currentOrg,
-            currentOrgMember,
+            currentGroup,
+            currentGroupMember,
             round,
             bucket,
           });
           //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        await discourse(currentOrg.discourse).topics.updateStatus(
+        await discourse(currentGroup.discourse).topics.updateStatus(
           {
             id: bucket.discourseTopicId,
             status: "visible",
@@ -141,7 +141,7 @@ module.exports = {
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
       }
@@ -150,48 +150,48 @@ module.exports = {
     eventHub.subscribe(
       "create-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, round, bucket, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
 
-        if (comment.content.length < currentOrg.discourse.minPostLength)
+        if (comment.content.length < currentGroup.discourse.minPostLength)
           throw new Error(
-            `Your post needs to be at least ${currentOrg.discourse.minPostLength} characters long!`
+            `Your post needs to be at least ${currentGroup.discourse.minPostLength} characters long!`
           );
 
         console.log(`Publishing comment in bucket ${bucket.id} to discourse...`);
 
         if (!bucket.discourseTopicId) {
           await eventHub.publish("create-bucket", {
-            currentOrg,
-            currentOrgMember,
+            currentGroup,
+            currentGroupMember,
             round,
             bucket,
           });
           //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        const post = await discourse(currentOrg.discourse).posts.create(
+        const post = await discourse(currentGroup.discourse).posts.create(
           {
             topic_id: bucket.discourseTopicId,
             raw: comment.content,
           },
           {
-            username: currentOrgMember.discourseUsername,
-            userApiKey: currentOrgMember.discourseApiKey,
+            username: currentGroupMember.discourseUsername,
+            userApiKey: currentGroupMember.discourseApiKey,
           }
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
         const created = this.generateComment(
           { ...post, raw: comment.content },
-          currentOrgMember
+          currentGroupMember
         );
         liveUpdate.publish("commentsChanged", {
           commentsChanged: { comment: created, action: "created" },
@@ -204,11 +204,11 @@ module.exports = {
     eventHub.subscribe(
       "edit-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, bucket, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, bucket, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
@@ -217,15 +217,15 @@ module.exports = {
           `Updating comment ${comment.id} in bucket ${bucket.id} to discourse...`
         );
 
-        const post = await discourse(currentOrg.discourse).posts.update(
+        const post = await discourse(currentGroup.discourse).posts.update(
           comment.id,
           {
             title: bucket.title,
             raw: comment.content,
           },
           {
-            username: currentOrgMember.discourseUsername,
-            userApiKey: currentOrgMember.discourseApiKey,
+            username: currentGroupMember.discourseUsername,
+            userApiKey: currentGroupMember.discourseApiKey,
           }
         );
 
@@ -233,7 +233,7 @@ module.exports = {
 
         const updated = this.generateComment(
           { ...post, raw: comment.content },
-          currentOrgMember
+          currentGroupMember
         );
         liveUpdate.publish("commentsChanged", {
           commentsChanged: { comment: updated, action: "edited" },
@@ -246,20 +246,20 @@ module.exports = {
     eventHub.subscribe(
       "delete-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
 
         console.log(`Deleting comment ${comment.id} on discourse...`);
 
-        const res = await discourse(currentOrg.discourse).posts.delete({
+        const res = await discourse(currentGroup.discourse).posts.delete({
           id: comment.id,
-          userApiKey: currentOrgMember.discourseApiKey,
+          userApiKey: currentGroupMember.discourseApiKey,
         });
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
@@ -273,13 +273,13 @@ module.exports = {
     );
   },
 
-  generateBucketMarkdown(bucket, round, org) {
+  generateBucketMarkdown(bucket, round, group) {
     const content = [];
 
-    if (org) {
+    if (group) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
       const domain =
-        org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`;
+        group.customDomain || `${group.subdomain}.${process.env.DEPLOY_URL}`;
       const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
       content.push(
         "View and edit this post on the Cobudget platform: ",

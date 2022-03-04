@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($roundSlug: String, $orgSlug: String) {
-    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
+  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
       slug
       info
@@ -62,7 +62,7 @@ export const TOP_LEVEL_QUERY = gql`
       avatar
       email
 
-      orgMemberships {
+      groupMemberships {
         id
         isAdmin
         group {
@@ -88,7 +88,7 @@ export const TOP_LEVEL_QUERY = gql`
           }
         }
       }
-      currentCollMember(orgSlug: $orgSlug, roundSlug: $roundSlug) {
+      currentCollMember(groupSlug: $groupSlug, roundSlug: $roundSlug) {
         id
         isAdmin
         isModerator
@@ -101,7 +101,7 @@ export const TOP_LEVEL_QUERY = gql`
           title
         }
       }
-      currentOrgMember(orgSlug: $orgSlug) {
+      currentGroupMember(groupSlug: $groupSlug) {
         id
         bio
         isAdmin
@@ -110,7 +110,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg(orgSlug: $orgSlug) {
+    currentGroup(groupSlug: $groupSlug) {
       __typename
       id
       name
@@ -127,9 +127,9 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, round } = {
+      data: { currentUser, currentGroup, round } = {
         currentUser: null,
-        currentOrg: null,
+        currentGroup: null,
         round: null,
       },
       fetching,
@@ -138,7 +138,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      groupSlug: router.query.group,
       roundSlug: router.query.round,
     },
   });
@@ -177,20 +177,20 @@ const MyApp = ({ Component, pageProps, router }) => {
         active={modal}
         closeModal={closeModal}
         currentUser={currentUser}
-        currentOrg={currentOrg}
+        currentGroup={currentGroup}
       />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
-        currentOrg={currentOrg}
+        currentGroup={currentGroup}
         openModal={openModal}
         round={round}
         router={router}
         title={
-          currentOrg
+          currentGroup
             ? round
-              ? `${round.title} | ${currentOrg.name}`
-              : currentOrg.name
+              ? `${round.title} | ${currentGroup.name}`
+              : currentGroup.name
             : round
             ? round.title
             : "Cobudget"
@@ -200,7 +200,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           {...pageProps}
           round={round}
           currentUser={currentUser}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
           openModal={openModal}
           router={router}
         />

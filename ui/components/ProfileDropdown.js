@@ -63,17 +63,17 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
                 )}
               </div>
             )}
-            {currentOrgMember?.roundMemberships.map((membership) => {
+            {currentGroupMember?.roundMemberships.map((membership) => {
               if (
-                currentOrgMember.currentEventMembership &&
-                currentOrgMember.currentEventMembership.id === membership.id
+                currentGroupMember.currentEventMembership &&
+                currentGroupMember.currentEventMembership.id === membership.id
               ) {
                 return null;
               }
               return (
                 <Link
-                  href="/[org]/[round]"
-                  as={`/${currentOrg.slug}/${membership.event.slug}`}
+                  href="/[group]/[round]"
+                  as={`/${currentGroup.slug}/${membership.event.slug}`}
                   key={membership.event.slug}
                 >
                   <a className={css.button}>{membership.event.title}</a>

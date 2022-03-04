@@ -43,7 +43,7 @@ export async function isAndGetCollMember({
   return collMember;
 }
 
-export async function isAndGetCollMemberOrOrgAdmin({
+export async function isAndGetCollMemberOrGroupAdmin({
   roundId,
   userId,
   bucketId,
@@ -55,7 +55,7 @@ export async function isAndGetCollMemberOrOrgAdmin({
   include?: object;
 }) {
   let collMember = null;
-  let orgMember = null;
+  let groupMember = null;
 
   if (bucketId) {
     collMember = await prisma.roundMember.findFirst({
@@ -71,21 +71,21 @@ export async function isAndGetCollMemberOrOrgAdmin({
     });
   }
   if (!collMember) {
-    orgMember = await prisma.orgMember.findFirst({
+    groupMember = await prisma.groupMember.findFirst({
       where: { group: { rounds: { some: { id: roundId } } } },
     });
   }
 
-  if (!orgMember?.isAdmin || !collMember?.isApproved)
-    throw new Error("Not a round member or an org admin");
+  if (!groupMember?.isAdmin || !collMember?.isApproved)
+    throw new Error("Not a round member or an group admin");
 
-  return { collMember, orgMember };
+  return { collMember, groupMember };
 }
 
-export async function getOrgMember({ orgId, userId }) {
-  return prisma.orgMember.findUnique({
+export async function getGroupMember({ groupId, userId }) {
+  return prisma.groupMember.findUnique({
     where: {
-      groupId_userId: { groupId: orgId, userId },
+      groupId_userId: { groupId: groupId, userId },
     },
   });
 }
@@ -123,37 +123,37 @@ export async function getRoundMember({
   return collMember;
 }
 
-export async function getCurrentOrgAndMember({
-  orgId,
+export async function getCurrentGroupAndMember({
+  groupId,
   roundId,
   bucketId,
   user,
 }: {
-  orgId?: string;
+  groupId?: string;
   roundId?: string;
   bucketId?: string;
   user?: any;
 }) {
-  let currentOrg = null;
+  let currentGroup = null;
 
   const include = {
     ...(user && {
-      orgMembers: { where: { userId: user.id }, include: { user: true } },
+      groupMembers: { where: { userId: user.id }, include: { user: true } },
     }),
     discourse: true,
   };
 
-  if (orgId) {
-    currentOrg = await prisma.group.findUnique({
-      where: { id: orgId },
+  if (groupId) {
+    currentGroup = await prisma.group.findUnique({
+      where: { id: groupId },
       include,
     });
   } else if (roundId) {
-    currentOrg = await prisma.group.findFirst({
+    currentGroup = await prisma.group.findFirst({
       where: { rounds: { some: { id: roundId } } },
       include: {
         ...(user && {
-          orgMembers: {
+          groupMembers: {
             where: { userId: user.id },
           },
         }),
@@ -161,15 +161,15 @@ export async function getCurrentOrgAndMember({
       },
     });
   } else if (bucketId) {
-    currentOrg = await prisma.group.findFirst({
+    currentGroup = await prisma.group.findFirst({
       where: { rounds: { some: { buckets: { some: { id: bucketId } } } } },
       include,
     });
   }
 
-  const currentOrgMember = currentOrg?.orgMembers?.[0];
-  const roundMember = currentOrgMember?.roundMemberships?.[0];
-  return { currentOrg, currentOrgMember, roundMember };
+  const currentGroupMember = currentGroup?.groupMembers?.[0];
+  const roundMember = currentGroupMember?.roundMemberships?.[0];
+  return { currentGroup, currentGroupMember, roundMember };
 }
 
 /** contributions = donations */

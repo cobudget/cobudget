@@ -24,15 +24,15 @@ function LinkItem(props) {
 
 export default function Selector({
   currentUser,
-  currentOrg,
+  currentGroup,
   round,
   color,
   className,
 }) {
-  const orgIds = currentUser?.orgMemberships?.map(
-    (orgMember) => orgMember.group.id
+  const groupIds = currentUser?.groupMemberships?.map(
+    (groupMember) => groupMember.group.id
   );
-  const activeId = currentOrg ? currentOrg.id : round?.id;
+  const activeId = currentGroup ? currentGroup.id : round?.id;
   return (
     <Menu as="div" className="inline-block">
       <div>
@@ -61,24 +61,24 @@ export default function Selector({
       >
         <Menu.Items className="absolute z-10 left-14 w-64 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="pb-1 mb-1 border-b-default border-gray-200">
-            {currentUser?.orgMemberships?.map((orgMember) => {
+            {currentUser?.groupMemberships?.map((groupMember) => {
               return (
-                <Menu.Item key={orgMember.id}>
+                <Menu.Item key={groupMember.id}>
                   {({ active }) => (
                     <LinkItem
-                      href={`/${orgMember.group.slug}`}
+                      href={`/${groupMember.group.slug}`}
                       active={active}
-                      selected={orgMember.group.id === activeId}
+                      selected={groupMember.group.id === activeId}
                     >
                       <div className="flex items-center space-x-2">
-                        {orgMember.group.logo && (
+                        {groupMember.group.logo && (
                           <img
-                            src={orgMember.group.logo}
+                            src={groupMember.group.logo}
                             className="h-6 w-6 rounded"
                           />
                         )}
                         <p className="truncate">
-                          {orgMember.group.name}
+                          {groupMember.group.name}
                         </p>
                       </div>
                     </LinkItem>
@@ -89,7 +89,7 @@ export default function Selector({
             {currentUser?.roundMemberships
               ?.filter(
                 (collMember) =>
-                  !orgIds.includes(collMember.round.group?.id)
+                  !groupIds.includes(collMember.round.group?.id)
               )
               .map((collMember) => {
                 if (collMember.round.group)

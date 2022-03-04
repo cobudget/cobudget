@@ -7,7 +7,7 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
-const RoundSettings = ({ round, currentOrg, currentUser }) => {
+const RoundSettings = ({ round, currentGroup, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const defaultTabs = [
@@ -21,10 +21,10 @@ const RoundSettings = ({ round, currentOrg, currentUser }) => {
 
   const tabs = useMemo(
     () =>
-      currentOrg?.discourseUrl
+      currentGroup?.discourseUrl
         ? defaultTabs.concat({ name: "Discourse", component: Discourse })
         : defaultTabs,
-    [currentOrg?.discourseUrl]
+    [currentGroup?.discourseUrl]
   );
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -51,7 +51,7 @@ const RoundSettings = ({ round, currentOrg, currentUser }) => {
           <SettingsComponent
             round={round}
             handleClose={handleClose}
-            currentOrg={currentOrg}
+            currentGroup={currentGroup}
             currentUser={currentUser}
           />
         </div>

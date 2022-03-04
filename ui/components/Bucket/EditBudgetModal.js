@@ -49,7 +49,7 @@ const EditBudgetModal = ({
   bucketId,
   budgetItems,
   round,
-  currentOrg,
+  currentGroup,
   currency,
   allowStretchGoals,
   handleClose,
@@ -229,7 +229,7 @@ const EditBudgetModal = ({
             <div className="pl-4">
               {Boolean(round.guidelines.length) && (
                 <a
-                  href={`/${currentOrg?.slug ?? "c"}/${
+                  href={`/${currentGroup?.slug ?? "c"}/${
                     round.slug
                   }/about#guidelines`}
                   target="_blank"

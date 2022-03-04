@@ -42,7 +42,7 @@ const EDIT_ROUND = gql`
 
 export default function GeneralSettings({
   round,
-  currentOrg,
+  currentGroup,
   currentUser,
 }) {
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
@@ -56,9 +56,9 @@ export default function GeneralSettings({
     formState: { isDirty },
   } = useForm();
 
-  const startUrl = `${process.env.DEPLOY_URL}/${currentOrg?.slug ?? "c"}/`;
+  const startUrl = `${process.env.DEPLOY_URL}/${currentGroup?.slug ?? "c"}/`;
   const isAdmin =
-    currentUser.currentOrgMember?.isAdmin ||
+    currentUser.currentGroupMember?.isAdmin ||
     currentUser.currentCollMember?.isAdmin;
   return (
     <div className="px-6">
@@ -76,7 +76,7 @@ export default function GeneralSettings({
             } else {
               toast.success("Settings updated!");
               router.replace(
-                `/${currentOrg?.slug ?? "c"}/${variables.slug}/settings`
+                `/${currentGroup?.slug ?? "c"}/${variables.slug}/settings`
               );
             }
           });
@@ -175,7 +175,7 @@ export default function GeneralSettings({
           handleClose={() => {
             setIsDeleteModalOpened(false);
           }}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
         />
       )}
     </div>

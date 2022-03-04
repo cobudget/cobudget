@@ -1,5 +1,5 @@
 import { useQuery, useMutation, gql } from "urql";
-import GroupsTable from "../../components/Org/GroupsTable";
+import GroupsTable from "../../components/Group/GroupsTable";
 import HappySpinner from "../../components/HappySpinner";
 import Router from "next/router";
 

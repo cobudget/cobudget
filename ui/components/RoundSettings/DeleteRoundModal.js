@@ -15,7 +15,7 @@ const DELETE_ROUND_MUTATION = gql`
   }
 `;
 
-export default ({ round, handleClose, currentOrg }) => {
+export default ({ round, handleClose, currentGroup }) => {
   const [allowDelete, setAllowDelete] = useState(false);
   const [{ fetching: loading }, deleteRound] = useMutation(
     DELETE_ROUND_MUTATION
@@ -28,7 +28,7 @@ export default ({ round, handleClose, currentOrg }) => {
         toast.error(error.message);
       } else {
         handleClose();
-        Router.push(`/${currentOrg?.slug ?? "c"}/`);
+        Router.push(`/${currentGroup?.slug ?? "c"}/`);
         toast.success("Round deleted");
       }
     });

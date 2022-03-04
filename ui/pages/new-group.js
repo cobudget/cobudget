@@ -1,4 +1,4 @@
-import EditGroup from "../components/Org/EditGroup";
+import EditGroup from "../components/Group/EditGroup";
 
 const CreateGroupPage = ({ currentUser }) => {
   if (!currentUser) {

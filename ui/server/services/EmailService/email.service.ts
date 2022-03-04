@@ -14,7 +14,7 @@ import rehypeStringify from "rehype-stringify";
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
-import { orgHasDiscourse } from "server/subscribers/discourse.subscriber";
+import { groupHasDiscourse } from "server/subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketTotalContributions,
@@ -54,7 +54,7 @@ export default {
     email,
     currentUser,
     round,
-    currentOrg,
+    currentGroup,
   }: {
     email: string;
     currentUser: { name: string };
@@ -64,7 +64,7 @@ export default {
       info?: string;
       group: { slug: string };
     };
-    currentOrg?: { slug: string; name: string; info?: string };
+    currentGroup?: { slug: string; name: string; info?: string };
   }) => {
     const invitedUser = await prisma.user.findUnique({
       where: {
@@ -73,24 +73,24 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentOrg?.slug ?? round.group.slug}/${
+      `/${currentGroup?.slug ?? round.group.slug}/${
         round?.slug ?? ""
       }`
     );
 
-    const orgCollName = currentOrg?.name ?? round.title;
+    const groupCollName = currentGroup?.name ?? round.title;
 
-    const mdPurpose = currentOrg?.info ?? round?.info ?? "";
+    const mdPurpose = currentGroup?.info ?? round?.info ?? "";
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
     await sendEmail({
       to: email,
-      subject: `${currentUser.name} invited you to join "${orgCollName}" on Cobudget!`,
+      subject: `${currentUser.name} invited you to join "${groupCollName}" on Cobudget!`,
       html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
-        orgCollName
+        groupCollName
       )} on Cobudget.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
       ${
@@ -186,7 +186,7 @@ export default {
   sendCommentNotification: async ({
     bucket,
     round,
-    currentOrg,
+    currentGroup,
     currentCollMember,
     currentUser,
     comment,
@@ -231,7 +231,7 @@ export default {
         (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
       );
 
-    const bucketLink = appLink(`/${currentOrg.slug}/${round.slug}/${bucket.id}`);
+    const bucketLink = appLink(`/${currentGroup.slug}/${round.slug}/${bucket.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
@@ -295,7 +295,7 @@ export default {
 
     await sendEmails(cocreatorEmails);
 
-    if (!orgHasDiscourse(currentOrg)) {
+    if (!groupHasDiscourse(currentGroup)) {
       const comments = await prisma.comment.findMany({
         where: { bucketId: bucket.id },
         include: {
@@ -365,7 +365,7 @@ export default {
       where: { id: roundId },
       include: { group: true },
     });
-    const org = round.group;
+    const group = round.group;
 
     if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
@@ -377,7 +377,7 @@ export default {
       } in ${escape(round.title)}.
       <br/><br/>
       Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
-        `/${org.slug}/${round.slug}`
+        `/${group.slug}/${round.slug}`
       )}">${escape(round.title)}</a>.
       <br/><br/>
       ${footer}
@@ -442,8 +442,8 @@ export default {
     await sendEmails(emails);
   },
   bucketPublishedNotification: async ({
-    currentOrg,
-    currentOrgMember,
+    currentGroup,
+    currentGroupMember,
     round,
     bucket,
     unpublish,
@@ -474,7 +474,7 @@ export default {
       .map((collMember) => collMember.user)
       .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
 
-    const collLink = appLink(`/${currentOrg.slug}/${round.slug}`);
+    const collLink = appLink(`/${currentGroup.slug}/${round.slug}`);
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,

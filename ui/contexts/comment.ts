@@ -165,7 +165,7 @@ export const useCommentContext = (initialInput) => {
   return {
     bucketId: initialInput.bucketId,
     round: initialInput.round,
-    currentOrg: initialInput.currentOrg,
+    currentGroup: initialInput.currentGroup,
     currentUser: initialInput.currentUser,
     from,
     setFrom,

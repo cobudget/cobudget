@@ -17,21 +17,21 @@ const EDIT_ROUND = gql`
 `;
 
 export const CATEGORIES_QUERY = gql`
-  query Categories($orgId: ID!) {
-    categories(orgId: $orgId) {
+  query Categories($groupId: ID!) {
+    categories(groupId: $groupId) {
       id
       name
     }
   }
 `;
 
-const Discourse = ({ round, currentOrg }) => {
-  if (!currentOrg) return null;
+const Discourse = ({ round, currentGroup }) => {
+  if (!currentGroup) return null;
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
     query: CATEGORIES_QUERY,
-    variables: { orgId: currentOrg.id },
+    variables: { groupId: currentGroup.id },
   });
 
   const {

@@ -21,7 +21,7 @@ function AddComment() {
     addComment,
     bucketId,
     round,
-    currentOrg,
+    currentGroup,
     currentUser,
   } = useContext<any>(Context);
 
@@ -35,8 +35,8 @@ function AddComment() {
   }, [register]);
 
   if (
-    currentOrg?.discourseUrl &&
-    !currentUser.currentOrgMember?.hasDiscourseApiKey
+    currentGroup?.discourseUrl &&
+    !currentUser.currentGroupMember?.hasDiscourseApiKey
   ) {
     return (
       <Link href={"/connect-discourse"} passHref>

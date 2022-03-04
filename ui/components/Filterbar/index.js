@@ -8,7 +8,7 @@ const Filterbar = ({
   textSearchTerm,
   tag,
   round,
-  currentOrg,
+  currentGroup,
   statusFilter,
   bucketStatusCount,
 }) => {
@@ -24,9 +24,9 @@ const Filterbar = ({
     e.preventDefault();
 
     router.push({
-      pathname: "/[org]/[round]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
+        group: currentGroup?.slug ?? "c",
         round: round.slug,
         s: input,
         ...(tag && { tag }),
@@ -38,9 +38,9 @@ const Filterbar = ({
     const tag = e.target.value === "All tags" ? null : e.target.value;
 
     router.push({
-      pathname: "/[org]/[round]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
+        group: currentGroup?.slug ?? "c",
         round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
@@ -50,9 +50,9 @@ const Filterbar = ({
 
   const onChangeStatus = (statusFilterArray) => {
     router.push({
-      pathname: "/[org]/[round]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
+        group: currentGroup?.slug ?? "c",
         round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),

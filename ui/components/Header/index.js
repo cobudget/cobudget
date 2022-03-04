@@ -13,9 +13,9 @@ const css = {
     "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:ring",
 };
 
-const JOIN_ORG_MUTATION = gql`
-  mutation JoinOrg($orgId: ID!) {
-    joinOrg(orgId: $orgId) {
+const JOIN_GROUP_MUTATION = gql`
+  mutation JoinGroup($groupId: ID!) {
+    joinGroup(groupId: $groupId) {
       id
       bio
       isAdmin
@@ -89,10 +89,10 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({ round, currentUser, currentOrg, openModal, router }) => {
+const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
-  const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
+  const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
@@ -103,7 +103,7 @@ const Header = ({ round, currentUser, currentOrg, openModal, router }) => {
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative">
           <GroupAndRoundHeader
-            currentOrg={currentOrg}
+            currentGroup={currentGroup}
             round={round}
             color={color}
             currentUser={currentUser}
@@ -163,7 +163,7 @@ const Header = ({ round, currentUser, currentOrg, openModal, router }) => {
                 {!currentUser.currentCollMember &&
                   round &&
                   (round.registrationPolicy !== "INVITE_ONLY" ||
-                    currentUser.currentOrgMember?.isAdmin) && (
+                    currentUser.currentGroupMember?.isAdmin) && (
                     <NavItem
                       primary
                       roundColor={color}
@@ -190,13 +190,13 @@ const Header = ({ round, currentUser, currentOrg, openModal, router }) => {
                         : "Join round"}
                     </NavItem>
                   )}
-                {!currentUser.currentOrgMember && !round && currentOrg && (
+                {!currentUser.currentGroupMember && !round && currentGroup && (
                   <NavItem
                     primary
                     roundColor={color}
-                    onClick={() => joinOrg({ orgId: currentOrg.id })}
+                    onClick={() => joinGroup({ groupId: currentGroup.id })}
                   >
-                    Join org
+                    Join group
                   </NavItem>
                 )}
 

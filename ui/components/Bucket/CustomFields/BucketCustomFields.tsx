@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import BucketCustomField from "./BucketCustomField";
 
 const CUSTOM_FIELDS_QUERY = gql`
-  query CustomFields($orgSlug: String!, $roundSlug: String!) {
-    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
+  query CustomFields($groupSlug: String!, $roundSlug: String!) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
       customFields {
         id
@@ -30,7 +30,7 @@ const BucketCustomFields = ({
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      groupSlug: router.query.group,
       roundSlug: router.query.round,
     },
   });

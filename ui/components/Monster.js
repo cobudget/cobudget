@@ -109,7 +109,7 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = ({ guidelines, raiseFlag, currentOrg, bucketId }) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, currentGroup, bucketId }) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -163,7 +163,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   },
 ];
 
-const Monster = ({ round, bucket, currentOrg }) => {
+const Monster = ({ round, bucket, currentGroup }) => {
   const [open, setOpen] = useState(false);
   const isAngry = bucket.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
@@ -215,7 +215,7 @@ const Monster = ({ round, bucket, currentOrg }) => {
                     .includes(guideline.id)
               ),
               raiseFlag,
-              currentOrg,
+              currentGroup,
               bucketId: bucket.id,
             }),
           },

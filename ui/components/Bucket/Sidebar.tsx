@@ -134,7 +134,7 @@ const BucketSidebar = ({
   round,
   currentUser,
   canEdit,
-  currentOrg,
+  currentGroup,
   showBucketReview,
 }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
@@ -200,7 +200,7 @@ const BucketSidebar = ({
                 <Monster
                   round={round}
                   bucket={bucket}
-                  currentOrg={currentOrg}
+                  currentGroup={currentGroup}
                 />
               ) : null}
               {contributeModalOpen && (
@@ -349,8 +349,8 @@ const BucketSidebar = ({
                         } else {
                           setActionsDropdownOpen(false);
                           Router.push(
-                            "/[org]/[round]",
-                            `/${currentOrg?.slug ?? "c"}/${round.slug}`
+                            "/[group]/[round]",
+                            `/${currentGroup?.slug ?? "c"}/${round.slug}`
                           );
                           toast.success("Bucket deleted");
                         }
@@ -416,7 +416,7 @@ const BucketSidebar = ({
           />
         </div>
         <Tags
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
           bucket={bucket}
           round={round}
           canEdit={canEdit}

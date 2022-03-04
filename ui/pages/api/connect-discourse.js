@@ -23,25 +23,25 @@ export default async function (req, res) {
   // const { sub: userId } = jwt.decode(accessToken);
 
   // const db = await getConnection(process.env.MONGO_URL);
-  // const { OrgMember, Group } = getModels(db);
+  // const { GroupMember, Group } = getModels(db);
 
   const { subdomain, host } = getHostInfo(req);
 
   console.log({ DEPLOY_URL: process.env.DEPLOY_URL, host });
 
-  let currentOrg;
+  let currentGroup;
 
   // if (host.includes(process.env.DEPLOY_URL)) {
-  //   currentOrg = await Group.findOne({ subdomain });
+  //   currentGroup = await Group.findOne({ subdomain });
   // } else {
-  //   currentOrg = await Group.findOne({ customDomain: host });
+  //   currentGroup = await Group.findOne({ customDomain: host });
   // }
 
-  if (!currentOrg.discourse) throw new Error("Missing discourse config");
+  if (!currentGroup.discourse) throw new Error("Missing discourse config");
 
   // get discourse username
   const discourseUserResponse = await fetch(
-    `${currentOrg.discourse.url}/session/current.json`,
+    `${currentGroup.discourse.url}/session/current.json`,
     {
       headers: {
         "User-Api-Key": discourseApiKey,
@@ -55,8 +55,8 @@ export default async function (req, res) {
   } = await discourseUserResponse.json();
 
   // save discourse user api key and username in database
-  await OrgMember.update(
-    { userId, groupId: currentOrg.id },
+  await GroupMember.update(
+    { userId, groupId: currentGroup.id },
     { discourseApiKey, discourseUsername: username }
   );
 

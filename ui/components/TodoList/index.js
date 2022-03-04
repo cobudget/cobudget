@@ -7,22 +7,22 @@ import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
-  query TodoInfo($orgId: ID!) {
-    orgMembersPage(limit: 2, orgId: $orgId) {
-      orgMembers {
+  query TodoInfo($groupId: ID!) {
+    groupMembersPage(limit: 2, groupId: $groupId) {
+      groupMembers {
         id
       }
     }
 
-    rounds(limit: 1, orgId: $orgId) {
+    rounds(limit: 1, groupId: $groupId) {
       id
     }
   }
 `;
 
 const SET_TODOS_FINISHED = gql`
-  mutation SetTodosFinished($orgId: ID!) {
-    setTodosFinished(orgId: $orgId) {
+  mutation SetTodosFinished($groupId: ID!) {
+    setTodosFinished(groupId: $groupId) {
       id
       finishedTodos
     }
@@ -59,10 +59,10 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
   );
 });
 
-const TodoList = ({ currentOrg }) => {
+const TodoList = ({ currentGroup }) => {
   const [{ data, fetching: loading, error }] = useQuery({
     query: GET_TODO_INFO,
-    variables: { orgId: currentOrg.id },
+    variables: { groupId: currentGroup.id },
   });
   const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
     SET_TODOS_FINISHED
@@ -72,26 +72,26 @@ const TodoList = ({ currentOrg }) => {
   const rawTodos = [
     {
       title: "Create community",
-      desc: `This is your own home on the Cobudget platform, now available under ${process.env.DEPLOY_URL}/${currentOrg.slug}`,
+      desc: `This is your own home on the Cobudget platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
       link: null,
     },
     {
       title: "Invite members",
       desc: "Invite your community members by email",
-      link: `/${currentOrg.slug}/members`,
+      link: `/${currentGroup.slug}/members`,
     },
     {
       title: "Create first round",
       desc: "A round is a page for gathering ideas from the community",
-      link: `/${currentOrg.slug}/new-round`,
+      link: `/${currentGroup.slug}/new-round`,
     },
   ];
 
   useEffect(() => {
-    if (allDone && currentOrg) {
-      setTodosFinished({ orgId: currentOrg.id });
+    if (allDone && currentGroup) {
+      setTodosFinished({ groupId: currentGroup.id });
     }
-  }, [allDone, setTodosFinished, currentOrg]);
+  }, [allDone, setTodosFinished, currentGroup]);
 
   if (error) {
     console.error("Couldn't check todo status", error);
@@ -105,7 +105,7 @@ const TodoList = ({ currentOrg }) => {
     if (index === 0) {
       done = true;
     } else if (index === 1) {
-      done = data?.orgMembers?.length > 1;
+      done = data?.groupMembers?.length > 1;
     } else if (index === 2) {
       done = data?.rounds.length > 0;
     }
@@ -144,7 +144,7 @@ const TodoList = ({ currentOrg }) => {
         <NavItem
           onClick={() =>
             window.confirm("Are you sure you want skip this introduction?") &&
-            setTodosFinished({ orgId: currentOrg.id })
+            setTodosFinished({ groupId: currentGroup.id })
           }
           className="text-xs opacity-70 ml-auto"
         >

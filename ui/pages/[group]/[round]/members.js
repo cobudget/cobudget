@@ -9,7 +9,7 @@ const RoundMembersPage = ({ round, currentUser }) => {
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
       {currentUser?.currentCollMember?.isApproved ||
-      currentUser?.currentOrgMember?.isAdmin ? (
+      currentUser?.currentGroupMember?.isAdmin ? (
         <Members round={round} currentUser={currentUser} />
       ) : (
         <PageHero>

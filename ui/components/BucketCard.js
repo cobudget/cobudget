@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 
-const BucketCard = ({ bucket, round, currentOrg }) => {
+const BucketCard = ({ bucket, round, currentGroup }) => {
   const showFundingStats =
     (bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
   return (

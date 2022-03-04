@@ -19,7 +19,7 @@ model User {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   image           String?
-  orgMemberships  OrgMember[]
+  groupMemberships  GroupMember[]
   collMemberships RoundMember[]
   emailSettings   EmailSettings?
 }
@@ -37,7 +37,7 @@ model EmailSettings {
   userId                         String  @unique
 }
 
-model OrgMember {
+model GroupMember {
   id                String       @id @default(cuid())
   group      Group @relation(fields: [groupId], references: [id])
   groupId    String
@@ -94,7 +94,7 @@ model Group {
   info         String?
   logo         String?
   customDomain String?
-  orgMembers   OrgMember[]
+  groupMembers   GroupMember[]
   rounds  Round[]
   discourse    DiscourseConfig?
 

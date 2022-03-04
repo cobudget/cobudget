@@ -50,7 +50,7 @@ export const TRANSACTIONS_QUERY = gql`
   }
 `;
 
-const Transactions = ({ round, currentOrg }) => {
+const Transactions = ({ round, currentGroup }) => {
   const [
     {
       data: { roundTransactions: { moreExist, transactions } } = {
@@ -87,7 +87,7 @@ const Transactions = ({ round, currentOrg }) => {
                     @{c.roundMember.user.username} funded{" "}
                     {thousandSeparator(c.amount / 100)} {round.currency} to{" "}
                     <Link
-                      href={`/${currentOrg?.slug ?? "c"}/${round.slug}/${
+                      href={`/${currentGroup?.slug ?? "c"}/${round.slug}/${
                         c.bucket?.id
                       }`}
                     >

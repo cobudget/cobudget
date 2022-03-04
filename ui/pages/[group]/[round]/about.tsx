@@ -9,7 +9,7 @@ export default function AboutPage({
   router,
   round,
   currentUser,
-  currentOrg,
+  currentGroup,
 }) {
   if (!round) return null;
   return (
@@ -23,7 +23,7 @@ export default function AboutPage({
               label="Add about text"
               placeholder={`# About ${round.title}`}
               canEdit={
-                currentUser?.currentOrgMember?.isAdmin ||
+                currentUser?.currentGroupMember?.isAdmin ||
                 currentUser?.currentCollMember?.isAdmin
               }
               name="about"
@@ -45,7 +45,7 @@ export default function AboutPage({
         </div>
       </PageHero>
       <div className="page">
-        <About router={router} currentOrg={currentOrg} />
+        <About router={router} currentGroup={currentGroup} />
       </div>
     </>
   );

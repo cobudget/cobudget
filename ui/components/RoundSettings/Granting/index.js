@@ -75,7 +75,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const RoundSettingsModalGranting = ({ round, currentOrg }) => {
+const RoundSettingsModalGranting = ({ round, currentGroup }) => {
   const [open, setOpen] = React.useState(null);
 
   const handleOpen = (modal) => {
@@ -106,7 +106,7 @@ const RoundSettingsModalGranting = ({ round, currentOrg }) => {
             <ModalContent
               round={round}
               closeModal={handleClose}
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
             />
           )}
         </div>

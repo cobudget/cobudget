@@ -17,7 +17,7 @@ const CREATE_BUCKET = gql`
   }
 `;
 
-const NewBucketModal = ({ round, handleClose, currentOrg }) => {
+const NewBucketModal = ({ round, handleClose, currentGroup }) => {
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
   const { handleSubmit, register, errors } = useForm();
@@ -26,8 +26,8 @@ const NewBucketModal = ({ round, handleClose, currentOrg }) => {
     createBucket({ ...variables, roundId: round.id })
       .then(({ data }) => {
         Router.push(
-          "/[org]/[round]/[bucket]",
-          `/${currentOrg?.slug ?? "c"}/${round.slug}/${
+          "/[Group]/[round]/[bucket]",
+          `/${currentGroup?.slug ?? "c"}/${round.slug}/${
             data.createBucket.id
           }`
         );

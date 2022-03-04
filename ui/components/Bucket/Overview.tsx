@@ -8,7 +8,7 @@ import Summary from "./Summary";
 export default function Overview({
   round,
   currentUser,
-  currentOrg,
+  currentGroup,
   fetching,
   error,
   bucket,
@@ -85,7 +85,7 @@ export default function Overview({
                 round={round}
                 currentUser={currentUser}
                 canEdit={canEdit}
-                currentOrg={currentOrg}
+                currentGroup={currentGroup}
                 showBucketReview={showBucketReview}
               />
             </div>

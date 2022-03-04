@@ -22,12 +22,12 @@ const CREATE_GROUP = gql`
 
 const EDIT_GROUP = gql`
   mutation EditGroup(
-    $orgId: ID!
+    $groupId: ID!
     $name: String!
     $logo: String
     $slug: String!
   ) {
-    editGroup(orgId: $orgId, name: $name, logo: $logo, slug: $slug) {
+    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug) {
       id
       name
       logo
@@ -72,7 +72,7 @@ const EditGroup = ({ group, currentUser }) => {
         editGroup({
           ...variables,
           logo: logoImage,
-          orgId: group.id,
+          groupId: group.id,
         }).then(({ error }) => {
           if (error) {
             toast.error(error.message.replace("[GraphQL]", ""));
@@ -147,7 +147,7 @@ const EditGroup = ({ group, currentUser }) => {
                 </Tooltip>
               </div>
             )}
-            placeholder="orgdomain.com"
+            placeholder="groupdomain.com"
             inputRef={register}
             className="mb-4"
             defaultValue={group?.customDomain}

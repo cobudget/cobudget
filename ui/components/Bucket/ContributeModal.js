@@ -57,12 +57,12 @@ const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
     //     variables: { slug: round.slug },
     //     data: {
     //       ...topLevelQueryData,
-    //       currentOrgMember: {
-    //         ...topLevelQueryData.currentOrgMember,
+    //       currentGroupMember: {
+    //         ...topLevelQueryData.currentGroupMember,
     //         currentRoundMembership: {
-    //           ...topLevelQueryData.currentOrgMember.currentRoundMembership,
+    //           ...topLevelQueryData.currentGroupMember.currentRoundMembership,
     //           balance:
-    //             topLevelQueryData.currentOrgMember.currentRoundMembership
+    //             topLevelQueryData.currentGroupMember.currentRoundMembership
     //               .balance - amount,
     //         },
     //       },

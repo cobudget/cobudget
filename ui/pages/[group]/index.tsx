@@ -9,8 +9,8 @@ import PageHero from "../../components/PageHero";
 import EditableField from "components/EditableField";
 import Router from "next/router";
 export const ROUNDS_QUERY = gql`
-  query Rounds($orgId: ID!) {
-    rounds(orgId: $orgId) {
+  query Rounds($groupId: ID!) {
+    rounds(groupId: $groupId) {
       id
       slug
       title
@@ -43,20 +43,20 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
-const IndexPage = ({ router, currentOrg, currentUser }) => {
+const IndexPage = ({ router, currentGroup, currentUser }) => {
   useEffect(() => {
-    if (router.query.org == "c") router.replace("/");
+    if (router.query.group == "c") router.replace("/");
   }, []);
 
   const [{ data, error }] = useQuery({
     query: ROUNDS_QUERY,
-    variables: { orgId: currentOrg?.id },
+    variables: { groupId: currentGroup?.id },
   });
-  if (!currentOrg) return null;
+  if (!currentGroup) return null;
 
   const rounds = data?.rounds ?? [];
   const showTodos =
-    currentUser?.currentOrgMember?.isAdmin && !currentOrg.finishedTodos;
+    currentUser?.currentGroupMember?.isAdmin && !currentGroup.finishedTodos;
 
   return (
     <>
@@ -65,28 +65,28 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              defaultValue={currentOrg?.info}
+              defaultValue={currentGroup?.info}
               name="info"
               label="Add message"
-              placeholder={`# Welcome to ${currentOrg?.name}'s page`}
-              canEdit={currentUser?.currentOrgMember?.isAdmin}
+              placeholder={`# Welcome to ${currentGroup?.name}'s page`}
+              canEdit={currentUser?.currentGroupMember?.isAdmin}
               className="h-10"
               MUTATION={gql`
-                mutation EditOrgInfo($orgId: ID!, $info: String) {
-                  editGroup(orgId: $orgId, info: $info) {
+                mutation EditGroupInfo($groupId: ID!, $info: String) {
+                  editGroup(groupId: $groupId, info: $info) {
                     id
                     info
                   }
                 }
               `}
-              variables={{ orgId: currentOrg?.id }}
+              variables={{ groupId: currentGroup?.id }}
               maxLength={500}
               required
             />
           </div>
           <div>
-            {currentUser?.currentOrgMember?.isAdmin && (
-              <Link href={`/${currentOrg.slug}/new-round`}>
+            {currentUser?.currentGroupMember?.isAdmin && (
+              <Link href={`/${currentGroup.slug}/new-round`}>
                 <Button size="large" color="anthracit" className="float-right">
                   New round
                 </Button>
@@ -124,7 +124,7 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
         </div>
         {showTodos && (
           <div className="col-span-2">
-            <TodoList currentOrg={currentOrg} />
+            <TodoList currentGroup={currentGroup} />
           </div>
         )}
       </div>

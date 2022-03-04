@@ -7,9 +7,9 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import Banner from "components/Banner";
 
-const INVITE_ORG_MEMBERS_MUTATION = gql`
-  mutation InviteOrgMembers($orgId: ID!, $emails: String!) {
-    inviteOrgMembers(orgId: $orgId, emails: $emails) {
+const INVITE_GROUP_MEMBERS_MUTATION = gql`
+  mutation InviteGroupMembers($groupId: ID!, $emails: String!) {
+    inviteGroupMembers(groupId: $groupId, emails: $emails) {
       id
       isAdmin
       bio
@@ -51,17 +51,17 @@ export const INVITE_ROUND_MEMBERS_MUTATION = gql`
 const InviteMembersModal = ({
   handleClose,
   roundId,
-  currentOrg,
+  currentGroup,
 }: {
   handleClose: () => void;
   roundId?: string;
-  currentOrg?: any;
+  currentGroup?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId
       ? INVITE_ROUND_MEMBERS_MUTATION
-      : INVITE_ORG_MEMBERS_MUTATION
+      : INVITE_GROUP_MEMBERS_MUTATION
   );
 
   return (
@@ -103,7 +103,7 @@ const InviteMembersModal = ({
             onSubmit={handleSubmit((variables) => {
               inviteMembers({
                 ...variables,
-                ...(roundId ? { roundId } : { orgId: currentOrg.id }),
+                ...(roundId ? { roundId } : { groupId: currentGroup.id }),
               })
                 .then(() => {
                   reset();

@@ -99,7 +99,7 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ round, currentUser, currentOrg, router }) => {
+const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
@@ -128,7 +128,7 @@ const BucketIndex = ({ round, currentUser, currentOrg, router }) => {
         fetching={fetching}
         error={error}
         currentUser={currentUser}
-        currentOrg={currentOrg}
+        currentGroup={currentGroup}
         round={round}
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
@@ -182,7 +182,7 @@ const BucketIndex = ({ round, currentUser, currentOrg, router }) => {
               bucket={bucket}
               round={round}
               currentUser={currentUser}
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
               openImageModal={() => setEditImagesModalOpen(true)}
             />
           </Tab.Panel>
@@ -192,7 +192,7 @@ const BucketIndex = ({ round, currentUser, currentOrg, router }) => {
               router={router}
               round={round}
               currentUser={currentUser}
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
             />
           </Tab.Panel>
           <Tab.Panel>

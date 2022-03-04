@@ -18,11 +18,11 @@ import ReactDOM from "react-dom";
 import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
-export const ORG_MEMBERS_QUERY = gql`
-  query OrgMembers($orgId: ID!, $offset: Int, $limit: Int) {
-    orgMembersPage(orgId: $orgId, offset: $offset, limit: $limit) {
+export const GROUP_MEMBERS_QUERY = gql`
+  query GroupMembers($groupId: ID!, $offset: Int, $limit: Int) {
+    groupMembersPage(groupId: $groupId, offset: $offset, limit: $limit) {
       moreExist
-      orgMembers {
+      groupMembers {
         id
         isAdmin
         bio
@@ -42,9 +42,9 @@ export const ORG_MEMBERS_QUERY = gql`
 `;
 
 const ActionsDropdown = ({
-  updateOrgMember,
+  updateGroupMember,
   //deleteMember,
-  currentOrg,
+  currentGroup,
   member,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -75,8 +75,8 @@ const ActionsDropdown = ({
       >
         <MenuItem
           onClick={() => {
-            updateOrgMember({
-              orgId: currentOrg.id,
+            updateGroupMember({
+              groupId: currentGroup.id,
               memberId: member.id,
               isAdmin: !member.isAdmin,
             }).then(() => {
@@ -86,14 +86,14 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        {/* how to also remove the user's round memberships when their org
+        {/* how to also remove the user's round memberships when their group
             membership is removed?
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete org membership from user with email ${member.user.email}?`
+                `Are you sure you would like to delete group membership from user with email ${member.user.email}?`
               )
             )
               deleteMember({
@@ -126,20 +126,20 @@ const Page = ({
   isLastPage,
   onLoadMore,
   deleteMember,
-  updateOrgMember,
-  currentOrg,
+  updateGroupMember,
+  currentGroup,
 }) => {
   const [{ data, fetching, error }] = useQuery({
-    query: ORG_MEMBERS_QUERY,
+    query: GROUP_MEMBERS_QUERY,
     variables: {
-      orgId: currentOrg.id,
+      groupId: currentGroup.id,
       offset: variables.offset,
       limit: variables.limit,
     },
   });
 
-  const moreExist = data?.orgMembersPage?.moreExist;
-  const orgMembers = data?.orgMembersPage?.orgMembers ?? [];
+  const moreExist = data?.groupMembersPage?.moreExist;
+  const groupMembers = data?.groupMembersPage?.groupMembers ?? [];
 
   if (error) {
     console.error(error);
@@ -148,7 +148,7 @@ const Page = ({
 
   return (
     <>
-      {orgMembers.map((member) => (
+      {groupMembers.map((member) => (
         <TableRow key={member.id}>
           <TableCell component="th" scope="row">
             {member.user.username}
@@ -176,8 +176,8 @@ const Page = ({
             <ActionsDropdown
               member={member}
               deleteMember={deleteMember}
-              updateOrgMember={updateOrgMember}
-              currentOrg={currentOrg}
+              updateGroupMember={updateGroupMember}
+              currentGroup={currentGroup}
             />
           </TableCell>
         </TableRow>
@@ -191,7 +191,7 @@ const Page = ({
             onClick={() =>
               onLoadMore({
                 limit: variables.limit,
-                offset: variables.offset + orgMembers.length,
+                offset: variables.offset + groupMembers.length,
               })
             }
           />
@@ -201,7 +201,7 @@ const Page = ({
   );
 };
 
-const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
+const GroupMembersTable = ({ updateGroupMember, deleteMember, currentGroup }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
   ]);
@@ -232,8 +232,8 @@ const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
                       setPageVariables([...pageVariables, { limit, offset }]);
                     }}
                     deleteMember={deleteMember}
-                    updateOrgMember={updateOrgMember}
-                    currentOrg={currentOrg}
+                    updateGroupMember={updateGroupMember}
+                    currentGroup={currentGroup}
                   />
                 );
               })}
@@ -246,4 +246,4 @@ const OrgMembersTable = ({ updateOrgMember, deleteMember, currentOrg }) => {
   );
 };
 
-export default OrgMembersTable;
+export default GroupMembersTable;

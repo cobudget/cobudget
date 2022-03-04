@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useQuery, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
-import EditGroup from "components/Org/EditGroup";
+import EditGroup from "components/Group/EditGroup";
 
 export const GROUP_QUERY = gql`
   query Group($id: ID!) {

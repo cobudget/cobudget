@@ -7,8 +7,8 @@ import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 
 export const ROUND_QUERY = gql`
-  query RoundQuery($orgSlug: String!, $roundSlug: String!) {
-    round(orgSlug: $orgSlug, roundSlug: $roundSlug) {
+  query RoundQuery($groupSlug: String!, $roundSlug: String!) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
       about
       guidelines {
@@ -33,11 +33,11 @@ export const ROUND_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ router, currentOrg }) {
+export default function AboutPage({ router, currentGroup }) {
   const [{ data: { round } = {}, fetching: loading, error }] = useQuery({
     query: ROUND_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      groupSlug: router.query.group,
       roundSlug: router.query.round,
     },
   });

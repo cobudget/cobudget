@@ -23,7 +23,7 @@ const defaults = {
   introspectionQueryResultData,
 }); */
 
-async function makeContext(orgSlug) {
+async function makeContext(groupSlug) {
   // const token = window.sessionStorage.getItem("accessToken");
 
   const response = await fetch("/api/getToken", {
@@ -39,7 +39,7 @@ async function makeContext(orgSlug) {
     : {};
 
   return {
-    orgSlug,
+    groupSlug,
     ...authObj,
   };
 }
@@ -47,18 +47,18 @@ async function makeContext(orgSlug) {
 function createRealitiesApollo() {
   if (typeof window === "undefined") return null;
 
-  const { subdomain: orgSlug } = getHostInfo();
+  const { subdomain: groupSlug } = getHostInfo();
 
   const cache = new InMemoryCache({
-    // remember to fetch nodeId/orgId even if we don't use it, because of
+    // remember to fetch nodeId/groupId even if we don't use it, because of
     // https://stackoverflow.com/questions/48840223/apollo-duplicates-first-result-to-every-node-in-array-of-edges
     dataIdFromObject: (object) =>
-      `${object.__typename}:${object.nodeId}:${object.orgId}`,
+      `${object.__typename}:${object.nodeId}:${object.groupId}`,
     // fragmentMatcher,
   });
 
   const authMiddleware = setContext(async () => ({
-    headers: await makeContext(orgSlug),
+    headers: await makeContext(groupSlug),
   }));
 
   const httpLink = new HttpLink({
@@ -70,7 +70,7 @@ function createRealitiesApollo() {
     options: {
       reconnect: true,
       // TODO: i don't think this gets a new token when the token's refreshed
-      connectionParams: makeContext(orgSlug),
+      connectionParams: makeContext(groupSlug),
     },
   });
 

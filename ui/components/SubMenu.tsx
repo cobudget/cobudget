@@ -1,50 +1,50 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
 
-const bucketItems = ({ orgSlug, roundSlug, bucketId, bucket }) => {
+const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }) => {
   return [
-    { label: "Bucket", href: `/${orgSlug}/${roundSlug}/${bucketId}` },
+    { label: "Bucket", href: `/${groupSlug}/${roundSlug}/${bucketId}` },
     {
       label: `Comments (${bucket.noOfComments})`,
-      href: `/${orgSlug}/${roundSlug}/${bucketId}/comments`,
+      href: `/${groupSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
       label: `Funders (${bucket.noOfFunders})`,
-      href: `/${orgSlug}/${roundSlug}/${bucketId}/funders`,
+      href: `/${groupSlug}/${roundSlug}/${bucketId}/funders`,
     },
   ];
 };
 
-const orgItems = ({ currentUser, orgSlug }) => {
+const groupItems = ({ currentUser, groupSlug }) => {
   return [
-    { label: "Overview", href: `/${orgSlug}` },
+    { label: "Overview", href: `/${groupSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${orgSlug}/members`, admin: true },
-    { label: "Settings", href: `/${orgSlug}/settings`, admin: true },
-  ].filter((i) => (i.admin ? currentUser?.currentOrgMember?.isAdmin : true));
+    { label: "Members", href: `/${groupSlug}/members`, admin: true },
+    { label: "Settings", href: `/${groupSlug}/settings`, admin: true },
+  ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
 
-export const roundItems = ({ currentUser, orgSlug, roundSlug }) => {
+export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
   const isAdmin =
-    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentGroupMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { label: "Overview", href: `/${orgSlug}/${roundSlug}` },
-    { label: "About", href: `/${orgSlug}/${roundSlug}/about` },
+    { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
+    { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
     {
       label: "Members",
-      href: `/${orgSlug}/${roundSlug}/members`,
+      href: `/${groupSlug}/${roundSlug}/members`,
       member: true,
     },
     {
       label: "Transactions",
-      href: `/${orgSlug}/${roundSlug}/transactions`,
+      href: `/${groupSlug}/${roundSlug}/transactions`,
       admin: true,
     },
     {
       label: "Settings",
-      href: `/${orgSlug}/${roundSlug}/settings`,
+      href: `/${groupSlug}/${roundSlug}/settings`,
       admin: true,
     },
   ].filter((i) => (i.admin ? isAdmin : true));
@@ -64,7 +64,7 @@ export default function SubMenu({
   const items = bucket
     ? bucketItems({
         roundSlug: router.query.round,
-        orgSlug: router.query.org,
+        groupSlug: router.query.group,
         bucketId: router.query.bucket,
         bucket,
       })
@@ -72,9 +72,9 @@ export default function SubMenu({
     ? roundItems({
         currentUser,
         roundSlug: router.query.round,
-        orgSlug: router.query.org,
+        groupSlug: router.query.group,
       })
-    : orgItems({ currentUser, orgSlug: router.query.org });
+    : groupItems({ currentUser, groupSlug: router.query.group });
 
   const color = round?.color ?? "anthracit";
 

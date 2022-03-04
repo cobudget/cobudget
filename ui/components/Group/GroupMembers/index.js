@@ -4,18 +4,18 @@ import { useQuery, useMutation, gql } from "urql";
 import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
 
-import OrgMembersTable from "./OrgMembersTable";
+import GroupMembersTable from "./GroupMembersTable";
 
-const UPDATE_ORG_MEMBER = gql`
-  mutation UpdateOrgMember($orgId: ID!, $memberId: ID!, $isAdmin: Boolean) {
-    updateOrgMember(orgId: $orgId, memberId: $memberId, isAdmin: $isAdmin) {
+const UPDATE_GROUP_MEMBER = gql`
+  mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
+    updateGroupMember(groupId: $groupId, memberId: $memberId, isAdmin: $isAdmin) {
       id
       isAdmin
     }
   }
 `;
 
-// // TODO: change to deleting org members, not round members
+// // TODO: change to deleting group members, not round members
 // const DELETE_MEMBER = gql`
 //   mutation UpdateMember($memberId: ID!, $roundId: ID!) {
 //     deleteMember(memberId: $memberId, roundId: $roundId) {
@@ -24,8 +24,8 @@ const UPDATE_ORG_MEMBER = gql`
 //   }
 // `;
 
-const OrgMembers = ({ currentOrg }) => {
-  const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
+const GroupMembers = ({ currentGroup }) => {
+  const [, updateGroupMember] = useMutation(UPDATE_GROUP_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   // const [deleteMember] = useMutation(DELETE_MEMBER, {
   //   variables: { roundId: round.id },
@@ -55,19 +55,19 @@ const OrgMembers = ({ currentOrg }) => {
           </Button>
           {inviteModalOpen && (
             <InviteMembersModal
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
               handleClose={() => setInviteModalOpen(false)}
             />
           )}
         </div>
       </div>
 
-      <OrgMembersTable
-        updateOrgMember={updateOrgMember}
-        currentOrg={currentOrg}
+      <GroupMembersTable
+        updateGroupMember={updateGroupMember}
+        currentGroup={currentGroup}
       />
     </div>
   );
 };
 
-export default OrgMembers;
+export default GroupMembers;

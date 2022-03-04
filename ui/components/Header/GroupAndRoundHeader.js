@@ -13,8 +13,8 @@ const BUCKET_QUERY = gql`
   }
 `;
 
-const OrganizationAndEventHeader = ({
-  currentOrg,
+const GroupanizationAndEventHeader = ({
+  currentGroup,
   round,
   currentUser,
   router,
@@ -33,30 +33,30 @@ const OrganizationAndEventHeader = ({
       <Link href="/">
         <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
           <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-          {!currentUser && !currentOrg && !round && <h1>Cobudget</h1>}
+          {!currentUser && !currentGroup && !round && <h1>Cobudget</h1>}
         </a>
       </Link>
 
-      {(currentOrg || round || currentUser) && (
+      {(currentGroup || round || currentUser) && (
         <>
           <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
 
-          {currentOrg ? (
-            <Link href={`/${currentOrg.slug}`}>
+          {currentGroup ? (
+            <Link href={`/${currentGroup.slug}`}>
               <a
                 className={
                   "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
                 }
                 style={{ flex: "1 1 25%" }}
               >
-                {currentOrg.logo && (
+                {currentGroup.logo && (
                   <img
                     className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
-                    src={currentOrg?.logo}
+                    src={currentGroup?.logo}
                   />
                 )}
                 <span className={`text-white font-medium truncate`}>
-                  {currentOrg.name}
+                  {currentGroup.name}
                 </span>
               </a>
             </Link>
@@ -75,7 +75,7 @@ const OrganizationAndEventHeader = ({
           {currentUser && (
             <Selector
               currentUser={currentUser}
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
               round={round}
               color={color}
               className="max-w-none"
@@ -84,11 +84,11 @@ const OrganizationAndEventHeader = ({
         </>
       )}
 
-      {currentOrg && round && (
+      {currentGroup && round && (
         <>
           <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
 
-          <Link href={`/${currentOrg?.slug ?? "c"}/${round.slug}`}>
+          <Link href={`/${currentGroup?.slug ?? "c"}/${round.slug}`}>
             <a
               className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
               style={{ flex: "1 1 25%" }}
@@ -121,4 +121,4 @@ const OrganizationAndEventHeader = ({
   );
 };
 
-export default OrganizationAndEventHeader;
+export default GroupanizationAndEventHeader;

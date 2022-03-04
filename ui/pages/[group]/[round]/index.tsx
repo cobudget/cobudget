@@ -12,8 +12,8 @@ import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
 
 export const BUCKET_STATUS_QUERY = gql`
-  query BucketStatus($roundSlug: String!, $orgSlug: String) {
-    round(roundSlug: $roundSlug, orgSlug: $orgSlug) {
+  query BucketStatus($roundSlug: String!, $groupSlug: String) {
+    round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       bucketStatusCount {
         PENDING_APPROVAL
@@ -87,7 +87,7 @@ const Page = ({
   onLoadMore,
   router,
   round,
-  org,
+  group,
   statusFilter,
 }) => {
   const { tag, s } = router.query;
@@ -115,14 +115,14 @@ const Page = ({
     <>
       {buckets.map((bucket) => (
         <Link
-          href={`/${org?.slug ?? "c"}/${round.slug}/${bucket.id}`}
+          href={`/${group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
             <BucketCard
               bucket={bucket}
               round={round}
-              currentOrg={org}
+              currentGroup={group}
             />
           </a>
         </Link>
@@ -176,7 +176,7 @@ const getStandardFilter = (bucketStatusCount) => {
   return stdFilter;
 };
 
-const RoundPage = ({ round, router, currentOrg, currentUser }) => {
+const RoundPage = ({ round, router, currentGroup, currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
@@ -185,7 +185,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
     query: BUCKET_STATUS_QUERY,
     variables: {
       roundSlug: round?.slug,
-      orgSlug: currentOrg?.slug ?? "c",
+      groupSlug: currentGroup?.slug ?? "c",
     },
   });
 
@@ -210,7 +210,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
 
   if (!round) return null;
   const canEdit =
-    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentGroupMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
   return (
     <div>
@@ -265,7 +265,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
                     <NewBucketModal
                       round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
-                      currentOrg={currentOrg}
+                      currentGroup={currentGroup}
                     />
                   )}
                 </>
@@ -277,7 +277,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
       <div className="page flex-1">
         <Filterbar
           round={round}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
           textSearchTerm={s}
           tag={tag}
           statusFilter={statusFilter}
@@ -287,7 +287,7 @@ const RoundPage = ({ round, router, currentOrg, currentUser }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
-                org={currentOrg}
+                group={currentGroup}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}

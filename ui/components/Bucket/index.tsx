@@ -9,7 +9,7 @@ const Bucket = ({
   bucket,
   round,
   currentUser,
-  currentOrg,
+  currentGroup,
   openImageModal,
 }) => {
   if (!bucket) return null;
@@ -55,7 +55,7 @@ const Bucket = ({
               currency={round.currency}
               allowStretchGoals={round.allowStretchGoals}
               round={round}
-              currentOrg={currentOrg}
+              currentGroup={currentGroup}
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />

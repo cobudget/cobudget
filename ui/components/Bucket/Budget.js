@@ -11,7 +11,7 @@ const BucketBudget = ({
   bucketId,
   canEdit,
   round,
-  currentOrg,
+  currentGroup,
   currency,
   allowStretchGoals,
   minGoal,
@@ -43,7 +43,7 @@ const BucketBudget = ({
           handleClose={() => setEditing(false)}
           open={editing}
           round={round}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
         />
       )}
 

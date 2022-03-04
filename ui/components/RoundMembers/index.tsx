@@ -157,7 +157,7 @@ const RoundMembers = ({ round, currentUser }) => {
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const isAdmin =
-    currentUser?.currentOrgMember?.isAdmin ||
+    currentUser?.currentGroupMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
 
   if (error) {

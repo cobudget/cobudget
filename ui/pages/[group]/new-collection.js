@@ -13,14 +13,14 @@ import { QuestionMarkIcon } from "components/Icons";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
-    $orgId: ID!
+    $groupId: ID!
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
     createRound(
-      orgId: $orgId
+      groupId: $groupId
       title: $title
       slug: $slug
       currency: $currency
@@ -32,17 +32,17 @@ const CREATE_ROUND = gql`
   }
 `;
 
-export default function NewRoundPage({ currentOrg }) {
+export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const onSubmit = (variables) => {
-    createRound({ ...variables, orgId: currentOrg.id })
+    createRound({ ...variables, groupId: currentGroup.id })
       .then(({ data }) => {
         Router.push(
-          "/[org]/[round]",
-          `/${currentOrg.slug}/${data.createRound.slug}`
+          "/[group]/[round]",
+          `/${currentGroup.slug}/${data.createRound.slug}`
         );
       })
       .catch((err) => {

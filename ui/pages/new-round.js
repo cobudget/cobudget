@@ -16,14 +16,14 @@ import PageHero from "../components/PageHero";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
-    $orgId: ID
+    $groupId: ID
     $title: String!
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
   ) {
     createRound(
-      orgId: $orgId
+      groupId: $groupId
       title: $title
       slug: $slug
       currency: $currency
@@ -35,7 +35,7 @@ const CREATE_ROUND = gql`
   }
 `;
 
-export default function NewRoundPage({ currentOrg }) {
+export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
@@ -49,7 +49,7 @@ export default function NewRoundPage({ currentOrg }) {
             : error.message
         );
       } else {
-        Router.push("/[org]/[round]", `/c/${data.createRound.slug}`);
+        Router.push("/[group]/[round]", `/c/${data.createRound.slug}`);
       }
     });
   };

@@ -7,11 +7,11 @@ const schema = gql`
   type Query {
     currentUser: User
     user(userId: ID!): User!
-    currentOrg(orgSlug: String): Group
+    currentGroup(groupSlug: String): Group
     groups: [Group!]
-    group(orgId: ID!): Group!
-    rounds(orgId: ID!, limit: Int): [Round!]
-    round(orgSlug: String, roundSlug: String): Round
+    group(groupId: ID!): Group!
+    rounds(groupId: ID!, limit: Int): [Round!]
+    round(groupSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
     bucketsPage(
       roundId: ID!
@@ -22,7 +22,7 @@ const schema = gql`
       status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    orgMembersPage(orgId: ID!, offset: Int, limit: Int): OrgMembersPage
+    groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
     membersPage(
       roundId: ID!
       isApproved: Boolean
@@ -31,7 +31,7 @@ const schema = gql`
       limit: Int
     ): MembersPage
     members(roundId: ID!, isApproved: Boolean): [RoundMember]
-    categories(orgId: ID!): [Category!]
+    categories(groupId: ID!): [Category!]
     contributionsPage(
       roundId: ID!
       offset: Int
@@ -52,16 +52,16 @@ const schema = gql`
     ): Group!
 
     editGroup(
-      orgId: ID!
+      groupId: ID!
       name: String
       info: String
       logo: String
       slug: String
     ): Group!
-    setTodosFinished(orgId: ID!): Group
+    setTodosFinished(groupId: ID!): Group
 
     createRound(
-      orgId: ID
+      groupId: ID
       slug: String!
       title: String!
       currency: String!
@@ -149,7 +149,7 @@ const schema = gql`
     resolveFlag(bucketId: ID!, flagId: ID!, comment: String!): Bucket
     allGoodFlag(bucketId: ID!): Bucket
 
-    joinOrg(orgId: ID!): OrgMember
+    joinGroup(groupId: ID!): GroupMember
 
     updateProfile(username: String, name: String): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
@@ -158,8 +158,8 @@ const schema = gql`
       roundId: ID!
       emails: String!
     ): [RoundMember]
-    inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
-    updateOrgMember(orgId: ID!, memberId: ID!, isAdmin: Boolean): OrgMember
+    inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
+    updateGroupMember(groupId: ID!, memberId: ID!, isAdmin: Boolean): GroupMember
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -219,7 +219,7 @@ const schema = gql`
   }
 
   enum RoundType {
-    ORG
+    ROUND
     SUB
     SINGLE
   }
@@ -319,16 +319,16 @@ const schema = gql`
     name: String
     verifiedEmail: Boolean!
     isRootAdmin: Boolean
-    orgMemberships: [OrgMember!]
+    groupMemberships: [GroupMember!]
     roundMemberships: [RoundMember!]
     avatar: String
     createdAt: Date
-    currentOrgMember(orgSlug: String): OrgMember
-    currentCollMember(orgSlug: String, roundSlug: String): RoundMember
+    currentGroupMember(groupSlug: String): GroupMember
+    currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
   }
 
-  type OrgMember {
+  type GroupMember {
     id: ID!
     group: Group!
     user: User!
@@ -343,9 +343,9 @@ const schema = gql`
     name: String
   }
 
-  type OrgMembersPage {
+  type GroupMembersPage {
     moreExist: Boolean
-    orgMembers: [OrgMember]
+    groupMembers: [GroupMember]
   }
 
   type RoundMember {

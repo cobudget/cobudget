@@ -4,12 +4,12 @@ import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
-import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
+import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
 import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { BUCKETS_QUERY } from "pages/[org]/[round]";
-import { BUCKET_QUERY } from "pages/[org]/[round]/[bucket]";
-import { ROUNDS_QUERY } from "pages/[org]";
+import { BUCKETS_QUERY } from "pages/[group]/[round]";
+import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
+import { ROUNDS_QUERY } from "pages/[group]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
@@ -43,7 +43,7 @@ export const client = (
       dedupExchange,
       cacheExchange({
         keys: {
-          OrgMembersPage: () => null,
+          GroupMembersPage: () => null,
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
@@ -66,7 +66,7 @@ export const client = (
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug:
+                      groupSlug:
                         result.joinRound.round.group?.slug ??
                         "c",
                       roundSlug: result.joinRound.round.slug,
@@ -99,20 +99,20 @@ export const client = (
                   });
               }
             },
-            joinOrg(result: any, args, cache) {
-              if (result.joinOrg) {
+            joinGroup(result: any, args, cache) {
+              if (result.joinGroup) {
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug: result.joinOrg.group.slug,
+                      groupSlug: result.joinGroup.group.slug,
                       roundSlug: undefined,
                     },
                   },
                   (data) => {
                     return {
                       ...data,
-                      currentOrgMember: result.joinOrg,
+                      currentGroupMember: result.joinGroup,
                     };
                   }
                 );
@@ -180,7 +180,7 @@ export const client = (
                     {
                       query: ROUNDS_QUERY,
                       variables: {
-                        orgSlug: field.arguments.orgSlug,
+                        groupSlug: field.arguments.groupSlug,
                       },
                     },
                     (data) => {
@@ -316,21 +316,21 @@ export const client = (
                   cache.invalidate("Query", "commentSet", field.arguments);
                 });
             },
-            inviteOrgMembers(result: any, _args, cache) {
-              if (result.inviteOrgMembers) {
+            inviteGroupMembers(result: any, _args, cache) {
+              if (result.inviteGroupMembers) {
                 cache.updateQuery(
                   {
-                    query: ORG_MEMBERS_QUERY,
+                    query: GROUP_MEMBERS_QUERY,
                     variables: { offset: 0, limit: 30 },
                   },
                   (data: any) => {
                     return {
                       ...data,
-                      orgMembersPage: {
-                        ...data.orgMembersPage,
-                        orgMembers: [
-                          ...result.inviteOrgMembers,
-                          ...data.orgMembersPage.orgMembers,
+                      groupMembersPage: {
+                        ...data.groupMembersPage,
+                        groupMembers: [
+                          ...result.inviteGroupMembers,
+                          ...data.groupMembersPage.groupMembers,
                         ],
                       },
                     };

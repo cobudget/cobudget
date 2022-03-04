@@ -28,7 +28,7 @@ const DELETE_TAG = gql`
   }
 `;
 
-const Tags = ({ round, currentOrg }) => {
+const Tags = ({ round, currentGroup }) => {
   const {
     handleSubmit,
     reset,
@@ -49,7 +49,7 @@ const Tags = ({ round, currentOrg }) => {
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${currentOrg?.slug ?? "c"}/${round.slug}?tag=${
+              href={`/${currentGroup?.slug ?? "c"}/${round.slug}?tag=${
                 tag.value
               }`}
             >
