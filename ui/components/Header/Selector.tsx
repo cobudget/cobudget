@@ -30,7 +30,7 @@ export default function Selector({
   className,
 }) {
   const orgIds = currentUser?.orgMemberships?.map(
-    (orgMember) => orgMember.organization.id
+    (orgMember) => orgMember.group.id
   );
   const activeId = currentOrg ? currentOrg.id : round?.id;
   return (
@@ -66,19 +66,19 @@ export default function Selector({
                 <Menu.Item key={orgMember.id}>
                   {({ active }) => (
                     <LinkItem
-                      href={`/${orgMember.organization.slug}`}
+                      href={`/${orgMember.group.slug}`}
                       active={active}
-                      selected={orgMember.organization.id === activeId}
+                      selected={orgMember.group.id === activeId}
                     >
                       <div className="flex items-center space-x-2">
-                        {orgMember.organization.logo && (
+                        {orgMember.group.logo && (
                           <img
-                            src={orgMember.organization.logo}
+                            src={orgMember.group.logo}
                             className="h-6 w-6 rounded"
                           />
                         )}
                         <p className="truncate">
-                          {orgMember.organization.name}
+                          {orgMember.group.name}
                         </p>
                       </div>
                     </LinkItem>
@@ -89,22 +89,22 @@ export default function Selector({
             {currentUser?.roundMemberships
               ?.filter(
                 (collMember) =>
-                  !orgIds.includes(collMember.round.organization?.id)
+                  !orgIds.includes(collMember.round.group?.id)
               )
               .map((collMember) => {
-                if (collMember.round.organization)
+                if (collMember.round.group)
                   return (
                     <Menu.Item key={collMember.id}>
                       {({ active }) => (
                         <LinkItem
-                          href={`/${collMember.round.organization.slug}`}
+                          href={`/${collMember.round.group.slug}`}
                           active={active}
                           selected={
-                            collMember.round.organization.id === activeId
+                            collMember.round.group.id === activeId
                           }
                         >
                           <span className="truncate">
-                            {collMember.round.organization.name}
+                            {collMember.round.group.name}
                           </span>
                         </LinkItem>
                       )}

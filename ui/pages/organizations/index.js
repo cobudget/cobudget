@@ -1,11 +1,11 @@
 import { useQuery, useMutation, gql } from "urql";
-import OrganizationsTable from "../../components/Org/OrganizationsTable";
+import GroupsTable from "../../components/Org/GroupsTable";
 import HappySpinner from "../../components/HappySpinner";
 import Router from "next/router";
 
-export const ORGANIZATIONS_QUERY = gql`
-  query Organizations {
-    organizations {
+export const GROUPS_QUERY = gql`
+  query Groups {
+    groups {
       id
       name
       logo
@@ -15,9 +15,9 @@ export const ORGANIZATIONS_QUERY = gql`
   }
 `;
 
-const DELETE_ORGANIZATION = gql`
-  mutation DeleteOrganization($organizationId: ID!) {
-    deleteOrganization(organizationId: $organizationId) {
+const DELETE_GROUP = gql`
+  mutation DeleteGroup($groupId: ID!) {
+    deleteGroup(groupId: $groupId) {
       id
     }
   }
@@ -26,34 +26,34 @@ const DELETE_ORGANIZATION = gql`
 export default () => {
   const [
     {
-      data: { organizations } = { organizations: [] },
+      data: { groups } = { groups: [] },
       fetching: loading,
       error,
     },
-  ] = useQuery({ query: ORGANIZATIONS_QUERY });
+  ] = useQuery({ query: GROUPS_QUERY });
 
-  const [, deleteOrganization] = useMutation(
-    DELETE_ORGANIZATION
-    // update(cache, { data: { deleteOrganization } }) {
-    //   const { organizations } = cache.readQuery({
-    //     query: ORGANIZATIONS_QUERY,
+  const [, deleteGroup] = useMutation(
+    DELETE_GROUP
+    // update(cache, { data: { deleteGroup } }) {
+    //   const { groups } = cache.readQuery({
+    //     query: GROUPS_QUERY,
     //   });
 
     //   cache.writeQuery({
-    //     query: ORGANIZATIONS_QUERY,
+    //     query: GROUPS_QUERY,
     //     data: {
-    //       organizations: organizations.filter(
-    //         (organization) => organization.id !== deleteOrganization.id
+    //       groups: groups.filter(
+    //         (group) => group.id !== deleteGroup.id
     //       ),
     //     },
     //   });
     // },
   );
 
-  const updateOrganization = async ({ organizationId }) => {
+  const updateGroup = async ({ groupId }) => {
     Router.push(
-      "/organizations/[organization]/edit",
-      `/organizations/${organizationId}/edit`
+      "/groups/[group]/edit",
+      `/groups/${groupId}/edit`
     );
   };
 
@@ -76,12 +76,12 @@ export default () => {
     <>
       <div className="max-w-screen-md flex-1">
         <h2 className="flex justify-between text-xl mb-3">
-          {organizations.length} organizations
+          {groups.length} groups
         </h2>
-        <OrganizationsTable
-          organizations={organizations}
-          deleteOrganization={deleteOrganization}
-          updateOrganization={updateOrganization}
+        <GroupsTable
+          groups={groups}
+          deleteGroup={deleteGroup}
+          updateGroup={updateGroup}
         />
       </div>
     </>

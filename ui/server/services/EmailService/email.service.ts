@@ -62,7 +62,7 @@ export default {
       title: string;
       slug: string;
       info?: string;
-      organization: { slug: string };
+      group: { slug: string };
     };
     currentOrg?: { slug: string; name: string; info?: string };
   }) => {
@@ -73,7 +73,7 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentOrg?.slug ?? round.organization.slug}/${
+      `/${currentOrg?.slug ?? round.group.slug}/${
         round?.slug ?? ""
       }`
     );
@@ -142,7 +142,7 @@ export default {
       where: { email: newUser.email },
       include: {
         collMemberships: {
-          include: { round: { include: { organization: true } } },
+          include: { round: { include: { group: true } } },
         },
       },
     });
@@ -150,7 +150,7 @@ export default {
     const createYourFirst =
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
-            `/${collMemberships[0].round.organization.slug}/${collMemberships[0].round.slug}`
+            `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
           )}">create your first Bucket</a>!`
         : `Jump right in and <a href="${appLink(
             "/new-round"
@@ -161,7 +161,7 @@ export default {
       subject: "Welcome to Cobudget!",
       html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
       <br/><br/>
-      Since 2014 we’ve been on a path to change the ways organizations and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
+      Since 2014 we’ve been on a path to change the ways groups and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
       <br/><br/>
       We are thrilled to have you with us!
       <br/><br/>
@@ -363,9 +363,9 @@ export default {
     });
     const round = await prisma.round.findUnique({
       where: { id: roundId },
-      include: { organization: true },
+      include: { group: true },
     });
-    const org = round.organization;
+    const org = round.group;
 
     if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
@@ -389,7 +389,7 @@ export default {
   }: {
     bucket: Prisma.BucketCreateInput & {
       round: Prisma.RoundCreateInput & {
-        organization: Prisma.OrganizationCreateInput;
+        group: Prisma.GroupCreateInput;
       };
       Contributions: Array<
         Prisma.ContributionCreateInput & {
@@ -431,7 +431,7 @@ export default {
           }.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
-          `/${bucket.round.organization.slug}/${bucket.round.slug}`
+          `/${bucket.round.group.slug}/${bucket.round.slug}`
         )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
         ${footer}
@@ -521,13 +521,13 @@ export default {
       ((totalContributions + income) / minGoal) * 100
     );
 
-    const { organization } = await prisma.round.findUnique({
+    const { group } = await prisma.round.findUnique({
       where: { id: round.id },
-      include: { organization: true },
+      include: { group: true },
     });
 
     const bucketLink = appLink(
-      `/${organization.slug}/${round.slug}/${bucket.id}`
+      `/${group.slug}/${round.slug}/${bucket.id}`
     );
 
     const emails = usersToNotify.map((mailRecipient) => ({

@@ -65,7 +65,7 @@ export const TOP_LEVEL_QUERY = gql`
       orgMemberships {
         id
         isAdmin
-        organization {
+        group {
           id
           name
           slug
@@ -80,7 +80,7 @@ export const TOP_LEVEL_QUERY = gql`
           id
           title
           slug
-          organization {
+          group {
             id
             name
             slug

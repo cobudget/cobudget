@@ -6,7 +6,7 @@ const liStyle =
 
 const IndexPage = ({ currentUser }) => {
   const orgIds = currentUser?.orgMemberships?.map(
-    (orgMember) => orgMember.organization.id
+    (orgMember) => orgMember.group.id
   );
   return (
     <div className="page w-full">
@@ -18,8 +18,8 @@ const IndexPage = ({ currentUser }) => {
               {currentUser?.orgMemberships?.map((orgMember) => {
                 return (
                   <li key={orgMember.id} className={liStyle}>
-                    <Link href={`/${orgMember.organization.slug}`}>
-                      <a>{orgMember.organization.name}</a>
+                    <Link href={`/${orgMember.group.slug}`}>
+                      <a>{orgMember.group.name}</a>
                     </Link>
                   </li>
                 );
@@ -27,16 +27,16 @@ const IndexPage = ({ currentUser }) => {
               {currentUser?.roundMemberships
                 ?.filter(
                   (collMember) =>
-                    !orgIds.includes(collMember.round.organization?.id)
+                    !orgIds.includes(collMember.round.group?.id)
                 )
                 .map((collMember) => {
-                  if (collMember.round.organization)
+                  if (collMember.round.group)
                     return (
                       <li key={collMember.id} className={liStyle}>
                         <Link
-                          href={`/${collMember.round.organization.slug}`}
+                          href={`/${collMember.round.group.slug}`}
                         >
-                          <a>{collMember.round.organization.name}</a>
+                          <a>{collMember.round.group.name}</a>
                         </Link>
                       </li>
                     );

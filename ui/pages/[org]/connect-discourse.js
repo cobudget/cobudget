@@ -7,7 +7,7 @@ export default ({ currentOrgMember, currentOrg }) => {
   if (!currentOrgMember) return null;
   if (!currentOrg.discourseUrl)
     return (
-      <div>Your organization has not set up custom discourse integration.</div>
+      <div>Your group has not set up custom discourse integration.</div>
     );
 
   const [discourseConnectUrl, setUrl] = useState("");
@@ -28,7 +28,7 @@ export default ({ currentOrgMember, currentOrg }) => {
       </h1>
       <p className="mb-4 text-gray-800">
         {!currentOrgMember.hasDiscourseApiKey
-          ? "Click the button below to connect your existing account on your organizations Discourse or to create a new one."
+          ? "Click the button below to connect your existing account on your groups Discourse or to create a new one."
           : "Click the button below to re-connect, if your api key has expired or you have changed username on Discourse."}
       </p>
 

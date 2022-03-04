@@ -72,7 +72,7 @@ export async function isAndGetCollMemberOrOrgAdmin({
   }
   if (!collMember) {
     orgMember = await prisma.orgMember.findFirst({
-      where: { organization: { rounds: { some: { id: roundId } } } },
+      where: { group: { rounds: { some: { id: roundId } } } },
     });
   }
 
@@ -85,7 +85,7 @@ export async function isAndGetCollMemberOrOrgAdmin({
 export async function getOrgMember({ orgId, userId }) {
   return prisma.orgMember.findUnique({
     where: {
-      organizationId_userId: { organizationId: orgId, userId },
+      groupId_userId: { groupId: orgId, userId },
     },
   });
 }
@@ -144,12 +144,12 @@ export async function getCurrentOrgAndMember({
   };
 
   if (orgId) {
-    currentOrg = await prisma.organization.findUnique({
+    currentOrg = await prisma.group.findUnique({
       where: { id: orgId },
       include,
     });
   } else if (roundId) {
-    currentOrg = await prisma.organization.findFirst({
+    currentOrg = await prisma.group.findFirst({
       where: { rounds: { some: { id: roundId } } },
       include: {
         ...(user && {
@@ -161,7 +161,7 @@ export async function getCurrentOrgAndMember({
       },
     });
   } else if (bucketId) {
-    currentOrg = await prisma.organization.findFirst({
+    currentOrg = await prisma.group.findFirst({
       where: { rounds: { some: { buckets: { some: { id: bucketId } } } } },
       include,
     });

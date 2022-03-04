@@ -67,7 +67,7 @@ export const client = (
                     query: TOP_LEVEL_QUERY,
                     variables: {
                       orgSlug:
-                        result.joinRound.round.organization?.slug ??
+                        result.joinRound.round.group?.slug ??
                         "c",
                       roundSlug: result.joinRound.round.slug,
                     },
@@ -105,7 +105,7 @@ export const client = (
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug: result.joinOrg.organization.slug,
+                      orgSlug: result.joinOrg.group.slug,
                       roundSlug: undefined,
                     },
                   },

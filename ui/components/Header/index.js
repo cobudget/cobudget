@@ -3,7 +3,7 @@ import { useMutation, gql } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
-import OrganizationAndRoundHeader from "./OrganizationAndRoundHeader";
+import GroupAndRoundHeader from "./GroupAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -38,7 +38,7 @@ const JOIN_ORG_MUTATION = gql`
           slug
         }
       }
-      organization {
+      group {
         id
         slug
       }
@@ -59,7 +59,7 @@ const ACCEPT_INVITATION = gql`
         id
         title
         slug
-        organization {
+        group {
           id
           slug
         }
@@ -80,7 +80,7 @@ const JOIN_ROUND_MUTATION = gql`
         id
         title
         slug
-        organization {
+        group {
           id
           slug
         }
@@ -102,7 +102,7 @@ const Header = ({ round, currentUser, currentOrg, openModal, router }) => {
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative">
-          <OrganizationAndRoundHeader
+          <GroupAndRoundHeader
             currentOrg={currentOrg}
             round={round}
             color={color}

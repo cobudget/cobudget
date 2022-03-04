@@ -7,9 +7,9 @@ const schema = gql`
   type Query {
     currentUser: User
     user(userId: ID!): User!
-    currentOrg(orgSlug: String): Organization
-    organizations: [Organization!]
-    organization(orgId: ID!): Organization!
+    currentOrg(orgSlug: String): Group
+    groups: [Group!]
+    group(orgId: ID!): Group!
     rounds(orgId: ID!, limit: Int): [Round!]
     round(orgSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
@@ -45,20 +45,20 @@ const schema = gql`
   }
 
   type Mutation {
-    createOrganization(
+    createGroup(
       name: String!
       logo: String
       slug: String!
-    ): Organization!
+    ): Group!
 
-    editOrganization(
+    editGroup(
       orgId: ID!
       name: String
       info: String
       logo: String
       slug: String
-    ): Organization!
-    setTodosFinished(orgId: ID!): Organization
+    ): Group!
+    setTodosFinished(orgId: ID!): Group
 
     createRound(
       orgId: ID
@@ -169,7 +169,7 @@ const schema = gql`
     ): RoundMember
     deleteMember(roundId: ID!, memberId: ID!): RoundMember
 
-    deleteOrganization(organizationId: ID!): Organization
+    deleteGroup(groupId: ID!): Group
 
     approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
     updateGrantingSettings(
@@ -205,7 +205,7 @@ const schema = gql`
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
-  type Organization {
+  type Group {
     id: ID!
     name: String!
     info: String
@@ -238,7 +238,7 @@ const schema = gql`
     slug: String!
     title: String!
     archived: Boolean
-    organization: Organization
+    group: Group
     info: String
     color: String
     numberOfApprovedMembers: Int
@@ -330,7 +330,7 @@ const schema = gql`
 
   type OrgMember {
     id: ID!
-    organization: Organization!
+    group: Group!
     user: User!
     isAdmin: Boolean
     bio: String #what do we do with this one?

@@ -58,19 +58,19 @@ export default handler()
         //   }
 
         //   if (customDomain) {
-        //     currentOrg = await prisma.organization.findFirst({
+        //     currentOrg = await prisma.group.findFirst({
         //       where: { customDomain },
         //     });
         //   } else if (subdomain) {
-        //     currentOrg = await prisma.organization.findUnique({
+        //     currentOrg = await prisma.group.findUnique({
         //       where: { slug: subdomain },
         //     });
         //   }
         //   if (currentOrg && user) {
         //     currentOrgMember = await prisma.orgMember.findUnique({
         //       where: {
-        //         organizationId_userId: {
-        //           organizationId: currentOrg.id,
+        //         groupId_userId: {
+        //           groupId: currentOrg.id,
         //           userId: user.id,
         //         },
         //       },

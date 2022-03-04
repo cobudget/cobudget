@@ -83,7 +83,7 @@ const InviteMembersModal = ({
             <ul className="list-disc ml-5">
               <li className="mt-2">
                 This is currently more of a quick way of adding people as
-                members of the organization and/or round, rather than a
+                members of the group and/or round, rather than a
                 proper invite functionality.
               </li>
               <li className="mt-2">

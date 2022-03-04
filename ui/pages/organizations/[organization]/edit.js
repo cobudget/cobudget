@@ -1,11 +1,11 @@
 import { useRouter } from "next/router";
 import { useQuery, gql } from "@apollo/client";
 import HappySpinner from "components/HappySpinner";
-import EditOrganization from "components/Org/EditOrganization";
+import EditGroup from "components/Org/EditGroup";
 
-export const ORGANIZATION_QUERY = gql`
-  query Organization($id: ID!) {
-    organization(id: $id) {
+export const GROUP_QUERY = gql`
+  query Group($id: ID!) {
+    group(id: $id) {
       id
       name
       logo
@@ -18,11 +18,11 @@ export const ORGANIZATION_QUERY = gql`
 export default () => {
   const router = useRouter();
   const {
-    data: { organization } = { organization: null },
+    data: { group } = { group: null },
     loading,
     error,
-  } = useQuery(ORGANIZATION_QUERY, {
-    variables: { id: router.query.organization },
+  } = useQuery(GROUP_QUERY, {
+    variables: { id: router.query.group },
   });
 
   if (error) {
@@ -42,7 +42,7 @@ export default () => {
           <HappySpinner />
         </div>
       ) : (
-        <EditOrganization organization={organization} />
+        <EditGroup group={group} />
       )}
     </>
   );

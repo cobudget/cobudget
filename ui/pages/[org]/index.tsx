@@ -16,7 +16,7 @@ export const ROUNDS_QUERY = gql`
       title
       archived
       color
-      organization {
+      group {
         id
         slug
       }
@@ -73,7 +73,7 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
               className="h-10"
               MUTATION={gql`
                 mutation EditOrgInfo($orgId: ID!, $info: String) {
-                  editOrganization(orgId: $orgId, info: $info) {
+                  editGroup(orgId: $orgId, info: $info) {
                     id
                     info
                   }
@@ -109,7 +109,7 @@ const IndexPage = ({ router, currentOrg, currentUser }) => {
         >
           {rounds.map((round) => (
             <Link
-              href={`/${round.organization.slug}/${round.slug}`}
+              href={`/${round.group.slug}/${round.slug}`}
               key={round.slug}
               passHref
             >

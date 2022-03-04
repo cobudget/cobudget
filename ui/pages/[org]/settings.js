@@ -1,4 +1,4 @@
-import EditOrganization from "../../components/Org/EditOrganization";
+import EditGroup from "../../components/Org/EditGroup";
 import SubMenu from "../../components/SubMenu";
 
 const OrgSettingsPage = ({ currentOrg, currentUser }) => {
@@ -9,7 +9,7 @@ const OrgSettingsPage = ({ currentOrg, currentUser }) => {
     <>
       <SubMenu currentUser={currentUser} />
       <div className="page">
-        <EditOrganization organization={currentOrg} currentUser={currentUser} />
+        <EditGroup group={currentOrg} currentUser={currentUser} />
       </div>
     </>
   );

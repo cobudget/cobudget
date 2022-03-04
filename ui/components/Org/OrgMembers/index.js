@@ -48,7 +48,7 @@ const OrgMembers = ({ currentOrg }) => {
   return (
     <div>
       <div className="flex justify-between mb-3 items-center">
-        <h2 className="text-xl font-semibold">Organization members</h2>{" "}
+        <h2 className="text-xl font-semibold">Group members</h2>{" "}
         <div>
           <Button onClick={() => setInviteModalOpen(true)}>
             Invite members

@@ -14,9 +14,9 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
 const ActionsDropdown = ({
-  deleteOrganization,
-  updateOrganization,
-  organization,
+  deleteGroup,
+  updateGroup,
+  group,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -46,22 +46,22 @@ const ActionsDropdown = ({
       >
         <MenuItem
           onClick={() => {
-            updateOrganization({ organizationId: organization.id });
+            updateGroup({ groupId: group.id });
             handleClose();
           }}
         >
-          Update organization
+          Update group
         </MenuItem>
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete organization ${organization.name}?`
+                `Are you sure you would like to delete group ${group.name}?`
               )
             )
-              deleteOrganization({
-                variables: { organizationId: organization.id },
+              deleteGroup({
+                variables: { groupId: group.id },
               });
           }}
         >
@@ -72,7 +72,7 @@ const ActionsDropdown = ({
   );
 };
 
-export default ({ organizations, updateOrganization, deleteOrganization }) => {
+export default ({ groups, updateGroup, deleteGroup }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
@@ -87,26 +87,26 @@ export default ({ organizations, updateOrganization, deleteOrganization }) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {organizations.map((organization) => (
-              <TableRow key={organization.id}>
+            {groups.map((group) => (
+              <TableRow key={group.id}>
                 <TableCell component="th" scope="row">
-                  <img src={organization.logo} className="h-7 w-7 rounded" />
+                  <img src={group.logo} className="h-7 w-7 rounded" />
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {organization.name}
+                  {group.name}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {organization.subdomain}
+                  {group.subdomain}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {organization.customDomain}
+                  {group.customDomain}
                 </TableCell>
 
                 <TableCell align="right" padding="none">
                   <ActionsDropdown
-                    organization={organization}
-                    deleteOrganization={deleteOrganization}
-                    updateOrganization={updateOrganization}
+                    group={group}
+                    deleteGroup={deleteGroup}
+                    updateGroup={updateGroup}
                   />
                 </TableCell>
               </TableRow>

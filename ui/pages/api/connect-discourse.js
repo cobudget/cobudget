@@ -23,7 +23,7 @@ export default async function (req, res) {
   // const { sub: userId } = jwt.decode(accessToken);
 
   // const db = await getConnection(process.env.MONGO_URL);
-  // const { OrgMember, Organization } = getModels(db);
+  // const { OrgMember, Group } = getModels(db);
 
   const { subdomain, host } = getHostInfo(req);
 
@@ -32,9 +32,9 @@ export default async function (req, res) {
   let currentOrg;
 
   // if (host.includes(process.env.DEPLOY_URL)) {
-  //   currentOrg = await Organization.findOne({ subdomain });
+  //   currentOrg = await Group.findOne({ subdomain });
   // } else {
-  //   currentOrg = await Organization.findOne({ customDomain: host });
+  //   currentOrg = await Group.findOne({ customDomain: host });
   // }
 
   if (!currentOrg.discourse) throw new Error("Missing discourse config");
@@ -56,7 +56,7 @@ export default async function (req, res) {
 
   // save discourse user api key and username in database
   await OrgMember.update(
-    { userId, organizationId: currentOrg.id },
+    { userId, groupId: currentOrg.id },
     { discourseApiKey, discourseUsername: username }
   );
 

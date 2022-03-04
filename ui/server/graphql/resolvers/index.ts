@@ -44,12 +44,12 @@ const isMemberOfOrg = async (parent, { orgId }, { user }) => {
 
   const currentOrgMember = await prisma.orgMember.findUnique({
     where: {
-      organizationId_userId: { organizationId: orgId, userId: user.id },
+      groupId_userId: { groupId: orgId, userId: user.id },
     },
   });
 
   if (!currentOrgMember)
-    throw new Error("You need to be a member of that organization");
+    throw new Error("You need to be a member of that group");
   return skip;
 };
 
@@ -82,7 +82,7 @@ const isCollMemberOrOrgAdmin = async (parent, { roundId }, { user }) => {
   });
   let orgMember = null;
   if (!roundMember) {
-    const org = await prisma.organization.findFirst({
+    const org = await prisma.group.findFirst({
       where: { rounds: { some: { id: roundId } } },
     });
     orgMember = await getOrgMember({
@@ -106,7 +106,7 @@ const isCollOrOrgAdmin = async (parent, { roundId }, { user }) => {
   });
   let orgMember = null;
   if (!roundMember?.isAdmin) {
-    const org = await prisma.organization.findFirst({
+    const org = await prisma.group.findFirst({
       where: { rounds: { some: { id: roundId } } },
     });
     orgMember = await getOrgMember({
@@ -142,7 +142,7 @@ const isOrgAdmin = async (parent, { orgId }, { user }) => {
   if (!orgId) return skip;
   const orgMember = await prisma.orgMember.findUnique({
     where: {
-      organizationId_userId: { organizationId: orgId, userId: user.id },
+      groupId_userId: { groupId: orgId, userId: user.id },
     },
   });
   if (!orgMember?.isAdmin) throw new Error("You need to be org admin");
@@ -198,13 +198,13 @@ const resolvers = {
     },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug || orgSlug === "c") return null;
-      return prisma.organization.findUnique({ where: { slug: orgSlug } });
+      return prisma.group.findUnique({ where: { slug: orgSlug } });
     },
-    organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
-      return prisma.organization.findUnique({ where: { id: orgId } });
+    group: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
+      return prisma.group.findUnique({ where: { id: orgId } });
     }),
-    organizations: combineResolvers(isRootAdmin, async (parent, args) => {
-      return prisma.organization.findMany();
+    groups: combineResolvers(isRootAdmin, async (parent, args) => {
+      return prisma.group.findMany();
     }),
     rounds: async (parent, { limit, orgId }, { user }) => {
       if (!orgId) return null;
@@ -212,7 +212,7 @@ const resolvers = {
       const currentOrgMember = user
         ? await prisma.orgMember.findUnique({
             where: {
-              organizationId_userId: { organizationId: orgId, userId: user.id },
+              groupId_userId: { groupId: orgId, userId: user.id },
             },
           })
         : null;
@@ -220,14 +220,14 @@ const resolvers = {
       // if admin show all rounds (current or archived)
       if (currentOrgMember && currentOrgMember.isAdmin) {
         return prisma.round.findMany({
-          where: { organizationId: orgId, deleted: { not: true } },
+          where: { groupId: orgId, deleted: { not: true } },
           take: limit,
         });
       }
 
       const allColls = await prisma.round.findMany({
         where: {
-          organizationId: orgId,
+          groupId: orgId,
           archived: { not: true },
           deleted: { not: true },
         },
@@ -249,7 +249,7 @@ const resolvers = {
       const round = await prisma.round.findFirst({
         where: {
           slug: roundSlug,
-          organization: { slug: orgSlug },
+          group: { slug: orgSlug },
           deleted: { not: true },
         },
       });
@@ -401,7 +401,7 @@ const resolvers = {
       isOrgAdmin,
       async (parent, { offset = 0, limit, orgId }, { user }) => {
         const orgMembersWithExtra = await prisma.orgMember.findMany({
-          where: { organizationId: orgId },
+          where: { groupId: orgId },
           skip: offset,
           take: limit + 1,
         });
@@ -475,7 +475,7 @@ const resolvers = {
       }
     ),
     categories: async (parent, { orgId }) => {
-      const org = await prisma.organization.findUnique({
+      const org = await prisma.group.findUnique({
         where: { id: orgId },
         include: { discourse: true },
       });
@@ -499,14 +499,14 @@ const resolvers = {
         include: {
           comments: true,
           round: {
-            include: { organization: { include: { discourse: true } } },
+            include: { group: { include: { discourse: true } } },
           },
         },
       });
       // const bucket = await Bucket.findOne({ _id: bucketId });
 
       let comments;
-      const org = bucket.round.organization;
+      const org = bucket.round.group;
 
       if (orgHasDiscourse(org)) {
         const topic = await discourse(org.discourse).posts.get(
@@ -530,7 +530,7 @@ const resolvers = {
                     orgMemberships: {
                       some: {
                         discourseUsername: post.username,
-                        organizationId: org.id,
+                        groupId: org.id,
                       },
                     },
                   },
@@ -560,14 +560,14 @@ const resolvers = {
     },
   },
   Mutation: {
-    createOrganization: async (
+    createGroup: async (
       parent,
       { name, slug, logo },
       { user, eventHub }
     ) => {
       if (!user) throw new Error("You need to be logged in!");
 
-      const org = await prisma.organization.create({
+      const org = await prisma.group.create({
         data: {
           name,
           slug: slugify(slug),
@@ -579,14 +579,14 @@ const resolvers = {
         },
       });
 
-      await eventHub.publish("create-organization", {
-        currentOrganization: org,
+      await eventHub.publish("create-group", {
+        currentGroup: org,
         currentOrgMember: org.orgMembers[0],
       });
 
       return org;
     },
-    editOrganization: combineResolvers(
+    editGroup: combineResolvers(
       isOrgAdmin,
       async (parent, { orgId, name, info, slug, logo }, { user, eventHub }) => {
         if (name?.length === 0) throw new Error("Org name cannot be blank");
@@ -594,7 +594,7 @@ const resolvers = {
           throw new Error("Org subdomain cannot be blank");
         if (info?.length > 500) throw new Error("Org info too long");
 
-        const organization = await prisma.organization.update({
+        const group = await prisma.group.update({
           where: {
             id: orgId,
           },
@@ -607,17 +607,17 @@ const resolvers = {
         });
 
         // TODO: add back
-        // await eventHub.publish("edit-organization", {
-        //   currentOrg: organization,
+        // await eventHub.publish("edit-group", {
+        //   currentOrg: group,
         //   currentOrgMember,
         // });
-        return organization;
+        return group;
       }
     ),
     setTodosFinished: combineResolvers(
       isOrgAdmin,
       async (parent, { orgId }) => {
-        const org = await prisma.organization.update({
+        const org = await prisma.group.update({
           where: { id: orgId },
           data: { finishedTodos: true },
         });
@@ -633,11 +633,11 @@ const resolvers = {
       ) => {
         let singleRound = false;
         if (!orgId) {
-          let rootOrg = await prisma.organization.findUnique({
+          let rootOrg = await prisma.group.findUnique({
             where: { slug: "c" },
           });
           if (!rootOrg) {
-            rootOrg = await prisma.organization.create({
+            rootOrg = await prisma.group.create({
               data: { slug: "c", name: "Root" },
             });
           }
@@ -650,7 +650,7 @@ const resolvers = {
             title,
             currency,
             registrationPolicy,
-            organizationId: orgId,
+            groupId: orgId,
             singleRound,
             roundMember: {
               create: {
@@ -889,13 +889,13 @@ const resolvers = {
         const round = await prisma.round.findUnique({
           where: { id: roundId },
           include: {
-            organization: {
+            group: {
               include: { orgMembers: { where: { userId: user.id } } },
             },
           },
         });
 
-        const currentOrgMember = round?.organization?.orgMembers?.[0];
+        const currentOrgMember = round?.group?.orgMembers?.[0];
 
         const bucketCreationIsOpen = round.bucketCreationCloses
           ? dayjs().isBefore(dayjs(round.bucketCreationCloses))
@@ -917,7 +917,7 @@ const resolvers = {
         });
 
         await eventHub.publish("create-bucket", {
-          currentOrg: round.organization,
+          currentOrg: round.group,
           currentOrgMember,
           bucket: bucket,
           round: round,
@@ -952,7 +952,7 @@ const resolvers = {
           include: {
             round: {
               include: {
-                organization: {
+                group: {
                   include: { orgMembers: { where: { userId: user.id } } },
                 },
               },
@@ -961,8 +961,8 @@ const resolvers = {
         });
 
         await eventHub.publish("edit-bucket", {
-          currentOrg: updated.round.organization,
-          currentOrgMember: updated.round.organization?.orgMembers?.[0],
+          currentOrg: updated.round.group,
+          currentOrgMember: updated.round.group?.orgMembers?.[0],
           round: updated.round,
           bucket: updated,
         });
@@ -1055,7 +1055,7 @@ const resolvers = {
           include: {
             round: {
               include: {
-                organization: {
+                group: {
                   include: { orgMembers: { where: { userId: user.id } } },
                 },
               },
@@ -1064,8 +1064,8 @@ const resolvers = {
         });
 
         await eventHub.publish("edit-bucket", {
-          currentOrg: updated.round.organization,
-          currentOrgMember: updated.round.organization?.orgMembers?.[0],
+          currentOrg: updated.round.group,
+          currentOrgMember: updated.round.group?.orgMembers?.[0],
           round: updated.round,
           bucket: updated,
         });
@@ -1095,7 +1095,7 @@ const resolvers = {
           include: {
             round: {
               include: {
-                organization: {
+                group: {
                   include: { orgMembers: { where: { userId: user.id } } },
                 },
               },
@@ -1104,8 +1104,8 @@ const resolvers = {
         });
 
         await eventHub.publish("delete-bucket", {
-          currentOrg: bucket.round.organization,
-          currentOrgMember: bucket.round.organization?.orgMembers?.[0],
+          currentOrg: bucket.round.group,
+          currentOrgMember: bucket.round.group?.orgMembers?.[0],
           round: bucket.round,
           bucket: bucket,
         });
@@ -1141,7 +1141,7 @@ const resolvers = {
           include: {
             round: {
               include: {
-                organization: {
+                group: {
                   include: { orgMembers: { where: { userId: user.id } } },
                 },
               },
@@ -1156,8 +1156,8 @@ const resolvers = {
         });
 
         await eventHub.publish("publish-bucket", {
-          currentOrg: bucket.round.organization,
-          currentOrgMember: bucket.round.organization?.orgMembers?.[0],
+          currentOrg: bucket.round.group,
+          currentOrgMember: bucket.round.group?.orgMembers?.[0],
           round: bucket.round,
           bucket: bucket,
           unpublish,
@@ -1175,7 +1175,7 @@ const resolvers = {
             round: {
               include: {
                 roundMember: { where: { userId: user.id } },
-                organization: {
+                group: {
                   include: {
                     discourse: true,
                     orgMembers: { where: { userId: user.id } },
@@ -1185,7 +1185,7 @@ const resolvers = {
             },
           },
         });
-        const currentOrg = bucket.round.organization;
+        const currentOrg = bucket.round.group;
         const currentOrgMember = currentOrg?.orgMembers?.[0];
         const currentCollMember = bucket.round.roundMember?.[0];
 
@@ -1232,7 +1232,7 @@ const resolvers = {
             round: {
               include: {
                 roundMember: { where: { userId: user.id } },
-                organization: {
+                group: {
                   include: {
                     orgMembers: { where: { userId: user.id } },
                   },
@@ -1241,7 +1241,7 @@ const resolvers = {
             },
           },
         });
-        const currentOrg = bucket.round.organization;
+        const currentOrg = bucket.round.group;
         const currentOrgMember = currentOrg?.orgMembers?.[0];
         const currentCollMember = bucket.round.roundMember?.[0];
         const comment = bucket.comments?.[0];
@@ -1278,7 +1278,7 @@ const resolvers = {
             user: true,
             round: {
               include: {
-                organization: {
+                group: {
                   include: { orgMembers: { where: { userId: user.id } } },
                 },
               },
@@ -1291,9 +1291,9 @@ const resolvers = {
         const { discourse, prisma: prismaResult } = await eventHub.publish(
           "edit-comment",
           {
-            currentOrg: currentCollMember.round.organization,
+            currentOrg: currentCollMember.round.group,
             currentOrgMember:
-              currentCollMember.round.organization?.orgMembers?.[0],
+              currentCollMember.round.group?.orgMembers?.[0],
             currentCollMember,
             bucket: comment.bucket,
             comment,
@@ -1340,14 +1340,14 @@ const resolvers = {
           round: {
             include: {
               guidelines: { where: { id: guidelineId } },
-              organization: { include: { discourse: true } },
+              group: { include: { discourse: true } },
             },
           },
         },
       });
 
       const logContent = `Someone flagged this bucket for the **${updated.round.guidelines[0].title}** guideline: \n> ${comment}`;
-      const currentOrg = updated.round.organization;
+      const currentOrg = updated.round.group;
       if (orgHasDiscourse(currentOrg)) {
         if (!updated.discourseTopicId) {
           // TODO: break out create thread into separate function
@@ -1376,7 +1376,7 @@ const resolvers = {
               round: {
                 include: {
                   guidelines: { where: { id: guidelineId } },
-                  organization: { include: { discourse: true } },
+                  group: { include: { discourse: true } },
                 },
               },
             },
@@ -1443,11 +1443,11 @@ const resolvers = {
         },
         include: {
           round: {
-            include: { organization: { include: { discourse: true } } },
+            include: { group: { include: { discourse: true } } },
           },
         },
       });
-      const currentOrg = updated.round.organization;
+      const currentOrg = updated.round.group;
       const resolvedFlagGuideline = bucket.flags[0].guideline;
 
       const logContent = `Someone resolved a flag for the **${resolvedFlagGuideline.title}** guideline: \n> ${comment}`;
@@ -1478,7 +1478,7 @@ const resolvers = {
             data: { discourseTopicId: discoursePost.topic_id },
             include: {
               round: {
-                include: { organization: { include: { discourse: true } } },
+                include: { group: { include: { discourse: true } } },
               },
             },
           });
@@ -1550,7 +1550,7 @@ const resolvers = {
       if (!user) throw new Error("You need to be logged in.");
 
       return await prisma.orgMember.create({
-        data: { userId: user.id, organizationId: orgId },
+        data: { userId: user.id, groupId: orgId },
       });
     },
     updateProfile: async (_, { name, username }, { user }) => {
@@ -1583,7 +1583,7 @@ const resolvers = {
       ) => {
         const round = await prisma.round.findUnique({
           where: { id: roundId },
-          include: { organization: true },
+          include: { group: true },
         });
         const emails = emailsString.split(",");
 
@@ -1662,25 +1662,25 @@ const resolvers = {
               email,
             },
             create: {
-              orgMemberships: { create: { organizationId: orgId } },
+              orgMemberships: { create: { groupId: orgId } },
               email,
             },
             update: {
               orgMemberships: {
                 create: {
-                  organizationId: orgId,
+                  groupId: orgId,
                 },
               },
             },
             include: {
               orgMemberships: {
-                where: { organizationId: orgId },
-                include: { organization: true },
+                where: { groupId: orgId },
+                include: { group: true },
               },
             },
           });
           const orgMembership = user.orgMemberships?.[0];
-          const currentOrg = orgMembership.organization;
+          const currentOrg = orgMembership.group;
 
           await emailService.inviteMember({ email, currentUser, currentOrg });
 
@@ -1694,7 +1694,7 @@ const resolvers = {
       isOrgAdmin,
       async (parent, { orgId, memberId, isAdmin }, { user }) => {
         const orgMember = await prisma.orgMember.findFirst({
-          where: { id: memberId, organizationId: orgId },
+          where: { id: memberId, groupId: orgId },
         });
 
         if (!orgMember) throw new Error("No member to update found");
@@ -1702,7 +1702,7 @@ const resolvers = {
         if (typeof isAdmin !== "undefined") {
           if (isAdmin === false) {
             const orgAdmins = await prisma.orgMember.findMany({
-              where: { organizationId: orgId, isAdmin: true },
+              where: { groupId: orgId, isAdmin: true },
             });
             if (orgAdmins.length <= 1)
               throw new Error("You need at least 1 org admin");
@@ -1751,9 +1751,9 @@ const resolvers = {
         });
       }
     ),
-    // deleteOrganization: async (parent, { organizationId }, { user }) => {
+    // deleteGroup: async (parent, { groupId }, { user }) => {
     //   const { currentOrgMember } = await getCurrentOrgAndMember({
-    //     orgId: organizationId,
+    //     orgId: groupId,
     //     user,
     //   });
 
@@ -1761,15 +1761,15 @@ const resolvers = {
     //     !(
     //       (currentOrgMember &&
     //         currentOrgMember.isAdmin &&
-    //         organizationId == currentOrgMember.organizationId) ||
+    //         groupId == currentOrgMember.groupId) ||
     //       user.isRootAdmin
     //     )
     //   )
     //     throw new Error(
-    //       "You need to be org. or root admin to delete an organization"
+    //       "You need to be org. or root admin to delete an group"
     //     );
     //   //TODO: turn into soft delete
-    //   return prisma.organization.delete({ where: { id: organizationId } });
+    //   return prisma.group.delete({ where: { id: groupId } });
     // },
     approveForGranting: combineResolvers(
       async (parent, args, ctx) => {
@@ -2043,7 +2043,7 @@ const resolvers = {
           where: { id: bucketId },
           include: {
             cocreators: true,
-            round: { include: { organization: true } },
+            round: { include: { group: true } },
             Contributions: {
               include: {
                 roundMember: {
@@ -2150,7 +2150,7 @@ const resolvers = {
       const currentOrgMember = await prisma.orgMember.findFirst({
         where: {
           userId: user.id,
-          organization: { rounds: { some: { id: roundId } } },
+          group: { rounds: { some: { id: roundId } } },
         },
       });
 
@@ -2313,8 +2313,8 @@ const resolvers = {
       if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
-          organizationId_userId: {
-            organizationId: member.organizationId,
+          groupId_userId: {
+            groupId: member.groupId,
             userId: user.id,
           },
         },
@@ -2336,8 +2336,8 @@ const resolvers = {
       if (!user) return null;
       const currentOrgMember = await prisma.orgMember.findUnique({
         where: {
-          organizationId_userId: {
-            organizationId: member.organizationId,
+          groupId_userId: {
+            groupId: member.groupId,
             userId: user.id,
           },
         },
@@ -2355,9 +2355,9 @@ const resolvers = {
       });
       return u.name;
     },
-    organization: async (orgMember) =>
-      prisma.organization.findUnique({
-        where: { id: orgMember.organizationId },
+    group: async (orgMember) =>
+      prisma.group.findUnique({
+        where: { id: orgMember.groupId },
       }),
   },
   User: {
@@ -2365,7 +2365,7 @@ const resolvers = {
       if (user?.id !== parent.id) return null;
       if (!orgSlug) return null;
       return prisma.orgMember.findFirst({
-        where: { organization: { slug: orgSlug }, userId: user.id },
+        where: { group: { slug: orgSlug }, userId: user.id },
       });
     },
     currentCollMember: async (
@@ -2379,7 +2379,7 @@ const resolvers = {
         where: {
           round: {
             slug: roundSlug,
-            organization: { slug: orgSlug },
+            group: { slug: orgSlug },
           },
           userId: user.id,
         },
@@ -2430,7 +2430,7 @@ const resolvers = {
       });
     },
   },
-  Organization: {
+  Group: {
     info: (org) => {
       return org.info && org.info.length
         ? org.info
@@ -2442,11 +2442,11 @@ const resolvers = {
         where: {
           OR: [
             {
-              organizationId: org.id,
+              groupId: org.id,
               visibility: "PUBLIC",
             },
             {
-              organizationId: org.id,
+              groupId: org.id,
               roundMember: {
                 some: { userId: user?.id ?? "undefined", isApproved: true },
               },
@@ -2457,7 +2457,7 @@ const resolvers = {
     },
     discourseUrl: async (org) => {
       const discourseConfig = await prisma.discourseConfig.findFirst({
-        where: { organizationId: org.id },
+        where: { groupId: org.id },
       });
       return discourseConfig?.url ?? null;
     },
@@ -2629,10 +2629,10 @@ const resolvers = {
 
       return now.isBefore(bucketCreationCloses);
     },
-    organization: async (round) => {
+    group: async (round) => {
       if (round.singleRound) return null;
-      return prisma.organization.findUnique({
-        where: { id: round.organizationId },
+      return prisma.group.findUnique({
+        where: { id: round.groupId },
       });
     },
     bucketStatusCount: async (round) => {
@@ -2783,7 +2783,7 @@ const resolvers = {
       });
     },
     discourseTopicUrl: async (bucket) => {
-      const org = await prisma.organization.findFirst({
+      const org = await prisma.group.findFirst({
         where: {
           rounds: { some: { buckets: { some: { id: bucket.id } } } },
         },
