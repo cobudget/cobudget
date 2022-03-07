@@ -59,7 +59,7 @@ export default function Selector({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 left-14 w-64 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute z-10 left-14 w-72 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="pb-1 mb-1 border-b-default border-gray-200">
             {currentUser?.orgMemberships?.map((orgMember) => {
               return (
@@ -70,27 +70,35 @@ export default function Selector({
                       active={active}
                       selected={orgMember.organization.id === activeId}
                     >
-                      <div className="flex items-center space-x-2">
-                        {orgMember.organization.logo && (
-                          <img
-                            src={orgMember.organization.logo}
-                            className="h-6 w-6 rounded"
-                          />
-                        )}
-                        <p className="truncate">
-                          {orgMember.organization.name}
-                        </p>
-                      </div>
+                      {orgMember.organization.logo && (
+                        <img
+                          src={orgMember.organization.logo}
+                          className="h-6 w-6 rounded flex-shrink-0 mr-2"
+                        />
+                      )}
+                      <p className="truncate">{orgMember.organization.name}</p>
                     </LinkItem>
                   )}
                 </Menu.Item>
               );
             })}
             {currentUser?.collectionMemberships
-              ?.filter(
-                (collMember) =>
-                  !orgIds.includes(collMember.collection.organization?.id)
-              )
+              ?.filter((collMember, i, array) => {
+                const orgId = collMember.collection.organization?.id;
+                if (orgId) {
+                  if (orgIds.includes(orgId)) return false;
+
+                  const collectionFromOrgAlreadyInList = array
+                    .slice(0, i)
+                    .some(
+                      (collMember) =>
+                        collMember.collection.organization?.id === orgId
+                    );
+                  if (collectionFromOrgAlreadyInList) return false;
+                }
+
+                return true;
+              })
               .map((collMember) => {
                 if (collMember.collection.organization)
                   return (
@@ -103,9 +111,15 @@ export default function Selector({
                             collMember.collection.organization.id === activeId
                           }
                         >
-                          <span className="truncate">
+                          {collMember.collection.organization.logo && (
+                            <img
+                              src={collMember.collection.organization.logo}
+                              className="h-6 w-6 rounded flex-shrink-0 mr-2"
+                            />
+                          )}
+                          <p className="truncate">
                             {collMember.collection.organization.name}
-                          </span>
+                          </p>
                         </LinkItem>
                       )}
                     </Menu.Item>
