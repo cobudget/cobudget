@@ -13,6 +13,11 @@ const BUCKET_QUERY = gql`
   }
 `;
 
+//const capLength = (title: string) =>
+//              title <= 30
+//                ? title
+//                : title.substr(0, 30) + "..."}
+
 const OrganizationAndEventHeader = ({
   currentOrg,
   collection,

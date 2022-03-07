@@ -9,7 +9,7 @@ const NavItem = ({
   primary,
   eventColor,
   external,
-}) => {
+}: any) => {
   const active = currentPath === href;
 
   const regularClasses = `ring-transparent text-gray-800 hover:bg-gray-300`;
