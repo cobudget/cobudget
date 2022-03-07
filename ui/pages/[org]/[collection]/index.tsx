@@ -204,7 +204,14 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
-  if (!collection) return null;
+  if (!collection) {
+    return (
+      <div className="text-center mt-7">
+        This round either doesn't exist or you don't have access to it
+      </div>
+    );
+  }
+
   const canEdit =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
