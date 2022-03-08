@@ -10,7 +10,7 @@ export default {
     eventHub.subscribe("cancel-funding", "email", async (args) => {
       await emailService.cancelFundingNotification(args);
     });
-    eventHub.subscribe("publish-dream", "email", async (args) => {
+    eventHub.subscribe("publish-bucket", "email", async (args) => {
       await emailService.bucketPublishedNotification(args);
     });
     eventHub.subscribe("contribute-to-bucket", "email", async (args) => {

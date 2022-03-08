@@ -5,16 +5,16 @@ const toBase64URL = (base64) =>
   base64.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
 const btoa = (b) => Buffer.from(b).toString("base64");
 
-export default function (currentOrg) {
+export default function (currentGroup) {
   const applicationName = "Dreams";
   const scopes = "read,write,session_info";
   const redirectUrl = process.env.IS_PROD
     ? `https://${
-        currentOrg.customDomain
-          ? currentOrg.customDomain
-          : `${currentOrg.subdomain}.${process.env.DEPLOY_URL}`
+        currentGroup.customDomain
+          ? currentGroup.customDomain
+          : `${currentGroup.subdomain}.${process.env.DEPLOY_URL}`
       }/api/connect-discourse`
-    : `http://${currentOrg.subdomain}.localhost:3000/api/connect-discourse`;
+    : `http://${currentGroup.subdomain}.localhost:3000/api/connect-discourse`;
 
   // inspired by github.com/edgeryders/tell
   const randomClientId = toBase64URL(
@@ -35,7 +35,7 @@ export default function (currentOrg) {
   // const pubKeyPem = forge.pki.publicKeyToPem(pubKey).replace(/\r/g, "");
 
   const pubKeyPem = process.env.NEXT_PUBLIC_TOKEN_KEY;
-  const url = new URL(currentOrg.discourseUrl);
+  const url = new URL(currentGroup.discourseUrl);
   url.pathname = "/user-api-key/new";
   url.searchParams.set("auth_redirect", redirectUrl);
   url.searchParams.set("application_name", applicationName);

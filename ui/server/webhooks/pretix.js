@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
         );
 
         const membership = await Member.findOneAndUpdate(
-          { userId: user.id, collectionId: event.id },
+          { userId: user.id, roundId: event.id },
           { isApproved: true },
           { setDefaultsOnInsert: true, upsert: true, new: true }
         );

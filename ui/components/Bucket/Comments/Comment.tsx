@@ -23,7 +23,7 @@ const Comment = ({ comment, showBorderBottom }) => {
 
   const canEdit =
     currentUser &&
-    (currentUser.currentCollMember?.id === comment.collectionMember?.id ||
+    (currentUser.currentCollMember?.id === comment.roundMember?.id ||
       currentUser.currentCollMember?.isAdmin);
 
   return (
@@ -34,7 +34,7 @@ const Comment = ({ comment, showBorderBottom }) => {
         ) : (
           <Avatar
             user={
-              comment.collectionMember?.user ?? {
+              comment.roundMember?.user ?? {
                 username: comment.discourseUsername,
               }
             }
@@ -47,14 +47,14 @@ const Comment = ({ comment, showBorderBottom }) => {
         <div className="flex justify-between items-center mb-2 text-gray-900 font-medium">
           {comment.isLog ? (
             <h5>Log</h5>
-          ) : comment.collectionMember === null ? (
+          ) : comment.roundMember === null ? (
             <h5>A discourse user</h5>
           ) : (
             <h5 className="font-medium">
-              <span>{comment.collectionMember?.user.name}</span>{" "}
-              {comment.collectionMember.user.username && (
+              <span>{comment.roundMember.user.name}</span>{" "}
+              {comment.roundMember.user.username && (
                 <span className="text-gray-500 font-normal">
-                  @{comment.collectionMember?.user.username}
+                  @{comment.roundMember.user.username}
                 </span>
               )}
             </h5>

@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
-    collection(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
       slug
       info
@@ -63,25 +63,25 @@ export const TOP_LEVEL_QUERY = gql`
       avatar
       email
 
-      orgMemberships {
+      groupMemberships {
         id
         isAdmin
-        organization {
+        group {
           id
           name
           slug
           logo
         }
       }
-      collectionMemberships {
+      roundMemberships {
         id
         isAdmin
         isApproved
-        collection {
+        round {
           id
           title
           slug
-          organization {
+          group {
             id
             name
             slug
@@ -89,19 +89,19 @@ export const TOP_LEVEL_QUERY = gql`
           }
         }
       }
-      currentCollMember(orgSlug: $orgSlug, collectionSlug: $collectionSlug) {
+      currentCollMember(groupSlug: $groupSlug, roundSlug: $roundSlug) {
         id
         isAdmin
         isModerator
         isApproved
         hasJoined
         balance
-        collection {
+        round {
           id
           title
         }
       }
-      currentOrgMember(orgSlug: $orgSlug) {
+      currentGroupMember(groupSlug: $groupSlug) {
         id
         bio
         isAdmin
@@ -110,7 +110,7 @@ export const TOP_LEVEL_QUERY = gql`
       }
     }
 
-    currentOrg(orgSlug: $orgSlug) {
+    currentGroup(groupSlug: $groupSlug) {
       __typename
       id
       name
@@ -127,10 +127,10 @@ export const TOP_LEVEL_QUERY = gql`
 const MyApp = ({ Component, pageProps, router }) => {
   const [
     {
-      data: { currentUser, currentOrg, collection } = {
+      data: { currentUser, currentGroup, round } = {
         currentUser: null,
-        currentOrg: null,
-        collection: null,
+        currentGroup: null,
+        round: null,
       },
       fetching,
       error,
@@ -138,8 +138,8 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org,
-      collectionSlug: router.query.collection,
+      groupSlug: router.query.group,
+      roundSlug: router.query.round,
     },
   });
 
@@ -177,30 +177,30 @@ const MyApp = ({ Component, pageProps, router }) => {
         active={modal}
         closeModal={closeModal}
         currentUser={currentUser}
-        currentOrg={currentOrg}
+        currentGroup={currentGroup}
       />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
-        currentOrg={currentOrg}
+        currentGroup={currentGroup}
         openModal={openModal}
-        collection={collection}
+        round={round}
         router={router}
         title={
-          currentOrg
-            ? collection
-              ? `${collection.title} | ${currentOrg.name}`
-              : currentOrg.name
-            : collection
-            ? collection.title
+          currentGroup
+            ? round
+              ? `${round.title} | ${currentGroup.name}`
+              : currentGroup.name
+            : round
+            ? round.title
             : "Cobudget"
         }
       >
         <Component
           {...pageProps}
-          collection={collection}
+          round={round}
           currentUser={currentUser}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
           openModal={openModal}
           router={router}
         />

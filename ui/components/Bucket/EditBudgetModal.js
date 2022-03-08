@@ -12,7 +12,7 @@ import * as yup from "yup";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
-    editDream(bucketId: $bucketId, budgetItems: $budgetItems) {
+    editBucket(bucketId: $bucketId, budgetItems: $budgetItems) {
       id
       minGoal
       maxGoal
@@ -48,14 +48,14 @@ const schema = yup.object().shape({
 const EditBudgetModal = ({
   bucketId,
   budgetItems,
-  collection,
-  currentOrg,
+  round,
+  currentGroup,
   currency,
   allowStretchGoals,
   handleClose,
   open,
 }) => {
-  const [{ fetching: loading }, editDream] = useMutation(EDIT_BUDGET_MUTATION);
+  const [{ fetching: loading }, editBucket] = useMutation(EDIT_BUDGET_MUTATION);
 
   const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
@@ -81,7 +81,7 @@ const EditBudgetModal = ({
         <h1 className="text-xl font-semibold mb-4">Edit budget</h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editDream({
+            editBucket({
               bucketId,
               budgetItems: [
                 ...(variables.budgetItems?.map((item) => ({
@@ -156,7 +156,7 @@ const EditBudgetModal = ({
           <div className="flex mb-4">
             <Button
               variant="secondary"
-              color={collection.color}
+              color={round.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
@@ -209,7 +209,7 @@ const EditBudgetModal = ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
-              color={collection.color}
+              color={round.color}
               onClick={() =>
                 insert(fields.filter((f) => f.type === "INCOME").length, {
                   type: "INCOME",
@@ -227,10 +227,10 @@ const EditBudgetModal = ({
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
-              {Boolean(collection.guidelines.length) && (
+              {Boolean(round.guidelines.length) && (
                 <a
-                  href={`/${currentOrg?.slug ?? "c"}/${
-                    collection.slug
+                  href={`/${currentGroup?.slug ?? "c"}/${
+                    round.slug
                   }/about#guidelines`}
                   target="_blank"
                   rel="noreferrer"

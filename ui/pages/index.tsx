@@ -5,8 +5,8 @@ const liStyle =
   "px-3 py-2 hover:bg-gray-200 hover:text-gray-900 text-gray-700 truncate";
 
 const IndexPage = ({ currentUser }) => {
-  const orgIds = currentUser?.orgMemberships?.map(
-    (orgMember) => orgMember.organization.id
+  const groupIds = currentUser?.groupMemberships?.map(
+    (groupMember) => groupMember.group.id
   );
   return (
     <div className="page w-full">
@@ -15,42 +15,42 @@ const IndexPage = ({ currentUser }) => {
           <div className="flex justify-center items-center flex-col ">
             <h2 className="mb-4 text-lg font-medium">Your groups</h2>
             <ul className="max-w-xs bg-white rounded-md shadow divide-y-default divide-gray-200">
-              {currentUser?.orgMemberships?.map((orgMember) => {
+              {currentUser?.groupMemberships?.map((groupMember) => {
                 return (
-                  <li key={orgMember.id} className={liStyle}>
-                    <Link href={`/${orgMember.organization.slug}`}>
-                      <a>{orgMember.organization.name}</a>
+                  <li key={groupMember.id} className={liStyle}>
+                    <Link href={`/${groupMember.group.slug}`}>
+                      <a>{groupMember.group.name}</a>
                     </Link>
                   </li>
                 );
               })}
-              {currentUser?.collectionMemberships
+              {currentUser?.roundMemberships
                 ?.filter(
                   (collMember) =>
-                    !orgIds.includes(collMember.collection.organization?.id)
+                    !groupIds.includes(collMember.round.group?.id)
                 )
                 .map((collMember) => {
-                  if (collMember.collection.organization)
+                  if (collMember.round.group)
                     return (
                       <li key={collMember.id} className={liStyle}>
                         <Link
-                          href={`/${collMember.collection.organization.slug}`}
+                          href={`/${collMember.round.group.slug}`}
                         >
-                          <a>{collMember.collection.organization.name}</a>
+                          <a>{collMember.round.group.name}</a>
                         </Link>
                       </li>
                     );
                   return (
                     <li key={collMember.id} className={liStyle}>
-                      <Link href={`/c/${collMember.collection.slug}`}>
-                        <a>{collMember.collection.title}</a>
+                      <Link href={`/c/${collMember.round.slug}`}>
+                        <a>{collMember.round.title}</a>
                       </Link>
                     </li>
                   );
                 })}
               <li className={liStyle}>
-                <Button size="large" nextJsLink href="/new-collection">
-                  Create collection
+                <Button size="large" nextJsLink href="/new-round">
+                  Create round
                 </Button>
               </li>
             </ul>

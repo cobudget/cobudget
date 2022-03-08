@@ -10,19 +10,19 @@ generator client {
 }
 
 model User {
-  id              String             @id @default(cuid())
-  username        String?            @unique
-  email           String?            @unique
-  name            String?
-  verifiedEmail   Boolean            @default(false)
-  emailVerified   DateTime?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  image           String?
-  orgMemberships  OrgMember[]
-  collMemberships CollectionMember[]
-  emailSettings   EmailSettings?
-  Transaction     Transaction[]
+  id               String         @id @default(cuid())
+  username         String?        @unique
+  email            String?        @unique
+  name             String?
+  verifiedEmail    Boolean        @default(false)
+  emailVerified    DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  image            String?
+  groupMemberships GroupMember[]
+  collMemberships  RoundMember[]
+  emailSettings    EmailSettings?
+  Transaction      Transaction[]
 }
 
 model EmailSettings {
@@ -38,28 +38,28 @@ model EmailSettings {
   userId                         String  @unique
 }
 
-model OrgMember {
-  id                String       @id @default(cuid())
-  organization      Organization @relation(fields: [organizationId], references: [id])
-  organizationId    String
-  user              User         @relation(fields: [userId], references: [id])
+model GroupMember {
+  id                String   @id @default(cuid())
+  group             Group    @relation(fields: [groupId], references: [id])
+  groupId           String
+  user              User     @relation(fields: [userId], references: [id])
   userId            String
   bio               String?
-  isAdmin           Boolean      @default(false)
+  isAdmin           Boolean  @default(false)
   discourseUsername String?
   discourseApiKey   String?
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  @@unique([organizationId, userId])
+  @@unique([groupId, userId])
 }
 
-model CollectionMember {
-  id           String     @id @default(cuid())
-  collection   Collection @relation(fields: [collectionId], references: [id])
-  collectionId String
-  user         User       @relation(fields: [userId], references: [id])
-  userId       String
+model RoundMember {
+  id      String @id @default(cuid())
+  round   Round  @relation(fields: [roundId], references: [id])
+  roundId String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
 
   isAdmin     Boolean @default(false)
   isModerator Boolean @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
@@ -85,32 +85,32 @@ model CollectionMember {
   statusAccountId   String?  @unique
 
   transactionsCreated Transaction[]
-  @@unique([userId, collectionId])
+  @@unique([userId, roundId])
 }
 
-model Organization {
+model Group {
   id           String           @id @default(cuid())
   slug         String           @unique
   name         String
   info         String?
   logo         String?
   customDomain String?
-  orgMembers   OrgMember[]
-  collections  Collection[]
+  groupMembers GroupMember[]
+  rounds       Round[]
   discourse    DiscourseConfig?
 
   finishedTodos Boolean @default(false)
 }
 
-model Collection {
-  id               String       @id @default(cuid())
-  slug             String
-  organization     Organization @relation(fields: [organizationId], references: [id])
-  organizationId   String
-  singleCollection Boolean      @default(false)
-  title            String
-  archived         Boolean      @default(false)
-  deleted          Boolean      @default(false)
+model Round {
+  id          String  @id @default(cuid())
+  slug        String
+  group       Group   @relation(fields: [groupId], references: [id])
+  groupId     String
+  singleRound Boolean @default(false)
+  title       String
+  archived    Boolean @default(false)
+  deleted     Boolean @default(false)
 
   info               String?
   about              String?
@@ -135,55 +135,55 @@ model Collection {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  collectionMember CollectionMember[]
-  buckets          Bucket[]
-  allocations      Allocation[]
-  contributions    Contribution[]
-  transactions     Transaction[]
+  roundMember   RoundMember[]
+  buckets       Bucket[]
+  allocations   Allocation[]
+  contributions Contribution[]
+  transactions  Transaction[]
 
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  @@unique([organizationId, slug])
+  @@unique([groupId, slug])
 }
 
 model Tag {
-  id           String     @id @default(cuid())
-  value        String
-  collection   Collection @relation(fields: [collectionId], references: [id])
-  collectionId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  value     String
+  round     Round    @relation(fields: [roundId], references: [id])
+  roundId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   buckets Bucket[]
-  @@unique([collectionId, value])
+  @@unique([roundId, value])
 }
 
 model Guideline {
-  id           String     @id @default(cuid())
-  title        String
-  description  String
-  position     Float
-  collection   Collection @relation(fields: [collectionId], references: [id])
-  collectionId String
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  Flag         Flag[]
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  position    Float
+  round       Round    @relation(fields: [roundId], references: [id])
+  roundId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Flag        Flag[]
 }
 
 model Field {
-  id           String       @id @default(cuid())
-  name         String
-  description  String
-  type         FieldType
-  limit        Int?
-  isRequired   Boolean
-  position     Float
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  collection   Collection   @relation(fields: [collectionId], references: [id])
-  collectionId String
-  fieldValue   FieldValue[]
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  type        FieldType
+  limit       Int?
+  isRequired  Boolean
+  position    Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  round       Round        @relation(fields: [roundId], references: [id])
+  roundId     String
+  fieldValue  FieldValue[]
 }
 
 model FieldValue {
@@ -223,23 +223,23 @@ enum AllocationType {
 }
 
 model Bucket {
-  id           String             @id @default(cuid())
-  collection   Collection         @relation(fields: [collectionId], references: [id])
-  collectionId String
-  title        String
-  description  String?
-  summary      String?
-  Images       Image[]
-  cocreators   CollectionMember[]
-  BudgetItems  BudgetItem[]
-  FieldValues  FieldValue[]
-  comments     Comment[]
-  approvedAt   DateTime?
-  publishedAt  DateTime?
-  fundedAt     DateTime?
-  canceledAt   DateTime?
-  completedAt  DateTime?
-  archivedAt   DateTime?
+  id          String             @id @default(cuid())
+  round       Round              @relation(fields: [roundId], references: [id])
+  roundId     String
+  title       String
+  description String?
+  summary     String?
+  Images      Image[]
+  cocreators  CollectionMember[]
+  BudgetItems BudgetItem[]
+  FieldValues FieldValue[]
+  comments    Comment[]
+  approvedAt  DateTime?
+  publishedAt DateTime?
+  fundedAt    DateTime?
+  canceledAt  DateTime?
+  completedAt DateTime?
+  archivedAt  DateTime?
 
   deleted           Boolean        @default(false)
   discourseTopicId  Int?
@@ -278,31 +278,31 @@ enum BudgetItemType {
 }
 
 model Comment {
-  id           String           @id @default(cuid())
+  id           String      @id @default(cuid())
   content      String
-  isLog        Boolean          @default(false)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  collMember   CollectionMember @relation(fields: [collMemberId], references: [id])
+  isLog        Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  collMember   RoundMember @relation(fields: [collMemberId], references: [id])
   collMemberId String
-  bucket       Bucket           @relation(fields: [bucketId], references: [id])
+  bucket       Bucket      @relation(fields: [bucketId], references: [id])
   bucketId     String
 }
 
 model Flag {
-  id              String           @id @default(cuid())
-  guideline       Guideline?       @relation(fields: [guidelineId], references: [id])
+  id              String      @id @default(cuid())
+  guideline       Guideline?  @relation(fields: [guidelineId], references: [id])
   guidelineId     String?
   comment         String?
-  collMember      CollectionMember @relation(fields: [collMemberId], references: [id])
+  collMember      RoundMember @relation(fields: [collMemberId], references: [id])
   collMemberId    String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   type            FlagType
-  resolvingFlag   Flag?            @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
-  resolvedBy      Flag?            @relation("FlagToFlag")
-  resolvingFlagId String?          @unique
-  bucket          Bucket           @relation(fields: [bucketId], references: [id])
+  resolvingFlag   Flag?       @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
+  resolvedBy      Flag?       @relation("FlagToFlag")
+  resolvingFlagId String?     @unique
+  bucket          Bucket      @relation(fields: [bucketId], references: [id])
   bucketId        String
 }
 
@@ -313,53 +313,53 @@ enum FlagType {
 }
 
 model Allocation {
-  id                 String            @id @default(cuid())
-  collection         Collection        @relation(fields: [collectionId], references: [id])
-  collectionId       String
-  collectionMember   CollectionMember  @relation(fields: [collectionMemberId], references: [id])
-  collectionMemberId String
-  allocatedBy        CollectionMember? @relation("allocatedBy", fields: [allocatedById], references: [id])
-  allocatedById      String?
-  amount             Int
-  amountBefore       Int?
-  allocationType     AllocationType    @default(ADD)
-  createdAt          DateTime          @default(now())
+  id             String         @id @default(cuid())
+  round          Round          @relation(fields: [roundId], references: [id])
+  roundId        String
+  roundMember    RoundMember    @relation(fields: [roundMemberId], references: [id])
+  roundMemberId  String
+  allocatedBy    RoundMember?   @relation("allocatedBy", fields: [allocatedById], references: [id])
+  allocatedById  String?
+  amount         Int
+  amountBefore   Int?
+  allocationType AllocationType @default(ADD)
+  createdAt      DateTime       @default(now())
 }
 
 model Contribution {
-  id                 String           @id @default(cuid())
-  collection         Collection       @relation(fields: [collectionId], references: [id])
-  collectionId       String
-  collectionMember   CollectionMember @relation(fields: [collectionMemberId], references: [id])
-  collectionMemberId String
-  bucket             Bucket           @relation(fields: [bucketId], references: [id])
-  bucketId           String
-  amount             Int
-  amountBefore       Int?
-  createdAt          DateTime         @default(now())
+  id            String      @id @default(cuid())
+  round         Round       @relation(fields: [roundId], references: [id])
+  roundId       String
+  roundMember   RoundMember @relation(fields: [roundMemberId], references: [id])
+  roundMemberId String
+  bucket        Bucket      @relation(fields: [bucketId], references: [id])
+  bucketId      String
+  amount        Int
+  amountBefore  Int?
+  createdAt     DateTime    @default(now())
 }
 
 model DiscourseConfig {
-  id               String       @id @default(cuid())
+  id               String @id @default(cuid())
   url              String
   apiKey           String
   dreamsCategoryId Int
   minPostLength    Int
-  organization     Organization @relation(fields: [organizationId], references: [id])
-  organizationId   String       @unique
+  group            Group  @relation(fields: [groupId], references: [id])
+  groupId          String @unique
 }
 
 model Account {
   id String @id @default(cuid())
 
-  collectionMemberIncoming CollectionMember? @relation(name: "incoming")
-  collectionMemberOutgoing CollectionMember? @relation(name: "outgoing")
-  collectionMemberStatus   CollectionMember? @relation(name: "status")
+  roundMemberIncoming RoundMember? @relation(name: "incoming")
+  roundMemberOutgoing RoundMember? @relation(name: "outgoing")
+  roundMemberStatus   RoundMember? @relation(name: "status")
 
   bucketStatus   Bucket? @relation(name: "bucketStatus")
   bucketOutgoing Bucket? @relation(name: "bucketOutgoing")
 
-  collection Collection[]
+  roundStatus Round?
 
   outgoingTransactions Transaction[] @relation(name: "from")
   incomingTransactions Transaction[] @relation(name: "to")
@@ -373,12 +373,12 @@ model Transaction {
   amount    Int
   createdAt DateTime @default(now())
 
-  collectionMember   CollectionMember? @relation(fields: [collectionMemberId], references: [id])
-  collectionMemberId String?
-  user               User?             @relation(fields: [userId], references: [id])
-  userId             String?
+  roundMember   RoundMember? @relation(fields: [collectionMemberId], references: [id])
+  roundMemberId String?
+  user          User?        @relation(fields: [userId], references: [id])
+  userId        String?
 
-  collection   Collection? @relation(fields: [collectionId], references: [id])
+  collection   Round?  @relation(fields: [collectionId], references: [id])
   collectionId String?
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
