@@ -8,6 +8,9 @@ node_modules
 .idea
 ui/.env
 
+# ts typecheck caching
+tsconfig.tsbuildinfo
+
 # dependencies
 ui/.pnp
 ui/.pnp.js
