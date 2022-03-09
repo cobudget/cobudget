@@ -1,5 +1,2 @@
 # TODO: unignore this, see https://github.com/Edgeryders-Participio/multi-dreams/issues/334
-api/services/eventHub.service.js
-
-# TODO: https://github.com/cobudget-org/cobudget/issues/448
-**/*.ts
+ui/server/services/eventHub.service.js
