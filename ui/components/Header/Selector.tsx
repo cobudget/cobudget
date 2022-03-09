@@ -73,7 +73,7 @@ export default function Selector({
                       {orgMember.organization.logo && (
                         <img
                           src={orgMember.organization.logo}
-                          className="h-6 w-6 rounded flex-shrink-0 mr-2"
+                          className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                         />
                       )}
                       <p className="truncate">{orgMember.organization.name}</p>
