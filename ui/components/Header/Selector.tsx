@@ -7,7 +7,7 @@ import { CheckIcon, SelectorIcon } from "../Icons";
 function LinkItem(props) {
   let { href, children, active, selected, className, ...rest } = props;
   const linkStyle = classNames(
-    "px-2 py-2 rounded flex justify-between items-center",
+    "px-2 py-2 rounded flex justify-start items-center",
     active && "bg-gray-200",
     selected && "font-medium",
     className
@@ -16,7 +16,8 @@ function LinkItem(props) {
   return (
     <Link href={href}>
       <a {...rest} className={linkStyle}>
-        {children} {selected && <CheckIcon className="h-5 w-5 flex-shrink-0" />}
+        {children}{" "}
+        {selected && <CheckIcon className="h-5 w-5 flex-shrink-0 ml-auto" />}
       </a>
     </Link>
   );
@@ -73,7 +74,7 @@ export default function Selector({
                       {orgMember.organization.logo && (
                         <img
                           src={orgMember.organization.logo}
-                          className="h-6 w-6 rounded flex-shrink-0 mr-2"
+                          className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                         />
                       )}
                       <p className="truncate">{orgMember.organization.name}</p>
@@ -114,7 +115,7 @@ export default function Selector({
                           {collMember.collection.organization.logo && (
                             <img
                               src={collMember.collection.organization.logo}
-                              className="h-6 w-6 rounded flex-shrink-0 mr-2"
+                              className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                             />
                           )}
                           <p className="truncate">
