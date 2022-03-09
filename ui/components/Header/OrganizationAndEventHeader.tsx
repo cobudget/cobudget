@@ -42,7 +42,7 @@ const OrganizationAndEventHeader = ({
 
       {(currentOrg || collection || currentUser) && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           {currentOrg ? (
             <Link href={`/${currentOrg.slug}`}>
@@ -87,7 +87,7 @@ const OrganizationAndEventHeader = ({
 
       {currentOrg && collection && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
             <a
@@ -101,7 +101,7 @@ const OrganizationAndEventHeader = ({
       {bucket && router.query?.bucket && (
         <>
           <SlashIcon
-            className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
+            className={`w-7 h-7 flex-none text-white opacity-25 hidden sm:block`}
           />
 
           <span
