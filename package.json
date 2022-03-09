@@ -7,12 +7,13 @@
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
     "postinstall": "cd ui && yarn",
-    "lint": "prettier --ignore-path .gitignore --check . && eslint . && yarn --cwd ui typecheck",
+    "lint": "prettier --ignore-path .gitignore --check . && eslint . && yarn typecheck",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
     "test:open": "cypress open",
     "test:run": "cypress run",
-    "test": "./scripts/wait.sh 3001 && npm run test:run"
+    "test": "./scripts/wait.sh 3001 && npm run test:run",
+    "typecheck": "yarn --cwd ui typecheck"
   },
   "devDependencies": {
     "concurrently": "3.5.1",
