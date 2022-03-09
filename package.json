@@ -7,7 +7,7 @@
     "db:up": "docker-compose up",
     "db:reset": "docker-compose down && docker-compose rm -f",
     "postinstall": "cd ui && yarn",
-    "lint": "prettier --ignore-path .gitignore --check . && eslint .",
+    "lint": "prettier --ignore-path .gitignore --check . && eslint . && yarn --cwd ui typecheck",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix",
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
     "test:open": "cypress open",
