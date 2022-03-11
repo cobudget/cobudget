@@ -64,8 +64,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
               </Dialog.Title>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  You need to finish sign up by choosing a username and
-                  accepting terms of service.
+                  Please add your name and username.
                 </p>
               </div>
               <div className="space-y-4 mt-2">
@@ -94,10 +93,11 @@ export default function FinishSignup({ isOpen, currentUser }) {
                     type="checkbox"
                   />{" "}
                   <span>
-                    I accept{" "}
+                    I accept Cobudget&apos;s{" "}
                     <a
                       className="text-blue underline"
                       target="_blank"
+                      rel="noreferrer"
                       href="https://www.iubenda.com/terms-and-conditions/58637640"
                     >
                       Terms and Conditions
