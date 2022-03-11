@@ -41,7 +41,7 @@ module.exports = {
         f: "rgb(172, 182, 192)",
       },
       fontSize: {
-        "xxs": '9px',
+        xxs: "9px",
       },
       height: {
         88: "22rem",

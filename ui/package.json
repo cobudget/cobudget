@@ -110,7 +110,7 @@
     "prisma": "^3.4.1",
     "tailwindcss": "^2.1.0",
     "tailwindcss-font-inter": "2.0.2",
-    "typescript": "^4.4.3"
+    "typescript": "4.4.3"
   },
   "resolutions": {
     "graphql": "15.8.0",

@@ -36,12 +36,15 @@ const CONTRIBUTE_MUTATION = gql`
 
 const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
   const [inputValue, setInputValue] = useState("");
-  const [availableBalance, setAvailableBalance] = useState(currentUser.currentCollMember.balance / 100);
+  const [availableBalance, setAvailableBalance] = useState(
+    currentUser.currentCollMember.balance / 100
+  );
   const amount = Math.round(inputValue * 100);
 
   useEffect(() => {
     setAvailableBalance(
-      (currentUser.currentCollMember.balance / 100) - parseFloat(inputValue || '0')
+      currentUser.currentCollMember.balance / 100 -
+        parseFloat(inputValue || "0")
     );
   }, [inputValue, currentUser.currentCollMember.balance]);
 
@@ -94,12 +97,10 @@ const ContributeModal = ({ handleClose, dream, collection, currentUser }) => {
         <h1 className="text-2xl mb-2 font-semibold">
           Contribute to {dream.title}
         </h1>
-        <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-600" }>
-          {
-            availableBalance >= 0 ?
-            `Available balance: ${availableBalance} ${collection.currency}`
-            : "Insufficient balance"
-          }
+        <p className={availableBalance >= 0 ? "text-gray-800" : "text-red-600"}>
+          {availableBalance >= 0
+            ? `Available balance: ${availableBalance} ${collection.currency}`
+            : "Insufficient balance"}
         </p>
         {collection.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
