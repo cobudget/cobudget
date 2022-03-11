@@ -36,5 +36,7 @@ module.exports = {
     "react/prop-types": "off",
     // don't require components to have a display name
     "react/display-name": "off",
+    // https://dev.to/wkrueger/never-ignore-the-exhaustive-deps-rule-2ap8
+    "react-hooks/exhaustive-deps": "error",
   },
 };
