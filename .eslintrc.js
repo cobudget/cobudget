@@ -8,6 +8,8 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    // https://github.com/cobudget/cobudget/issues/602
+    //"plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:react/recommended",
     "plugin:react-hooks/recommended",
     "prettier",
@@ -23,6 +25,8 @@ module.exports = {
     },
     ecmaVersion: 2020,
     sourceType: "module",
+    tsconfigRootDir: __dirname,
+    project: ["./ui/tsconfig.json"],
   },
   plugins: ["react", "@typescript-eslint"],
   rules: {
