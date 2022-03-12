@@ -94,7 +94,7 @@ model Organization {
   name         String
   info         String?
   logo         String?
-  customDomain String?
+  customDomain String?          @unique
   orgMembers   OrgMember[]
   collections  Collection[]
   discourse    DiscourseConfig?
