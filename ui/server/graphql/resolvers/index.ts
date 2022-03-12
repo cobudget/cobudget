@@ -198,6 +198,13 @@ const resolvers = {
     },
     currentOrg: async (parent, { orgSlug }) => {
       if (!orgSlug || orgSlug === "c") return null;
+
+      // orgSlug is a custom domain
+      if (orgSlug.includes("."))
+        return prisma.organization.findUnique({
+          where: { customDomain: orgSlug },
+        });
+
       return prisma.organization.findUnique({ where: { slug: orgSlug } });
     },
     organization: combineResolvers(isMemberOfOrg, async (parent, { orgId }) => {
