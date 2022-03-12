@@ -8,6 +8,7 @@ import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
+import getHostInfo from "utils/getHostInfo";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
@@ -124,7 +125,7 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps, router }) => {
+const MyApp = ({ Component, pageProps, router, customDomain }) => {
   const [
     {
       data: { currentUser, currentOrg, collection } = {
@@ -138,7 +139,7 @@ const MyApp = ({ Component, pageProps, router }) => {
   ] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      orgSlug: router.query.org,
+      orgSlug: customDomain ?? router.query.org,
       collectionSlug: router.query.collection,
     },
   });
@@ -208,6 +209,17 @@ const MyApp = ({ Component, pageProps, router }) => {
       </Layout>
     </>
   );
+};
+
+MyApp.getInitialProps = async ({ ctx }) => {
+  // calls page's `getInitialProps` and fills `appProps.pageProps`
+  //const appProps = await appContext.getInitialProps(appContext);
+  // get the damn host info, get the damn group info.
+  const { host, subdomain } = getHostInfo(ctx.req);
+  console.log({ host });
+  let rootGroup = null;
+  const customDomain = host;
+  return { customDomain };
 };
 
 //@ts-ignore
