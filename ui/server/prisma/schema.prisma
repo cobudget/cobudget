@@ -39,8 +39,8 @@ model EmailSettings {
 
 model GroupMember {
   id                String       @id @default(cuid())
-  group      Group @relation(fields: [groupId], references: [id])
-  groupId    String
+  group             Group        @relation(fields: [groupId], references: [id])
+  groupId           String       @map("organizationId")
   user              User         @relation(fields: [userId], references: [id])
   userId            String
   bio               String?
@@ -51,12 +51,13 @@ model GroupMember {
   updatedAt         DateTime     @updatedAt
 
   @@unique([groupId, userId])
+  @@map("OrgMember")
 }
 
 model RoundMember {
   id           String     @id @default(cuid())
-  round   Round @relation(fields: [roundId], references: [id])
-  roundId String
+  round        Round      @relation(fields: [roundId], references: [id])
+  roundId      String     @map("collectionId")
   user         User       @relation(fields: [userId], references: [id])
   userId       String
 
@@ -85,6 +86,7 @@ model RoundMember {
 
   transactionsCreated Transaction[]
   @@unique([userId, roundId])
+  @@map("CollectionMember")
 }
 
 model Group {
@@ -94,19 +96,20 @@ model Group {
   info         String?
   logo         String?
   customDomain String?
-  groupMembers   GroupMember[]
-  rounds  Round[]
+  groupMembers GroupMember[]
+  rounds       Round[]
   discourse    DiscourseConfig?
 
   finishedTodos Boolean @default(false)
+  @@map("Organization")
 }
 
 model Round {
   id               String       @id @default(cuid())
   slug             String
-  group     Group @relation(fields: [groupId], references: [id])
-  groupId   String
-  singleRound Boolean      @default(false)
+  group            Group        @relation(fields: [groupId], references: [id])
+  groupId          String       @map("organizationId") 
+  singleRound      Boolean      @default(false) @map("singleCollection")
   title            String
   archived         Boolean      @default(false)
   deleted          Boolean      @default(false)
@@ -141,13 +144,14 @@ model Round {
   transactions     Transaction[]
 
   @@unique([groupId, slug])
+  @@map("Collection")
 }
 
 model Tag {
   id           String     @id @default(cuid())
   value        String
-  round   Round @relation(fields: [roundId], references: [id])
-  roundId String
+  round        Round      @relation(fields: [roundId], references: [id])
+  roundId      String     @map("collectionId")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
@@ -160,8 +164,8 @@ model Guideline {
   title        String
   description  String
   position     Float
-  round   Round @relation(fields: [roundId], references: [id])
-  roundId String
+  round        Round      @relation(fields: [roundId], references: [id])
+  roundId      String     @map("collectionId")
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
   Flag         Flag[]
@@ -177,8 +181,8 @@ model Field {
   position     Float
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  round   Round   @relation(fields: [roundId], references: [id])
-  roundId String
+  round        Round        @relation(fields: [roundId], references: [id])
+  roundId      String       @map("collectionId")
   fieldValue   FieldValue[]
 }
 
@@ -220,8 +224,8 @@ enum AllocationType {
 
 model Bucket {
   id               String             @id @default(cuid())
-  round       Round         @relation(fields: [roundId], references: [id])
-  roundId     String
+  round       Round                   @relation(fields: [roundId], references: [id])
+  roundId     String                  @map("collectionId")
   title            String
   description      String?
   summary          String?
@@ -306,11 +310,11 @@ enum FlagType {
 
 model Allocation {
   id                 String            @id @default(cuid())
-  round         Round        @relation(fields: [roundId], references: [id])
-  roundId       String
-  roundMember   RoundMember  @relation(fields: [roundMemberId], references: [id])
-  roundMemberId String
-  allocatedBy        RoundMember? @relation("allocatedBy", fields: [allocatedById], references: [id])
+  round              Round             @relation(fields: [roundId], references: [id])
+  roundId            String            @map("collection")
+  roundMember        RoundMember       @relation(fields: [roundMemberId], references: [id])
+  roundMemberId      String            @map("collectionMemberId")
+  allocatedBy        RoundMember?      @relation("allocatedBy", fields: [allocatedById], references: [id])
   allocatedById      String?
   amount             Int
   amountBefore       Int?
@@ -321,9 +325,9 @@ model Allocation {
 model Contribution {
   id                 String           @id @default(cuid())
   round         Round       @relation(fields: [roundId], references: [id])
-  roundId       String
+  roundId       String      @map("collectionId")
   roundMember   RoundMember @relation(fields: [roundMemberId], references: [id])
-  roundMemberId String
+  roundMemberId String      @map("collectionMemberId")
   bucket             Bucket           @relation(fields: [bucketId], references: [id])
   bucketId           String
   amount             Int
@@ -338,7 +342,7 @@ model DiscourseConfig {
   dreamsCategoryId Int
   minPostLength    Int
   group     Group @relation(fields: [groupId], references: [id])
-  groupId   String       @unique
+  groupId   String       @unique @map("organizationId")
 }
 
 model Account {
@@ -363,9 +367,9 @@ model Transaction {
   createdAt DateTime        @default(now())
 
   roundMember   RoundMember? @relation(fields: [roundMemberId], references: [id])
-  roundMemberId String?
+  roundMemberId String?      @map("collectionMemberId")
   round         Round?       @relation(fields: [roundId], references: [id])
-  roundId       String?
+  roundId       String?      @map("collectionId")
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
