@@ -311,7 +311,7 @@ enum FlagType {
 model Allocation {
   id                 String            @id @default(cuid())
   round              Round             @relation(fields: [roundId], references: [id])
-  roundId            String            @map("collection")
+  roundId            String            @map("collectionId")
   roundMember        RoundMember       @relation(fields: [roundMemberId], references: [id])
   roundMemberId      String            @map("collectionMemberId")
   allocatedBy        RoundMember?      @relation("allocatedBy", fields: [allocatedById], references: [id])
