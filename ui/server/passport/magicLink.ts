@@ -1,4 +1,5 @@
 import MagicLoginStrategy from "passport-magic-login";
+import AppError from "server/utils/AppError";
 import prisma from "../prisma";
 import emailService from "../services/EmailService/email.service";
 
@@ -12,6 +13,9 @@ const magicLink = new MagicLoginStrategy({
     await emailService.loginMagicLink({ destination, href, code, req });
   },
   verify: (payload, callback) => {
+    if (payload === false) {
+      return callback(new AppError("Invalid Token", 400));
+    }
     const email = payload.destination.toLowerCase().trim();
 
     prisma.user
