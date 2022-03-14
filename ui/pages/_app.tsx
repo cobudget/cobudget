@@ -211,4 +211,4 @@ const MyApp = ({ Component, pageProps, router }) => {
 };
 
 //@ts-ignore
-export default withUrqlClient(client, { ssr: true })(MyApp as any);
+export default withUrqlClient(client, { ssr: false })(MyApp as any);
