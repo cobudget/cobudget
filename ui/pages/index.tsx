@@ -61,78 +61,13 @@ function replace(node) {
 const parseOptions = { replace };
 
 const IndexPage = ({ currentUser, bodyContent, headContent }) => {
-  // const orgIds = currentUser?.orgMemberships?.map(
-  //   (orgMember) => orgMember.organization.id
-  // );
-  console.log({ bodyContent, headContent });
-
   return (
     <>
       <Head>{parseHtml(headContent)}</Head>
       {parseHtml(bodyContent, parseOptions)}
     </>
   );
-
-  return (
-    <div className="page w-full">
-      <div className="py-10">
-        {false ? (
-          <div className="flex justify-center items-center flex-col ">
-            <h2 className="mb-4 text-lg font-medium">Your groups</h2>
-            <ul className="max-w-xs bg-white rounded-md shadow divide-y-default divide-gray-200">
-              {currentUser?.orgMemberships?.map((orgMember) => {
-                return (
-                  <li key={orgMember.id} className={liStyle}>
-                    <Link href={`/${orgMember.organization.slug}`}>
-                      <a>{orgMember.organization.name}</a>
-                    </Link>
-                  </li>
-                );
-              })}
-              {currentUser?.collectionMemberships
-                ?.filter(
-                  (collMember) =>
-                    !orgIds.includes(collMember.collection.organization?.id)
-                )
-                .map((collMember) => {
-                  if (collMember.collection.organization)
-                    return (
-                      <li key={collMember.id} className={liStyle}>
-                        <Link
-                          href={`/${collMember.collection.organization.slug}`}
-                        >
-                          <a>{collMember.collection.organization.name}</a>
-                        </Link>
-                      </li>
-                    );
-                  return (
-                    <li key={collMember.id} className={liStyle}>
-                      <Link href={`/c/${collMember.collection.slug}`}>
-                        <a>{collMember.collection.title}</a>
-                      </Link>
-                    </li>
-                  );
-                })}
-              <li className={liStyle}>
-                <Button size="large" nextJsLink href="/new-collection">
-                  Create collection
-                </Button>
-              </li>
-            </ul>
-          </div>
-        ) : (
-          <div>
-            <h1 className="text-2xl mb-2 font-medium">Cobudget v2</h1>
-          </div>
-        )}
-      </div>
-    </div>
-  );
 };
-
-// export default function Home(props) {
-//   return <div dangerouslySetInnerHTML={{ __html: props.bodyContent }} />
-// }
 
 export async function getStaticProps(ctx) {
   // Import modules in here that aren't needed in the component
@@ -140,7 +75,7 @@ export async function getStaticProps(ctx) {
   const axios = (await import(`axios`)).default;
 
   // Fetch HTML
-  let res = await axios("https://cobudget.webflow.io").catch((err) => {
+  let res: any = await axios("https://cobudget.webflow.io").catch((err) => {
     console.error(err);
   });
 
