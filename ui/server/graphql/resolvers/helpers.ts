@@ -274,3 +274,15 @@ export async function canViewRound({ round, user }) {
     return false;
   }
 }
+
+export async function deleteRoundMember({ roundMemberId }) {
+  const collectionMember = await prisma.collectionMember.findUnique({
+    where: { id: roundMemberId },
+  });
+  if (!collectionMember)
+    throw new Error("This member does not exist in this collection");
+
+  return prisma.collectionMember.delete({
+    where: { id: roundMemberId },
+  });
+}

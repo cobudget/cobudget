@@ -122,6 +122,14 @@ export const client = (
                 );
               }
             },
+            deleteGroupMember(result: any, { groupMemberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "orgMembersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                });
+            },
             updateMember(result: any, { isApproved }, cache) {
               // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
               if (isApproved)
