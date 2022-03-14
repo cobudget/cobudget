@@ -8,6 +8,7 @@ import LoadMore from "../LoadMore";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/EventMembers/SearchBar";
+import Router from 'next/router'
 
 export const COLLECTION_MEMBERS_QUERY = gql`
   query Members(
@@ -104,22 +105,12 @@ const DELETE_MEMBER = gql`
 
 const EventMembers = ({ collection, currentUser }) => {
   const [searchString, setSearchString] = useState("");
+  const [approvedMembers, setApprovedMembers] = useState([]);
+  const [moreExist, setMoreExist] = useState(false);
+  const [requestsToJoin, setRequestsToJoin] = useState([]);
   const [
     {
-      data: {
-        approvedMembersPage: { moreExist, approvedMembers } = {
-          moreExist: false,
-          approvedMembers: [],
-        },
-        requestsToJoinPage: { requestsToJoin },
-      } = {
-        approvedMembersPage: {
-          approvedMembers: [],
-        },
-        requestsToJoinPage: {
-          requestsToJoin: [],
-        },
-      },
+      data,
       fetching: loading,
       error,
     },
@@ -134,6 +125,14 @@ const EventMembers = ({ collection, currentUser }) => {
     },
     pause: true,
   });
+
+  useEffect(() => {
+    setApprovedMembers(
+      data?.approvedMembersPage?.approvedMembers || []
+    );
+    setMoreExist(data?.approvedMembersPage?.moreExist || false);
+    setRequestsToJoin(data?.requestsToJoinPage?.requestsToJoin || []);
+  }, [loading]);
 
   const debouncedSearchMembers = useMemo(() => {
     return debounce(searchApprovedMembers, 300, { leading: true });
@@ -152,13 +151,25 @@ const EventMembers = ({ collection, currentUser }) => {
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
-  const [, deleteMember] = useMutation(DELETE_MEMBER);
+  const [{ fetching:deleteMemberLoading, data: deleteMemberResponse }, deleteMember] = useMutation(DELETE_MEMBER);
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const isAdmin =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
+
+  useEffect(() => {
+    const member = approvedMembers.find(_member => {
+      return _member.id === deleteMemberResponse?.deleteMember.id
+    });
+    
+    if (!deleteMemberLoading && (currentUser.id === member?.user?.id)) {
+      Router.reload();
+    }
+
+    console.log(deleteMemberResponse, currentUser);
+  }, [deleteMemberLoading]);
 
   if (error) {
     console.error(error);
