@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 import EditOrganization from "components/Org/EditOrganization";
 
@@ -17,11 +17,14 @@ export const ORGANIZATION_QUERY = gql`
 
 export default () => {
   const router = useRouter();
-  const {
-    data: { organization } = { organization: null },
-    loading,
-    error,
-  } = useQuery(ORGANIZATION_QUERY, {
+  const [
+    {
+      data: { organization } = { organization: null },
+      fetching: loading,
+      error,
+    },
+  ] = useQuery({
+    query: ORGANIZATION_QUERY,
     variables: { id: router.query.organization },
   });
 
