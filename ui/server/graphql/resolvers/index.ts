@@ -436,6 +436,9 @@ const resolvers = {
           collectionId,
         });
 
+        // unapproved members are uninteresting to non-admins
+        if (!isAdmin && !isApproved) return null;
+
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
             where: {
