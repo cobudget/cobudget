@@ -13,7 +13,10 @@ const BUCKET_QUERY = gql`
   }
 `;
 
-const GroupanizationAndEventHeader = ({
+const capLength = (title: string) =>
+  title.length <= 30 ? title : title.substr(0, 30) + "...";
+
+const GroupAndRoundHeader = ({
   currentGroup,
   round,
   currentUser,
@@ -33,13 +36,15 @@ const GroupanizationAndEventHeader = ({
       <Link href="/">
         <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
           <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-          {!currentUser && !currentGroup && !round && <h1>Cobudget</h1>}
+          {!currentUser && !currentGroup && !round && (
+            <h1 className="leading-normal">Cobudget</h1>
+          )}
         </a>
       </Link>
 
       {(currentGroup || round || currentUser) && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           {currentGroup ? (
             <Link href={`/${currentGroup.slug}`}>
@@ -47,7 +52,6 @@ const GroupanizationAndEventHeader = ({
                 className={
                   "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
                 }
-                style={{ flex: "1 1 25%" }}
               >
                 {currentGroup.logo && (
                   <img
@@ -56,7 +60,7 @@ const GroupanizationAndEventHeader = ({
                   />
                 )}
                 <span className={`text-white font-medium truncate`}>
-                  {currentGroup.name}
+                  {capLength(currentGroup.name)}
                 </span>
               </a>
             </Link>
@@ -66,9 +70,8 @@ const GroupanizationAndEventHeader = ({
                 className={
                   "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
                 }
-                style={{ flex: "1 1 25%" }}
               >
-                {round.title}
+                {capLength(round.title)}
               </a>
             </Link>
           ) : null}
@@ -86,16 +89,13 @@ const GroupanizationAndEventHeader = ({
 
       {currentGroup && round && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           <Link href={`/${currentGroup?.slug ?? "c"}/${round.slug}`}>
             <a
               className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
-              style={{ flex: "1 1 25%" }}
             >
-              {round.title.length <= 30
-                ? round.title
-                : round.title.substr(0, 30) + "..."}
+              {capLength(round.title)}
             </a>
           </Link>
         </>
@@ -103,7 +103,7 @@ const GroupanizationAndEventHeader = ({
       {bucket && router.query?.bucket && (
         <>
           <SlashIcon
-            className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
+            className={`w-7 h-7 flex-none text-white opacity-25 hidden sm:block`}
           />
 
           <span
@@ -111,9 +111,7 @@ const GroupanizationAndEventHeader = ({
               "px-2 py-1 text-white rounded-md mx-0 font-medium truncate hidden sm:block"
             }
           >
-            {bucket.title.length <= 30
-              ? bucket.title
-              : bucket.title.substr(0, 30) + "..."}
+            {capLength(bucket.title)}
           </span>
         </>
       )}
@@ -121,4 +119,4 @@ const GroupanizationAndEventHeader = ({
   );
 };
 
-export default GroupanizationAndEventHeader;
+export default GroupAndRoundHeader;

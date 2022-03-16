@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 import EditGroup from "components/Group/EditGroup";
 
@@ -19,7 +19,7 @@ export default () => {
   const router = useRouter();
   const {
     data: { group } = { group: null },
-    loading,
+    fetching: loading,
     error,
   } = useQuery(GROUP_QUERY, {
     variables: { id: router.query.group },

@@ -32,11 +32,7 @@ const schema = gql`
     ): MembersPage
     members(roundId: ID!, isApproved: Boolean): [RoundMember]
     categories(groupId: ID!): [Category!]
-    contributionsPage(
-      roundId: ID!
-      offset: Int
-      limit: Int
-    ): ContributionsPage
+    contributionsPage(roundId: ID!, offset: Int, limit: Int): ContributionsPage
     roundTransactions(
       roundId: ID!
       offset: Int
@@ -45,11 +41,7 @@ const schema = gql`
   }
 
   type Mutation {
-    createGroup(
-      name: String!
-      logo: String
-      slug: String!
-    ): Group!
+    createGroup(name: String!, logo: String, slug: String!): Group!
 
     editGroup(
       groupId: ID!
@@ -95,10 +87,7 @@ const schema = gql`
     ): Round!
     deleteGuideline(roundId: ID!, guidelineId: ID!): Round!
 
-    addCustomField(
-      roundId: ID!
-      customField: CustomFieldInput!
-    ): Round!
+    addCustomField(roundId: ID!, customField: CustomFieldInput!): Round!
     editCustomField(
       roundId: ID!
       fieldId: ID!
@@ -154,12 +143,14 @@ const schema = gql`
     updateProfile(username: String, name: String): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
 
-    inviteRoundMembers(
-      roundId: ID!
-      emails: String!
-    ): [RoundMember]
+    inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
     inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
-    updateGroupMember(groupId: ID!, memberId: ID!, isAdmin: Boolean): GroupMember
+    updateGroupMember(
+      groupId: ID!
+      memberId: ID!
+      isAdmin: Boolean
+    ): GroupMember
+    deleteGroupMember(groupMemberId: ID!): GroupMember
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -357,7 +348,6 @@ const schema = gql`
     isApproved: Boolean!
     createdAt: Date
     balance: Int # stored as cents
-    amountContributed: Int
     email: String
     name: String
     hasJoined: Boolean
@@ -537,11 +527,7 @@ const schema = gql`
 
   type RoundTransactionPage {
     moreExist: Boolean
-    transactions(
-      roundId: ID!
-      offset: Int
-      limit: Int
-    ): [RoundTransaction]
+    transactions(roundId: ID!, offset: Int, limit: Int): [RoundTransaction]
   }
 
   # type GrantingPeriod {

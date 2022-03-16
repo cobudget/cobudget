@@ -7,11 +7,7 @@ import toast from "react-hot-toast";
 
 const CONTRIBUTE_MUTATION = gql`
   mutation Contribute($roundId: ID!, $bucketId: ID!, $amount: Int!) {
-    contribute(
-      roundId: $roundId
-      bucketId: $bucketId
-      amount: $amount
-    ) {
+    contribute(roundId: $roundId, bucketId: $bucketId, amount: $amount) {
       id
       totalContributions
       totalContributionsFromCurrentMember
@@ -36,12 +32,15 @@ const CONTRIBUTE_MUTATION = gql`
 
 const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
   const [inputValue, setInputValue] = useState("");
-  const [availableBalance, setAvailableBalance] = useState(currentUser.currentCollMember.balance / 100);
+  const [availableBalance, setAvailableBalance] = useState(
+    currentUser.currentCollMember.balance / 100
+  );
   const amount = Math.round(inputValue * 100);
 
   useEffect(() => {
     setAvailableBalance(
-      (currentUser.currentCollMember.balance / 100) - parseFloat(inputValue || '0')
+      currentUser.currentCollMember.balance / 100 -
+        parseFloat(inputValue || "0")
     );
   }, [inputValue, currentUser.currentCollMember.balance]);
 
@@ -77,11 +76,7 @@ const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
   const memberBalance = currentUser.currentCollMember.balance;
 
   const max = round.maxAmountToBucketPerUser
-    ? Math.min(
-        amountToMaxGoal,
-        memberBalance,
-        round.maxAmountToBucketPerUser
-      )
+    ? Math.min(amountToMaxGoal, memberBalance, round.maxAmountToBucketPerUser)
     : Math.min(amountToMaxGoal, memberBalance);
 
   return (
@@ -94,17 +89,15 @@ const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
         <h1 className="text-2xl mb-2 font-semibold">
           Contribute to {bucket.title}
         </h1>
-        <p className={ availableBalance >= 0 ? "text-gray-800" : "text-red-600" }>
-          {
-            availableBalance >= 0 ?
-            `Available balance: ${availableBalance} ${round.currency}`
-            : "Insufficient balance"
-          }
+        <p className={availableBalance >= 0 ? "text-gray-800" : "text-red-600"}>
+          {availableBalance >= 0
+            ? `Available balance: ${availableBalance} ${round.currency}`
+            : "Insufficient balance"}
         </p>
         {round.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {round.maxAmountToBucketPerUser / 100}{" "}
-            {round.currency} to one bucket
+            Max. {round.maxAmountToBucketPerUser / 100} {round.currency} to one
+            bucket
           </p>
         )}
         <form

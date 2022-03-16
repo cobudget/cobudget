@@ -14,11 +14,7 @@ const ALLOCATE_MUTATION = gql`
     $amount: Int!
     $type: AllocationType!
   ) {
-    allocate(
-      roundMemberId: $roundMemberId
-      amount: $amount
-      type: $type
-    ) {
+    allocate(roundMemberId: $roundMemberId, amount: $amount, type: $type) {
       id
       balance
     }
@@ -43,7 +39,11 @@ const AllocateModal = ({ member, round, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage @{member.user.username}&apos;s balance
+          Manage{" "}
+          {member.user.username
+            ? `@${member.user.username}'`
+            : member.user.name ?? "member"}
+          s balance
         </h1>
         <Switch
           options={["Add", "Set"]}
@@ -82,10 +82,10 @@ const AllocateModal = ({ member, round, handleClose }) => {
           <p className="text-center mb-4 text-sm text-gray-800">
             {type === "Add" ? (
               <>
-                Adding {thousandSeparator(amount / 100)} {round.currency}{" "}
-                to {thousandSeparator(member.balance / 100)}{" "}
-                {round.currency} <br />({total / 100} {round.currency}{" "}
-                in total)
+                Adding {thousandSeparator(amount / 100)} {round.currency} to{" "}
+                {thousandSeparator(member.balance / 100)} {round.currency}{" "}
+                <br />({thousandSeparator(total / 100)} {round.currency} in
+                total)
               </>
             ) : (
               <>

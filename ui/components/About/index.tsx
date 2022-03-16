@@ -1,6 +1,7 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
 import { useQuery, gql } from "urql";
+import { sortBy } from "lodash";
 import HappySpinner from "components/HappySpinner";
 import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
@@ -33,8 +34,8 @@ export const ROUND_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ router, currentGroup }) {
-  const [{ data: { round } = {}, fetching: loading, error }] = useQuery({
+export default function AboutPage({ router }) {
+  const [{ data, fetching: loading, error }] = useQuery({
     query: ROUND_QUERY,
     variables: {
       groupSlug: router.query.group,
@@ -42,12 +43,16 @@ export default function AboutPage({ router, currentGroup }) {
     },
   });
 
+  if (error) return <div>{error.message}</div>;
+
   if (loading)
     return (
       <div className="flex-grow flex justify-center items-center">
         <HappySpinner />
       </div>
     );
+
+  const round = data?.round;
 
   return (
     <div className="max-w-screen-md">
@@ -57,7 +62,7 @@ export default function AboutPage({ router, currentGroup }) {
             Guidelines
           </h2>
           <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
-            {round.guidelines.map((guideline) => (
+            {sortBy(round.guidelines, (g) => g.position).map((guideline) => (
               <div key={guideline.id} className="p-4">
                 <h3 className="text-lg font-medium">{guideline.title}</h3>
                 <Markdown source={guideline.description} />
@@ -71,10 +76,7 @@ export default function AboutPage({ router, currentGroup }) {
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
-            <ListItemText
-              primary={"Currency"}
-              secondary={round.currency}
-            />
+            <ListItemText primary={"Currency"} secondary={round.currency} />
           </ListItem>
 
           {!!round.maxAmountToBucketPerUser && (
@@ -147,9 +149,9 @@ export default function AboutPage({ router, currentGroup }) {
           parts={[
             {
               title: "Allocated funds",
-              total: `${thousandSeparator(
-                round.totalContributions / 100
-              )} ${round.currency}`,
+              total: `${thousandSeparator(round.totalContributions / 100)} ${
+                round.currency
+              }`,
               breakdown: [
                 {
                   title: "Contributions made to bucket open for funding",
@@ -174,9 +176,9 @@ export default function AboutPage({ router, currentGroup }) {
             },
           ]}
           totalTitle={"Total funds available"}
-          totalAmount={`${thousandSeparator(
-            round.totalAllocations / 100
-          )} ${round.currency}`}
+          totalAmount={`${thousandSeparator(round.totalAllocations / 100)} ${
+            round.currency
+          }`}
         />
       </div>
     </div>

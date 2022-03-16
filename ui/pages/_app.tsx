@@ -33,6 +33,7 @@ export const TOP_LEVEL_QUERY = gql`
       requireBucketApproval
       bucketReviewIsOpen
       discourseCategoryId
+      totalInMembersBalances
       guidelines {
         id
         title
@@ -95,7 +96,6 @@ export const TOP_LEVEL_QUERY = gql`
         isApproved
         hasJoined
         balance
-        amountContributed
         round {
           id
           title
@@ -211,4 +211,4 @@ const MyApp = ({ Component, pageProps, router }) => {
 };
 
 //@ts-ignore
-export default withUrqlClient(client, { ssr: true })(MyApp as any);
+export default withUrqlClient(client, { ssr: false })(MyApp as any);

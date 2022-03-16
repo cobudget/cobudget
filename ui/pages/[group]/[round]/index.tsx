@@ -10,6 +10,7 @@ import NewBucketModal from "../../../components/NewBucketModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
+import { RoundedCornerRounded } from "@material-ui/icons";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($roundSlug: String!, $groupSlug: String) {
@@ -119,11 +120,7 @@ const Page = ({
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
-            <BucketCard
-              bucket={bucket}
-              round={round}
-              currentGroup={group}
-            />
+            <BucketCard bucket={bucket} round={round} currentGroup={group} />
           </a>
         </Link>
       ))}
@@ -189,7 +186,9 @@ const RoundPage = ({ round, router, currentGroup, currentUser }) => {
     },
   });
 
-  const [bucketStatusCount, setBucketStatusCount] = useState(data?.round?.bucketStatusCount ?? {});
+  const [bucketStatusCount, setBucketStatusCount] = useState(
+    data?.round?.bucketStatusCount ?? {}
+  );
 
   const { tag, s, f } = router.query;
   const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
@@ -208,7 +207,14 @@ const RoundPage = ({ round, router, currentGroup, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
-  if (!round) return null;
+  if (!round) {
+    return (
+      <div className="text-center mt-7">
+        This round either doesn't exist or you don't have access to it
+      </div>
+    );
+  }
+
   const canEdit =
     currentUser?.currentGroupMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
@@ -226,10 +232,7 @@ const RoundPage = ({ round, router, currentGroup, currentUser }) => {
               canEdit={canEdit}
               className="h-10"
               MUTATION={gql`
-                mutation EditHomepageMessage(
-                  $roundId: ID!
-                  $info: String
-                ) {
+                mutation EditHomepageMessage($roundId: ID!, $info: String) {
                   editRound(roundId: $roundId, info: $info) {
                     id
                     info
@@ -245,15 +248,28 @@ const RoundPage = ({ round, router, currentGroup, currentUser }) => {
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  
-                  <p className="font-bold my-0.5">
-                    Your Funds
-                  </p>
-                  <p className="mb-5">
-                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(round.currency)}</span>{" "}
-                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(round.currency)} in round)</span>
-                  </p>
-                  
+                  <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+                    <p className="font-bold my-0.5">Funds available</p>
+                    <div>
+                      <table>
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="pr-3">In this round</td>
+                          <td className="font-bold">
+                            {round.totalInMembersBalances / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+
                   <Button
                     size="large"
                     color={round.color}

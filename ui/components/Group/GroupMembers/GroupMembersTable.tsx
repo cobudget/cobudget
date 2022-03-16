@@ -15,6 +15,7 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
+import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
 
@@ -32,7 +33,6 @@ export const GROUP_MEMBERS_QUERY = gql`
           id
           name
           username
-          email
           verifiedEmail
           avatar
         }
@@ -43,7 +43,7 @@ export const GROUP_MEMBERS_QUERY = gql`
 
 const ActionsDropdown = ({
   updateGroupMember,
-  //deleteMember,
+  deleteGroupMember,
   currentGroup,
   member,
 }) => {
@@ -86,23 +86,32 @@ const ActionsDropdown = ({
         >
           {member.isAdmin ? "Remove admin" : "Make admin"}
         </MenuItem>
-        {/* how to also remove the user's round memberships when their group
-            membership is removed?
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete group membership from user with email ${member.user.email}?`
+                `Are you sure you would like to delete group membership from user with email ${member.email}?`
               )
-            )
-              deleteMember({
-                variables: { memberId: member.id },
+            ) {
+              deleteGroupMember({
+                groupMemberId: member.id,
+              }).then(({ error }) => {
+                if (error) {
+                  console.error(error);
+                  toast.error(error.message);
+                } else {
+                  toast.success(
+                    `Deleted group member with email ${member.email}`
+                  );
+                }
+                handleClose();
               });
+            }
           }}
         >
           <Box color="error.main">Delete</Box>
-        </MenuItem>*/}
+        </MenuItem>
       </Menu>
     </>
   );
@@ -125,7 +134,7 @@ const Page = ({
   variables,
   isLastPage,
   onLoadMore,
-  deleteMember,
+  deleteGroupMember,
   updateGroupMember,
   currentGroup,
 }) => {
@@ -175,7 +184,7 @@ const Page = ({
           <TableCell align="right" padding="none">
             <ActionsDropdown
               member={member}
-              deleteMember={deleteMember}
+              deleteGroupMember={deleteGroupMember}
               updateGroupMember={updateGroupMember}
               currentGroup={currentGroup}
             />
@@ -201,7 +210,11 @@ const Page = ({
   );
 };
 
-const GroupMembersTable = ({ updateGroupMember, deleteMember, currentGroup }) => {
+const GroupMembersTable = ({
+  updateGroupMember,
+  deleteGroupMember,
+  currentGroup,
+}) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
   ]);
@@ -231,7 +244,7 @@ const GroupMembersTable = ({ updateGroupMember, deleteMember, currentGroup }) =>
                     onLoadMore={({ limit, offset }) => {
                       setPageVariables([...pageVariables, { limit, offset }]);
                     }}
-                    deleteMember={deleteMember}
+                    deleteGroupMember={deleteGroupMember}
                     updateGroupMember={updateGroupMember}
                     currentGroup={currentGroup}
                   />

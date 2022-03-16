@@ -44,13 +44,20 @@ const Comment = ({ comment, showBorderBottom }) => {
       <div
         className={`flex-grow ${showBorderBottom && "border-b"} pb-4 min-w-0`}
       >
-        <div className="flex justify-between items-center mb-2 text-gray-900 font-medium text-sm">
+        <div className="flex justify-between items-center mb-2 text-gray-900 font-medium">
           {comment.isLog ? (
             <h5>Log</h5>
           ) : comment.roundMember === null ? (
             <h5>A discourse user</h5>
           ) : (
-            <h5>{comment.roundMember?.user.username}</h5>
+            <h5 className="font-medium">
+              <span>{comment.roundMember?.user.name}</span>{" "}
+              {comment.roundMember.user.username && (
+                <span className="text-gray-500 font-normal">
+                  @{comment.roundMember?.user.username}
+                </span>
+              )}
+            </h5>
           )}
           <div className="flex items-center">
             <span className="font-normal mr-2">

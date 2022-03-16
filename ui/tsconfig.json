@@ -16,11 +16,18 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "../cypress/**/*.js",
+    "../cypress/**/*.ts"
+  ],
   "exclude": ["node_modules"],
   "ts-node": {
     "compilerOptions": {
       "module": "CommonJS"
     }
-  },
+  }
 }

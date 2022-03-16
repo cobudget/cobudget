@@ -56,7 +56,11 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "roundTransactions")
                 .forEach((field) => {
-                  cache.invalidate("Query", "roundTransactions", field.arguments);
+                  cache.invalidate(
+                    "Query",
+                    "roundTransactions",
+                    field.arguments
+                  );
                 });
             },
             joinRound(result: any, args, cache) {
@@ -66,9 +70,7 @@ export const client = (
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      groupSlug:
-                        result.joinRound.round.group?.slug ??
-                        "c",
+                      groupSlug: result.joinRound.round.group?.slug ?? "c",
                       roundSlug: result.joinRound.round.slug,
                     },
                   },
@@ -117,6 +119,14 @@ export const client = (
                   }
                 );
               }
+            },
+            deleteGroupMember(result: any, { groupMemberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "orgMembersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                });
             },
             updateMember(result: any, { isApproved }, cache) {
               // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
@@ -220,9 +230,7 @@ export const client = (
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
-                .filter(
-                  (field) => field.arguments.roundId === roundId
-                )
+                .filter((field) => field.arguments.roundId === roundId)
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
@@ -374,12 +382,16 @@ export const client = (
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");
-              
+
               queryFields
-                  .filter((field) => field.fieldName === "roundTransactions")
-                  .forEach((field) => {
-                    cache.invalidate("Query", "roundTransactions", field.arguments);
-                  });
+                .filter((field) => field.fieldName === "roundTransactions")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "roundTransactions",
+                    field.arguments
+                  );
+                });
 
               queryFields
                 .filter((field) => field.fieldName === "contributionsPage")
@@ -396,13 +408,12 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "membersPage", field.arguments);
                 });
-              
+
               queryFields
                 .filter((field) => field.fieldName === "round")
                 .forEach((field) => {
                   cache.invalidate("Query", "round", field.arguments);
                 });
-
             },
           },
         },

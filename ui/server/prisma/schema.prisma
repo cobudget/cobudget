@@ -10,18 +10,19 @@ generator client {
 }
 
 model User {
-  id              String             @id @default(cuid())
-  username        String?            @unique
-  email           String?            @unique
-  name            String?
-  verifiedEmail   Boolean            @default(false)
-  emailVerified   DateTime?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  image           String?
-  groupMemberships  GroupMember[]
-  collMemberships RoundMember[]
-  emailSettings   EmailSettings?
+  id               String         @id @default(cuid())
+  username         String?        @unique
+  email            String?        @unique
+  name             String?
+  verifiedEmail    Boolean        @default(false)
+  emailVerified    DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  image            String?
+  groupMemberships GroupMember[]
+  collMemberships  RoundMember[]
+  emailSettings    EmailSettings?
+  Transaction      Transaction[]
 }
 
 model EmailSettings {
@@ -38,28 +39,28 @@ model EmailSettings {
 }
 
 model GroupMember {
-  id                String       @id @default(cuid())
-  group             Group        @relation(fields: [groupId], references: [id])
-  groupId           String       @map("organizationId")
-  user              User         @relation(fields: [userId], references: [id])
+  id                String   @id @default(cuid())
+  group             Group    @relation(fields: [groupId], references: [id])
+  groupId           String   @map("organizationId")
+  user              User     @relation(fields: [userId], references: [id])
   userId            String
   bio               String?
-  isAdmin           Boolean      @default(false)
+  isAdmin           Boolean  @default(false)
   discourseUsername String?
   discourseApiKey   String?
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([groupId, userId])
   @@map("OrgMember")
 }
 
 model RoundMember {
-  id           String     @id @default(cuid())
-  round        Round      @relation(fields: [roundId], references: [id])
-  roundId      String     @map("collectionId")
-  user         User       @relation(fields: [userId], references: [id])
-  userId       String
+  id      String @id @default(cuid())
+  round   Round  @relation(fields: [roundId], references: [id])
+  roundId String @map("collectionId")
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
 
   isAdmin     Boolean @default(false)
   isModerator Boolean @default(false) //switch to ROLES: admin, moderator, member, unapproved, banned
@@ -105,14 +106,14 @@ model Group {
 }
 
 model Round {
-  id               String       @id @default(cuid())
-  slug             String
-  group            Group        @relation(fields: [groupId], references: [id])
-  groupId          String       @map("organizationId") 
-  singleRound      Boolean      @default(false) @map("singleCollection")
-  title            String
-  archived         Boolean      @default(false)
-  deleted          Boolean      @default(false)
+  id          String  @id @default(cuid())
+  slug        String
+  group       Group   @relation(fields: [groupId], references: [id])
+  groupId     String  @map("organizationId")
+  singleRound Boolean @default(false) @map("singleCollection")
+  title       String
+  archived    Boolean @default(false)
+  deleted     Boolean @default(false)
 
   info               String?
   about              String?
@@ -137,53 +138,57 @@ model Round {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  roundMember RoundMember[]
-  buckets          Bucket[]
-  allocations      Allocation[]
-  contributions    Contribution[]
-  transactions     Transaction[]
+  roundMember   RoundMember[]
+  buckets       Bucket[]
+  allocations   Allocation[]
+  contributions Contribution[]
+  transactions  Transaction[]
+
+
+  statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
+  statusAccountId String?  @unique
 
   @@unique([groupId, slug])
   @@map("Collection")
 }
 
 model Tag {
-  id           String     @id @default(cuid())
-  value        String
-  round        Round      @relation(fields: [roundId], references: [id])
-  roundId      String     @map("collectionId")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id        String   @id @default(cuid())
+  value     String
+  round     Round    @relation(fields: [roundId], references: [id])
+  roundId   String   @map("collectionId")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   buckets Bucket[]
   @@unique([roundId, value])
 }
 
 model Guideline {
-  id           String     @id @default(cuid())
-  title        String
-  description  String
-  position     Float
-  round        Round      @relation(fields: [roundId], references: [id])
-  roundId      String     @map("collectionId")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  Flag         Flag[]
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  position    Float
+  round       Round    @relation(fields: [roundId], references: [id])
+  roundId     String   @map("collectionId")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  Flag        Flag[]
 }
 
 model Field {
-  id           String       @id @default(cuid())
-  name         String
-  description  String
-  type         FieldType
-  limit        Int?
-  isRequired   Boolean
-  position     Float
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  round        Round        @relation(fields: [roundId], references: [id])
-  roundId      String       @map("collectionId")
-  fieldValue   FieldValue[]
+  id          String       @id @default(cuid())
+  name        String
+  description String
+  type        FieldType
+  limit       Int?
+  isRequired  Boolean
+  position    Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  round       Round        @relation(fields: [roundId], references: [id])
+  roundId     String       @map("collectionId")
+  fieldValue  FieldValue[]
 }
 
 model FieldValue {
@@ -223,31 +228,35 @@ enum AllocationType {
 }
 
 model Bucket {
-  id               String             @id @default(cuid())
-  round       Round                   @relation(fields: [roundId], references: [id])
-  roundId     String                  @map("collectionId")
-  title            String
-  description      String?
-  summary          String?
-  Images           Image[]
-  cocreators       RoundMember[]
-  BudgetItems      BudgetItem[]
-  FieldValues      FieldValue[]
-  comments         Comment[]
-  approvedAt       DateTime?
-  publishedAt      DateTime?
-  fundedAt         DateTime?
-  canceledAt       DateTime?
-  completedAt      DateTime?
-  deleted          Boolean            @default(false)
-  discourseTopicId Int?
-  flags            Flag[]
-  tags             Tag[]
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  Contributions    Contribution[]
-  account          Account?           @relation(fields: [statusAccountId], references: [id])
-  statusAccountId  String?            @unique
+  id          String        @id @default(cuid())
+  round       Round         @relation(fields: [roundId], references: [id])
+  roundId     String        @map("collectionId")
+  title       String
+  description String?
+  summary     String?
+  Images      Image[]
+  cocreators  RoundMember[]
+  BudgetItems BudgetItem[]
+  FieldValues FieldValue[]
+  comments    Comment[]
+  approvedAt  DateTime?
+  publishedAt DateTime?
+  fundedAt    DateTime?
+  canceledAt  DateTime?
+  completedAt DateTime?
+  archivedAt  DateTime?
+
+  deleted           Boolean        @default(false)
+  discourseTopicId  Int?
+  flags             Flag[]
+  tags              Tag[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  Contributions     Contribution[]
+  statusAccount     Account?       @relation(name: "bucketStatus", fields: [statusAccountId], references: [id])
+  statusAccountId   String?        @unique
+  outgoingAccount   Account?       @relation(name: "bucketOutgoing", fields: [outgoingAccountId], references: [id])
+  outgoingAccountId String?        @unique
 }
 
 model Image {
@@ -274,31 +283,31 @@ enum BudgetItemType {
 }
 
 model Comment {
-  id           String           @id @default(cuid())
+  id           String      @id @default(cuid())
   content      String
-  isLog        Boolean          @default(false)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  isLog        Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   collMember   RoundMember @relation(fields: [collMemberId], references: [id])
   collMemberId String
-  bucket       Bucket           @relation(fields: [bucketId], references: [id])
+  bucket       Bucket      @relation(fields: [bucketId], references: [id])
   bucketId     String
 }
 
 model Flag {
-  id              String           @id @default(cuid())
-  guideline       Guideline?       @relation(fields: [guidelineId], references: [id])
+  id              String      @id @default(cuid())
+  guideline       Guideline?  @relation(fields: [guidelineId], references: [id])
   guidelineId     String?
   comment         String?
   collMember      RoundMember @relation(fields: [collMemberId], references: [id])
   collMemberId    String
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
   type            FlagType
-  resolvingFlag   Flag?            @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
-  resolvedBy      Flag?            @relation("FlagToFlag")
-  resolvingFlagId String?          @unique
-  bucket          Bucket           @relation(fields: [bucketId], references: [id])
+  resolvingFlag   Flag?       @relation("FlagToFlag", fields: [resolvingFlagId], references: [id])
+  resolvedBy      Flag?       @relation("FlagToFlag")
+  resolvingFlagId String?     @unique
+  bucket          Bucket      @relation(fields: [bucketId], references: [id])
   bucketId        String
 }
 
@@ -309,49 +318,53 @@ enum FlagType {
 }
 
 model Allocation {
-  id                 String            @id @default(cuid())
-  round              Round             @relation(fields: [roundId], references: [id])
-  roundId            String            @map("collectionId")
-  roundMember        RoundMember       @relation(fields: [roundMemberId], references: [id])
-  roundMemberId      String            @map("collectionMemberId")
-  allocatedBy        RoundMember?      @relation("allocatedBy", fields: [allocatedById], references: [id])
-  allocatedById      String?
-  amount             Int
-  amountBefore       Int?
-  allocationType     AllocationType    @default(ADD)
-  createdAt          DateTime          @default(now())
+  id             String         @id @default(cuid())
+  round          Round          @relation(fields: [roundId], references: [id])
+  roundId        String         @map("collectionId")
+  roundMember    RoundMember    @relation(fields: [roundMemberId], references: [id])
+  roundMemberId  String         @map("collectionMemberId")
+  allocatedBy    RoundMember?   @relation("allocatedBy", fields: [allocatedById], references: [id])
+  allocatedById  String?
+  amount         Int
+  amountBefore   Int?
+  allocationType AllocationType @default(ADD)
+  createdAt      DateTime       @default(now())
 }
 
 model Contribution {
-  id                 String           @id @default(cuid())
+  id            String      @id @default(cuid())
   round         Round       @relation(fields: [roundId], references: [id])
   roundId       String      @map("collectionId")
   roundMember   RoundMember @relation(fields: [roundMemberId], references: [id])
   roundMemberId String      @map("collectionMemberId")
-  bucket             Bucket           @relation(fields: [bucketId], references: [id])
-  bucketId           String
-  amount             Int
-  amountBefore       Int?
-  createdAt          DateTime         @default(now())
+  bucket        Bucket      @relation(fields: [bucketId], references: [id])
+  bucketId      String
+  amount        Int
+  amountBefore  Int?
+  createdAt     DateTime    @default(now())
 }
 
 model DiscourseConfig {
-  id               String       @id @default(cuid())
+  id               String @id @default(cuid())
   url              String
   apiKey           String
   dreamsCategoryId Int
   minPostLength    Int
-  group     Group @relation(fields: [groupId], references: [id])
-  groupId   String       @unique @map("organizationId")
+  group            Group  @relation(fields: [groupId], references: [id])
+  groupId          String @unique @map("organizationId")
 }
 
 model Account {
   id String @id @default(cuid())
 
-  incomingRoundMember RoundMember? @relation(name: "incoming")
-  outgoingRoundMember RoundMember? @relation(name: "outgoing")
-  statusRoundMember   RoundMember? @relation(name: "status")
-  bucket                   Bucket?
+  roundMemberIncoming RoundMember? @relation(name: "incoming")
+  roundMemberOutgoing RoundMember? @relation(name: "outgoing")
+  roundMemberStatus   RoundMember? @relation(name: "status")
+
+  bucketStatus   Bucket? @relation(name: "bucketStatus")
+  bucketOutgoing Bucket? @relation(name: "bucketOutgoing")
+
+  roundStatus Round[]
 
   outgoingTransactions Transaction[] @relation(name: "from")
   incomingTransactions Transaction[] @relation(name: "to")
@@ -362,22 +375,19 @@ model Account {
 model Transaction {
   id String @id @default(cuid())
 
-  type      TransactionType
   amount    Int
-  createdAt DateTime        @default(now())
+  createdAt DateTime @default(now())
 
+  user          User?        @relation(fields: [userId], references: [id])
+  userId        String?
   roundMember   RoundMember? @relation(fields: [roundMemberId], references: [id])
   roundMemberId String?      @map("collectionMemberId")
-  round         Round?       @relation(fields: [roundId], references: [id])
-  roundId       String?      @map("collectionId")
+
+  round   Round?  @relation(fields: [roundId], references: [id])
+  roundId String? @map("collectionId")
 
   fromAccount   Account @relation(name: "from", fields: [fromAccountId], references: [id])
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
   fromAccountId String
   toAccountId   String
-}
-
-enum TransactionType {
-  ALLOCATION
-  CONTRIBUTION
 }

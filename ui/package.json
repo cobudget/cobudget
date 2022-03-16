@@ -42,6 +42,7 @@
     "apollo-server-micro": "^2.21.2",
     "autoprefixer": "^10.2.5",
     "bootstrap": "4.6.0",
+    "cheerio": "^1.0.0-rc.10",
     "cookie-session": "^1.4.0",
     "cors": "^2.8.5",
     "dayjs": "^1.8.20",
@@ -52,6 +53,7 @@
     "graphql-iso-date": "^3.6.1",
     "graphql-resolvers": "^0.4.2",
     "graphql-type-json": "^0.3.2",
+    "html-react-parser": "^1.4.8",
     "isomorphic-unfetch": "^3.0.0",
     "js-cookie": "^2.2.1",
     "jsonwebtoken": "^8.5.1",
@@ -110,7 +112,7 @@
     "prisma": "^3.4.1",
     "tailwindcss": "^2.1.0",
     "tailwindcss-font-inter": "2.0.2",
-    "typescript": "^4.4.3"
+    "typescript": "4.4.3"
   },
   "resolutions": {
     "graphql": "15.8.0",

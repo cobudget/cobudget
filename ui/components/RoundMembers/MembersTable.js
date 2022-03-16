@@ -128,8 +128,10 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         <div className="flex space-x-3">
           <Avatar user={member.user} />
           <div>
-            <p className="font-medium text-base">{member.name}</p>
-            <p className="text-gray-700 text-sm">@{member.user.username}</p>
+            <p className="font-medium text-base">{member.user.name}</p>
+            {member.user.username && (
+              <p className="text-gray-700 text-sm">@{member.user.username}</p>
+            )}
           </div>
         </div>
       </TableCell>

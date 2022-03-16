@@ -1,69 +1,101 @@
 import Link from "next/link";
 import Button from "components/Button";
+import Head from "next/head";
+
+import parseHtml, { domToReact } from "html-react-parser";
+import get from "lodash/get";
 
 const liStyle =
   "px-3 py-2 hover:bg-gray-200 hover:text-gray-900 text-gray-700 truncate";
 
-const IndexPage = ({ currentUser }) => {
-  const groupIds = currentUser?.groupMemberships?.map(
-    (groupMember) => groupMember.group.id
-  );
+// Determines if URL is internal or external
+function isUrlInternal(link) {
+  if (
+    !link ||
+    link.indexOf(`https:`) === 0 ||
+    link.indexOf(`#`) === 0 ||
+    link.indexOf(`http`) === 0 ||
+    link.indexOf(`://`) === 0
+  ) {
+    return false;
+  }
+  return true;
+}
+// Replaces DOM nodes with React components
+function replace(node) {
+  const attribs = node.attribs || {};
+
+  // Replace links with Next links
+  if (node.name === `a` && isUrlInternal(attribs.href)) {
+    const { href, ...props } = attribs;
+    if (props.class) {
+      props.className = props.class;
+      delete props.class;
+    }
+    return (
+      <Link href={href}>
+        <a {...props}>
+          {!!node.children &&
+            !!node.children.length &&
+            domToReact(node.children, parseOptions)}
+        </a>
+      </Link>
+    );
+  }
+
+  // Make Google Fonts scripts work
+  if (node.name === `script`) {
+    let content = get(node, `children.0.data`, ``);
+    if (content && content.trim().indexOf(`WebFont.load(`) === 0) {
+      content = `setTimeout(function(){${content}}, 1)`;
+      return (
+        <script
+          {...attribs}
+          dangerouslySetInnerHTML={{ __html: content }}
+        ></script>
+      );
+    }
+  }
+}
+
+const parseOptions = { replace };
+
+const IndexPage = ({ currentUser, bodyContent, headContent }) => {
   return (
-    <div className="page w-full">
-      <div className="py-10">
-        {false ? (
-          <div className="flex justify-center items-center flex-col ">
-            <h2 className="mb-4 text-lg font-medium">Your groups</h2>
-            <ul className="max-w-xs bg-white rounded-md shadow divide-y-default divide-gray-200">
-              {currentUser?.groupMemberships?.map((groupMember) => {
-                return (
-                  <li key={groupMember.id} className={liStyle}>
-                    <Link href={`/${groupMember.group.slug}`}>
-                      <a>{groupMember.group.name}</a>
-                    </Link>
-                  </li>
-                );
-              })}
-              {currentUser?.roundMemberships
-                ?.filter(
-                  (collMember) =>
-                    !groupIds.includes(collMember.round.group?.id)
-                )
-                .map((collMember) => {
-                  if (collMember.round.group)
-                    return (
-                      <li key={collMember.id} className={liStyle}>
-                        <Link
-                          href={`/${collMember.round.group.slug}`}
-                        >
-                          <a>{collMember.round.group.name}</a>
-                        </Link>
-                      </li>
-                    );
-                  return (
-                    <li key={collMember.id} className={liStyle}>
-                      <Link href={`/c/${collMember.round.slug}`}>
-                        <a>{collMember.round.title}</a>
-                      </Link>
-                    </li>
-                  );
-                })}
-              <li className={liStyle}>
-                <Button size="large" nextJsLink href="/new-round">
-                  Create round
-                </Button>
-              </li>
-            </ul>
-          </div>
-        ) : (
-          <div>
-            <h1 className="text-2xl mb-2 font-medium">Cobudget v2 beta</h1>
-            <p>Stable version launching Jan 15th 2022</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <>
+      <Head>{parseHtml(headContent)}</Head>
+      {parseHtml(bodyContent, parseOptions)}
+    </>
   );
 };
+
+export async function getStaticProps(ctx) {
+  // Import modules in here that aren't needed in the component
+  const cheerio = await import(`cheerio`);
+  const axios = (await import(`axios`)).default;
+
+  // Fetch HTML
+  let res: any = await axios("https://cobudget.webflow.io").catch((err) => {
+    console.error(err);
+  });
+
+  const html = res.data;
+
+  console.log({ res });
+
+  // Parse HTML with Cheerio
+  const $ = cheerio.load(html);
+  const bodyContent = $(`body`).html();
+  const headContent = $(`head`).html();
+  console.log({ bodyContent });
+  console.log("hey");
+  // Send HTML to component via props
+  return {
+    props: {
+      bodyContent,
+      headContent,
+    },
+  };
+}
 
 export default IndexPage;

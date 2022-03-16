@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "urql";
+import { useMutation, gql } from "urql";
 
 import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
@@ -8,42 +8,29 @@ import GroupMembersTable from "./GroupMembersTable";
 
 const UPDATE_GROUP_MEMBER = gql`
   mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
-    updateGroupMember(groupId: $groupId, memberId: $memberId, isAdmin: $isAdmin) {
+    updateGroupMember(
+      groupId: $groupId
+      memberId: $memberId
+      isAdmin: $isAdmin
+    ) {
       id
       isAdmin
     }
   }
 `;
 
-// // TODO: change to deleting group members, not round members
-// const DELETE_MEMBER = gql`
-//   mutation UpdateMember($memberId: ID!, $roundId: ID!) {
-//     deleteMember(memberId: $memberId, roundId: $roundId) {
-//       id
-//     }
-//   }
-// `;
+const DELETE_GROUP_MEMBER = gql`
+  mutation DeleteGroupMember($groupMemberId: ID!) {
+    deleteGroupMember(groupMemberId: $groupMemberId) {
+      id
+    }
+  }
+`;
 
 const GroupMembers = ({ currentGroup }) => {
   const [, updateGroupMember] = useMutation(UPDATE_GROUP_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
-  // const [deleteMember] = useMutation(DELETE_MEMBER, {
-  //   variables: { roundId: round.id },
-  //   update(cache, { data: { deleteMember } }) {
-  //     const { members } = cache.readQuery({
-  //       query: MEMBERS_QUERY,
-  //       variables: { roundId: round.id },
-  //     });
-
-  //     cache.writeQuery({
-  //       query: MEMBERS_QUERY,
-  //       variables: { roundId: round.id },
-  //       data: {
-  //         members: members.filter((member) => member.id !== deleteMember.id),
-  //       },
-  //     });
-  //   },
-  // });
+  const [, deleteGroupMember] = useMutation(DELETE_GROUP_MEMBER);
 
   return (
     <div>
@@ -64,6 +51,7 @@ const GroupMembers = ({ currentGroup }) => {
 
       <GroupMembersTable
         updateGroupMember={updateGroupMember}
+        deleteGroupMember={deleteGroupMember}
         currentGroup={currentGroup}
       />
     </div>

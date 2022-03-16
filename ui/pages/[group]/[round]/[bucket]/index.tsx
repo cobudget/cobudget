@@ -77,6 +77,7 @@ export const BUCKET_QUERY = gql`
 
         user {
           id
+          name
           username
           avatar
         }
@@ -112,7 +113,12 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
     round.guidelines.length > 0 &&
     bucket?.published;
 
-  if (!bucket || !round) return null;
+  if (!bucket || !round)
+    return (
+      <div className="text-center mt-7">
+        This bucket either doesn't exist or you don't have access to it
+      </div>
+    );
 
   return (
     <>
@@ -196,11 +202,7 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
             />
           </Tab.Panel>
           <Tab.Panel>
-            <Funders
-              bucket={bucket}
-              round={round}
-              currentUser={currentUser}
-            />
+            <Funders bucket={bucket} round={round} currentUser={currentUser} />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

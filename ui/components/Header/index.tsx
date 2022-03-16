@@ -101,7 +101,7 @@ const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
-        <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative">
+        <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
           <GroupAndRoundHeader
             currentGroup={currentGroup}
             round={round}
@@ -135,7 +135,7 @@ const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
         <nav
           className={`${
             isMenuOpen ? "block" : "hidden"
-          } min-w-full sm:m-0 sm:min-w-0 sm:block bg-${color} sm:bg-transparent`}
+          } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
         >
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
@@ -175,8 +175,7 @@ const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
                               toast.error(error.message);
                             } else {
                               toast.success(
-                                round.registrationPolicy ===
-                                  "REQUEST_TO_JOIN"
+                                round.registrationPolicy === "REQUEST_TO_JOIN"
                                   ? "Request sent!"
                                   : "You joined this round!"
                               );

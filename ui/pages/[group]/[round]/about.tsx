@@ -5,12 +5,7 @@ import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
 import EditableField from "../../../components/EditableField";
 
-export default function AboutPage({
-  router,
-  round,
-  currentUser,
-  currentGroup,
-}) {
+export default function AboutPage({ router, round, currentUser }) {
   if (!round) return null;
   return (
     <>
@@ -29,10 +24,7 @@ export default function AboutPage({
               name="about"
               className="h-10"
               MUTATION={gql`
-                mutation EditRoundAbout(
-                  $roundId: ID!
-                  $about: String
-                ) {
+                mutation EditRoundAbout($roundId: ID!, $about: String) {
                   editRound(roundId: $roundId, about: $about) {
                     id
                     about
@@ -45,7 +37,7 @@ export default function AboutPage({
         </div>
       </PageHero>
       <div className="page">
-        <About router={router} currentGroup={currentGroup} />
+        <About router={router} />
       </div>
     </>
   );

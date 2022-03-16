@@ -389,11 +389,18 @@ const BucketSidebar = ({
               // <Tooltip key={member.user.id} title={member.user.name}>
               <div
                 key={member.user.id}
-                className="flex items-center mr-2 md:mr-3 sm:mb-2"
+                className="flex items-center mr-2 md:mr-3 sm:mb-2 space-x-2"
               >
                 <Avatar user={member.user} />{" "}
-                <span className="ml-2 text-gray-700 hidden md:block">
-                  {member.user.username}
+                <span className="items-center space-x-1 hidden md:block">
+                  <span className="font-medium text-gray-900">
+                    {member.user.name}
+                  </span>
+                  {member.user.username && (
+                    <span className="text-gray-600 font-normal">
+                      @{member.user.username}
+                    </span>
+                  )}
                 </span>
               </div>
               // </Tooltip>

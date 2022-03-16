@@ -45,7 +45,6 @@ export const allocateToMember = async ({
   await prisma.transaction.create({
     data: {
       roundMemberId: allocatedBy,
-      type: "ALLOCATION",
       amount: adjustedAmount,
       toAccountId: member.statusAccountId,
       fromAccountId: member.incomingAccountId,
