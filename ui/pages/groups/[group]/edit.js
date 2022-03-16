@@ -17,13 +17,9 @@ export const GROUP_QUERY = gql`
 
 export default () => {
   const router = useRouter();
-  const {
-    data: { group } = { group: null },
-    fetching: loading,
-    error,
-  } = useQuery(GROUP_QUERY, {
-    variables: { id: router.query.group },
-  });
+  const [
+    { data: { group } = { group: null }, fetching: loading, error },
+  ] = useQuery({ query: GROUP_QUERY, variables: { id: router.query.group } });
 
   if (error) {
     return (
