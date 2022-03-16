@@ -7,6 +7,7 @@ import {
   TableHead,
   TableRow,
 } from "@material-ui/core";
+import toast from "react-hot-toast";
 import Avatar from "../Avatar";
 import Button from "../Button";
 
@@ -63,11 +64,17 @@ const RequestToJoinTable = ({
                                 confirm(
                                   "Are you sure you would like to delete this membership request?"
                                 )
-                              )
+                              ) {
                                 deleteMember({
                                   collectionId: collection.id,
                                   memberId: member.id,
+                                }).then(({ error }) => {
+                                  if (error) {
+                                    console.error(error);
+                                    toast.error(error.message);
+                                  }
                                 });
+                              }
                             }}
                           >
                             Delete
@@ -79,12 +86,18 @@ const RequestToJoinTable = ({
                           onClick={() => {
                             if (
                               confirm("Are you sure you would like to approve?")
-                            )
+                            ) {
                               updateMember({
                                 collectionId: collection.id,
                                 memberId: member.id,
                                 isApproved: true,
+                              }).then(({ error }) => {
+                                if (error) {
+                                  console.error(error);
+                                  toast.error(error.message);
+                                }
                               });
+                            }
                           }}
                         >
                           Approve

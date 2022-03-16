@@ -428,13 +428,16 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, search, offset = 0, limit = 10 },
+        { collectionId, isApproved = true, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
           userId: user.id,
           collectionId,
         });
+
+        // unapproved members are uninteresting to non-admins
+        if (!isAdmin && !isApproved) return null;
 
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {

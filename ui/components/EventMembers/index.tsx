@@ -111,7 +111,7 @@ const EventMembers = ({ collection, currentUser }) => {
           moreExist: false,
           approvedMembers: [],
         },
-        requestsToJoinPage: { requestsToJoin },
+        requestsToJoinPage,
       } = {
         approvedMembersPage: {
           approvedMembers: [],
@@ -168,12 +168,14 @@ const EventMembers = ({ collection, currentUser }) => {
   return (
     <>
       <div className="page">
-        <RequestsToJoinTable
-          requestsToJoin={requestsToJoin}
-          updateMember={updateMember}
-          deleteMember={deleteMember}
-          collection={collection}
-        />
+        {requestsToJoinPage && (
+          <RequestsToJoinTable
+            requestsToJoin={requestsToJoinPage.requestsToJoin}
+            updateMember={updateMember}
+            deleteMember={deleteMember}
+            collection={collection}
+          />
+        )}
 
         <div className="flex justify-between mb-3 items-center">
           <SearchBar
