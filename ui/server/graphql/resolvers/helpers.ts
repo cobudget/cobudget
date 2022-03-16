@@ -228,6 +228,7 @@ export function statusTypeToQuery(statusType) {
     case "PENDING_APPROVAL":
       return {
         approvedAt: null,
+        deleted: false,
       };
     case "OPEN_FOR_FUNDING":
       return {
@@ -235,20 +236,24 @@ export function statusTypeToQuery(statusType) {
         fundedAt: null,
         completedAt: null,
         canceledAt: null,
+        deleted: false,
       };
     case "FUNDED":
       return {
         fundedAt: { not: null },
         canceledAt: null,
         completedAt: null,
+        deleted: false,
       };
     case "CANCELED":
       return {
         canceledAt: { not: null },
+        deleted: false,
       };
     case "COMPLETED":
       return {
         completedAt: { not: null },
+        deleted: false,
       };
     default:
       return false;
