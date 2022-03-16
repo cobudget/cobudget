@@ -293,7 +293,7 @@ const resolvers = {
           (
             SELECT 
               "id", 
-              "roundMemberId", 
+              "collectionMemberId" as "roundMemberId", 
               null as "allocatedById", 
               "amount",
               "bucketId",
@@ -301,13 +301,13 @@ const resolvers = {
               null as "allocationType",
               'CONTRIBUTION' as "transactionType",
               "createdAt"
-            FROM "Contribution" where "roundId" = ${roundId}
+            FROM "Contribution" where "collectionId" = ${roundId}
             
             UNION ALL
             
             SELECT 
               "id", 
-              "roundMemberId", 
+              "collectionMemberId" as "roundMemberId", 
               "allocatedById", 
               "amount",
               null as "bucketId",
@@ -315,7 +315,7 @@ const resolvers = {
               "allocationType",
               'ALLOCATION' as "transactionType",
               "createdAt"
-            FROM "Allocation" where "roundId" = ${roundId}
+            FROM "Allocation" where "collectionId" = ${roundId}
           ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
         `;
 
