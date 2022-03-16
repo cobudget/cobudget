@@ -8,7 +8,7 @@ import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
-
+import { useRouter } from "next/router";
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($roundSlug: String, $groupSlug: String) {
     round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
@@ -124,7 +124,8 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps, router }) => {
+const MyApp = ({ Component, pageProps }) => {
+  const router = useRouter();
   const [
     {
       data: { currentUser, currentGroup, round } = {
@@ -141,6 +142,7 @@ const MyApp = ({ Component, pageProps, router }) => {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
     },
+    pause: !router.isReady,
   });
 
   useEffect(() => {

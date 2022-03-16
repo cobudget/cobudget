@@ -11,6 +11,7 @@ import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
 import { RoundedCornerRounded } from "@material-ui/icons";
+import { useRouter } from "next/router";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($roundSlug: String!, $groupSlug: String) {
@@ -168,22 +169,27 @@ const getStandardFilter = (bucketStatusCount) => {
     // otherwise show every other
     const statusNames = Object.keys(bucketStatusCount);
     const values = Object.values(bucketStatusCount);
-    stdFilter = statusNames.filter((status, i) => !!values[i]);
+    stdFilter = statusNames
+      .filter((status, i) => !!values[i])
+      .filter((status) => status !== "__typename");
   }
   return stdFilter;
 };
 
-const RoundPage = ({ round, router, currentGroup, currentUser }) => {
+const RoundPage = ({ round, currentGroup, currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
+  const router = useRouter();
+
   const [{ data }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
-      roundSlug: round?.slug,
-      groupSlug: currentGroup?.slug ?? "c",
+      roundSlug: router.query.round,
+      groupSlug: router.query.group,
     },
+    pause: !router.isReady,
   });
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
