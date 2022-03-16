@@ -428,7 +428,7 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, search, offset = 0, limit = 10 },
+        { collectionId, isApproved = true, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
