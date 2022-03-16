@@ -8,6 +8,7 @@ import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
+import HappySpinner from "components/HappySpinner";
 
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($collectionSlug: String, $orgSlug: String) {
@@ -159,16 +160,19 @@ const MyApp = ({ Component, pageProps, router }) => {
     setModal(null);
   };
 
-  if (error) {
-    console.error("Top level query failed:", error);
-    return error.message;
-  }
-
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
+  }
+
+  if (fetching) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
   }
 
   return (

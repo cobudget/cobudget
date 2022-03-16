@@ -10,6 +10,7 @@ import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
+import HappySpinner from "components/HappySpinner";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($collectionSlug: String!, $orgSlug: String) {
@@ -181,7 +182,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
-  const [{ data }] = useQuery({
+  const [{ data, fetching }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
       collectionSlug: collection?.slug,
@@ -204,10 +205,18 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
+  if (fetching) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
+
   if (!collection) {
     return (
       <div className="text-center mt-7">
-        This round either doesn't exist or you don't have access to it
+        This round either doesn&apos;t exist or you don&apos;t have access to it
       </div>
     );
   }
