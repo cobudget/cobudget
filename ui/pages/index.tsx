@@ -81,14 +81,11 @@ export async function getStaticProps(ctx) {
 
   const html = res.data;
 
-  console.log({ res });
-
   // Parse HTML with Cheerio
   const $ = cheerio.load(html);
   const bodyContent = $(`body`).html();
   const headContent = $(`head`).html();
-  console.log({ bodyContent });
-  console.log("hey");
+
   // Send HTML to component via props
   return {
     props: {
