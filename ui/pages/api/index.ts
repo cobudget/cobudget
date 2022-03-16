@@ -20,8 +20,8 @@ export interface GraphQLContext {
   prisma: typeof prisma;
   //origin: string;
   eventHub?: any;
-  currentOrg?: any;
-  currentOrgMember?: any;
+  currentGroup?: any;
+  currentGroupMember?: any;
 }
 
 const corsOptions = {
@@ -40,8 +40,8 @@ export default handler()
       context: async ({ req }): Promise<GraphQLContext> => {
         const { user } = req;
         // TODO: fetch user from Prisma?
-        // let currentOrg = null;
-        // let currentOrgMember = null;
+        // let currentGroup = null;
+        // let currentGroupMember = null;
 
         // if (req.headers.host) {
         //   let customDomain;
@@ -58,19 +58,19 @@ export default handler()
         //   }
 
         //   if (customDomain) {
-        //     currentOrg = await prisma.organization.findFirst({
+        //     currentGroup = await prisma.group.findFirst({
         //       where: { customDomain },
         //     });
         //   } else if (subdomain) {
-        //     currentOrg = await prisma.organization.findUnique({
+        //     currentGroup = await prisma.group.findUnique({
         //       where: { slug: subdomain },
         //     });
         //   }
-        //   if (currentOrg && user) {
-        //     currentOrgMember = await prisma.orgMember.findUnique({
+        //   if (currentGroup && user) {
+        //     currentGroupMember = await prisma.groupMember.findUnique({
         //       where: {
-        //         organizationId_userId: {
-        //           organizationId: currentOrg.id,
+        //         groupId_userId: {
+        //           groupId: currentGroup.id,
         //           userId: user.id,
         //         },
         //       },
@@ -86,8 +86,8 @@ export default handler()
           //origin,
           prisma,
           eventHub: EventHub,
-          //currentOrg,
-          //currentOrgMember,
+          //currentGroup,
+          //currentGroupMember,
         };
       },
     }).createHandler({

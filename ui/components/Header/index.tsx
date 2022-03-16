@@ -3,7 +3,7 @@ import { useMutation, gql } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
-import OrganizationAndEventHeader from "./OrganizationAndEventHeader";
+import GroupAndRoundHeader from "./GroupAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
@@ -13,9 +13,9 @@ const css = {
     "mx-1 px-3 py-2 block text-gray-800 text-left rounded hover:bg-gray-200 focus:outline-none focus:ring",
 };
 
-const JOIN_ORG_MUTATION = gql`
-  mutation JoinOrg($orgId: ID!) {
-    joinOrg(orgId: $orgId) {
+const JOIN_GROUP_MUTATION = gql`
+  mutation JoinGroup($groupId: ID!) {
+    joinGroup(groupId: $groupId) {
       id
       bio
       isAdmin
@@ -27,18 +27,18 @@ const JOIN_ORG_MUTATION = gql`
         username
         email
       }
-      collectionMemberships {
+      roundMemberships {
         id
         isAdmin
         isModerator
         isApproved
-        collection {
+        round {
           id
           title
           slug
         }
       }
-      organization {
+      group {
         id
         slug
       }
@@ -47,19 +47,19 @@ const JOIN_ORG_MUTATION = gql`
 `;
 
 const ACCEPT_INVITATION = gql`
-  mutation AcceptInvitation($collectionId: ID!) {
-    acceptInvitation(collectionId: $collectionId) {
+  mutation AcceptInvitation($roundId: ID!) {
+    acceptInvitation(roundId: $roundId) {
       id
       isAdmin
       isModerator
       isApproved
       hasJoined
       balance
-      collection {
+      round {
         id
         title
         slug
-        organization {
+        group {
           id
           slug
         }
@@ -68,19 +68,19 @@ const ACCEPT_INVITATION = gql`
   }
 `;
 
-const JOIN_COLLECTION_MUTATION = gql`
-  mutation JoinCollection($collectionId: ID!) {
-    joinCollection(collectionId: $collectionId) {
+const JOIN_ROUND_MUTATION = gql`
+  mutation JoinRound($roundId: ID!) {
+    joinRound(roundId: $roundId) {
       id
       isAdmin
       isModerator
       isApproved
       balance
-      collection {
+      round {
         id
         title
         slug
-        organization {
+        group {
           id
           slug
         }
@@ -89,22 +89,22 @@ const JOIN_COLLECTION_MUTATION = gql`
   }
 `;
 
-const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
+const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
 
-  const [, joinOrg] = useMutation(JOIN_ORG_MUTATION);
+  const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
-  const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
-  const color = collection?.color ?? "anthracit";
+  const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
+  const color = round?.color ?? "anthracit";
 
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
-          <OrganizationAndEventHeader
-            currentOrg={currentOrg}
-            collection={collection}
+          <GroupAndRoundHeader
+            currentGroup={currentGroup}
+            round={round}
             color={color}
             currentUser={currentUser}
             router={router}
@@ -143,9 +143,9 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                 {currentUser.currentCollMember?.hasJoined === false ? (
                   <NavItem
                     primary
-                    eventColor={color}
+                    roundColor={color}
                     onClick={() => {
-                      acceptInvitation({ collectionId: collection?.id }).then(
+                      acceptInvitation({ roundId: round?.id }).then(
                         ({ data, error }) => {
                           console.log({ data });
                           if (error) {
@@ -161,42 +161,41 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                   </NavItem>
                 ) : null}
                 {!currentUser.currentCollMember &&
-                  collection &&
-                  (collection.registrationPolicy !== "INVITE_ONLY" ||
-                    currentUser.currentOrgMember?.isAdmin) && (
+                  round &&
+                  (round.registrationPolicy !== "INVITE_ONLY" ||
+                    currentUser.currentGroupMember?.isAdmin) && (
                     <NavItem
                       primary
-                      eventColor={color}
+                      roundColor={color}
                       onClick={() =>
-                        joinCollection({ collectionId: collection?.id }).then(
+                        joinRound({ roundId: round?.id }).then(
                           ({ data, error }) => {
                             console.log({ data });
                             if (error) {
                               toast.error(error.message);
                             } else {
                               toast.success(
-                                collection.registrationPolicy ===
-                                  "REQUEST_TO_JOIN"
+                                round.registrationPolicy === "REQUEST_TO_JOIN"
                                   ? "Request sent!"
-                                  : "You joined this collection!"
+                                  : "You joined this round!"
                               );
                             }
                           }
                         )
                       }
                     >
-                      {collection.registrationPolicy === "REQUEST_TO_JOIN"
+                      {round.registrationPolicy === "REQUEST_TO_JOIN"
                         ? "Request to join"
-                        : "Join collection"}
+                        : "Join round"}
                     </NavItem>
                   )}
-                {!currentUser.currentOrgMember && !collection && currentOrg && (
+                {!currentUser.currentGroupMember && !round && currentGroup && (
                   <NavItem
                     primary
-                    eventColor={color}
-                    onClick={() => joinOrg({ orgId: currentOrg.id })}
+                    roundColor={color}
+                    onClick={() => joinGroup({ groupId: currentGroup.id })}
                   >
-                    Join org
+                    Join group
                   </NavItem>
                 )}
 
@@ -210,10 +209,10 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
               </>
             ) : (
               <>
-                <NavItem href={`/login`} eventColor={color}>
+                <NavItem href={`/login`} roundColor={color}>
                   Log in
                 </NavItem>
-                <NavItem href={`/signup`} eventColor={color} primary>
+                <NavItem href={`/signup`} roundColor={color} primary>
                   Sign up
                 </NavItem>
               </>

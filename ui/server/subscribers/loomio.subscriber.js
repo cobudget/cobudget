@@ -8,11 +8,11 @@ module.exports = {
 
     console.log(`Integrating with Loomio at ${process.env.LOOMIO_API_URL}`);
 
-    eventHub.subscribe("create-event", ({ event, actor }) => {
+    eventHub.subscribe("create-round", ({ round, actor }) => {
       console.log("TODO: publish group to Loomio (?)");
     });
 
-    eventHub.subscribe("create-dream", ({ dream, actor }) => {
+    eventHub.subscribe("create-bucket", ({ bucket, actor }) => {
       console.log("TODO: publish discussion to Loomio");
     });
 

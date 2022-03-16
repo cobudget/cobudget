@@ -9,7 +9,7 @@ const CommentsLog = ({ log }) => {
     case "FlagRaised":
       headline = (
         <>
-          Dream was flagged for violating the{" "}
+          Bucket was flagged for violating the{" "}
           <span className="underline">{log.details.guideline.title}</span>{" "}
           guideline:
         </>

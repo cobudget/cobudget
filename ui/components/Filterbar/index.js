@@ -7,8 +7,8 @@ import StatusFilter from "./StatusFilter";
 const Filterbar = ({
   textSearchTerm,
   tag,
-  collection,
-  currentOrg,
+  round,
+  currentGroup,
   statusFilter,
   bucketStatusCount,
 }) => {
@@ -24,10 +24,10 @@ const Filterbar = ({
     e.preventDefault();
 
     router.push({
-      pathname: "/[org]/[collection]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
-        collection: collection.slug,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         s: input,
         ...(tag && { tag }),
       },
@@ -38,10 +38,10 @@ const Filterbar = ({
     const tag = e.target.value === "All tags" ? null : e.target.value;
 
     router.push({
-      pathname: "/[org]/[collection]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
-        collection: collection.slug,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
       },
@@ -50,10 +50,10 @@ const Filterbar = ({
 
   const onChangeStatus = (statusFilterArray) => {
     router.push({
-      pathname: "/[org]/[collection]",
+      pathname: "/[group]/[round]",
       query: {
-        org: currentOrg?.slug ?? "c",
-        collection: collection.slug,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
         f: statusFilterArray,
@@ -64,7 +64,7 @@ const Filterbar = ({
   return (
     <div className="mb-5 grid sm:flex gap-2 grid-cols-2">
       <div
-        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${collection.color} border-3 px-1 relative pr-10 flex items-center overflow-hidden`}
+        className={`bg-white shadow-sm rounded-md border-transparent focus-within:border-${round.color} border-3 px-1 relative pr-10 flex items-center overflow-hidden`}
       >
         <form onSubmit={onSubmitSearch}>
           <input
@@ -78,7 +78,7 @@ const Filterbar = ({
             className={
               `h-full absolute inset-y-0 right-0 flex items-center p-3 focus:outline-none transition-colors` +
               " " +
-              (changed ? `bg-${collection.color} text-white` : "text-gray-400")
+              (changed ? `bg-${round.color} text-white` : "text-gray-400")
             }
           >
             <SearchIcon className="h-5 w-5" />
@@ -90,20 +90,20 @@ const Filterbar = ({
         className="col-span-2 order-3 sm:order-2"
         onChangeStatus={onChangeStatus}
         statusFilter={statusFilter}
-        color={collection.color}
+        color={round.color}
         bucketStatusCount={bucketStatusCount}
       />
 
       <SelectField
         className="bg-white sm:order-last"
-        color={collection.color}
+        color={round.color}
         inputProps={{
           value: tag || "All tags",
           onChange: onChangeTag,
         }}
       >
         <option value="All tags">All tags</option>
-        {collection.tags.map((tag) => (
+        {round.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
             {tag.value}
           </option>
