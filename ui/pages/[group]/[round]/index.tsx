@@ -10,8 +10,8 @@ import NewBucketModal from "../../../components/NewBucketModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
-import { RoundedCornerRounded } from "@material-ui/icons";
 import { useRouter } from "next/router";
+import HappySpinner from "components/HappySpinner";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($roundSlug: String!, $groupSlug: String) {
@@ -183,7 +183,7 @@ const RoundPage = ({ round, currentGroup, currentUser }) => {
   ]);
   const router = useRouter();
 
-  const [{ data }] = useQuery({
+  const [{ data, fetching }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
       roundSlug: router.query.round,
@@ -213,10 +213,18 @@ const RoundPage = ({ round, currentGroup, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
+  if (fetching && !round) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
+
   if (!round) {
     return (
       <div className="text-center mt-7">
-        This round either doesn't exist or you don't have access to it
+        This round either doesn&apos;t exist or you don&apos;t have access to it
       </div>
     );
   }

@@ -417,13 +417,14 @@ const resolvers = {
       isCollMemberOrGroupAdmin,
       async (
         parent,
-        { roundId, isApproved, search, offset = 0, limit = 10 },
+        { roundId, isApproved = true, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
           userId: user.id,
           roundId,
         });
+        if (!isAdmin && !isApproved) return null;
 
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {

@@ -9,6 +9,8 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
+import HappySpinner from "components/HappySpinner";
+
 export const TOP_LEVEL_QUERY = gql`
   query TopLevelQuery($roundSlug: String, $groupSlug: String) {
     round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
@@ -126,17 +128,7 @@ export const TOP_LEVEL_QUERY = gql`
 
 const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
-  const [
-    {
-      data: { currentUser, currentGroup, round } = {
-        currentUser: null,
-        currentGroup: null,
-        round: null,
-      },
-      fetching,
-      error,
-    },
-  ] = useQuery({
+  const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
       groupSlug: router.query.group,
@@ -144,6 +136,8 @@ const MyApp = ({ Component, pageProps }) => {
     },
     pause: !router.isReady,
   });
+
+  const { currentUser = null, currentGroup = null, round = null } = data;
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -161,16 +155,19 @@ const MyApp = ({ Component, pageProps }) => {
     setModal(null);
   };
 
-  if (error) {
-    console.error("Top level query failed:", error);
-    return error.message;
-  }
-
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
+  }
+
+  if (fetching && !data) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
   }
 
   return (

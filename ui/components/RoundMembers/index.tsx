@@ -10,12 +10,7 @@ import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/RoundMembers/SearchBar";
 
 export const ROUND_MEMBERS_QUERY = gql`
-  query Members(
-    $roundId: ID!
-    $search: String!
-    $offset: Int
-    $limit: Int
-  ) {
+  query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
     approvedMembersPage: membersPage(
       roundId: $roundId
       isApproved: true
@@ -47,10 +42,7 @@ export const ROUND_MEMBERS_QUERY = gql`
         }
       }
     }
-    requestsToJoinPage: membersPage(
-      roundId: $roundId
-      isApproved: false
-    ) {
+    requestsToJoinPage: membersPage(roundId: $roundId, isApproved: false) {
       requestsToJoin: members(roundId: $roundId, isApproved: false) {
         id
         isAdmin
@@ -111,7 +103,7 @@ const RoundMembers = ({ round, currentUser }) => {
           moreExist: false,
           approvedMembers: [],
         },
-        requestsToJoinPage: { requestsToJoin },
+        requestsToJoinPage,
       } = {
         approvedMembersPage: {
           approvedMembers: [],
@@ -168,12 +160,14 @@ const RoundMembers = ({ round, currentUser }) => {
   return (
     <>
       <div className="page">
-        <RequestsToJoinTable
-          requestsToJoin={requestsToJoin}
-          updateMember={updateMember}
-          deleteMember={deleteMember}
-          round={round}
-        />
+        {requestsToJoinPage && (
+          <RequestsToJoinTable
+            requestsToJoin={requestsToJoinPage.requestsToJoin}
+            updateMember={updateMember}
+            deleteMember={deleteMember}
+            round={round}
+          />
+        )}
 
         <div className="flex justify-between mb-3 items-center">
           <SearchBar
