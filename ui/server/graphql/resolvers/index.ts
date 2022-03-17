@@ -1755,7 +1755,16 @@ const resolvers = {
     deleteMember: combineResolvers(
       isCollOrOrgAdmin,
       async (parent, { collectionId, memberId }) => {
-        return deleteRoundMember({ roundMemberId: memberId });
+        const collectionMember = await prisma.collectionMember.findUnique({
+          where: { id: memberId },
+        });
+        if (!collectionMember)
+          throw new Error("This member does not exist in this collection");
+
+        return prisma.collectionMember.update({
+          where: { id: memberId },
+          data: { isApproved: false, isRemoved: true },
+        });
       }
     ),
     // deleteOrganization: async (parent, { organizationId }, { user }) => {

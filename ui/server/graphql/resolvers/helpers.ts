@@ -1,8 +1,6 @@
 import prisma from "../../prisma";
 import dayjs from "dayjs";
 
-export async function getCurrentCollMember({ collMemberId }) {}
-
 export async function isCollAdmin({ collectionId, userId }) {
   const collectionMember = await getCollectionMember({
     userId: userId,
@@ -273,16 +271,4 @@ export async function canViewRound({ round, user }) {
   } else {
     return false;
   }
-}
-
-export async function deleteRoundMember({ roundMemberId }) {
-  const collectionMember = await prisma.collectionMember.findUnique({
-    where: { id: roundMemberId },
-  });
-  if (!collectionMember)
-    throw new Error("This member does not exist in this collection");
-
-  return prisma.collectionMember.delete({
-    where: { id: roundMemberId },
-  });
 }
