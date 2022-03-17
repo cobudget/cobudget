@@ -137,7 +137,7 @@ const MyApp = ({ Component, pageProps }) => {
     pause: !router.isReady,
   });
 
-  const { currentUser = null, currentGroup = null, round = null } = data;
+  const { currentUser = null, currentGroup = null, round = null } = data ?? {};
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
