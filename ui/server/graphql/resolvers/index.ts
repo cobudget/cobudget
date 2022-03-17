@@ -419,7 +419,8 @@ const resolvers = {
         return await prisma.collectionMember.findMany({
           where: {
             collectionId,
-            ...(typeof isApproved === "boolean" && { isApproved }),
+            isApproved,
+            ...(!isApproved && { isRemoved: false }),
           },
         });
       }
@@ -428,7 +429,7 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved = true, search, offset = 0, limit = 10 },
+        { collectionId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
@@ -443,7 +444,8 @@ const resolvers = {
           {
             where: {
               collectionId,
-              ...(typeof isApproved === "boolean" && { isApproved }),
+              isApproved,
+              ...(!isApproved && { isRemoved: false }),
               ...(search && {
                 OR: [
                   {
