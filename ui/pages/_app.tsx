@@ -95,6 +95,7 @@ export const TOP_LEVEL_QUERY = gql`
         isAdmin
         isModerator
         isApproved
+        isRemoved
         hasJoined
         balance
         collection {

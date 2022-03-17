@@ -356,6 +356,7 @@ const schema = gql`
     isAdmin: Boolean!
     isModerator: Boolean
     isApproved: Boolean!
+    isRemoved: Boolean
     createdAt: Date
     balance: Int # stored as cents
     email: String

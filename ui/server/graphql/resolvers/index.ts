@@ -2181,17 +2181,20 @@ const resolvers = {
       )
         throw new Error("This collection is invite only");
 
-      const collectionMember = await prisma.collectionMember.create({
-        data: {
+      const isApproved =
+        currentOrgMember?.isAdmin || collection.registrationPolicy === "OPEN";
+
+      const collectionMember = await prisma.collectionMember.upsert({
+        where: { userId_collectionId: { userId: user.id, collectionId } },
+        create: {
           collection: { connect: { id: collectionId } },
           user: { connect: { id: user.id } },
-          isApproved:
-            currentOrgMember?.isAdmin ||
-            collection.registrationPolicy === "OPEN",
+          isApproved,
           statusAccount: { create: {} },
           incomingAccount: { create: {} },
           outgoingAccount: { create: {} },
         },
+        update: { isApproved, isRemoved: false },
       });
 
       return collectionMember;

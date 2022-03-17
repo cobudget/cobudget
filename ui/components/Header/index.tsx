@@ -75,6 +75,7 @@ const JOIN_COLLECTION_MUTATION = gql`
       isAdmin
       isModerator
       isApproved
+      isRemoved
       balance
       collection {
         id
@@ -97,6 +98,8 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
 
   const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
   const color = collection?.color ?? "anthracit";
+
+  console.log("currentUser", currentUser);
 
   return (
     <header className={`bg-${color} shadow-md w-full`}>
@@ -160,36 +163,40 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                     Accept Invitation
                   </NavItem>
                 ) : null}
-                {!currentUser.currentCollMember &&
-                  collection &&
-                  (collection.registrationPolicy !== "INVITE_ONLY" ||
-                    currentUser.currentOrgMember?.isAdmin) && (
-                    <NavItem
-                      primary
-                      eventColor={color}
-                      onClick={() =>
-                        joinCollection({ collectionId: collection?.id }).then(
-                          ({ data, error }) => {
-                            console.log({ data });
-                            if (error) {
-                              toast.error(error.message);
-                            } else {
-                              toast.success(
-                                collection.registrationPolicy ===
-                                  "REQUEST_TO_JOIN"
-                                  ? "Request sent!"
-                                  : "You joined this collection!"
-                              );
+                {
+                  // you can ask to be a member if you've either never been a member, or been a member but been removed
+                  (!currentUser.currentCollMember ||
+                    currentUser.currentCollMember.isRemoved) &&
+                    collection &&
+                    (collection.registrationPolicy !== "INVITE_ONLY" ||
+                      currentUser.currentOrgMember?.isAdmin) && (
+                      <NavItem
+                        primary
+                        eventColor={color}
+                        onClick={() =>
+                          joinCollection({ collectionId: collection?.id }).then(
+                            ({ data, error }) => {
+                              console.log({ data });
+                              if (error) {
+                                toast.error(error.message);
+                              } else {
+                                toast.success(
+                                  collection.registrationPolicy ===
+                                    "REQUEST_TO_JOIN"
+                                    ? "Request sent!"
+                                    : "You joined this collection!"
+                                );
+                              }
                             }
-                          }
-                        )
-                      }
-                    >
-                      {collection.registrationPolicy === "REQUEST_TO_JOIN"
-                        ? "Request to join"
-                        : "Join collection"}
-                    </NavItem>
-                  )}
+                          )
+                        }
+                      >
+                        {collection.registrationPolicy === "REQUEST_TO_JOIN"
+                          ? "Request to join"
+                          : "Join collection"}
+                      </NavItem>
+                    )
+                }
                 {!currentUser.currentOrgMember && !collection && currentOrg && (
                   <NavItem
                     primary
