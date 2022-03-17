@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useMutation, gql } from "urql";
+import { useMutation, gql } from "urql";
 
 import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
@@ -15,14 +15,13 @@ const UPDATE_ORG_MEMBER = gql`
   }
 `;
 
-// // TODO: change to deleting org members, not event members
-// const DELETE_MEMBER = gql`
-//   mutation UpdateMember($memberId: ID!, $collectionId: ID!) {
-//     deleteMember(memberId: $memberId, collectionId: $collectionId) {
-//       id
-//     }
-//   }
-// `;
+const DELETE_GROUP_MEMBER = gql`
+  mutation DeleteGroupMember($groupMemberId: ID!) {
+    deleteGroupMember(groupMemberId: $groupMemberId) {
+      id
+    }
+  }
+`;
 
 const OrgMembers = ({ currentOrg }) => {
   const [, updateOrgMember] = useMutation(UPDATE_ORG_MEMBER);
@@ -44,6 +43,7 @@ const OrgMembers = ({ currentOrg }) => {
   //     });
   //   },
   // });
+  const [, deleteGroupMember] = useMutation(DELETE_GROUP_MEMBER);
 
   return (
     <div>
@@ -64,6 +64,7 @@ const OrgMembers = ({ currentOrg }) => {
 
       <OrgMembersTable
         updateOrgMember={updateOrgMember}
+        deleteGroupMember={deleteGroupMember}
         currentOrg={currentOrg}
       />
     </div>

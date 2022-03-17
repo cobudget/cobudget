@@ -13,6 +13,9 @@ const BUCKET_QUERY = gql`
   }
 `;
 
+const capLength = (title: string) =>
+  title.length <= 30 ? title : title.substr(0, 30) + "...";
+
 const OrganizationAndEventHeader = ({
   currentOrg,
   collection,
@@ -39,7 +42,7 @@ const OrganizationAndEventHeader = ({
 
       {(currentOrg || collection || currentUser) && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           {currentOrg ? (
             <Link href={`/${currentOrg.slug}`}>
@@ -47,7 +50,6 @@ const OrganizationAndEventHeader = ({
                 className={
                   "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
                 }
-                style={{ flex: "1 1 25%" }}
               >
                 {currentOrg.logo && (
                   <img
@@ -56,7 +58,7 @@ const OrganizationAndEventHeader = ({
                   />
                 )}
                 <span className={`text-white font-medium truncate`}>
-                  {currentOrg.name}
+                  {capLength(currentOrg.name)}
                 </span>
               </a>
             </Link>
@@ -66,9 +68,8 @@ const OrganizationAndEventHeader = ({
                 className={
                   "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
                 }
-                style={{ flex: "1 1 25%" }}
               >
-                {collection.title}
+                {capLength(collection.title)}
               </a>
             </Link>
           ) : null}
@@ -86,16 +87,13 @@ const OrganizationAndEventHeader = ({
 
       {currentOrg && collection && (
         <>
-          <SlashIcon className={`w-7 h-7 text-white opacity-25`} />
+          <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
           <Link href={`/${currentOrg?.slug ?? "c"}/${collection.slug}`}>
             <a
               className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
-              style={{ flex: "1 1 25%" }}
             >
-              {collection.title.length <= 30
-                ? collection.title
-                : collection.title.substr(0, 30) + "..."}
+              {capLength(collection.title)}
             </a>
           </Link>
         </>
@@ -103,7 +101,7 @@ const OrganizationAndEventHeader = ({
       {bucket && router.query?.bucket && (
         <>
           <SlashIcon
-            className={`w-7 h-7 text-white opacity-25 hidden sm:block`}
+            className={`w-7 h-7 flex-none text-white opacity-25 hidden sm:block`}
           />
 
           <span
@@ -111,9 +109,7 @@ const OrganizationAndEventHeader = ({
               "px-2 py-1 text-white rounded-md mx-0 font-medium truncate hidden sm:block"
             }
           >
-            {bucket.title.length <= 30
-              ? bucket.title
-              : bucket.title.substr(0, 30) + "..."}
+            {capLength(bucket.title)}
           </span>
         </>
       )}

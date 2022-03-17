@@ -160,6 +160,7 @@ const schema = gql`
     ): [CollectionMember]
     inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
     updateOrgMember(orgId: ID!, memberId: ID!, isAdmin: Boolean): OrgMember
+    deleteGroupMember(groupMemberId: ID!): OrgMember
     updateMember(
       collectionId: ID!
       memberId: ID!
@@ -357,7 +358,6 @@ const schema = gql`
     isApproved: Boolean!
     createdAt: Date
     balance: Int # stored as cents
-    amountContributed: Int
     email: String
     name: String
     hasJoined: Boolean

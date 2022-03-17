@@ -10,6 +10,7 @@ import NewDreamModal from "../../../components/NewDreamModal";
 import EditableField from "../../../components/EditableField";
 import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
+import HappySpinner from "components/HappySpinner";
 
 export const BUCKET_STATUS_QUERY = gql`
   query BucketStatus($collectionSlug: String!, $orgSlug: String) {
@@ -181,7 +182,7 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
-  const [{ data }] = useQuery({
+  const [{ data, fetching }] = useQuery({
     query: BUCKET_STATUS_QUERY,
     variables: {
       collectionSlug: collection?.slug,
@@ -204,7 +205,22 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
-  if (!collection) return null;
+  if (fetching) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
+
+  if (!collection) {
+    return (
+      <div className="text-center mt-7">
+        This round either doesn&apos;t exist or you don&apos;t have access to it
+      </div>
+    );
+  }
+
   const canEdit =
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
@@ -241,15 +257,28 @@ const CollectionPage = ({ collection, router, currentOrg, currentUser }) => {
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  
-                  <p className="font-bold my-0.5">
-                    Your Funds
-                  </p>
-                  <p className="mb-5">
-                    <span className="font-bold">{currentUser.currentCollMember.balance / 100} {getCurrencySymbol(collection.currency)}</span>{" "}
-                    <span>({currentUser.currentCollMember.amountContributed / 100} {getCurrencySymbol(collection.currency)} in round)</span>
-                  </p>
-                  
+                  <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+                    <p className="font-bold my-0.5">Funds available</p>
+                    <div>
+                      <table>
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(collection.currency)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="pr-3">In this round</td>
+                          <td className="font-bold">
+                            {collection.totalInMembersBalances / 100}
+                            {getCurrencySymbol(collection.currency)}
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </div>
+
                   <Button
                     size="large"
                     color={collection.color}

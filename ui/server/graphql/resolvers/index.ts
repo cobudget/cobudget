@@ -19,6 +19,7 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   canViewRound,
+  deleteRoundMember,
   getCollectionMember,
   getCurrentOrgAndMember,
   getOrgMember,
@@ -427,13 +428,16 @@ const resolvers = {
       isCollMemberOrOrgAdmin,
       async (
         parent,
-        { collectionId, isApproved, search, offset = 0, limit = 10 },
+        { collectionId, isApproved = true, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
           userId: user.id,
           collectionId,
         });
+
+        // unapproved members are uninteresting to non-admins
+        if (!isAdmin && !isApproved) return null;
 
         const collectionMembersWithExtra = await prisma.collectionMember.findMany(
           {
@@ -1718,6 +1722,14 @@ const resolvers = {
         });
       }
     ),
+    deleteGroupMember: combineResolvers(
+      isOrgAdmin,
+      async (parent, { groupMemberId }) => {
+        return prisma.orgMember.delete({
+          where: { id: groupMemberId },
+        });
+      }
+    ),
     updateMember: combineResolvers(
       isCollOrOrgAdmin,
       async (
@@ -1742,16 +1754,8 @@ const resolvers = {
     ),
     deleteMember: combineResolvers(
       isCollOrOrgAdmin,
-      async (parent, { collectionId, memberId }, { user }) => {
-        const collectionMember = await prisma.collectionMember.findFirst({
-          where: { collectionId, id: memberId },
-        });
-        if (!collectionMember)
-          throw new Error("This member does not exist in this collection");
-
-        return prisma.collectionMember.delete({
-          where: { id: memberId },
-        });
+      async (parent, { collectionId, memberId }) => {
+        return deleteRoundMember({ roundMemberId: memberId });
       }
     ),
     // deleteOrganization: async (parent, { organizationId }, { user }) => {
@@ -1978,7 +1982,6 @@ const resolvers = {
 
       await prisma.transaction.create({
         data: {
-          type: "CONTRIBUTION",
           collectionMemberId: collectionMember.id,
           amount,
           toAccountId: bucket.statusAccountId,
@@ -2249,16 +2252,6 @@ const resolvers = {
       // }
 
       return totalAllocations - totalContributions;
-    },
-    amountContributed: async (member) => {
-      const {
-        _sum: { amount: totalContributions },
-      } = await prisma.contribution.aggregate({
-        where: { collectionMemberId: member.id },
-        _sum: { amount: true },
-      });
-
-      return totalContributions;
     },
     email: async (member, _, { user }) => {
       if (!user) return null;

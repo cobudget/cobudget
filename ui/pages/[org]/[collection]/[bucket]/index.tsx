@@ -9,6 +9,7 @@ import Comments from "components/Bucket/Comments";
 import Monster from "components/Monster";
 
 import classNames from "utils/classNames";
+import HappySpinner from "components/HappySpinner";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -113,7 +114,21 @@ const BucketIndex = ({ collection, currentUser, currentOrg, router }) => {
     collection.guidelines.length > 0 &&
     bucket?.published;
 
-  if (!bucket || !collection) return null;
+  if (fetching) {
+    return (
+      <div className="flex-grow flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
+
+  if (!bucket || !collection)
+    return (
+      <div className="text-center mt-7">
+        This bucket either doesn&apos;t exist or you don&apos;t have access to
+        it
+      </div>
+    );
 
   return (
     <>
