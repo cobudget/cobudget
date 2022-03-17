@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 
-const BucketCard = ({ bucket, round, currentGroup }) => {
+const BucketCard = ({ bucket, round }) => {
   const showFundingStats =
     (bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
   return (
@@ -30,7 +30,9 @@ const BucketCard = ({ bucket, round, currentGroup }) => {
           {showFundingStats && (
             <ProgressBar
               color={round.color}
-              ratio={(bucket.totalContributions + bucket.income) / bucket.minGoal}
+              ratio={
+                (bucket.totalContributions + bucket.income) / bucket.minGoal
+              }
               className="mt-2 mb-3"
             />
           )}
@@ -53,7 +55,9 @@ const BucketCard = ({ bucket, round, currentGroup }) => {
             {parseInt(bucket.noOfComments) > 0 && (
               <div className="flex items-center text-gray-700">
                 <CommentIcon className="w-5 h-5" />
-                <span className="block ml-1 text-sm">{bucket.noOfComments}</span>
+                <span className="block ml-1 text-sm">
+                  {bucket.noOfComments}
+                </span>
               </div>
             )}
           </div>

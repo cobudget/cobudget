@@ -52,10 +52,6 @@ export const TOP_LEVEL_QUERY = gql`
         position
         createdAt
       }
-      tags {
-        id
-        value
-      }
     }
 
     currentUser {
@@ -160,14 +156,6 @@ const MyApp = ({ Component, pageProps }) => {
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
-  }
-
-  if (fetching && !data) {
-    return (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
-    );
   }
 
   return (

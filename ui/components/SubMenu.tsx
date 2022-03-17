@@ -61,14 +61,14 @@ export default function SubMenu({
 }) {
   const router = useRouter();
 
-  const items = bucket
+  const items = router.query.bucket
     ? bucketItems({
         roundSlug: router.query.round,
         groupSlug: router.query.group,
         bucketId: router.query.bucket,
         bucket,
       })
-    : round
+    : router.query.round
     ? roundItems({
         currentUser,
         roundSlug: router.query.round,

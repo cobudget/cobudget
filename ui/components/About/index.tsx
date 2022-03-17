@@ -7,56 +7,21 @@ import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 
-export const ROUND_QUERY = gql`
-  query RoundQuery($groupSlug: String!, $roundSlug: String!) {
-    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
-      id
-      about
-      guidelines {
-        id
-        title
-        description
-        position
-      }
-      maxAmountToBucketPerUser
-      allowStretchGoals
-      bucketCreationCloses
-      grantingOpens
-      grantingCloses
-      color
-      currency
-      totalContributions
-      totalAllocations
-      totalInMembersBalances
-      totalContributionsFunding
-      totalContributionsFunded
-    }
-  }
-`;
+export default function AboutPage({ router, round }) {
+  // if (error) return <div>{error.message}</div>;
 
-export default function AboutPage({ router }) {
-  const [{ data, fetching: loading, error }] = useQuery({
-    query: ROUND_QUERY,
-    variables: {
-      groupSlug: router.query.group,
-      roundSlug: router.query.round,
-    },
-  });
+  // if (loading)
+  //   return (
+  //     <div className="flex-grow flex justify-center items-center">
+  //       <HappySpinner />
+  //     </div>
+  //   );
 
-  if (error) return <div>{error.message}</div>;
-
-  if (loading)
-    return (
-      <div className="flex-grow flex justify-center items-center">
-        <HappySpinner />
-      </div>
-    );
-
-  const round = data?.round;
-
+  // const round = data?.round;
+  if (!round) return <div>Loading...</div>;
   return (
     <div className="max-w-screen-md">
-      {Boolean(round.guidelines?.length) && (
+      {Boolean(round?.guidelines?.length) && (
         <>
           <h2 className="text-xl font-semibold mb-3" id="guidelines">
             Guidelines

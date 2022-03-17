@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, gql } from "urql";
+import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
 import { modals } from "components/Modal/index";
@@ -7,6 +7,7 @@ import GroupAndRoundHeader from "./GroupAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 const css = {
   mobileProfileItem:
@@ -89,7 +90,28 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({ round, currentUser, currentGroup, openModal, router }) => {
+export const ROUND_QUERY = gql`
+  query Round($roundSlug: String!, $groupSlug: String) {
+    round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
+      id
+      slug
+      title
+      color
+    }
+  }
+`;
+
+const Header = ({ currentUser, currentGroup, openModal }) => {
+  const router = useRouter();
+
+  const [{ data: { round } = { round: null }, fetching }] = useQuery({
+    query: ROUND_QUERY,
+    variables: {
+      roundSlug: router.query.round,
+      groupSlug: router.query.group,
+    },
+    pause: !router.isReady,
+  });
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
