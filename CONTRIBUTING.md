@@ -10,7 +10,9 @@ We adopt this schedule to fit with that many in our team have a co-working day s
 We use three branches for our release cycle.
 
 **main** is our active development branch. Everyone works from the assumption that they should keep their own WIP branches in sync with 'main'.
+
 **staging** is our release candidate branch. It gets automatically deployed to staging.cobudget.com.
+
 **production** is our production branch. It gets automatically deployed to cobudget.com.
 
 ## Merging
@@ -26,18 +28,23 @@ Small bug fixes and minor fixes can be pushed straight to 'production', but they
 In summary, this is the order of merging:
 
 **If 'staging' is not frozen**
+
 feature-branch -> main -> staging
 
 **If 'staging' is frozen**
+
 feature-branch -> main
 
 **If update is a small hotfix**
+
 feature-branch -> production -> staging -> main
 
 **When a new version is released**
+
 staging -> production
 
 **After a new version is released**
+
 main -> staging
 
 ## Responsibilities
