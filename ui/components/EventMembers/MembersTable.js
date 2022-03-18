@@ -101,29 +101,36 @@ const ActionsDropdown = ({
         >
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
-        <MenuItem
-          color="error.main"
-          // TODO: disable in backend first
-          //disabled={member.balance !== 0}
-          onClick={() => {
-            if (
-              confirm(
-                `Are you sure you would like to delete membership from user with email ${member.email}?`
-              )
-            )
-              deleteMember({ collectionId, memberId: member.id }).then(
-                ({ error }) => {
-                  if (error) {
-                    console.error(error);
-                    toast.error(error.message);
-                  }
-                  handleClose();
-                }
-              );
-          }}
+        <Tooltip
+          title={
+            member.balance !== 0
+              ? "You can only remove a round member with 0 balance"
+              : ""
+          }
         >
-          <Box color="error.main">Delete</Box>
-        </MenuItem>
+          <MenuItem
+            color="error.main"
+            disabled={member.balance !== 0}
+            onClick={() => {
+              if (
+                confirm(
+                  `Are you sure you would like to delete membership from user with email ${member.email}?`
+                )
+              )
+                deleteMember({ collectionId, memberId: member.id }).then(
+                  ({ error }) => {
+                    if (error) {
+                      console.error(error);
+                      toast.error(error.message);
+                    }
+                    handleClose();
+                  }
+                );
+            }}
+          >
+            <Box color="error.main">Delete</Box>
+          </MenuItem>
+        </Tooltip>
       </Menu>
     </>
   );
