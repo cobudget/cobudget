@@ -167,7 +167,8 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
                 {
                   // you can ask to be a member if you've either never been a member, or been a member but been removed
                   (!currentUser.currentCollMember ||
-                    currentUser.currentCollMember.isRemoved) &&
+                    (!currentUser.currentCollMember.isApproved &&
+                      currentUser.currentCollMember.isRemoved)) &&
                     collection &&
                     (collection.registrationPolicy !== "INVITE_ONLY" ||
                       currentUser.currentOrgMember?.isAdmin) && (
