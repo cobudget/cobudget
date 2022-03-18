@@ -102,11 +102,8 @@ const ActionsDropdown = ({
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
         <Tooltip
-          title={
-            member.balance !== 0
-              ? "You can only remove a round member with 0 balance"
-              : ""
-          }
+          title="You can only remove a round member with 0 balance"
+          disabled={member.balance === 0}
         >
           <MenuItem
             color="error.main"
