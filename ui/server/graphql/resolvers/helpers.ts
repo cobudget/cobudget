@@ -272,3 +272,50 @@ export async function canViewRound({ round, user }) {
     return false;
   }
 }
+
+export async function roundMemberBalance(member) {
+  if (!member.statusAccountId) return 0;
+
+  // console.time("memberBalanceTransactions");
+  // const {
+  //   _sum: { amount: debit },
+  // } = await prisma.transaction.aggregate({
+  //   where: { toAccountId: member.statusAccountId },
+  //   _sum: { amount: true },
+  // });
+
+  // const {
+  //   _sum: { amount: credit },
+  // } = await prisma.transaction.aggregate({
+  //   where: { fromAccountId: member.statusAccountId },
+  //   _sum: { amount: true },
+  // });
+
+  // console.timeEnd("memberBalanceTransactions");
+
+  // const debitMinusCredit = debit - credit;
+
+  // console.time("memberBalanceAllocationsAndContributions");
+
+  const {
+    _sum: { amount: totalAllocations },
+  } = await prisma.allocation.aggregate({
+    where: { collectionMemberId: member.id },
+    _sum: { amount: true },
+  });
+
+  const {
+    _sum: { amount: totalContributions },
+  } = await prisma.contribution.aggregate({
+    where: { collectionMemberId: member.id },
+    _sum: { amount: true },
+  });
+
+  // console.timeEnd("memberBalanceAllocationsAndContributions");
+
+  // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
+  //   console.error("Member balance is not adding up");
+  // }
+
+  return totalAllocations - totalContributions;
+}

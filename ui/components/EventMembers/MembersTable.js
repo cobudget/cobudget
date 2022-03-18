@@ -103,6 +103,8 @@ const ActionsDropdown = ({
         </MenuItem>
         <MenuItem
           color="error.main"
+          // TODO: disable in backend first
+          //disabled={member.balance === 0}
           onClick={() => {
             if (
               confirm(
