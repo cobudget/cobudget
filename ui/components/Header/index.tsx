@@ -99,8 +99,6 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
   const [, joinCollection] = useMutation(JOIN_COLLECTION_MUTATION);
   const color = collection?.color ?? "anthracit";
 
-  console.log("currentUser", currentUser);
-
   return (
     <header className={`bg-${color} shadow-md w-full`}>
       <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
