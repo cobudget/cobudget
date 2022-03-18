@@ -1626,7 +1626,7 @@ const resolvers = {
             },
             update: {
               collMemberships: {
-                connectOrCreate: {
+                upsert: {
                   create: {
                     isApproved: true,
                     collection: { connect: { id: collectionId } },
@@ -1634,6 +1634,10 @@ const resolvers = {
                     statusAccount: { create: {} },
                     incomingAccount: { create: {} },
                     outgoingAccount: { create: {} },
+                  },
+                  update: {
+                    isApproved: true,
+                    isRemoved: false,
                   },
                   where: {
                     userId_collectionId: {
@@ -1770,7 +1774,7 @@ const resolvers = {
 
         return prisma.collectionMember.update({
           where: { id: memberId },
-          data: { isApproved: false, isRemoved: true },
+          data: { isApproved: false, hasJoined: false, isRemoved: true },
         });
       }
     ),
@@ -2199,7 +2203,7 @@ const resolvers = {
           incomingAccount: { create: {} },
           outgoingAccount: { create: {} },
         },
-        update: { isApproved, isRemoved: false },
+        update: { isApproved, hasJoined: true, isRemoved: false },
       });
 
       return collectionMember;

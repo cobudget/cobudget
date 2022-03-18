@@ -143,7 +143,8 @@ const Header = ({ collection, currentUser, currentOrg, openModal, router }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {currentUser.currentCollMember?.hasJoined === false ? (
+                {currentUser.currentCollMember?.isApproved &&
+                currentUser.currentCollMember?.hasJoined === false ? (
                   <NavItem
                     primary
                     eventColor={color}
