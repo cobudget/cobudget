@@ -1764,6 +1764,10 @@ const resolvers = {
         if (!collectionMember)
           throw new Error("This member does not exist in this collection");
 
+        if ((await roundMemberBalance(collectionMember)) !== 0) {
+          throw new Error("You can only remove a round member with 0 balance");
+        }
+
         return prisma.collectionMember.update({
           where: { id: memberId },
           data: { isApproved: false, isRemoved: true },

@@ -104,14 +104,22 @@ const ActionsDropdown = ({
         <MenuItem
           color="error.main"
           // TODO: disable in backend first
-          //disabled={member.balance === 0}
+          //disabled={member.balance !== 0}
           onClick={() => {
             if (
               confirm(
                 `Are you sure you would like to delete membership from user with email ${member.email}?`
               )
             )
-              deleteMember({ collectionId, memberId: member.id });
+              deleteMember({ collectionId, memberId: member.id }).then(
+                ({ error }) => {
+                  if (error) {
+                    console.error(error);
+                    toast.error(error.message);
+                  }
+                  handleClose();
+                }
+              );
           }}
         >
           <Box color="error.main">Delete</Box>
