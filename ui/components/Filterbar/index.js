@@ -60,6 +60,7 @@ const Filterbar = ({
       },
     });
   };
+  if (!round) return null;
 
   return (
     <div className="mb-5 grid sm:flex gap-2 grid-cols-2">

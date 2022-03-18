@@ -12,11 +12,23 @@ import LoadMore from "../../../components/LoadMore";
 import getCurrencySymbol from "utils/getCurrencySymbol";
 import { useRouter } from "next/router";
 import HappySpinner from "components/HappySpinner";
+import { HeaderSkeleton } from "components/Skeleton";
 
-export const BUCKET_STATUS_QUERY = gql`
-  query BucketStatus($roundSlug: String!, $groupSlug: String) {
+export const ROUND_QUERY = gql`
+  query Round($roundSlug: String!, $groupSlug: String) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
+      slug
+      title
+      info
+      color
+      bucketCreationIsOpen
+      totalInMembersBalances
+      currency
+      tags {
+        id
+        value
+      }
       bucketStatusCount {
         PENDING_APPROVAL
         OPEN_FOR_FUNDING
@@ -97,13 +109,14 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
-      roundId: round.id,
+      roundId: round?.id,
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
+    pause: !round,
   });
 
   const moreExist = data?.bucketsPage.moreExist;
@@ -121,15 +134,36 @@ const Page = ({
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
-            <BucketCard bucket={bucket} round={round} currentGroup={group} />
+            <BucketCard bucket={bucket} round={round} />
           </a>
         </Link>
       ))}
-      {isFirstPage && buckets.length === 0 && !fetching && (
-        <div className="absolute w-full flex justify-center items-center h-64">
-          <h1 className="text-3xl text-gray-500 text-center ">No buckets...</h1>
-        </div>
-      )}
+
+      {isFirstPage &&
+        buckets.length === 0 &&
+        (!fetching ? (
+          <div className="absolute w-full flex justify-center items-center h-64">
+            <h1 className="text-3xl text-gray-500 text-center ">
+              No buckets...
+            </h1>
+          </div>
+        ) : (
+          <div className="absolute w-full flex justify-center items-center h-64">
+            <HappySpinner />
+          </div>
+          // <div className="bg-white rounded-lg shadow-md animate-pulse overflow-hidden">
+          //   <div className="bg-anthracit h-48"></div>
+          //   <div className="animate-pulse flex space-x-4 p-4">
+          //     <div className="flex-1 space-y-4 py-1">
+          //       <div className="h-4 bg-gray-400 rounded w-3/4"></div>
+          //       <div className="space-y-2">
+          //         <div className="h-4 bg-gray-400 rounded"></div>
+          //         <div className="h-4 bg-gray-400 rounded w-5/6"></div>
+          //       </div>
+          //     </div>
+          //   </div>
+          // </div>
+        ))}
       {isLastPage && moreExist && (
         <div className="absolute bottom-0 justify-center flex w-full">
           <LoadMore
@@ -176,7 +210,7 @@ const getStandardFilter = (bucketStatusCount) => {
   return stdFilter;
 };
 
-const RoundPage = ({ round, currentGroup, currentUser }) => {
+const RoundPage = ({ currentGroup, currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
@@ -184,13 +218,14 @@ const RoundPage = ({ round, currentGroup, currentUser }) => {
   const router = useRouter();
 
   const [{ data, fetching }] = useQuery({
-    query: BUCKET_STATUS_QUERY,
+    query: ROUND_QUERY,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
     pause: !router.isReady,
   });
+  const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
     data?.round?.bucketStatusCount ?? {}
@@ -213,15 +248,15 @@ const RoundPage = ({ round, currentGroup, currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount]);
 
-  if (fetching && !round) {
-    return (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
-    );
-  }
+  // if (!router.isReady || (fetching && !round)) {
+  //   return (
+  //     <div className="flex-grow flex justify-center items-center h-64">
+  //       <HappySpinner />
+  //     </div>
+  //   );
+  // }
 
-  if (!round) {
+  if (!round && !fetching && router.isReady) {
     return (
       <div className="text-center mt-7">
         This round either doesn&apos;t exist or you don&apos;t have access to it
@@ -238,27 +273,31 @@ const RoundPage = ({ round, currentGroup, currentUser }) => {
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
-            <EditableField
-              defaultValue={round.info}
-              name="info"
-              label="Add homepage message"
-              placeholder={`# Welcome to ${round.title}'s bucket page`}
-              canEdit={canEdit}
-              className="h-10"
-              MUTATION={gql`
-                mutation EditHomepageMessage($roundId: ID!, $info: String) {
-                  editRound(roundId: $roundId, info: $info) {
-                    id
-                    info
+            {round ? (
+              <EditableField
+                defaultValue={round.info}
+                name="info"
+                label="Add homepage message"
+                placeholder={`# Welcome to ${round.title}'s bucket page`}
+                canEdit={canEdit}
+                className="h-10"
+                MUTATION={gql`
+                  mutation EditHomepageMessage($roundId: ID!, $info: String) {
+                    editRound(roundId: $roundId, info: $info) {
+                      id
+                      info
+                    }
                   }
-                }
-              `}
-              variables={{ roundId: round.id }}
-              required
-            />
+                `}
+                variables={{ roundId: round.id }}
+                required
+              />
+            ) : (
+              <HeaderSkeleton />
+            )}
           </div>
           <div className={`flex flex-col justify-end items-start`}>
-            {round.bucketCreationIsOpen &&
+            {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
