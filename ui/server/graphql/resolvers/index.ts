@@ -332,7 +332,7 @@ const resolvers = {
     ),
     bucket: async (parent, { id }) => {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
-      if (bucket.deleted) return null;
+      if (!bucket || bucket.deleted) return null;
       return bucket;
     },
     bucketsPage: async (
