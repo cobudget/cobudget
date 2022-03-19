@@ -19,7 +19,7 @@ const groupItems = ({ currentUser, groupSlug }) => {
   return [
     { label: "Overview", href: `/${groupSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${groupSlug}/members`, admin: true },
+    { label: "Participants", href: `/${groupSlug}/participants`, admin: true },
     { label: "Settings", href: `/${groupSlug}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
@@ -33,8 +33,8 @@ export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
     { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
     { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
     {
-      label: "Members",
-      href: `/${groupSlug}/${roundSlug}/members`,
+      label: "Participants",
+      href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,
     },
     {
