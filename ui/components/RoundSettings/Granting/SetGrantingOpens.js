@@ -19,7 +19,7 @@ const SetGrantingOpens = ({ closeModal, round }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set granting open date</h1>
+        <h1 className="text-3xl">Set funding open date</h1>
 
         <form
           onSubmit={handleSubmit(() => {
@@ -40,7 +40,7 @@ const SetGrantingOpens = ({ closeModal, round }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label="Granting opens date"
+                label="Funding opens date"
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}

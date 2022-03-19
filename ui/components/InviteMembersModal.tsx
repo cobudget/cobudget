@@ -73,7 +73,7 @@ const InviteMembersModal = ({
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h1 className="text-xl font-semibold mb-2">
-            Invite {roundId ? "round " : ""}members
+            Invite participants {roundId ? " to this round" : ""}
           </h1>
           <Banner
             className={"mb-4"}
