@@ -77,10 +77,13 @@ const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
 
 const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  const roundMember = await getRoundMember({
-    userId: user.id,
-    roundId,
-  });
+  let roundMember = null;
+  try {
+    roundMember = await getRoundMember({
+      userId: user.id,
+      roundId,
+    });
+  } catch(err){}
   let groupMember = null;
   if (!roundMember) {
     const group = await prisma.group.findFirst({
@@ -91,11 +94,11 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
       groupId: group.id,
     });
   }
-
-  if (!(roundMember?.isApproved || groupMember?.isAdmin))
+  if (!(roundMember?.isApproved || groupMember?.isAdmin)) {
     throw new Error(
       "You need to be approved member of this round or group admin to view round members"
     );
+  }
   return skip;
 };
 
