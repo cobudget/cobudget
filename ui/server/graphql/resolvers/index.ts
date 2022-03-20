@@ -423,12 +423,29 @@ const resolvers = {
         { roundId, isApproved = true, search, offset = 0, limit = 10 },
         { user }
       ) => {
-        const isAdmin = await isCollAdmin({
-          userId: user.id,
-          roundId,
-        });
-        if (!isAdmin && !isApproved) return null;
+        let isAdmin;
+        try {
+          isAdmin = await isCollAdmin({
+            userId: user.id,
+            roundId,
+          });
+        }catch(err){}
 
+        if (!isAdmin) {
+          const group = await prisma.group.findFirst({
+            where: { rounds: { some: { id: roundId } } },
+          });
+          const groupMember = await getGroupMember({
+            userId: user.id,
+            groupId: group?.id,
+          });
+          isAdmin = !!groupMember?.isAdmin;
+        }
+
+        if (!isAdmin && !isApproved) {
+          return null;
+        }
+        try {
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {
             roundId,
@@ -464,6 +481,8 @@ const resolvers = {
           moreExist: roundMembersWithExtra.length > limit,
           members: roundMembersWithExtra.slice(0, limit),
         };
+        }
+        catch(err){}
       }
     ),
     categories: async (parent, { groupId }) => {
@@ -2185,6 +2204,7 @@ const resolvers = {
         where: { id: member.userId },
       }),
     balance: async (member) => {
+      try {
       if (!member.statusAccountId) return 0;
 
       // console.time("memberBalanceTransactions");
@@ -2207,7 +2227,6 @@ const resolvers = {
       // const debitMinusCredit = debit - credit;
 
       // console.time("memberBalanceAllocationsAndContributions");
-
       const {
         _sum: { amount: totalAllocations },
       } = await prisma.allocation.aggregate({
@@ -2229,9 +2248,12 @@ const resolvers = {
       // }
 
       return totalAllocations - totalContributions;
+      }catch(err){}
     },
     email: async (member, _, { user }) => {
+      try {
       if (!user) return null;
+      let isGroupAdmin;
       const currentCollMember = await prisma.roundMember.findUnique({
         where: {
           userId_roundId: {
@@ -2241,7 +2263,18 @@ const resolvers = {
         },
       });
 
-      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
+      if (!currentCollMember?.isAdmin) {
+        const group = await prisma.group.findFirst({
+          where: { rounds: { some: { id: member.roundId } } },
+        });
+        const groupMember = await getGroupMember({
+          userId: user.id,
+          groupId: group?.id,
+        });
+        isGroupAdmin = !!groupMember?.isAdmin;
+      }
+
+      if (!(isGroupAdmin || currentCollMember?.isAdmin || currentCollMember?.id == member.id))
         return null;
 
       const u = await prisma.user.findFirst({
@@ -2252,6 +2285,7 @@ const resolvers = {
         },
       });
       return u.email;
+      }catch(err){return null}
     },
     name: async (member, _, { user }) => {
       if (!user) return null;
