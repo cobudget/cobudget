@@ -1,28 +1,28 @@
 /* eslint-disable no-unused-vars */
-import { orgHasDiscourse } from "./discourse.subscriber";
+import { groupHasDiscourse } from "./discourse.subscriber";
 import liveUpdate from "../services/liveUpdate.service";
 import prisma from "../prisma";
 const MIN_POST_LENGTH = 3;
 export default {
   initialize(eventHub) {
     eventHub.subscribe(
-      "create-dream",
+      "create-bucket",
       "prisma",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {}
+      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {}
     );
 
     eventHub.subscribe(
       "create-comment",
       "prisma",
       async ({
-        currentOrg,
-        currentOrgMember,
+        currentGroup,
+        currentGroupMember,
         currentCollMember,
-        event,
-        dream,
+        round,
+        bucket,
         comment: { content },
       }) => {
-        if (orgHasDiscourse(currentOrg)) {
+        if (groupHasDiscourse(currentGroup)) {
           return;
         }
 
@@ -33,7 +33,7 @@ export default {
 
         const comment = await prisma.comment.create({
           data: {
-            bucketId: dream.id,
+            bucketId: bucket.id,
             content,
             collMemberId: currentCollMember.id,
           },
@@ -51,14 +51,14 @@ export default {
       "edit-comment",
       "prisma",
       async ({
-        currentOrg,
-        currentOrgMember,
-        event,
-        eventMember,
-        dream,
+        currentGroup,
+        currentGroupMember,
+        round,
+        roundMember,
+        bucket,
         comment,
       }) => {
-        if (orgHasDiscourse(currentOrg)) {
+        if (groupHasDiscourse(currentGroup)) {
           return;
         }
 
@@ -78,8 +78,8 @@ export default {
     eventHub.subscribe(
       "delete-comment",
       "prisma",
-      async ({ currentOrg, currentCollMember, event, dream, comment }) => {
-        if (orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentCollMember, event, bucket, comment }) => {
+        if (groupHasDiscourse(currentGroup)) {
           return;
         }
         if (!comment) return;

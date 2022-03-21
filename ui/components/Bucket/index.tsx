@@ -1,15 +1,15 @@
-import { isMemberOfDream } from "utils/helpers";
+import { isMemberOfBucket } from "utils/helpers";
 
 import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
-import DreamCustomFields from "./CustomFields/DreamCustomFields";
+import BucketCustomFields from "./CustomFields/BucketCustomFields";
 
 const Bucket = ({
   bucket,
-  collection,
+  round,
   currentUser,
-  currentOrg,
+  currentGroup,
   openImageModal,
 }) => {
   if (!bucket) return null;
@@ -17,7 +17,7 @@ const Bucket = ({
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    isMemberOfDream(currentUser, bucket);
+    isMemberOfBucket(currentUser, bucket);
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
@@ -33,7 +33,7 @@ const Bucket = ({
 
             {bucket.description && (
               <Description
-                // We no longer use this field for new dreams.
+                // We no longer use this field for new buckets.
                 // Eventually we will migrate all current descriptions to custom fields.
                 description={bucket.description}
                 bucketId={bucket.id}
@@ -41,8 +41,8 @@ const Bucket = ({
               />
             )}
 
-            <DreamCustomFields
-              collectionId={collection.id}
+            <BucketCustomFields
+              roundId={round.id}
               bucketId={bucket.id}
               customFields={bucket.customFields}
               canEdit={canEdit}
@@ -52,10 +52,10 @@ const Bucket = ({
               bucketId={bucket.id}
               budgetItems={bucket.budgetItems}
               canEdit={canEdit}
-              currency={collection.currency}
-              allowStretchGoals={collection.allowStretchGoals}
-              collection={collection}
-              currentOrg={currentOrg}
+              currency={round.currency}
+              allowStretchGoals={round.allowStretchGoals}
+              round={round}
+              currentGroup={currentGroup}
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />

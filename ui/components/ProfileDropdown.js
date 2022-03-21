@@ -48,7 +48,7 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
             </h2>
             {currentUser.currentCollMember && (
               <div className="mx-2 px-2 py-1 rounded-lg bg-gray-200 mb-1 text-gray-800">
-                {currentUser.currentCollMember.collection.title}
+                {currentUser.currentCollMember.round.title}
                 {Boolean(currentUser.currentCollMember.balance) && (
                   <p className="mt-1 text-gray-800 text-sm">
                     You have{" "}
@@ -63,17 +63,17 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
                 )}
               </div>
             )}
-            {currentOrgMember?.collectionMemberships.map((membership) => {
+            {currentGroupMember?.roundMemberships.map((membership) => {
               if (
-                currentOrgMember.currentEventMembership &&
-                currentOrgMember.currentEventMembership.id === membership.id
+                currentGroupMember.currentEventMembership &&
+                currentGroupMember.currentEventMembership.id === membership.id
               ) {
                 return null;
               }
               return (
                 <Link
-                  href="/[org]/[collection]"
-                  as={`/${currentOrg.slug}/${membership.event.slug}`}
+                  href="/[group]/[round]"
+                  as={`/${currentGroup.slug}/${membership.event.slug}`}
                   key={membership.event.slug}
                 >
                   <a className={css.button}>{membership.event.title}</a>

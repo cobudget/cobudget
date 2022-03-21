@@ -72,15 +72,15 @@ const DetailViewContainer = ({ currentUser, viewResp }) => {
   // around hooks
 
   /* there are 5 cases to handle
-    * we're on an /orgSlug/respId url. we want to render need and resp at
+    * we're on an /groupSlug/respId url. we want to render need and resp at
     the same time
       1. we're rendering a need. get the needId from checking the resp's
       fulfills field
       2. we're rendering a resp. get the respId from the url
-    * we're on an /orgSlug/need/needId url. we just want to render the need
+    * we're on an /groupSlug/need/needId url. we just want to render the need
       3. we're rendering the need. get the needId from the url
       4. we're "rendering" a resp. return null
-    * we're just on /orgslug
+    * we're just on /groupslug
       5. don't render anything
   */
 

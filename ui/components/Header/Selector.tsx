@@ -25,15 +25,15 @@ function LinkItem(props) {
 
 export default function Selector({
   currentUser,
-  currentOrg,
-  collection,
+  currentGroup,
+  round,
   color,
   className,
 }) {
-  const orgIds = currentUser?.orgMemberships?.map(
-    (orgMember) => orgMember.organization.id
+  const groupIds = currentUser?.groupMemberships?.map(
+    (groupMember) => groupMember.group.id
   );
-  const activeId = currentOrg ? currentOrg.id : collection?.id;
+  const activeId = currentGroup ? currentGroup.id : round?.id;
   return (
     <Menu as="div" className="inline-block">
       <div>
@@ -62,79 +62,76 @@ export default function Selector({
       >
         <Menu.Items className="absolute z-10 left-14 w-72 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="pb-1 mb-1 border-b-default border-gray-200">
-            {currentUser?.orgMemberships?.map((orgMember) => {
+            {currentUser?.groupMemberships?.map((groupMember) => {
               return (
-                <Menu.Item key={orgMember.id}>
+                <Menu.Item key={groupMember.id}>
                   {({ active }) => (
                     <LinkItem
-                      href={`/${orgMember.organization.slug}`}
+                      href={`/${groupMember.group.slug}`}
                       active={active}
-                      selected={orgMember.organization.id === activeId}
+                      selected={groupMember.group.id === activeId}
                     >
-                      {orgMember.organization.logo && (
+                      {groupMember.group.logo && (
                         <img
-                          src={orgMember.organization.logo}
+                          src={groupMember.group.logo}
                           className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                         />
                       )}
-                      <p className="truncate">{orgMember.organization.name}</p>
+                      <p className="truncate">{groupMember.group.name}</p>
                     </LinkItem>
                   )}
                 </Menu.Item>
               );
             })}
-            {currentUser?.collectionMemberships
-              ?.filter((collMember, i, array) => {
-                const orgId = collMember.collection.organization?.id;
-                if (orgId) {
-                  if (orgIds.includes(orgId)) return false;
+            {currentUser?.roundMemberships
+              ?.filter((roundMember, i, array) => {
+                const groupId = roundMember.round.group?.id;
+                if (groupId) {
+                  if (groupIds.includes(groupId)) return false;
 
-                  const collectionFromOrgAlreadyInList = array
+                  const roundFromGroupAlreadyInList = array
                     .slice(0, i)
                     .some(
-                      (collMember) =>
-                        collMember.collection.organization?.id === orgId
+                      (roundMember) => roundMember.round.group?.id === groupId
                     );
-                  if (collectionFromOrgAlreadyInList) return false;
+                  if (roundFromGroupAlreadyInList) return false;
                 }
 
                 return true;
               })
-              .map((collMember) => {
-                if (collMember.collection.organization)
+              .map((roundMember) => {
+                if (roundMember.round.group)
                   return (
-                    <Menu.Item key={collMember.id}>
+                    <Menu.Item key={roundMember.id}>
                       {({ active }) => (
                         <LinkItem
-                          href={`/${collMember.collection.organization.slug}`}
+                          href={`/${roundMember.round.group.slug}`}
                           active={active}
-                          selected={
-                            collMember.collection.organization.id === activeId
-                          }
+                          selected={roundMember.round.group.id === activeId}
                         >
-                          {collMember.collection.organization.logo && (
+                          {roundMember.round.group.logo && (
                             <img
-                              src={collMember.collection.organization.logo}
+                              src={roundMember.round.group.logo}
                               className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                             />
                           )}
                           <p className="truncate">
-                            {collMember.collection.organization.name}
+                            {roundMember.round.group.name}
                           </p>
                         </LinkItem>
                       )}
                     </Menu.Item>
                   );
                 return (
-                  <Menu.Item key={collMember.id}>
+                  <Menu.Item key={roundMember.id}>
                     {({ active }) => (
                       <LinkItem
-                        href={`/c/${collMember.collection.slug}`}
+                        href={`/c/${roundMember.round.slug}`}
                         active={active}
-                        selected={collMember.collection.id === activeId}
+                        selected={roundMember.round.id === activeId}
                       >
                         <span className="truncate">
-                          {collMember.collection.title}
+                          {roundMember.round.title}
                         </span>
                       </LinkItem>
                     )}

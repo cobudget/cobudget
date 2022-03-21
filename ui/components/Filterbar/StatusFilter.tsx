@@ -33,7 +33,7 @@ export default function StatusFilter({
     .filter((item) => !!bucketStatusCount[item.type])
     .map((item) => ({
       type: item.type,
-      value: statusFilter.includes(item.type),
+      value: statusFilter.includes && statusFilter.includes(item.type),
       placeholder: `${item.placeholder} (${bucketStatusCount[item.type]})`,
     }));
 
