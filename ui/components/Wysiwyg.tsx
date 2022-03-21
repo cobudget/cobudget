@@ -116,13 +116,13 @@ const EditorCss = styled.div`
 `;
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
-  query SearchMentionMembers($collectionId: ID!, $search: String!) {
+  query SearchMentionMembers($roundId: ID!, $search: String!) {
     membersPage(
-      collectionId: $collectionId
+      roundId: $roundId
       isApproved: true
       search: $search
     ) {
-      members(collectionId: $collectionId, isApproved: true, search: $search) {
+      members(roundId: $roundId, isApproved: true, search: $search) {
         id
         user {
           id
@@ -133,7 +133,7 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
   }
 `;
 
-function MentionComponent({ collectionId }) {
+function MentionComponent({ roundId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
 
   const searchString = mentionState?.query.full.toLowerCase() ?? "";
@@ -142,7 +142,7 @@ function MentionComponent({ collectionId }) {
   const [{ fetching, data }, searchMembers] = useQuery({
     query: SEARCH_MENTION_MEMBERS_QUERY,
     variables: {
-      collectionId,
+      roundId,
       search: searchString,
     },
     pause: true,
@@ -560,7 +560,7 @@ const Wysiwyg = ({
             </div>
             <EditorComponent />
             {enableMentions && (
-              <MentionComponent collectionId={mentionsCollId} />
+              <MentionComponent roundId={mentionsCollId} />
             )}
           </Remirror>
         </EditorCss>
