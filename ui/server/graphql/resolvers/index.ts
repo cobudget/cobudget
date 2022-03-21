@@ -1864,14 +1864,14 @@ const resolvers = {
         ? dayjs(round.grantingCloses).isBefore(now)
         : false;
       const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
-      if (!grantingIsOpen) throw new Error("Granting is not open");
+      if (!grantingIsOpen) throw new Error("Funding is not open");
 
       let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
 
       if (bucket.roundId !== roundId) throw new Error("Bucket not in round");
 
       if (!bucket.approvedAt)
-        throw new Error("Bucket is not approved for granting");
+        throw new Error("Bucket is not approved for funding");
 
       if (bucket.canceledAt)
         throw new Error("Funding has been canceled for bucket");
@@ -2090,7 +2090,7 @@ const resolvers = {
 
         if (currency && grantingHasOpened) {
           throw new Error(
-            "You can't change currency after granting has started"
+            "You can't change currency after funding has started"
           );
         }
 

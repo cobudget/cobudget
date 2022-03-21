@@ -37,7 +37,7 @@ export default function AboutPage({ router, round }) {
         </>
       )}
 
-      <h2 className="text-xl font-semibold mb-3">Granting settings</h2>
+      <h2 className="text-xl font-semibold mb-3">Funding settings</h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
@@ -84,7 +84,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Granting opens"
+                  primary="Funding opens"
                   secondary={dayjs(round.grantingOpens).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -97,7 +97,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Granting closes"
+                  primary="Funding closes"
                   secondary={dayjs(round.grantingCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}

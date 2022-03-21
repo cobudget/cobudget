@@ -112,7 +112,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
         </div>
       </Modal>
 
-      <h2 className="text-2xl font-semibold mb-3 px-6">Granting</h2>
+      <h2 className="text-2xl font-semibold mb-3 px-6">Funding</h2>
       <div className="border-t">
         <List>
           <SettingsListItem
@@ -185,7 +185,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Granting opens"
+            primary="Funding opens"
             secondary={
               round.grantingOpens
                 ? dayjs(round.grantingOpens).format(
@@ -202,7 +202,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary="Granting closes"
+            primary="Funding closes"
             secondary={
               round.grantingCloses
                 ? dayjs(round.grantingCloses).format(
