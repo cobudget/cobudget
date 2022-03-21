@@ -333,7 +333,7 @@ const BucketSidebar = ({
                         .catch((err) => alert(err.message))
                     }
                   >
-                    Unapprove for granting
+                    Unapprove for funding
                   </button>
                 )}
                 {showDeleteButton && (
