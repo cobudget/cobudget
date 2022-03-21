@@ -20,6 +20,11 @@ function handler() {
   return nc<Request, NextApiResponse>({
     onError: (err, _, res) => {
       error(err);
+
+      if (err.statusCode === 400 && err.message === "Invalid Token") {
+        res.redirect("/login?err=INVALID_TOKEN");
+      }
+
       res.status(500).end(err.toString());
     },
   })
