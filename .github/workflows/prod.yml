@@ -1,9 +1,9 @@
-name: Migrate
+name: Deploy to prod
 
 on:
   push:
     branches:
-      - main
+      - prod
 
 jobs:
   production:
