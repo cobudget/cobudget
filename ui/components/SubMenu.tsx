@@ -19,7 +19,7 @@ const groupItems = ({ currentUser, groupSlug }) => {
   return [
     { label: "Overview", href: `/${groupSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Participants", href: `/${groupSlug}/participants`, admin: true },
+    { label: "Members", href: `/${groupSlug}/members`, admin: true },
     { label: "Settings", href: `/${groupSlug}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
