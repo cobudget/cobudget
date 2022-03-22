@@ -105,9 +105,6 @@ const DELETE_MEMBER = gql`
 
 const EventMembers = ({ collection, currentUser }) => {
   const [searchString, setSearchString] = useState("");
-  const [approvedMembers, setApprovedMembers] = useState([]);
-  const [moreExist, setMoreExist] = useState(false);
-  const [requestsToJoin, setRequestsToJoin] = useState([]);
   const [
     {
       data,
@@ -126,13 +123,9 @@ const EventMembers = ({ collection, currentUser }) => {
     pause: true,
   });
 
-  useEffect(() => {
-    setApprovedMembers(
-      data?.approvedMembersPage?.approvedMembers || []
-    );
-    setMoreExist(data?.approvedMembersPage?.moreExist || false);
-    setRequestsToJoin(data?.requestsToJoinPage?.requestsToJoin || []);
-  }, [loading]);
+  const approvedMembers = data?.approvedMembersPage?.approvedMembers || [];
+  const moreExist = data?.approvedMembersPage?.moreExist || false;
+  const requestsToJoin = data?.requestsToJoinPage?.requestsToJoin || [];
 
   const debouncedSearchMembers = useMemo(() => {
     return debounce(searchApprovedMembers, 300, { leading: true });
