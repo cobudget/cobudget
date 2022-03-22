@@ -1,8 +1,6 @@
 import prisma from "../../prisma";
 import dayjs from "dayjs";
 
-export async function getCurrentCollMember({ collMemberId }) {}
-
 export async function isCollAdmin({ roundId, userId }) {
   const roundMember = await getRoundMember({
     userId: userId,
@@ -280,14 +278,49 @@ export async function canViewRound({ round, user }) {
   }
 }
 
-export async function deleteRoundMember({ roundMemberId }) {
-  const roundMember = await prisma.roundMember.findUnique({
-    where: { id: roundMemberId },
-  });
-  if (!roundMember)
-    throw new Error("This member does not exist in this collection");
+export async function roundMemberBalance(member) {
+  if (!member.statusAccountId) return 0;
 
-  return prisma.roundMember.delete({
-    where: { id: roundMemberId },
+  // console.time("memberBalanceTransactions");
+  // const {
+  //   _sum: { amount: debit },
+  // } = await prisma.transaction.aggregate({
+  //   where: { toAccountId: member.statusAccountId },
+  //   _sum: { amount: true },
+  // });
+
+  // const {
+  //   _sum: { amount: credit },
+  // } = await prisma.transaction.aggregate({
+  //   where: { fromAccountId: member.statusAccountId },
+  //   _sum: { amount: true },
+  // });
+
+  // console.timeEnd("memberBalanceTransactions");
+
+  // const debitMinusCredit = debit - credit;
+
+  // console.time("memberBalanceAllocationsAndContributions");
+
+  const {
+    _sum: { amount: totalAllocations },
+  } = await prisma.allocation.aggregate({
+    where: { roundMemberId: member.id },
+    _sum: { amount: true },
   });
+
+  const {
+    _sum: { amount: totalContributions },
+  } = await prisma.contribution.aggregate({
+    where: { roundMemberId: member.id },
+    _sum: { amount: true },
+  });
+
+  // console.timeEnd("memberBalanceAllocationsAndContributions");
+
+  // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
+  //   console.error("Member balance is not adding up");
+  // }
+
+  return totalAllocations - totalContributions;
 }

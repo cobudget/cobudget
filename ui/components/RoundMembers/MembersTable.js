@@ -24,12 +24,7 @@ import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 
-const ActionsDropdown = ({
-  roundId,
-  updateMember,
-  deleteMember,
-  member,
-}) => {
+const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_MUTATION);
@@ -101,19 +96,33 @@ const ActionsDropdown = ({
         >
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
-        <MenuItem
-          color="error.main"
-          onClick={() => {
-            if (
-              confirm(
-                `Are you sure you would like to delete membership from user with email ${member.user.email}?`
-              )
-            )
-              deleteMember({ roundId, memberId: member.id });
-          }}
+        <Tooltip
+          title="You can only remove a round member with 0 balance"
+          disabled={member.balance === 0}
         >
-          <Box color="error.main">Delete</Box>
-        </MenuItem>
+          <MenuItem
+            color="error.main"
+            disabled={member.balance !== 0}
+            onClick={() => {
+              if (
+                confirm(
+                  `Are you sure you would like to delete membership from user with email ${member.email}?`
+                )
+              )
+                deleteMember({ collectionId, memberId: member.id }).then(
+                  ({ error }) => {
+                    if (error) {
+                      console.error(error);
+                      toast.error(error.message);
+                    }
+                    handleClose();
+                  }
+                );
+            }}
+          >
+            <Box color="error.main">Delete</Box>
+          </MenuItem>
+        </Tooltip>
       </Menu>
     </>
   );
