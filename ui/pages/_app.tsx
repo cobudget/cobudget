@@ -147,8 +147,6 @@ const MyApp = ({ Component, pageProps }) => {
 
   const { currentUser = null, currentGroup = null, round = null } = data ?? {};
 
-  console.log({ currentGroup, customDomain });
-
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
