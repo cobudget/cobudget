@@ -193,22 +193,14 @@ const resolvers = {
         select: { id: true },
       });
     },
-<<<<<<< HEAD
-    currentOrg: async (parent, { orgSlug }) => {
-      if (!orgSlug || orgSlug === "c") return null;
-
-      // orgSlug is a custom domain
-      if (orgSlug.includes("."))
-        return prisma.organization.findUnique({
-          where: { customDomain: orgSlug },
-        });
-
-      return prisma.organization.findUnique({ where: { slug: orgSlug } });
-=======
     currentGroup: async (parent, { groupSlug }) => {
       if (!groupSlug || groupSlug === "c") return null;
+      // orgSlug is a custom domain
+      if (groupSlug.includes("."))
+        return prisma.group.findUnique({
+          where: { customDomain: groupSlug },
+        });
       return prisma.group.findUnique({ where: { slug: groupSlug } });
->>>>>>> 4db1b7cb2d53ce2d7c30c228d14ee31dcb5586af
     },
     group: combineResolvers(isMemberOfGroup, async (parent, { groupId }) => {
       return prisma.group.findUnique({ where: { id: groupId } });
