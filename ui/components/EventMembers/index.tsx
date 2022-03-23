@@ -152,18 +152,6 @@ const EventMembers = ({ collection, currentUser }) => {
     currentUser?.currentOrgMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
 
-  useEffect(() => {
-    const member = approvedMembers.find(_member => {
-      return _member.id === deleteMemberResponse?.deleteMember.id
-    });
-    
-    if (!deleteMemberLoading && (currentUser.id === member?.user?.id)) {
-      Router.reload();
-    }
-
-    console.log(deleteMemberResponse, currentUser);
-  }, [deleteMemberLoading]);
-
   if (error) {
     console.error(error);
     return null;
