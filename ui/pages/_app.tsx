@@ -123,8 +123,19 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps, customDomain }) => {
+const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
+
+  //console.log({ router: router });
+
+  // const {VERCEL_URL,} = process.env.VERCEL_URL;
+  console.log({
+    VERCEL_URL: process.env.VERCEL_URL,
+    DEPLOY_URL: process.env.DEPLOY_URL,
+  });
+
+  const customDomain = process.env.VERCEL_URL;
+
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -135,6 +146,8 @@ const MyApp = ({ Component, pageProps, customDomain }) => {
   });
 
   const { currentUser = null, currentGroup = null, round = null } = data ?? {};
+
+  console.log({ currentGroup, customDomain });
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -191,6 +204,7 @@ const MyApp = ({ Component, pageProps, customDomain }) => {
           currentGroup={currentGroup}
           openModal={openModal}
           router={router}
+          customDomain={customDomain}
         />
         <Toaster />
       </Layout>
@@ -198,16 +212,19 @@ const MyApp = ({ Component, pageProps, customDomain }) => {
   );
 };
 
-MyApp.getInitialProps = async ({ ctx }) => {
-  // calls page's `getInitialProps` and fills `appProps.pageProps`
-  //const appProps = await appContext.getInitialProps(appContext);
-  // get the damn host info, get the damn group info.
-  const { host, subdomain } = getHostInfo(ctx.req);
-  console.log({ host });
-  let rootGroup = null;
-  const customDomain = host;
-  return { customDomain };
-};
+// MyApp.getInitialProps = async ({ ctx }) => {
+//   // calls page's `getInitialProps` and fills `appProps.pageProps`
+//   //const appProps = await appContext.getInitialProps(appContext);
+//   // get the damn host info, get the damn group info.
+//   const { host, subdomain } = getHostInfo(ctx.req);
+//   console.log({ host });
+//   let rootGroup = null;
+//   let customDomain;
+//   if (host !== "localhost:3000") {
+//     customDomain = host;
+//   }
+//   return { customDomain };
+// };
 
 //@ts-ignore
 export default withUrqlClient(client, { ssr: false })(MyApp as any);

@@ -60,13 +60,25 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, bodyContent, headContent }) => {
-  return (
-    <>
-      <Head>{parseHtml(headContent)}</Head>
-      {parseHtml(bodyContent, parseOptions)}
-    </>
-  );
+const IndexPage = ({
+  currentUser,
+  bodyContent,
+  headContent,
+  currentGroup,
+  customDomain,
+}) => {
+  console.log({ currentGroup, currentUser });
+  if (customDomain) {
+    return <div>show group</div>;
+  }
+  if (headContent)
+    return (
+      <>
+        <Head>{parseHtml(headContent)}</Head>
+        {parseHtml(bodyContent, parseOptions)}
+      </>
+    );
+  return <div>hey</div>;
 };
 
 export async function getStaticProps(ctx) {

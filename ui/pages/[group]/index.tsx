@@ -8,6 +8,7 @@ import SubMenu from "../../components/SubMenu";
 import PageHero from "../../components/PageHero";
 import EditableField from "components/EditableField";
 import Router from "next/router";
+
 export const ROUNDS_QUERY = gql`
   query Rounds($groupId: ID!) {
     rounds(groupId: $groupId) {
@@ -47,6 +48,8 @@ const IndexPage = ({ router, currentGroup, currentUser }) => {
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
   }, []);
+
+  console.log({ currentGroup, currentUser });
 
   const [{ data, error }] = useQuery({
     query: ROUNDS_QUERY,

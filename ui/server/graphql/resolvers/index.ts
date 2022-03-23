@@ -2321,6 +2321,11 @@ const resolvers = {
     currentGroupMember: async (parent, { groupSlug }, { user }) => {
       if (user?.id !== parent.id) return null;
       if (!groupSlug) return null;
+      if (groupSlug.includes(".")) {
+        return prisma.groupMember.findFirst({
+          where: { group: { customDomain: groupSlug }, userId: user.id },
+        });
+      }
       return prisma.groupMember.findFirst({
         where: { group: { slug: groupSlug }, userId: user.id },
       });

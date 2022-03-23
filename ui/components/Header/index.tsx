@@ -111,8 +111,9 @@ const Header = ({ currentUser, currentGroup, openModal }) => {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
-    pause: !router.isReady,
+    pause: !router.isReady || !router.query.round,
   });
+  console.log({ query: router.query });
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
