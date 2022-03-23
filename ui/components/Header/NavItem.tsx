@@ -7,23 +7,23 @@ const NavItem = ({
   className,
   children,
   primary,
-  eventColor,
+  roundColor,
   external,
 }: any) => {
   const active = currentPath === href;
 
   const regularClasses = `ring-transparent text-gray-800 hover:bg-gray-300`;
   const primaryClasses = `ring-anthracit hover:bg-anthracit-dark hover:text-gray-200`;
-  const regularEventClasses = `ring-transparent text-white hover:bg-${eventColor}-dark`;
-  const primaryEventClasses = `ring-white text-white hover:bg-white hover:text-${eventColor}`;
-  const eventActiveClasses = `ring-transparent bg-${eventColor}-dark text-white`;
+  const regularRoundClasses = `ring-transparent text-white hover:bg-${roundColor}-dark`;
+  const primaryRoundClasses = `ring-white text-white hover:bg-white hover:text-${roundColor}`;
+  const roundActiveClasses = `ring-transparent bg-${roundColor}-dark text-white`;
 
-  const colorsClasses = eventColor
+  const colorsClasses = roundColor
     ? primary
-      ? primaryEventClasses
+      ? primaryRoundClasses
       : active
-      ? eventActiveClasses
-      : regularEventClasses
+      ? roundActiveClasses
+      : regularRoundClasses
     : primary
     ? primaryClasses
     : regularClasses;

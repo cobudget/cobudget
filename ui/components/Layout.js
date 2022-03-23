@@ -14,8 +14,8 @@ const LinkOut = ({ href, children }) => {
 const Layout = ({
   children,
   currentUser,
-  currentOrg,
-  collection,
+  currentGroup,
+  round,
   title,
   openModal,
   router,
@@ -31,9 +31,9 @@ const Layout = ({
       </Head>
       <div>
         <Header
-          collection={collection}
+          round={round}
           currentUser={currentUser}
-          currentOrg={currentOrg}
+          currentGroup={currentGroup}
           openModal={openModal}
           router={router}
         />

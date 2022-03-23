@@ -4,12 +4,12 @@ import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 import { simplePagination } from "@urql/exchange-graphcache/extras";
 
-import { ORG_MEMBERS_QUERY } from "../components/Org/OrgMembers/OrgMembersTable";
-import { COLLECTION_MEMBERS_QUERY } from "../components/EventMembers";
+import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
+import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
-import { BUCKETS_QUERY } from "pages/[org]/[collection]";
-import { BUCKET_QUERY } from "pages/[org]/[collection]/[bucket]";
-import { COLLECTIONS_QUERY } from "pages/[org]";
+import { BUCKETS_QUERY } from "pages/[group]/[round]";
+import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
+import { ROUNDS_QUERY } from "pages/[group]";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
@@ -43,7 +43,7 @@ export const client = (
       dedupExchange,
       cacheExchange({
         keys: {
-          OrgMembersPage: () => null,
+          GroupMembersPage: () => null,
           MembersPage: () => null,
           ContributionsPage: () => null,
           CommentSet: () => null,
@@ -54,26 +54,24 @@ export const client = (
             allocate(result: any, args, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "collectionTransactions")
+                .filter((field) => field.fieldName === "roundTransactions")
                 .forEach((field) => {
                   cache.invalidate(
                     "Query",
-                    "collectionTransactions",
+                    "roundTransactions",
                     field.arguments
                   );
                 });
             },
-            joinCollection(result: any, args, cache) {
-              if (result.joinCollection) {
+            joinRound(result: any, args, cache) {
+              if (result.joinRound) {
                 console.log({ result });
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug:
-                        result.joinCollection.collection.organization?.slug ??
-                        "c",
-                      collectionSlug: result.joinCollection.collection.slug,
+                      groupSlug: result.joinRound.round.group?.slug ?? "c",
+                      roundSlug: result.joinRound.round.slug,
                     },
                   },
                   (data) => {
@@ -82,10 +80,10 @@ export const client = (
                       ...data,
                       currentUser: {
                         ...data.currentUser,
-                        currentCollMember: result.joinCollection,
-                        collectionMemberships: [
-                          ...data.currentUser.collectionMemberships,
-                          result.joinCollection,
+                        currentCollMember: result.joinRound,
+                        roundMemberships: [
+                          ...data.currentUser.roundMemberships,
+                          result.joinRound,
                         ],
                       },
                     };
@@ -103,24 +101,32 @@ export const client = (
                   });
               }
             },
-            joinOrg(result: any, args, cache) {
-              if (result.joinOrg) {
+            joinGroup(result: any, args, cache) {
+              if (result.joinGroup) {
                 cache.updateQuery(
                   {
                     query: TOP_LEVEL_QUERY,
                     variables: {
-                      orgSlug: result.joinOrg.organization.slug,
-                      collectionSlug: undefined,
+                      groupSlug: result.joinGroup.group.slug,
+                      roundSlug: undefined,
                     },
                   },
                   (data) => {
                     return {
                       ...data,
-                      currentOrgMember: result.joinOrg,
+                      currentGroupMember: result.joinGroup,
                     };
                   }
                 );
               }
+            },
+            deleteGroupMember(result: any, { groupMemberId }, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "orgMembersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                });
             },
             updateMember(result: any, { isApproved }, cache) {
               // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
@@ -148,9 +154,9 @@ export const client = (
               //     if (!field.arguments.limit) return null;
               //     cache.updateQuery(
               //       {
-              //         query: COLLECTION_MEMBERS_QUERY,
+              //         query: ROUND_MEMBERS_QUERY,
               //         variables: {
-              //           collectionId: field.arguments.collectionId,
+              //           roundId: field.arguments.roundId,
               //           offset: field.arguments.offset,
               //           limit: field.arguments.limit,
               //         },
@@ -175,21 +181,21 @@ export const client = (
               //     );
               //   });
             },
-            deleteCollection(result: any, { collectionId }, cache) {
+            deleteRound(result: any, { roundId }, cache) {
               const fields = cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "collections")
+                .filter((field) => field.fieldName === "rounds")
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: COLLECTIONS_QUERY,
+                      query: ROUNDS_QUERY,
                       variables: {
-                        orgSlug: field.arguments.orgSlug,
+                        groupSlug: field.arguments.groupSlug,
                       },
                     },
                     (data) => {
-                      data.collections = data.collections.filter(
-                        (collection) => collection.id !== collectionId
+                      data.rounds = data.rounds.filter(
+                        (round) => round.id !== roundId
                       );
                       return data;
                     }
@@ -215,7 +221,7 @@ export const client = (
                   );
                 });
             },
-            createDream(result: any, { collectionId }, cache) {
+            createBucket(result: any, { roundId }, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -224,14 +230,12 @@ export const client = (
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
-                .filter(
-                  (field) => field.arguments.collectionId === collectionId
-                )
+                .filter((field) => field.arguments.roundId === roundId)
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
             },
-            deleteDream(result: any, { bucketId }, cache) {
+            deleteBucket(result: any, { bucketId }, cache) {
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
@@ -320,21 +324,21 @@ export const client = (
                   cache.invalidate("Query", "commentSet", field.arguments);
                 });
             },
-            inviteOrgMembers(result: any, _args, cache) {
-              if (result.inviteOrgMembers) {
+            inviteGroupMembers(result: any, _args, cache) {
+              if (result.inviteGroupMembers) {
                 cache.updateQuery(
                   {
-                    query: ORG_MEMBERS_QUERY,
+                    query: GROUP_MEMBERS_QUERY,
                     variables: { offset: 0, limit: 30 },
                   },
                   (data: any) => {
                     return {
                       ...data,
-                      orgMembersPage: {
-                        ...data.orgMembersPage,
-                        orgMembers: [
-                          ...result.inviteOrgMembers,
-                          ...data.orgMembersPage.orgMembers,
+                      groupMembersPage: {
+                        ...data.groupMembersPage,
+                        groupMembers: [
+                          ...result.inviteGroupMembers,
+                          ...data.groupMembersPage.groupMembers,
                         ],
                       },
                     };
@@ -342,19 +346,19 @@ export const client = (
                 );
               }
             },
-            inviteCollectionMembers(result: any, { collectionId }, cache) {
-              if (result.inviteCollectionMembers) {
+            inviteRoundMembers(result: any, { roundId }, cache) {
+              if (result.inviteRoundMembers) {
                 cache.updateQuery(
                   {
-                    query: COLLECTION_MEMBERS_QUERY,
-                    variables: { collectionId, offset: 0, limit: 1000 },
+                    query: ROUND_MEMBERS_QUERY,
+                    variables: { roundId, offset: 0, limit: 1000, search: "" },
                   },
                   (data: any) => {
                     const existingEmails =
                       data.approvedMembersPage?.approvedMembers?.map(
                         (member) => member.email
                       ) || [];
-                    const newInvitedMembers = result.inviteCollectionMembers?.filter(
+                    const newInvitedMembers = result.inviteRoundMembers?.filter(
                       (member) => existingEmails.indexOf(member.email) === -1
                     );
 
@@ -380,11 +384,11 @@ export const client = (
               const queryFields = cache.inspectFields("Query");
 
               queryFields
-                .filter((field) => field.fieldName === "collectionTransactions")
+                .filter((field) => field.fieldName === "roundTransactions")
                 .forEach((field) => {
                   cache.invalidate(
                     "Query",
-                    "collectionTransactions",
+                    "roundTransactions",
                     field.arguments
                   );
                 });
@@ -406,9 +410,9 @@ export const client = (
                 });
 
               queryFields
-                .filter((field) => field.fieldName === "collection")
+                .filter((field) => field.fieldName === "round")
                 .forEach((field) => {
-                  cache.invalidate("Query", "collection", field.arguments);
+                  cache.invalidate("Query", "round", field.arguments);
                 });
             },
           },

@@ -1,13 +1,13 @@
-// export const isMemberOfEvent = (currentMember, event) => {
-//   if (!currentMember || !event) return false;
+// export const isMemberOfRound = (currentMember, round) => {
+//   if (!currentMember || !round) return false;
 //   return currentMember.memberships.reduce((res, membership) => {
-//     if (membership.event.slug === event.slug) return true;
+//     if (membership.round.slug === round.slug) return true;
 //   }, false);
 // };
 
-export const isMemberOfDream = (currentUser, dream) => {
-  if (!currentUser || !dream || !currentUser.currentCollMember) return false;
-  return dream.cocreators.reduce((res, member) => {
+export const isMemberOfBucket = (currentUser, bucket) => {
+  if (!currentUser || !bucket || !currentUser.currentCollMember) return false;
+  return bucket.cocreators.reduce((res, member) => {
     if (member.id === currentUser.currentCollMember.id) return true;
     return res;
   }, false);
