@@ -20,7 +20,7 @@ const SetCurrency = ({ closeModal, round }) => {
         <h1 className="text-3xl">Set currency</h1>
         <Alert severity="warning">
           You should not change currency after someone has added budgets or
-          granting has started.
+          funding has started.
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {

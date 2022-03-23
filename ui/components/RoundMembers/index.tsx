@@ -173,14 +173,14 @@ const RoundMembers = ({ round, currentUser }) => {
           <SearchBar
             round={round}
             value={searchString}
-            placeholder="Search members"
+            placeholder="Search participants"
             onChange={(e) => setSearchString(e.target.value)}
             clearInput={() => setSearchString("")}
           />
           {isAdmin && (
             <div className="flex items-center space-x-2">
               <Button onClick={() => setInviteModalOpen(true)}>
-                Invite members
+                Invite participants
               </Button>
               {inviteModalOpen && (
                 <InviteMembersModal

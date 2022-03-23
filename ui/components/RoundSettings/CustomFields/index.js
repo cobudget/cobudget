@@ -11,9 +11,11 @@ const CustomFields = ({ round }) => {
 
   return (
     <div className="px-6">
-      <h1 className="text-2xl font-semibold mb-2">Questions</h1>
+      <h1 className="text-2xl font-semibold mb-2">Bucket Form</h1>
 
-      <p className="text-gray-700 mb-4">Add questions for buckets to answer.</p>
+      <p className="text-gray-700 mb-4">
+        Customize the form for buckets to fill out.
+      </p>
 
       <DraggableCustomField
         round={round}
@@ -28,7 +30,7 @@ const CustomFields = ({ round }) => {
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> Add question
+          <AddIcon className="h-5 w-5 mr-1" /> Add form item
         </Button>
       </div>
       {(addCustomFieldModalOpen || editingCustomField) && (

@@ -31,8 +31,8 @@ export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
     { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
     { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
     {
-      label: "Members",
-      href: `/${groupSlug}/${roundSlug}/members`,
+      label: "Participants",
+      href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,
     },
     {

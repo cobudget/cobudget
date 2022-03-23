@@ -14,8 +14,8 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
     { name: "General", component: GeneralSettings },
     { name: "Guidelines", component: Guidelines },
     { name: "Bucket Review", component: BucketReview },
-    { name: "Questions", component: CustomFields },
-    { name: "Granting", component: Granting },
+    { name: "Bucket Form", component: CustomFields },
+    { name: "Funding", component: Granting },
     { name: "Tags", component: Tags },
   ];
 
