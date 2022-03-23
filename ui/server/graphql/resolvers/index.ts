@@ -1738,7 +1738,7 @@ const resolvers = {
     ),
     deleteMember: combineResolvers(
       isCollOrGroupAdmin,
-      async (parent, { collectionId, memberId }) => {
+      async (parent, { roundId, memberId }) => {
         const roundMember = await prisma.roundMember.findUnique({
           where: { id: memberId },
         });

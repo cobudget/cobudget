@@ -109,7 +109,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
                   `Are you sure you would like to delete membership from user with email ${member.email}?`
                 )
               )
-                deleteMember({ collectionId, memberId: member.id }).then(
+                deleteMember({ roundId, memberId: member.id }).then(
                   ({ error }) => {
                     if (error) {
                       console.error(error);
