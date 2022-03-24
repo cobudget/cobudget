@@ -101,7 +101,6 @@ model Group {
   name         String
   info         String?
   logo         String?
-  customDomain String?
   groupMembers GroupMember[]
   rounds       Round[]
   discourse    DiscourseConfig?
