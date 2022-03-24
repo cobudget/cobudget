@@ -60,37 +60,44 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, bodyContent, headContent }) => {
-  return (
-    <>
-      <Head>{parseHtml(headContent)}</Head>
-      {parseHtml(bodyContent, parseOptions)}
-    </>
-  );
+const IndexPage = ({ currentUser, landingPage }) => {
+  if (landingPage) {
+    return (
+      <>
+        <Head>{parseHtml(landingPage.headContent)}</Head>
+        {parseHtml(landingPage.bodyContent, parseOptions)}
+      </>
+    );
+  }
+  return <div>hey</div>;
 };
 
 export async function getStaticProps(ctx) {
-  // Import modules in here that aren't needed in the component
-  const cheerio = await import(`cheerio`);
-  const axios = (await import(`axios`)).default;
+  let landingPage = null;
+  if (process.env.LANDING_PAGE_URL) {
+    // Import modules in here that aren't needed in the component
+    const cheerio = await import(`cheerio`);
+    const axios = (await import(`axios`)).default;
 
-  // Fetch HTML
-  let res: any = await axios("https://cobudget.webflow.io").catch((err) => {
-    console.error(err);
-  });
+    // Fetch HTML
+    let res: any = await axios(process.env.LANDING_PAGE_URL).catch((err) => {
+      console.error(err);
+    });
 
-  const html = res.data;
+    const html = res.data;
 
-  // Parse HTML with Cheerio
-  const $ = cheerio.load(html);
-  const bodyContent = $(`body`).html();
-  const headContent = $(`head`).html();
+    // Parse HTML with Cheerio
+    const $ = cheerio.load(html);
+    const bodyContent = $(`body`).html();
+    const headContent = $(`head`).html();
+
+    landingPage = { bodyContent, headContent };
+  }
 
   // Send HTML to component via props
   return {
     props: {
-      bodyContent,
-      headContent,
+      landingPage,
     },
   };
 }
