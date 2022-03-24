@@ -33,7 +33,7 @@ module.exports = {
   theme: {
     extend: {
       gridTemplateColumns: {
-        // Dream page layout
+        // Bucket page layout
         sidebar: "minmax(0,1fr) 350px",
         funding: "auto minmax(100px, max-content)",
       },

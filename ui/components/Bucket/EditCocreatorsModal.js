@@ -5,8 +5,8 @@ import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
 
 const SEARCH_MEMBERS_QUERY = gql`
-  query SearchMembers($collectionId: ID!, $isApproved: Boolean) {
-    members(collectionId: $collectionId, isApproved: $isApproved) {
+  query SearchMembers($roundId: ID!, $isApproved: Boolean) {
+    members(roundId: $roundId, isApproved: $isApproved) {
       id
       isApproved
       user {
@@ -82,13 +82,13 @@ const Member = ({ member, add, remove }) => {
 const SearchMembersResult = ({
   searchInput,
   cocreators,
-  collectionId,
+  roundId,
   addCocreator,
   bucket,
 }) => {
   const [{ data: { members } = { members: [] } }] = useQuery({
     query: SEARCH_MEMBERS_QUERY,
-    variables: { collectionId, isApproved: true },
+    variables: { roundId, isApproved: true },
   });
 
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
@@ -123,8 +123,8 @@ const SearchMembersResult = ({
 const EditCocreatorsModal = ({
   open,
   handleClose,
-  dream,
-  collection,
+  bucket,
+  round,
   cocreators,
   currentUser,
 }) => {
@@ -154,7 +154,7 @@ const EditCocreatorsModal = ({
                   )
                 ) {
                   removeCocreator({
-                    bucketId: dream.id,
+                    bucketId: bucket.id,
                     memberId: member.id,
                   }).catch((err) => alert(err.message));
                 }
@@ -175,8 +175,8 @@ const EditCocreatorsModal = ({
               searchInput={searchInput}
               addCocreator={addCocreator}
               cocreators={cocreators}
-              collectionId={collection.id}
-              bucket={dream}
+              roundId={round.id}
+              bucket={bucket}
             />
           </div>
         </div>

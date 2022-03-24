@@ -1,6 +1,6 @@
-import EditOrganization from "../components/Org/EditOrganization";
+import EditGroup from "../components/Group/EditGroup";
 
-const CreateOrganizationPage = ({ currentUser }) => {
+const CreateGroupPage = ({ currentUser }) => {
   if (!currentUser) {
     if (typeof window !== "undefined") window.location.assign("/login"); //TODO: fix redirect after the fact
     return (
@@ -11,9 +11,9 @@ const CreateOrganizationPage = ({ currentUser }) => {
   }
   return (
     <div className="page">
-      <EditOrganization currentUser={currentUser} />
+      <EditGroup currentUser={currentUser} />
     </div>
   );
 };
 
-export default CreateOrganizationPage;
+export default CreateGroupPage;

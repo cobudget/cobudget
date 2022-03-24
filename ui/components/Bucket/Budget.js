@@ -6,12 +6,12 @@ import { Tooltip } from "react-tippy";
 
 import EditBudgetModal from "./EditBudgetModal";
 
-const DreamBudget = ({
+const BucketBudget = ({
   budgetItems,
   bucketId,
   canEdit,
-  collection,
-  currentOrg,
+  round,
+  currentGroup,
   currency,
   allowStretchGoals,
   minGoal,
@@ -42,8 +42,8 @@ const DreamBudget = ({
           allowStretchGoals={allowStretchGoals}
           handleClose={() => setEditing(false)}
           open={editing}
-          collection={collection}
-          currentOrg={currentOrg}
+          round={round}
+          currentGroup={currentGroup}
         />
       )}
 
@@ -187,4 +187,4 @@ const DreamBudget = ({
   );
 };
 
-export default DreamBudget;
+export default BucketBudget;

@@ -17,7 +17,7 @@ const UPDATE_PROFILE_QUERY = gql`
   }
 `;
 
-const EditProfile = ({ closeModal, currentUser, currentOrg }) => {
+const EditProfile = ({ closeModal, currentUser, currentGroup }) => {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
@@ -33,7 +33,7 @@ const EditProfile = ({ closeModal, currentUser, currentOrg }) => {
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
               updateUser({
-                ...(currentOrg && { orgId: currentOrg.id }),
+                ...(currentGroup && { groupId: currentGroup.id }),
                 ...dirtyValues(dirtyFields, variables),
               }).then(({ error }) => {
                 if (error) {
@@ -76,15 +76,15 @@ const EditProfile = ({ closeModal, currentUser, currentOrg }) => {
               })}
             />
           </div>
-          {/* {currentUser.currentOrgMember && (
+          {/* {currentUser.currentGroupMember && (
             <div className="my-4">
               <TextField
                 name="bio"
-                label={`Bio for ${currentOrg.name}`}
+                label={`Bio for ${currentGroup.name}`}
                 multiline
                 rows={5}
                 variant="outlined"
-                defaultValue={currentUser.currentOrgMember.bio}
+                defaultValue={currentUser.currentGroupMember.bio}
                 error={Boolean(errors.bio)}
                 helperText={errors.bio && errors.bio.message}
                 fullWidth

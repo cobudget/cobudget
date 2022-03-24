@@ -1,8 +1,8 @@
 import Realities from "components/Realities";
 
-const RealitiesPage = ({ currentOrgMember, currentUser }) => {
+const RealitiesPage = ({ currentGroupMember, currentUser }) => {
   return (
-    <Realities currentOrgMember={currentOrgMember} currentUser={currentUser} />
+    <Realities currentGroupMember={currentGroupMember} currentUser={currentUser} />
   );
 };
 
