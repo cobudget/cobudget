@@ -198,5 +198,4 @@ const MyApp = ({ Component, pageProps }) => {
   );
 };
 
-//@ts-ignore
 export default withUrqlClient(client, { ssr: false })(MyApp as any);

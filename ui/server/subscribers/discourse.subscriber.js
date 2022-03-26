@@ -112,7 +112,13 @@ module.exports = {
     eventHub.subscribe(
       "publish-bucket",
       "discourse",
-      async ({ currentGroup, currentGroupMember, round, bucket, unpublish }) => {
+      async ({
+        currentGroup,
+        currentGroupMember,
+        round,
+        bucket,
+        unpublish,
+      }) => {
         if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
@@ -165,7 +171,9 @@ module.exports = {
             `Your post needs to be at least ${currentGroup.discourse.minPostLength} characters long!`
           );
 
-        console.log(`Publishing comment in bucket ${bucket.id} to discourse...`);
+        console.log(
+          `Publishing comment in bucket ${bucket.id} to discourse...`
+        );
 
         if (!bucket.discourseTopicId) {
           await eventHub.publish("create-bucket", {

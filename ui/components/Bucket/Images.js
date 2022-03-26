@@ -1,12 +1,10 @@
 import Modal from "@material-ui/core/Modal";
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import _Card from "../styled/Card";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
-
-import EditImagesModal from "./EditImagesModal";
 
 const Card = styled(_Card)`
   position: absolute;
@@ -42,7 +40,7 @@ const Image = styled.img`
   max-width: calc(100vw - 60px);
 `;
 
-const Images = ({ bucketId, images, size, canEdit, openImageModal }) => {
+const Images = ({ images, size, canEdit, openImageModal }) => {
   return (
     <>
       {images.length > 0 ? (

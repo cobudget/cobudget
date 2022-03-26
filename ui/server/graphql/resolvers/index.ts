@@ -1643,7 +1643,7 @@ const resolvers = {
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
 
-        let newGroupMembers = [];
+        const newGroupMembers = [];
 
         for (let email of emails) {
           email = email.trim().toLowerCase();

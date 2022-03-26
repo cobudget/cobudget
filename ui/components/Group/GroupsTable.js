@@ -13,11 +13,7 @@ import {
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 
-const ActionsDropdown = ({
-  deleteGroup,
-  updateGroup,
-  group,
-}) => {
+const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
