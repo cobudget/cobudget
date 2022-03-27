@@ -19,7 +19,6 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   canViewRound,
-  deleteRoundMember,
   getRoundMember,
   getCurrentGroupAndMember,
   getGroupMember,
@@ -27,6 +26,7 @@ import {
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
   isGrantingOpen,
+  roundMemberBalance,
   statusTypeToQuery,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
@@ -408,7 +408,8 @@ const resolvers = {
         return await prisma.roundMember.findMany({
           where: {
             roundId,
-            ...(typeof isApproved === "boolean" && { isApproved }),
+            isApproved,
+            ...(!isApproved && { isRemoved: false }),
           },
         });
       }
@@ -417,7 +418,7 @@ const resolvers = {
       isCollMemberOrGroupAdmin,
       async (
         parent,
-        { roundId, isApproved = true, search, offset = 0, limit = 10 },
+        { roundId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
@@ -429,7 +430,8 @@ const resolvers = {
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {
             roundId,
-            ...(typeof isApproved === "boolean" && { isApproved }),
+            isApproved,
+            ...(!isApproved && { isRemoved: false }),
             ...(search && {
               OR: [
                 {
@@ -1601,7 +1603,7 @@ const resolvers = {
             },
             update: {
               collMemberships: {
-                connectOrCreate: {
+                upsert: {
                   create: {
                     isApproved: true,
                     round: { connect: { id: roundId } },
@@ -1609,6 +1611,10 @@ const resolvers = {
                     statusAccount: { create: {} },
                     incomingAccount: { create: {} },
                     outgoingAccount: { create: {} },
+                  },
+                  update: {
+                    isApproved: true,
+                    isRemoved: false,
                   },
                   where: {
                     userId_roundId: {
@@ -1733,7 +1739,20 @@ const resolvers = {
     deleteMember: combineResolvers(
       isCollOrGroupAdmin,
       async (parent, { roundId, memberId }) => {
-        return deleteRoundMember({ roundMemberId: memberId });
+        const roundMember = await prisma.roundMember.findUnique({
+          where: { id: memberId },
+        });
+        if (!roundMember)
+          throw new Error("This member does not exist in this collection");
+
+        if ((await roundMemberBalance(roundMember)) !== 0) {
+          throw new Error("You can only remove a round member with 0 balance");
+        }
+
+        return prisma.roundMember.update({
+          where: { id: memberId },
+          data: { isApproved: false, hasJoined: false, isRemoved: true },
+        });
       }
     ),
     // deleteGroup: async (parent, { groupId }, { user }) => {
@@ -2145,16 +2164,20 @@ const resolvers = {
       )
         throw new Error("This round is invite only");
 
-      const roundMember = await prisma.roundMember.create({
-        data: {
+      const isApproved =
+        currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN";
+
+      const roundMember = await prisma.roundMember.upsert({
+        where: { userId_roundId: { userId: user.id, roundId } },
+        create: {
           round: { connect: { id: roundId } },
           user: { connect: { id: user.id } },
-          isApproved:
-            currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN",
+          isApproved,
           statusAccount: { create: {} },
           incomingAccount: { create: {} },
           outgoingAccount: { create: {} },
         },
+        update: { isApproved, hasJoined: true, isRemoved: false },
       });
 
       return roundMember;
@@ -2182,50 +2205,7 @@ const resolvers = {
         where: { id: member.userId },
       }),
     balance: async (member) => {
-      if (!member.statusAccountId) return 0;
-
-      // console.time("memberBalanceTransactions");
-      // const {
-      //   _sum: { amount: debit },
-      // } = await prisma.transaction.aggregate({
-      //   where: { toAccountId: member.statusAccountId },
-      //   _sum: { amount: true },
-      // });
-
-      // const {
-      //   _sum: { amount: credit },
-      // } = await prisma.transaction.aggregate({
-      //   where: { fromAccountId: member.statusAccountId },
-      //   _sum: { amount: true },
-      // });
-
-      // console.timeEnd("memberBalanceTransactions");
-
-      // const debitMinusCredit = debit - credit;
-
-      // console.time("memberBalanceAllocationsAndContributions");
-
-      const {
-        _sum: { amount: totalAllocations },
-      } = await prisma.allocation.aggregate({
-        where: { roundMemberId: member.id },
-        _sum: { amount: true },
-      });
-
-      const {
-        _sum: { amount: totalContributions },
-      } = await prisma.contribution.aggregate({
-        where: { roundMemberId: member.id },
-        _sum: { amount: true },
-      });
-
-      // console.timeEnd("memberBalanceAllocationsAndContributions");
-
-      // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
-      //   console.error("Member balance is not adding up");
-      // }
-
-      return totalAllocations - totalContributions;
+      return roundMemberBalance(member);
     },
     email: async (member, _, { user }) => {
       if (!user) return null;
