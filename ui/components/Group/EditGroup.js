@@ -156,7 +156,7 @@ const EditGroup = ({ group, currentUser }) => {
         <ImageUpload
           label="Logo"
           onImageUploaded={setLogoImage}
-          cloudinaryPreset="group_logos"
+          cloudinaryPreset="organization_logos"
           initialImage={logoImage}
         />
 
