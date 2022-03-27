@@ -45,7 +45,7 @@ const AddTag = ({ items: roundTags, bucket }) => {
         openMenu,
         clearSelection,
       }) => {
-        let filtered = roundTags
+        const filtered = roundTags
           .filter((tag) => !bucket.tags.map((t) => t.id).includes(tag.id))
           .filter(
             (item) =>

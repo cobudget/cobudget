@@ -204,7 +204,9 @@ const RoundMembers = ({ round, currentUser }) => {
           moreExist={moreExist}
           loading={loading}
           onClick={
-            () => {}
+            () => {
+              return;
+            }
             //fetchMore({ variables: { offset: approvedMembers.length } })
           }
         />

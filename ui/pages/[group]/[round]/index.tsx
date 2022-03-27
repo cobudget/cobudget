@@ -246,7 +246,7 @@ const RoundPage = ({ currentGroup, currentUser }) => {
   useEffect(() => {
     const filter = f ?? getStandardFilter(bucketStatusCount);
     setStatusFilter(stringOrArrayIntoArray(filter));
-  }, [bucketStatusCount]);
+  }, [bucketStatusCount, f]);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (

@@ -6,15 +6,13 @@ import { useEffect, useState } from "react";
 export default ({ currentGroupMember, currentGroup }) => {
   if (!currentGroupMember) return null;
   if (!currentGroup.discourseUrl)
-    return (
-      <div>Your group has not set up custom discourse integration.</div>
-    );
+    return <div>Your group has not set up custom discourse integration.</div>;
 
   const [discourseConnectUrl, setUrl] = useState("");
 
   useEffect(() => {
     setUrl(createDiscourseConnectUrl(currentGroup));
-  }, []);
+  }, [currentGroup]);
 
   return (
     <div className="max-w-screen-sm mt-10">

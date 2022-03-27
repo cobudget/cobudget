@@ -76,7 +76,7 @@ const BucketCustomField = ({
         name: "customField.value",
       });
     }
-  }, [register]);
+  }, [register, defaultCustomField.type]);
 
   if (editing) {
     return (
