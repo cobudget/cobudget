@@ -1,5 +1,5 @@
-const discourse = require("../lib/discourse");
-const liveUpdate = require("../services/liveUpdate.service");
+import discourse from "../lib/discourse";
+import liveUpdate from "../services/liveUpdate.service";
 
 module.exports = {
   groupHasDiscourse(group) {
