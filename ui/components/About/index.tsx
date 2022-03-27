@@ -5,7 +5,7 @@ import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 
-export default function AboutPage({ round }) {
+export default function AboutPage({ router, round }) {
   // if (error) return <div>{error.message}</div>;
 
   // if (loading)

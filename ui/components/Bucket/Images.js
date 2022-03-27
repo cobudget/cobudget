@@ -40,7 +40,7 @@ const Image = styled.img`
   max-width: calc(100vw - 60px);
 `;
 
-const Images = ({ images, size, canEdit, openImageModal }) => {
+const Images = ({ bucketId, images, size, canEdit, openImageModal }) => {
   return (
     <>
       {images.length > 0 ? (

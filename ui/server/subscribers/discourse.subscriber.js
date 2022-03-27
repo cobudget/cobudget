@@ -1,7 +1,7 @@
 import discourse from "../lib/discourse";
 import liveUpdate from "../services/liveUpdate.service";
 
-module.exports = {
+export default {
   groupHasDiscourse(group) {
     return group?.discourse?.url && group?.discourse?.apiKey;
   },

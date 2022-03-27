@@ -10,10 +10,7 @@ import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
 import { allocateToMember } from "../../controller";
-import {
-  groupHasDiscourse,
-  generateComment,
-} from "../../subscribers/discourse.subscriber";
+import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketMinGoal,
@@ -32,6 +29,8 @@ import {
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
+
+const { groupHasDiscourse, generateComment } = subscribers;
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now

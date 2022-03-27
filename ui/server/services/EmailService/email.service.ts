@@ -14,13 +14,15 @@ import rehypeStringify from "rehype-stringify";
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
-import { groupHasDiscourse } from "server/subscribers/discourse.subscriber";
+import subscibers from "server/subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
 import { tailwindHsl } from "utils/colors";
+
+const { groupHasDiscourse } = subscibers;
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
