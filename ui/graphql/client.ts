@@ -26,8 +26,8 @@ export const getUrl = (): string => {
 };
 
 export const client = (
-  ssrExchange: SSRExchange,
-  ctx: NextUrqlContext | undefined
+  ssrExchange: SSRExchange
+  //ctx: NextUrqlContext | undefined
 ) => {
   return {
     url: getUrl(),
@@ -422,11 +422,10 @@ export const client = (
       fetchExchange,
     ],
     fetchOptions: {
-      headers: {
-        //@ts-ignore
-        ...ctx?.req?.headers,
-      },
-      credentials: "include",
+      //headers: {
+      //  ...ctx?.req?.headers,
+      //},
+      //credentials: "include",
     },
   };
 };

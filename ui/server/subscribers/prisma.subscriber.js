@@ -8,7 +8,9 @@ export default {
     eventHub.subscribe(
       "create-bucket",
       "prisma",
-      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {}
+      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {
+        return;
+      }
     );
 
     eventHub.subscribe(

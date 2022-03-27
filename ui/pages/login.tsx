@@ -3,7 +3,6 @@ import AuthenticationForm from "../components/AuthenticationForm";
 import toast, { Toaster } from "react-hot-toast";
 
 function Login() {
-
   useEffect(() => {
     if (window.location.href.indexOf("err=INVALID_TOKEN") > -1) {
       toast.error("The magic link is invalid. Please login again.");

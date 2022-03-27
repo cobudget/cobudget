@@ -68,11 +68,7 @@ const DragHandle = sortableHandle(() => (
 ));
 
 const SortableItem = sortableElement(
-  ({
-    item: customField,
-    setEditingItem: setEditingCustomField,
-    roundId,
-  }) => {
+  ({ item: customField, setEditingItem: setEditingCustomField, roundId }) => {
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
     );
@@ -97,8 +93,7 @@ const SortableItem = sortableElement(
                 onClick={() =>
                   confirm(
                     `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
-                  ) &&
-                  deleteCustomField({ roundId, fieldId: customField.id })
+                  ) && deleteCustomField({ roundId, fieldId: customField.id })
                 }
               >
                 <DeleteIcon className="h-6 w-6" />

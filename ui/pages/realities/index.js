@@ -2,7 +2,10 @@ import Realities from "components/Realities";
 
 const RealitiesPage = ({ currentGroupMember, currentUser }) => {
   return (
-    <Realities currentGroupMember={currentGroupMember} currentUser={currentUser} />
+    <Realities
+      currentGroupMember={currentGroupMember}
+      currentUser={currentUser}
+    />
   );
 };
 

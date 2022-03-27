@@ -7,4 +7,4 @@ assignees: ""
 ---
 
 **Describe the idea**
-Point to the exact place where the issues is and describe as clearly as possible what should be done. 
+Point to the exact place where the issues is and describe as clearly as possible what should be done.

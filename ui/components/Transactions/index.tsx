@@ -9,17 +9,9 @@ dayjs.extend(LocalizedFormat);
 
 export const TRANSACTIONS_QUERY = gql`
   query Transactions($roundId: ID!, $offset: Int, $limit: Int) {
-    roundTransactions(
-      roundId: $roundId
-      offset: $offset
-      limit: $limit
-    ) {
+    roundTransactions(roundId: $roundId, offset: $offset, limit: $limit) {
       moreExist
-      transactions(
-        roundId: $roundId
-        offset: $offset
-        limit: $limit
-      ) {
+      transactions(roundId: $roundId, offset: $offset, limit: $limit) {
         id
         amount
         amountBefore
@@ -126,15 +118,14 @@ const Transactions = ({ round, currentGroup }) => {
                     {c.allocationType === "ADD" ? (
                       <>
                         {c.amount < 0 ? " deducted " : " added "}
-                        {thousandSeparator(c.amount / 100)}{" "}
-                        {round.currency}
+                        {thousandSeparator(c.amount / 100)} {round.currency}
                         {c.amount < 0 ? " from " : " to "}@
-                        {c.roundMember.user.username}'s balance
+                        {c.roundMember.user.username}&apos;s balance
                       </>
                     ) : (
                       <>
                         {" "}
-                        set @{c.roundMember.user.username}'s balance to{" "}
+                        set @{c.roundMember.user.username}&apos;s balance to{" "}
                         {thousandSeparator((c.amount + c.amountBefore) / 100)}{" "}
                         {round.currency}
                       </>

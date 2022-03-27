@@ -39,7 +39,9 @@ const Tags = ({ currentGroup, bucket, round, canEdit }) => {
             </Link>
             {canEdit && (
               <button
-                onClick={() => removeTag({ bucketId: bucket.id, tagId: tag.id })}
+                onClick={() =>
+                  removeTag({ bucketId: bucket.id, tagId: tag.id })
+                }
                 className="rounded-full bg-gray-400 hover:bg-black"
               >
                 <CloseIcon className="w-3 h-3 text-white" />

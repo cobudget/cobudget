@@ -154,9 +154,9 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             primary={`Max. amount to one bucket per user`}
             secondary={
               round.maxAmountToBucketPerUser
-                ? `${thousandSeparator(
-                    round.maxAmountToBucketPerUser / 100
-                  )} ${round.currency}`
+                ? `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
+                    round.currency
+                  }`
                 : "Not set"
             }
             isSet={!!round.maxAmountToBucketPerUser}
@@ -188,9 +188,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             primary="Funding opens"
             secondary={
               round.grantingOpens
-                ? dayjs(round.grantingOpens).format(
-                    "MMMM D, YYYY - h:mm a"
-                  )
+                ? dayjs(round.grantingOpens).format("MMMM D, YYYY - h:mm a")
                 : "Not set"
             }
             isSet={round.grantingOpens}
@@ -205,9 +203,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             primary="Funding closes"
             secondary={
               round.grantingCloses
-                ? dayjs(round.grantingCloses).format(
-                    "MMMM D, YYYY - h:mm a"
-                  )
+                ? dayjs(round.grantingCloses).format("MMMM D, YYYY - h:mm a")
                 : "Not set"
             }
             isSet={round.grantingCloses}
