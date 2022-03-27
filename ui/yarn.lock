@@ -2005,7 +2005,15 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
 
-"@types/passport@1.0.7":
+"@types/passport-facebook@2.1.11":
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/@types/passport-facebook/-/passport-facebook-2.1.11.tgz#9fd1d6ad8fddc23395c36a88a46f36b9b67a4d9b"
+  integrity sha512-YsZUZryJvHt2E/WdR22FlnCi9ckMwkGR+FwCcXq830rOvruhXJHJtKSXSD+Kn4phBsrEpqoP4xX6fFuEodk20A==
+  dependencies:
+    "@types/express" "*"
+    "@types/passport" "*"
+
+"@types/passport@*", "@types/passport@1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@types/passport/-/passport-1.0.7.tgz#85892f14932168158c86aecafd06b12f5439467a"
   integrity sha512-JtswU8N3kxBYgo+n9of7C97YQBT+AYPP2aBfNGTzABqPAZnK/WOAaKfh3XesUYMZRrXFuoPc2Hv0/G/nQFveHw==

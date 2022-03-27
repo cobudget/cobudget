@@ -24,6 +24,12 @@ function handler() {
       if (err.statusCode === 400 && err.message === "Invalid Token") {
         res.redirect("/login?err=INVALID_TOKEN");
       }
+      if (
+        err.statusCode === 403 &&
+        err.message === "Email scope not provided on Facebook login"
+      ) {
+        res.redirect("/login?err=FACEBOOK_NO_EMAIL");
+      }
 
       res.status(500).end(err.toString());
     },

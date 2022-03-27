@@ -1,11 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AuthenticationForm from "../components/AuthenticationForm";
 import toast, { Toaster } from "react-hot-toast";
 
 function Login() {
+  const [fbEmailError, setFbEmailError] = useState(false);
+
   useEffect(() => {
     if (window.location.href.indexOf("err=INVALID_TOKEN") > -1) {
       toast.error("The magic link is invalid. Please login again.");
+    }
+    if (window.location.href.indexOf("err=FACEBOOK_NO_EMAIL") > -1) {
+      setFbEmailError(true);
     }
   }, []);
 
@@ -20,8 +25,16 @@ function Login() {
         <AuthenticationForm />
       </div>
 
+      {fbEmailError &&
+        "To log in with Facebook, please allow us to get your email address. This is needed to notify you of important events in the app. You can always change what emails you receive from us."}
       {/* TODO: remove if env vars aren't here, altho avoid publishing secret */}
-      <a href="/api/auth/facebook/">Login with facebook</a>
+      <a
+        href={`/api/auth/facebook/${
+          fbEmailError ? "?fb_no_email_scope=true" : ""
+        }`}
+      >
+        Login with facebook
+      </a>
     </div>
   );
 }
