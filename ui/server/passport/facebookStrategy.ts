@@ -1,6 +1,7 @@
 import { Strategy } from "passport-facebook";
 import { appLink } from "utils/internalLinks";
 import AppError from "server/utils/AppError";
+import { createOrGetUser } from "./helpers";
 
 const facebookStrategy =
   process.env.FACEBOOK_APP_ID &&
@@ -36,11 +37,11 @@ const facebookStrategy =
       console.log("user fb id:", userFbId, "user email:", userEmail);
 
       // TODO: save userFbId in user object or something, alt. find the existing user
-
-      cb("totally an error");
-      //User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-      //  return cb(err, user);
-      //});
+      createOrGetUser({ email: userEmail, facebookId: userFbId })
+        .then((user) => {
+          cb(null, user);
+        })
+        .catch((error) => cb(error));
     }
   );
 

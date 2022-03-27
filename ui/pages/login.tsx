@@ -27,6 +27,7 @@ function Login() {
 
       {fbEmailError &&
         "To log in with Facebook, please allow us to get your email address. This is needed to notify you of important events in the app. You can always change what emails you receive from us."}
+      {/* TODO: also put this on the signup page (i.e. prob move it to AuthenticationForm) */}
       {/* TODO: remove if env vars aren't here, altho avoid publishing secret */}
       <a
         href={`/api/auth/facebook/${
