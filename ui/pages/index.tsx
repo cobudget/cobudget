@@ -4,9 +4,10 @@ import Head from "next/head";
 
 import parseHtml, { domToReact } from "html-react-parser";
 import get from "lodash/get";
-
-const liStyle =
-  "px-3 py-2 hover:bg-gray-200 hover:text-gray-900 text-gray-700 truncate";
+import { gql, ssrExchange, useQuery } from "urql";
+import { initUrqlClient } from "next-urql";
+import { client as createClientConfig } from "graphql/client";
+import GroupPage, { ROUNDS_QUERY } from "../components/Group";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -60,7 +61,7 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, landingPage }) => {
+const IndexPage = ({ currentUser, landingPage, currentGroup }) => {
   if (landingPage) {
     return (
       <>
@@ -69,11 +70,11 @@ const IndexPage = ({ currentUser, landingPage }) => {
       </>
     );
   }
-  return <div>hey</div>;
+
+  return <GroupPage currentUser={currentUser} currentGroup={currentGroup} />;
 };
 
 export async function getStaticProps(ctx) {
-  let landingPage = null;
   if (process.env.LANDING_PAGE_URL) {
     // Import modules in here that aren't needed in the component
     const cheerio = await import(`cheerio`);
@@ -91,14 +92,32 @@ export async function getStaticProps(ctx) {
     const bodyContent = $(`body`).html();
     const headContent = $(`head`).html();
 
-    landingPage = { bodyContent, headContent };
+    // Send HTML to component via props
+    return {
+      props: {
+        landingPage: { bodyContent, headContent },
+      },
+    };
+  } else if (process.env.SINGLE_GROUP_MODE) {
+    const ssrCache = ssrExchange({ isClient: false });
+    const client = initUrqlClient(createClientConfig(ssrCache, ctx), false);
+
+    // This query is used to populate the cache for the query
+    // used on this page.
+    await client.query(ROUNDS_QUERY, { groupSlug: "c" }).toPromise();
+
+    return {
+      props: {
+        // urqlState is a keyword here so withUrqlClient can pick it up.
+        urqlState: ssrCache.extractData(),
+      },
+      revalidate: 60,
+    };
+    // get root group and get that yooo.
   }
 
-  // Send HTML to component via props
   return {
-    props: {
-      landingPage,
-    },
+    props: {},
   };
 }
 

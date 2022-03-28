@@ -194,7 +194,7 @@ const resolvers = {
       });
     },
     currentGroup: async (parent, { groupSlug }) => {
-      if (!groupSlug || groupSlug === "c") return null;
+      if (!groupSlug) return null;
       return prisma.group.findUnique({ where: { slug: groupSlug } });
     },
     group: combineResolvers(isMemberOfGroup, async (parent, { groupId }) => {
@@ -203,28 +203,29 @@ const resolvers = {
     groups: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.group.findMany();
     }),
-    rounds: async (parent, { limit, groupId }, { user }) => {
-      if (!groupId) return null;
+    rounds: async (parent, { limit, groupSlug }, { user }) => {
+      if (!groupSlug) return null;
 
       const currentGroupMember = user
-        ? await prisma.groupMember.findUnique({
+        ? await prisma.groupMember.findFirst({
             where: {
-              groupId_userId: { groupId: groupId, userId: user.id },
+              group: { slug: groupSlug },
+              userId: user.id,
             },
           })
         : null;
 
       // if admin show all rounds (current or archived)
-      if (currentGroupMember && currentGroupMember.isAdmin) {
+      if (currentGroupMember?.isAdmin) {
         return prisma.round.findMany({
-          where: { groupId: groupId, deleted: { not: true } },
+          where: { group: { slug: groupSlug }, deleted: { not: true } },
           take: limit,
         });
       }
 
-      const allColls = await prisma.round.findMany({
+      const allRounds = await prisma.round.findMany({
         where: {
-          groupId: groupId,
+          group: { slug: groupSlug },
           archived: { not: true },
           deleted: { not: true },
         },
@@ -234,7 +235,7 @@ const resolvers = {
       // filter away colls the current user shouldn't be able to view
       return (
         await Promise.all(
-          allColls.map(async (coll) =>
+          allRounds.map(async (coll) =>
             (await canViewRound({ round: coll, user })) ? coll : undefined
           )
         )

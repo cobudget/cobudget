@@ -421,12 +421,12 @@ export const client = (
       ssrExchange,
       fetchExchange,
     ],
-    fetchOptions: {
-      headers: {
-        //@ts-ignore
-        ...ctx?.req?.headers,
-      },
-      credentials: "include",
-    },
+    // fetchOptions: {
+    //   headers: {
+    //     //@ts-ignore
+    //     ...ctx?.req?.headers,
+    //   },
+    //   credentials: "include",
+    // },
   };
 };

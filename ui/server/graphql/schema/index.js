@@ -10,7 +10,7 @@ const schema = gql`
     currentGroup(groupSlug: String): Group
     groups: [Group!]
     group(groupId: ID!): Group!
-    rounds(groupId: ID!, limit: Int): [Round!]
+    rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
     bucketsPage(

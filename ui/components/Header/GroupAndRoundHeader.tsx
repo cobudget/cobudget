@@ -46,7 +46,7 @@ const GroupAndRoundHeader = ({
         <>
           <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
-          {currentGroup ? (
+          {currentGroup.slug !== "c" ? (
             <Link href={`/${currentGroup.slug}`}>
               <a
                 className={

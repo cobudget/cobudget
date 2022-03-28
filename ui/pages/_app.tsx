@@ -128,14 +128,14 @@ const MyApp = ({ Component, pageProps }) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      groupSlug: router.query.group,
+      groupSlug: router.query.group ?? "c",
       roundSlug: router.query.round,
     },
     pause: !router.isReady,
   });
 
   const { currentUser = null, currentGroup = null, round = null } = data ?? {};
-
+  console.log({ currentGroup, currentUser, round });
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
