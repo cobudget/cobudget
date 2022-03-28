@@ -31,6 +31,10 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
+      tags {
+        id
+        value
+      }
       allowStretchGoals
       requireBucketApproval
       bucketReviewIsOpen
