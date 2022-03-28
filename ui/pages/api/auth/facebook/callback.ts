@@ -9,6 +9,5 @@ export default handler()
     })
   )
   .use((req, res) => {
-    console.log("fb cb req:", req, "res:", res);
     res.redirect(req.user?.redirect || "/");
   });

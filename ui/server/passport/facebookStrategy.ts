@@ -34,9 +34,6 @@ const facebookStrategy =
         return cb(new AppError("User doesn't have a Facebook user ID", 403));
       }
 
-      console.log("user fb id:", userFbId, "user email:", userEmail);
-
-      // TODO: save userFbId in user object or something, alt. find the existing user
       createOrGetUser({ email: userEmail, facebookId: userFbId })
         .then((user) => {
           cb(null, user);
