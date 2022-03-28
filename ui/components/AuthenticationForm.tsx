@@ -74,17 +74,22 @@ export default function AuthenticationForm({
         </Button>
       </form>
 
+      <div className="w-full h-px bg-gray-300 my-5"></div>
+
       {fbLoginEnabled && (
         <div>
           {fbEmailError &&
             "To log in with Facebook, please allow us to get your email address. This is needed to notify you of important events in the app. You can always change what emails you receive from us."}
-          <a
+          <Button
+            fullWidth
             href={`/api/auth/facebook/${
               fbEmailError ? "?fb_no_email_scope=true" : ""
             }`}
+            className="text-center"
+            style={{ backgroundColor: "#1977f2" }}
           >
-            Login with facebook
-          </a>
+            Login with Facebook
+          </Button>
         </div>
       )}
     </div>
