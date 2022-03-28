@@ -1,8 +1,10 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
+import WarningIcon from "@material-ui/icons/WarningOutlined";
 import TextField from "./TextField";
 import Button from "./Button";
+import Banner from "components/Banner";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -78,8 +80,17 @@ export default function AuthenticationForm({
 
       {fbLoginEnabled && (
         <div>
-          {fbEmailError &&
-            "To log in with Facebook, please allow us to get your email address. This is needed to notify you of important events in the app. You can always change what emails you receive from us."}
+          {fbEmailError && (
+            <Banner
+              className={"mb-4"}
+              variant="critical"
+              title="Problem logging in with Facebook"
+            >
+              To log in with Facebook, please allow us to get your email
+              address. This is needed to notify you of important events in the
+              app. You can always change what emails you receive from us.
+            </Banner>
+          )}
           <Button
             fullWidth
             href={`/api/auth/facebook/${
