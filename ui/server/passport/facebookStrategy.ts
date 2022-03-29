@@ -12,8 +12,9 @@ const facebookStrategy =
       clientSecret: process.env.FACEBOOK_APP_SECRET,
       callbackURL: appLink("/api/auth/facebook/callback"),
       profileFields: ["id", "email"],
+      passReqToCallback: true,
     },
-    function (accessToken, refreshToken, profile, cb) {
+    function (req, accessToken, refreshToken, profile, cb) {
       if (!profile?.emails) {
         return cb(
           // Exact string important, matched against in api-handler
@@ -33,6 +34,9 @@ const facebookStrategy =
       if (!userFbId) {
         return cb(new AppError("User doesn't have a Facebook user ID", 403));
       }
+
+      // req actually contains a session here
+      (req as any).session.accessToken = accessToken;
 
       createOrGetUser({ email: userEmail, facebookId: userFbId })
         .then((user) => {

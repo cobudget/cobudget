@@ -8,6 +8,10 @@ export default handler()
       failureMessage: true, // errors get added to req.session.messages
     })
   )
+  .use(function (req, res, next) {
+    req.session.lastSSOLoggedInCheck = Number(new Date());
+    next();
+  })
   .use((req, res) => {
     res.redirect(req.user?.redirect || "/");
   });
