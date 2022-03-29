@@ -92,9 +92,9 @@ export default function AuthenticationForm({
           )}
           <Button
             fullWidth
-            href={`/api/auth/facebook/${
-              fbEmailError ? "?fb_no_email_scope=true" : ""
-            }`}
+            href={`/api/auth/facebook/?${
+              fbEmailError ? "fb_no_email_scope=true&" : ""
+            }remember_me=${rememberMe}`}
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >

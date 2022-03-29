@@ -50,9 +50,15 @@ function handler() {
       // if we're not logged in yet
       if (!req.session.passport?.user) {
         // the rememberMe field being set means we're in the process of logging in
-        if (req.body?.rememberMe === true) {
+        if (
+          req.body?.rememberMe === true ||
+          req.query?.remember_me === "true"
+        ) {
           req.session.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-        } else if (req.body?.rememberMe === false) {
+        } else if (
+          req.body?.rememberMe === false ||
+          req.query?.remember_me === "false"
+        ) {
           req.session.maxAge = 12 * 60 * 60 * 1000; // 12 hours
         }
       }
