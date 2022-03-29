@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
-import WarningIcon from "@material-ui/icons/WarningOutlined";
 import TextField from "./TextField";
 import Button from "./Button";
 import Banner from "components/Banner";

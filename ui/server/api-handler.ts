@@ -48,9 +48,9 @@ function handler() {
     )
     .use(function (req, res, next) {
       if (!req.session.maxAge) {
-        if (req.body?.rememberMe) {
+        if (req.body?.rememberMe === true) {
           req.session.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
-        } else {
+        } else if (req.body?.rememberMe === false) {
           req.session.maxAge = 12 * 60 * 60 * 1000; // 12 hours
         }
       }
