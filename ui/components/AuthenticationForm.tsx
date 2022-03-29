@@ -13,7 +13,8 @@ export default function AuthenticationForm({
   fbLoginEnabled: boolean;
 }) {
   const [email, setEmail] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMeOne, setRememberMeOne] = useState(false);
+  const [rememberMeTwo, setRememberMeTwo] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { r } = router.query;
@@ -30,7 +31,7 @@ export default function AuthenticationForm({
             body: JSON.stringify({
               redirect,
               destination: email,
-              rememberMe,
+              rememberMe: rememberMeOne,
             }),
             headers: { "Content-Type": "application/json" },
           })
@@ -59,8 +60,8 @@ export default function AuthenticationForm({
         <FormControlLabel
           control={
             <Checkbox
-              value={rememberMe}
-              onChange={(evt) => setRememberMe(evt.target.checked)}
+              value={rememberMeOne}
+              onChange={(evt) => setRememberMeOne(evt.target.checked)}
             />
           }
           label="Keep me logged in"
@@ -90,11 +91,20 @@ export default function AuthenticationForm({
               app. You can always change what emails you receive from us.
             </Banner>
           )}
+          <FormControlLabel
+            control={
+              <Checkbox
+                value={rememberMeTwo}
+                onChange={(evt) => setRememberMeTwo(evt.target.checked)}
+              />
+            }
+            label="Keep me logged in"
+          />
           <Button
             fullWidth
             href={`/api/auth/facebook/?${
               fbEmailError ? "fb_no_email_scope=true&" : ""
-            }remember_me=${rememberMe}`}
+            }remember_me=${rememberMeTwo}`}
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >
