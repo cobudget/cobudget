@@ -132,7 +132,8 @@ const MyApp = ({ Component, pageProps }) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      groupSlug: process.env.SINGLE_GROUP_MODE ? "c" : router.query.group,
+      groupSlug:
+        process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
       roundSlug: router.query.round,
     },
     pause: !router.isReady,

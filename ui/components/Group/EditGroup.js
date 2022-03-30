@@ -99,7 +99,7 @@ const EditGroup = ({ group, currentUser }) => {
           error={errors.name}
           helperText={errors.name?.message}
         />
-        {!process.env.SINGLE_GROUP_MODE && (
+        {process.env.SINGLE_GROUP_MODE !== "true" && (
           <TextField
             name="slug"
             label="URL"

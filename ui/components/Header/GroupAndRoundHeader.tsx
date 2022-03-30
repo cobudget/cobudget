@@ -33,7 +33,7 @@ const GroupAndRoundHeader = ({
 
   return (
     <div className="flex items-center max-w-screen overflow-hidden">
-      {!process.env.SINGLE_GROUP_MODE && (
+      {process.env.SINGLE_GROUP_MODE !== "true" && (
         <Link href="/">
           <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
             <img src="/cobudget-logo.png" className="h-6 max-w-none" />
@@ -46,7 +46,7 @@ const GroupAndRoundHeader = ({
 
       {(currentGroup || round || currentUser) && (
         <>
-          {!process.env.SINGLE_GROUP_MODE && (
+          {process.env.SINGLE_GROUP_MODE !== "true" && (
             <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
           )}
 
@@ -81,7 +81,7 @@ const GroupAndRoundHeader = ({
               </a>
             </Link>
           ) : null}
-          {currentUser && !process.env.SINGLE_GROUP_MODE && (
+          {currentUser && process.env.SINGLE_GROUP_MODE !== "true" && (
             <Selector
               currentUser={currentUser}
               currentGroup={currentGroup}

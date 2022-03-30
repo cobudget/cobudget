@@ -98,7 +98,7 @@ export async function getStaticProps(ctx) {
         landingPage: { bodyContent, headContent },
       },
     };
-  } else if (process.env.SINGLE_GROUP_MODE) {
+  } else if (process.env.SINGLE_GROUP_MODE == "true") {
     const ssrCache = ssrExchange({ isClient: false });
     const client = initUrqlClient(createClientConfig(ssrCache), false);
 
