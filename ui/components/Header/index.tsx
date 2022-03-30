@@ -111,7 +111,7 @@ const Header = ({ currentUser, currentGroup, openModal }) => {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
-    pause: !router.isReady || !router.query.round,
+    pause: !router.isReady,
   });
   const [isMenuOpen, setMenuOpen] = useState(false);
 
