@@ -49,7 +49,9 @@ const Layout = ({
           <LinkOut href="https://github.com/cobudget/cobudget">online</LinkOut>.
         </div>
         <div className="space-x-6">
-          <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+          {process.env.PRIVACY_POLICY_URL && (
+            <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+          )}
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
           )}
