@@ -26,8 +26,8 @@ export const getUrl = (): string => {
 };
 
 export const client = (
-  ssrExchange: SSRExchange,
-  ctx: NextUrqlContext | undefined
+  ssrExchange: SSRExchange
+  //ctx: NextUrqlContext | undefined
 ) => {
   return {
     url: getUrl(),

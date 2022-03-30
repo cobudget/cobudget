@@ -167,6 +167,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
   const [open, setOpen] = useState(false);
   const isAngry = bucket.raisedFlags.length > 0;
   const [bubbleOpen, setBubbleOpen] = useState(true);
+  const [chatItems, setChatItems] = useState(items);
   const closeBubble = () => setBubbleOpen(false);
 
   const [, raiseFlag] = useMutation(RAISE_FLAG_MUTATION);
@@ -287,8 +288,6 @@ const Monster = ({ round, bucket, currentGroup }) => {
       ],
     ];
   }
-
-  const [chatItems, setChatItems] = useState(items);
 
   const renderChatItem = (item, i) => {
     switch (item.type) {

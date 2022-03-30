@@ -5,7 +5,7 @@ import classNames from "../../utils/classNames";
 import { CheckIcon, SelectorIcon } from "../Icons";
 
 function LinkItem(props) {
-  let { href, children, active, selected, className, ...rest } = props;
+  const { href, children, active, selected, className, ...rest } = props;
   const linkStyle = classNames(
     "px-2 py-2 rounded flex justify-start items-center",
     active && "bg-gray-200",

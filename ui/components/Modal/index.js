@@ -29,7 +29,9 @@ const Modal = ({ active, closeModal, currentGroup, currentUser }) => {
   return (
     <MUIModal
       open={Boolean(active)}
-      onClose={() => {}}
+      onClose={() => {
+        return;
+      }}
       className={classes.modal}
     >
       <div className={classes.innerModal}>

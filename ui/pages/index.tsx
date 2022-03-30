@@ -81,7 +81,7 @@ export async function getStaticProps(ctx) {
     const axios = (await import(`axios`)).default;
 
     // Fetch HTML
-    let res: any = await axios(process.env.LANDING_PAGE_URL).catch((err) => {
+    const res: any = await axios(process.env.LANDING_PAGE_URL).catch((err) => {
       console.error(err);
     });
 
@@ -100,7 +100,7 @@ export async function getStaticProps(ctx) {
     };
   } else if (process.env.SINGLE_GROUP_MODE) {
     const ssrCache = ssrExchange({ isClient: false });
-    const client = initUrqlClient(createClientConfig(ssrCache, ctx), false);
+    const client = initUrqlClient(createClientConfig(ssrCache), false);
 
     // This query is used to populate the cache for the query
     // used on this page.
