@@ -50,7 +50,9 @@ const Layout = ({
         </div>
         <div className="space-x-6">
           <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
-          <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
+          {process.env.TERMS_URL && (
+            <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
+          )}
         </div>
       </div>
     </div>
