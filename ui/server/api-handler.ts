@@ -48,7 +48,7 @@ function handler() {
     )
     .use(function (req, res, next) {
       // if we're not logged in yet
-      if (!req.session.passport?.user) {
+      if (!req.session?.passport?.user) {
         // the rememberMe field being set means we're in the process of logging in
         if (
           req.body?.rememberMe === true ||
@@ -68,46 +68,35 @@ function handler() {
       next();
     })
     .use(function (req, res, next) {
-      const interval = 6 * 60 * 60 * 1000; // 6 hours
+      const interval = 1 * 60 * 60 * 1000; // 1 hour
 
       if (
-        req.session.lastSSOLoggedInCheck &&
-        req.session.lastSSOLoggedInCheck + interval < Number(new Date())
+        req.session.lastSSOValidCheck &&
+        req.session.lastSSOValidCheck + interval < Number(new Date())
       ) {
         fetch(
           `https://graph.facebook.com/debug_token?input_token=${req.session.accessToken}&access_token=${process.env.FACEBOOK_APP_ID}|${process.env.FACEBOOK_APP_SECRET}`,
           {
             method: "GET",
-            //body: JSON.stringify({
-            //  redirect,
-            //  destination: email,
-            //  rememberMe: rememberMeOne,
-            //}),
-            //headers: { "Content-Type": "application/json" },
           }
         )
           .then((res) => res.json())
           .then((json) => {
-            console.log("debug_token result:", json);
-            //debug_token result: {
-            //  data: {
-            //    app_id: '123',
-            //    type: 'USER',
-            //    application: 'Plato Project - Test1',
-            //    data_access_expires_at: 1656352784,
-            //    expires_at: 1653743336,
-            //    is_valid: true,
-            //    issued_at: 1648559336,
-            //    scopes: [ 'email', 'public_profile' ],
-            //    user_id: '456'
-            //  }
-            //}
+            // is_valid turns false if the user has revoked permissions to our app
+            // according to facebook we have to check this at least every 24 hours
+            // https://developers.facebook.com/devpolicy/#login
+            if (json?.data?.is_valid !== true) {
+              req.logout?.();
+              req.session = null;
+            } else {
+              req.session.lastSSOValidCheck = Number(new Date());
+            }
             next();
           })
           .catch((error) => next(error));
+      } else {
+        next();
       }
-
-      next();
     })
     .use(passport.initialize())
     .use(passport.session());

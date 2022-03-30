@@ -9,7 +9,7 @@ export default handler()
     })
   )
   .use(function (req, res, next) {
-    req.session.lastSSOLoggedInCheck = Number(new Date());
+    req.session.lastSSOValidCheck = Number(new Date());
     next();
   })
   .use((req, res) => {
