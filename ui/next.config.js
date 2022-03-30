@@ -17,6 +17,7 @@ module.exports = (phase) => {
     SINGLE_GROUP_MODE: process.env.SINGLE_GROUP_MODE,
     TERMS_URL: process.env.TERMS_URL,
     PRIVACY_POLICY_URL: process.env.PRIVACY_POLICY_URL,
+    PLATFORM_NAME: process.env.PLATFORM_NAME,
     //process.env.KEYCLOAK_CLIENT_ID
     //process.env.COOKIE_SECRET
     //KEYCLOAK_REALM: process.env.KEYCLOAK_REALM,

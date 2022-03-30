@@ -38,7 +38,7 @@ const GroupAndRoundHeader = ({
           <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
             <img src="/cobudget-logo.png" className="h-6 max-w-none" />
             {!currentUser && !currentGroup && !round && (
-              <h1 className="leading-normal">Cobudget</h1>
+              <h1 className="leading-normal">{process.env.PLATFORM_NAME}</h1>
             )}
           </a>
         </Link>

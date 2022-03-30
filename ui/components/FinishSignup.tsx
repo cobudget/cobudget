@@ -64,7 +64,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Welcome to Cobudget!
+                Welcome to {process.env.PLATFORM_NAME}!
               </Dialog.Title>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
@@ -97,7 +97,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
                       type="checkbox"
                     />{" "}
                     <span>
-                      I accept Cobudget&apos;s{" "}
+                      I accept the {process.env.PLATFORM_NAME}{" "}
                       <a
                         className="text-blue underline"
                         target="_blank"
@@ -126,7 +126,9 @@ export default function FinishSignup({ isOpen, currentUser }) {
                           toast.error(error.message);
                         }
                       } else {
-                        toast.success("Welcome to Cobudget!");
+                        toast.success(
+                          `Welcome to ${process.env.PLATFORM_NAME}!`
+                        );
                       }
                     })
                   }

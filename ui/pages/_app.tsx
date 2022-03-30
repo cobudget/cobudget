@@ -186,7 +186,7 @@ const MyApp = ({ Component, pageProps }) => {
               : currentGroup.name
             : round
             ? round.title
-            : "Cobudget"
+            : process.env.PLATFORM_NAME
         }
       >
         <Component

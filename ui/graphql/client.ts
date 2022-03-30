@@ -9,7 +9,7 @@ import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[group]/[round]";
 import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
-import { ROUNDS_QUERY } from "pages/[group]";
+import { ROUNDS_QUERY } from "components/Group";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {

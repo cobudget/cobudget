@@ -72,7 +72,7 @@ const TodoList = ({ currentGroup }) => {
   const rawTodos = [
     {
       title: "Create community",
-      desc: `This is your own home on the Cobudget platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
+      desc: `This is your own home on the ${process.env.PLATFORM_NAME} platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
       link: null,
     },
     {
