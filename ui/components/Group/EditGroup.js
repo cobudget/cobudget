@@ -41,12 +41,8 @@ const EditGroup = ({ group, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(group?.logo);
-  const [{ fetching: loading }, createGroup] = useMutation(
-    CREATE_GROUP
-  );
-  const [{ fetching: editLoading }, editGroup] = useMutation(
-    EDIT_GROUP
-  );
+  const [{ fetching: loading }, createGroup] = useMutation(CREATE_GROUP);
+  const [{ fetching: editLoading }, editGroup] = useMutation(EDIT_GROUP);
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -103,29 +99,30 @@ const EditGroup = ({ group, currentUser }) => {
           error={errors.name}
           helperText={errors.name?.message}
         />
-
-        <TextField
-          name="slug"
-          label="URL"
-          placeholder={slugify(`${currentUser.name}'s community`)}
-          inputRef={register({ required: "Required" })}
-          error={errors.slug}
-          inputProps={{
-            value: slugValue,
-            onChange: (e) => {
-              setSlugValue(e.target.value);
-            },
-            onBlur: (e) => setSlugValue(slugify(e.target.value)),
-          }}
-          helperText={errors.subdomain?.message}
-          startAdornment={
-            fromRealities ? (
-              <span>{process.env.REALITIES_DEPLOY_URL}/</span>
-            ) : (
-              <span>{process.env.DEPLOY_URL}/</span>
-            )
-          }
-        />
+        {!process.env.SINGLE_GROUP_MODE && (
+          <TextField
+            name="slug"
+            label="URL"
+            placeholder={slugify(`${currentUser.name}'s community`)}
+            inputRef={register({ required: "Required" })}
+            error={errors.slug}
+            inputProps={{
+              value: slugValue,
+              onChange: (e) => {
+                setSlugValue(e.target.value);
+              },
+              onBlur: (e) => setSlugValue(slugify(e.target.value)),
+            }}
+            helperText={errors.subdomain?.message}
+            startAdornment={
+              fromRealities ? (
+                <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+              ) : (
+                <span>{process.env.DEPLOY_URL}/</span>
+              )
+            }
+          />
+        )}
 
         {/* removing this for now since currently don't automatically update
             the redirect uris in keycloak
