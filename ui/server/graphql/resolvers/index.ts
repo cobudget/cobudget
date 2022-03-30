@@ -195,6 +195,8 @@ const resolvers = {
     },
     currentGroup: async (parent, { groupSlug }) => {
       if (!groupSlug) return null;
+      if (!process.env.SINGLE_GROUP_MODE && groupSlug == "c") return null;
+
       return prisma.group.findUnique({ where: { slug: groupSlug } });
     },
     group: combineResolvers(isMemberOfGroup, async (parent, { groupId }) => {
@@ -2317,6 +2319,8 @@ const resolvers = {
     currentGroupMember: async (parent, { groupSlug }, { user }) => {
       if (user?.id !== parent.id) return null;
       if (!groupSlug) return null;
+      if (!process.env.SINGLE_GROUP_MODE && groupSlug == "c") return null;
+
       return prisma.groupMember.findFirst({
         where: { group: { slug: groupSlug }, userId: user.id },
       });
