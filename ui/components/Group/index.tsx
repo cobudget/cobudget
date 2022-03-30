@@ -47,10 +47,9 @@ const LinkCard = forwardRef((props: any, ref) => {
 
 const GroupIndex = ({ currentGroup, currentUser }) => {
   const router = useRouter();
-  // useEffect(() => {
-  //   console.log("hey, group: ", router.query.group);
-  //   if (router.query.group == "c") router.replace("/");
-  // }, [router.query]);
+  useEffect(() => {
+    if (router.query.group == "c") router.replace("/");
+  }, [router.query]);
 
   const [{ data, error }] = useQuery({
     query: ROUNDS_QUERY,
@@ -58,8 +57,6 @@ const GroupIndex = ({ currentGroup, currentUser }) => {
   });
 
   console.log({ data, router, currentGroup });
-
-  if (!currentGroup) return null;
 
   const rounds = data?.rounds ?? [];
   const showTodos =
