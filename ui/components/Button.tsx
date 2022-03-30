@@ -16,6 +16,7 @@ const Button = forwardRef(
       href,
       onClick,
       nextJsLink,
+      style,
       ...props
     }: {
       children: any;
@@ -30,6 +31,7 @@ const Button = forwardRef(
       href?: string;
       onClick?: () => void;
       nextJsLink?: boolean;
+      style?: any;
     },
     ref: any
   ) => {
@@ -62,7 +64,7 @@ const Button = forwardRef(
 
     if (href || nextJsLink)
       return (
-        <a {...(href && { href })} ref={ref} className={classes}>
+        <a {...(href && { href })} ref={ref} className={classes} style={style}>
           {children}
         </a>
       );
@@ -74,6 +76,7 @@ const Button = forwardRef(
         disabled={disabled || loading}
         type={type}
         className={classes}
+        style={style}
         ref={ref}
       >
         {loading && (

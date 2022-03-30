@@ -1,8 +1,13 @@
 import passport from "passport";
 import magicLink from "./magicLink";
+import facebook from "./facebookStrategy";
 import prisma from "../prisma";
 
 passport.use(magicLink);
+
+if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
+  passport.use(facebook);
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
