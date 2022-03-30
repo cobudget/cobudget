@@ -1350,11 +1350,7 @@ const resolvers = {
           ).posts.create(
             {
               title: bucket.title,
-              raw: `https://${
-                currentGroup.customDomain
-                  ? currentGroup.customDomain
-                  : `${currentGroup.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.round.slug}/${bucket.id}`,
+              raw: `https://${process.env.DEPLOY_URL}/${currentGroup.slug}/${bucket.round.slug}/${bucket.id}`,
               ...(currentGroup.discourse.dreamsCategoryId && {
                 category: currentGroup.discourse.dreamsCategoryId,
               }),
@@ -1454,11 +1450,7 @@ const resolvers = {
           ).posts.create(
             {
               title: bucket.title,
-              raw: `https://${
-                currentGroup.customDomain
-                  ? currentGroup.customDomain
-                  : `${currentGroup.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.round.slug}/${bucket.id}`,
+              raw: `https://${process.env.DEPLOY_URL}/${currentGroup.slug}/${bucket.round.slug}/${bucket.id}`,
               ...(currentGroup.discourse.dreamsCategoryId && {
                 category: currentGroup.discourse.dreamsCategoryId,
               }),
