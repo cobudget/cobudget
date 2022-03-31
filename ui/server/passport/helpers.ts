@@ -11,7 +11,7 @@ export async function createOrGetUser({
   const olderUser = await prisma.user.findUnique({ where: { email } });
 
   if (
-    olderUser.facebookId &&
+    olderUser?.facebookId &&
     facebookId &&
     olderUser.facebookId !== facebookId
   ) {
@@ -29,7 +29,7 @@ export async function createOrGetUser({
     },
     update: {
       verifiedEmail: true,
-      ...(!olderUser.facebookId && facebookId && { facebookId }),
+      ...(!olderUser?.facebookId && facebookId && { facebookId }),
     },
     where: {
       email,
