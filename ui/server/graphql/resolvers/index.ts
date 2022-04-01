@@ -135,7 +135,6 @@ const isCollModOrAdmin = async (parent, { bucketId, roundId }, { user }) => {
 
 const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  if (!groupId) return skip;
   const groupMember = await prisma.groupMember.findUnique({
     where: {
       groupId_userId: { groupId: groupId, userId: user.id },
@@ -709,11 +708,13 @@ const resolvers = {
         });
       }
     ),
-    deleteRound: combineResolvers(isGroupAdmin, async (parent, { roundId }) =>
-      prisma.round.update({
-        where: { id: roundId },
-        data: { deleted: true },
-      })
+    deleteRound: combineResolvers(
+      isCollOrGroupAdmin,
+      async (parent, { roundId }) =>
+        prisma.round.update({
+          where: { id: roundId },
+          data: { deleted: true },
+        })
     ),
     addGuideline: combineResolvers(
       isCollOrGroupAdmin,
@@ -1707,7 +1708,7 @@ const resolvers = {
     ),
     deleteGroupMember: combineResolvers(
       isGroupAdmin,
-      async (parent, { groupMemberId }) => {
+      async (parent, { groupId, groupMemberId }) => {
         return prisma.groupMember.delete({
           where: { id: groupMemberId },
         });
