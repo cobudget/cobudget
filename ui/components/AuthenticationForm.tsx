@@ -108,15 +108,10 @@ export default function AuthenticationForm({
         <div>
           <Button
             fullWidth
-            href={`/api/auth/google/?${
-              "" /*
-              fbEmailError ? "fb_no_email_scope=true&" : ""
-      */
-            }remember_me=true`}
+            href="/api/auth/google/?remember_me=true"
             className="mt-5 text-center shadow-lg border-default"
             color="white"
             variant="secondary"
-            //style={{ backgroundColor: "#1977f2" }}
           >
             Login with Google
           </Button>
