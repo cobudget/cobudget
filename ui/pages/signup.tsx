@@ -1,6 +1,6 @@
 import AuthenticationForm from "../components/AuthenticationForm";
 
-function Signup({ fbLoginEnabled }) {
+function Signup({ fbLoginEnabled, googleLoginEnabled }) {
   return (
     <div className="page">
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
@@ -8,7 +8,10 @@ function Signup({ fbLoginEnabled }) {
       </h1>
 
       <div className="max-w-sm bg-white mx-auto my-6 p-6 shadow rounded">
-        <AuthenticationForm fbLoginEnabled={fbLoginEnabled} />
+        <AuthenticationForm
+          fbLoginEnabled={fbLoginEnabled}
+          googleLoginEnabled={googleLoginEnabled}
+        />
       </div>
     </div>
   );
@@ -22,5 +25,9 @@ export async function getStaticProps() {
     process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
   );
 
-  return { props: { fbLoginEnabled } };
+  const googleLoginEnabled = !!(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+  );
+
+  return { props: { fbLoginEnabled, googleLoginEnabled } };
 }

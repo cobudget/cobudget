@@ -1,12 +1,17 @@
 import passport from "passport";
 import magicLink from "./magicLink";
 import facebook from "./facebookStrategy";
+import google from "./googleStrategy";
 import prisma from "../prisma";
 
 passport.use(magicLink);
 
 if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
   passport.use(facebook);
+}
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(google);
 }
 
 declare global {

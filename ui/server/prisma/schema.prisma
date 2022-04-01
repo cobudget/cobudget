@@ -20,6 +20,7 @@ model User {
   updatedAt        DateTime       @updatedAt
   image            String?
   facebookId       String?        @unique
+  googleId         String?        @unique
   groupMemberships GroupMember[]
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?

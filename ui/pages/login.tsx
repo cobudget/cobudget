@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AuthenticationForm from "../components/AuthenticationForm";
 import toast, { Toaster } from "react-hot-toast";
 
-function Login({ fbLoginEnabled }) {
+function Login({ fbLoginEnabled, googleLoginEnabled }) {
   const [fbEmailError, setFbEmailError] = useState(false);
 
   useEffect(() => {
@@ -25,6 +25,7 @@ function Login({ fbLoginEnabled }) {
         <AuthenticationForm
           fbLoginEnabled={fbLoginEnabled}
           fbEmailError={fbEmailError}
+          googleLoginEnabled={googleLoginEnabled}
         />
       </div>
     </div>
@@ -39,5 +40,9 @@ export async function getStaticProps() {
     process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
   );
 
-  return { props: { fbLoginEnabled } };
+  const googleLoginEnabled = !!(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+  );
+
+  return { props: { fbLoginEnabled, googleLoginEnabled } };
 }
