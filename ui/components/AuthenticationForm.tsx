@@ -8,9 +8,11 @@ import Banner from "components/Banner";
 export default function AuthenticationForm({
   fbEmailError = false,
   fbLoginEnabled,
+  googleLoginEnabled,
 }: {
   fbEmailError?: boolean;
   fbLoginEnabled: boolean;
+  googleLoginEnabled: boolean;
 }) {
   const [email, setEmail] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -99,6 +101,24 @@ export default function AuthenticationForm({
             style={{ backgroundColor: "#1977f2" }}
           >
             Login with Facebook
+          </Button>
+        </div>
+      )}
+      {googleLoginEnabled && (
+        <div>
+          <Button
+            fullWidth
+            href={`/api/auth/google/?${
+              "" /*
+              fbEmailError ? "fb_no_email_scope=true&" : ""
+      */
+            }remember_me=true`}
+            className="mt-5 text-center shadow-lg border-default"
+            color="white"
+            variant="secondary"
+            //style={{ backgroundColor: "#1977f2" }}
+          >
+            Login with Google
           </Button>
         </div>
       )}
