@@ -194,6 +194,7 @@ export const client = (
                       },
                     },
                     (data) => {
+                      if (!data) return data;
                       data.rounds = data.rounds.filter(
                         (round) => round.id !== roundId
                       );
