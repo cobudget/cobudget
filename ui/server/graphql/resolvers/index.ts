@@ -613,66 +613,65 @@ const resolvers = {
         return group;
       }
     ),
-    createRound: combineResolvers(
-      isGroupAdmin,
-      async (
-        parent,
-        { groupId, slug, title, currency, registrationPolicy },
-        { user }
-      ) => {
-        let singleRound = false;
-        if (!groupId) {
-          let rootGroup = await prisma.group.findUnique({
-            where: { slug: "c" },
+    createRound: async (
+      parent,
+      { groupId, slug, title, currency, registrationPolicy },
+      { user }
+    ) => {
+      let singleRound = false;
+      if (!groupId) {
+        let rootGroup = await prisma.group.findUnique({
+          where: { slug: "c" },
+        });
+        if (!rootGroup) {
+          rootGroup = await prisma.group.create({
+            data: { slug: "c", name: "Root" },
           });
-          if (!rootGroup) {
-            rootGroup = await prisma.group.create({
-              data: { slug: "c", name: "Root" },
-            });
-          }
-          groupId = rootGroup.id;
-          singleRound = true;
         }
-        const round = await prisma.round.create({
-          data: {
-            slug,
-            title,
-            currency,
-            registrationPolicy,
-            group: { connect: { id: groupId } },
-            singleRound,
-            statusAccount: { create: {} },
-            roundMember: {
-              create: {
-                user: { connect: { id: user.id } },
-                isAdmin: true,
-                isApproved: true,
-                statusAccount: { create: {} },
-                incomingAccount: { create: {} },
-                outgoingAccount: { create: {} },
-              },
-            },
-            fields: {
-              create: {
-                name: "Description",
-                description: "Describe your bucket",
-                type: "MULTILINE_TEXT",
-                isRequired: false,
-                position: 1001,
-              },
+        groupId = rootGroup.id;
+        singleRound = true;
+      } else {
+        await isGroupAdmin(null, { groupId }, { user });
+      }
+      const round = await prisma.round.create({
+        data: {
+          slug,
+          title,
+          currency,
+          registrationPolicy,
+          group: { connect: { id: groupId } },
+          singleRound,
+          statusAccount: { create: {} },
+          roundMember: {
+            create: {
+              user: { connect: { id: user.id } },
+              isAdmin: true,
+              isApproved: true,
+              statusAccount: { create: {} },
+              incomingAccount: { create: {} },
+              outgoingAccount: { create: {} },
             },
           },
-        });
+          fields: {
+            create: {
+              name: "Description",
+              description: "Describe your bucket",
+              type: "MULTILINE_TEXT",
+              isRequired: false,
+              position: 1001,
+            },
+          },
+        },
+      });
 
-        // await eventHub.publish("create-round", {
-        //   currentGroup,
-        //   currentGroupMember,
-        //   round: round,
-        // });
+      // await eventHub.publish("create-round", {
+      //   currentGroup,
+      //   currentGroupMember,
+      //   round: round,
+      // });
 
-        return round;
-      }
-    ),
+      return round;
+    },
     editRound: combineResolvers(
       isCollOrGroupAdmin,
       async (
