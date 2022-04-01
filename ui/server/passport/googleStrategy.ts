@@ -16,9 +16,6 @@ const googleStrategy =
       passReqToCallback: true,
     },
     function (req, accessToken, refreshToken, profile, cb) {
-      console.log("google strat", { accessToken, refreshToken, profile });
-      return cb("errooour");
-
       //profile: {
       //  id: '123',
       //  displayName: undefined,
@@ -39,30 +36,25 @@ const googleStrategy =
       //  }
       //}
 
-      if (!profile?.emails) {
+      const userEmail = profile?._json?.email_verified && profile?._json?.email;
+
+      const userGoogleId = profile?.id;
+
+      if (!userEmail) {
         return cb(
-          // Exact string important, matched against in api-handler
-          new AppError("Email scope not provided on Facebook login", 403)
+          new AppError("User doesn't have an email or it is not verified", 403)
         );
       }
 
-      const userEmail =
-        profile.emails.length > 0 ? profile.emails[0].value : null;
-
-      const userFbId = profile?.id;
-
-      if (!userEmail) {
-        return cb(new AppError("User doesn't have an email", 403));
-      }
-
-      if (!userFbId) {
-        return cb(new AppError("User doesn't have a Facebook user ID", 403));
+      if (!userGoogleId) {
+        return cb(new AppError("User doesn't have a Google user ID", 403));
       }
 
       // req actually contains a session here
-      (req as any).session.accessToken = accessToken;
+      // TODO: do we need this?
+      //(req as any).session.accessToken = accessToken;
 
-      createOrGetUser({ email: userEmail, facebookId: userFbId })
+      createOrGetUser({ email: userEmail, googleId: userGoogleId })
         .then((user) => {
           cb(null, user);
         })
