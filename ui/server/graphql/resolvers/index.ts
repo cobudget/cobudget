@@ -1745,7 +1745,9 @@ const resolvers = {
           throw new Error("This member does not exist in this collection");
 
         if ((await roundMemberBalance(roundMember)) !== 0) {
-          throw new Error("You can only remove a round participant with 0 balance");
+          throw new Error(
+            "You can only remove a round participant with 0 balance"
+          );
         }
 
         return prisma.roundMember.update({
