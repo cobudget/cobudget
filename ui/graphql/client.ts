@@ -9,8 +9,8 @@ import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[group]/[round]";
 import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
-import { ROUNDS_QUERY } from "components/Group";
-import { TOP_LEVEL_QUERY } from "pages/_app";
+import { GROUP_PAGE_QUERY } from "components/Group";
+import { CURRENT_USER_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
   if (typeof window !== "undefined") return `/api`;
@@ -68,7 +68,7 @@ export const client = (
                 console.log({ result });
                 cache.updateQuery(
                   {
-                    query: TOP_LEVEL_QUERY,
+                    query: CURRENT_USER_QUERY,
                     variables: {
                       groupSlug: result.joinRound.round.group?.slug ?? "c",
                       roundSlug: result.joinRound.round.slug,
@@ -105,7 +105,7 @@ export const client = (
               if (result.joinGroup) {
                 cache.updateQuery(
                   {
-                    query: TOP_LEVEL_QUERY,
+                    query: CURRENT_USER_QUERY,
                     variables: {
                       groupSlug: result.joinGroup.group.slug,
                       roundSlug: undefined,
@@ -188,7 +188,7 @@ export const client = (
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: ROUNDS_QUERY,
+                      query: GROUP_PAGE_QUERY,
                       variables: {
                         groupSlug: field.arguments.groupSlug,
                       },

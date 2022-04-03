@@ -9,55 +9,9 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
-import HappySpinner from "components/HappySpinner";
 
-export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
-    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
-      id
-      slug
-      info
-      title
-      archived
-      color
-      currency
-      registrationPolicy
-      visibility
-      maxAmountToBucketPerUser
-      bucketCreationCloses
-      bucketCreationIsOpen
-      grantingOpens
-      grantingCloses
-      grantingIsOpen
-      numberOfApprovedMembers
-      about
-      tags {
-        id
-        value
-      }
-      allowStretchGoals
-      requireBucketApproval
-      bucketReviewIsOpen
-      discourseCategoryId
-      totalInMembersBalances
-      guidelines {
-        id
-        title
-        description
-        position
-      }
-      customFields {
-        id
-        name
-        description
-        type
-        limit
-        isRequired
-        position
-        createdAt
-      }
-    }
-
+export const CURRENT_USER_QUERY = gql`
+  query CurrentUser($roundSlug: String, $groupSlug: String) {
     currentUser {
       id
       username
@@ -112,25 +66,13 @@ export const TOP_LEVEL_QUERY = gql`
         hasDiscourseApiKey
       }
     }
-
-    currentGroup(groupSlug: $groupSlug) {
-      __typename
-      id
-      name
-      info
-      logo
-      slug
-      customDomain
-      discourseUrl
-      finishedTodos
-    }
   }
 `;
 
 const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
-    query: TOP_LEVEL_QUERY,
+    query: CURRENT_USER_QUERY,
     variables: {
       groupSlug:
         process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
@@ -139,20 +81,19 @@ const MyApp = ({ Component, pageProps }) => {
     pause: !router.isReady,
   });
 
-  const { currentUser = null, currentGroup = null, round = null } = data ?? {};
-  console.log({ currentGroup, currentUser, round });
+  const { currentUser = null } = data ?? {};
+
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
     if (jssStyles && jssStyles.parentNode)
       jssStyles.parentNode.removeChild(jssStyles);
   });
 
+  // legacy modal logic
   const [modal, setModal] = useState(null);
-
   const openModal = (name) => {
     if (modal !== name) setModal(name);
   };
-
   const closeModal = () => {
     setModal(null);
   };
@@ -166,37 +107,11 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <Modal
-        active={modal}
-        closeModal={closeModal}
-        currentUser={currentUser}
-        currentGroup={currentGroup}
-      />
+      {/* legacy Modal component, use individual modals where they are called instead */}
+      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        currentGroup={currentGroup}
-        openModal={openModal}
-        round={round}
-        router={router}
-        title={
-          currentGroup
-            ? round
-              ? `${round.title} | ${currentGroup.name}`
-              : currentGroup.name
-            : round
-            ? round.title
-            : process.env.PLATFORM_NAME
-        }
-      >
-        <Component
-          {...pageProps}
-          round={round}
-          currentUser={currentUser}
-          currentGroup={currentGroup}
-          openModal={openModal}
-          router={router}
-        />
+      <Layout currentUser={currentUser} openModal={openModal}>
+        <Component {...pageProps} currentUser={currentUser} router={router} />
         <Toaster />
       </Layout>
     </>
