@@ -1,5 +1,4 @@
 import React from "react";
-import Head from "next/head";
 import Header from "./Header";
 import "../lib/beacon";
 
@@ -11,32 +10,11 @@ const LinkOut = ({ href, children }) => {
   );
 };
 
-const Layout = ({
-  children,
-  currentUser,
-  currentGroup,
-  round,
-  title,
-  openModal,
-  router,
-}) => {
+const Layout = ({ children, currentUser, openModal }) => {
   return (
     <div className="flex flex-col min-h-screen">
-      <Head>
-        <title>{title}</title>
-        <meta
-          name="viewport"
-          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
-        />
-      </Head>
       <div>
-        <Header
-          round={round}
-          currentUser={currentUser}
-          currentGroup={currentGroup}
-          openModal={openModal}
-          router={router}
-        />
+        <Header currentUser={currentUser} openModal={openModal} />
         {children}
       </div>
 
