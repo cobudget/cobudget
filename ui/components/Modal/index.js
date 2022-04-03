@@ -22,7 +22,7 @@ const modalComponents = {
   EDIT_PROFILE: EditProfile,
 };
 
-const Modal = ({ active, closeModal, currentGroup, currentUser }) => {
+const Modal = ({ active, closeModal, currentUser }) => {
   const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
