@@ -10,8 +10,8 @@ import SubMenu from "../SubMenu";
 import PageHero from "../PageHero";
 import EditableField from "../EditableField";
 
-export const ROUNDS_QUERY = gql`
-  query Rounds($groupSlug: String!) {
+export const GROUP_PAGE_QUERY = gql`
+  query GroupPage($groupSlug: String!) {
     rounds(groupSlug: $groupSlug) {
       id
       slug
@@ -22,6 +22,12 @@ export const ROUNDS_QUERY = gql`
         id
         slug
       }
+    }
+    group(groupSlug: $groupSlug) {
+      id
+      name
+      info
+      finishedTodos
     }
   }
 `;
@@ -45,22 +51,21 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
-const GroupIndex = ({ currentGroup, currentUser }) => {
+const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
   }, [router.query]);
 
-  const [{ data, error }] = useQuery({
-    query: ROUNDS_QUERY,
+  const [
+    { data: { rounds, group } = { rounds: [], group: null }, error },
+  ] = useQuery({
+    query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
 
-  console.log({ data, router, currentGroup });
-
-  const rounds = data?.rounds ?? [];
   const showTodos =
-    currentUser?.currentGroupMember?.isAdmin && !currentGroup.finishedTodos;
+    currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
 
   return (
     <>
@@ -69,10 +74,10 @@ const GroupIndex = ({ currentGroup, currentUser }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
             <EditableField
-              defaultValue={currentGroup?.info}
+              defaultValue={group?.info}
               name="info"
               label="Add message"
-              placeholder={`# Welcome to ${currentGroup?.name}'s page`}
+              placeholder={`# Welcome to ${group?.name}'s page`}
               canEdit={currentUser?.currentGroupMember?.isAdmin}
               className="h-10"
               MUTATION={gql`
@@ -83,14 +88,14 @@ const GroupIndex = ({ currentGroup, currentUser }) => {
                   }
                 }
               `}
-              variables={{ groupId: currentGroup?.id }}
+              variables={{ groupId: group?.id }}
               maxLength={500}
               required
             />
           </div>
           <div>
             {currentUser?.currentGroupMember?.isAdmin && (
-              <Link href={`/${currentGroup.slug}/new-round`}>
+              <Link href={`/${group.slug}/new-round`}>
                 <Button size="large" color="anthracit" className="float-right">
                   New round
                 </Button>
@@ -128,7 +133,7 @@ const GroupIndex = ({ currentGroup, currentUser }) => {
         </div>
         {showTodos && (
           <div className="col-span-2">
-            <TodoList currentGroup={currentGroup} />
+            <TodoList currentGroup={group} />
           </div>
         )}
       </div>

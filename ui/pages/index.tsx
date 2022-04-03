@@ -7,7 +7,9 @@ import get from "lodash/get";
 import { gql, ssrExchange, useQuery } from "urql";
 import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
-import GroupPage, { ROUNDS_QUERY } from "../components/Group";
+import GroupPage, { GROUP_PAGE_QUERY } from "../components/Group";
+
+import { HEADER_QUERY } from "components/Header";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -61,7 +63,7 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, landingPage, currentGroup }) => {
+const IndexPage = ({ currentUser, landingPage }) => {
   if (landingPage) {
     return (
       <>
@@ -71,7 +73,7 @@ const IndexPage = ({ currentUser, landingPage, currentGroup }) => {
     );
   }
 
-  return <GroupPage currentUser={currentUser} currentGroup={currentGroup} />;
+  return <GroupPage currentUser={currentUser} />;
 };
 
 export async function getStaticProps(ctx) {
@@ -104,7 +106,8 @@ export async function getStaticProps(ctx) {
 
     // This query is used to populate the cache for the query
     // used on this page.
-    await client.query(ROUNDS_QUERY, { groupSlug: "c" }).toPromise();
+    await client.query(GROUP_PAGE_QUERY, { groupSlug: "c" }).toPromise();
+    await client.query(HEADER_QUERY, { groupSlug: "c" }).toPromise();
 
     return {
       props: {
@@ -113,7 +116,6 @@ export async function getStaticProps(ctx) {
       },
       revalidate: 60,
     };
-    // get root group and get that yooo.
   }
 
   return {
