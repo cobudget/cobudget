@@ -192,16 +192,13 @@ const resolvers = {
         select: { id: true },
       });
     },
-    currentGroup: async (parent, { groupSlug }) => {
+    group: async (parent, { groupSlug }) => {
       if (!groupSlug) return null;
       if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
         return null;
 
       return prisma.group.findUnique({ where: { slug: groupSlug } });
     },
-    group: combineResolvers(isMemberOfGroup, async (parent, { groupId }) => {
-      return prisma.group.findUnique({ where: { id: groupId } });
-    }),
     groups: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.group.findMany();
     }),

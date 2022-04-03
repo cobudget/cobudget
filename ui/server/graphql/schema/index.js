@@ -7,9 +7,8 @@ const schema = gql`
   type Query {
     currentUser: User
     user(userId: ID!): User!
-    currentGroup(groupSlug: String): Group
     groups: [Group!]
-    group(groupId: ID!): Group!
+    group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
