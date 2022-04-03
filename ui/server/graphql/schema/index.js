@@ -200,9 +200,7 @@ const schema = gql`
     id: ID!
     name: String!
     info: String
-    subdomain: String
     slug: String
-    customDomain: String
     logo: String
     rounds: [Round]
     discourseUrl: String

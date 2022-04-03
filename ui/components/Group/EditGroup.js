@@ -25,7 +25,7 @@ const EDIT_GROUP = gql`
     $groupId: ID!
     $name: String!
     $logo: String
-    $slug: String!
+    $slug: String
   ) {
     editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug) {
       id
@@ -113,7 +113,7 @@ const EditGroup = ({ group, currentUser }) => {
               },
               onBlur: (e) => setSlugValue(slugify(e.target.value)),
             }}
-            helperText={errors.subdomain?.message}
+            helperText={errors.slug?.message}
             startAdornment={
               fromRealities ? (
                 <span>{process.env.REALITIES_DEPLOY_URL}/</span>

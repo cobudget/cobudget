@@ -584,8 +584,7 @@ const resolvers = {
         { user, eventHub }
       ) => {
         if (name?.length === 0) throw new Error("Group name cannot be blank");
-        if (slug?.length === 0)
-          throw new Error("Group subdomain cannot be blank");
+        if (slug?.length === 0) throw new Error("Group slug cannot be blank");
         if (info?.length > 500) throw new Error("Group info too long");
 
         const group = await prisma.group.update({
@@ -2383,7 +2382,6 @@ const resolvers = {
         ? group.info
         : `# Welcome to ${group.name}`;
     },
-    subdomain: (group) => group.slug,
     rounds: async (group, args, { user }) => {
       return await prisma.round.findMany({
         where: {

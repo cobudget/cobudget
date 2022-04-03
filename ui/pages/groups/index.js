@@ -9,8 +9,7 @@ export const GROUPS_QUERY = gql`
       id
       name
       logo
-      subdomain
-      customDomain
+      slug
     }
   }
 `;
