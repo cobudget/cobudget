@@ -15,7 +15,8 @@ const RoundMembersPage = ({ round, currentUser }) => {
         <PageHero>
           <div className="flex justify-between">
             <h2 className="text-2xl font-semibold">
-              You need to be a participant of this round to see the participant list.
+              You need to be a participant in this round to see the participant
+              list.
             </h2>
           </div>
         </PageHero>
