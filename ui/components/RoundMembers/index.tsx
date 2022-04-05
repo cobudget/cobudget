@@ -90,6 +90,9 @@ const DELETE_MEMBER = gql`
   mutation DeleteMember($memberId: ID!, $roundId: ID!) {
     deleteMember(memberId: $memberId, roundId: $roundId) {
       id
+      user {
+        id
+      }
     }
   }
 `;
@@ -128,10 +131,7 @@ const RoundMembers = ({ round, currentUser }) => {
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
-  const [
-    { fetching: deleteMemberLoading, data: deleteMemberResponse },
-    deleteMember,
-  ] = useMutation(DELETE_MEMBER);
+  const [, deleteMember] = useMutation(DELETE_MEMBER);
 
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
