@@ -1,12 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AuthenticationForm from "../components/AuthenticationForm";
 import toast, { Toaster } from "react-hot-toast";
 
-function Login() {
+function Login({ fbLoginEnabled, googleLoginEnabled }) {
+  const [fbEmailError, setFbEmailError] = useState(false);
 
   useEffect(() => {
     if (window.location.href.indexOf("err=INVALID_TOKEN") > -1) {
       toast.error("The magic link is invalid. Please login again.");
+    }
+    if (window.location.href.indexOf("err=FACEBOOK_NO_EMAIL") > -1) {
+      setFbEmailError(true);
     }
   }, []);
 
@@ -18,10 +22,27 @@ function Login() {
       </h1>
 
       <div className="max-w-sm bg-white mx-auto my-6 p-6 shadow rounded">
-        <AuthenticationForm />
+        <AuthenticationForm
+          fbLoginEnabled={fbLoginEnabled}
+          fbEmailError={fbEmailError}
+          googleLoginEnabled={googleLoginEnabled}
+        />
       </div>
     </div>
   );
 }
 
 export default Login;
+
+export async function getStaticProps() {
+  //getStaticProps is only serverside (build time) so this is safe
+  const fbLoginEnabled = !!(
+    process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET
+  );
+
+  const googleLoginEnabled = !!(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+  );
+
+  return { props: { fbLoginEnabled, googleLoginEnabled } };
+}

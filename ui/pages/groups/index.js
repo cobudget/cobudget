@@ -25,11 +25,7 @@ const DELETE_GROUP = gql`
 
 export default () => {
   const [
-    {
-      data: { groups } = { groups: [] },
-      fetching: loading,
-      error,
-    },
+    { data: { groups } = { groups: [] }, fetching: loading, error },
   ] = useQuery({ query: GROUPS_QUERY });
 
   const [, deleteGroup] = useMutation(
@@ -51,10 +47,7 @@ export default () => {
   );
 
   const updateGroup = async ({ groupId }) => {
-    Router.push(
-      "/groups/[group]/edit",
-      `/groups/${groupId}/edit`
-    );
+    Router.push("/groups/[group]/edit", `/groups/${groupId}/edit`);
   };
 
   if (error) {

@@ -24,7 +24,9 @@ export default function FinishSignup({ isOpen, currentUser }) {
       <Dialog
         as="div"
         className="fixed inset-0 z-30 overflow-y-auto"
-        onClose={() => {}}
+        onClose={() => {
+          return;
+        }}
       >
         <div className="min-h-screen px-4 text-center">
           <Transition.Child
