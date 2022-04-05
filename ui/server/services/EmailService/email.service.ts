@@ -62,13 +62,17 @@ export default {
       where: { id: roundMember.userId },
     });
 
-    const roundLink = appLink(`/${round.slug}`);
+    const group = await prisma.group.findFirst({
+      where: { rounds: { some: { id: round.id } } },
+    });
+
+    const roundLink = appLink(`/${group.slug}/${round.slug}`);
 
     const adminEmails: SendEmailInput[] = admins.map((admin) => ({
       to: admin.user.email,
       subject: `Someone wants to join ${round.title}`,
       html: `${escape(
-        user.username
+        user.name
       )} has requested to join <a href="${roundLink}">${escape(
         round.title
       )}</a>:

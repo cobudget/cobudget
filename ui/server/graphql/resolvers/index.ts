@@ -2180,7 +2180,7 @@ const resolvers = {
       });
 
       if (!isApproved) {
-        emailService.roundJoinRequest({
+        await emailService.roundJoinRequest({
           round,
           roundMember,
         });
