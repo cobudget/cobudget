@@ -313,8 +313,6 @@ const schema = gql`
     groupMemberships: [GroupMember!]
     roundMemberships: [RoundMember!]
     avatar: String
-    facebookId: String
-    googleId: String
     createdAt: Date
     currentGroupMember(groupSlug: String): GroupMember
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
