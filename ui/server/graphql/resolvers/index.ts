@@ -93,7 +93,7 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
 
   if (!(roundMember?.isApproved || groupMember?.isAdmin))
     throw new Error(
-      "You need to be approved member of this round or group admin to view round members"
+      "You need to be approved participant in this round or group admin to view round participant"
     );
   return skip;
 };
@@ -2129,7 +2129,7 @@ const resolvers = {
       });
 
       if (!member) {
-        throw new Error("You are not a member of this round");
+        throw new Error("You are not a participant in this round");
       }
 
       if (member.hasJoined) {
