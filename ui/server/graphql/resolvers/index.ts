@@ -93,7 +93,7 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
 
   if (!(roundMember?.isApproved || groupMember?.isAdmin))
     throw new Error(
-      "You need to be approved member of this round or group admin to view round members"
+      "You need to be an approved participant in this round or a group admin to view round participants"
     );
   return skip;
 };
@@ -1745,7 +1745,9 @@ const resolvers = {
           throw new Error("This member does not exist in this collection");
 
         if ((await roundMemberBalance(roundMember)) !== 0) {
-          throw new Error("You can only remove a round member with 0 balance");
+          throw new Error(
+            "You can only remove a round participant with 0 balance"
+          );
         }
 
         return prisma.roundMember.update({
@@ -2129,7 +2131,7 @@ const resolvers = {
       });
 
       if (!member) {
-        throw new Error("You are not a member of this round");
+        throw new Error("You are not a participant in this round");
       }
 
       if (member.hasJoined) {

@@ -90,33 +90,16 @@ const DELETE_MEMBER = gql`
   mutation DeleteMember($memberId: ID!, $roundId: ID!) {
     deleteMember(memberId: $memberId, roundId: $roundId) {
       id
+      user {
+        id
+      }
     }
   }
 `;
 
 const RoundMembers = ({ round, currentUser }) => {
   const [searchString, setSearchString] = useState("");
-  const [
-    {
-      data: {
-        approvedMembersPage: { moreExist, approvedMembers } = {
-          moreExist: false,
-          approvedMembers: [],
-        },
-        requestsToJoinPage,
-      } = {
-        approvedMembersPage: {
-          approvedMembers: [],
-        },
-        requestsToJoinPage: {
-          requestsToJoin: [],
-        },
-      },
-      fetching: loading,
-      error,
-    },
-    searchApprovedMembers,
-  ] = useQuery({
+  const [{ data, fetching: loading, error }, searchApprovedMembers] = useQuery({
     query: ROUND_MEMBERS_QUERY,
     variables: {
       roundId: round.id,
@@ -127,16 +110,20 @@ const RoundMembers = ({ round, currentUser }) => {
     pause: true,
   });
 
+  const moreExist = data?.approvedMembersPage?.moreExist || false;
+  const requestsToJoin = data?.requestsToJoinPage?.requestsToJoin || [];
+
   const debouncedSearchMembers = useMemo(() => {
     return debounce(searchApprovedMembers, 300, { leading: true });
   }, [searchApprovedMembers]);
 
   const items = useMemo(() => {
+    const approvedMembers = data?.approvedMembersPage?.approvedMembers || [];
     if (loading || !approvedMembers) {
       return [];
     }
     return approvedMembers;
-  }, [approvedMembers, loading]);
+  }, [data?.approvedMembersPage?.approvedMembers, loading]);
 
   useEffect(() => {
     debouncedSearchMembers();
@@ -160,9 +147,9 @@ const RoundMembers = ({ round, currentUser }) => {
   return (
     <>
       <div className="page">
-        {requestsToJoinPage && (
+        {requestsToJoin.length > 0 && (
           <RequestsToJoinTable
-            requestsToJoin={requestsToJoinPage.requestsToJoin}
+            requestsToJoin={requestsToJoin}
             updateMember={updateMember}
             deleteMember={deleteMember}
             round={round}
