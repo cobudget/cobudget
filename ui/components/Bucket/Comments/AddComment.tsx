@@ -17,13 +17,7 @@ const schema = yup.object().shape({
 function AddComment() {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<any>();
-  const {
-    addComment,
-    bucketId,
-    round,
-    currentGroup,
-    currentUser,
-  } = useContext<any>(Context);
+  const { addComment, currentUser, bucket } = useContext<any>(Context);
 
   const { handleSubmit, register, errors, setValue, watch } = useForm({
     resolver: yupResolver(schema),
@@ -35,12 +29,12 @@ function AddComment() {
   }, [register]);
 
   if (
-    currentGroup?.discourseUrl &&
+    bucket.round.group?.discourseUrl &&
     !currentUser.currentGroupMember?.hasDiscourseApiKey
   ) {
     return (
       <Link href={"/connect-discourse"} passHref>
-        <Button color={round.color} nextJsLink className="my-2">
+        <Button color={bucket.round.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
       </Link>
@@ -51,7 +45,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit((vars) => {
         setSubmitting(true);
-        addComment({ bucketId, ...vars })
+        addComment({ bucketId: bucket.id, ...vars })
           .then(({ error }) => {
             if (error) return toast.error(error.message);
             inputRef.current.blur();
@@ -78,10 +72,10 @@ function AddComment() {
               inputRef={(e) => {
                 inputRef.current = e;
               }}
-              color={round.color}
+              color={bucket.round.color}
               wysiwyg
               enableMentions
-              mentionsCollId={round.id}
+              mentionsCollId={bucket.round.id}
             />
           </div>
           {content.length > 0 && (
@@ -89,7 +83,7 @@ function AddComment() {
               <Button
                 onClick={inputRef.current.clear}
                 variant="secondary"
-                color={round.color}
+                color={bucket.round.color}
                 className="mr-2"
               >
                 Cancel
@@ -97,7 +91,7 @@ function AddComment() {
               <Button
                 type="submit"
                 disabled={content.length === 0}
-                color={round.color}
+                color={bucket.round.color}
                 loading={submitting}
               >
                 Submit

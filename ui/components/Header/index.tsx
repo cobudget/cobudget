@@ -99,6 +99,7 @@ export const HEADER_QUERY = gql`
       slug
       title
       color
+      registrationPolicy
     }
     group(groupSlug: $groupSlug) {
       id

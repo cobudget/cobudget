@@ -1,7 +1,7 @@
 import GroupMembers from "../../components/Group/GroupMembers";
 import SubMenu from "../../components/SubMenu";
 
-const GroupMembersPage = ({ currentUser, currentGroup }) => {
+const GroupMembersPage = ({ currentUser }) => {
   const isAdmin = currentUser?.currentGroupMember?.isAdmin;
   if (!isAdmin) return null;
 
@@ -10,7 +10,7 @@ const GroupMembersPage = ({ currentUser, currentGroup }) => {
       <SubMenu currentUser={currentUser} />
 
       <div className="page">
-        <GroupMembers currentGroup={currentGroup} />
+        <GroupMembers />
       </div>
     </>
   );

@@ -246,7 +246,7 @@ const resolvers = {
       const round = await prisma.round.findFirst({
         where: {
           slug: roundSlug,
-          group: { slug: groupSlug },
+          group: { slug: groupSlug ?? "c" },
           deleted: { not: true },
         },
       });
@@ -285,7 +285,6 @@ const resolvers = {
         };
       }
     ),
-    //here
     roundTransactions: combineResolvers(
       isCollMemberOrGroupAdmin,
       async (parent, { roundId, offset, limit }) => {
@@ -337,15 +336,21 @@ const resolvers = {
     },
     bucketsPage: async (
       parent,
-      { roundId, textSearchTerm, tag: tagValue, offset = 0, limit, status },
+      {
+        roundSlug,
+        groupSlug,
+        textSearchTerm,
+        tag: tagValue,
+        offset = 0,
+        limit,
+        status,
+      },
       { user }
     ) => {
-      const currentMember = await prisma.roundMember.findUnique({
+      const currentMember = await prisma.roundMember.findFirst({
         where: {
-          userId_roundId: {
-            userId: user?.id ?? "undefined",
-            roundId,
-          },
+          userId: user?.id ?? "undefined",
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
         },
       });
 
@@ -356,7 +361,7 @@ const resolvers = {
 
       const buckets = await prisma.bucket.findMany({
         where: {
-          roundId,
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
           deleted: { not: true },
           OR: statusFilter,
           ...(textSearchTerm && { title: { search: textSearchTerm } }),
@@ -631,7 +636,6 @@ const resolvers = {
               data: { slug: "c", name: "Root" },
             });
           }
-          groupId = rootGroup.id;
           singleRound = true;
         }
         const round = await prisma.round.create({

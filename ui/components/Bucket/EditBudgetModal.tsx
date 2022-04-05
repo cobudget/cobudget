@@ -46,10 +46,8 @@ const schema = yup.object().shape({
 });
 
 const EditBudgetModal = ({
-  bucketId,
+  bucket,
   budgetItems,
-  round,
-  currentGroup,
   currency,
   allowStretchGoals,
   handleClose,
@@ -82,7 +80,7 @@ const EditBudgetModal = ({
         <form
           onSubmit={handleSubmit((variables) => {
             editBucket({
-              bucketId,
+              bucketId: bucket.id,
               budgetItems: [
                 ...(variables.budgetItems?.map((item) => ({
                   ...item,
@@ -122,10 +120,12 @@ const EditBudgetModal = ({
                   <TextField
                     placeholder={allowStretchGoals ? "Min amount" : "Amount"}
                     name={`budgetItems[${index}].min`}
-                    defaultValue={typeof min !== "undefined" ? min / 100 : null}
+                    defaultValue={
+                      typeof min !== "undefined" ? String(min / 100) : null
+                    }
                     inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
-                    endAdornment={<span>{currency}</span>}
+                    endAdornment={currency}
                   />
                 </div>
 
@@ -137,11 +137,11 @@ const EditBudgetModal = ({
                       defaultValue={
                         typeof max === "undefined" || max === null
                           ? null
-                          : max / 100
+                          : String(max / 100)
                       }
                       inputProps={{ type: "number", min: 0 }}
                       inputRef={register()}
-                      endAdornment={<span>{currency}</span>}
+                      endAdornment={currency}
                     />
                   </div>
                 )}
@@ -156,7 +156,7 @@ const EditBudgetModal = ({
           <div className="flex mb-4">
             <Button
               variant="secondary"
-              color={round.color}
+              color={bucket.round.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
@@ -191,10 +191,12 @@ const EditBudgetModal = ({
                   <TextField
                     placeholder={"Amount"}
                     name={`budgetItems[${index}].min`}
-                    defaultValue={typeof min !== "undefined" ? min / 100 : null}
+                    defaultValue={
+                      typeof min !== "undefined" ? String(min / 100) : null
+                    }
                     inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
-                    endAdornment={<span>{currency}</span>}
+                    endAdornment={currency}
                   />
                 </div>
 
@@ -209,7 +211,7 @@ const EditBudgetModal = ({
           <div className="flex mb-2">
             <Button
               variant="secondary"
-              color={round.color}
+              color={bucket.round.color}
               onClick={() =>
                 insert(fields.filter((f) => f.type === "INCOME").length, {
                   type: "INCOME",
@@ -227,10 +229,10 @@ const EditBudgetModal = ({
 
           <div className="flex justify-between items-center">
             <div className="pl-4">
-              {Boolean(round.guidelines.length) && (
+              {Boolean(bucket.round.guidelines.length) && (
                 <a
-                  href={`/${currentGroup?.slug ?? "c"}/${
-                    round.slug
+                  href={`/${bucket.round.group?.slug ?? "c"}/${
+                    bucket.round.slug
                   }/about#guidelines`}
                   target="_blank"
                   rel="noreferrer"

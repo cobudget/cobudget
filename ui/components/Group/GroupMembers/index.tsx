@@ -27,7 +27,7 @@ const DELETE_GROUP_MEMBER = gql`
   }
 `;
 
-const GroupMembers = ({ currentGroup }) => {
+const GroupMembers = ({}) => {
   const [, updateGroupMember] = useMutation(UPDATE_GROUP_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [, deleteGroupMember] = useMutation(DELETE_GROUP_MEMBER);
@@ -42,7 +42,7 @@ const GroupMembers = ({ currentGroup }) => {
           </Button>
           {inviteModalOpen && (
             <InviteMembersModal
-              currentGroup={currentGroup}
+              currentGroup={currentGroup} // it needs groupId (or could rewrite the mutation to use groupSlug)
               handleClose={() => setInviteModalOpen(false)}
             />
           )}
@@ -52,7 +52,7 @@ const GroupMembers = ({ currentGroup }) => {
       <GroupMembersTable
         updateGroupMember={updateGroupMember}
         deleteGroupMember={deleteGroupMember}
-        currentGroup={currentGroup}
+        currentGroup={currentGroup} // it needs groupId (or could rewrite the query to use groupSlug)
       />
     </div>
   );

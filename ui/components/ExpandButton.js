@@ -1,6 +1,6 @@
 import { CheveronDownIcon, CheveronUpIcon } from "./Icons";
 
-const ExpandButton = ({ expanded, setExpanded, className }) => {
+const ExpandButton = ({ expanded, setExpanded, className = "" }) => {
   return (
     <div
       className={`block ${

@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
 
-export const CURRENT_USER_QUERY = gql`
-  query CurrentUser($roundSlug: String, $groupSlug: String) {
+export const TOP_LEVEL_QUERY = gql`
+  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
     currentUser {
       id
       username
@@ -66,13 +66,67 @@ export const CURRENT_USER_QUERY = gql`
         hasDiscourseApiKey
       }
     }
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
+      id
+      slug
+      info
+      title
+      archived
+      color
+      currency
+      registrationPolicy
+      visibility
+      maxAmountToBucketPerUser
+      bucketCreationCloses
+      bucketCreationIsOpen
+      grantingOpens
+      grantingCloses
+      grantingIsOpen
+      numberOfApprovedMembers
+      about
+      tags {
+        id
+        value
+      }
+      allowStretchGoals
+      requireBucketApproval
+      bucketReviewIsOpen
+      discourseCategoryId
+      totalInMembersBalances
+      guidelines {
+        id
+        title
+        description
+        position
+      }
+      customFields {
+        id
+        name
+        description
+        type
+        limit
+        isRequired
+        position
+        createdAt
+      }
+    }
+    group(groupSlug: $groupSlug) {
+      __typename
+      id
+      name
+      info
+      logo
+      slug
+      discourseUrl
+      finishedTodos
+    }
   }
 `;
 
 const MyApp = ({ Component, pageProps }) => {
   const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
-    query: CURRENT_USER_QUERY,
+    query: TOP_LEVEL_QUERY,
     variables: {
       groupSlug:
         process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
@@ -81,7 +135,7 @@ const MyApp = ({ Component, pageProps }) => {
     pause: !router.isReady,
   });
 
-  const { currentUser = null } = data ?? {};
+  const { currentUser = null, round = null, group = null } = data ?? {};
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -111,7 +165,13 @@ const MyApp = ({ Component, pageProps }) => {
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout currentUser={currentUser} openModal={openModal}>
-        <Component {...pageProps} currentUser={currentUser} router={router} />
+        <Component
+          {...pageProps}
+          currentUser={currentUser}
+          router={router}
+          round={round}
+          currentGroup={group}
+        />
         <Toaster />
       </Layout>
     </>

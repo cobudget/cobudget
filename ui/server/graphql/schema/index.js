@@ -13,7 +13,8 @@ const schema = gql`
     round(groupSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
     bucketsPage(
-      roundId: ID!
+      groupSlug: String
+      roundSlug: String!
       textSearchTerm: String
       tag: String
       offset: Int

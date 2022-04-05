@@ -10,6 +10,7 @@ import Monster from "components/Monster";
 
 import classNames from "utils/classNames";
 import HappySpinner from "components/HappySpinner";
+import { useRouter } from "next/router";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -34,6 +35,32 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+      round {
+        id
+        slug
+        color
+        currency
+        allowStretchGoals
+        bucketReviewIsOpen
+        requireBucketApproval
+        grantingIsOpen
+        grantingHasClosed
+        maxAmountToBucketPerUser
+        guidelines {
+          id
+          title
+          description
+        }
+        tags {
+          id
+          value
+        }
+        group {
+          id
+          slug
+          discourseUrl
+        }
+      }
       funders {
         id
         amount
@@ -101,7 +128,8 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
+const BucketIndex = ({ currentUser }) => {
+  const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
@@ -110,8 +138,8 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
   const { bucket } = data ?? { bucket: null };
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
-    round.bucketReviewIsOpen &&
-    round.guidelines.length > 0 &&
+    bucket.round?.bucketReviewIsOpen &&
+    bucket.round?.guidelines.length > 0 &&
     bucket?.published;
 
   if (fetching && !bucket) {
@@ -122,7 +150,7 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
     );
   }
 
-  if (!bucket || !round)
+  if (!bucket || !bucket.round)
     return (
       <div className="text-center mt-7">
         This bucket either doesn&apos;t exist or you don&apos;t have access to
@@ -144,8 +172,6 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
         fetching={fetching}
         error={error}
         currentUser={currentUser}
-        currentGroup={currentGroup}
-        round={round}
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
@@ -196,9 +222,7 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
           <Tab.Panel>
             <Bucket
               bucket={bucket}
-              round={round}
               currentUser={currentUser}
-              currentGroup={currentGroup}
               openImageModal={() => setEditImagesModalOpen(true)}
             />
           </Tab.Panel>
@@ -206,13 +230,11 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
             <Comments
               bucket={bucket}
               router={router}
-              round={round}
               currentUser={currentUser}
-              currentGroup={currentGroup}
             />
           </Tab.Panel>
           <Tab.Panel>
-            <Funders bucket={bucket} round={round} currentUser={currentUser} />
+            <Funders bucket={bucket} currentUser={currentUser} />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

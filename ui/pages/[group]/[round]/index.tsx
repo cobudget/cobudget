@@ -29,6 +29,10 @@ export const ROUND_QUERY = gql`
         id
         value
       }
+      group {
+        id
+        slug
+      }
       bucketStatusCount {
         PENDING_APPROVAL
         OPEN_FOR_FUNDING
@@ -42,7 +46,8 @@ export const ROUND_QUERY = gql`
 
 export const BUCKETS_QUERY = gql`
   query Buckets(
-    $roundId: ID!
+    $groupSlug: String
+    $roundSlug: String!
     $textSearchTerm: String
     $tag: String
     $offset: Int
@@ -50,7 +55,8 @@ export const BUCKETS_QUERY = gql`
     $status: [StatusType!]
   ) {
     bucketsPage(
-      roundId: $roundId
+      groupSlug: $groupSlug
+      roundSlug: $roundSlug
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
@@ -101,7 +107,6 @@ const Page = ({
   onLoadMore,
   router,
   round,
-  group,
   statusFilter,
 }) => {
   const { tag, s } = router.query;
@@ -109,7 +114,8 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
-      roundId: round?.id,
+      groupSlug: router.query.group,
+      roundSlug: router.query.round,
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
@@ -130,7 +136,7 @@ const Page = ({
     <>
       {buckets.map((bucket) => (
         <Link
-          href={`/${group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
+          href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
@@ -210,7 +216,7 @@ const getStandardFilter = (bucketStatusCount) => {
   return stdFilter;
 };
 
-const RoundPage = ({ currentGroup, currentUser }) => {
+const RoundPage = ({ currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
@@ -334,7 +340,7 @@ const RoundPage = ({ currentGroup, currentUser }) => {
                     <NewBucketModal
                       round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
-                      currentGroup={currentGroup}
+                      router={router}
                     />
                   )}
                 </>
@@ -346,7 +352,6 @@ const RoundPage = ({ currentGroup, currentUser }) => {
       <div className="page flex-1">
         <Filterbar
           round={round}
-          currentGroup={currentGroup}
           textSearchTerm={s}
           tag={tag}
           statusFilter={statusFilter}
@@ -356,7 +361,6 @@ const RoundPage = ({ currentGroup, currentUser }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
-                group={currentGroup}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}

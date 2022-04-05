@@ -1,7 +1,7 @@
 import GroupPage from "../../components/Group";
 
-const IndexPage = ({ currentGroup, currentUser }) => {
-  return <GroupPage currentUser={currentUser} currentGroup={currentGroup} />;
+const IndexPage = ({ currentUser }) => {
+  return <GroupPage currentUser={currentUser} />;
 };
 
 export default IndexPage;

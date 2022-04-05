@@ -6,6 +6,7 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
+import RoundSettingsModalGranting from "./Granting";
 
 const defaultTabs = [
   { name: "General", component: GeneralSettings },
@@ -16,15 +17,15 @@ const defaultTabs = [
   { name: "Tags", component: Tags },
 ];
 
-const RoundSettings = ({ round, currentGroup, currentUser }) => {
+const RoundSettings = ({ round, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const tabs = useMemo(
     () =>
-      currentGroup?.discourseUrl
+      round.group?.discourseUrl
         ? defaultTabs.concat({ name: "Discourse", component: Discourse })
         : defaultTabs,
-    [currentGroup?.discourseUrl]
+    [round.group?.discourseUrl]
   );
 
   const SettingsComponent = tabs[selectedTab].component;
@@ -50,8 +51,7 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
             round={round}
-            handleClose={handleClose}
-            currentGroup={currentGroup}
+            currentGroup={round.group}
             currentUser={currentUser}
           />
         </div>

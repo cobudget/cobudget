@@ -4,15 +4,13 @@ import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
-const Comments = ({ currentUser, currentGroup, bucket, round, router }) => {
+const Comments = ({ currentUser, bucket, router }) => {
   const context = useCommentContext({
     from: 0,
     limit: 10,
     order: "desc",
-    currentGroup,
     currentUser,
-    round,
-    bucketId: router.query.bucket,
+    bucket,
   });
   const { comments, setFrom, limit, total, loading } = context;
 
