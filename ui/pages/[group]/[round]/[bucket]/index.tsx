@@ -138,8 +138,8 @@ const BucketIndex = ({ currentUser }) => {
   const { bucket } = data ?? { bucket: null };
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
-    bucket.round?.bucketReviewIsOpen &&
-    bucket.round?.guidelines.length > 0 &&
+    bucket?.round?.bucketReviewIsOpen &&
+    bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
 
   if (fetching && !bucket) {
