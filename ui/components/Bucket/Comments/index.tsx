@@ -4,18 +4,19 @@ import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
-const Comments = ({ currentUser, currentOrg, bucket, collection, router }) => {
-  if (!bucket) return null;
+const Comments = ({ currentUser, currentGroup, bucket, round, router }) => {
   const context = useCommentContext({
     from: 0,
     limit: 10,
     order: "desc",
-    currentOrg,
+    currentGroup,
     currentUser,
-    collection,
+    round,
     bucketId: router.query.bucket,
   });
   const { comments, setFrom, limit, total, loading } = context;
+
+  if (!bucket) return null;
 
   return (
     <div className="bg-white border-b-default">
@@ -62,7 +63,7 @@ const Comments = ({ currentUser, currentOrg, bucket, collection, router }) => {
                 />
               );
             })}
-            {currentUser?.currentCollMember && <AddComment />}
+            {currentUser?.currentCollMember?.isApproved && <AddComment />}
           </Context.Provider>
         </div>
       </div>

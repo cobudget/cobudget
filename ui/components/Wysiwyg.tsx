@@ -116,13 +116,9 @@ const EditorCss = styled.div`
 `;
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
-  query SearchMentionMembers($collectionId: ID!, $search: String!) {
-    membersPage(
-      collectionId: $collectionId
-      isApproved: true
-      search: $search
-    ) {
-      members(collectionId: $collectionId, isApproved: true, search: $search) {
+  query SearchMentionMembers($roundId: ID!, $search: String!) {
+    membersPage(roundId: $roundId, isApproved: true, search: $search) {
+      members(roundId: $roundId, isApproved: true, search: $search) {
         id
         user {
           id
@@ -133,7 +129,7 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
   }
 `;
 
-function MentionComponent({ collectionId }) {
+function MentionComponent({ roundId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
 
   const searchString = mentionState?.query.full.toLowerCase() ?? "";
@@ -142,7 +138,7 @@ function MentionComponent({ collectionId }) {
   const [{ fetching, data }, searchMembers] = useQuery({
     query: SEARCH_MENTION_MEMBERS_QUERY,
     variables: {
-      collectionId,
+      roundId,
       search: searchString,
     },
     pause: true,
@@ -339,7 +335,7 @@ const Wysiwyg = ({
        */
       new HardBreakExtension(),
     ],
-    [placeholder]
+    [placeholder, enableMentions]
   );
 
   const { manager, getContext } = useRemirror({
@@ -383,11 +379,11 @@ const Wysiwyg = ({
       fileUploadFileHandler(Array.from(filePicker.current.files));
     };
 
+    const _filePicker = filePicker.current;
     filePicker.current.addEventListener("change", detectFileUpload);
 
-    return () =>
-      filePicker.current?.removeEventListener("change", detectFileUpload);
-  }, [filePicker]);
+    return () => _filePicker?.removeEventListener("change", detectFileUpload);
+  }, [filePicker, fileUploadFileHandler]);
 
   const toolbarItems = useCallback(
     (): ToolbarItemUnion[] => [
@@ -523,7 +519,7 @@ const Wysiwyg = ({
         separator: "none",
       },
     ],
-    [filePicker]
+    []
   );
 
   return (
@@ -559,9 +555,7 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
-            {enableMentions && (
-              <MentionComponent collectionId={mentionsCollId} />
-            )}
+            {enableMentions && <MentionComponent roundId={mentionsCollId} />}
           </Remirror>
         </EditorCss>
       </ThemeProvider>

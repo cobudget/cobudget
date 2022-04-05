@@ -14,13 +14,15 @@ import rehypeStringify from "rehype-stringify";
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
-import { orgHasDiscourse } from "server/subscribers/discourse.subscriber";
+import subscibers from "server/subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
 import { tailwindHsl } from "utils/colors";
+
+const { groupHasDiscourse } = subscibers;
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
@@ -53,18 +55,18 @@ export default {
   inviteMember: async ({
     email,
     currentUser,
-    collection,
-    currentOrg,
+    round,
+    currentGroup,
   }: {
     email: string;
     currentUser: { name: string };
-    collection?: {
+    round?: {
       title: string;
       slug: string;
       info?: string;
-      organization: { slug: string };
+      group: { slug: string };
     };
-    currentOrg?: { slug: string; name: string; info?: string };
+    currentGroup?: { slug: string; name: string; info?: string };
   }) => {
     const invitedUser = await prisma.user.findUnique({
       where: {
@@ -73,24 +75,22 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentOrg?.slug ?? collection.organization.slug}/${
-        collection?.slug ?? ""
-      }`
+      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
     );
 
-    const orgCollName = currentOrg?.name ?? collection.title;
+    const groupCollName = currentGroup?.name ?? round.title;
 
-    const mdPurpose = currentOrg?.info ?? collection?.info ?? "";
+    const mdPurpose = currentGroup?.info ?? round?.info ?? "";
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
     await sendEmail({
       to: email,
-      subject: `${currentUser.name} invited you to join "${orgCollName}" on Cobudget!`,
+      subject: `${currentUser.name} invited you to join "${groupCollName}" on Cobudget!`,
       html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
-        orgCollName
+        groupCollName
       )} on Cobudget.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
       ${
@@ -142,7 +142,7 @@ export default {
       where: { email: newUser.email },
       include: {
         collMemberships: {
-          include: { collection: { include: { organization: true } } },
+          include: { round: { include: { group: true } } },
         },
       },
     });
@@ -150,18 +150,18 @@ export default {
     const createYourFirst =
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
-            `/${collMemberships[0].collection.organization.slug}/${collMemberships[0].collection.slug}`
+            `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
           )}">create your first Bucket</a>!`
         : `Jump right in and <a href="${appLink(
-            "/new-collection"
-          )}">create your first Collection</a>!`;
+            "/new-round"
+          )}">create your first Round</a>!`;
 
     await sendEmail({
       to: newUser.email,
       subject: "Welcome to Cobudget!",
       html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
       <br/><br/>
-      Since 2014 we’ve been on a path to change the ways organizations and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
+      Since 2014 we’ve been on a path to change the ways groups and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
       <br/><br/>
       We are thrilled to have you with us!
       <br/><br/>
@@ -178,15 +178,15 @@ export default {
       </ul>
       <br/>
       Ready to invite others to co-create and fund projects with you? <a href="${appLink(
-        "/new-collection"
-      )}">Create a Collection</a>!
+        "/new-round"
+      )}">Create a Round</a>!
       `,
     });
   },
   sendCommentNotification: async ({
-    dream,
-    event,
-    currentOrg,
+    bucket,
+    round,
+    currentGroup,
     currentCollMember,
     currentUser,
     comment,
@@ -231,18 +231,20 @@ export default {
         (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
       );
 
-    const bucketLink = appLink(`/${currentOrg.slug}/${event.slug}/${dream.id}`);
+    const bucketLink = appLink(
+      `/${currentGroup.slug}/${round.slug}/${bucket.id}`
+    );
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
     const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
       (mentionedUser) => ({
         to: mentionedUser.email,
-        subject: `You were mentioned in a comment in the bucket ${dream.title}`,
+        subject: `You were mentioned in a comment in the bucket ${bucket.title}`,
         html: `${escape(
           currentUser.name
         )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
-          dream.title
+          bucket.title
         )}</a>:
         <br/><br/>
         ${commentAsHtml}
@@ -255,14 +257,12 @@ export default {
     await sendEmails(mentionEmails);
 
     const cocreatorsToEmail = (
-      await prisma.collectionMember.findMany({
-        where: { buckets: { some: { id: dream.id } } },
+      await prisma.roundMember.findMany({
+        where: { buckets: { some: { id: bucket.id } } },
         include: { user: { include: { emailSettings: true } } },
       })
     )
-      .filter(
-        (collectionMember) => collectionMember.id !== currentCollMember.id
-      )
+      .filter((roundMember) => roundMember.id !== currentCollMember.id)
       .filter(
         (roundMember) =>
           roundMember.user.emailSettings?.commentBecauseCocreator ?? true
@@ -277,12 +277,12 @@ export default {
             .includes(cocreatorCollMember.user.id)
       )
       .map(
-        (collectionMember): SendEmailInput => ({
-          to: collectionMember.user.email,
-          subject: `New comment by ${currentUser.name} in your bucket ${dream.title}`,
-          html: `Hey ${escape(collectionMember.user.name)}!
+        (roundMember): SendEmailInput => ({
+          to: roundMember.user.email,
+          subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
+          html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
-          Your bucket “${escape(dream.title)}” received a new comment.
+          Your bucket “${escape(bucket.title)}” received a new comment.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -295,9 +295,9 @@ export default {
 
     await sendEmails(cocreatorEmails);
 
-    if (!orgHasDiscourse(currentOrg)) {
+    if (!groupHasDiscourse(currentGroup)) {
       const comments = await prisma.comment.findMany({
-        where: { bucketId: dream.id },
+        where: { bucketId: bucket.id },
         include: {
           collMember: {
             include: {
@@ -334,11 +334,11 @@ export default {
 
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
-        subject: `New comment by ${currentUser.name} in bucket ${dream.title}`,
+        subject: `New comment by ${currentUser.name} in bucket ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
-            dream.title
+            bucket.title
           )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
           ${commentAsHtml}
@@ -350,35 +350,35 @@ export default {
     }
   },
   allocateToMemberNotification: async ({
-    collectionMemberId,
-    collectionId,
+    roundMemberId,
+    roundId,
     oldAmount,
     newAmount,
   }) => {
     if (newAmount <= oldAmount) return;
 
-    const { user } = await prisma.collectionMember.findUnique({
-      where: { id: collectionMemberId },
+    const { user } = await prisma.roundMember.findUnique({
+      where: { id: roundMemberId },
       include: { user: { include: { emailSettings: true } } },
     });
-    const collection = await prisma.collection.findUnique({
-      where: { id: collectionId },
-      include: { organization: true },
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
     });
-    const org = collection.organization;
+    const group = round.group;
 
     if (!(user.emailSettings?.allocatedToYou ?? true)) return null;
 
     await sendEmail({
       to: user.email,
-      subject: `${user.name}, you’ve received funds to spend in ${collection.title}!`,
+      subject: `${user.name}, you’ve received funds to spend in ${round.title}!`,
       html: `You have received ${(newAmount - oldAmount) / 100} ${
-        collection.currency
-      } in ${escape(collection.title)}.
+        round.currency
+      } in ${escape(round.title)}.
       <br/><br/>
       Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
-        `/${org.slug}/${collection.slug}`
-      )}">${escape(collection.title)}</a>.
+        `/${group.slug}/${round.slug}`
+      )}">${escape(round.title)}</a>.
       <br/><br/>
       ${footer}
       `,
@@ -388,12 +388,12 @@ export default {
     bucket,
   }: {
     bucket: Prisma.BucketCreateInput & {
-      collection: Prisma.CollectionCreateInput & {
-        organization: Prisma.OrganizationCreateInput;
+      round: Prisma.RoundCreateInput & {
+        group: Prisma.GroupCreateInput;
       };
       Contributions: Array<
         Prisma.ContributionCreateInput & {
-          collectionMember: Prisma.CollectionMemberCreateInput & {
+          roundMember: Prisma.RoundMemberCreateInput & {
             user: Prisma.UserCreateInput & {
               emailSettings: Prisma.EmailSettingsCreateInput;
             };
@@ -404,7 +404,7 @@ export default {
   }) => {
     const refundedCollMembersToEmail = uniqBy(
       bucket.Contributions.map(
-        (contribution) => contribution.collectionMember
+        (contribution) => contribution.roundMember
       ).filter(
         (roundMember) =>
           roundMember.user.emailSettings?.refundedBecauseBucketCancelled ?? true
@@ -414,7 +414,7 @@ export default {
     const emails: SendEmailInput[] = refundedCollMembersToEmail.map(
       (collMember) => {
         const amount = bucket.Contributions.filter(
-          (contrib) => contrib.collectionMember.id === collMember.id
+          (contrib) => contrib.roundMember.id === collMember.id
         )
           .map((contrib) => contrib.amount)
           .reduce((a, b) => a + b, 0);
@@ -425,14 +425,12 @@ export default {
           html: `The bucket “${escape(
             bucket.title
           )}” you have contributed to was cancelled in ${escape(
-            bucket.collection.title
-          )}. You've been refunded ${amount / 100} ${
-            bucket.collection.currency
-          }.
+            bucket.round.title
+          )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
-          `/${bucket.collection.organization.slug}/${bucket.collection.slug}`
-        )}">${escape(bucket.collection.title)}</a>.
+          `/${bucket.round.group.slug}/${bucket.round.slug}`
+        )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
         ${footer}
         `,
@@ -442,27 +440,25 @@ export default {
     await sendEmails(emails);
   },
   bucketPublishedNotification: async ({
-    currentOrg,
-    currentOrgMember,
-    event,
-    dream,
+    currentGroup,
+    currentGroupMember,
+    round,
+    bucket,
     unpublish,
   }) => {
     if (unpublish) return;
 
-    const {
-      collectionMember: collMembers,
-    } = await prisma.collection.findUnique({
-      where: { id: event.id },
+    const { roundMember: collMembers } = await prisma.round.findUnique({
+      where: { id: round.id },
       include: {
-        collectionMember: {
+        roundMember: {
           include: { user: { include: { emailSettings: true } } },
         },
       },
     });
 
     const { cocreators } = await prisma.bucket.findUnique({
-      where: { id: dream.id },
+      where: { id: bucket.id },
       include: { cocreators: true },
     });
 
@@ -474,14 +470,14 @@ export default {
       .map((collMember) => collMember.user)
       .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
 
-    const collLink = appLink(`/${currentOrg.slug}/${event.slug}`);
+    const collLink = appLink(`/${currentGroup.slug}/${round.slug}`);
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `There is a new bucket in ${event.title}!`,
+      subject: `There is a new bucket in ${round.title}!`,
       html: `Creativity is flowing in ${escape(
-        event.title
-      )}! <a href="${collLink}">Have a look at the new buckets in this collection.</a>
+        round.title
+      )}! <a href="${collLink}">Have a look at the new buckets in this round.</a>
       <br/><br/>
       ${footer}
       `,
@@ -490,12 +486,12 @@ export default {
     await sendEmails(emails);
   },
   contributionToBucketNotification: async ({
-    collection,
+    round,
     bucket,
     contributingUser,
     amount,
   }: {
-    collection: any;
+    round: any;
     bucket: any;
     contributingUser: any;
     amount: number;
@@ -521,14 +517,12 @@ export default {
       ((totalContributions + income) / minGoal) * 100
     );
 
-    const { organization } = await prisma.collection.findUnique({
-      where: { id: collection.id },
-      include: { organization: true },
+    const { group } = await prisma.round.findUnique({
+      where: { id: round.id },
+      include: { group: true },
     });
 
-    const bucketLink = appLink(
-      `/${organization.slug}/${collection.slug}/${bucket.id}`
-    );
+    const bucketLink = appLink(`/${group.slug}/${round.slug}/${bucket.id}`);
 
     const emails = usersToNotify.map((mailRecipient) => ({
       to: mailRecipient.email,
@@ -537,7 +531,7 @@ export default {
         bucket.title
       )}”</a> just received some funds!<br/>
       ${escape(contributingUser.name)} contributed ${amount / 100} ${
-        collection.currency
+        round.currency
       }<br/>
       Your bucket is now ${progressPercent}% funded!<br/>
       <br/><br/>

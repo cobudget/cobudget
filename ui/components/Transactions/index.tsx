@@ -8,25 +8,17 @@ import LoadMore from "components/LoadMore";
 dayjs.extend(LocalizedFormat);
 
 export const TRANSACTIONS_QUERY = gql`
-  query Transactions($collectionId: ID!, $offset: Int, $limit: Int) {
-    collectionTransactions(
-      collectionId: $collectionId
-      offset: $offset
-      limit: $limit
-    ) {
+  query Transactions($roundId: ID!, $offset: Int, $limit: Int) {
+    roundTransactions(roundId: $roundId, offset: $offset, limit: $limit) {
       moreExist
-      transactions(
-        collectionId: $collectionId
-        offset: $offset
-        limit: $limit
-      ) {
+      transactions(roundId: $roundId, offset: $offset, limit: $limit) {
         id
         amount
         amountBefore
         createdAt
         allocationType
         transactionType
-        collectionMember {
+        roundMember {
           id
           user {
             id
@@ -50,17 +42,17 @@ export const TRANSACTIONS_QUERY = gql`
   }
 `;
 
-const Transactions = ({ collection, currentOrg }) => {
+const Transactions = ({ round, currentGroup }) => {
   const [
     {
-      data: { collectionTransactions: { moreExist, transactions } } = {
-        collectionTransactions: { transactions: [], moreExist: false },
+      data: { roundTransactions: { moreExist, transactions } } = {
+        roundTransactions: { transactions: [], moreExist: false },
       },
       fetching,
     },
   ] = useQuery({
     query: TRANSACTIONS_QUERY,
-    variables: { collectionId: collection.id, offset: 0, limit: 500 },
+    variables: { roundId: round.id, offset: 0, limit: 500 },
   });
 
   return (
@@ -84,10 +76,10 @@ const Transactions = ({ collection, currentOrg }) => {
                     <span className="text-gray-500 mr-4">
                       {dayjs(c.createdAt).format("LLL")}
                     </span>
-                    @{c.collectionMember.user.username} funded{" "}
-                    {thousandSeparator(c.amount / 100)} {collection.currency} to{" "}
+                    @{c.roundMember.user.username} funded{" "}
+                    {thousandSeparator(c.amount / 100)} {round.currency} to{" "}
                     <Link
-                      href={`/${currentOrg?.slug ?? "c"}/${collection.slug}/${
+                      href={`/${currentGroup?.slug ?? "c"}/${round.slug}/${
                         c.bucket?.id
                       }`}
                     >
@@ -101,7 +93,7 @@ const Transactions = ({ collection, currentOrg }) => {
                       <span className="block text-right">
                         <p className="text-green-700 font-semibold">
                           {thousandSeparator((c.amountBefore + c.amount) / 100)}{" "}
-                          {collection.currency}
+                          {round.currency}
                         </p>
                         <p className="text-xxs text-slate-100 font-semibold">
                           Bucket balance
@@ -126,17 +118,16 @@ const Transactions = ({ collection, currentOrg }) => {
                     {c.allocationType === "ADD" ? (
                       <>
                         {c.amount < 0 ? " deducted " : " added "}
-                        {thousandSeparator(c.amount / 100)}{" "}
-                        {collection.currency}
+                        {thousandSeparator(c.amount / 100)} {round.currency}
                         {c.amount < 0 ? " from " : " to "}@
-                        {c.collectionMember.user.username}'s balance
+                        {c.roundMember.user.username}&apos;s balance
                       </>
                     ) : (
                       <>
                         {" "}
-                        set @{c.collectionMember.user.username}'s balance to{" "}
+                        set @{c.roundMember.user.username}&apos;s balance to{" "}
                         {thousandSeparator((c.amount + c.amountBefore) / 100)}{" "}
-                        {collection.currency}
+                        {round.currency}
                       </>
                     )}
                   </div>
@@ -144,7 +135,7 @@ const Transactions = ({ collection, currentOrg }) => {
                     <span className="block text-right">
                       <p className="text-green-700 font-semibold">
                         {thousandSeparator((c.amount + c.amountBefore) / 100)}{" "}
-                        {collection.currency}
+                        {round.currency}
                       </p>
                       <p className="text-xxs text-slate-100 font-semibold">
                         User balance

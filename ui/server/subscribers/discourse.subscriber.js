@@ -1,9 +1,9 @@
-const discourse = require("../lib/discourse");
-const liveUpdate = require("../services/liveUpdate.service");
+import discourse from "../lib/discourse";
+import liveUpdate from "../services/liveUpdate.service";
 
-module.exports = {
-  orgHasDiscourse(org) {
-    return org?.discourse?.url && org?.discourse?.apiKey;
+export default {
+  groupHasDiscourse(group) {
+    return group?.discourse?.url && group?.discourse?.apiKey;
   },
   generateComment(post, collMember) {
     return {
@@ -17,131 +17,137 @@ module.exports = {
   },
   initialize(eventHub) {
     eventHub.subscribe(
-      "create-dream",
+      "create-bucket",
       "discourse",
       async ({
-        currentOrg,
-        currentOrgMember,
+        currentGroup,
+        currentGroupMember,
         currentCollMember,
-        event,
-        dream,
+        round,
+        bucket,
       }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
-        console.log(`Publishing dream ${dream.id} to discourse...`);
+        console.log(`Publishing bucket ${bucket.id} to discourse...`);
 
-        const post = await discourse(currentOrg.discourse).posts.create(
+        const post = await discourse(currentGroup.discourse).posts.create(
           {
-            title: dream.title,
-            raw: this.generateDreamMarkdown(dream, event, currentOrg),
-            category: event.discourseCategoryId,
-            unlist_topic: !dream.published,
+            title: bucket.title,
+            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
+            category: round.discourseCategoryId,
+            unlist_topic: !bucket.published,
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        dream.comments.forEach((comment) => {
+        bucket.comments.forEach((comment) => {
           eventHub.publish("create-comment", {
-            currentOrg,
-            currentOrgMember,
+            currentGroup,
+            currentGroupMember,
             currentCollMember,
-            event,
-            dream,
+            round,
+            bucket,
             comment,
           });
         });
 
-        dream.discourseTopicId = post.topic_id;
-        await dream.save();
+        bucket.discourseTopicId = post.topic_id;
+        await bucket.save();
       }
     );
 
     eventHub.subscribe(
-      "edit-dream",
+      "edit-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, round, bucket }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
-            currentOrg,
-            currentOrgMember,
-            event,
-            dream,
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
+            currentGroup,
+            currentGroupMember,
+            round,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        console.log(`Updating dream ${dream.id} on discourse`);
+        console.log(`Updating bucket ${bucket.id} on discourse`);
 
-        const post = await discourse(currentOrg.discourse).topics.getSummary(
+        const post = await discourse(currentGroup.discourse).topics.getSummary(
           {
-            id: dream.discourseTopicId,
+            id: bucket.discourseTopicId,
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
 
-        await discourse(currentOrg.discourse).posts.update(
+        await discourse(currentGroup.discourse).posts.update(
           post.id,
           {
-            title: dream.title,
-            raw: this.generateDreamMarkdown(dream, event, currentOrg),
+            title: bucket.title,
+            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
       }
     );
 
     eventHub.subscribe(
-      "publish-dream",
+      "publish-bucket",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, unpublish }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({
+        currentGroup,
+        currentGroupMember,
+        round,
+        bucket,
+        unpublish,
+      }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
         console.log(
-          `Setting visibility of dream ${
-            dream.id
+          `Setting visibility of bucket ${
+            bucket.id
           } to ${!unpublish} on Discourse...`
         );
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
-            currentOrg,
-            currentOrgMember,
-            event,
-            dream,
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
+            currentGroup,
+            currentGroupMember,
+            round,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        await discourse(currentOrg.discourse).topics.updateStatus(
+        await discourse(currentGroup.discourse).topics.updateStatus(
           {
-            id: dream.discourseTopicId,
+            id: bucket.discourseTopicId,
             status: "visible",
             enabled: !unpublish,
           },
           {
             username: "system",
-            apiKey: currentOrg.discourse.apiKey,
+            apiKey: currentGroup.discourse.apiKey,
           }
         );
       }
@@ -150,48 +156,50 @@ module.exports = {
     eventHub.subscribe(
       "create-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, event, dream, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
 
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
 
-        if (comment.content.length < currentOrg.discourse.minPostLength)
+        if (comment.content.length < currentGroup.discourse.minPostLength)
           throw new Error(
-            `Your post needs to be at least ${currentOrg.discourse.minPostLength} characters long!`
+            `Your post needs to be at least ${currentGroup.discourse.minPostLength} characters long!`
           );
 
-        console.log(`Publishing comment in dream ${dream.id} to discourse...`);
+        console.log(
+          `Publishing comment in bucket ${bucket.id} to discourse...`
+        );
 
-        if (!dream.discourseTopicId) {
-          await eventHub.publish("create-dream", {
-            currentOrg,
-            currentOrgMember,
-            event,
-            dream,
+        if (!bucket.discourseTopicId) {
+          await eventHub.publish("create-bucket", {
+            currentGroup,
+            currentGroupMember,
+            round,
+            bucket,
           });
-          //dream = Dream.findOne({ _id: dream.id });
+          //bucket = Bucket.findOne({ _id: bucket.id });
         }
 
-        const post = await discourse(currentOrg.discourse).posts.create(
+        const post = await discourse(currentGroup.discourse).posts.create(
           {
-            topic_id: dream.discourseTopicId,
+            topic_id: bucket.discourseTopicId,
             raw: comment.content,
           },
           {
-            username: currentOrgMember.discourseUsername,
-            userApiKey: currentOrgMember.discourseApiKey,
+            username: currentGroupMember.discourseUsername,
+            userApiKey: currentGroupMember.discourseApiKey,
           }
         );
 
         if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
         const created = this.generateComment(
           { ...post, raw: comment.content },
-          currentOrgMember
+          currentGroupMember
         );
         liveUpdate.publish("commentsChanged", {
           commentsChanged: { comment: created, action: "created" },
@@ -204,28 +212,28 @@ module.exports = {
     eventHub.subscribe(
       "edit-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, dream, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, bucket, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
 
         console.log(
-          `Updating comment ${comment.id} in dream ${dream.id} to discourse...`
+          `Updating comment ${comment.id} in bucket ${bucket.id} to discourse...`
         );
 
-        const post = await discourse(currentOrg.discourse).posts.update(
+        const post = await discourse(currentGroup.discourse).posts.update(
           comment.id,
           {
-            title: dream.title,
+            title: bucket.title,
             raw: comment.content,
           },
           {
-            username: currentOrgMember.discourseUsername,
-            userApiKey: currentOrgMember.discourseApiKey,
+            username: currentGroupMember.discourseUsername,
+            userApiKey: currentGroupMember.discourseApiKey,
           }
         );
 
@@ -233,7 +241,7 @@ module.exports = {
 
         const updated = this.generateComment(
           { ...post, raw: comment.content },
-          currentOrgMember
+          currentGroupMember
         );
         liveUpdate.publish("commentsChanged", {
           commentsChanged: { comment: updated, action: "edited" },
@@ -246,20 +254,20 @@ module.exports = {
     eventHub.subscribe(
       "delete-comment",
       "discourse",
-      async ({ currentOrg, currentOrgMember, comment }) => {
-        if (!this.orgHasDiscourse(currentOrg)) {
+      async ({ currentGroup, currentGroupMember, comment }) => {
+        if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
-        if (!currentOrgMember.discourseApiKey)
+        if (!currentGroupMember.discourseApiKey)
           throw new Error(
             "You need to have a discourse account connected, go to /connect-discourse"
           );
 
         console.log(`Deleting comment ${comment.id} on discourse...`);
 
-        const res = await discourse(currentOrg.discourse).posts.delete({
+        const res = await discourse(currentGroup.discourse).posts.delete({
           id: comment.id,
-          userApiKey: currentOrgMember.discourseApiKey,
+          userApiKey: currentGroupMember.discourseApiKey,
         });
 
         if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
@@ -273,33 +281,33 @@ module.exports = {
     );
   },
 
-  generateDreamMarkdown(dream, event, org) {
+  generateBucketMarkdown(bucket, round, group) {
     const content = [];
 
-    if (org) {
+    if (group) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
       const domain =
-        org.customDomain || `${org.subdomain}.${process.env.DEPLOY_URL}`;
-      const dreamUrl = `${protocol}://${domain}/${event.slug}/${dream.id}`;
+        group.customDomain || `${group.subdomain}.${process.env.DEPLOY_URL}`;
+      const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
       content.push(
         "View and edit this post on the Cobudget platform: ",
-        dreamUrl
+        bucketUrl
       );
     }
 
-    if (dream.summary) {
+    if (bucket.summary) {
       content.push("## Summary");
-      content.push(dream.summary);
+      content.push(bucket.summary);
     }
 
-    if (dream.description) {
+    if (bucket.description) {
       content.push("## Description");
-      content.push(dream.description);
+      content.push(bucket.description);
     }
 
-    if (dream.customFields) {
-      dream.customFields.forEach((customField) => {
-        const customFieldName = event.customFields.find(
+    if (bucket.customFields) {
+      bucket.customFields.forEach((customField) => {
+        const customFieldName = round.customFields.find(
           (customEventField) =>
             String(customEventField._id) === String(customField.fieldId)
         ).name;
@@ -308,9 +316,9 @@ module.exports = {
       });
     }
 
-    if (dream.budgetItems && dream.budgetItems.length > 0) {
-      const income = dream.budgetItems.filter(({ type }) => type === "INCOME");
-      const expenses = dream.budgetItems.filter(
+    if (bucket.budgetItems && bucket.budgetItems.length > 0) {
+      const income = bucket.budgetItems.filter(({ type }) => type === "INCOME");
+      const expenses = bucket.budgetItems.filter(
         ({ type }) => type === "EXPENSE"
       );
 
@@ -324,7 +332,7 @@ module.exports = {
             `|---|---|`,
             ...income.map(
               ({ description, min }) =>
-                `|${description}|${min} ${event.currency}|`
+                `|${description}|${min} ${round.currency}|`
             ),
           ].join("\n")
         );
@@ -338,20 +346,20 @@ module.exports = {
             `|---|---|`,
             ...expenses.map(
               ({ description, min }) =>
-                `|${description}|${min} ${event.currency}|`
+                `|${description}|${min} ${round.currency}|`
             ),
           ].join("\n")
         );
       }
 
       content.push(
-        `Total funding goal: ${dream.minGoal / 100} ${event.currency}`
+        `Total funding goal: ${bucket.minGoal / 100} ${round.currency}`
       );
     }
 
-    if (dream.images && dream.images.length > 0) {
+    if (bucket.images && bucket.images.length > 0) {
       content.push("## Images");
-      dream.images.forEach(({ small }) => content.push(`![](${small})`));
+      bucket.images.forEach(({ small }) => content.push(`![](${small})`));
     }
 
     return content.join("\n\n");

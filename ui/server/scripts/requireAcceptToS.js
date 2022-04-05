@@ -1,8 +1,7 @@
-const {
-  RequiredActionAlias,
-} = require("keycloak-admin/lib/defs/requiredActionProviderRepresentation");
-require("dotenv").config({ path: "api/.env" });
-const initKcAdminClient = require("../utils/initKcAdminClient");
+import { RequiredActionAlias } from "keycloak-admin/lib/defs/requiredActionProviderRepresentation";
+import initKcAdminClient from "../utils/initKcAdminClient";
+import dotenv from "dotenv";
+dotenv.config({ path: "api/.env" });
 
 if (!process.env.KEYCLOAK_AUTH_SERVER) {
   throw ".env not loaded. Call from the top dir in the repo";

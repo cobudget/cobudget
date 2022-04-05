@@ -1,8 +1,8 @@
-const fetch = require("node-fetch");
-const { getModels } = require("../database/models");
-const {
-  db: { getConnection },
-} = require("@sensestack/plato-core");
+import fetch from "node-fetch";
+import { getModels } from "../database/models";
+import { db } from "@sensestack/plato-core";
+
+const { getConnection } = db;
 // example request body:
 // {
 //   "notification_id": 123455,
@@ -47,7 +47,7 @@ module.exports = async (req, res) => {
         );
 
         const membership = await Member.findOneAndUpdate(
-          { userId: user.id, collectionId: event.id },
+          { userId: user.id, roundId: event.id },
           { isApproved: true },
           { setDefaultsOnInsert: true, upsert: true, new: true }
         );

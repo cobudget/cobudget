@@ -5,9 +5,9 @@ import NeedsContainer from "./NeedsContainer";
 import DetailViewContainer from "./Details/DetailViewContainer";
 import Search from "./Search";
 
-const RealitiesHome = ({ currentOrgMember, currentUser }) => (
+const RealitiesHome = ({ currentGroupMember, currentUser }) => (
   <>
-    <SubMenu currentOrgMember={currentOrgMember} />
+    <SubMenu currentGroupMember={currentGroupMember} />
     <div className="page">
       <div className="md:container md:mx-auto">
         <Search />
@@ -25,7 +25,7 @@ const RealitiesHome = ({ currentOrgMember, currentUser }) => (
   </>
 );
 
-const Realities = ({ currentOrgMember, currentUser }) => {
+const Realities = ({ currentGroupMember, currentUser }) => {
   const [onServer, setOnServer] = useState(true);
   useEffect(() => {
     setOnServer(false);
@@ -35,7 +35,7 @@ const Realities = ({ currentOrgMember, currentUser }) => {
 
   return (
     <RealitiesHome
-      currentOrgMember={currentOrgMember}
+      currentGroupMember={currentGroupMember}
       currentUser={currentUser}
     />
   );

@@ -1,8 +1,7 @@
-import { useQuery, gql } from "urql";
 import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
 
-export default function Funders({ bucket, collection, currentUser }) {
+export default function Funders({ bucket, round, currentUser }) {
   if (!bucket) return null;
   return (
     <div className="bg-white border-b-default">
@@ -12,16 +11,16 @@ export default function Funders({ bucket, collection, currentUser }) {
             {bucket.funders.map((contribution) => (
               <li className="flex items-center space-x-3" key={contribution.id}>
                 <Avatar
-                  user={contribution.collectionMember.user}
+                  user={contribution.roundMember.user}
                   highlighted={
-                    currentUser?.id === contribution.collectionMember.user.id
+                    currentUser?.id === contribution.roundMember.user.id
                   }
                 />
 
                 <span>
-                  {contribution.collectionMember.user.username} -{" "}
+                  {contribution.roundMember.user.username} -{" "}
                   {thousandSeparator(contribution.amount / 100)}{" "}
-                  {collection.currency}
+                  {round.currency}
                 </span>
               </li>
             ))}

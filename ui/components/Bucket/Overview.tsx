@@ -1,14 +1,14 @@
 import Head from "next/head";
 import Sidebar from "./Sidebar";
 import HappySpinner from "components/HappySpinner";
-import { isMemberOfDream } from "utils/helpers";
+import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
 import Summary from "./Summary";
 
 export default function Overview({
-  collection,
+  round,
   currentUser,
-  currentOrg,
+  currentGroup,
   fetching,
   error,
   bucket,
@@ -19,7 +19,7 @@ export default function Overview({
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    isMemberOfDream(currentUser, bucket);
+    isMemberOfBucket(currentUser, bucket);
 
   if (fetching && !bucket) {
     return (
@@ -51,7 +51,7 @@ export default function Overview({
     <>
       <Head>
         <title>
-          {bucket.title} | {collection?.title}
+          {bucket.title} | {round?.title}
         </title>
       </Head>
       <div className="border-b border-b-default">
@@ -81,11 +81,11 @@ export default function Overview({
             )}
             <div className="">
               <Sidebar
-                dream={bucket}
-                collection={collection}
+                bucket={bucket}
+                round={round}
                 currentUser={currentUser}
                 canEdit={canEdit}
-                currentOrg={currentOrg}
+                currentGroup={currentGroup}
                 showBucketReview={showBucketReview}
               />
             </div>

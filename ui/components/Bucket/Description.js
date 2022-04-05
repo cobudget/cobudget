@@ -11,15 +11,15 @@ import Markdown from "components/Markdown";
 
 const EDIT_DESCRIPTION_MUTATION = gql`
   mutation EditDescription($bucketId: ID!, $description: String) {
-    editDream(bucketId: $bucketId, description: $description) {
+    editBucket(bucketId: $bucketId, description: $description) {
       id
       description
     }
   }
 `;
 
-const DreamDescription = ({ description, bucketId, canEdit }) => {
-  const [{ fetching: loading }, editDream] = useMutation(
+const BucketDescription = ({ description, bucketId, canEdit }) => {
+  const [{ fetching: loading }, editBucket] = useMutation(
     EDIT_DESCRIPTION_MUTATION
   );
 
@@ -32,7 +32,7 @@ const DreamDescription = ({ description, bucketId, canEdit }) => {
     return (
       <form
         onSubmit={handleSubmit((variables) =>
-          editDream({ bucketId, ...variables })
+          editBucket({ bucketId, ...variables })
             .then(() => setEditing(false))
             .catch((err) => alert(err.message))
         )}
@@ -106,4 +106,4 @@ const DreamDescription = ({ description, bucketId, canEdit }) => {
   return null;
 };
 
-export default DreamDescription;
+export default BucketDescription;

@@ -7,14 +7,14 @@ const schema = gql`
   type Query {
     currentUser: User
     user(userId: ID!): User!
-    currentOrg(orgSlug: String): Organization
-    organizations: [Organization!]
-    organization(orgId: ID!): Organization!
-    collections(orgId: ID!, limit: Int): [Collection!]
-    collection(orgSlug: String, collectionSlug: String): Collection
+    currentGroup(groupSlug: String): Group
+    groups: [Group!]
+    group(groupId: ID!): Group!
+    rounds(groupId: ID!, limit: Int): [Round!]
+    round(groupSlug: String, roundSlug: String): Round
     bucket(id: ID!): Bucket
     bucketsPage(
-      collectionId: ID!
+      roundId: ID!
       textSearchTerm: String
       tag: String
       offset: Int
@@ -22,53 +22,45 @@ const schema = gql`
       status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    orgMembersPage(orgId: ID!, offset: Int, limit: Int): OrgMembersPage
+    groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
     membersPage(
-      collectionId: ID!
-      isApproved: Boolean
+      roundId: ID!
+      isApproved: Boolean!
       search: String
       offset: Int
       limit: Int
     ): MembersPage
-    members(collectionId: ID!, isApproved: Boolean): [CollectionMember]
-    categories(orgId: ID!): [Category!]
-    contributionsPage(
-      collectionId: ID!
+    members(roundId: ID!, isApproved: Boolean!): [RoundMember]
+    categories(groupId: ID!): [Category!]
+    contributionsPage(roundId: ID!, offset: Int, limit: Int): ContributionsPage
+    roundTransactions(
+      roundId: ID!
       offset: Int
       limit: Int
-    ): ContributionsPage
-    collectionTransactions(
-      collectionId: ID!
-      offset: Int
-      limit: Int
-    ): CollectionTransactionPage
+    ): RoundTransactionPage
   }
 
   type Mutation {
-    createOrganization(
-      name: String!
-      logo: String
-      slug: String!
-    ): Organization!
+    createGroup(name: String!, logo: String, slug: String!): Group!
 
-    editOrganization(
-      orgId: ID!
+    editGroup(
+      groupId: ID!
       name: String
       info: String
       logo: String
       slug: String
-    ): Organization!
-    setTodosFinished(orgId: ID!): Organization
+    ): Group!
+    setTodosFinished(groupId: ID!): Group
 
-    createCollection(
-      orgId: ID
+    createRound(
+      groupId: ID
       slug: String!
       title: String!
       currency: String!
       registrationPolicy: RegistrationPolicy!
-    ): Collection!
-    editCollection(
-      collectionId: ID!
+    ): Round!
+    editRound(
+      roundId: ID!
       slug: String
       title: String
       archived: Boolean
@@ -79,45 +71,42 @@ const schema = gql`
       about: String
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
-    ): Collection!
-    deleteCollection(collectionId: ID!): Collection
+    ): Round!
+    deleteRound(roundId: ID!): Round
 
-    addGuideline(collectionId: ID!, guideline: GuidelineInput!): Collection!
+    addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
-      collectionId: ID!
+      roundId: ID!
       guidelineId: ID!
       guideline: GuidelineInput!
-    ): Collection!
+    ): Round!
     setGuidelinePosition(
-      collectionId: ID!
+      roundId: ID!
       guidelineId: ID!
       newPosition: Float
-    ): Collection!
-    deleteGuideline(collectionId: ID!, guidelineId: ID!): Collection!
+    ): Round!
+    deleteGuideline(roundId: ID!, guidelineId: ID!): Round!
 
-    addCustomField(
-      collectionId: ID!
-      customField: CustomFieldInput!
-    ): Collection!
+    addCustomField(roundId: ID!, customField: CustomFieldInput!): Round!
     editCustomField(
-      collectionId: ID!
+      roundId: ID!
       fieldId: ID!
       customField: CustomFieldInput!
-    ): Collection!
+    ): Round!
     setCustomFieldPosition(
-      collectionId: ID!
+      roundId: ID!
       fieldId: ID!
       newPosition: Float
-    ): Collection!
-    deleteCustomField(collectionId: ID!, fieldId: ID!): Collection!
+    ): Round!
+    deleteCustomField(roundId: ID!, fieldId: ID!): Round!
 
-    editDreamCustomField(
+    editBucketCustomField(
       bucketId: ID!
       customField: CustomFieldValueInput!
     ): Bucket!
 
-    createDream(collectionId: ID!, title: String!): Bucket
-    editDream(
+    createBucket(roundId: ID!, title: String!): Bucket
+    editBucket(
       bucketId: ID!
       title: String
       description: String
@@ -126,7 +115,7 @@ const schema = gql`
       budgetItems: [BudgetItemInput]
       tags: [String!]
     ): Bucket
-    deleteDream(bucketId: ID!): Bucket
+    deleteBucket(bucketId: ID!): Bucket
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
@@ -134,12 +123,12 @@ const schema = gql`
     addCocreator(bucketId: ID!, memberId: ID!): Bucket
     removeCocreator(bucketId: ID!, memberId: ID!): Bucket
 
-    createTag(collectionId: ID!, tagValue: String!): Collection
+    createTag(roundId: ID!, tagValue: String!): Round
     addTag(bucketId: ID!, tagId: ID!): Bucket
-    deleteTag(collectionId: ID!, tagId: ID!): Collection
+    deleteTag(roundId: ID!, tagId: ID!): Round
     removeTag(bucketId: ID!, tagId: ID!): Bucket
 
-    publishDream(bucketId: ID!, unpublish: Boolean): Bucket
+    publishBucket(bucketId: ID!, unpublish: Boolean): Bucket
 
     addComment(bucketId: ID!, content: String!): Comment
     editComment(bucketId: ID!, commentId: ID!, content: String!): Comment
@@ -149,31 +138,33 @@ const schema = gql`
     resolveFlag(bucketId: ID!, flagId: ID!, comment: String!): Bucket
     allGoodFlag(bucketId: ID!): Bucket
 
-    joinOrg(orgId: ID!): OrgMember
+    joinGroup(groupId: ID!): GroupMember
 
     updateProfile(username: String, name: String): User
-    updateBio(collMemberId: ID!, bio: String): CollectionMember
+    updateBio(collMemberId: ID!, bio: String): RoundMember
 
-    inviteCollectionMembers(
-      collectionId: ID!
-      emails: String!
-    ): [CollectionMember]
-    inviteOrgMembers(orgId: ID!, emails: String!): [OrgMember]
-    updateOrgMember(orgId: ID!, memberId: ID!, isAdmin: Boolean): OrgMember
+    inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
+    inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
+    updateGroupMember(
+      groupId: ID!
+      memberId: ID!
+      isAdmin: Boolean
+    ): GroupMember
+    deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(
-      collectionId: ID!
+      roundId: ID!
       memberId: ID!
       isApproved: Boolean
       isAdmin: Boolean
       isModerator: Boolean
-    ): CollectionMember
-    deleteMember(collectionId: ID!, memberId: ID!): CollectionMember
+    ): RoundMember
+    deleteMember(roundId: ID!, memberId: ID!): RoundMember
 
-    deleteOrganization(organizationId: ID!): Organization
+    deleteGroup(groupId: ID!): Group
 
     approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
     updateGrantingSettings(
-      collectionId: ID!
+      roundId: ID!
       currency: String
       maxAmountToBucketPerUser: Int
       grantingOpens: Date
@@ -181,31 +172,31 @@ const schema = gql`
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
       requireBucketApproval: Boolean
-    ): Collection
+    ): Round
 
     allocate(
-      collectionMemberId: ID!
+      roundMemberId: ID!
       amount: Int!
       type: AllocationType!
-    ): CollectionMember
+    ): RoundMember
     bulkAllocate(
-      collectionId: ID!
+      roundId: ID!
       amount: Int!
       type: AllocationType!
-    ): [CollectionMember]
-    contribute(collectionId: ID!, bucketId: ID!, amount: Int!): Bucket
+    ): [RoundMember]
+    contribute(roundId: ID!, bucketId: ID!, amount: Int!): Bucket
 
     cancelFunding(bucketId: ID!): Bucket
     acceptFunding(bucketId: ID!): Bucket
     markAsCompleted(bucketId: ID!): Bucket
 
-    acceptInvitation(collectionId: ID!): CollectionMember
-    joinCollection(collectionId: ID!): CollectionMember
+    acceptInvitation(roundId: ID!): RoundMember
+    joinRound(roundId: ID!): RoundMember
 
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
-  type Organization {
+  type Group {
     id: ID!
     name: String!
     info: String
@@ -213,13 +204,13 @@ const schema = gql`
     slug: String
     customDomain: String
     logo: String
-    collections: [Collection]
+    rounds: [Round]
     discourseUrl: String
     finishedTodos: Boolean
   }
 
-  enum CollectionType {
-    ORG
+  enum RoundType {
+    ROUND
     SUB
     SINGLE
   }
@@ -233,12 +224,12 @@ const schema = gql`
     ARCHIVED
   }
 
-  type Collection {
+  type Round {
     id: ID!
     slug: String!
     title: String!
     archived: Boolean
-    organization: Organization
+    group: Group
     info: String
     color: String
     numberOfApprovedMembers: Int
@@ -319,42 +310,43 @@ const schema = gql`
     name: String
     verifiedEmail: Boolean!
     isRootAdmin: Boolean
-    orgMemberships: [OrgMember!]
-    collectionMemberships: [CollectionMember!]
+    groupMemberships: [GroupMember!]
+    roundMemberships: [RoundMember!]
     avatar: String
     createdAt: Date
-    currentOrgMember(orgSlug: String): OrgMember
-    currentCollMember(orgSlug: String, collectionSlug: String): CollectionMember
+    currentGroupMember(groupSlug: String): GroupMember
+    currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
   }
 
-  type OrgMember {
+  type GroupMember {
     id: ID!
-    organization: Organization!
+    group: Group!
     user: User!
     isAdmin: Boolean
     bio: String #what do we do with this one?
     createdAt: Date
-    currentCollectionMembership(collectionSlug: String): CollectionMember #this is weird syntax...
-    collectionMemberships: [CollectionMember!]
+    currentRoundMembership(roundSlug: String): RoundMember #this is weird syntax...
+    roundMemberships: [RoundMember!]
     discourseUsername: String
     hasDiscourseApiKey: Boolean
     email: String
     name: String
   }
 
-  type OrgMembersPage {
+  type GroupMembersPage {
     moreExist: Boolean
-    orgMembers: [OrgMember]
+    groupMembers: [GroupMember]
   }
 
-  type CollectionMember {
+  type RoundMember {
     id: ID!
-    collection: Collection!
+    round: Round!
     user: User!
     isAdmin: Boolean!
     isModerator: Boolean
     isApproved: Boolean!
+    isRemoved: Boolean
     createdAt: Date
     balance: Int # stored as cents
     email: String
@@ -366,12 +358,12 @@ const schema = gql`
   type MembersPage {
     moreExist: Boolean
     members(
-      collectionId: ID!
-      isApproved: Boolean
+      roundId: ID!
+      isApproved: Boolean!
       search: String
       offset: Int
       limit: Int
-    ): [CollectionMember]
+    ): [RoundMember]
   }
 
   # enum Role {
@@ -381,12 +373,12 @@ const schema = gql`
 
   type Bucket {
     id: ID!
-    event: Collection!
+    round: Round!
     title: String!
     description: String
     summary: String
     images: [Image!]
-    cocreators: [CollectionMember]!
+    cocreators: [RoundMember]!
     budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
     approved: Boolean
@@ -414,7 +406,6 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
-    collection: Collection!
   }
 
   type BucketsPage {
@@ -424,7 +415,7 @@ const schema = gql`
 
   type Comment {
     id: ID!
-    collectionMember: CollectionMember
+    roundMember: RoundMember
     createdAt: Date!
     updatedAt: Date
     isLog: Boolean
@@ -489,16 +480,16 @@ const schema = gql`
 
   interface Transaction {
     id: ID!
-    collection: Collection!
-    collectionMember: CollectionMember!
+    round: Round!
+    roundMember: RoundMember!
     amount: Int!
     createdAt: Date
   }
 
   type Contribution implements Transaction {
     id: ID!
-    collection: Collection!
-    collectionMember: CollectionMember!
+    round: Round!
+    roundMember: RoundMember!
     amount: Int!
     amountBefore: Int!
     createdAt: Date
@@ -507,13 +498,13 @@ const schema = gql`
 
   type ContributionsPage {
     moreExist: Boolean
-    contributions(collectionId: ID!, offset: Int, limit: Int): [Contribution]
+    contributions(roundId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
   type Allocation implements Transaction {
     id: ID!
-    collection: Collection!
-    collectionMember: CollectionMember!
+    round: Round!
+    roundMember: RoundMember!
     amount: Int!
     allocatedById: Int!
     allocationType: AllocationType!
@@ -521,11 +512,11 @@ const schema = gql`
     createdAt: Date
   }
 
-  type CollectionTransaction {
+  type RoundTransaction {
     id: ID!
-    collection: Collection!
-    collectionMember: CollectionMember!
-    allocatedBy: CollectionMember
+    round: Round!
+    roundMember: RoundMember!
+    allocatedBy: RoundMember
     amount: Int!
     createdAt: Date
     bucket: Bucket
@@ -535,17 +526,13 @@ const schema = gql`
     transactionType: TransactionType
   }
 
-  type CollectionTransactionPage {
+  type RoundTransactionPage {
     moreExist: Boolean
-    transactions(
-      collectionId: ID!
-      offset: Int
-      limit: Int
-    ): [CollectionTransaction]
+    transactions(roundId: ID!, offset: Int, limit: Int): [RoundTransaction]
   }
 
   # type GrantingPeriod {
-  #   event: Event!
+  #   round: Event!
   #   submissionCloses: Date
   #   grantingStarts: Date
   #   grantingCloses: Date # when this happens. all grants to non-funded projects go back into the pool
@@ -562,7 +549,7 @@ const schema = gql`
 
   # type Emoji {
   #   unicode: String!
-  #   event: Event!
+  #   round: Event!
   # }
 
   # type Reaction {
@@ -579,7 +566,7 @@ const schema = gql`
 
   input CustomFieldValueInput {
     fieldId: ID!
-    collectionId: ID!
+    roundId: ID!
     value: JSON
   }
 
@@ -618,8 +605,8 @@ const schema = gql`
   # type Log {
   #   createdAt: Date
   #   user: User
-  #   dream: Bucket
-  #   event: Collection
+  #   bucket: Bucket
+  #   round: Round
   #   details: LogDetails
   #   type: String
   # }

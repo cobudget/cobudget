@@ -7,9 +7,9 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import Banner from "components/Banner";
 
-const INVITE_ORG_MEMBERS_MUTATION = gql`
-  mutation InviteOrgMembers($orgId: ID!, $emails: String!) {
-    inviteOrgMembers(orgId: $orgId, emails: $emails) {
+const INVITE_GROUP_MEMBERS_MUTATION = gql`
+  mutation InviteGroupMembers($groupId: ID!, $emails: String!) {
+    inviteGroupMembers(groupId: $groupId, emails: $emails) {
       id
       isAdmin
       bio
@@ -27,9 +27,9 @@ const INVITE_ORG_MEMBERS_MUTATION = gql`
   }
 `;
 
-export const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
-  mutation InviteCollectionMembers($emails: String!, $collectionId: ID!) {
-    inviteCollectionMembers(emails: $emails, collectionId: $collectionId) {
+export const INVITE_ROUND_MEMBERS_MUTATION = gql`
+  mutation InviteRoundMembers($emails: String!, $roundId: ID!) {
+    inviteRoundMembers(emails: $emails, roundId: $roundId) {
       id
       isAdmin
       isModerator
@@ -50,18 +50,16 @@ export const INVITE_COLLECTION_MEMBERS_MUTATION = gql`
 
 const InviteMembersModal = ({
   handleClose,
-  collectionId,
-  currentOrg,
+  roundId,
+  currentGroup,
 }: {
   handleClose: () => void;
-  collectionId?: string;
-  currentOrg?: any;
+  roundId?: string;
+  currentGroup?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
-    collectionId
-      ? INVITE_COLLECTION_MEMBERS_MUTATION
-      : INVITE_ORG_MEMBERS_MUTATION
+    roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
 
   return (
@@ -73,8 +71,9 @@ const InviteMembersModal = ({
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h1 className="text-xl font-semibold mb-2">
-            Invite {collectionId ? "collection " : ""}members
+            Invite participants {roundId ? " to this round" : ""}
           </h1>
+          {/*
           <Banner
             className={"mb-4"}
             variant="warning"
@@ -83,7 +82,7 @@ const InviteMembersModal = ({
             <ul className="list-disc ml-5">
               <li className="mt-2">
                 This is currently more of a quick way of adding people as
-                members of the organization and/or collection, rather than a
+                members of the group and/or round, rather than a
                 proper invite functionality.
               </li>
               <li className="mt-2">
@@ -99,11 +98,12 @@ const InviteMembersModal = ({
               </li>
             </ul>
           </Banner>
+          */}
           <form
             onSubmit={handleSubmit((variables) => {
               inviteMembers({
                 ...variables,
-                ...(collectionId ? { collectionId } : { orgId: currentOrg.id }),
+                ...(roundId ? { roundId } : { groupId: currentGroup.id }),
               })
                 .then(() => {
                   reset();

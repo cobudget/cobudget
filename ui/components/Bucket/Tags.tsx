@@ -15,23 +15,23 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-const Tags = ({ currentOrg, dream, collection, canEdit }) => {
+const Tags = ({ currentGroup, bucket, round, canEdit }) => {
   const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
-  if (!collection.tags?.length) return null;
+  if (!round.tags?.length) return null;
 
   return (
     <div className="">
       <h2 className="mb-2 font-medium hidden md:block relative">Tags</h2>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
-        {dream.tags?.map((tag) => (
+        {bucket.tags?.map((tag) => (
           <div
             key={tag.id}
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${currentOrg?.slug ?? "c"}/${collection.slug}?tag=${
+              href={`/${currentGroup?.slug ?? "c"}/${round.slug}?tag=${
                 tag.value
               }`}
             >
@@ -39,7 +39,9 @@ const Tags = ({ currentOrg, dream, collection, canEdit }) => {
             </Link>
             {canEdit && (
               <button
-                onClick={() => removeTag({ bucketId: dream.id, tagId: tag.id })}
+                onClick={() =>
+                  removeTag({ bucketId: bucket.id, tagId: tag.id })
+                }
                 className="rounded-full bg-gray-400 hover:bg-black"
               >
                 <CloseIcon className="w-3 h-3 text-white" />
@@ -48,7 +50,7 @@ const Tags = ({ currentOrg, dream, collection, canEdit }) => {
           </div>
         ))}
       </div>
-      {canEdit && <AddTag items={collection.tags} dream={dream} />}
+      {canEdit && <AddTag items={round.tags} bucket={bucket} />}
     </div>
   );
 };

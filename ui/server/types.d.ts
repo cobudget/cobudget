@@ -1,8 +1,8 @@
-export interface CollectionTransaction {
+export interface RoundTransaction {
   id: string;
   amount: number;
   amountBefore: number;
-  collectionMemberId: string;
+  roundMemberId: string;
   bucketId?: string;
   allocatedById?: string;
   allocationType?: string;
