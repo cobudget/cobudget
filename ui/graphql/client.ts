@@ -147,6 +147,24 @@ export const client = (
                   cache.invalidate("Query", "membersPage", field.arguments);
                 });
 
+              const currentUserQuery = cache.readQuery({
+                query: `
+                  query {
+                    currentUser {
+                      id
+                    }
+                  }
+                `,
+              });
+
+              const currentUserId = (currentUserQuery?.currentUser as any)?.id;
+              const deletedMemberUserId = result?.deleteMember?.user?.id;
+
+              // if we removed ourselves then clear the cache completely since it's practically like logging out
+              if (deletedMemberUserId === currentUserId) {
+                cache.invalidate("Query");
+              }
+
               // cache
               //   .inspectFields("Query")
               //   .filter((field) => field.fieldName === "membersPage")
