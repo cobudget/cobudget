@@ -27,7 +27,7 @@ const DELETE_GROUP_MEMBER = gql`
   }
 `;
 
-const GroupMembers = ({}) => {
+const GroupMembers = ({ currentGroup }) => {
   const [, updateGroupMember] = useMutation(UPDATE_GROUP_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [, deleteGroupMember] = useMutation(DELETE_GROUP_MEMBER);
