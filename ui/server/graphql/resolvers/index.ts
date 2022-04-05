@@ -93,7 +93,7 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
 
   if (!(roundMember?.isApproved || groupMember?.isAdmin))
     throw new Error(
-      "You need to be approved participant in this round or group admin to view round members"
+      "You need to be an approved participant in this round or a group admin to view round participants"
     );
   return skip;
 };
