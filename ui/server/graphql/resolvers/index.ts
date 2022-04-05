@@ -2181,6 +2181,13 @@ const resolvers = {
         update: { isApproved, hasJoined: true, isRemoved: false },
       });
 
+      if (!isApproved) {
+        await emailService.roundJoinRequest({
+          round,
+          roundMember,
+        });
+      }
+
       return roundMember;
     },
     setEmailSetting: async (parent, { settingKey, value }, { user }) => {
