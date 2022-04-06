@@ -181,6 +181,14 @@ export const client = (
               //     );
               //   });
             },
+            createRound(result: any, args, cache) {
+              const fields = cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "rounds")
+                .forEach((field) => {
+                  cache.invalidate("Query", "rounds", field.arguments);
+                });
+            },
             deleteRound(result: any, { roundId }, cache) {
               const fields = cache
                 .inspectFields("Query")
