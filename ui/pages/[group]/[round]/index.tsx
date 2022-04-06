@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQuery, gql } from "urql";
+import { useQuery, gql, ssrExchange } from "urql";
 import Link from "next/link";
 import BucketCard from "../../../components/BucketCard";
 import Filterbar from "../../../components/Filterbar";
@@ -13,6 +13,10 @@ import getCurrencySymbol from "utils/getCurrencySymbol";
 import { useRouter } from "next/router";
 import HappySpinner from "components/HappySpinner";
 import { HeaderSkeleton } from "components/Skeleton";
+import { initUrqlClient } from "next-urql";
+import { client as createClientConfig } from "graphql/client";
+import { HEADER_QUERY } from "components/Header";
+import prisma from "server/prisma";
 
 export const ROUND_QUERY = gql`
   query Round($roundSlug: String!, $groupSlug: String) {
@@ -379,5 +383,45 @@ const RoundPage = ({ currentUser }) => {
     </div>
   );
 };
+
+export async function getStaticProps(ctx) {
+  const ssrCache = ssrExchange({ isClient: false });
+  const client = initUrqlClient(createClientConfig(ssrCache), false);
+
+  // This query is used to populate the cache for the query
+  // used on this page.
+  const variables = {
+    groupSlug: ctx.params.group,
+    roundSlug: ctx.params.round,
+  };
+
+  await client.query(ROUND_QUERY, variables).toPromise();
+  await client
+    .query(BUCKETS_QUERY, { ...variables, offset: 0, limit: 12, status: [] })
+    .toPromise();
+  await client.query(HEADER_QUERY, variables).toPromise();
+
+  return {
+    props: {
+      // urqlState is a keyword here so withUrqlClient can pick it up.
+      urqlState: ssrCache.extractData(),
+    },
+    revalidate: 60,
+  };
+}
+
+export async function getStaticPaths() {
+  const rounds = await prisma.round.findMany({
+    where: { visibility: "PUBLIC" },
+    include: { group: true },
+  });
+
+  return {
+    paths: rounds.map((round) => ({
+      params: { group: round.group.slug, round: round.slug },
+    })),
+    fallback: true, // false or 'blocking'
+  };
+}
 
 export default RoundPage;

@@ -121,7 +121,7 @@ const Header = ({ currentUser, openModal }) => {
       roundSlug: router.query.round,
       groupSlug: process.env.SINGLE_GROUP_MODE ? "c" : router.query.group,
     },
-    //pause: !router.isReady,
+    pause: !router.isReady,
   });
   console.log({ group, round });
   const [isMenuOpen, setMenuOpen] = useState(false);
