@@ -315,20 +315,22 @@ const RoundPage = ({ currentUser }) => {
                     <p className="font-bold my-0.5">Funds available</p>
                     <div>
                       <table>
-                        <tr>
-                          <td className="pr-3">In your account</td>
-                          <td className="font-bold">
-                            {currentUser.currentCollMember.balance / 100}
-                            {getCurrencySymbol(round.currency)}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="pr-3">In this round</td>
-                          <td className="font-bold">
-                            {round.totalInMembersBalances / 100}
-                            {getCurrencySymbol(round.currency)}
-                          </td>
-                        </tr>
+                        <tbody>
+                          <tr>
+                            <td className="pr-3">In your account</td>
+                            <td className="font-bold">
+                              {currentUser.currentCollMember.balance / 100}
+                              {getCurrencySymbol(round.currency)}
+                            </td>
+                          </tr>
+                          <tr>
+                            <td className="pr-3">In this round</td>
+                            <td className="font-bold">
+                              {round.totalInMembersBalances / 100}
+                              {getCurrencySymbol(round.currency)}
+                            </td>
+                          </tr>
+                        </tbody>
                       </table>
                     </div>
                   </div>
