@@ -7,14 +7,14 @@ import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
-  query TodoInfo($groupId: ID!) {
+  query TodoInfo($groupId: ID!, $groupSlug: String!) {
     groupMembersPage(limit: 2, groupId: $groupId) {
       groupMembers {
         id
       }
     }
 
-    rounds(limit: 1, groupId: $groupId) {
+    rounds(limit: 1, groupSlug: $groupSlug) {
       id
     }
   }
@@ -62,7 +62,7 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
 const TodoList = ({ currentGroup }) => {
   const [{ data, fetching: loading, error }] = useQuery({
     query: GET_TODO_INFO,
-    variables: { groupId: currentGroup.id },
+    variables: { groupId: currentGroup.id, groupSlug: currentGroup.slug },
   });
   const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
     SET_TODOS_FINISHED

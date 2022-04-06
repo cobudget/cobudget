@@ -26,6 +26,7 @@ export const GROUP_PAGE_QUERY = gql`
     group(groupSlug: $groupSlug) {
       id
       name
+      slug
       info
       finishedTodos
     }
