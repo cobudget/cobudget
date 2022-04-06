@@ -98,6 +98,7 @@ export const ROUND_QUERY = gql`
       slug
       title
       color
+      registrationPolicy
     }
   }
 `;
