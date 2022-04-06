@@ -170,6 +170,7 @@ const Header = ({ currentUser, openModal }) => {
               color={color}
               currentUser={currentUser}
               router={router}
+              bucket={bucket}
             />
 
             <div className="sm:hidden">
