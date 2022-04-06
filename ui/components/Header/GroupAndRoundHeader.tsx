@@ -4,15 +4,6 @@ import { useQuery, gql } from "urql";
 import { SlashIcon } from "../Icons";
 import Selector from "./Selector";
 
-const BUCKET_QUERY = gql`
-  query Bucket($id: ID!) {
-    bucket(id: $id) {
-      id
-      title
-    }
-  }
-`;
-
 const capLength = (title: string) =>
   title.length <= 30 ? title : title.substr(0, 30) + "...";
 
@@ -22,15 +13,8 @@ const GroupAndRoundHeader = ({
   currentUser,
   router,
   color,
+  bucket,
 }) => {
-  const [{ data }] = useQuery({
-    query: BUCKET_QUERY,
-    variables: { id: router.query.bucket },
-    pause: !router.query.bucket,
-  });
-
-  const { bucket } = data ?? { bucket: null };
-
   return (
     <div className="flex items-center max-w-screen overflow-hidden">
       {process.env.SINGLE_GROUP_MODE !== "true" && (

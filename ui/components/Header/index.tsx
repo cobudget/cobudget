@@ -93,7 +93,7 @@ const JOIN_ROUND_MUTATION = gql`
 `;
 
 export const HEADER_QUERY = gql`
-  query Header($roundSlug: String, $groupSlug: String) {
+  query Header($roundSlug: String, $groupSlug: String, $bucketId: ID) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       slug
@@ -107,6 +107,10 @@ export const HEADER_QUERY = gql`
       logo
       slug
     }
+    bucket(id: $bucketId) {
+      id
+      title
+    }
   }
 `;
 
@@ -114,12 +118,20 @@ const Header = ({ currentUser, openModal }) => {
   const router = useRouter();
 
   const [
-    { data: { round, group } = { round: null, group: null }, fetching },
+    {
+      data: { round, group, bucket } = {
+        round: null,
+        group: null,
+        bucket: null,
+      },
+      fetching,
+    },
   ] = useQuery({
     query: HEADER_QUERY,
     variables: {
       roundSlug: router.query.round,
       groupSlug: process.env.SINGLE_GROUP_MODE ? "c" : router.query.group,
+      bucketId: router.query.bucket,
     },
     pause: !router.isReady,
   });
