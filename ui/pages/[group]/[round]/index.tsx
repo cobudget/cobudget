@@ -15,7 +15,6 @@ import HappySpinner from "components/HappySpinner";
 import { HeaderSkeleton } from "components/Skeleton";
 import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
-import { HEADER_QUERY } from "components/Header";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
