@@ -13,6 +13,10 @@ const CREATE_BUCKET = gql`
     createBucket(roundId: $roundId, title: $title) {
       id
       title
+      round {
+        id
+        slug
+      }
     }
   }
 `;
