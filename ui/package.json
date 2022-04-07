@@ -94,7 +94,7 @@
     "tailwindcss-animations": "^2.0.0",
     "unified": "10.1.1",
     "unist-util-visit": "4.1.0",
-    "urql": "2.0.6",
+    "urql": "2.2.0",
     "validator": "13.7.0",
     "yup": "^0.29.3"
   },

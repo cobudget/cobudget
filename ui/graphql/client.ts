@@ -48,6 +48,7 @@ export const client = (
           ContributionsPage: () => null,
           CommentSet: () => null,
           BucketsPage: () => null,
+          BucketStatusCount: () => null,
         },
         updates: {
           Mutation: {
