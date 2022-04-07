@@ -57,13 +57,11 @@ const isMemberOfGroup = async (parent, { groupId }, { user }) => {
 const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
   let roundMember;
-  try {
-    roundMember = await getRoundMember({
-      userId: user.id,
-      roundId,
-      bucketId,
-    });
-  } catch (err){}
+  roundMember = await getRoundMember({
+    userId: user.id,
+    roundId,
+    bucketId,
+  });
   // const roundMember = await prisma.roundMember.findUnique({
   //   where: { userId_roundId: { userId: user.id, roundId } },
   // });
@@ -79,14 +77,15 @@ const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
 };
 
 const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
+
   if (!user) throw new Error("You need to be logged in");
   let roundMember;
-  try {
-    roundMember = await getRoundMember({
-      userId: user.id,
-      roundId,
-    });
-  } catch(err){}
+  
+  roundMember = await getRoundMember({
+    userId: user.id,
+    roundId,
+  });
+  
   let groupMember = null;
   if (!roundMember) {
     const group = await prisma.group.findFirst({
