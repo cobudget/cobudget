@@ -59,11 +59,13 @@ const GroupIndex = ({ currentUser }) => {
   }, [router.query]);
 
   const [
-    { data: { rounds, group } = { rounds: [], group: null }, error },
+    { data: { rounds, group } = { rounds: [], group: null }, error, fetching },
   ] = useQuery({
     query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
+
+  if (!group) return null;
 
   const showTodos =
     currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
