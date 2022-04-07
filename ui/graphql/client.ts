@@ -26,7 +26,7 @@ export const getUrl = (): string => {
     return `http://localhost:3000/api`;
 
   if (process.env.DEPLOY_URL) {
-    return `https://${process.env.DEPLOY_URL}.com/api`;
+    return `https://${process.env.DEPLOY_URL}/api`;
   }
 
   return `https://${process.env.VERCEL_URL}/api`;
