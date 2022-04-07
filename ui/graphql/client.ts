@@ -15,14 +15,14 @@ import { TOP_LEVEL_QUERY } from "pages/_app";
 export const getUrl = (): string => {
   if (typeof window !== "undefined") return `/api`;
 
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}/api`;
-  }
-
   if (process.env.NODE_ENV === `development`)
     return `http://localhost:3000/api`;
 
-  return "https://cobudget.com/api";
+  if (process.env.DEPLOY_URL) {
+    return `https://${process.env.DEPLOY_URL}.com/api`;
+  }
+
+  return `https://${process.env.VERCEL_URL}/api`;
 };
 
 export const client = (
