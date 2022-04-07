@@ -46,7 +46,7 @@ const LinkCard = forwardRef((props: any, ref) => {
 const IndexPage = ({ router, currentGroup, currentUser }) => {
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
-  }, []);
+  }, [router]);
 
   const [{ data, error }] = useQuery({
     query: ROUNDS_QUERY,

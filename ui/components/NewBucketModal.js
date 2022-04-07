@@ -27,9 +27,7 @@ const NewBucketModal = ({ round, handleClose, currentGroup }) => {
       .then(({ data }) => {
         Router.push(
           "/[Group]/[round]/[bucket]",
-          `/${currentGroup?.slug ?? "c"}/${round.slug}/${
-            data.createBucket.id
-          }`
+          `/${currentGroup?.slug ?? "c"}/${round.slug}/${data.createBucket.id}`
         );
         handleClose();
       })

@@ -10,16 +10,12 @@ import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
 import { allocateToMember } from "../../controller";
-import {
-  groupHasDiscourse,
-  generateComment,
-} from "../../subscribers/discourse.subscriber";
+import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketMinGoal,
   bucketTotalContributions,
   canViewRound,
-  deleteRoundMember,
   getRoundMember,
   getCurrentGroupAndMember,
   getGroupMember,
@@ -27,11 +23,14 @@ import {
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
   isGrantingOpen,
+  roundMemberBalance,
   statusTypeToQuery,
 } from "./helpers";
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
+
+const { groupHasDiscourse, generateComment } = subscribers;
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -99,7 +98,7 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
 
   if (!(roundMember?.isApproved || groupMember?.isAdmin))
     throw new Error(
-      "You need to be approved member of this round or group admin to view round members"
+      "You need to be an approved participant in this round or a group admin to view round participants"
     );
   return skip;
 };
@@ -141,7 +140,6 @@ const isCollModOrAdmin = async (parent, { bucketId, roundId }, { user }) => {
 
 const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  if (!groupId) return skip;
   const groupMember = await prisma.groupMember.findUnique({
     where: {
       groupId_userId: { groupId: groupId, userId: user.id },
@@ -337,7 +335,7 @@ const resolvers = {
     ),
     bucket: async (parent, { id }) => {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
-      if (bucket.deleted) return null;
+      if (!bucket || bucket.deleted) return null;
       return bucket;
     },
     bucketsPage: async (
@@ -413,7 +411,8 @@ const resolvers = {
         return await prisma.roundMember.findMany({
           where: {
             roundId,
-            ...(typeof isApproved === "boolean" && { isApproved }),
+            isApproved,
+            ...(!isApproved && { isRemoved: false }),
           },
         });
       }
@@ -422,7 +421,7 @@ const resolvers = {
       isCollMemberOrGroupAdmin,
       async (
         parent,
-        { roundId, isApproved = true, search, offset = 0, limit = 10 },
+        { roundId, isApproved, search, offset = 0, limit = 10 },
         { user }
       ) => {
         const isAdmin = await isCollAdmin({
@@ -434,7 +433,8 @@ const resolvers = {
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {
             roundId,
-            ...(typeof isApproved === "boolean" && { isApproved }),
+            isApproved,
+            ...(!isApproved && { isRemoved: false }),
             ...(search && {
               OR: [
                 {
@@ -618,66 +618,65 @@ const resolvers = {
         return group;
       }
     ),
-    createRound: combineResolvers(
-      isGroupAdmin,
-      async (
-        parent,
-        { groupId, slug, title, currency, registrationPolicy },
-        { user }
-      ) => {
-        let singleRound = false;
-        if (!groupId) {
-          let rootGroup = await prisma.group.findUnique({
-            where: { slug: "c" },
+    createRound: async (
+      parent,
+      { groupId, slug, title, currency, registrationPolicy },
+      { user }
+    ) => {
+      let singleRound = false;
+      if (!groupId) {
+        let rootGroup = await prisma.group.findUnique({
+          where: { slug: "c" },
+        });
+        if (!rootGroup) {
+          rootGroup = await prisma.group.create({
+            data: { slug: "c", name: "Root" },
           });
-          if (!rootGroup) {
-            rootGroup = await prisma.group.create({
-              data: { slug: "c", name: "Root" },
-            });
-          }
-          groupId = rootGroup.id;
-          singleRound = true;
         }
-        const round = await prisma.round.create({
-          data: {
-            slug,
-            title,
-            currency,
-            registrationPolicy,
-            group: { connect: { id: groupId } },
-            singleRound,
-            statusAccount: { create: {} },
-            roundMember: {
-              create: {
-                user: { connect: { id: user.id } },
-                isAdmin: true,
-                isApproved: true,
-                statusAccount: { create: {} },
-                incomingAccount: { create: {} },
-                outgoingAccount: { create: {} },
-              },
-            },
-            fields: {
-              create: {
-                name: "Description",
-                description: "Describe your bucket",
-                type: "MULTILINE_TEXT",
-                isRequired: false,
-                position: 1001,
-              },
+        groupId = rootGroup.id;
+        singleRound = true;
+      } else {
+        await isGroupAdmin(null, { groupId }, { user });
+      }
+      const round = await prisma.round.create({
+        data: {
+          slug,
+          title,
+          currency,
+          registrationPolicy,
+          group: { connect: { id: groupId } },
+          singleRound,
+          statusAccount: { create: {} },
+          roundMember: {
+            create: {
+              user: { connect: { id: user.id } },
+              isAdmin: true,
+              isApproved: true,
+              statusAccount: { create: {} },
+              incomingAccount: { create: {} },
+              outgoingAccount: { create: {} },
             },
           },
-        });
+          fields: {
+            create: {
+              name: "Description",
+              description: "Describe your bucket",
+              type: "MULTILINE_TEXT",
+              isRequired: false,
+              position: 1001,
+            },
+          },
+        },
+      });
 
-        // await eventHub.publish("create-round", {
-        //   currentGroup,
-        //   currentGroupMember,
-        //   round: round,
-        // });
+      // await eventHub.publish("create-round", {
+      //   currentGroup,
+      //   currentGroupMember,
+      //   round: round,
+      // });
 
-        return round;
-      }
-    ),
+      return round;
+    },
     editRound: combineResolvers(
       isCollOrGroupAdmin,
       async (
@@ -713,11 +712,13 @@ const resolvers = {
         });
       }
     ),
-    deleteRound: combineResolvers(isGroupAdmin, async (parent, { roundId }) =>
-      prisma.round.update({
-        where: { id: roundId },
-        data: { deleted: true },
-      })
+    deleteRound: combineResolvers(
+      isCollOrGroupAdmin,
+      async (parent, { roundId }) =>
+        prisma.round.update({
+          where: { id: roundId },
+          data: { deleted: true },
+        })
     ),
     addGuideline: combineResolvers(
       isCollOrGroupAdmin,
@@ -1606,7 +1607,7 @@ const resolvers = {
             },
             update: {
               collMemberships: {
-                connectOrCreate: {
+                upsert: {
                   create: {
                     isApproved: true,
                     round: { connect: { id: roundId } },
@@ -1614,6 +1615,10 @@ const resolvers = {
                     statusAccount: { create: {} },
                     incomingAccount: { create: {} },
                     outgoingAccount: { create: {} },
+                  },
+                  update: {
+                    isApproved: true,
+                    isRemoved: false,
                   },
                   where: {
                     userId_roundId: {
@@ -1642,7 +1647,7 @@ const resolvers = {
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
 
-        let newGroupMembers = [];
+        const newGroupMembers = [];
 
         for (let email of emails) {
           email = email.trim().toLowerCase();
@@ -1707,7 +1712,7 @@ const resolvers = {
     ),
     deleteGroupMember: combineResolvers(
       isGroupAdmin,
-      async (parent, { groupMemberId }) => {
+      async (parent, { groupId, groupMemberId }) => {
         return prisma.groupMember.delete({
           where: { id: groupMemberId },
         });
@@ -1738,7 +1743,22 @@ const resolvers = {
     deleteMember: combineResolvers(
       isCollOrGroupAdmin,
       async (parent, { roundId, memberId }) => {
-        return deleteRoundMember({ roundMemberId: memberId });
+        const roundMember = await prisma.roundMember.findUnique({
+          where: { id: memberId },
+        });
+        if (!roundMember)
+          throw new Error("This member does not exist in this collection");
+
+        if ((await roundMemberBalance(roundMember)) !== 0) {
+          throw new Error(
+            "You can only remove a round participant with 0 balance"
+          );
+        }
+
+        return prisma.roundMember.update({
+          where: { id: memberId },
+          data: { isApproved: false, hasJoined: false, isRemoved: true },
+        });
       }
     ),
     // deleteGroup: async (parent, { groupId }, { user }) => {
@@ -2116,7 +2136,7 @@ const resolvers = {
       });
 
       if (!member) {
-        throw new Error("You are not a member of this round");
+        throw new Error("You are not a participant in this round");
       }
 
       if (member.hasJoined) {
@@ -2150,17 +2170,28 @@ const resolvers = {
       )
         throw new Error("This round is invite only");
 
-      const roundMember = await prisma.roundMember.create({
-        data: {
+      const isApproved =
+        currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN";
+
+      const roundMember = await prisma.roundMember.upsert({
+        where: { userId_roundId: { userId: user.id, roundId } },
+        create: {
           round: { connect: { id: roundId } },
           user: { connect: { id: user.id } },
-          isApproved:
-            currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN",
+          isApproved,
           statusAccount: { create: {} },
           incomingAccount: { create: {} },
           outgoingAccount: { create: {} },
         },
+        update: { isApproved, hasJoined: true, isRemoved: false },
       });
+
+      if (!isApproved) {
+        await emailService.roundJoinRequest({
+          round,
+          roundMember,
+        });
+      }
 
       return roundMember;
     },
@@ -2187,50 +2218,7 @@ const resolvers = {
         where: { id: member.userId },
       }),
     balance: async (member) => {
-      if (!member.statusAccountId) return 0;
-
-      // console.time("memberBalanceTransactions");
-      // const {
-      //   _sum: { amount: debit },
-      // } = await prisma.transaction.aggregate({
-      //   where: { toAccountId: member.statusAccountId },
-      //   _sum: { amount: true },
-      // });
-
-      // const {
-      //   _sum: { amount: credit },
-      // } = await prisma.transaction.aggregate({
-      //   where: { fromAccountId: member.statusAccountId },
-      //   _sum: { amount: true },
-      // });
-
-      // console.timeEnd("memberBalanceTransactions");
-
-      // const debitMinusCredit = debit - credit;
-
-      // console.time("memberBalanceAllocationsAndContributions");
-
-      const {
-        _sum: { amount: totalAllocations },
-      } = await prisma.allocation.aggregate({
-        where: { roundMemberId: member.id },
-        _sum: { amount: true },
-      });
-
-      const {
-        _sum: { amount: totalContributions },
-      } = await prisma.contribution.aggregate({
-        where: { roundMemberId: member.id },
-        _sum: { amount: true },
-      });
-
-      // console.timeEnd("memberBalanceAllocationsAndContributions");
-
-      // if (debitMinusCredit !== (totalAllocations - totalContributions)) {
-      //   console.error("Member balance is not adding up");
-      // }
-
-      return totalAllocations - totalContributions;
+      return roundMemberBalance(member);
     },
     email: async (member, _, { user }) => {
       if (!user) return null;

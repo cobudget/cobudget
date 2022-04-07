@@ -7,17 +7,17 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 
+const defaultTabs = [
+  { name: "General", component: GeneralSettings },
+  { name: "Guidelines", component: Guidelines },
+  { name: "Bucket Review", component: BucketReview },
+  { name: "Bucket Form", component: CustomFields },
+  { name: "Funding", component: Granting },
+  { name: "Tags", component: Tags },
+];
+
 const RoundSettings = ({ round, currentGroup, currentUser }) => {
   const [selectedTab, setSelectedTab] = useState(0);
-
-  const defaultTabs = [
-    { name: "General", component: GeneralSettings },
-    { name: "Guidelines", component: Guidelines },
-    { name: "Bucket Review", component: BucketReview },
-    { name: "Bucket Form", component: CustomFields },
-    { name: "Funding", component: Granting },
-    { name: "Tags", component: Tags },
-  ];
 
   const tabs = useMemo(
     () =>

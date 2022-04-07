@@ -76,6 +76,7 @@ const JOIN_ROUND_MUTATION = gql`
       isAdmin
       isModerator
       isApproved
+      isRemoved
       balance
       round {
         id
@@ -97,6 +98,7 @@ export const ROUND_QUERY = gql`
       slug
       title
       color
+      registrationPolicy
     }
   }
 `;
@@ -162,7 +164,8 @@ const Header = ({ currentUser, currentGroup, openModal }) => {
           <div className="py-2 sm:flex sm:p-0 sm:items-center">
             {currentUser ? (
               <>
-                {currentUser.currentCollMember?.hasJoined === false ? (
+                {currentUser.currentCollMember?.isApproved &&
+                currentUser.currentCollMember?.hasJoined === false ? (
                   <NavItem
                     primary
                     roundColor={color}
@@ -182,35 +185,40 @@ const Header = ({ currentUser, currentGroup, openModal }) => {
                     Accept Invitation
                   </NavItem>
                 ) : null}
-                {!currentUser.currentCollMember &&
-                  round &&
-                  (round.registrationPolicy !== "INVITE_ONLY" ||
-                    currentUser.currentGroupMember?.isAdmin) && (
-                    <NavItem
-                      primary
-                      roundColor={color}
-                      onClick={() =>
-                        joinRound({ roundId: round?.id }).then(
-                          ({ data, error }) => {
-                            console.log({ data });
-                            if (error) {
-                              toast.error(error.message);
-                            } else {
-                              toast.success(
-                                round.registrationPolicy === "REQUEST_TO_JOIN"
-                                  ? "Request sent!"
-                                  : "You joined this round!"
-                              );
+                {
+                  // you can ask to be a member if you've either never been a member, or been a member but been removed
+                  (!currentUser.currentCollMember ||
+                    (!currentUser.currentCollMember.isApproved &&
+                      currentUser.currentCollMember.isRemoved)) &&
+                    round &&
+                    (round.registrationPolicy !== "INVITE_ONLY" ||
+                      currentUser.currentGroupMember?.isAdmin) && (
+                      <NavItem
+                        primary
+                        roundColor={color}
+                        onClick={() =>
+                          joinRound({ roundId: round?.id }).then(
+                            ({ data, error }) => {
+                              console.log({ data });
+                              if (error) {
+                                toast.error(error.message);
+                              } else {
+                                toast.success(
+                                  round.registrationPolicy === "REQUEST_TO_JOIN"
+                                    ? "Request sent!"
+                                    : "You joined this round!"
+                                );
+                              }
                             }
-                          }
-                        )
-                      }
-                    >
-                      {round.registrationPolicy === "REQUEST_TO_JOIN"
-                        ? "Request to join"
-                        : "Join round"}
-                    </NavItem>
-                  )}
+                          )
+                        }
+                      >
+                        {round.registrationPolicy === "REQUEST_TO_JOIN"
+                          ? "Request to join"
+                          : "Join round"}
+                      </NavItem>
+                    )
+                }
                 {!currentUser.currentGroupMember && !round && currentGroup && (
                   <NavItem
                     primary

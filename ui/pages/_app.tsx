@@ -31,6 +31,10 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
+      tags {
+        id
+        value
+      }
       allowStretchGoals
       requireBucketApproval
       bucketReviewIsOpen
@@ -92,6 +96,7 @@ export const TOP_LEVEL_QUERY = gql`
         isAdmin
         isModerator
         isApproved
+        isRemoved
         hasJoined
         balance
         round {
@@ -197,5 +202,4 @@ const MyApp = ({ Component, pageProps }) => {
   );
 };
 
-//@ts-ignore
 export default withUrqlClient(client, { ssr: false })(MyApp as any);

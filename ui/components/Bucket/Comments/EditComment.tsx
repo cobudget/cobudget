@@ -11,7 +11,6 @@ const schema = yup.object().shape({
 });
 
 const EditComment = ({ comment, handleDone }) => {
-  const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { editComment, bucketId, round } = useContext<any>(Context);
 

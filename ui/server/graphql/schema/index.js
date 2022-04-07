@@ -25,12 +25,12 @@ const schema = gql`
     groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
     membersPage(
       roundId: ID!
-      isApproved: Boolean
+      isApproved: Boolean!
       search: String
       offset: Int
       limit: Int
     ): MembersPage
-    members(roundId: ID!, isApproved: Boolean): [RoundMember]
+    members(roundId: ID!, isApproved: Boolean!): [RoundMember]
     categories(groupId: ID!): [Category!]
     contributionsPage(roundId: ID!, offset: Int, limit: Int): ContributionsPage
     roundTransactions(
@@ -150,7 +150,7 @@ const schema = gql`
       memberId: ID!
       isAdmin: Boolean
     ): GroupMember
-    deleteGroupMember(groupMemberId: ID!): GroupMember
+    deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -346,6 +346,7 @@ const schema = gql`
     isAdmin: Boolean!
     isModerator: Boolean
     isApproved: Boolean!
+    isRemoved: Boolean
     createdAt: Date
     balance: Int # stored as cents
     email: String
@@ -358,7 +359,7 @@ const schema = gql`
     moreExist: Boolean
     members(
       roundId: ID!
-      isApproved: Boolean
+      isApproved: Boolean!
       search: String
       offset: Int
       limit: Int
