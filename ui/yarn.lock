@@ -2267,7 +2267,7 @@
   dependencies:
     wonka ">= 4.0.9"
 
-"@urql/exchange-graphcache@^4.3.6":
+"@urql/exchange-graphcache@4.3.6":
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/@urql/exchange-graphcache/-/exchange-graphcache-4.3.6.tgz#fea25b8877a704a9d65bdd29578fa6e9fd31bfa5"
   integrity sha512-RDEi1954lcnwBK2dwQGaxOInuebZrRliz2v7aAuQasj49N9bWYrlSkBfELG14EzOL7NI23IUaeLeaDN7MouDJg==
