@@ -92,39 +92,8 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-export const HEADER_QUERY = gql`
-  query Header($roundSlug: String, $groupSlug: String, $bucketId: ID) {
-    round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
-      id
-      slug
-      title
-      color
-      registrationPolicy
-    }
-    group(groupSlug: $groupSlug) {
-      id
-      name
-      logo
-      slug
-    }
-    bucket(id: $bucketId) {
-      id
-      title
-    }
-  }
-`;
-
-const Header = ({ currentUser, openModal }) => {
+const Header = ({ currentUser, openModal, group, round, bucket }) => {
   const router = useRouter();
-  const [{ data, error }] = useQuery({
-    query: HEADER_QUERY,
-    variables: {
-      roundSlug: router.query.round,
-      groupSlug: process.env.SINGLE_GROUP_MODE ? "c" : router.query.group,
-      bucketId: router.query.bucket,
-    },
-  });
-  const { round = null, group = null, bucket = null } = data ?? {};
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);

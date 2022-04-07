@@ -11,7 +11,7 @@ import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
 
 export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
+  query TopLevelQuery($roundSlug: String, $groupSlug: String, $bucketId: ID) {
     currentUser {
       id
       username
@@ -120,6 +120,10 @@ export const TOP_LEVEL_QUERY = gql`
       discourseUrl
       finishedTodos
     }
+    bucket(id: $bucketId) {
+      id
+      title
+    }
   }
 `;
 
@@ -131,11 +135,12 @@ const MyApp = ({ Component, pageProps }) => {
       groupSlug:
         process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
       roundSlug: router.query.round,
+      bucketId: router.query.bucket,
     },
-    pause: !router.isReady,
   });
 
-  const { currentUser = null, round = null, group = null } = data ?? {};
+  const { currentUser = null, round = null, group = null, bucket = null } =
+    data ?? {};
 
   useEffect(() => {
     const jssStyles = document.querySelector("#jss-server-side");
@@ -164,7 +169,13 @@ const MyApp = ({ Component, pageProps }) => {
       {/* legacy Modal component, use individual modals where they are called instead */}
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
-      <Layout currentUser={currentUser} openModal={openModal}>
+      <Layout
+        currentUser={currentUser}
+        openModal={openModal}
+        group={group}
+        round={round}
+        bucket={bucket}
+      >
         <Component
           {...pageProps}
           currentUser={currentUser}
@@ -178,4 +189,7 @@ const MyApp = ({ Component, pageProps }) => {
   );
 };
 
-export default withUrqlClient(client, { ssr: false })(MyApp as any);
+export default withUrqlClient(client, {
+  ssr: false,
+  // staleWhileRevalidate: true,
+})(MyApp as any);

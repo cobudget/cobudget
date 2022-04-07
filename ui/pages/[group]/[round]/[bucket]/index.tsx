@@ -15,6 +15,7 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import { HEADER_QUERY } from "components/Header";
 import prisma from "server/prisma";
+import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -256,7 +257,7 @@ export async function getStaticProps(ctx) {
   // used on this page.
 
   await client
-    .query(HEADER_QUERY, {
+    .query(TOP_LEVEL_QUERY, {
       groupSlug: ctx.params.group,
       roundSlug: ctx.params.round,
       bucketId: ctx.params.bucket,

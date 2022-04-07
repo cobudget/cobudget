@@ -9,7 +9,7 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import GroupPage, { GROUP_PAGE_QUERY } from "../components/Group";
 
-import { HEADER_QUERY } from "components/Header";
+import { TOP_LEVEL_QUERY } from "./_app";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -107,7 +107,7 @@ export async function getStaticProps(ctx) {
     // This query is used to populate the cache for the query
     // used on this page.
     await client.query(GROUP_PAGE_QUERY, { groupSlug: "c" }).toPromise();
-    await client.query(HEADER_QUERY, { groupSlug: "c" }).toPromise();
+    await client.query(TOP_LEVEL_QUERY, { groupSlug: "c" }).toPromise();
 
     return {
       props: {

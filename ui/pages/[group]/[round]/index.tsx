@@ -17,6 +17,7 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import { HEADER_QUERY } from "components/Header";
 import prisma from "server/prisma";
+import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const ROUND_QUERY = gql`
   query Round($roundSlug: String!, $groupSlug: String) {
@@ -414,7 +415,7 @@ export async function getStaticProps(ctx) {
   //   })
   //   .toPromise();
 
-  await client.query(HEADER_QUERY, variables).toPromise();
+  await client.query(TOP_LEVEL_QUERY, variables).toPromise();
 
   return {
     props: {
