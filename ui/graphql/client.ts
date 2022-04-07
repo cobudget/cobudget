@@ -31,6 +31,7 @@ export const client = (
 ) => {
   return {
     url: getUrl(),
+    requestPolicy: "cache-and-network",
     exchanges: [
       // errorExchange({
       //   // onError: (error) => {
