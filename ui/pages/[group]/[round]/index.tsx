@@ -399,10 +399,21 @@ export async function getStaticProps(ctx) {
     roundSlug: ctx.params.round,
   };
 
-  await client.query(ROUND_QUERY, variables).toPromise();
-  await client
-    .query(BUCKETS_QUERY, { ...variables, offset: 0, limit: 12, status: [] })
-    .toPromise();
+  const { data } = await client.query(ROUND_QUERY, variables).toPromise();
+
+  // TODO: try to get static generation of bucket list to work (it does not revalidate)
+  // const statusFilter = stringOrArrayIntoArray(
+  //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
+  // );
+  // await client
+  //   .query(BUCKETS_QUERY, {
+  //     ...variables,
+  //     offset: 0,
+  //     limit: 12,
+  //     status: statusFilter,
+  //   })
+  //   .toPromise();
+
   await client.query(HEADER_QUERY, variables).toPromise();
 
   return {
