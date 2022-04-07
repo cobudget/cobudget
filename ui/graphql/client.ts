@@ -75,7 +75,7 @@ export const client = (
                       roundSlug: result.joinRound.round.slug,
                     },
                   },
-                  (data) => {
+                  (data: any) => {
                     console.log({ data });
                     return {
                       ...data,
@@ -202,7 +202,7 @@ export const client = (
                         groupSlug: field.arguments.groupSlug,
                       },
                     },
-                    (data) => {
+                    (data: any) => {
                       data.rounds = data.rounds.filter(
                         (round) => round.id !== roundId
                       );
@@ -221,7 +221,7 @@ export const client = (
                       query: BUCKET_QUERY,
                       variables: field.arguments,
                     },
-                    (data) => {
+                    (data: any) => {
                       data.bucket.tags = data.bucket.tags.filter(
                         (tag) => tag.id !== tagId
                       );
@@ -230,7 +230,7 @@ export const client = (
                   );
                 });
             },
-            createBucket(result: any, { roundId }, cache) {
+            createBucket(result: any, args, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -239,7 +239,10 @@ export const client = (
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
-                .filter((field) => field.arguments.roundId === roundId)
+                .filter(
+                  (field) =>
+                    field.arguments.roundSlug === result.createBucket.round.slug
+                )
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
@@ -254,7 +257,7 @@ export const client = (
                       query: BUCKETS_QUERY,
                       variables: field.arguments,
                     },
-                    (data) => {
+                    (data: any) => {
                       data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
                         (bucket) => bucket.id !== bucketId
                       );
@@ -275,7 +278,7 @@ export const client = (
                       order: "desc",
                     },
                   },
-                  (data) => {
+                  (data: any) => {
                     return {
                       ...data,
                       commentSet: {
@@ -301,7 +304,7 @@ export const client = (
                       order: "desc",
                     },
                   },
-                  (data) => {
+                  (data: any) => {
                     return {
                       ...data,
                       commentSet: {
@@ -430,12 +433,5 @@ export const client = (
       ssrExchange,
       fetchExchange,
     ],
-    // fetchOptions: {
-    //   headers: {
-    //     //@ts-ignore
-    //     ...ctx?.req?.headers,
-    //   },
-    //   credentials: "include",
-    // },
   };
 };
