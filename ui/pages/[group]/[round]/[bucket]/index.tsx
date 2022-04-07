@@ -1,4 +1,4 @@
-import { useQuery, gql } from "urql";
+import { useQuery, gql, ssrExchange } from "urql";
 import { useState } from "react";
 import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
 import Bucket from "../../../../components/Bucket";
@@ -11,6 +11,10 @@ import Monster from "components/Monster";
 import classNames from "utils/classNames";
 import HappySpinner from "components/HappySpinner";
 import { useRouter } from "next/router";
+import { initUrqlClient } from "next-urql";
+import { client as createClientConfig } from "graphql/client";
+import { HEADER_QUERY } from "components/Header";
+import prisma from "server/prisma";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -241,5 +245,50 @@ const BucketIndex = ({ currentUser }) => {
     </>
   );
 };
+
+export async function getStaticProps(ctx) {
+  const ssrCache = ssrExchange({
+    isClient: false,
+  });
+  const client = initUrqlClient(createClientConfig(ssrCache), false);
+
+  // This query is used to populate the cache for the query
+  // used on this page.
+
+  await client
+    .query(HEADER_QUERY, {
+      groupSlug: ctx.params.group,
+      roundSlug: ctx.params.round,
+      bucketId: ctx.params.bucket,
+    })
+    .toPromise();
+  await client.query(BUCKET_QUERY, { id: ctx.params.bucket }).toPromise();
+
+  return {
+    props: {
+      // urqlState is a keyword here so withUrqlClient can pick it up.
+      urqlState: ssrCache.extractData(),
+    },
+    revalidate: 60,
+  };
+}
+
+export async function getStaticPaths() {
+  const buckets = await prisma.bucket.findMany({
+    where: { publishedAt: { not: null }, round: { visibility: "PUBLIC" } },
+    include: { round: { include: { group: true } } },
+  });
+
+  return {
+    paths: buckets.map((bucket) => ({
+      params: {
+        group: bucket.round.group.slug,
+        round: bucket.round.slug,
+        bucket: bucket.id,
+      },
+    })),
+    fallback: true, // false or 'blocking'
+  };
+}
 
 export default BucketIndex;
