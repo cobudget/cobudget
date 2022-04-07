@@ -55,8 +55,8 @@ const isMemberOfGroup = async (parent, { groupId }, { user }) => {
 
 const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  let roundMember;
-  roundMember = await getRoundMember({
+
+  const roundMember = await getRoundMember({
     userId: user.id,
     roundId,
     bucketId,
@@ -76,15 +76,13 @@ const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
 };
 
 const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
-
   if (!user) throw new Error("You need to be logged in");
-  let roundMember;
-  
-  roundMember = await getRoundMember({
+
+  const roundMember = await getRoundMember({
     userId: user.id,
     roundId,
   });
-  
+
   let groupMember = null;
   if (!roundMember) {
     const group = await prisma.group.findFirst({

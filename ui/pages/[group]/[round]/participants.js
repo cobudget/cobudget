@@ -8,9 +8,9 @@ const RoundMembersPage = ({ round, currentUser }) => {
   return (
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
-      {currentUser?.currentCollMember?.isApproved ?
+      {currentUser?.currentCollMember?.isApproved ? (
         <Members round={round} currentUser={currentUser} />
-      : (
+      ) : (
         <PageHero>
           <div className="flex justify-between">
             <h2 className="text-2xl font-semibold">
