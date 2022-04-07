@@ -116,26 +116,15 @@ export const HEADER_QUERY = gql`
 
 const Header = ({ currentUser, openModal }) => {
   const router = useRouter();
-
-  const [
-    {
-      data: { round, group, bucket } = {
-        round: null,
-        group: null,
-        bucket: null,
-      },
-      fetching,
-    },
-  ] = useQuery({
+  const [{ data, error }] = useQuery({
     query: HEADER_QUERY,
     variables: {
       roundSlug: router.query.round,
       groupSlug: process.env.SINGLE_GROUP_MODE ? "c" : router.query.group,
       bucketId: router.query.bucket,
     },
-    pause: !router.isReady,
   });
-  console.log({ group, round });
+  const { round = null, group = null, bucket = null } = data ?? {};
   const [isMenuOpen, setMenuOpen] = useState(false);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);

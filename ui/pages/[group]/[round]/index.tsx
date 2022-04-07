@@ -126,7 +126,6 @@ const Page = ({
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
-    pause: !round,
   });
 
   const moreExist = data?.bucketsPage.moreExist;
@@ -233,7 +232,6 @@ const RoundPage = ({ currentUser }) => {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
-    pause: !router.isReady,
   });
   const round = data?.round;
 
@@ -242,7 +240,9 @@ const RoundPage = ({ currentUser }) => {
   );
 
   const { tag, s, f } = router.query;
-  const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
+  const [statusFilter, setStatusFilter] = useState(
+    stringOrArrayIntoArray(f ?? getStandardFilter(bucketStatusCount))
+  );
 
   useEffect(() => {
     setStatusFilter(stringOrArrayIntoArray(f));
@@ -387,7 +387,9 @@ const RoundPage = ({ currentUser }) => {
 };
 
 export async function getStaticProps(ctx) {
-  const ssrCache = ssrExchange({ isClient: false });
+  const ssrCache = ssrExchange({
+    isClient: false,
+  });
   const client = initUrqlClient(createClientConfig(ssrCache), false);
 
   // This query is used to populate the cache for the query
