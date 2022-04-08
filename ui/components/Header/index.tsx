@@ -122,7 +122,7 @@ const Header = ({
     (!currentUser.currentCollMember ||
       (!currentUser.currentCollMember.isApproved &&
         currentUser.currentCollMember.isRemoved));
-  const isGroupAdmin = currentUser.currentGroupMember?.isAdmin;
+  const isGroupAdmin = currentUser?.currentGroupMember?.isAdmin;
   const allowedToJoinOrRequest =
     (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
 
@@ -130,8 +130,8 @@ const Header = ({
 
   console.log({
     notAMember,
-    fetching: currentUser.fetching,
-    collMember: currentUser.currentCollMember,
+    fetching: fetchingUser,
+    collMember: currentUser?.currentCollMember,
     isGroupAdmin,
     round,
     allowedToJoinOrRequest,
