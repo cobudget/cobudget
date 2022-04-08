@@ -36,11 +36,7 @@ const Modal = ({ active, closeModal, currentUser }) => {
     >
       <div className={classes.innerModal}>
         {active && (
-          <ModalComponent
-            currentGroup={currentGroup}
-            closeModal={closeModal}
-            currentUser={currentUser}
-          />
+          <ModalComponent closeModal={closeModal} currentUser={currentUser} />
         )}
       </div>
     </MUIModal>
