@@ -119,9 +119,9 @@ const Header = ({
 
   const notAMember =
     !fetchingUser &&
-    (!currentUser.currentCollMember ||
-      (!currentUser.currentCollMember.isApproved &&
-        currentUser.currentCollMember.isRemoved));
+    (!currentUser?.currentCollMember ||
+      (!currentUser?.currentCollMember.isApproved &&
+        currentUser?.currentCollMember.isRemoved));
   const isGroupAdmin = currentUser?.currentGroupMember?.isAdmin;
   const allowedToJoinOrRequest =
     (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
