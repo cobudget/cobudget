@@ -115,11 +115,21 @@ const Header = ({ currentUser, openModal, group, round, bucket }) => {
     (!currentUser.currentCollMember ||
       (!currentUser.currentCollMember.isApproved &&
         currentUser.currentCollMember.isRemoved));
+  const isGroupAdmin = currentUser.currentGroupMember?.isAdmin;
   const allowedToJoinOrRequest =
-    (round && round.registrationPolicy !== "INVITE_ONLY") ||
-    currentUser.currentGroupMember?.isAdmin;
+    (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
+
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
 
+  console.log({
+    notAMember,
+    fetching: currentUser.fetching,
+    collMember: currentUser.currentCollMember,
+    isGroupAdmin,
+    round,
+    allowedToJoinOrRequest,
+    showJoinRoundButton,
+  });
   return (
     <>
       <Head>
