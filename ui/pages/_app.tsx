@@ -10,8 +10,8 @@ import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
 
-export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($roundSlug: String, $groupSlug: String, $bucketId: ID) {
+export const CURRENT_USER_QUERY = gql`
+  query CurrentUser($roundSlug: String, $groupSlug: String) {
     currentUser {
       id
       username
@@ -66,6 +66,11 @@ export const TOP_LEVEL_QUERY = gql`
         hasDiscourseApiKey
       }
     }
+  }
+`;
+
+export const TOP_LEVEL_QUERY = gql`
+  query TopLevelQuery($roundSlug: String, $groupSlug: String, $bucketId: ID) {
     round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
       slug
@@ -139,15 +144,19 @@ const MyApp = ({ Component, pageProps }) => {
     },
   });
 
-  const { currentUser = null, round = null, group = null, bucket = null } =
-    data ?? {};
-
-  useEffect(() => {
-    const jssStyles = document.querySelector("#jss-server-side");
-    if (jssStyles && jssStyles.parentNode)
-      jssStyles.parentNode.removeChild(jssStyles);
+  const [
+    { data: currentUserData, fetching: fetchingUser, error: errorUser },
+  ] = useQuery({
+    query: CURRENT_USER_QUERY,
+    variables: {
+      groupSlug:
+        process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
+      roundSlug: router.query.round,
+    },
   });
 
+  const { round = null, group = null, bucket = null } = data ?? {};
+  const { currentUser = null } = currentUserData ?? {};
   // legacy modal logic
   const [modal, setModal] = useState(null);
   const openModal = (name) => {
