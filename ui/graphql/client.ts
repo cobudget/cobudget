@@ -34,10 +34,10 @@ export const getUrl = (): string => {
 export const client = (
   ssrExchange: SSRExchange
   //ctx: NextUrqlContext | undefined
-): { url: string; requestPolicy: RequestPolicy; exchanges: Exchange[] } => {
+): { url: string; exchanges: Exchange[] } => {
   return {
     url: getUrl(),
-    requestPolicy: "cache-and-network",
+    // requestPolicy: "cache-and-network",
     exchanges: [
       // errorExchange({
       //   // onError: (error) => {
