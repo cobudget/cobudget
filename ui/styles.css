@@ -77,7 +77,7 @@ h5 {
   @apply list-inside;
 }
 .markdown li > * {
-  display: inline-block;
+  display: inline;
 }
 .markdown ul {
   @apply list-disc;
