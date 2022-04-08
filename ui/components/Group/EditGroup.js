@@ -32,7 +32,6 @@ const EDIT_GROUP = gql`
       name
       logo
       slug
-      customDomain
     }
   }
 `;
