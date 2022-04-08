@@ -1755,7 +1755,13 @@ const resolvers = {
 
         return prisma.roundMember.update({
           where: { id: memberId },
-          data: { isApproved: false, hasJoined: false, isRemoved: true },
+          data: {
+            isApproved: false,
+            hasJoined: false,
+            isRemoved: true,
+            isAdmin: false,
+            isModerator: false,
+          },
         });
       }
     ),
