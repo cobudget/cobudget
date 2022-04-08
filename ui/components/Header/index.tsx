@@ -92,7 +92,14 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({ currentUser, openModal, group, round, bucket }) => {
+const Header = ({
+  currentUser,
+  fetchingUser,
+  openModal,
+  group,
+  round,
+  bucket,
+}) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
 
@@ -111,7 +118,7 @@ const Header = ({ currentUser, openModal, group, round, bucket }) => {
     : process.env.PLATFORM_NAME;
 
   const notAMember =
-    !currentUser.fetching &&
+    !fetchingUser &&
     (!currentUser.currentCollMember ||
       (!currentUser.currentCollMember.isApproved &&
         currentUser.currentCollMember.isRemoved));

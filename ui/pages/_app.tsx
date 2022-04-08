@@ -156,7 +156,7 @@ const MyApp = ({ Component, pageProps }) => {
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};
-  let { currentUser = null } = currentUserData ?? {};
+  const { currentUser = null } = currentUserData ?? {};
 
   currentUser = { ...currentUser, fetching: fetchingUser };
   // legacy modal logic
@@ -182,6 +182,7 @@ const MyApp = ({ Component, pageProps }) => {
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
+        fetchingUser={fetchingUser}
         openModal={openModal}
         group={group}
         round={round}

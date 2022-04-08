@@ -10,12 +10,21 @@ const LinkOut = ({ href, children }) => {
   );
 };
 
-const Layout = ({ children, currentUser, openModal, group, round, bucket }) => {
+const Layout = ({
+  children,
+  currentUser,
+  fetchingUser,
+  openModal,
+  group,
+  round,
+  bucket,
+}) => {
   return (
     <div className="flex flex-col min-h-screen">
       <div>
         <Header
           currentUser={currentUser}
+          fetchingUser={fetchingUser}
           openModal={openModal}
           group={group}
           round={round}
