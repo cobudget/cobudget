@@ -9,7 +9,6 @@ import {
 import { NextUrqlContext, NextUrqlPageContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
-// import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
 import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
