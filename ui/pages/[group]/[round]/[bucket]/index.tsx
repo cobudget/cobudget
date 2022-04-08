@@ -15,6 +15,7 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
+import capitalize from "utils/capitalize";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -157,8 +158,8 @@ const BucketIndex = ({ currentUser }) => {
   if (!bucket || !bucket.round)
     return (
       <div className="text-center mt-7">
-        This bucket either doesn&apos;t exist or you don&apos;t have access to
-        it
+        This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
+        don&apos;t have access to it
       </div>
     );
 
@@ -193,7 +194,7 @@ const BucketIndex = ({ currentUser }) => {
                 )
               }
             >
-              Bucket
+              {capitalize(process.env.BUCKET_NAME_SINGULAR)}
             </Tab>
             <Tab
               className={({ selected }) =>

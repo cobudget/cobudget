@@ -118,7 +118,7 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }) => [
       chatItems: [
         {
           type: INPUT,
-          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the bucket creators.`,
+          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${process.env.BUCKET_NAME_SINGULAR} creators.`,
           sideEffect: (answer) => {
             raiseFlag({
               bucketId,
@@ -187,16 +187,16 @@ const Monster = ({ bucket }) => {
     items = [
       {
         type: MESSAGE,
-        message: `This bucket has been flagged for breaking guidelines. Please help review it!`,
+        message: `This ${process.env.BUCKET_NAME_SINGULAR} has been flagged for breaking guidelines. Please help review it!`,
       },
       {
         type: MESSAGE,
-        message: `Here are the guidelines that buckets need to follow:`,
+        message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
       },
       ...guidelineItems,
       ...raisedFlags.map((raisedFlag) => ({
         type: MESSAGE,
-        message: `Someone flagged this bucket for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
+        message: `Someone flagged this ${process.env.BUCKET_NAME_SINGULAR} for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
 
           "${raisedFlag.comment}"`,
       })),
@@ -251,18 +251,18 @@ const Monster = ({ bucket }) => {
       ...[
         {
           type: MESSAGE,
-          message: `Please help review this bucket!`,
+          message: `Please help review this  ${process.env.BUCKET_NAME_SINGULAR}!`,
         },
         {
           type: MESSAGE,
-          message: `Here are the guidelines that buckets need to follow:`,
+          message: `Here are the guidelines that  ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
         },
       ],
       ...guidelineItems,
       ...[
         {
           type: ACTION,
-          message: `Does this bucket comply with the guidelines?`,
+          message: `Does this ${process.env.BUCKET_NAME_SINGULAR} comply with the guidelines?`,
           actions: [
             {
               label: "Yes, looks good to me!",

@@ -7,12 +7,19 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 import RoundSettingsModalGranting from "./Granting";
+import capitalize from "utils/capitalize";
 
 const defaultTabs = [
   { name: "General", component: GeneralSettings },
   { name: "Guidelines", component: Guidelines },
-  { name: "Bucket Review", component: BucketReview },
-  { name: "Bucket Form", component: CustomFields },
+  {
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
+    component: BucketReview,
+  },
+  {
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
+    component: CustomFields,
+  },
   { name: "Funding", component: Granting },
   { name: "Tags", component: Tags },
 ];

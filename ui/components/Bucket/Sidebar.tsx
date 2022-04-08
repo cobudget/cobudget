@@ -17,6 +17,7 @@ import GrantingStatus from "./GrantingStatus";
 import Tags from "./Tags";
 import toast from "react-hot-toast";
 import Monster from "components/Monster";
+import capitalize from "utils/capitalize";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -87,10 +88,12 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
     <Modal open={open} className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <div className="font-bold text-lg mb-2">
-          Are you sure you want to cancel this bucket?
+          Are you sure you want to cancel this{" "}
+          {process.env.BUCKET_NAME_SINGULAR}?
         </div>
         <div className="mb-2">
-          If you confirm, the money that has already been given to this bucket
+          If you confirm, the money that has already been given to this{" "}
+          {process.env.BUCKET_NAME_SINGULAR}
           will be returned to its funders.
         </div>
         <div className="font-bold">Caution: This cannot be undone</div>
@@ -206,7 +209,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
+                  `Are you sure you would like to accept and finalize funding for this ${process.env.BUCKET_NAME_SINGULAR}? This can't be undone.`
                 ) &&
                 acceptFunding({ bucketId: bucket.id }).catch((err) =>
                   alert(err.message)
@@ -251,7 +254,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to mark this bucket as completed? This can't be undone.`
+                  `Are you sure you would like to mark this ${process.env.BUCKET_NAME_SINGULAR} as completed? This can't be undone.`
                 ) &&
                 markAsCompleted({ bucketId: bucket.id }).then(
                   ({ data, error }) => {
@@ -304,7 +307,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
                     >
-                      Cancel bucket
+                      Cancel {process.env.BUCKET_NAME_SINGULAR}
                     </button>
                   </>
                 )}
@@ -328,7 +331,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        `Are you sure you would like to delete this bucket?`
+                        `Are you sure you would like to delete this ${process.env.BUCKET_NAME_SINGULAR}?`
                       ) &&
                       deleteBucket({ bucketId: bucket.id }).then(
                         ({ error }) => {
@@ -342,7 +345,11 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                                 bucket.round.slug
                               }`
                             );
-                            toast.success("Bucket deleted");
+                            toast.success(
+                              `${capitalize(
+                                process.env.BUCKET_NAME_SINGULAR
+                              )} deleted`
+                            );
                           }
                         }
                       )

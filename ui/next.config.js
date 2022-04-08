@@ -18,6 +18,8 @@ module.exports = (phase) => {
     TERMS_URL: process.env.TERMS_URL,
     PRIVACY_POLICY_URL: process.env.PRIVACY_POLICY_URL,
     PLATFORM_NAME: process.env.PLATFORM_NAME,
+    BUCKET_NAME_SINGULAR: process.env.BUCKET_NAME_SINGULAR,
+    BUCKET_NAME_PLURAL: process.env.BUCKET_NAME_PLURAL,
     //process.env.KEYCLOAK_CLIENT_ID
     //process.env.COOKIE_SECRET
     //KEYCLOAK_REALM: process.env.KEYCLOAK_REALM,

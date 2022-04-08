@@ -101,7 +101,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
         {bucket.round.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
             Max. {bucket.round.maxAmountToBucketPerUser / 100}{" "}
-            {bucket.round.currency} to one bucket
+            {bucket.round.currency} to one {process.env.BUCKET_NAME_SINGULAR}
           </p>
         )}
         <form
@@ -119,7 +119,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
                   toast.success(
                     `You contributed ${amount / 100} ${
                       bucket.round.currency
-                    } to this bucket!`
+                    } to this ${process.env.BUCKET_NAME_SINGULAR}!`
                   );
                 }
                 handleClose();

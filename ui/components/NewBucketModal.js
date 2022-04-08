@@ -49,7 +49,9 @@ const NewBucketModal = ({ round, handleClose, router }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <form onSubmit={handleSubmit(onSubmitCreate)}>
-          <h1 className="text-xl font-semibold">New bucket</h1>
+          <h1 className="text-xl font-semibold">
+            New {process.env.BUCKET_NAME_SINGULAR}
+          </h1>
 
           <TextField
             className="my-3"

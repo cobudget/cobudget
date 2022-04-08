@@ -55,7 +55,7 @@ export default function NewRoundPage({ currentGroup }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">New bucket round</h1>
+        <h1 className="text-2xl mb-2 font-semibold">New round</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"

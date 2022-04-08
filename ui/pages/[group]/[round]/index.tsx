@@ -18,8 +18,8 @@ import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 
-export const ROUND_QUERY = gql`
-  query Round($roundSlug: String!, $groupSlug: String) {
+export const ROUND_PAGE_QUERY = gql`
+  query RoundPage($roundSlug: String!, $groupSlug: String) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       slug
@@ -153,7 +153,7 @@ const Page = ({
         (!fetching ? (
           <div className="absolute w-full flex justify-center items-center h-64">
             <h1 className="text-3xl text-gray-500 text-center ">
-              No buckets...
+              No {process.env.BUCKET_NAME_PLURAL}...
             </h1>
           </div>
         ) : (
@@ -226,17 +226,21 @@ const RoundPage = ({ currentUser }) => {
   ]);
   const router = useRouter();
 
-  const [{ data, fetching }] = useQuery({
-    query: ROUND_QUERY,
+  const [
+    { data: { round } = { round: null }, fetching, error, stale },
+  ] = useQuery({
+    query: ROUND_PAGE_QUERY,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
   });
-  const round = data?.round;
+
+  console.log({ round, fetching, error, stale });
+  // const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
-    data?.round?.bucketStatusCount ?? {}
+    round?.bucketStatusCount ?? {}
   );
 
   const { tag, s, f } = router.query;
@@ -249,8 +253,8 @@ const RoundPage = ({ currentUser }) => {
   }, [f]);
 
   useEffect(() => {
-    setBucketStatusCount(data?.round?.bucketStatusCount ?? {});
-  }, [data]);
+    setBucketStatusCount(round?.bucketStatusCount ?? {});
+  }, [round?.bucketStatusCount]);
 
   // apply standard filter (hidden from URL)
   useEffect(() => {
@@ -287,7 +291,7 @@ const RoundPage = ({ currentUser }) => {
               <EditableField
                 defaultValue={round.info}
                 name="info"
-                label="Add homepage message"
+                label="Add message"
                 placeholder={`# Welcome to ${round.title}'s bucket page`}
                 canEdit={canEdit}
                 className="h-10"
@@ -340,7 +344,7 @@ const RoundPage = ({ currentUser }) => {
                     color={round.color}
                     onClick={() => setNewBucketModalOpen(true)}
                   >
-                    New bucket
+                    New {process.env.BUCKET_NAME_SINGULAR}
                   </Button>
                   {newBucketModalOpen && (
                     <NewBucketModal
@@ -399,7 +403,7 @@ export async function getStaticProps(ctx) {
     roundSlug: ctx.params.round,
   };
 
-  const { data } = await client.query(ROUND_QUERY, variables).toPromise();
+  await client.query(ROUND_PAGE_QUERY, variables).toPromise();
 
   // TODO: try to get static generation of bucket list to work (it does not revalidate)
   // const statusFilter = stringOrArrayIntoArray(
