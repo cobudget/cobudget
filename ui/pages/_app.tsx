@@ -158,7 +158,6 @@ const MyApp = ({ Component, pageProps }) => {
   const { round = null, group = null, bucket = null } = data ?? {};
   const { currentUser = null } = currentUserData ?? {};
 
-  currentUser = { ...currentUser, fetching: fetchingUser };
   // legacy modal logic
   const [modal, setModal] = useState(null);
   const openModal = (name) => {
