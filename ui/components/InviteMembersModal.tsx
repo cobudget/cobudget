@@ -6,6 +6,16 @@ import { Modal } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Banner from "components/Banner";
+import { DeleteIcon } from "components/Icons";
+import IconButton from "components/IconButton";
+import styled from "styled-components";
+
+const GridWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 80px calc(100% - 130px) 50px;
+  background: rgba(243, 244, 246,1);
+  border-radius: 0.375rem;
+`;
 
 const INVITE_GROUP_MEMBERS_MUTATION = gql`
   mutation InviteGroupMembers($groupId: ID!, $emails: String!) {
@@ -130,13 +140,38 @@ const InviteMembersModal = ({
                 },
               })}
             />
+            {
+              true &&
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-1 block">
+                  Anyone with this link will be able to join your round
+                </p>
+                <GridWrapper>
+                  <p className="mt-4 ml-4 text-sm font-medium">Copy</p>
+                  <TextField 
+                    inputProps={{
+                      disabled: true,
+                      value: "Link"
+                    }}
+                  />
+                  <span className="mt-2 ml-2">
+                    <IconButton>
+                      <DeleteIcon className="h-5 w-5" />
+                    </IconButton>
+                  </span>
+                </GridWrapper>
+              </div>
+            }
             <div className="flex justify-end mt-4">
               <Button
                 className="mr-2"
                 variant="secondary"
                 onClick={handleClose}
               >
-                Cancel
+                Close
+              </Button>
+              <Button className="mr-2" type="submit" loading={loading}>
+                Create Invite Link
               </Button>
               <Button type="submit" loading={loading}>
                 Add people
