@@ -29,6 +29,8 @@ import {
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
+import { sign } from "server/utils/jwt";
+import { appLink } from "utils/internalLinks";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -266,7 +268,7 @@ const resolvers = {
         },
       });
       return {
-        link: round.inviteNonce,
+        link: round.inviteNonce !== null ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId})) : null
       };
     },
     contributionsPage: combineResolvers(

@@ -1,5 +1,6 @@
-import { useMutation, gql } from "urql";
+import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
 import { Modal } from "@material-ui/core";
 
@@ -33,6 +34,30 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
         verifiedEmail
         avatar
       }
+    }
+  }
+`;
+
+const ROUND_INVITE_LINK = gql`
+  query RoundInvitationLink($roundId: ID!) {
+    roundInvitationLink (roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const CREATE_ROUND_INVITE_LINK = gql`
+  mutation CreateRoundInvitationLink($roundId: ID!) {
+    createRoundInvitationLink (roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const DELETE_ROUND_INVITE_LINK = gql`
+  mutation DeleteRoundInvitationLink($roundId: ID!) {
+    deleteRoundInvitationLink (roundId: $roundId) {
+      link
     }
   }
 `;
@@ -71,6 +96,14 @@ const InviteMembersModal = ({
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
+  const [{ data: inviteLink }] = useQuery({
+    query: ROUND_INVITE_LINK,
+    variables: { roundId }
+  });
+  const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(CREATE_ROUND_INVITE_LINK);
+  const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(DELETE_ROUND_INVITE_LINK);
+
+  const link = inviteLink?.roundInvitationLink?.link;
 
   return (
     <>
@@ -140,7 +173,7 @@ const InviteMembersModal = ({
                 },
               })}
             />
-            {true && (
+            {link && (
               <div className="mt-4">
                 <p className="text-sm font-medium mb-1 block">
                   Anyone with this link will be able to join your round
@@ -150,7 +183,7 @@ const InviteMembersModal = ({
                     className="mt-4 ml-4 text-sm font-medium"
                     onClick={() => {
                       navigator.clipboard
-                        .writeText("Link")
+                        .writeText(link)
                         .then(() => window.alert("Copied"));
                     }}
                   >
@@ -159,11 +192,17 @@ const InviteMembersModal = ({
                   <TextField
                     inputProps={{
                       disabled: true,
-                      value: "Link",
+                      value: link,
                     }}
                   />
                   <span className="mt-2 ml-2">
-                    <IconButton>
+                    <IconButton
+                      onClick={() => {
+                        deleteInviteLink({
+                          roundId
+                        })
+                      }}
+                    >
                       <DeleteIcon className="h-5 w-5" />
                     </IconButton>
                   </span>
@@ -178,7 +217,15 @@ const InviteMembersModal = ({
               >
                 Close
               </Button>
-              <Button className="mr-2" type="submit" loading={loading}>
+              <Button 
+                className="mr-2"
+                loading={loading}
+                onClick={() => {
+                  createInviteLink({
+                    roundId
+                  })
+                }}
+              >
                 Create Invite Link
               </Button>
               <Button type="submit" loading={loading}>
