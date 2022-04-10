@@ -10,6 +10,7 @@ import Banner from "components/Banner";
 import { DeleteIcon } from "components/Icons";
 import IconButton from "components/IconButton";
 import styled from "styled-components";
+import toast from "react-hot-toast";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -180,11 +181,11 @@ const InviteMembersModal = ({
                 </p>
                 <GridWrapper>
                   <p
-                    className="mt-4 ml-4 text-sm font-medium"
+                    className="mt-4 ml-4 text-sm font-medium cursor-pointer"
                     onClick={() => {
                       navigator.clipboard
                         .writeText(link)
-                        .then(() => window.alert("Copied"));
+                        .then(() => toast.success("Invitation link copied"));
                     }}
                   >
                     Copy
@@ -219,11 +220,11 @@ const InviteMembersModal = ({
               </Button>
               <Button 
                 className="mr-2"
-                loading={loading}
+                loading={createInviteLoading}
                 onClick={() => {
                   createInviteLink({
                     roundId
-                  })
+                  }).then(() => toast.success("Invite link created"))
                 }}
               >
                 Create Invite Link
