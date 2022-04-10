@@ -13,7 +13,7 @@ import styled from "styled-components";
 const GridWrapper = styled.div`
   display: grid;
   grid-template-columns: 80px calc(100% - 130px) 50px;
-  background: rgba(243, 244, 246,1);
+  background: rgba(243, 244, 246, 1);
   border-radius: 0.375rem;
 `;
 
@@ -140,18 +140,26 @@ const InviteMembersModal = ({
                 },
               })}
             />
-            {
-              true &&
+            {true && (
               <div className="mt-4">
                 <p className="text-sm font-medium mb-1 block">
                   Anyone with this link will be able to join your round
                 </p>
                 <GridWrapper>
-                  <p className="mt-4 ml-4 text-sm font-medium">Copy</p>
-                  <TextField 
+                  <p
+                    className="mt-4 ml-4 text-sm font-medium"
+                    onClick={() => {
+                      navigator.clipboard
+                        .writeText("Link")
+                        .then(() => window.alert("Copied"));
+                    }}
+                  >
+                    Copy
+                  </p>
+                  <TextField
                     inputProps={{
                       disabled: true,
-                      value: "Link"
+                      value: "Link",
                     }}
                   />
                   <span className="mt-2 ml-2">
@@ -161,7 +169,7 @@ const InviteMembersModal = ({
                   </span>
                 </GridWrapper>
               </div>
-            }
+            )}
             <div className="flex justify-end mt-4">
               <Button
                 className="mr-2"

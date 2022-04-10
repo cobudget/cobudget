@@ -259,6 +259,16 @@ const resolvers = {
         return null;
       }
     },
+    roundInvitationLink: async (parent, { roundId }, { user }) => {
+      const round = await prisma.round.findFirst({
+        where: {
+          id: roundId,
+        },
+      });
+      return {
+        link: round.inviteNonce,
+      };
+    },
     contributionsPage: combineResolvers(
       isCollMemberOrGroupAdmin,
       async (parent, { roundId, offset, limit }) => {
@@ -710,6 +720,25 @@ const resolvers = {
         });
       }
     ),
+    createRoundInvitationLink: async (parent, { roundId }, { user }) => {
+      const inviteNonce = Date.now();
+      const round = await prisma.round.update({
+        where: { id: roundId },
+        data: { inviteNonce },
+      });
+      return {
+        link: round.inviteNonce,
+      };
+    },
+    deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
+      await prisma.round.update({
+        where: { id: roundId },
+        data: { inviteNonce: null },
+      });
+      return {
+        link: null,
+      };
+    },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,
       async (parent, { roundId }) =>
