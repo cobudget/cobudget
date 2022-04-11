@@ -29,7 +29,7 @@ import {
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
-import { sign } from "server/utils/jwt";
+import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 
 const { groupHasDiscourse, generateComment } = subscribers;
@@ -740,6 +740,45 @@ const resolvers = {
       return {
         link: null,
       };
+    },
+    joinRoundInvitationLink: async (parent, { token }, { user }) => {
+
+      if (!user) {
+        throw new Error("You need to be logged in to join the group");
+      }
+
+      const payload = verify(token);
+
+      if (!payload) {
+        throw new Error("Invalid invitation link");
+      }
+
+      const { roundId, nonce: inviteNonce } = payload;
+
+      const round = await prisma.round.findFirst({
+        where: { id: roundId, inviteNonce }
+      });
+
+      if (!round) {
+        throw new Error("Round link expired");
+      }
+      
+      const isApproved = true;
+      const roundMember = await prisma.roundMember.upsert({
+        where: { userId_roundId: { userId: user.id, roundId } },
+        create: {
+          round: { connect: { id: roundId } },
+          user: { connect: { id: user.id } },
+          isApproved,
+          statusAccount: { create: {} },
+          incomingAccount: { create: {} },
+          outgoingAccount: { create: {} },
+        },
+        update: { isApproved, hasJoined: true, isRemoved: false },
+      });
+
+      return roundMember;
+
     },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,

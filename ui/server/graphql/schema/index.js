@@ -76,6 +76,7 @@ const schema = gql`
     deleteRound(roundId: ID!): Round
     createRoundInvitationLink(roundId: ID): RoundInvitationLink
     deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
+    joinRoundInvitationLink(token: String): RoundMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
