@@ -262,6 +262,16 @@ const resolvers = {
       }
     },
     roundInvitationLink: async (parent, { roundId }, { user }) => {
+
+      const isAdmin = await !!user && isCollAdmin({
+        userId: user?.id,
+        roundId
+      });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to fetch invitation link");
+      }
+
       const round = await prisma.round.findFirst({
         where: {
           id: roundId,
@@ -723,6 +733,16 @@ const resolvers = {
       }
     ),
     createRoundInvitationLink: async (parent, { roundId }, { user }) => {
+
+      const isAdmin = await !!user && isCollAdmin({
+        userId: user?.id,
+        roundId
+      });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to create invitation link");
+      }
+
       const inviteNonce = Date.now();
       const round = await prisma.round.update({
         where: { id: roundId },
@@ -733,6 +753,16 @@ const resolvers = {
       };
     },
     deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
+
+      const isAdmin = await !!user && isCollAdmin({
+        userId: user?.id,
+        roundId
+      });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to create delete link");
+      }
+
       await prisma.round.update({
         where: { id: roundId },
         data: { inviteNonce: null },
