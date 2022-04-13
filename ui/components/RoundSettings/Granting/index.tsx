@@ -15,6 +15,7 @@ import SetGrantingOpens from "./SetGrantingOpens";
 import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
+import SetDirectFunding from "./SetDirectFunding";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -38,6 +39,7 @@ const modals = {
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_ABOUT: SetAbout,
+  SET_DIRECT_FUNDING: SetDirectFunding,
 };
 
 export const UPDATE_GRANTING_SETTINGS = gql`
@@ -207,6 +209,17 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             }
             isSet={round.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
+
+          <Divider />
+
+          <SettingsListItem
+            primary="Accept direct funding"
+            secondary={round.directFundingEnabled?.toString() ?? "false"}
+            isSet={round.directFundingEnabled}
+            openModal={() => handleOpen("SET_DIRECT_FUNDING")}
             canEdit={canEditSettings}
             roundColor={round.color}
           />
