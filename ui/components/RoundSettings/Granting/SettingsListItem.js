@@ -13,7 +13,7 @@ const SettingsListItem = ({
   secondary,
   isSet,
   openModal,
-  disabled,
+  disabled = false,
   canEdit,
   roundColor,
 }) => {

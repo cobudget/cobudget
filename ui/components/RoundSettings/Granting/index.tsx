@@ -123,7 +123,6 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             openModal={() => handleOpen("SET_CURRENCY")}
             canEdit={canEditSettings}
             roundColor={round.color}
-            classes="px-6"
           />
 
           <Divider />
