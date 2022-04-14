@@ -8,7 +8,7 @@ function CheckMailbox() {
   return (
     <div className="page text-gray-700">
       <h1 className="text-xl font-medium">Check your mailbox!</h1>
-      <p>We&apos;ve sent you a magic link to {email ? email : "your email"}.</p>
+      <p>We've sent you a magic link to {email ? email : "your email"}.</p>
       <p>Click on the link to finish signing in.</p>
       {code && <p>Make sure the verification code matches {code}!</p>}
     </div>

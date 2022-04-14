@@ -1,5 +1,5 @@
-import path from "path";
-import ejs from "ejs";
+const path = require("path");
+const ejs = require("ejs");
 
 /**
  * Handles loading and caching of templates

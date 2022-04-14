@@ -5,6 +5,7 @@ import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 
 const Comments = ({ currentUser, currentGroup, bucket, round, router }) => {
+  if (!bucket) return null;
   const context = useCommentContext({
     from: 0,
     limit: 10,
@@ -15,8 +16,6 @@ const Comments = ({ currentUser, currentGroup, bucket, round, router }) => {
     bucketId: router.query.bucket,
   });
   const { comments, setFrom, limit, total, loading } = context;
-
-  if (!bucket) return null;
 
   return (
     <div className="bg-white border-b-default">
@@ -63,7 +62,7 @@ const Comments = ({ currentUser, currentGroup, bucket, round, router }) => {
                 />
               );
             })}
-            {currentUser?.currentCollMember?.isApproved && <AddComment />}
+            {currentUser?.currentCollMember && <AddComment />}
           </Context.Provider>
         </div>
       </div>

@@ -6,8 +6,8 @@ import ProgressBar from "components/ProgressBar";
 const GrantingStatus = ({ bucket, round }) => {
   const funding = bucket.totalContributions + bucket.income;
   const ratio = isNaN(funding / bucket.minGoal) ? 0 : funding / bucket.minGoal;
-  //const userName = (nameOrEmail) =>
-  //  (nameOrEmail ?? "Somebody").match(/@/) === null ? nameOrEmail : "Somebody";
+  const userName = (nameOrEmail) =>
+    (nameOrEmail ?? "Somebody").match(/@/) === null ? nameOrEmail : "Somebody";
 
   return (
     <div className="space-y-0">
@@ -22,16 +22,14 @@ const GrantingStatus = ({ bucket, round }) => {
           {thousandSeparator(funding / 100)} {round.currency}
         </p>
         <p className="text-sm text-gray-700 mb-2">
-          funded of {thousandSeparator(bucket.minGoal / 100)} {round.currency}{" "}
-          goal
+          funded of {thousandSeparator(bucket.minGoal / 100)}{" "}
+          {round.currency} goal
         </p>
 
         {!!bucket.totalContributionsFromCurrentMember && (
           <p className="my-2 text-sm text-gray-700">
             You have contributed{" "}
-            {thousandSeparator(
-              bucket.totalContributionsFromCurrentMember / 100
-            )}{" "}
+            {thousandSeparator(bucket.totalContributionsFromCurrentMember / 100)}{" "}
             {round.currency}
           </p>
         )}
@@ -43,8 +41,7 @@ const GrantingStatus = ({ bucket, round }) => {
         )}
         {bucket.canceled && (
           <p>
-            Funding canceled on{" "}
-            {dayjs(bucket.canceledAt).format("MMMM D, YYYY")}
+            Funding canceled on {dayjs(bucket.canceledAt).format("MMMM D, YYYY")}
           </p>
         )}
         {bucket.completed && (

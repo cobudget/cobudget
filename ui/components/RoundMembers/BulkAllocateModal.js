@@ -9,7 +9,11 @@ import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 
 const BULK_ALLOCATE_MUTATION = gql`
-  mutation BulkAllocate($roundId: ID!, $amount: Int!, $type: AllocationType!) {
+  mutation BulkAllocate(
+    $roundId: ID!
+    $amount: Int!
+    $type: AllocationType!
+  ) {
     bulkAllocate(roundId: $roundId, amount: $amount, type: $type) {
       id
       balance

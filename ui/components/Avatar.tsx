@@ -11,13 +11,13 @@ const Avatar = React.forwardRef(
       className,
       ...props
     }: {
-      user;
+      user: any;
       size?: string;
       highlighted?: boolean;
       style?: object;
       className?: string;
     },
-    ref: React.RefObject<HTMLDivElement>
+    ref: any
   ) => {
     // const { user } = props;
     if (!user) return null;

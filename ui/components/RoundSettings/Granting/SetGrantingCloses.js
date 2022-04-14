@@ -12,7 +12,9 @@ const SetGrantingCloses = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
 
-  const [selectedDate, handleDateChange] = React.useState(round.grantingCloses);
+  const [selectedDate, handleDateChange] = React.useState(
+    round.grantingCloses
+  );
 
   return (
     <Card>

@@ -1,8 +1,8 @@
-import fetch from "node-fetch";
-import { getModels } from "../database/models";
-import { db } from "@sensestack/plato-core";
-
-const { getConnection } = db;
+const fetch = require("node-fetch");
+const { getModels } = require("../database/models");
+const {
+  db: { getConnection },
+} = require("@sensestack/plato-core");
 // example request body:
 // {
 //   "notification_id": 123455,

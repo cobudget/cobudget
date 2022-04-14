@@ -1,19 +1,14 @@
 /* eslint-disable no-unused-vars */
-import discourse from "./discourse.subscriber";
+import { groupHasDiscourse } from "./discourse.subscriber";
 import liveUpdate from "../services/liveUpdate.service";
 import prisma from "../prisma";
-
 const MIN_POST_LENGTH = 3;
-const { groupHasDiscourse } = discourse;
-
 export default {
   initialize(eventHub) {
     eventHub.subscribe(
       "create-bucket",
       "prisma",
-      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {
-        return;
-      }
+      async ({ currentGroup, currentGroupMember, round, bucket, comment }) => {}
     );
 
     eventHub.subscribe(

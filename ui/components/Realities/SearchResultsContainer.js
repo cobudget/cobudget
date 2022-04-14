@@ -96,12 +96,8 @@ SearchResultsContainer.propTypes = {
 
 SearchResultsContainer.defaultProps = {
   searchTerm: "",
-  getMenuProps: () => {
-    return;
-  },
-  getItemProps: () => {
-    return;
-  },
+  getMenuProps: () => {},
+  getItemProps: () => {},
   highlightedIndex: null,
 };
 

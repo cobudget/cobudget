@@ -1,7 +1,7 @@
-import discourse from "../lib/discourse";
-import liveUpdate from "../services/liveUpdate.service";
+const discourse = require("../lib/discourse");
+const liveUpdate = require("../services/liveUpdate.service");
 
-export default {
+module.exports = {
   groupHasDiscourse(group) {
     return group?.discourse?.url && group?.discourse?.apiKey;
   },
@@ -112,13 +112,7 @@ export default {
     eventHub.subscribe(
       "publish-bucket",
       "discourse",
-      async ({
-        currentGroup,
-        currentGroupMember,
-        round,
-        bucket,
-        unpublish,
-      }) => {
+      async ({ currentGroup, currentGroupMember, round, bucket, unpublish }) => {
         if (!this.groupHasDiscourse(currentGroup)) {
           return;
         }
@@ -171,9 +165,7 @@ export default {
             `Your post needs to be at least ${currentGroup.discourse.minPostLength} characters long!`
           );
 
-        console.log(
-          `Publishing comment in bucket ${bucket.id} to discourse...`
-        );
+        console.log(`Publishing comment in bucket ${bucket.id} to discourse...`);
 
         if (!bucket.discourseTopicId) {
           await eventHub.publish("create-bucket", {

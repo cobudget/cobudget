@@ -150,7 +150,7 @@ const schema = gql`
       memberId: ID!
       isAdmin: Boolean
     ): GroupMember
-    deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
+    deleteGroupMember(groupMemberId: ID!): GroupMember
     updateMember(
       roundId: ID!
       memberId: ID!

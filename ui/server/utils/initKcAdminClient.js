@@ -1,4 +1,4 @@
-import KcAdminClient from "keycloak-admin";
+const KcAdminClient = require("keycloak-admin").default;
 
 module.exports = async function () {
   const kcAdminClient = new KcAdminClient({

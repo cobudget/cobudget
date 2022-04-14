@@ -51,12 +51,8 @@ SearchResults.propTypes = {
 
 SearchResults.defaultProps = {
   results: [],
-  getMenuProps: () => {
-    return;
-  },
-  getItemProps: () => {
-    return;
-  },
+  getMenuProps: () => {},
+  getItemProps: () => {},
   highlightedIndex: null,
 };
 

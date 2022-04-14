@@ -108,7 +108,7 @@ const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
               bucketId: bucket.id,
               amount,
             })
-              .then(({ error }) => {
+              .then(({ data, error }) => {
                 if (error) {
                   toast.error(error.message);
                 } else {
