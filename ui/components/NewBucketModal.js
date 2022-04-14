@@ -13,11 +13,15 @@ const CREATE_BUCKET = gql`
     createBucket(roundId: $roundId, title: $title) {
       id
       title
+      round {
+        id
+        slug
+      }
     }
   }
 `;
 
-const NewBucketModal = ({ round, handleClose, currentGroup }) => {
+const NewBucketModal = ({ round, handleClose, router }) => {
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
   const { handleSubmit, register, errors } = useForm();
@@ -26,8 +30,8 @@ const NewBucketModal = ({ round, handleClose, currentGroup }) => {
     createBucket({ ...variables, roundId: round.id })
       .then(({ data }) => {
         Router.push(
-          "/[Group]/[round]/[bucket]",
-          `/${currentGroup?.slug ?? "c"}/${round.slug}/${data.createBucket.id}`
+          "/[group]/[round]/[bucket]",
+          `/${router.query.group}/${round.slug}/${data.createBucket.id}`
         );
         handleClose();
       })
@@ -45,7 +49,9 @@ const NewBucketModal = ({ round, handleClose, currentGroup }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <form onSubmit={handleSubmit(onSubmitCreate)}>
-          <h1 className="text-xl font-semibold">New bucket</h1>
+          <h1 className="text-xl font-semibold">
+            New {process.env.BUCKET_NAME_SINGULAR}
+          </h1>
 
           <TextField
             className="my-3"
