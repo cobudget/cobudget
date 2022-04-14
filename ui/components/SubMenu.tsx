@@ -25,7 +25,9 @@ const groupItems = ({ currentUser, groupSlug }) => {
 };
 
 export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
-  const isAdmin = currentUser?.currentCollMember?.isAdmin;
+  const isAdmin =
+    currentUser?.currentGroupMember?.isAdmin ||
+    currentUser?.currentCollMember?.isAdmin;
 
   return [
     { label: "Overview", href: `/${groupSlug}/${roundSlug}` },

@@ -41,8 +41,12 @@ const EditGroup = ({ group, currentUser }) => {
   const router = useRouter();
   const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(group?.logo);
-  const [{ fetching: loading }, createGroup] = useMutation(CREATE_GROUP);
-  const [{ fetching: editLoading }, editGroup] = useMutation(EDIT_GROUP);
+  const [{ fetching: loading }, createGroup] = useMutation(
+    CREATE_GROUP
+  );
+  const [{ fetching: editLoading }, editGroup] = useMutation(
+    EDIT_GROUP
+  );
 
   const { handleSubmit, register, errors, reset } = useForm();
 
@@ -156,7 +160,7 @@ const EditGroup = ({ group, currentUser }) => {
         <ImageUpload
           label="Logo"
           onImageUploaded={setLogoImage}
-          cloudinaryPreset="organization_logos"
+          cloudinaryPreset="group_logos"
           initialImage={logoImage}
         />
 

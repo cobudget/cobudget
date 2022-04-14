@@ -19,8 +19,6 @@ model User {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   image            String?
-  facebookId       String?        @unique
-  googleId         String?        @unique
   groupMemberships GroupMember[]
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?

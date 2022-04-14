@@ -6,7 +6,10 @@ import HappySpinner from "../../HappySpinner";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $discourseCategoryId: Int) {
-    editRound(roundId: $roundId, discourseCategoryId: $discourseCategoryId) {
+    editRound(
+      roundId: $roundId
+      discourseCategoryId: $discourseCategoryId
+    ) {
       id
       discourseCategoryId
     }
@@ -23,6 +26,7 @@ export const CATEGORIES_QUERY = gql`
 `;
 
 const Discourse = ({ round, currentGroup }) => {
+  if (!currentGroup) return null;
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
 
   const [{ data: { categories } = { categories: [] } }] = useQuery({
@@ -36,14 +40,12 @@ const Discourse = ({ round, currentGroup }) => {
     formState: { isDirty },
   } = useForm();
 
-  if (!currentGroup) return null;
-
   return (
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">Category</h2>
       <p className="text-gray-700 mb-4">
-        Select the discourse category that buckets in this round will be posted
-        to
+        Select the discourse category that buckets in this round will be
+        posted to
       </p>
       <form
         onSubmit={handleSubmit((variables) => {

@@ -18,9 +18,7 @@ const EDIT_SUMMARY_MUTATION = gql`
 `;
 
 const BucketSummary = ({ summary, canEdit, bucketId }) => {
-  const [{ fetching: loading }, editBucket] = useMutation(
-    EDIT_SUMMARY_MUTATION
-  );
+  const [{ fetching: loading }, editBucket] = useMutation(EDIT_SUMMARY_MUTATION);
 
   const { handleSubmit, register } = useForm();
 

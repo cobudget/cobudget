@@ -180,8 +180,7 @@ const BucketSidebar = ({
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
-  const showCancelFundingButton =
-    bucket.approved && !bucket.canceled && canEdit;
+  const showCancelFundingButton = bucket.approved && !bucket.canceled && canEdit;
 
   return (
     <>
@@ -344,20 +343,18 @@ const BucketSidebar = ({
                       confirm(
                         `Are you sure you would like to delete this bucket?`
                       ) &&
-                      deleteBucket({ bucketId: bucket.id }).then(
-                        ({ error }) => {
-                          if (error) {
-                            toast.error(error.message);
-                          } else {
-                            setActionsDropdownOpen(false);
-                            Router.push(
-                              "/[group]/[round]",
-                              `/${currentGroup?.slug ?? "c"}/${round.slug}`
-                            );
-                            toast.success("Bucket deleted");
-                          }
+                      deleteBucket({ bucketId: bucket.id }).then(({ error }) => {
+                        if (error) {
+                          toast.error(error.message);
+                        } else {
+                          setActionsDropdownOpen(false);
+                          Router.push(
+                            "/[group]/[round]",
+                            `/${currentGroup?.slug ?? "c"}/${round.slug}`
+                          );
+                          toast.success("Bucket deleted");
                         }
-                      )
+                      })
                     }
                   >
                     Delete

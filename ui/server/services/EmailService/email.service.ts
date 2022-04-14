@@ -14,15 +14,13 @@ import rehypeStringify from "rehype-stringify";
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
-import subscibers from "server/subscribers/discourse.subscriber";
+import { groupHasDiscourse } from "server/subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
 import { tailwindHsl } from "utils/colors";
-
-const { groupHasDiscourse } = subscibers;
 
 function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
@@ -52,39 +50,6 @@ const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and
 )}">Go here</a> to change what kinds of email notifications you receive</div>`;
 
 export default {
-  roundJoinRequest: async ({ round, roundMember }) => {
-    const admins = await prisma.roundMember.findMany({
-      where: { roundId: round.id, isAdmin: true },
-      include: { user: true },
-    });
-
-    const user = await prisma.user.findUnique({
-      where: { id: roundMember.userId },
-    });
-
-    const group = await prisma.group.findFirst({
-      where: { rounds: { some: { id: round.id } } },
-    });
-
-    const roundLink = appLink(`/${group.slug}/${round.slug}`);
-
-    const adminEmails: SendEmailInput[] = admins.map((admin) => ({
-      to: admin.user.email,
-      subject: `Someone wants to join ${round.title}`,
-      html: `${escape(
-        user.name
-      )} has requested to join <a href="${roundLink}">${escape(
-        round.title
-      )}</a>:
-        <br/>
-        <a href="${roundLink}/participants">Click here</a> to review this request
-        <br/><br/>
-        ${footer}
-        `,
-    }));
-
-    await sendEmails(adminEmails);
-  },
   inviteMember: async ({
     email,
     currentUser,
@@ -108,7 +73,9 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+      `/${currentGroup?.slug ?? round.group.slug}/${
+        round?.slug ?? ""
+      }`
     );
 
     const groupCollName = currentGroup?.name ?? round.title;
@@ -264,9 +231,7 @@ export default {
         (mentionedUser) => mentionedUser.emailSettings?.commentMentions ?? true
       );
 
-    const bucketLink = appLink(
-      `/${currentGroup.slug}/${round.slug}/${bucket.id}`
-    );
+    const bucketLink = appLink(`/${currentGroup.slug}/${round.slug}/${bucket.id}`);
 
     const commentAsHtml = quotedSection(await mdToHtml(comment.content));
 
@@ -295,7 +260,9 @@ export default {
         include: { user: { include: { emailSettings: true } } },
       })
     )
-      .filter((roundMember) => roundMember.id !== currentCollMember.id)
+      .filter(
+        (roundMember) => roundMember.id !== currentCollMember.id
+      )
       .filter(
         (roundMember) =>
           roundMember.user.emailSettings?.commentBecauseCocreator ?? true
@@ -459,7 +426,9 @@ export default {
             bucket.title
           )}” you have contributed to was cancelled in ${escape(
             bucket.round.title
-          )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
+          )}. You've been refunded ${amount / 100} ${
+            bucket.round.currency
+          }.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
           `/${bucket.round.group.slug}/${bucket.round.slug}`
@@ -481,7 +450,9 @@ export default {
   }) => {
     if (unpublish) return;
 
-    const { roundMember: collMembers } = await prisma.round.findUnique({
+    const {
+      roundMember: collMembers,
+    } = await prisma.round.findUnique({
       where: { id: round.id },
       include: {
         roundMember: {
@@ -555,7 +526,9 @@ export default {
       include: { group: true },
     });
 
-    const bucketLink = appLink(`/${group.slug}/${round.slug}/${bucket.id}`);
+    const bucketLink = appLink(
+      `/${group.slug}/${round.slug}/${bucket.id}`
+    );
 
     const emails = usersToNotify.map((mailRecipient) => ({
       to: mailRecipient.email,

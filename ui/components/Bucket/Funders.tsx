@@ -1,3 +1,4 @@
+import { useQuery, gql } from "urql";
 import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
 

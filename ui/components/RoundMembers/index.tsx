@@ -90,16 +90,33 @@ const DELETE_MEMBER = gql`
   mutation DeleteMember($memberId: ID!, $roundId: ID!) {
     deleteMember(memberId: $memberId, roundId: $roundId) {
       id
-      user {
-        id
-      }
     }
   }
 `;
 
 const RoundMembers = ({ round, currentUser }) => {
   const [searchString, setSearchString] = useState("");
-  const [{ data, fetching: loading, error }, searchApprovedMembers] = useQuery({
+  const [
+    {
+      data: {
+        approvedMembersPage: { moreExist, approvedMembers } = {
+          moreExist: false,
+          approvedMembers: [],
+        },
+        requestsToJoinPage,
+      } = {
+        approvedMembersPage: {
+          approvedMembers: [],
+        },
+        requestsToJoinPage: {
+          requestsToJoin: [],
+        },
+      },
+      fetching: loading,
+      error,
+    },
+    searchApprovedMembers,
+  ] = useQuery({
     query: ROUND_MEMBERS_QUERY,
     variables: {
       roundId: round.id,
@@ -110,20 +127,16 @@ const RoundMembers = ({ round, currentUser }) => {
     pause: true,
   });
 
-  const moreExist = data?.approvedMembersPage?.moreExist || false;
-  const requestsToJoin = data?.requestsToJoinPage?.requestsToJoin || [];
-
   const debouncedSearchMembers = useMemo(() => {
     return debounce(searchApprovedMembers, 300, { leading: true });
   }, [searchApprovedMembers]);
 
   const items = useMemo(() => {
-    const approvedMembers = data?.approvedMembersPage?.approvedMembers || [];
     if (loading || !approvedMembers) {
       return [];
     }
     return approvedMembers;
-  }, [data?.approvedMembersPage?.approvedMembers, loading]);
+  }, [approvedMembers, loading]);
 
   useEffect(() => {
     debouncedSearchMembers();
@@ -147,9 +160,9 @@ const RoundMembers = ({ round, currentUser }) => {
   return (
     <>
       <div className="page">
-        {requestsToJoin.length > 0 && (
+        {requestsToJoinPage && (
           <RequestsToJoinTable
-            requestsToJoin={requestsToJoin}
+            requestsToJoin={requestsToJoinPage.requestsToJoin}
             updateMember={updateMember}
             deleteMember={deleteMember}
             round={round}
@@ -191,9 +204,7 @@ const RoundMembers = ({ round, currentUser }) => {
           moreExist={moreExist}
           loading={loading}
           onClick={
-            () => {
-              return;
-            }
+            () => {}
             //fetchMore({ variables: { offset: approvedMembers.length } })
           }
         />

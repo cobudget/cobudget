@@ -5,7 +5,7 @@ import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
 
 const SEARCH_MEMBERS_QUERY = gql`
-  query SearchMembers($roundId: ID!, $isApproved: Boolean!) {
+  query SearchMembers($roundId: ID!, $isApproved: Boolean) {
     members(roundId: $roundId, isApproved: $isApproved) {
       id
       isApproved

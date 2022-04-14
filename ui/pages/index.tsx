@@ -75,7 +75,7 @@ export async function getStaticProps(ctx) {
   const axios = (await import(`axios`)).default;
 
   // Fetch HTML
-  const res: any = await axios("https://cobudget.webflow.io").catch((err) => {
+  let res: any = await axios("https://cobudget.webflow.io").catch((err) => {
     console.error(err);
   });
 

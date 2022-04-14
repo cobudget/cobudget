@@ -73,12 +73,8 @@ TypeaheadResultsContainer.propTypes = {
 
 TypeaheadResultsContainer.defaultProps = {
   inputValue: "",
-  getMenuProps: () => {
-    return;
-  },
-  getItemProps: () => {
-    return;
-  },
+  getMenuProps: () => {},
+  getItemProps: () => {},
   highlightedIndex: null,
   itemToResult: () => "",
   searchQuery: {},

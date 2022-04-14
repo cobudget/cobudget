@@ -19,13 +19,6 @@ if (typeof window !== "undefined" && process.env.HELPSCOUT_KEY) {
     e.attachEvent
       ? e.attachEvent("onload", a)
       : e.addEventListener("load", a, !1);
-  })(
-    window,
-    document,
-    window.Beacon ||
-      function () {
-        return;
-      }
-  );
+  })(window, document, window.Beacon || function () {});
   window.Beacon("init", process.env.HELPSCOUT_KEY);
 }

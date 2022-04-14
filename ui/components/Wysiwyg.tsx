@@ -117,7 +117,11 @@ const EditorCss = styled.div`
 
 const SEARCH_MENTION_MEMBERS_QUERY = gql`
   query SearchMentionMembers($roundId: ID!, $search: String!) {
-    membersPage(roundId: $roundId, isApproved: true, search: $search) {
+    membersPage(
+      roundId: $roundId
+      isApproved: true
+      search: $search
+    ) {
       members(roundId: $roundId, isApproved: true, search: $search) {
         id
         user {
@@ -335,7 +339,7 @@ const Wysiwyg = ({
        */
       new HardBreakExtension(),
     ],
-    [placeholder, enableMentions]
+    [placeholder]
   );
 
   const { manager, getContext } = useRemirror({
@@ -379,11 +383,11 @@ const Wysiwyg = ({
       fileUploadFileHandler(Array.from(filePicker.current.files));
     };
 
-    const _filePicker = filePicker.current;
     filePicker.current.addEventListener("change", detectFileUpload);
 
-    return () => _filePicker?.removeEventListener("change", detectFileUpload);
-  }, [filePicker, fileUploadFileHandler]);
+    return () =>
+      filePicker.current?.removeEventListener("change", detectFileUpload);
+  }, [filePicker]);
 
   const toolbarItems = useCallback(
     (): ToolbarItemUnion[] => [
@@ -519,7 +523,7 @@ const Wysiwyg = ({
         separator: "none",
       },
     ],
-    []
+    [filePicker]
   );
 
   return (
@@ -555,7 +559,9 @@ const Wysiwyg = ({
               />
             </div>
             <EditorComponent />
-            {enableMentions && <MentionComponent roundId={mentionsCollId} />}
+            {enableMentions && (
+              <MentionComponent roundId={mentionsCollId} />
+            )}
           </Remirror>
         </EditorCss>
       </ThemeProvider>
