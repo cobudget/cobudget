@@ -194,38 +194,39 @@ const resolvers = {
         select: { id: true },
       });
     },
-    currentGroup: async (parent, { groupSlug }) => {
-      if (!groupSlug || groupSlug === "c") return null;
+    group: async (parent, { groupSlug }) => {
+      if (!groupSlug) return null;
+      if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
+        return null;
+
       return prisma.group.findUnique({ where: { slug: groupSlug } });
     },
-    group: combineResolvers(isMemberOfGroup, async (parent, { groupId }) => {
-      return prisma.group.findUnique({ where: { id: groupId } });
-    }),
     groups: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.group.findMany();
     }),
-    rounds: async (parent, { limit, groupId }, { user }) => {
-      if (!groupId) return null;
+    rounds: async (parent, { limit, groupSlug }, { user }) => {
+      if (!groupSlug) return null;
 
       const currentGroupMember = user
-        ? await prisma.groupMember.findUnique({
+        ? await prisma.groupMember.findFirst({
             where: {
-              groupId_userId: { groupId: groupId, userId: user.id },
+              group: { slug: groupSlug },
+              userId: user.id,
             },
           })
         : null;
 
       // if admin show all rounds (current or archived)
-      if (currentGroupMember && currentGroupMember.isAdmin) {
+      if (currentGroupMember?.isAdmin) {
         return prisma.round.findMany({
-          where: { groupId: groupId, deleted: { not: true } },
+          where: { group: { slug: groupSlug }, deleted: { not: true } },
           take: limit,
         });
       }
 
-      const allColls = await prisma.round.findMany({
+      const allRounds = await prisma.round.findMany({
         where: {
-          groupId: groupId,
+          group: { slug: groupSlug },
           archived: { not: true },
           deleted: { not: true },
         },
@@ -235,7 +236,7 @@ const resolvers = {
       // filter away colls the current user shouldn't be able to view
       return (
         await Promise.all(
-          allColls.map(async (coll) =>
+          allRounds.map(async (coll) =>
             (await canViewRound({ round: coll, user })) ? coll : undefined
           )
         )
@@ -247,7 +248,7 @@ const resolvers = {
       const round = await prisma.round.findFirst({
         where: {
           slug: roundSlug,
-          group: { slug: groupSlug },
+          group: { slug: groupSlug ?? "c" },
           deleted: { not: true },
         },
       });
@@ -286,7 +287,6 @@ const resolvers = {
         };
       }
     ),
-    //here
     roundTransactions: combineResolvers(
       isCollMember,
       async (parent, { roundId, offset, limit }) => {
@@ -332,21 +332,28 @@ const resolvers = {
       }
     ),
     bucket: async (parent, { id }) => {
+      if (!id) return null;
       const bucket = await prisma.bucket.findUnique({ where: { id } });
       if (!bucket || bucket.deleted) return null;
       return bucket;
     },
     bucketsPage: async (
       parent,
-      { roundId, textSearchTerm, tag: tagValue, offset = 0, limit, status },
+      {
+        roundSlug,
+        groupSlug,
+        textSearchTerm,
+        tag: tagValue,
+        offset = 0,
+        limit,
+        status,
+      },
       { user }
     ) => {
-      const currentMember = await prisma.roundMember.findUnique({
+      const currentMember = await prisma.roundMember.findFirst({
         where: {
-          userId_roundId: {
-            userId: user?.id ?? "undefined",
-            roundId,
-          },
+          userId: user?.id ?? "undefined",
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
         },
       });
 
@@ -357,7 +364,7 @@ const resolvers = {
 
       const buckets = await prisma.bucket.findMany({
         where: {
-          roundId,
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
           deleted: { not: true },
           OR: statusFilter,
           ...(textSearchTerm && { title: { search: textSearchTerm } }),
@@ -582,8 +589,7 @@ const resolvers = {
         { user, eventHub }
       ) => {
         if (name?.length === 0) throw new Error("Group name cannot be blank");
-        if (slug?.length === 0)
-          throw new Error("Group subdomain cannot be blank");
+        if (slug?.length === 0) throw new Error("Group slug cannot be blank");
         if (info?.length > 500) throw new Error("Group info too long");
 
         const group = await prisma.group.update({
@@ -1349,11 +1355,7 @@ const resolvers = {
           ).posts.create(
             {
               title: bucket.title,
-              raw: `https://${
-                currentGroup.customDomain
-                  ? currentGroup.customDomain
-                  : `${currentGroup.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.round.slug}/${bucket.id}`,
+              raw: `https://${process.env.DEPLOY_URL}/${currentGroup.slug}/${bucket.round.slug}/${bucket.id}`,
               ...(currentGroup.discourse.dreamsCategoryId && {
                 category: currentGroup.discourse.dreamsCategoryId,
               }),
@@ -1453,11 +1455,7 @@ const resolvers = {
           ).posts.create(
             {
               title: bucket.title,
-              raw: `https://${
-                currentGroup.customDomain
-                  ? currentGroup.customDomain
-                  : `${currentGroup.slug}.${process.env.DEPLOY_URL}`
-              }/${bucket.round.slug}/${bucket.id}`,
+              raw: `https://${process.env.DEPLOY_URL}/${currentGroup.slug}/${bucket.round.slug}/${bucket.id}`,
               ...(currentGroup.discourse.dreamsCategoryId && {
                 category: currentGroup.discourse.dreamsCategoryId,
               }),
@@ -2333,6 +2331,9 @@ const resolvers = {
     currentGroupMember: async (parent, { groupSlug }, { user }) => {
       if (user?.id !== parent.id) return null;
       if (!groupSlug) return null;
+      if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
+        return null;
+
       return prisma.groupMember.findFirst({
         where: { group: { slug: groupSlug }, userId: user.id },
       });
@@ -2402,7 +2403,6 @@ const resolvers = {
         ? group.info
         : `# Welcome to ${group.name}`;
     },
-    subdomain: (group) => group.slug,
     rounds: async (group, args, { user }) => {
       return await prisma.round.findMany({
         where: {

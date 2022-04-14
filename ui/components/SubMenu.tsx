@@ -17,10 +17,10 @@ const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }) => {
 
 const groupItems = ({ currentUser, groupSlug }) => {
   return [
-    { label: "Overview", href: `/${groupSlug}` },
+    { label: "Overview", href: `/${groupSlug == "c" ? "" : groupSlug}` },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${groupSlug}/members`, admin: true },
-    { label: "Settings", href: `/${groupSlug}/settings`, admin: true },
+    { label: "Members", href: `/${groupSlug ?? "c"}/members`, admin: true },
+    { label: "Settings", href: `/${groupSlug ?? "c"}/settings`, admin: true },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
 
@@ -72,7 +72,7 @@ export default function SubMenu({
         roundSlug: router.query.round,
         groupSlug: router.query.group,
       })
-    : groupItems({ currentUser, groupSlug: router.query.group });
+    : groupItems({ currentUser, groupSlug: router.query.group ?? "c" });
 
   const color = round?.color ?? "anthracit";
 
