@@ -42,7 +42,7 @@ const GroupMembers = ({ currentGroup }) => {
           </Button>
           {inviteModalOpen && (
             <InviteMembersModal
-              currentGroup={currentGroup} // it needs groupId (or could rewrite the mutation to use groupSlug)
+              currentGroup={currentGroup}
               handleClose={() => setInviteModalOpen(false)}
             />
           )}
@@ -52,7 +52,7 @@ const GroupMembers = ({ currentGroup }) => {
       <GroupMembersTable
         updateGroupMember={updateGroupMember}
         deleteGroupMember={deleteGroupMember}
-        currentGroup={currentGroup} // it needs groupId (or could rewrite the query to use groupSlug)
+        currentGroup={currentGroup}
       />
     </div>
   );

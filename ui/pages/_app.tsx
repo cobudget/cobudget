@@ -202,5 +202,4 @@ const MyApp = ({ Component, pageProps }) => {
 
 export default withUrqlClient(client, {
   ssr: false,
-  // staleWhileRevalidate: true,
 })(MyApp as any);
