@@ -12,7 +12,7 @@ const Dropdown = ({ children, open, handleClose }) => {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, []);
+  }, [handleClose]);
 
   return (
     <>

@@ -7,6 +7,7 @@ const atob = (a) => Buffer.from(a, "base64").toString("binary");
 
 export default async function (req, res) {
   return null;
+  /*
   const { query } = req;
   const { payload } = query;
   const pem = process.env.PRIVATE_TOKEN_KEY;
@@ -66,4 +67,5 @@ export default async function (req, res) {
     Location: "/connect-discourse",
   });
   res.end();
+  */
 }

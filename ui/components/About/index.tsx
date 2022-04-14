@@ -1,8 +1,6 @@
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import dayjs from "dayjs";
-import { useQuery, gql } from "urql";
 import { sortBy } from "lodash";
-import HappySpinner from "components/HappySpinner";
 import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";

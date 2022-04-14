@@ -95,6 +95,7 @@ const ActionsDropdown = ({
               )
             ) {
               deleteGroupMember({
+                groupId: currentGroup.id,
                 groupMemberId: member.id,
               }).then(({ error }) => {
                 if (error) {

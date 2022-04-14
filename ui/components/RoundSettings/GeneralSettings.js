@@ -40,11 +40,7 @@ const EDIT_ROUND = gql`
   }
 `;
 
-export default function GeneralSettings({
-  round,
-  currentGroup,
-  currentUser,
-}) {
+export default function GeneralSettings({ round, currentGroup, currentUser }) {
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
   const [color, setColor] = useState(round.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
