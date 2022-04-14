@@ -33,6 +33,12 @@ function InviteToken () {
         }
     }, [data]);
 
+    useEffect(() => {
+        if (error?.message.indexOf("You need to be logged in to join the group") > -1 ) {
+            router.push("/login?r=/invite/" + router.query.token)
+        }
+    }, [error, router.query, router]);
+
     if (error?.message) {
         return (
             <div className="flex justify-center mt-10">
