@@ -10,10 +10,7 @@ import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
 import { allocateToMember } from "../../controller";
-import {
-  groupHasDiscourse,
-  generateComment,
-} from "../../subscribers/discourse.subscriber";
+import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
   bucketMinGoal,
@@ -32,6 +29,8 @@ import {
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
+
+const { groupHasDiscourse, generateComment } = subscribers;
 
 const isRootAdmin = (parent, args, { user }) => {
   // TODO: this is old code that doesn't really work right now
@@ -56,6 +55,7 @@ const isMemberOfGroup = async (parent, { groupId }, { user }) => {
 
 const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
+
   const roundMember = await getRoundMember({
     userId: user.id,
     roundId,
@@ -77,10 +77,12 @@ const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
 
 const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
+
   const roundMember = await getRoundMember({
     userId: user.id,
     roundId,
   });
+
   let groupMember = null;
   if (!roundMember) {
     const group = await prisma.group.findFirst({
@@ -94,7 +96,7 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
 
   if (!(roundMember?.isApproved || groupMember?.isAdmin))
     throw new Error(
-      "You need to be approved member of this round or group admin to view round members"
+      "You need to be an approved participant in this round or a group admin to view round participants"
     );
   return skip;
 };
@@ -136,7 +138,6 @@ const isCollModOrAdmin = async (parent, { bucketId, roundId }, { user }) => {
 
 const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
-  if (!groupId) return skip;
   const groupMember = await prisma.groupMember.findUnique({
     where: {
       groupId_userId: { groupId: groupId, userId: user.id },
@@ -287,7 +288,7 @@ const resolvers = {
     ),
     //here
     roundTransactions: combineResolvers(
-      isCollMemberOrGroupAdmin,
+      isCollMember,
       async (parent, { roundId, offset, limit }) => {
         const transactions: [RoundTransaction] = await prisma.$queryRaw`
           (
@@ -615,66 +616,65 @@ const resolvers = {
         return group;
       }
     ),
-    createRound: combineResolvers(
-      isGroupAdmin,
-      async (
-        parent,
-        { groupId, slug, title, currency, registrationPolicy },
-        { user }
-      ) => {
-        let singleRound = false;
-        if (!groupId) {
-          let rootGroup = await prisma.group.findUnique({
-            where: { slug: "c" },
+    createRound: async (
+      parent,
+      { groupId, slug, title, currency, registrationPolicy },
+      { user }
+    ) => {
+      let singleRound = false;
+      if (!groupId) {
+        let rootGroup = await prisma.group.findUnique({
+          where: { slug: "c" },
+        });
+        if (!rootGroup) {
+          rootGroup = await prisma.group.create({
+            data: { slug: "c", name: "Root" },
           });
-          if (!rootGroup) {
-            rootGroup = await prisma.group.create({
-              data: { slug: "c", name: "Root" },
-            });
-          }
-          groupId = rootGroup.id;
-          singleRound = true;
         }
-        const round = await prisma.round.create({
-          data: {
-            slug,
-            title,
-            currency,
-            registrationPolicy,
-            group: { connect: { id: groupId } },
-            singleRound,
-            statusAccount: { create: {} },
-            roundMember: {
-              create: {
-                user: { connect: { id: user.id } },
-                isAdmin: true,
-                isApproved: true,
-                statusAccount: { create: {} },
-                incomingAccount: { create: {} },
-                outgoingAccount: { create: {} },
-              },
-            },
-            fields: {
-              create: {
-                name: "Description",
-                description: "Describe your bucket",
-                type: "MULTILINE_TEXT",
-                isRequired: false,
-                position: 1001,
-              },
+        groupId = rootGroup.id;
+        singleRound = true;
+      } else {
+        await isGroupAdmin(null, { groupId }, { user });
+      }
+      const round = await prisma.round.create({
+        data: {
+          slug,
+          title,
+          currency,
+          registrationPolicy,
+          group: { connect: { id: groupId } },
+          singleRound,
+          statusAccount: { create: {} },
+          roundMember: {
+            create: {
+              user: { connect: { id: user.id } },
+              isAdmin: true,
+              isApproved: true,
+              statusAccount: { create: {} },
+              incomingAccount: { create: {} },
+              outgoingAccount: { create: {} },
             },
           },
-        });
+          fields: {
+            create: {
+              name: "Description",
+              description: "Describe your bucket",
+              type: "MULTILINE_TEXT",
+              isRequired: false,
+              position: 1001,
+            },
+          },
+        },
+      });
 
-        // await eventHub.publish("create-round", {
-        //   currentGroup,
-        //   currentGroupMember,
-        //   round: round,
-        // });
+      // await eventHub.publish("create-round", {
+      //   currentGroup,
+      //   currentGroupMember,
+      //   round: round,
+      // });
 
-        return round;
-      }
-    ),
+      return round;
+    },
     editRound: combineResolvers(
       isCollOrGroupAdmin,
       async (
@@ -710,11 +710,13 @@ const resolvers = {
         });
       }
     ),
-    deleteRound: combineResolvers(isGroupAdmin, async (parent, { roundId }) =>
-      prisma.round.update({
-        where: { id: roundId },
-        data: { deleted: true },
-      })
+    deleteRound: combineResolvers(
+      isCollOrGroupAdmin,
+      async (parent, { roundId }) =>
+        prisma.round.update({
+          where: { id: roundId },
+          data: { deleted: true },
+        })
     ),
     addGuideline: combineResolvers(
       isCollOrGroupAdmin,
@@ -1643,7 +1645,7 @@ const resolvers = {
         if (emails.length > 1000)
           throw new Error("You can only invite 1000 people at a time");
 
-        let newGroupMembers = [];
+        const newGroupMembers = [];
 
         for (let email of emails) {
           email = email.trim().toLowerCase();
@@ -1708,7 +1710,7 @@ const resolvers = {
     ),
     deleteGroupMember: combineResolvers(
       isGroupAdmin,
-      async (parent, { groupMemberId }) => {
+      async (parent, { groupId, groupMemberId }) => {
         return prisma.groupMember.delete({
           where: { id: groupMemberId },
         });
@@ -1746,12 +1748,20 @@ const resolvers = {
           throw new Error("This member does not exist in this collection");
 
         if ((await roundMemberBalance(roundMember)) !== 0) {
-          throw new Error("You can only remove a round member with 0 balance");
+          throw new Error(
+            "You can only remove a round participant with 0 balance"
+          );
         }
 
         return prisma.roundMember.update({
           where: { id: memberId },
-          data: { isApproved: false, hasJoined: false, isRemoved: true },
+          data: {
+            isApproved: false,
+            hasJoined: false,
+            isRemoved: true,
+            isAdmin: false,
+            isModerator: false,
+          },
         });
       }
     ),
@@ -2130,7 +2140,7 @@ const resolvers = {
       });
 
       if (!member) {
-        throw new Error("You are not a member of this round");
+        throw new Error("You are not a participant in this round");
       }
 
       if (member.hasJoined) {
@@ -2179,6 +2189,13 @@ const resolvers = {
         },
         update: { isApproved, hasJoined: true, isRemoved: false },
       });
+
+      if (!isApproved) {
+        await emailService.roundJoinRequest({
+          round,
+          roundMember,
+        });
+      }
 
       return roundMember;
     },

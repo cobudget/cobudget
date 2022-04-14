@@ -98,6 +98,7 @@ export const ROUND_QUERY = gql`
       slug
       title
       color
+      registrationPolicy
     }
   }
 `;
@@ -194,7 +195,7 @@ const Header = ({ currentUser, currentGroup, openModal }) => {
                       currentUser.currentGroupMember?.isAdmin) && (
                       <NavItem
                         primary
-                        eventColor={color}
+                        roundColor={color}
                         onClick={() =>
                           joinRound({ roundId: round?.id }).then(
                             ({ data, error }) => {

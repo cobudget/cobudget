@@ -5,10 +5,7 @@ import { SelectField } from "components/SelectInput";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $bucketReviewIsOpen: Boolean) {
-    editRound(
-      roundId: $roundId
-      bucketReviewIsOpen: $bucketReviewIsOpen
-    ) {
+    editRound(roundId: $roundId, bucketReviewIsOpen: $bucketReviewIsOpen) {
       id
       bucketReviewIsOpen
     }

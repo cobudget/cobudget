@@ -20,8 +20,8 @@ const UPDATE_GROUP_MEMBER = gql`
 `;
 
 const DELETE_GROUP_MEMBER = gql`
-  mutation DeleteGroupMember($groupMemberId: ID!) {
-    deleteGroupMember(groupMemberId: $groupMemberId) {
+  mutation DeleteGroupMember($groupId: ID!, $groupMemberId: ID!) {
+    deleteGroupMember(groupId: $groupId, groupMemberId: $groupMemberId) {
       id
     }
   }

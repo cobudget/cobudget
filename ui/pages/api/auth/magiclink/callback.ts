@@ -5,4 +5,4 @@ export default handler()
   .use(passport.authenticate("magiclogin"))
   .use((req, res) => {
     res.redirect(req.user?.redirect || "/");
-  })
+  });

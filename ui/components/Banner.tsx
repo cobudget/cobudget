@@ -12,7 +12,14 @@ const Banner = ({
   title = "",
   disabled,
   ...props
-}: any) => {
+}: {
+  variant: string;
+  className: string;
+  loading?: boolean;
+  title: string;
+  disabled?: false;
+  children: React.ReactNode;
+}) => {
   return (
     <div
       {...props}

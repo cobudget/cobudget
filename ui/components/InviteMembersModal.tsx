@@ -59,9 +59,7 @@ const InviteMembersModal = ({
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
-    roundId
-      ? INVITE_ROUND_MEMBERS_MUTATION
-      : INVITE_GROUP_MEMBERS_MUTATION
+    roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
 
   return (

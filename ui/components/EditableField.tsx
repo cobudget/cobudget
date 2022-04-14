@@ -30,7 +30,7 @@ const EditableField = ({
     return yup.object().shape({
       [name]: required ? maxField.required("Required") : maxField,
     });
-  }, [maxLength, required]);
+  }, [maxLength, required, name]);
 
   const { handleSubmit, register, setValue, errors } = useForm({
     resolver: yupResolver(schema),
@@ -40,7 +40,7 @@ const EditableField = ({
 
   useEffect(() => {
     register({ name });
-  }, [register]);
+  }, [register, name]);
 
   if (editing)
     return (
