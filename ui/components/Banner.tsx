@@ -15,9 +15,9 @@ const Banner = ({
 }: {
   variant: string;
   className: string;
-  loading: boolean;
+  loading?: boolean;
   title: string;
-  disabled: false;
+  disabled?: false;
   children: React.ReactNode;
 }) => {
   return (

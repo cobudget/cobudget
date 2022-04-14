@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, gql } from "urql";
 
 import { CloseIcon, ArrowUpIcon } from "components/Icons";
@@ -165,10 +165,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
 
 const Monster = ({ bucket }) => {
   const [open, setOpen] = useState(false);
-  const isAngry = bucket.raisedFlags.length > 0;
-  const [bubbleOpen, setBubbleOpen] = useState(true);
-
-  const closeBubble = () => setBubbleOpen(false);
+  const [chatItems, setChatItems] = useState([]);
 
   const [, raiseFlag] = useMutation(RAISE_FLAG_MUTATION);
   const [, resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION);
@@ -181,111 +178,125 @@ const Monster = ({ bucket }) => {
     guideline,
   }));
 
-  if (!guidelineItems) return null;
-  let items;
-  if (raisedFlags.length > 0) {
-    items = [
-      {
-        type: MESSAGE,
-        message: `This ${process.env.BUCKET_NAME_SINGULAR} has been flagged for breaking guidelines. Please help review it!`,
-      },
-      {
-        type: MESSAGE,
-        message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
-      },
-      ...guidelineItems,
-      ...raisedFlags.map((raisedFlag) => ({
-        type: MESSAGE,
-        message: `Someone flagged this ${process.env.BUCKET_NAME_SINGULAR} for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
+  useEffect(() => {
+    if (chatItems.length === 0) {
+      if (raisedFlags.length > 0) {
+        setChatItems([
+          {
+            type: MESSAGE,
+            message: `This ${process.env.BUCKET_NAME_SINGULAR} has been flagged for breaking guidelines. Please help review it!`,
+          },
+          {
+            type: MESSAGE,
+            message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
+          },
+          ...guidelineItems,
+          ...raisedFlags.map((raisedFlag) => ({
+            type: MESSAGE,
+            message: `Someone flagged this ${process.env.BUCKET_NAME_SINGULAR} for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
 
           "${raisedFlag.comment}"`,
-      })),
-      {
-        type: ACTION,
-        message: `Could you help review this?`,
-        actions: [
+          })),
           {
-            label: "It is breaking another guideline",
-            chatItems: raiseFlagFlow({
-              guidelines: bucket.round.guidelines.filter(
-                (guideline) =>
-                  !raisedFlags
-                    .map((flag) => flag.guideline.id)
-                    .includes(guideline.id)
-              ),
-              raiseFlag,
-              bucketId: bucket.id,
-            }),
-          },
-          raisedFlags.length > 1
-            ? {
-                label: "I'd like to resolve a flag",
-                chatItems: [
-                  {
-                    type: ACTION,
-                    message: "Which one?",
-                    actions: raisedFlags.map((raisedFlag) => ({
-                      label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
-                      chatItems: resolveFlagFlow({
-                        flagId: raisedFlag.id,
-                        resolveFlag,
-                        bucketId: bucket.id,
-                      }),
-                    })),
-                  },
-                ],
-              }
-            : {
-                label: "I'd like to resolve the flag",
-                chatItems: resolveFlagFlow({
-                  flagId: raisedFlags[0].id,
-                  resolveFlag,
+            type: ACTION,
+            message: `Could you help review this?`,
+            actions: [
+              {
+                label: "It is breaking another guideline",
+                chatItems: raiseFlagFlow({
+                  guidelines: bucket.round.guidelines.filter(
+                    (guideline) =>
+                      !raisedFlags
+                        .map((flag) => flag.guideline.id)
+                        .includes(guideline.id)
+                  ),
+                  raiseFlag,
                   bucketId: bucket.id,
                 }),
               },
-        ],
-      },
-    ];
-  } else {
-    items = [
-      ...[
-        {
-          type: MESSAGE,
-          message: `Please help review this  ${process.env.BUCKET_NAME_SINGULAR}!`,
-        },
-        {
-          type: MESSAGE,
-          message: `Here are the guidelines that  ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
-        },
-      ],
-      ...guidelineItems,
-      ...[
-        {
-          type: ACTION,
-          message: `Does this ${process.env.BUCKET_NAME_SINGULAR} comply with the guidelines?`,
-          actions: [
+              raisedFlags.length > 1
+                ? {
+                    label: "I'd like to resolve a flag",
+                    chatItems: [
+                      {
+                        type: ACTION,
+                        message: "Which one?",
+                        actions: raisedFlags.map((raisedFlag) => ({
+                          label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
+                          chatItems: resolveFlagFlow({
+                            flagId: raisedFlag.id,
+                            resolveFlag,
+                            bucketId: bucket.id,
+                          }),
+                        })),
+                      },
+                    ],
+                  }
+                : {
+                    label: "I'd like to resolve the flag",
+                    chatItems: resolveFlagFlow({
+                      flagId: raisedFlags[0].id,
+                      resolveFlag,
+                      bucketId: bucket.id,
+                    }),
+                  },
+            ],
+          },
+        ]);
+      } else {
+        setChatItems([
+          ...[
             {
-              label: "Yes, looks good to me!",
-              sideEffect: () =>
-                allGoodFlag({ bucketId: bucket.id }).then(({ error }) => {
-                  if (error) throw new Error(error.message);
-                }),
-              chatItems: [{ type: MESSAGE, message: "Alright, thank you!" }],
+              type: MESSAGE,
+              message: `Please help review this ${process.env.BUCKET_NAME_SINGULAR}!`,
             },
             {
-              label: "No, it's breaking a guideline",
-              chatItems: raiseFlagFlow({
-                guidelines: bucket.round.guidelines,
-                raiseFlag,
-                bucketId: bucket.id,
-              }),
+              type: MESSAGE,
+              message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
             },
           ],
-        },
-      ],
-    ];
-  }
-  const [chatItems, setChatItems] = useState(items);
+          ...guidelineItems,
+          ...[
+            {
+              type: ACTION,
+              message: `Does this ${process.env.BUCKET_NAME_SINGULAR} comply with the guidelines?`,
+              actions: [
+                {
+                  label: "Yes, looks good to me!",
+                  sideEffect: () =>
+                    allGoodFlag({ bucketId: bucket.id }).then(({ error }) => {
+                      if (error) throw new Error(error.message);
+                    }),
+                  chatItems: [
+                    { type: MESSAGE, message: "Alright, thank you!" },
+                  ],
+                },
+                {
+                  label: "No, it's breaking a guideline",
+                  chatItems: raiseFlagFlow({
+                    guidelines: bucket.round.guidelines,
+                    raiseFlag,
+                    bucketId: bucket.id,
+                  }),
+                },
+              ],
+            },
+          ],
+        ]);
+      }
+    }
+  }, [
+    allGoodFlag,
+    bucket.id,
+    chatItems,
+    guidelineItems,
+    raiseFlag,
+    raisedFlags,
+    resolveFlag,
+    bucket.round.guidelines,
+  ]);
+
+  if (!guidelineItems) return null;
 
   const renderChatItem = (item, i) => {
     switch (item.type) {
@@ -348,35 +359,37 @@ const Monster = ({ bucket }) => {
               <div className="h-full overflow-y-scroll">
                 {chatItems.map((item, i) => renderChatItem(item, i))}
 
-                {chatItems[chatItems.length - 1].actions && (
-                  <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
-                    {chatItems[chatItems.length - 1].actions.map((action) => (
-                      <button
-                        className={`border-2 border-${bucket.round.color} m-1 hover:bg-${bucket.round.color} text-${bucket.round.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
-                        key={action.label}
-                        onClick={() => {
-                          action.sideEffect && action.sideEffect();
-                          setChatItems([
-                            ...chatItems,
-                            { type: ANSWER, message: action.label },
-                            ...action.chatItems,
-                          ]);
-                        }}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {chatItems.length > 0 &&
+                  chatItems[chatItems.length - 1].actions && (
+                    <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
+                      {chatItems[chatItems.length - 1].actions.map((action) => (
+                        <button
+                          className={`border-2 border-${bucket.round.color} m-1 hover:bg-${bucket.round.color} text-${bucket.round.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
+                          key={action.label}
+                          onClick={() => {
+                            action.sideEffect && action.sideEffect();
+                            setChatItems([
+                              ...chatItems,
+                              { type: ANSWER, message: action.label },
+                              ...action.chatItems,
+                            ]);
+                          }}
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {chatItems[chatItems.length - 1].type === INPUT && (
-                  <InputAction
-                    item={chatItems[chatItems.length - 1]}
-                    chatItems={chatItems}
-                    setChatItems={setChatItems}
-                    color={bucket.round.color}
-                  />
-                )}
+                {chatItems.length > 0 &&
+                  chatItems[chatItems.length - 1].type === INPUT && (
+                    <InputAction
+                      item={chatItems[chatItems.length - 1]}
+                      chatItems={chatItems}
+                      setChatItems={setChatItems}
+                      color={bucket.round.color}
+                    />
+                  )}
               </div>
             </div>
           </div>
@@ -390,8 +403,7 @@ const Monster = ({ bucket }) => {
             fullWidth
             className={"flex"}
             onClick={() => {
-              closeBubble();
-              setOpen(!open);
+              setOpen(true);
             }}
           >
             Review

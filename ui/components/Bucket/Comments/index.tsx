@@ -61,7 +61,7 @@ const Comments = ({ currentUser, bucket, router }) => {
                 />
               );
             })}
-            {currentUser?.currentCollMember && <AddComment />}
+            {currentUser?.currentCollMember?.isApproved && <AddComment />}
           </Context.Provider>
         </div>
       </div>

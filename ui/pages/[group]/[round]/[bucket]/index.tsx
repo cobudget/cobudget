@@ -1,12 +1,11 @@
 import { useQuery, gql, ssrExchange } from "urql";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
 import Bucket from "../../../../components/Bucket";
 import Overview from "../../../../components/Bucket/Overview";
 import { Tab } from "@headlessui/react";
 import Funders from "components/Bucket/Funders";
 import Comments from "components/Bucket/Comments";
-import Monster from "components/Monster";
 
 import classNames from "utils/classNames";
 import HappySpinner from "components/HappySpinner";
@@ -140,12 +139,19 @@ const BucketIndex = ({ currentUser }) => {
     variables: { id: router.query.bucket },
   });
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
+  const [tab, setTab] = useState(0);
   const { bucket } = data ?? { bucket: null };
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
     bucket?.round?.bucketReviewIsOpen &&
     bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
+
+  const tabsList = useMemo(() => ["bucket", "comments", "funders"], []);
+  useEffect(() => {
+    const index = tabsList.findIndex((tab) => tab === router.query.tab);
+    setTab(index > -1 ? index : 0);
+  }, [router.query.tab, tabsList]);
 
   if (fetching && !bucket) {
     return (
@@ -181,7 +187,20 @@ const BucketIndex = ({ currentUser }) => {
         openImageModal={() => setEditImagesModalOpen(true)}
       />
 
-      <Tab.Group>
+      <Tab.Group
+        defaultIndex={tab}
+        onChange={(tab) => {
+          router.push(
+            {
+              pathname: router.pathname,
+              query: { ...router.query, tab: tabsList[tab] },
+            },
+            undefined,
+            { scroll: false }
+          );
+          setTab(tab);
+        }}
+      >
         <div className="bg-white border-b border-b-default">
           <Tab.List className="space-x-2 max-w-screen-xl mx-auto flex px-2 overflow-x-auto">
             <Tab

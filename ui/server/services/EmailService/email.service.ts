@@ -52,6 +52,39 @@ const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and
 )}">Go here</a> to change what kinds of email notifications you receive</div>`;
 
 export default {
+  roundJoinRequest: async ({ round, roundMember }) => {
+    const admins = await prisma.roundMember.findMany({
+      where: { roundId: round.id, isAdmin: true },
+      include: { user: true },
+    });
+
+    const user = await prisma.user.findUnique({
+      where: { id: roundMember.userId },
+    });
+
+    const group = await prisma.group.findFirst({
+      where: { rounds: { some: { id: round.id } } },
+    });
+
+    const roundLink = appLink(`/${group.slug}/${round.slug}`);
+
+    const adminEmails: SendEmailInput[] = admins.map((admin) => ({
+      to: admin.user.email,
+      subject: `Someone wants to join ${round.title}`,
+      html: `${escape(
+        user.name
+      )} has requested to join <a href="${roundLink}">${escape(
+        round.title
+      )}</a>:
+        <br/>
+        <a href="${roundLink}/participants">Click here</a> to review this request
+        <br/><br/>
+        ${footer}
+        `,
+    }));
+
+    await sendEmails(adminEmails);
+  },
   inviteMember: async ({
     email,
     currentUser,
