@@ -51,7 +51,14 @@ const settingsMeta = [
   },
 ];
 
-const EmailSettingItem = ({ settingKey, value }) => {
+const adminSettingsMeta = [
+  {
+    key: "roundJoinRequest",
+    label: `A user requests to join a round`
+  }
+];
+
+const EmailSettingItem = ({ settingKey, value, settingsMeta }) => {
   const [{ fetching, error }, setEmailSetting] = useMutation(
     SET_EMAIL_SETTING_MUTATION
   );
@@ -96,6 +103,16 @@ const SettingsIndex = () => {
             key={key}
             settingKey={key}
             value={data.currentUser.emailSettings[key]}
+            settingsMeta={settingsMeta}
+          />
+        ))}
+        <div>Admin e-mail settings:</div>
+        {adminSettingsMeta.map(({ key }) => (
+          <EmailSettingItem
+            key={key}
+            settingKey={key}
+            value={data.currentUser.emailSettings[key]}
+            settingsMeta={adminSettingsMeta}
           />
         ))}
       </FormGroup>
