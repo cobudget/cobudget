@@ -55,7 +55,7 @@ export default {
   roundJoinRequest: async ({ round, roundMember }) => {
     const admins = await prisma.roundMember.findMany({
       where: { roundId: round.id, isAdmin: true },
-      include: { user: true },
+      include: { user: { include: { emailSettings: true } } },
     });
 
     const user = await prisma.user.findUnique({
@@ -68,7 +68,7 @@ export default {
 
     const roundLink = appLink(`/${group.slug}/${round.slug}`);
 
-    const adminEmails: SendEmailInput[] = admins.map((admin) => ({
+    const adminEmails: SendEmailInput[] = admins.map((admin) => admin.user?.emailSettings?.roundJoinRequest ? ({
       to: admin.user.email,
       subject: `Someone wants to join ${round.title}`,
       html: `${escape(
@@ -81,9 +81,8 @@ export default {
         <br/><br/>
         ${footer}
         `,
-    }));
-
-    await sendEmails(adminEmails);
+    }): null)
+    await sendEmails(adminEmails.filter(mail => mail !== null));
   },
   inviteMember: async ({
     email,
