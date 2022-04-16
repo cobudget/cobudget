@@ -262,11 +262,12 @@ const resolvers = {
       }
     },
     roundInvitationLink: async (parent, { roundId }, { user }) => {
-
-      const isAdmin = await !!user && isCollAdmin({
-        userId: user?.id,
-        roundId
-      });
+      const isAdmin =
+        (await !!user) &&
+        isCollAdmin({
+          userId: user?.id,
+          roundId,
+        });
 
       if (!isAdmin) {
         throw new Error("You need to be admin to fetch invitation link");
@@ -278,7 +279,10 @@ const resolvers = {
         },
       });
       return {
-        link: round.inviteNonce !== null ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId})) : null
+        link:
+          round.inviteNonce !== null
+            ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
+            : null,
       };
     },
     contributionsPage: combineResolvers(
@@ -733,11 +737,12 @@ const resolvers = {
       }
     ),
     createRoundInvitationLink: async (parent, { roundId }, { user }) => {
-
-      const isAdmin = await !!user && isCollAdmin({
-        userId: user?.id,
-        roundId
-      });
+      const isAdmin =
+        (await !!user) &&
+        isCollAdmin({
+          userId: user?.id,
+          roundId,
+        });
 
       if (!isAdmin) {
         throw new Error("You need to be admin to create invitation link");
@@ -753,11 +758,12 @@ const resolvers = {
       };
     },
     deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
-
-      const isAdmin = await !!user && isCollAdmin({
-        userId: user?.id,
-        roundId
-      });
+      const isAdmin =
+        (await !!user) &&
+        isCollAdmin({
+          userId: user?.id,
+          roundId,
+        });
 
       if (!isAdmin) {
         throw new Error("You need to be admin to create delete link");
@@ -772,7 +778,6 @@ const resolvers = {
       };
     },
     joinRoundInvitationLink: async (parent, { token }, { user }) => {
-
       if (!user) {
         throw new Error("You need to be logged in to join the group");
       }
@@ -786,13 +791,13 @@ const resolvers = {
       const { roundId, nonce: inviteNonce } = payload;
 
       const round = await prisma.round.findFirst({
-        where: { id: roundId, inviteNonce }
+        where: { id: roundId, inviteNonce },
       });
 
       if (!round) {
         throw new Error("Round link expired");
       }
-      
+
       const isApproved = true;
       const roundMember = await prisma.roundMember.upsert({
         where: { userId_roundId: { userId: user.id, roundId } },
@@ -808,7 +813,6 @@ const resolvers = {
       });
 
       return roundMember;
-
     },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,

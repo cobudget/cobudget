@@ -41,7 +41,7 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
 
 const ROUND_INVITE_LINK = gql`
   query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink (roundId: $roundId) {
+    roundInvitationLink(roundId: $roundId) {
       link
     }
   }
@@ -49,7 +49,7 @@ const ROUND_INVITE_LINK = gql`
 
 const CREATE_ROUND_INVITE_LINK = gql`
   mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink (roundId: $roundId) {
+    createRoundInvitationLink(roundId: $roundId) {
       link
     }
   }
@@ -57,7 +57,7 @@ const CREATE_ROUND_INVITE_LINK = gql`
 
 const DELETE_ROUND_INVITE_LINK = gql`
   mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink (roundId: $roundId) {
+    deleteRoundInvitationLink(roundId: $roundId) {
       link
     }
   }
@@ -99,10 +99,14 @@ const InviteMembersModal = ({
   );
   const [{ data: inviteLink }] = useQuery({
     query: ROUND_INVITE_LINK,
-    variables: { roundId }
+    variables: { roundId },
   });
-  const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(CREATE_ROUND_INVITE_LINK);
-  const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(DELETE_ROUND_INVITE_LINK);
+  const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
+    CREATE_ROUND_INVITE_LINK
+  );
+  const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(
+    DELETE_ROUND_INVITE_LINK
+  );
 
   const link = inviteLink?.roundInvitationLink?.link;
 
@@ -200,8 +204,8 @@ const InviteMembersModal = ({
                     <IconButton
                       onClick={() => {
                         deleteInviteLink({
-                          roundId
-                        })
+                          roundId,
+                        });
                       }}
                     >
                       <DeleteIcon className="h-5 w-5" />
@@ -218,13 +222,13 @@ const InviteMembersModal = ({
               >
                 Close
               </Button>
-              <Button 
+              <Button
                 className="mr-2"
                 loading={createInviteLoading}
                 onClick={() => {
                   createInviteLink({
-                    roundId
-                  }).then(() => toast.success("Invite link created"))
+                    roundId,
+                  }).then(() => toast.success("Invite link created"));
                 }}
               >
                 Create Invite Link
