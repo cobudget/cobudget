@@ -16,14 +16,14 @@ const JOIN_ROUND = gql`
 
 function InviteToken () {
     const router = useRouter();
-    const [{ fetching: loading, error, data }, joinRound] = useMutation(JOIN_ROUND);
+    const [{ error, data }, joinRound] = useMutation(JOIN_ROUND);
 
     useEffect(() => {
         if (router.query.token)
         joinRound({
             token: router.query.token
         });
-    }, [router.query.token]);
+    }, [router.query.token, joinRound]);
 
     useEffect(() => {
         if (data?.joinRoundInvitationLink?.id) {
@@ -47,6 +47,18 @@ function InviteToken () {
                     (
                         <>
                             <p>You need to be logged in to join the round. <a href="#link" className="underline">Click here</a> to go to round page.</p>
+                        </>
+                    ) :
+                    error?.message.indexOf("Invalid invitation link") > -1 ?
+                    (
+                        <>
+                            <p>This invitation link is not valid</p>
+                        </>
+                    ) :
+                    error?.message.indexOf("Round link expired") > -1 ?
+                    (
+                        <>
+                            <p>This invitation link is expired</p>
                         </>
                     ) 
                     : error?.message
