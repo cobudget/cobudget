@@ -1,5 +1,35 @@
-import prisma from "../../prisma";
 import dayjs from "dayjs";
+import { skip } from "graphql-resolvers";
+import prisma from "../../prisma";
+
+export async function isCollOrGroupAdmin(
+  parent,
+  { roundId: roundIdArg },
+  { user }
+) {
+  if (!user) throw new Error("You need to be logged in");
+
+  const roundId = roundIdArg ?? parent.id;
+
+  const roundMember = await getRoundMember({
+    userId: user.id,
+    roundId,
+  });
+  let groupMember = null;
+  if (!roundMember?.isAdmin) {
+    const group = await prisma.group.findFirst({
+      where: { rounds: { some: { id: roundId } } },
+    });
+    groupMember = await getGroupMember({
+      userId: user.id,
+      groupId: group?.id,
+    });
+  }
+
+  if (!(roundMember?.isAdmin || groupMember?.isAdmin))
+    throw new Error("You need to be admin of the round or the group");
+  return skip;
+}
 
 export async function isCollAdmin({ roundId, userId }) {
   const roundMember = await getRoundMember({

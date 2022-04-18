@@ -22,11 +22,11 @@ import {
   isAndGetCollMember,
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
+  isCollOrGroupAdmin,
   isGrantingOpen,
   roundMemberBalance,
   statusTypeToQuery,
 } from "./helpers";
-import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
 
@@ -98,28 +98,6 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
     throw new Error(
       "You need to be an approved participant in this round or a group admin to view round participants"
     );
-  return skip;
-};
-
-const isCollOrGroupAdmin = async (parent, { roundId }, { user }) => {
-  if (!user) throw new Error("You need to be logged in");
-  const roundMember = await getRoundMember({
-    userId: user.id,
-    roundId,
-  });
-  let groupMember = null;
-  if (!roundMember?.isAdmin) {
-    const group = await prisma.group.findFirst({
-      where: { rounds: { some: { id: roundId } } },
-    });
-    groupMember = await getGroupMember({
-      userId: user.id,
-      groupId: group?.id,
-    });
-  }
-
-  if (!(roundMember?.isAdmin || groupMember?.isAdmin))
-    throw new Error("You need to be admin of the round or the group");
   return skip;
 };
 
@@ -2596,6 +2574,12 @@ const resolvers = {
 
       return now.isBefore(bucketCreationCloses);
     },
+    stripeIsConnected: combineResolvers(isCollOrGroupAdmin, (round) => {
+      // TODO: https://stripe.com/docs/connect/standard-accounts#handle-users
+      // https://stripe.com/docs/api/accounts/object#account_object-charges_enabled
+      // we need to ping stripe to see if the user has finished signing up
+      return !!round.stripeAccountId;
+    }),
     group: async (round) => {
       if (round.singleRound) return null;
       return prisma.group.findUnique({
