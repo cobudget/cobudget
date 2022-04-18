@@ -15,6 +15,7 @@ import SetGrantingOpens from "./SetGrantingOpens";
 import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
+import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
 
 const useStyles = makeStyles((theme) => ({
@@ -39,6 +40,7 @@ const modals = {
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_ABOUT: SetAbout,
+  SET_STRIPE: SetStripe,
   SET_DIRECT_FUNDING: SetDirectFunding,
 };
 
@@ -52,6 +54,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
     $requireBucketApproval: Boolean
+    $directFundingEnabled: Boolean
+    $directFundingTerms: String
   ) {
     updateGrantingSettings(
       roundId: $roundId
@@ -62,6 +66,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
       requireBucketApproval: $requireBucketApproval
+      directFundingEnabled: $directFundingEnabled
+      directFundingTerms: $directFundingTerms
     ) {
       id
       currency
@@ -73,6 +79,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationIsOpen
       allowStretchGoals
       requireBucketApproval
+      directFundingEnabled
+      directFundingTerms
     }
   }
 `;
@@ -209,6 +217,17 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             }
             isSet={round.grantingCloses}
             openModal={() => handleOpen("SET_GRANTING_CLOSES")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
+
+          <Divider />
+
+          <SettingsListItem
+            primary="Connect with Stripe"
+            secondary={round.stripeIsConnected?.toString() ?? "false"}
+            isSet={round.stripeIsConnected}
+            openModal={() => handleOpen("SET_STRIPE")}
             canEdit={canEditSettings}
             roundColor={round.color}
           />

@@ -39,8 +39,9 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
               if (error) {
                 console.error({ error });
                 alert(error.message);
+              } else {
+                closeModal();
               }
-              closeModal();
             });
           })}
         >
@@ -58,34 +59,18 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           </Box>
 
           {directFundingEnabled && (
-            <div>
-              <div className="my-7">
-                <h3 className="font-bold">Stripe integration</h3>
-                <div className="my-2">
-                  Direct funds from all buckets will be sent to this Stripe
-                  account.
-                </div>
-                <Button
-                  onClick={() => console.log("click stripe")}
-                  variant="contained"
-                  color="primary"
-                >
-                  Set up Stripe
-                </Button>
+            <div className="my-7">
+              <h3 className="font-bold">Message to bucket co-creators</h3>
+              <div className="my-2">
+                Describe what they need to know to set up and manage direct
+                funding for their bucket.
               </div>
-              <div className="my-7">
-                <h3 className="font-bold">Message to bucket co-creators</h3>
-                <div className="my-2">
-                  Describe what they need to know to set up and manage direct
-                  funding for their bucket.
-                </div>
-                <Wysiwyg
-                  defaultValue={directFundingTerms}
-                  onChange={(e) => setDirectFundingTerms(e.target.value)}
-                  rows={4}
-                  highlightColor={round.color}
-                />
-              </div>
+              <Wysiwyg
+                defaultValue={directFundingTerms}
+                onChange={(e) => setDirectFundingTerms(e.target.value)}
+                rows={4}
+                highlightColor={round.color}
+              />
             </div>
           )}
 
