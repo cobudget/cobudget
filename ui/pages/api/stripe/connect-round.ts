@@ -32,7 +32,8 @@ export default handler().get(async (req, res) => {
   accountId ??= round.stripeAccountId;
 
   // TODO: we can't have a dynamic link here, it has to be pre-filled in the stripe settings
-  const callbackLink = appLink(`/${round.group.slug}/${round.slug}/settings`);
+  const redirectTo = appLink(`/${round.group.slug}/${round.slug}/settings`);
+  const callbackLink = appLink("/api/stripe/return");
 
   const accountLink = await stripe.accountLinks.create({
     account: accountId,

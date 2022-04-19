@@ -27,7 +27,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
             Direct funds from all buckets will be sent to this Stripe account.
           </div>
           <Button
-            href={`/api/connect-round-stripe?roundId=${round.id}`}
+            href={`/api/stripe/connect-round?roundId=${round.id}`}
             variant="contained"
             color="primary"
           >
