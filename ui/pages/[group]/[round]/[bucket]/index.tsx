@@ -300,13 +300,14 @@ export async function getStaticPaths() {
   });
 
   return {
-    paths: buckets.map((bucket) => ({
-      params: {
-        group: bucket.round.group.slug,
-        round: bucket.round.slug,
-        bucket: bucket.id,
-      },
-    })),
+    // paths: buckets.map((bucket) => ({
+    //   params: {
+    //     group: bucket.round.group.slug,
+    //     round: bucket.round.slug,
+    //     bucket: bucket.id,
+    //   },
+    // })),
+    paths: [],
     fallback: true, // false or 'blocking'
   };
 }
