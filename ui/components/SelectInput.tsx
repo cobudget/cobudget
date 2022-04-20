@@ -8,6 +8,8 @@ const SelectInput = ({
   inputRef,
   name,
   fullWidth,
+  value,
+  onChange,
 }: any) => {
   const inputLabel = React.useRef(null);
   const [labelWidth, setLabelWidth] = React.useState(0);
@@ -27,6 +29,8 @@ const SelectInput = ({
         defaultValue={defaultValue}
         labelWidth={labelWidth}
         inputRef={inputRef}
+        value={value}
+        onChange={onChange}
       >
         {children}
       </Select>

@@ -2082,6 +2082,8 @@ const resolvers = {
           grantingCloses,
           allowStretchGoals,
           requireBucketApproval,
+          directFundingEnabled,
+          directFundingTerms,
         }
       ) => {
         const round = await prisma.round.findUnique({
@@ -2105,6 +2107,8 @@ const resolvers = {
             grantingCloses,
             allowStretchGoals,
             requireBucketApproval,
+            directFundingEnabled,
+            directFundingTerms,
           },
         });
       }

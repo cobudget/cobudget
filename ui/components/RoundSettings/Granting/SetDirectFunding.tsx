@@ -1,23 +1,21 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useMutation } from "urql";
-
 import { Box, Button } from "@material-ui/core";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
+import Wysiwyg from "components/Wysiwyg";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
-import Wysiwyg from "components/Wysiwyg";
-import { useState } from "react";
 
 const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
-  const { handleSubmit, register, watch } = useForm();
+  const [directFundingEnabled, setDirectFundingEnabled] = useState<boolean>(
+    round.directFundingEnabled
+  );
   const [directFundingTerms, setDirectFundingTerms] = useState<string>(
     round.directFundingTerms
   );
-
-  const directFundingEnabled = watch("directFundingEnabled") === "true";
 
   return (
     <Card>
@@ -30,7 +28,9 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
         </div>
 
         <form
-          onSubmit={handleSubmit(() => {
+          onSubmit={(e) => {
+            e.preventDefault();
+
             updateGranting({
               roundId: round.id,
               directFundingEnabled,
@@ -43,15 +43,16 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
                 closeModal();
               }
             });
-          })}
+          }}
         >
           <Box m="15px 0">
             <SelectInput
-              name="directFundingEnabled"
               label="Accept direct funding"
-              defaultValue={round.directFundingEnabled ?? false}
-              inputRef={register}
               fullWidth
+              value={directFundingEnabled ? "true" : "false"}
+              onChange={(e) =>
+                setDirectFundingEnabled(e.target.value === "true")
+              }
             >
               <option value="true">Yes</option>
               <option value="false">No</option>
