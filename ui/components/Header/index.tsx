@@ -128,15 +128,6 @@ const Header = ({
 
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
 
-  console.log({
-    notAMember,
-    fetching: fetchingUser,
-    collMember: currentUser?.currentCollMember,
-    isGroupAdmin,
-    round,
-    allowedToJoinOrRequest,
-    showJoinRoundButton,
-  });
   return (
     <>
       <Head>
