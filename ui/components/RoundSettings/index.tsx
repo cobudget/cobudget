@@ -28,7 +28,7 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
   );
 
   const SettingsComponent = tabs[selectedTab].component;
-  const handleClose = () => null;
+
   return (
     <div className="page">
       <div className="grid sm:grid-cols-6">
@@ -50,7 +50,6 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
             round={round}
-            handleClose={handleClose}
             currentGroup={currentGroup}
             currentUser={currentUser}
           />
