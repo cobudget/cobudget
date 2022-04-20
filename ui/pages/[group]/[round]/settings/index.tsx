@@ -1,5 +1,5 @@
-import RoundSettings from "../../../components/RoundSettings";
-import SubMenu from "../../../components/SubMenu";
+import RoundSettings from "../../../../components/RoundSettings";
+import SubMenu from "../../../../components/SubMenu";
 
 const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
   const isAdmin =
