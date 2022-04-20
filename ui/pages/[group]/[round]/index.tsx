@@ -442,9 +442,10 @@ export async function getStaticPaths() {
   });
 
   return {
-    paths: rounds.map((round) => ({
-      params: { group: round.group.slug, round: round.slug },
-    })),
+    // paths: rounds.map((round) => ({
+    //   params: { group: round.group.slug, round: round.slug },
+    // })),
+    paths: [],
     fallback: true, // false or 'blocking'
   };
 }
