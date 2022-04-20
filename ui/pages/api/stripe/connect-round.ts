@@ -31,7 +31,9 @@ export default handler().get(async (req, res) => {
 
   accountId ??= round.stripeAccountId;
 
-  req.session.redirect = appLink(`/${round.group.slug}/${round.slug}/settings`);
+  req.session.redirect = appLink(
+    `/${round.group.slug}/${round.slug}/settings/funding`
+  );
 
   const callbackLink = appLink("/api/stripe/return");
 

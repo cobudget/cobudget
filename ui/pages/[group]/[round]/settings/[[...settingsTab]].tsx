@@ -15,7 +15,7 @@ const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
       <RoundSettings
-        settingsTabSlug={router.query?.settingsTab ?? ""}
+        settingsTabSlug={(router.query?.settingsTab as string[])?.[0] ?? ""}
         round={round}
         currentGroup={currentGroup}
         currentUser={currentUser}
