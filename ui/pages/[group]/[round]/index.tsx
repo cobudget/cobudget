@@ -402,9 +402,12 @@ export async function getStaticProps(ctx) {
     groupSlug: ctx.params.group,
     roundSlug: ctx.params.round,
   };
+  console.log({ variables });
 
-  await client.query(ROUND_PAGE_QUERY, variables).toPromise();
-
+  const roundPageQuery = await client
+    .query(ROUND_PAGE_QUERY, variables)
+    .toPromise();
+  console.log({ roundPageQuery });
   // TODO: try to get static generation of bucket list to work (it does not revalidate)
   // const statusFilter = stringOrArrayIntoArray(
   //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
@@ -418,7 +421,10 @@ export async function getStaticProps(ctx) {
   //   })
   //   .toPromise();
 
-  await client.query(TOP_LEVEL_QUERY, variables).toPromise();
+  const topLevelQuery = await client
+    .query(TOP_LEVEL_QUERY, variables)
+    .toPromise();
+  console.log({ topLevelQuery });
 
   return {
     props: {
