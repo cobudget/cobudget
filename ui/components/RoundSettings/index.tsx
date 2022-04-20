@@ -16,7 +16,12 @@ const defaultTabs = [
   { name: "Tags", component: Tags },
 ];
 
-const RoundSettings = ({ round, currentGroup, currentUser }) => {
+const RoundSettings = ({
+  settingsTabSlug,
+  round,
+  currentGroup,
+  currentUser,
+}) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const tabs = useMemo(
