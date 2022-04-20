@@ -96,7 +96,7 @@ export default function AuthenticationForm({
             fullWidth
             href={`/api/auth/facebook/?${
               fbEmailError ? "fb_no_email_scope=true&" : ""
-            }remember_me=true&d=test&${redirect && ("r=/" + redirect)}`}
+            }remember_me=true&d=test&${redirect && "r=/" + redirect}`}
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >

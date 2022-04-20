@@ -56,7 +56,7 @@ const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
-  }, [router.query]);
+  }, [router, router.query]);
 
   const [
     { data: { rounds, group } = { rounds: [], group: null }, error, fetching },
