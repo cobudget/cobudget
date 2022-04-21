@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
+import { Tooltip } from "react-tippy";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
@@ -46,17 +47,26 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           }}
         >
           <Box m="15px 0">
-            <SelectInput
-              label="Accept direct funding"
-              fullWidth
-              value={directFundingEnabled ? "true" : "false"}
-              onChange={(e) =>
-                setDirectFundingEnabled(e.target.value === "true")
+            <Tooltip
+              title={
+                !round.stripeIsConnected
+                  ? "You need to connect this round to Stripe first"
+                  : ""
               }
             >
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </SelectInput>
+              <SelectInput
+                label="Accept direct funding"
+                fullWidth
+                value={directFundingEnabled ? "true" : "false"}
+                disabled={!round.stripeIsConnected}
+                onChange={(e) =>
+                  setDirectFundingEnabled(e.target.value === "true")
+                }
+              >
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </SelectInput>
+            </Tooltip>
           </Box>
 
           {directFundingEnabled && (
