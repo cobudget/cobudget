@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
+import stripe from "server/utils/stripe";
 import prisma from "../../prisma";
 
 export async function isCollOrGroupAdmin(
@@ -357,8 +358,11 @@ export async function roundMemberBalance(member) {
 
 /** only call this if you've verified the user is at least a round admin */
 export async function stripeIsConnected({ round }) {
-  // TODO: https://stripe.com/docs/connect/standard-accounts#handle-users
-  // https://stripe.com/docs/api/accounts/object#account_object-charges_enabled
-  // we need to ping stripe to see if the user has finished signing up
-  return !!round.stripeAccountId;
+  if (!round.stripeAccountId) {
+    return false;
+  }
+
+  const account = await stripe.accounts.retrieve(round.stripeAccountId);
+
+  return account.charges_enabled;
 }
