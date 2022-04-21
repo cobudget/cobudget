@@ -26,6 +26,7 @@ import {
   isGrantingOpen,
   roundMemberBalance,
   statusTypeToQuery,
+  stripeIsConnected,
 } from "./helpers";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
@@ -2097,6 +2098,10 @@ const resolvers = {
           );
         }
 
+        if (directFundingEnabled && !(await stripeIsConnected({ round }))) {
+          throw new Error("You need to connect this round to Stripe first");
+        }
+
         return prisma.round.update({
           where: { id: roundId },
           data: {
@@ -2579,10 +2584,7 @@ const resolvers = {
       return now.isBefore(bucketCreationCloses);
     },
     stripeIsConnected: combineResolvers(isCollOrGroupAdmin, (round) => {
-      // TODO: https://stripe.com/docs/connect/standard-accounts#handle-users
-      // https://stripe.com/docs/api/accounts/object#account_object-charges_enabled
-      // we need to ping stripe to see if the user has finished signing up
-      return !!round.stripeAccountId;
+      return stripeIsConnected({ round });
     }),
     group: async (round) => {
       if (round.singleRound) return null;

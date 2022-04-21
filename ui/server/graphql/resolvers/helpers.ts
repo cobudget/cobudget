@@ -354,3 +354,11 @@ export async function roundMemberBalance(member) {
 
   return totalAllocations - totalContributions;
 }
+
+/** only call this if you've verified the user is at least a round admin */
+export async function stripeIsConnected({ round }) {
+  // TODO: https://stripe.com/docs/connect/standard-accounts#handle-users
+  // https://stripe.com/docs/api/accounts/object#account_object-charges_enabled
+  // we need to ping stripe to see if the user has finished signing up
+  return !!round.stripeAccountId;
+}
