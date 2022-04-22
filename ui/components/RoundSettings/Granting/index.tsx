@@ -1,10 +1,12 @@
 import React from "react";
 import { Modal, List, Divider } from "@material-ui/core";
-import { gql } from "urql";
-
+import { gql, useQuery } from "urql";
+import { useRouter } from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
+
 import thousandSeparator from "utils/thousandSeparator";
+import HappySpinner from "components/HappySpinner";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -43,6 +45,26 @@ const modals = {
   SET_STRIPE: SetStripe,
   SET_DIRECT_FUNDING: SetDirectFunding,
 };
+
+const GET_ROUND_FUNDING_SETTINGS = gql`
+  query GetRoundFundingSettings($roundSlug: String!, $groupSlug: String!) {
+    round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
+      id
+      currency
+      maxAmountToBucketPerUser
+      grantingOpens
+      grantingCloses
+      grantingIsOpen
+      bucketCreationCloses
+      bucketCreationIsOpen
+      allowStretchGoals
+      requireBucketApproval
+      stripeIsConnected
+      directFundingEnabled
+      directFundingTerms
+    }
+  }
+`;
 
 export const UPDATE_GRANTING_SETTINGS = gql`
   mutation updateGrantingSettings(
@@ -85,8 +107,17 @@ export const UPDATE_GRANTING_SETTINGS = gql`
   }
 `;
 
-const RoundSettingsModalGranting = ({ round, currentGroup }) => {
+const RoundSettingsModalGranting = ({ currentGroup }) => {
+  const router = useRouter();
+
   const [open, setOpen] = React.useState(null);
+
+  const [{ data, error, fetching }] = useQuery({
+    query: GET_ROUND_FUNDING_SETTINGS,
+    variables: { groupSlug: router.query.group, roundSlug: router.query.round },
+  });
+
+  const round = data?.round;
 
   const handleOpen = (modal) => {
     setOpen(modal);
@@ -101,6 +132,15 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
   const ModalContent = modals[open];
 
   const canEditSettings = true;
+
+  if (error) {
+    console.error(error);
+    return <div>{error.message}</div>;
+  }
+
+  if (fetching || !round) {
+    return <HappySpinner className="mx-auto" />;
+  }
 
   return (
     <div className="-mb-6">

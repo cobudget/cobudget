@@ -37,7 +37,6 @@ export const TOP_LEVEL_QUERY = gql`
       }
       allowStretchGoals
       requireBucketApproval
-      stripeIsConnected
       directFundingEnabled
       directFundingTerms
       bucketReviewIsOpen
