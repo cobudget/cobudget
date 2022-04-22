@@ -95,7 +95,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           </Button>
 
           {directFundingEnabled && (
-            <div className="mt-5">
+            <div className="mt-5 text-gray-600">
               If a bucket is not fully funded, direct funds will be
               automatically refunded via Stripe to the funder.
             </div>

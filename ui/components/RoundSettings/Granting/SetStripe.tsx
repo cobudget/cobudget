@@ -19,9 +19,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           buckets by users.
         </div>
 
-        <div>StripeIsConnected: {String(round.stripeIsConnected)}</div>
-
-        <div className="my-7">
+        <div className="mt-9 mb-12">
           <h3 className="font-bold">Stripe integration</h3>
           <div className="my-2">
             Direct funds from all buckets will be sent to this Stripe account.
