@@ -362,6 +362,7 @@ export async function stripeIsConnected({ round }) {
     return false;
   }
 
+  // this seems to take approx 400-700ms
   const account = await stripe.accounts.retrieve(round.stripeAccountId);
 
   return account.charges_enabled;
