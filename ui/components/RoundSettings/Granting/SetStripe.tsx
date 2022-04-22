@@ -1,15 +1,7 @@
-import { useMutation } from "urql";
-
 import { Box, Button } from "@material-ui/core";
-
 import Card from "components/styled/Card";
 
-import { UPDATE_GRANTING_SETTINGS } from ".";
-
 const SetAllowStretchGoals = ({ closeModal, round }) => {
-  // TODO: create mutation for getting link to redirect user to
-  //const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
-
   return (
     <Card>
       <Box p={3}>
