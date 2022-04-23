@@ -8,6 +8,7 @@ const JOIN_ROUND = gql`
     joinRoundInvitationLink(token: $token) {
       id
       round {
+        id
         slug
       }
     }

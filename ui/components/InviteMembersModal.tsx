@@ -189,7 +189,8 @@ const InviteMembersModal = ({
                     onClick={() => {
                       navigator.clipboard
                         .writeText(link)
-                        .then(() => toast.success("Invitation link copied"));
+                        .then(() => toast.success("Invitation link copied"))
+                        .catch(() => toast.error("Error while copying link"))
                     }}
                   >
                     Copy
@@ -228,7 +229,9 @@ const InviteMembersModal = ({
                 onClick={() => {
                   createInviteLink({
                     roundId,
-                  }).then(() => toast.success("Invite link created"));
+                  })
+                  .then(() => toast.success("Invite link created"))
+                  .catch(() => toast.error("Could not created invite link"));
                 }}
               >
                 Create Invite Link
