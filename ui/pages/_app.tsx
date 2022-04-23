@@ -9,6 +9,8 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
+import {IntlProvider} from "react-intl";
+import lang from "../lang";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -175,7 +177,7 @@ const MyApp = ({ Component, pageProps }) => {
   }
 
   return (
-    <>
+    <IntlProvider locale='en' messages={lang['swe']}>
       {/* legacy Modal component, use individual modals where they are called instead */}
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
@@ -196,7 +198,7 @@ const MyApp = ({ Component, pageProps }) => {
         />
         <Toaster />
       </Layout>
-    </>
+    </IntlProvider>
   );
 };
 

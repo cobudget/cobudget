@@ -1,5 +1,6 @@
 import React from "react";
 import Header from "./Header";
+import {FormattedMessage} from 'react-intl';
 import "../lib/beacon";
 
 const LinkOut = ({ href, children }) => {
@@ -37,13 +38,19 @@ const Layout = ({
         {/* NOTE TO PEOPLE WANTING TO EDIT THIS:
             Please see our license in the file /LICENSE in this repo for details on how you're allowed to change this section */}
         <div>
-          You are using <LinkOut href="https://cobudget.com/">Cobudget</LinkOut>
-          . Source code available{" "}
-          <LinkOut href="https://github.com/cobudget/cobudget">online</LinkOut>.
+          <FormattedMessage
+            defaultMessage="You are using <a1>Cobudget</a1>. Source code available <a2>online</a2>."
+            values={{
+              a1: (msg) => <LinkOut href="https://cobudget.com/">{msg}</LinkOut>,
+              a2: (msg) => <LinkOut href="https://github.com/cobudget/cobudget">{msg}</LinkOut>
+            }}
+          />
         </div>
         <div className="space-x-6">
           {process.env.PRIVACY_POLICY_URL && (
-            <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+            <LinkOut href="/privacy-policy">
+              Privacy Policy
+            </LinkOut>
           )}
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>

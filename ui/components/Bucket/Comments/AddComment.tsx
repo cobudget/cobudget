@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
+import {FormattedMessage} from 'react-intl';
 
 import TextField from "components/TextField";
 import Button from "components/Button";

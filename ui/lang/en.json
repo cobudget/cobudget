@@ -1,0 +1,50 @@
+{
+  "0KKXrH": {
+    "defaultMessage": "Budget"
+  },
+  "26gDq9": {
+    "defaultMessage": "Funding goal:"
+  },
+  "47FYwb": {
+    "defaultMessage": "Cancel"
+  },
+  "C/OtcW": {
+    "defaultMessage": "Non-monetary contributions"
+  },
+  "Ctmnwu": {
+    "defaultMessage": "Fund"
+  },
+  "Lvy00l": {
+    "defaultMessage": "Existing funds"
+  },
+  "MJ2jZQ": {
+    "defaultMessage": "Total"
+  },
+  "NYQP6J": {
+    "defaultMessage": "stretch goal:"
+  },
+  "NaGSue": {
+    "defaultMessage": "Max."
+  },
+  "QfdRBy": {
+    "defaultMessage": "Costs"
+  },
+  "Zg5tZj": {
+    "defaultMessage": "Available balance:"
+  },
+  "ZzTq6v": {
+    "defaultMessage": "You are using <a1>Cobudget</a1>. Source code available <a2>online</a2>."
+  },
+  "duxEls": {
+    "defaultMessage": "= Costs - Existing funds"
+  },
+  "kUUexp": {
+    "defaultMessage": "Contribute to"
+  },
+  "kaPKOB": {
+    "defaultMessage": "Insufficient balance"
+  },
+  "n6ne4U": {
+    "defaultMessage": "+ Budget"
+  }
+}

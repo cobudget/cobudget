@@ -4,6 +4,7 @@ import { Modal } from "@material-ui/core";
 import Button from "components/Button";
 import TextField from "components/TextField";
 import toast from "react-hot-toast";
+import {FormattedMessage} from "react-intl";
 
 const CONTRIBUTE_MUTATION = gql`
   mutation Contribute($roundId: ID!, $bucketId: ID!, $amount: Int!) {
@@ -91,16 +92,16 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
         <h1 className="text-2xl mb-2 font-semibold">
-          Contribute to {bucket.title}
+        <FormattedMessage defaultMessage="Contribute to"/> {bucket.title}
         </h1>
         <p className={availableBalance >= 0 ? "text-gray-800" : "text-red-600"}>
           {availableBalance >= 0
-            ? `Available balance: ${availableBalance} ${bucket.round.currency}`
-            : "Insufficient balance"}
+            ? <><FormattedMessage defaultMessage="Available balance:"/> {availableBalance} {bucket.round.currency}</>
+            : <FormattedMessage defaultMessage="Insufficient balance"/>}
         </p>
         {bucket.round.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {bucket.round.maxAmountToBucketPerUser / 100}{" "}
+            <FormattedMessage defaultMessage="Max."/> {bucket.round.maxAmountToBucketPerUser / 100}{" "}
             {bucket.round.currency} to one {process.env.BUCKET_NAME_SINGULAR}
           </p>
         )}
@@ -152,7 +153,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
             disabled={inputValue === "" || availableBalance < 0}
             className="my-2"
           >
-            Fund
+            <FormattedMessage defaultMessage="Fund"/>
           </Button>
           <Button
             size="large"
@@ -161,7 +162,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
             color={bucket.round.color}
             onClick={handleClose}
           >
-            Cancel
+            <FormattedMessage defaultMessage="Cancel"/>
           </Button>
         </form>
       </div>

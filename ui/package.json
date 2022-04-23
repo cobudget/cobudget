@@ -13,7 +13,8 @@
     "generate": "yarn run generate:prisma",
     "generate:prisma": "prisma generate",
     "migrate": "npx prisma migrate dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "extract": "formatjs extract 'components/**/*.*s*' --ignore='**/*.d.ts' --out-file lang/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]'"
   },
   "engines": {
     "node": "14.x"
@@ -79,6 +80,7 @@
     "react-hook-form": "^6.3.3",
     "react-hot-toast": "^2.1.1",
     "react-icons": "3.11.0",
+    "react-intl": "^5.25.0",
     "react-markdown": "5.0.3",
     "react-sortable-hoc": "2.0.0",
     "react-tippy": "^1.4.0",
@@ -102,6 +104,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.10.2",
+    "@formatjs/cli": "^4.8.3",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
     "@types/lodash": "4.14.178",
     "@types/nodemailer": "6.4.4",
