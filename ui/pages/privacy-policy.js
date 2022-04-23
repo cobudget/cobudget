@@ -1,4 +1,5 @@
 const PrivacyPolicy = () => {
+  if (!process.env.PRIVACY_POLICY_URL) return null;
   return (
     <div className="flex">
       <div className="flex-1 flex m-auto mt-12 flex-col items-center">
@@ -7,7 +8,7 @@ const PrivacyPolicy = () => {
           <iframe
             className="flex-1 md:mx-16"
             style={{ height: "70vh" }}
-            src="https://www.iubenda.com/privacy-policy/58637640"
+            src={process.env.PRIVACY_POLICY_URL}
           ></iframe>
         </div>
       </div>

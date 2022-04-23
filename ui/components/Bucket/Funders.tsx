@@ -1,7 +1,7 @@
 import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
 
-export default function Funders({ bucket, round, currentUser }) {
+export default function Funders({ bucket, currentUser }) {
   if (!bucket) return null;
   return (
     <div className="bg-white border-b-default">
@@ -20,7 +20,7 @@ export default function Funders({ bucket, round, currentUser }) {
                 <span>
                   {contribution.roundMember.user.username} -{" "}
                   {thousandSeparator(contribution.amount / 100)}{" "}
-                  {round.currency}
+                  {bucket.round.currency}
                 </span>
               </li>
             ))}

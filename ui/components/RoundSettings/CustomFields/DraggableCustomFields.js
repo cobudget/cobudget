@@ -92,7 +92,7 @@ const SortableItem = sortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    `Deleting a custom field would delete it from all the buckets that use it. Are you sure?`
+                    `Deleting a custom field would delete it from all the ${process.env.BUCKET_NAME_PLURAL} that use it. Are you sure?`
                   ) && deleteCustomField({ roundId, fieldId: customField.id })
                 }
               >

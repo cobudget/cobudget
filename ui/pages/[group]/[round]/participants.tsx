@@ -1,8 +1,32 @@
 import Members from "../../../components/RoundMembers";
 import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
+import { useRouter } from "next/router";
+import { gql, useQuery } from "urql";
 
-const RoundMembersPage = ({ round, currentUser }) => {
+export const ROUND_QUERY = gql`
+  query RoundQuery($groupSlug: String!, $roundSlug: String!) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
+      id
+      color
+      numberOfApprovedMembers
+      currency
+    }
+  }
+`;
+
+const RoundMembersPage = ({ currentUser }) => {
+  const router = useRouter();
+  const [
+    { data: { round } = { round: null }, fetching: loading, error },
+  ] = useQuery({
+    query: ROUND_QUERY,
+    variables: {
+      groupSlug: router.query.group,
+      roundSlug: router.query.round,
+    },
+  });
+
   if (!round) return null;
 
   return (
