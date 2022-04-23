@@ -4,6 +4,7 @@ import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
+import DirectFunding from "./DirectFunding";
 
 const Bucket = ({
   bucket,
@@ -59,6 +60,8 @@ const Bucket = ({
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />
+
+            <DirectFunding canEdit={canEdit} round={round} />
           </div>
         </div>
       </div>
