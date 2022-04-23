@@ -42,8 +42,8 @@ const Discourse = ({ round, currentGroup }) => {
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">Category</h2>
       <p className="text-gray-700 mb-4">
-        Select the discourse category that buckets in this round will be posted
-        to
+        Select the discourse category that {process.env.BUCKET_NAME_PLURAL} in
+        this round will be posted to
       </p>
       <form
         onSubmit={handleSubmit((variables) => {

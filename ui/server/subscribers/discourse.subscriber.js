@@ -290,7 +290,7 @@ export default {
         group.customDomain || `${group.subdomain}.${process.env.DEPLOY_URL}`;
       const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
       content.push(
-        "View and edit this post on the Cobudget platform: ",
+        `View and edit this post on the ${process.env.PLATFORM_NAME} platform: `,
         bucketUrl
       );
     }

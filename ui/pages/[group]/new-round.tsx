@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 import slugify from "utils/slugify";
 import currencies from "utils/currencies";
@@ -26,6 +26,7 @@ const CREATE_ROUND = gql`
       currency: $currency
       registrationPolicy: $registrationPolicy
     ) {
+      id
       slug
       title
     }
@@ -36,13 +37,14 @@ export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
-
+  const router = useRouter();
   const onSubmit = (variables) => {
     createRound({ ...variables, groupId: currentGroup.id })
       .then(({ data }) => {
+        console.log({ data });
         Router.push(
           "/[group]/[round]",
-          `/${currentGroup.slug}/${data.createRound.slug}`
+          `/${router.query.group}/${data.createRound.slug}`
         );
       })
       .catch((err) => {
@@ -53,7 +55,7 @@ export default function NewRoundPage({ currentGroup }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">New bucket round</h1>
+        <h1 className="text-2xl mb-2 font-semibold">New round</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"
