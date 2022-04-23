@@ -206,7 +206,13 @@ const InviteMembersModal = ({
                       onClick={() => {
                         deleteInviteLink({
                           roundId,
-                        });
+                        })
+                        .then(result => {
+                          if (result.error) {
+                            return toast.error("Could not delete invitation link");
+                          }
+                          toast.success("Invitation link deleted")
+                        })
                       }}
                     >
                       <DeleteIcon className="h-5 w-5" />
@@ -230,8 +236,12 @@ const InviteMembersModal = ({
                   createInviteLink({
                     roundId,
                   })
-                  .then(() => toast.success("Invite link created"))
-                  .catch(() => toast.error("Could not created invite link"));
+                  .then((result) => {
+                    if (result.error) {
+                      return toast.error("Could not create invite link")
+                    }
+                    toast.success("Invite link created")
+                  })
                 }}
               >
                 Create Invite Link
