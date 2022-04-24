@@ -1,5 +1,5 @@
+import prisma from "server/prisma";
 import discourse from "../lib/discourse";
-import liveUpdate from "../services/liveUpdate.service";
 
 export default {
   groupHasDiscourse(group) {
@@ -45,7 +45,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:", ...post.errors);
 
         bucket.comments.forEach((comment) => {
           eventHub.publish("create-comment", {
@@ -58,8 +58,10 @@ export default {
           });
         });
 
-        bucket.discourseTopicId = post.topic_id;
-        await bucket.save();
+        await prisma.bucket.update({
+          where: { id: bucket.id },
+          data: { discourseTopicId: post.topic_id },
+        });
       }
     );
 
@@ -93,7 +95,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:", ...post.errors);
 
         await discourse(currentGroup.discourse).posts.update(
           post.id,
@@ -196,14 +198,14 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:", ...post.errors);
         const created = this.generateComment(
           { ...post, raw: comment.content },
           currentGroupMember
         );
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { comment: created, action: "created" },
-        });
+        // liveUpdate.publish("commentsChanged", {
+        //   commentsChanged: { comment: created, action: "created" },
+        // });
 
         return created;
       }
@@ -237,15 +239,12 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:", ...post.errors);
 
         const updated = this.generateComment(
           { ...post, raw: comment.content },
           currentGroupMember
         );
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { comment: updated, action: "edited" },
-        });
 
         return updated;
       }
@@ -268,13 +267,10 @@ export default {
         const res = await discourse(currentGroup.discourse).posts.delete({
           id: comment.id,
           userApiKey: currentGroupMember.discourseApiKey,
+          username: currentGroupMember.discourseUsername,
         });
 
-        if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
-
-        // liveUpdate.publish("commentsChanged", {
-        //   commentsChanged: { comment, action: "deleted" },
-        // });
+        if (!res.ok) throw new Error("Discourse API:", res.statusText);
 
         return comment;
       }
@@ -286,9 +282,8 @@ export default {
 
     if (group) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
-      const domain =
-        group.customDomain || `${group.subdomain}.${process.env.DEPLOY_URL}`;
-      const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
+
+      const bucketUrl = `${protocol}://${process.env.DEPLOY_URL}/${group.slug}/${round.slug}/${bucket.id}`;
       content.push(
         `View and edit this post on the ${process.env.PLATFORM_NAME} platform: `,
         bucketUrl
