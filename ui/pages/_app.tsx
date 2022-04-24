@@ -177,7 +177,7 @@ const MyApp = ({ Component, pageProps }) => {
   }
 
   return (
-    <IntlProvider locale='en' messages={lang['swe']}>
+    <IntlProvider locale={router.locale} messages={lang[(router.locale)]}>
       {/* legacy Modal component, use individual modals where they are called instead */}
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />

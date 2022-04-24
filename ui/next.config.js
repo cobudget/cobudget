@@ -32,6 +32,10 @@ module.exports = (phase) => {
   };
   return withBundleAnalyzer({
     env,
+    i18n: {
+      locales: ['en', 'sv', 'ur'],
+      defaultLocale: 'en'
+    },
     eslint: {
       ignoreDuringBuilds: true,
     },

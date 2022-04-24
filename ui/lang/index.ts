@@ -1,9 +1,11 @@
 import en from "./en.json";
-import swe from "./swe.json";
+import sv from "./sv-SE.json";
+import ur from "./ur-PK.json";
 
 const langs = {
     en,
-    swe
+    sv,
+    ur
 }
 
 export default langs;
