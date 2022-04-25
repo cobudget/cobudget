@@ -90,7 +90,7 @@ const BucketBudget = ({
                       key="total"
                       className="bg-gray-200 border-t-2 border-gray-300"
                     >
-                      <td className="px-4 py-2">Total</td>
+                      <td className="px-4 py-2"><FormattedMessage defaultMessage="Total" /></td>
                       <td className="px-4 py-2">
                         {thousandSeparator(expenseTotalMin / 100)}
                         {expenseTotalMax > 0

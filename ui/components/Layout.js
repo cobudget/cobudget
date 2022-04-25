@@ -19,9 +19,10 @@ const Layout = ({
   group,
   round,
   bucket,
+  dir
 }) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" id="hello-container" dir={dir}>
       <div>
         <Header
           currentUser={currentUser}

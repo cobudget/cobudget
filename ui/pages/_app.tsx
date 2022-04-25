@@ -11,6 +11,7 @@ import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
 import {IntlProvider} from "react-intl";
 import lang from "../lang";
+import isRTL from "../utils/isRTL"
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -188,6 +189,7 @@ const MyApp = ({ Component, pageProps }) => {
         group={group}
         round={round}
         bucket={bucket}
+        dir={isRTL(router.locale) ? "rtl" : "ltr"}
       >
         <Component
           {...pageProps}

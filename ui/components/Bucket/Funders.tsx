@@ -1,5 +1,6 @@
 import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
+import {FormattedMessage} from "react-intl";
 
 export default function Funders({ bucket, currentUser }) {
   if (!bucket) return null;
@@ -29,7 +30,7 @@ export default function Funders({ bucket, currentUser }) {
       ) : (
         <div className="page">
           <div className="text-xl font-medium text-gray-500 py-10 text-center">
-            {"No contributions yet"}
+            <FormattedMessage defaultMessage="No contributions yet"/>
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
+import { FormattedMessage } from "react-intl";
 
 const EDIT_TITLE_MUTATION = gql`
   mutation EditTitle($bucketId: ID!, $title: String) {
@@ -53,11 +54,11 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
                 variant="secondary"
                 onClick={() => setEditing(false)}
               >
-                Cancel
+                <FormattedMessage defaultMessage="Cancel" />
               </Button>
 
               <Button loading={loading} type="submit">
-                Save
+              <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>

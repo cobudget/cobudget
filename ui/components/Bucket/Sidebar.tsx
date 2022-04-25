@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { Modal } from "@material-ui/core";
+import {FormattedMessage} from "react-intl";
 
 import Dropdown from "../Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "../Icons";
@@ -88,15 +89,24 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
     <Modal open={open} className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <div className="font-bold text-lg mb-2">
-          Are you sure you want to cancel this{" "}
-          {process.env.BUCKET_NAME_SINGULAR}?
+          <FormattedMessage 
+            defaultMessage="Are you sure you want to cancel this {bucketName}?"
+            values={{
+              bucketName: process.env.BUCKET_NAME_SINGULAR,
+            }}
+          />
         </div>
         <div className="mb-2">
-          If you confirm, the money that has already been given to this{" "}
-          {process.env.BUCKET_NAME_SINGULAR}
-          will be returned to its funders.
+          <FormattedMessage 
+            defaultMessage="If you confirm, the money that has already been given to this {bucketName} will be returned to its funders."
+            values={{
+              bucketName: process.env.BUCKET_NAME_SINGULAR,
+            }}
+          />
         </div>
-        <div className="font-bold">Caution: This cannot be undone</div>
+        <div className="font-bold">
+          <FormattedMessage defaultMessage="Caution: This cannot be undone" />
+        </div>
         <div className="mt-4 flex justify-end items-center">
           <div className="flex">
             <Button
@@ -105,7 +115,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
               onClick={() => close()}
               disabled={fetching}
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button
               color="red"
@@ -118,7 +128,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
                 })
               }
             >
-              Yes, cancel it
+              <FormattedMessage defaultMessage="Yes, cancel it" />
             </Button>
           </div>
         </div>
@@ -191,7 +201,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
-                Fund
+                <FormattedMessage defaultMessage="Fund" />
               </Button>
               {showBucketReview ? <Monster bucket={bucket} /> : null}
               {contributeModalOpen && (
@@ -216,7 +226,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 )
               }
             >
-              Accept funding
+              <FormattedMessage defaultMessage="Accept funding" />
             </Button>
           )}
 
@@ -231,7 +241,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               }
               fullWidth
             >
-              Publish
+              <FormattedMessage defaultMessage="Publish" />
             </Button>
           )}
           {showApproveButton && (
@@ -245,7 +255,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 }).catch((err) => alert(err.message))
               }
             >
-              Open for funding
+              <FormattedMessage defaultMessage="Open for funding" />
             </Button>
           )}
           {showMarkAsCompletedButton && (
@@ -263,7 +273,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 )
               }
             >
-              Mark as completed
+              <FormattedMessage defaultMessage="Mark as completed" />
             </Button>
           )}
           {canEdit && (
@@ -290,7 +300,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       }).then(() => setActionsDropdownOpen(false))
                     }
                   >
-                    Unpublish
+                    <FormattedMessage defaultMessage="Unpublish" />
                   </button>
                 )}
                 {showCancelFundingButton && (
@@ -307,7 +317,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
                     >
-                      Cancel {process.env.BUCKET_NAME_SINGULAR}
+                      <FormattedMessage defaultMessage="Cancel" /> {process.env.BUCKET_NAME_SINGULAR}
                     </button>
                   </>
                 )}
@@ -323,7 +333,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                         .catch((err) => alert(err.message))
                     }
                   >
-                    Unapprove for funding
+                    <FormattedMessage defaultMessage="Unapprove for funding" />
                   </button>
                 )}
                 {showDeleteButton && (
@@ -355,7 +365,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       )
                     }
                   >
-                    Delete
+                    <FormattedMessage defaultMessage="Delete" />
                   </button>
                 )}
               </Dropdown>

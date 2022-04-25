@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
+import { FormattedMessage } from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -51,7 +52,7 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
           />
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-600 font-medium pl-4">
-              {160 - inputValue.length} characters remaining
+              {160 - inputValue.length} <FormattedMessage defaultMessage="characters remaining" />
             </div>
             <div className="flex">
               <Button
@@ -59,11 +60,11 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
                 variant="secondary"
                 onClick={() => setEditing(false)}
               >
-                Cancel
+                <FormattedMessage defaultMessage="Cancel" />
               </Button>
 
               <Button loading={loading} type="submit">
-                Save
+              <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>
@@ -93,7 +94,7 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
         onClick={() => setEditing(true)}
         className="block w-full h-20 text-gray-600 font-semibold rounded-lg border-3 border-dashed hover:bg-gray-100 mb-4 focus:outline-none focus:bg-gray-100"
       >
-        + Summary
+        <FormattedMessage defaultMessage="+ Summary" />
       </button>
     );
 

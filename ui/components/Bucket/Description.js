@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
+import {FormattedMessage} from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -58,9 +59,9 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
               target="_/blank"
               className="hover:text-gray-800 border-b hover:border-gray-800"
             >
-              Markdown
+              <FormattedMessage defaultMessage="Markdown" />
             </a>{" "}
-            allowed.
+            <FormattedMessage defaultMessage="allowed."/>
           </div>
           <div className="flex">
             <Button
@@ -68,10 +69,10 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
               variant="secondary"
               className="mr-2"
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button type="submit" loading={loading}>
-              Save
+            <FormattedMessage defaultMessage="Save" />
             </Button>
           </div>
         </div>
@@ -100,7 +101,7 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
         onClick={() => setEditing(true)}
         className="block w-full h-64 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       >
-        + Description
+        <FormattedMessage defaultMessage="+ Description" />
       </button>
     );
   return null;
