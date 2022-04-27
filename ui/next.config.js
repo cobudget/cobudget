@@ -50,6 +50,10 @@ module.exports = (phase) => {
           destination: "/c/dream-generator/:path*",
           permanent: true,
         },
+        {
+          source: "/bll-dreams-platform-2022/:path*",
+          destination: "/c/bll-dreams-platform-2022/:path*",
+        }
       ];
     },
   });
