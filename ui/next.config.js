@@ -53,6 +53,7 @@ module.exports = (phase) => {
         {
           source: "/bll-dreams-platform-2022/:path*",
           destination: "/c/bll-dreams-platform-2022/:path*",
+          permanent: true
         }
       ];
     },
