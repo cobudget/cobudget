@@ -264,9 +264,9 @@ const resolvers = {
     },
     roundInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
-        (await !!user) &&
+        !!user &&
         isCollAdmin({
-          userId: user?.id,
+          userId: user.id,
           roundId,
         });
 
@@ -282,7 +282,9 @@ const resolvers = {
       return {
         link:
           round.inviteNonce !== null
-            ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
+            ? appLink(
+                "/invite/" + sign({ nonce: String(round.inviteNonce), roundId })
+              )
             : null,
       };
     },
