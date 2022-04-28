@@ -1,15 +1,16 @@
 import fetch from "isomorphic-unfetch";
 import forge from "node-forge";
 import prisma from "../../server/prisma";
-import getHostInfo from "utils/getHostInfo";
+import handler from "server/api-handler";
 
 const atob = (a) => Buffer.from(a, "base64").toString("binary");
 
-export default async function (req, res) {
-  return null;
-  /*
+export async function connectDiscourse(req, res) {
   const { query } = req;
-  const { payload } = query;
+  const { payload, g } = query;
+
+  console.log({ payload, g, req });
+
   const pem = process.env.PRIVATE_TOKEN_KEY;
   const privKey = forge.pki.privateKeyFromPem(pem);
 
@@ -20,29 +21,16 @@ export default async function (req, res) {
 
   const { key: discourseApiKey } = parsedPayload;
 
-  // const { accessToken } = await auth(req).getAccessToken(req, res);
-  // const { sub: userId } = jwt.decode(accessToken);
+  const group = await prisma.group.findUnique({
+    where: { slug: g },
+    include: { discourse: true },
+  });
 
-  // const db = await getConnection(process.env.MONGO_URL);
-  // const { GroupMember, Group } = getModels(db);
-
-  const { subdomain, host } = getHostInfo(req);
-
-  console.log({ DEPLOY_URL: process.env.DEPLOY_URL, host });
-
-  let currentGroup;
-
-  // if (host.includes(process.env.DEPLOY_URL)) {
-  //   currentGroup = await Group.findOne({ subdomain });
-  // } else {
-  //   currentGroup = await Group.findOne({ customDomain: host });
-  // }
-
-  if (!currentGroup.discourse) throw new Error("Missing discourse config");
+  if (!group.discourse) throw new Error("Missing discourse config");
 
   // get discourse username
   const discourseUserResponse = await fetch(
-    `${currentGroup.discourse.url}/session/current.json`,
+    `${group.discourse.url}/session/current.json`,
     {
       headers: {
         "User-Api-Key": discourseApiKey,
@@ -56,10 +44,14 @@ export default async function (req, res) {
   } = await discourseUserResponse.json();
 
   // save discourse user api key and username in database
-  await GroupMember.update(
-    { userId, groupId: currentGroup.id },
-    { discourseApiKey, discourseUsername: username }
-  );
+  const userId = req.user.id;
+
+  console.log({ userId });
+
+  await prisma.groupMember.update({
+    where: { groupId_userId: { groupId: group.id, userId } },
+    data: { discourseApiKey, discourseUsername: username },
+  });
 
   // TODO: error handling
 
@@ -67,5 +59,6 @@ export default async function (req, res) {
     Location: "/connect-discourse",
   });
   res.end();
-  */
 }
+
+export default handler().use(connectDiscourse);

@@ -18,7 +18,7 @@ export default function Funders({ bucket, currentUser }) {
                 />
 
                 <span>
-                  {contribution.roundMember.user.username} -{" "}
+                  {contribution.roundMember.user.username}:{" "}
                   {thousandSeparator(contribution.amount / 100)}{" "}
                   {bucket.round.currency}
                 </span>

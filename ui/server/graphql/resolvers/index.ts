@@ -282,9 +282,7 @@ const resolvers = {
       return {
         link:
           round.inviteNonce !== null
-            ? appLink(
-                "/invite/" + sign({ nonce: String(round.inviteNonce), roundId })
-              )
+            ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
             : null,
       };
     },
@@ -991,7 +989,10 @@ const resolvers = {
           where: { id: roundId },
           include: {
             group: {
-              include: { groupMembers: { where: { userId: user.id } } },
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
             },
           },
         });
@@ -1056,7 +1057,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
@@ -1244,7 +1248,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
@@ -1340,6 +1347,7 @@ const resolvers = {
                 group: {
                   include: {
                     groupMembers: { where: { userId: user.id } },
+                    discourse: true,
                   },
                 },
               },
@@ -1384,7 +1392,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
