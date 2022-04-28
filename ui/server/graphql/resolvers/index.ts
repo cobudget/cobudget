@@ -991,7 +991,10 @@ const resolvers = {
           where: { id: roundId },
           include: {
             group: {
-              include: { groupMembers: { where: { userId: user.id } } },
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
             },
           },
         });
@@ -1056,7 +1059,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
@@ -1244,7 +1250,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
@@ -1340,6 +1349,7 @@ const resolvers = {
                 group: {
                   include: {
                     groupMembers: { where: { userId: user.id } },
+                    discourse: true,
                   },
                 },
               },
@@ -1384,7 +1394,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
