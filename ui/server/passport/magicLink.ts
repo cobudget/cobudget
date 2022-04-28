@@ -21,7 +21,7 @@ const magicLink = new MagicLoginStrategy({
 
     createOrGetUser({ email })
       .then((user) => {
-        callback(null, user);
+        callback(null, { ...user, redirect: payload.redirect });
       })
       .catch((err) => callback(err));
   },
