@@ -8,6 +8,6 @@ export const verify = (token: string) => {
   }
 };
 
-export const sign = (data: { [key: string]: string }) => {
+export const sign = (data: any) => {
   return jwt.sign(data, process.env.COOKIE_SECRET);
 };

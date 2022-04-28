@@ -282,9 +282,7 @@ const resolvers = {
       return {
         link:
           round.inviteNonce !== null
-            ? appLink(
-                "/invite/" + sign({ nonce: String(round.inviteNonce), roundId })
-              )
+            ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
             : null,
       };
     },
