@@ -327,7 +327,7 @@ export default {
             `|---|---|`,
             ...income.map(
               ({ description, min }) =>
-                `|${description}|${min} ${round.currency}|`
+                `|${description}|${min / 100} ${round.currency}|`
             ),
           ].join("\n")
         );
@@ -341,7 +341,7 @@ export default {
             `|---|---|`,
             ...expenses.map(
               ({ description, min }) =>
-                `|${description}|${min} ${round.currency}|`
+                `|${description}|${min / 100} ${round.currency}|`
             ),
           ].join("\n")
         );
