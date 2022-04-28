@@ -45,7 +45,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error("Discourse API:", ...post.errors);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
         bucket.comments.forEach((comment) => {
           eventHub.publish("create-comment", {
@@ -95,7 +95,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error("Discourse API:", ...post.errors);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
         await discourse(currentGroup.discourse).posts.update(
           post.id,
@@ -198,7 +198,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error("Discourse API:", ...post.errors);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
         const created = this.generateComment(
           { ...post, raw: comment.content },
           currentGroupMember
@@ -239,7 +239,7 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error("Discourse API:", ...post.errors);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
         const updated = this.generateComment(
           { ...post, raw: comment.content },
@@ -270,7 +270,7 @@ export default {
           username: currentGroupMember.discourseUsername,
         });
 
-        if (!res.ok) throw new Error("Discourse API:", res.statusText);
+        if (!res.ok) throw new Error("Discourse API:" + res.statusText);
 
         return comment;
       }
