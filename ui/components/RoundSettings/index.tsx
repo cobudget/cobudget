@@ -16,12 +16,12 @@ const defaultTabs = [
   { slug: "", name: "General", component: GeneralSettings },
   { slug: "guidelines", name: "Guidelines", component: Guidelines },
   {
-    slug: "bucket-review",
+    slug: `${process.env.BUCKET_NAME_SINGULAR}-review`,
     name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
     component: BucketReview,
   },
   {
-    slug: "bucket-form",
+    slug: `${process.env.BUCKET_NAME_SINGULAR}-form`,
     name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
     component: CustomFields,
   },
