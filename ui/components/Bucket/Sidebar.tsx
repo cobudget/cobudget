@@ -17,6 +17,7 @@ import GrantingStatus from "./GrantingStatus";
 import Tags from "./Tags";
 import toast from "react-hot-toast";
 import Monster from "components/Monster";
+import capitalize from "utils/capitalize";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -87,10 +88,12 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
     <Modal open={open} className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <div className="font-bold text-lg mb-2">
-          Are you sure you want to cancel this bucket?
+          Are you sure you want to cancel this{" "}
+          {process.env.BUCKET_NAME_SINGULAR}?
         </div>
         <div className="mb-2">
-          If you confirm, the money that has already been given to this bucket
+          If you confirm, the money that has already been given to this{" "}
+          {process.env.BUCKET_NAME_SINGULAR}
           will be returned to its funders.
         </div>
         <div className="font-bold">Caution: This cannot be undone</div>
@@ -129,14 +132,7 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const BucketSidebar = ({
-  bucket,
-  round,
-  currentUser,
-  canEdit,
-  currentGroup,
-  showBucketReview,
-}) => {
+const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -149,7 +145,7 @@ const BucketSidebar = ({
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const canApproveBucket =
-    (!round.requireBucketApproval && canEdit) ||
+    (!bucket.round.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isRoundAdminOrGuide =
@@ -164,7 +160,7 @@ const BucketSidebar = ({
     !bucket.funded &&
     !bucket.canceled &&
     hasNotReachedMaxGoal &&
-    round.grantingIsOpen &&
+    bucket.round.grantingIsOpen &&
     currentUser?.currentCollMember;
   const showAcceptFundingButton =
     bucket.approved &&
@@ -176,7 +172,7 @@ const BucketSidebar = ({
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
-    canApproveBucket && !round.grantingHasClosed && !bucket.approved;
+    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved;
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
@@ -187,28 +183,21 @@ const BucketSidebar = ({
     <>
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus bucket={bucket} round={round} />
+          <GrantingStatus bucket={bucket} />
           {showFundButton && (
             <>
               <Button
-                color={round.color}
+                color={bucket.round.color}
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
                 Fund
               </Button>
-              {showBucketReview ? (
-                <Monster
-                  round={round}
-                  bucket={bucket}
-                  currentGroup={currentGroup}
-                />
-              ) : null}
+              {showBucketReview ? <Monster bucket={bucket} /> : null}
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
-                  round={round}
                   currentUser={currentUser}
                 />
               )}
@@ -216,11 +205,11 @@ const BucketSidebar = ({
           )}
           {showAcceptFundingButton && (
             <Button
-              color={round.color}
+              color={bucket.round.color}
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
+                  `Are you sure you would like to accept and finalize funding for this ${process.env.BUCKET_NAME_SINGULAR}? This can't be undone.`
                 ) &&
                 acceptFunding({ bucketId: bucket.id }).catch((err) =>
                   alert(err.message)
@@ -233,7 +222,7 @@ const BucketSidebar = ({
 
           {showPublishButton && (
             <Button
-              color={round.color}
+              color={bucket.round.color}
               onClick={() =>
                 publishBucket({
                   bucketId: bucket.id,
@@ -247,7 +236,7 @@ const BucketSidebar = ({
           )}
           {showApproveButton && (
             <Button
-              color={round.color}
+              color={bucket.round.color}
               fullWidth
               onClick={() =>
                 approveForGranting({
@@ -261,11 +250,11 @@ const BucketSidebar = ({
           )}
           {showMarkAsCompletedButton && (
             <Button
-              color={round.color}
+              color={bucket.round.color}
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to mark this bucket as completed? This can't be undone.`
+                  `Are you sure you would like to mark this ${process.env.BUCKET_NAME_SINGULAR} as completed? This can't be undone.`
                 ) &&
                 markAsCompleted({ bucketId: bucket.id }).then(
                   ({ data, error }) => {
@@ -318,7 +307,7 @@ const BucketSidebar = ({
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
                     >
-                      Cancel bucket
+                      Cancel {process.env.BUCKET_NAME_SINGULAR}
                     </button>
                   </>
                 )}
@@ -342,7 +331,7 @@ const BucketSidebar = ({
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        `Are you sure you would like to delete this bucket?`
+                        `Are you sure you would like to delete this ${process.env.BUCKET_NAME_SINGULAR}?`
                       ) &&
                       deleteBucket({ bucketId: bucket.id }).then(
                         ({ error }) => {
@@ -352,9 +341,15 @@ const BucketSidebar = ({
                             setActionsDropdownOpen(false);
                             Router.push(
                               "/[group]/[round]",
-                              `/${currentGroup?.slug ?? "c"}/${round.slug}`
+                              `/${bucket.round.group?.slug ?? "c"}/${
+                                bucket.round.slug
+                              }`
                             );
-                            toast.success("Bucket deleted");
+                            toast.success(
+                              `${capitalize(
+                                process.env.BUCKET_NAME_SINGULAR
+                              )} deleted`
+                            );
                           }
                         }
                       )
@@ -420,17 +415,11 @@ const BucketSidebar = ({
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
             cocreators={bucket.cocreators}
-            round={round}
             bucket={bucket}
             currentUser={currentUser}
           />
         </div>
-        <Tags
-          currentGroup={currentGroup}
-          bucket={bucket}
-          round={round}
-          canEdit={canEdit}
-        />
+        <Tags bucket={bucket} canEdit={canEdit} />
       </div>
     </>
   );

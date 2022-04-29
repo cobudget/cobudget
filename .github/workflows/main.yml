@@ -1,4 +1,4 @@
-name: Deploy backend
+name: "Deploy to dokku (branch: master)"
 
 on:
   push:

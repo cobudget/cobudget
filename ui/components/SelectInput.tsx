@@ -52,7 +52,7 @@ export const SelectField = ({
   label,
   color = "green",
   className = "",
-}) => {
+}: any) => {
   return (
     <div className={className}>
       {label && (

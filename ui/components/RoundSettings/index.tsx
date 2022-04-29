@@ -1,6 +1,9 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
+import capitalize from "utils/capitalize";
+
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
@@ -12,8 +15,16 @@ import Discourse from "./Discourse";
 const defaultTabs = [
   { slug: "", name: "General", component: GeneralSettings },
   { slug: "guidelines", name: "Guidelines", component: Guidelines },
-  { slug: "bucket-review", name: "Bucket Review", component: BucketReview },
-  { slug: "bucket-form", name: "Bucket Form", component: CustomFields },
+  {
+    slug: "bucket-review",
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
+    component: BucketReview,
+  },
+  {
+    slug: "bucket-form",
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
+    component: CustomFields,
+  },
   { slug: "funding", name: "Funding", component: Granting },
   { slug: "tags", name: "Tags", component: Tags },
 ];
@@ -21,26 +32,24 @@ const defaultTabs = [
 const RoundSettings = ({
   settingsTabSlug,
   round,
-  currentGroup,
   currentUser,
 }: {
   settingsTabSlug: string;
   round: any;
-  currentGroup: any;
   currentUser: any;
 }) => {
   const router = useRouter();
 
   const tabs = useMemo(
     () =>
-      currentGroup?.discourseUrl
+      round.group?.discourseUrl
         ? defaultTabs.concat({
             slug: "discourse",
             name: "Discourse",
             component: Discourse,
           })
         : defaultTabs,
-    [currentGroup?.discourseUrl]
+    [round.group?.discourseUrl]
   );
 
   const currentTab =
@@ -73,7 +82,7 @@ const RoundSettings = ({
         <div className="py-6 col-span-4 bg-white rounded-lg shadow overflow-hidden">
           <SettingsComponent
             round={round}
-            currentGroup={currentGroup}
+            currentGroup={round.group}
             currentUser={currentUser}
           />
         </div>
