@@ -135,6 +135,9 @@ model Round {
   grantingCloses           DateTime?
   allowStretchGoals        Boolean?
   requireBucketApproval    Boolean?
+  stripeAccountId          String?
+  directFundingEnabled     Boolean   @default(false)
+  directFundingTerms       String    @default("")
   bucketReviewIsOpen       Boolean?
   discourseCategoryId      Int?
 
