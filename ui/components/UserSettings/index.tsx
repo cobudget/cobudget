@@ -54,8 +54,8 @@ const settingsMeta = [
 const adminSettingsMeta = [
   {
     key: "roundJoinRequest",
-    label: `A user requests to join a round`
-  }
+    label: `A user requests to join a round`,
+  },
 ];
 
 const EmailSettingItem = ({ settingKey, value, settingsMeta }) => {

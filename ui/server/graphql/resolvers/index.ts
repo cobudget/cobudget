@@ -2187,7 +2187,7 @@ const resolvers = {
         },
         update: { isApproved, hasJoined: true, isRemoved: false },
       });
-      
+
       if (!isApproved) {
         await emailService.roundJoinRequest({
           round,
