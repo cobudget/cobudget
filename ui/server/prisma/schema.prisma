@@ -36,6 +36,7 @@ model EmailSettings {
   refundedBecauseBucketCancelled Boolean @default(true)
   bucketPublishedInRound         Boolean @default(true)
   contributionToYourBucket       Boolean @default(true)
+  roundJoinRequest               Boolean @default(true)
   user                           User    @relation(fields: [userId], references: [id])
   userId                         String  @unique
 }
@@ -103,7 +104,6 @@ model Group {
   name         String
   info         String?
   logo         String?
-  customDomain String?
   groupMembers GroupMember[]
   rounds       Round[]
   discourse    DiscourseConfig?
@@ -157,6 +157,8 @@ model Round {
 
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
+
+  inviteNonce   Int?
 
   @@unique([groupId, slug])
   @@map("Collection")

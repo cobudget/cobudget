@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
-import { withUrqlClient, initUrqlClient } from "next-urql";
+import { withUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
 import Modal from "../components/Modal";
@@ -9,57 +9,9 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
-import HappySpinner from "components/HappySpinner";
 
-export const TOP_LEVEL_QUERY = gql`
-  query TopLevelQuery($roundSlug: String, $groupSlug: String) {
-    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
-      id
-      slug
-      info
-      title
-      archived
-      color
-      currency
-      registrationPolicy
-      visibility
-      maxAmountToBucketPerUser
-      bucketCreationCloses
-      bucketCreationIsOpen
-      grantingOpens
-      grantingCloses
-      grantingIsOpen
-      numberOfApprovedMembers
-      about
-      tags {
-        id
-        value
-      }
-      allowStretchGoals
-      requireBucketApproval
-      directFundingEnabled
-      directFundingTerms
-      bucketReviewIsOpen
-      discourseCategoryId
-      totalInMembersBalances
-      guidelines {
-        id
-        title
-        description
-        position
-      }
-      customFields {
-        id
-        name
-        description
-        type
-        limit
-        isRequired
-        position
-        createdAt
-      }
-    }
-
+export const CURRENT_USER_QUERY = gql`
+  query CurrentUser($roundSlug: String, $groupSlug: String) {
     currentUser {
       id
       username
@@ -114,17 +66,70 @@ export const TOP_LEVEL_QUERY = gql`
         hasDiscourseApiKey
       }
     }
+  }
+`;
 
-    currentGroup(groupSlug: $groupSlug) {
+export const TOP_LEVEL_QUERY = gql`
+  query TopLevelQuery($roundSlug: String, $groupSlug: String, $bucketId: ID) {
+    round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
+      id
+      slug
+      info
+      title
+      archived
+      color
+      currency
+      registrationPolicy
+      visibility
+      maxAmountToBucketPerUser
+      bucketCreationCloses
+      bucketCreationIsOpen
+      grantingOpens
+      grantingCloses
+      grantingIsOpen
+      numberOfApprovedMembers
+      about
+      tags {
+        id
+        value
+      }
+      allowStretchGoals
+      requireBucketApproval
+      directFundingEnabled
+      directFundingTerms
+      bucketReviewIsOpen
+      discourseCategoryId
+      totalInMembersBalances
+      guidelines {
+        id
+        title
+        description
+        position
+      }
+      customFields {
+        id
+        name
+        description
+        type
+        limit
+        isRequired
+        position
+        createdAt
+      }
+    }
+    group(groupSlug: $groupSlug) {
       __typename
       id
       name
       info
       logo
       slug
-      customDomain
       discourseUrl
       finishedTodos
+    }
+    bucket(id: $bucketId) {
+      id
+      title
     }
   }
 `;
@@ -134,26 +139,32 @@ const MyApp = ({ Component, pageProps }) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
-      groupSlug: router.query.group,
+      groupSlug:
+        process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
+      roundSlug: router.query.round,
+      bucketId: router.query.bucket,
+    },
+  });
+
+  const [
+    { data: currentUserData, fetching: fetchingUser, error: errorUser },
+  ] = useQuery({
+    query: CURRENT_USER_QUERY,
+    variables: {
+      groupSlug:
+        process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
       roundSlug: router.query.round,
     },
-    pause: !router.isReady,
   });
 
-  const { currentUser = null, currentGroup = null, round = null } = data ?? {};
+  const { round = null, group = null, bucket = null } = data ?? {};
+  const { currentUser = null } = currentUserData ?? {};
 
-  useEffect(() => {
-    const jssStyles = document.querySelector("#jss-server-side");
-    if (jssStyles && jssStyles.parentNode)
-      jssStyles.parentNode.removeChild(jssStyles);
-  });
-
+  // legacy modal logic
   const [modal, setModal] = useState(null);
-
   const openModal = (name) => {
     if (modal !== name) setModal(name);
   };
-
   const closeModal = () => {
     setModal(null);
   };
@@ -167,36 +178,23 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <>
-      <Modal
-        active={modal}
-        closeModal={closeModal}
-        currentUser={currentUser}
-        currentGroup={currentGroup}
-      />
+      {/* legacy Modal component, use individual modals where they are called instead */}
+      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
-        currentGroup={currentGroup}
+        fetchingUser={fetchingUser}
         openModal={openModal}
+        group={group}
         round={round}
-        router={router}
-        title={
-          currentGroup
-            ? round
-              ? `${round.title} | ${currentGroup.name}`
-              : currentGroup.name
-            : round
-            ? round.title
-            : "Cobudget"
-        }
+        bucket={bucket}
       >
         <Component
           {...pageProps}
-          round={round}
           currentUser={currentUser}
-          currentGroup={currentGroup}
-          openModal={openModal}
           router={router}
+          round={round}
+          currentGroup={group}
         />
         <Toaster />
       </Layout>
@@ -204,4 +202,6 @@ const MyApp = ({ Component, pageProps }) => {
   );
 };
 
-export default withUrqlClient(client, { ssr: false })(MyApp as any);
+export default withUrqlClient(client, {
+  ssr: false,
+})(MyApp as any);

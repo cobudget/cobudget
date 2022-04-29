@@ -17,7 +17,7 @@ const UPDATE_PROFILE_QUERY = gql`
   }
 `;
 
-const EditProfile = ({ closeModal, currentUser, currentGroup }) => {
+const EditProfile = ({ closeModal, currentUser }) => {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const {
     handleSubmit,
@@ -33,7 +33,6 @@ const EditProfile = ({ closeModal, currentUser, currentGroup }) => {
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
               updateUser({
-                ...(currentGroup && { groupId: currentGroup.id }),
                 ...dirtyValues(dirtyFields, variables),
               }).then(({ error }) => {
                 if (error) {

@@ -1,4 +1,4 @@
-name: Migrate
+name: "Migrate (branch: staging)"
 
 on:
   push:
