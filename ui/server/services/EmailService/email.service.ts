@@ -68,25 +68,24 @@ export default {
 
     const roundLink = appLink(`/${group.slug}/${round.slug}`);
 
-    const adminEmails: SendEmailInput[] = admins.map((admin) =>
-      admin.user?.emailSettings?.roundJoinRequest
-        ? {
-            to: admin.user.email,
-            subject: `Someone wants to join ${round.title}`,
-            html: `${escape(
-              user.name
-            )} has requested to join <a href="${roundLink}">${escape(
-              round.title
-            )}</a>:
+    const adminEmails: SendEmailInput[] = admins
+      .filter((admin) => admin.user?.emailSettings?.roundJoinRequest ?? true)
+      .map((admin) => ({
+        to: admin.user.email,
+        subject: `Someone wants to join ${round.title}`,
+        html: `${escape(
+          user.name
+        )} has requested to join <a href="${roundLink}">${escape(
+          round.title
+        )}</a>:
         <br/>
         <a href="${roundLink}/participants">Click here</a> to review this request
         <br/><br/>
         ${footer}
         `,
-          }
-        : null
-    );
-    await sendEmails(adminEmails.filter((mail) => mail !== null));
+      }));
+
+    await sendEmails(adminEmails);
   },
   inviteMember: async ({
     email,
