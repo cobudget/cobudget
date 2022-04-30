@@ -2,6 +2,7 @@ import React from "react";
 import Header from "./Header";
 import {FormattedMessage} from 'react-intl';
 import "../lib/beacon";
+import { supportedLangs } from "lang";
 
 const LinkOut = ({ href, children }) => {
   return (
@@ -19,7 +20,9 @@ const Layout = ({
   group,
   round,
   bucket,
-  dir
+  dir,
+  locale,
+  changeLocale
 }) => {
   return (
     <div className="flex flex-col min-h-screen" id="hello-container" dir={dir}>
@@ -56,6 +59,19 @@ const Layout = ({
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
           )}
+          <select onChange={(e) => changeLocale(e.target.value)}>
+            {
+              supportedLangs.map((option) => (
+                <option 
+                  key={option.value} 
+                  value={option.value}
+                  selected={locale === option.value}
+                >
+                  {option.label}
+                </option>
+              ))
+            }
+          </select>
         </div>
       </div>
     </div>

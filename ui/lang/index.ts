@@ -8,4 +8,11 @@ const langs = {
     ur
 }
 
+export const supportedLangCodes = Object.keys(langs);
+export const supportedLangs = [
+    { value: "en", label: "English"},
+    { value: "sv", label: "Swedish"},
+    { value: "ur", label: "Urdu" }
+];
+
 export default langs;
