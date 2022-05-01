@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { Modal } from "@material-ui/core";
-import {FormattedMessage} from "react-intl";
+import {useIntl, FormattedMessage} from "react-intl";
 
 import Dropdown from "../Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "../Icons";
@@ -19,6 +19,7 @@ import Tags from "./Tags";
 import toast from "react-hot-toast";
 import Monster from "components/Monster";
 import capitalize from "utils/capitalize";
+import isRtl from "../../utils/isRTL";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -153,6 +154,8 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION);
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
+
+  const intl = useIntl();
 
   const canApproveBucket =
     (!bucket.round.requireBucketApproval && canEdit) ||
@@ -378,7 +381,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">Co-creators</span>
             {canEdit && (
-              <div className="absolute top-0 right-0">
+              <div className={"absolute top-0 " + (isRtl(intl.locale) ? "left-0" : "right-0")}>
                 <Tooltip
                   title="Edit co-creators"
                   position="bottom"
@@ -400,7 +403,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 className="flex items-center mr-2 md:mr-3 sm:mb-2 space-x-2"
               >
                 <Avatar user={member.user} />{" "}
-                <span className="items-center space-x-1 hidden md:block">
+                <span className={"items-center space-x-1 hidden md:block " + (isRtl(intl.locale) ? "space-x-reverse" : "")}>
                   <span className="font-medium text-gray-900">
                     {member.user.name}
                   </span>

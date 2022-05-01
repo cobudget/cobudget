@@ -5,14 +5,14 @@ import ur from "./ur-PK.json";
 const langs = {
     en,
     sv,
-    ur
+    ur,
 }
 
 export const supportedLangCodes = Object.keys(langs);
 export const supportedLangs = [
     { value: "en", label: "English"},
     { value: "sv", label: "Swedish"},
-    { value: "ur", label: "Urdu" }
+    { value: "ur", label: "Urdu" },
 ];
 
 export default langs;

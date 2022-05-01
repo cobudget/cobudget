@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import {FormattedMessage} from "react-intl";
+import {FormattedMessage, FormattedNumber} from "react-intl";
 
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
@@ -24,26 +24,19 @@ const GrantingStatus = ({ bucket }) => {
         </p>
         <p className="text-sm text-gray-700 mb-2">
           <FormattedMessage
-            defaultMessage="funded of {total} {currency} goal"
+            defaultMessage="funded of {total} goal"
             values={{
-              total: thousandSeparator(bucket.minGoal / 100),
-              currency: bucket.round.currency
+              total: <FormattedNumber style="currency" currencyDisplay={"symbol"} currency={bucket.round.currency} value={bucket.minGoal / 100}/>
             }}
           />
         </p>
 
         {!!bucket.totalContributionsFromCurrentMember && (
           <p className="my-2 text-sm text-gray-700">
-            -SBD- You have contributed{" "}
-            {thousandSeparator(
-              bucket.totalContributionsFromCurrentMember / 100
-            )}{" "}
-            {bucket.round.currency}
             <FormattedMessage
-              defaultMessage="You have contributed {total} {currency}"
+              defaultMessage="You have contributed {total}"
               values={{
-                total: thousandSeparator(bucket.totalContributionsFromCurrentMember / 100),
-                currency: bucket.round.currency
+                total: <FormattedNumber style="currency" currencyDisplay={"symbol"} currency={bucket.round.currency} value={bucket.totalContributionsFromCurrentMember / 100}/>
               }}
             />
           </p>

@@ -2,7 +2,6 @@
   "/AmWqb": "+ Cover image",
   "0KKXrH": "Budget",
   "26gDq9": "Funding goal:",
-  "2F03+/": "funded of {total} {currency} goal",
   "3g96gM": "No contributions yet",
   "47FYwb": "Cancel",
   "4U2uvI": "Completed on {day}",
@@ -36,9 +35,10 @@
   "kaPKOB": "Insufficient balance",
   "m2b5Ox": "Funding canceled on {day}",
   "n6ne4U": "+ Budget",
-  "sp/ysu": "You have contributed {total} {currency}",
+  "p+yifj": "You have contributed {total}",
   "syEQFE": "Publish",
   "vtVplk": "If you confirm, the money that has already been given to this {bucketName} will be returned to its funders.",
+  "xUUto/": "funded of {total} goal",
   "zbmae5": "Open for funding",
   "zvdC3E": "Unapprove for funding"
 }
