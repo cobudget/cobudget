@@ -17,7 +17,7 @@ import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
 
 export const BUCKET_QUERY = gql`
-  query Bucket($id: ID!) {
+  query Bucket($id: ID) {
     bucket(id: $id) {
       id
       description
@@ -134,10 +134,19 @@ export const BUCKET_QUERY = gql`
 
 const BucketIndex = ({ currentUser }) => {
   const router = useRouter();
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, executeQuery] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
+    pause: true
   });
+
+  useEffect(() => {
+    if (router.isReady && router.query.bucket) {
+      executeQuery()
+    }
+  }, [router.isReady, executeQuery, router.query.bucket]);
+
+
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
   const { bucket } = data ?? { bucket: null };
@@ -153,7 +162,7 @@ const BucketIndex = ({ currentUser }) => {
     setTab(index > -1 ? index : 0);
   }, [router.query.tab, tabsList]);
 
-  if (fetching && !bucket) {
+  if (!data && !error) {
     return (
       <div className="flex-grow flex justify-center items-center h-64">
         <HappySpinner />
@@ -161,7 +170,7 @@ const BucketIndex = ({ currentUser }) => {
     );
   }
 
-  if (!bucket || !bucket.round)
+  if ((!bucket || !bucket.round))
     return (
       <div className="text-center mt-7">
         This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
