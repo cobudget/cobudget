@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { LoaderIcon } from "components/Icons"
 
 const css = {
   mobileProfileItem:
@@ -247,7 +248,10 @@ const Header = ({
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
-              ) : (
+              ) 
+              : fetchingUser ?
+              <LoaderIcon className="animate-spin" fill="white" width={20} height={20}/>
+              : (
                 <>
                   <NavItem href={`/login`} roundColor={color}>
                     Log in
