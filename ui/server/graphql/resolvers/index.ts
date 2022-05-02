@@ -547,6 +547,7 @@ const resolvers = {
               (comment) =>
                 !(comment.username === "system" && comment.raw === "")
             )
+            .reverse()
             .map(async (post) => {
               const author = await prisma.roundMember.findFirst({
                 where: {

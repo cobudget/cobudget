@@ -7,6 +7,7 @@ import { Modal } from "@material-ui/core";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
+import toast from "react-hot-toast";
 
 const CREATE_BUCKET = gql`
   mutation CreateBucket($roundId: ID!, $title: String!) {
@@ -27,18 +28,20 @@ const NewBucketModal = ({ round, handleClose, router }) => {
   const { handleSubmit, register, errors } = useForm();
 
   const onSubmitCreate = (variables) => {
-    createBucket({ ...variables, roundId: round.id })
-      .then(({ data }) => {
-        Router.push(
-          "/[group]/[round]/[bucket]",
-          `/${router.query.group}/${round.slug}/${data.createBucket.id}`
-        );
-        handleClose();
-      })
-      .catch((err) => {
-        console.log({ err });
-        alert(err.message);
-      });
+    createBucket({ ...variables, roundId: round.id }).then(
+      ({ data, error }) => {
+        if (error) {
+          toast.error(error.message);
+        } else {
+          console.log({ data });
+          Router.push(
+            "/[group]/[round]/[bucket]",
+            `/${router.query.group}/${round.slug}/${data.createBucket.id}`
+          );
+          handleClose();
+        }
+      }
+    );
   };
 
   return (
