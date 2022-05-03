@@ -56,7 +56,7 @@ export async function connectDiscourse(req, res) {
   // TODO: error handling
 
   res.writeHead(302, {
-    Location: "/connect-discourse",
+    Location: `/${g}/connect-discourse`,
   });
   res.end();
 }

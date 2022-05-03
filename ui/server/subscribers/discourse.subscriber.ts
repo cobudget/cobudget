@@ -47,16 +47,16 @@ export default {
 
         if (post.errors) throw new Error("Discourse API:" + post.errors);
 
-        bucket.comments.forEach((comment) => {
-          eventHub.publish("create-comment", {
-            currentGroup,
-            currentGroupMember,
-            currentCollMember,
-            round,
-            bucket,
-            comment,
-          });
-        });
+        // bucket.comments.forEach((comment) => {
+        //   eventHub.publish("create-comment", {
+        //     currentGroup,
+        //     currentGroupMember,
+        //     currentCollMember,
+        //     round,
+        //     bucket,
+        //     comment,
+        //   });
+        // });
 
         await prisma.bucket.update({
           where: { id: bucket.id },

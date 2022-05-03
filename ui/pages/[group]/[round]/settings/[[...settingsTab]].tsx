@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import RoundSettings from "../../../../components/RoundSettings";
 import SubMenu from "../../../../components/SubMenu";
 
-const RoundSettingsPage = ({ round, currentUser }) => {
+const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
   const router = useRouter();
 
   const isAdmin =
@@ -18,6 +18,7 @@ const RoundSettingsPage = ({ round, currentUser }) => {
         settingsTabSlug={(router.query?.settingsTab as string[])?.[0] ?? ""}
         round={round}
         currentUser={currentUser}
+        currentGroup={currentGroup}
       />
     </div>
   );

@@ -11,7 +11,7 @@ import { UPDATE_GRANTING_SETTINGS } from ".";
 const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
-  console.log({ round });
+
   return (
     <Card>
       <Box p={3}>

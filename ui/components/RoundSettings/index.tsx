@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -33,23 +33,25 @@ const RoundSettings = ({
   settingsTabSlug,
   round,
   currentUser,
+  currentGroup,
 }: {
   settingsTabSlug: string;
   round: any;
   currentUser: any;
+  currentGroup: any;
 }) => {
   const router = useRouter();
 
   const tabs = useMemo(
     () =>
-      round.group?.discourseUrl
+      currentGroup?.discourseUrl
         ? defaultTabs.concat({
             slug: "discourse",
             name: "Discourse",
             component: Discourse,
           })
         : defaultTabs,
-    [round.group?.discourseUrl]
+    [currentGroup?.discourseUrl]
   );
 
   const currentTab =
@@ -82,7 +84,7 @@ const RoundSettings = ({
         <div className="py-6 col-span-4 bg-white rounded-lg shadow overflow-hidden">
           <SettingsComponent
             round={round}
-            currentGroup={round.group}
+            currentGroup={currentGroup}
             currentUser={currentUser}
           />
         </div>
