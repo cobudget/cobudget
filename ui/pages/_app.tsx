@@ -95,8 +95,6 @@ export const TOP_LEVEL_QUERY = gql`
       }
       allowStretchGoals
       requireBucketApproval
-      directFundingEnabled
-      directFundingTerms
       bucketReviewIsOpen
       discourseCategoryId
       totalInMembersBalances
