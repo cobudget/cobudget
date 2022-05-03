@@ -190,7 +190,7 @@ const InviteMembersModal = ({
                       navigator.clipboard
                         .writeText(link)
                         .then(() => toast.success("Invitation link copied"))
-                        .catch(() => toast.error("Error while copying link"))
+                        .catch(() => toast.error("Error while copying link"));
                     }}
                   >
                     Copy
@@ -206,13 +206,14 @@ const InviteMembersModal = ({
                       onClick={() => {
                         deleteInviteLink({
                           roundId,
-                        })
-                        .then(result => {
+                        }).then((result) => {
                           if (result.error) {
-                            return toast.error("Could not delete invitation link");
+                            return toast.error(
+                              "Could not delete invitation link"
+                            );
                           }
-                          toast.success("Invitation link deleted")
-                        })
+                          toast.success("Invitation link deleted");
+                        });
                       }}
                     >
                       <DeleteIcon className="h-5 w-5" />
@@ -235,13 +236,12 @@ const InviteMembersModal = ({
                 onClick={() => {
                   createInviteLink({
                     roundId,
-                  })
-                  .then((result) => {
+                  }).then((result) => {
                     if (result.error) {
-                      return toast.error("Could not create invite link")
+                      return toast.error("Could not create invite link");
                     }
-                    toast.success("Invite link created")
-                  })
+                    toast.success("Invite link created");
+                  });
                 }}
               >
                 Create Invite Link
