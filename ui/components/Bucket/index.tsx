@@ -52,7 +52,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               maxGoal={bucket.maxGoal}
             />
 
-            <DirectFunding canEdit={canEdit} round={round} />
+            <DirectFunding canEdit={canEdit} round={bucket.round} />
           </div>
         </div>
       </div>
