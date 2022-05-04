@@ -2,6 +2,7 @@ import SeededShuffle from "seededshuffle";
 import slugify from "../../utils/slugify";
 //import liveUpdate from "../../services/liveUpdate.service";
 import prisma from "../../prisma";
+import { Prisma } from "@prisma/client";
 import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLJSONObject } from "graphql-type-json";
@@ -1014,7 +1015,19 @@ const resolvers = {
       isBucketCocreatorOrCollAdminOrMod,
       async (
         parent,
-        { bucketId, title, description, summary, images, budgetItems },
+        {
+          bucketId,
+          title,
+          description,
+          summary,
+          images,
+          budgetItems,
+          directFundingEnabled,
+          directFundingType,
+          exchangeDescription,
+          exchangeMinimumContribution,
+          exchangeVat,
+        },
         { user, eventHub }
       ) => {
         const updated = await prisma.bucket.update({
@@ -1032,6 +1045,11 @@ const resolvers = {
             ...(typeof images !== "undefined" && {
               Images: { deleteMany: {}, createMany: { data: images } },
             }),
+            directFundingEnabled,
+            directFundingType,
+            exchangeDescription,
+            exchangeMinimumContribution,
+            exchangeVat: exchangeVat && new Prisma.Decimal(exchangeVat),
           },
           include: {
             round: {

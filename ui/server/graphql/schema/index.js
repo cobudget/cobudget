@@ -117,7 +117,11 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
-      tags: [String!]
+      directFundingEnabled: Boolean
+      directFundingType: DirectFundingType
+      exchangeDescription: String
+      exchangeMinimumContribution: Int
+      exchangeVat: String # gets parsed by decimal.js
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -418,6 +422,16 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+    directFundingEnabled: Boolean
+    directFundingType: DirectFundingType
+    exchangeDescription: String
+    exchangeMinimumContribution: Int
+    exchangeVat: String
+  }
+
+  enum DirectFundingType {
+    DONATION
+    EXCHANGE
   }
 
   type BucketsPage {
