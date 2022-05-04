@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, gql } from "urql";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
@@ -5,7 +6,7 @@ import { Tooltip } from "react-tippy";
 import HappySpinner from "components/HappySpinner";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
-import { useState } from "react";
+import Form from "./Form";
 
 const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -62,7 +63,11 @@ const DirectFunding = ({ canEdit = false, round }) => {
         <div>
           <div className="font-medium">Terms</div>
           {editing ? (
-            <div>Now we are editing thiiiiings</div>
+            <Form
+              bucket={bucket}
+              round={round}
+              exitEditing={() => setEditing(false)}
+            />
           ) : (
             <div>Funds received are donations{/*TODO: make dynamic*/}</div>
           )}
