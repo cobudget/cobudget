@@ -137,15 +137,14 @@ const BucketIndex = ({ currentUser }) => {
   const [{ data, fetching, error }, executeQuery] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
-    pause: true
+    pause: true,
   });
 
   useEffect(() => {
     if (router.isReady && router.query.bucket) {
-      executeQuery()
+      executeQuery();
     }
   }, [router.isReady, executeQuery, router.query.bucket]);
-
 
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
@@ -170,7 +169,7 @@ const BucketIndex = ({ currentUser }) => {
     );
   }
 
-  if ((!bucket || !bucket.round))
+  if (!bucket || !bucket.round)
     return (
       <div className="text-center mt-7">
         This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you

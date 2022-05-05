@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import { LoaderIcon } from "components/Icons"
+import { LoaderIcon } from "components/Icons";
 import { set, get, remove } from "../../utils/storage";
 
 const css = {
@@ -120,10 +120,14 @@ const Header = ({
 
   useEffect(() => {
     const user = get("user");
-    if (user) {
+    if (user && fetchingUser) {
       setUserFromStorage(user);
     }
-  }, []);
+    else if (!fetchingUser && currentUser === null) {
+      remove("user");
+      setUserFromStorage(null);
+    }
+  }, [fetchingUser, currentUser]);
 
   const title = group
     ? round
@@ -193,7 +197,7 @@ const Header = ({
             } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
           >
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
-              {(currentUser || userFromStorage) ? (
+              {currentUser || userFromStorage ? (
                 <>
                   {currentUser?.currentCollMember?.isApproved &&
                   currentUser?.currentCollMember?.hasJoined === false ? (
@@ -263,10 +267,14 @@ const Header = ({
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
-              ) 
-              : fetchingUser ?
-              <LoaderIcon className="animate-spin" fill="white" width={20} height={20}/>
-              : (
+              ) : fetchingUser ? (
+                <LoaderIcon
+                  className="animate-spin"
+                  fill="white"
+                  width={20}
+                  height={20}
+                />
+              ) : (
                 <>
                   <NavItem href={`/login`} roundColor={color}>
                     Log in
@@ -304,7 +312,7 @@ const Header = ({
                   <a
                     onClick={() => {
                       remove("user");
-                      window.location.href="/api/auth/logout"
+                      window.location.href = "/api/auth/logout";
                     }}
                     className={css.mobileProfileItem}
                   >
