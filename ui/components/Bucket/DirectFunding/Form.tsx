@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import Markdown from "components/Markdown";
 import Button from "components/Button";
 import SelectInput from "components/SelectInput";
+import Wysiwyg from "components/Wysiwyg";
 
 const DirectFundingBucketForm = ({
   bucket,
@@ -14,6 +15,9 @@ const DirectFundingBucketForm = ({
   const [directFundingType, setDirectFundingType] = useState<string>(
     bucket.directFundingType
   );
+  const [exchangeDescription, setExchangeDescription] = useState<string>(
+    bucket.exchangeDescription
+  );
 
   return (
     <>
@@ -24,7 +28,7 @@ const DirectFundingBucketForm = ({
           className="mt-5"
         />
       )}
-      <div className="font-bold my-5">
+      <div className="font-medium my-5">
         Select whether funds are a donation or in exchange for goods or services
       </div>
       <SelectInput
@@ -37,21 +41,38 @@ const DirectFundingBucketForm = ({
           We are offering goods or services in exchange for funds.
         </option>
       </SelectInput>
+      {directFundingType === "EXCHANGE" && (
+        <>
+          <div className="font-medium mt-8">Description</div>
+          <div className="my-4">
+            Describe what funders will receive in exchange for their
+            contribution.
+          </div>
+          <Wysiwyg
+            defaultValue={exchangeDescription}
+            onChange={(e) => setExchangeDescription(e.target.value)}
+            rows={5}
+            highlightColor={round.color}
+          />
+        </>
+      )}
       <Button
         className="mt-8"
         color={round.color}
         loading={fetchingMutation}
         onClick={() => {
-          editBucket({ bucketId: bucket.id, directFundingType }).then(
-            ({ error }) => {
-              if (error) {
-                console.error(error);
-                toast.error(error.message);
-              } else {
-                exitEditing();
-              }
+          editBucket({
+            bucketId: bucket.id,
+            directFundingType,
+            exchangeDescription,
+          }).then(({ error }) => {
+            if (error) {
+              console.error(error);
+              toast.error(error.message);
+            } else {
+              exitEditing();
             }
-          );
+          });
         }}
       >
         Save

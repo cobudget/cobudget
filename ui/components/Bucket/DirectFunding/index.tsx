@@ -26,15 +26,18 @@ const EDIT_BUCKET_MUTATION = gql`
     $bucketId: ID!
     $directFundingEnabled: Boolean
     $directFundingType: DirectFundingType
+    $exchangeDescription: String
   ) {
     editBucket(
       bucketId: $bucketId
       directFundingEnabled: $directFundingEnabled
       directFundingType: $directFundingType
+      exchangeDescription: $exchangeDescription
     ) {
       id
       directFundingEnabled
       directFundingType
+      exchangeDescription
     }
   }
 `;
