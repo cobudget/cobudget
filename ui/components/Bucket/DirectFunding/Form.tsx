@@ -94,36 +94,56 @@ const DirectFundingBucketForm = ({
           />
         </>
       )}
-      <Button
-        className="mt-8"
-        color={round.color}
-        loading={fetchingMutation}
-        disabled={
-          exchangeVat === undefined ||
-          exchangeMinimumContribution < 0 ||
-          exchangeVat < 0 ||
-          exchangeVat > 100
-        }
-        onClick={() => {
-          editBucket({
-            bucketId: bucket.id,
-            directFundingType,
-            exchangeDescription,
-            exchangeMinimumContribution:
-              Number(exchangeMinimumContribution) * 100,
-            exchangeVat: Number(exchangeVat) * 100,
-          }).then(({ error }) => {
-            if (error) {
-              console.error(error);
-              toast.error(error.message);
-            } else {
-              exitEditing();
-            }
-          });
-        }}
-      >
-        Save
-      </Button>
+      <div className="flex space-x-5">
+        <Button
+          className="mt-8"
+          color={round.color}
+          loading={fetchingMutation}
+          disabled={
+            exchangeVat === undefined ||
+            exchangeMinimumContribution < 0 ||
+            exchangeVat < 0 ||
+            exchangeVat > 100
+          }
+          onClick={() => {
+            editBucket({
+              bucketId: bucket.id,
+              directFundingType,
+              exchangeDescription,
+              exchangeMinimumContribution:
+                Number(exchangeMinimumContribution) * 100,
+              exchangeVat: Number(exchangeVat) * 100,
+            }).then(({ error }) => {
+              if (error) {
+                console.error(error);
+                toast.error(error.message);
+              } else {
+                exitEditing();
+              }
+            });
+          }}
+        >
+          Save
+        </Button>
+        <Button
+          className="mt-8"
+          color="red"
+          loading={fetchingMutation}
+          onClick={() => {
+            editBucket({
+              bucketId: bucket.id,
+              directFundingEnabled: false,
+            }).then(({ error }) => {
+              if (error) {
+                console.error(error);
+                toast.error(error.message);
+              }
+            });
+          }}
+        >
+          Disable direct funding for this bucket
+        </Button>
+      </div>
       <div className="mt-5 text-gray-600">
         If a bucket is not fully funded, direct funds will be automatically
         refunded via Stripe to the funder.
