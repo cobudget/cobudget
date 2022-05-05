@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { Modal } from "@material-ui/core";
-import {useIntl, FormattedMessage} from "react-intl";
+import { useIntl, FormattedMessage } from "react-intl";
 
 import Dropdown from "../Dropdown";
 import { EditIcon, DotsHorizontalIcon } from "../Icons";
@@ -90,7 +90,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
     <Modal open={open} className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <div className="font-bold text-lg mb-2">
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="Are you sure you want to cancel this {bucketName}?"
             values={{
               bucketName: process.env.BUCKET_NAME_SINGULAR,
@@ -98,7 +98,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
           />
         </div>
         <div className="mb-2">
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="If you confirm, the money that has already been given to this {bucketName} will be returned to its funders."
             values={{
               bucketName: process.env.BUCKET_NAME_SINGULAR,
@@ -320,7 +320,8 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
                     >
-                      <FormattedMessage defaultMessage="Cancel" /> {process.env.BUCKET_NAME_SINGULAR}
+                      <FormattedMessage defaultMessage="Cancel" />{" "}
+                      {process.env.BUCKET_NAME_SINGULAR}
                     </button>
                   </>
                 )}
@@ -381,7 +382,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">Co-creators</span>
             {canEdit && (
-              <div className={"absolute top-0 " + (isRtl(intl.locale) ? "left-0" : "right-0")}>
+              <div
+                className={
+                  "absolute top-0 " +
+                  (isRtl(intl.locale) ? "left-0" : "right-0")
+                }
+              >
                 <Tooltip
                   title="Edit co-creators"
                   position="bottom"
@@ -403,7 +409,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 className="flex items-center mr-2 md:mr-3 sm:mb-2 space-x-2"
               >
                 <Avatar user={member.user} />{" "}
-                <span className={"items-center space-x-1 hidden md:block " + (isRtl(intl.locale) ? "space-x-reverse" : "")}>
+                <span
+                  className={
+                    "items-center space-x-1 hidden md:block " +
+                    (isRtl(intl.locale) ? "space-x-reverse" : "")
+                  }
+                >
                   <span className="font-medium text-gray-900">
                     {member.user.name}
                   </span>

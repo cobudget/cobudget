@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
-import {FormattedMessage} from "react-intl";
+import { FormattedMessage } from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -61,7 +61,7 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
             >
               <FormattedMessage defaultMessage="Markdown" />
             </a>{" "}
-            <FormattedMessage defaultMessage="allowed."/>
+            <FormattedMessage defaultMessage="allowed." />
           </div>
           <div className="flex">
             <Button
@@ -72,7 +72,7 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
               <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button type="submit" loading={loading}>
-            <FormattedMessage defaultMessage="Save" />
+              <FormattedMessage defaultMessage="Save" />
             </Button>
           </div>
         </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import Header from "./Header";
-import {FormattedMessage} from 'react-intl';
+import { FormattedMessage } from "react-intl";
 import "../lib/beacon";
 import { supportedLangs } from "lang";
 
@@ -22,7 +22,7 @@ const Layout = ({
   bucket,
   dir,
   locale,
-  changeLocale
+  changeLocale,
 }) => {
   return (
     <div className="flex flex-col min-h-screen" id="hello-container" dir={dir}>
@@ -45,32 +45,34 @@ const Layout = ({
           <FormattedMessage
             defaultMessage="You are using <a1>Cobudget</a1>. Source code available <a2>online</a2>."
             values={{
-              a1: (msg) => <LinkOut href="https://cobudget.com/">{msg}</LinkOut>,
-              a2: (msg) => <LinkOut href="https://github.com/cobudget/cobudget">{msg}</LinkOut>
+              a1: (msg) => (
+                <LinkOut href="https://cobudget.com/">{msg}</LinkOut>
+              ),
+              a2: (msg) => (
+                <LinkOut href="https://github.com/cobudget/cobudget">
+                  {msg}
+                </LinkOut>
+              ),
             }}
           />
         </div>
         <div className="space-x-6">
           {process.env.PRIVACY_POLICY_URL && (
-            <LinkOut href="/privacy-policy">
-              Privacy Policy
-            </LinkOut>
+            <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
           )}
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
           )}
           <select onChange={(e) => changeLocale(e.target.value)}>
-            {
-              supportedLangs.map((option) => (
-                <option 
-                  key={option.value} 
-                  value={option.value}
-                  selected={locale === option.value}
-                >
-                  {option.label}
-                </option>
-              ))
-            }
+            {supportedLangs.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                selected={locale === option.value}
+              >
+                {option.label}
+              </option>
+            ))}
           </select>
         </div>
       </div>

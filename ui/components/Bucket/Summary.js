@@ -52,7 +52,8 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
           />
           <div className="flex justify-between items-center mb-4">
             <div className="text-sm text-gray-600 font-medium pl-4">
-              {160 - inputValue.length} <FormattedMessage defaultMessage="characters remaining" />
+              {160 - inputValue.length}{" "}
+              <FormattedMessage defaultMessage="characters remaining" />
             </div>
             <div className="flex">
               <Button
@@ -64,7 +65,7 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
               </Button>
 
               <Button loading={loading} type="submit">
-              <FormattedMessage defaultMessage="Save" />
+                <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>

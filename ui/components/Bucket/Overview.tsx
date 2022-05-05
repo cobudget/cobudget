@@ -4,7 +4,7 @@ import HappySpinner from "components/HappySpinner";
 import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
 import Summary from "./Summary";
-import {FormattedMessage} from "react-intl";
+import { FormattedMessage } from "react-intl";
 
 export default function Overview({
   currentUser,

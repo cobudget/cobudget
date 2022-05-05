@@ -9,9 +9,9 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
-import {IntlProvider} from "react-intl";
+import { IntlProvider } from "react-intl";
 import lang, { supportedLangCodes } from "../lang";
-import isRTL from "../utils/isRTL"
+import isRTL from "../utils/isRTL";
 import Cookies from "js-cookie";
 
 export const CURRENT_USER_QUERY = gql`
@@ -164,16 +164,18 @@ const MyApp = ({ Component, pageProps }) => {
 
   // legacy modal logic
   const [modal, setModal] = useState(null);
-  const [locale, setLocale] = useState((() => {
-    if (typeof window !== "undefined") {
-      const locale = window.navigator.language;
-      const langCode = locale.split("-")[0];
-      if (supportedLangCodes.indexOf(langCode) > -1) {
-        return langCode;
+  const [locale, setLocale] = useState(
+    (() => {
+      if (typeof window !== "undefined") {
+        const locale = window.navigator.language;
+        const langCode = locale.split("-")[0];
+        if (supportedLangCodes.indexOf(langCode) > -1) {
+          return langCode;
+        }
       }
-    }
-    return "en";
-  })());
+      return "en";
+    })()
+  );
 
   const openModal = (name) => {
     if (modal !== name) setModal(name);
@@ -192,7 +194,7 @@ const MyApp = ({ Component, pageProps }) => {
   const changeLocale = (locale) => {
     Cookies.set("locale", locale);
     setLocale(locale);
-  }
+  };
 
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 

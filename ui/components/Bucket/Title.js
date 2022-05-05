@@ -58,7 +58,7 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
               </Button>
 
               <Button loading={loading} type="submit">
-              <FormattedMessage defaultMessage="Save" />
+                <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>
