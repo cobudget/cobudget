@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { LoaderIcon } from "components/Icons"
+import { set, get } from "../../utils/storage";
 
 const css = {
   mobileProfileItem:
@@ -103,12 +104,26 @@ const Header = ({
 }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [userFromStorage, setUserFromStorage] = useState(null);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
+
+  useEffect(() => {
+    if (currentUser) {
+      set("user", currentUser);
+    }
+  }, [currentUser]);
+
+  useEffect(() => {
+    const user = get("user");
+    if (user) {
+      setUserFromStorage(user);
+    }
+  }, []);
 
   const title = group
     ? round
@@ -178,10 +193,10 @@ const Header = ({
             } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
           >
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
-              {currentUser ? (
+              {(currentUser || userFromStorage) ? (
                 <>
-                  {currentUser.currentCollMember?.isApproved &&
-                  currentUser.currentCollMember?.hasJoined === false ? (
+                  {currentUser?.currentCollMember?.isApproved &&
+                  currentUser?.currentCollMember?.hasJoined === false ? (
                     <NavItem
                       primary
                       roundColor={color}
@@ -230,7 +245,7 @@ const Header = ({
                       </NavItem>
                     )
                   }
-                  {!currentUser.currentGroupMember && !round && group && (
+                  {!currentUser?.currentGroupMember && !round && group && (
                     <NavItem
                       primary
                       roundColor={color}
@@ -242,7 +257,7 @@ const Header = ({
 
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
-                      currentUser={currentUser}
+                      currentUser={currentUser || userFromStorage}
                       openModal={openModal}
                     />
                   </div>
@@ -270,7 +285,7 @@ const Header = ({
                   <Avatar user={currentUser} />
                   <div className="ml-4">
                     <span className="font-semibold text-gray-600">
-                      {currentUser.name}
+                      {currentUser?.name}
                     </span>
                   </div>
                 </div>
