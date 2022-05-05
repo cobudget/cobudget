@@ -124,6 +124,17 @@ const DirectFundingBucketForm = ({
       >
         Save
       </Button>
+      <div className="mt-5 text-gray-600">
+        If a bucket is not fully funded, direct funds will be automatically
+        refunded via Stripe to the funder.
+      </div>
+      {directFundingType === "EXCHANGE" && (
+        <div className="mt-5 text-gray-600">
+          {process.env.PLATFORM_NAME} is not responsible for the correct
+          handling of taxes. If in doubt, please contact a lawyer or tax
+          consultant.
+        </div>
+      )}
     </>
   );
 };
