@@ -227,7 +227,9 @@ const BucketIndex = ({ currentUser }) => {
                 )
               }
             >
-              Comments ({bucket?.noOfComments})
+              Comments{" "}
+              {!bucket?.round?.group?.discourseUrl &&
+                `(${bucket?.noOfComments})`}
             </Tab>
             <Tab
               className={({ selected }) =>

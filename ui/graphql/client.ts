@@ -483,6 +483,8 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "round", field.arguments);
                 });
+
+              cache.invalidate("Query", "currentUser");
             },
           },
         },
