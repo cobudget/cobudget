@@ -28,7 +28,7 @@ const EDIT_BUCKET_MUTATION = gql`
     $directFundingType: DirectFundingType
     $exchangeDescription: String
     $exchangeMinimumContribution: Int
-    $exchangeVat: String
+    $exchangeVat: Int
   ) {
     editBucket(
       bucketId: $bucketId

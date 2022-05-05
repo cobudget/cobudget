@@ -121,7 +121,7 @@ const schema = gql`
       directFundingType: DirectFundingType
       exchangeDescription: String
       exchangeMinimumContribution: Int
-      exchangeVat: String # gets parsed by decimal.js
+      exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -426,7 +426,7 @@ const schema = gql`
     directFundingType: DirectFundingType
     exchangeDescription: String
     exchangeMinimumContribution: Int
-    exchangeVat: String
+    exchangeVat: Int
   }
 
   enum DirectFundingType {

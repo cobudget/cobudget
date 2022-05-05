@@ -262,7 +262,7 @@ model Bucket {
   directFundingType           DirectFundingType @default(DONATION)
   exchangeDescription         String            @default("")
   exchangeMinimumContribution Int               @default(0)
-  exchangeVat                 Decimal?
+  exchangeVat                 Int?
 
   deleted           Boolean        @default(false)
   discourseTopicId  Int?

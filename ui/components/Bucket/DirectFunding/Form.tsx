@@ -19,11 +19,13 @@ const DirectFundingBucketForm = ({
   const [exchangeDescription, setExchangeDescription] = useState<string>(
     bucket.exchangeDescription
   );
-
   const [
     exchangeMinimumContribution,
     setExchangeMinimumContribution,
-  ] = useState<number>(bucket.exchangeMinimumContribution);
+  ] = useState<number>(bucket.exchangeMinimumContribution / 100);
+  const [exchangeVat, setExchangeVat] = useState<number>(
+    bucket.exchangeVat ? bucket.exchangeVat / 100 : undefined
+  );
 
   return (
     <>
@@ -64,7 +66,6 @@ const DirectFundingBucketForm = ({
           <TextField
             placeholder="0"
             endAdornment={round.currency}
-            size="large"
             color={round.color}
             inputProps={{
               value: exchangeMinimumContribution,
@@ -74,18 +75,43 @@ const DirectFundingBucketForm = ({
               step: 0.01,
             }}
           />
+          <div className="font-medium mt-8 mb-4">VAT</div>
+          <div className="my-4">
+            You may be liable for collecting VAT depending on your region. It is
+            your responsibility to figure this part out.
+          </div>
+          <TextField
+            endAdornment="%"
+            color={round.color}
+            inputProps={{
+              value: exchangeVat,
+              onChange: (e) => setExchangeVat(e.target.value),
+              type: "number",
+              min: "0.00",
+              max: "100.00",
+              step: 0.01,
+            }}
+          />
         </>
       )}
       <Button
         className="mt-8"
         color={round.color}
         loading={fetchingMutation}
+        disabled={
+          exchangeVat === undefined ||
+          exchangeMinimumContribution < 0 ||
+          exchangeVat < 0 ||
+          exchangeVat > 100
+        }
         onClick={() => {
           editBucket({
             bucketId: bucket.id,
             directFundingType,
             exchangeDescription,
-            exchangeMinimumContribution: Number(exchangeMinimumContribution),
+            exchangeMinimumContribution:
+              Number(exchangeMinimumContribution) * 100,
+            exchangeVat: Number(exchangeVat) * 100,
           }).then(({ error }) => {
             if (error) {
               console.error(error);

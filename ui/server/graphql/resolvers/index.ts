@@ -1038,6 +1038,7 @@ const resolvers = {
             "The minimum contribution requirement must be 0 or higher"
           );
         }
+        //TODO: control VAT
 
         const updated = await prisma.bucket.update({
           where: { id: bucketId },
@@ -1058,7 +1059,7 @@ const resolvers = {
             directFundingType,
             exchangeDescription,
             exchangeMinimumContribution,
-            exchangeVat: exchangeVat && new Prisma.Decimal(exchangeVat),
+            exchangeVat,
           },
           include: {
             Images: true,
