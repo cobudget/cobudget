@@ -1030,6 +1030,15 @@ const resolvers = {
         },
         { user, eventHub }
       ) => {
+        if (
+          exchangeMinimumContribution !== undefined &&
+          exchangeMinimumContribution < 0
+        ) {
+          throw new Error(
+            "The minimum contribution requirement must be 0 or higher"
+          );
+        }
+
         const updated = await prisma.bucket.update({
           where: { id: bucketId },
           data: {

@@ -4,6 +4,7 @@ import Markdown from "components/Markdown";
 import Button from "components/Button";
 import SelectInput from "components/SelectInput";
 import Wysiwyg from "components/Wysiwyg";
+import TextField from "components/TextField";
 
 const DirectFundingBucketForm = ({
   bucket,
@@ -18,6 +19,11 @@ const DirectFundingBucketForm = ({
   const [exchangeDescription, setExchangeDescription] = useState<string>(
     bucket.exchangeDescription
   );
+
+  const [
+    exchangeMinimumContribution,
+    setExchangeMinimumContribution,
+  ] = useState<number>(bucket.exchangeMinimumContribution);
 
   return (
     <>
@@ -54,6 +60,20 @@ const DirectFundingBucketForm = ({
             rows={5}
             highlightColor={round.color}
           />
+          <div className="font-medium mt-8 mb-4">Minimum contribution</div>
+          <TextField
+            placeholder="0"
+            endAdornment={round.currency}
+            size="large"
+            color={round.color}
+            inputProps={{
+              value: exchangeMinimumContribution,
+              onChange: (e) => setExchangeMinimumContribution(e.target.value),
+              type: "number",
+              min: "0.00",
+              step: 0.01,
+            }}
+          />
         </>
       )}
       <Button
@@ -65,6 +85,7 @@ const DirectFundingBucketForm = ({
             bucketId: bucket.id,
             directFundingType,
             exchangeDescription,
+            exchangeMinimumContribution: Number(exchangeMinimumContribution),
           }).then(({ error }) => {
             if (error) {
               console.error(error);
