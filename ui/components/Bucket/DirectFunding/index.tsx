@@ -13,18 +13,28 @@ const BUCKET_QUERY = gql`
     bucket(id: $id) {
       id
       directFundingEnabled
+      directFundingType
+      exchangeDescription
+      exchangeMinimumContribution
+      exchangeVat
     }
   }
 `;
 
 const EDIT_BUCKET_MUTATION = gql`
-  mutation EditBucket($bucketId: ID!, $directFundingEnabled: Boolean) {
+  mutation EditBucket(
+    $bucketId: ID!
+    $directFundingEnabled: Boolean
+    $directFundingType: DirectFundingType
+  ) {
     editBucket(
       bucketId: $bucketId
       directFundingEnabled: $directFundingEnabled
+      directFundingType: $directFundingType
     ) {
       id
       directFundingEnabled
+      directFundingType
     }
   }
 `;
@@ -65,6 +75,8 @@ const DirectFunding = ({ canEdit = false, round }) => {
           {editing ? (
             <Form
               bucket={bucket}
+              editBucket={editBucket}
+              fetchingMutation={fetchingMutation}
               round={round}
               exitEditing={() => setEditing(false)}
             />
