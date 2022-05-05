@@ -3,6 +3,7 @@ import Avatar from "./Avatar";
 import { modals } from "./Modal/index";
 import Link from "next/link";
 import thousandSeparator from "utils/thousandSeparator";
+import { remove } from "../utils/storage";
 
 const css = {
   button:
@@ -95,7 +96,13 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
             <Link href="/settings">
               <a className={css.button}>Email settings</a>
             </Link>
-            <a href="/api/auth/logout" className={css.button}>
+            <a 
+              onClick={() => {
+                remove("user");
+                window.location.href="/api/auth/logout"
+              }}
+              className={css.button}
+            >
               Sign out
             </a>
           </div>

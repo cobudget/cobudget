@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { LoaderIcon } from "components/Icons"
-import { set, get } from "../../utils/storage";
+import { set, get, remove } from "../../utils/storage";
 
 const css = {
   mobileProfileItem:
@@ -302,7 +302,10 @@ const Header = ({
                     <a className={css.mobileProfileItem}>Email settings</a>
                   </Link>
                   <a
-                    href={"/api/auth/logout"}
+                    onClick={() => {
+                      remove("user");
+                      window.location.href="/api/auth/logout"
+                    }}
                     className={css.mobileProfileItem}
                   >
                     Sign out

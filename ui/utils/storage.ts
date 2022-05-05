@@ -17,3 +17,7 @@ export function set (key: string, data) {
         return false;
     }
 }
+
+export function remove (key: string) {
+    localStorage.removeItem(key);
+}
