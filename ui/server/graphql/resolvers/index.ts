@@ -1038,7 +1038,12 @@ const resolvers = {
             "The minimum contribution requirement must be 0 or higher"
           );
         }
-        //TODO: control VAT
+        if (
+          exchangeVat !== undefined &&
+          (exchangeVat < 0 || exchangeVat > 100 * 100)
+        ) {
+          throw new Error("VAT must be a percentage from 0 to 100");
+        }
 
         const updated = await prisma.bucket.update({
           where: { id: bucketId },

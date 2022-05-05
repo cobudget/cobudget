@@ -90,7 +90,11 @@ const DirectFunding = ({ canEdit = false, round }) => {
               exitEditing={() => setEditing(false)}
             />
           ) : (
-            <div>Funds received are donations{/*TODO: make dynamic*/}</div>
+            <div>
+              {bucket.directFundingType === "DONATION"
+                ? "Funds received are donations"
+                : "We are offering goods or services in exchange for funds."}
+            </div>
           )}
         </div>
         {!editing && (
