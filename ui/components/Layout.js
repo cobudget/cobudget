@@ -63,12 +63,11 @@ const Layout = ({
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
           )}
-          <select onChange={(e) => changeLocale(e.target.value)}>
+          <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
             {supportedLangs.map((option) => (
               <option
                 key={option.value}
                 value={option.value}
-                selected={locale === option.value}
               >
                 {option.label}
               </option>
