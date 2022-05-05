@@ -47,6 +47,8 @@ export const BUCKET_QUERY = gql`
         allowStretchGoals
         bucketReviewIsOpen
         requireBucketApproval
+        directFundingEnabled
+        directFundingTerms
         grantingIsOpen
         grantingHasClosed
         maxAmountToBucketPerUser

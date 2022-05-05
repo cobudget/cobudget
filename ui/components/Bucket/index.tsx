@@ -4,6 +4,7 @@ import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
+import DirectFunding from "./DirectFunding";
 
 const Bucket = ({ bucket, currentUser, openImageModal }) => {
   if (!bucket) return null;
@@ -50,6 +51,8 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />
+
+            <DirectFunding canEdit={canEdit} round={bucket.round} />
           </div>
         </div>
       </div>

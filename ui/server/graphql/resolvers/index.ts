@@ -2,6 +2,7 @@ import SeededShuffle from "seededshuffle";
 import slugify from "../../utils/slugify";
 //import liveUpdate from "../../services/liveUpdate.service";
 import prisma from "../../prisma";
+import { Prisma } from "@prisma/client";
 import { GraphQLScalarType } from "graphql";
 import GraphQLJSON from "graphql-type-json";
 import { GraphQLJSONObject } from "graphql-type-json";
@@ -1014,9 +1015,36 @@ const resolvers = {
       isBucketCocreatorOrCollAdminOrMod,
       async (
         parent,
-        { bucketId, title, description, summary, images, budgetItems },
+        {
+          bucketId,
+          title,
+          description,
+          summary,
+          images,
+          budgetItems,
+          directFundingEnabled,
+          directFundingType,
+          exchangeDescription,
+          exchangeMinimumContribution,
+          exchangeVat,
+        },
         { user, eventHub }
       ) => {
+        if (
+          exchangeMinimumContribution !== undefined &&
+          exchangeMinimumContribution < 0
+        ) {
+          throw new Error(
+            "The minimum contribution requirement must be 0 or higher"
+          );
+        }
+        if (
+          exchangeVat !== undefined &&
+          (exchangeVat < 0 || exchangeVat > 100 * 100)
+        ) {
+          throw new Error("VAT must be a percentage from 0 to 100");
+        }
+
         const updated = await prisma.bucket.update({
           where: { id: bucketId },
           data: {
@@ -1032,6 +1060,11 @@ const resolvers = {
             ...(typeof images !== "undefined" && {
               Images: { deleteMany: {}, createMany: { data: images } },
             }),
+            directFundingEnabled,
+            directFundingType,
+            exchangeDescription,
+            exchangeMinimumContribution,
+            exchangeVat,
           },
           include: {
             Images: true,
