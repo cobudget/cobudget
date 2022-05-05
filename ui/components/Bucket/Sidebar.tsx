@@ -153,7 +153,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     currentUser?.currentCollMember?.isModerator;
   const hasNotReachedMaxGoal =
     bucket.totalContributions < Math.max(bucket.minGoal, bucket.maxGoal);
-  const hasReachedMinGoal = bucket.totalContributions > bucket.minGoal;
+  const hasReachedMinGoal = bucket.totalContributions >= bucket.minGoal;
 
   const showFundButton =
     bucket.approved &&
@@ -163,11 +163,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     bucket.round.grantingIsOpen &&
     currentUser?.currentCollMember;
   const showAcceptFundingButton =
-    bucket.approved &&
-    !bucket.funded &&
-    canEdit &&
-    hasNotReachedMaxGoal &&
-    hasReachedMinGoal;
+    bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
