@@ -173,9 +173,10 @@ const MyApp = ({ Component, pageProps }) => {
       let lvMap = get("lv");
       if (lvMap) {
         lvMap[currentUser.email] = { path: router.pathname, as: router.asPath };
-      }
-      else {
-        lvMap = { [currentUser.email]: { path: router.pathname, as: router.asPath }}
+      } else {
+        lvMap = {
+          [currentUser.email]: { path: router.pathname, as: router.asPath },
+        };
       }
       set("lv", lvMap);
     }

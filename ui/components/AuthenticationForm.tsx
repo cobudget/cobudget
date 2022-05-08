@@ -32,7 +32,7 @@ export default function AuthenticationForm({
           let lvPage = "";
           if (!redirect) {
             const lv = get("lv");
-            lvPage = lv?.[email]?.as
+            lvPage = lv?.[email]?.as;
           }
 
           fetch(`/api/auth/magiclink`, {
