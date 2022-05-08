@@ -4,6 +4,7 @@ import { Checkbox, FormControlLabel } from "@material-ui/core";
 import TextField from "./TextField";
 import Button from "./Button";
 import Banner from "components/Banner";
+import { get } from "utils/storage";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -27,10 +28,17 @@ export default function AuthenticationForm({
         onSubmit={(evt) => {
           evt.preventDefault();
           setLoading(true);
+
+          let lvPage = "";
+          if (!redirect) {
+            const lv = get("lv");
+            lvPage = lv?.[email]?.as
+          }
+
           fetch(`/api/auth/magiclink`, {
             method: `POST`,
             body: JSON.stringify({
-              redirect,
+              redirect: redirect || lvPage,
               destination: email,
               rememberMe,
             }),

@@ -9,6 +9,7 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
+import { set, get } from "utils/storage";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -166,6 +167,19 @@ const MyApp = ({ Component, pageProps }) => {
   const closeModal = () => {
     setModal(null);
   };
+
+  useEffect(() => {
+    if (currentUser) {
+      let lvMap = get("lv");
+      if (lvMap) {
+        lvMap[currentUser.email] = { path: router.pathname, as: router.asPath };
+      }
+      else {
+        lvMap = { [currentUser.email]: { path: router.pathname, as: router.asPath }}
+      }
+      set("lv", lvMap);
+    }
+  }, [router, currentUser]);
 
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
 
