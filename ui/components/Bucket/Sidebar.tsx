@@ -189,7 +189,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               >
                 Fund
               </Button>
-              {showBucketReview ? <Monster bucket={bucket} /> : null}
+              
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
@@ -199,6 +199,10 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               )}
             </>
           )}
+          {
+            (showBucketReview || canEdit || (bucket.cocreators.find(co => co.id === currentUser?.currentCollMember?.id)))
+            ? <Monster bucket={bucket} /> : null
+          }
           {showAcceptFundingButton && (
             <Button
               color={bucket.round.color}
