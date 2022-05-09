@@ -50,15 +50,7 @@ const REMOVE_CO_CREATOR_MUTATION = gql`
   }
 `;
 
-const Member = ({
-  member,
-  add,
-  remove,
-}: {
-  member: any;
-  add?: () => void;
-  remove?: () => void;
-}) => {
+const Member = ({ member, add, remove }) => {
   return (
     <div className="flex items-center justify-between mb-2 overflow-y-scroll ">
       <div className="flex items-center">
@@ -132,6 +124,7 @@ const EditCocreatorsModal = ({
   open,
   handleClose,
   bucket,
+  round,
   cocreators,
   currentUser,
 }) => {
@@ -182,7 +175,7 @@ const EditCocreatorsModal = ({
               searchInput={searchInput}
               addCocreator={addCocreator}
               cocreators={cocreators}
-              roundId={bucket.round.id}
+              roundId={round.id}
               bucket={bucket}
             />
           </div>

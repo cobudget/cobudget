@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
-const GrantingStatus = ({ bucket }) => {
+const GrantingStatus = ({ bucket, round }) => {
   const funding = bucket.totalContributions + bucket.income;
   const ratio = isNaN(funding / bucket.minGoal) ? 0 : funding / bucket.minGoal;
   //const userName = (nameOrEmail) =>
@@ -16,14 +16,14 @@ const GrantingStatus = ({ bucket }) => {
           ratio={ratio}
           className="mb-2"
           size="large"
-          color={bucket.round.color}
+          color={round.color}
         />
-        <p className={`text-xl font-semibold text-${bucket.round.color}-dark`}>
-          {thousandSeparator(funding / 100)} {bucket.round.currency}
+        <p className={`text-xl font-semibold text-${round.color}-dark`}>
+          {thousandSeparator(funding / 100)} {round.currency}
         </p>
         <p className="text-sm text-gray-700 mb-2">
-          funded of {thousandSeparator(bucket.minGoal / 100)}{" "}
-          {bucket.round.currency} goal
+          funded of {thousandSeparator(bucket.minGoal / 100)} {round.currency}{" "}
+          goal
         </p>
 
         {!!bucket.totalContributionsFromCurrentMember && (
@@ -32,7 +32,7 @@ const GrantingStatus = ({ bucket }) => {
             {thousandSeparator(
               bucket.totalContributionsFromCurrentMember / 100
             )}{" "}
-            {bucket.round.currency}
+            {round.currency}
           </p>
         )}
       </div>

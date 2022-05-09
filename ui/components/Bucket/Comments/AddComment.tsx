@@ -17,7 +17,13 @@ const schema = yup.object().shape({
 function AddComment() {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<any>();
-  const { addComment, currentUser, bucket } = useContext<any>(Context);
+  const {
+    addComment,
+    bucketId,
+    round,
+    currentGroup,
+    currentUser,
+  } = useContext<any>(Context);
 
   const { handleSubmit, register, errors, setValue, watch } = useForm({
     resolver: yupResolver(schema),
@@ -29,12 +35,12 @@ function AddComment() {
   }, [register]);
 
   if (
-    bucket.round.group?.discourseUrl &&
+    currentGroup?.discourseUrl &&
     !currentUser.currentGroupMember?.hasDiscourseApiKey
   ) {
     return (
-      <Link href={`/${bucket.round.group.slug}/connect-discourse`} passHref>
-        <Button color={bucket.round.color} nextJsLink className="my-2">
+      <Link href={"/connect-discourse"} passHref>
+        <Button color={round.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
       </Link>
@@ -45,7 +51,7 @@ function AddComment() {
     <form
       onSubmit={handleSubmit((vars) => {
         setSubmitting(true);
-        addComment({ bucketId: bucket.id, ...vars })
+        addComment({ bucketId, ...vars })
           .then(({ error }) => {
             if (error) return toast.error(error.message);
             inputRef.current.blur();
@@ -69,33 +75,35 @@ function AddComment() {
               inputProps={{
                 onChange: (e) => setValue("content", e.target.value),
               }}
-              inputRef={inputRef}
-              color={bucket.round.color}
+              inputRef={(e) => {
+                inputRef.current = e;
+              }}
+              color={round.color}
               wysiwyg
               enableMentions
-              mentionsCollId={bucket.round.id}
+              mentionsCollId={round.id}
             />
           </div>
-
-          <div className="flex justify-end">
-            <Button
-              onClick={inputRef.current?.clear}
-              disabled={content.length === 0}
-              variant="secondary"
-              color={bucket.round.color}
-              className="mr-2"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={content.length === 0}
-              color={bucket.round.color}
-              loading={submitting}
-            >
-              Submit
-            </Button>
-          </div>
+          {content.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                onClick={inputRef.current.clear}
+                variant="secondary"
+                color={round.color}
+                className="mr-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={content.length === 0}
+                color={round.color}
+                loading={submitting}
+              >
+                Submit
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </form>

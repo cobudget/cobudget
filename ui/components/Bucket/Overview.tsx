@@ -6,7 +6,9 @@ import Title from "./Title";
 import Summary from "./Summary";
 
 export default function Overview({
+  round,
   currentUser,
+  currentGroup,
   fetching,
   error,
   bucket,
@@ -49,7 +51,7 @@ export default function Overview({
     <>
       <Head>
         <title>
-          {bucket.title} | {bucket.round?.title}
+          {bucket.title} | {round?.title}
         </title>
       </Head>
       <div className="border-b border-b-default">
@@ -80,8 +82,10 @@ export default function Overview({
             <div className="">
               <Sidebar
                 bucket={bucket}
+                round={round}
                 currentUser={currentUser}
                 canEdit={canEdit}
+                currentGroup={currentGroup}
                 showBucketReview={showBucketReview}
               />
             </div>

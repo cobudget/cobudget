@@ -22,7 +22,7 @@ const modalComponents = {
   EDIT_PROFILE: EditProfile,
 };
 
-const Modal = ({ active, closeModal, currentUser }) => {
+const Modal = ({ active, closeModal, currentGroup, currentUser }) => {
   const classes = useStyles();
   const ModalComponent = modalComponents[active];
 
@@ -36,7 +36,11 @@ const Modal = ({ active, closeModal, currentUser }) => {
     >
       <div className={classes.innerModal}>
         {active && (
-          <ModalComponent closeModal={closeModal} currentUser={currentUser} />
+          <ModalComponent
+            currentGroup={currentGroup}
+            closeModal={closeModal}
+            currentUser={currentUser}
+          />
         )}
       </div>
     </MUIModal>

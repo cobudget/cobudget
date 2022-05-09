@@ -30,12 +30,12 @@ const CONTRIBUTE_MUTATION = gql`
   }
 `;
 
-const ContributeModal = ({ handleClose, bucket, currentUser }) => {
+const ContributeModal = ({ handleClose, bucket, round, currentUser }) => {
   const [inputValue, setInputValue] = useState("");
   const [availableBalance, setAvailableBalance] = useState(
     currentUser.currentCollMember.balance / 100
   );
-  const amount = Math.round(Number(inputValue) * 100);
+  const amount = Math.round(inputValue * 100);
 
   useEffect(() => {
     setAvailableBalance(
@@ -75,12 +75,8 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
 
   const memberBalance = currentUser.currentCollMember.balance;
 
-  const max = bucket.round.maxAmountToBucketPerUser
-    ? Math.min(
-        amountToMaxGoal,
-        memberBalance,
-        bucket.round.maxAmountToBucketPerUser
-      )
+  const max = round.maxAmountToBucketPerUser
+    ? Math.min(amountToMaxGoal, memberBalance, round.maxAmountToBucketPerUser)
     : Math.min(amountToMaxGoal, memberBalance);
 
   return (
@@ -95,20 +91,20 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
         </h1>
         <p className={availableBalance >= 0 ? "text-gray-800" : "text-red-600"}>
           {availableBalance >= 0
-            ? `Available balance: ${availableBalance} ${bucket.round.currency}`
+            ? `Available balance: ${availableBalance} ${round.currency}`
             : "Insufficient balance"}
         </p>
-        {bucket.round.maxAmountToBucketPerUser && (
+        {round.maxAmountToBucketPerUser && (
           <p className="text-sm text-gray-600 my-2">
-            Max. {bucket.round.maxAmountToBucketPerUser / 100}{" "}
-            {bucket.round.currency} to one {process.env.BUCKET_NAME_SINGULAR}
+            Max. {round.maxAmountToBucketPerUser / 100} {round.currency} to one
+            bucket
           </p>
         )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             contribute({
-              roundId: bucket.round.id,
+              roundId: round.id,
               bucketId: bucket.id,
               amount,
             })
@@ -118,8 +114,8 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
                 } else {
                   toast.success(
                     `You contributed ${amount / 100} ${
-                      bucket.round.currency
-                    } to this ${process.env.BUCKET_NAME_SINGULAR}!`
+                      round.currency
+                    } to this bucket!`
                   );
                 }
                 handleClose();
@@ -128,12 +124,13 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
           }}
         >
           <TextField
+            fullWidth
             className="my-3"
             autoFocus
             placeholder="0"
-            endAdornment={bucket.round.currency}
+            endAdornment={round.currency}
             size="large"
-            color={bucket.round.color}
+            color={round.color}
             inputProps={{
               value: inputValue,
               onChange: (e) => setInputValue(e.target.value),
@@ -147,7 +144,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
             type="submit"
             size="large"
             fullWidth
-            color={bucket.round.color}
+            color={round.color}
             loading={loading}
             disabled={inputValue === "" || availableBalance < 0}
             className="my-2"
@@ -158,7 +155,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
             size="large"
             fullWidth
             variant="secondary"
-            color={bucket.round.color}
+            color={round.color}
             onClick={handleClose}
           >
             Cancel

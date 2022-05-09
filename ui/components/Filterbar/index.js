@@ -8,6 +8,7 @@ const Filterbar = ({
   textSearchTerm,
   tag,
   round,
+  currentGroup,
   statusFilter,
   bucketStatusCount,
 }) => {
@@ -25,8 +26,8 @@ const Filterbar = ({
     router.push({
       pathname: "/[group]/[round]",
       query: {
-        group: router.query.group,
-        round: router.query.round,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         s: input,
         ...(tag && { tag }),
       },
@@ -39,8 +40,8 @@ const Filterbar = ({
     router.push({
       pathname: "/[group]/[round]",
       query: {
-        group: router.query.group,
-        round: router.query.round,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
       },
@@ -51,8 +52,8 @@ const Filterbar = ({
     router.push({
       pathname: "/[group]/[round]",
       query: {
-        group: router.query.group,
-        round: router.query.round,
+        group: currentGroup?.slug ?? "c",
+        round: round.slug,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
         f: statusFilterArray,

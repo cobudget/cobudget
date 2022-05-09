@@ -99,26 +99,26 @@ export async function getRoundMember({
   include?: object;
   bucketId?: string;
 }) {
-  let roundMember = null;
+  let collMember = null;
 
   if (bucketId) {
-    roundMember = await prisma.roundMember.findFirst({
+    collMember = await prisma.roundMember.findFirst({
       where: { round: { buckets: { some: { id: bucketId } } }, userId },
       include,
     });
   } else if (roundId) {
-    roundMember = await prisma.roundMember.findUnique({
+    collMember = await prisma.roundMember.findUnique({
       where: {
         userId_roundId: { userId, roundId },
       },
       include,
     });
   }
-  if (!roundMember?.isApproved) {
+  if (!collMember?.isApproved) {
     throw new Error("Not a round member ");
   }
 
-  return roundMember;
+  return collMember;
 }
 
 export async function getCurrentGroupAndMember({

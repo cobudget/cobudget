@@ -14,12 +14,6 @@ module.exports = (phase) => {
     GRAPHQL_SUBSCRIPTIONS_URL: process.env.GRAPHQL_SUBSCRIPTIONS_URL,
     IS_PROD: isProd,
     DEPLOY_URL: process.env.DEPLOY_URL,
-    SINGLE_GROUP_MODE: process.env.SINGLE_GROUP_MODE,
-    TERMS_URL: process.env.TERMS_URL,
-    PRIVACY_POLICY_URL: process.env.PRIVACY_POLICY_URL,
-    PLATFORM_NAME: process.env.PLATFORM_NAME,
-    BUCKET_NAME_SINGULAR: process.env.BUCKET_NAME_SINGULAR,
-    BUCKET_NAME_PLURAL: process.env.BUCKET_NAME_PLURAL,
     //process.env.KEYCLOAK_CLIENT_ID
     //process.env.COOKIE_SECRET
     //KEYCLOAK_REALM: process.env.KEYCLOAK_REALM,

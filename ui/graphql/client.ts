@@ -1,43 +1,36 @@
-import {
-  dedupExchange,
-  fetchExchange,
-  errorExchange,
-  gql,
-  RequestPolicy,
-  Exchange,
-} from "urql";
+import { dedupExchange, fetchExchange, errorExchange, gql } from "urql";
 import { NextUrqlContext, NextUrqlPageContext, SSRExchange } from "next-urql";
 import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
+import { simplePagination } from "@urql/exchange-graphcache/extras";
 
 import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
 import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[group]/[round]";
 import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
-import { GROUP_PAGE_QUERY } from "components/Group";
-import { CURRENT_USER_QUERY } from "pages/_app";
+import { ROUNDS_QUERY } from "pages/[group]";
+import { TOP_LEVEL_QUERY } from "pages/_app";
 
 export const getUrl = (): string => {
   if (typeof window !== "undefined") return `/api`;
 
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}/api`;
+  }
+
   if (process.env.NODE_ENV === `development`)
     return `http://localhost:3000/api`;
 
-  if (process.env.DEPLOY_URL) {
-    return `https://${process.env.DEPLOY_URL}/api`;
-  }
-
-  return `https://${process.env.VERCEL_URL}/api`;
+  return "https://cobudget.com/api";
 };
 
 export const client = (
   ssrExchange: SSRExchange
   //ctx: NextUrqlContext | undefined
-): { url: string; exchanges: Exchange[] } => {
+) => {
   return {
     url: getUrl(),
-    // requestPolicy: "cache-and-network",
     exchanges: [
       // errorExchange({
       //   // onError: (error) => {
@@ -55,7 +48,6 @@ export const client = (
           ContributionsPage: () => null,
           CommentSet: () => null,
           BucketsPage: () => null,
-          BucketStatusCount: () => null,
         },
         updates: {
           Mutation: {
@@ -76,13 +68,13 @@ export const client = (
                 console.log({ result });
                 cache.updateQuery(
                   {
-                    query: CURRENT_USER_QUERY,
+                    query: TOP_LEVEL_QUERY,
                     variables: {
                       groupSlug: result.joinRound.round.group?.slug ?? "c",
                       roundSlug: result.joinRound.round.slug,
                     },
                   },
-                  (data: any) => {
+                  (data) => {
                     console.log({ data });
                     return {
                       ...data,
@@ -109,51 +101,20 @@ export const client = (
                   });
               }
             },
-            deleteRoundInvitationLink(result, args, cache) {
-              if (result.deleteRoundInvitationLink) {
-                cache
-                  .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
-                  .forEach((field) => {
-                    cache.invalidate(
-                      "Query",
-                      "roundInvitationLink",
-                      field.arguments
-                    );
-                  });
-              }
-            },
-            createRoundInvitationLink(result, args, cache) {
-              if (result.createRoundInvitationLink) {
-                cache
-                  .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
-                  .forEach((field) => {
-                    cache.invalidate(
-                      "Query",
-                      "roundInvitationLink",
-                      field.arguments
-                    );
-                  });
-              }
-            },
             joinGroup(result: any, args, cache) {
               if (result.joinGroup) {
                 cache.updateQuery(
                   {
-                    query: CURRENT_USER_QUERY,
+                    query: TOP_LEVEL_QUERY,
                     variables: {
                       groupSlug: result.joinGroup.group.slug,
                       roundSlug: undefined,
                     },
                   },
-                  (data: any) => {
+                  (data) => {
                     return {
                       ...data,
-                      currentUser: {
-                        ...data.currentUser,
-                        currentGroupMember: result.joinGroup,
-                      },
+                      currentGroupMember: result.joinGroup,
                     };
                   }
                 );
@@ -238,14 +199,6 @@ export const client = (
               //     );
               //   });
             },
-            createRound(result: any, args, cache) {
-              const fields = cache
-                .inspectFields("Query")
-                .filter((field) => field.fieldName === "rounds")
-                .forEach((field) => {
-                  cache.invalidate("Query", "rounds", field.arguments);
-                });
-            },
             deleteRound(result: any, { roundId }, cache) {
               const fields = cache
                 .inspectFields("Query")
@@ -253,12 +206,12 @@ export const client = (
                 .forEach((field) => {
                   cache.updateQuery(
                     {
-                      query: GROUP_PAGE_QUERY,
+                      query: ROUNDS_QUERY,
                       variables: {
                         groupSlug: field.arguments.groupSlug,
                       },
                     },
-                    (data: any) => {
+                    (data) => {
                       if (!data) return data;
                       data.rounds = data.rounds.filter(
                         (round) => round.id !== roundId
@@ -278,7 +231,7 @@ export const client = (
                       query: BUCKET_QUERY,
                       variables: field.arguments,
                     },
-                    (data: any) => {
+                    (data) => {
                       data.bucket.tags = data.bucket.tags.filter(
                         (tag) => tag.id !== tagId
                       );
@@ -287,7 +240,7 @@ export const client = (
                   );
                 });
             },
-            createBucket(result: any, args, cache) {
+            createBucket(result: any, { roundId }, cache) {
               // normally when adding a thing to a cached list we just want
               // to prepend the new item. but the bucket list on the coll
               // page has a weird shuffle, so we'll instead invalidate the
@@ -296,10 +249,7 @@ export const client = (
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
-                .filter(
-                  (field) =>
-                    field.arguments.roundSlug === result.createBucket.round.slug
-                )
+                .filter((field) => field.arguments.roundId === roundId)
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
@@ -314,7 +264,7 @@ export const client = (
                       query: BUCKETS_QUERY,
                       variables: field.arguments,
                     },
-                    (data: any) => {
+                    (data) => {
                       data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
                         (bucket) => bucket.id !== bucketId
                       );
@@ -335,7 +285,7 @@ export const client = (
                       order: "desc",
                     },
                   },
-                  (data: any) => {
+                  (data) => {
                     return {
                       ...data,
                       commentSet: {
@@ -361,7 +311,7 @@ export const client = (
                       order: "desc",
                     },
                   },
-                  (data: any) => {
+                  (data) => {
                     return {
                       ...data,
                       commentSet: {
@@ -483,8 +433,6 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "round", field.arguments);
                 });
-
-              cache.invalidate("Query", "currentUser");
             },
           },
         },
@@ -492,5 +440,11 @@ export const client = (
       ssrExchange,
       fetchExchange,
     ],
+    fetchOptions: {
+      //headers: {
+      //  ...ctx?.req?.headers,
+      //},
+      //credentials: "include",
+    },
   };
 };

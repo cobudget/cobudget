@@ -25,13 +25,14 @@ const EDIT_GROUP = gql`
     $groupId: ID!
     $name: String!
     $logo: String
-    $slug: String
+    $slug: String!
   ) {
     editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug) {
       id
       name
       logo
       slug
+      customDomain
     }
   }
 `;
@@ -98,30 +99,29 @@ const EditGroup = ({ group, currentUser }) => {
           error={errors.name}
           helperText={errors.name?.message}
         />
-        {process.env.SINGLE_GROUP_MODE !== "true" && (
-          <TextField
-            name="slug"
-            label="URL"
-            placeholder={slugify(`${currentUser.name}'s community`)}
-            inputRef={register({ required: "Required" })}
-            error={errors.slug}
-            inputProps={{
-              value: slugValue,
-              onChange: (e) => {
-                setSlugValue(e.target.value);
-              },
-              onBlur: (e) => setSlugValue(slugify(e.target.value)),
-            }}
-            helperText={errors.slug?.message}
-            startAdornment={
-              fromRealities ? (
-                <span>{process.env.REALITIES_DEPLOY_URL}/</span>
-              ) : (
-                <span>{process.env.DEPLOY_URL}/</span>
-              )
-            }
-          />
-        )}
+
+        <TextField
+          name="slug"
+          label="URL"
+          placeholder={slugify(`${currentUser.name}'s community`)}
+          inputRef={register({ required: "Required" })}
+          error={errors.slug}
+          inputProps={{
+            value: slugValue,
+            onChange: (e) => {
+              setSlugValue(e.target.value);
+            },
+            onBlur: (e) => setSlugValue(slugify(e.target.value)),
+          }}
+          helperText={errors.subdomain?.message}
+          startAdornment={
+            fromRealities ? (
+              <span>{process.env.REALITIES_DEPLOY_URL}/</span>
+            ) : (
+              <span>{process.env.DEPLOY_URL}/</span>
+            )
+          }
+        />
 
         {/* removing this for now since currently don't automatically update
             the redirect uris in keycloak

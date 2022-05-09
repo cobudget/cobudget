@@ -4,7 +4,6 @@ import { sortBy } from "lodash";
 import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
-import capitalize from "utils/capitalize";
 
 export default function AboutPage({ router, round }) {
   // if (error) return <div>{error.message}</div>;
@@ -48,7 +47,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`}
+                  primary={`Max. amount to one bucket per user`}
                   secondary={`${thousandSeparator(
                     round.maxAmountToBucketPerUser / 100
                   )} ${round.currency}`}
@@ -70,9 +69,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`${capitalize(
-                    process.env.BUCKET_NAME_SINGULAR
-                  )} creation closes`}
+                  primary={`Bucket creation closes`}
                   secondary={dayjs(round.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -120,13 +117,13 @@ export default function AboutPage({ router, round }) {
               }`,
               breakdown: [
                 {
-                  title: `Contributions made to ${process.env.BUCKET_NAME_SINGULAR} open for funding`,
+                  title: "Contributions made to bucket open for funding",
                   amount: `${thousandSeparator(
                     round.totalContributionsFunding / 100
                   )} ${round.currency}`,
                 },
                 {
-                  title: `Contributions made to funded ${process.env.BUCKET_NAME_PLURAL}`,
+                  title: "Contributions made to funded buckets",
                   amount: `${thousandSeparator(
                     round.totalContributionsFunded / 100
                   )} ${round.currency}`,

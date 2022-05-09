@@ -1,23 +1,11 @@
-import { useMutation, gql, useQuery } from "urql";
+import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
 
 import { Modal } from "@material-ui/core";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import Banner from "components/Banner";
-import { DeleteIcon } from "components/Icons";
-import IconButton from "components/IconButton";
-import styled from "styled-components";
-import toast from "react-hot-toast";
-
-const GridWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 80px calc(100% - 130px) 50px;
-  background: rgba(243, 244, 246, 1);
-  border-radius: 0.375rem;
-`;
 
 const INVITE_GROUP_MEMBERS_MUTATION = gql`
   mutation InviteGroupMembers($groupId: ID!, $emails: String!) {
@@ -35,30 +23,6 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
         verifiedEmail
         avatar
       }
-    }
-  }
-`;
-
-const ROUND_INVITE_LINK = gql`
-  query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink(roundId: $roundId) {
-      link
-    }
-  }
-`;
-
-const CREATE_ROUND_INVITE_LINK = gql`
-  mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink(roundId: $roundId) {
-      link
-    }
-  }
-`;
-
-const DELETE_ROUND_INVITE_LINK = gql`
-  mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink(roundId: $roundId) {
-      link
     }
   }
 `;
@@ -97,18 +61,6 @@ const InviteMembersModal = ({
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
-  const [{ data: inviteLink }] = useQuery({
-    query: ROUND_INVITE_LINK,
-    variables: { roundId },
-  });
-  const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
-    CREATE_ROUND_INVITE_LINK
-  );
-  const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(
-    DELETE_ROUND_INVITE_LINK
-  );
-
-  const link = inviteLink?.roundInvitationLink?.link;
 
   return (
     <>
@@ -178,73 +130,13 @@ const InviteMembersModal = ({
                 },
               })}
             />
-            {link && (
-              <div className="mt-4">
-                <p className="text-sm font-medium mb-1 block">
-                  Anyone with this link will be able to join your round
-                </p>
-                <GridWrapper>
-                  <p
-                    className="mt-4 ml-4 text-sm font-medium cursor-pointer"
-                    onClick={() => {
-                      navigator.clipboard
-                        .writeText(link)
-                        .then(() => toast.success("Invitation link copied"))
-                        .catch(() => toast.error("Error while copying link"))
-                    }}
-                  >
-                    Copy
-                  </p>
-                  <TextField
-                    inputProps={{
-                      disabled: true,
-                      value: link,
-                    }}
-                  />
-                  <span className="mt-2 ml-2">
-                    <IconButton
-                      onClick={() => {
-                        deleteInviteLink({
-                          roundId,
-                        })
-                        .then(result => {
-                          if (result.error) {
-                            return toast.error("Could not delete invitation link");
-                          }
-                          toast.success("Invitation link deleted")
-                        })
-                      }}
-                    >
-                      <DeleteIcon className="h-5 w-5" />
-                    </IconButton>
-                  </span>
-                </GridWrapper>
-              </div>
-            )}
             <div className="flex justify-end mt-4">
               <Button
                 className="mr-2"
                 variant="secondary"
                 onClick={handleClose}
               >
-                Close
-              </Button>
-              <Button
-                className="mr-2"
-                loading={createInviteLoading}
-                onClick={() => {
-                  createInviteLink({
-                    roundId,
-                  })
-                  .then((result) => {
-                    if (result.error) {
-                      return toast.error("Could not create invite link")
-                    }
-                    toast.success("Invite link created")
-                  })
-                }}
-              >
-                Create Invite Link
+                Cancel
               </Button>
               <Button type="submit" loading={loading}>
                 Add people

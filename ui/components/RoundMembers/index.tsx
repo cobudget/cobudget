@@ -152,13 +152,13 @@ const RoundMembers = ({ round, currentUser }) => {
             requestsToJoin={requestsToJoin}
             updateMember={updateMember}
             deleteMember={deleteMember}
-            roundId={round.id}
+            round={round}
           />
         )}
 
         <div className="flex justify-between mb-3 items-center">
           <SearchBar
-            color={round.color}
+            round={round}
             value={searchString}
             placeholder="Search participants"
             onChange={(e) => setSearchString(e.target.value)}

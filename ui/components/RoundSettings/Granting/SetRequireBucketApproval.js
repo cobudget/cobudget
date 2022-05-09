@@ -11,12 +11,12 @@ import { UPDATE_GRANTING_SETTINGS } from ".";
 const SetRequireBucketApproval = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
+  console.log({ round });
   return (
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">
-          Require moderator approval of {process.env.BUCKET_NAME_PLURAL} before
-          funding
+          Require moderator approval of buckets before funding
         </h1>
 
         <form
@@ -38,7 +38,7 @@ const SetRequireBucketApproval = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="requireBucketApproval"
-              label={`Require moderator approval of ${process.env.BUCKET_NAME_PLURAL} before funding`}
+              label="Require moderator approval of buckets before funding"
               defaultValue={round.requireBucketApproval ?? false}
               inputRef={register}
               fullWidth
