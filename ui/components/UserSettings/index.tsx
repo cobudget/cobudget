@@ -23,19 +23,19 @@ const SET_EMAIL_SETTING_MUTATION = gql`
 const settingsMeta = [
   {
     key: "allocatedToYou",
-    label: "I receive funds (to spend on buckets)",
+    label: `I receive funds (to spend on ${process.env.BUCKET_NAME_PLURAL})`,
   },
   {
     key: "refundedBecauseBucketCancelled",
-    label: "I have been refunded (because a bucket was cancelled)",
+    label: `I have been refunded (because a ${process.env.BUCKET_NAME_SINGULAR} was cancelled)`,
   },
   {
     key: "contributionToYourBucket",
-    label: "Funds have been contributed to my bucket",
+    label: `Funds have been contributed to my ${process.env.BUCKET_NAME_PLURAL}`,
   },
   {
     key: "commentBecauseCocreator",
-    label: "There are comments on my bucket",
+    label: `There are comments on my ${process.env.BUCKET_NAME_PLURAL}`,
   },
   {
     key: "commentMentions",
@@ -43,15 +43,22 @@ const settingsMeta = [
   },
   {
     key: "bucketPublishedInRound",
-    label: "A new bucket is published",
+    label: `A new ${process.env.BUCKET_NAME_PLURAL} is published`,
   },
   {
     key: "commentBecauseCommented",
-    label: "A bucket I have commented on receives a new comment",
+    label: `A ${process.env.BUCKET_NAME_PLURAL} I have commented on receives a new comment`,
   },
 ];
 
-const EmailSettingItem = ({ settingKey, value }) => {
+const adminSettingsMeta = [
+  {
+    key: "roundJoinRequest",
+    label: `A user requests to join a round`,
+  },
+];
+
+const EmailSettingItem = ({ settingKey, value, settingsMeta }) => {
   const [{ fetching, error }, setEmailSetting] = useMutation(
     SET_EMAIL_SETTING_MUTATION
   );
@@ -96,6 +103,16 @@ const SettingsIndex = () => {
             key={key}
             settingKey={key}
             value={data.currentUser.emailSettings[key]}
+            settingsMeta={settingsMeta}
+          />
+        ))}
+        <div>Admin e-mail settings:</div>
+        {adminSettingsMeta.map(({ key }) => (
+          <EmailSettingItem
+            key={key}
+            settingKey={key}
+            value={data.currentUser.emailSettings[key]}
+            settingsMeta={adminSettingsMeta}
           />
         ))}
       </FormGroup>

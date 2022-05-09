@@ -1,5 +1,6 @@
+import { bucketMinGoal } from "server/graphql/resolvers/helpers";
+import prisma from "server/prisma";
 import discourse from "../lib/discourse";
-import liveUpdate from "../services/liveUpdate.service";
 
 export default {
   groupHasDiscourse(group) {
@@ -35,7 +36,7 @@ export default {
         const post = await discourse(currentGroup.discourse).posts.create(
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
+            raw: await this.generateBucketMarkdown(bucket, round, currentGroup),
             category: round.discourseCategoryId,
             unlist_topic: !bucket.published,
           },
@@ -45,21 +46,23 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
-        bucket.comments.forEach((comment) => {
-          eventHub.publish("create-comment", {
-            currentGroup,
-            currentGroupMember,
-            currentCollMember,
-            round,
-            bucket,
-            comment,
-          });
+        // bucket.comments.forEach((comment) => {
+        //   eventHub.publish("create-comment", {
+        //     currentGroup,
+        //     currentGroupMember,
+        //     currentCollMember,
+        //     round,
+        //     bucket,
+        //     comment,
+        //   });
+        // });
+
+        await prisma.bucket.update({
+          where: { id: bucket.id },
+          data: { discourseTopicId: post.topic_id },
         });
-
-        bucket.discourseTopicId = post.topic_id;
-        await bucket.save();
       }
     );
 
@@ -93,13 +96,13 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
         await discourse(currentGroup.discourse).posts.update(
           post.id,
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
+            raw: await this.generateBucketMarkdown(bucket, round, currentGroup),
           },
           {
             username: "system",
@@ -196,14 +199,14 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
         const created = this.generateComment(
           { ...post, raw: comment.content },
           currentGroupMember
         );
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { comment: created, action: "created" },
-        });
+        // liveUpdate.publish("commentsChanged", {
+        //   commentsChanged: { comment: created, action: "created" },
+        // });
 
         return created;
       }
@@ -237,15 +240,12 @@ export default {
           }
         );
 
-        if (post.errors) throw new Error(["Discourse API:", ...post.errors]);
+        if (post.errors) throw new Error("Discourse API:" + post.errors);
 
         const updated = this.generateComment(
           { ...post, raw: comment.content },
           currentGroupMember
         );
-        liveUpdate.publish("commentsChanged", {
-          commentsChanged: { comment: updated, action: "edited" },
-        });
 
         return updated;
       }
@@ -268,29 +268,25 @@ export default {
         const res = await discourse(currentGroup.discourse).posts.delete({
           id: comment.id,
           userApiKey: currentGroupMember.discourseApiKey,
+          username: currentGroupMember.discourseUsername,
         });
 
-        if (!res.ok) throw new Error(["Discourse API:", res.statusText]);
-
-        // liveUpdate.publish("commentsChanged", {
-        //   commentsChanged: { comment, action: "deleted" },
-        // });
+        if (!res.ok) throw new Error("Discourse API:" + res.statusText);
 
         return comment;
       }
     );
   },
 
-  generateBucketMarkdown(bucket, round, group) {
+  async generateBucketMarkdown(bucket, round, group) {
     const content = [];
 
     if (group) {
       const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
-      const domain =
-        group.customDomain || `${group.subdomain}.${process.env.DEPLOY_URL}`;
-      const bucketUrl = `${protocol}://${domain}/${round.slug}/${bucket.id}`;
+
+      const bucketUrl = `${protocol}://${process.env.DEPLOY_URL}/${group.slug}/${round.slug}/${bucket.id}`;
       content.push(
-        "View and edit this post on the Cobudget platform: ",
+        `View and edit this post on the ${process.env.PLATFORM_NAME} platform: `,
         bucketUrl
       );
     }
@@ -305,20 +301,19 @@ export default {
       content.push(bucket.description);
     }
 
-    if (bucket.customFields) {
-      bucket.customFields.forEach((customField) => {
-        const customFieldName = round.customFields.find(
-          (customEventField) =>
-            String(customEventField._id) === String(customField.fieldId)
+    if (bucket.FieldValues) {
+      bucket.FieldValues.forEach((fieldValue) => {
+        const fieldName = round.fields.find(
+          (field) => field.id === fieldValue.fieldId
         ).name;
-        content.push(`## ${customFieldName}`);
-        content.push(customField.value);
+        content.push(`## ${fieldName}`);
+        content.push(fieldValue.value);
       });
     }
 
-    if (bucket.budgetItems && bucket.budgetItems.length > 0) {
-      const income = bucket.budgetItems.filter(({ type }) => type === "INCOME");
-      const expenses = bucket.budgetItems.filter(
+    if (bucket.BudgetItems && bucket.BudgetItems.length > 0) {
+      const income = bucket.BudgetItems.filter(({ type }) => type === "INCOME");
+      const expenses = bucket.BudgetItems.filter(
         ({ type }) => type === "EXPENSE"
       );
 
@@ -332,7 +327,7 @@ export default {
             `|---|---|`,
             ...income.map(
               ({ description, min }) =>
-                `|${description}|${min} ${round.currency}|`
+                `|${description}|${min / 100} ${round.currency}|`
             ),
           ].join("\n")
         );
@@ -346,22 +341,25 @@ export default {
             `|---|---|`,
             ...expenses.map(
               ({ description, min }) =>
-                `|${description}|${min} ${round.currency}|`
+                `|${description}|${min / 100} ${round.currency}|`
             ),
           ].join("\n")
         );
       }
 
       content.push(
-        `Total funding goal: ${bucket.minGoal / 100} ${round.currency}`
+        `Total funding goal: ${(await bucketMinGoal(bucket)) / 100} ${
+          round.currency
+        }`
       );
     }
 
-    if (bucket.images && bucket.images.length > 0) {
+    if (bucket.Images && bucket.Images.length > 0) {
       content.push("## Images");
-      bucket.images.forEach(({ small }) => content.push(`![](${small})`));
+      bucket.Images.forEach(({ small }) => content.push(`![](${small})`));
     }
-
-    return content.join("\n\n");
+    const markdown = content.join("\n\n");
+    console.log({ markdown });
+    return markdown;
   },
 };
