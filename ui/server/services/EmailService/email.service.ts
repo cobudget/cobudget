@@ -55,7 +55,7 @@ export default {
   roundJoinRequest: async ({ round, roundMember }) => {
     const admins = await prisma.roundMember.findMany({
       where: { roundId: round.id, isAdmin: true },
-      include: { user: { include: { emailSettings: true } } },
+      include: { user: true },
     });
 
     const user = await prisma.user.findUnique({
@@ -68,22 +68,20 @@ export default {
 
     const roundLink = appLink(`/${group.slug}/${round.slug}`);
 
-    const adminEmails: SendEmailInput[] = admins
-      .filter((admin) => admin.user?.emailSettings?.roundJoinRequest ?? true)
-      .map((admin) => ({
-        to: admin.user.email,
-        subject: `Someone wants to join ${round.title}`,
-        html: `${escape(
-          user.name
-        )} has requested to join <a href="${roundLink}">${escape(
-          round.title
-        )}</a>:
+    const adminEmails: SendEmailInput[] = admins.map((admin) => ({
+      to: admin.user.email,
+      subject: `Someone wants to join ${round.title}`,
+      html: `${escape(
+        user.name
+      )} has requested to join <a href="${roundLink}">${escape(
+        round.title
+      )}</a>:
         <br/>
         <a href="${roundLink}/participants">Click here</a> to review this request
         <br/><br/>
         ${footer}
         `,
-      }));
+    }));
 
     await sendEmails(adminEmails);
   },
@@ -121,12 +119,12 @@ export default {
 
     await sendEmail({
       to: email,
-      subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+      subject: `${currentUser.name} invited you to join "${groupCollName}" on Cobudget!`,
       html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
         groupCollName
-      )} on ${process.env.PLATFORM_NAME}.
+      )} on Cobudget.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
       ${
         htmlPurpose
@@ -149,7 +147,7 @@ export default {
     if (hasAccountAlready) {
       await sendEmail({
         to: destination,
-        subject: `Your ${process.env.PLATFORM_NAME} login link`,
+        subject: `Your Cobudget login link`,
         html: `<a href="${link}">Click here to login</a>
         <br/><br/>
         Verification code: ${code}
@@ -160,10 +158,10 @@ export default {
     } else {
       await sendEmail({
         to: destination,
-        subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
+        subject: `Welcome to Cobudget - confirm your account and get started!`,
         html: `Welcome!
         <br/><br/>
-        Your ${process.env.PLATFORM_NAME} account has been created! We're excited to welcome you to the community.
+        Your Cobudget account has been created! We're excited to welcome you to the community.
         <br/><br/>
         Please confirm your account by <a href="${link}">Clicking here</a>! Verification code: ${code}.
         <br/><br/>
@@ -193,7 +191,7 @@ export default {
 
     await sendEmail({
       to: newUser.email,
-      subject: `Welcome to ${process.env.PLATFORM_NAME}!`,
+      subject: "Welcome to Cobudget!",
       html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
       <br/><br/>
       Since 2014 we’ve been on a path to change the ways groups and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.

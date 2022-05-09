@@ -7,14 +7,14 @@ import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 
 const GET_TODO_INFO = gql`
-  query TodoInfo($groupId: ID!, $groupSlug: String!) {
+  query TodoInfo($groupId: ID!) {
     groupMembersPage(limit: 2, groupId: $groupId) {
       groupMembers {
         id
       }
     }
 
-    rounds(limit: 1, groupSlug: $groupSlug) {
+    rounds(limit: 1, groupId: $groupId) {
       id
     }
   }
@@ -62,7 +62,7 @@ const TodoItem = forwardRef(({ onClick, href, todo, index }, ref) => {
 const TodoList = ({ currentGroup }) => {
   const [{ data, fetching: loading, error }] = useQuery({
     query: GET_TODO_INFO,
-    variables: { groupId: currentGroup.id, groupSlug: currentGroup.slug },
+    variables: { groupId: currentGroup.id },
   });
   const [{ data: todoData, error: todoError }, setTodosFinished] = useMutation(
     SET_TODOS_FINISHED
@@ -72,7 +72,7 @@ const TodoList = ({ currentGroup }) => {
   const rawTodos = [
     {
       title: "Create community",
-      desc: `This is your own home on the ${process.env.PLATFORM_NAME} platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
+      desc: `This is your own home on the Cobudget platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
       link: null,
     },
     {

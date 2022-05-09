@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQuery, gql, ssrExchange } from "urql";
+import { useQuery, gql } from "urql";
 import Link from "next/link";
 import BucketCard from "../../../components/BucketCard";
 import Filterbar from "../../../components/Filterbar";
@@ -13,13 +13,9 @@ import getCurrencySymbol from "utils/getCurrencySymbol";
 import { useRouter } from "next/router";
 import HappySpinner from "components/HappySpinner";
 import { HeaderSkeleton } from "components/Skeleton";
-import { initUrqlClient } from "next-urql";
-import { client as createClientConfig } from "graphql/client";
-import prisma from "server/prisma";
-import { TOP_LEVEL_QUERY } from "pages/_app";
 
-export const ROUND_PAGE_QUERY = gql`
-  query RoundPage($roundSlug: String!, $groupSlug: String) {
+export const ROUND_QUERY = gql`
+  query Round($roundSlug: String!, $groupSlug: String) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       slug
@@ -32,10 +28,6 @@ export const ROUND_PAGE_QUERY = gql`
       tags {
         id
         value
-      }
-      group {
-        id
-        slug
       }
       bucketStatusCount {
         PENDING_APPROVAL
@@ -50,8 +42,7 @@ export const ROUND_PAGE_QUERY = gql`
 
 export const BUCKETS_QUERY = gql`
   query Buckets(
-    $groupSlug: String
-    $roundSlug: String!
+    $roundId: ID!
     $textSearchTerm: String
     $tag: String
     $offset: Int
@@ -59,8 +50,7 @@ export const BUCKETS_QUERY = gql`
     $status: [StatusType!]
   ) {
     bucketsPage(
-      groupSlug: $groupSlug
-      roundSlug: $roundSlug
+      roundId: $roundId
       textSearchTerm: $textSearchTerm
       tag: $tag
       offset: $offset
@@ -111,6 +101,7 @@ const Page = ({
   onLoadMore,
   router,
   round,
+  group,
   statusFilter,
 }) => {
   const { tag, s } = router.query;
@@ -118,14 +109,14 @@ const Page = ({
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
-      groupSlug: router.query.group,
-      roundSlug: router.query.round,
+      roundId: round?.id,
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
+    pause: !round,
   });
 
   const moreExist = data?.bucketsPage.moreExist;
@@ -139,7 +130,7 @@ const Page = ({
     <>
       {buckets.map((bucket) => (
         <Link
-          href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
+          href={`/${group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
           key={bucket.id}
         >
           <a className="flex focus:outline-none focus:ring rounded-lg">
@@ -153,7 +144,7 @@ const Page = ({
         (!fetching ? (
           <div className="absolute w-full flex justify-center items-center h-64">
             <h1 className="text-3xl text-gray-500 text-center ">
-              No {process.env.BUCKET_NAME_PLURAL}...
+              No buckets...
             </h1>
           </div>
         ) : (
@@ -219,42 +210,37 @@ const getStandardFilter = (bucketStatusCount) => {
   return stdFilter;
 };
 
-const RoundPage = ({ currentUser }) => {
+const RoundPage = ({ currentGroup, currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
   const router = useRouter();
 
-  const [
-    { data: { round } = { round: null }, fetching, error, stale },
-  ] = useQuery({
-    query: ROUND_PAGE_QUERY,
+  const [{ data, fetching }] = useQuery({
+    query: ROUND_QUERY,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
+    pause: !router.isReady,
   });
-
-  console.log({ round, fetching, error, stale });
-  // const round = data?.round;
+  const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
-    round?.bucketStatusCount ?? {}
+    data?.round?.bucketStatusCount ?? {}
   );
 
   const { tag, s, f } = router.query;
-  const [statusFilter, setStatusFilter] = useState(
-    stringOrArrayIntoArray(f ?? getStandardFilter(bucketStatusCount))
-  );
+  const [statusFilter, setStatusFilter] = useState(stringOrArrayIntoArray(f));
 
   useEffect(() => {
     setStatusFilter(stringOrArrayIntoArray(f));
   }, [f]);
 
   useEffect(() => {
-    setBucketStatusCount(round?.bucketStatusCount ?? {});
-  }, [round?.bucketStatusCount]);
+    setBucketStatusCount(data?.round?.bucketStatusCount ?? {});
+  }, [data]);
 
   // apply standard filter (hidden from URL)
   useEffect(() => {
@@ -291,7 +277,7 @@ const RoundPage = ({ currentUser }) => {
               <EditableField
                 defaultValue={round.info}
                 name="info"
-                label="Add message"
+                label="Add homepage message"
                 placeholder={`# Welcome to ${round.title}'s bucket page`}
                 canEdit={canEdit}
                 className="h-10"
@@ -319,22 +305,20 @@ const RoundPage = ({ currentUser }) => {
                     <p className="font-bold my-0.5">Funds available</p>
                     <div>
                       <table>
-                        <tbody>
-                          <tr>
-                            <td className="pr-3">In your account</td>
-                            <td className="font-bold">
-                              {currentUser.currentCollMember.balance / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-3">In this round</td>
-                            <td className="font-bold">
-                              {round.totalInMembersBalances / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                        </tbody>
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="pr-3">In this round</td>
+                          <td className="font-bold">
+                            {round.totalInMembersBalances / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
                       </table>
                     </div>
                   </div>
@@ -344,13 +328,13 @@ const RoundPage = ({ currentUser }) => {
                     color={round.color}
                     onClick={() => setNewBucketModalOpen(true)}
                   >
-                    New {process.env.BUCKET_NAME_SINGULAR}
+                    New bucket
                   </Button>
                   {newBucketModalOpen && (
                     <NewBucketModal
                       round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
-                      router={router}
+                      currentGroup={currentGroup}
                     />
                   )}
                 </>
@@ -362,6 +346,7 @@ const RoundPage = ({ currentUser }) => {
       <div className="page flex-1">
         <Filterbar
           round={round}
+          currentGroup={currentGroup}
           textSearchTerm={s}
           tag={tag}
           statusFilter={statusFilter}
@@ -371,6 +356,7 @@ const RoundPage = ({ currentUser }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
+                group={currentGroup}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}
@@ -389,65 +375,5 @@ const RoundPage = ({ currentUser }) => {
     </div>
   );
 };
-
-export async function getStaticProps(ctx) {
-  const ssrCache = ssrExchange({
-    isClient: false,
-  });
-  const client = initUrqlClient(createClientConfig(ssrCache), false);
-
-  // This query is used to populate the cache for the query
-  // used on this page.
-  const variables = {
-    groupSlug: ctx.params.group,
-    roundSlug: ctx.params.round,
-  };
-  console.log({ variables });
-
-  const roundPageQuery = await client
-    .query(ROUND_PAGE_QUERY, variables)
-    .toPromise();
-  console.log({ roundPageQuery });
-  // TODO: try to get static generation of bucket list to work (it does not revalidate)
-  // const statusFilter = stringOrArrayIntoArray(
-  //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
-  // );
-  // await client
-  //   .query(BUCKETS_QUERY, {
-  //     ...variables,
-  //     offset: 0,
-  //     limit: 12,
-  //     status: statusFilter,
-  //   })
-  //   .toPromise();
-
-  const topLevelQuery = await client
-    .query(TOP_LEVEL_QUERY, variables)
-    .toPromise();
-  console.log({ topLevelQuery });
-
-  return {
-    props: {
-      // urqlState is a keyword here so withUrqlClient can pick it up.
-      urqlState: ssrCache.extractData(),
-    },
-    revalidate: 60,
-  };
-}
-
-export async function getStaticPaths() {
-  const rounds = await prisma.round.findMany({
-    where: { visibility: "PUBLIC" },
-    include: { group: true },
-  });
-
-  return {
-    // paths: rounds.map((round) => ({
-    //   params: { group: round.group.slug, round: round.slug },
-    // })),
-    paths: [],
-    fallback: true, // false or 'blocking'
-  };
-}
 
 export default RoundPage;

@@ -4,7 +4,6 @@ import Button from "components/Button";
 import { AddIcon } from "components/Icons";
 import AddOrEditCustomField from "./AddOrEditCustomField";
 import DraggableCustomField from "./DraggableCustomFields";
-import capitalize from "utils/capitalize";
 
 const CustomFields = ({ round }) => {
   const [addCustomFieldModalOpen, setAddCustomFieldModalOpen] = useState(false);
@@ -12,12 +11,10 @@ const CustomFields = ({ round }) => {
 
   return (
     <div className="px-6">
-      <h1 className="text-2xl font-semibold mb-2">
-        {capitalize(process.env.BUCKET_NAME_SINGULAR)} Form
-      </h1>
+      <h1 className="text-2xl font-semibold mb-2">Bucket Form</h1>
 
       <p className="text-gray-700 mb-4">
-        Customize the form for {process.env.BUCKET_NAME_PLURAL} to fill out.
+        Customize the form for buckets to fill out.
       </p>
 
       <DraggableCustomField

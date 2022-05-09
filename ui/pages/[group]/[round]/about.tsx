@@ -5,7 +5,6 @@ import SubMenu from "../../../components/SubMenu";
 import PageHero from "../../../components/PageHero";
 import EditableField from "../../../components/EditableField";
 import { HeaderSkeleton } from "components/Skeleton";
-import { useRouter } from "next/router";
 
 export const ROUND_QUERY = gql`
   query RoundQuery($groupSlug: String!, $roundSlug: String!) {
@@ -34,8 +33,7 @@ export const ROUND_QUERY = gql`
   }
 `;
 
-export default function AboutPage({ currentUser }) {
-  const router = useRouter();
+export default function AboutPage({ router, currentUser }) {
   const [
     { data: { round } = { round: null }, fetching: loading, error },
   ] = useQuery({

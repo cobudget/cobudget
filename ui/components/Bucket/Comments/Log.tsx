@@ -1,7 +1,6 @@
 import dayjs from "dayjs";
 
 import { FlagIcon } from "components/Icons";
-import capitalize from "utils/capitalize";
 
 const CommentsLog = ({ log }) => {
   let headline;
@@ -10,8 +9,7 @@ const CommentsLog = ({ log }) => {
     case "FlagRaised":
       headline = (
         <>
-          {capitalize(process.env.BUCKET_NAME_SINGULAR)} was flagged for
-          violating the{" "}
+          Bucket was flagged for violating the{" "}
           <span className="underline">{log.details.guideline.title}</span>{" "}
           guideline:
         </>

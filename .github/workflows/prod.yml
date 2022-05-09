@@ -1,4 +1,4 @@
-name: "Migrate (branch: prod)"
+name: Deploy to prod
 
 on:
   push:

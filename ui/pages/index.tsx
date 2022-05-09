@@ -4,12 +4,9 @@ import Head from "next/head";
 
 import parseHtml, { domToReact } from "html-react-parser";
 import get from "lodash/get";
-import { gql, ssrExchange, useQuery } from "urql";
-import { initUrqlClient } from "next-urql";
-import { client as createClientConfig } from "graphql/client";
-import GroupPage, { GROUP_PAGE_QUERY } from "../components/Group";
 
-import { TOP_LEVEL_QUERY } from "./_app";
+const liStyle =
+  "px-3 py-2 hover:bg-gray-200 hover:text-gray-900 text-gray-700 truncate";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -63,63 +60,38 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, landingPage }) => {
-  if (landingPage) {
-    return (
-      <>
-        <Head>{parseHtml(landingPage.headContent)}</Head>
-        {parseHtml(landingPage.bodyContent, parseOptions)}
-      </>
-    );
-  }
-
-  return <GroupPage currentUser={currentUser} />;
+const IndexPage = ({ currentUser, bodyContent, headContent }) => {
+  return (
+    <>
+      <Head>{parseHtml(headContent)}</Head>
+      {parseHtml(bodyContent, parseOptions)}
+    </>
+  );
 };
 
 export async function getStaticProps(ctx) {
-  if (process.env.LANDING_PAGE_URL) {
-    // Import modules in here that aren't needed in the component
-    const cheerio = await import(`cheerio`);
-    const axios = (await import(`axios`)).default;
+  // Import modules in here that aren't needed in the component
+  const cheerio = await import(`cheerio`);
+  const axios = (await import(`axios`)).default;
 
-    // Fetch HTML
-    const res: any = await axios(process.env.LANDING_PAGE_URL).catch((err) => {
-      console.error(err);
-    });
+  // Fetch HTML
+  const res: any = await axios("https://cobudget.webflow.io").catch((err) => {
+    console.error(err);
+  });
 
-    const html = res.data;
+  const html = res.data;
 
-    // Parse HTML with Cheerio
-    const $ = cheerio.load(html);
-    const bodyContent = $(`body`).html();
-    const headContent = $(`head`).html();
+  // Parse HTML with Cheerio
+  const $ = cheerio.load(html);
+  const bodyContent = $(`body`).html();
+  const headContent = $(`head`).html();
 
-    // Send HTML to component via props
-    return {
-      props: {
-        landingPage: { bodyContent, headContent },
-      },
-    };
-  } else if (process.env.SINGLE_GROUP_MODE == "true") {
-    const ssrCache = ssrExchange({ isClient: false });
-    const client = initUrqlClient(createClientConfig(ssrCache), false);
-
-    // This query is used to populate the cache for the query
-    // used on this page.
-    await client.query(GROUP_PAGE_QUERY, { groupSlug: "c" }).toPromise();
-    await client.query(TOP_LEVEL_QUERY, { groupSlug: "c" }).toPromise();
-
-    return {
-      props: {
-        // urqlState is a keyword here so withUrqlClient can pick it up.
-        urqlState: ssrCache.extractData(),
-      },
-      revalidate: 60,
-    };
-  }
-
+  // Send HTML to component via props
   return {
-    props: {},
+    props: {
+      bodyContent,
+      headContent,
+    },
   };
 }
 

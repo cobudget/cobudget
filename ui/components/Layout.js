@@ -1,4 +1,5 @@
 import React from "react";
+import Head from "next/head";
 import Header from "./Header";
 import "../lib/beacon";
 
@@ -13,22 +14,28 @@ const LinkOut = ({ href, children }) => {
 const Layout = ({
   children,
   currentUser,
-  fetchingUser,
-  openModal,
-  group,
+  currentGroup,
   round,
-  bucket,
+  title,
+  openModal,
+  router,
 }) => {
   return (
     <div className="flex flex-col min-h-screen">
+      <Head>
+        <title>{title}</title>
+        <meta
+          name="viewport"
+          content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
+        />
+      </Head>
       <div>
         <Header
-          currentUser={currentUser}
-          fetchingUser={fetchingUser}
-          openModal={openModal}
-          group={group}
           round={round}
-          bucket={bucket}
+          currentUser={currentUser}
+          currentGroup={currentGroup}
+          openModal={openModal}
+          router={router}
         />
         {children}
       </div>
@@ -42,12 +49,8 @@ const Layout = ({
           <LinkOut href="https://github.com/cobudget/cobudget">online</LinkOut>.
         </div>
         <div className="space-x-6">
-          {process.env.PRIVACY_POLICY_URL && (
-            <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
-          )}
-          {process.env.TERMS_URL && (
-            <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
-          )}
+          <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+          <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
         </div>
       </div>
     </div>

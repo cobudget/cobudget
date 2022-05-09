@@ -88,7 +88,7 @@ export const useCommentContext = (initialInput) => {
 
   const [{ data, fetching: loading }] = useQuery({
     query: COMMENTS_QUERY,
-    variables: { bucketId: initialInput.bucket.id, from, limit, order },
+    variables: { bucketId: initialInput.bucketId, from, limit, order },
     //notifyOnNetworkStatusChange: true,
   });
 
@@ -166,7 +166,9 @@ export const useCommentContext = (initialInput) => {
   // });
 
   return {
-    bucket: initialInput.bucket,
+    bucketId: initialInput.bucketId,
+    round: initialInput.round,
+    currentGroup: initialInput.currentGroup,
     currentUser: initialInput.currentUser,
     from,
     setFrom,

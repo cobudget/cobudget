@@ -12,9 +12,7 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">
-          Set max. amount to one {process.env.BUCKET_NAME_SINGULAR} per user
-        </h1>
+        <h1 className="text-3xl">Set max. amount to one bucket per user</h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
@@ -34,7 +32,7 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
           <Box m="15px 0">
             <TextField
               name="maxAmountToBucketPerUser"
-              label={`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`}
+              label={`Max. amount to one bucket per user`}
               defaultValue={round.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}

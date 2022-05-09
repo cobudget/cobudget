@@ -155,14 +155,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
       },
     },
     topics: {
-      getSummary: async (
-        { id },
-        {
-          username,
-          userApiKey,
-          apiKey,
-        }: { username?: string; userApiKey?: string; apiKey: string }
-      ) => {
+      getSummary: async ({ id }, { username, userApiKey, apiKey }) => {
         const res = await fetch(`${url}/posts/by_number/${id}/1.json`, {
           headers: {
             ...defaultHeaders,
@@ -177,11 +170,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
       },
       updateStatus: async (
         { id, status, enabled },
-        {
-          username,
-          userApiKey,
-          apiKey,
-        }: { username?: string; userApiKey?: string; apiKey: string }
+        { username, userApiKey, apiKey }
       ) => {
         const res = await fetch(`${url}/t/${id}/status.json`, {
           headers: {

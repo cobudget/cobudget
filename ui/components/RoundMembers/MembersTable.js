@@ -179,6 +179,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
 
         {allocateModalOpen && (
           <AllocateModal
+            open={allocateModalOpen}
             member={member}
             round={round}
             handleClose={() => setAllocateModalOpen(false)}
@@ -224,7 +225,7 @@ const RoundMembersTable = ({
                   {isAdmin && (
                     <Tooltip
                       title="Allocate to all members"
-                      position="bottom"
+                      position="bottom-center"
                       size="small"
                     >
                       <IconButton

@@ -5,7 +5,13 @@ import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
 
-const Bucket = ({ bucket, currentUser, openImageModal }) => {
+const Bucket = ({
+  bucket,
+  round,
+  currentUser,
+  currentGroup,
+  openImageModal,
+}) => {
   if (!bucket) return null;
 
   const canEdit =
@@ -36,17 +42,20 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
             )}
 
             <BucketCustomFields
-              roundId={bucket.round.id}
+              roundId={round.id}
               bucketId={bucket.id}
               customFields={bucket.customFields}
               canEdit={canEdit}
             />
 
             <Budget
-              bucket={bucket}
+              bucketId={bucket.id}
+              budgetItems={bucket.budgetItems}
               canEdit={canEdit}
-              currency={bucket.round.currency}
-              allowStretchGoals={bucket.round.allowStretchGoals}
+              currency={round.currency}
+              allowStretchGoals={round.allowStretchGoals}
+              round={round}
+              currentGroup={currentGroup}
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
             />

@@ -12,7 +12,7 @@ const schema = yup.object().shape({
 
 const EditComment = ({ comment, handleDone }) => {
   const [submitting, setSubmitting] = useState(false);
-  const { editComment, bucket } = useContext<any>(Context);
+  const { editComment, bucketId, round } = useContext<any>(Context);
 
   const { handleSubmit, register, errors, setValue } = useForm({
     resolver: yupResolver(schema),
@@ -27,7 +27,7 @@ const EditComment = ({ comment, handleDone }) => {
       onSubmit={handleSubmit((vars) => {
         setSubmitting(true);
         editComment({
-          bucketId: bucket.id,
+          bucketId,
           commentId: comment.id,
           ...vars,
         })
@@ -47,21 +47,21 @@ const EditComment = ({ comment, handleDone }) => {
           onChange: (e) => setValue("content", e.target.value),
         }}
         autoFocus
-        color={bucket.round.color}
+        color={round.color}
         wysiwyg
         enableMentions
-        mentionsCollId={bucket.round.id}
+        mentionsCollId={round.id}
       />
       <div className="flex justify-end">
         <Button
           onClick={handleDone}
           className="mr-2"
           variant="secondary"
-          color={bucket.round.color}
+          color={round.color}
         >
           Cancel
         </Button>
-        <Button type="submit" loading={submitting} color={bucket.round.color}>
+        <Button type="submit" loading={submitting} color={round.color}>
           Save
         </Button>
       </div>

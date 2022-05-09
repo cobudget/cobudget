@@ -5,7 +5,6 @@ import { gql } from "urql";
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import thousandSeparator from "utils/thousandSeparator";
-import capitalize from "utils/capitalize";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -141,7 +140,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={`Require moderator approval of ${process.env.BUCKET_NAME_PLURAL} before funding`}
+            primary="Require moderator approval of buckets before funding"
             secondary={round.requireBucketApproval?.toString() ?? "false"}
             isSet={typeof round.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
@@ -152,7 +151,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`}
+            primary={`Max. amount to one bucket per user`}
             secondary={
               round.maxAmountToBucketPerUser
                 ? `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
@@ -169,9 +168,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={`${capitalize(
-              process.env.BUCKET_NAME_PLURAL
-            )} creation closes`}
+            primary={`Bucket creation closes`}
             secondary={
               round.bucketCreationCloses
                 ? dayjs(round.bucketCreationCloses).format(

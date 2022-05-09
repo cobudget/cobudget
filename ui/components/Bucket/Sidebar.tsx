@@ -17,7 +17,6 @@ import GrantingStatus from "./GrantingStatus";
 import Tags from "./Tags";
 import toast from "react-hot-toast";
 import Monster from "components/Monster";
-import capitalize from "utils/capitalize";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -88,12 +87,10 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
     <Modal open={open} className="flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <div className="font-bold text-lg mb-2">
-          Are you sure you want to cancel this{" "}
-          {process.env.BUCKET_NAME_SINGULAR}?
+          Are you sure you want to cancel this bucket?
         </div>
         <div className="mb-2">
-          If you confirm, the money that has already been given to this{" "}
-          {process.env.BUCKET_NAME_SINGULAR}
+          If you confirm, the money that has already been given to this bucket
           will be returned to its funders.
         </div>
         <div className="font-bold">Caution: This cannot be undone</div>
@@ -132,7 +129,14 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
+const BucketSidebar = ({
+  bucket,
+  round,
+  currentUser,
+  canEdit,
+  currentGroup,
+  showBucketReview,
+}) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -145,7 +149,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const canApproveBucket =
-    (!bucket.round.requireBucketApproval && canEdit) ||
+    (!round.requireBucketApproval && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isRoundAdminOrGuide =
@@ -160,7 +164,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     !bucket.funded &&
     !bucket.canceled &&
     hasNotReachedMaxGoal &&
-    bucket.round.grantingIsOpen &&
+    round.grantingIsOpen &&
     currentUser?.currentCollMember;
   const showAcceptFundingButton =
     bucket.approved &&
@@ -172,7 +176,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
-    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved;
+    canApproveBucket && !round.grantingHasClosed && !bucket.approved;
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
@@ -183,21 +187,28 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     <>
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus bucket={bucket} />
+          <GrantingStatus bucket={bucket} round={round} />
           {showFundButton && (
             <>
               <Button
-                color={bucket.round.color}
+                color={round.color}
                 fullWidth
                 onClick={() => setContributeModalOpen(true)}
               >
                 Fund
               </Button>
-              {showBucketReview ? <Monster bucket={bucket} /> : null}
+              {showBucketReview ? (
+                <Monster
+                  round={round}
+                  bucket={bucket}
+                  currentGroup={currentGroup}
+                />
+              ) : null}
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
+                  round={round}
                   currentUser={currentUser}
                 />
               )}
@@ -205,11 +216,11 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           )}
           {showAcceptFundingButton && (
             <Button
-              color={bucket.round.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to accept and finalize funding for this ${process.env.BUCKET_NAME_SINGULAR}? This can't be undone.`
+                  `Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.`
                 ) &&
                 acceptFunding({ bucketId: bucket.id }).catch((err) =>
                   alert(err.message)
@@ -222,7 +233,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
 
           {showPublishButton && (
             <Button
-              color={bucket.round.color}
+              color={round.color}
               onClick={() =>
                 publishBucket({
                   bucketId: bucket.id,
@@ -236,7 +247,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           )}
           {showApproveButton && (
             <Button
-              color={bucket.round.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 approveForGranting({
@@ -250,11 +261,11 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           )}
           {showMarkAsCompletedButton && (
             <Button
-              color={bucket.round.color}
+              color={round.color}
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to mark this ${process.env.BUCKET_NAME_SINGULAR} as completed? This can't be undone.`
+                  `Are you sure you would like to mark this bucket as completed? This can't be undone.`
                 ) &&
                 markAsCompleted({ bucketId: bucket.id }).then(
                   ({ data, error }) => {
@@ -307,7 +318,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
                     >
-                      Cancel {process.env.BUCKET_NAME_SINGULAR}
+                      Cancel bucket
                     </button>
                   </>
                 )}
@@ -331,7 +342,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        `Are you sure you would like to delete this ${process.env.BUCKET_NAME_SINGULAR}?`
+                        `Are you sure you would like to delete this bucket?`
                       ) &&
                       deleteBucket({ bucketId: bucket.id }).then(
                         ({ error }) => {
@@ -341,15 +352,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                             setActionsDropdownOpen(false);
                             Router.push(
                               "/[group]/[round]",
-                              `/${bucket.round.group?.slug ?? "c"}/${
-                                bucket.round.slug
-                              }`
+                              `/${currentGroup?.slug ?? "c"}/${round.slug}`
                             );
-                            toast.success(
-                              `${capitalize(
-                                process.env.BUCKET_NAME_SINGULAR
-                              )} deleted`
-                            );
+                            toast.success("Bucket deleted");
                           }
                         }
                       )
@@ -415,11 +420,17 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
             cocreators={bucket.cocreators}
+            round={round}
             bucket={bucket}
             currentUser={currentUser}
           />
         </div>
-        <Tags bucket={bucket} canEdit={canEdit} />
+        <Tags
+          currentGroup={currentGroup}
+          bucket={bucket}
+          round={round}
+          canEdit={canEdit}
+        />
       </div>
     </>
   );

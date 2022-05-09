@@ -15,10 +15,10 @@ const REMOVE_TAG_MUTATION = gql`
   }
 `;
 
-const Tags = ({ bucket, canEdit }) => {
+const Tags = ({ currentGroup, bucket, round, canEdit }) => {
   const [, removeTag] = useMutation(REMOVE_TAG_MUTATION);
 
-  if (!bucket.round.tags?.length) return null;
+  if (!round.tags?.length) return null;
 
   return (
     <div className="">
@@ -31,9 +31,9 @@ const Tags = ({ bucket, canEdit }) => {
             className="py-1 px-2 bg-gray-100 rounded flex items-center"
           >
             <Link
-              href={`/${bucket.round.group?.slug ?? "c"}/${
-                bucket.round.slug
-              }?tag=${tag.value}`}
+              href={`/${currentGroup?.slug ?? "c"}/${round.slug}?tag=${
+                tag.value
+              }`}
             >
               <a className="text-gray-500 hover:text-black mr-2">{tag.value}</a>
             </Link>
@@ -50,7 +50,7 @@ const Tags = ({ bucket, canEdit }) => {
           </div>
         ))}
       </div>
-      {canEdit && <AddTag items={bucket.round.tags} bucket={bucket} />}
+      {canEdit && <AddTag items={round.tags} bucket={bucket} />}
     </div>
   );
 };

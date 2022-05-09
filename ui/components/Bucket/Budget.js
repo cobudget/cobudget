@@ -7,14 +7,16 @@ import { Tooltip } from "react-tippy";
 import EditBudgetModal from "./EditBudgetModal";
 
 const BucketBudget = ({
-  bucket,
+  budgetItems,
+  bucketId,
   canEdit,
+  round,
+  currentGroup,
   currency,
   allowStretchGoals,
   minGoal,
   maxGoal,
 }) => {
-  const { budgetItems } = bucket;
   const [editing, setEditing] = useState(false);
   const incomeItems = budgetItems.filter((item) => item.type === "INCOME");
   const monetaryIncome = incomeItems.filter((item) => item.min > 0);
@@ -34,12 +36,14 @@ const BucketBudget = ({
     <>
       {editing && (
         <EditBudgetModal
-          bucket={bucket}
+          bucketId={bucketId}
           budgetItems={budgetItems}
           currency={currency}
           allowStretchGoals={allowStretchGoals}
           handleClose={() => setEditing(false)}
           open={editing}
+          round={round}
+          currentGroup={currentGroup}
         />
       )}
 

@@ -17,9 +17,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const [username, setUsername] = useState(currentUser?.username ?? "");
   const [name, setName] = useState(currentUser?.name ?? "");
-  const [acceptTerms, setAcceptTerms] = useState(
-    process.env.TERMS_URL ? false : true
-  );
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -64,7 +62,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Welcome to {process.env.PLATFORM_NAME}!
+                Welcome to Cobudget!
               </Dialog.Title>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
@@ -86,29 +84,28 @@ export default function FinishSignup({ isOpen, currentUser }) {
                     onChange: (e) => setUsername(e.target.value),
                   }}
                 />
-                {process.env.TERMS_URL && (
-                  <label className="text-sm flex items-center space-x-2">
-                    <input
-                      value={acceptTerms.toString()}
-                      onChange={(e) => {
-                        console.log(e.target.value);
-                        setAcceptTerms(!acceptTerms);
-                      }}
-                      type="checkbox"
-                    />{" "}
-                    <span>
-                      I accept the {process.env.PLATFORM_NAME}{" "}
-                      <a
-                        className="text-blue underline"
-                        target="_blank"
-                        rel="noreferrer"
-                        href={process.env.TERMS_URL}
-                      >
-                        Terms and Conditions
-                      </a>
-                    </span>
-                  </label>
-                )}
+
+                <label className="text-sm flex items-center space-x-2">
+                  <input
+                    value={acceptTerms.toString()}
+                    onChange={(e) => {
+                      console.log(e.target.value);
+                      setAcceptTerms(!acceptTerms);
+                    }}
+                    type="checkbox"
+                  />{" "}
+                  <span>
+                    I accept Cobudget&apos;s{" "}
+                    <a
+                      className="text-blue underline"
+                      target="_blank"
+                      rel="noreferrer"
+                      href="https://www.iubenda.com/terms-and-conditions/58637640"
+                    >
+                      Terms and Conditions
+                    </a>
+                  </span>
+                </label>
               </div>
               <div className="mt-4 space-x-2 flex justify-end">
                 <Button variant="secondary" href="/api/auth/logout">
@@ -126,9 +123,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
                           toast.error(error.message);
                         }
                       } else {
-                        toast.success(
-                          `Welcome to ${process.env.PLATFORM_NAME}!`
-                        );
+                        toast.success("Welcome to Cobudget!");
                       }
                     })
                   }
