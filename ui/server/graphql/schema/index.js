@@ -7,14 +7,15 @@ const schema = gql`
   type Query {
     currentUser: User
     user(userId: ID!): User!
-    currentGroup(groupSlug: String): Group
     groups: [Group!]
-    group(groupId: ID!): Group!
-    rounds(groupId: ID!, limit: Int): [Round!]
+    group(groupSlug: String): Group
+    rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
-    bucket(id: ID!): Bucket
+    roundInvitationLink(roundId: ID): RoundInvitationLink
+    bucket(id: ID): Bucket
     bucketsPage(
-      roundId: ID!
+      groupSlug: String
+      roundSlug: String!
       textSearchTerm: String
       tag: String
       offset: Int
@@ -73,6 +74,9 @@ const schema = gql`
       discourseCategoryId: Int
     ): Round!
     deleteRound(roundId: ID!): Round
+    createRoundInvitationLink(roundId: ID): RoundInvitationLink
+    deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
+    joinRoundInvitationLink(token: String): RoundMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
@@ -200,9 +204,7 @@ const schema = gql`
     id: ID!
     name: String!
     info: String
-    subdomain: String
     slug: String
-    customDomain: String
     logo: String
     rounds: [Round]
     discourseUrl: String
@@ -257,6 +259,11 @@ const schema = gql`
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
+    inviteNonce: Int
+  }
+
+  type RoundInvitationLink {
+    link: String
   }
 
   type BucketStatusCount {

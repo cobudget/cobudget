@@ -56,8 +56,8 @@ export default ({ round, handleClose, currentGroup }) => {
         ></Banner>
         <p className="mb-4">
           This action cannot be undone. This will permanently delete the{" "}
-          <b>{round.title}</b> round, buckets, questions, comments and remove
-          all collaborators.{" "}
+          <b>{round.title}</b> round, {process.env.BUCKET_NAME_PLURAL},
+          questions, comments and remove all collaborators.{" "}
         </p>
         <p className="mb-4">
           Please type <b>{round.slug}</b> to confirm.

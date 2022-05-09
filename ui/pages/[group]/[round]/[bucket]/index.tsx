@@ -1,4 +1,4 @@
-import { useQuery, gql } from "urql";
+import { useQuery, gql, ssrExchange } from "urql";
 import { useState, useEffect, useMemo } from "react";
 import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
 import Bucket from "../../../../components/Bucket";
@@ -9,6 +9,12 @@ import Comments from "components/Bucket/Comments";
 
 import classNames from "utils/classNames";
 import HappySpinner from "components/HappySpinner";
+import { useRouter } from "next/router";
+import { initUrqlClient } from "next-urql";
+import { client as createClientConfig } from "graphql/client";
+import prisma from "server/prisma";
+import { TOP_LEVEL_QUERY } from "pages/_app";
+import capitalize from "utils/capitalize";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -33,6 +39,32 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+      round {
+        id
+        slug
+        color
+        currency
+        allowStretchGoals
+        bucketReviewIsOpen
+        requireBucketApproval
+        grantingIsOpen
+        grantingHasClosed
+        maxAmountToBucketPerUser
+        guidelines {
+          id
+          title
+          description
+        }
+        tags {
+          id
+          value
+        }
+        group {
+          id
+          slug
+          discourseUrl
+        }
+      }
       funders {
         id
         amount
@@ -100,7 +132,8 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
+const BucketIndex = ({ currentUser }) => {
+  const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
@@ -110,8 +143,8 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
   const { bucket } = data ?? { bucket: null };
   const showBucketReview =
     currentUser?.currentCollMember?.isApproved &&
-    round.bucketReviewIsOpen &&
-    round.guidelines.length > 0 &&
+    bucket?.round?.bucketReviewIsOpen &&
+    bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
 
   const tabsList = useMemo(() => ["bucket", "comments", "funders"], []);
@@ -128,11 +161,11 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
     );
   }
 
-  if (!bucket || !round)
+  if (!bucket || !bucket.round)
     return (
       <div className="text-center mt-7">
-        This bucket either doesn&apos;t exist or you don&apos;t have access to
-        it
+        This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
+        don&apos;t have access to it
       </div>
     );
 
@@ -150,8 +183,6 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
         fetching={fetching}
         error={error}
         currentUser={currentUser}
-        currentGroup={currentGroup}
-        round={round}
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
@@ -182,7 +213,7 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
                 )
               }
             >
-              Bucket
+              {capitalize(process.env.BUCKET_NAME_SINGULAR)}
             </Tab>
             <Tab
               className={({ selected }) =>
@@ -194,7 +225,9 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
                 )
               }
             >
-              Comments ({bucket?.noOfComments})
+              Comments{" "}
+              {!bucket?.round?.group?.discourseUrl &&
+                `(${bucket?.noOfComments})`}
             </Tab>
             <Tab
               className={({ selected }) =>
@@ -215,9 +248,7 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
           <Tab.Panel>
             <Bucket
               bucket={bucket}
-              round={round}
               currentUser={currentUser}
-              currentGroup={currentGroup}
               openImageModal={() => setEditImagesModalOpen(true)}
             />
           </Tab.Panel>
@@ -225,18 +256,62 @@ const BucketIndex = ({ round, currentUser, currentGroup, router }) => {
             <Comments
               bucket={bucket}
               router={router}
-              round={round}
               currentUser={currentUser}
-              currentGroup={currentGroup}
             />
           </Tab.Panel>
           <Tab.Panel>
-            <Funders bucket={bucket} round={round} currentUser={currentUser} />
+            <Funders bucket={bucket} currentUser={currentUser} />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
     </>
   );
 };
+
+export async function getStaticProps(ctx) {
+  const ssrCache = ssrExchange({
+    isClient: false,
+  });
+  const client = initUrqlClient(createClientConfig(ssrCache), false);
+
+  // This query is used to populate the cache for the query
+  // used on this page.
+
+  await client
+    .query(TOP_LEVEL_QUERY, {
+      groupSlug: ctx.params.group,
+      roundSlug: ctx.params.round,
+      bucketId: ctx.params.bucket,
+    })
+    .toPromise();
+  await client.query(BUCKET_QUERY, { id: ctx.params.bucket }).toPromise();
+
+  return {
+    props: {
+      // urqlState is a keyword here so withUrqlClient can pick it up.
+      urqlState: ssrCache.extractData(),
+    },
+    revalidate: 60,
+  };
+}
+
+export async function getStaticPaths() {
+  const buckets = await prisma.bucket.findMany({
+    where: { publishedAt: { not: null }, round: { visibility: "PUBLIC" } },
+    include: { round: { include: { group: true } } },
+  });
+
+  return {
+    // paths: buckets.map((bucket) => ({
+    //   params: {
+    //     group: bucket.round.group.slug,
+    //     round: bucket.round.slug,
+    //     bucket: bucket.id,
+    //   },
+    // })),
+    paths: [],
+    fallback: true, // false or 'blocking'
+  };
+}
 
 export default BucketIndex;
