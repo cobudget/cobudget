@@ -6,17 +6,25 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
+import RoundSettingsModalGranting from "./Granting";
+import capitalize from "utils/capitalize";
 
 const defaultTabs = [
   { name: "General", component: GeneralSettings },
   { name: "Guidelines", component: Guidelines },
-  { name: "Bucket Review", component: BucketReview },
-  { name: "Bucket Form", component: CustomFields },
+  {
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
+    component: BucketReview,
+  },
+  {
+    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
+    component: CustomFields,
+  },
   { name: "Funding", component: Granting },
   { name: "Tags", component: Tags },
 ];
 
-const RoundSettings = ({ round, currentGroup, currentUser }) => {
+const RoundSettings = ({ round, currentUser, currentGroup }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const tabs = useMemo(
@@ -28,7 +36,7 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
   );
 
   const SettingsComponent = tabs[selectedTab].component;
-  const handleClose = () => null;
+
   return (
     <div className="page">
       <div className="grid sm:grid-cols-6">
@@ -50,7 +58,6 @@ const RoundSettings = ({ round, currentGroup, currentUser }) => {
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
             round={round}
-            handleClose={handleClose}
             currentGroup={currentGroup}
             currentUser={currentUser}
           />

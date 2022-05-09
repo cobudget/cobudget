@@ -77,8 +77,7 @@ export default ({ groups, updateGroup, deleteGroup }) => {
             <TableRow>
               <TableCell>Logo</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Subdomain</TableCell>
-              <TableCell>Custom Domain</TableCell>
+              <TableCell>Slug</TableCell>
               <TableCell align="right">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -92,10 +91,7 @@ export default ({ groups, updateGroup, deleteGroup }) => {
                   {group.name}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {group.subdomain}
-                </TableCell>
-                <TableCell component="th" scope="row">
-                  {group.customDomain}
+                  {group.slug}
                 </TableCell>
 
                 <TableCell align="right" padding="none">

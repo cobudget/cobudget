@@ -109,7 +109,7 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = ({ guidelines, raiseFlag, currentGroup, bucketId }) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }) => [
   {
     type: ACTION,
     message: "Which one?",
@@ -118,7 +118,7 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, currentGroup, bucketId }) => [
       chatItems: [
         {
           type: INPUT,
-          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the bucket creators.`,
+          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${process.env.BUCKET_NAME_SINGULAR} creators.`,
           sideEffect: (answer) => {
             raiseFlag({
               bucketId,
@@ -163,7 +163,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   },
 ];
 
-const Monster = ({ round, bucket, currentGroup }) => {
+const Monster = ({ bucket }) => {
   const [open, setOpen] = useState(false);
   const [chatItems, setChatItems] = useState([]);
 
@@ -173,7 +173,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
 
   const { raisedFlags } = bucket;
 
-  const guidelines = round.guidelines.map((guideline) => ({
+  const guidelineItems = bucket.round.guidelines.map((guideline) => ({
     type: GUIDELINE,
     guideline,
   }));
@@ -184,16 +184,16 @@ const Monster = ({ round, bucket, currentGroup }) => {
         setChatItems([
           {
             type: MESSAGE,
-            message: `This bucket has been flagged for breaking guidelines. Please help review it!`,
+            message: `This ${process.env.BUCKET_NAME_SINGULAR} has been flagged for breaking guidelines. Please help review it!`,
           },
           {
             type: MESSAGE,
-            message: `Here are the guidelines that buckets need to follow:`,
+            message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
           },
-          ...guidelines,
+          ...guidelineItems,
           ...raisedFlags.map((raisedFlag) => ({
             type: MESSAGE,
-            message: `Someone flagged this bucket for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
+            message: `Someone flagged this ${process.env.BUCKET_NAME_SINGULAR} for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
 
           "${raisedFlag.comment}"`,
           })),
@@ -204,14 +204,13 @@ const Monster = ({ round, bucket, currentGroup }) => {
               {
                 label: "It is breaking another guideline",
                 chatItems: raiseFlagFlow({
-                  guidelines: round.guidelines.filter(
+                  guidelines: bucket.round.guidelines.filter(
                     (guideline) =>
                       !raisedFlags
                         .map((flag) => flag.guideline.id)
                         .includes(guideline.id)
                   ),
                   raiseFlag,
-                  currentGroup,
                   bucketId: bucket.id,
                 }),
               },
@@ -249,18 +248,18 @@ const Monster = ({ round, bucket, currentGroup }) => {
           ...[
             {
               type: MESSAGE,
-              message: `Please help review this bucket!`,
+              message: `Please help review this ${process.env.BUCKET_NAME_SINGULAR}!`,
             },
             {
               type: MESSAGE,
-              message: `Here are the guidelines that buckets need to follow:`,
+              message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
             },
           ],
-          ...guidelines,
+          ...guidelineItems,
           ...[
             {
               type: ACTION,
-              message: `Does this bucket comply with the guidelines?`,
+              message: `Does this ${process.env.BUCKET_NAME_SINGULAR} comply with the guidelines?`,
               actions: [
                 {
                   label: "Yes, looks good to me!",
@@ -275,7 +274,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
                 {
                   label: "No, it's breaking a guideline",
                   chatItems: raiseFlagFlow({
-                    guidelines: round.guidelines,
+                    guidelines: bucket.round.guidelines,
                     raiseFlag,
                     bucketId: bucket.id,
                   }),
@@ -290,15 +289,14 @@ const Monster = ({ round, bucket, currentGroup }) => {
     allGoodFlag,
     bucket.id,
     chatItems,
-    currentGroup,
-    guidelines,
+    guidelineItems,
     raiseFlag,
     raisedFlags,
     resolveFlag,
-    round.guidelines,
+    bucket.round.guidelines,
   ]);
 
-  if (!guidelines) return null;
+  if (!guidelineItems) return null;
 
   const renderChatItem = (item, i) => {
     switch (item.type) {
@@ -325,7 +323,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
         return (
           <div className={`mt-1 my-2 mx-3 flex justify-end`} key={i}>
             <div
-              className={`rounded-full border-2 border-${round.color} bg-${round.color} font-semibold py-2 px-3 text-white`}
+              className={`rounded-full border-2 border-${bucket.round.color} bg-${bucket.round.color} font-semibold py-2 px-3 text-white`}
               key={i}
             >
               {item.message}
@@ -343,10 +341,10 @@ const Monster = ({ round, bucket, currentGroup }) => {
     >
       {open && (
         <div
-          className={`fixed inset-0 sm:relative sm:h-148 sm:w-100 bg-gray-100 sm:rounded-lg shadow-lg border-${round.color} overflow-hidden border-3 flex flex-col`}
+          className={`fixed inset-0 sm:relative sm:h-148 sm:w-100 bg-gray-100 sm:rounded-lg shadow-lg border-${bucket.round.color} overflow-hidden border-3 flex flex-col`}
         >
           <div
-            className={`bg-${round.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
+            className={`bg-${bucket.round.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
           >
             <div className="">Review</div>
             <button
@@ -366,7 +364,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
                     <div className="flex min-w-full justify-end flex-wrap -mx-1 p-3">
                       {chatItems[chatItems.length - 1].actions.map((action) => (
                         <button
-                          className={`border-2 border-${round.color} m-1 hover:bg-${round.color} text-${round.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
+                          className={`border-2 border-${bucket.round.color} m-1 hover:bg-${bucket.round.color} text-${bucket.round.color}-dark hover:text-white font-semibold py-2 px-3 rounded-full focus:outline-none`}
                           key={action.label}
                           onClick={() => {
                             action.sideEffect && action.sideEffect();
@@ -389,7 +387,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
                       item={chatItems[chatItems.length - 1]}
                       chatItems={chatItems}
                       setChatItems={setChatItems}
-                      color={round.color}
+                      color={bucket.round.color}
                     />
                   )}
               </div>
@@ -401,7 +399,7 @@ const Monster = ({ round, bucket, currentGroup }) => {
       {!open && (
         <>
           <Button
-            color={round.color}
+            color={bucket.round.color}
             fullWidth
             className={"flex"}
             onClick={() => {

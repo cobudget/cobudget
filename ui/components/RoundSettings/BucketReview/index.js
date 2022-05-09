@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
+import capitalize from "utils/capitalize";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $bucketReviewIsOpen: Boolean) {
@@ -22,10 +23,12 @@ const BucketReview = ({ round }) => {
 
   return (
     <div className="px-6">
-      <h2 className="text-2xl font-semibold mb-2">Bucket Review</h2>
+      <h2 className="text-2xl font-semibold mb-2">
+        {capitalize(process.env.BUCKET_NAME_SINGULAR)} Review
+      </h2>
       <p className="text-gray-700 mb-4">
         If you have set up guidelines you can allow users to review each others{" "}
-        buckets according to them.
+        {process.env.BUCKET_NAME_PLURAL} according to them.
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
