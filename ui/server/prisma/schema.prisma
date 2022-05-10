@@ -34,7 +34,7 @@ model EmailSettings {
   commentBecauseCommented        Boolean @default(true)
   allocatedToYou                 Boolean @default(true)
   refundedBecauseBucketCancelled Boolean @default(true)
-  bucketPublishedInRound         Boolean @default(true)
+  bucketPublishedInRound         Boolean @default(false)
   contributionToYourBucket       Boolean @default(true)
   roundJoinRequest               Boolean @default(true)
   user                           User    @relation(fields: [userId], references: [id])
