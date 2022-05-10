@@ -5,6 +5,7 @@ import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 import capitalize from "utils/capitalize";
+import { FormattedMessage } from "react-intl";
 
 export default function AboutPage({ router, round }) {
   // if (error) return <div>{error.message}</div>;
