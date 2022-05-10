@@ -109,6 +109,34 @@ export const client = (
                   });
               }
             },
+            deleteRoundInvitationLink(result, args, cache) {
+              if (result.deleteRoundInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "roundInvitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
+            createRoundInvitationLink(result, args, cache) {
+              if (result.createRoundInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "roundInvitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
             joinGroup(result: any, args, cache) {
               if (result.joinGroup) {
                 cache.updateQuery(
@@ -455,6 +483,8 @@ export const client = (
                 .forEach((field) => {
                   cache.invalidate("Query", "round", field.arguments);
                 });
+
+              cache.invalidate("Query", "currentUser");
             },
           },
         },

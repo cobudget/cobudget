@@ -166,7 +166,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     currentUser?.currentCollMember?.isModerator;
   const hasNotReachedMaxGoal =
     bucket.totalContributions < Math.max(bucket.minGoal, bucket.maxGoal);
-  const hasReachedMinGoal = bucket.totalContributions > bucket.minGoal;
+  const hasReachedMinGoal = bucket.totalContributions >= bucket.minGoal;
 
   const showFundButton =
     bucket.approved &&
@@ -176,11 +176,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
     bucket.round.grantingIsOpen &&
     currentUser?.currentCollMember;
   const showAcceptFundingButton =
-    bucket.approved &&
-    !bucket.funded &&
-    canEdit &&
-    hasNotReachedMaxGoal &&
-    hasReachedMinGoal;
+    bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
@@ -206,7 +202,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               >
                 <FormattedMessage defaultMessage="Fund" />
               </Button>
-              {showBucketReview ? <Monster bucket={bucket} /> : null}
+
               {contributeModalOpen && (
                 <ContributeModal
                   handleClose={() => setContributeModalOpen(false)}
@@ -216,6 +212,13 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               )}
             </>
           )}
+          {showBucketReview ||
+          canEdit ||
+          bucket.cocreators.find(
+            (co) => co.id === currentUser?.currentCollMember?.id
+          ) ? (
+            <Monster bucket={bucket} />
+          ) : null}
           {showAcceptFundingButton && (
             <Button
               color={bucket.round.color}

@@ -34,7 +34,7 @@ function AddComment() {
     !currentUser.currentGroupMember?.hasDiscourseApiKey
   ) {
     return (
-      <Link href={"/connect-discourse"} passHref>
+      <Link href={`/${bucket.round.group.slug}/connect-discourse`} passHref>
         <Button color={bucket.round.color} nextJsLink className="my-2">
           You need to connect to Discourse to comment
         </Button>
@@ -70,35 +70,33 @@ function AddComment() {
               inputProps={{
                 onChange: (e) => setValue("content", e.target.value),
               }}
-              inputRef={(e) => {
-                inputRef.current = e;
-              }}
+              inputRef={inputRef}
               color={bucket.round.color}
               wysiwyg
               enableMentions
               mentionsCollId={bucket.round.id}
             />
           </div>
-          {content.length > 0 && (
-            <div className="flex justify-end">
-              <Button
-                onClick={inputRef.current.clear}
-                variant="secondary"
-                color={bucket.round.color}
-                className="mr-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={content.length === 0}
-                color={bucket.round.color}
-                loading={submitting}
-              >
-                Submit
-              </Button>
-            </div>
-          )}
+
+          <div className="flex justify-end">
+            <Button
+              onClick={inputRef.current?.clear}
+              disabled={content.length === 0}
+              variant="secondary"
+              color={bucket.round.color}
+              className="mr-2"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={content.length === 0}
+              color={bucket.round.color}
+              loading={submitting}
+            >
+              Submit
+            </Button>
+          </div>
         </div>
       </div>
     </form>

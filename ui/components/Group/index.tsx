@@ -1,7 +1,7 @@
 import { forwardRef, useEffect } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
-import Router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 
 import Button from "../Button";
 import TodoList from "../TodoList";
@@ -56,7 +56,7 @@ const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
-  }, [router.query, router]);
+  }, [router]);
 
   const [
     { data: { rounds, group } = { rounds: [], group: null }, error, fetching },

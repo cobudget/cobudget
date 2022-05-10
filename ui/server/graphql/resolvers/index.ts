@@ -29,6 +29,8 @@ import {
 import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
+import { sign, verify } from "server/utils/jwt";
+import { appLink } from "utils/internalLinks";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -259,6 +261,30 @@ const resolvers = {
       } else {
         return null;
       }
+    },
+    roundInvitationLink: async (parent, { roundId }, { user }) => {
+      const isAdmin =
+        !!user &&
+        isCollAdmin({
+          userId: user.id,
+          roundId,
+        });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to fetch invitation link");
+      }
+
+      const round = await prisma.round.findFirst({
+        where: {
+          id: roundId,
+        },
+      });
+      return {
+        link:
+          round.inviteNonce !== null
+            ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
+            : null,
+      };
     },
     contributionsPage: combineResolvers(
       isCollMemberOrGroupAdmin,
@@ -521,6 +547,7 @@ const resolvers = {
               (comment) =>
                 !(comment.username === "system" && comment.raw === "")
             )
+            .reverse()
             .map(async (post) => {
               const author = await prisma.roundMember.findFirst({
                 where: {
@@ -716,6 +743,84 @@ const resolvers = {
         });
       }
     ),
+    createRoundInvitationLink: async (parent, { roundId }, { user }) => {
+      const isAdmin =
+        (await !!user) &&
+        isCollAdmin({
+          userId: user?.id,
+          roundId,
+        });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to create invitation link");
+      }
+
+      const inviteNonce = Date.now();
+      const round = await prisma.round.update({
+        where: { id: roundId },
+        data: { inviteNonce },
+      });
+      return {
+        link: round.inviteNonce,
+      };
+    },
+    deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
+      const isAdmin =
+        (await !!user) &&
+        isCollAdmin({
+          userId: user?.id,
+          roundId,
+        });
+
+      if (!isAdmin) {
+        throw new Error("You need to be admin to create delete link");
+      }
+
+      await prisma.round.update({
+        where: { id: roundId },
+        data: { inviteNonce: null },
+      });
+      return {
+        link: null,
+      };
+    },
+    joinRoundInvitationLink: async (parent, { token }, { user }) => {
+      if (!user) {
+        throw new Error("You need to be logged in to join the group");
+      }
+
+      const payload = verify(token);
+
+      if (!payload) {
+        throw new Error("Invalid invitation link");
+      }
+
+      const { roundId, nonce: inviteNonce } = payload;
+
+      const round = await prisma.round.findFirst({
+        where: { id: roundId, inviteNonce },
+      });
+
+      if (!round) {
+        throw new Error("Round link expired");
+      }
+
+      const isApproved = true;
+      const roundMember = await prisma.roundMember.upsert({
+        where: { userId_roundId: { userId: user.id, roundId } },
+        create: {
+          round: { connect: { id: roundId } },
+          user: { connect: { id: user.id } },
+          isApproved,
+          statusAccount: { create: {} },
+          incomingAccount: { create: {} },
+          outgoingAccount: { create: {} },
+        },
+        update: { isApproved, hasJoined: true, isRemoved: false },
+      });
+
+      return roundMember;
+    },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,
       async (parent, { roundId }) =>
@@ -885,7 +990,10 @@ const resolvers = {
           where: { id: roundId },
           include: {
             group: {
-              include: { groupMembers: { where: { userId: user.id } } },
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
             },
           },
         });
@@ -947,10 +1055,17 @@ const resolvers = {
             }),
           },
           include: {
+            Images: true,
+            FieldValues: true,
+            BudgetItems: true,
             round: {
               include: {
+                fields: true,
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    discourse: true,
+                    groupMembers: { where: { userId: user.id } },
+                  },
                 },
               },
             },
@@ -1049,10 +1164,17 @@ const resolvers = {
             },
           },
           include: {
+            Images: true,
+            FieldValues: true,
+            BudgetItems: true,
             round: {
               include: {
+                fields: true,
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    discourse: true,
+                    groupMembers: { where: { userId: user.id } },
+                  },
                 },
               },
             },
@@ -1138,7 +1260,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
@@ -1234,6 +1359,7 @@ const resolvers = {
                 group: {
                   include: {
                     groupMembers: { where: { userId: user.id } },
+                    discourse: true,
                   },
                 },
               },
@@ -1278,7 +1404,10 @@ const resolvers = {
             round: {
               include: {
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    groupMembers: { where: { userId: user.id } },
+                    discourse: true,
+                  },
                 },
               },
             },
