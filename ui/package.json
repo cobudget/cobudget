@@ -13,13 +13,18 @@
     "generate": "yarn run generate:prisma",
     "generate:prisma": "prisma generate",
     "migrate": "npx prisma migrate dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "extract": "formatjs extract 'components/**/*.*s*' --ignore='**/*.d.ts' --out-file lang/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]' --format ../scripts/formatter.js",
+    "crowdin": "crowdin",
+    "crowdin:download": "../scripts/crowdin.sh download",
+    "crowdin:upload": "../scripts/crowdin.sh upload"
   },
   "engines": {
     "node": "14.x"
   },
   "dependencies": {
     "@apollo/client": "^3.4.11",
+    "@crowdin/cli": "3",
     "@date-io/dayjs": "^1.3.13",
     "@emotion/react": "11.5.0",
     "@emotion/styled": "11.3.0",
@@ -79,6 +84,7 @@
     "react-hook-form": "^6.3.3",
     "react-hot-toast": "^2.1.1",
     "react-icons": "3.11.0",
+    "react-intl": "^5.25.0",
     "react-markdown": "5.0.3",
     "react-sortable-hoc": "2.0.0",
     "react-tippy": "^1.4.0",
@@ -103,6 +109,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.10.2",
+    "@formatjs/cli": "^4.8.3",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
     "@types/lodash": "4.14.178",
     "@types/nodemailer": "6.4.4",
@@ -112,6 +119,7 @@
     "@types/validator": "13.7.0",
     "@types/yup": "0.29.13",
     "babel-loader": "8.1.0",
+    "babel-plugin-formatjs": "^10.3.19",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
     "prisma": "^3.4.1",
@@ -120,6 +128,8 @@
     "typescript": "4.4.3"
   },
   "resolutions": {
+    "@types/react": "17.x",
+    "@types/react-dom": "17.x",
     "graphql": "15.8.0",
     "**/graphql": "15.8.0"
   },

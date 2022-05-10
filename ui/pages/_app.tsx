@@ -9,6 +9,10 @@ import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import FinishSignup from "components/FinishSignup";
 import { useRouter } from "next/router";
+import { IntlProvider } from "react-intl";
+import lang, { supportedLangCodes } from "../lang";
+import isRTL from "../utils/isRTL";
+import Cookies from "js-cookie";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -160,11 +164,36 @@ const MyApp = ({ Component, pageProps }) => {
 
   // legacy modal logic
   const [modal, setModal] = useState(null);
+  const [locale, setLocale] = useState(
+    (() => {
+      if (typeof window !== "undefined") {
+        const locale = window.navigator.language;
+        const langCode = locale.split("-")[0];
+        if (supportedLangCodes.indexOf(langCode) > -1) {
+          return langCode;
+        }
+      }
+      return "en";
+    })()
+  );
+
   const openModal = (name) => {
     if (modal !== name) setModal(name);
   };
   const closeModal = () => {
     setModal(null);
+  };
+
+  useEffect(() => {
+    const locale = Cookies.get("locale");
+    if (locale) {
+      setLocale(locale);
+    }
+  }, []);
+
+  const changeLocale = (locale) => {
+    Cookies.set("locale", locale);
+    setLocale(locale);
   };
 
   const showFinishSignupModal = !!(currentUser && !currentUser.username);
@@ -175,7 +204,7 @@ const MyApp = ({ Component, pageProps }) => {
   }
 
   return (
-    <>
+    <IntlProvider locale={locale} messages={lang[locale]}>
       {/* legacy Modal component, use individual modals where they are called instead */}
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
       <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
@@ -186,6 +215,9 @@ const MyApp = ({ Component, pageProps }) => {
         group={group}
         round={round}
         bucket={bucket}
+        dir={isRTL(locale) ? "rtl" : "ltr"}
+        locale={locale}
+        changeLocale={changeLocale}
       >
         <Component
           {...pageProps}
@@ -196,7 +228,7 @@ const MyApp = ({ Component, pageProps }) => {
         />
         <Toaster />
       </Layout>
-    </>
+    </IntlProvider>
   );
 };
 
