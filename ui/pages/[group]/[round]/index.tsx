@@ -151,8 +151,8 @@ const Page = ({
       {isFirstPage &&
         buckets.length === 0 &&
         (!fetching ? (
-          <div className="absolute w-full flex justify-center items-center h-64">
-            <h1 className="text-3xl text-gray-500 text-center ">
+          <div className="absolute w-full flex justify-center items-center h-20">
+            <h1 className="text-3xl text-gray-500 text-center mt-10 mb-20">
               No {process.env.BUCKET_NAME_PLURAL}...
             </h1>
           </div>

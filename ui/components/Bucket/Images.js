@@ -5,6 +5,7 @@ import _Card from "../styled/Card";
 import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
+import { FormattedMessage } from "react-intl";
 
 const Card = styled(_Card)`
   position: absolute;
@@ -65,7 +66,7 @@ const Images = ({ bucketId, images, size, canEdit, openImageModal }) => {
           onClick={openImageModal}
           className="h-24 w-full  text-gray-600  font-semibold rounded-lg border-3 focus:outline-none border-dashed hover:bg-gray-100 mb-4"
         >
-          + Images
+          <FormattedMessage defaultMessage="+ Images" />
         </button>
       ) : null}
     </>
