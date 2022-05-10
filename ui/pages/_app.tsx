@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 import { withUrqlClient } from "next-urql";
