@@ -93,6 +93,7 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
+      faq
       tags {
         id
         value

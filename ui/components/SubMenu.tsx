@@ -28,8 +28,10 @@ export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
-    { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
+    {
+      label: "Overview",
+      href: `/${groupSlug}/${roundSlug}`
+    },
     {
       label: "Participants",
       href: `/${groupSlug}/${roundSlug}/participants`,
@@ -43,6 +45,15 @@ export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
     {
       label: "Settings",
       href: `/${groupSlug}/${roundSlug}/settings`,
+      admin: true,
+    },
+    {
+      label: "About",
+      href: `/${groupSlug}/${roundSlug}/about`
+    },
+    {
+      label: "FAQ",
+      href: `/${groupSlug}/${roundSlug}/faq`,
       admin: true,
     },
   ].filter((i) => (i.admin ? isAdmin : true));

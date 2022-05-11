@@ -70,6 +70,7 @@ const schema = gql`
       info: String
       color: String
       about: String
+      faq: String
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
     ): Round!
@@ -247,6 +248,7 @@ const schema = gql`
     grantingHasClosed: Boolean
     guidelines: [Guideline]
     about: String
+    faq: String
     allowStretchGoals: Boolean
     requireBucketApproval: Boolean
     customFields: [CustomField]

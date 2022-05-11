@@ -722,6 +722,7 @@ const resolvers = {
           info,
           color,
           about,
+          faq,
           bucketReviewIsOpen,
           discourseCategoryId,
         }
@@ -736,6 +737,7 @@ const resolvers = {
             visibility,
             info,
             about,
+            faq,
             color,
             bucketReviewIsOpen,
             discourseCategoryId,
@@ -2568,6 +2570,11 @@ const resolvers = {
       return round.about && round.about.length
         ? round.about
         : `# About ${round.title}`;
+    },
+    faq: (round) => {
+      return round.faq && round.faq.length
+        ? round.faq
+        : `# ${round.title} FAQ`;
     },
     numberOfApprovedMembers: async (round) => {
       return prisma.roundMember.count({
