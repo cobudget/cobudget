@@ -39,6 +39,13 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+
+      directFundingEnabled
+      directFundingType
+      exchangeDescription
+      exchangeMinimumContribution
+      exchangeVat
+
       round {
         id
         slug

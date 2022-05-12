@@ -2,6 +2,7 @@ import { Modal } from "@material-ui/core";
 import { Tab } from "@headlessui/react";
 import { FormattedMessage } from "react-intl";
 import FromBalance from "./FromBalance";
+import WithCard from "./WithCard";
 
 const StyledTab = ({ children, color }) => (
   <Tab
@@ -36,6 +37,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
               <FormattedMessage defaultMessage="From my balance" />
             </StyledTab>
             <StyledTab color={bucket.round.color}>
+              {/* TODO: disable if disabled for bucket */}
               <FormattedMessage defaultMessage="Direct with card" />
             </StyledTab>
           </Tab.List>
@@ -47,7 +49,9 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
                 handleClose={handleClose}
               />
             </Tab.Panel>
-            <Tab.Panel>Item two</Tab.Panel>
+            <Tab.Panel>
+              <WithCard bucket={bucket} />
+            </Tab.Panel>
           </Tab.Panels>
         </Tab.Group>
       </div>
