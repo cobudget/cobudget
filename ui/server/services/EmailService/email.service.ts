@@ -45,7 +45,7 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them.</i></div>
 <br/>
 <div><a href="${appLink(
   "/settings"
