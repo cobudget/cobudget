@@ -136,8 +136,8 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps }) => {
-  const router = useRouter();
+const MyApp = ({ Component, pageProps, router }) => {
+  
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -146,6 +146,7 @@ const MyApp = ({ Component, pageProps }) => {
       roundSlug: router.query.round,
       bucketId: router.query.bucket,
     },
+    pause: !router.isReady
   });
 
   const [
@@ -157,6 +158,7 @@ const MyApp = ({ Component, pageProps }) => {
         process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
       roundSlug: router.query.round,
     },
+    pause: !router.isReady,
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};

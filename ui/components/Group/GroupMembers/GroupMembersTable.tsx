@@ -17,8 +17,8 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
-import LoadMore from "../../LoadMore";
 import { FormattedMessage, useIntl } from "react-intl";
+import LoadMore, { PortaledLoadMore } from "../../LoadMore";
 
 export const GROUP_MEMBERS_QUERY = gql`
   query GroupMembers($groupId: ID!, $offset: Int, $limit: Int) {
@@ -131,19 +131,6 @@ const ActionsDropdown = ({
         </MenuItem>
       </Menu>
     </>
-  );
-};
-
-const PortaledLoadMore = ({ children }) => {
-  if (typeof window !== "undefined")
-    return ReactDOM.createPortal(
-      children,
-      document.getElementById("load-more")
-    );
-  return (
-    <TableRow>
-      <TableCell></TableCell>
-    </TableRow>
   );
 };
 
