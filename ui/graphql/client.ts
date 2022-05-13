@@ -11,7 +11,6 @@ import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 
 import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
-import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[group]/[round]";
 import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
@@ -416,38 +415,17 @@ export const client = (
               }
             },
             inviteRoundMembers(result: any, { roundId }, cache) {
-              if (result.inviteRoundMembers) {
-                cache.updateQuery(
-                  {
-                    query: ROUND_MEMBERS_QUERY,
-                    variables: { roundId, offset: 0, limit: 1000, search: "" },
-                  },
-                  (data: any) => {
-                    const existingEmails =
-                      data.approvedMembersPage?.approvedMembers?.map(
-                        (member) => member.email
-                      ) || [];
-                    const newInvitedMembers = result.inviteRoundMembers?.filter(
-                      (member) => existingEmails.indexOf(member.email) === -1
-                    );
+              const queryFields = cache.inspectFields("Query");
 
-                    if (newInvitedMembers.length === 0) {
-                      return;
-                    }
-
-                    return {
-                      ...data,
-                      approvedMembersPage: {
-                        ...data.approvedMembersPage,
-                        approvedMembers: [
-                          ...newInvitedMembers,
-                          ...data.approvedMembersPage?.approvedMembers,
-                        ],
-                      },
-                    };
-                  }
-                );
-              }
+              queryFields
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "membersPage",
+                    field.arguments
+                  );
+                });
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");
