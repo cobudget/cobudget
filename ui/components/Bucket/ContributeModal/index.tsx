@@ -23,7 +23,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
     <Modal
       open={true}
       onClose={handleClose}
-      className="flex items-center justify-center p-4"
+      className="items-center justify-center p-4 overflow-y-auto"
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
         <h1 className="text-2xl mb-2 font-semibold">
@@ -50,7 +50,7 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
               />
             </Tab.Panel>
             <Tab.Panel>
-              <WithCard bucket={bucket} />
+              <WithCard bucket={bucket} handleClose={handleClose} />
             </Tab.Panel>
           </Tab.Panels>
         </Tab.Group>

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import Markdown from "components/Markdown";
 import TextField from "components/TextField";
 import SelectInput from "components/SelectInput";
+import Button from "components/Button";
 
 const Decimal = Prisma.Decimal;
 
@@ -11,7 +12,7 @@ const Title = ({ children }) => (
   <div className="font-medium mt-5">{children}</div>
 );
 
-const WithCard = ({ bucket }) => {
+const WithCard = ({ bucket, handleClose }) => {
   const isExchange = bucket.directFundingType === "EXCHANGE";
 
   const [contribution, setContribution] = useState<number>(
@@ -76,6 +77,26 @@ const WithCard = ({ bucket }) => {
           );
         })}
       </SelectInput>
+      <Button
+        type="submit"
+        size="large"
+        fullWidth
+        color={bucket.round.color}
+        //loading={loading}
+        //disabled={inputValue === "" || availableBalance < 0}
+        className="mt-8 mb-2"
+      >
+        <FormattedMessage defaultMessage="Continue" />
+      </Button>
+      <Button
+        size="large"
+        fullWidth
+        variant="secondary"
+        color={bucket.round.color}
+        onClick={handleClose}
+      >
+        <FormattedMessage defaultMessage="Cancel" />
+      </Button>
     </div>
   );
 };
