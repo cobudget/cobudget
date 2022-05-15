@@ -24,7 +24,7 @@ const WithCard = ({ bucket }) => {
     () =>
       [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3].map((fraction) => ({
         fraction,
-        amount: new Decimal(fraction).mul(contribution || 0),
+        amount: new Decimal(fraction).mul(contribution || 0).toFixed(2),
       })),
     [contribution]
   );
@@ -68,11 +68,10 @@ const WithCard = ({ bucket }) => {
         value={cobudgetTip}
         onChange={(e) => setCobudgetTip(e.target.value)}
       >
-        {tipAlternatives.map(({ fraction, amount }, i) => {
+        {tipAlternatives.map(({ fraction, amount }) => {
           return (
-            // TODO: truncate to 2 decimals
             <option value={fraction} key={fraction}>
-              {amount.toString()} {bucket.round.currency} ({fraction * 100}%)
+              {amount} {bucket.round.currency} ({fraction * 100}%)
             </option>
           );
         })}
