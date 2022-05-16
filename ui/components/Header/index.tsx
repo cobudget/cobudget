@@ -128,15 +128,6 @@ const Header = ({
 
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
 
-  console.log({
-    notAMember,
-    fetching: fetchingUser,
-    collMember: currentUser?.currentCollMember,
-    isGroupAdmin,
-    round,
-    allowedToJoinOrRequest,
-    showJoinRoundButton,
-  });
   return (
     <>
       <Head>
@@ -258,7 +249,12 @@ const Header = ({
                 </>
               ) : (
                 <>
-                  <NavItem href={`/login`} roundColor={color}>
+                  <NavItem
+                    href={`/login${
+                      router.pathname === `/login` ? "" : "?r=" + router.asPath
+                    }`}
+                    roundColor={color}
+                  >
                     Log in
                   </NavItem>
                   <NavItem href={`/signup`} roundColor={color} primary>

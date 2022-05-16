@@ -24,19 +24,19 @@ const defaultTabs = [
   { name: "Tags", component: Tags },
 ];
 
-const RoundSettings = ({ round, currentUser }) => {
+const RoundSettings = ({ round, currentUser, currentGroup }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const tabs = useMemo(
     () =>
-      round.group?.discourseUrl
+      currentGroup?.discourseUrl
         ? defaultTabs.concat({ name: "Discourse", component: Discourse })
         : defaultTabs,
-    [round.group?.discourseUrl]
+    [currentGroup?.discourseUrl]
   );
 
   const SettingsComponent = tabs[selectedTab].component;
-  const handleClose = () => null;
+
   return (
     <div className="page">
       <div className="grid sm:grid-cols-6">
@@ -58,7 +58,7 @@ const RoundSettings = ({ round, currentUser }) => {
           {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
             round={round}
-            currentGroup={round.group}
+            currentGroup={currentGroup}
             currentUser={currentUser}
           />
         </div>

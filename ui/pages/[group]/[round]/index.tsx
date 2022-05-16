@@ -151,8 +151,8 @@ const Page = ({
       {isFirstPage &&
         buckets.length === 0 &&
         (!fetching ? (
-          <div className="absolute w-full flex justify-center items-center h-64">
-            <h1 className="text-3xl text-gray-500 text-center ">
+          <div className="absolute w-full flex justify-center items-center h-20">
+            <h1 className="text-3xl text-gray-500 text-center mt-10 mb-20">
               No {process.env.BUCKET_NAME_PLURAL}...
             </h1>
           </div>
@@ -390,57 +390,64 @@ const RoundPage = ({ currentUser }) => {
   );
 };
 
-export async function getStaticProps(ctx) {
-  const ssrCache = ssrExchange({
-    isClient: false,
-  });
-  const client = initUrqlClient(createClientConfig(ssrCache), false);
+// export async function getStaticProps(ctx) {
+//   const ssrCache = ssrExchange({
+//     isClient: false,
+//   });
+//   const client = initUrqlClient(createClientConfig(ssrCache), false);
 
-  // This query is used to populate the cache for the query
-  // used on this page.
-  const variables = {
-    groupSlug: ctx.params.group,
-    roundSlug: ctx.params.round,
-  };
+//   // This query is used to populate the cache for the query
+//   // used on this page.
+//   const variables = {
+//     groupSlug: ctx.params.group,
+//     roundSlug: ctx.params.round,
+//   };
+//   console.log({ variables });
 
-  await client.query(ROUND_PAGE_QUERY, variables).toPromise();
+//   const roundPageQuery = await client
+//     .query(ROUND_PAGE_QUERY, variables)
+//     .toPromise();
+//   console.log({ roundPageQuery });
+//   // TODO: try to get static generation of bucket list to work (it does not revalidate)
+//   // const statusFilter = stringOrArrayIntoArray(
+//   //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
+//   // );
+//   // await client
+//   //   .query(BUCKETS_QUERY, {
+//   //     ...variables,
+//   //     offset: 0,
+//   //     limit: 12,
+//   //     status: statusFilter,
+//   //   })
+//   //   .toPromise();
 
-  // TODO: try to get static generation of bucket list to work (it does not revalidate)
-  // const statusFilter = stringOrArrayIntoArray(
-  //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
-  // );
-  // await client
-  //   .query(BUCKETS_QUERY, {
-  //     ...variables,
-  //     offset: 0,
-  //     limit: 12,
-  //     status: statusFilter,
-  //   })
-  //   .toPromise();
+//   const topLevelQuery = await client
+//     .query(TOP_LEVEL_QUERY, variables)
+//     .toPromise();
+//   console.log({ topLevelQuery });
 
-  await client.query(TOP_LEVEL_QUERY, variables).toPromise();
+//   return {
+//     props: {
+//       // urqlState is a keyword here so withUrqlClient can pick it up.
+//       urqlState: ssrCache.extractData(),
+//     },
+//     revalidate: 60,
+//   };
+// }
 
-  return {
-    props: {
-      // urqlState is a keyword here so withUrqlClient can pick it up.
-      urqlState: ssrCache.extractData(),
-    },
-    revalidate: 60,
-  };
-}
+// export async function getStaticPaths() {
+//   const rounds = await prisma.round.findMany({
+//     where: { visibility: "PUBLIC" },
+//     include: { group: true },
+//   });
 
-export async function getStaticPaths() {
-  const rounds = await prisma.round.findMany({
-    where: { visibility: "PUBLIC" },
-    include: { group: true },
-  });
-
-  return {
-    paths: rounds.map((round) => ({
-      params: { group: round.group.slug, round: round.slug },
-    })),
-    fallback: true, // false or 'blocking'
-  };
-}
+//   return {
+//     // paths: rounds.map((round) => ({
+//     //   params: { group: round.group.slug, round: round.slug },
+//     // })),
+//     paths: [],
+//     fallback: true, // false or 'blocking'
+//   };
+// }
 
 export default RoundPage;

@@ -11,6 +11,7 @@ const schema = gql`
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
+    roundInvitationLink(roundId: ID): RoundInvitationLink
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -73,6 +74,9 @@ const schema = gql`
       discourseCategoryId: Int
     ): Round!
     deleteRound(roundId: ID!): Round
+    createRoundInvitationLink(roundId: ID): RoundInvitationLink
+    deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
+    joinRoundInvitationLink(token: String): RoundMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
@@ -255,6 +259,11 @@ const schema = gql`
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
+    inviteNonce: Int
+  }
+
+  type RoundInvitationLink {
+    link: String
   }
 
   type BucketStatusCount {
