@@ -249,7 +249,12 @@ const Header = ({
                 </>
               ) : (
                 <>
-                  <NavItem href={`/login${router.pathname === `/login` ? "" : "?r=" + router.asPath}`} roundColor={color}>
+                  <NavItem
+                    href={`/login${
+                      router.pathname === `/login` ? "" : "?r=" + router.asPath
+                    }`}
+                    roundColor={color}
+                  >
                     Log in
                   </NavItem>
                   <NavItem href={`/signup`} roundColor={color} primary>
