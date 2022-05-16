@@ -8,6 +8,9 @@ import Button from "components/Button";
 
 const Decimal = Prisma.Decimal;
 
+const tipAmount = ({ fraction, contribution }) =>
+  new Decimal(fraction).mul(contribution || 0).toFixed(2);
+
 const Title = ({ children }) => (
   <div className="font-medium mt-5">{children}</div>
 );
@@ -25,10 +28,13 @@ const WithCard = ({ bucket, handleClose }) => {
     () =>
       [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3].map((fraction) => ({
         fraction,
-        amount: new Decimal(fraction).mul(contribution || 0).toFixed(2),
+        amount: tipAmount({ fraction, contribution }),
       })),
     [contribution]
   );
+
+  const notAboveMinimum =
+    isExchange && contribution * 100 < bucket.exchangeMinimumContribution;
 
   return (
     <div>
@@ -55,7 +61,7 @@ const WithCard = ({ bucket, handleClose }) => {
           step: 0.01,
         }}
       />
-      {isExchange && contribution * 100 < bucket.exchangeMinimumContribution && (
+      {notAboveMinimum && (
         <div className="text-red-600">
           <FormattedMessage defaultMessage="Contribution needs to be at least" />{" "}
           {bucket.exchangeMinimumContribution / 100} {bucket.round.currency}
@@ -77,17 +83,25 @@ const WithCard = ({ bucket, handleClose }) => {
           );
         })}
       </SelectInput>
-      <Button
-        type="submit"
-        size="large"
-        fullWidth
-        color={bucket.round.color}
-        //loading={loading}
-        //disabled={inputValue === "" || availableBalance < 0}
-        className="mt-8 mb-2"
+      <form
+        action={`/api/stripe/create-checkout-session?bucketId=${
+          bucket.id
+        }&contribution=${contribution * 100}&tipAmount=${
+          Number(tipAmount({ fraction: cobudgetTip, contribution })) * 100
+        }`}
+        method="POST"
       >
-        <FormattedMessage defaultMessage="Continue" />
-      </Button>
+        <Button
+          type="submit"
+          size="large"
+          fullWidth
+          color={bucket.round.color}
+          disabled={notAboveMinimum || !(contribution > 0)}
+          className="mt-8 mb-2"
+        >
+          <FormattedMessage defaultMessage="Continue" />
+        </Button>
+      </form>
       <Button
         size="large"
         fullWidth

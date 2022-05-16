@@ -23,9 +23,9 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
     <Modal
       open={true}
       onClose={handleClose}
-      className="items-center justify-center p-4 overflow-y-auto"
+      className="flex items-center justify-center p-4 overflow-y-auto"
     >
-      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
+      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm m-auto">
         <h1 className="text-2xl mb-2 font-semibold">
           <FormattedMessage defaultMessage="Contribute to" /> {bucket.title}
         </h1>
