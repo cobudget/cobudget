@@ -503,7 +503,7 @@ export default {
         (collMember) => !cocreators.map((co) => co.id).includes(collMember.id)
       )
       .map((collMember) => collMember.user)
-      .filter((user) => user.emailSettings?.bucketPublishedInRound ?? true);
+      .filter((user) => user.emailSettings?.bucketPublishedInRound ?? false);
 
     const collLink = appLink(`/${currentGroup.slug}/${round.slug}`);
 

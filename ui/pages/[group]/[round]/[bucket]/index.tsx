@@ -268,50 +268,50 @@ const BucketIndex = ({ currentUser }) => {
   );
 };
 
-export async function getStaticProps(ctx) {
-  const ssrCache = ssrExchange({
-    isClient: false,
-  });
-  const client = initUrqlClient(createClientConfig(ssrCache), false);
+// export async function getStaticProps(ctx) {
+//   const ssrCache = ssrExchange({
+//     isClient: false,
+//   });
+//   const client = initUrqlClient(createClientConfig(ssrCache), false);
 
-  // This query is used to populate the cache for the query
-  // used on this page.
+//   // This query is used to populate the cache for the query
+//   // used on this page.
 
-  await client
-    .query(TOP_LEVEL_QUERY, {
-      groupSlug: ctx.params.group,
-      roundSlug: ctx.params.round,
-      bucketId: ctx.params.bucket,
-    })
-    .toPromise();
-  await client.query(BUCKET_QUERY, { id: ctx.params.bucket }).toPromise();
+//   await client
+//     .query(TOP_LEVEL_QUERY, {
+//       groupSlug: ctx.params.group,
+//       roundSlug: ctx.params.round,
+//       bucketId: ctx.params.bucket,
+//     })
+//     .toPromise();
+//   await client.query(BUCKET_QUERY, { id: ctx.params.bucket }).toPromise();
 
-  return {
-    props: {
-      // urqlState is a keyword here so withUrqlClient can pick it up.
-      urqlState: ssrCache.extractData(),
-    },
-    revalidate: 60,
-  };
-}
+//   return {
+//     props: {
+//       // urqlState is a keyword here so withUrqlClient can pick it up.
+//       urqlState: ssrCache.extractData(),
+//     },
+//     revalidate: 60,
+//   };
+// }
 
-export async function getStaticPaths() {
-  const buckets = await prisma.bucket.findMany({
-    where: { publishedAt: { not: null }, round: { visibility: "PUBLIC" } },
-    include: { round: { include: { group: true } } },
-  });
+// export async function getStaticPaths() {
+//   const buckets = await prisma.bucket.findMany({
+//     where: { publishedAt: { not: null }, round: { visibility: "PUBLIC" } },
+//     include: { round: { include: { group: true } } },
+//   });
 
-  return {
-    // paths: buckets.map((bucket) => ({
-    //   params: {
-    //     group: bucket.round.group.slug,
-    //     round: bucket.round.slug,
-    //     bucket: bucket.id,
-    //   },
-    // })),
-    paths: [],
-    fallback: true, // false or 'blocking'
-  };
-}
+//   return {
+//     // paths: buckets.map((bucket) => ({
+//     //   params: {
+//     //     group: bucket.round.group.slug,
+//     //     round: bucket.round.slug,
+//     //     bucket: bucket.id,
+//     //   },
+//     // })),
+//     paths: [],
+//     fallback: true, // false or 'blocking'
+//   };
+// }
 
 export default BucketIndex;

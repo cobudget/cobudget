@@ -1,6 +1,8 @@
 import React from "react";
 import Header from "./Header";
+import { FormattedMessage } from "react-intl";
 import "../lib/beacon";
+import { supportedLangs } from "lang";
 
 const LinkOut = ({ href, children }) => {
   return (
@@ -18,9 +20,12 @@ const Layout = ({
   group,
   round,
   bucket,
+  dir,
+  locale,
+  changeLocale,
 }) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" id="hello-container" dir={dir}>
       <div>
         <Header
           currentUser={currentUser}
@@ -37,9 +42,19 @@ const Layout = ({
         {/* NOTE TO PEOPLE WANTING TO EDIT THIS:
             Please see our license in the file /LICENSE in this repo for details on how you're allowed to change this section */}
         <div>
-          You are using <LinkOut href="https://cobudget.com/">Cobudget</LinkOut>
-          . Source code available{" "}
-          <LinkOut href="https://github.com/cobudget/cobudget">online</LinkOut>.
+          <FormattedMessage
+            defaultMessage="You are using <a1>Cobudget</a1>. Source code available <a2>online</a2>."
+            values={{
+              a1: (msg) => (
+                <LinkOut href="https://cobudget.com/">{msg}</LinkOut>
+              ),
+              a2: (msg) => (
+                <LinkOut href="https://github.com/cobudget/cobudget">
+                  {msg}
+                </LinkOut>
+              ),
+            }}
+          />
         </div>
         <div className="space-x-6">
           {process.env.PRIVACY_POLICY_URL && (
@@ -48,6 +63,13 @@ const Layout = ({
           {process.env.TERMS_URL && (
             <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
           )}
+          <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
+            {supportedLangs.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>
