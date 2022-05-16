@@ -77,11 +77,11 @@ export default function AuthenticationForm({
         </Button>
       </form>
 
-      
+      {(fbLoginEnabled || googleLoginEnabled) && (
+        <div className="w-full h-px bg-gray-300 my-5"></div>
+      )}
 
       {fbLoginEnabled && (
-        <>
-        <div className="w-full h-px bg-gray-300 my-5"></div>
         <div>
           {fbEmailError && (
             <Banner
@@ -105,7 +105,6 @@ export default function AuthenticationForm({
             Login with Facebook
           </Button>
         </div>
-        </>
       )}
       {googleLoginEnabled && (
         <div>
