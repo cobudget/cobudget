@@ -60,7 +60,7 @@ export default function Selector({
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute z-10 left-14 w-72 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <Menu.Items className="absolute z-10  w-72 mt-2 p-2 origin-top bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="pb-1 mb-1 border-b-default border-gray-200">
             {currentUser?.groupMemberships?.map((groupMember) => {
               return (

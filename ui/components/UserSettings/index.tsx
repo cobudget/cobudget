@@ -43,7 +43,7 @@ const settingsMeta = [
   },
   {
     key: "bucketPublishedInRound",
-    label: `A new ${process.env.BUCKET_NAME_PLURAL} is published`,
+    label: `A new ${process.env.BUCKET_NAME_SINGULAR} is published`,
   },
   {
     key: "commentBecauseCommented",

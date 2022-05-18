@@ -77,7 +77,9 @@ export default function AuthenticationForm({
         </Button>
       </form>
 
-      <div className="w-full h-px bg-gray-300 my-5"></div>
+      {(fbLoginEnabled || googleLoginEnabled) && (
+        <div className="w-full h-px bg-gray-300 my-5"></div>
+      )}
 
       {fbLoginEnabled && (
         <div>
@@ -96,7 +98,7 @@ export default function AuthenticationForm({
             fullWidth
             href={`/api/auth/facebook/?${
               fbEmailError ? "fb_no_email_scope=true&" : ""
-            }remember_me=true`}
+            }remember_me=true&${redirect ? `r=${redirect}` : ""}`}
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >
