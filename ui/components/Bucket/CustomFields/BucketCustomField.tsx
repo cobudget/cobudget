@@ -11,6 +11,7 @@ import TextField from "../../TextField";
 import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
+import {FormattedMessage, useIntl } from "react-intl";
 
 const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
   mutation EditBucketCustomField(
@@ -46,6 +47,7 @@ const BucketCustomField = ({
 }) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
+  const intl = useIntl();
 
   const schema = useMemo(() => {
     const maxValue = yup
@@ -130,8 +132,8 @@ const BucketCustomField = ({
                 fullWidth
               >
                 <option value={""}></option>
-                <option value={"true"}>Yes</option>
-                <option value={"false"}>No</option>
+                <option value={"true"}><FormattedMessage defaultMessage="Yes" /></option>
+                <option value={"false"}><FormattedMessage defaultMessage="No" /></option>
               </SelectInput>
             ) : null}
           </div>
@@ -139,20 +141,27 @@ const BucketCustomField = ({
         <div className="flex justify-between items-center mb-4">
           <div className="text-sm text-gray-600 font-medium pl-4">
             {defaultCustomField.limit
-              ? String(defaultCustomField.limit - inputValue.length) +
-                " characters remaining."
+              ? 
+                intl.formatMessage(
+                  { defaultMessage: "{count} characters remaining." },
+                  { count: String(defaultCustomField.limit - inputValue.length) }
+                )
               : ""}
             <br></br>
             <span>
               {" "}
-              <a
-                href="https://www.markdownguide.org/cheat-sheet/"
-                target="_/blank"
-                className="hover:text-gray-800 border-b hover:border-gray-800"
-              >
-                Markdown formatting
-              </a>{" "}
-              allowed.
+              <FormattedMessage 
+                defaultMessage="<a>Markdown formatting</a> allowed."
+                values={{
+                  a: msg => (
+                    <a
+                      href="https://www.markdownguide.org/cheat-sheet/"
+                      target="_/blank"
+                      className="hover:text-gray-800 border-b hover:border-gray-800"
+                    >{msg}</a>
+                  )
+                }}
+              />
             </span>
           </div>
           <div className="flex">
@@ -161,11 +170,11 @@ const BucketCustomField = ({
               variant="secondary"
               onClick={() => setEditing(false)}
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
 
             <Button loading={loading} type="submit">
-              Save
+            <FormattedMessage defaultMessage="Save" />
             </Button>
           </div>
         </div>
@@ -184,7 +193,7 @@ const BucketCustomField = ({
           ) : (
             <span
               dangerouslySetInnerHTML={{
-                __html: renderBooleanOrValue(customField.value),
+                __html: renderBooleanOrValue(customField.value, intl),
               }}
             />
           )}
@@ -215,9 +224,9 @@ const BucketCustomField = ({
   return null;
 };
 
-const renderBooleanOrValue = (value) => {
-  if (value === "true") return "Yes";
-  if (value === "false") return "No";
+const renderBooleanOrValue = (value, intl) => {
+  if (value === "true") return intl.formatMessage({ defaultMessage: "Yes" });
+  if (value === "false") return intl.formatMessage({ defaultMessage: "No"});
   return value.split("\n").join("<br/>");
 };
 

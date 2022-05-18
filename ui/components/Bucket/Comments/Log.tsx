@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-
 import { FlagIcon } from "components/Icons";
 import capitalize from "utils/capitalize";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const CommentsLog = ({ log }) => {
   let headline;
@@ -10,10 +10,14 @@ const CommentsLog = ({ log }) => {
     case "FlagRaised":
       headline = (
         <>
-          {capitalize(process.env.BUCKET_NAME_SINGULAR)} was flagged for
-          violating the{" "}
-          <span className="underline">{log.details.guideline.title}</span>{" "}
-          guideline:
+          <FormattedMessage 
+            defaultMessage={`{bucketName} was flagged for violating the <und>{violation}</und> guideline:`}
+            values={{
+              bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR),
+              violation: log.details.guideline.title,
+              und: (msg) => (<><span className="underline">{msg}</span></>)
+            }}
+          />
         </>
       );
       break;

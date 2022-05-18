@@ -12,10 +12,12 @@ import {
   TableRow,
 } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const intl = useIntl();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -46,14 +48,17 @@ const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
             handleClose();
           }}
         >
-          Update group
+          <FormattedMessage defaultMessage="Update group" />
         </MenuItem>
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete group ${group.name}?`
+                intl.formatMessage(
+                  { defaultMessage: `Are you sure you would like to delete group {groupName}?` },
+                  { groupName: group.name }
+                )
               )
             )
               deleteGroup({
@@ -61,7 +66,7 @@ const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
               });
           }}
         >
-          <Box color="error.main">Delete</Box>
+          <Box color="error.main"><FormattedMessage defaultMessage="Delete" /></Box>
         </MenuItem>
       </Menu>
     </>
@@ -75,10 +80,10 @@ export default ({ groups, updateGroup, deleteGroup }) => {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Logo</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Slug</TableCell>
-              <TableCell align="right">Actions</TableCell>
+              <TableCell><FormattedMessage defaultMessage="Logo" /></TableCell>
+              <TableCell><FormattedMessage defaultMessage="Name" /></TableCell>
+              <TableCell><FormattedMessage defaultMessage="Slug" /></TableCell>
+              <TableCell align="right"><FormattedMessage defaultMessage="Actions" /></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

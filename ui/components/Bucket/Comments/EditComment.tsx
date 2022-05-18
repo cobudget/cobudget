@@ -5,12 +5,14 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
 import Context from "contexts/comment";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const schema = yup.object().shape({
   content: yup.string().required("Required"),
 });
 
 const EditComment = ({ comment, handleDone }) => {
+  const intl = useIntl();
   const [submitting, setSubmitting] = useState(false);
   const { editComment, bucket } = useContext<any>(Context);
 
@@ -38,7 +40,7 @@ const EditComment = ({ comment, handleDone }) => {
     >
       <TextField
         className="mb-2"
-        placeholder="Comment"
+        placeholder={intl.formatMessage({ defaultMessage:"Comment"})}
         multiline
         error={Boolean(errors.content)}
         helperText={errors.content?.message}
@@ -59,10 +61,10 @@ const EditComment = ({ comment, handleDone }) => {
           variant="secondary"
           color={bucket.round.color}
         >
-          Cancel
+          <FormattedMessage defaultMessage="Cancel" />
         </Button>
         <Button type="submit" loading={submitting} color={bucket.round.color}>
-          Save
+          <FormattedMessage defaultMessage="Save" />
         </Button>
       </div>
     </form>

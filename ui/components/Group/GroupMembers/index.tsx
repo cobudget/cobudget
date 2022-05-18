@@ -5,6 +5,7 @@ import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
 
 import GroupMembersTable from "./GroupMembersTable";
+import { FormattedMessage } from "react-intl";
 
 const UPDATE_GROUP_MEMBER = gql`
   mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
@@ -35,10 +36,12 @@ const GroupMembers = ({ currentGroup }) => {
   return (
     <div>
       <div className="flex justify-between mb-3 items-center">
-        <h2 className="text-xl font-semibold">Group members</h2>{" "}
+        <h2 className="text-xl font-semibold">
+          <FormattedMessage defaultMessage="Group members" />
+        </h2>{" "}
         <div>
           <Button onClick={() => setInviteModalOpen(true)}>
-            Invite members
+            <FormattedMessage defaultMessage="Invite members" />
           </Button>
           {inviteModalOpen && (
             <InviteMembersModal

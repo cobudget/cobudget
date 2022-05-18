@@ -23,12 +23,14 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_MUTATION);
 
+  const intl = useIntl();
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
@@ -41,7 +43,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   return (
     <>
       <MuiIconButton
-        aria-label="more"
+        aria-label={intl.formatMessage({ defaultMessage: "more" })}
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
@@ -66,7 +68,10 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             });
           }}
         >
-          {member.isAdmin ? "Remove admin" : "Make admin"}
+          {member.isAdmin ? 
+            intl.formatMessage({ defaultMessage: "Remove admin" })
+            : intl.formatMessage({ defaultMessage: "Make admin" })
+          }
         </MenuItem>
         {member.hasJoined ? null : (
           <MenuItem
@@ -75,12 +80,12 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
                 roundId,
                 emails: member.email,
               }).then(() => {
-                toast.success("Invitation sent again");
+                toast.success(intl.formatMessage({ defaultMessage: "Invitation sent again"}));
                 handleClose();
               });
             }}
           >
-            Invite Again
+            <FormattedMessage defaultMessage="Invite Again" />
           </MenuItem>
         )}
         <MenuItem
@@ -97,7 +102,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
         <Tooltip
-          title="You can only remove a round participant with 0 balance"
+          title={ intl.formatMessage({ defaultMessage:"You can only remove a round participant with 0 balance" })}
           disabled={member.balance === 0}
         >
           <MenuItem
@@ -106,7 +111,10 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             onClick={() => {
               if (
                 confirm(
-                  `Are you sure you would like to delete membership from user with email ${member.email}?`
+                  intl.formatMessage(
+                    { defaultMessage: "Are you sure you would like to delete membership from user with email {email}?" },
+                    { email: member.email }
+                  )
                 )
               )
                 deleteMember({ roundId, memberId: member.id }).then(
@@ -120,7 +128,9 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
                 );
             }}
           >
-            <Box color="error.main">Delete</Box>
+            <Box color="error.main">
+              <FormattedMessage defaultMessage="Delete" />
+            </Box>
           </MenuItem>
         </Tooltip>
       </Menu>
@@ -147,9 +157,9 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
       <TableCell>
         <p>{member.email}</p>
         {!member.user.verifiedEmail ? (
-          <p className="text-sm text-gray-500">(not verified)</p>
+          <p className="text-sm text-gray-500">(<FormattedMessage defaultMessage="not verified" />)</p>
         ) : !member.hasJoined ? (
-          <p className="text-sm text-gray-500">(invitation pending)</p>
+          <p className="text-sm text-gray-500">(<FormattedMessage defaultMessage="invitation pending" />)</p>
         ) : null}
       </TableCell>
       <TableCell component="th" scope="row">
@@ -160,8 +170,8 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         )}
       </TableCell>
       <TableCell align="right" className="flex space-x-2">
-        {member.isAdmin && <p>Admin</p>}
-        {member.isModerator && <p>Moderator</p>}
+        {member.isAdmin && <p><FormattedMessage defaultMessage="Admin" /></p>}
+        {member.isModerator && <p><FormattedMessage defaultMessage="Moderator" /></p>}
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (

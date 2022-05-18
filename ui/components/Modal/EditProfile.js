@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { TextField, Button } from "@material-ui/core";
 import Card from "../styled/Card";
 import dirtyValues from "utils/dirtyValues";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile($username: String, $name: String) {
@@ -19,6 +20,7 @@ const UPDATE_PROFILE_QUERY = gql`
 
 const EditProfile = ({ closeModal, currentUser }) => {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
+  const intl = useIntl();
   const {
     handleSubmit,
     register,
@@ -28,7 +30,9 @@ const EditProfile = ({ closeModal, currentUser }) => {
   return (
     <Card>
       <div className="p-5">
-        <h1 className="text-2xl">Edit profile</h1>
+        <h1 className="text-2xl">
+          <FormattedMessage defaultMessage="Edit profile" />
+        </h1>
         <form
           onSubmit={handleSubmit((variables) => {
             if (isDirty) {
@@ -49,7 +53,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
           <div className="my-4">
             <TextField
               name="name"
-              label="Name"
+              label={ intl.formatMessage({ defaultMessage: "Name" })}
               variant="outlined"
               defaultValue={currentUser.name}
               error={Boolean(errors.name)}
@@ -64,7 +68,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
           <div className="my-4">
             <TextField
               name="username"
-              label="Username"
+              label={ intl.formatMessage({ defaultMessage: "Username" })}
               variant="outlined"
               defaultValue={currentUser.username}
               error={Boolean(errors.username)}
@@ -98,7 +102,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
               // color="secondary"
               onClick={closeModal}
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button
               type="submit"
@@ -106,7 +110,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
               variant="contained"
               color="primary"
             >
-              Save
+              <FormattedMessage defaultMessage="Save" />
             </Button>
           </div>
         </form>

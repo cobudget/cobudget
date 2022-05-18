@@ -5,9 +5,12 @@ import Markdown from "components/Markdown";
 import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 import capitalize from "utils/capitalize";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export default function AboutPage({ router, round }) {
+
+  const intl = useIntl();
+
   // if (error) return <div>{error.message}</div>;
 
   // if (loading)
@@ -18,13 +21,13 @@ export default function AboutPage({ router, round }) {
   //   );
 
   // const round = data?.round;
-  if (!round) return <div>Loading...</div>;
+  if (!round) return <div><FormattedMessage defaultMessage="Loading..." /></div>;
   return (
     <div className="max-w-screen-md">
       {Boolean(round?.guidelines?.length) && (
         <>
           <h2 className="text-xl font-semibold mb-3" id="guidelines">
-            Guidelines
+          <FormattedMessage defaultMessage="Guidelines" />
           </h2>
           <div className="shadow rounded-lg bg-white relative mb-6 divide-y-default divide-gray-200">
             {sortBy(round.guidelines, (g) => g.position).map((guideline) => (
@@ -37,11 +40,11 @@ export default function AboutPage({ router, round }) {
         </>
       )}
 
-      <h2 className="text-xl font-semibold mb-3">Funding settings</h2>
+      <h2 className="text-xl font-semibold mb-3"><FormattedMessage defaultMessage="Funding settings" /></h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <List>
           <ListItem>
-            <ListItemText primary={"Currency"} secondary={round.currency} />
+            <ListItemText primary={intl.formatMessage({ defaultMessage: "Currency" })} secondary={round.currency} />
           </ListItem>
 
           {!!round.maxAmountToBucketPerUser && (
@@ -49,10 +52,19 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`}
-                  secondary={`${thousandSeparator(
-                    round.maxAmountToBucketPerUser / 100
-                  )} ${round.currency}`}
+                  primary={
+                    //`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`
+                    intl.formatMessage(
+                      {defaultMessage: "Max. amount to one {bucketName} per user"},
+                      {bucketName: process.env.BUCKET_NAME_SINGULAR}
+                    )
+                  }
+                  secondary={
+                    intl.formatNumber(round.maxAmountToBucketPerUser / 100, {
+                      style: "currency",
+                      currency: round.currency
+                    })
+                  }
                 />
               </ListItem>
             </>
@@ -71,9 +83,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary={`${capitalize(
-                    process.env.BUCKET_NAME_SINGULAR
-                  )} creation closes`}
+                  primary={intl.formatMessage({ defaultMessage: "{bucketName} creation closes" }, { bucketName:  capitalize(process.env.BUCKET_NAME_SINGULAR)})}
                   secondary={dayjs(round.bucketCreationCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -86,7 +96,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Funding opens"
+                  primary={intl.formatMessage({ defaultMessage: "Funding opens"})}
                   secondary={dayjs(round.grantingOpens).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -99,7 +109,7 @@ export default function AboutPage({ router, round }) {
               <Divider />
               <ListItem>
                 <ListItemText
-                  primary="Funding closes"
+                  primary={intl.formatMessage({ defaultMessage: "Funding closes"})}
                   secondary={dayjs(round.grantingCloses).format(
                     "MMMM D, YYYY - h:mm a"
                   )}
@@ -110,24 +120,32 @@ export default function AboutPage({ router, round }) {
         </List>
       </div>
 
-      <h2 className="text-xl font-semibold mb-3">Funding status</h2>
+      <h2 className="text-xl font-semibold mb-3"><FormattedMessage defaultMessage="Funding status" /></h2>
       <div className="bg-white rounded-lg shadow mb-6">
         <BillBreakdown
           parts={[
             {
-              title: "Allocated funds",
+              title: intl.formatMessage({ defaultMessage: "Allocated funds"}),
               total: `${thousandSeparator(round.totalContributions / 100)} ${
                 round.currency
               }`,
               breakdown: [
                 {
-                  title: `Contributions made to ${process.env.BUCKET_NAME_SINGULAR} open for funding`,
+                  title: intl.formatMessage({
+                    defaultMessage: `Contributions made to {bucketName} open for funding`,
+                  }, {
+                    bucketName: process.env.BUCKET_NAME_SINGULAR
+                  }),
                   amount: `${thousandSeparator(
                     round.totalContributionsFunding / 100
                   )} ${round.currency}`,
                 },
                 {
-                  title: `Contributions made to funded ${process.env.BUCKET_NAME_PLURAL}`,
+                  title: intl.formatMessage({
+                    defaultMessage: `Contributions made to funded {bucketName}`,
+                  }, {
+                    bucketName: process.env.BUCKET_NAME_PLURAL
+                  }),
                   amount: `${thousandSeparator(
                     round.totalContributionsFunded / 100
                   )} ${round.currency}`,
@@ -135,14 +153,14 @@ export default function AboutPage({ router, round }) {
               ],
             },
             {
-              title: "Unallocated funds",
+              title: intl.formatMessage({ defaultMessage:"Unallocated funds"}),
               total: `${thousandSeparator(
                 round.totalInMembersBalances / 100
               )} ${round.currency}`,
               breakdown: [],
             },
           ]}
-          totalTitle={"Total funds available"}
+          totalTitle={intl.formatMessage({ defaultMessage:"Total funds available"})}
           totalAmount={`${thousandSeparator(round.totalAllocations / 100)} ${
             round.currency
           }`}
