@@ -62,7 +62,10 @@ const DirectFundingBucketForm = ({
             rows={5}
             highlightColor={round.color}
           />
-          <div className="font-medium mt-8 mb-4">Minimum contribution</div>
+          <div className="font-medium mt-8">Minimum contribution</div>
+          <div className="my-4">
+            Remember to account for payment processing fees and taxes.
+          </div>
           <TextField
             placeholder="0"
             endAdornment={round.currency}

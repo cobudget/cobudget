@@ -66,6 +66,12 @@ export default handler().post(async (req, res) => {
           currency: bucket.round.currency.toLowerCase(),
           quantity: 1,
         },
+        {
+          name: "Cobudget Tip",
+          amount: tipAmount,
+          currency: bucket.round.currency.toLowerCase(),
+          quantity: 1,
+        },
       ],
       payment_intent_data: {
         application_fee_amount: tipAmount,

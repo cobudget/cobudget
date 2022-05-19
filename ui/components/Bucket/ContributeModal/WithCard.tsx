@@ -35,6 +35,7 @@ const WithCard = ({ bucket, handleClose }) => {
 
   const notAboveMinimum =
     isExchange &&
+    contribution &&
     new Decimal(contribution)
       .mul(100)
       .lessThan(bucket.exchangeMinimumContribution);
@@ -86,10 +87,11 @@ const WithCard = ({ bucket, handleClose }) => {
           );
         })}
       </SelectInput>
+      {/* TODO: move form up so you can press enter to submit */}
       <form
         action={`/api/stripe/create-checkout-session?bucketId=${
           bucket.id
-        }&contribution=${new Decimal(contribution).mul(
+        }&contribution=${new Decimal(contribution || 0).mul(
           100
         )}&tipAmount=${new Decimal(
           tipAmount({ fraction: cobudgetTip, contribution })
