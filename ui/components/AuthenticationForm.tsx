@@ -102,7 +102,7 @@ export default function AuthenticationForm({
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >
-            Login with Facebook
+            Log in with Facebook
           </Button>
         </div>
       )}
@@ -111,11 +111,12 @@ export default function AuthenticationForm({
           <Button
             fullWidth
             href="/api/auth/google/?remember_me=true"
-            className="mt-5 text-center shadow-lg border-default"
+            className="mt-5 text-center shadow-lg border-default flex"
             color="white"
             variant="secondary"
           >
-            Login with Google
+            <img src="/google-icon.png" className="h-8 max-w-none mr-2" />
+            Log in with Google
           </Button>
         </div>
       )}
