@@ -1,10 +1,13 @@
 import { CheckIcon } from "components/Icons";
 import { colors } from "utils/colors";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 export default ({ setColor, color: currentColor }) => {
   return (
     <div>
-      <label className="text-sm font-medium mb-1 block">Color</label>
+      <label className="text-sm font-medium mb-1 block">
+        <FormattedMessage defaultMessage="Color" />
+      </label>
       <div className="flex flex-wrap">
         {colors.map((color) => (
           <button

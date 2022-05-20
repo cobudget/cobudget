@@ -9,18 +9,21 @@ import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const SetCurrency = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const intl = useIntl();
   const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set currency</h1>
+        <h1 className="text-3xl">
+        <FormattedMessage defaultMessage="Set currency" />
+        </h1>
         <Alert severity="warning">
-          You should not change currency after someone has added budgets or
-          funding has started.
+        <FormattedMessage defaultMessage="You should not change currency after someone has added budgets or funding has started. " />
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
@@ -37,7 +40,7 @@ const SetCurrency = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="currency"
-              label="Currency"
+              label={intl.formatMessage({ defaultMessage:"Currency" })}
               defaultValue={round.currency}
               inputRef={register}
               fullWidth
@@ -56,7 +59,7 @@ const SetCurrency = ({ closeModal, round }) => {
             variant="contained"
             color="primary"
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </form>
       </Box>

@@ -7,17 +7,21 @@ import DayjsUtils from "@date-io/dayjs";
 
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
+import { FormattedMessage, useIntl} from "react-intl";
 
 const SetGrantingOpens = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
+  const intl = useIntl();
 
   const [selectedDate, handleDateChange] = React.useState(round.grantingOpens);
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Set funding open date</h1>
+        <h1 className="text-3xl">
+          <FormattedMessage defaultMessage="Set funding open date" />
+        </h1>
 
         <form
           onSubmit={handleSubmit(() => {
@@ -38,7 +42,7 @@ const SetGrantingOpens = ({ closeModal, round }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label="Funding opens date"
+                label={intl.formatMessage({ defaultMessage:"Funding opens date"})}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}
@@ -57,7 +61,7 @@ const SetGrantingOpens = ({ closeModal, round }) => {
               variant="contained"
               color="primary"
             >
-              Save
+              <FormattedMessage defaultMessage="Save" />
             </Button>
 
             {round.grantingOpens && (
@@ -82,7 +86,7 @@ const SetGrantingOpens = ({ closeModal, round }) => {
                     });
                 }}
               >
-                Clear date
+                <FormattedMessage defaultMessage="Clear date" />
               </Button>
             )}
           </div>

@@ -2,18 +2,24 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 import { Box, Button, TextField } from "@material-ui/core";
 import Card from "components/styled/Card";
-
+import { FormattedMessage, useIntl, } from "react-intl";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetMaxAmountToDream = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const intl = useIntl();
   const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">
-          Set max. amount to one {process.env.BUCKET_NAME_SINGULAR} per user
+          <FormattedMessage
+            defaultMessage="Set max. amount to one {bucketName} per user"
+            values={{
+              bucketName: process.env.BUCKET_NAME_SINGULAR
+            }}
+          />
         </h1>
 
         <form
@@ -34,7 +40,12 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
           <Box m="15px 0">
             <TextField
               name="maxAmountToBucketPerUser"
-              label={`Max. amount to one ${process.env.BUCKET_NAME_SINGULAR} per user`}
+              label={
+                intl.formatMessage(
+                  { defaultMessage: `Max. amount to one {bucketName} per user` },
+                  { values: { bucketName: process.env.BUCKET_NAME_SINGULAR } }
+                )
+              }
               defaultValue={round.maxAmountToBucketPerUser / 100}
               fullWidth
               inputRef={register}
@@ -52,7 +63,7 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
             variant="contained"
             color="primary"
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </form>
       </Box>

@@ -7,6 +7,7 @@ import {
 import Button from "components/Button";
 import { Edit as EditIcon } from "@material-ui/icons";
 import { AddIcon } from "components/Icons";
+import { FormattedMessage } from "react-intl";
 
 const SettingsListItem = ({
   primary,
@@ -33,7 +34,8 @@ const SettingsListItem = ({
               onClick={openModal}
               disabled={disabled}
             >
-              <AddIcon className="h-4 w-4 -ml-2 mr-2" /> Set
+              <AddIcon className="h-4 w-4 -ml-2 mr-2" /> 
+                <FormattedMessage defaultMessage="Set" />
             </Button>
           )}
         </ListItemSecondaryAction>

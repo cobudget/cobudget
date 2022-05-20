@@ -9,6 +9,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
   mutation AddCustomField($roundId: ID!, $customField: CustomFieldInput!) {
@@ -95,6 +96,7 @@ export default function AddOrEditCustomField({
   // Requires to manage seperetly due to Material UI Checkbox
   const [isRequired, setIsRequired] = useState(customField.isRequired || false);
   const [limit, setLimit] = useState(Number(customField.limit) || null);
+  const intl = useIntl();
 
   return (
     <Modal
@@ -104,7 +106,12 @@ export default function AddOrEditCustomField({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <h1 className="text-lg font-semibold mb-2">
-          {editing ? "Editing" : "Add"} form item
+          <FormattedMessage 
+            defaultMessage="{action} for item" 
+            values={{
+              action: editing ? "Editing" : "Add"
+            }}
+          />
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
@@ -120,7 +127,7 @@ export default function AddOrEditCustomField({
         >
           <div className="grid gap-4">
             <TextField
-              placeholder="Name"
+              placeholder={intl.formatMessage({ defaultMessage:"Name"})}
               name={"customField.name"}
               defaultValue={customField.name}
               inputRef={register}
@@ -129,7 +136,7 @@ export default function AddOrEditCustomField({
               color={round.color}
             />
             <TextField
-              placeholder="Description"
+              placeholder={intl.formatMessage({ defaultMessage:"Description" })}
               name={"customField.description"}
               defaultValue={customField.description}
               inputRef={register}
@@ -149,14 +156,14 @@ export default function AddOrEditCustomField({
                   onChange: (e) => setTypeInputValue(e.target.value),
                 }}
               >
-                <option value="TEXT">Short Text</option>
-                <option value="MULTILINE_TEXT">Long Text</option>
-                <option value="BOOLEAN">Yes/No</option>
+                <option value="TEXT"><FormattedMessage defaultMessage="Short Text" /></option>
+                <option value="MULTILINE_TEXT"><FormattedMessage defaultMessage="Long Text" /></option>
+                <option value="BOOLEAN"><FormattedMessage defaultMessage="Yes/No" /></option>
               </SelectField>
               {typeInputValue == "TEXT" ||
               typeInputValue == "MULTILINE_TEXT" ? (
                 <TextField
-                  placeholder="Character limit"
+                  placeholder={intl.formatMessage({ defaultMessage:"Character limit"})}
                   name={"customField.limit"}
                   defaultValue={customField.limit}
                   inputRef={register}
@@ -176,7 +183,7 @@ export default function AddOrEditCustomField({
               <Controller
                 as={
                   <FormControlLabel
-                    label="Is Required"
+                    label={intl.formatMessage({ defaultMessage:"Is Required"})}
                     control={
                       <Checkbox
                         onChange={(e) => {
@@ -203,10 +210,10 @@ export default function AddOrEditCustomField({
                 onClick={handleClose}
                 className="mr-2"
               >
-                Cancel
+                <FormattedMessage defaultMessage="Cancel" />
               </Button>
               <Button type="submit" loading={loading} color={round.color}>
-                Save
+              <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>

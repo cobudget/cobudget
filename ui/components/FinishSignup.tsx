@@ -4,6 +4,7 @@ import { useMutation, gql } from "urql";
 import TextField from "./TextField";
 import Button from "./Button";
 import toast from "react-hot-toast";
+import { FormattedMessage, useIntl, } from "react-intl";
 const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile($username: String, $name: String) {
     updateProfile(username: $username, name: $name) {
@@ -17,6 +18,8 @@ export default function FinishSignup({ isOpen, currentUser }) {
   const [, updateUser] = useMutation(UPDATE_PROFILE_QUERY);
   const [username, setUsername] = useState(currentUser?.username ?? "");
   const [name, setName] = useState(currentUser?.name ?? "");
+  const intl = useIntl();
+
   const [acceptTerms, setAcceptTerms] = useState(
     process.env.TERMS_URL ? false : true
   );
@@ -64,23 +67,30 @@ export default function FinishSignup({ isOpen, currentUser }) {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Welcome to {process.env.PLATFORM_NAME}!
+                <FormattedMessage
+                  defaultMessage={"Welcome to {bucketName}!"}
+                  values={{
+                    bucketName: process.env.PLATFORM_NAME
+                  }}
+                />
               </Dialog.Title>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  Please add your name and username.
+                  <FormattedMessage
+                    defaultMessage="Please add your name and username."
+                  />
                 </p>
               </div>
               <div className="space-y-4 mt-2">
                 <TextField
-                  label="Name"
+                  label={intl.formatMessage({ defaultMessage:"Name"})}
                   inputProps={{
                     value: name,
                     onChange: (e) => setName(e.target.value),
                   }}
                 />
                 <TextField
-                  label="Username"
+                  label={intl.formatMessage({ defaultMessage:"Username" })}
                   inputProps={{
                     value: username,
                     onChange: (e) => setUsername(e.target.value),
@@ -97,22 +107,27 @@ export default function FinishSignup({ isOpen, currentUser }) {
                       type="checkbox"
                     />{" "}
                     <span>
-                      I accept the {process.env.PLATFORM_NAME}{" "}
-                      <a
-                        className="text-blue underline"
-                        target="_blank"
-                        rel="noreferrer"
-                        href={process.env.TERMS_URL}
-                      >
-                        Terms and Conditions
-                      </a>
+                      <FormattedMessage 
+                        defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
+                        values={{
+                          bucketName: process.env.PLATFORM_NAME,
+                          a: msg => (
+                              <a
+                                className="text-blue underline"
+                                target="_blank"
+                                rel="noreferrer"
+                                href={process.env.TERMS_URL}
+                              >{msg}</a>
+                          )
+                        }}
+                      />
                     </span>
                   </label>
                 )}
               </div>
               <div className="mt-4 space-x-2 flex justify-end">
                 <Button variant="secondary" href="/api/auth/logout">
-                  Cancel
+                  <FormattedMessage defaultMessage="Cancel" />
                 </Button>
                 <Button
                   type="submit"
@@ -121,19 +136,19 @@ export default function FinishSignup({ isOpen, currentUser }) {
                     updateUser({ username, name }).then(({ data, error }) => {
                       if (error) {
                         if (error.message.includes("Unique")) {
-                          toast.error("Username already taken");
+                          toast.error(intl.formatMessage({ defaultMessage:"Username already taken" }));
                         } else {
                           toast.error(error.message);
                         }
                       } else {
                         toast.success(
-                          `Welcome to ${process.env.PLATFORM_NAME}!`
-                        );
+                          intl.formatMessage({ defaultMessage:`Welcome to {bucketName}!` }, { values: {bucketName: process.env.PLATFORM_NAME} })
+                        )
                       }
                     })
                   }
                 >
-                  Finish sign up
+                  <FormattedMessage defaultMessage="Finish sign up" />
                 </Button>
               </div>
             </div>

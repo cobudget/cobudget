@@ -9,6 +9,7 @@ import slugify from "../../utils/slugify";
 import DeleteRoundModal from "./DeleteRoundModal";
 import toast from "react-hot-toast";
 import router from "next/router";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const EDIT_ROUND = gql`
   mutation editRound(
@@ -44,6 +45,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
   const [color, setColor] = useState(round.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
+  const intl = useIntl();
   const {
     handleSubmit,
     register,
@@ -58,7 +60,9 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
     currentUser.currentCollMember?.isAdmin;
   return (
     <div className="px-6">
-      <h2 className="text-2xl font-semibold">General</h2>
+      <h2 className="text-2xl font-semibold">
+        <FormattedMessage defaultMessage="General" />
+      </h2>
       <form
         onSubmit={handleSubmit((variables) => {
           editRound({
@@ -70,7 +74,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             if (error) {
               toast.error(error.message.replace("[GraphQL]", ""));
             } else {
-              toast.success("Settings updated!");
+              toast.success(intl.formatMessage({ defaultMessage:"Settings updated!"}));
               router.replace(
                 `/${currentGroup?.slug ?? "c"}/${variables.slug}/settings`
               );
@@ -80,8 +84,8 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
       >
         <TextField
           name="title"
-          label="Title"
-          placeholder="Title"
+          label={intl.formatMessage({ defaultMessage:"Title" })}
+          placeholder={intl.formatMessage({ defaultMessage:"Title" })}
           defaultValue={round.title}
           inputRef={register}
           className="my-4"
@@ -89,8 +93,8 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <TextField
           name="slug"
-          label="URL"
-          placeholder="Slug"
+          label={intl.formatMessage({ defaultMessage:"URL" })}
+          placeholder={intl.formatMessage({ defaultMessage:"Slug" })}
           defaultValue={round.slug}
           inputRef={register}
           startAdornment={startUrl}
@@ -109,8 +113,8 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
           inputRef={register}
           className="my-4"
         >
-          <option value="PUBLIC">Public</option>
-          <option value="HIDDEN">Hidden</option>
+          <option value="PUBLIC"><FormattedMessage defaultMessage="Public" /></option>
+          <option value="HIDDEN"><FormattedMessage defaultMessage="Hidden" /></option>
         </SelectField>
 
         <SelectField
@@ -120,9 +124,9 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
           inputRef={register}
           className="my-4"
         >
-          <option value="OPEN">Open</option>
-          <option value="REQUEST_TO_JOIN">Request to join</option>
-          <option value="INVITE_ONLY">Invite only</option>
+          <option value="OPEN"><FormattedMessage defaultMessage="Open" /></option>
+          <option value="REQUEST_TO_JOIN"><FormattedMessage defaultMessage="Request to join" /></option>
+          <option value="INVITE_ONLY"><FormattedMessage defaultMessage="Invite only" /></option>
         </SelectField>
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
@@ -135,20 +139,22 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             inputRef={register}
             className="my-4"
           >
-            <option value="true">Yes</option>
-            <option value="false">No</option>
+            <option value="true"><FormattedMessage defaultMessage="Yes" /></option>
+            <option value="false"><FormattedMessage defaultMessage="No" /></option>
           </SelectField>
         )}
 
         {isAdmin && (
           <>
-            <h2 className="text-xl font-semibold mt-8 mb-4">Danger Zone</h2>
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Danger Zone" />
+            </h2>
             <Button
               onClick={() => setIsDeleteModalOpened(true)}
               variant="secondary"
               color="red"
             >
-              Delete this round
+              <FormattedMessage defaultMessage="Delete this round" />
             </Button>
           </>
         )}
@@ -160,7 +166,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             disabled={!(isDirty || round.color !== color)}
             loading={loading}
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </div>
       </form>

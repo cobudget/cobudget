@@ -5,6 +5,7 @@ import { AddIcon } from "components/Icons";
 
 import AddOrEditGuideline from "./EditGuideline";
 import DraggableGuidelines from "./DraggableGuidelines";
+import { FormattedMessage } from "react-intl";
 
 const Guidelines = ({ round }) => {
   const [addGuidelineModalOpen, setAddGuidelineModalOpen] = useState(false);
@@ -12,10 +13,16 @@ const Guidelines = ({ round }) => {
 
   return (
     <div className="px-6">
-      <h1 className="text-2xl font-semibold mb-2">Guidelines</h1>
+      <h1 className="text-2xl font-semibold mb-2">
+        <FormattedMessage defaultMessage="Guidelines" />
+      </h1>
       <p className="text-gray-700 mb-4">
-        Set up the guidelines that {process.env.BUCKET_NAME_PLURAL} should
-        follow.
+        <FormattedMessage 
+          defaultMessage="Set up the guidelines that {bucketName} should follow."
+          values={{
+            bucketName: process.env.BUCKET_NAME_PLURAL
+          }}
+        />
       </p>
 
       <DraggableGuidelines
@@ -31,7 +38,8 @@ const Guidelines = ({ round }) => {
           onClick={() => setAddGuidelineModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> Add guideline
+          <AddIcon className="h-5 w-5 mr-1" /> 
+          <FormattedMessage defaultMessage="Add guideline" />
         </Button>
       </div>
       {(addGuidelineModalOpen || editingGuideline) && (

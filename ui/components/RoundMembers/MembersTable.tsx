@@ -21,7 +21,6 @@ import { AddIcon } from "components/Icons";
 import Avatar from "components/Avatar";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
-import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
@@ -179,11 +178,21 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setAllocateModalOpen(true)}
           >
-            {thousandSeparator(member.balance / 100)} {round.currency}
+            <FormattedNumber 
+              value={member.balance / 100}
+              style="currency"
+              currencyDisplay={"symbol"}
+              currency={round.currency}
+            />
           </button>
         ) : (
           <span>
-            {thousandSeparator(member.balance / 100)} {round.currency}
+            <FormattedNumber 
+              value={member.balance / 100}
+              style="currency"
+              currencyDisplay={"symbol"}
+              currency={round.currency}
+            />
           </span>
         )}
 
@@ -217,6 +226,7 @@ const RoundMembersTable = ({
   isAdmin,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
+  const intl = useIntl();
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -224,16 +234,16 @@ const RoundMembersTable = ({
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>User</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Bio</TableCell>
-              <TableCell align="right">Role</TableCell>
+              <TableCell><FormattedMessage defaultMessage="User" /></TableCell>
+              <TableCell><FormattedMessage defaultMessage="Email" /></TableCell>
+              <TableCell><FormattedMessage defaultMessage="Bio" /></TableCell>
+              <TableCell align="right"><FormattedMessage defaultMessage="Role" /></TableCell>
               <TableCell align="right">
                 <div className="flex items-center justify-end space-x-1">
-                  <span className="block">Balance</span>{" "}
+                  <span className="block"><FormattedMessage defaultMessage="Balance" /></span>{" "}
                   {isAdmin && (
                     <Tooltip
-                      title="Allocate to all members"
+                      title={intl.formatMessage({ defaultMessage:"Allocate to all members" })}
                       position="bottom"
                       size="small"
                     >
@@ -252,7 +262,7 @@ const RoundMembersTable = ({
                   />
                 )}
               </TableCell>
-              {isAdmin && <TableCell align="right">Actions</TableCell>}
+              {isAdmin && <TableCell align="right"><FormattedMessage defaultMessage="Actions"/></TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>

@@ -4,6 +4,7 @@ import { Checkbox, FormControlLabel } from "@material-ui/core";
 import TextField from "./TextField";
 import Button from "./Button";
 import Banner from "components/Banner";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -20,6 +21,7 @@ export default function AuthenticationForm({
   const router = useRouter();
   const { r } = router.query;
   const redirect = r?.toString();
+  const intl = useIntl();
 
   return (
     <div>
@@ -54,7 +56,7 @@ export default function AuthenticationForm({
             value: email,
             onChange: (evt) => setEmail(evt.target.value),
           }}
-          label="Email"
+          label={intl.formatMessage({ defaultMessage:"Email"})}
           className="mb-4"
           placeholder="me@hello.com"
         />
@@ -65,7 +67,7 @@ export default function AuthenticationForm({
               onChange={(evt) => setRememberMe(evt.target.checked)}
             />
           }
-          label="Keep me logged in"
+          label={intl.formatMessage({ defaultMessage:"Keep me logged in"})}
         />
         <Button
           type="submit"
@@ -73,7 +75,7 @@ export default function AuthenticationForm({
           disabled={!email?.length}
           loading={loading}
         >
-          Send magic link
+          <FormattedMessage defaultMessage="Send magic link" />
         </Button>
       </form>
 
@@ -87,9 +89,11 @@ export default function AuthenticationForm({
               variant="critical"
               title="Problem logging in with Facebook"
             >
+              <FormattedMessage defaultMessage="
               To log in with Facebook, please allow us to get your email
               address. This is needed to notify you of important events in the
               app. You can always change what emails you receive from us.
+              " />
             </Banner>
           )}
           <Button
@@ -100,7 +104,7 @@ export default function AuthenticationForm({
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >
-            Login with Facebook
+            <FormattedMessage defaultMessage="Login with Facebook" />
           </Button>
         </div>
       )}
@@ -113,7 +117,7 @@ export default function AuthenticationForm({
             color="white"
             variant="secondary"
           >
-            Login with Google
+            <FormattedMessage defaultMessage="Login with Google" />
           </Button>
         </div>
       )}
