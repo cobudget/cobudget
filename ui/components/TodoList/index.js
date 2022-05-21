@@ -5,6 +5,7 @@ import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const GET_TODO_INFO = gql`
   query TodoInfo($groupId: ID!, $groupSlug: String!) {
@@ -68,21 +69,29 @@ const TodoList = ({ currentGroup }) => {
     SET_TODOS_FINISHED
   );
   const [allDone, setAllDone] = useState(false);
+  const intl = useIntl();
 
   const rawTodos = [
     {
-      title: "Create community",
-      desc: `This is your own home on the ${process.env.PLATFORM_NAME} platform, now available under ${process.env.DEPLOY_URL}/${currentGroup.slug}`,
+      title: intl.formatMessage({ defaultMessage: "Create community" }),
+      desc: intl.formatMessage(
+        { defaultMessage: `This is your own home on the {bucketName} platform, now available under {deployUrl}/{slug}`},
+        { values: {
+          bucketName: process.env.PLATFORM_NAME,
+          deployUrl: process.env.DEPLOY_URL,
+          slug: currentGroup.slug,
+        }}
+      ),
       link: null,
     },
     {
-      title: "Invite members",
-      desc: "Invite your community members by email",
+      title: intl.formatMessage({ defaultMessage:"Invite members" }),
+      desc: intl.formatMessage({ defaultMessage:"Invite your community members by email" }),
       link: `/${currentGroup.slug}/members`,
     },
     {
-      title: "Create first round",
-      desc: "A round is a page for gathering ideas from the community",
+      title: intl.formatMessage({ defaultMessage:"Create first round" }),
+      desc: intl.formatMessage({ defaultMessage:"A round is a page for gathering ideas from the community" }),
       link: `/${currentGroup.slug}/new-round`,
     },
   ];
@@ -126,7 +135,7 @@ const TodoList = ({ currentGroup }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h1 className="text-2xl font-semibold mb-5 mt-2 text-center">
-        {"👌 Let's get this ball rolling!"}
+        <FormattedMessage defaultMessage="👌 Let's get this ball rolling!" />
       </h1>
       <LoadingBar ratio={doneRatio} />
       <div className="flex flex-col space-y-2">
@@ -143,12 +152,14 @@ const TodoList = ({ currentGroup }) => {
       <div className="mt-4">
         <NavItem
           onClick={() =>
-            window.confirm("Are you sure you want skip this introduction?") &&
+            window.confirm(
+              intl.formatMessage({ defaultMessage: "Are you sure you want skip this introduction?" })
+            ) &&
             setTodosFinished({ groupId: currentGroup.id })
           }
           className="text-xs opacity-70 ml-auto"
         >
-          Hide intro
+          <FormattedMessage defaultMessage="Hide intro" />
         </NavItem>
       </div>
     </div>

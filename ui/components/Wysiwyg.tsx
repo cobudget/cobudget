@@ -65,6 +65,7 @@ import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -179,9 +180,13 @@ function MentionComponent({ roundId }) {
         fetching ? (
           <HappySpinner className="m-3" />
         ) : tooShortSearch ? (
-          <div className="text-gray-700 m-3">Type to search for a user</div>
+          <div className="text-gray-700 m-3">
+            <FormattedMessage defaultMessage="Type to search for a user" />
+          </div>
         ) : (
-          <div className="text-gray-700 m-3">No user found</div>
+          <div className="text-gray-700 m-3">
+            <FormattedMessage defaultMessage="No user found" />
+          </div>
         )
       }
     />
@@ -384,12 +389,13 @@ const Wysiwyg = ({
 
     return () => _filePicker?.removeEventListener("change", detectFileUpload);
   }, [filePicker, fileUploadFileHandler]);
+  const intl = useIntl();
 
   const toolbarItems = useCallback(
     (): ToolbarItemUnion[] => [
       {
         type: ComponentItem.ToolbarGroup,
-        label: "Simple Formatting",
+        label: intl.formatMessage({ defaultMessage:"Simple Formatting"}),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -416,7 +422,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: "Heading Formatting",
+        label: intl.formatMessage({ defaultMessage:"Heading Formatting" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -441,7 +447,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: "Simple Formatting",
+        label: intl.formatMessage({ defaultMessage:"Simple Formatting" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -472,7 +478,7 @@ const Wysiwyg = ({
       // },
       {
         type: ComponentItem.ToolbarGroup,
-        label: "Lists",
+        label: intl.formatMessage({ defaultMessage:"Lists" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -503,7 +509,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: "History",
+        label: intl.formatMessage({ defaultMessage:"History" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -551,7 +557,7 @@ const Wysiwyg = ({
               <Toolbar
                 items={toolbarItems()}
                 refocusEditor
-                label="Top Toolbar"
+                label={intl.formatMessage({ defaultMessage:"Top Toolbar"})}
               />
             </div>
             <EditorComponent />

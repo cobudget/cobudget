@@ -1,3 +1,4 @@
+/*missing-translation*/
 import { useEffect, useState } from "react";
 import { useMutation, gql } from "urql";
 

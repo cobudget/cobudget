@@ -5,6 +5,7 @@ import { FormGroup } from "reactstrap";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import TypeaheadInput from "./TypeaheadInput";
 import TypeBadge from "./TypeBadge";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const ADD_DEPENDENCY = gql`
   mutation AddDependency_addResponsibilityDependsOnResponsibilitiesMutation(
@@ -36,8 +37,8 @@ const AddDependency = ({ nodeId }) => {
   return (
     <FormGroup>
       <TypeaheadInput
-        label="Add dependency"
-        placeholder="Search responsibilities"
+        label={intl.formatMessage({ defaultMessage: "Add dependency" })}
+        placeholder={intl.formatMessage({ defaultMessage: "Search responsibilities" })}
         disabled={loadingAddDependency}
         searchQuery={gql`
           query AddDependency_searchResponsibilities($term: String!) {

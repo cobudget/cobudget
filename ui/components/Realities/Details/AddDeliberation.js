@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { FaUnlink } from "react-icons/fa";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import InfoForm from "./InfoForm";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const ADD_RESP_HAS_DELIBERATION = gql`
   mutation AddRespHasDeliberation_addHasDeliberationMutation(
@@ -32,6 +33,7 @@ const InvalidUrlText = styled.span`
 `;
 
 const AddDeliberation = ({ nodeId }) => {
+  const intl = useIntl();
   const realitiesApollo = getRealitiesApollo();
   const [createDeliberation] = useMutation(ADD_RESP_HAS_DELIBERATION, {
     client: realitiesApollo,
@@ -42,7 +44,9 @@ const AddDeliberation = ({ nodeId }) => {
       <Formik
         initialValues={{ url: "" }}
         validationSchema={yup.object().shape({
-          url: yup.string().required("URL is required").url("Invalid URL"),
+          url: yup.string()
+          .required(intl.formatMessage({ defaultMessage: "URL is required" }))
+          .url(intl.formatMessage({ defaultMessage: "Invalid URL"})),
         })}
         onSubmit={(values, { resetForm }) => {
           createDeliberation({
@@ -63,9 +67,9 @@ const AddDeliberation = ({ nodeId }) => {
         }) => (
           <div>
             <InfoForm
-              label="Add a discussion reference"
+              label={intl.formatMessage({ defaultMessage: "Add a discussion reference" })}
               inputName="url"
-              placeholder="Enter a discussion URL..."
+              placeholder={intl.formatMessage({ defaultMessage:"Enter a discussion URL..." })}
               value={values.url}
               handleChange={handleChange}
               handleBlur={handleBlur}

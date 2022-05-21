@@ -1,6 +1,9 @@
+/*missing-translation*/
+
 import { useQuery, gql, useMutation } from "urql";
 import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const USER_SETTINGS_QUERY = gql`
   query UserSettings {
@@ -97,7 +100,9 @@ const SettingsIndex = () => {
   return (
     <div className="page">
       <FormGroup className="max-w-xl mx-auto p-5 space-y-2 bg-white rounded-lg shadow">
-        <div>Please send me an email when:</div>
+        <div>
+          <FormattedMessage defaultMessage="Please send me an email when:" />
+        </div>
         {settingsMeta.map(({ key }) => (
           <EmailSettingItem
             key={key}
@@ -106,7 +111,9 @@ const SettingsIndex = () => {
             settingsMeta={settingsMeta}
           />
         ))}
-        <div>Admin e-mail settings:</div>
+        <div>
+          <FormattedMessage defaultMessage="Admin e-mail settings:" />
+        </div>
         {adminSettingsMeta.map(({ key }) => (
           <EmailSettingItem
             key={key}

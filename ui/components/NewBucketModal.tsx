@@ -8,6 +8,7 @@ import { Modal } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import toast from "react-hot-toast";
+import { FormattedMessage } from "react-intl";
 
 const CREATE_BUCKET = gql`
   mutation CreateBucket($roundId: ID!, $title: String!) {
@@ -53,14 +54,19 @@ const NewBucketModal = ({ round, handleClose, router }) => {
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <form onSubmit={handleSubmit(onSubmitCreate)}>
           <h1 className="text-xl font-semibold">
-            New {process.env.BUCKET_NAME_SINGULAR}
+            <FormattedMessage 
+              defaultMessage="New {bucketName}"
+              values={{
+                bucketName: process.env.BUCKET_NAME_SINGULAR
+              }}
+            />
           </h1>
 
           <TextField
             className="my-3"
             name="title"
             size="large"
-            placeholder="Title"
+            placeholder={intl.formatMessage({ defaultMessage:"Title"})}
             inputRef={register({
               required: "Required",
             })}
@@ -78,7 +84,7 @@ const NewBucketModal = ({ round, handleClose, router }) => {
               className="mr-3"
               color={round.color}
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button
               size="large"
@@ -86,7 +92,7 @@ const NewBucketModal = ({ round, handleClose, router }) => {
               loading={loading}
               color={round.color}
             >
-              Create
+              <FormattedMessage defaultMessage="Create" />
             </Button>
           </div>
         </form>

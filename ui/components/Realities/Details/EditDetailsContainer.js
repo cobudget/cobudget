@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import EditDetailsForm from "./EditDetailsForm";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const createEditDetailsMutation = (nodeType, isResp) => gql`
   mutation EditDetailsContainer_update${nodeType}(
@@ -59,13 +60,13 @@ const EditDetailsContainer = ({ node, isResp, stopEdit }) => {
       }}
       enableReinitialize
       validationSchema={yup.object().shape({
-        title: yup.string().required("Title is required"),
+        title: yup.string().required(intl.formatMessage({ defaultMessage:"Title is required" })),
         guide: yup
           .object()
           .shape({
             email: yup.string().required(),
           })
-          .typeError("Guide is required")
+          .typeError(intl.formatMessage({ defaultMessage:"Guide is required"}))
           .required(),
         realizer: yup
           .object()

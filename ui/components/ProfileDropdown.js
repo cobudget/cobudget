@@ -3,6 +3,7 @@ import Avatar from "./Avatar";
 import { modals } from "./Modal/index";
 import Link from "next/link";
 import thousandSeparator from "utils/thousandSeparator";
+import { FormattedMessage } from "react-intl";
 
 const css = {
   button:
@@ -90,13 +91,15 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
               }}
               className={css.button}
             >
-              Edit profile
+              <FormattedMessage defaultMessage="Edit profile" />
             </button>
             <Link href="/settings">
-              <a className={css.button}>Email settings</a>
+              <a className={css.button}>
+                <FormattedMessage defaultMessage="Email settings" />
+              </a>
             </Link>
             <a href="/api/auth/logout" className={css.button}>
-              Sign out
+              <FormattedMessage defaultMessage="Sign out" />
             </a>
           </div>
         </>

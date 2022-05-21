@@ -4,6 +4,7 @@ import { gql } from "@apollo/client";
 import { FormFeedback, FormGroup } from "reactstrap";
 import { TextField, Button } from "@material-ui/core";
 import TypeaheadInput from "./TypeaheadInput";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 function personToString(person) {
   if (!person) return "";
@@ -31,11 +32,15 @@ const EditDetailsForm = ({
   setFieldValue,
   isSubmitting,
   cancel,
-}) => (
+}) => {
+  
+  const intl = useIntl();
+
+  return (
   <form onSubmit={handleSubmit} className="space-y-4 pt-4">
     <FormGroup>
       <TextField
-        label="Title"
+        label={intl.formatMessage({ defaultMessage:"Title" })}
         variant="outlined"
         name="title"
         id="editDetailsTitle"
@@ -52,7 +57,7 @@ const EditDetailsForm = ({
       <div className={`col-span-full ${isResp ? "md:col-span-1" : ""}`}>
         <FormGroup>
           <TypeaheadInput
-            label="Guide"
+            label={intl.formatMessage({ defaultMessage:"Guide" })}
             name="guide"
             id="editDetailsGuide"
             selectedItem={values.guide}
@@ -74,7 +79,7 @@ const EditDetailsForm = ({
       {isResp && (
         <div className="col-span-full md:col-span-1">
           <TypeaheadInput
-            label="Realizer"
+            label={intl.formatMessage({ defaultMessage:"Realizer" })}
             name="realizer"
             id="editDetailsRealizer"
             selectedItem={values.realizer}
@@ -96,7 +101,7 @@ const EditDetailsForm = ({
     </div>
     <FormGroup>
       <TextField
-        label="Description"
+        label={intl.formatMessage({ defaultMessage:"Description" })}
         name="description"
         id="editDetailsDescription"
         type="textarea"
@@ -119,14 +124,15 @@ const EditDetailsForm = ({
         color="primary"
         disabled={isSubmitting}
       >
-        Save
+        <FormattedMessage defaultMessage="Save" />
       </Button>
       <Button onClick={cancel} disabled={isSubmitting}>
-        Cancel
+      <FormattedMessage defaultMessage="Cancel" />
       </Button>
     </div>
   </form>
-);
+)
+}
 
 EditDetailsForm.propTypes = {
   isResp: PropTypes.bool,

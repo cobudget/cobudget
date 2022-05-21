@@ -1,5 +1,7 @@
+/*missing-translation*/
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { FormattedMessage, useIntl, } from "react-intl";
 
 const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }) => {
   return [

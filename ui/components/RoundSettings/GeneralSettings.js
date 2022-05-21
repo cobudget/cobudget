@@ -108,7 +108,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <SelectField
           name="visibility"
-          label="Visibility"
+          label={intl.formatMessage({ defaultMessage:"Visibility" })}
           defaultValue={round.visibility}
           inputRef={register}
           className="my-4"
@@ -119,7 +119,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <SelectField
           name="registrationPolicy"
-          label="Registration policy"
+          label={intl.formatMessage({ defaultMessage:"Registration policy" })}
           defaultValue={round.registrationPolicy}
           inputRef={register}
           className="my-4"
@@ -134,7 +134,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
         {isAdmin && (
           <SelectField
             name="archived"
-            label="Archive round"
+            label={intl.formatMessage({ defaultMessage:"Archive round" })}
             defaultValue={round.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
