@@ -61,20 +61,38 @@ export default handler().post(async (req, res) => {
     {
       line_items: [
         {
-          name: "Contribution",
-          amount: contribution,
-          currency: bucket.round.currency.toLowerCase(),
-          quantity: 1,
+          price_data: {
+            currency: bucket.round.currency.toLowerCase(),
+            unit_amount: contribution,
+            product_data: {
+              name: "Contribution",
+              metadata: {
+                contribution: "true",
+              },
+            },
+          },
         },
         {
-          name: "Cobudget Tip",
-          amount: tipAmount,
-          currency: bucket.round.currency.toLowerCase(),
-          quantity: 1,
+          price_data: {
+            currency: bucket.round.currency.toLowerCase(),
+            unit_amount: tipAmount,
+            product_data: {
+              name: "Cobudget Tip",
+              metadata: {
+                tip: "true",
+              },
+            },
+          },
         },
       ],
       payment_intent_data: {
         application_fee_amount: tipAmount,
+      },
+      metadata: {
+        userId: roundMember.user.id,
+        bucketId,
+        contribution,
+        tipAmount,
       },
       customer_email: roundMember.user.email,
       mode: "payment",
