@@ -1,5 +1,3 @@
-/*missing-translation*/
-
 import { useMutation, gql } from "urql";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
@@ -58,12 +56,6 @@ const css = {
     "bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-800 mr-2",
 };
 
-const types = {
-  TEXT: "Short Text",
-  MULTILINE_TEXT: "Long Text",
-  BOOLEAN: "Yes/No",
-};
-
 const DragHandle = sortableHandle(() => (
   <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
@@ -76,6 +68,12 @@ const SortableItem = sortableElement(
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
     );
+
+    const types = {
+      TEXT: intl.formatMessage({ defaultMessage:"Short Text" }),
+      MULTILINE_TEXT: intl.formatMessage({ defaultMessage:"Long Text" }),
+      BOOLEAN: intl.formatMessage({ defaultMessage:"Yes/No" }),
+    };
 
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">

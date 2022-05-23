@@ -1,49 +1,66 @@
-/*missing-translation*/
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { useIntl, } from "react-intl";
 
-const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }) => {
+const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }, formatMessage) => {
   return [
-    { label: "Bucket", href: `/${groupSlug}/${roundSlug}/${bucketId}` },
+    { 
+      label: formatMessage({ defaultMessage: "Bucket" }), 
+      href: `/${groupSlug}/${roundSlug}/${bucketId}` 
+    },
     {
-      label: `Comments (${bucket.noOfComments})`,
+      label: formatMessage({defaultMessage: `Comments ({count})` }, {values: {count: bucket.noOfComments}}),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
-      label: `Funders (${bucket.noOfFunders})`,
+      label: formatMessage({defaultMessage: `Funders ({count})` }, { values: {count: bucket.noOfFunders} }),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/funders`,
     },
   ];
 };
 
-const groupItems = ({ currentUser, groupSlug }) => {
+const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
   return [
-    { label: "Overview", href: `/${groupSlug == "c" ? "" : groupSlug}` },
+    { 
+      label: formatMessage({ defaultMessage: "Overview" }), 
+      href: `/${groupSlug == "c" ? "" : groupSlug}` 
+    },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${groupSlug ?? "c"}/members`, admin: true },
-    { label: "Settings", href: `/${groupSlug ?? "c"}/settings`, admin: true },
+    { 
+      label: formatMessage({ defaultMessage: "Members"}), 
+      href: `/${groupSlug ?? "c"}/members`, admin: true 
+    },
+    { 
+      label: formatMessage({ defaultMessage: "Settings" }), 
+      href: `/${groupSlug ?? "c"}/settings`, admin: true 
+    },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
 
-export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
+export const roundItems = ({ currentUser, groupSlug, roundSlug }, formatMessage) => {
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
-    { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
+    { 
+      label: formatMessage({ defaultMessage: "Overview" }), 
+      href: `/${groupSlug}/${roundSlug}` 
+    },
+    { 
+      label: formatMessage({ defaultMessage: "About" }), 
+      href: `/${groupSlug}/${roundSlug}/about` 
+    },
     {
-      label: "Participants",
+      label: formatMessage({ defaultMessage: "Participants" }),
       href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,
     },
     {
-      label: "Transactions",
+      label: formatMessage({ defaultMessage: "Transactions" }),
       href: `/${groupSlug}/${roundSlug}/transactions`,
       admin: true,
     },
     {
-      label: "Settings",
+      label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug}/${roundSlug}/settings`,
       admin: true,
     },
@@ -60,6 +77,7 @@ export default function SubMenu({
   currentUser: any;
 }) {
   const router = useRouter();
+  const intl = useIntl();
 
   const items = router.query.bucket
     ? bucketItems({
@@ -67,14 +85,14 @@ export default function SubMenu({
         groupSlug: router.query.group,
         bucketId: router.query.bucket,
         bucket,
-      })
+      }, intl.formatMessage)
     : router.query.round
     ? roundItems({
         currentUser,
         roundSlug: router.query.round,
         groupSlug: router.query.group,
-      })
-    : groupItems({ currentUser, groupSlug: router.query.group ?? "c" });
+      }, intl.formatMessage)
+    : groupItems({ currentUser, groupSlug: router.query.group ?? "c" }, intl.formatMessage);
 
   const color = round?.color ?? "anthracit";
 

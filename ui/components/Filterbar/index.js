@@ -104,7 +104,9 @@ const Filterbar = ({
           onChange: onChangeTag,
         }}
       >
-        <option value="All tags"><FormattedMessage defaultMessage="All tags" /></option>
+        <option value="All tags">
+          {intl.formatMessage({ defaultMessage: "All tags" })}
+        </option>
         {round.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
             {tag.value}
