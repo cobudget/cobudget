@@ -193,7 +193,11 @@ const Header = ({
                             if (error) {
                               toast.error(error.message);
                             } else {
-                              toast.success(intl.formatMessage({ defaultMessage: "Invitation Accepted" }));
+                              toast.success(
+                                intl.formatMessage({
+                                  defaultMessage: "Invitation Accepted",
+                                })
+                              );
                             }
                           }
                         );
@@ -217,8 +221,13 @@ const Header = ({
                               } else {
                                 toast.success(
                                   round.registrationPolicy === "REQUEST_TO_JOIN"
-                                    ? intl.formatMessage({ defaultMessage: "Request sent!" })
-                                    : intl.formatMessage({ defaultMessage:"You joined this round!" })
+                                    ? intl.formatMessage({
+                                        defaultMessage: "Request sent!",
+                                      })
+                                    : intl.formatMessage({
+                                        defaultMessage:
+                                          "You joined this round!",
+                                      })
                                 );
                               }
                             }
@@ -226,8 +235,12 @@ const Header = ({
                         }
                       >
                         {round.registrationPolicy === "REQUEST_TO_JOIN"
-                          ? intl.formatMessage({ defaultMessage: "Request to join" })
-                          : intl.formatMessage({ defaultMessage: "Join round" }) }
+                          ? intl.formatMessage({
+                              defaultMessage: "Request to join",
+                            })
+                          : intl.formatMessage({
+                              defaultMessage: "Join round",
+                            })}
                       </NavItem>
                     )
                   }
@@ -251,7 +264,12 @@ const Header = ({
                 </>
               ) : (
                 <>
-                  <NavItem href={`/login`} roundColor={color}>
+                  <NavItem
+                    href={`/login${
+                      router.pathname === `/login` ? "" : "?r=" + router.asPath
+                    }`}
+                    roundColor={color}
+                  >
                     <FormattedMessage defaultMessage="Log in" />
                   </NavItem>
                   <NavItem href={`/signup`} roundColor={color} primary>
