@@ -1,8 +1,11 @@
+import { Prisma } from "@prisma/client";
 import { appLink } from "utils/internalLinks";
 import handler from "server/api-handler";
 import { getRoundMember } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 import stripe from "server/utils/stripe";
+
+const Decimal = Prisma.Decimal;
 
 export default handler().post(async (req, res) => {
   console.log("handling cchekout");
@@ -55,6 +58,36 @@ export default handler().post(async (req, res) => {
 
   const callbackLink = appLink("/api/stripe/return");
 
+  const taxRates = await stripe.taxRates.list({ limit: 100 });
+
+  //TODO
+  if (taxRates.has_more)
+    throw new Error("We should implement pagination for taxes");
+
+  let taxRateId = taxRates.data.find((rate) =>
+    new Decimal(bucket.exchangeVat).div(100).equals(rate.percentage)
+  )?.id;
+
+  if (!taxRateId) {
+    // There isn't an existing taxRate at this percentage, so we create a new one
+
+    console.log("creating new taxRate");
+
+    taxRateId = (
+      await stripe.taxRates.create({
+        display_name: "VAT",
+        inclusive: true,
+        percentage: new Decimal(bucket.exchangeVat).div(100).toNumber(),
+        metadata: {
+          createdByUserId: roundMember.user.id,
+          createdForBucketId: bucket.id,
+        },
+      })
+    ).id;
+  }
+
+  console.log("taxRateId", taxRateId);
+
   //TODO: taxes
   //TODO: text note about which round and bucket it's for
   const session = await stripe.checkout.sessions.create(
@@ -71,6 +104,8 @@ export default handler().post(async (req, res) => {
               },
             },
           },
+          // TODO: if donation, do 0 tax
+          tax_rates: [taxRateId],
         },
         {
           price_data: {
