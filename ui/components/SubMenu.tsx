@@ -14,14 +14,14 @@ const bucketItems = (
     {
       label: formatMessage(
         { defaultMessage: `Comments ({count})` },
-        { values: { count: bucket.noOfComments } }
+        { count: bucket.noOfComments }
       ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
       label: formatMessage(
         { defaultMessage: `Funders ({count})` },
-        { values: { count: bucket.noOfFunders } }
+        { count: bucket.noOfFunders }
       ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/funders`,
     },

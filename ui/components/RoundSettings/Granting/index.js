@@ -153,9 +153,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
                   "Require moderator approval of {bucketName} before funding",
               },
               {
-                values: {
-                  bucketName: process.env.BUCKET_NAME_PLURAL,
-                },
+                bucketName: process.env.BUCKET_NAME_PLURAL,
               }
             )}
             secondary={round.requireBucketApproval?.toString() ?? "false"}
@@ -197,9 +195,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
             primary={intl.formatMessage(
               { defaultMessage: "{bucketName} creation closes" },
               {
-                values: {
-                  bucketName: capitalize(process.env.BUCKET_NAME_PLURAL),
-                },
+                bucketName: capitalize(process.env.BUCKET_NAME_PLURAL),
               }
             )}
             secondary={

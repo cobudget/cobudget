@@ -47,7 +47,7 @@ const SetRequireBucketApproval = ({ closeModal, round }) => {
                   defaultMessage:
                     "Require moderator approval of {bucketName} before funding",
                 },
-                { values: { bucketName: process.env.BUCKET_NAME_PLURAL } }
+                { bucketName: process.env.BUCKET_NAME_PLURAL }
               )}
               defaultValue={round.requireBucketApproval ?? false}
               inputRef={register}

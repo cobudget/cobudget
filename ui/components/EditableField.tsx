@@ -23,6 +23,17 @@ const EditableField = ({
   maxLength = undefined,
   required = false,
   className = "",
+}: {
+  defaultValue: string;
+  name: string;
+  label: string;
+  canEdit: boolean;
+  MUTATION: any;
+  placeholder: string;
+  variables: any;
+  maxLength?: number;
+  required?: boolean;
+  className?: string;
 }) => {
   const [{ fetching: loading }, mutation] = useMutation(MUTATION);
   const intl = useIntl();
@@ -105,7 +116,7 @@ const EditableField = ({
             <Tooltip
               title={intl.formatMessage(
                 { defaultMessage: `Edit {name}` },
-                { values: { name: name } }
+                { name: name }
               )}
               position="bottom"
               size="small"

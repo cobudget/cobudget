@@ -42,7 +42,7 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
               name="maxAmountToBucketPerUser"
               label={intl.formatMessage(
                 { defaultMessage: `Max. amount to one {bucketName} per user` },
-                { values: { bucketName: process.env.BUCKET_NAME_SINGULAR } }
+                { bucketName: process.env.BUCKET_NAME_SINGULAR }
               )}
               defaultValue={round.maxAmountToBucketPerUser / 100}
               fullWidth

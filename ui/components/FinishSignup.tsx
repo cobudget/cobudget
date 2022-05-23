@@ -148,9 +148,7 @@ export default function FinishSignup({ isOpen, currentUser }) {
                         toast.success(
                           intl.formatMessage(
                             { defaultMessage: `Welcome to {bucketName}!` },
-                            {
-                              values: { bucketName: process.env.PLATFORM_NAME },
-                            }
+                            { bucketName: process.env.PLATFORM_NAME }
                           )
                         );
                       }

@@ -8,7 +8,7 @@ import { Modal } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import toast from "react-hot-toast";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const CREATE_BUCKET = gql`
   mutation CreateBucket($roundId: ID!, $title: String!) {
@@ -24,6 +24,7 @@ const CREATE_BUCKET = gql`
 `;
 
 const NewBucketModal = ({ round, handleClose, router }) => {
+  const intl = useIntl();
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
   const { handleSubmit, register, errors } = useForm();

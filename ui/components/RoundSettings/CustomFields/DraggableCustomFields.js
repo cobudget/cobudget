@@ -108,9 +108,7 @@ const SortableItem = sortableElement(
                           "Deleting a custom field would delete it from all the {bucketName} that use it. Are you sure?",
                       },
                       {
-                        values: {
-                          bucketName: process.env.BUCKET_NAME_PLURAL,
-                        },
+                        bucketName: process.env.BUCKET_NAME_PLURAL,
                       }
                     )
                   ) && deleteCustomField({ roundId, fieldId: customField.id })

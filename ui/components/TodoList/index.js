@@ -76,14 +76,12 @@ const TodoList = ({ currentGroup }) => {
       title: intl.formatMessage({ defaultMessage: "Create community" }),
       desc: intl.formatMessage(
         {
-          defaultMessage: `This is your own home on the {bucketName} platform, now available under {deployUrl}/{slug}`,
+          defaultMessage: `This is your own home on the {platformName} platform, now available under {deployUrl}/{slug}`,
         },
         {
-          values: {
-            bucketName: process.env.PLATFORM_NAME,
-            deployUrl: process.env.DEPLOY_URL,
-            slug: currentGroup.slug,
-          },
+          platformName: process.env.PLATFORM_NAME,
+          deployUrl: process.env.DEPLOY_URL,
+          slug: currentGroup.slug,
         }
       ),
       link: null,
