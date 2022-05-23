@@ -18,6 +18,7 @@ import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
 import LoadMore from "../../LoadMore";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const GROUP_MEMBERS_QUERY = gql`
   query GroupMembers($groupId: ID!, $offset: Int, $limit: Int) {
@@ -49,6 +50,7 @@ const ActionsDropdown = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const intl = useIntl();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -60,7 +62,7 @@ const ActionsDropdown = ({
   return (
     <>
       <IconButton
-        aria-label="more"
+        aria-label={intl.formatMessage({ defaultMessage: "more" })}
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
@@ -84,14 +86,21 @@ const ActionsDropdown = ({
             });
           }}
         >
-          {member.isAdmin ? "Remove admin" : "Make admin"}
+          {member.isAdmin
+            ? intl.formatMessage({ defaultMessage: "Remove admin" })
+            : intl.formatMessage({ defaultMessage: "Make admin" })}
         </MenuItem>
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete group membership from user with email ${member.email}?`
+                intl.formatMessage(
+                  {
+                    defaultMessage: `Are you sure you would like to delete group membership from user with email {email}?`,
+                  },
+                  { email: member.email }
+                )
               )
             ) {
               deleteGroupMember({
@@ -103,7 +112,12 @@ const ActionsDropdown = ({
                   toast.error(error.message);
                 } else {
                   toast.success(
-                    `Deleted group member with email ${member.email}`
+                    intl.formatMessage(
+                      {
+                        defaultMessage: `Deleted group member with email {email}`,
+                      },
+                      { email: member.email }
+                    )
                   );
                 }
                 handleClose();
@@ -111,7 +125,9 @@ const ActionsDropdown = ({
             }
           }}
         >
-          <Box color="error.main">Delete</Box>
+          <Box color="error.main">
+            <FormattedMessage defaultMessage="Delete" />
+          </Box>
         </MenuItem>
       </Menu>
     </>
@@ -148,6 +164,7 @@ const Page = ({
     },
   });
 
+  const intl = useIntl();
   const moreExist = data?.groupMembersPage?.moreExist;
   const groupMembers = data?.groupMembersPage?.groupMembers ?? [];
 
@@ -170,7 +187,12 @@ const Page = ({
             <Box display="flex" alignItems="center">
               <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
-                <Tooltip title="Email not verified" placement="right">
+                <Tooltip
+                  title={intl.formatMessage({
+                    defaultMessage: "Email not verified",
+                  })}
+                  placement="right"
+                >
                   <HelpOutlineOutlinedIcon fontSize="small" />
                 </Tooltip>
               )}
@@ -180,7 +202,11 @@ const Page = ({
             {member.bio}
           </TableCell>
           <TableCell align="right">
-            {member.isAdmin && <span className="mr-2">Admin</span>}
+            {member.isAdmin && (
+              <span className="mr-2">
+                <FormattedMessage defaultMessage="Admin" />
+              </span>
+            )}
           </TableCell>
           <TableCell align="right" padding="none">
             <ActionsDropdown
@@ -227,12 +253,24 @@ const GroupMembersTable = ({
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>Username</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Bio</TableCell>
-                <TableCell align="right">Role</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Username" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Name" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Email" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Bio" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Role" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Actions" />
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

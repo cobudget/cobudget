@@ -7,6 +7,7 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
@@ -24,6 +25,7 @@ const ALLOCATE_MUTATION = gql`
 const AllocateModal = ({ member, round, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
+  const intl = useIntl();
   const amount = Math.round(Number(inputValue) * 100);
 
   const [{ fetching: loading }, allocate] = useMutation(ALLOCATE_MUTATION);
@@ -39,14 +41,20 @@ const AllocateModal = ({ member, round, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage{" "}
-          {member.user.username
-            ? `@${member.user.username}'`
-            : member.user.name ?? "member"}
-          s balance
+          <FormattedMessage
+            defaultMessage="Manage {name}'s balance"
+            values={{
+              name: member.user.username
+                ? `@${member.user.username}`
+                : member.user.name ?? "member",
+            }}
+          />
         </h1>
         <Switch
-          options={["Add", "Set"]}
+          options={[
+            intl.formatMessage({ defaultMessage: "Add" }),
+            intl.formatMessage({ defaultMessage: "Set" }),
+          ]}
           setSelected={setSelectedType}
           selected={type}
           className="mx-auto mb-4"
@@ -64,7 +72,11 @@ const AllocateModal = ({ member, round, handleClose }) => {
                 toast.error(error.message);
               } else {
                 handleClose();
-                toast.success("Allocated funds successfully");
+                toast.success(
+                  intl.formatMessage({
+                    defaultMessage: "Allocated funds successfully",
+                  })
+                );
               }
             });
           }}
@@ -82,27 +94,49 @@ const AllocateModal = ({ member, round, handleClose }) => {
           <p className="text-center mb-4 text-sm text-gray-800">
             {type === "Add" ? (
               <>
-                Adding {thousandSeparator(amount / 100)} {round.currency} to{" "}
-                {thousandSeparator(member.balance / 100)} {round.currency}{" "}
-                <br />({thousandSeparator(total / 100)} {round.currency} in
-                total)
+                <FormattedMessage defaultMessage="Adding " />{" "}
+                <FormattedNumber
+                  value={amount / 100}
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={round.currency}
+                />{" "}
+                <FormattedMessage defaultMessage=" to " />{" "}
+                <FormattedNumber
+                  value={total / 100}
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={round.currency}
+                />{" "}
+                <FormattedMessage defaultMessage=" in total" />
               </>
             ) : (
               <>
-                Set balance to {thousandSeparator(amount / 100)}{" "}
-                {round.currency} <br />
-                (previously {thousandSeparator(member.balance / 100)}{" "}
-                {round.currency})
+                <FormattedMessage defaultMessage="Set balance to" />{" "}
+                <FormattedNumber
+                  value={amount / 100}
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={round.currency}
+                />
+                <br />
+                <FormattedMessage defaultMessage="previously" />{" "}
+                <FormattedNumber
+                  value={member.balance / 100}
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={round.currency}
+                />
               </>
             )}
           </p>
 
           <div className="flex space-x-3 justify-end">
             <Button onClick={handleClose} variant="secondary">
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button type="submit" loading={loading} disabled={disabled}>
-              Done
+              <FormattedMessage defaultMessage="Done" />
             </Button>
           </div>
         </form>

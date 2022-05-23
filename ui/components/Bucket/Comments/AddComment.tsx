@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -18,6 +18,7 @@ const schema = yup.object().shape({
 function AddComment() {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<any>();
+  const intl = useIntl();
   const { addComment, currentUser, bucket } = useContext<any>(Context);
 
   const { handleSubmit, register, errors, setValue, watch } = useForm({
@@ -36,7 +37,7 @@ function AddComment() {
     return (
       <Link href={`/${bucket.round.group.slug}/connect-discourse`} passHref>
         <Button color={bucket.round.color} nextJsLink className="my-2">
-          You need to connect to Discourse to comment
+          <FormattedMessage defaultMessage="You need to connect to Discourse to comment" />
         </Button>
       </Link>
     );
@@ -62,7 +63,9 @@ function AddComment() {
         <div className="min-w-0">
           <div className="mb-2">
             <TextField
-              placeholder="Add comment"
+              placeholder={intl.formatMessage({
+                defaultMessage: "Add comment",
+              })}
               multiline
               rows={1}
               error={Boolean(errors.content)}
@@ -86,7 +89,7 @@ function AddComment() {
               color={bucket.round.color}
               className="mr-2"
             >
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button
               type="submit"
@@ -94,7 +97,7 @@ function AddComment() {
               color={bucket.round.color}
               loading={submitting}
             >
-              Submit
+              <FormattedMessage defaultMessage="Submit" />
             </Button>
           </div>
         </div>

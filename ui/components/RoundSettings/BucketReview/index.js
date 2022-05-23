@@ -3,6 +3,7 @@ import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import capitalize from "utils/capitalize";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $bucketReviewIsOpen: Boolean) {
@@ -14,6 +15,7 @@ const EDIT_ROUND = gql`
 `;
 
 const BucketReview = ({ round }) => {
+  const intl = useIntl();
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
   const {
     handleSubmit,
@@ -24,11 +26,20 @@ const BucketReview = ({ round }) => {
   return (
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">
-        {capitalize(process.env.BUCKET_NAME_SINGULAR)} Review
+        <FormattedMessage
+          defaultMessage="{bucketName} Review"
+          values={{
+            bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR),
+          }}
+        />
       </h2>
       <p className="text-gray-700 mb-4">
-        If you have set up guidelines you can allow users to review each others{" "}
-        {process.env.BUCKET_NAME_PLURAL} according to them.
+        <FormattedMessage
+          defaultMessage="If you have set up guidelines you can allow users to review each others {bucketName} according to them."
+          values={{
+            bucketName: process.env.BUCKET_NAME_PLURAL,
+          }}
+        />
       </p>
       <form
         onSubmit={handleSubmit((variables) => {
@@ -43,13 +54,17 @@ const BucketReview = ({ round }) => {
       >
         <SelectField
           name="bucketReviewIsOpen"
-          label="Show Review Prompt"
+          label={intl.formatMessage({ defaultMessage: "Show Review Prompt" })}
           defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
-          <option value="true">true</option>
-          <option value="false">false</option>
+          <option value="true">
+            <FormattedMessage defaultMessage="true" />
+          </option>
+          <option value="false">
+            <FormattedMessage defaultMessage="false" />
+          </option>
         </SelectField>
 
         {/* <SelectField
@@ -81,7 +96,7 @@ const BucketReview = ({ round }) => {
             disabled={!isDirty}
             loading={loading}
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </div>
       </form>

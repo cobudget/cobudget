@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { CloseIcon, LoaderIcon } from "components/Icons";
 import uploadImageFiles from "utils/uploadImageFiles";
+import { FormattedMessage } from "react-intl";
 
 const ImageUpload = ({
   label,
@@ -42,7 +43,7 @@ const ImageUpload = ({
               {uploadingImage ? (
                 <LoaderIcon className="w-6 h-6 absolute animation-spin animation-linear animation-2s" />
               ) : (
-                "Upload image"
+                <FormattedMessage defaultMessage="Upload image" />
               )}
             </button>
             <input

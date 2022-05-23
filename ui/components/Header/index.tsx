@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const css = {
   mobileProfileItem:
@@ -102,6 +103,7 @@ const Header = ({
 }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const intl = useIntl();
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
@@ -191,13 +193,17 @@ const Header = ({
                             if (error) {
                               toast.error(error.message);
                             } else {
-                              toast.success("Invitation Accepted");
+                              toast.success(
+                                intl.formatMessage({
+                                  defaultMessage: "Invitation Accepted",
+                                })
+                              );
                             }
                           }
                         );
                       }}
                     >
-                      Accept Invitation
+                      <FormattedMessage defaultMessage="Accept Invitation" />
                     </NavItem>
                   ) : null}
                   {
@@ -215,8 +221,13 @@ const Header = ({
                               } else {
                                 toast.success(
                                   round.registrationPolicy === "REQUEST_TO_JOIN"
-                                    ? "Request sent!"
-                                    : "You joined this round!"
+                                    ? intl.formatMessage({
+                                        defaultMessage: "Request sent!",
+                                      })
+                                    : intl.formatMessage({
+                                        defaultMessage:
+                                          "You joined this round!",
+                                      })
                                 );
                               }
                             }
@@ -224,8 +235,12 @@ const Header = ({
                         }
                       >
                         {round.registrationPolicy === "REQUEST_TO_JOIN"
-                          ? "Request to join"
-                          : "Join round"}
+                          ? intl.formatMessage({
+                              defaultMessage: "Request to join",
+                            })
+                          : intl.formatMessage({
+                              defaultMessage: "Join round",
+                            })}
                       </NavItem>
                     )
                   }
@@ -235,7 +250,7 @@ const Header = ({
                       roundColor={color}
                       onClick={() => joinGroup({ groupId: group.id })}
                     >
-                      Join group
+                      <FormattedMessage defaultMessage="Join group" />
                     </NavItem>
                   )}
 
@@ -255,10 +270,10 @@ const Header = ({
                     }`}
                     roundColor={color}
                   >
-                    Log in
+                    <FormattedMessage defaultMessage="Log in" />
                   </NavItem>
                   <NavItem href={`/signup`} roundColor={color} primary>
-                    Sign up
+                    <FormattedMessage defaultMessage="Sign up" />
                   </NavItem>
                 </>
               )}
@@ -282,16 +297,18 @@ const Header = ({
                     }}
                     className={css.mobileProfileItem}
                   >
-                    Edit profile
+                    <FormattedMessage defaultMessage="Edit profile" />
                   </button>
                   <Link href={"/settings"}>
-                    <a className={css.mobileProfileItem}>Email settings</a>
+                    <a className={css.mobileProfileItem}>
+                      <FormattedMessage defaultMessage="Email settings" />
+                    </a>
                   </Link>
                   <a
                     href={"/api/auth/logout"}
                     className={css.mobileProfileItem}
                   >
-                    Sign out
+                    <FormattedMessage defaultMessage="Sign out" />
                   </a>
                 </div>
               </div>
