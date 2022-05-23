@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import TextField from "../TextField";
 import Button from "../Button";
 import Banner from "../Banner";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const DELETE_ROUND_MUTATION = gql`
   mutation DeleteRound($roundId: ID!) {
@@ -31,7 +31,7 @@ export default ({ round, handleClose, currentGroup }) => {
       } else {
         handleClose();
         Router.push(`/${currentGroup?.slug ?? "c"}/`);
-        toast.success(intl.formatMessage({ defaultMessage:"Round deleted"}));
+        toast.success(intl.formatMessage({ defaultMessage: "Round deleted" }));
       }
     });
   };
@@ -54,24 +54,27 @@ export default ({ round, handleClose, currentGroup }) => {
         <Banner
           className={"mb-4"}
           variant="critical"
-          title={intl.formatMessage({ defaultMessage: "Unexpected bad things will happen if you don’t read this!"})}
+          title={intl.formatMessage({
+            defaultMessage:
+              "Unexpected bad things will happen if you don’t read this!",
+          })}
         ></Banner>
         <p className="mb-4">
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="This action cannot be undone. This will permanently delete the <b>{roundTitle}</b> round, {bucketName} questions, comments and remove all collaborators."
             values={{
               roundTitle: round.title,
               bucketName: process.env.BUCKET_NAME_PLURAL,
-              b: msg => <b>{msg}</b>
+              b: (msg) => <b>{msg}</b>,
             }}
           />
-        </p> {" "}
+        </p>{" "}
         <p className="mb-4">
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="Please type <b>{round.slug}</b> to confirm."
             values={{
               slug: round.slug,
-              b: msg => <b>{msg}</b>
+              b: (msg) => <b>{msg}</b>,
             }}
           />
         </p>

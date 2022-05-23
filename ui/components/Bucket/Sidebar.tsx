@@ -226,7 +226,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               onClick={() =>
                 confirm(
                   intl.formatMessage(
-                    { defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.` },
+                    {
+                      defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.`,
+                    },
                     { bucketName: process.env.BUCKET_NAME_SINGULAR }
                   )
                 ) &&
@@ -274,8 +276,10 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               onClick={() =>
                 confirm(
                   intl.formatMessage(
-                    {defaultMessage: `Are you sure you would like to mark this {bucketName} as completed? This can't be undone.`},
-                    {bucketName: process.env.BUCKET_NAME_SINGULAR}
+                    {
+                      defaultMessage: `Are you sure you would like to mark this {bucketName} as completed? This can't be undone.`,
+                    },
+                    { bucketName: process.env.BUCKET_NAME_SINGULAR }
                   )
                 ) &&
                 markAsCompleted({ bucketId: bucket.id }).then(
@@ -291,7 +295,11 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           {canEdit && (
             <div className="relative">
               <div className="flex justify-end">
-                <Tooltip title={intl.formatMessage({ defaultMessage: "More actions"})} position="bottom" size="small">
+                <Tooltip
+                  title={intl.formatMessage({ defaultMessage: "More actions" })}
+                  position="bottom"
+                  size="small"
+                >
                   <IconButton onClick={() => setActionsDropdownOpen(true)}>
                     <DotsHorizontalIcon />
                   </IconButton>
@@ -354,7 +362,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        intl.formatMessage({defaultMessage: `Are you sure you would like to delete this {bucketName}?`}, { bucketName: process.env.BUCKET_NAME_SINGULAR })
+                        intl.formatMessage(
+                          {
+                            defaultMessage: `Are you sure you would like to delete this {bucketName}?`,
+                          },
+                          { bucketName: process.env.BUCKET_NAME_SINGULAR }
+                        )
                       ) &&
                       deleteBucket({ bucketId: bucket.id }).then(
                         ({ error }) => {
@@ -371,7 +384,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                             toast.success(
                               `${capitalize(
                                 process.env.BUCKET_NAME_SINGULAR
-                              )} ${intl.formatMessage({ defaultMessage: "deleted" })}`
+                              )} ${intl.formatMessage({
+                                defaultMessage: "deleted",
+                              })}`
                             );
                           }
                         }
@@ -400,7 +415,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 }
               >
                 <Tooltip
-                  title={intl.formatMessage({ defaultMessage: "Edit co-creators" })}
+                  title={intl.formatMessage({
+                    defaultMessage: "Edit co-creators",
+                  })}
                   position="bottom"
                   size="small"
                 >

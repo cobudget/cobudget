@@ -63,7 +63,9 @@ function AddComment() {
         <div className="min-w-0">
           <div className="mb-2">
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage:"Add comment"})}
+              placeholder={intl.formatMessage({
+                defaultMessage: "Add comment",
+              })}
               multiline
               rows={1}
               error={Boolean(errors.content)}

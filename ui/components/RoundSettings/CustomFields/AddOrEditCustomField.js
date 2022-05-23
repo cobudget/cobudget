@@ -106,10 +106,10 @@ export default function AddOrEditCustomField({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <h1 className="text-lg font-semibold mb-2">
-          <FormattedMessage 
-            defaultMessage="{action} for item" 
+          <FormattedMessage
+            defaultMessage="{action} for item"
             values={{
-              action: editing ? "Editing" : "Add"
+              action: editing ? "Editing" : "Add",
             }}
           />
         </h1>
@@ -127,7 +127,7 @@ export default function AddOrEditCustomField({
         >
           <div className="grid gap-4">
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage:"Name"})}
+              placeholder={intl.formatMessage({ defaultMessage: "Name" })}
               name={"customField.name"}
               defaultValue={customField.name}
               inputRef={register}
@@ -136,7 +136,9 @@ export default function AddOrEditCustomField({
               color={round.color}
             />
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage:"Description" })}
+              placeholder={intl.formatMessage({
+                defaultMessage: "Description",
+              })}
               name={"customField.description"}
               defaultValue={customField.description}
               inputRef={register}
@@ -156,14 +158,22 @@ export default function AddOrEditCustomField({
                   onChange: (e) => setTypeInputValue(e.target.value),
                 }}
               >
-                <option value="TEXT"><FormattedMessage defaultMessage="Short Text" /></option>
-                <option value="MULTILINE_TEXT"><FormattedMessage defaultMessage="Long Text" /></option>
-                <option value="BOOLEAN"><FormattedMessage defaultMessage="Yes/No" /></option>
+                <option value="TEXT">
+                  <FormattedMessage defaultMessage="Short Text" />
+                </option>
+                <option value="MULTILINE_TEXT">
+                  <FormattedMessage defaultMessage="Long Text" />
+                </option>
+                <option value="BOOLEAN">
+                  <FormattedMessage defaultMessage="Yes/No" />
+                </option>
               </SelectField>
               {typeInputValue == "TEXT" ||
               typeInputValue == "MULTILINE_TEXT" ? (
                 <TextField
-                  placeholder={intl.formatMessage({ defaultMessage:"Character limit"})}
+                  placeholder={intl.formatMessage({
+                    defaultMessage: "Character limit",
+                  })}
                   name={"customField.limit"}
                   defaultValue={customField.limit}
                   inputRef={register}
@@ -183,7 +193,9 @@ export default function AddOrEditCustomField({
               <Controller
                 as={
                   <FormControlLabel
-                    label={intl.formatMessage({ defaultMessage:"Is Required"})}
+                    label={intl.formatMessage({
+                      defaultMessage: "Is Required",
+                    })}
                     control={
                       <Checkbox
                         onChange={(e) => {
@@ -213,7 +225,7 @@ export default function AddOrEditCustomField({
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
               <Button type="submit" loading={loading} color={round.color}>
-              <FormattedMessage defaultMessage="Save" />
+                <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>

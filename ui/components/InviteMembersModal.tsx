@@ -11,7 +11,7 @@ import { DeleteIcon } from "components/Icons";
 import IconButton from "components/IconButton";
 import styled from "styled-components";
 import toast from "react-hot-toast";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -121,11 +121,11 @@ const InviteMembersModal = ({
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h1 className="text-xl font-semibold mb-2">
-            {
-              roundId ?
+            {roundId ? (
               <FormattedMessage defaultMessage="Invite participants to this round" />
-              : <FormattedMessage defaultMessage="Invite participants" />
-            }
+            ) : (
+              <FormattedMessage defaultMessage="Invite participants" />
+            )}
           </h1>
           {/*
           <Banner
@@ -169,7 +169,9 @@ const InviteMembersModal = ({
             })}
           >
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage:"Comma separated emails"})}
+              placeholder={intl.formatMessage({
+                defaultMessage: "Comma separated emails",
+              })}
               multiline
               rows={4}
               name="emails"
@@ -180,7 +182,10 @@ const InviteMembersModal = ({
                 required: "Required",
                 pattern: {
                   value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                  message: intl.formatMessage({ defaultMessage:"Need to be a comma separated list of emails" })
+                  message: intl.formatMessage({
+                    defaultMessage:
+                      "Need to be a comma separated list of emails",
+                  }),
                 },
               })}
             />
@@ -195,8 +200,20 @@ const InviteMembersModal = ({
                     onClick={() => {
                       navigator.clipboard
                         .writeText(link)
-                        .then(() => toast.success(intl.formatMessage({ defaultMessage:"Invitation link copied" })))
-                        .catch(() => toast.error(intl.formatMessage({ defaultMessage:"Error while copying link" })));
+                        .then(() =>
+                          toast.success(
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link copied",
+                            })
+                          )
+                        )
+                        .catch(() =>
+                          toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "Error while copying link",
+                            })
+                          )
+                        );
                     }}
                   >
                     <FormattedMessage defaultMessage="Copy" />
@@ -215,11 +232,16 @@ const InviteMembersModal = ({
                         }).then((result) => {
                           if (result.error) {
                             return toast.error(
-                              intl.formatMessage({ defaultMessage:"Could not delete invitation link" })
+                              intl.formatMessage({
+                                defaultMessage:
+                                  "Could not delete invitation link",
+                              })
                             );
                           }
                           toast.success(
-                            intl.formatMessage({ defaultMessage:"Invitation link deleted" })
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link deleted",
+                            })
                           );
                         });
                       }}
@@ -246,9 +268,17 @@ const InviteMembersModal = ({
                     roundId,
                   }).then((result) => {
                     if (result.error) {
-                      return toast.error(intl.formatMessage({ defaultMessage:"Could not create invite link" }))
+                      return toast.error(
+                        intl.formatMessage({
+                          defaultMessage: "Could not create invite link",
+                        })
+                      );
                     }
-                    toast.success(intl.formatMessage({ defaultMessage: "Invite link created"}));
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Invite link created",
+                      })
+                    );
                   });
                 }}
               >

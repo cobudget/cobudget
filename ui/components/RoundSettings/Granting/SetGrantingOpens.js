@@ -7,7 +7,7 @@ import DayjsUtils from "@date-io/dayjs";
 
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
-import { FormattedMessage, useIntl} from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const SetGrantingOpens = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
@@ -42,7 +42,9 @@ const SetGrantingOpens = ({ closeModal, round }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label={intl.formatMessage({ defaultMessage:"Funding opens date"})}
+                label={intl.formatMessage({
+                  defaultMessage: "Funding opens date",
+                })}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}

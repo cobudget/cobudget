@@ -17,10 +17,10 @@ const Guidelines = ({ round }) => {
         <FormattedMessage defaultMessage="Guidelines" />
       </h1>
       <p className="text-gray-700 mb-4">
-        <FormattedMessage 
+        <FormattedMessage
           defaultMessage="Set up the guidelines that {bucketName} should follow."
           values={{
-            bucketName: process.env.BUCKET_NAME_PLURAL
+            bucketName: process.env.BUCKET_NAME_PLURAL,
           }}
         />
       </p>
@@ -38,7 +38,7 @@ const Guidelines = ({ round }) => {
           onClick={() => setAddGuidelineModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> 
+          <AddIcon className="h-5 w-5 mr-1" />
           <FormattedMessage defaultMessage="Add guideline" />
         </Button>
       </div>

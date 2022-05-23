@@ -80,7 +80,7 @@ const DraggableItems = ({
       {localItems &&
         localItems
           // lol this sort actually mutates localItems, which turns out to be
-          // central to the functioning of this 
+          // central to the functioning of this
           .sort((a, b) => a.position - b.position)
           .map((item, index) => (
             <SortableItem

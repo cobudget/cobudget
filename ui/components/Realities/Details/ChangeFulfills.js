@@ -10,7 +10,7 @@ import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import { GET_RESPONSIBILITIES } from "lib/realities/queries";
 import TypeaheadInput from "./TypeaheadInput";
 import TypeBadge from "./TypeBadge";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const StyledFormGroup = styled(FormGroup)`
   margin-bottom: 2em;
@@ -59,11 +59,13 @@ const ChangeFulfills = ({ node }) => {
 
   return (
     <StyledFormGroup>
-      <Label><FormattedMessage defaultMessage="Fulfills" /></Label>
+      <Label>
+        <FormattedMessage defaultMessage="Fulfills" />
+      </Label>
       <div>
         {editing ? (
           <TypeaheadInput
-            placeholder={intl.formatMessage({ defaultMessage:"Search needs" })}
+            placeholder={intl.formatMessage({ defaultMessage: "Search needs" })}
             searchQuery={gql`
               query ChangeOwner_searchNeeds($term: String!) {
                 needs(search: $term) {

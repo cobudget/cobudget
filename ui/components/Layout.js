@@ -59,7 +59,7 @@ const Layout = ({
         <div className="space-x-6">
           {process.env.PRIVACY_POLICY_URL && (
             <LinkOut href="/privacy-policy">
-              <FormatMessage defaultMessage="Privacy Policy" />
+              <FormattedMessage defaultMessage="Privacy Policy" />
             </LinkOut>
           )}
           {process.env.TERMS_URL && (

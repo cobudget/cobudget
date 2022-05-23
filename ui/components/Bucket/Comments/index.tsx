@@ -5,7 +5,6 @@ import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 import { FormattedMessage } from "react-intl";
 
-
 const Comments = ({ currentUser, bucket, router }) => {
   const context = useCommentContext({
     from: 0,
@@ -28,11 +27,11 @@ const Comments = ({ currentUser, bucket, router }) => {
                 <div className="flex justify-between items-center">
                   {!!total && (
                     <h2 className="font-medium text-gray-600" id="comments">
-                      <FormattedMessage 
+                      <FormattedMessage
                         defaultMessage="{length} of {total} {total, plural, one {comment} other {comments}}"
                         values={{
                           total,
-                          length: comments.length
+                          length: comments.length,
                         }}
                       />
                     </h2>

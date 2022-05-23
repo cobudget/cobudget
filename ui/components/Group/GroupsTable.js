@@ -56,7 +56,9 @@ const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
             if (
               confirm(
                 intl.formatMessage(
-                  { defaultMessage: `Are you sure you would like to delete group {groupName}?` },
+                  {
+                    defaultMessage: `Are you sure you would like to delete group {groupName}?`,
+                  },
                   { groupName: group.name }
                 )
               )
@@ -66,7 +68,9 @@ const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {
               });
           }}
         >
-          <Box color="error.main"><FormattedMessage defaultMessage="Delete" /></Box>
+          <Box color="error.main">
+            <FormattedMessage defaultMessage="Delete" />
+          </Box>
         </MenuItem>
       </Menu>
     </>
@@ -80,10 +84,18 @@ export default ({ groups, updateGroup, deleteGroup }) => {
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell><FormattedMessage defaultMessage="Logo" /></TableCell>
-              <TableCell><FormattedMessage defaultMessage="Name" /></TableCell>
-              <TableCell><FormattedMessage defaultMessage="Slug" /></TableCell>
-              <TableCell align="right"><FormattedMessage defaultMessage="Actions" /></TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="Logo" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="Name" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="Slug" />
+              </TableCell>
+              <TableCell align="right">
+                <FormattedMessage defaultMessage="Actions" />
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

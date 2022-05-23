@@ -82,7 +82,10 @@ const GroupIndex = ({ currentUser }) => {
               defaultValue={group?.info}
               name="info"
               label={intl.formatMessage({ defaultMessage: "Add message" })}
-              placeholder={ intl.formatMessage({defaultMessage: "# Welcome to {groupName}'s page"}, { groupName: group?.name })}
+              placeholder={intl.formatMessage(
+                { defaultMessage: "# Welcome to {groupName}'s page" },
+                { groupName: group?.name }
+              )}
               canEdit={currentUser?.currentGroupMember?.isAdmin}
               className="h-10"
               MUTATION={gql`
@@ -102,7 +105,7 @@ const GroupIndex = ({ currentUser }) => {
             {currentUser?.currentGroupMember?.isAdmin && (
               <Link href={`/${group.slug}/new-round`}>
                 <Button size="large" color="anthracit" className="float-right">
-                <FormattedMessage defaultMessage="New round" />
+                  <FormattedMessage defaultMessage="New round" />
                 </Button>
               </Link>
             )}

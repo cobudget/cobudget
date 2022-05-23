@@ -9,7 +9,7 @@ import slugify from "../../utils/slugify";
 import DeleteRoundModal from "./DeleteRoundModal";
 import toast from "react-hot-toast";
 import router from "next/router";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const EDIT_ROUND = gql`
   mutation editRound(
@@ -74,7 +74,9 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             if (error) {
               toast.error(error.message.replace("[GraphQL]", ""));
             } else {
-              toast.success(intl.formatMessage({ defaultMessage:"Settings updated!"}));
+              toast.success(
+                intl.formatMessage({ defaultMessage: "Settings updated!" })
+              );
               router.replace(
                 `/${currentGroup?.slug ?? "c"}/${variables.slug}/settings`
               );
@@ -84,8 +86,8 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
       >
         <TextField
           name="title"
-          label={intl.formatMessage({ defaultMessage:"Title" })}
-          placeholder={intl.formatMessage({ defaultMessage:"Title" })}
+          label={intl.formatMessage({ defaultMessage: "Title" })}
+          placeholder={intl.formatMessage({ defaultMessage: "Title" })}
           defaultValue={round.title}
           inputRef={register}
           className="my-4"
@@ -93,8 +95,8 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <TextField
           name="slug"
-          label={intl.formatMessage({ defaultMessage:"URL" })}
-          placeholder={intl.formatMessage({ defaultMessage:"Slug" })}
+          label={intl.formatMessage({ defaultMessage: "URL" })}
+          placeholder={intl.formatMessage({ defaultMessage: "Slug" })}
           defaultValue={round.slug}
           inputRef={register}
           startAdornment={startUrl}
@@ -108,25 +110,35 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <SelectField
           name="visibility"
-          label={intl.formatMessage({ defaultMessage:"Visibility" })}
+          label={intl.formatMessage({ defaultMessage: "Visibility" })}
           defaultValue={round.visibility}
           inputRef={register}
           className="my-4"
         >
-          <option value="PUBLIC"><FormattedMessage defaultMessage="Public" /></option>
-          <option value="HIDDEN"><FormattedMessage defaultMessage="Hidden" /></option>
+          <option value="PUBLIC">
+            <FormattedMessage defaultMessage="Public" />
+          </option>
+          <option value="HIDDEN">
+            <FormattedMessage defaultMessage="Hidden" />
+          </option>
         </SelectField>
 
         <SelectField
           name="registrationPolicy"
-          label={intl.formatMessage({ defaultMessage:"Registration policy" })}
+          label={intl.formatMessage({ defaultMessage: "Registration policy" })}
           defaultValue={round.registrationPolicy}
           inputRef={register}
           className="my-4"
         >
-          <option value="OPEN"><FormattedMessage defaultMessage="Open" /></option>
-          <option value="REQUEST_TO_JOIN"><FormattedMessage defaultMessage="Request to join" /></option>
-          <option value="INVITE_ONLY"><FormattedMessage defaultMessage="Invite only" /></option>
+          <option value="OPEN">
+            <FormattedMessage defaultMessage="Open" />
+          </option>
+          <option value="REQUEST_TO_JOIN">
+            <FormattedMessage defaultMessage="Request to join" />
+          </option>
+          <option value="INVITE_ONLY">
+            <FormattedMessage defaultMessage="Invite only" />
+          </option>
         </SelectField>
 
         <ColorPicker color={color} setColor={(color) => setColor(color)} />
@@ -134,13 +146,17 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
         {isAdmin && (
           <SelectField
             name="archived"
-            label={intl.formatMessage({ defaultMessage:"Archive round" })}
+            label={intl.formatMessage({ defaultMessage: "Archive round" })}
             defaultValue={round.archived ? "true" : "false"}
             inputRef={register}
             className="my-4"
           >
-            <option value="true"><FormattedMessage defaultMessage="Yes" /></option>
-            <option value="false"><FormattedMessage defaultMessage="No" /></option>
+            <option value="true">
+              <FormattedMessage defaultMessage="Yes" />
+            </option>
+            <option value="false">
+              <FormattedMessage defaultMessage="No" />
+            </option>
           </SelectField>
         )}
 

@@ -6,7 +6,7 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 import Switch from "components/Switch";
 import toast from "react-hot-toast";
-import { FormattedMessage, useIntl, FormattedNumber } from "react-intl"; 
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const BULK_ALLOCATE_MUTATION = gql`
   mutation BulkAllocate($roundId: ID!, $amount: Int!, $type: AllocationType!) {
@@ -58,7 +58,9 @@ const BulkAllocateModal = ({ round, handleClose }) => {
               } else {
                 handleClose();
                 toast.success(
-                  intl.formatMessage({ defaultMessage:"Allocated funds successfully"})
+                  intl.formatMessage({
+                    defaultMessage: "Allocated funds successfully",
+                  })
                 );
               }
             });
@@ -83,8 +85,8 @@ const BulkAllocateModal = ({ round, handleClose }) => {
                 style="currency"
                 currencyDisplay={"symbol"}
                 currency={round.currency}
-              /> {" "}
-              <FormattedMessage 
+              />{" "}
+              <FormattedMessage
                 defaultMessage=" to {count} {count, plural, one {member} other {members}}"
                 values={{
                   count: round.numberOfApprovedMembers,
@@ -93,10 +95,10 @@ const BulkAllocateModal = ({ round, handleClose }) => {
             </p>
           ) : (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              <FormattedMessage 
-                defaultMessage="Setting {count} {count, plural, one {member} other {members}} {count, plural, one {balance} other {balances}} to" 
+              <FormattedMessage
+                defaultMessage="Setting {count} {count, plural, one {member} other {members}} {count, plural, one {balance} other {balances}} to"
                 values={{
-                  count: round.numberOfApprovedMembers
+                  count: round.numberOfApprovedMembers,
                 }}
               />{" "}
               <FormattedNumber
@@ -110,10 +112,10 @@ const BulkAllocateModal = ({ round, handleClose }) => {
 
           <div className="flex space-x-3 justify-end">
             <Button onClick={handleClose} variant="secondary">
-            <FormattedMessage defaultMessage="Cancel" />
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button type="submit" loading={loading} disabled={disabled}>
-            <FormattedMessage defaultMessage="Done" />
+              <FormattedMessage defaultMessage="Done" />
             </Button>
           </div>
         </form>

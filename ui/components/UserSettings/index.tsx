@@ -1,7 +1,7 @@
 import { useQuery, gql, useMutation } from "urql";
 import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const USER_SETTINGS_QUERY = gql`
   query UserSettings {
@@ -56,35 +56,39 @@ const SettingsIndex = () => {
   const settingsMeta = [
     {
       key: "allocatedToYou",
-      label:
+      label: (
         <FormattedMessage
           defaultMessage={`I receive funds (to spend on {bucketName})`}
-          values={{bucketName: process.env.BUCKET_NAME_PLURAL || ""}}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
         />
+      ),
     },
     {
       key: "refundedBecauseBucketCancelled",
-      label: 
+      label: (
         <FormattedMessage
-          defaultMessage={ `I have been refunded (because a {bucketName} was cancelled)`}
-          values= {{ bucketName: process.env.BUCKET_NAME_SINGULAR }}
+          defaultMessage={`I have been refunded (because a {bucketName} was cancelled)`}
+          values={{ bucketName: process.env.BUCKET_NAME_SINGULAR }}
         />
+      ),
     },
     {
       key: "contributionToYourBucket",
-      label: 
+      label: (
         <FormattedMessage
           defaultMessage={`Funds have been contributed to my {bucketName}`}
-          values= {{bucketName: process.env.BUCKET_NAME_PLURAL || ""}}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
         />
+      ),
     },
     {
       key: "commentBecauseCocreator",
-      label: 
+      label: (
         <FormattedMessage
-          defaultMessage={`There are comments on my {bucketName}` }
-          values= {{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
+          defaultMessage={`There are comments on my {bucketName}`}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
         />
+      ),
     },
     {
       key: "commentMentions",
@@ -92,34 +96,34 @@ const SettingsIndex = () => {
     },
     {
       key: "bucketPublishedInRound",
-      label: 
+      label: (
         <FormattedMessage
           defaultMessage={`A new {bucketName} is published`}
           values={{
-            bucketName: process.env.BUCKET_NAME_SINGULAR
+            bucketName: process.env.BUCKET_NAME_SINGULAR,
           }}
         />
+      ),
     },
     {
       key: "commentBecauseCommented",
-      label: 
+      label: (
         <FormattedMessage
           defaultMessage="A {bucketName} I have commented on receives a new comment"
           values={{
             bucketName: process.env.BUCKET_NAME_PLURAL,
           }}
         />
+      ),
     },
   ];
-  
+
   const adminSettingsMeta = [
     {
       key: "roundJoinRequest",
-      label: 
-        <FormattedMessage
-          defaultMessage={`A user requests to join a round`}
-        />
-      ,
+      label: (
+        <FormattedMessage defaultMessage={`A user requests to join a round`} />
+      ),
     },
   ];
 

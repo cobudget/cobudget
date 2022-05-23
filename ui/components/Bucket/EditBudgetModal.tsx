@@ -99,7 +99,9 @@ const EditBudgetModal = ({
               .catch((err) => alert(err.message));
           })}
         >
-          <h2 className="text-lg font-semibold mb-2"><FormattedMessage defaultMessage="Costs" /></h2>
+          <h2 className="text-lg font-semibold mb-2">
+            <FormattedMessage defaultMessage="Costs" />
+          </h2>
 
           {expenseItems.map(({ fieldId, description, type, min, max }, i) => {
             const index = i + incomeItems.length;
@@ -107,7 +109,9 @@ const EditBudgetModal = ({
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <TextField
-                    placeholder={intl.formatMessage({ defaultMessage: "Description" })}
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Description",
+                    })}
                     name={`budgetItems[${index}].description`}
                     defaultValue={description}
                     inputRef={register()}
@@ -123,9 +127,9 @@ const EditBudgetModal = ({
                 <div className="mr-2 my-2 sm:my-0">
                   <TextField
                     placeholder={
-                      allowStretchGoals ? 
-                      intl.formatMessage({ defaultMessage: "Min amount" })
-                      : intl.formatMessage({ defaultMessage: "Amount"})
+                      allowStretchGoals
+                        ? intl.formatMessage({ defaultMessage: "Min amount" })
+                        : intl.formatMessage({ defaultMessage: "Amount" })
                     }
                     name={`budgetItems[${index}].min`}
                     defaultValue={
@@ -140,7 +144,9 @@ const EditBudgetModal = ({
                 {allowStretchGoals && (
                   <div className="mr-2 my-2 sm:my-0">
                     <TextField
-                      placeholder={intl.formatMessage({ defaultMessage: "Max amount"})}
+                      placeholder={intl.formatMessage({
+                        defaultMessage: "Max amount",
+                      })}
                       name={`budgetItems[${index}].max`}
                       defaultValue={
                         typeof max === "undefined" || max === null
@@ -168,12 +174,13 @@ const EditBudgetModal = ({
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
             >
-              <AddIcon className="h-5 w-5 mr-1" /> <FormattedMessage defaultMessage="Add row" />
+              <AddIcon className="h-5 w-5 mr-1" />{" "}
+              <FormattedMessage defaultMessage="Add row" />
             </Button>
           </div>
 
           <h2 className="text-lg font-semibold my-2">
-            <FormattedMessage defaultMessage ="Existing funding and resources" />
+            <FormattedMessage defaultMessage="Existing funding and resources" />
           </h2>
 
           {incomeItems.map(({ fieldId, description, type, min }, index) => {
@@ -181,7 +188,9 @@ const EditBudgetModal = ({
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <TextField
-                    placeholder={intl.formatMessage({ defaultMessage: "Description"})}
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Description",
+                    })}
                     name={`budgetItems[${index}].description`}
                     inputRef={register()}
                     defaultValue={description}
@@ -197,7 +206,9 @@ const EditBudgetModal = ({
 
                 <div className="mr-2 my-2 sm:my-0">
                   <TextField
-                    placeholder={intl.formatMessage({ defaultMessage: "Amount"})}
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Amount",
+                    })}
                     name={`budgetItems[${index}].min`}
                     defaultValue={
                       typeof min !== "undefined" ? String(min / 100) : null
@@ -227,7 +238,8 @@ const EditBudgetModal = ({
               }
               className="flex-grow"
             >
-              <AddIcon className="h-5 w-5 mr-1" /> <FormattedMessage defaultMessage="Add row" />
+              <AddIcon className="h-5 w-5 mr-1" />{" "}
+              <FormattedMessage defaultMessage="Add row" />
             </Button>
           </div>
 

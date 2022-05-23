@@ -44,7 +44,11 @@ export default function Selector({
             className
           )}
         >
-          {!activeId && <span className="p-1 mx-1 opacity-50"><FormattedMessage defaultMessage="Select" /></span>}
+          {!activeId && (
+            <span className="p-1 mx-1 opacity-50">
+              <FormattedMessage defaultMessage="Select" />
+            </span>
+          )}
           <div
             className={`p-1 opacity-50 group-hover:opacity-100 group-hover:bg-${color}-dark rounded`}
           >

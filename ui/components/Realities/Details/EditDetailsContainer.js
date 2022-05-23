@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { Formik } from "formik";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import EditDetailsForm from "./EditDetailsForm";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { useIntl } from "react-intl";
 
 const createEditDetailsMutation = (nodeType, isResp) => gql`
   mutation EditDetailsContainer_update${nodeType}(
@@ -44,6 +44,7 @@ const createEditDetailsMutation = (nodeType, isResp) => gql`
 `;
 
 const EditDetailsContainer = ({ node, isResp, stopEdit }) => {
+  const intl = useIntl();
   const realitiesApollo = getRealitiesApollo();
   const [updateNode] = useMutation(
     createEditDetailsMutation(node.__typename, isResp),
@@ -60,13 +61,19 @@ const EditDetailsContainer = ({ node, isResp, stopEdit }) => {
       }}
       enableReinitialize
       validationSchema={yup.object().shape({
-        title: yup.string().required(intl.formatMessage({ defaultMessage:"Title is required" })),
+        title: yup
+          .string()
+          .required(
+            intl.formatMessage({ defaultMessage: "Title is required" })
+          ),
         guide: yup
           .object()
           .shape({
             email: yup.string().required(),
           })
-          .typeError(intl.formatMessage({ defaultMessage:"Guide is required"}))
+          .typeError(
+            intl.formatMessage({ defaultMessage: "Guide is required" })
+          )
           .required(),
         realizer: yup
           .object()

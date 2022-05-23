@@ -86,11 +86,9 @@ const ActionsDropdown = ({
             });
           }}
         >
-          {
-            member.isAdmin ? 
-            intl.formatMessage({ defaultMessage: "Remove admin" }) : 
-            intl.formatMessage({ defaultMessage: "Make admin" })
-          }
+          {member.isAdmin
+            ? intl.formatMessage({ defaultMessage: "Remove admin" })
+            : intl.formatMessage({ defaultMessage: "Make admin" })}
         </MenuItem>
         <MenuItem
           color="error.main"
@@ -98,8 +96,10 @@ const ActionsDropdown = ({
             if (
               confirm(
                 intl.formatMessage(
-                  { defaultMessage: `Are you sure you would like to delete group membership from user with email {email}?` },
-                  { email:  member.email}
+                  {
+                    defaultMessage: `Are you sure you would like to delete group membership from user with email {email}?`,
+                  },
+                  { email: member.email }
                 )
               )
             ) {
@@ -113,8 +113,10 @@ const ActionsDropdown = ({
                 } else {
                   toast.success(
                     intl.formatMessage(
-                      {defaultMessage: `Deleted group member with email {email}`},
-                      {email: member.email}
+                      {
+                        defaultMessage: `Deleted group member with email {email}`,
+                      },
+                      { email: member.email }
                     )
                   );
                 }
@@ -185,7 +187,12 @@ const Page = ({
             <Box display="flex" alignItems="center">
               <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
-                <Tooltip title={ intl.formatMessage({ defaultMessage: "Email not verified" })} placement="right">
+                <Tooltip
+                  title={intl.formatMessage({
+                    defaultMessage: "Email not verified",
+                  })}
+                  placement="right"
+                >
                   <HelpOutlineOutlinedIcon fontSize="small" />
                 </Tooltip>
               )}
@@ -195,7 +202,11 @@ const Page = ({
             {member.bio}
           </TableCell>
           <TableCell align="right">
-            {member.isAdmin && <span className="mr-2"><FormattedMessage defaultMessage="Admin" /></span>}
+            {member.isAdmin && (
+              <span className="mr-2">
+                <FormattedMessage defaultMessage="Admin" />
+              </span>
+            )}
           </TableCell>
           <TableCell align="right" padding="none">
             <ActionsDropdown
@@ -242,12 +253,24 @@ const GroupMembersTable = ({
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell><FormattedMessage defaultMessage="Username" /></TableCell>
-                <TableCell><FormattedMessage defaultMessage="Name" /></TableCell>
-                <TableCell><FormattedMessage defaultMessage="Email" /></TableCell>
-                <TableCell><FormattedMessage defaultMessage="Bio" /></TableCell>
-                <TableCell align="right"><FormattedMessage defaultMessage="Role" /></TableCell>
-                <TableCell align="right"><FormattedMessage defaultMessage="Actions" /></TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Username" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Name" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Email" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Bio" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Role" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Actions" />
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

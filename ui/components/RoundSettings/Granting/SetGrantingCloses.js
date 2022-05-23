@@ -41,7 +41,9 @@ const SetGrantingCloses = ({ closeModal, round }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label={intl.formatMessage({ defaultMessage:"Funding close date" })}
+                label={intl.formatMessage({
+                  defaultMessage: "Funding close date",
+                })}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}

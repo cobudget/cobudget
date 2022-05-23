@@ -121,7 +121,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
       <div className="border-t">
         <List>
           <SettingsListItem
-            primary={ intl.formatMessage({ defaultMessage: "Currency"})}
+            primary={intl.formatMessage({ defaultMessage: "Currency" })}
             secondary={round.currency}
             isSet={round.currency}
             disabled={!round.bucketCreationIsOpen}
@@ -134,7 +134,9 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={intl.formatMessage({ defaultMessage: "Allow stretch goals" })}
+            primary={intl.formatMessage({
+              defaultMessage: "Allow stretch goals",
+            })}
             secondary={round.allowStretchGoals?.toString() ?? "false"}
             isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
@@ -145,13 +147,17 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={
-              intl.formatMessage(
-                { defaultMessage: "Require moderator approval of {bucketName} before funding" },
-                { values: {
-                  bucketName: process.env.BUCKET_NAME_PLURAL
-                }}
-              )}
+            primary={intl.formatMessage(
+              {
+                defaultMessage:
+                  "Require moderator approval of {bucketName} before funding",
+              },
+              {
+                values: {
+                  bucketName: process.env.BUCKET_NAME_PLURAL,
+                },
+              }
+            )}
             secondary={round.requireBucketApproval?.toString() ?? "false"}
             isSet={typeof round.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
@@ -162,19 +168,22 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={
-              intl.formatMessage({
-                defaultMessage: "Max. amount to one {bucketName} per user"
-              }, {
-                bucketName: process.env.BUCKET_NAME_SINGULAR
-              })
-            }
+            primary={intl.formatMessage(
+              {
+                defaultMessage: "Max. amount to one {bucketName} per user",
+              },
+              {
+                bucketName: process.env.BUCKET_NAME_SINGULAR,
+              }
+            )}
             secondary={
-              round.maxAmountToBucketPerUser
-                ? `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
-                    round.currency
-                  }`
-                : <FormattedMessage defaultMessage="Not set" />
+              round.maxAmountToBucketPerUser ? (
+                `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
+                  round.currency
+                }`
+              ) : (
+                <FormattedMessage defaultMessage="Not set" />
+              )
             }
             isSet={!!round.maxAmountToBucketPerUser}
             openModal={() => handleOpen("SET_MAX_AMOUNT_TO_BUCKET")}
@@ -185,12 +194,14 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={
-              intl.formatMessage(
-                { defaultMessage: "{bucketName} creation closes" },
-                { values: { bucketName: capitalize(process.env.BUCKET_NAME_PLURAL) } }
-              )
-            }
+            primary={intl.formatMessage(
+              { defaultMessage: "{bucketName} creation closes" },
+              {
+                values: {
+                  bucketName: capitalize(process.env.BUCKET_NAME_PLURAL),
+                },
+              }
+            )}
             secondary={
               round.bucketCreationCloses
                 ? dayjs(round.bucketCreationCloses).format(
@@ -207,7 +218,7 @@ const RoundSettingsModalGranting = ({ round, currentGroup }) => {
           <Divider />
 
           <SettingsListItem
-            primary={intl.formatMessage({ defaultMessage:"Funding opens"})}
+            primary={intl.formatMessage({ defaultMessage: "Funding opens" })}
             secondary={
               round.grantingOpens
                 ? dayjs(round.grantingOpens).format("MMMM D, YYYY - h:mm a")

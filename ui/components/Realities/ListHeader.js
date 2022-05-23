@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { FaPlus } from "react-icons/fa";
 import { CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const ListHeaderText = styled.span`
   line-height: 2.1rem;

@@ -26,18 +26,18 @@ const BucketReview = ({ round }) => {
   return (
     <div className="px-6">
       <h2 className="text-2xl font-semibold mb-2">
-        <FormattedMessage 
-          defaultMessage="{bucketName} Review" 
+        <FormattedMessage
+          defaultMessage="{bucketName} Review"
           values={{
-            bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR)
+            bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR),
           }}
         />
       </h2>
       <p className="text-gray-700 mb-4">
-        <FormattedMessage 
+        <FormattedMessage
           defaultMessage="If you have set up guidelines you can allow users to review each others {bucketName} according to them."
           values={{
-            bucketName: process.env.BUCKET_NAME_PLURAL
+            bucketName: process.env.BUCKET_NAME_PLURAL,
           }}
         />
       </p>
@@ -54,13 +54,17 @@ const BucketReview = ({ round }) => {
       >
         <SelectField
           name="bucketReviewIsOpen"
-          label={intl.formatMessage({ defaultMessage: "Show Review Prompt"})}
+          label={intl.formatMessage({ defaultMessage: "Show Review Prompt" })}
           defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
           inputRef={register}
           className="my-4"
         >
-          <option value="true"><FormattedMessage defaultMessage="true" /></option>
-          <option value="false"><FormattedMessage defaultMessage="false" /></option>
+          <option value="true">
+            <FormattedMessage defaultMessage="true" />
+          </option>
+          <option value="false">
+            <FormattedMessage defaultMessage="false" />
+          </option>
         </SelectField>
 
         {/* <SelectField
@@ -92,7 +96,7 @@ const BucketReview = ({ round }) => {
             disabled={!isDirty}
             loading={loading}
           >
-            <FormattedMessage defaultMessage="Save"/>
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </div>
       </form>

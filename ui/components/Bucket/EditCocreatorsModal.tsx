@@ -60,7 +60,6 @@ const Member = ({
   add?: () => void;
   remove?: () => void;
 }) => {
-
   return (
     <div className="flex items-center justify-between mb-2 overflow-y-scroll ">
       <div className="flex items-center">
@@ -96,7 +95,6 @@ const SearchMembersResult = ({
   addCocreator,
   bucket,
 }) => {
-
   const [{ data: { members } = { members: [] } }] = useQuery({
     query: SEARCH_MEMBERS_QUERY,
     variables: { roundId, isApproved: true },
@@ -163,7 +161,10 @@ const EditCocreatorsModal = ({
                 if (
                   member.id !== currentUser?.currentCollMember.id ||
                   confirm(
-                    intl.formatMessage({ defaultMessage: "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"})
+                    intl.formatMessage({
+                      defaultMessage:
+                        "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)",
+                    })
                   )
                 ) {
                   removeCocreator({
@@ -182,7 +183,9 @@ const EditCocreatorsModal = ({
           <div>
             <input
               value={searchInput}
-              placeholder={intl.formatMessage({ defaultMessage: "Filter by name..." })}
+              placeholder={intl.formatMessage({
+                defaultMessage: "Filter by name...",
+              })}
               className="bg-gray-200 rounded py-2 px-3 mb-4 focus:outline-none focus:ring focus:bg-white"
               onChange={(e) => setSearchInput(e.target.value)}
             />

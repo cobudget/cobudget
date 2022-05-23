@@ -3,7 +3,7 @@ import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetRequireBucketApproval = ({ closeModal, round }) => {
@@ -18,7 +18,7 @@ const SetRequireBucketApproval = ({ closeModal, round }) => {
           <FormattedMessage
             defaultMessage="Require moderator approval of {bucketName} before funding"
             values={{
-              bucketName: process.env.BUCKET_NAME_PLURAL
+              bucketName: process.env.BUCKET_NAME_PLURAL,
             }}
           />
         </h1>
@@ -42,12 +42,13 @@ const SetRequireBucketApproval = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="requireBucketApproval"
-              label={
-                intl.formatMessage(
-                  { defaultMessage: "Require moderator approval of {bucketName} before funding"},
-                  { values: { bucketName: process.env.BUCKET_NAME_PLURAL } }
-                )
-              }
+              label={intl.formatMessage(
+                {
+                  defaultMessage:
+                    "Require moderator approval of {bucketName} before funding",
+                },
+                { values: { bucketName: process.env.BUCKET_NAME_PLURAL } }
+              )}
               defaultValue={round.requireBucketApproval ?? false}
               inputRef={register}
               fullWidth

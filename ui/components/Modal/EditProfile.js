@@ -53,7 +53,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
           <div className="my-4">
             <TextField
               name="name"
-              label={ intl.formatMessage({ defaultMessage: "Name" })}
+              label={intl.formatMessage({ defaultMessage: "Name" })}
               variant="outlined"
               defaultValue={currentUser.name}
               error={Boolean(errors.name)}
@@ -68,7 +68,7 @@ const EditProfile = ({ closeModal, currentUser }) => {
           <div className="my-4">
             <TextField
               name="username"
-              label={ intl.formatMessage({ defaultMessage: "Username" })}
+              label={intl.formatMessage({ defaultMessage: "Username" })}
               variant="outlined"
               defaultValue={currentUser.username}
               error={Boolean(errors.username)}

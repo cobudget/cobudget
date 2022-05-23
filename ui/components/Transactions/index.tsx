@@ -62,11 +62,11 @@ const Transactions = ({ round, currentGroup }) => {
       <div className="page">
         <div className="flex justify-between mb-3 items-center">
           <h2 className="text-xl font-semibold">
-            {
-              transactions.length === 0 ?
+            {transactions.length === 0 ? (
               <FormattedMessage defaultMessage="0 transactions" />
-              : <FormattedMessage defaultMessage="All transactions" />
-            }
+            ) : (
+              <FormattedMessage defaultMessage="All transactions" />
+            )}
           </h2>
         </div>
         {!!transactions.length && (
@@ -88,16 +88,20 @@ const Transactions = ({ round, currentGroup }) => {
                         username: c.roundMember.user.username,
                         a: () => (
                           <Link
-                            href={`/${currentGroup?.slug ?? "c"}/${round.slug}/${
-                              c.bucket?.id
-                            }`}
+                            href={`/${currentGroup?.slug ?? "c"}/${
+                              round.slug
+                            }/${c.bucket?.id}`}
                           >
                             <a className="font-semibold hover:underline">
                               {c.bucket?.title}
                             </a>
                           </Link>
                         ),
-                        m: intl.formatNumber(c.amount / 100, { style: "currency", currencyDisplay: "symbol", currency: round.currency })
+                        m: intl.formatNumber(c.amount / 100, {
+                          style: "currency",
+                          currencyDisplay: "symbol",
+                          currency: round.currency,
+                        }),
                       }}
                     />
                   </div>
@@ -130,29 +134,43 @@ const Transactions = ({ round, currentGroup }) => {
                     </span>
                     {c.allocatedBy
                       ? `@${c.allocatedBy.user.username}`
-                      : intl.formatMessage({ defaultMessage: "Admin" })
-                    }
+                      : intl.formatMessage({ defaultMessage: "Admin" })}
 
                     {c.allocationType === "ADD" ? (
                       <>
-                        {" "}{c.amount < 0 ? intl.formatMessage({ defaultMessage:"deducted"}) : intl.formatMessage({ defaultMessage:"added" })}{" "}
-                        {thousandSeparator(c.amount / 100)} {round.currency}
-                        {" "}{c.amount < 0 ? intl.formatMessage({ defaultMessage: "from" }) : intl.formatMessage({ defaultMessage: "to" })}{" "}@
+                        {" "}
+                        {c.amount < 0
+                          ? intl.formatMessage({ defaultMessage: "deducted" })
+                          : intl.formatMessage({
+                              defaultMessage: "added",
+                            })}{" "}
+                        {thousandSeparator(c.amount / 100)} {round.currency}{" "}
+                        {c.amount < 0
+                          ? intl.formatMessage({ defaultMessage: "from" })
+                          : intl.formatMessage({ defaultMessage: "to" })}{" "}
+                        @
                         <FormattedMessage
                           defaultMessage="{username}'s balance"
                           values={{
-                            username: c.roundMember.user.username
+                            username: c.roundMember.user.username,
                           }}
                         />
                       </>
                     ) : (
                       <>
                         {" "}
-                        <FormattedMessage 
+                        <FormattedMessage
                           defaultMessage="set @{username}'s balance to {m}"
                           values={{
                             username: c.roundMember.user.username,
-                            m: intl.formatNumber((c.amount + c.amountBefore) / 100, { style: "currency", currencyDisplay: "symbol", currency: round.currency })
+                            m: intl.formatNumber(
+                              (c.amount + c.amountBefore) / 100,
+                              {
+                                style: "currency",
+                                currencyDisplay: "symbol",
+                                currency: round.currency,
+                              }
+                            ),
                           }}
                         />
                       </>

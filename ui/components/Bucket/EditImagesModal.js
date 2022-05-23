@@ -141,15 +141,19 @@ const EditImagesModal = ({
                 </div>
               ))}
             {uploadingImage ? (
-              <label><FormattedMessage defaultMessage="uploading..." /></label>
+              <label>
+                <FormattedMessage defaultMessage="uploading..." />
+              </label>
             ) : (
               <>
                 <label>
-                  <FormattedMessage defaultMessage = "Upload image" />
+                  <FormattedMessage defaultMessage="Upload image" />
                   <input
                     type="file"
                     name="file"
-                    placeholder={intl.formatMessage({ defaultMessage: "Upload image"})}
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Upload image",
+                    })}
                     onChange={uploadFile}
                   />
                 </label>

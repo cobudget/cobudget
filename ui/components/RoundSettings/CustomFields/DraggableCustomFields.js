@@ -70,9 +70,9 @@ const SortableItem = sortableElement(
     );
 
     const types = {
-      TEXT: intl.formatMessage({ defaultMessage:"Short Text" }),
-      MULTILINE_TEXT: intl.formatMessage({ defaultMessage:"Long Text" }),
-      BOOLEAN: intl.formatMessage({ defaultMessage:"Yes/No" }),
+      TEXT: intl.formatMessage({ defaultMessage: "Short Text" }),
+      MULTILINE_TEXT: intl.formatMessage({ defaultMessage: "Long Text" }),
+      BOOLEAN: intl.formatMessage({ defaultMessage: "Yes/No" }),
     };
 
     return (
@@ -80,7 +80,11 @@ const SortableItem = sortableElement(
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg">{customField.name}</h2>
           <div>
-            <Tooltip title={intl.formatMessage({ defaultMessage: "Edit"})} position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton
                 onClick={() => setEditingCustomField(customField)}
                 className="mx-1"
@@ -89,16 +93,25 @@ const SortableItem = sortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={intl.formatMessage({ defaultMessage: "Delete" })} position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Delete" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton
                 loading={deleting}
                 onClick={() =>
                   confirm(
                     intl.formatMessage(
-                      {defaultMessage: "Deleting a custom field would delete it from all the {bucketName} that use it. Are you sure?"},
-                      {values: {
-                        bucketName: process.env.BUCKET_NAME_PLURAL
-                      }}
+                      {
+                        defaultMessage:
+                          "Deleting a custom field would delete it from all the {bucketName} that use it. Are you sure?",
+                      },
+                      {
+                        values: {
+                          bucketName: process.env.BUCKET_NAME_PLURAL,
+                        },
+                      }
                     )
                   ) && deleteCustomField({ roundId, fieldId: customField.id })
                 }
@@ -107,16 +120,25 @@ const SortableItem = sortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title={intl.formatMessage({ defaultMessage: "Drag to reorder" })} position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Drag to reorder" })}
+              position="bottom"
+              size="small"
+            >
               <DragHandle />
             </Tooltip>
           </div>
         </div>
         <p className="mb-2">{customField.description}</p>
         <div className="flex">
-          <span className={css.label}><FormattedMessage defaultMessage="Type:" /> {types[customField.type]}</span>
+          <span className={css.label}>
+            <FormattedMessage defaultMessage="Type:" />{" "}
+            {types[customField.type]}
+          </span>
           {customField.isRequired && (
-            <span className={css.label}><FormattedMessage defaultMessage="Is Required" /></span>
+            <span className={css.label}>
+              <FormattedMessage defaultMessage="Is Required" />
+            </span>
           )}
         </div>
       </li>

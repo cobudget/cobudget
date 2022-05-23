@@ -6,7 +6,7 @@ import Dependencies from "./Dependencies";
 import RealizersMissingIcon from "../RealizersMissingIcon";
 import Deliberations from "./Deliberations";
 import Markdown from "components/Markdown";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const LabelSpan = styled.span`
   font-weight: bold;
@@ -44,7 +44,7 @@ const DetailViewBody = ({ node, isResp }) => (
 
     <CardSection>
       <LabelSpan>
-        <FormattedMessage defaultMessage="Description:"/>
+        <FormattedMessage defaultMessage="Description:" />
       </LabelSpan>
       <div>
         <Markdown source={node.description} />
@@ -55,7 +55,7 @@ const DetailViewBody = ({ node, isResp }) => (
       <>
         <CardSection>
           <LabelSpan>
-            <FormattedMessage defaultMessage="Related discussions:"/>
+            <FormattedMessage defaultMessage="Related discussions:" />
           </LabelSpan>
           <Deliberations
             nodeType={node.__typename}

@@ -1,7 +1,7 @@
 import React from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import { Button, Snackbar, IconButton } from "@material-ui/core";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export default function DevelopmentNotice() {
   const [open, setOpen] = React.useState(true);
@@ -24,7 +24,10 @@ export default function DevelopmentNotice() {
         }}
         open={open}
         onClose={handleClose}
-        message={intl.formatMessage({ defaultMessage: "Hi! This platform is under development, don't use it for anything real.. :-)"})}
+        message={intl.formatMessage({
+          defaultMessage:
+            "Hi! This platform is under development, don't use it for anything real.. :-)",
+        })}
         action={
           <React.Fragment>
             <Button

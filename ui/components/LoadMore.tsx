@@ -1,6 +1,6 @@
 import HappySpinner from "components/HappySpinner";
 import { CheveronDownIcon } from "components/Icons";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const LoadMore = ({
   moreExist,

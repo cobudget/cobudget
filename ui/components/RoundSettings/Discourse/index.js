@@ -41,12 +41,14 @@ const Discourse = ({ round, currentGroup }) => {
 
   return (
     <div className="px-6">
-      <h2 className="text-2xl font-semibold mb-2"><FormattedMessage defaultMessage="Category" /></h2>
+      <h2 className="text-2xl font-semibold mb-2">
+        <FormattedMessage defaultMessage="Category" />
+      </h2>
       <p className="text-gray-700 mb-4">
-        <FormattedMessage 
+        <FormattedMessage
           defaultMessage="Select the discourse category that {bucketName} in this round will be posted to"
           values={{
-            bucketName: process.env.BUCKET_NAME_PLURAL
+            bucketName: process.env.BUCKET_NAME_PLURAL,
           }}
         />
       </p>

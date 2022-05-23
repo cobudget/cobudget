@@ -20,10 +20,10 @@ const SetCurrency = ({ closeModal, round }) => {
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">
-        <FormattedMessage defaultMessage="Set currency" />
+          <FormattedMessage defaultMessage="Set currency" />
         </h1>
         <Alert severity="warning">
-        <FormattedMessage defaultMessage="You should not change currency after someone has added budgets or funding has started. " />
+          <FormattedMessage defaultMessage="You should not change currency after someone has added budgets or funding has started. " />
         </Alert>
         <form
           onSubmit={handleSubmit((variables) => {
@@ -40,7 +40,7 @@ const SetCurrency = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="currency"
-              label={intl.formatMessage({ defaultMessage:"Currency" })}
+              label={intl.formatMessage({ defaultMessage: "Currency" })}
               defaultValue={round.currency}
               inputRef={register}
               fullWidth

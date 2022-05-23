@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { GET_NEEDS, GET_RESPONSIBILITIES } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import DeleteNodeButton from "./DeleteNodeButton";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const SOFT_DELETE_NEED = gql`
   mutation DeleteNodeContainer_softDeleteNeed($nodeId: ID!) {
@@ -88,7 +88,10 @@ const DeleteNodeContainer = ({ node, stopEdit }) => {
       disabled={loading || isNeedAndHasResponsibilities}
       disabledReason={
         isNeedAndHasResponsibilities
-          ? intl.formatMessage({ defaultMessage:"You can't delete a Need that still contains Responsibilities" })
+          ? intl.formatMessage({
+              defaultMessage:
+                "You can't delete a Need that still contains Responsibilities",
+            })
           : ""
       }
       error={error && error.toString()}

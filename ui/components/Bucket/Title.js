@@ -36,7 +36,7 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
         >
           <TextField
             className="mb-2"
-            placeholder={intl.formatMessage({ defaultMessage: "Title"})}
+            placeholder={intl.formatMessage({ defaultMessage: "Title" })}
             name="title"
             defaultValue={title}
             size="large"
@@ -75,7 +75,11 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
         </h1>
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title={ intl.formatMessage({ defaultMessage: "Edit title" })} position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit title" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>

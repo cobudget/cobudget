@@ -67,10 +67,9 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             });
           }}
         >
-          {member.isAdmin ? 
-            intl.formatMessage({ defaultMessage: "Remove admin" })
-            : intl.formatMessage({ defaultMessage: "Make admin" })
-          }
+          {member.isAdmin
+            ? intl.formatMessage({ defaultMessage: "Remove admin" })
+            : intl.formatMessage({ defaultMessage: "Make admin" })}
         </MenuItem>
         {member.hasJoined ? null : (
           <MenuItem
@@ -79,7 +78,11 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
                 roundId,
                 emails: member.email,
               }).then(() => {
-                toast.success(intl.formatMessage({ defaultMessage: "Invitation sent again"}));
+                toast.success(
+                  intl.formatMessage({
+                    defaultMessage: "Invitation sent again",
+                  })
+                );
                 handleClose();
               });
             }}
@@ -101,7 +104,10 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
         <Tooltip
-          title={ intl.formatMessage({ defaultMessage:"You can only remove a round participant with 0 balance" })}
+          title={intl.formatMessage({
+            defaultMessage:
+              "You can only remove a round participant with 0 balance",
+          })}
           disabled={member.balance === 0}
         >
           <MenuItem
@@ -111,7 +117,10 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
               if (
                 confirm(
                   intl.formatMessage(
-                    { defaultMessage: "Are you sure you would like to delete membership from user with email {email}?" },
+                    {
+                      defaultMessage:
+                        "Are you sure you would like to delete membership from user with email {email}?",
+                    },
                     { email: member.email }
                   )
                 )
@@ -156,9 +165,13 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
       <TableCell>
         <p>{member.email}</p>
         {!member.user.verifiedEmail ? (
-          <p className="text-sm text-gray-500">(<FormattedMessage defaultMessage="not verified" />)</p>
+          <p className="text-sm text-gray-500">
+            (<FormattedMessage defaultMessage="not verified" />)
+          </p>
         ) : !member.hasJoined ? (
-          <p className="text-sm text-gray-500">(<FormattedMessage defaultMessage="invitation pending" />)</p>
+          <p className="text-sm text-gray-500">
+            (<FormattedMessage defaultMessage="invitation pending" />)
+          </p>
         ) : null}
       </TableCell>
       <TableCell component="th" scope="row">
@@ -169,8 +182,16 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         )}
       </TableCell>
       <TableCell align="right" className="flex space-x-2">
-        {member.isAdmin && <p><FormattedMessage defaultMessage="Admin" /></p>}
-        {member.isModerator && <p><FormattedMessage defaultMessage="Moderator" /></p>}
+        {member.isAdmin && (
+          <p>
+            <FormattedMessage defaultMessage="Admin" />
+          </p>
+        )}
+        {member.isModerator && (
+          <p>
+            <FormattedMessage defaultMessage="Moderator" />
+          </p>
+        )}
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (
@@ -178,7 +199,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => setAllocateModalOpen(true)}
           >
-            <FormattedNumber 
+            <FormattedNumber
               value={member.balance / 100}
               style="currency"
               currencyDisplay={"symbol"}
@@ -187,7 +208,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
           </button>
         ) : (
           <span>
-            <FormattedNumber 
+            <FormattedNumber
               value={member.balance / 100}
               style="currency"
               currencyDisplay={"symbol"}
@@ -234,16 +255,28 @@ const RoundMembersTable = ({
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell><FormattedMessage defaultMessage="User" /></TableCell>
-              <TableCell><FormattedMessage defaultMessage="Email" /></TableCell>
-              <TableCell><FormattedMessage defaultMessage="Bio" /></TableCell>
-              <TableCell align="right"><FormattedMessage defaultMessage="Role" /></TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="User" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="Email" />
+              </TableCell>
+              <TableCell>
+                <FormattedMessage defaultMessage="Bio" />
+              </TableCell>
+              <TableCell align="right">
+                <FormattedMessage defaultMessage="Role" />
+              </TableCell>
               <TableCell align="right">
                 <div className="flex items-center justify-end space-x-1">
-                  <span className="block"><FormattedMessage defaultMessage="Balance" /></span>{" "}
+                  <span className="block">
+                    <FormattedMessage defaultMessage="Balance" />
+                  </span>{" "}
                   {isAdmin && (
                     <Tooltip
-                      title={intl.formatMessage({ defaultMessage:"Allocate to all members" })}
+                      title={intl.formatMessage({
+                        defaultMessage: "Allocate to all members",
+                      })}
                       position="bottom"
                       size="small"
                     >
@@ -262,7 +295,11 @@ const RoundMembersTable = ({
                   />
                 )}
               </TableCell>
-              {isAdmin && <TableCell align="right"><FormattedMessage defaultMessage="Actions"/></TableCell>}
+              {isAdmin && (
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Actions" />
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>

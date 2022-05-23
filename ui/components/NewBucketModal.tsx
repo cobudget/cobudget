@@ -54,10 +54,10 @@ const NewBucketModal = ({ round, handleClose, router }) => {
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <form onSubmit={handleSubmit(onSubmitCreate)}>
           <h1 className="text-xl font-semibold">
-            <FormattedMessage 
+            <FormattedMessage
               defaultMessage="New {bucketName}"
               values={{
-                bucketName: process.env.BUCKET_NAME_SINGULAR
+                bucketName: process.env.BUCKET_NAME_SINGULAR,
               }}
             />
           </h1>
@@ -66,7 +66,7 @@ const NewBucketModal = ({ round, handleClose, router }) => {
             className="my-3"
             name="title"
             size="large"
-            placeholder={intl.formatMessage({ defaultMessage:"Title"})}
+            placeholder={intl.formatMessage({ defaultMessage: "Title" })}
             inputRef={register({
               required: "Required",
             })}

@@ -7,7 +7,7 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
-import { FormattedMessage, useIntl, FormattedNumber } from "react-intl"; 
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const ALLOCATE_MUTATION = gql`
   mutation Allocate(
@@ -41,19 +41,19 @@ const AllocateModal = ({ member, round, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-xs">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          <FormattedMessage 
-            defaultMessage="Manage {name}'s balance" 
+          <FormattedMessage
+            defaultMessage="Manage {name}'s balance"
             values={{
               name: member.user.username
-              ? `@${member.user.username}`
-              : member.user.name ?? "member"
+                ? `@${member.user.username}`
+                : member.user.name ?? "member",
             }}
           />
         </h1>
         <Switch
           options={[
-            intl.formatMessage({ defaultMessage: "Add" }), 
-            intl.formatMessage({ defaultMessage: "Set" })
+            intl.formatMessage({ defaultMessage: "Add" }),
+            intl.formatMessage({ defaultMessage: "Set" }),
           ]}
           setSelected={setSelectedType}
           selected={type}
@@ -73,7 +73,9 @@ const AllocateModal = ({ member, round, handleClose }) => {
               } else {
                 handleClose();
                 toast.success(
-                  intl.formatMessage({ defaultMessage: "Allocated funds successfully" })
+                  intl.formatMessage({
+                    defaultMessage: "Allocated funds successfully",
+                  })
                 );
               }
             });
@@ -98,8 +100,8 @@ const AllocateModal = ({ member, round, handleClose }) => {
                   style="currency"
                   currencyDisplay={"symbol"}
                   currency={round.currency}
-                /> {" "}
-                <FormattedMessage defaultMessage=" to " /> {" "}
+                />{" "}
+                <FormattedMessage defaultMessage=" to " />{" "}
                 <FormattedNumber
                   value={total / 100}
                   style="currency"
@@ -116,8 +118,9 @@ const AllocateModal = ({ member, round, handleClose }) => {
                   style="currency"
                   currencyDisplay={"symbol"}
                   currency={round.currency}
-                /><br/>
-                <FormattedMessage defaultMessage="previously" /> {" "}
+                />
+                <br />
+                <FormattedMessage defaultMessage="previously" />{" "}
                 <FormattedNumber
                   value={member.balance / 100}
                   style="currency"

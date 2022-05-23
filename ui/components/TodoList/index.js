@@ -5,7 +5,7 @@ import { CheckIcon } from "components/Icons";
 import HappySpinner from "components/HappySpinner";
 import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const GET_TODO_INFO = gql`
   query TodoInfo($groupId: ID!, $groupSlug: String!) {
@@ -75,23 +75,32 @@ const TodoList = ({ currentGroup }) => {
     {
       title: intl.formatMessage({ defaultMessage: "Create community" }),
       desc: intl.formatMessage(
-        { defaultMessage: `This is your own home on the {bucketName} platform, now available under {deployUrl}/{slug}`},
-        { values: {
-          bucketName: process.env.PLATFORM_NAME,
-          deployUrl: process.env.DEPLOY_URL,
-          slug: currentGroup.slug,
-        }}
+        {
+          defaultMessage: `This is your own home on the {bucketName} platform, now available under {deployUrl}/{slug}`,
+        },
+        {
+          values: {
+            bucketName: process.env.PLATFORM_NAME,
+            deployUrl: process.env.DEPLOY_URL,
+            slug: currentGroup.slug,
+          },
+        }
       ),
       link: null,
     },
     {
-      title: intl.formatMessage({ defaultMessage:"Invite members" }),
-      desc: intl.formatMessage({ defaultMessage:"Invite your community members by email" }),
+      title: intl.formatMessage({ defaultMessage: "Invite members" }),
+      desc: intl.formatMessage({
+        defaultMessage: "Invite your community members by email",
+      }),
       link: `/${currentGroup.slug}/members`,
     },
     {
-      title: intl.formatMessage({ defaultMessage:"Create first round" }),
-      desc: intl.formatMessage({ defaultMessage:"A round is a page for gathering ideas from the community" }),
+      title: intl.formatMessage({ defaultMessage: "Create first round" }),
+      desc: intl.formatMessage({
+        defaultMessage:
+          "A round is a page for gathering ideas from the community",
+      }),
       link: `/${currentGroup.slug}/new-round`,
     },
   ];
@@ -153,9 +162,10 @@ const TodoList = ({ currentGroup }) => {
         <NavItem
           onClick={() =>
             window.confirm(
-              intl.formatMessage({ defaultMessage: "Are you sure you want skip this introduction?" })
-            ) &&
-            setTodosFinished({ groupId: currentGroup.id })
+              intl.formatMessage({
+                defaultMessage: "Are you sure you want skip this introduction?",
+              })
+            ) && setTodosFinished({ groupId: currentGroup.id })
           }
           className="text-xs opacity-70 ml-auto"
         >

@@ -22,10 +22,10 @@ const SetBucketCreationCloses = ({ closeModal, round }) => {
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="Set {bucketName} creation closes date"
             values={{
-              bucketName: process.env.BUCKET_NAME_SINGULAR
+              bucketName: process.env.BUCKET_NAME_SINGULAR,
             }}
           />
         </h1>
@@ -49,12 +49,10 @@ const SetBucketCreationCloses = ({ closeModal, round }) => {
           <Box m="15px 0">
             <MuiPickersUtilsProvider utils={DayjsUtils}>
               <DateTimePicker
-                label={
-                  intl.formatMessage(
-                    { defaultMessage: "{bucketName} creation close date" },
-                    { bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR) }
-                  )
-                }
+                label={intl.formatMessage(
+                  { defaultMessage: "{bucketName} creation close date" },
+                  { bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+                )}
                 variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}

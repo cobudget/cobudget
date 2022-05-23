@@ -65,7 +65,7 @@ import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -395,7 +395,7 @@ const Wysiwyg = ({
     (): ToolbarItemUnion[] => [
       {
         type: ComponentItem.ToolbarGroup,
-        label: intl.formatMessage({ defaultMessage:"Simple Formatting"}),
+        label: intl.formatMessage({ defaultMessage: "Simple Formatting" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -422,7 +422,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: intl.formatMessage({ defaultMessage:"Heading Formatting" }),
+        label: intl.formatMessage({ defaultMessage: "Heading Formatting" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -447,7 +447,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: intl.formatMessage({ defaultMessage:"Simple Formatting" }),
+        label: intl.formatMessage({ defaultMessage: "Simple Formatting" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -478,7 +478,7 @@ const Wysiwyg = ({
       // },
       {
         type: ComponentItem.ToolbarGroup,
-        label: intl.formatMessage({ defaultMessage:"Lists" }),
+        label: intl.formatMessage({ defaultMessage: "Lists" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -509,7 +509,7 @@ const Wysiwyg = ({
       },
       {
         type: ComponentItem.ToolbarGroup,
-        label: intl.formatMessage({ defaultMessage:"History" }),
+        label: intl.formatMessage({ defaultMessage: "History" }),
         items: [
           {
             type: ComponentItem.ToolbarCommandButton,
@@ -525,7 +525,7 @@ const Wysiwyg = ({
         separator: "none",
       },
     ],
-    []
+    [intl]
   );
 
   return (
@@ -557,7 +557,7 @@ const Wysiwyg = ({
               <Toolbar
                 items={toolbarItems()}
                 refocusEditor
-                label={intl.formatMessage({ defaultMessage:"Top Toolbar"})}
+                label={intl.formatMessage({ defaultMessage: "Top Toolbar" })}
               />
             </div>
             <EditorComponent />

@@ -162,7 +162,9 @@ const RoundMembers = ({ round, currentUser }) => {
           <SearchBar
             color={round.color}
             value={searchString}
-            placeholder={intl.formatMessage({ defaultMessage: "Search participants" })}
+            placeholder={intl.formatMessage({
+              defaultMessage: "Search participants",
+            })}
             onChange={(e) => setSearchString(e.target.value)}
             clearInput={() => setSearchString("")}
           />

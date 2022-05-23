@@ -1,6 +1,6 @@
 import { CheckIcon } from "components/Icons";
 import { colors } from "utils/colors";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export default ({ setColor, color: currentColor }) => {
   return (

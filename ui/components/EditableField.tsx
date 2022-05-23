@@ -10,7 +10,7 @@ import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import Markdown from "./Markdown";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const EditableField = ({
   defaultValue,
@@ -28,7 +28,12 @@ const EditableField = ({
   const intl = useIntl();
 
   const schema = useMemo(() => {
-    const maxField = yup.string().max(maxLength ?? Infinity, intl.formatMessage({ defaultMessage:"Too long"}));
+    const maxField = yup
+      .string()
+      .max(
+        maxLength ?? Infinity,
+        intl.formatMessage({ defaultMessage: "Too long" })
+      );
     return yup.object().shape({
       [name]: required ? maxField.required("Required") : maxField,
     });
@@ -97,12 +102,14 @@ const EditableField = ({
         <Markdown source={defaultValue} />
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title={
-              intl.formatMessage(   
+            <Tooltip
+              title={intl.formatMessage(
                 { defaultMessage: `Edit {name}` },
                 { values: { name: name } }
-              )
-            } position="bottom" size="small">
+              )}
+              position="bottom"
+              size="small"
+            >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>

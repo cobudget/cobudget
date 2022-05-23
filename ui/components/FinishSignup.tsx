@@ -4,7 +4,7 @@ import { useMutation, gql } from "urql";
 import TextField from "./TextField";
 import Button from "./Button";
 import toast from "react-hot-toast";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 const UPDATE_PROFILE_QUERY = gql`
   mutation updateProfile($username: String, $name: String) {
     updateProfile(username: $username, name: $name) {
@@ -70,27 +70,25 @@ export default function FinishSignup({ isOpen, currentUser }) {
                 <FormattedMessage
                   defaultMessage={"Welcome to {bucketName}!"}
                   values={{
-                    bucketName: process.env.PLATFORM_NAME
+                    bucketName: process.env.PLATFORM_NAME,
                   }}
                 />
               </Dialog.Title>
               <div className="mt-2">
                 <p className="text-sm text-gray-500">
-                  <FormattedMessage
-                    defaultMessage="Please add your name and username."
-                  />
+                  <FormattedMessage defaultMessage="Please add your name and username." />
                 </p>
               </div>
               <div className="space-y-4 mt-2">
                 <TextField
-                  label={intl.formatMessage({ defaultMessage:"Name"})}
+                  label={intl.formatMessage({ defaultMessage: "Name" })}
                   inputProps={{
                     value: name,
                     onChange: (e) => setName(e.target.value),
                   }}
                 />
                 <TextField
-                  label={intl.formatMessage({ defaultMessage:"Username" })}
+                  label={intl.formatMessage({ defaultMessage: "Username" })}
                   inputProps={{
                     value: username,
                     onChange: (e) => setUsername(e.target.value),
@@ -107,18 +105,20 @@ export default function FinishSignup({ isOpen, currentUser }) {
                       type="checkbox"
                     />{" "}
                     <span>
-                      <FormattedMessage 
+                      <FormattedMessage
                         defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
                         values={{
                           bucketName: process.env.PLATFORM_NAME,
-                          a: msg => (
-                              <a
-                                className="text-blue underline"
-                                target="_blank"
-                                rel="noreferrer"
-                                href={process.env.TERMS_URL}
-                              >{msg}</a>
-                          )
+                          a: (msg) => (
+                            <a
+                              className="text-blue underline"
+                              target="_blank"
+                              rel="noreferrer"
+                              href={process.env.TERMS_URL}
+                            >
+                              {msg}
+                            </a>
+                          ),
                         }}
                       />
                     </span>
@@ -136,14 +136,23 @@ export default function FinishSignup({ isOpen, currentUser }) {
                     updateUser({ username, name }).then(({ data, error }) => {
                       if (error) {
                         if (error.message.includes("Unique")) {
-                          toast.error(intl.formatMessage({ defaultMessage:"Username already taken" }));
+                          toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "Username already taken",
+                            })
+                          );
                         } else {
                           toast.error(error.message);
                         }
                       } else {
                         toast.success(
-                          intl.formatMessage({ defaultMessage:`Welcome to {bucketName}!` }, { values: {bucketName: process.env.PLATFORM_NAME} })
-                        )
+                          intl.formatMessage(
+                            { defaultMessage: `Welcome to {bucketName}!` },
+                            {
+                              values: { bucketName: process.env.PLATFORM_NAME },
+                            }
+                          )
+                        );
                       }
                     })
                   }

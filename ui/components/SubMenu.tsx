@@ -1,19 +1,28 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useIntl, } from "react-intl";
+import { useIntl } from "react-intl";
 
-const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }, formatMessage) => {
+const bucketItems = (
+  { groupSlug, roundSlug, bucketId, bucket },
+  formatMessage
+) => {
   return [
-    { 
-      label: formatMessage({ defaultMessage: "Bucket" }), 
-      href: `/${groupSlug}/${roundSlug}/${bucketId}` 
+    {
+      label: formatMessage({ defaultMessage: "Bucket" }),
+      href: `/${groupSlug}/${roundSlug}/${bucketId}`,
     },
     {
-      label: formatMessage({defaultMessage: `Comments ({count})` }, {values: {count: bucket.noOfComments}}),
+      label: formatMessage(
+        { defaultMessage: `Comments ({count})` },
+        { values: { count: bucket.noOfComments } }
+      ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
-      label: formatMessage({defaultMessage: `Funders ({count})` }, { values: {count: bucket.noOfFunders} }),
+      label: formatMessage(
+        { defaultMessage: `Funders ({count})` },
+        { values: { count: bucket.noOfFunders } }
+      ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/funders`,
     },
   ];
@@ -21,33 +30,38 @@ const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }, formatMessage) 
 
 const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
   return [
-    { 
-      label: formatMessage({ defaultMessage: "Overview" }), 
-      href: `/${groupSlug == "c" ? "" : groupSlug}` 
+    {
+      label: formatMessage({ defaultMessage: "Overview" }),
+      href: `/${groupSlug == "c" ? "" : groupSlug}`,
     },
     // { label: "Realities", href: "/realities" },
-    { 
-      label: formatMessage({ defaultMessage: "Members"}), 
-      href: `/${groupSlug ?? "c"}/members`, admin: true 
+    {
+      label: formatMessage({ defaultMessage: "Members" }),
+      href: `/${groupSlug ?? "c"}/members`,
+      admin: true,
     },
-    { 
-      label: formatMessage({ defaultMessage: "Settings" }), 
-      href: `/${groupSlug ?? "c"}/settings`, admin: true 
+    {
+      label: formatMessage({ defaultMessage: "Settings" }),
+      href: `/${groupSlug ?? "c"}/settings`,
+      admin: true,
     },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
 
-export const roundItems = ({ currentUser, groupSlug, roundSlug }, formatMessage) => {
+export const roundItems = (
+  { currentUser, groupSlug, roundSlug },
+  formatMessage
+) => {
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { 
-      label: formatMessage({ defaultMessage: "Overview" }), 
-      href: `/${groupSlug}/${roundSlug}` 
+    {
+      label: formatMessage({ defaultMessage: "Overview" }),
+      href: `/${groupSlug}/${roundSlug}`,
     },
-    { 
-      label: formatMessage({ defaultMessage: "About" }), 
-      href: `/${groupSlug}/${roundSlug}/about` 
+    {
+      label: formatMessage({ defaultMessage: "About" }),
+      href: `/${groupSlug}/${roundSlug}/about`,
     },
     {
       label: formatMessage({ defaultMessage: "Participants" }),
@@ -80,19 +94,28 @@ export default function SubMenu({
   const intl = useIntl();
 
   const items = router.query.bucket
-    ? bucketItems({
-        roundSlug: router.query.round,
-        groupSlug: router.query.group,
-        bucketId: router.query.bucket,
-        bucket,
-      }, intl.formatMessage)
+    ? bucketItems(
+        {
+          roundSlug: router.query.round,
+          groupSlug: router.query.group,
+          bucketId: router.query.bucket,
+          bucket,
+        },
+        intl.formatMessage
+      )
     : router.query.round
-    ? roundItems({
-        currentUser,
-        roundSlug: router.query.round,
-        groupSlug: router.query.group,
-      }, intl.formatMessage)
-    : groupItems({ currentUser, groupSlug: router.query.group ?? "c" }, intl.formatMessage);
+    ? roundItems(
+        {
+          currentUser,
+          roundSlug: router.query.round,
+          groupSlug: router.query.group,
+        },
+        intl.formatMessage
+      )
+    : groupItems(
+        { currentUser, groupSlug: router.query.group ?? "c" },
+        intl.formatMessage
+      );
 
   const color = round?.color ?? "anthracit";
 

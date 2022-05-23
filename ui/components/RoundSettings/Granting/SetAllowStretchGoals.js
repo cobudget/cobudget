@@ -40,13 +40,19 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="allowStretchGoals"
-              label={intl.formatMessage({ defaultMessage: "Allow stretch goals"})}
+              label={intl.formatMessage({
+                defaultMessage: "Allow stretch goals",
+              })}
               defaultValue={round.allowStretchGoals ?? false}
               inputRef={register}
               fullWidth
             >
-              <option value={true}><FormattedMessage defaultMessage="true" /></option>
-              <option value={false}><FormattedMessage defaultMessage="false" /></option>
+              <option value={true}>
+                <FormattedMessage defaultMessage="true" />
+              </option>
+              <option value={false}>
+                <FormattedMessage defaultMessage="false" />
+              </option>
             </SelectInput>
           </Box>
 

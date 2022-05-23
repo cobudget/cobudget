@@ -59,7 +59,11 @@ const EditGroup = ({ group, currentUser }) => {
             if (error) {
               toast.error(error.message.replace("[GraphQL]", ""));
             } else {
-              toast.success(intl.formatMessage({ defaultMessage: "Group created successfully"}));
+              toast.success(
+                intl.formatMessage({
+                  defaultMessage: "Group created successfully",
+                })
+              );
               router.replace(`/${variables.slug}/settings`);
               router.push(`/${variables.slug}`);
             }
@@ -74,7 +78,11 @@ const EditGroup = ({ group, currentUser }) => {
           if (error) {
             toast.error(error.message.replace("[GraphQL]", ""));
           } else {
-            toast.success(intl.formatMessage({ defaultMessage: "Group updated successfully" }));
+            toast.success(
+              intl.formatMessage({
+                defaultMessage: "Group updated successfully",
+              })
+            );
             router.replace(`/${variables.slug}/settings`);
           }
         });
@@ -89,14 +97,19 @@ const EditGroup = ({ group, currentUser }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="mt-10">
       <div className="bg-white rounded-lg shadow-xl p-6 flex-1 max-w-md mx-auto space-y-4">
         <h1 className="text-2xl font-semibold">
-          {isNew ? <FormattedMessage defaultMessage="New Group" /> : <FormattedMessage defaultMessage="Edit Group" />}
+          {isNew ? (
+            <FormattedMessage defaultMessage="New Group" />
+          ) : (
+            <FormattedMessage defaultMessage="Edit Group" />
+          )}
         </h1>
         <TextField
           name="name"
           label="Name"
-          placeholder={
-            intl.formatMessage({ defaultMessage: "{name}'s community" }, { name: currentUser.name })
-          }
+          placeholder={intl.formatMessage(
+            { defaultMessage: "{name}'s community" },
+            { name: currentUser.name }
+          )}
           inputRef={register({ required: "Required" })}
           defaultValue={group?.name}
           error={errors.name}
@@ -105,8 +118,13 @@ const EditGroup = ({ group, currentUser }) => {
         {process.env.SINGLE_GROUP_MODE !== "true" && (
           <TextField
             name="slug"
-            label={ intl.formatMessage({ defaultMessage: "URL" })}
-            placeholder={slugify(intl.formatMessage({ defaultMessage: "{name}'s community" }, { name: currentUser.name }))}
+            label={intl.formatMessage({ defaultMessage: "URL" })}
+            placeholder={slugify(
+              intl.formatMessage(
+                { defaultMessage: "{name}'s community" },
+                { name: currentUser.name }
+              )
+            )}
             inputRef={register({ required: "Required" })}
             error={errors.slug}
             inputProps={{
@@ -158,14 +176,18 @@ const EditGroup = ({ group, currentUser }) => {
         */}
 
         <ImageUpload
-          label={ intl.formatMessage({ defaultMessage: "Logo" })}
+          label={intl.formatMessage({ defaultMessage: "Logo" })}
           onImageUploaded={setLogoImage}
           cloudinaryPreset="organization_logos"
           initialImage={logoImage}
         />
 
         <Button fullWidth type="submit" loading={loading || editLoading}>
-          {isNew ? <FormattedMessage defaultMessage="Continue" /> : <FormattedMessage defaultMessage="Save" />}
+          {isNew ? (
+            <FormattedMessage defaultMessage="Continue" />
+          ) : (
+            <FormattedMessage defaultMessage="Save" />
+          )}
         </Button>
       </div>
     </form>

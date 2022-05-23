@@ -10,12 +10,16 @@ const CommentsLog = ({ log }) => {
     case "FlagRaised":
       headline = (
         <>
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage={`{bucketName} was flagged for violating the <und>{violation}</und> guideline:`}
             values={{
               bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR),
               violation: log.details.guideline.title,
-              und: (msg) => (<><span className="underline">{msg}</span></>)
+              und: (msg) => (
+                <>
+                  <span className="underline">{msg}</span>
+                </>
+              ),
             }}
           />
         </>

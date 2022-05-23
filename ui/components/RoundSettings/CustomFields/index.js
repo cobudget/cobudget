@@ -14,10 +14,10 @@ const CustomFields = ({ round }) => {
   return (
     <div className="px-6">
       <h1 className="text-2xl font-semibold mb-2">
-        <FormattedMessage 
+        <FormattedMessage
           defaultMessage="{bucketName} Form"
           values={{
-            bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR)
+            bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR),
           }}
         />
       </h1>
@@ -26,7 +26,7 @@ const CustomFields = ({ round }) => {
         <FormattedMessage
           defaultMessage="Customize the form for {bucketName} to fill out."
           values={{
-            bucketName: process.env.BUCKET_NAME_PLURAL
+            bucketName: process.env.BUCKET_NAME_PLURAL,
           }}
         />
       </p>
@@ -44,7 +44,8 @@ const CustomFields = ({ round }) => {
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
         >
-          <AddIcon className="h-5 w-5 mr-1" /> <FormattedMessage defaultMessage="Add form item" />
+          <AddIcon className="h-5 w-5 mr-1" />{" "}
+          <FormattedMessage defaultMessage="Add form item" />
         </Button>
       </div>
       {(addCustomFieldModalOpen || editingCustomField) && (

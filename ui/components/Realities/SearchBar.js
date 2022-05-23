@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import styled from "styled-components";
 import { FaTimesCircle } from "react-icons/fa";
 import { TextField } from "@material-ui/core";
-import { useIntl, } from "react-intl";
+import { useIntl } from "react-intl";
 
 const ClearButton = styled.button`
   background-color: white;
@@ -33,7 +33,7 @@ const SearchBar = (props) => {
   return (
     <div className="w-2/3 m-auto flex mb-4">
       <TextField
-        placeholder={intl.formatMessage({defaultMessage: "Search"})}
+        placeholder={intl.formatMessage({ defaultMessage: "Search" })}
         fullWidth
         variant="outlined"
         {...inputProps}

@@ -40,7 +40,7 @@ const EditComment = ({ comment, handleDone }) => {
     >
       <TextField
         className="mb-2"
-        placeholder={intl.formatMessage({ defaultMessage:"Comment"})}
+        placeholder={intl.formatMessage({ defaultMessage: "Comment" })}
         multiline
         error={Boolean(errors.content)}
         helperText={errors.content?.message}

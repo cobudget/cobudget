@@ -1,9 +1,9 @@
-/*missing-translation*///end
+/*missing-translation*/ //end
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { Button, TextField } from "@material-ui/core";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Wrapper = styled.div`
   margin: 0.5rem 0;

@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers";
 import { Modal } from "@material-ui/core";
 import TextField from "components/TextField";
 import Button from "components/Button";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const ADD_GUIDELINE_MUTATION = gql`
   mutation AddGuideline($roundId: ID!, $guideline: GuidelineInput!) {
@@ -83,8 +83,9 @@ export default ({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <h1 className="text-lg font-semibold mb-2">
-          {editing ? intl.formatMessage({ defaultMessage:"Editing guideline"}) : intl.formatMessage({ defaultMessage:"Add guideline"})}
-
+          {editing
+            ? intl.formatMessage({ defaultMessage: "Editing guideline" })
+            : intl.formatMessage({ defaultMessage: "Add guideline" })}
         </h1>
         <form
           onSubmit={handleSubmit((variables) =>
@@ -99,7 +100,7 @@ export default ({
         >
           <div className="grid gap-4">
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage:"Title" })}
+              placeholder={intl.formatMessage({ defaultMessage: "Title" })}
               name="guideline.title"
               defaultValue={guideline.title}
               inputRef={register}
@@ -109,7 +110,9 @@ export default ({
               autoFocus
             />
             <TextField
-              placeholder={intl.formatMessage({ defaultMessage: "Description" })}
+              placeholder={intl.formatMessage({
+                defaultMessage: "Description",
+              })}
               defaultValue={guideline.description}
               multiline
               rows={4}

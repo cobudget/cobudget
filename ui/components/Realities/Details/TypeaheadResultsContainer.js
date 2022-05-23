@@ -46,7 +46,11 @@ const TypeaheadResultsContainer = withDebouncedProp(
           if (error) return <CardBody>`Error! ${error.message}`</CardBody>;
           const searchResults = queryDataToResultsArray(data) || [];
           if (searchResults.length === 0)
-            return <CardBody><FormattedMessage defaultMessage="No results" /></CardBody>;
+            return (
+              <CardBody>
+                <FormattedMessage defaultMessage="No results" />
+              </CardBody>
+            );
           return (
             <TypeaheadResults
               results={searchResults}

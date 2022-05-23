@@ -7,7 +7,7 @@ import {
   DialogContent,
   DialogActions,
 } from "@material-ui/core";
-import { FormattedMessage, useIntl, } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Wrapper = styled.div`
   margin-bottom: 1rem;
@@ -31,10 +31,10 @@ const DeleteNodeButton = ({
             onClick={onToggleConfirmationModal}
             disabled={disabled}
           >
-            <FormattedMessage 
+            <FormattedMessage
               defaultMessage="Delete {name}"
               values={{
-                name: nodeType.toLowerCase()
+                name: nodeType.toLowerCase(),
               }}
             />
           </Button>
@@ -48,10 +48,10 @@ const DeleteNodeButton = ({
         open={confirmationModalIsOpen}
       >
         <DialogContent>
-          <FormattedMessage 
+          <FormattedMessage
             defaultMessage="Are you sure you want to delete this {name}?"
             values={{
-              name: nodeType.toLowerCase()
+              name: nodeType.toLowerCase(),
             }}
           />
         </DialogContent>
@@ -61,10 +61,10 @@ const DeleteNodeButton = ({
             onClick={onConfirmSoftDelete}
             disabled={disabled}
           >
-            <FormattedMessage 
+            <FormattedMessage
               defaultMessage="Yes, delete this {name}"
               values={{
-                name: nodeType.toLowerCase()
+                name: nodeType.toLowerCase(),
               }}
             />
           </Button>

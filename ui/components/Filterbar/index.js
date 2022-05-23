@@ -70,7 +70,7 @@ const Filterbar = ({
       >
         <form onSubmit={onSubmitSearch}>
           <input
-            placeholder={ intl.formatMessage({ defaultMessage: "Search..." })}
+            placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
             className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
             value={input}
             onChange={(e) => setInput(e.target.value)}
