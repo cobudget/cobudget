@@ -100,11 +100,11 @@ export default handler().post(async (req, res) => {
 
   const callbackLink = appLink("/api/stripe/return");
 
-  //TODO: text note about which round and bucket it's for
   const session = await stripe.checkout.sessions.create(
     {
       line_items: [
         {
+          quantity: 1,
           price_data: {
             currency: bucket.round.currency.toLowerCase(),
             unit_amount: contribution,
@@ -118,6 +118,7 @@ export default handler().post(async (req, res) => {
           tax_rates: await getTaxRates({ bucket, roundMember }),
         },
         {
+          quantity: 1,
           price_data: {
             currency: bucket.round.currency.toLowerCase(),
             unit_amount: tipAmount,
@@ -132,12 +133,22 @@ export default handler().post(async (req, res) => {
       ],
       payment_intent_data: {
         application_fee_amount: tipAmount,
+        description: JSON.stringify({
+          contributionInCurrency: new Decimal(contribution).div(100).toFixed(2),
+          currency: bucket.round.currency.toLowerCase(),
+          bucketId: bucket.id,
+          roundSlug: bucket.round.slug,
+          directFundingType: bucket.directFundingType,
+          userId: roundMember.user.id,
+          userEmail: roundMember.user.email,
+        }),
       },
       metadata: {
         userId: roundMember.user.id,
         bucketId,
         contribution,
         tipAmount,
+        currency: bucket.round.currency.toLowerCase(),
       },
       customer_email: roundMember.user.email,
       mode: "payment",

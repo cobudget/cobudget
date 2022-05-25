@@ -19,7 +19,7 @@ const WithCard = ({ bucket, handleClose }) => {
   const isExchange = bucket.directFundingType === "EXCHANGE";
 
   const [contribution, setContribution] = useState<number>(
-    isExchange ? bucket.exchangeMinimumContribution / 100 : 0
+    isExchange ? bucket.exchangeMinimumContribution / 100 : null
   );
   // fraction
   const [cobudgetTip, setCobudgetTip] = useState<number>(0.15);
