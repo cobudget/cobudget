@@ -1,11 +1,12 @@
-import { Modal } from "@material-ui/core";
+import { Modal, Tooltip } from "@material-ui/core";
 import { Tab } from "@headlessui/react";
 import { FormattedMessage } from "react-intl";
 import FromBalance from "./FromBalance";
 import WithCard from "./WithCard";
 
-const StyledTab = ({ children, color }) => (
+const StyledTab = ({ children, color, disabled = false }) => (
   <Tab
+    disabled={disabled}
     className={({ selected }) =>
       `block px-2 py-4 border-b-2 font-medium transition-colors ${
         selected
@@ -19,6 +20,9 @@ const StyledTab = ({ children, color }) => (
 );
 
 const ContributeModal = ({ handleClose, bucket, currentUser }) => {
+  const directFundingEnabled =
+    bucket.directFundingEnabled && bucket.round.directFundingEnabled;
+
   return (
     <Modal
       open={true}
@@ -36,9 +40,21 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
             <StyledTab color={bucket.round.color}>
               <FormattedMessage defaultMessage="From my balance" />
             </StyledTab>
-            <StyledTab color={bucket.round.color}>
-              {/* TODO: disable if disabled for bucket */}
-              <FormattedMessage defaultMessage="Direct with card" />
+            <StyledTab
+              color={bucket.round.color}
+              disabled={!directFundingEnabled}
+            >
+              <Tooltip
+                title={
+                  directFundingEnabled
+                    ? ""
+                    : "Direct funding not enabled for this bucket and/or round"
+                }
+              >
+                <span>
+                  <FormattedMessage defaultMessage="Direct with card" />
+                </span>
+              </Tooltip>
             </StyledTab>
           </Tab.List>
           <Tab.Panels>
