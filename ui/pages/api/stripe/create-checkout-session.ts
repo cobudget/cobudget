@@ -133,6 +133,7 @@ export default handler().post(async (req, res) => {
       ],
       payment_intent_data: {
         application_fee_amount: tipAmount,
+        // shows up for the connected account in their stripe dashboard
         description: JSON.stringify({
           contributionInCurrency: new Decimal(contribution).div(100).toFixed(2),
           currency: bucket.round.currency.toLowerCase(),
@@ -143,8 +144,11 @@ export default handler().post(async (req, res) => {
           userEmail: roundMember.user.email,
         }),
       },
+      // metadata that returns to us in the checkout.session.completed webhook
       metadata: {
         userId: roundMember.user.id,
+        roundMemberId: roundMember.id,
+        roundId: bucket.round.id,
         bucketId,
         contribution,
         tipAmount,
