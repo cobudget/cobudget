@@ -1,6 +1,7 @@
 import getRawBody from "raw-body";
 import { appLink } from "utils/internalLinks";
 import handler from "server/api-handler";
+import { allocateToMember, contribute } from "server/controller";
 import { isCollOrGroupAdmin } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 import stripe from "server/utils/stripe";
@@ -32,35 +33,52 @@ export default handler().post(async (req, res) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const metadata = session.metadata;
 
     console.log("session", session);
-
-    const roundMember = await prisma.roundMember.findUnique({
-      where: { id: metadata.roundMemberId },
-    });
-    const bucket = await prisma.bucket.findUnique({
-      where: { id: metadata.bucketId },
-    });
 
     const missing = () => {
       throw new Error(`Missing metadata in session ${session.id}`);
     };
 
-    await prisma.$transaction([
-      prisma.transaction.create({
-        data: {
-          amount: metadata.contribution || missing(),
-          roundMemberId: metadata.roundMemberId || missing(),
-          roundId: metadata.roundId || missing(),
-          fromAccountId: roundMember.incomingAccountId || missing(),
-          toAccountId: bucket.statusAccountId || missing(),
-          stripeSessionId: session.id || missing(),
-        },
-      }),
-      //TODO: skapa också en Contribution med typ samma info. kanske också lägga till session id?
-      //TODO: gör också en Allocation från användaren till sig själv. lägg till session id på den också
-    ]);
+    const stripeSessionId = session.id ?? missing();
+
+    const {
+      roundMemberId = missing(),
+      roundId = missing(),
+      bucketId = missing(),
+    } = session.metadata;
+
+    const contribution = session.metadata.contribution
+      ? Number(session.metadata.contribution)
+      : missing();
+
+    const roundMember = await prisma.roundMember.findUnique({
+      where: { id: roundMemberId },
+      include: {
+        user: true,
+      },
+    });
+
+    await prisma.$transaction(async (prisma) => {
+      await allocateToMember({
+        roundId,
+        allocatedBy: roundMemberId,
+        amount: contribution,
+        member: roundMember,
+        type: "ADD",
+        stripeSessionId,
+        prisma: prisma as any,
+      });
+
+      await contribute({
+        roundId,
+        bucketId,
+        amount: contribution,
+        user: roundMember.user,
+        stripeSessionId,
+        prisma: prisma as any,
+      });
+    });
   } else {
     console.log(`Unhandled event type ${event.type}`);
   }

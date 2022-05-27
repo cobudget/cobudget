@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "interactiveTransactions"]
 
 }
 
@@ -352,6 +352,8 @@ model Allocation {
   amountBefore   Int?
   allocationType AllocationType @default(ADD)
   createdAt      DateTime       @default(now())
+
+  stripeSessionId String?
 }
 
 model Contribution {
@@ -365,6 +367,8 @@ model Contribution {
   amount        Int
   amountBefore  Int?
   createdAt     DateTime    @default(now())
+
+  stripeSessionId String?
 }
 
 model DiscourseConfig {
