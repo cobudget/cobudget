@@ -137,7 +137,9 @@ const Page = ({
 
   return (
     <>
-      {buckets.map((bucket) => (
+      {
+      typeof window !== "undefined" && window.location.hash !== "#table" &&
+      buckets.map((bucket) => (
         <Link
           href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
           key={bucket.id}
@@ -147,6 +149,13 @@ const Page = ({
           </a>
         </Link>
       ))}
+
+      {
+        typeof window !== "undefined" && window.location.hash === "#table" &&
+        buckets.map((bucket) => (
+          <div>Hello</div>
+        ))
+      }
 
       {isFirstPage &&
         buckets.length === 0 &&
