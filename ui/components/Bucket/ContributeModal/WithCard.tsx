@@ -50,44 +50,6 @@ const WithCard = ({ bucket, handleClose }) => {
           <Markdown source={bucket.exchangeDescription} />
         </>
       )}
-      <Title>
-        <FormattedMessage defaultMessage="How much would you like to contribute?" />
-      </Title>
-      <TextField
-        placeholder="0"
-        endAdornment={bucket.round.currency}
-        color={bucket.round.color}
-        inputProps={{
-          value: contribution,
-          onChange: (e) => setContribution(e.target.value),
-          type: "number",
-          min: isExchange ? bucket.exchangeMinimumContribution / 100 : "0.00",
-          step: 0.01,
-        }}
-      />
-      {notAboveMinimum && (
-        <div className="text-red-600">
-          <FormattedMessage defaultMessage="Contribution needs to be at least" />{" "}
-          {bucket.exchangeMinimumContribution / 100} {bucket.round.currency}
-        </div>
-      )}
-      <Title>
-        <FormattedMessage defaultMessage="Add a tip to support Cobudget" />
-      </Title>
-      <SelectInput
-        fullWidth
-        value={cobudgetTip}
-        onChange={(e) => setCobudgetTip(e.target.value)}
-      >
-        {tipAlternatives.map(({ fraction, amount }) => {
-          return (
-            <option value={fraction} key={fraction}>
-              {amount} {bucket.round.currency} ({fraction * 100}%)
-            </option>
-          );
-        })}
-      </SelectInput>
-      {/* TODO: move form up so you can press enter to submit */}
       <form
         action={`/api/stripe/create-checkout-session?bucketId=${
           bucket.id
@@ -98,6 +60,43 @@ const WithCard = ({ bucket, handleClose }) => {
         ).mul(100)}`}
         method="POST"
       >
+        <Title>
+          <FormattedMessage defaultMessage="How much would you like to contribute?" />
+        </Title>
+        <TextField
+          placeholder="0"
+          endAdornment={bucket.round.currency}
+          color={bucket.round.color}
+          inputProps={{
+            value: contribution ?? "",
+            onChange: (e) => setContribution(e.target.value),
+            type: "number",
+            min: isExchange ? bucket.exchangeMinimumContribution / 100 : "0.00",
+            step: 0.01,
+          }}
+        />
+        {notAboveMinimum && (
+          <div className="text-red-600">
+            <FormattedMessage defaultMessage="Contribution needs to be at least" />{" "}
+            {bucket.exchangeMinimumContribution / 100} {bucket.round.currency}
+          </div>
+        )}
+        <Title>
+          <FormattedMessage defaultMessage="Add a tip to support Cobudget" />
+        </Title>
+        <SelectInput
+          fullWidth
+          value={cobudgetTip}
+          onChange={(e) => setCobudgetTip(e.target.value)}
+        >
+          {tipAlternatives.map(({ fraction, amount }) => {
+            return (
+              <option value={fraction} key={fraction}>
+                {amount} {bucket.round.currency} ({fraction * 100}%)
+              </option>
+            );
+          })}
+        </SelectInput>
         <Button
           type="submit"
           size="large"
