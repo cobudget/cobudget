@@ -9,9 +9,11 @@ const StyledTab = ({ children, color, disabled = false }) => (
     disabled={disabled}
     className={({ selected }) =>
       `block px-2 py-4 border-b-2 font-medium transition-colors ${
+        disabled ? "cursor-not-allowed" : ""
+      } ${
         selected
           ? `border-${color} text-anthracit`
-          : "border-transparent text-gray-500"
+          : `border-transparent text-gray-${disabled ? 400 : 500}`
       }`
     }
   >
