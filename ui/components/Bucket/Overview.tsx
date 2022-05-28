@@ -4,6 +4,7 @@ import HappySpinner from "components/HappySpinner";
 import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
 import Summary from "./Summary";
+import { FormattedMessage } from "react-intl";
 
 export default function Overview({
   currentUser,
@@ -40,7 +41,9 @@ export default function Overview({
     return (
       <div className="flex-grow flex flex-col justify-center items-center">
         <span className="text-4xl">404</span>
-        <h1 className="text-2xl">Can&apos;t find this bucket...</h1>
+        <h1 className="text-2xl">
+          <FormattedMessage defaultMessage="Can't find this bucket..." />
+        </h1>
       </div>
     );
   }
@@ -72,7 +75,7 @@ export default function Overview({
                 className={`w-full h-64 md:h-88 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100`}
                 onClick={openImageModal}
               >
-                + Cover image
+                <FormattedMessage defaultMessage="+ Cover image" />
               </button>
             ) : (
               <div className="w-full h-64 md:h-88 block border-3 border-dashed rounded-lg"></div>

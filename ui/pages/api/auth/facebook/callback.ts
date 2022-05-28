@@ -13,5 +13,5 @@ export default handler()
     next();
   })
   .use((req, res) => {
-    res.redirect(req.user?.redirect || "/");
+    res.redirect(req.session?.redirect || req.user?.redirect || "/");
   });

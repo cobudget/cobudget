@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { FormattedMessage, FormattedNumber } from "react-intl";
 
 import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
@@ -22,33 +23,66 @@ const GrantingStatus = ({ bucket }) => {
           {thousandSeparator(funding / 100)} {bucket.round.currency}
         </p>
         <p className="text-sm text-gray-700 mb-2">
-          funded of {thousandSeparator(bucket.minGoal / 100)}{" "}
-          {bucket.round.currency} goal
+          <FormattedMessage
+            defaultMessage="funded of {total} goal"
+            values={{
+              total: (
+                <FormattedNumber
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={bucket.round.currency}
+                  value={bucket.minGoal / 100}
+                />
+              ),
+            }}
+          />
         </p>
 
         {!!bucket.totalContributionsFromCurrentMember && (
           <p className="my-2 text-sm text-gray-700">
-            You have contributed{" "}
-            {thousandSeparator(
-              bucket.totalContributionsFromCurrentMember / 100
-            )}{" "}
-            {bucket.round.currency}
+            <FormattedMessage
+              defaultMessage="You have contributed {total}"
+              values={{
+                total: (
+                  <FormattedNumber
+                    style="currency"
+                    currencyDisplay={"symbol"}
+                    currency={bucket.round.currency}
+                    value={bucket.totalContributionsFromCurrentMember / 100}
+                  />
+                ),
+              }}
+            />
           </p>
         )}
       </div>
 
       <div className="text-sm text-gray-700 space-y-2">
         {bucket.funded && (
-          <p>Funded on {dayjs(bucket.fundedAt).format("MMMM D, YYYY")}</p>
+          <FormattedMessage
+            defaultMessage="Funded on {day}"
+            values={{
+              day: dayjs(bucket.fundedAt).format("MMMM D, YYYY"),
+            }}
+          />
         )}
         {bucket.canceled && (
           <p>
-            Funding canceled on{" "}
-            {dayjs(bucket.canceledAt).format("MMMM D, YYYY")}
+            <FormattedMessage
+              defaultMessage="Funding canceled on {day}"
+              values={{
+                day: dayjs(bucket.canceledAt).format("MMMM D, YYYY"),
+              }}
+            />
           </p>
         )}
         {bucket.completed && (
-          <p>Completed on {dayjs(bucket.completedAt).format("MMMM D, YYYY")}</p>
+          <FormattedMessage
+            defaultMessage="Completed on {day}"
+            values={{
+              day: dayjs(bucket.completedAt).format("MMMM D, YYYY"),
+            }}
+          />
         )}
       </div>
     </div>
