@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, gql, ssrExchange } from "urql";
 import Link from "next/link";
 import BucketCard from "../../../components/BucketCard";
@@ -17,6 +17,7 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
+import Table from "../../../components/Table";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -28,6 +29,7 @@ export const ROUND_PAGE_QUERY = gql`
       color
       bucketCreationIsOpen
       totalInMembersBalances
+      allowStretchGoals
       currency
       tags {
         id
@@ -75,8 +77,12 @@ export const BUCKETS_QUERY = gql`
         title
         minGoal
         maxGoal
+        raisedFlags {
+          type
+        }
         income
         totalContributions
+        totalContributionsFromCurrentMember
         noOfComments
         published
         approved
@@ -131,6 +137,20 @@ const Page = ({
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
 
+  const columns = useMemo(() => {
+    return [
+      {Header: "Name", accessor: "title"},
+      {Header: "Min Goal", accessor: "minGoal"},
+      {Header: "Stretch Goal", accessor: "stretchGoal"},
+      {Header: "Your Contribution", accessor: "myFunding"},
+      {Header: "Internal Funding", accessor: "internalFunding"},
+      {Header: "External Funding", accessor: "externalFunding"},
+      {Header: "Funding", accessor: "totalFunding"},
+      {Header: "Funding Progress", accessor: "progress"},
+      {Header: "Stretch Goal Progress", accessor: "stretchGoalProgress"},
+    ]
+  }, []);
+
   if (error) {
     console.error(error);
   }
@@ -149,12 +169,31 @@ const Page = ({
           </a>
         </Link>
       ))}
-
+      
       {
         typeof window !== "undefined" && window.location.hash === "#table" &&
-        buckets.map((bucket) => (
-          <div>Hello</div>
-        ))
+          <div>
+            <Table
+              columns={columns}
+              data={buckets.map(bucket => ({
+                title: bucket.title,
+                minGoal: bucket.minGoal,
+                stretchGoal: round.allowStretchGoals ? bucket.maxGoal : "-",
+                myFunding: bucket.totalContributionsFromCurrentMember,
+                totalFunding: bucket.totalContributions,
+                externalFunding: bucket.income || 0,
+                internalFunding: bucket.totalContributions - (bucket.totalContributions || 0),
+                progress: Math.floor(bucket.totalContributions/bucket.minGoal *10000)/100 + "%",
+                stretchGoalProgress: round.allowStretchGoals && bucket.maxGoal ?
+                (
+                  bucket.totalContributions - bucket.minGoal > 0 ?
+                  (bucket.totalContributions - bucket.minGoal)/(bucket.maxGoal - bucket.minGoal) *100 + "%"
+                  : "0%"
+                )
+                : "-"
+              }))}
+            />
+          </div>
       }
 
       {isFirstPage &&
@@ -230,6 +269,7 @@ const getStandardFilter = (bucketStatusCount) => {
 
 const RoundPage = ({ currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
+  const [bucketTableView, setBucketTableView] = useState(false);
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
@@ -270,6 +310,10 @@ const RoundPage = ({ currentUser }) => {
     const filter = f ?? getStandardFilter(bucketStatusCount);
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount, f]);
+
+  useEffect(() => {
+    setBucketTableView(typeof window !== "undefined" && window.location.hash === "#table")
+  }, []);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -376,7 +420,12 @@ const RoundPage = ({ currentUser }) => {
           statusFilter={statusFilter}
           bucketStatusCount={bucketStatusCount}
         />
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
+        <div 
+          className={
+            bucketTableView ? "" :
+            "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20"
+          }
+        >
           {pageVariables.map((variables, i) => {
             return (
               <Page
