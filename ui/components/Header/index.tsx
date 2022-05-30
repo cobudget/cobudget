@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { LoaderIcon } from "components/Icons";
-import { set, get, remove } from "../../utils/storage";
 
 const css = {
   mobileProfileItem:
@@ -104,30 +103,12 @@ const Header = ({
 }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
-  const [userFromStorage, setUserFromStorage] = useState(null);
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
-
-  useEffect(() => {
-    if (currentUser) {
-      set("user", currentUser);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    const user = get("user");
-    if (user && fetchingUser) {
-      setUserFromStorage(user);
-    }
-    else if (!fetchingUser && currentUser === null) {
-      remove("user");
-      setUserFromStorage(null);
-    }
-  }, [fetchingUser, currentUser]);
 
   const title = group
     ? round
@@ -197,7 +178,7 @@ const Header = ({
             } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
           >
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
-              {currentUser || userFromStorage ? (
+              {currentUser ? (
                 <>
                   {currentUser?.currentCollMember?.isApproved &&
                   currentUser?.currentCollMember?.hasJoined === false ? (
@@ -261,7 +242,7 @@ const Header = ({
 
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
-                      currentUser={currentUser || userFromStorage}
+                      currentUser={currentUser}
                       openModal={openModal}
                     />
                   </div>
@@ -311,7 +292,6 @@ const Header = ({
                   </Link>
                   <a
                     onClick={() => {
-                      remove("user");
                       window.location.href = "/api/auth/logout";
                     }}
                     className={css.mobileProfileItem}
