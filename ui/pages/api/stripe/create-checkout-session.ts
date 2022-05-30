@@ -1,4 +1,4 @@
-import { Prisma, Bucket, RoundMember, User } from "@prisma/client";
+import { Prisma, Bucket, Round, RoundMember, User } from "@prisma/client";
 import { appLink } from "utils/internalLinks";
 import handler from "server/api-handler";
 import { getRoundMember } from "server/graphql/resolvers/helpers";
@@ -11,12 +11,15 @@ async function getTaxRates({
   bucket,
   roundMember,
 }: {
-  bucket: Bucket;
+  bucket: Bucket & { round: Round };
   roundMember: RoundMember & { user: User };
 }): Promise<string[]> {
   if (bucket.directFundingType === "DONATION") return [];
 
-  const taxRates = await stripe.taxRates.list({ limit: 100 });
+  const taxRates = await stripe.taxRates.list(
+    { limit: 100 },
+    { stripeAccount: bucket.round.stripeAccountId }
+  );
 
   //TODO
   if (taxRates.has_more)
@@ -32,15 +35,18 @@ async function getTaxRates({
     console.log("creating new taxRate");
 
     taxRateId = (
-      await stripe.taxRates.create({
-        display_name: "VAT",
-        inclusive: true,
-        percentage: new Decimal(bucket.exchangeVat).div(100).toNumber(),
-        metadata: {
-          createdByUserId: roundMember.user.id,
-          createdForBucketId: bucket.id,
+      await stripe.taxRates.create(
+        {
+          display_name: "VAT",
+          inclusive: true,
+          percentage: new Decimal(bucket.exchangeVat).div(100).toNumber(),
+          metadata: {
+            createdByUserId: roundMember.user.id,
+            createdForBucketId: bucket.id,
+          },
         },
-      })
+        { stripeAccount: bucket.round.stripeAccountId }
+      )
     ).id;
   }
 
