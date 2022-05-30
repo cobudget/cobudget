@@ -71,7 +71,7 @@ export default ({ round, handleClose, currentGroup }) => {
         </p>{" "}
         <p className="mb-4">
           <FormattedMessage
-            defaultMessage="Please type <b>{round.slug}</b> to confirm."
+            defaultMessage="Please type <b>{slug}</b> to confirm."
             values={{
               slug: round.slug,
               b: (msg) => <b>{msg}</b>,
