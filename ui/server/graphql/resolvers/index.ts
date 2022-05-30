@@ -547,6 +547,7 @@ const resolvers = {
               (comment) =>
                 !(comment.username === "system" && comment.raw === "")
             )
+            .reverse()
             .map(async (post) => {
               const author = await prisma.roundMember.findFirst({
                 where: {
@@ -1054,12 +1055,16 @@ const resolvers = {
             }),
           },
           include: {
+            Images: true,
+            FieldValues: true,
+            BudgetItems: true,
             round: {
               include: {
+                fields: true,
                 group: {
                   include: {
-                    groupMembers: { where: { userId: user.id } },
                     discourse: true,
+                    groupMembers: { where: { userId: user.id } },
                   },
                 },
               },
@@ -1159,10 +1164,17 @@ const resolvers = {
             },
           },
           include: {
+            Images: true,
+            FieldValues: true,
+            BudgetItems: true,
             round: {
               include: {
+                fields: true,
                 group: {
-                  include: { groupMembers: { where: { userId: user.id } } },
+                  include: {
+                    discourse: true,
+                    groupMembers: { where: { userId: user.id } },
+                  },
                 },
               },
             },

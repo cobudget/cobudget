@@ -1,3 +1,4 @@
+import { bucketMinGoal } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 import discourse from "../lib/discourse";
 
@@ -35,7 +36,7 @@ export default {
         const post = await discourse(currentGroup.discourse).posts.create(
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
+            raw: await this.generateBucketMarkdown(bucket, round, currentGroup),
             category: round.discourseCategoryId,
             unlist_topic: !bucket.published,
           },
@@ -47,16 +48,16 @@ export default {
 
         if (post.errors) throw new Error("Discourse API:" + post.errors);
 
-        bucket.comments.forEach((comment) => {
-          eventHub.publish("create-comment", {
-            currentGroup,
-            currentGroupMember,
-            currentCollMember,
-            round,
-            bucket,
-            comment,
-          });
-        });
+        // bucket.comments.forEach((comment) => {
+        //   eventHub.publish("create-comment", {
+        //     currentGroup,
+        //     currentGroupMember,
+        //     currentCollMember,
+        //     round,
+        //     bucket,
+        //     comment,
+        //   });
+        // });
 
         await prisma.bucket.update({
           where: { id: bucket.id },
@@ -101,7 +102,7 @@ export default {
           post.id,
           {
             title: bucket.title,
-            raw: this.generateBucketMarkdown(bucket, round, currentGroup),
+            raw: await this.generateBucketMarkdown(bucket, round, currentGroup),
           },
           {
             username: "system",
@@ -277,7 +278,7 @@ export default {
     );
   },
 
-  generateBucketMarkdown(bucket, round, group) {
+  async generateBucketMarkdown(bucket, round, group) {
     const content = [];
 
     if (group) {
@@ -300,20 +301,19 @@ export default {
       content.push(bucket.description);
     }
 
-    if (bucket.customFields) {
-      bucket.customFields.forEach((customField) => {
-        const customFieldName = round.customFields.find(
-          (customEventField) =>
-            String(customEventField._id) === String(customField.fieldId)
+    if (bucket.FieldValues) {
+      bucket.FieldValues.forEach((fieldValue) => {
+        const fieldName = round.fields.find(
+          (field) => field.id === fieldValue.fieldId
         ).name;
-        content.push(`## ${customFieldName}`);
-        content.push(customField.value);
+        content.push(`## ${fieldName}`);
+        content.push(fieldValue.value);
       });
     }
 
-    if (bucket.budgetItems && bucket.budgetItems.length > 0) {
-      const income = bucket.budgetItems.filter(({ type }) => type === "INCOME");
-      const expenses = bucket.budgetItems.filter(
+    if (bucket.BudgetItems && bucket.BudgetItems.length > 0) {
+      const income = bucket.BudgetItems.filter(({ type }) => type === "INCOME");
+      const expenses = bucket.BudgetItems.filter(
         ({ type }) => type === "EXPENSE"
       );
 
@@ -348,15 +348,18 @@ export default {
       }
 
       content.push(
-        `Total funding goal: ${bucket.minGoal / 100} ${round.currency}`
+        `Total funding goal: ${(await bucketMinGoal(bucket)) / 100} ${
+          round.currency
+        }`
       );
     }
 
-    if (bucket.images && bucket.images.length > 0) {
+    if (bucket.Images && bucket.Images.length > 0) {
       content.push("## Images");
-      bucket.images.forEach(({ small }) => content.push(`![](${small})`));
+      bucket.Images.forEach(({ small }) => content.push(`![](${small})`));
     }
-
-    return content.join("\n\n");
+    const markdown = content.join("\n\n");
+    console.log({ markdown });
+    return markdown;
   },
 };
