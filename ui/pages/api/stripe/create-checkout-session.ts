@@ -16,18 +16,28 @@ async function getTaxRates({
 }): Promise<string[]> {
   if (bucket.directFundingType === "DONATION") return [];
 
-  const taxRates = await stripe.taxRates.list(
+  let taxRates = await stripe.taxRates.list(
     { limit: 100 },
     { stripeAccount: bucket.round.stripeAccountId }
   );
 
-  //TODO
-  if (taxRates.has_more)
-    throw new Error("We should implement pagination for taxes");
+  let taxRateId = null;
+  while (!taxRateId) {
+    taxRateId = taxRates.data.find((rate) =>
+      new Decimal(bucket.exchangeVat).div(100).equals(rate.percentage)
+    )?.id;
 
-  let taxRateId = taxRates.data.find((rate) =>
-    new Decimal(bucket.exchangeVat).div(100).equals(rate.percentage)
-  )?.id;
+    if (!taxRateId && taxRates.has_more) {
+      // grab another page of rates
+      taxRates = await stripe.taxRates.list(
+        {
+          limit: 100,
+          starting_after: taxRates.data[taxRates.data.length - 1].id,
+        },
+        { stripeAccount: bucket.round.stripeAccountId }
+      );
+    }
+  }
 
   if (!taxRateId) {
     // There isn't an existing taxRate at this percentage, so we create a new one
