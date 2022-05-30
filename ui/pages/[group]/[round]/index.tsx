@@ -18,6 +18,7 @@ import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import Table from "../../../components/Table";
+import { FormattedNumber } from "react-intl";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -139,17 +140,91 @@ const Page = ({
 
   const columns = useMemo(() => {
     return [
-      {Header: "Name", accessor: "title"},
-      {Header: "Min Goal", accessor: "minGoal"},
-      {Header: "Stretch Goal", accessor: "stretchGoal"},
-      {Header: "Your Contribution", accessor: "myFunding"},
-      {Header: "Internal Funding", accessor: "internalFunding"},
-      {Header: "External Funding", accessor: "externalFunding"},
-      {Header: "Funding", accessor: "totalFunding"},
-      {Header: "Funding Progress", accessor: "progress"},
-      {Header: "Stretch Goal Progress", accessor: "stretchGoalProgress"},
-    ]
-  }, []);
+      { Header: "Name", accessor: "title" },
+      {
+        Header: "Min Goal",
+        accessor: "minGoal",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Stretch Goal",
+        accessor: "stretchGoal",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Your Contribution",
+        accessor: "myFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Internal Funding",
+        accessor: "internalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "External Funding",
+        accessor: "externalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Funding",
+        accessor: "totalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Funding Progress",
+        accessor: "progress",
+        Cell: ({ cell }) => cell.value + "%",
+      },
+      {
+        Header: "Stretch Goal Progress",
+        accessor: "stretchGoalProgress",
+        Cell: ({ cell }) => cell.value + "%",
+      },
+    ];
+  }, [round?.currency]);
 
   if (error) {
     console.error(error);
@@ -157,44 +232,48 @@ const Page = ({
 
   return (
     <>
-      {
-      typeof window !== "undefined" && window.location.hash !== "#table" &&
-      buckets.map((bucket) => (
-        <Link
-          href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
-          key={bucket.id}
-        >
-          <a className="flex focus:outline-none focus:ring rounded-lg">
-            <BucketCard bucket={bucket} round={round} />
-          </a>
-        </Link>
-      ))}
-      
-      {
-        typeof window !== "undefined" && window.location.hash === "#table" &&
-          <div>
-            <Table
-              columns={columns}
-              data={buckets.map(bucket => ({
-                title: bucket.title,
-                minGoal: bucket.minGoal,
-                stretchGoal: round.allowStretchGoals ? bucket.maxGoal : "-",
-                myFunding: bucket.totalContributionsFromCurrentMember,
-                totalFunding: bucket.totalContributions,
-                externalFunding: bucket.income || 0,
-                internalFunding: bucket.totalContributions - (bucket.totalContributions || 0),
-                progress: Math.floor(bucket.totalContributions/bucket.minGoal *10000)/100 + "%",
-                stretchGoalProgress: round.allowStretchGoals && bucket.maxGoal ?
-                (
-                  bucket.totalContributions - bucket.minGoal > 0 ?
-                  (bucket.totalContributions - bucket.minGoal)/(bucket.maxGoal - bucket.minGoal) *100 + "%"
-                  : "0%"
-                )
-                : "-"
-              }))}
-            />
-          </div>
-      }
+      {typeof window !== "undefined" &&
+        window.location.hash !== "#table" &&
+        buckets.map((bucket) => (
+          <Link
+            href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
+            key={bucket.id}
+          >
+            <a className="flex focus:outline-none focus:ring rounded-lg">
+              <BucketCard bucket={bucket} round={round} />
+            </a>
+          </Link>
+        ))}
+
+      {typeof window !== "undefined" && window.location.hash === "#table" && (
+        <div>
+          <Table
+            columns={columns}
+            data={buckets.map((bucket) => ({
+              title: bucket.title,
+              minGoal: bucket.minGoal,
+              stretchGoal: round.allowStretchGoals ? bucket.maxGoal : "-",
+              myFunding: bucket.totalContributionsFromCurrentMember,
+              totalFunding: bucket.totalContributions,
+              externalFunding: bucket.income || 0,
+              internalFunding:
+                bucket.totalContributions - (bucket.totalContributions || 0),
+              progress:
+                Math.floor(
+                  (bucket.totalContributions / bucket.minGoal) * 10000
+                ) / 100,
+              stretchGoalProgress:
+                round.allowStretchGoals && bucket.maxGoal
+                  ? bucket.totalContributions - bucket.minGoal > 0
+                    ? ((bucket.totalContributions - bucket.minGoal) /
+                        (bucket.maxGoal - bucket.minGoal)) *
+                      100
+                    : 0
+                  : "-",
+            }))}
+          />
+        </div>
+      )}
 
       {isFirstPage &&
         buckets.length === 0 &&
@@ -312,7 +391,9 @@ const RoundPage = ({ currentUser }) => {
   }, [bucketStatusCount, f]);
 
   useEffect(() => {
-    setBucketTableView(typeof window !== "undefined" && window.location.hash === "#table")
+    setBucketTableView(
+      typeof window !== "undefined" && window.location.hash === "#table"
+    );
   }, []);
 
   // if (!router.isReady || (fetching && !round)) {
@@ -420,10 +501,11 @@ const RoundPage = ({ currentUser }) => {
           statusFilter={statusFilter}
           bucketStatusCount={bucketStatusCount}
         />
-        <div 
+        <div
           className={
-            bucketTableView ? "" :
-            "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20"
+            bucketTableView
+              ? ""
+              : "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20"
           }
         >
           {pageVariables.map((variables, i) => {
