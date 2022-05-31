@@ -7,6 +7,9 @@ on:
 
 jobs:
   production:
+    strategy:
+      matrix:
+        database_urls: ${{ fromJSON(secrets.DATABASE_URLS) }}
     name: Production
     runs-on: ubuntu-latest
     steps:
@@ -24,4 +27,4 @@ jobs:
       - name: Run migrations
         run: cd ui && yarn prisma migrate deploy
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ matrix.database_urls }}
