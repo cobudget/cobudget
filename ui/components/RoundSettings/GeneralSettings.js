@@ -116,10 +116,10 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
           className="my-4"
         >
           <option value="PUBLIC">
-            <FormattedMessage defaultMessage="Public" />
+            {intl.formatMessage({ defaultMessage: "Public" })}
           </option>
           <option value="HIDDEN">
-            <FormattedMessage defaultMessage="Hidden" />
+            {intl.formatMessage({ defaultMessage: "Hidden" })}
           </option>
         </SelectField>
 
@@ -131,13 +131,13 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
           className="my-4"
         >
           <option value="OPEN">
-            <FormattedMessage defaultMessage="Open" />
+            {intl.formatMessage({ defaultMessage: "Open" })}
           </option>
           <option value="REQUEST_TO_JOIN">
-            <FormattedMessage defaultMessage="Request to join" />
+            {intl.formatMessage({ defaultMessage: "Request to join" })}
           </option>
           <option value="INVITE_ONLY">
-            <FormattedMessage defaultMessage="Invite only" />
+            {intl.formatMessage({ defaultMessage: "Invite only" })}
           </option>
         </SelectField>
 
@@ -152,10 +152,10 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             className="my-4"
           >
             <option value="true">
-              <FormattedMessage defaultMessage="Yes" />
+              {intl.formatMessage({ defaultMessage: "Yes" })}
             </option>
             <option value="false">
-              <FormattedMessage defaultMessage="No" />
+              {intl.formatMessage({ defaultMessage: "No" })}
             </option>
           </SelectField>
         )}
