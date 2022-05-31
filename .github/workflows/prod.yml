@@ -9,7 +9,7 @@ jobs:
   production:
     strategy:
       matrix:
-        database_urls: ${{ fromJSON(secrets.DATABASE_URLS) }}
+        database_urls: ${{ fromJSON(${{ secrets.DATABASE_URLS }}) }}
     name: Production
     runs-on: ubuntu-latest
     steps:
