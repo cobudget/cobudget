@@ -9,7 +9,7 @@ jobs:
   staging:
     strategy:
       matrix:
-        database_urls: ${{ fromJson(${{ secrets.STAGING_DATABASE_URLS }}) }}
+        database_urls: ${{ fromJSON(secrets.STAGING_DATABASE_URLS) }}
     name: Staging
     runs-on: ubuntu-latest
     steps:
