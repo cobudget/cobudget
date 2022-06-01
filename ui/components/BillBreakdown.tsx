@@ -21,9 +21,8 @@ function BillBreakdown({
   return (
     <div className="shadow overflow-hidden">
       {parts.map((part, index) => (
-        <>
+        <div key={index}>
           <div
-            key={index}
             className="p-4 grid grid-cols-funding bg-gray-100 even:bg-white font-medium"
           >
             <p>{part.title}</p>
@@ -38,7 +37,7 @@ function BillBreakdown({
               <p>{row.amount}</p>
             </div>
           ))}
-        </>
+        </div>
       ))}
       <div className="p-4 grid grid-cols-funding bg-gray-200 font-medium">
         <p>{totalTitle}</p>
