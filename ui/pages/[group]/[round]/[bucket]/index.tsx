@@ -134,17 +134,10 @@ export const BUCKET_QUERY = gql`
 
 const BucketIndex = ({ currentUser }) => {
   const router = useRouter();
-  const [{ data, fetching, error }, executeQuery] = useQuery({
+  const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
-    pause: true,
   });
-
-  useEffect(() => {
-    if (router.isReady && router.query.bucket) {
-      executeQuery();
-    }
-  }, [router.isReady, executeQuery, router.query.bucket]);
 
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
@@ -161,7 +154,7 @@ const BucketIndex = ({ currentUser }) => {
     setTab(index > -1 ? index : 0);
   }, [router.query.tab, tabsList]);
 
-  if (!data && !error) {
+  if ((!bucket && fetching) || !router.isReady) {
     return (
       <div className="flex-grow flex justify-center items-center h-64">
         <HappySpinner />
@@ -169,13 +162,17 @@ const BucketIndex = ({ currentUser }) => {
     );
   }
 
-  if (!bucket || !bucket.round)
+  if (!bucket && !fetching)
     return (
       <div className="text-center mt-7">
         This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
         don&apos;t have access to it
       </div>
     );
+
+  if (error) {
+    <div className="text-center mt-7">{error.message}</div>;
+  }
 
   return (
     <>
