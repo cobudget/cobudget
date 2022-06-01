@@ -290,12 +290,7 @@ const Header = ({
                   <Link href={"/settings"}>
                     <a className={css.mobileProfileItem}>Email settings</a>
                   </Link>
-                  <a
-                    onClick={() => {
-                      window.location.href = "/api/auth/logout";
-                    }}
-                    className={css.mobileProfileItem}
-                  >
+                  <a href="/api/auth/logout" className={css.mobileProfileItem}>
                     Sign out
                   </a>
                 </div>
