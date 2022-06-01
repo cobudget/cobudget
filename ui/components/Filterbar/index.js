@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 import StatusFilter from "./StatusFilter";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Filterbar = ({
   textSearchTerm,
@@ -11,6 +12,7 @@ const Filterbar = ({
   statusFilter,
   bucketStatusCount,
 }) => {
+  const intl = useIntl();
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -68,7 +70,7 @@ const Filterbar = ({
       >
         <form onSubmit={onSubmitSearch}>
           <input
-            placeholder="Search..."
+            placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
             className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -98,11 +100,13 @@ const Filterbar = ({
         className="bg-white sm:order-last"
         color={round.color}
         inputProps={{
-          value: tag || "All tags",
+          value: tag || intl.formatMessage({ defaultMessage: "All tags" }),
           onChange: onChangeTag,
         }}
       >
-        <option value="All tags">All tags</option>
+        <option value="All tags">
+          {intl.formatMessage({ defaultMessage: "All tags" })}
+        </option>
         {round.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
             {tag.value}

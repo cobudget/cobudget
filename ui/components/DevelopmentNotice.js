@@ -1,9 +1,11 @@
 import React from "react";
 import CloseIcon from "@material-ui/icons/Close";
 import { Button, Snackbar, IconButton } from "@material-ui/core";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export default function DevelopmentNotice() {
   const [open, setOpen] = React.useState(true);
+  const intl = useIntl();
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -22,7 +24,10 @@ export default function DevelopmentNotice() {
         }}
         open={open}
         onClose={handleClose}
-        message="Hi! This platform is under development, don't use it for anything real.. :-)"
+        message={intl.formatMessage({
+          defaultMessage:
+            "Hi! This platform is under development, don't use it for anything real.. :-)",
+        })}
         action={
           <React.Fragment>
             <Button
@@ -32,7 +37,7 @@ export default function DevelopmentNotice() {
               href="https://github.com/Edgeryders-Participio/multi-dreams"
               target="_blank"
             >
-              Go to GitHub repository
+              <FormattedMessage defaultMessage="Go to GitHub repository" />
             </Button>
             <IconButton
               size="small"

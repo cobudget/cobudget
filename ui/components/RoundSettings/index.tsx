@@ -6,7 +6,6 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
-import RoundSettingsModalGranting from "./Granting";
 import capitalize from "utils/capitalize";
 
 const defaultTabs = [

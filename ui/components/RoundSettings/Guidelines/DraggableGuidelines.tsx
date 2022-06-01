@@ -6,6 +6,7 @@ import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
 import Markdown from "components/Markdown";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const DELETE_GUIDELINE_MUTATION = gql`
   mutation DeleteGuideline($roundId: ID!, $guidelineId: ID!) {
@@ -54,12 +55,18 @@ const SortableItem = SortableElement(
       DELETE_GUIDELINE_MUTATION
     );
 
+    const intl = useIntl();
+
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg">{guideline.title}</h2>
           <div>
-            <Tooltip title="Edit" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton
                 onClick={() => setEditingGuideline(guideline)}
                 className="mx-1"
@@ -73,7 +80,10 @@ const SortableItem = SortableElement(
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    "Are you sure you would like to delete this guideline?"
+                    intl.formatMessage({
+                      defaultMessage:
+                        "Are you sure you would like to delete this guideline?",
+                    })
                   ) &&
                   deleteGuideline({
                     roundId,
@@ -85,7 +95,11 @@ const SortableItem = SortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Drag to reorder" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Drag to reorder" })}
+              position="bottom"
+              size="small"
+            >
               <DragHandle />
             </Tooltip>
           </div>

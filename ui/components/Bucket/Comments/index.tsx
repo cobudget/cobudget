@@ -3,6 +3,7 @@ import Comment from "./Comment";
 import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
+import { FormattedMessage } from "react-intl";
 
 const Comments = ({ currentUser, bucket, router }) => {
   const context = useCommentContext({
@@ -26,9 +27,13 @@ const Comments = ({ currentUser, bucket, router }) => {
                 <div className="flex justify-between items-center">
                   {!!total && (
                     <h2 className="font-medium text-gray-600" id="comments">
-                      {`${comments.length} of ${total} ${
-                        total === 1 ? "comment" : "comments"
-                      }`}
+                      <FormattedMessage
+                        defaultMessage="{length} of {total} {total, plural, one {comment} other {comments}}"
+                        values={{
+                          total,
+                          length: comments.length,
+                        }}
+                      />
                     </h2>
                   )}
 
@@ -38,7 +43,7 @@ const Comments = ({ currentUser, bucket, router }) => {
                       rel="noreferrer"
                       href={bucket.discourseTopicUrl}
                     >
-                      View on Discourse
+                      <FormattedMessage defaultMessage="View on Discourse" />
                     </a>
                   )}
                 </div>

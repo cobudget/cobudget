@@ -1,5 +1,6 @@
 import HappySpinner from "components/HappySpinner";
 import { CheveronDownIcon } from "components/Icons";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const LoadMore = ({
   moreExist,
@@ -23,7 +24,9 @@ const LoadMore = ({
           className="hover:bg-gray-300 p-1 m-auto h-full rounded flex justify-center items-center focus:outline-none opacity-75"
           onClick={onClick}
         >
-          <div>Load more</div>
+          <div>
+            <FormattedMessage defaultMessage="Load more" />
+          </div>
           <CheveronDownIcon
             className={`h-8 w-8 ml-3 p-1 text-gray-900 bg-gray-100 rounded-full ${
               reverse ? "transform rotate-180" : ""

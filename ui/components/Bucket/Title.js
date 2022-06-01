@@ -7,7 +7,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const EDIT_TITLE_MUTATION = gql`
   mutation EditTitle($bucketId: ID!, $title: String) {
@@ -19,6 +19,7 @@ const EDIT_TITLE_MUTATION = gql`
 `;
 
 const BucketTitle = ({ title, canEdit, bucketId }) => {
+  const intl = useIntl();
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_TITLE_MUTATION);
   const { handleSubmit, register, errors } = useForm();
 
@@ -35,7 +36,7 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
         >
           <TextField
             className="mb-2"
-            placeholder="Title"
+            placeholder={intl.formatMessage({ defaultMessage: "Title" })}
             name="title"
             defaultValue={title}
             size="large"
@@ -74,7 +75,11 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
         </h1>
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit title" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit title" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>

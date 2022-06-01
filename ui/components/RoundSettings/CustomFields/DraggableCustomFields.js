@@ -5,6 +5,7 @@ import { Tooltip } from "react-tippy";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const DELETE_CUSTOM_FIELD_MUTATION = gql`
   mutation DeleteCustomField($roundId: ID!, $fieldId: ID!) {
@@ -55,12 +56,6 @@ const css = {
     "bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-800 mr-2",
 };
 
-const types = {
-  TEXT: "Short Text",
-  MULTILINE_TEXT: "Long Text",
-  BOOLEAN: "Yes/No",
-};
-
 const DragHandle = sortableHandle(() => (
   <IconButton className="mx-1 cursor-move">
     <DraggableIcon className="h-6 w-6" />
@@ -69,16 +64,27 @@ const DragHandle = sortableHandle(() => (
 
 const SortableItem = sortableElement(
   ({ item: customField, setEditingItem: setEditingCustomField, roundId }) => {
+    const intl = useIntl();
     const [{ fetching: deleting }, deleteCustomField] = useMutation(
       DELETE_CUSTOM_FIELD_MUTATION
     );
+
+    const types = {
+      TEXT: intl.formatMessage({ defaultMessage: "Short Text" }),
+      MULTILINE_TEXT: intl.formatMessage({ defaultMessage: "Long Text" }),
+      BOOLEAN: intl.formatMessage({ defaultMessage: "Yes/No" }),
+    };
 
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-lg">{customField.name}</h2>
           <div>
-            <Tooltip title="Edit" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton
                 onClick={() => setEditingCustomField(customField)}
                 className="mx-1"
@@ -87,12 +93,24 @@ const SortableItem = sortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Delete" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Delete" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton
                 loading={deleting}
                 onClick={() =>
                   confirm(
-                    `Deleting a custom field would delete it from all the ${process.env.BUCKET_NAME_PLURAL} that use it. Are you sure?`
+                    intl.formatMessage(
+                      {
+                        defaultMessage:
+                          "Deleting a custom field would delete it from all the {bucketName} that use it. Are you sure?",
+                      },
+                      {
+                        bucketName: process.env.BUCKET_NAME_PLURAL,
+                      }
+                    )
                   ) && deleteCustomField({ roundId, fieldId: customField.id })
                 }
               >
@@ -100,16 +118,25 @@ const SortableItem = sortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Drag to reorder" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Drag to reorder" })}
+              position="bottom"
+              size="small"
+            >
               <DragHandle />
             </Tooltip>
           </div>
         </div>
         <p className="mb-2">{customField.description}</p>
         <div className="flex">
-          <span className={css.label}>Type: {types[customField.type]}</span>
+          <span className={css.label}>
+            <FormattedMessage defaultMessage="Type:" />{" "}
+            {types[customField.type]}
+          </span>
           {customField.isRequired && (
-            <span className={css.label}>Is Required</span>
+            <span className={css.label}>
+              <FormattedMessage defaultMessage="Is Required" />
+            </span>
           )}
         </div>
       </li>

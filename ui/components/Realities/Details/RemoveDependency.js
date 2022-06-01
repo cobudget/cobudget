@@ -4,6 +4,7 @@ import { gql, useMutation } from "@apollo/client";
 import { Button } from "@material-ui/core";
 import { useRouter } from "next/router";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
+import { FormattedMessage } from "react-intl";
 
 const REMOVE_DEPENDENCY = gql`
   mutation RemoveDependency_removeResponsibilityDependsOnResponsibilitiesMutation(
@@ -49,7 +50,7 @@ const RemoveDependency = ({ nodeId }) => {
         });
       }}
     >
-      Remove
+      <FormattedMessage defaultMessage="Remove" />
     </Button>
   );
 };

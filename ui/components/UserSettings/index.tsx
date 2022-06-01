@@ -1,6 +1,7 @@
 import { useQuery, gql, useMutation } from "urql";
 import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const USER_SETTINGS_QUERY = gql`
   query UserSettings {
@@ -19,44 +20,6 @@ const SET_EMAIL_SETTING_MUTATION = gql`
     }
   }
 `;
-
-const settingsMeta = [
-  {
-    key: "allocatedToYou",
-    label: `I receive funds (to spend on ${process.env.BUCKET_NAME_PLURAL})`,
-  },
-  {
-    key: "refundedBecauseBucketCancelled",
-    label: `I have been refunded (because a ${process.env.BUCKET_NAME_SINGULAR} was cancelled)`,
-  },
-  {
-    key: "contributionToYourBucket",
-    label: `Funds have been contributed to my ${process.env.BUCKET_NAME_PLURAL}`,
-  },
-  {
-    key: "commentBecauseCocreator",
-    label: `There are comments on my ${process.env.BUCKET_NAME_PLURAL}`,
-  },
-  {
-    key: "commentMentions",
-    label: "I am mentioned in a comment",
-  },
-  {
-    key: "bucketPublishedInRound",
-    label: `A new ${process.env.BUCKET_NAME_SINGULAR} is published`,
-  },
-  {
-    key: "commentBecauseCommented",
-    label: `A ${process.env.BUCKET_NAME_PLURAL} I have commented on receives a new comment`,
-  },
-];
-
-const adminSettingsMeta = [
-  {
-    key: "roundJoinRequest",
-    label: `A user requests to join a round`,
-  },
-];
 
 const EmailSettingItem = ({ settingKey, value, settingsMeta }) => {
   const [{ fetching, error }, setEmailSetting] = useMutation(
@@ -89,6 +52,81 @@ const SettingsIndex = () => {
     query: USER_SETTINGS_QUERY,
   });
 
+  const intl = useIntl();
+  const settingsMeta = [
+    {
+      key: "allocatedToYou",
+      label: (
+        <FormattedMessage
+          defaultMessage={`I receive funds (to spend on {bucketName})`}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
+        />
+      ),
+    },
+    {
+      key: "refundedBecauseBucketCancelled",
+      label: (
+        <FormattedMessage
+          defaultMessage={`I have been refunded (because a {bucketName} was cancelled)`}
+          values={{ bucketName: process.env.BUCKET_NAME_SINGULAR }}
+        />
+      ),
+    },
+    {
+      key: "contributionToYourBucket",
+      label: (
+        <FormattedMessage
+          defaultMessage={`Funds have been contributed to my {bucketName}`}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
+        />
+      ),
+    },
+    {
+      key: "commentBecauseCocreator",
+      label: (
+        <FormattedMessage
+          defaultMessage={`There are comments on my {bucketName}`}
+          values={{ bucketName: process.env.BUCKET_NAME_PLURAL || "" }}
+        />
+      ),
+    },
+    {
+      key: "commentMentions",
+      label: <FormattedMessage defaultMessage="I am mentioned in a comment" />,
+    },
+    {
+      key: "bucketPublishedInRound",
+      label: (
+        <FormattedMessage
+          defaultMessage={`A new {bucketName} is published`}
+          values={{
+            bucketName: process.env.BUCKET_NAME_SINGULAR,
+          }}
+        />
+      ),
+    },
+    {
+      key: "commentBecauseCommented",
+      label: (
+        <FormattedMessage
+          defaultMessage="A {bucketName} I have commented on receives a new comment"
+          values={{
+            bucketName: process.env.BUCKET_NAME_PLURAL,
+          }}
+        />
+      ),
+    },
+  ];
+
+  const adminSettingsMeta = [
+    {
+      key: "roundJoinRequest",
+      label: (
+        <FormattedMessage defaultMessage={`A user requests to join a round`} />
+      ),
+    },
+  ];
+
   if (fetching) return <HappySpinner />;
   if (error) {
     return <div className="text-center">{error.message}</div>;
@@ -97,7 +135,9 @@ const SettingsIndex = () => {
   return (
     <div className="page">
       <FormGroup className="max-w-xl mx-auto p-5 space-y-2 bg-white rounded-lg shadow">
-        <div>Please send me an email when:</div>
+        <div>
+          <FormattedMessage defaultMessage="Please send me an email when:" />
+        </div>
         {settingsMeta.map(({ key }) => (
           <EmailSettingItem
             key={key}
@@ -106,7 +146,9 @@ const SettingsIndex = () => {
             settingsMeta={settingsMeta}
           />
         ))}
-        <div>Admin e-mail settings:</div>
+        <div>
+          <FormattedMessage defaultMessage="Admin e-mail settings:" />
+        </div>
         {adminSettingsMeta.map(({ key }) => (
           <EmailSettingItem
             key={key}

@@ -1,7 +1,5 @@
 import dayjs from "dayjs";
 import { FormattedMessage, FormattedNumber } from "react-intl";
-
-import thousandSeparator from "utils/thousandSeparator";
 import ProgressBar from "components/ProgressBar";
 
 const GrantingStatus = ({ bucket }) => {
@@ -20,7 +18,12 @@ const GrantingStatus = ({ bucket }) => {
           color={bucket.round.color}
         />
         <p className={`text-xl font-semibold text-${bucket.round.color}-dark`}>
-          {thousandSeparator(funding / 100)} {bucket.round.currency}
+          <FormattedNumber
+            value={funding / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={bucket.round.currency}
+          />
         </p>
         <p className="text-sm text-gray-700 mb-2">
           <FormattedMessage

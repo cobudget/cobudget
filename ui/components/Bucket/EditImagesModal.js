@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { Modal } from "@material-ui/core";
 
@@ -76,6 +77,7 @@ const EditImagesModal = ({
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_IMAGES_MUTATION);
 
   const { handleSubmit } = useForm();
+  const intl = useIntl();
 
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -120,7 +122,9 @@ const EditImagesModal = ({
               .catch((err) => alert(err.message));
           })}
         >
-          <h1 className="text-xl font-semibold mb-4">Edit images</h1>
+          <h1 className="text-xl font-semibold mb-4">
+            <FormattedMessage defaultMessage="Edit images" />
+          </h1>
           <Images>
             {images.length > 0 &&
               images.map((image, i) => (
@@ -137,15 +141,19 @@ const EditImagesModal = ({
                 </div>
               ))}
             {uploadingImage ? (
-              <label>uploading...</label>
+              <label>
+                <FormattedMessage defaultMessage="uploading..." />
+              </label>
             ) : (
               <>
                 <label>
-                  Upload image
+                  <FormattedMessage defaultMessage="Upload image" />
                   <input
                     type="file"
                     name="file"
-                    placeholder="Upload image"
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Upload image",
+                    })}
                     onChange={uploadFile}
                   />
                 </label>
@@ -155,7 +163,7 @@ const EditImagesModal = ({
 
           <div className="flex justify-between items-center">
             <div className=" text-sm text-gray-600 font-medium">
-              The first image will be used as cover
+              <FormattedMessage defaultMessage="The first image will be used as cover" />
             </div>
             <div className="flex">
               <Button
@@ -163,10 +171,10 @@ const EditImagesModal = ({
                 onClick={handleClose}
                 className="mr-2"
               >
-                Cancel
+                <FormattedMessage defaultMessage="Cancel" />
               </Button>
               <Button type="submit" loading={loading}>
-                Save
+                <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
           </div>
