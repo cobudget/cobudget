@@ -7,9 +7,6 @@ on:
 
 jobs:
   staging:
-    strategy:
-      matrix:
-        database_urls: ${{ fromJSON(${{ secrets.STAGING_DATABASE_URLS }}) }}
     name: Staging
     runs-on: ubuntu-latest
     steps:
@@ -27,4 +24,4 @@ jobs:
       - name: Run migrations
         run: cd ui && yarn prisma migrate deploy
         env:
-          DATABASE_URL: ${{ matrix.database_urls }}
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
