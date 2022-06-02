@@ -72,7 +72,7 @@ const Page = ({
   isAdmin,
   searchString,
 }) => {
-  const [{ data, fetching, error }, searchMembers] = useQuery({
+  const [{ data, fetching, error }, executeQuery] = useQuery({
     query: MEMBERS_QUERY,
     variables: {
       roundId: round.id,
@@ -86,8 +86,8 @@ const Page = ({
   const moreExist = data?.membersPage?.moreExist || false;
 
   const debouncedSearchMembers = useMemo(() => {
-    return debounce(searchMembers, 300, { leading: true });
-  }, [searchMembers]);
+    return debounce(executeQuery, 300, { leading: true });
+  }, [executeQuery]);
 
   const items = useMemo(() => {
     const members = data?.membersPage?.members || [];
