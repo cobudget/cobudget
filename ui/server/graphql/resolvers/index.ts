@@ -2339,6 +2339,13 @@ const resolvers = {
 
       return prisma.user.findUnique({ where: { id: user.id } });
     },
+    acceptTerms: async (parent, args, { user }) => {
+      if (!user) throw new Error("You need to be logged in");
+      return prisma.user.update({
+        where: { id: user.id },
+        data: { acceptedTermsAt: new Date() },
+      });
+    },
   },
   RoundMember: {
     round: async (member) => {
