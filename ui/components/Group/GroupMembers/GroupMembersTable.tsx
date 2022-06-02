@@ -134,18 +134,6 @@ const ActionsDropdown = ({
   );
 };
 
-const PortaledLoadMore = ({ children }) => {
-  if (typeof window !== "undefined")
-    return ReactDOM.createPortal(
-      children,
-      document.getElementById("load-more")
-    );
-  return (
-    <TableRow>
-      <TableCell></TableCell>
-    </TableRow>
-  );
-};
 
 const Page = ({
   variables,
