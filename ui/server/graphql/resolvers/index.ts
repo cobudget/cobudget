@@ -423,9 +423,39 @@ const resolvers = {
     },
     groupMembersPage: combineResolvers(
       isGroupAdmin,
-      async (parent, { offset = 0, limit, groupId }, { user }) => {
+      async (parent, { offset = 0, limit, groupId, search }, { user }) => {
         const groupMembersWithExtra = await prisma.groupMember.findMany({
-          where: { groupId: groupId },
+          where: {
+            groupId: groupId,
+            ...(search && {
+              OR: [
+                {
+                  user: {
+                    username: {
+                      contains: search,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+                {
+                  user: {
+                    name: {
+                      contains: search,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+                {
+                  user: {
+                    email: {
+                      contains: search,
+                      mode: "insensitive",
+                    },
+                  },
+                },
+              ],
+            }),
+          },
           skip: offset,
           take: limit + 1,
         });

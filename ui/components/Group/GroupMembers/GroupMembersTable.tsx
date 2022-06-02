@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Table,
@@ -18,11 +18,22 @@ import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
 import { FormattedMessage, useIntl } from "react-intl";
+import { debounce } from "lodash";
 import LoadMore, { PortaledLoadMore } from "../../LoadMore";
 
 export const GROUP_MEMBERS_QUERY = gql`
-  query GroupMembers($groupId: ID!, $offset: Int, $limit: Int) {
-    groupMembersPage(groupId: $groupId, offset: $offset, limit: $limit) {
+  query GroupMembers(
+    $groupId: ID!
+    $offset: Int
+    $limit: Int
+    $search: String
+  ) {
+    groupMembersPage(
+      groupId: $groupId
+      offset: $offset
+      limit: $limit
+      search: $search
+    ) {
       moreExist
       groupMembers {
         id
@@ -141,19 +152,37 @@ const Page = ({
   deleteGroupMember,
   updateGroupMember,
   currentGroup,
+  searchString,
 }) => {
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, executeQuery] = useQuery({
     query: GROUP_MEMBERS_QUERY,
     variables: {
       groupId: currentGroup.id,
       offset: variables.offset,
       limit: variables.limit,
+      search: searchString,
     },
+    pause: true,
   });
 
   const intl = useIntl();
   const moreExist = data?.groupMembersPage?.moreExist;
-  const groupMembers = data?.groupMembersPage?.groupMembers ?? [];
+
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(executeQuery, 300, { leading: true });
+  }, [executeQuery]);
+
+  const items = useMemo(() => {
+    const members = data?.groupMembersPage?.groupMembers || [];
+    if (fetching || !members) {
+      return [];
+    }
+    return members;
+  }, [data?.groupMembersPage?.groupMembers, fetching]);
+
+  useEffect(() => {
+    debouncedSearchMembers();
+  }, [debouncedSearchMembers]);
 
   if (error) {
     console.error(error);
@@ -162,7 +191,7 @@ const Page = ({
 
   return (
     <>
-      {groupMembers.map((member) => (
+      {items.map((member) => (
         <TableRow key={member.id}>
           <TableCell component="th" scope="row">
             {member.user.username}
@@ -214,7 +243,7 @@ const Page = ({
             onClick={() =>
               onLoadMore({
                 limit: variables.limit,
-                offset: variables.offset + groupMembers.length,
+                offset: variables.offset + items.length,
               })
             }
           />
@@ -228,6 +257,7 @@ const GroupMembersTable = ({
   updateGroupMember,
   deleteGroupMember,
   currentGroup,
+  searchString,
 }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
@@ -273,6 +303,7 @@ const GroupMembersTable = ({
                     deleteGroupMember={deleteGroupMember}
                     updateGroupMember={updateGroupMember}
                     currentGroup={currentGroup}
+                    searchString={searchString}
                   />
                 );
               })}
