@@ -7,7 +7,7 @@ import Layout from "../components/Layout";
 import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
-import FinishSignup from "components/FinishSignup";
+import RequiredActionsModal from "components/RequiredActions";
 import { useRouter } from "next/router";
 import { IntlProvider } from "react-intl";
 import lang, { supportedLangCodes } from "../lang";
@@ -22,6 +22,7 @@ export const CURRENT_USER_QUERY = gql`
       name
       avatar
       email
+      acceptedTermsAt
 
       groupMemberships {
         id
@@ -196,8 +197,6 @@ const MyApp = ({ Component, pageProps }) => {
     setLocale(locale);
   };
 
-  const showFinishSignupModal = !!(currentUser && !currentUser.username);
-
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
@@ -207,7 +206,8 @@ const MyApp = ({ Component, pageProps }) => {
     <IntlProvider locale={locale} messages={lang[locale]}>
       {/* legacy Modal component, use individual modals where they are called instead */}
       <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
-      <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
+
+      <RequiredActionsModal currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
         fetchingUser={fetchingUser}
