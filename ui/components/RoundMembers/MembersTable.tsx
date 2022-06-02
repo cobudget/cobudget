@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Table,
@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
 import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
-import { useMutation } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
 import IconButton from "components/IconButton";
@@ -240,16 +240,17 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
 };
 
 const RoundMembersTable = ({
-  approvedMembers,
   updateMember,
   deleteMember,
   round,
   isAdmin,
+  searchString
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
   const intl = useIntl();
 
   return (
+    <>
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <TableContainer>
         <Table aria-label="simple table">
@@ -303,21 +304,33 @@ const RoundMembersTable = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {approvedMembers.map((member) => (
-              <Row
-                key={member.id}
-                member={member}
-                round={round}
+            {pageVariables.map((variables, i) => {
+              return (
+                <Page key={i}
+                variables={variables}
+                isLastPage={i === pageVariables.length - 1}
+                onLoadMore={({ limit, offset }) => {
+                  setPageVariables([...pageVariables, { limit, offset }]);
+                }}
                 deleteMember={deleteMember}
                 updateMember={updateMember}
                 isAdmin={isAdmin}
-              />
-            ))}
+                round={round}
+                searchString={searchString}
+                />
+              )
+            })}
+          
           </TableBody>
         </Table>
       </TableContainer>
     </div>
+    <div id="load-more"></div>
+</>
   );
 };
+
+
+
 
 export default RoundMembersTable;
