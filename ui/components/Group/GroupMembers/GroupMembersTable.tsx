@@ -20,6 +20,7 @@ import { useQuery, gql } from "urql";
 import { FormattedMessage, useIntl } from "react-intl";
 import { debounce } from "lodash";
 import LoadMore, { PortaledLoadMore } from "../../LoadMore";
+import Avatar from "components/Avatar";
 
 export const GROUP_MEMBERS_QUERY = gql`
   query GroupMembers(
@@ -40,7 +41,6 @@ export const GROUP_MEMBERS_QUERY = gql`
         isAdmin
         bio
         email
-        name
         user {
           id
           name
@@ -194,10 +194,17 @@ const Page = ({
       {items.map((member) => (
         <TableRow key={member.id}>
           <TableCell component="th" scope="row">
-            {member.user.username}
-          </TableCell>
-          <TableCell component="th" scope="row">
-            {member.name}
+            <div className="flex space-x-3">
+              <Avatar user={member.user} />
+              <div>
+                <p className="font-medium text-base">{member.user.name}</p>
+                {member.user.username && (
+                  <p className="text-gray-700 text-sm">
+                    @{member.user.username}
+                  </p>
+                )}
+              </div>
+            </div>
           </TableCell>
           <TableCell>
             <Box display="flex" alignItems="center">
@@ -271,10 +278,7 @@ const GroupMembersTable = ({
             <TableHead>
               <TableRow>
                 <TableCell>
-                  <FormattedMessage defaultMessage="Username" />
-                </TableCell>
-                <TableCell>
-                  <FormattedMessage defaultMessage="Name" />
+                  <FormattedMessage defaultMessage="User" />
                 </TableCell>
                 <TableCell>
                   <FormattedMessage defaultMessage="Email" />
