@@ -428,32 +428,13 @@ const resolvers = {
           where: {
             groupId: groupId,
             ...(search && {
-              OR: [
-                {
-                  user: {
-                    username: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-                {
-                  user: {
-                    name: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-                {
-                  user: {
-                    email: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              ],
+              user: {
+                OR: [
+                  { username: { contains: search, mode: "insensitive" } },
+                  { name: { contains: search, mode: "insensitive" } },
+                  { email: { contains: search, mode: "insensitive" } },
+                ],
+              },
             }),
           },
           skip: offset,
@@ -491,30 +472,24 @@ const resolvers = {
         });
         if (!isAdmin && !isApproved) return null;
 
+        const insensitiveSearch: { contains: string; mode: "insensitive" } = {
+          contains: search,
+          mode: "insensitive",
+        };
+
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {
             roundId,
             isApproved,
             ...(!isApproved && { isRemoved: false }),
             ...(search && {
-              OR: [
-                {
-                  user: {
-                    username: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-                {
-                  user: {
-                    name: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              ],
+              user: {
+                OR: [
+                  { username: insensitiveSearch },
+                  { name: insensitiveSearch },
+                  ...(isAdmin ? [{ email: insensitiveSearch }] : []),
+                ],
+              },
             }),
             ...(!isAdmin && { hasJoined: true }),
           },
