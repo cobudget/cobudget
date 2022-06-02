@@ -5,6 +5,7 @@ import TextField from "../TextField";
 import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
+import validateUsername from "utils/validateUsername";
 
 const FINISH_SIGNUP_MUTATION = gql`
   mutation updateProfile($username: String, $name: String) {
@@ -58,6 +59,11 @@ export default function FinishSignup({ currentUser }) {
         />
         <TextField
           label={intl.formatMessage({ defaultMessage: "Username" })}
+          error={!validateUsername(username)}
+          helperText={intl.formatMessage({
+            defaultMessage:
+              "Usernames can only contain A-z, 0-9 and be between 2 and 20 characters long",
+          })}
           inputProps={{
             value: username,
             onChange: (e) => setUsername(e.target.value),

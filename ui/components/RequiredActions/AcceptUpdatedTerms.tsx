@@ -29,20 +29,26 @@ export default function AcceptUpdatedTerms() {
         className="text-lg font-medium leading-6 text-gray-900"
       >
         <FormattedMessage
-          defaultMessage={"Terms of Service has been updated!"}
+          defaultMessage={
+            "We've updated the {platformName} Terms and Conditions on {date}"
+          }
+          values={{
+            platformName: process.env.PLATFORM_NAME,
+            date: dayjs(process.env.TERMS_UPDATED_AT).format("YYYY-MM-DD"),
+          }}
         />
       </Dialog.Title>
       <div className="mt-2">
         <p className="text-sm text-gray-500">
           <FormattedMessage
-            defaultMessage="Terms of service was updated on {date}"
+            defaultMessage="To continue using the platform you need to review and accept the updated Terms and Conditions"
             values={{
               date: dayjs(process.env.TERMS_UPDATED_AT).format("YYYY-MM-DD"),
             }}
           />
         </p>
       </div>
-      <div className="space-y-4 mt-2">
+      <div className="space-y-4 my-6">
         <label className="text-sm flex items-center space-x-2">
           <input
             value={checked.toString()}
