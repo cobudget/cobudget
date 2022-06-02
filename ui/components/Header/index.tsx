@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { LoaderIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const css = {
@@ -181,8 +182,8 @@ const Header = ({
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
               {currentUser ? (
                 <>
-                  {currentUser.currentCollMember?.isApproved &&
-                  currentUser.currentCollMember?.hasJoined === false ? (
+                  {currentUser?.currentCollMember?.isApproved &&
+                  currentUser?.currentCollMember?.hasJoined === false ? (
                     <NavItem
                       primary
                       roundColor={color}
@@ -244,7 +245,7 @@ const Header = ({
                       </NavItem>
                     )
                   }
-                  {!currentUser.currentGroupMember && !round && group && (
+                  {!currentUser?.currentGroupMember && !round && group && (
                     <NavItem
                       primary
                       roundColor={color}
@@ -262,6 +263,13 @@ const Header = ({
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
+              ) : fetchingUser ? (
+                <LoaderIcon
+                  className="animate-spin"
+                  fill="white"
+                  width={20}
+                  height={20}
+                />
               ) : (
                 <>
                   <NavItem
@@ -286,7 +294,7 @@ const Header = ({
                   <Avatar user={currentUser} />
                   <div className="ml-4">
                     <span className="font-semibold text-gray-600">
-                      {currentUser.name}
+                      {currentUser?.name}
                     </span>
                   </div>
                 </div>
