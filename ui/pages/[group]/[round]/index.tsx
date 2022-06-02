@@ -78,9 +78,10 @@ export const BUCKETS_QUERY = gql`
         title
         minGoal
         maxGoal
-        raisedFlags {
+        flags {
           type
         }
+        noOfFunders
         income
         totalContributions
         totalContributionsFromCurrentMember
@@ -119,6 +120,8 @@ const Page = ({
   router,
   round,
   statusFilter,
+  currentUser,
+  loading
 }) => {
   const { tag, s } = router.query;
 
@@ -139,7 +142,7 @@ const Page = ({
   const buckets = data?.bucketsPage.buckets ?? [];
 
   const columns = useMemo(() => {
-    return [
+    const cols = [
       { Header: "Name", accessor: "title" },
       {
         Header: "Min Goal",
@@ -154,31 +157,7 @@ const Page = ({
         ),
       },
       {
-        Header: "Stretch Goal",
-        accessor: "stretchGoal",
-        Cell: ({ cell }) => (
-          <FormattedNumber
-            value={cell.value / 100}
-            style="currency"
-            currencyDisplay={"symbol"}
-            currency={round?.currency}
-          />
-        ),
-      },
-      {
-        Header: "Your Contribution",
-        accessor: "myFunding",
-        Cell: ({ cell }) => (
-          <FormattedNumber
-            value={cell.value / 100}
-            style="currency"
-            currencyDisplay={"symbol"}
-            currency={round?.currency}
-          />
-        ),
-      },
-      {
-        Header: "Internal Funding",
+        Header: "Own Funding",
         accessor: "internalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -190,7 +169,7 @@ const Page = ({
         ),
       },
       {
-        Header: "External Funding",
+        Header: "Contributions",
         accessor: "externalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -202,7 +181,7 @@ const Page = ({
         ),
       },
       {
-        Header: "Funding",
+        Header: "Total funding",
         accessor: "totalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -214,17 +193,61 @@ const Page = ({
         ),
       },
       {
+        Header: "Funders",
+        accessor: "fundersCount"
+      },
+      {
         Header: "Funding Progress",
         accessor: "progress",
         Cell: ({ cell }) => cell.value + "%",
       },
       {
+        Header: "Approvals",
+        accessor: "goodFlagCount"
+      },
+      {
+        Header: "Flags raised",
+        accessor: "raiseFlagCount"
+      }
+    ];
+
+    if (currentUser) {
+      cols.splice(round?.allowStretchGoals ? 3 : 2, 0, {
+        Header: "Your Contribution",
+        accessor: "myFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      })
+    }
+
+    if (round?.allowStretchGoals) {
+      cols.splice(5, 0, {
         Header: "Stretch Goal Progress",
         accessor: "stretchGoalProgress",
         Cell: ({ cell }) => cell.value + "%",
-      },
-    ];
-  }, [round?.currency]);
+      });
+      cols.splice(1, 0, {
+        Header: "Stretch Goal",
+        accessor: "stretchGoal",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      })
+    }
+
+    return cols;
+  }, [round?.currency, round?.allowStretchGoals, currentUser]);
 
   if (error) {
     console.error(error);
@@ -245,34 +268,35 @@ const Page = ({
           </Link>
         ))}
 
-      {typeof window !== "undefined" && window.location.hash === "#table" && (
-        <div>
+      {!loading && typeof window !== "undefined" && window.location.hash === "#table" && (
           <Table
             columns={columns}
             data={buckets.map((bucket) => ({
               title: bucket.title,
               minGoal: bucket.minGoal,
-              stretchGoal: round.allowStretchGoals ? bucket.maxGoal : "-",
+              stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
               myFunding: bucket.totalContributionsFromCurrentMember,
               totalFunding: bucket.totalContributions,
               externalFunding: bucket.income || 0,
+              goodFlagCount: bucket.flags.filter(f => f.type === "ALL_GOOD_FLAG").length,
+              raiseFlagCount: bucket.flags.filter(f => f.type === "RAISE_FLAG").length,
+              fundersCount: bucket.noOfFunders || 0,
               internalFunding:
                 bucket.totalContributions - (bucket.totalContributions || 0),
               progress:
                 Math.floor(
-                  (bucket.totalContributions / bucket.minGoal) * 10000
+                  ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) * 10000
                 ) / 100,
               stretchGoalProgress:
                 round.allowStretchGoals && bucket.maxGoal
                   ? bucket.totalContributions - bucket.minGoal > 0
-                    ? ((bucket.totalContributions - bucket.minGoal) /
-                        (bucket.maxGoal - bucket.minGoal)) *
+                    ? (((bucket.totalContributions || 0) - bucket.minGoal) /
+                        ((bucket.maxGoal - bucket.minGoal) || 1)) *
                       100
                     : 0
                   : "-",
             }))}
           />
-        </div>
       )}
 
       {isFirstPage &&
@@ -284,7 +308,7 @@ const Page = ({
             </h1>
           </div>
         ) : (
-          <div className="absolute w-full flex justify-center items-center h-64">
+          <div className="w-full flex justify-center items-center h-64">
             <HappySpinner />
           </div>
           // <div className="bg-white rounded-lg shadow-md animate-pulse overflow-hidden">
@@ -517,10 +541,12 @@ const RoundPage = ({ currentUser }) => {
                 variables={variables}
                 isFirstPage={i === 0}
                 isLastPage={i === pageVariables.length - 1}
+                currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
+                loading={fetching}
               />
             );
           })}

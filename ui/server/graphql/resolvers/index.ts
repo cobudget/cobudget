@@ -2873,6 +2873,11 @@ const resolvers = {
         },
       });
     },
+    flags: async (bucket) => {
+      return await prisma.flag.findMany({
+        where: { bucketId: bucket.id },
+      });
+    },
     discourseTopicUrl: async (bucket) => {
       const group = await prisma.group.findFirst({
         where: {
