@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { FaPlus } from "react-icons/fa";
 import { CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const ListHeaderText = styled.span`
   line-height: 2.1rem;
@@ -32,7 +33,9 @@ const ListHeader = ({ needIsExpanded }) => {
           }
           data-cy="list-header-create-need-btn"
         >
-          <ListHeaderText>Need</ListHeaderText>
+          <ListHeaderText>
+            <FormattedMessage defaultMessage="Need" />
+          </ListHeaderText>
           <FaPlus />
         </Button>
         <Button
@@ -50,7 +53,9 @@ const ListHeader = ({ needIsExpanded }) => {
           }
           data-cy="list-header-create-resp-btn"
         >
-          <ListHeaderText>Responsibility</ListHeaderText>
+          <ListHeaderText>
+            <FormattedMessage defaultMessage="Responsibility" />
+          </ListHeaderText>
           <FaPlus />
         </Button>
       </div>

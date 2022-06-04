@@ -3,6 +3,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import classNames from "../../utils/classNames";
 import { CheckIcon, SelectorIcon } from "../Icons";
+import { FormattedMessage } from "react-intl";
 
 function LinkItem(props) {
   const { href, children, active, selected, className, ...rest } = props;
@@ -43,7 +44,11 @@ export default function Selector({
             className
           )}
         >
-          {!activeId && <span className="p-1 mx-1 opacity-50">Select</span>}
+          {!activeId && (
+            <span className="p-1 mx-1 opacity-50">
+              <FormattedMessage defaultMessage="Select" />
+            </span>
+          )}
           <div
             className={`p-1 opacity-50 group-hover:opacity-100 group-hover:bg-${color}-dark rounded`}
           >
@@ -146,7 +151,7 @@ export default function Selector({
                 active={active}
                 className="text-gray-500 hover:text-gray-900"
               >
-                New Round
+                <FormattedMessage defaultMessage="New Round" />
               </LinkItem>
             )}
           </Menu.Item>

@@ -8,6 +8,7 @@ import LoadMore from "../LoadMore";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/RoundMembers/SearchBar";
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 
 export const REQUESTS_TO_JOIN_QUERY = gql`
@@ -77,6 +78,7 @@ const RoundMembers = ({ round, currentUser }) => {
     },
   });
 
+  const intl = useIntl();
   const requestsToJoin = data?.requestsToJoinPage?.requestsToJoin || [];
 
   const [searchString, setSearchString] = useState("");
@@ -113,14 +115,16 @@ const RoundMembers = ({ round, currentUser }) => {
           <SearchBar
             color={round.color}
             value={searchString}
-            placeholder="Search participants"
+            placeholder={intl.formatMessage({
+              defaultMessage: "Search participants",
+            })}
             onChange={(e) => setSearchString(e.target.value)}
             clearInput={() => setSearchString("")}
           />
           {isAdmin && (
             <div className="flex items-center space-x-2">
               <Button onClick={() => setInviteModalOpen(true)}>
-                Invite participants
+                <FormattedMessage defaultMessage="Invite participants" />
               </Button>
               {inviteModalOpen && (
                 <InviteMembersModal

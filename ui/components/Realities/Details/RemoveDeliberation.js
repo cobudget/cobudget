@@ -3,6 +3,7 @@ import { gql, useMutation } from "@apollo/client";
 import { Button } from "@material-ui/core";
 import { useRouter } from "next/router";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
+import { FormattedMessage } from "react-intl";
 
 const REMOVE_RESP_HAS_DELIBERATION = gql`
   mutation RemoveDeliberation_removeRespHasDeliberationMutation(
@@ -43,7 +44,7 @@ const RemoveDeliberation = ({ url }) => {
         });
       }}
     >
-      Remove
+      <FormattedMessage defaultMessage="Remove" />
     </Button>
   );
 };

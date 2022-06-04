@@ -7,6 +7,7 @@ import { Formik } from "formik";
 import { GET_RESPONSIBILITIES, CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import ListForm from "./ListForm";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const CREATE_RESPONSIBILITY = gql`
   mutation CreateResponsibility_createResponsibilityMutation(
@@ -26,6 +27,7 @@ const CREATE_RESPONSIBILITY = gql`
 
 const CreateResponsibility = ({ needId }) => {
   const router = useRouter();
+  const intl = useIntl();
   const realitiesApollo = getRealitiesApollo();
   const [createResponsibility] = useMutation(CREATE_RESPONSIBILITY, {
     client: realitiesApollo,
@@ -61,7 +63,11 @@ const CreateResponsibility = ({ needId }) => {
     <Formik
       initialValues={{ title: "" }}
       validationSchema={yup.object().shape({
-        title: yup.string().required("Title is required"),
+        title: yup
+          .string()
+          .required(
+            intl.formatMessage({ defaultMessage: "Title is required" })
+          ),
       })}
       onSubmit={(values, { resetForm }) => {
         createResponsibility({
@@ -78,7 +84,9 @@ const CreateResponsibility = ({ needId }) => {
       {({ values, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
         <ListForm
           inputName="title"
-          placeholder="Enter a title for the new responsibility..."
+          placeholder={intl.formatMessage({
+            defaultMessage: "Enter a title for the new responsibility...",
+          })}
           value={values.title}
           handleChange={handleChange}
           handleBlur={handleBlur}

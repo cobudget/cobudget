@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import TextField from "../TextField";
 import Button from "../Button";
 import Banner from "../Banner";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const DELETE_ROUND_MUTATION = gql`
   mutation DeleteRound($roundId: ID!) {
@@ -17,6 +18,7 @@ const DELETE_ROUND_MUTATION = gql`
 
 export default ({ round, handleClose, currentGroup }) => {
   const [allowDelete, setAllowDelete] = useState(false);
+  const intl = useIntl();
   const [{ fetching: loading }, deleteRound] = useMutation(
     DELETE_ROUND_MUTATION
   );
@@ -29,7 +31,7 @@ export default ({ round, handleClose, currentGroup }) => {
       } else {
         handleClose();
         Router.push(`/${currentGroup?.slug ?? "c"}/`);
-        toast.success("Round deleted");
+        toast.success(intl.formatMessage({ defaultMessage: "Round deleted" }));
       }
     });
   };
@@ -47,20 +49,34 @@ export default ({ round, handleClose, currentGroup }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
         <h1 className="text-2xl font-semibold mb-4">
-          Are you absolutely sure?
+          <FormattedMessage defaultMessage="Are you absolutely sure?" />
         </h1>
         <Banner
           className={"mb-4"}
           variant="critical"
-          title={"Unexpected bad things will happen if you don’t read this!"}
+          title={intl.formatMessage({
+            defaultMessage:
+              "Unexpected bad things will happen if you don’t read this!",
+          })}
         ></Banner>
         <p className="mb-4">
-          This action cannot be undone. This will permanently delete the{" "}
-          <b>{round.title}</b> round, {process.env.BUCKET_NAME_PLURAL},
-          questions, comments and remove all collaborators.{" "}
-        </p>
+          <FormattedMessage
+            defaultMessage="This action cannot be undone. This will permanently delete the <b>{roundTitle}</b> round, {bucketName} questions, comments and remove all collaborators."
+            values={{
+              roundTitle: round.title,
+              bucketName: process.env.BUCKET_NAME_PLURAL,
+              b: (msg) => <b>{msg}</b>,
+            }}
+          />
+        </p>{" "}
         <p className="mb-4">
-          Please type <b>{round.slug}</b> to confirm.
+          <FormattedMessage
+            defaultMessage="Please type <b>{slug}</b> to confirm."
+            values={{
+              slug: round.slug,
+              b: (msg) => <b>{msg}</b>,
+            }}
+          />
         </p>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4">
@@ -79,7 +95,7 @@ export default ({ round, handleClose, currentGroup }) => {
                 disabled={!allowDelete}
                 color="red"
               >
-                I understand the consequences, delete this round
+                <FormattedMessage defaultMessage="I understand the consequences, delete this round" />
               </Button>
             </div>
           </div>

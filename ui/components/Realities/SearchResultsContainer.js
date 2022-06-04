@@ -7,6 +7,7 @@ import HappySpinner from "components/HappySpinner";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import withDebouncedProp from "./Details/withDebouncedProp";
 import SearchResults from "./SearchResults";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const GET_SEARCH = gql`
   query Search_searchNeedsAndResponsibilities($term: String!) {
@@ -56,14 +57,24 @@ const SearchResultsContainer = withDebouncedProp(
     <Wrapper>
       {(() => {
         if (loading) return <HappySpinner />;
-        if (error) return <CardBody>`Error! ${error.message}`</CardBody>;
+        if (error)
+          return (
+            <CardBody>
+              `<FormattedMessage defaultMessage="Error!" /> ${error.message}`
+            </CardBody>
+          );
         const searchResults = [
           ...(data.needs || []),
           ...(data.responsibilities || []),
           // TODO: add person page
           //...(data.persons || []),
         ];
-        if (searchResults.length === 0) return <CardBody>No results</CardBody>;
+        if (searchResults.length === 0)
+          return (
+            <CardBody>
+              <FormattedMessage defaultMessage="No results" />
+            </CardBody>
+          );
         return (
           <SearchResults
             results={_.orderBy(
