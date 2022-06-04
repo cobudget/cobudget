@@ -31,6 +31,9 @@ export const allocateToMember = async ({
 
     adjustedAmount = amount - balance;
   }
+
+  if (adjustedAmount == 0) return;
+
   await prisma.allocation.create({
     data: {
       roundId,
