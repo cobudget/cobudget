@@ -32,24 +32,23 @@ const send = async (mail: SendEmailInput) => {
     } catch {
       // if mailhog isn't running, print it to the terminal instead
       console.log(
-        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
-          mail.text ?? mail.html
+        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text ?? mail.html
         }\n`
       );
     }
   } else {
-    try {
-      await client.sendEmail({
-        From: process.env.FROM_EMAIL,
-        To: mail.to,
-        Subject: mail.subject,
-        TextBody: mail.text,
-        HtmlBody: mail.html,
-      });
-    } catch (err) {
+    client.sendEmail({
+      From: process.env.FROM_EMAIL,
+      To: mail.to,
+      Subject: mail.subject,
+      TextBody: mail.text,
+      HtmlBody: mail.html,
+    }).then(data => {
+      console.log("Email successful");
+    }).catch(err => {
       console.log(err);
       throw err;
-    }
+    });
   }
 };
 
