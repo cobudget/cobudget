@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import Monster from "components/Monster";
 import capitalize from "utils/capitalize";
 import isRtl from "../../utils/isRTL";
+import moment from "moment";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -472,6 +473,13 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           />
         </div>
         <Tags bucket={bucket} canEdit={canEdit} />
+
+        <p className="italic text-gray-600 text-sm">
+          <FormattedMessage
+            defaultMessage="The bucket was created on {date}"
+            values={{ date: moment(bucket.createdAt).format("MMMM DD, YYYY")}}
+          />
+        </p>
       </div>
     </>
   );
