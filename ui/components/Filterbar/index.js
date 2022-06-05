@@ -11,6 +11,7 @@ const Filterbar = ({
   round,
   statusFilter,
   bucketStatusCount,
+  view
 }) => {
   const intl = useIntl();
   const router = useRouter();
@@ -61,6 +62,18 @@ const Filterbar = ({
       },
     });
   };
+  const onChangeView = (view) => {
+    router.push({
+      pathname: "/[group]/[round]",
+      query: {
+        group: router.query.group,
+        round: router.query.round,
+        ...(tag && { tag }),
+        ...(!!input && { s: input }),
+        view
+      },
+    });
+  };
   if (!round) return null;
 
   return (
@@ -97,7 +110,7 @@ const Filterbar = ({
       />
 
       <SelectField
-        className="bg-white sm:order-last"
+        className="bg-white sm:order-3"
         color={round.color}
         inputProps={{
           value: tag || intl.formatMessage({ defaultMessage: "All tags" }),
@@ -113,6 +126,19 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
+      <span className="sm:order-last">
+        <SelectField
+          className="bg-white sm:order-3"
+          color={round.color}
+          inputProps={{
+            value: view || intl.formatMessage({ defaultMessage: "Grid View" }),
+            onChange: (e) => onChangeView(e.target.value),
+          }}
+        >
+          <option value="grid">Grid View</option>
+          <option value="table">Table View</option>
+        </SelectField>
+      </span>
     </div>
   );
 };

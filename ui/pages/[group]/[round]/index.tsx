@@ -121,7 +121,8 @@ const Page = ({
   round,
   statusFilter,
   currentUser,
-  loading
+  loading,
+  bucketTableView
 }) => {
   const { tag, s } = router.query;
 
@@ -265,8 +266,8 @@ const Page = ({
 
   return (
     <>
-      {typeof window !== "undefined" &&
-        window.location.hash !== "#table" &&
+      {
+        !bucketTableView ?
         buckets.map((bucket) => (
           <Link
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
@@ -276,9 +277,8 @@ const Page = ({
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>
-        ))}
-
-      {!loading && typeof window !== "undefined" && window.location.hash === "#table" && (
+        )) :
+        !loading ?
           <Table
             columns={columns}
             data={buckets.map((bucket) => ({
@@ -307,8 +307,8 @@ const Page = ({
                     : 0
                   : "-",
             }))}
-          />
-      )}
+          /> : null
+      }
 
       {isFirstPage &&
         buckets.length === 0 &&
@@ -424,10 +424,11 @@ const RoundPage = ({ currentUser }) => {
   }, [bucketStatusCount, f]);
 
   useEffect(() => {
-    setBucketTableView(
-      typeof window !== "undefined" && window.location.hash === "#table"
-    );
-  }, []);
+    setBucketTableView(router.query.view === "table");
+    if (router.query.view === "table") {
+      setPageVariables([{ offset: 0, limit: 1000 }]);
+    }
+  }, [router?.asPath, router?.query?.view]);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -524,7 +525,6 @@ const RoundPage = ({ currentUser }) => {
           </div>
         </div>
       </PageHero>
-
       <div className="page flex-1">
         <Filterbar
           round={round}
@@ -532,6 +532,7 @@ const RoundPage = ({ currentUser }) => {
           tag={tag}
           statusFilter={statusFilter}
           bucketStatusCount={bucketStatusCount}
+          view={bucketTableView ? "table" : "grid"}
         />
         <div
           className={
@@ -555,6 +556,7 @@ const RoundPage = ({ currentUser }) => {
                 }}
                 statusFilter={statusFilter}
                 loading={fetching}
+                bucketTableView={bucketTableView}
               />
             );
           })}
