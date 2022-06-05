@@ -17,7 +17,7 @@ import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
 
 export const BUCKET_QUERY = gql`
-  query Bucket($id: ID!) {
+  query Bucket($id: ID) {
     bucket(id: $id) {
       id
       description
@@ -138,6 +138,7 @@ const BucketIndex = ({ currentUser }) => {
     query: BUCKET_QUERY,
     variables: { id: router.query.bucket },
   });
+
   const [editImagesModalOpen, setEditImagesModalOpen] = useState(false);
   const [tab, setTab] = useState(0);
   const { bucket } = data ?? { bucket: null };
@@ -153,7 +154,7 @@ const BucketIndex = ({ currentUser }) => {
     setTab(index > -1 ? index : 0);
   }, [router.query.tab, tabsList]);
 
-  if (fetching && !bucket) {
+  if ((!bucket && fetching) || !router.isReady) {
     return (
       <div className="flex-grow flex justify-center items-center h-64">
         <HappySpinner />
@@ -161,13 +162,17 @@ const BucketIndex = ({ currentUser }) => {
     );
   }
 
-  if (!bucket || !bucket.round)
+  if (!bucket && !fetching)
     return (
       <div className="text-center mt-7">
         This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
         don&apos;t have access to it
       </div>
     );
+
+  if (error) {
+    <div className="text-center mt-7">{error.message}</div>;
+  }
 
   return (
     <>
