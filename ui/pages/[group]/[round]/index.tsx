@@ -143,7 +143,17 @@ const Page = ({
 
   const columns = useMemo(() => {
     const cols = [
-      { Header: "Name", accessor: "title" },
+      { 
+        Header: "Name",
+        accessor: "title",
+        Cell: ({ cell }) => (
+          <Link
+            href={`/${round.group?.slug ?? "c"}/${round.slug}/${cell.row.original?.id}`}
+          >
+            <span className="underline cursor-pointer text-ellipsis">{cell.value.substr(0,20) + (cell.value.length > 20 ? "..." : "")}</span>
+          </Link>
+        )
+      },
       {
         Header: "Min Goal",
         accessor: "minGoal",
@@ -247,7 +257,7 @@ const Page = ({
     }
 
     return cols;
-  }, [round?.currency, round?.allowStretchGoals, currentUser]);
+  }, [round?.currency, round?.allowStretchGoals, currentUser, round?.group?.slug, round?.slug]);
 
   if (error) {
     console.error(error);
@@ -272,6 +282,7 @@ const Page = ({
           <Table
             columns={columns}
             data={buckets.map((bucket) => ({
+              id: bucket.id,
               title: bucket.title,
               minGoal: bucket.minGoal,
               stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
@@ -387,8 +398,6 @@ const RoundPage = ({ currentUser }) => {
       groupSlug: router.query.group,
     },
   });
-
-  console.log({ round, fetching, error, stale });
   // const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
@@ -496,7 +505,6 @@ const RoundPage = ({ currentUser }) => {
                       </table>
                     </div>
                   </div>
-
                   <Button
                     size="large"
                     color={round.color}
