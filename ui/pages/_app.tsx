@@ -137,7 +137,6 @@ export const TOP_LEVEL_QUERY = gql`
 `;
 
 const MyApp = ({ Component, pageProps, router }) => {
-  
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -146,7 +145,7 @@ const MyApp = ({ Component, pageProps, router }) => {
       roundSlug: router.query.round,
       bucketId: router.query.bucket,
     },
-    pause: !router.isReady
+    pause: !router.isReady,
   });
 
   const [

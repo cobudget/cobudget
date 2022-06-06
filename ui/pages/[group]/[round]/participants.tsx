@@ -25,7 +25,7 @@ const RoundMembersPage = ({ currentUser }) => {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
     },
-    pause: !router.isReady
+    pause: !router.isReady,
   });
 
   if (!round) return null;

@@ -420,11 +420,7 @@ export const client = (
               queryFields
                 .filter((field) => field.fieldName === "membersPage")
                 .forEach((field) => {
-                  cache.invalidate(
-                    "Query",
-                    "membersPage",
-                    field.arguments
-                  );
+                  cache.invalidate("Query", "membersPage", field.arguments);
                 });
             },
             contribute(result, args, cache) {
