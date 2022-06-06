@@ -122,7 +122,7 @@ const Page = ({
   statusFilter,
   currentUser,
   loading,
-  bucketTableView
+  bucketTableView,
 }) => {
   const { tag, s } = router.query;
 
@@ -144,16 +144,20 @@ const Page = ({
 
   const columns = useMemo(() => {
     const cols = [
-      { 
+      {
         Header: "Name",
         accessor: "title",
         Cell: ({ cell }) => (
           <Link
-            href={`/${round.group?.slug ?? "c"}/${round.slug}/${cell.row.original?.id}`}
+            href={`/${round.group?.slug ?? "c"}/${round.slug}/${
+              cell.row.original?.id
+            }`}
           >
-            <span className="underline cursor-pointer text-ellipsis">{cell.value.substr(0,20) + (cell.value.length > 20 ? "..." : "")}</span>
+            <span className="underline cursor-pointer text-ellipsis">
+              {cell.value.substr(0, 20) + (cell.value.length > 20 ? "..." : "")}
+            </span>
           </Link>
-        )
+        ),
       },
       {
         Header: "Min Goal",
@@ -205,7 +209,7 @@ const Page = ({
       },
       {
         Header: "Funders",
-        accessor: "fundersCount"
+        accessor: "fundersCount",
       },
       {
         Header: "Funding Progress",
@@ -214,12 +218,12 @@ const Page = ({
       },
       {
         Header: "Approvals",
-        accessor: "goodFlagCount"
+        accessor: "goodFlagCount",
       },
       {
         Header: "Flags raised",
-        accessor: "raiseFlagCount"
-      }
+        accessor: "raiseFlagCount",
+      },
     ];
 
     if (currentUser) {
@@ -234,7 +238,7 @@ const Page = ({
             currency={round?.currency}
           />
         ),
-      })
+      });
     }
 
     if (round?.allowStretchGoals) {
@@ -254,11 +258,17 @@ const Page = ({
             currency={round?.currency}
           />
         ),
-      })
+      });
     }
 
     return cols;
-  }, [round?.currency, round?.allowStretchGoals, currentUser, round?.group?.slug, round?.slug]);
+  }, [
+    round?.currency,
+    round?.allowStretchGoals,
+    currentUser,
+    round?.group?.slug,
+    round?.slug,
+  ]);
 
   if (error) {
     console.error(error);
@@ -266,8 +276,7 @@ const Page = ({
 
   return (
     <>
-      {
-        !bucketTableView ?
+      {!bucketTableView ? (
         buckets.map((bucket) => (
           <Link
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
@@ -277,38 +286,42 @@ const Page = ({
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>
-        )) :
-        !loading ?
-          <Table
-            columns={columns}
-            data={buckets.map((bucket) => ({
-              id: bucket.id,
-              title: bucket.title,
-              minGoal: bucket.minGoal,
-              stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
-              myFunding: bucket.totalContributionsFromCurrentMember,
-              totalFunding: bucket.totalContributions,
-              externalFunding: bucket.income || 0,
-              goodFlagCount: bucket.flags.filter(f => f.type === "ALL_GOOD_FLAG").length,
-              raiseFlagCount: bucket.flags.filter(f => f.type === "RAISE_FLAG").length,
-              fundersCount: bucket.noOfFunders || 0,
-              internalFunding:
-                bucket.totalContributions - (bucket.totalContributions || 0),
-              progress:
-                Math.floor(
-                  ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) * 10000
-                ) / 100,
-              stretchGoalProgress:
-                round.allowStretchGoals && bucket.maxGoal
-                  ? bucket.totalContributions - bucket.minGoal > 0
-                    ? (((bucket.totalContributions || 0) - bucket.minGoal) /
-                        ((bucket.maxGoal - bucket.minGoal) || 1)) *
-                      100
-                    : 0
-                  : "-",
-            }))}
-          /> : null
-      }
+        ))
+      ) : !loading ? (
+        <Table
+          columns={columns}
+          data={buckets.map((bucket) => ({
+            id: bucket.id,
+            title: bucket.title,
+            minGoal: bucket.minGoal,
+            stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
+            myFunding: bucket.totalContributionsFromCurrentMember,
+            totalFunding: bucket.totalContributions,
+            externalFunding: bucket.income || 0,
+            goodFlagCount: bucket.flags.filter(
+              (f) => f.type === "ALL_GOOD_FLAG"
+            ).length,
+            raiseFlagCount: bucket.flags.filter((f) => f.type === "RAISE_FLAG")
+              .length,
+            fundersCount: bucket.noOfFunders || 0,
+            internalFunding:
+              bucket.totalContributions - (bucket.totalContributions || 0),
+            progress:
+              Math.floor(
+                ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
+                  10000
+              ) / 100,
+            stretchGoalProgress:
+              round.allowStretchGoals && bucket.maxGoal
+                ? bucket.totalContributions - bucket.minGoal > 0
+                  ? (((bucket.totalContributions || 0) - bucket.minGoal) /
+                      (bucket.maxGoal - bucket.minGoal || 1)) *
+                    100
+                  : 0
+                : "-",
+          }))}
+        />
+      ) : null}
 
       {isFirstPage &&
         buckets.length === 0 &&
@@ -533,6 +546,7 @@ const RoundPage = ({ currentUser }) => {
           statusFilter={statusFilter}
           bucketStatusCount={bucketStatusCount}
           view={bucketTableView ? "table" : "grid"}
+          currentUser={currentUser}
         />
         <div
           className={
