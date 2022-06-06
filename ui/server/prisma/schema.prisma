@@ -21,6 +21,7 @@ model User {
   image            String?
   facebookId       String?        @unique
   googleId         String?        @unique
+  acceptedTermsAt  DateTime?
   groupMemberships GroupMember[]
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?
@@ -155,7 +156,7 @@ model Round {
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce   Int?
+  inviteNonce Int?
 
   @@unique([groupId, slug])
   @@map("Collection")

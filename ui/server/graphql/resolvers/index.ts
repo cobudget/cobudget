@@ -31,6 +31,7 @@ import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
+import validateUsername from "utils/validateUsername";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -1676,6 +1677,15 @@ const resolvers = {
     updateProfile: async (_, { name, username }, { user }) => {
       if (!user) throw new Error("You need to be logged in..");
 
+      if (!validateUsername(username)) throw new Error("Username is not valid");
+
+      // check case insensitive uniquness of username
+      const existingUser = await prisma.user.findFirst({
+        where: { username: { mode: "insensitive", equals: username } },
+      });
+
+      if (existingUser) throw new Error("Username is already taken");
+
       return prisma.user.update({
         where: { id: user.id },
         data: {
@@ -2338,6 +2348,13 @@ const resolvers = {
       });
 
       return prisma.user.findUnique({ where: { id: user.id } });
+    },
+    acceptTerms: async (parent, args, { user }) => {
+      if (!user) throw new Error("You need to be logged in");
+      return prisma.user.update({
+        where: { id: user.id },
+        data: { acceptedTermsAt: new Date() },
+      });
     },
   },
   RoundMember: {

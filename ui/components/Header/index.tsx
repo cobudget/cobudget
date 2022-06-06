@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
-import { modals } from "components/Modal/index";
 import GroupAndRoundHeader from "./GroupAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { LoaderIcon } from "components/Icons";
+import EditProfileModal from "./EditProfile";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const css = {
@@ -93,16 +94,10 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({
-  currentUser,
-  fetchingUser,
-  openModal,
-  group,
-  round,
-  bucket,
-}) => {
+const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const intl = useIntl();
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
@@ -181,8 +176,8 @@ const Header = ({
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
               {currentUser ? (
                 <>
-                  {currentUser.currentCollMember?.isApproved &&
-                  currentUser.currentCollMember?.hasJoined === false ? (
+                  {currentUser?.currentCollMember?.isApproved &&
+                  currentUser?.currentCollMember?.hasJoined === false ? (
                     <NavItem
                       primary
                       roundColor={color}
@@ -244,7 +239,7 @@ const Header = ({
                       </NavItem>
                     )
                   }
-                  {!currentUser.currentGroupMember && !round && group && (
+                  {!currentUser?.currentGroupMember && !round && group && (
                     <NavItem
                       primary
                       roundColor={color}
@@ -257,11 +252,18 @@ const Header = ({
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
                       currentUser={currentUser}
-                      openModal={openModal}
+                      setEditProfileModalOpen={setEditProfileModalOpen}
                     />
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
+              ) : fetchingUser ? (
+                <LoaderIcon
+                  className="animate-spin"
+                  fill="white"
+                  width={20}
+                  height={20}
+                />
               ) : (
                 <>
                   <NavItem
@@ -286,15 +288,13 @@ const Header = ({
                   <Avatar user={currentUser} />
                   <div className="ml-4">
                     <span className="font-semibold text-gray-600">
-                      {currentUser.name}
+                      {currentUser?.name}
                     </span>
                   </div>
                 </div>
                 <div className="mt-2 flex flex-col items-stretch">
                   <button
-                    onClick={() => {
-                      openModal(modals.EDIT_PROFILE);
-                    }}
+                    onClick={() => setEditProfileModalOpen(true)}
                     className={css.mobileProfileItem}
                   >
                     <FormattedMessage defaultMessage="Edit profile" />
@@ -316,6 +316,13 @@ const Header = ({
           </nav>
         </div>
       </header>
+      {currentUser && (
+        <EditProfileModal
+          currentUser={currentUser}
+          isOpen={editProfileModalOpen}
+          handleClose={() => setEditProfileModalOpen(false)}
+        />
+      )}
     </>
   );
 };
