@@ -62,7 +62,7 @@ export default function FinishSignup({ currentUser }) {
           error={!validateUsername(username)}
           helperText={intl.formatMessage({
             defaultMessage:
-              "Usernames can only contain A-z, 0-9 and be between 2 and 20 characters long",
+              "Usernames can only contain A-Z, 0-9 and be between 2 and 20 characters long",
           })}
           inputProps={{
             value: username,

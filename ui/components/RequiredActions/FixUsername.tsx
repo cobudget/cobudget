@@ -50,7 +50,7 @@ export default function FixUsername({ currentUser }) {
         />
       </div>
       <p className="text-sm mt-2 text-gray-500">
-        <FormattedMessage defaultMessage="Usernames can only contain A-z, 0-9 and be between 2 and 20 characters long" />
+        <FormattedMessage defaultMessage="Usernames can only contain A-Z, 0-9 and be between 2 and 20 characters long" />
       </p>
       <div className="mt-4 space-x-2 flex justify-end">
         <Button variant="secondary" href="/api/auth/logout">
