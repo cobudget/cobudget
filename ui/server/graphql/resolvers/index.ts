@@ -1977,17 +1977,27 @@ const resolvers = {
           },
         });
 
-        await Promise.all(
-          roundMembers.map((member) =>
-            allocateToMember({
-              member,
-              roundId,
-              amount,
-              type,
-              allocatedBy: currentCollMember.id,
-            })
-          )
-        );
+        for (const member of roundMembers) {
+          await allocateToMember({
+            member,
+            roundId: roundId,
+            amount,
+            type,
+            allocatedBy: currentCollMember.id,
+          });
+        }
+
+        // await Promise.all(
+        //   roundMembers.map((member) =>
+        //     allocateToMember({
+        //       member,
+        //       roundId,
+        //       amount,
+        //       type,
+        //       allocatedBy: currentCollMember.id,
+        //     })
+        //   )
+        // );
 
         return roundMembers;
       }

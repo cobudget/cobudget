@@ -8,35 +8,42 @@ export const allocateToMember = async ({
   allocatedBy,
   member,
 }) => {
-  const {
-    _sum: { amount: totalAllocations },
-  } = await prisma.allocation.aggregate({
-    where: { roundMemberId: member.id },
-    _sum: { amount: true },
-  });
+  let adjustedAmount, amountBefore;
 
-  const {
-    _sum: { amount: totalContributions },
-  } = await prisma.contribution.aggregate({
-    where: { roundMemberId: member.id },
-    _sum: { amount: true },
-  });
+  if (type === "ADD" && amount > 0) {
+    adjustedAmount = amount;
+  } else {
+    const {
+      _sum: { amount: totalAllocations },
+    } = await prisma.allocation.aggregate({
+      where: { roundMemberId: member.id },
+      _sum: { amount: true },
+    });
 
-  const balance = totalAllocations - totalContributions;
-  let adjustedAmount;
-  if (type === "ADD") {
-    adjustedAmount = balance + amount >= 0 ? amount : -balance;
-  } else if (type === "SET") {
-    if (amount < 0) throw new Error("Can't set negative values");
+    const {
+      _sum: { amount: totalContributions },
+    } = await prisma.contribution.aggregate({
+      where: { roundMemberId: member.id },
+      _sum: { amount: true },
+    });
 
-    adjustedAmount = amount - balance;
+    const balance = totalAllocations - totalContributions;
+    if (type === "ADD") {
+      adjustedAmount = balance + amount >= 0 ? amount : -balance;
+    } else if (type === "SET") {
+      if (amount < 0) throw new Error("Can't set negative values");
+
+      adjustedAmount = amount - balance;
+    }
+    amountBefore = balance;
   }
+
   await prisma.allocation.create({
     data: {
       roundId,
       roundMemberId: member.id,
       amount: adjustedAmount,
-      amountBefore: balance,
+      amountBefore,
       allocatedById: allocatedBy,
       allocationType: type,
     },
@@ -55,7 +62,7 @@ export const allocateToMember = async ({
   await eventHub.publish("allocate-to-member", {
     roundMemberId: member.id,
     roundId,
-    oldAmount: balance,
-    newAmount: balance + adjustedAmount,
+    oldAmount: amountBefore ?? 0,
+    newAmount: (amountBefore ?? 0) + adjustedAmount,
   });
 };

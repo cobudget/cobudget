@@ -17,7 +17,7 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
-import LoadMore from "../../LoadMore";
+import LoadMore, { PortaledLoadMore } from "../../LoadMore";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export const GROUP_MEMBERS_QUERY = gql`
