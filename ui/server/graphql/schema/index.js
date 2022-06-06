@@ -202,6 +202,7 @@ const schema = gql`
     acceptInvitation(roundId: ID!): RoundMember
     joinRound(roundId: ID!): RoundMember
 
+    acceptTerms: User
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
@@ -329,6 +330,7 @@ const schema = gql`
     currentGroupMember(groupSlug: String): GroupMember
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
+    acceptedTermsAt: Date
   }
 
   type GroupMember {

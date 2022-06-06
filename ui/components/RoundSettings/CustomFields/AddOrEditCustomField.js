@@ -159,13 +159,13 @@ export default function AddOrEditCustomField({
                 }}
               >
                 <option value="TEXT">
-                  {intl.formatMessage({defaultMessage: "Short Text"})}
+                  {intl.formatMessage({ defaultMessage: "Short Text" })}
                 </option>
                 <option value="MULTILINE_TEXT">
-                  {intl.formatMessage({defaultMessage: "Long Text"})}
+                  {intl.formatMessage({ defaultMessage: "Long Text" })}
                 </option>
                 <option value="BOOLEAN">
-                  {intl.formatMessage({defaultMessage: "Yes/No"})}
+                  {intl.formatMessage({ defaultMessage: "Yes/No" })}
                 </option>
               </SelectField>
               {typeInputValue == "TEXT" ||
