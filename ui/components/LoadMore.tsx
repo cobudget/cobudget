@@ -1,6 +1,21 @@
+import { TableCell, TableRow } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
 import { CheveronDownIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
+import ReactDOM from "react-dom";
+
+export const PortaledLoadMore = ({ children }) => {
+  if (typeof window !== "undefined")
+    return ReactDOM.createPortal(
+      children,
+      document.getElementById("load-more")
+    );
+  return (
+    <TableRow>
+      <TableCell></TableCell>
+    </TableRow>
+  );
+};
 
 const LoadMore = ({
   moreExist,
