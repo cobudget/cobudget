@@ -23,7 +23,12 @@ const schema = gql`
       status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
+    groupMembersPage(
+      groupId: ID!
+      search: String
+      offset: Int
+      limit: Int
+    ): GroupMembersPage
     membersPage(
       roundId: ID!
       isApproved: Boolean!
