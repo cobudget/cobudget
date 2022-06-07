@@ -1,5 +1,8 @@
-import prisma from "../prisma";
+import dayjs from "dayjs";
+import { User, AllocationType, RoundMember } from "@prisma/client";
+import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
+import { getRoundMember } from "../graphql/resolvers/helpers";
 
 export const allocateToMember = async ({
   roundId,
@@ -7,6 +10,16 @@ export const allocateToMember = async ({
   type,
   allocatedBy,
   member,
+  stripeSessionId,
+  prisma = importedPrisma,
+}: {
+  roundId: string;
+  amount: number;
+  type: AllocationType;
+  allocatedBy: string;
+  member: RoundMember;
+  stripeSessionId?: string;
+  prisma?: typeof importedPrisma;
 }) => {
   const {
     _sum: { amount: totalAllocations },
@@ -39,6 +52,7 @@ export const allocateToMember = async ({
       amountBefore: balance,
       allocatedById: allocatedBy,
       allocationType: type,
+      stripeSessionId,
     },
   });
 
@@ -49,6 +63,7 @@ export const allocateToMember = async ({
       toAccountId: member.statusAccountId,
       fromAccountId: member.incomingAccountId,
       roundId,
+      stripeSessionId,
     },
   });
 
@@ -58,4 +73,157 @@ export const allocateToMember = async ({
     oldAmount: balance,
     newAmount: balance + adjustedAmount,
   });
+};
+
+export const contribute = async ({
+  roundId,
+  bucketId,
+  amount,
+  user,
+  stripeSessionId,
+  prisma = importedPrisma,
+}: {
+  roundId: string;
+  bucketId: string;
+  amount: number;
+  user: User;
+  stripeSessionId?: string;
+  prisma?: typeof importedPrisma;
+}) => {
+  const roundMember = await getRoundMember({
+    roundId,
+    userId: user.id,
+    include: { round: true },
+  });
+
+  const { round } = roundMember;
+
+  if (amount <= 0) throw new Error("Value needs to be more than zero");
+
+  // Check that granting is open
+  const now = dayjs();
+  const grantingHasOpened = round.grantingOpens
+    ? dayjs(round.grantingOpens).isBefore(now)
+    : true;
+  const grantingHasClosed = round.grantingCloses
+    ? dayjs(round.grantingCloses).isBefore(now)
+    : false;
+  const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
+  if (!grantingIsOpen) throw new Error("Funding is not open");
+
+  let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
+
+  if (bucket.roundId !== roundId) throw new Error("Bucket not in round");
+
+  if (!bucket.approvedAt) throw new Error("Bucket is not approved for funding");
+
+  if (bucket.canceledAt)
+    throw new Error("Funding has been canceled for bucket");
+
+  if (bucket.fundedAt) throw new Error("Bucket has been funded");
+
+  if (bucket.completedAt) throw new Error("Bucket is already completed");
+
+  // Check that the max goal of the bucket is not exceeded
+  const {
+    _sum: { amount: contributionsForBucket },
+  } = await prisma.contribution.aggregate({
+    where: { bucketId: bucket.id },
+    _sum: { amount: true },
+  });
+
+  const budgetItems = await prisma.budgetItem.findMany({
+    where: { bucketId: bucket.id, type: "EXPENSE" },
+  });
+
+  const maxGoal = budgetItems.reduce(
+    (acc, item) => acc + (item.max ? item.max : item.min),
+    0
+  );
+
+  if (contributionsForBucket + amount > maxGoal)
+    throw new Error("You can't overfund this bucket.");
+
+  // mark bucket as funded if it has reached its max goal
+  if (contributionsForBucket + amount === maxGoal) {
+    bucket = await prisma.bucket.update({
+      where: { id: bucketId },
+      data: { fundedAt: new Date() },
+    });
+  }
+
+  // Check that it is not more than is allowed per bucket (if this number is set)
+  const {
+    _sum: { amount: contributionsFromUserToThisBucket },
+  } = await prisma.contribution.aggregate({
+    where: {
+      bucketId: bucket.id,
+      roundMemberId: roundMember.id,
+    },
+    _sum: { amount: true },
+  });
+
+  if (
+    round.maxAmountToBucketPerUser &&
+    amount + contributionsFromUserToThisBucket > round.maxAmountToBucketPerUser
+  ) {
+    throw new Error(
+      `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${
+        round.currency
+      } to one bucket`
+    );
+  }
+
+  // Check that user has not spent more tokens than he has
+  const {
+    _sum: { amount: contributionsFromUser },
+  } = await prisma.contribution.aggregate({
+    where: {
+      roundMemberId: roundMember.id,
+    },
+    _sum: { amount: true },
+  });
+
+  const {
+    _sum: { amount: allocationsForUser },
+  } = await prisma.allocation.aggregate({
+    where: {
+      roundMemberId: roundMember.id,
+    },
+    _sum: { amount: true },
+  });
+
+  if (contributionsFromUser + amount > allocationsForUser)
+    throw new Error("You are trying to spend more than what you have.");
+
+  await prisma.contribution.create({
+    data: {
+      roundId,
+      roundMemberId: roundMember.id,
+      amount,
+      bucketId: bucket.id,
+      amountBefore: contributionsForBucket || 0,
+      stripeSessionId,
+    },
+  });
+
+  await prisma.transaction.create({
+    data: {
+      roundMemberId: roundMember.id,
+      amount,
+      toAccountId: bucket.statusAccountId,
+      fromAccountId: roundMember.statusAccountId,
+      roundId,
+      stripeSessionId,
+    },
+  });
+
+  await eventHub.publish("contribute-to-bucket", {
+    round,
+    bucket,
+    contributingUser: user,
+    amount,
+  });
+
+  return bucket;
 };

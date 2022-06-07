@@ -27,6 +27,8 @@ const DirectFundingBucketForm = ({
     bucket.exchangeVat ? bucket.exchangeVat / 100 : undefined
   );
 
+  const isExchange = directFundingType === "EXCHANGE";
+
   return (
     <>
       {round.directFundingTerms && (
@@ -49,7 +51,7 @@ const DirectFundingBucketForm = ({
           We are offering goods or services in exchange for funds.
         </option>
       </SelectInput>
-      {directFundingType === "EXCHANGE" && (
+      {isExchange && (
         <>
           <div className="font-medium mt-8">Description</div>
           <div className="my-4">
@@ -62,7 +64,10 @@ const DirectFundingBucketForm = ({
             rows={5}
             highlightColor={round.color}
           />
-          <div className="font-medium mt-8 mb-4">Minimum contribution</div>
+          <div className="font-medium mt-8">Minimum contribution</div>
+          <div className="my-4">
+            Remember to account for payment processing fees and taxes.
+          </div>
           <TextField
             placeholder="0"
             endAdornment={round.currency}
@@ -100,10 +105,11 @@ const DirectFundingBucketForm = ({
           color={round.color}
           loading={fetchingMutation}
           disabled={
-            exchangeVat === undefined ||
-            exchangeMinimumContribution < 0 ||
-            exchangeVat < 0 ||
-            exchangeVat > 100
+            isExchange &&
+            (exchangeVat === undefined ||
+              exchangeMinimumContribution < 0 ||
+              exchangeVat < 0 ||
+              exchangeVat > 100)
           }
           onClick={() => {
             editBucket({
