@@ -23,7 +23,12 @@ const schema = gql`
       status: [StatusType!]
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
+    groupMembersPage(
+      groupId: ID!
+      search: String
+      offset: Int
+      limit: Int
+    ): GroupMembersPage
     membersPage(
       roundId: ID!
       isApproved: Boolean!
@@ -203,6 +208,7 @@ const schema = gql`
     acceptInvitation(roundId: ID!): RoundMember
     joinRound(roundId: ID!): RoundMember
 
+    acceptTerms: User
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
@@ -333,6 +339,7 @@ const schema = gql`
     currentGroupMember(groupSlug: String): GroupMember
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
+    acceptedTermsAt: Date
   }
 
   type GroupMember {

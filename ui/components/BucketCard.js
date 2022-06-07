@@ -3,6 +3,7 @@ import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
+import { FormattedMessage } from "react-intl";
 
 const BucketCard = ({ bucket, round }) => {
   const showFundingStats =
@@ -18,7 +19,9 @@ const BucketCard = ({ bucket, round }) => {
         <div className={`w-full h-48 bg-${stringToColor(bucket.title)}`} />
       )}
       {!bucket.published && (
-        <Label className="absolute right-0 m-2">Unpublished</Label>
+        <Label className="absolute right-0 m-2">
+          <FormattedMessage defaultMessage="Unpublished" />
+        </Label>
       )}
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">

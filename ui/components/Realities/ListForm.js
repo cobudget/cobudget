@@ -1,7 +1,9 @@
+/*missing-translation*/ //end
 import React from "react";
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import { Button, TextField } from "@material-ui/core";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Wrapper = styled.div`
   margin: 0.5rem 0;
@@ -31,7 +33,7 @@ const ListForm = ({
         data-cy="list-form-name-input"
       />
       <Button type="submit" disabled={!value || isSubmitting}>
-        Save
+        <FormattedMessage defaultMessage="Save" />
       </Button>
     </form>
   </Wrapper>

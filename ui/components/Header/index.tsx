@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
-import { modals } from "components/Modal/index";
 import GroupAndRoundHeader from "./GroupAndRoundHeader";
 import NavItem from "./NavItem";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import { LoaderIcon } from "components/Icons";
+import EditProfileModal from "./EditProfile";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const css = {
   mobileProfileItem:
@@ -92,16 +94,11 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({
-  currentUser,
-  fetchingUser,
-  openModal,
-  group,
-  round,
-  bucket,
-}) => {
+const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
+  const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
+  const intl = useIntl();
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
@@ -179,8 +176,8 @@ const Header = ({
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
               {currentUser ? (
                 <>
-                  {currentUser.currentCollMember?.isApproved &&
-                  currentUser.currentCollMember?.hasJoined === false ? (
+                  {currentUser?.currentCollMember?.isApproved &&
+                  currentUser?.currentCollMember?.hasJoined === false ? (
                     <NavItem
                       primary
                       roundColor={color}
@@ -191,13 +188,17 @@ const Header = ({
                             if (error) {
                               toast.error(error.message);
                             } else {
-                              toast.success("Invitation Accepted");
+                              toast.success(
+                                intl.formatMessage({
+                                  defaultMessage: "Invitation Accepted",
+                                })
+                              );
                             }
                           }
                         );
                       }}
                     >
-                      Accept Invitation
+                      <FormattedMessage defaultMessage="Accept Invitation" />
                     </NavItem>
                   ) : null}
                   {
@@ -215,8 +216,13 @@ const Header = ({
                               } else {
                                 toast.success(
                                   round.registrationPolicy === "REQUEST_TO_JOIN"
-                                    ? "Request sent!"
-                                    : "You joined this round!"
+                                    ? intl.formatMessage({
+                                        defaultMessage: "Request sent!",
+                                      })
+                                    : intl.formatMessage({
+                                        defaultMessage:
+                                          "You joined this round!",
+                                      })
                                 );
                               }
                             }
@@ -224,36 +230,52 @@ const Header = ({
                         }
                       >
                         {round.registrationPolicy === "REQUEST_TO_JOIN"
-                          ? "Request to join"
-                          : "Join round"}
+                          ? intl.formatMessage({
+                              defaultMessage: "Request to join",
+                            })
+                          : intl.formatMessage({
+                              defaultMessage: "Join round",
+                            })}
                       </NavItem>
                     )
                   }
-                  {!currentUser.currentGroupMember && !round && group && (
+                  {!currentUser?.currentGroupMember && !round && group && (
                     <NavItem
                       primary
                       roundColor={color}
                       onClick={() => joinGroup({ groupId: group.id })}
                     >
-                      Join group
+                      <FormattedMessage defaultMessage="Join group" />
                     </NavItem>
                   )}
 
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
                       currentUser={currentUser}
-                      openModal={openModal}
+                      setEditProfileModalOpen={setEditProfileModalOpen}
                     />
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
+              ) : fetchingUser ? (
+                <LoaderIcon
+                  className="animate-spin"
+                  fill="white"
+                  width={20}
+                  height={20}
+                />
               ) : (
                 <>
-                  <NavItem href={`/login`} roundColor={color}>
-                    Log in
+                  <NavItem
+                    href={`/login${
+                      router.pathname === `/login` ? "" : "?r=" + router.asPath
+                    }`}
+                    roundColor={color}
+                  >
+                    <FormattedMessage defaultMessage="Log in" />
                   </NavItem>
                   <NavItem href={`/signup`} roundColor={color} primary>
-                    Sign up
+                    <FormattedMessage defaultMessage="Sign up" />
                   </NavItem>
                 </>
               )}
@@ -266,27 +288,27 @@ const Header = ({
                   <Avatar user={currentUser} />
                   <div className="ml-4">
                     <span className="font-semibold text-gray-600">
-                      {currentUser.name}
+                      {currentUser?.name}
                     </span>
                   </div>
                 </div>
                 <div className="mt-2 flex flex-col items-stretch">
                   <button
-                    onClick={() => {
-                      openModal(modals.EDIT_PROFILE);
-                    }}
+                    onClick={() => setEditProfileModalOpen(true)}
                     className={css.mobileProfileItem}
                   >
-                    Edit profile
+                    <FormattedMessage defaultMessage="Edit profile" />
                   </button>
                   <Link href={"/settings"}>
-                    <a className={css.mobileProfileItem}>Email settings</a>
+                    <a className={css.mobileProfileItem}>
+                      <FormattedMessage defaultMessage="Email settings" />
+                    </a>
                   </Link>
                   <a
                     href={"/api/auth/logout"}
                     className={css.mobileProfileItem}
                   >
-                    Sign out
+                    <FormattedMessage defaultMessage="Sign out" />
                   </a>
                 </div>
               </div>
@@ -294,6 +316,13 @@ const Header = ({
           </nav>
         </div>
       </header>
+      {currentUser && (
+        <EditProfileModal
+          currentUser={currentUser}
+          isOpen={editProfileModalOpen}
+          handleClose={() => setEditProfileModalOpen(false)}
+        />
+      )}
     </>
   );
 };

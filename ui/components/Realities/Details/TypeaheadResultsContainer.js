@@ -7,6 +7,7 @@ import HappySpinner from "components/HappySpinner";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import withDebouncedProp from "./withDebouncedProp";
 import TypeaheadResults from "./TypeaheadResults";
+import { FormattedMessage } from "react-intl";
 
 const Wrapper = styled(Card)`
   box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
@@ -45,7 +46,11 @@ const TypeaheadResultsContainer = withDebouncedProp(
           if (error) return <CardBody>`Error! ${error.message}`</CardBody>;
           const searchResults = queryDataToResultsArray(data) || [];
           if (searchResults.length === 0)
-            return <CardBody>No results</CardBody>;
+            return (
+              <CardBody>
+                <FormattedMessage defaultMessage="No results" />
+              </CardBody>
+            );
           return (
             <TypeaheadResults
               results={searchResults}

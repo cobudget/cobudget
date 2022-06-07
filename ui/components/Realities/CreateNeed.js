@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { GET_NEEDS, CACHE_QUERY } from "lib/realities/queries";
 import getRealitiesApollo from "lib/realities/getRealitiesApollo";
 import ListForm from "./ListForm";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const CREATE_NEED = gql`
   mutation CreateNeed_createNeedMutation($title: String!) {
@@ -26,6 +27,7 @@ const CREATE_NEED = gql`
 
 const CreateNeed = () => {
   const router = useRouter();
+  const intl = useIntl();
   const realitiesApollo = getRealitiesApollo();
 
   const [createNeed] = useMutation(CREATE_NEED, {
@@ -54,7 +56,11 @@ const CreateNeed = () => {
     <Formik
       initialValues={{ title: "" }}
       validationSchema={yup.object().shape({
-        title: yup.string().required("Title is required"),
+        title: yup
+          .string()
+          .required(
+            intl.formatMessage({ defaultMessage: "Title is required" })
+          ),
       })}
       onSubmit={(values, { resetForm }) => {
         createNeed({ variables: { title: values.title } }).then(({ data }) => {
@@ -66,7 +72,9 @@ const CreateNeed = () => {
       {({ values, handleChange, handleBlur, handleSubmit, isSubmitting }) => (
         <ListForm
           inputName="title"
-          placeholder="Enter a title for the new need..."
+          placeholder={intl.formatMessage({
+            defaultMessage: "Enter a title for the new need...",
+          })}
           value={values.title}
           handleChange={handleChange}
           handleBlur={handleBlur}

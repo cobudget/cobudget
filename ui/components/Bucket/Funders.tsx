@@ -1,6 +1,6 @@
 import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, FormattedNumber } from "react-intl";
 
 export default function Funders({ bucket, currentUser }) {
   if (!bucket) return null;
@@ -20,8 +20,12 @@ export default function Funders({ bucket, currentUser }) {
 
                 <span>
                   {contribution.roundMember.user.username}:{" "}
-                  {thousandSeparator(contribution.amount / 100)}{" "}
-                  {bucket.round.currency}
+                  <FormattedNumber
+                    value={contribution.amount / 100}
+                    style="currency"
+                    currencyDisplay={"symbol"}
+                    currency={bucket.round.currency}
+                  />
                 </span>
               </li>
             ))}

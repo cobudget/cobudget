@@ -16,7 +16,6 @@ const Layout = ({
   children,
   currentUser,
   fetchingUser,
-  openModal,
   group,
   round,
   bucket,
@@ -30,7 +29,6 @@ const Layout = ({
         <Header
           currentUser={currentUser}
           fetchingUser={fetchingUser}
-          openModal={openModal}
           group={group}
           round={round}
           bucket={bucket}
@@ -58,10 +56,14 @@ const Layout = ({
         </div>
         <div className="space-x-6">
           {process.env.PRIVACY_POLICY_URL && (
-            <LinkOut href="/privacy-policy">Privacy Policy</LinkOut>
+            <LinkOut href="/privacy-policy">
+              <FormattedMessage defaultMessage="Privacy Policy" />
+            </LinkOut>
           )}
           {process.env.TERMS_URL && (
-            <LinkOut href="/terms-and-conditions">Terms and Conditions</LinkOut>
+            <LinkOut href="/terms-and-conditions">
+              <FormattedMessage defaultMessage="Terms and Conditions" />
+            </LinkOut>
           )}
           <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
             {supportedLangs.map((option) => (

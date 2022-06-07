@@ -1,3 +1,1 @@
-stable: 0.1
-staging: 0.1
-deployment: 11/04/2022 16:15
+deployment: 18/05/2022 13:00

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { Tooltip } from "react-tippy";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -19,6 +19,7 @@ const EDIT_SUMMARY_MUTATION = gql`
 `;
 
 const BucketSummary = ({ summary, canEdit, bucketId }) => {
+  const intl = useIntl();
   const [{ fetching: loading }, editBucket] = useMutation(
     EDIT_SUMMARY_MUTATION
   );
@@ -41,7 +42,7 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
             className="mb-2"
             multiline
             name="summary"
-            placeholder="Summary"
+            placeholder={intl.formatMessage({ defaultMessage: "Summary" })}
             inputRef={register}
             inputProps={{
               maxLength: 160,
@@ -79,7 +80,11 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
         {summary}
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit summary" position="bottom" size="small">
+            <Tooltip
+              title={intl.formatMessage({ defaultMessage: "Edit summary" })}
+              position="bottom"
+              size="small"
+            >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>

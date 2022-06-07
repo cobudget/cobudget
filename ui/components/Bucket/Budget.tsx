@@ -198,7 +198,12 @@ const BucketBudget = ({
                   {" "}
                   (<FormattedMessage defaultMessage="stretch goal:" />{" "}
                   <span className="font-bold">
-                    {thousandSeparator(goalTotalMax / 100)} {currency}
+                    <FormattedNumber
+                      value={goalTotalMax / 100}
+                      style="currency"
+                      currencyDisplay={"symbol"}
+                      currency={currency}
+                    />
                   </span>
                   )
                 </>

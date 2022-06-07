@@ -5,17 +5,21 @@ import { Box, Button } from "@material-ui/core";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
+  const intl = useIntl();
   const { handleSubmit, register } = useForm();
 
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Allow stretch goals</h1>
+        <h1 className="text-3xl">
+          <FormattedMessage defaultMessage="Allow stretch goals" />
+        </h1>
 
         <form
           onSubmit={handleSubmit((variables) => {
@@ -36,13 +40,19 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           <Box m="15px 0">
             <SelectInput
               name="allowStretchGoals"
-              label="Allow stretch goals"
+              label={intl.formatMessage({
+                defaultMessage: "Allow stretch goals",
+              })}
               defaultValue={round.allowStretchGoals ?? false}
               inputRef={register}
               fullWidth
             >
-              <option value={true}>true</option>
-              <option value={false}>false</option>
+              <option value={true}>
+                <FormattedMessage defaultMessage="true" />
+              </option>
+              <option value={false}>
+                <FormattedMessage defaultMessage="false" />
+              </option>
             </SelectInput>
           </Box>
 
@@ -52,7 +62,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
             variant="contained"
             color="primary"
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
         </form>
       </Box>

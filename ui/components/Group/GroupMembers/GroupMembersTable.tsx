@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Table,
@@ -17,18 +17,30 @@ import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
-import LoadMore from "../../LoadMore";
+import { FormattedMessage, useIntl } from "react-intl";
+import { debounce } from "lodash";
+import LoadMore, { PortaledLoadMore } from "../../LoadMore";
+import Avatar from "components/Avatar";
 
 export const GROUP_MEMBERS_QUERY = gql`
-  query GroupMembers($groupId: ID!, $offset: Int, $limit: Int) {
-    groupMembersPage(groupId: $groupId, offset: $offset, limit: $limit) {
+  query GroupMembers(
+    $groupId: ID!
+    $offset: Int
+    $limit: Int
+    $search: String
+  ) {
+    groupMembersPage(
+      groupId: $groupId
+      offset: $offset
+      limit: $limit
+      search: $search
+    ) {
       moreExist
       groupMembers {
         id
         isAdmin
         bio
         email
-        name
         user {
           id
           name
@@ -49,6 +61,7 @@ const ActionsDropdown = ({
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const intl = useIntl();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -60,7 +73,7 @@ const ActionsDropdown = ({
   return (
     <>
       <IconButton
-        aria-label="more"
+        aria-label={intl.formatMessage({ defaultMessage: "more" })}
         aria-controls="simple-menu"
         aria-haspopup="true"
         onClick={handleClick}
@@ -84,14 +97,21 @@ const ActionsDropdown = ({
             });
           }}
         >
-          {member.isAdmin ? "Remove admin" : "Make admin"}
+          {member.isAdmin
+            ? intl.formatMessage({ defaultMessage: "Remove admin" })
+            : intl.formatMessage({ defaultMessage: "Make admin" })}
         </MenuItem>
         <MenuItem
           color="error.main"
           onClick={() => {
             if (
               confirm(
-                `Are you sure you would like to delete group membership from user with email ${member.email}?`
+                intl.formatMessage(
+                  {
+                    defaultMessage: `Are you sure you would like to delete group membership from user with email {email}?`,
+                  },
+                  { email: member.email }
+                )
               )
             ) {
               deleteGroupMember({
@@ -103,7 +123,12 @@ const ActionsDropdown = ({
                   toast.error(error.message);
                 } else {
                   toast.success(
-                    `Deleted group member with email ${member.email}`
+                    intl.formatMessage(
+                      {
+                        defaultMessage: `Deleted group member with email {email}`,
+                      },
+                      { email: member.email }
+                    )
                   );
                 }
                 handleClose();
@@ -111,23 +136,12 @@ const ActionsDropdown = ({
             }
           }}
         >
-          <Box color="error.main">Delete</Box>
+          <Box color="error.main">
+            <FormattedMessage defaultMessage="Delete" />
+          </Box>
         </MenuItem>
       </Menu>
     </>
-  );
-};
-
-const PortaledLoadMore = ({ children }) => {
-  if (typeof window !== "undefined")
-    return ReactDOM.createPortal(
-      children,
-      document.getElementById("load-more")
-    );
-  return (
-    <TableRow>
-      <TableCell></TableCell>
-    </TableRow>
   );
 };
 
@@ -138,18 +152,37 @@ const Page = ({
   deleteGroupMember,
   updateGroupMember,
   currentGroup,
+  searchString,
 }) => {
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, executeQuery] = useQuery({
     query: GROUP_MEMBERS_QUERY,
     variables: {
       groupId: currentGroup.id,
       offset: variables.offset,
       limit: variables.limit,
+      search: searchString,
     },
+    pause: true,
   });
 
+  const intl = useIntl();
   const moreExist = data?.groupMembersPage?.moreExist;
-  const groupMembers = data?.groupMembersPage?.groupMembers ?? [];
+
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(executeQuery, 300, { leading: true });
+  }, [executeQuery]);
+
+  const items = useMemo(() => {
+    const members = data?.groupMembersPage?.groupMembers || [];
+    if (fetching || !members) {
+      return [];
+    }
+    return members;
+  }, [data?.groupMembersPage?.groupMembers, fetching]);
+
+  useEffect(() => {
+    debouncedSearchMembers();
+  }, [debouncedSearchMembers]);
 
   if (error) {
     console.error(error);
@@ -158,19 +191,31 @@ const Page = ({
 
   return (
     <>
-      {groupMembers.map((member) => (
+      {items.map((member) => (
         <TableRow key={member.id}>
           <TableCell component="th" scope="row">
-            {member.user.username}
-          </TableCell>
-          <TableCell component="th" scope="row">
-            {member.name}
+            <div className="flex space-x-3">
+              <Avatar user={member.user} />
+              <div>
+                <p className="font-medium text-base">{member.user.name}</p>
+                {member.user.username && (
+                  <p className="text-gray-700 text-sm">
+                    @{member.user.username}
+                  </p>
+                )}
+              </div>
+            </div>
           </TableCell>
           <TableCell>
             <Box display="flex" alignItems="center">
               <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
-                <Tooltip title="Email not verified" placement="right">
+                <Tooltip
+                  title={intl.formatMessage({
+                    defaultMessage: "Email not verified",
+                  })}
+                  placement="right"
+                >
                   <HelpOutlineOutlinedIcon fontSize="small" />
                 </Tooltip>
               )}
@@ -180,7 +225,11 @@ const Page = ({
             {member.bio}
           </TableCell>
           <TableCell align="right">
-            {member.isAdmin && <span className="mr-2">Admin</span>}
+            {member.isAdmin && (
+              <span className="mr-2">
+                <FormattedMessage defaultMessage="Admin" />
+              </span>
+            )}
           </TableCell>
           <TableCell align="right" padding="none">
             <ActionsDropdown
@@ -201,7 +250,7 @@ const Page = ({
             onClick={() =>
               onLoadMore({
                 limit: variables.limit,
-                offset: variables.offset + groupMembers.length,
+                offset: variables.offset + items.length,
               })
             }
           />
@@ -215,6 +264,7 @@ const GroupMembersTable = ({
   updateGroupMember,
   deleteGroupMember,
   currentGroup,
+  searchString,
 }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 30, offset: 0 },
@@ -227,12 +277,21 @@ const GroupMembersTable = ({
           <Table aria-label="simple table">
             <TableHead>
               <TableRow>
-                <TableCell>Username</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Bio</TableCell>
-                <TableCell align="right">Role</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="User" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Email" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Bio" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Role" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Actions" />
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -248,6 +307,7 @@ const GroupMembersTable = ({
                     deleteGroupMember={deleteGroupMember}
                     updateGroupMember={updateGroupMember}
                     currentGroup={currentGroup}
+                    searchString={searchString}
                   />
                 );
               })}

@@ -45,7 +45,7 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://cobudget.helpscoutdocs.com/">Discover how it works.</a></i></div>
 <br/>
 <div><a href="${appLink(
   "/settings"
@@ -202,13 +202,13 @@ export default {
       <br/><br/>
       <b>How to get started?</b>
       <ul>
-      <li>Check out our <a href="https://guide.cobudget.co/">Cobudget guide</a> for some simple how-to’s</li>
+      <li>Check out the <a href="https://cobudget.helpscoutdocs.com/">Cobudget docs</a> for some simple how-to’s</li>
       <li>${createYourFirst}</li>
       </ul>
       <br/>
       <b>Want to learn more?</b>
       <ul>
-      <li>Dig into our <a href="https://guide.cobudget.co/case-studies">case studies</a> to see how others are using the tool</li>
+      <li>Dig into our <a href="https://cobudget.helpscoutdocs.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
       <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
       </ul>
       <br/>

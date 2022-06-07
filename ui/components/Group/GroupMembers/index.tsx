@@ -5,6 +5,8 @@ import Button from "components/Button";
 import InviteMembersModal from "components/InviteMembersModal";
 
 import GroupMembersTable from "./GroupMembersTable";
+import SearchBar from "../../RoundMembers/SearchBar";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const UPDATE_GROUP_MEMBER = gql`
   mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
@@ -28,17 +30,26 @@ const DELETE_GROUP_MEMBER = gql`
 `;
 
 const GroupMembers = ({ currentGroup }) => {
+  const [searchString, setSearchString] = useState("");
   const [, updateGroupMember] = useMutation(UPDATE_GROUP_MEMBER);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [, deleteGroupMember] = useMutation(DELETE_GROUP_MEMBER);
-
+  const intl = useIntl();
   return (
     <div>
       <div className="flex justify-between mb-3 items-center">
-        <h2 className="text-xl font-semibold">Group members</h2>{" "}
+        <SearchBar
+          color={"anthracit"}
+          value={searchString}
+          placeholder={intl.formatMessage({
+            defaultMessage: "Search members",
+          })}
+          onChange={(e) => setSearchString(e.target.value)}
+          clearInput={() => setSearchString("")}
+        />
         <div>
           <Button onClick={() => setInviteModalOpen(true)}>
-            Invite members
+            <FormattedMessage defaultMessage="Invite members" />
           </Button>
           {inviteModalOpen && (
             <InviteMembersModal
@@ -53,6 +64,7 @@ const GroupMembers = ({ currentGroup }) => {
         updateGroupMember={updateGroupMember}
         deleteGroupMember={deleteGroupMember}
         currentGroup={currentGroup}
+        searchString={searchString}
       />
     </div>
   );

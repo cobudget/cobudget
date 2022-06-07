@@ -4,10 +4,9 @@ import "react-tippy/dist/tippy.css";
 import { withUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
-import Modal from "../components/Modal";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
-import FinishSignup from "components/FinishSignup";
+import RequiredActionsModal from "components/RequiredActions";
 import { useRouter } from "next/router";
 import { IntlProvider } from "react-intl";
 import lang, { supportedLangCodes } from "../lang";
@@ -22,6 +21,7 @@ export const CURRENT_USER_QUERY = gql`
       name
       avatar
       email
+      acceptedTermsAt
 
       groupMemberships {
         id
@@ -136,8 +136,7 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps }) => {
-  const router = useRouter();
+const MyApp = ({ Component, pageProps, router }) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -146,6 +145,7 @@ const MyApp = ({ Component, pageProps }) => {
       roundSlug: router.query.round,
       bucketId: router.query.bucket,
     },
+    pause: !router.isReady,
   });
 
   const [
@@ -157,13 +157,12 @@ const MyApp = ({ Component, pageProps }) => {
         process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
       roundSlug: router.query.round,
     },
+    pause: !router.isReady,
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};
   const { currentUser = null } = currentUserData ?? {};
 
-  // legacy modal logic
-  const [modal, setModal] = useState(null);
   const [locale, setLocale] = useState(
     (() => {
       if (typeof window !== "undefined") {
@@ -177,13 +176,6 @@ const MyApp = ({ Component, pageProps }) => {
     })()
   );
 
-  const openModal = (name) => {
-    if (modal !== name) setModal(name);
-  };
-  const closeModal = () => {
-    setModal(null);
-  };
-
   useEffect(() => {
     const locale = Cookies.get("locale");
     if (locale) {
@@ -196,8 +188,6 @@ const MyApp = ({ Component, pageProps }) => {
     setLocale(locale);
   };
 
-  const showFinishSignupModal = !!(currentUser && !currentUser.username);
-
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
@@ -205,13 +195,10 @@ const MyApp = ({ Component, pageProps }) => {
 
   return (
     <IntlProvider locale={locale} messages={lang[locale]}>
-      {/* legacy Modal component, use individual modals where they are called instead */}
-      <Modal active={modal} closeModal={closeModal} currentUser={currentUser} />
-      <FinishSignup isOpen={showFinishSignupModal} currentUser={currentUser} />
+      <RequiredActionsModal currentUser={currentUser} />
       <Layout
         currentUser={currentUser}
         fetchingUser={fetchingUser}
-        openModal={openModal}
         group={group}
         round={round}
         bucket={bucket}

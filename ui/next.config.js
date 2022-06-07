@@ -16,13 +16,11 @@ module.exports = (phase) => {
     DEPLOY_URL: process.env.DEPLOY_URL,
     SINGLE_GROUP_MODE: process.env.SINGLE_GROUP_MODE,
     TERMS_URL: process.env.TERMS_URL,
+    TERMS_UPDATED_AT: process.env.TERMS_UPDATED_AT,
     PRIVACY_POLICY_URL: process.env.PRIVACY_POLICY_URL,
     PLATFORM_NAME: process.env.PLATFORM_NAME,
     BUCKET_NAME_SINGULAR: process.env.BUCKET_NAME_SINGULAR,
     BUCKET_NAME_PLURAL: process.env.BUCKET_NAME_PLURAL,
-    //process.env.KEYCLOAK_CLIENT_ID
-    //process.env.COOKIE_SECRET
-    //KEYCLOAK_REALM: process.env.KEYCLOAK_REALM,
     REALITIES_DEPLOY_URL: process.env.REALITIES_DEPLOY_URL,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     // these are for realities
