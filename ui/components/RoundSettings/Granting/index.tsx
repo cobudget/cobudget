@@ -290,27 +290,31 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             roundColor={round.color}
           />
 
-          <Divider />
+          {currentGroup?.experimentalFeatures && (
+            <>
+              <Divider />
 
-          <SettingsListItem
-            primary="Connect with Stripe"
-            secondary={round.stripeIsConnected?.toString() ?? "false"}
-            isSet={round.stripeIsConnected}
-            openModal={() => handleOpen("SET_STRIPE")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
+              <SettingsListItem
+                primary="Connect with Stripe"
+                secondary={round.stripeIsConnected?.toString() ?? "false"}
+                isSet={round.stripeIsConnected}
+                openModal={() => handleOpen("SET_STRIPE")}
+                canEdit={canEditSettings}
+                roundColor={round.color}
+              />
 
-          <Divider />
+              <Divider />
 
-          <SettingsListItem
-            primary="Accept direct funding"
-            secondary={round.directFundingEnabled?.toString() ?? "false"}
-            isSet={round.directFundingEnabled}
-            openModal={() => handleOpen("SET_DIRECT_FUNDING")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
+              <SettingsListItem
+                primary="Accept direct funding"
+                secondary={round.directFundingEnabled?.toString() ?? "false"}
+                isSet={round.directFundingEnabled}
+                openModal={() => handleOpen("SET_DIRECT_FUNDING")}
+                canEdit={canEditSettings}
+                roundColor={round.color}
+              />
+            </>
+          )}
         </List>
       </div>
     </div>

@@ -143,7 +143,13 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
+const BucketSidebar = ({
+  bucket,
+  currentUser,
+  currentGroup,
+  canEdit,
+  showBucketReview,
+}) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -208,6 +214,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
                   currentUser={currentUser}
+                  currentGroup={currentGroup}
                 />
               )}
             </>
