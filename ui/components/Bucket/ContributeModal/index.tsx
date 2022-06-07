@@ -21,7 +21,12 @@ const StyledTab = ({ children, color, disabled = false }) => (
   </Tab>
 );
 
-const ContributeModal = ({ handleClose, bucket, currentUser }) => {
+const ContributeModal = ({
+  handleClose,
+  bucket,
+  currentUser,
+  currentGroup,
+}) => {
   const directFundingEnabled =
     bucket.directFundingEnabled && bucket.round.directFundingEnabled;
 
@@ -38,7 +43,11 @@ const ContributeModal = ({ handleClose, bucket, currentUser }) => {
         <Tab.Group
           defaultIndex={currentUser.currentCollMember.balance > 0 ? 0 : 1}
         >
-          <Tab.List className="space-x-2 max-w-screen-xl mx-auto flex px-2 overflow-x-auto mb-3">
+          <Tab.List
+            className={`space-x-2 max-w-screen-xl mx-auto flex px-2 overflow-x-auto mb-3 ${
+              currentGroup?.experimentalFeatures ? "" : "hidden"
+            }`}
+          >
             <StyledTab color={bucket.round.color}>
               <FormattedMessage defaultMessage="From my balance" />
             </StyledTab>

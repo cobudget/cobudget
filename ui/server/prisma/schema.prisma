@@ -110,6 +110,8 @@ model Group {
   discourse    DiscourseConfig?
 
   finishedTodos Boolean @default(false)
+  experimentalFeatures Boolean @default(false)
+
   @@map("Organization")
 }
 
