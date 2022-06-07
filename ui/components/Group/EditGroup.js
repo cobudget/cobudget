@@ -6,6 +6,7 @@ import { useMutation, gql } from "urql";
 import Button from "../Button";
 import TextField from "../TextField";
 import ImageUpload from "components/ImageUpload";
+import Banner from "components/Banner";
 import slugify from "utils/slugify";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -189,6 +190,24 @@ const EditGroup = ({ group, currentUser }) => {
             <FormattedMessage defaultMessage="Save" />
           )}
         </Button>
+
+        {group?.experimentalFeatures && (
+          <div className="text-gray-600">
+            <Banner
+              className={"mb-4"}
+              variant="warning"
+              title={intl.formatMessage(
+                {
+                  defaultMessage:
+                    "Experimental features are enabled for this group. This might cause things to break more often for you. Contact {platformName} if you wish to disable this.",
+                },
+                {
+                  platformName: process.env.PLATFORM_NAME,
+                }
+              )}
+            />
+          </div>
+        )}
       </div>
     </form>
   );

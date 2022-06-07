@@ -221,6 +221,7 @@ const schema = gql`
     rounds: [Round]
     discourseUrl: String
     finishedTodos: Boolean
+    experimentalFeatures: Boolean
   }
 
   enum RoundType {
