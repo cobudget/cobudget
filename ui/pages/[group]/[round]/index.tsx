@@ -320,7 +320,11 @@ const Page = ({
             fundersCount: bucket.noOfFunders || 0,
             internalFunding:
               bucket.totalContributions || 0,
-            fundsNeeded: bucket.minGoal - bucket.income - bucket.totalContributions,
+            fundsNeeded: 
+              (bucket.minGoal - bucket.income - bucket.totalContributions) > 0 
+                ? bucket.minGoal - bucket.income - bucket.totalContributions
+                : 0
+              ,
             progress:
               Math.floor(
                 ((bucket.income + bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
