@@ -12,7 +12,7 @@ const tipAmount = ({ fraction, contribution }) =>
   new Decimal(fraction).mul(contribution || 0).toFixed(2);
 
 const Title = ({ children }) => (
-  <div className="font-medium mt-5">{children}</div>
+  <div className="font-medium mt-5 mb-2">{children}</div>
 );
 
 const WithCard = ({ bucket, handleClose }) => {
@@ -84,6 +84,9 @@ const WithCard = ({ bucket, handleClose }) => {
         <Title>
           <FormattedMessage defaultMessage="Add a tip to support Cobudget" />
         </Title>
+        <div className="mb-2">
+          <FormattedMessage defaultMessage="Cobudget is an open source project and does not charge transaction fees. Your generosity allows us to develop and maintain this tool." />
+        </div>
         <SelectInput
           fullWidth
           value={cobudgetTip}
