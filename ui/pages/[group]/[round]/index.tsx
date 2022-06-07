@@ -145,7 +145,7 @@ const Page = ({
   const columns = useMemo(() => {
     const cols = [
       {
-        Header: "Name",
+        Header: "Title",
         accessor: "title",
         Cell: ({ cell }) => (
           <Link
@@ -160,7 +160,7 @@ const Page = ({
         ),
       },
       {
-        Header: "Min Goal",
+        Header: "Goal",
         accessor: "minGoal",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -172,7 +172,7 @@ const Page = ({
         ),
       },
       {
-        Header: "Own Funding",
+        Header: "Resources",
         accessor: "externalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -184,7 +184,7 @@ const Page = ({
         ),
       },
       {
-        Header: "Contributions",
+        Header: "Funded",
         accessor: "internalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -195,8 +195,8 @@ const Page = ({
           />
         ),
       },
-      {
-        Header: "Total funding",
+      /*{
+        Header: "Total",
         accessor: "totalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
@@ -206,22 +206,34 @@ const Page = ({
             currency={round?.currency}
           />
         ),
+      },*/
+      {
+      Header: "Needed",
+      accessor: "fundsNeeded",
+      Cell: ({ cell }) => (
+        <FormattedNumber
+          value={cell.value / 100}
+          style="currency"
+          currencyDisplay={"symbol"}
+          currency={round?.currency}
+        />
+      ),
+    },
+      {
+        Header: "Progress",
+        accessor: "progress",
+        Cell: ({ cell }) => Math.round(cell.value) + "%",
       },
       {
         Header: "Funders",
         accessor: "fundersCount",
       },
       {
-        Header: "Funding Progress",
-        accessor: "progress",
-        Cell: ({ cell }) => Math.round(cell.value) + "%",
-      },
-      {
         Header: "Approvals",
         accessor: "goodFlagCount",
       },
       {
-        Header: "Flags raised",
+        Header: "Flags",
         accessor: "raiseFlagCount",
       },
     ];
@@ -244,12 +256,12 @@ const Page = ({
     */
 
     if (round?.allowStretchGoals) {
-      cols.splice(5, 0, {
-        Header: "Stretch Goal Progress",
+      cols.splice(7, 0, {
+        Header: "Stretch Progress",
         accessor: "stretchGoalProgress",
         Cell: ({ cell }) => Math.round(cell.value) + "%",
       });
-      cols.splice(1, 0, {
+      cols.splice(2, 0, {
         Header: "Stretch Goal",
         accessor: "stretchGoal",
         Cell: ({ cell }) => (
@@ -308,15 +320,16 @@ const Page = ({
             fundersCount: bucket.noOfFunders || 0,
             internalFunding:
               bucket.totalContributions || 0,
+            fundsNeeded: bucket.minGoal - bucket.income - bucket.totalContributions,
             progress:
               Math.floor(
-                ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
+                ((bucket.income + bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
                   10000
               ) / 100,
             stretchGoalProgress:
               round.allowStretchGoals && bucket.maxGoal
                 ? bucket.maxGoal - bucket.minGoal > 0
-                  ? ((bucket.totalContributions || 0) /
+                  ? ((bucket.income + bucket.totalContributions || 0) /
                       (bucket.maxGoal || 1)) *
                     100
                   : 0
