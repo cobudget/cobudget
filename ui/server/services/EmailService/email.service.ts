@@ -128,12 +128,11 @@ export default {
         groupCollName
       )} on ${process.env.PLATFORM_NAME}.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
-      ${
-        htmlPurpose
+      ${htmlPurpose
           ? `<br/><br/>
             ${quotedSection(htmlPurpose)}`
           : ""
-      }
+        }
       <br/><br/>
       ${footer}
       `,
@@ -185,11 +184,11 @@ export default {
     const createYourFirst =
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
-            `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
-          )}">create your first Bucket</a>!`
+          `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
+        )}">create your first Bucket</a>!`
         : `Jump right in and <a href="${appLink(
-            "/new-round"
-          )}">create your first Round</a>!`;
+          "/new-round"
+        )}">create your first Round</a>!`;
 
     await sendEmail({
       to: newUser.email,
@@ -373,8 +372,8 @@ export default {
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
-            bucket.title
-          )}” - <a href="${bucketLink}">have a look at the new comments</a>.
+          bucket.title
+        )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -407,17 +406,37 @@ export default {
     await sendEmail({
       to: user.email,
       subject: `${user.name}, you’ve received funds to spend in ${round.title}!`,
-      html: `You have received ${(newAmount - oldAmount) / 100} ${
-        round.currency
-      } in ${escape(round.title)}.
+      html: `You have received ${(newAmount - oldAmount) / 100} ${round.currency
+        } in ${escape(round.title)}.
       <br/><br/>
       Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
-        `/${group.slug}/${round.slug}`
-      )}">${escape(round.title)}</a>.
+          `/${group.slug}/${round.slug}`
+        )}">${escape(round.title)}</a>.
       <br/><br/>
       ${footer}
       `,
     });
+  },
+  bulkAllocateNotification: async ({ roundId, membersData, }) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
+    });
+
+    const emails = membersData.filter((member) => member.emailSettings?.allocatedToYou ?? true).filter((member) => member.adjustedAmount > 0).map(member => {
+      return {
+        to: member.user.email, subject: `${member.user.name}, you’ve received funds to spend in ${round.title}!`, html: `You have received ${(member.adjustedAmount) / 100} ${round.currency
+          } in ${escape(round.title)}.
+        <br/><br/>
+        Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+            `/${round.group.slug}/${round.slug}`
+          )}">${escape(round.title)}</a>.
+        <br/><br/>
+        ${footer}
+      `,
+      }
+    });
+    await sendEmails(emails);
   },
   cancelFundingNotification: async ({
     bucket,
@@ -464,8 +483,8 @@ export default {
           )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
         <br/><br/>
         Explore other buckets you can fund in <a href="${appLink(
-          `/${bucket.round.group.slug}/${bucket.round.slug}`
-        )}">${escape(bucket.round.title)}</a>.
+            `/${bucket.round.group.slug}/${bucket.round.slug}`
+          )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
         ${footer}
         `,
@@ -565,9 +584,8 @@ export default {
       html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
         bucket.title
       )}”</a> just received some funds!<br/>
-      ${escape(contributingUser.name)} contributed ${amount / 100} ${
-        round.currency
-      }<br/>
+      ${escape(contributingUser.name)} contributed ${amount / 100} ${round.currency
+        }<br/>
       Your bucket is now ${progressPercent}% funded!<br/>
       <br/><br/>
       ${footer}

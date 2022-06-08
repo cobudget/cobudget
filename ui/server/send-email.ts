@@ -32,8 +32,7 @@ const send = async (mail: SendEmailInput) => {
     } catch {
       // if mailhog isn't running, print it to the terminal instead
       console.log(
-        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
-          mail.text ?? mail.html
+        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text ?? mail.html
         }\n`
       );
     }
@@ -52,6 +51,19 @@ const send = async (mail: SendEmailInput) => {
     }
   }
 };
+
+const sendBatch = async (mails: SendEmailInput[]) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("Not sending " + mails.length + " emails in development (batch)");
+  } else {
+    try {
+      await client.sendEmailBatch(mails.map(mail => ({ From: process.env.FROM_EMAIL, To: mail.to, Subject: mail.subject, TextBody: mail.text, HtmlBody: mail.html })));
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+}
 
 const checkEnv = () => {
   if (!process.env.FROM_EMAIL) {
@@ -72,5 +84,5 @@ export const sendEmail = async (input: SendEmailInput) => {
 
 export const sendEmails = async (inputs: SendEmailInput[]) => {
   checkEnv();
-  await Promise.all(inputs.map((mail) => send(mail)));
+  await sendBatch(inputs);
 };
