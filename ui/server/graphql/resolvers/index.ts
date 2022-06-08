@@ -9,7 +9,7 @@ import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
-import { allocateToMember } from "../../controller";
+import { allocateToMember, bulkAllocate } from "../../controller";
 import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
@@ -1992,17 +1992,12 @@ const resolvers = {
           },
         });
 
-        await Promise.all(
-          roundMembers.map((member) =>
-            allocateToMember({
-              member,
-              roundId,
-              amount,
-              type,
-              allocatedBy: currentCollMember.id,
-            })
-          )
-        );
+        await bulkAllocate({
+          roundId,
+          amount,
+          type,
+          allocatedBy: currentCollMember.id,
+        });
 
         return roundMembers;
       }
