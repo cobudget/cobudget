@@ -70,7 +70,8 @@ export const allocateToMember = async ({
 export const bulkAllocate = async ({ roundId, amount, type, allocatedBy }) => {
   if (type === "SET" && amount < 0) throw new Error("Can't set negative values");
 
-  const members = await prisma.roundMember.findMany({ where: { id: roundId }, include: { contributions: true, allocations: true, user: { include: { emailSettings: true } } } });
+  const members = await prisma.roundMember.findMany({ where: { roundId }, include: { contributions: true, allocations: true, user: { include: { emailSettings: true } } } });
+
   const membersWithCalculatedData = members.map(member => {
     const totalAllocations = member.allocations.reduce((acc, curr) => acc + curr.amount, 0);
     const totalContributions = member.contributions.reduce((acc, curr) => acc + curr.amount, 0);
