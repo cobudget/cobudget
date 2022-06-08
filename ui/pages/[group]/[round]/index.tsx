@@ -84,7 +84,6 @@ export const BUCKETS_QUERY = gql`
         noOfFunders
         income
         totalContributions
-        totalContributionsFromCurrentMember
         noOfComments
         published
         approved
