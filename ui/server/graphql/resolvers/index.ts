@@ -1997,8 +1997,7 @@ const resolvers = {
           amount,
           type,
           allocatedBy: currentCollMember.id,
-        })
-
+        });
 
         return roundMembers;
       }
