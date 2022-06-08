@@ -7,6 +7,9 @@ export default {
     eventHub.subscribe("allocate-to-member", "email", async (args) => {
       await emailService.allocateToMemberNotification(args);
     });
+    eventHub.subscribe("bulk-allocate", "email", async (args) => {
+      await emailService.bulkAllocateNotification(args);
+    });
     eventHub.subscribe("cancel-funding", "email", async (args) => {
       await emailService.cancelFundingNotification(args);
     });
