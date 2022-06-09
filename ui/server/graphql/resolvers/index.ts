@@ -1974,12 +1974,15 @@ const resolvers = {
       if (!currentCollMember?.isAdmin)
         throw new Error("You are not admin for this round");
 
-      await allocateToMember({
-        member: targetRoundMember,
-        roundId: targetRoundMember.roundId,
-        amount,
-        type,
-        allocatedBy: currentCollMember.id,
+      await prisma.$transaction(async (prisma) => {
+        await allocateToMember({
+          member: targetRoundMember,
+          roundId: targetRoundMember.roundId,
+          amount,
+          type,
+          allocatedBy: currentCollMember.id,
+          prisma: prisma as any,
+        });
       });
 
       return targetRoundMember;

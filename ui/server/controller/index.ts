@@ -11,7 +11,7 @@ export const allocateToMember = async ({
   allocatedBy,
   member,
   stripeSessionId,
-  prisma = importedPrisma,
+  prisma,
 }: {
   roundId: string;
   amount: number;
@@ -19,7 +19,7 @@ export const allocateToMember = async ({
   allocatedBy: string;
   member: RoundMember;
   stripeSessionId?: string;
-  prisma?: typeof importedPrisma;
+  prisma: typeof importedPrisma;
 }) => {
   const {
     _sum: { amount: totalAllocations },
@@ -47,29 +47,28 @@ export const allocateToMember = async ({
   if (adjustedAmount === 0) return;
 
   try {
-    await prisma.$transaction([
-      prisma.allocation.create({
-        data: {
-          roundId,
-          roundMemberId: member.id,
-          amount: adjustedAmount,
-          amountBefore: balance,
-          allocatedById: allocatedBy,
-          allocationType: type,
-          stripeSessionId,
-        },
-      }),
-      prisma.transaction.create({
-        data: {
-          roundMemberId: allocatedBy,
-          amount: adjustedAmount,
-          toAccountId: member.statusAccountId,
-          fromAccountId: member.incomingAccountId,
-          roundId,
-          stripeSessionId,
-        },
-      }),
-    ]);
+    await prisma.allocation.create({
+      data: {
+        roundId,
+        roundMemberId: member.id,
+        amount: adjustedAmount,
+        amountBefore: balance,
+        allocatedById: allocatedBy,
+        allocationType: type,
+        stripeSessionId,
+      },
+    });
+
+    await prisma.transaction.create({
+      data: {
+        roundMemberId: allocatedBy,
+        amount: adjustedAmount,
+        toAccountId: member.statusAccountId,
+        fromAccountId: member.incomingAccountId,
+        roundId,
+        stripeSessionId,
+      },
+    });
 
     await eventHub.publish("allocate-to-member", {
       roundMemberId: member.id,
