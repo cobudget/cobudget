@@ -1,7 +1,7 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Prisma } from "@prisma/client";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import Markdown from "components/Markdown";
 import Button from "components/Button";
 import SelectInput from "components/SelectInput";
@@ -17,6 +17,7 @@ const DirectFundingBucketForm = ({
   round,
   exitEditing,
 }) => {
+  const intl = useIntl();
   const [directFundingType, setDirectFundingType] = useState<string>(
     bucket.directFundingType
   );
@@ -51,10 +52,15 @@ const DirectFundingBucketForm = ({
         onChange={(e) => setDirectFundingType(e.target.value)}
       >
         <option value="DONATION">
-          <FormattedMessage defaultMessage="Funds received are donations." />
+          {intl.formatMessage({
+            defaultMessage: "Funds received are donations.",
+          })}
         </option>
         <option value="EXCHANGE">
-          <FormattedMessage defaultMessage="We are offering goods or services in exchange for funds." />
+          {intl.formatMessage({
+            defaultMessage:
+              "We are offering goods or services in exchange for funds.",
+          })}
         </option>
       </SelectInput>
       {isExchange && (
@@ -63,10 +69,7 @@ const DirectFundingBucketForm = ({
             <FormattedMessage defaultMessage="Description" />
           </div>
           <div className="my-4">
-            <FormattedMessage
-              defaultMessage="Describe what funders will receive in exchange for their
-            contribution."
-            />
+            <FormattedMessage defaultMessage="Describe what funders will receive in exchange for their contribution." />
           </div>
           <Wysiwyg
             defaultValue={exchangeDescription}
@@ -96,10 +99,7 @@ const DirectFundingBucketForm = ({
             <FormattedMessage defaultMessage="VAT" />
           </div>
           <div className="my-4">
-            <FormattedMessage
-              defaultMessage="You may be liable for collecting VAT depending on your region. It is
-            your responsibility to figure this part out."
-            />
+            <FormattedMessage defaultMessage="You may be liable for collecting VAT depending on your region. It is your responsibility to figure this part out." />
           </div>
           <TextField
             endAdornment="%"
@@ -171,17 +171,12 @@ const DirectFundingBucketForm = ({
         </Button>
       </div>
       <div className="mt-5 text-gray-600">
-        <FormattedMessage
-          defaultMessage="If a bucket is not fully funded, direct funds will be automatically
-        refunded via Stripe to the funder."
-        />
+        <FormattedMessage defaultMessage="If a bucket is not fully funded, direct funds will be automatically refunded via Stripe to the funder." />
       </div>
       {isExchange && (
         <div className="mt-5 text-gray-600">
           <FormattedMessage
-            defaultMessage="{platform} is not responsible for the correct
-          handling of taxes. If in doubt, please contact a lawyer or tax
-          consultant."
+            defaultMessage="{platform} is not responsible for the correct handling of taxes. If in doubt, please contact a lawyer or tax consultant."
             values={{
               platform: process.env.PLATFORM_NAME,
             }}
