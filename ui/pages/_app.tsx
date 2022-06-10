@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
-import { withUrqlClient, initUrqlClient } from "next-urql";
+import { withUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
 import { useQuery, gql } from "urql";
@@ -128,6 +128,7 @@ export const TOP_LEVEL_QUERY = gql`
       slug
       discourseUrl
       finishedTodos
+      experimentalFeatures
     }
     bucket(id: $bucketId) {
       id

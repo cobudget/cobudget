@@ -259,10 +259,10 @@ class MyLinkExtension extends LinkExtension {
 }
 
 const Wysiwyg = ({
-  inputRef,
-  placeholder,
-  autoFocus,
-  defaultValue,
+  inputRef = null,
+  placeholder = "",
+  autoFocus = false,
+  defaultValue = "",
   rows = 2,
   onChange,
   highlightColor,

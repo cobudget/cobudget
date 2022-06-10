@@ -47,6 +47,10 @@ We are using crowdin + react-intl for translations. It works like this
 4. The en.json file is uploaded to crowdin using `yarn crowdin:upload` command.
 5. After translating text, translations can be downloaded using the command `yarn crowdin:download`
 
+### Stripe
+
+To make stripe checkout work you need their webhooks to reach your machine. Do this by running `./scripts/forward-stripe-webhooks.sh` (you'll need the stripe CLI and to have logged in using `stripe login` before that) in a terminal in the background. That command will also give you a webhook secret in the format `whsec_123...`, you should set the env var `STRIPE_WEBHOOK_SECRET` to this value.
+
 ## License
 
 Released under AGPL-3.0-or-later, with some additional terms. All of which are included in the file [LICENSE](LICENSE) in the git repository.

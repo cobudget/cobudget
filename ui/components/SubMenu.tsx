@@ -76,6 +76,7 @@ export const roundItems = (
     {
       label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug}/${roundSlug}/settings`,
+      startsWithHref: true,
       admin: true,
     },
   ].filter((i) => (i.admin ? isAdmin : true));
@@ -93,7 +94,13 @@ export default function SubMenu({
   const router = useRouter();
   const intl = useIntl();
 
-  const items = router.query.bucket
+  const items: {
+    label: string;
+    href: string;
+    startsWithHref?: boolean;
+    admin?: boolean;
+    member?: boolean;
+  }[] = router.query.bucket
     ? bucketItems(
         {
           roundSlug: router.query.round,
@@ -130,7 +137,11 @@ export default function SubMenu({
             <Link href={item.href} key={item.href} scroll={!bucket}>
               <a
                 className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
-                  item.href === router.asPath
+                  (
+                    item.startsWithHref
+                      ? router.asPath.startsWith(item.href)
+                      : item.href === router.asPath
+                  )
                     ? `border-${color} text-${color}`
                     : "border-transparent text-gray-500"
                 }`}
