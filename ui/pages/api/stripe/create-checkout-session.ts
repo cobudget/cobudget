@@ -28,15 +28,20 @@ async function getTaxRates({
       new Decimal(bucket.exchangeVat).div(100).equals(rate.percentage)
     )?.id;
 
-    if (!taxRateId && taxRates.has_more) {
-      // grab another page of rates
-      taxRates = await stripe.taxRates.list(
-        {
-          limit: 100,
-          starting_after: taxRates.data[taxRates.data.length - 1].id,
-        },
-        { stripeAccount: bucket.round.stripeAccountId }
-      );
+    if (!taxRateId) {
+      if (taxRates.has_more) {
+        // grab another page of rates
+        taxRates = await stripe.taxRates.list(
+          {
+            limit: 100,
+            starting_after: taxRates.data[taxRates.data.length - 1].id,
+          },
+          { stripeAccount: bucket.round.stripeAccountId }
+        );
+      } else {
+        // we looped through all the tax rates but didn't find one so we're breaking and creating a new one
+        break;
+      }
     }
   }
 
