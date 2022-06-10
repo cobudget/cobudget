@@ -36,7 +36,7 @@
     "@material-ui/pickers": "^3.2.10",
     "@next-auth/prisma-adapter": "^0.5.4",
     "@next/bundle-analyzer": "^9.1.6",
-    "@prisma/client": "^3.4.1",
+    "@prisma/client": "3.15.1",
     "@remirror/extension-react-tables": "1.0.13",
     "@remirror/pm": "1.0.4",
     "@remirror/react": "1.0.13",
@@ -123,7 +123,7 @@
     "babel-plugin-formatjs": "^10.3.19",
     "babel-plugin-styled-components": "^1.10.6",
     "postcss-preset-env": "^6.7.0",
-    "prisma": "^3.4.1",
+    "prisma": "3.15.1",
     "tailwindcss": "^2.1.0",
     "tailwindcss-font-inter": "2.0.2",
     "typescript": "4.4.3"

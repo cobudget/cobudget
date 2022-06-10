@@ -65,7 +65,7 @@ export default handler().post(async (req, res) => {
         member: roundMember,
         type: "ADD",
         stripeSessionId,
-        prisma: prisma as any,
+        prisma,
       });
 
       await contribute({
@@ -74,7 +74,7 @@ export default handler().post(async (req, res) => {
         amount: contribution,
         user: roundMember.user,
         stripeSessionId,
-        prisma: prisma as any,
+        prisma,
       });
     });
   } else {

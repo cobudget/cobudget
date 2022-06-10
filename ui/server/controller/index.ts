@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { User, AllocationType, RoundMember } from "@prisma/client";
+import { Prisma, User, AllocationType, RoundMember } from "@prisma/client";
 import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
 import { getRoundMember } from "../graphql/resolvers/helpers";
@@ -19,7 +19,7 @@ export const allocateToMember = async ({
   allocatedBy: string;
   member: RoundMember;
   stripeSessionId?: string;
-  prisma: typeof importedPrisma;
+  prisma: Prisma.TransactionClient;
 }) => {
   const {
     _sum: { amount: totalAllocations },
@@ -157,7 +157,7 @@ export const contribute = async ({
   amount: number;
   user: User;
   stripeSessionId?: string;
-  prisma?: typeof importedPrisma;
+  prisma?: Prisma.TransactionClient;
 }) => {
   const roundMember = await getRoundMember({
     roundId,
