@@ -1,27 +1,31 @@
 import { Box, Button } from "@material-ui/core";
+import { FormattedMessage } from "react-intl";
 import Card from "components/styled/Card";
 
 const SetAllowStretchGoals = ({ closeModal, round }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Connect with Stripe</h1>
+        <h1 className="text-3xl">
+          <FormattedMessage defaultMessage="Connect with Stripe" />
+        </h1>
         <div className="mt-5">
-          Connect this round to Stripe to be able to enable direct funding of
-          buckets by users.
+          <FormattedMessage defaultMessage="Connect this round to Stripe to be able to enable direct funding of buckets by users." />
         </div>
 
         <div className="mt-9 mb-12">
-          <h3 className="font-bold">Stripe integration</h3>
+          <h3 className="font-bold">
+            <FormattedMessage defaultMessage="Stripe integration" />
+          </h3>
           <div className="my-2">
-            Direct funds from all buckets will be sent to this Stripe account.
+            <FormattedMessage defaultMessage="Direct funds from all buckets will be sent to this Stripe account." />
           </div>
           <Button
             href={`/api/stripe/connect-round?roundId=${round.id}`}
             variant="contained"
             color="primary"
           >
-            Set up Stripe
+            <FormattedMessage defaultMessage="Set up Stripe" />
           </Button>
         </div>
 
@@ -31,7 +35,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
           color="primary"
           onClick={() => closeModal()}
         >
-          Close
+          <FormattedMessage defaultMessage="Close" />
         </Button>
       </Box>
     </Card>

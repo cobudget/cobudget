@@ -3,6 +3,7 @@ import { useQuery, useMutation, gql } from "urql";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { Tooltip } from "react-tippy";
+import { FormattedMessage, useIntl } from "react-intl";
 import HappySpinner from "components/HappySpinner";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
@@ -49,6 +50,7 @@ const EDIT_BUCKET_MUTATION = gql`
 `;
 
 const DirectFunding = ({ canEdit = false, round }) => {
+  const intl = useIntl();
   const router = useRouter();
   const bucketId = router.query.bucket;
 
@@ -77,10 +79,14 @@ const DirectFunding = ({ canEdit = false, round }) => {
 
   return bucket.directFundingEnabled ? (
     <div>
-      <h2 className="text-xl font-medium mb-2">Direct funding</h2>
+      <h2 className="text-xl font-medium mb-2">
+        <FormattedMessage defaultMessage="Direct funding" />
+      </h2>
       <div className="flex justify-between">
         <div>
-          <div className="font-medium">Terms</div>
+          <div className="font-medium">
+            <FormattedMessage defaultMessage="Terms" />
+          </div>
           {editing ? (
             <Form
               bucket={bucket}
@@ -91,14 +97,22 @@ const DirectFunding = ({ canEdit = false, round }) => {
             />
           ) : (
             <div>
-              {bucket.directFundingType === "DONATION"
-                ? "Funds received are donations"
-                : "We are offering goods or services in exchange for funds."}
+              {bucket.directFundingType === "DONATION" ? (
+                <FormattedMessage defaultMessage="Funds received are donations" />
+              ) : (
+                <FormattedMessage defaultMessage="We are offering goods or services in exchange for funds." />
+              )}
             </div>
           )}
         </div>
         {!editing && (
-          <Tooltip title="Edit Direct funding" position="bottom" size="small">
+          <Tooltip
+            title={intl.formatMessage({
+              defaultMessage: "Edit Direct funding",
+            })}
+            position="bottom"
+            size="small"
+          >
             <IconButton onClick={() => setEditing(true)}>
               <EditIcon className="h-6 w-6" />
             </IconButton>
@@ -121,7 +135,7 @@ const DirectFunding = ({ canEdit = false, round }) => {
       }
       className="block w-full h-32 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
     >
-      + Direct funding
+      <FormattedMessage defaultMessage="+ Direct funding" />
     </button>
   );
 };

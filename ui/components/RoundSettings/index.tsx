@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useIntl } from "react-intl";
 
 import capitalize from "utils/capitalize";
 
@@ -11,23 +12,6 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
-
-const defaultTabs = [
-  { slug: "", name: "General", component: GeneralSettings },
-  { slug: "guidelines", name: "Guidelines", component: Guidelines },
-  {
-    slug: `${process.env.BUCKET_NAME_SINGULAR}-review`,
-    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
-    component: BucketReview,
-  },
-  {
-    slug: `${process.env.BUCKET_NAME_SINGULAR}-form`,
-    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
-    component: CustomFields,
-  },
-  { slug: "funding", name: "Funding", component: Granting },
-  { slug: "tags", name: "Tags", component: Tags },
-];
 
 const RoundSettings = ({
   settingsTabSlug,
@@ -40,7 +24,54 @@ const RoundSettings = ({
   currentUser: any;
   currentGroup: any;
 }) => {
+  const intl = useIntl();
   const router = useRouter();
+
+  const defaultTabs = useMemo(
+    () => [
+      {
+        slug: "",
+        name: intl.formatMessage({ defaultMessage: "General" }),
+        component: GeneralSettings,
+      },
+      {
+        slug: "guidelines",
+        name: intl.formatMessage({ defaultMessage: "Guidelines" }),
+        component: Guidelines,
+      },
+      {
+        slug: "bucket-review",
+        name: intl.formatMessage(
+          {
+            defaultMessage: "{bucket} Review",
+          },
+          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+        ),
+        component: BucketReview,
+      },
+      {
+        slug: "bucket-form",
+        name: intl.formatMessage(
+          {
+            defaultMessage: "{bucket} Form",
+          },
+          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+        ),
+        component: CustomFields,
+      },
+      {
+        slug: "funding",
+        name: intl.formatMessage({ defaultMessage: "Funding" }),
+        component: Granting,
+      },
+      {
+        slug: "tags",
+        name: intl.formatMessage({ defaultMessage: "Tags" }),
+        component: Tags,
+      },
+    ],
+    [intl]
+  );
 
   const tabs = useMemo(
     () =>
@@ -51,7 +82,7 @@ const RoundSettings = ({
             component: Discourse,
           })
         : defaultTabs,
-    [currentGroup?.discourseUrl]
+    [currentGroup?.discourseUrl, defaultTabs]
   );
 
   const currentTab =

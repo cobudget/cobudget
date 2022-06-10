@@ -295,7 +295,9 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               <Divider />
 
               <SettingsListItem
-                primary="Connect with Stripe"
+                primary={intl.formatMessage({
+                  defaultMessage: "Connect with Stripe",
+                })}
                 secondary={round.stripeIsConnected?.toString() ?? "false"}
                 isSet={round.stripeIsConnected}
                 openModal={() => handleOpen("SET_STRIPE")}
@@ -306,7 +308,9 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               <Divider />
 
               <SettingsListItem
-                primary="Accept direct funding"
+                primary={intl.formatMessage({
+                  defaultMessage: "Accept direct funding",
+                })}
                 secondary={round.directFundingEnabled?.toString() ?? "false"}
                 isSet={round.directFundingEnabled}
                 openModal={() => handleOpen("SET_DIRECT_FUNDING")}

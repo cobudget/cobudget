@@ -41,9 +41,6 @@ async function getTaxRates({
 
   if (!taxRateId) {
     // There isn't an existing taxRate at this percentage, so we create a new one
-
-    console.log("creating new taxRate");
-
     taxRateId = (
       await stripe.taxRates.create(
         {
@@ -60,13 +57,10 @@ async function getTaxRates({
     ).id;
   }
 
-  console.log("taxRateId", taxRateId);
-
   return [taxRateId];
 }
 
 export default handler().post(async (req, res) => {
-  console.log("handling cchekout");
   if (typeof req.query?.bucketId !== "string") throw new Error("Bad bucketId");
   if (typeof req.query?.contribution !== "string")
     throw new Error("Bad contribution");

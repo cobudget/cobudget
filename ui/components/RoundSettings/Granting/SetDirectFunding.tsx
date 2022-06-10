@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";
@@ -10,6 +11,7 @@ import Wysiwyg from "components/Wysiwyg";
 import { UPDATE_GRANTING_SETTINGS } from ".";
 
 const SetAllowStretchGoals = ({ closeModal, round }) => {
+  const intl = useIntl();
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const [directFundingEnabled, setDirectFundingEnabled] = useState<boolean>(
     round.directFundingEnabled
@@ -21,11 +23,11 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
   return (
     <Card>
       <Box p={3}>
-        <h1 className="text-3xl">Accept direct funding</h1>
+        <h1 className="text-3xl">
+          <FormattedMessage defaultMessage="Accept direct funding" />
+        </h1>
         <div className="mt-5">
-          Allow bucket co-creators to receive funds directly via Stripe.
-          Co-creators will be asked to specify if direct funds are donations or
-          in exchange for goods or services.
+          <FormattedMessage defaultMessage="Allow bucket co-creators to receive funds directly via Stripe. Co-creators will be asked to specify if direct funds are donations or in exchange for goods or services." />
         </div>
 
         <form
@@ -50,12 +52,17 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
             <Tooltip
               title={
                 !round.stripeIsConnected
-                  ? "You need to connect this round to Stripe first"
+                  ? intl.formatMessage({
+                      defaultMessage:
+                        "You need to connect this round to Stripe first",
+                    })
                   : ""
               }
             >
               <SelectInput
-                label="Accept direct funding"
+                label={intl.formatMessage({
+                  defaultMessage: "Accept direct funding",
+                })}
                 fullWidth
                 value={directFundingEnabled ? "true" : "false"}
                 disabled={!round.stripeIsConnected}
@@ -63,18 +70,23 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
                   setDirectFundingEnabled(e.target.value === "true")
                 }
               >
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                <option value="true">
+                  <FormattedMessage defaultMessage="Yes" />
+                </option>
+                <option value="false">
+                  <FormattedMessage defaultMessage="No" />
+                </option>
               </SelectInput>
             </Tooltip>
           </Box>
 
           {directFundingEnabled && (
             <div className="my-7">
-              <h3 className="font-bold">Message to bucket co-creators</h3>
+              <h3 className="font-bold">
+                <FormattedMessage defaultMessage="Message to bucket co-creators" />
+              </h3>
               <div className="my-2">
-                Describe what they need to know to set up and manage direct
-                funding for their bucket.
+                <FormattedMessage defaultMessage="Describe what they need to know to set up and manage direct funding for their bucket." />
               </div>
               <Wysiwyg
                 defaultValue={directFundingTerms}
@@ -91,13 +103,12 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
             variant="contained"
             color="primary"
           >
-            Save
+            <FormattedMessage defaultMessage="Save" />
           </Button>
 
           {directFundingEnabled && (
             <div className="mt-5 text-gray-600">
-              If a bucket is not fully funded, direct funds will be
-              automatically refunded via Stripe to the funder.
+              <FormattedMessage defaultMessage="If a bucket is not fully funded, direct funds will be automatically refunded via Stripe to the funder." />
             </div>
           )}
         </form>

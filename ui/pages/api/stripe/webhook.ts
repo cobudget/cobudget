@@ -32,8 +32,6 @@ export default handler().post(async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    console.log("session", session);
-
     const missing = () => {
       throw new Error(`Missing metadata in session ${session.id}`);
     };
