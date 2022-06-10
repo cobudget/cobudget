@@ -54,10 +54,10 @@ const SetRequireBucketApproval = ({ closeModal, round }) => {
               fullWidth
             >
               <option value={true}>
-                <FormattedMessage defaultMessage="true" />
+                {intl.formatMessage({ defaultMessage: "true" })}
               </option>
               <option value={false}>
-                <FormattedMessage defaultMessage="false" />
+                {intl.formatMessage({ defaultMessage: "false" })}
               </option>
             </SelectInput>
           </Box>

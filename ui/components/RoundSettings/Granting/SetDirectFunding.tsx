@@ -71,10 +71,10 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
                 }
               >
                 <option value="true">
-                  <FormattedMessage defaultMessage="Yes" />
+                  {intl.formatMessage({ defaultMessage: "Yes" })}
                 </option>
                 <option value="false">
-                  <FormattedMessage defaultMessage="No" />
+                  {intl.formatMessage({ defaultMessage: "No" })}
                 </option>
               </SelectInput>
             </Tooltip>
