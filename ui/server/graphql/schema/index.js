@@ -122,7 +122,11 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
-      tags: [String!]
+      directFundingEnabled: Boolean
+      directFundingType: DirectFundingType
+      exchangeDescription: String
+      exchangeMinimumContribution: Int
+      exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -181,6 +185,8 @@ const schema = gql`
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
       requireBucketApproval: Boolean
+      directFundingEnabled: Boolean
+      directFundingTerms: String
     ): Round
 
     allocate(
@@ -215,6 +221,7 @@ const schema = gql`
     rounds: [Round]
     discourseUrl: String
     finishedTodos: Boolean
+    experimentalFeatures: Boolean
   }
 
   enum RoundType {
@@ -255,6 +262,9 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     requireBucketApproval: Boolean
+    stripeIsConnected: Boolean
+    directFundingEnabled: Boolean
+    directFundingTerms: String
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int
@@ -420,6 +430,16 @@ const schema = gql`
     completed: Boolean
     canceledAt: Date
     canceled: Boolean
+    directFundingEnabled: Boolean
+    directFundingType: DirectFundingType
+    exchangeDescription: String
+    exchangeMinimumContribution: Int
+    exchangeVat: Int
+  }
+
+  enum DirectFundingType {
+    DONATION
+    EXCHANGE
   }
 
   type BucketsPage {

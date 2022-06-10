@@ -39,6 +39,13 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+
+      directFundingEnabled
+      directFundingType
+      exchangeDescription
+      exchangeMinimumContribution
+      exchangeVat
+
       round {
         id
         slug
@@ -47,6 +54,8 @@ export const BUCKET_QUERY = gql`
         allowStretchGoals
         bucketReviewIsOpen
         requireBucketApproval
+        directFundingEnabled
+        directFundingTerms
         grantingIsOpen
         grantingHasClosed
         maxAmountToBucketPerUser
@@ -132,7 +141,7 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ currentUser }) => {
+const BucketIndex = ({ currentUser, currentGroup }) => {
   const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
@@ -188,6 +197,7 @@ const BucketIndex = ({ currentUser }) => {
         fetching={fetching}
         error={error}
         currentUser={currentUser}
+        currentGroup={currentGroup}
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />

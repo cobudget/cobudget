@@ -13,7 +13,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const intl = useIntl();
   const { handleSubmit, register } = useForm();
-  console.log({ round });
+
   return (
     <Card>
       <Box p={3}>
