@@ -14,7 +14,6 @@ async function getTaxRates({
   bucket: Bucket & { round: Round };
   roundMember: RoundMember & { user: User };
 }): Promise<string[]> {
-  console.log("starting to create tax rates");
   if (bucket.directFundingType === "DONATION") return [];
 
   let taxRates = await stripe.taxRates.list(
@@ -67,7 +66,6 @@ async function getTaxRates({
 }
 
 export default handler().post(async (req, res) => {
-  console.log("starting create checkout session");
   if (typeof req.query?.bucketId !== "string") throw new Error("Bad bucketId");
   if (typeof req.query?.contribution !== "string")
     throw new Error("Bad contribution");
@@ -84,7 +82,6 @@ export default handler().post(async (req, res) => {
     include: { user: true },
   });
 
-  console.log("getting bucket");
   const bucket = await prisma.bucket.findUnique({
     where: { id: bucketId },
     include: { round: { include: { group: true } } },
@@ -118,7 +115,6 @@ export default handler().post(async (req, res) => {
 
   const callbackLink = appLink("/api/stripe/return");
 
-  console.log("creating checkout session");
   const session = await stripe.checkout.sessions.create(
     {
       line_items: [
@@ -183,6 +179,5 @@ export default handler().post(async (req, res) => {
     }
   );
 
-  console.log("redirecting to stripe checkout");
   res.redirect(303, session.url);
 });
