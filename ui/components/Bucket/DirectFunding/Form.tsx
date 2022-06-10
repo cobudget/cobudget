@@ -1,10 +1,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Prisma } from "@prisma/client";
 import Markdown from "components/Markdown";
 import Button from "components/Button";
 import SelectInput from "components/SelectInput";
 import Wysiwyg from "components/Wysiwyg";
 import TextField from "components/TextField";
+
+const Decimal = Prisma.Decimal;
 
 const DirectFundingBucketForm = ({
   bucket,
@@ -116,9 +119,13 @@ const DirectFundingBucketForm = ({
               bucketId: bucket.id,
               directFundingType,
               exchangeDescription,
-              exchangeMinimumContribution:
-                Number(exchangeMinimumContribution) * 100,
-              exchangeVat: Number(exchangeVat) * 100,
+              exchangeMinimumContribution: new Decimal(
+                exchangeMinimumContribution
+              )
+                .mul(100)
+                .round()
+                .toNumber(),
+              exchangeVat: new Decimal(exchangeVat).mul(100).round().toNumber(),
             }).then(({ error }) => {
               if (error) {
                 console.error(error);
