@@ -354,8 +354,6 @@ const resolvers = {
         offset = 0,
         limit,
         status,
-        sortBy,
-        sortOrder
       },
       { user }
     ) => {
@@ -2765,6 +2763,11 @@ const resolvers = {
         by: ["roundMemberId"],
       });
       return funders.length;
+    },
+    percentageFunded: async (bucket) => {
+      const total = await bucketTotalContributions(bucket);
+      const minGoal = await bucketMinGoal(bucket);
+      return Math.floor(total / minGoal * 100)
     },
     raisedFlags: async (bucket) => {
       const resolveFlags = await prisma.flag.findMany({

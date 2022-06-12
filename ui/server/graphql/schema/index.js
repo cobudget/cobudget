@@ -435,6 +435,7 @@ const schema = gql`
     exchangeDescription: String
     exchangeMinimumContribution: Int
     exchangeVat: Int
+    percentageFunded: Int
   }
 
   enum DirectFundingType {
