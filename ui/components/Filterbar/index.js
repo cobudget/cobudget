@@ -113,6 +113,19 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
+      <SelectField
+        className="bg-white sm:order-last"
+        color={round.color}
+        inputProps={{
+          value: tag || intl.formatMessage({ defaultMessage: "All tags" }),
+          onChange: onChangeTag,
+        }}
+      >
+        <option value="default">Default</option>
+        <option value="">Bucket Name</option>
+        <option value="">Percentage Funded</option>
+        <option value=""></option>
+      </SelectField>
     </div>
   );
 };

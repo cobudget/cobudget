@@ -33,6 +33,7 @@ import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
+import { orderBy } from "lodash";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -353,6 +354,8 @@ const resolvers = {
         offset = 0,
         limit,
         status,
+        sortBy,
+        sortOrder
       },
       { user }
     ) => {
