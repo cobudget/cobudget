@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import Monster from "components/Monster";
 import capitalize from "utils/capitalize";
 import isRtl from "../../utils/isRTL";
+import Label from "../../components/Label";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -162,6 +163,15 @@ const BucketSidebar = ({
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const intl = useIntl();
+
+  const statusList = {
+    PENDING_APPROVAL: intl.formatMessage({ defaultMessage: "Pending Approval" }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
+    COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
+    ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
+  }
 
   const canApproveBucket =
     (!bucket.round.requireBucketApproval && canEdit) ||
@@ -409,6 +419,14 @@ const BucketSidebar = ({
         </div>
       )}
       <div className="mt-5 space-y-5">
+        <div>
+          <div className="mr-2 font-medium ">
+            <FormattedMessage defaultMessage="Bucket Status" />
+          </div>
+          <span>
+            <Label className="mt-2 inline-block">{statusList[bucket.status]}</Label>
+          </span>
+        </div>
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">
@@ -470,6 +488,7 @@ const BucketSidebar = ({
               )}
             </div>
           </div>
+
           <EditCocreatorsModal
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
@@ -479,6 +498,7 @@ const BucketSidebar = ({
           />
         </div>
         <Tags bucket={bucket} canEdit={canEdit} />
+
       </div>
     </>
   );
