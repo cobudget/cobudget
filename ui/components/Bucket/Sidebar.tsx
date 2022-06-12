@@ -477,7 +477,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
         <p className="italic text-gray-600 text-sm">
           <FormattedMessage
             defaultMessage="The bucket was created on {date}"
-            values={{ date: moment(bucket.createdAt).format("MMMM DD, YYYY")}}
+            values={{ date: moment(bucket.createdAt).format("MMMM DD, YYYY") }}
           />
         </p>
       </div>
