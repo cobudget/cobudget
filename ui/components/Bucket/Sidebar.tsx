@@ -21,6 +21,7 @@ import Monster from "components/Monster";
 import capitalize from "utils/capitalize";
 import isRtl from "../../utils/isRTL";
 import moment from "moment";
+import Label from "../../components/Label";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -144,7 +145,13 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
+const BucketSidebar = ({
+  bucket,
+  currentUser,
+  currentGroup,
+  canEdit,
+  showBucketReview,
+}) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -157,6 +164,15 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const intl = useIntl();
+
+  const statusList = {
+    PENDING_APPROVAL: intl.formatMessage({ defaultMessage: "Pending Approval" }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
+    COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
+    ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
+  }
 
   const canApproveBucket =
     (!bucket.round.requireBucketApproval && canEdit) ||
@@ -209,15 +225,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
                   currentUser={currentUser}
+                  currentGroup={currentGroup}
                 />
               )}
             </>
           )}
-          {showBucketReview ||
-          canEdit ||
-          bucket.cocreators.find(
-            (co) => co.id === currentUser?.currentCollMember?.id
-          ) ? (
+          {showBucketReview ? (
             <Monster bucket={bucket} />
           ) : null}
           {showAcceptFundingButton && (
@@ -403,6 +416,14 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
         </div>
       )}
       <div className="mt-5 space-y-5">
+        <div>
+          <div className="mr-2 font-medium ">
+            <FormattedMessage defaultMessage="Bucket Status" />
+          </div>
+          <span>
+            <Label className="mt-2 inline-block">{statusList[bucket.status]}</Label>
+          </span>
+        </div>
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">
@@ -464,6 +485,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               )}
             </div>
           </div>
+
           <EditCocreatorsModal
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
@@ -480,6 +502,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
             values={{ date: moment(bucket.createdAt).format("MMMM DD, YYYY") }}
           />
         </p>
+
       </div>
     </>
   );

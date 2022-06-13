@@ -63,12 +63,21 @@ export default function StatusFilter({
                     onChange={() => {
                       if (item.value) {
                         // remove from filter
+                        const statusList = statusFilter.filter((status) => status !== item.type);
+                        if (statusList.length === 0) {
+                          onChangeStatus(["HIDE_ALL"]);
+                        }
+                        else
                         onChangeStatus(
-                          statusFilter.filter((status) => status !== item.type)
+                          statusList
                         );
                       } else {
                         // add to filter
-                        onChangeStatus([...statusFilter, item.type]);
+                        const statusList = [...statusFilter, item.type];
+                        if (statusList.indexOf("HIDE_ALL") > -1) {
+                          statusList.splice(statusList.indexOf("HIDE_ALL"), 1);
+                        }
+                        onChangeStatus(statusList);
                       }
                     }}
                   ></input>

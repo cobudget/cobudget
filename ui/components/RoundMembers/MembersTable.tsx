@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Table,
@@ -13,7 +13,7 @@ import {
 } from "@material-ui/core";
 import { Tooltip } from "react-tippy";
 import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
-import { useMutation } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
 import IconButton from "components/IconButton";
@@ -23,6 +23,114 @@ import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AllocateModal from "./AllocateModal";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
+import { debounce } from "lodash";
+import LoadMore, { PortaledLoadMore } from "components/LoadMore";
+
+export const MEMBERS_QUERY = gql`
+  query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
+    membersPage(
+      roundId: $roundId
+      isApproved: true
+      search: $search
+      offset: $offset
+      limit: $limit
+    ) {
+      moreExist
+      members(
+        roundId: $roundId
+        isApproved: true
+        offset: $offset
+        limit: $limit
+      ) {
+        id
+        isAdmin
+        isModerator
+        isApproved
+        createdAt
+        balance
+        email
+        hasJoined
+        user {
+          id
+          username
+          name
+          verifiedEmail
+          avatar
+        }
+      }
+    }
+  }
+`;
+
+const Page = ({
+  variables,
+  round,
+  isLastPage,
+  onLoadMore,
+  deleteMember,
+  updateMember,
+  isAdmin,
+  searchString,
+}) => {
+  const [{ data, fetching, error }, executeQuery] = useQuery({
+    query: MEMBERS_QUERY,
+    variables: {
+      roundId: round.id,
+      search: searchString,
+      offset: variables.offset,
+      limit: variables.limit,
+    },
+    pause: true,
+  });
+
+  const moreExist = data?.membersPage?.moreExist || false;
+
+  const debouncedSearchMembers = useMemo(() => {
+    return debounce(executeQuery, 300, { leading: true });
+  }, [executeQuery]);
+
+  const items = useMemo(() => {
+    const members = data?.membersPage?.members || [];
+    if (fetching || !members) {
+      return [];
+    }
+    return members;
+  }, [data?.membersPage?.members, fetching]);
+
+  useEffect(() => {
+    debouncedSearchMembers();
+  }, [debouncedSearchMembers]);
+
+  return (
+    <>
+      {items.map((member) => (
+        <Row
+          key={member.id}
+          member={member}
+          deleteMember={deleteMember}
+          updateMember={updateMember}
+          round={round}
+          isAdmin={isAdmin}
+        />
+      ))}
+
+      {isLastPage && moreExist && (
+        <PortaledLoadMore>
+          <LoadMore
+            moreExist={moreExist}
+            loading={fetching}
+            onClick={() =>
+              onLoadMore({
+                limit: variables.limit,
+                offset: variables.offset + items.length,
+              })
+            }
+          />
+        </PortaledLoadMore>
+      )}
+    </>
+  );
+};
 
 const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -240,83 +348,97 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
 };
 
 const RoundMembersTable = ({
-  approvedMembers,
   updateMember,
   deleteMember,
   round,
   isAdmin,
+  searchString,
 }) => {
   const [bulkAllocateModalOpen, setBulkAllocateModalOpen] = useState(false);
   const intl = useIntl();
 
+  const [pageVariables, setPageVariables] = useState([
+    { limit: 30, offset: 0 },
+  ]);
+
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <TableContainer>
-        <Table aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <FormattedMessage defaultMessage="User" />
-              </TableCell>
-              <TableCell>
-                <FormattedMessage defaultMessage="Email" />
-              </TableCell>
-              <TableCell>
-                <FormattedMessage defaultMessage="Bio" />
-              </TableCell>
-              <TableCell align="right">
-                <FormattedMessage defaultMessage="Role" />
-              </TableCell>
-              <TableCell align="right">
-                <div className="flex items-center justify-end space-x-1">
-                  <span className="block">
-                    <FormattedMessage defaultMessage="Balance" />
-                  </span>{" "}
-                  {isAdmin && (
-                    <Tooltip
-                      title={intl.formatMessage({
-                        defaultMessage: "Allocate to all members",
-                      })}
-                      position="bottom"
-                      size="small"
-                    >
-                      <IconButton
-                        onClick={() => setBulkAllocateModalOpen(true)}
-                      >
-                        <AddIcon className="h-4 w-4" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </div>
-                {bulkAllocateModalOpen && (
-                  <BulkAllocateModal
-                    round={round}
-                    handleClose={() => setBulkAllocateModalOpen(false)}
-                  />
-                )}
-              </TableCell>
-              {isAdmin && (
-                <TableCell align="right">
-                  <FormattedMessage defaultMessage="Actions" />
+    <>
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <TableContainer>
+          <Table aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <FormattedMessage defaultMessage="User" />
                 </TableCell>
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {approvedMembers.map((member) => (
-              <Row
-                key={member.id}
-                member={member}
-                round={round}
-                deleteMember={deleteMember}
-                updateMember={updateMember}
-                isAdmin={isAdmin}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Email" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Bio" />
+                </TableCell>
+                <TableCell align="right">
+                  <FormattedMessage defaultMessage="Role" />
+                </TableCell>
+                <TableCell align="right">
+                  <div className="flex items-center justify-end space-x-1">
+                    <span className="block">
+                      <FormattedMessage defaultMessage="Balance" />
+                    </span>{" "}
+                    {isAdmin && (
+                      <Tooltip
+                        title={intl.formatMessage({
+                          defaultMessage: "Allocate to all members",
+                        })}
+                        position="bottom"
+                        size="small"
+                      >
+                        <IconButton
+                          onClick={() => setBulkAllocateModalOpen(true)}
+                        >
+                          <AddIcon className="h-4 w-4" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </div>
+                  {bulkAllocateModalOpen && (
+                    <BulkAllocateModal
+                      round={round}
+                      handleClose={() => setBulkAllocateModalOpen(false)}
+                    />
+                  )}
+                </TableCell>
+                {isAdmin && (
+                  <TableCell align="right">
+                    <FormattedMessage defaultMessage="Actions" />
+                  </TableCell>
+                )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {pageVariables.map((variables, i) => {
+                return (
+                  <Page
+                    key={i}
+                    variables={variables}
+                    isLastPage={i === pageVariables.length - 1}
+                    onLoadMore={({ limit, offset }) => {
+                      setPageVariables([...pageVariables, { limit, offset }]);
+                    }}
+                    deleteMember={deleteMember}
+                    updateMember={updateMember}
+                    isAdmin={isAdmin}
+                    round={round}
+                    searchString={searchString}
+                  />
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
+      <div id="load-more"></div>
+    </>
   );
 };
 

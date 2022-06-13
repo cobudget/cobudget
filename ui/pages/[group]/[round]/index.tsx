@@ -81,6 +81,7 @@ export const BUCKETS_QUERY = gql`
         published
         approved
         canceled
+        status
         customFields {
           value
           customField {
@@ -236,7 +237,6 @@ const RoundPage = ({ currentUser }) => {
     },
   });
 
-  console.log({ round, fetching, error, stale });
   // const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(

@@ -9,7 +9,7 @@ import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
-import { allocateToMember } from "../../controller";
+import { allocateToMember, bulkAllocate, contribute } from "../../controller";
 import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
@@ -22,15 +22,17 @@ import {
   isAndGetCollMember,
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
+  isCollOrGroupAdmin,
   isGrantingOpen,
   roundMemberBalance,
   statusTypeToQuery,
+  stripeIsConnected,
 } from "./helpers";
-import { sendEmail } from "server/send-email";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
+import validateUsername from "utils/validateUsername";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -100,28 +102,6 @@ const isCollMemberOrGroupAdmin = async (parent, { roundId }, { user }) => {
     throw new Error(
       "You need to be an approved participant in this round or a group admin to view round participants"
     );
-  return skip;
-};
-
-const isCollOrGroupAdmin = async (parent, { roundId }, { user }) => {
-  if (!user) throw new Error("You need to be logged in");
-  const roundMember = await getRoundMember({
-    userId: user.id,
-    roundId,
-  });
-  let groupMember = null;
-  if (!roundMember?.isAdmin) {
-    const group = await prisma.group.findFirst({
-      where: { rounds: { some: { id: roundId } } },
-    });
-    groupMember = await getGroupMember({
-      userId: user.id,
-      groupId: group?.id,
-    });
-  }
-
-  if (!(roundMember?.isAdmin || groupMember?.isAdmin))
-    throw new Error("You need to be admin of the round or the group");
   return skip;
 };
 
@@ -423,9 +403,20 @@ const resolvers = {
     },
     groupMembersPage: combineResolvers(
       isGroupAdmin,
-      async (parent, { offset = 0, limit, groupId }, { user }) => {
+      async (parent, { offset = 0, limit, groupId, search }, { user }) => {
         const groupMembersWithExtra = await prisma.groupMember.findMany({
-          where: { groupId: groupId },
+          where: {
+            groupId: groupId,
+            ...(search && {
+              user: {
+                OR: [
+                  { username: { contains: search, mode: "insensitive" } },
+                  { name: { contains: search, mode: "insensitive" } },
+                  { email: { contains: search, mode: "insensitive" } },
+                ],
+              },
+            }),
+          },
           skip: offset,
           take: limit + 1,
         });
@@ -461,30 +452,24 @@ const resolvers = {
         });
         if (!isAdmin && !isApproved) return null;
 
+        const insensitiveSearch: { contains: string; mode: "insensitive" } = {
+          contains: search,
+          mode: "insensitive",
+        };
+
         const roundMembersWithExtra = await prisma.roundMember.findMany({
           where: {
             roundId,
             isApproved,
             ...(!isApproved && { isRemoved: false }),
             ...(search && {
-              OR: [
-                {
-                  user: {
-                    username: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-                {
-                  user: {
-                    name: {
-                      contains: search,
-                      mode: "insensitive",
-                    },
-                  },
-                },
-              ],
+              user: {
+                OR: [
+                  { username: insensitiveSearch },
+                  { name: insensitiveSearch },
+                  ...(isAdmin ? [{ email: insensitiveSearch }] : []),
+                ],
+              },
             }),
             ...(!isAdmin && { hasJoined: true }),
           },
@@ -1035,9 +1020,36 @@ const resolvers = {
       isBucketCocreatorOrCollAdminOrMod,
       async (
         parent,
-        { bucketId, title, description, summary, images, budgetItems },
+        {
+          bucketId,
+          title,
+          description,
+          summary,
+          images,
+          budgetItems,
+          directFundingEnabled,
+          directFundingType,
+          exchangeDescription,
+          exchangeMinimumContribution,
+          exchangeVat,
+        },
         { user, eventHub }
       ) => {
+        if (
+          exchangeMinimumContribution !== undefined &&
+          exchangeMinimumContribution < 0
+        ) {
+          throw new Error(
+            "The minimum contribution requirement must be 0 or higher"
+          );
+        }
+        if (
+          exchangeVat !== undefined &&
+          (exchangeVat < 0 || exchangeVat > 100 * 100)
+        ) {
+          throw new Error("VAT must be a percentage from 0 to 100");
+        }
+
         const updated = await prisma.bucket.update({
           where: { id: bucketId },
           data: {
@@ -1053,6 +1065,11 @@ const resolvers = {
             ...(typeof images !== "undefined" && {
               Images: { deleteMany: {}, createMany: { data: images } },
             }),
+            directFundingEnabled,
+            directFundingType,
+            exchangeDescription,
+            exchangeMinimumContribution,
+            exchangeVat,
           },
           include: {
             Images: true,
@@ -1676,6 +1693,15 @@ const resolvers = {
     updateProfile: async (_, { name, username }, { user }) => {
       if (!user) throw new Error("You need to be logged in..");
 
+      if (!validateUsername(username)) throw new Error("Username is not valid");
+
+      // check case insensitive uniquness of username
+      const existingUser = await prisma.user.findFirst({
+        where: { username: { mode: "insensitive", equals: username } },
+      });
+
+      if (existingUser) throw new Error("Username is already taken");
+
       return prisma.user.update({
         where: { id: user.id },
         data: {
@@ -1948,12 +1974,15 @@ const resolvers = {
       if (!currentCollMember?.isAdmin)
         throw new Error("You are not admin for this round");
 
-      await allocateToMember({
-        member: targetRoundMember,
-        roundId: targetRoundMember.roundId,
-        amount,
-        type,
-        allocatedBy: currentCollMember.id,
+      await prisma.$transaction(async (prisma) => {
+        await allocateToMember({
+          member: targetRoundMember,
+          roundId: targetRoundMember.roundId,
+          amount,
+          type,
+          allocatedBy: currentCollMember.id,
+          prisma: prisma as any,
+        });
       });
 
       return targetRoundMember;
@@ -1977,160 +2006,18 @@ const resolvers = {
           },
         });
 
-        for (const member of roundMembers) {
-          await allocateToMember({
-            member,
-            roundId: roundId,
-            amount,
-            type,
-            allocatedBy: currentCollMember.id,
-          });
-        }
+        await bulkAllocate({
+          roundId,
+          amount,
+          type,
+          allocatedBy: currentCollMember.id,
+        });
 
         return roundMembers;
       }
     ),
-    contribute: async (
-      _,
-      { roundId, bucketId, amount },
-      { user, eventHub }
-    ) => {
-      const roundMember = await getRoundMember({
-        roundId,
-        userId: user.id,
-        include: { round: true },
-      });
-
-      const { round } = roundMember;
-
-      if (amount <= 0) throw new Error("Value needs to be more than zero");
-
-      // Check that granting is open
-      const now = dayjs();
-      const grantingHasOpened = round.grantingOpens
-        ? dayjs(round.grantingOpens).isBefore(now)
-        : true;
-      const grantingHasClosed = round.grantingCloses
-        ? dayjs(round.grantingCloses).isBefore(now)
-        : false;
-      const grantingIsOpen = grantingHasOpened && !grantingHasClosed;
-      if (!grantingIsOpen) throw new Error("Funding is not open");
-
-      let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
-
-      if (bucket.roundId !== roundId) throw new Error("Bucket not in round");
-
-      if (!bucket.approvedAt)
-        throw new Error("Bucket is not approved for funding");
-
-      if (bucket.canceledAt)
-        throw new Error("Funding has been canceled for bucket");
-
-      if (bucket.fundedAt) throw new Error("Bucket has been funded");
-
-      if (bucket.completedAt) throw new Error("Bucket is already completed");
-
-      // Check that the max goal of the bucket is not exceeded
-      const {
-        _sum: { amount: contributionsForBucket },
-      } = await prisma.contribution.aggregate({
-        where: { bucketId: bucket.id },
-        _sum: { amount: true },
-      });
-
-      const budgetItems = await prisma.budgetItem.findMany({
-        where: { bucketId: bucket.id, type: "EXPENSE" },
-      });
-
-      const maxGoal = budgetItems.reduce(
-        (acc, item) => acc + (item.max ? item.max : item.min),
-        0
-      );
-
-      if (contributionsForBucket + amount > maxGoal)
-        throw new Error("You can't overfund this bucket.");
-
-      // mark bucket as funded if it has reached its max goal
-      if (contributionsForBucket + amount === maxGoal) {
-        bucket = await prisma.bucket.update({
-          where: { id: bucketId },
-          data: { fundedAt: new Date() },
-        });
-      }
-
-      // Check that it is not more than is allowed per bucket (if this number is set)
-      const {
-        _sum: { amount: contributionsFromUserToThisBucket },
-      } = await prisma.contribution.aggregate({
-        where: {
-          bucketId: bucket.id,
-          roundMemberId: roundMember.id,
-        },
-        _sum: { amount: true },
-      });
-
-      if (
-        round.maxAmountToBucketPerUser &&
-        amount + contributionsFromUserToThisBucket >
-          round.maxAmountToBucketPerUser
-      ) {
-        throw new Error(
-          `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${
-            round.currency
-          } to one bucket`
-        );
-      }
-
-      // Check that user has not spent more tokens than he has
-      const {
-        _sum: { amount: contributionsFromUser },
-      } = await prisma.contribution.aggregate({
-        where: {
-          roundMemberId: roundMember.id,
-        },
-        _sum: { amount: true },
-      });
-
-      const {
-        _sum: { amount: allocationsForUser },
-      } = await prisma.allocation.aggregate({
-        where: {
-          roundMemberId: roundMember.id,
-        },
-        _sum: { amount: true },
-      });
-
-      if (contributionsFromUser + amount > allocationsForUser)
-        throw new Error("You are trying to spend more than what you have.");
-
-      await prisma.contribution.create({
-        data: {
-          roundId,
-          roundMemberId: roundMember.id,
-          amount,
-          bucketId: bucket.id,
-          amountBefore: contributionsForBucket || 0,
-        },
-      });
-
-      await prisma.transaction.create({
-        data: {
-          roundMemberId: roundMember.id,
-          amount,
-          toAccountId: bucket.statusAccountId,
-          fromAccountId: roundMember.statusAccountId,
-          roundId,
-        },
-      });
-
-      await eventHub.publish("contribute-to-bucket", {
-        round,
-        bucket,
-        contributingUser: user,
-        amount,
-      });
-
-      return bucket;
+    contribute: async (_, { roundId, bucketId, amount }, { user }) => {
+      return contribute({ roundId, bucketId, amount, user });
     },
     markAsCompleted: combineResolvers(
       isCollModOrAdmin,
@@ -2231,6 +2118,8 @@ const resolvers = {
           grantingCloses,
           allowStretchGoals,
           requireBucketApproval,
+          directFundingEnabled,
+          directFundingTerms,
         }
       ) => {
         const round = await prisma.round.findUnique({
@@ -2244,6 +2133,10 @@ const resolvers = {
           );
         }
 
+        if (directFundingEnabled && !(await stripeIsConnected({ round }))) {
+          throw new Error("You need to connect this round to Stripe first");
+        }
+
         return prisma.round.update({
           where: { id: roundId },
           data: {
@@ -2254,6 +2147,8 @@ const resolvers = {
             grantingCloses,
             allowStretchGoals,
             requireBucketApproval,
+            directFundingEnabled,
+            directFundingTerms,
           },
         });
       }
@@ -2336,6 +2231,13 @@ const resolvers = {
       });
 
       return prisma.user.findUnique({ where: { id: user.id } });
+    },
+    acceptTerms: async (parent, args, { user }) => {
+      if (!user) throw new Error("You need to be logged in");
+      return prisma.user.update({
+        where: { id: user.id },
+        data: { acceptedTermsAt: new Date() },
+      });
     },
   },
   RoundMember: {
@@ -2725,6 +2627,9 @@ const resolvers = {
 
       return now.isBefore(bucketCreationCloses);
     },
+    stripeIsConnected: combineResolvers(isCollOrGroupAdmin, (round) => {
+      return stripeIsConnected({ round });
+    }),
     group: async (round) => {
       if (round.singleRound) return null;
       return prisma.group.findUnique({
