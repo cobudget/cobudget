@@ -219,11 +219,7 @@ const BucketSidebar = ({
               )}
             </>
           )}
-          {showBucketReview ||
-          canEdit ||
-          bucket.cocreators.find(
-            (co) => co.id === currentUser?.currentCollMember?.id
-          ) ? (
+          {showBucketReview ? (
             <Monster bucket={bucket} />
           ) : null}
           {showAcceptFundingButton && (
