@@ -7,7 +7,7 @@ import { FormattedMessage } from "react-intl";
 
 const BucketCard = ({ bucket, round }) => {
   const showFundingStats =
-    (bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
+    !!(bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {bucket.images?.length ? (
