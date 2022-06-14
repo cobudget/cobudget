@@ -81,6 +81,7 @@ export const BUCKETS_QUERY = gql`
         published
         approved
         canceled
+        status
         customFields {
           value
           customField {
