@@ -2064,7 +2064,7 @@ const resolvers = {
     ),
     cancelFunding: combineResolvers(
       isBucketCocreatorOrCollAdminOrMod,
-      async (_, { bucketId }, { eventHub }) => {
+      async (_, { bucketId }, { eventHub, user }) => {
         const bucket = await prisma.bucket.findUnique({
           where: { id: bucketId },
           include: {
@@ -2077,6 +2077,11 @@ const resolvers = {
                 },
               },
             },
+            statusAccount: {
+              include: {
+                incomingTransactions: true,
+              },
+            },
           },
         });
 
@@ -2085,17 +2090,59 @@ const resolvers = {
             "This bucket has already been marked completed, can't cancel funding."
           );
 
-        const updated = await prisma.bucket.update({
-          where: { id: bucketId },
-          data: {
-            fundedAt: null,
-            approvedAt: null,
-            canceledAt: new Date(),
-            Contributions: { deleteMany: {} },
-            statusAccount: {
-              update: { incomingTransactions: { deleteMany: {} } },
+        const roundMemberCancelling = await prisma.roundMember.findUnique({
+          where: {
+            userId_roundId: {
+              userId: user.id,
+              roundId: bucket.roundId,
             },
           },
+        });
+
+        // TODO: figure out when/how to tell stripe to reverse the charge. should we attach info from that on the transactions?
+
+        await prisma.$transaction([
+          prisma.contribution.createMany({
+            data: bucket.Contributions.map(
+              ({
+                amount,
+                roundMemberId,
+                bucketId,
+                roundId,
+                stripeSessionId,
+              }) => ({
+                amount: -amount,
+                roundMemberId,
+                bucketId,
+                roundId,
+                stripeSessionId,
+              })
+            ),
+          }),
+          prisma.transaction.createMany({
+            data: bucket.statusAccount.incomingTransactions.map(
+              ({
+                amount,
+                fromAccountId,
+                toAccountId,
+                roundId,
+                stripeSessionId,
+              }) => ({
+                amount,
+                fromAccountId: toAccountId,
+                toAccountId: fromAccountId,
+                roundId,
+                roundMemberId: roundMemberCancelling.id,
+                stripeSessionId,
+              })
+            ),
+          }),
+        ]);
+
+        //TODO: for all the transactions that were due to direct funding, also do reverse allocations and reverse allocation transactions
+
+        const updated = await prisma.bucket.findUnique({
+          where: { id: bucketId },
         });
 
         await eventHub.publish("cancel-funding", {
