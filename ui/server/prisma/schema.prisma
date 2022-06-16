@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "interactiveTransactions"]
 
 }
 
@@ -21,6 +21,7 @@ model User {
   image            String?
   facebookId       String?        @unique
   googleId         String?        @unique
+  acceptedTermsAt  DateTime?
   groupMemberships GroupMember[]
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?
@@ -109,6 +110,8 @@ model Group {
   discourse    DiscourseConfig?
 
   finishedTodos Boolean @default(false)
+  experimentalFeatures Boolean @default(false)
+
   @@map("Organization")
 }
 
@@ -135,6 +138,9 @@ model Round {
   grantingCloses           DateTime?
   allowStretchGoals        Boolean?
   requireBucketApproval    Boolean?
+  stripeAccountId          String?
+  directFundingEnabled     Boolean   @default(false)
+  directFundingTerms       String    @default("")
   bucketReviewIsOpen       Boolean?
   discourseCategoryId      Int?
 
@@ -155,7 +161,7 @@ model Round {
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce   Int?
+  inviteNonce Int?
 
   @@unique([groupId, slug])
   @@map("Collection")
@@ -255,6 +261,12 @@ model Bucket {
   completedAt DateTime?
   archivedAt  DateTime?
 
+  directFundingEnabled        Boolean           @default(false)
+  directFundingType           DirectFundingType @default(DONATION)
+  exchangeDescription         String            @default("")
+  exchangeMinimumContribution Int               @default(0)
+  exchangeVat                 Int?
+
   deleted           Boolean        @default(false)
   discourseTopicId  Int?
   flags             Flag[]
@@ -266,6 +278,11 @@ model Bucket {
   statusAccountId   String?        @unique
   outgoingAccount   Account?       @relation(name: "bucketOutgoing", fields: [outgoingAccountId], references: [id])
   outgoingAccountId String?        @unique
+}
+
+enum DirectFundingType {
+  DONATION
+  EXCHANGE
 }
 
 model Image {
@@ -338,6 +355,8 @@ model Allocation {
   amountBefore   Int?
   allocationType AllocationType @default(ADD)
   createdAt      DateTime       @default(now())
+
+  stripeSessionId String?
 }
 
 model Contribution {
@@ -351,6 +370,8 @@ model Contribution {
   amount        Int
   amountBefore  Int?
   createdAt     DateTime    @default(now())
+
+  stripeSessionId String?
 }
 
 model DiscourseConfig {
@@ -387,6 +408,7 @@ model Transaction {
   amount    Int
   createdAt DateTime @default(now())
 
+  // TODO: is the user/userId fields used? can we remove them?
   user          User?        @relation(fields: [userId], references: [id])
   userId        String?
   roundMember   RoundMember? @relation(fields: [roundMemberId], references: [id])
@@ -399,4 +421,6 @@ model Transaction {
   toAccount     Account @relation(name: "to", fields: [toAccountId], references: [id])
   fromAccountId String
   toAccountId   String
+
+  stripeSessionId String?
 }

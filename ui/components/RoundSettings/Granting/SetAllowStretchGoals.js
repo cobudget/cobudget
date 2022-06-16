@@ -13,7 +13,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const intl = useIntl();
   const { handleSubmit, register } = useForm();
-  console.log({ round });
+
   return (
     <Card>
       <Box p={3}>
@@ -48,10 +48,10 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
               fullWidth
             >
               <option value={true}>
-                <FormattedMessage defaultMessage="true" />
+                {intl.formatMessage({ defaultMessage: "true" })}
               </option>
               <option value={false}>
-                <FormattedMessage defaultMessage="false" />
+                {intl.formatMessage({ defaultMessage: "false" })}
               </option>
             </SelectInput>
           </Box>

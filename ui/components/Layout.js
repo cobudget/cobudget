@@ -16,7 +16,6 @@ const Layout = ({
   children,
   currentUser,
   fetchingUser,
-  openModal,
   group,
   round,
   bucket,
@@ -30,7 +29,6 @@ const Layout = ({
         <Header
           currentUser={currentUser}
           fetchingUser={fetchingUser}
-          openModal={openModal}
           group={group}
           round={round}
           bucket={bucket}

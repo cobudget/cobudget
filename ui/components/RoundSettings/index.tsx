@@ -1,4 +1,10 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useIntl } from "react-intl";
+
+import capitalize from "utils/capitalize";
+
 import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
@@ -6,55 +12,107 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
-import capitalize from "utils/capitalize";
 
-const defaultTabs = [
-  { name: "General", component: GeneralSettings },
-  { name: "Guidelines", component: Guidelines },
-  {
-    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Review`,
-    component: BucketReview,
-  },
-  {
-    name: `${capitalize(process.env.BUCKET_NAME_SINGULAR)} Form`,
-    component: CustomFields,
-  },
-  { name: "Funding", component: Granting },
-  { name: "Tags", component: Tags },
-];
+const RoundSettings = ({
+  settingsTabSlug,
+  round,
+  currentUser,
+  currentGroup,
+}: {
+  settingsTabSlug: string;
+  round: any;
+  currentUser: any;
+  currentGroup: any;
+}) => {
+  const intl = useIntl();
+  const router = useRouter();
 
-const RoundSettings = ({ round, currentUser, currentGroup }) => {
-  const [selectedTab, setSelectedTab] = useState(0);
+  const defaultTabs = useMemo(
+    () => [
+      {
+        slug: "",
+        name: intl.formatMessage({ defaultMessage: "General" }),
+        component: GeneralSettings,
+      },
+      {
+        slug: "guidelines",
+        name: intl.formatMessage({ defaultMessage: "Guidelines" }),
+        component: Guidelines,
+      },
+      {
+        slug: "bucket-review",
+        name: intl.formatMessage(
+          {
+            defaultMessage: "{bucket} Review",
+          },
+          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+        ),
+        component: BucketReview,
+      },
+      {
+        slug: "bucket-form",
+        name: intl.formatMessage(
+          {
+            defaultMessage: "{bucket} Form",
+          },
+          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+        ),
+        component: CustomFields,
+      },
+      {
+        slug: "funding",
+        name: intl.formatMessage({ defaultMessage: "Funding" }),
+        component: Granting,
+      },
+      {
+        slug: "tags",
+        name: intl.formatMessage({ defaultMessage: "Tags" }),
+        component: Tags,
+      },
+    ],
+    [intl]
+  );
 
   const tabs = useMemo(
     () =>
       currentGroup?.discourseUrl
-        ? defaultTabs.concat({ name: "Discourse", component: Discourse })
+        ? defaultTabs.concat({
+            slug: "discourse",
+            name: "Discourse",
+            component: Discourse,
+          })
         : defaultTabs,
-    [currentGroup?.discourseUrl]
+    [currentGroup?.discourseUrl, defaultTabs]
   );
 
-  const SettingsComponent = tabs[selectedTab].component;
+  const currentTab =
+    tabs.find((tab) => tab.slug === settingsTabSlug) ?? tabs[0];
+
+  const SettingsComponent = currentTab.component;
 
   return (
     <div className="page">
       <div className="grid sm:grid-cols-6">
         <div className="flex flex-col mb-4">
-          {tabs.map((tab, i) => (
-            <button
+          {tabs.map((tab) => (
+            <Link
               key={tab.name}
-              onClick={() => setSelectedTab(i)}
-              className={
-                "text-left p-2 focus:outline-none font-medium " +
-                (selectedTab === i ? "text-black" : "text-gray-500")
-              }
+              href={`/${router.query.group}/${router.query.round}/settings/${tab.slug}`}
             >
-              {tab.name}
-            </button>
+              <a
+                className={
+                  "text-left p-2 focus:outline-none font-medium " +
+                  (settingsTabSlug === tab.slug
+                    ? "text-black"
+                    : "text-gray-500")
+                }
+              >
+                {tab.name}
+              </a>
+            </Link>
           ))}
         </div>
         <div className="py-6 col-span-4 bg-white rounded-lg shadow overflow-hidden">
-          {/* <div className="p-6 col-span-3 max-h-screen overflow-y-scroll mt-10 mb-10"> */}
           <SettingsComponent
             round={round}
             currentGroup={currentGroup}
