@@ -174,7 +174,7 @@ const Page = ({
       },
       {
         Header: "Own Funding",
-        accessor: "internalFunding",
+        accessor: "externalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
             value={cell.value / 100}
@@ -186,7 +186,7 @@ const Page = ({
       },
       {
         Header: "Contributions",
-        accessor: "externalFunding",
+        accessor: "internalFunding",
         Cell: ({ cell }) => (
           <FormattedNumber
             value={cell.value / 100}
@@ -215,7 +215,7 @@ const Page = ({
       {
         Header: "Funding Progress",
         accessor: "progress",
-        Cell: ({ cell }) => cell.value + "%",
+        Cell: ({ cell }) => Math.round(cell.value) + "%",
       },
       {
         Header: "Approvals",
@@ -227,6 +227,7 @@ const Page = ({
       },
     ];
 
+    /* 
     if (currentUser) {
       cols.splice(round?.allowStretchGoals ? 3 : 2, 0, {
         Header: "Your Contribution",
@@ -241,19 +242,20 @@ const Page = ({
         ),
       });
     }
+    */
 
     if (round?.allowStretchGoals) {
       cols.splice(5, 0, {
         Header: "Stretch Goal Progress",
         accessor: "stretchGoalProgress",
-        Cell: ({ cell }) => cell.value + "%",
+        Cell: ({ cell }) => Math.round(cell.value) + "%",
       });
       cols.splice(1, 0, {
         Header: "Stretch Goal",
         accessor: "stretchGoal",
         Cell: ({ cell }) => (
           <FormattedNumber
-            value={cell.value / 100}
+            value={Math.round(Math.round(cell.value / 100))}
             style="currency"
             currencyDisplay={"symbol"}
             currency={round?.currency}
@@ -297,7 +299,7 @@ const Page = ({
             minGoal: bucket.minGoal,
             stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
             myFunding: bucket.totalContributionsFromCurrentMember,
-            totalFunding: bucket.totalContributions,
+            totalFunding: bucket.totalContributions + bucket.income,
             externalFunding: bucket.income || 0,
             goodFlagCount: bucket.flags.filter(
               (f) => f.type === "ALL_GOOD_FLAG"
@@ -306,7 +308,7 @@ const Page = ({
               .length,
             fundersCount: bucket.noOfFunders || 0,
             internalFunding:
-              bucket.totalContributions - (bucket.totalContributions || 0),
+              bucket.totalContributions || 0,
             progress:
               Math.floor(
                 ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
@@ -314,9 +316,9 @@ const Page = ({
               ) / 100,
             stretchGoalProgress:
               round.allowStretchGoals && bucket.maxGoal
-                ? bucket.totalContributions - bucket.minGoal > 0
-                  ? (((bucket.totalContributions || 0) - bucket.minGoal) /
-                      (bucket.maxGoal - bucket.minGoal || 1)) *
+                ? bucket.maxGoal - bucket.minGoal > 0
+                  ? ((bucket.totalContributions || 0) /
+                      (bucket.maxGoal || 1)) *
                     100
                   : 0
                 : "-",
