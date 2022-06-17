@@ -1,4 +1,4 @@
-name: "Migrate (branch: prod)"
+name: "Migrate production"
 
 on:
   push:
