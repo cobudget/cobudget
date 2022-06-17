@@ -27,6 +27,7 @@ import {
   roundMemberBalance,
   statusTypeToQuery,
   stripeIsConnected,
+  bucketMaxGoal,
 } from "./helpers";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
@@ -191,11 +192,11 @@ const resolvers = {
 
       const currentGroupMember = user
         ? await prisma.groupMember.findFirst({
-            where: {
-              group: { slug: groupSlug },
-              userId: user.id,
-            },
-          })
+          where: {
+            group: { slug: groupSlug },
+            userId: user.id,
+          },
+        })
         : null;
 
       // if admin show all rounds (current or archived)
@@ -380,11 +381,11 @@ const resolvers = {
           ...(!isAdminOrGuide &&
             (currentMember
               ? {
-                  OR: [
-                    { publishedAt: { not: null } },
-                    { cocreators: { some: { id: currentMember.id } } },
-                  ],
-                }
+                OR: [
+                  { publishedAt: { not: null } },
+                  { cocreators: { some: { id: currentMember.id } } },
+                ],
+              }
               : { publishedAt: { not: null } })),
         },
       });
@@ -1338,8 +1339,7 @@ const resolvers = {
 
         if (content.length < (currentGroup?.discourse?.minPostLength || 3)) {
           throw new Error(
-            `Your post needs to be at least ${
-              currentGroup.discourse?.minPostLength || 3
+            `Your post needs to be at least ${currentGroup.discourse?.minPostLength || 3
             } characters long!`
           );
         }
@@ -2673,20 +2673,10 @@ const resolvers = {
   },
   Bucket: {
     cocreators: async (bucket) => {
-      // const { cocreators } = await prisma.bucket.findUnique({
-      //   where: { id: bucket.id },
-      //   include: { cocreators: true },
-      // });
-
-      const cocreators = await prisma.roundMember.findMany({
-        where: { buckets: { some: { id: bucket.id } } },
-      });
-      return cocreators;
+      return prisma.bucket.findUnique({ where: { id: bucket.id } }).cocreators();
     },
     round: async (bucket) => {
-      return prisma.round.findUnique({
-        where: { id: bucket.roundId },
-      });
+      return prisma.bucket.findUnique({ where: { id: bucket.id } }).round();
     },
     totalContributions: async (bucket) => {
       return bucketTotalContributions(bucket);
@@ -2722,8 +2712,8 @@ const resolvers = {
       // if (groupHasDiscourse(currentGroup)) {
       //   return;
       // }
-
-      return prisma.comment.count({ where: { bucketId: bucket.id } });
+      const comments = await prisma.bucket.findUnique({ where: { id: bucket.id } }).comments();
+      return comments.length;
     },
     contributions: async (bucket) => {
       return await prisma.contribution.findMany({
@@ -2757,11 +2747,18 @@ const resolvers = {
       return contributionsFormat;
     },
     noOfFunders: async (bucket) => {
-      const funders = await prisma.contribution.groupBy({
-        where: { bucketId: bucket.id },
-        by: ["roundMemberId"],
-      });
-      return funders.length;
+      const contributions = await prisma.bucket.findUnique({ where: { id: bucket.id } }).Contributions();
+      // group contributions by roundMemberId
+      const funders = contributions.reduce((acc, contribution) => {
+        const { roundMemberId } = contribution;
+        if (!acc[roundMemberId]) {
+          acc[roundMemberId] = contribution;
+        } else {
+          acc[roundMemberId].amount += contribution.amount;
+        }
+        return acc;
+      }, {});
+      return Object.keys(funders).length;
     },
     raisedFlags: async (bucket) => {
       const resolveFlags = await prisma.flag.findMany({
@@ -2777,6 +2774,9 @@ const resolvers = {
           id: { notIn: resolveFlagIds },
         },
       });
+    },
+    flags: async (bucket) => {
+      return await prisma.bucket.findUnique({ where: { id: bucket.id } }).flags();
     },
     discourseTopicUrl: async (bucket) => {
       const group = await prisma.group.findFirst({
@@ -2796,9 +2796,9 @@ const resolvers = {
       });
     },
     images: async (bucket) =>
-      prisma.image.findMany({ where: { bucketId: bucket.id } }),
+      prisma.bucket.findUnique({ where: { id: bucket.id } }).Images(),
     customFields: async (bucket) =>
-      prisma.fieldValue.findMany({ where: { bucketId: bucket.id } }),
+      prisma.bucket.findUnique({ where: { id: bucket.id } }).FieldValues(),
     budgetItems: async (bucket) =>
       prisma.budgetItem.findMany({ where: { bucketId: bucket.id } }),
     published: (bucket) => !!bucket.publishedAt,
@@ -2813,6 +2813,7 @@ const resolvers = {
       return bucketMinGoal(bucket);
     },
     maxGoal: async (bucket) => {
+      return bucketMaxGoal(bucket);
       const {
         _sum: { min },
       } = await prisma.budgetItem.aggregate({
@@ -2947,10 +2948,10 @@ const resolvers = {
           createdAt: new Date(),
         };
       }
-
-      const field = await prisma.field.findUnique({
-        where: { id: fieldValue.fieldId },
-      });
+      const field = await prisma.fieldValue.findUnique({ where: { id: fieldValue.id } }).field();
+      // const field = await prisma.field.findUnique({
+      //   where: { id: fieldValue.fieldId },
+      // });
 
       return field;
     },

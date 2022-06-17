@@ -201,7 +201,6 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
-
       <Tab.Group
         defaultIndex={tab}
         onChange={(tab) => {
