@@ -278,6 +278,8 @@ model Bucket {
   statusAccountId   String?        @unique
   outgoingAccount   Account?       @relation(name: "bucketOutgoing", fields: [outgoingAccountId], references: [id])
   outgoingAccountId String?        @unique
+
+  percentageFunded  Float?
 }
 
 enum DirectFundingType {

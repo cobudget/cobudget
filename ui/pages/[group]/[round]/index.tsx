@@ -90,6 +90,7 @@ export const BUCKETS_QUERY = gql`
         approved
         canceled
         status
+        percentageFunded
         customFields {
           value
           customField {
