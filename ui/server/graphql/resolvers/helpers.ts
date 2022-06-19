@@ -364,7 +364,7 @@ export async function stripeIsConnected({ round }) {
   return account.charges_enabled;
 }
 
-export async function updatedFundedPercentage (bucket) {
+export async function updateFundedPercentage (bucket) {
   try {
     const total = await bucketTotalContributions(bucket);
     const minGoal = await bucketMinGoal(bucket);

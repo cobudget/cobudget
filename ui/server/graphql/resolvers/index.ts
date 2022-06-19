@@ -34,6 +34,7 @@ import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
+import { updateFundedPercentage } from "../resolvers/helpers";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -354,6 +355,8 @@ const resolvers = {
         offset = 0,
         limit,
         status,
+        orderBy,
+        orderDir,
       },
       { user }
     ) => {
@@ -361,7 +364,7 @@ const resolvers = {
         where: {
           userId: user?.id ?? "undefined",
           round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
-        },
+        }
       });
 
       const isAdminOrGuide =
@@ -388,6 +391,7 @@ const resolvers = {
               }
               : { publishedAt: { not: null } })),
         },
+        ...(orderBy && { orderBy: { [orderBy]: orderDir } })
       });
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
@@ -1051,7 +1055,7 @@ const resolvers = {
           throw new Error("VAT must be a percentage from 0 to 100");
         }
 
-        const updated = await prisma.bucket.update({
+        let updated = await prisma.bucket.update({
           where: { id: bucketId },
           data: {
             title,
@@ -1096,6 +1100,8 @@ const resolvers = {
           round: updated.round,
           bucket: updated,
         });
+
+        updated = await updateFundedPercentage(updated);
 
         return updated;
       }

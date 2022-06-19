@@ -21,6 +21,8 @@ const schema = gql`
       offset: Int
       limit: Int
       status: [StatusType!]
+      orderBy: String
+      orderDir: String
     ): BucketsPage
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
