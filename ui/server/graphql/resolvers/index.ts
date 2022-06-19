@@ -28,6 +28,7 @@ import {
   statusTypeToQuery,
   stripeIsConnected,
   bucketMaxGoal,
+  getLanguageProgress,
 } from "./helpers";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
@@ -343,6 +344,9 @@ const resolvers = {
       const bucket = await prisma.bucket.findUnique({ where: { id } });
       if (!bucket || bucket.deleted) return null;
       return bucket;
+    },
+    languageProgressPage: async () => {
+      return getLanguageProgress();
     },
     bucketsPage: async (
       parent,
