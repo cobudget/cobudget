@@ -166,13 +166,15 @@ const BucketSidebar = ({
   const intl = useIntl();
 
   const statusList = {
-    PENDING_APPROVAL: intl.formatMessage({ defaultMessage: "Pending Approval" }),
+    PENDING_APPROVAL: intl.formatMessage({
+      defaultMessage: "Pending Approval",
+    }),
     OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
     ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
-  }
+  };
 
   const canApproveBucket =
     (!bucket.round.requireBucketApproval && canEdit) ||
@@ -230,9 +232,7 @@ const BucketSidebar = ({
               )}
             </>
           )}
-          {showBucketReview ? (
-            <Monster bucket={bucket} />
-          ) : null}
+          {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && (
             <Button
               color={bucket.round.color}
@@ -421,7 +421,9 @@ const BucketSidebar = ({
             <FormattedMessage defaultMessage="Bucket Status" />
           </div>
           <span>
-            <Label className="mt-2 inline-block">{statusList[bucket.status]}</Label>
+            <Label className="mt-2 inline-block">
+              {statusList[bucket.status]}
+            </Label>
           </span>
         </div>
         <div className="">
@@ -502,7 +504,6 @@ const BucketSidebar = ({
             values={{ date: dayjs(bucket.createdAt).format("MMMM DD, YYYY") }}
           />
         </p>
-
       </div>
     </>
   );

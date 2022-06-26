@@ -63,14 +63,12 @@ export default function StatusFilter({
                     onChange={() => {
                       if (item.value) {
                         // remove from filter
-                        const statusList = statusFilter.filter((status) => status !== item.type);
+                        const statusList = statusFilter.filter(
+                          (status) => status !== item.type
+                        );
                         if (statusList.length === 0) {
                           onChangeStatus(["HIDE_ALL"]);
-                        }
-                        else
-                        onChangeStatus(
-                          statusList
-                        );
+                        } else onChangeStatus(statusList);
                       } else {
                         // add to filter
                         const statusList = [...statusFilter, item.type];

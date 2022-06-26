@@ -7607,6 +7607,13 @@ react-icons@3.11.0:
   dependencies:
     camelcase "^5.0.0"
 
+react-in-viewport@^1.0.0-alpha.28:
+  version "1.0.0-alpha.28"
+  resolved "https://registry.yarnpkg.com/react-in-viewport/-/react-in-viewport-1.0.0-alpha.28.tgz#3957cb7931ec26582497acd14f7c3941f020fe75"
+  integrity sha512-SjBVCPUIRfJb516BUev1u/dejBfI5jIcskDz4Irq2RezNG7D199eER8reRzZX+w/FLxz21rpdqRbJbagv5n37Q==
+  dependencies:
+    hoist-non-react-statics "^3.0.0"
+
 react-intl@^5.25.0:
   version "5.25.0"
   resolved "https://registry.yarnpkg.com/react-intl/-/react-intl-5.25.0.tgz#8827e5fdb839055028b53005a221d1995c386591"
