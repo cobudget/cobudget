@@ -415,12 +415,13 @@ const getStandardFilter = (bucketStatusCount) => {
 };
 
 const RoundPage = ({ currentUser }) => {
+  const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
   const [pageVariables, setPageVariables] = useState(
     typeof window === "undefined" || window.location.hash.length < 1 ?
-    [{ limit: 12, offset: 0 }] :
-    (new Array(parseInt(window.location.hash.substr(1, window.location.hash.length))/12).fill(0).map((_, i) => ({ limit: 12, offset: i * 12 })))
+    [{ limit: limit, offset: 0 }] :
+    (new Array(parseInt(window.location.hash.substr(1, window.location.hash.length))/limit).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })))
     );
   const router = useRouter();
 
@@ -635,7 +636,7 @@ const RoundPage = ({ currentUser }) => {
 //   //   .query(BUCKETS_QUERY, {
 //   //     ...variables,
 //   //     offset: 0,
-//   //     limit: 12,
+//   //     limit: limit,
 //   //     status: statusFilter,
 //   //   })
 //   //   .toPromise();
