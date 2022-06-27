@@ -460,7 +460,18 @@ const RoundPage = ({ currentUser }) => {
     if (router.query.view === "table") {
       setPageVariables([{ offset: 0, limit: 1000 }]);
     }
+    else {
+      //setPageVariables([{ offset: 0, limit: 1000 }]);
+    }
   }, [router?.asPath, router?.query?.view]);
+
+  useEffect(() => {
+    const offset = (parseInt(window.location.hash.substr(1, window.location.hash.length)));
+    if (isNaN(offset)) {
+      return;
+    }
+    setPageVariables([{...pageVariables, offset: 0, limit: offset}]);
+  }, []);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -585,6 +596,7 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
+                  window.location.hash = offset + limit;
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
