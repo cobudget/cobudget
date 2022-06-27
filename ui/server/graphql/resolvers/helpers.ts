@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
-import stripe from "server/utils/stripe";
+import stripe from "server/stripe";
 import prisma from "../../prisma";
 
 export async function isCollOrGroupAdmin(

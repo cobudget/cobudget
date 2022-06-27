@@ -90,6 +90,7 @@
     "react-sortable-hoc": "2.0.0",
     "react-table": "^7.8.0",
     "react-tippy": "^1.4.0",
+    "react-use": "^17.4.0",
     "reactstrap": "8.10.0",
     "rehype-sanitize": "5.0.1",
     "rehype-stringify": "9.0.2",
