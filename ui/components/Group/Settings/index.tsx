@@ -3,16 +3,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
 
-import capitalize from "utils/capitalize";
-
-// import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Billing from "./Billing";
-// import Guidelines from "./Guidelines";
-// import Granting from "./Granting";
-// import Tags from "./Tags";
-// import BucketReview from "./BucketReview";
-// import Discourse from "./Discourse";
 
 const GroupSettings = ({
   settingsTabSlug,
@@ -20,7 +12,6 @@ const GroupSettings = ({
   group,
 }: {
   settingsTabSlug: string;
-  round: any;
   currentUser: any;
   group: any;
 }) => {
