@@ -192,11 +192,11 @@ const resolvers = {
 
       const currentGroupMember = user
         ? await prisma.groupMember.findFirst({
-          where: {
-            group: { slug: groupSlug },
-            userId: user.id,
-          },
-        })
+            where: {
+              group: { slug: groupSlug },
+              userId: user.id,
+            },
+          })
         : null;
 
       // if admin show all rounds (current or archived)
@@ -381,11 +381,11 @@ const resolvers = {
           ...(!isAdminOrGuide &&
             (currentMember
               ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
+                  OR: [
+                    { publishedAt: { not: null } },
+                    { cocreators: { some: { id: currentMember.id } } },
+                  ],
+                }
               : { publishedAt: { not: null } })),
         },
       });
@@ -1339,7 +1339,8 @@ const resolvers = {
 
         if (content.length < (currentGroup?.discourse?.minPostLength || 3)) {
           throw new Error(
-            `Your post needs to be at least ${currentGroup.discourse?.minPostLength || 3
+            `Your post needs to be at least ${
+              currentGroup.discourse?.minPostLength || 3
             } characters long!`
           );
         }
@@ -2720,7 +2721,9 @@ const resolvers = {
   },
   Bucket: {
     cocreators: async (bucket) => {
-      return prisma.bucket.findUnique({ where: { id: bucket.id } }).cocreators();
+      return prisma.bucket
+        .findUnique({ where: { id: bucket.id } })
+        .cocreators();
     },
     round: async (bucket) => {
       return prisma.bucket.findUnique({ where: { id: bucket.id } }).round();
@@ -2759,7 +2762,9 @@ const resolvers = {
       // if (groupHasDiscourse(currentGroup)) {
       //   return;
       // }
-      const comments = await prisma.bucket.findUnique({ where: { id: bucket.id } }).comments();
+      const comments = await prisma.bucket
+        .findUnique({ where: { id: bucket.id } })
+        .comments();
       return comments.length;
     },
     contributions: async (bucket) => {
@@ -2794,7 +2799,9 @@ const resolvers = {
       return contributionsFormat;
     },
     noOfFunders: async (bucket) => {
-      const contributions = await prisma.bucket.findUnique({ where: { id: bucket.id } }).Contributions();
+      const contributions = await prisma.bucket
+        .findUnique({ where: { id: bucket.id } })
+        .Contributions();
       // group contributions by roundMemberId
       const funders = contributions.reduce((acc, contribution) => {
         const { roundMemberId } = contribution;
@@ -2823,7 +2830,9 @@ const resolvers = {
       });
     },
     flags: async (bucket) => {
-      return await prisma.bucket.findUnique({ where: { id: bucket.id } }).flags();
+      return await prisma.bucket
+        .findUnique({ where: { id: bucket.id } })
+        .flags();
     },
     discourseTopicUrl: async (bucket) => {
       const group = await prisma.group.findFirst({
@@ -2995,7 +3004,9 @@ const resolvers = {
           createdAt: new Date(),
         };
       }
-      const field = await prisma.fieldValue.findUnique({ where: { id: fieldValue.id } }).field();
+      const field = await prisma.fieldValue
+        .findUnique({ where: { id: fieldValue.id } })
+        .field();
       // const field = await prisma.field.findUnique({
       //   where: { id: fieldValue.fieldId },
       // });
