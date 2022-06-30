@@ -237,8 +237,7 @@ export const contribute = async ({
     amount + contributionsFromUserToThisBucket > round.maxAmountToBucketPerUser
   ) {
     throw new Error(
-      `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${
-        round.currency
+      `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${round.currency
       } to one bucket`
     );
   }
