@@ -124,6 +124,8 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
+  limit,
+  offset
 }) => {
   const { tag, s } = router.query;
 
@@ -297,7 +299,12 @@ const Page = ({
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
             key={bucket.id}
           >
-            <a className="flex focus:outline-none focus:ring rounded-lg">
+            <a 
+              className="flex focus:outline-none focus:ring rounded-lg" 
+              onClick={() => {
+                window.location.hash = offset + limit;
+              }}
+            >
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>
@@ -421,7 +428,7 @@ const RoundPage = ({ currentUser }) => {
   const [pageVariables, setPageVariables] = useState(
     typeof window === "undefined" || window.location.hash.length < 1 ?
     [{ limit: limit, offset: 0 }] :
-    (new Array(parseInt(window.location.hash.substr(1, window.location.hash.length))/limit).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })))
+    (new Array((parseInt(window.location.hash.substr(1, window.location.hash.length)) || 0)/limit).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })))
     );
   const router = useRouter();
 
@@ -443,6 +450,11 @@ const RoundPage = ({ currentUser }) => {
   const [statusFilter, setStatusFilter] = useState(
     stringOrArrayIntoArray(f ?? getStandardFilter(bucketStatusCount))
   );
+
+  const offset = useMemo(() => {
+    const [v] = pageVariables.slice(-1);
+    return v ? v.offset : 0;
+  }, [pageVariables]);
 
   useEffect(() => {
     setStatusFilter(stringOrArrayIntoArray(f));
@@ -466,10 +478,8 @@ const RoundPage = ({ currentUser }) => {
   }, [router?.asPath, router?.query?.view]);
 
   useEffect(() => {
-    const offset = (parseInt(window.location.hash.substr(1, window.location.hash.length)));
-    if (isNaN(offset)) {
-      return;
-    }
+    history.pushState("", document.title, window.location.pathname
+                                                       + window.location.search);
   }, []);
 
   // if (!router.isReady || (fetching && !round)) {
@@ -595,12 +605,13 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
-                  window.location.hash = offset + limit;
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
                 loading={fetching}
                 bucketTableView={bucketTableView}
+                limit={limit}
+                offset={offset}
               />
             );
           })}
