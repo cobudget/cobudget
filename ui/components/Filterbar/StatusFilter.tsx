@@ -67,7 +67,7 @@ export default function StatusFilter({
                           (status) => status !== item.type
                         );
                         if (statusList.length === 0) {
-                          onChangeStatus(["HIDE_ALL"]);
+                          onChangeStatus();
                         } else onChangeStatus(statusList);
                       } else {
                         // add to filter

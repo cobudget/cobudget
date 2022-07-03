@@ -52,16 +52,29 @@ const Filterbar = ({
   };
 
   const onChangeStatus = (statusFilterArray) => {
-    router.push({
-      pathname: "/[group]/[round]",
-      query: {
-        group: router.query.group,
-        round: router.query.round,
-        ...(tag && { tag }),
-        ...(!!input && { s: input }),
-        f: statusFilterArray,
-      },
-    });
+    if (typeof statusFilterArray === "undefined") {
+      router.push({
+        pathname: "/[group]/[round]",
+        query: {
+          group: router.query.group,
+          round: router.query.round,
+          ...(tag && { tag }),
+          ...(!!input && { s: input }),
+        },
+      });
+    }
+    else {
+      router.push({
+        pathname: "/[group]/[round]",
+        query: {
+          group: router.query.group,
+          round: router.query.round,
+          ...(tag && { tag }),
+          ...(!!input && { s: input }),
+          f: statusFilterArray,
+        },
+      });
+    }
   };
   const onChangeView = (view) => {
     router.push({
