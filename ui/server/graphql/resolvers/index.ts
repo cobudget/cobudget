@@ -2637,36 +2637,92 @@ const resolvers = {
         where: { id: round.groupId },
       });
     },
-    bucketStatusCount: async (round) => {
+    bucketStatusCount: async (round, {groupSlug, roundSlug}, { user }) => {
+
+      const currentMember = await prisma.roundMember.findFirst({
+        where: {
+          userId: user?.id ?? "undefined",
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+        },
+      });
+
+      const isAdminOrGuide =
+        currentMember && (currentMember.isAdmin || currentMember.isModerator);
+
       return {
         PENDING_APPROVAL: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("PENDING_APPROVAL"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         OPEN_FOR_FUNDING: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("OPEN_FOR_FUNDING"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         FUNDED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("FUNDED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         CANCELED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("CANCELED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         COMPLETED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("COMPLETED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
       };
