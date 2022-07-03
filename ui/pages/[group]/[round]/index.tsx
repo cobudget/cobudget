@@ -124,11 +124,13 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
+  pause
 }) => {
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
+    pause,
     variables: {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
@@ -150,7 +152,7 @@ const Page = ({
         accessor: "title",
         Cell: ({ cell }) => (
           <Link
-            href={`/${round.group?.slug ?? "c"}/${round.slug}/${
+            href={`/${round?.group?.slug ?? "c"}/${round?.slug}/${
               cell.row.original?.id
             }`}
           >
@@ -409,7 +411,7 @@ const getStandardFilter = (bucketStatusCount) => {
     stdFilter = statusNames
       .filter((status, i) => !!values[i])
       .filter((status) => status !== "__typename");
-  }
+  } 
   return stdFilter;
 };
 
@@ -419,12 +421,14 @@ const RoundPage = ({ currentUser }) => {
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
+  const [pause, setPause] = useState(true);
   const router = useRouter();
 
   const [
     { data: { round } = { round: null }, fetching, error, stale },
   ] = useQuery({
     query: ROUND_PAGE_QUERY,
+    pause,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
@@ -461,6 +465,12 @@ const RoundPage = ({ currentUser }) => {
     }
   }, [router?.asPath, router?.query?.view]);
 
+  useEffect(() => {
+    if (router.query.round && router.query.group && pause) {
+      setPause(false);
+    }
+  }, [router.query.round, router.query.group]);
+
   // if (!router.isReady || (fetching && !round)) {
   //   return (
   //     <div className="flex-grow flex justify-center items-center h-64">
@@ -468,6 +478,14 @@ const RoundPage = ({ currentUser }) => {
   //     </div>
   //   );
   // }
+
+  if (pause || fetching) {
+    return (
+      <div className="w-full flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
 
   if (!round && !fetching && router.isReady) {
     return (
@@ -576,6 +594,7 @@ const RoundPage = ({ currentUser }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
+                pause={pause}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}
