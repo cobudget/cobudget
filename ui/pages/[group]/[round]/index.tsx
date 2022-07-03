@@ -124,8 +124,6 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
-  limit,
-  offset
 }) => {
   const { tag, s } = router.query;
 
@@ -299,12 +297,7 @@ const Page = ({
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
             key={bucket.id}
           >
-            <a 
-              className="flex focus:outline-none focus:ring rounded-lg" 
-              onClick={() => {
-                window.location.hash = offset + limit;
-              }}
-            >
+            <a className="flex focus:outline-none focus:ring rounded-lg">
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>
@@ -425,17 +418,15 @@ const RoundPage = ({ currentUser }) => {
   const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
-  const [pageVariables, setPageVariables] = useState(
-    typeof window === "undefined" || window.location.hash.length < 1 ?
-    [{ limit: limit, offset: 0 }] :
-    (new Array((parseInt(window.location.hash.substr(1, window.location.hash.length)) || 0)/limit).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })))
-    );
+  const [pageVariables, setPageVariables] = useState([{ limit: limit, offset: 0 }]);
+  const [pause, setPause] = useState(true);
   const router = useRouter();
 
   const [
     { data: { round } = { round: null }, fetching, error, stale },
   ] = useQuery({
     query: ROUND_PAGE_QUERY,
+    pause,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
@@ -450,11 +441,6 @@ const RoundPage = ({ currentUser }) => {
   const [statusFilter, setStatusFilter] = useState(
     stringOrArrayIntoArray(f ?? getStandardFilter(bucketStatusCount))
   );
-
-  const offset = useMemo(() => {
-    const [v] = pageVariables.slice(-1);
-    return v ? v.offset : 0;
-  }, [pageVariables]);
 
   useEffect(() => {
     setStatusFilter(stringOrArrayIntoArray(f));
@@ -478,9 +464,15 @@ const RoundPage = ({ currentUser }) => {
   }, [router?.asPath, router?.query?.view]);
 
   useEffect(() => {
-    history.pushState("", document.title, window.location.pathname
-                                                       + window.location.search);
-  }, []);
+    if (router.isReady) {
+      const page = parseInt(router.query.page as string);
+      if (!isNaN(page)) {
+        const pageVariables = (new Array(page).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })));
+        setPageVariables(pageVariables);
+      }
+      setPause(false);
+    }
+  }, [router.isReady]);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -605,13 +597,18 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
+                  router.push({
+                    pathname: "/[group]/[round]",
+                    query: {
+                      ...router.query,
+                      page: Math.floor(offset/limit) + 1
+                    },
+                  }, undefined, { shallow: true, scroll: false });
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
                 loading={fetching}
                 bucketTableView={bucketTableView}
-                limit={limit}
-                offset={offset}
               />
             );
           })}
