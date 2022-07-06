@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
 import stripe from "server/stripe";
 import prisma from "../../prisma";
+import fetch from "node-fetch";
 
 export async function isCollOrGroupAdmin(
   parent,
@@ -380,3 +381,32 @@ export async function stripeIsConnected({ round }) {
 
   return account.charges_enabled;
 }
+
+export const getLanguageProgress = async () => {
+  try {
+    if (!process.env.CROWDIN_PROJECT_ID) return [];
+
+    const res = await fetch(
+      `https://api.crowdin.com/api/v2/projects/${process.env.CROWDIN_PROJECT_ID}/languages/progress`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + process.env.CROWDIN_API_TOKEN,
+        },
+      }
+    );
+    const { data } = (await res.json()) as any;
+    const progress = [];
+    console.log(data);
+    data.forEach((lang) => {
+      progress.push({
+        code: lang.data.languageId.split("-")[0],
+        percentage: lang.data.translationProgress,
+      });
+    });
+    console.log(progress);
+    return progress;
+  } catch (err) {
+    return [];
+  }
+};
