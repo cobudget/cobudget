@@ -1,9 +1,9 @@
-name: "Migrate (branch: staging)"
+name: "Migrate staging"
 
 on:
   push:
     branches:
-      - staging
+      - main
 
 jobs:
   staging:
