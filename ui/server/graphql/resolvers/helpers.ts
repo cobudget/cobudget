@@ -203,7 +203,9 @@ export async function getCurrentGroupAndMember({
 
 /** contributions = donations */
 export async function bucketTotalContributions(bucket) {
-  const contributions = await prisma.bucket.findUnique({ where: { id: bucket.id } }).Contributions();
+  const contributions = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .Contributions();
   return contributions.reduce((acc, curr) => acc + curr.amount, 0);
 
   const {
@@ -219,20 +221,35 @@ export async function bucketTotalContributions(bucket) {
 
 /** income = existing funding */
 export async function bucketIncome(bucket) {
-  const budgetItems = await prisma.bucket.findUnique({ where: { id: bucket.id } }).BudgetItems();
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
 
-  return budgetItems.reduce((acc, curr) => acc + (curr.type == "INCOME" ? curr.min : 0), 0);
+  return budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "INCOME" ? curr.min : 0),
+    0
+  );
 }
 
 export async function bucketMinGoal(bucket) {
-  const budgetItems = await prisma.bucket.findUnique({ where: { id: bucket.id } }).BudgetItems();
-  const sumMinExpenses = budgetItems.reduce((acc, curr) => acc + (curr.type == "EXPENSE" ? curr.min : 0), 0)
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
+  const sumMinExpenses = budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "EXPENSE" ? curr.min : 0),
+    0
+  );
   return sumMinExpenses > 0 ? sumMinExpenses : 0;
 }
 
 export async function bucketMaxGoal(bucket) {
-  const budgetItems = await prisma.bucket.findUnique({ where: { id: bucket.id } }).BudgetItems();
-  const sumMaxExpenses = budgetItems.reduce((acc, curr) => acc + (curr.type == "EXPENSE" ? curr.max ?? curr.min : 0), 0)
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
+  const sumMaxExpenses = budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "EXPENSE" ? curr.max ?? curr.min : 0),
+    0
+  );
 
   return sumMaxExpenses > 0 ? sumMaxExpenses : 0;
 }

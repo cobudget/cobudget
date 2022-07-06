@@ -13,7 +13,6 @@ export const config = {
 
 const secondsToMsDate = (seconds: number) => new Date(seconds * 1000);
 
-
 export default handler().post(async (req, res) => {
   const sig = req.headers["stripe-signature"];
 
@@ -80,7 +79,6 @@ export default handler().post(async (req, res) => {
           prisma,
         });
       });
-
     } else {
       const subscription = await stripe.subscriptions.retrieve(
         session.subscription
@@ -94,7 +92,7 @@ export default handler().post(async (req, res) => {
 
       console.log("webhook: subscription", subscription);
 
-      console.log({ subscription, userId })
+      console.log({ subscription, userId });
 
       try {
         await prisma.group.create({
@@ -109,7 +107,6 @@ export default handler().post(async (req, res) => {
             stripePriceId: subscription.items.data[0].price.id,
             groupMembers: { create: { userId, isAdmin: true } },
           },
-
         });
       } catch (error) {
         console.log(error);
@@ -118,7 +115,9 @@ export default handler().post(async (req, res) => {
         await prisma.group.create({
           data: {
             name: groupName,
-            slug: slugify(groupSlug + "-" + (Math.random() + 1).toString(36).substring(7)),
+            slug: slugify(
+              groupSlug + "-" + (Math.random() + 1).toString(36).substring(7)
+            ),
             stripeCurrentPeriodEnd: secondsToMsDate(
               subscription.current_period_end
             ),
@@ -127,11 +126,9 @@ export default handler().post(async (req, res) => {
             stripePriceId: subscription.items.data[0].price.id,
             groupMembers: { create: { userId, isAdmin: true } },
           },
-        })
+        });
       }
     }
-
-
   } else {
     console.log(`Unhandled event type ${event.type}`);
   }

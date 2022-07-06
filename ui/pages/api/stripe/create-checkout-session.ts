@@ -71,9 +71,12 @@ async function getTaxRates({
 export default handler().post(async (req, res) => {
   if (req.query?.mode === "paidplan") {
     if (!req.user) throw new Error("You need to be logged in");
-    if (typeof req.query?.plan !== "string") throw new Error("No plan specified");
-    if (typeof req.query?.groupSlug !== "string") throw new Error("No plan specified");
-    if (typeof req.query?.groupName !== "string") throw new Error("No plan specified");
+    if (typeof req.query?.plan !== "string")
+      throw new Error("No plan specified");
+    if (typeof req.query?.groupSlug !== "string")
+      throw new Error("No plan specified");
+    if (typeof req.query?.groupName !== "string")
+      throw new Error("No plan specified");
 
     //if (typeof req.query?.contribution !== "string")
 
@@ -105,16 +108,19 @@ export default handler().post(async (req, res) => {
         allow_promotion_codes: true,
         ...customerMetadata,
         billing_address_collection: "auto",
-        success_url: `${origin}/new-group/?upgraded=true&group=${slugify(req.query.groupSlug)}`,
+        success_url: `${origin}/new-group/?upgraded=true&group=${slugify(
+          req.query.groupSlug
+        )}`,
         cancel_url: `${origin}/new-group/?upgraded=false`,
       });
-      console.log({ session })
+      console.log({ session });
       res.redirect(303, session.url);
     } catch (err) {
-      console.log({ err })
+      console.log({ err });
     }
   } else {
-    if (typeof req.query?.bucketId !== "string") throw new Error("Bad bucketId");
+    if (typeof req.query?.bucketId !== "string")
+      throw new Error("Bad bucketId");
     if (typeof req.query?.contribution !== "string")
       throw new Error("Bad contribution");
     if (typeof req.query?.tipAmount !== "string")
@@ -136,7 +142,9 @@ export default handler().post(async (req, res) => {
     });
 
     if (!bucket.directFundingEnabled || !bucket.round.directFundingEnabled) {
-      throw new Error("Direct funding not enabled for this bucket and/or round");
+      throw new Error(
+        "Direct funding not enabled for this bucket and/or round"
+      );
     }
 
     const isExchange = bucket.directFundingType === "EXCHANGE";
@@ -198,7 +206,9 @@ export default handler().post(async (req, res) => {
           application_fee_amount: tipAmount,
           // shows up for the connected account in their stripe dashboard
           description: JSON.stringify({
-            contributionInCurrency: new Decimal(contribution).div(100).toFixed(2),
+            contributionInCurrency: new Decimal(contribution)
+              .div(100)
+              .toFixed(2),
             currency: bucket.round.currency.toLowerCase(),
             bucketId: bucket.id,
             roundSlug: bucket.round.slug,
@@ -229,5 +239,4 @@ export default handler().post(async (req, res) => {
 
     res.redirect(303, session.url);
   }
-
 });
