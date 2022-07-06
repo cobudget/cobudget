@@ -33,16 +33,20 @@ const Layout = ({
   locale,
   changeLocale,
 }) => {
-
-  const [{data: languageProgressResponse, fetching: languageProgressLoading}] = useQuery({ query: getLanguageProgressQuery });
+  const [
+    { data: languageProgressResponse, fetching: languageProgressLoading },
+  ] = useQuery({ query: getLanguageProgressQuery });
 
   const languageProgress = React.useMemo(() => {
     try {
       const progress = {};
-      languageProgressResponse.languageProgressPage.forEach(p => progress[p.code] = p.percentage);
+      languageProgressResponse.languageProgressPage.forEach(
+        (p) => (progress[p.code] = p.percentage)
+      );
       return progress;
+    } catch (err) {
+      return {};
     }
-    catch (err) {return {}}
   }, [languageProgressResponse]);
 
   return (
@@ -90,12 +94,14 @@ const Layout = ({
           <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
             {supportedLangs.map((option) => (
               <option key={option.value} value={option.value}>
-                {
-                  languageProgressLoading ?
-                  option.label :
-                  option.label +" ("+ (option.value === "en" ? 100 : languageProgress[option.value] || 0) + "%)"
-                }
-                
+                {languageProgressLoading
+                  ? option.label
+                  : option.label +
+                    " (" +
+                    (option.value === "en"
+                      ? 100
+                      : languageProgress[option.value] || 0) +
+                    "%)"}
               </option>
             ))}
           </select>

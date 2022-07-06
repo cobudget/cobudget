@@ -384,27 +384,29 @@ export async function stripeIsConnected({ round }) {
 
 export const getLanguageProgress = async () => {
   try {
+    if (!process.env.CROWDIN_PROJECT_ID) return [];
 
-    if (!process.env.CROWDIN_PROJECT_ID)
-      return [];
-
-    const res = await fetch(`https://api.crowdin.com/api/v2/projects/${process.env.CROWDIN_PROJECT_ID}/languages/progress`, {
-      "headers": {
-        "Content-type": "application/json",
-        "Authorization": "Bearer " + process.env.CROWDIN_API_TOKEN
+    const res = await fetch(
+      `https://api.crowdin.com/api/v2/projects/${process.env.CROWDIN_PROJECT_ID}/languages/progress`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + process.env.CROWDIN_API_TOKEN,
+        },
       }
-    });
+    );
     const { data } = await res.json();
     const progress = [];
     console.log(data);
-    data.forEach(lang => {
+    data.forEach((lang) => {
       progress.push({
         code: lang.data.languageId.split("-")[0],
-        percentage: lang.data.translationProgress
+        percentage: lang.data.translationProgress,
       });
-    })
-    console.log(progress)
+    });
+    console.log(progress);
     return progress;
+  } catch (err) {
+    return [];
   }
-  catch (err) {return []}
-}
+};

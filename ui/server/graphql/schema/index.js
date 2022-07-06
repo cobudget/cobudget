@@ -449,7 +449,7 @@ const schema = gql`
   }
 
   type LanguageProgress {
-    code: String,
+    code: String
     percentage: Int
   }
 
