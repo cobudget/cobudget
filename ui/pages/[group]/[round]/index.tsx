@@ -280,7 +280,6 @@ const Page = ({
   }, [
     round?.currency,
     round?.allowStretchGoals,
-    currentUser,
     round?.group?.slug,
     round?.slug,
   ]);

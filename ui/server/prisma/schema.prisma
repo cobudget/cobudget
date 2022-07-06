@@ -109,8 +109,13 @@ model Group {
   rounds       Round[]
   discourse    DiscourseConfig?
 
-  finishedTodos Boolean @default(false)
+  finishedTodos        Boolean @default(false)
   experimentalFeatures Boolean @default(false)
+
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
 
   @@map("Organization")
 }
