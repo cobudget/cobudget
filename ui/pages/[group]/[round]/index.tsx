@@ -59,7 +59,7 @@ export const BUCKETS_QUERY = gql`
     $tag: String
     $offset: Int
     $limit: Int
-    $status: [StatusType!],
+    $status: [StatusType!]
     $orderBy: String
     $orderDir: String
   ) {
@@ -70,8 +70,8 @@ export const BUCKETS_QUERY = gql`
       tag: $tag
       offset: $offset
       limit: $limit
-      status: $status,
-      orderBy: $orderBy,
+      status: $status
+      orderBy: $orderBy
       orderDir: $orderDir
     ) {
       moreExist
@@ -141,7 +141,7 @@ const Page = ({
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
-      ...( orderBy && {
+      ...(orderBy && {
         orderBy,
         orderDir: "asc",
       }),

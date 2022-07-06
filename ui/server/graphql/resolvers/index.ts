@@ -368,7 +368,7 @@ const resolvers = {
         where: {
           userId: user?.id ?? "undefined",
           round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
-        }
+        },
       });
 
       const isAdminOrGuide =
@@ -395,7 +395,7 @@ const resolvers = {
                 }
               : { publishedAt: { not: null } })),
         },
-        ...(orderBy && { orderBy: { [orderBy]: orderDir } })
+        ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
       });
 
       const todaySeed = dayjs().format("YYYY-MM-DD");

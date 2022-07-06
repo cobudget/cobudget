@@ -14,7 +14,7 @@ const Filterbar = ({
   currentUser,
   view,
   sortBy,
-  onChangeSortBy
+  onChangeSortBy,
 }) => {
   const intl = useIntl();
   const router = useRouter();
@@ -144,7 +144,6 @@ const Filterbar = ({
             <option value="grid">Grid View</option>
             <option value="table">Table View</option>
           </SelectField>
-          
         </span>
       )}
       <span>
