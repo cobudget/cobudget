@@ -395,7 +395,7 @@ export const getLanguageProgress = async () => {
         },
       }
     );
-    const { data } = await res.json();
+    const { data } = (await res.json()) as any;
     const progress = [];
     console.log(data);
     data.forEach((lang) => {
