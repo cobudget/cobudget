@@ -60,6 +60,8 @@ export const BUCKETS_QUERY = gql`
     $offset: Int
     $limit: Int
     $status: [StatusType!]
+    $orderBy: String
+    $orderDir: String
   ) {
     bucketsPage(
       groupSlug: $groupSlug
@@ -69,6 +71,8 @@ export const BUCKETS_QUERY = gql`
       offset: $offset
       limit: $limit
       status: $status
+      orderBy: $orderBy
+      orderDir: $orderDir
     ) {
       moreExist
       buckets {
@@ -90,6 +94,7 @@ export const BUCKETS_QUERY = gql`
         approved
         canceled
         status
+        percentageFunded
         customFields {
           value
           customField {
@@ -124,6 +129,7 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
+  orderBy,
 }) => {
   const { tag, s } = router.query;
 
@@ -135,6 +141,10 @@ const Page = ({
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
+      ...(orderBy && {
+        orderBy,
+        orderDir: "asc",
+      }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -415,6 +425,7 @@ const getStandardFilter = (bucketStatusCount) => {
 const RoundPage = ({ currentUser }) => {
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
+  const [sortBy, setSortBy] = useState<string>();
   const [pageVariables, setPageVariables] = useState([
     { limit: 12, offset: 0 },
   ]);
@@ -564,6 +575,8 @@ const RoundPage = ({ currentUser }) => {
           bucketStatusCount={bucketStatusCount}
           view={bucketTableView ? "table" : "grid"}
           currentUser={currentUser}
+          sortBy={sortBy}
+          onChangeSortBy={(e) => setSortBy(e.target.value)}
         />
         <div
           className={
@@ -588,6 +601,7 @@ const RoundPage = ({ currentUser }) => {
                 statusFilter={statusFilter}
                 loading={fetching}
                 bucketTableView={bucketTableView}
+                orderBy={sortBy}
               />
             );
           })}

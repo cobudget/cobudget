@@ -382,6 +382,24 @@ export async function stripeIsConnected({ round }) {
   return account.charges_enabled;
 }
 
+export async function updateFundedPercentage(bucket) {
+  try {
+    const total = await bucketTotalContributions(bucket);
+    const minGoal = await bucketMinGoal(bucket);
+    const income = await bucketIncome(bucket);
+    const percentageFunded =
+      Math.floor(((total + income) / minGoal) * 10000) / 100;
+    return prisma.bucket.update({
+      where: { id: bucket.id },
+      data: {
+        percentageFunded,
+      },
+    });
+  } catch (err) {
+    return err;
+  }
+}
+
 export const getLanguageProgress = async () => {
   try {
     if (!process.env.CROWDIN_PROJECT_ID) return [];
