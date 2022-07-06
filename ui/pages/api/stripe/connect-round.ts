@@ -2,7 +2,7 @@ import { appLink } from "utils/internalLinks";
 import handler from "server/api-handler";
 import { isCollOrGroupAdmin } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
-import stripe from "server/utils/stripe";
+import stripe from "server/stripe";
 
 export default handler().get(async (req, res) => {
   if (typeof req.query?.roundId !== "string") throw new Error("Bad roundId");

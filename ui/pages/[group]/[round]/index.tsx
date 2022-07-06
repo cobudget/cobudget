@@ -219,17 +219,17 @@ const Page = ({
         ),
       },*/
       {
-      Header: "Needed",
-      accessor: "fundsNeeded",
-      Cell: ({ cell }) => (
-        <FormattedNumber
-          value={cell.value / 100}
-          style="currency"
-          currencyDisplay={"symbol"}
-          currency={round?.currency}
-        />
-      ),
-    },
+        Header: "Needed",
+        accessor: "fundsNeeded",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
       {
         Header: "Progress",
         accessor: "progress",
@@ -290,7 +290,6 @@ const Page = ({
   }, [
     round?.currency,
     round?.allowStretchGoals,
-    currentUser,
     round?.group?.slug,
     round?.slug,
   ]);
@@ -329,16 +328,15 @@ const Page = ({
             raiseFlagCount: bucket.flags.filter((f) => f.type === "RAISE_FLAG")
               .length,
             fundersCount: bucket.noOfFunders || 0,
-            internalFunding:
-              bucket.totalContributions || 0,
-            fundsNeeded: 
-              (bucket.minGoal - bucket.income - bucket.totalContributions) > 0 
+            internalFunding: bucket.totalContributions || 0,
+            fundsNeeded:
+              bucket.minGoal - bucket.income - bucket.totalContributions > 0
                 ? bucket.minGoal - bucket.income - bucket.totalContributions
-                : 0
-              ,
+                : 0,
             progress:
               Math.floor(
-                ((bucket.income + bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
+                ((bucket.income + bucket.totalContributions || 0) /
+                  (bucket.minGoal || 1)) *
                   10000
               ) / 100,
             stretchGoalProgress:

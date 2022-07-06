@@ -24,6 +24,7 @@ const schema = gql`
       orderBy: String
       orderDir: String
     ): BucketsPage
+    languageProgressPage: [LanguageProgress]
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!
@@ -448,6 +449,11 @@ const schema = gql`
   type BucketsPage {
     moreExist: Boolean
     buckets: [Bucket]
+  }
+
+  type LanguageProgress {
+    code: String
+    percentage: Int
   }
 
   type Comment {

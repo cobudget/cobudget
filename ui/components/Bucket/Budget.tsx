@@ -79,15 +79,14 @@ const BucketBudget = ({
                             currency={currency}
                           />
                           {budgetItem.max && " - "}
-                          {
-                            budgetItem.max &&
+                          {budgetItem.max && (
                             <FormattedNumber
                               value={budgetItem.max / 100}
                               style="currency"
                               currencyDisplay={"symbol"}
                               currency={currency}
                             />
-                          }
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -105,18 +104,17 @@ const BucketBudget = ({
                           currencyDisplay={"symbol"}
                           currency={currency}
                         />
-                        {
-                          expenseTotalMax > 0 ? " - " : ""
-                        }
-                        {
-                          expenseTotalMax > 0 ?
+                        {expenseTotalMax > 0 ? " - " : ""}
+                        {expenseTotalMax > 0 ? (
                           <FormattedNumber
                             value={expenseTotalMax / 100}
                             style="currency"
                             currencyDisplay={"symbol"}
                             currency={currency}
-                          /> : ""
-                        }
+                          />
+                        ) : (
+                          ""
+                        )}
                       </td>
                     </tr>
                   </tbody>

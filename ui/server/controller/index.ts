@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { Prisma, User, AllocationType, RoundMember } from "@prisma/client";
 import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
-import { getRoundMember } from "../graphql/resolvers/helpers";
+import { getRoundMember, bucketIncome } from "../graphql/resolvers/helpers";
 import { updateFundedPercentage } from "../graphql/resolvers/helpers";
 
 export const allocateToMember = async ({
@@ -211,7 +211,9 @@ export const contribute = async ({
     0
   );
 
-  if (contributionsForBucket + amount > maxGoal)
+  const income = await bucketIncome(bucket);
+
+  if (contributionsForBucket + amount + income > maxGoal)
     throw new Error("You can't overfund this bucket.");
 
   // mark bucket as funded if it has reached its max goal
@@ -238,7 +240,8 @@ export const contribute = async ({
     amount + contributionsFromUserToThisBucket > round.maxAmountToBucketPerUser
   ) {
     throw new Error(
-      `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${round.currency
+      `You can give a maximum of ${round.maxAmountToBucketPerUser / 100} ${
+        round.currency
       } to one bucket`
     );
   }
