@@ -60,6 +60,8 @@ export const BUCKETS_QUERY = gql`
     $offset: Int
     $limit: Int
     $status: [StatusType!]
+    $orderBy: String
+    $orderDir: String
   ) {
     bucketsPage(
       groupSlug: $groupSlug
@@ -69,6 +71,8 @@ export const BUCKETS_QUERY = gql`
       offset: $offset
       limit: $limit
       status: $status
+      orderBy: $orderBy
+      orderDir: $orderDir
     ) {
       moreExist
       buckets {
@@ -90,6 +94,7 @@ export const BUCKETS_QUERY = gql`
         approved
         canceled
         status
+        percentageFunded
         customFields {
           value
           customField {
@@ -124,6 +129,7 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
+  orderBy,
 }) => {
   const { tag, s } = router.query;
 
@@ -135,6 +141,10 @@ const Page = ({
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
+      ...(orderBy && {
+        orderBy,
+        orderDir: "asc",
+      }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -209,17 +219,17 @@ const Page = ({
         ),
       },*/
       {
-      Header: "Needed",
-      accessor: "fundsNeeded",
-      Cell: ({ cell }) => (
-        <FormattedNumber
-          value={cell.value / 100}
-          style="currency"
-          currencyDisplay={"symbol"}
-          currency={round?.currency}
-        />
-      ),
-    },
+        Header: "Needed",
+        accessor: "fundsNeeded",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
       {
         Header: "Progress",
         accessor: "progress",
@@ -280,7 +290,6 @@ const Page = ({
   }, [
     round?.currency,
     round?.allowStretchGoals,
-    currentUser,
     round?.group?.slug,
     round?.slug,
   ]);
@@ -319,16 +328,15 @@ const Page = ({
             raiseFlagCount: bucket.flags.filter((f) => f.type === "RAISE_FLAG")
               .length,
             fundersCount: bucket.noOfFunders || 0,
-            internalFunding:
-              bucket.totalContributions || 0,
-            fundsNeeded: 
-              (bucket.minGoal - bucket.income - bucket.totalContributions) > 0 
+            internalFunding: bucket.totalContributions || 0,
+            fundsNeeded:
+              bucket.minGoal - bucket.income - bucket.totalContributions > 0
                 ? bucket.minGoal - bucket.income - bucket.totalContributions
-                : 0
-              ,
+                : 0,
             progress:
               Math.floor(
-                ((bucket.income + bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
+                ((bucket.income + bucket.totalContributions || 0) /
+                  (bucket.minGoal || 1)) *
                   10000
               ) / 100,
             stretchGoalProgress:
@@ -418,8 +426,11 @@ const RoundPage = ({ currentUser }) => {
   const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
-  const [pageVariables, setPageVariables] = useState([{ limit: limit, offset: 0 }]);
+  const [pageVariables, setPageVariables] = useState([
+    { limit: limit, offset: 0 },
+  ]);
   const [pause, setPause] = useState(true);
+  const [sortBy, setSortBy] = useState<string>();
   const router = useRouter();
 
   const [
@@ -467,12 +478,14 @@ const RoundPage = ({ currentUser }) => {
     if (router.isReady) {
       const page = parseInt(router.query.page as string);
       if (!isNaN(page)) {
-        const pageVariables = (new Array(page).fill(0).map((_, i) => ({ limit: limit, offset: i * limit })));
+        const pageVariables = new Array(page)
+          .fill(0)
+          .map((_, i) => ({ limit: limit, offset: i * limit }));
         setPageVariables(pageVariables);
       }
       setPause(false);
     }
-  }, [router.isReady]);
+  }, [router.isReady, router.query.page]);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -578,6 +591,8 @@ const RoundPage = ({ currentUser }) => {
           bucketStatusCount={bucketStatusCount}
           view={bucketTableView ? "table" : "grid"}
           currentUser={currentUser}
+          sortBy={sortBy}
+          onChangeSortBy={(e) => setSortBy(e.target.value)}
         />
         <div
           className={
@@ -597,18 +612,23 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
-                  router.push({
-                    pathname: "/[group]/[round]",
-                    query: {
-                      ...router.query,
-                      page: Math.floor(offset/limit) + 1
+                  router.push(
+                    {
+                      pathname: "/[group]/[round]",
+                      query: {
+                        ...router.query,
+                        page: Math.floor(offset / limit) + 1,
+                      },
                     },
-                  }, undefined, { shallow: true, scroll: false });
+                    undefined,
+                    { shallow: true, scroll: false }
+                  );
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
                 loading={fetching}
                 bucketTableView={bucketTableView}
+                orderBy={sortBy}
               />
             );
           })}
