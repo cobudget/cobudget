@@ -423,18 +423,21 @@ const getStandardFilter = (bucketStatusCount) => {
 };
 
 const RoundPage = ({ currentUser }) => {
+  const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
-  const [sortBy, setSortBy] = useState<string>();
   const [pageVariables, setPageVariables] = useState([
-    { limit: 12, offset: 0 },
+    { limit: limit, offset: 0 },
   ]);
+  const [pause, setPause] = useState(true);
+  const [sortBy, setSortBy] = useState<string>();
   const router = useRouter();
 
   const [
     { data: { round } = { round: null }, fetching, error, stale },
   ] = useQuery({
     query: ROUND_PAGE_QUERY,
+    pause,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
@@ -470,6 +473,19 @@ const RoundPage = ({ currentUser }) => {
       setPageVariables([{ offset: 0, limit: 1000 }]);
     }
   }, [router?.asPath, router?.query?.view]);
+
+  useEffect(() => {
+    if (router.isReady) {
+      const page = parseInt(router.query.page as string);
+      if (!isNaN(page)) {
+        const pageVariables = new Array(page)
+          .fill(0)
+          .map((_, i) => ({ limit: limit, offset: i * limit }));
+        setPageVariables(pageVariables);
+      }
+      setPause(false);
+    }
+  }, [router.isReady, router.query.page]);
 
   // if (!router.isReady || (fetching && !round)) {
   //   return (
@@ -596,6 +612,17 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
+                  router.push(
+                    {
+                      pathname: "/[group]/[round]",
+                      query: {
+                        ...router.query,
+                        page: Math.floor(offset / limit) + 1,
+                      },
+                    },
+                    undefined,
+                    { shallow: true, scroll: false }
+                  );
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
@@ -637,7 +664,7 @@ const RoundPage = ({ currentUser }) => {
 //   //   .query(BUCKETS_QUERY, {
 //   //     ...variables,
 //   //     offset: 0,
-//   //     limit: 12,
+//   //     limit: limit,
 //   //     status: statusFilter,
 //   //   })
 //   //   .toPromise();
