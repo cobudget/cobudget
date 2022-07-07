@@ -3,6 +3,7 @@ import { Prisma, User, AllocationType, RoundMember } from "@prisma/client";
 import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
 import { getRoundMember, bucketIncome } from "../graphql/resolvers/helpers";
+import { updateFundedPercentage } from "../graphql/resolvers/helpers";
 
 export const allocateToMember = async ({
   roundId,
@@ -288,6 +289,8 @@ export const contribute = async ({
       stripeSessionId,
     },
   });
+
+  await updateFundedPercentage(bucket);
 
   await eventHub.publish("contribute-to-bucket", {
     round,

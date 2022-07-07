@@ -13,6 +13,8 @@ const Filterbar = ({
   bucketStatusCount,
   currentUser,
   view,
+  sortBy,
+  onChangeSortBy,
 }) => {
   const intl = useIntl();
   const router = useRouter();
@@ -144,6 +146,20 @@ const Filterbar = ({
           </SelectField>
         </span>
       )}
+      <span>
+        <SelectField
+          className="bg-white sm:order-last"
+          color={round.color}
+          inputProps={{
+            value: sortBy,
+            onChange: onChangeSortBy,
+          }}
+        >
+          <option value="">Default</option>
+          <option value="title">Bucket Name</option>
+          <option value="percentageFunded">Percentage Funded</option>
+        </SelectField>
+      </span>
     </div>
   );
 };

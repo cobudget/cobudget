@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
-import stripe from "server/utils/stripe";
+import stripe from "server/stripe";
 import prisma from "../../prisma";
+import fetch from "node-fetch";
 
 export async function isCollOrGroupAdmin(
   parent,
@@ -380,3 +381,50 @@ export async function stripeIsConnected({ round }) {
 
   return account.charges_enabled;
 }
+
+export async function updateFundedPercentage(bucket) {
+  try {
+    const total = await bucketTotalContributions(bucket);
+    const minGoal = await bucketMinGoal(bucket);
+    const income = await bucketIncome(bucket);
+    const percentageFunded =
+      Math.floor(((total + income) / minGoal) * 10000) / 100;
+    return prisma.bucket.update({
+      where: { id: bucket.id },
+      data: {
+        percentageFunded,
+      },
+    });
+  } catch (err) {
+    return err;
+  }
+}
+
+export const getLanguageProgress = async () => {
+  try {
+    if (!process.env.CROWDIN_PROJECT_ID) return [];
+
+    const res = await fetch(
+      `https://api.crowdin.com/api/v2/projects/${process.env.CROWDIN_PROJECT_ID}/languages/progress`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + process.env.CROWDIN_API_TOKEN,
+        },
+      }
+    );
+    const { data } = (await res.json()) as any;
+    const progress = [];
+    console.log(data);
+    data.forEach((lang) => {
+      progress.push({
+        code: lang.data.languageId.split("-")[0],
+        percentage: lang.data.translationProgress,
+      });
+    });
+    console.log(progress);
+    return progress;
+  } catch (err) {
+    return [];
+  }
+};

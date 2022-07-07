@@ -60,6 +60,8 @@ export const BUCKETS_QUERY = gql`
     $offset: Int
     $limit: Int
     $status: [StatusType!]
+    $orderBy: String
+    $orderDir: String
   ) {
     bucketsPage(
       groupSlug: $groupSlug
@@ -69,6 +71,8 @@ export const BUCKETS_QUERY = gql`
       offset: $offset
       limit: $limit
       status: $status
+      orderBy: $orderBy
+      orderDir: $orderDir
     ) {
       moreExist
       buckets {
@@ -90,6 +94,7 @@ export const BUCKETS_QUERY = gql`
         approved
         canceled
         status
+        percentageFunded
         customFields {
           value
           customField {
@@ -124,7 +129,8 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
-  pause
+  pause,
+  orderBy,
 }) => {
   const { tag, s } = router.query;
 
@@ -137,6 +143,10 @@ const Page = ({
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
+      ...(orderBy && {
+        orderBy,
+        orderDir: "asc",
+      }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -282,7 +292,6 @@ const Page = ({
   }, [
     round?.currency,
     round?.allowStretchGoals,
-    currentUser,
     round?.group?.slug,
     round?.slug,
   ]);
@@ -411,17 +420,19 @@ const getStandardFilter = (bucketStatusCount) => {
     stdFilter = statusNames
       .filter((status, i) => !!values[i])
       .filter((status) => status !== "__typename");
-  } 
+  }
   return stdFilter;
 };
 
 const RoundPage = ({ currentUser }) => {
+  const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
   const [pageVariables, setPageVariables] = useState([
-    { limit: 12, offset: 0 },
+    { limit: limit, offset: 0 },
   ]);
   const [pause, setPause] = useState(true);
+  const [sortBy, setSortBy] = useState<string>();
   const router = useRouter();
 
   const [
@@ -469,15 +480,20 @@ const RoundPage = ({ currentUser }) => {
     if (router.query.round && router.query.group && pause) {
       setPause(false);
     }
-  }, [router.query.round, router.query.group]);
+  }, [router.query.round, router.query.group, pause]);
 
-  // if (!router.isReady || (fetching && !round)) {
-  //   return (
-  //     <div className="flex-grow flex justify-center items-center h-64">
-  //       <HappySpinner />
-  //     </div>
-  //   );
-  // }
+  useEffect(() => {
+    if (router.isReady) {
+      const page = parseInt(router.query.page as string);
+      if (!isNaN(page)) {
+        const pageVariables = new Array(page)
+          .fill(0)
+          .map((_, i) => ({ limit: limit, offset: i * limit }));
+        setPageVariables(pageVariables);
+      }
+      setPause(false);
+    }
+  }, [router.isReady, router.query.page]);
 
   if (pause || fetching) {
     return (
@@ -583,6 +599,8 @@ const RoundPage = ({ currentUser }) => {
           bucketStatusCount={bucketStatusCount}
           view={bucketTableView ? "table" : "grid"}
           currentUser={currentUser}
+          sortBy={sortBy}
+          onChangeSortBy={(e) => setSortBy(e.target.value)}
         />
         <div
           className={
@@ -603,11 +621,23 @@ const RoundPage = ({ currentUser }) => {
                 isLastPage={i === pageVariables.length - 1}
                 currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
+                  router.push(
+                    {
+                      pathname: "/[group]/[round]",
+                      query: {
+                        ...router.query,
+                        page: Math.floor(offset / limit) + 1,
+                      },
+                    },
+                    undefined,
+                    { shallow: true, scroll: false }
+                  );
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
                 loading={fetching}
                 bucketTableView={bucketTableView}
+                orderBy={sortBy}
               />
             );
           })}
@@ -643,7 +673,7 @@ const RoundPage = ({ currentUser }) => {
 //   //   .query(BUCKETS_QUERY, {
 //   //     ...variables,
 //   //     offset: 0,
-//   //     limit: 12,
+//   //     limit: limit,
 //   //     status: statusFilter,
 //   //   })
 //   //   .toPromise();

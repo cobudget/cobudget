@@ -21,7 +21,7 @@ const TextField = ({
   required,
   startAdornment,
   endAdornment,
-  color = "blue",
+  color = "anthracit",
   wysiwyg,
   enableMentions = false,
   mentionsCollId = null,
