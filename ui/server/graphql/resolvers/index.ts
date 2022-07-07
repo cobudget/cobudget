@@ -2647,8 +2647,7 @@ const resolvers = {
         where: { id: round.groupId },
       });
     },
-    bucketStatusCount: async (round, {groupSlug, roundSlug}, { user }) => {
-
+    bucketStatusCount: async (round, { groupSlug, roundSlug }, { user }) => {
       const currentMember = await prisma.roundMember.findFirst({
         where: {
           userId: user?.id ?? "undefined",
