@@ -11,7 +11,7 @@ const Button = forwardRef(
       variant = "primary",
       className,
       type = "button",
-      color = "blue",
+      color = "anthracit",
       fullWidth = false,
       href,
       onClick,

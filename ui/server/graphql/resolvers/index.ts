@@ -28,12 +28,14 @@ import {
   statusTypeToQuery,
   stripeIsConnected,
   bucketMaxGoal,
+  getLanguageProgress,
 } from "./helpers";
 import emailService from "server/services/EmailService/email.service";
 import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
+import { updateFundedPercentage } from "../resolvers/helpers";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -344,6 +346,9 @@ const resolvers = {
       if (!bucket || bucket.deleted) return null;
       return bucket;
     },
+    languageProgressPage: async () => {
+      return getLanguageProgress();
+    },
     bucketsPage: async (
       parent,
       {
@@ -354,6 +359,8 @@ const resolvers = {
         offset = 0,
         limit,
         status,
+        orderBy,
+        orderDir,
       },
       { user }
     ) => {
@@ -388,6 +395,7 @@ const resolvers = {
                 }
               : { publishedAt: { not: null } })),
         },
+        ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
       });
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
@@ -1051,7 +1059,7 @@ const resolvers = {
           throw new Error("VAT must be a percentage from 0 to 100");
         }
 
-        const updated = await prisma.bucket.update({
+        let updated = await prisma.bucket.update({
           where: { id: bucketId },
           data: {
             title,
@@ -1096,6 +1104,8 @@ const resolvers = {
           round: updated.round,
           bucket: updated,
         });
+
+        updated = await updateFundedPercentage(updated);
 
         return updated;
       }
@@ -2684,36 +2694,91 @@ const resolvers = {
         where: { id: round.groupId },
       });
     },
-    bucketStatusCount: async (round) => {
+    bucketStatusCount: async (round, { groupSlug, roundSlug }, { user }) => {
+      const currentMember = await prisma.roundMember.findFirst({
+        where: {
+          userId: user?.id ?? "undefined",
+          round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+        },
+      });
+
+      const isAdminOrGuide =
+        currentMember && (currentMember.isAdmin || currentMember.isModerator);
+
       return {
         PENDING_APPROVAL: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("PENDING_APPROVAL"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         OPEN_FOR_FUNDING: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("OPEN_FOR_FUNDING"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         FUNDED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("FUNDED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         CANCELED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("CANCELED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
         COMPLETED: await prisma.bucket.count({
           where: {
             roundId: round.id,
             ...statusTypeToQuery("COMPLETED"),
+            ...(!isAdminOrGuide &&
+              (currentMember
+                ? {
+                    OR: [
+                      { publishedAt: { not: null } },
+                      { cocreators: { some: { id: currentMember.id } } },
+                    ],
+                  }
+                : { publishedAt: { not: null } })),
           },
         }),
       };

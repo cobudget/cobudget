@@ -17,7 +17,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
         });
         const {
           category_list: { categories },
-        } = await res.json();
+        } = (await res.json()) as any;
         return categories;
       },
       create: async ({ name, color = "2f2ad1", text_color = "FFFFFF" }) => {
@@ -27,7 +27,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
           body: JSON.stringify({ name, color, text_color }),
         });
 
-        const json = await res.json();
+        const json = (await res.json()) as any;
 
         if (json.errors) {
           console.log(json.errors);
@@ -82,7 +82,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
           unlist_topic,
         }: any,
         { username, userApiKey }: any = {}
-      ) => {
+      ): Promise<any> => {
         const res = await fetch(`${url}/posts`, {
           method: "post",
           headers: {
@@ -122,10 +122,10 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
           body: JSON.stringify({ title, post: { raw } }),
         });
 
-        const { post = {} } = await res.json();
+        const { post = {} } = (await res.json()) as any;
         return post;
       },
-      get: async (id) => {
+      get: async (id): Promise<any> => {
         const res = await fetch(
           `${url}/t/${id}.json?include_raw=true&print=true`,
           {
@@ -162,7 +162,7 @@ const discourse = ({ url, apiKey }: { url: string; apiKey: string }) => {
           userApiKey,
           apiKey,
         }: { username?: string; userApiKey?: string; apiKey: string }
-      ) => {
+      ): Promise<any> => {
         const res = await fetch(`${url}/posts/by_number/${id}/1.json`, {
           headers: {
             ...defaultHeaders,
