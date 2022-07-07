@@ -43,6 +43,7 @@ const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
     {
       label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug ?? "c"}/settings`,
+      startsWithHref: true,
       admin: true,
     },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));

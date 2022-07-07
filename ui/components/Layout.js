@@ -3,6 +3,16 @@ import Header from "./Header";
 import { FormattedMessage } from "react-intl";
 import "../lib/beacon";
 import { supportedLangs } from "lang";
+import { useQuery, gql } from "urql";
+
+const getLanguageProgressQuery = gql`
+  query LanguageProgressPage {
+    languageProgressPage {
+      code
+      percentage
+    }
+  }
+`;
 
 const LinkOut = ({ href, children }) => {
   return (
@@ -23,6 +33,22 @@ const Layout = ({
   locale,
   changeLocale,
 }) => {
+  const [
+    { data: languageProgressResponse, fetching: languageProgressLoading },
+  ] = useQuery({ query: getLanguageProgressQuery });
+
+  const languageProgress = React.useMemo(() => {
+    try {
+      const progress = {};
+      languageProgressResponse.languageProgressPage.forEach(
+        (p) => (progress[p.code] = p.percentage)
+      );
+      return progress;
+    } catch (err) {
+      return {};
+    }
+  }, [languageProgressResponse]);
+
   return (
     <div className="flex flex-col min-h-screen" id="hello-container" dir={dir}>
       <div>
@@ -68,7 +94,14 @@ const Layout = ({
           <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
             {supportedLangs.map((option) => (
               <option key={option.value} value={option.value}>
-                {option.label}
+                {languageProgressLoading
+                  ? option.label
+                  : option.label +
+                    " (" +
+                    (option.value === "en"
+                      ? 100
+                      : languageProgress[option.value] || 0) +
+                    "%)"}
               </option>
             ))}
           </select>

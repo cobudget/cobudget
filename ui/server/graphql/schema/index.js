@@ -21,7 +21,10 @@ const schema = gql`
       offset: Int
       limit: Int
       status: [StatusType!]
+      orderBy: String
+      orderDir: String
     ): BucketsPage
+    languageProgressPage: [LanguageProgress]
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!
@@ -435,6 +438,7 @@ const schema = gql`
     exchangeDescription: String
     exchangeMinimumContribution: Int
     exchangeVat: Int
+    percentageFunded: Float
   }
 
   enum DirectFundingType {
@@ -445,6 +449,11 @@ const schema = gql`
   type BucketsPage {
     moreExist: Boolean
     buckets: [Bucket]
+  }
+
+  type LanguageProgress {
+    code: String
+    percentage: Int
   }
 
   type Comment {

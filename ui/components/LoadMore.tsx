@@ -24,7 +24,7 @@ const LoadMore = ({
   loading,
   reverse,
   onClick,
-  autoLoadMore=true
+  autoLoadMore = true,
 }: {
   moreExist: boolean;
   loading: boolean;
@@ -39,11 +39,11 @@ const LoadMore = ({
     if (!autoLoadMore) {
       return;
     }
-    if ((loading || !inViewport)) {
+    if (loading || !inViewport) {
       return;
     }
     onClick();
-  }, [inViewport, loading]);
+  }, [autoLoadMore, inViewport, loading, onClick]);
 
   return (
     <div className="mt-7">

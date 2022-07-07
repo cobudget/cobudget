@@ -18,7 +18,7 @@ const Banner = ({
   loading?: boolean;
   title: string;
   disabled?: false;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) => {
   return (
     <div
