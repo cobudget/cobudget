@@ -129,12 +129,14 @@ const Page = ({
   currentUser,
   loading,
   bucketTableView,
+  pause,
   orderBy,
 }) => {
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
+    pause,
     variables: {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
@@ -160,7 +162,7 @@ const Page = ({
         accessor: "title",
         Cell: ({ cell }) => (
           <Link
-            href={`/${round.group?.slug ?? "c"}/${round.slug}/${
+            href={`/${round?.group?.slug ?? "c"}/${round?.slug}/${
               cell.row.original?.id
             }`}
           >
@@ -475,6 +477,12 @@ const RoundPage = ({ currentUser }) => {
   }, [router?.asPath, router?.query?.view]);
 
   useEffect(() => {
+    if (router.query.round && router.query.group && pause) {
+      setPause(false);
+    }
+  }, [router.query.round, router.query.group, pause]);
+
+  useEffect(() => {
     if (router.isReady) {
       const page = parseInt(router.query.page as string);
       if (!isNaN(page)) {
@@ -487,13 +495,13 @@ const RoundPage = ({ currentUser }) => {
     }
   }, [router.isReady, router.query.page]);
 
-  // if (!router.isReady || (fetching && !round)) {
-  //   return (
-  //     <div className="flex-grow flex justify-center items-center h-64">
-  //       <HappySpinner />
-  //     </div>
-  //   );
-  // }
+  if (pause || fetching) {
+    return (
+      <div className="w-full flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
 
   if (!round && !fetching && router.isReady) {
     return (
@@ -604,6 +612,7 @@ const RoundPage = ({ currentUser }) => {
           {pageVariables.map((variables, i) => {
             return (
               <Page
+                pause={pause}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}
