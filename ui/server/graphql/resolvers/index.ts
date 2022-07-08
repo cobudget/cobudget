@@ -2110,25 +2110,23 @@ const resolvers = {
           },
         });
 
-        // TODO: figure out when/how to tell stripe to reverse the charge. should we attach info from that on the transactions?
+        const stripeSessionIds = bucket.statusAccount.incomingTransactions
+          .map((t) => t.stripeSessionId)
+          .filter(Boolean);
+
+        // TODO: reverse payment intents here in a big promise.all
+        // hopefully you can reverse a charge idempotently. yes use an idempotency key
 
         await prisma.$transaction([
-          prisma.contribution.createMany({
-            data: bucket.Contributions.map(
-              ({
-                amount,
-                roundMemberId,
-                bucketId,
-                roundId,
-                stripeSessionId,
-              }) => ({
-                amount: -amount,
-                roundMemberId,
-                bucketId,
-                roundId,
-                stripeSessionId,
-              })
-            ),
+          // moving money back to the participants that contributed
+          prisma.bucket.update({
+            where: { id: bucketId },
+            data: {
+              fundedAt: null,
+              approvedAt: null,
+              canceledAt: new Date(),
+              Contributions: { deleteMany: {} },
+            },
           }),
           prisma.transaction.createMany({
             data: bucket.statusAccount.incomingTransactions.map(
@@ -2148,9 +2146,28 @@ const resolvers = {
               })
             ),
           }),
+          // in the cases where the participant did direct funding, also move the money back out of the platform
+          prisma.allocation.deleteMany({
+            where: {
+              stripeSessionId: {
+                in: stripeSessionIds,
+              },
+            },
+          }),
+          prisma.transaction.createMany({
+            data: bucket.statusAccount.incomingTransactions
+              .filter((t) => Boolean(t.stripeSessionId))
+              .map(({ amount, fromAccountId, roundId, stripeSessionId }) => ({
+                amount,
+                fromAccountId,
+                toAccountId: roundMemberCancelling.outgoingAccountId,
+                roundId,
+                roundMemberId: roundMemberCancelling.id,
+                stripeSessionId,
+                // i think you can find the stripe refund object through checkout session->payment intent->charge->refund
+              })),
+          }),
         ]);
-
-        //TODO: for all the transactions that were due to direct funding, also do reverse allocations and reverse allocation transactions
 
         const updated = await prisma.bucket.findUnique({
           where: { id: bucketId },
