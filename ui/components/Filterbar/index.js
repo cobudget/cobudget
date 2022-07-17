@@ -155,9 +155,10 @@ const Filterbar = ({
             onChange: onChangeSortBy,
           }}
         >
-          <option value="">Default</option>
-          <option value="title">Bucket Name</option>
-          <option value="percentageFunded">Percentage Funded</option>
+          <option value="">Random</option>
+          <option value="createdAt">Newest</option>
+          <option value="percentageFunded">Most Funded</option>
+          <option value="contributionsCount">Most Contributions</option>
         </SelectField>
       </span>
     </div>
