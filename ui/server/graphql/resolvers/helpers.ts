@@ -400,16 +400,15 @@ export async function updateFundedPercentage(bucket) {
   }
 }
 
-export async function updateContributionsCount (bucket, inc = 1) {
+export async function updateContributionsCount(bucket, inc = 1) {
   try {
     return prisma.bucket.update({
       where: { id: bucket.id },
       data: {
-        contributionsCount: ( bucket.contributionsCount || 0 ) + inc
-      }
+        contributionsCount: (bucket.contributionsCount || 0) + inc,
+      },
     });
-  }
-  catch (err) {
+  } catch (err) {
     return err;
   }
 }

@@ -157,8 +157,8 @@ const Filterbar = ({
         >
           <option value="">Random</option>
           <option value="createdAt">Newest</option>
-          <option value="percentageFunded">Most Funded</option>
-          <option value="contributionsCount">Most Contributions</option>
+          <option value="percentageFunded">Most funded</option>
+          <option value="contributionsCount">Most contributions</option>
         </SelectField>
       </span>
     </div>
