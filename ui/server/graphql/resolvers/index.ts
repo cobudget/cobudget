@@ -606,7 +606,7 @@ const resolvers = {
       isGroupAdmin,
       async (
         parent,
-        { groupId, name, info, slug, logo },
+        { groupId, name, info, slug, registrationPolicy, logo },
         { user, eventHub }
       ) => {
         if (name?.length === 0) throw new Error("Group name cannot be blank");
@@ -621,6 +621,7 @@ const resolvers = {
             name,
             info,
             logo,
+            registrationPolicy,
             slug: slug !== undefined ? slugify(slug) : undefined,
           },
         });

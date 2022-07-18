@@ -10,6 +10,7 @@ import Banner from "components/Banner";
 import slugify from "utils/slugify";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
+import { SelectField } from "components/SelectInput";
 
 const EDIT_GROUP = gql`
   mutation EditGroup(
@@ -17,12 +18,14 @@ const EDIT_GROUP = gql`
     $name: String!
     $logo: String
     $slug: String
+    $registrationPolicy: String
   ) {
-    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug) {
+    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug, registrationPolicy: $registrationPolicy) {
       id
       name
       logo
       slug
+      registrationPolicy
     }
   }
 `;
@@ -102,7 +105,23 @@ const EditGroup = ({ group, currentUser }) => {
             startAdornment={process.env.DEPLOY_URL + "/"}
           />
         )}
-
+        <SelectField
+          name="registrationPolicy"
+          label={intl.formatMessage({ defaultMessage: "Registration policy" })}
+          defaultValue={group.registrationPolicy}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="OPEN">
+            {intl.formatMessage({ defaultMessage: "Open" })}
+          </option>
+          <option value="REQUEST_TO_JOIN">
+            {intl.formatMessage({ defaultMessage: "Request to join" })}
+          </option>
+          <option value="INVITE_ONLY">
+            {intl.formatMessage({ defaultMessage: "Invite only" })}
+          </option>
+        </SelectField>
         <ImageUpload
           label={intl.formatMessage({ defaultMessage: "Logo" })}
           onImageUploaded={setLogoImage}
