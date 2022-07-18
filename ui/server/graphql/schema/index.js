@@ -432,6 +432,7 @@ const schema = gql`
     completedAt: Date
     completed: Boolean
     canceledAt: Date
+    createdAt: Date
     canceled: Boolean
     directFundingEnabled: Boolean
     directFundingType: DirectFundingType
