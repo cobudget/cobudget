@@ -54,16 +54,20 @@ const Filterbar = ({
   };
 
   const onChangeStatus = (statusFilterArray) => {
-    router.push({
-      pathname: "/[group]/[round]",
-      query: {
-        group: router.query.group,
-        round: router.query.round,
-        ...(tag && { tag }),
-        ...(!!input && { s: input }),
-        f: statusFilterArray,
+    router.push(
+      {
+        pathname: "/[group]/[round]",
+        query: {
+          group: router.query.group,
+          round: router.query.round,
+          ...(tag && { tag }),
+          ...(!!input && { s: input }),
+          f: statusFilterArray,
+        },
       },
-    });
+      undefined,
+      { scroll: false, shallow: true }
+    );
   };
   const onChangeView = (view) => {
     router.push({
