@@ -145,7 +145,7 @@ const Page = ({
       status: statusFilter,
       ...(orderBy && {
         orderBy,
-        orderDir: "asc",
+        orderDir: "desc",
       }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
