@@ -30,6 +30,7 @@ export const GROUP_PAGE_QUERY = gql`
       slug
       info
       finishedTodos
+      registrationPolicy
     }
   }
 `;

@@ -18,7 +18,7 @@ const EDIT_GROUP = gql`
     $name: String!
     $logo: String
     $slug: String
-    $registrationPolicy: String
+    $registrationPolicy: RegistrationPolicy
   ) {
     editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug, registrationPolicy: $registrationPolicy) {
       id

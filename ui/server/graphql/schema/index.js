@@ -58,6 +58,7 @@ const schema = gql`
       info: String
       logo: String
       slug: String
+      registrationPolicy: RegistrationPolicy
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -225,6 +226,7 @@ const schema = gql`
     discourseUrl: String
     finishedTodos: Boolean
     experimentalFeatures: Boolean
+    registrationPolicy: RegistrationPolicy
   }
 
   enum RoundType {
