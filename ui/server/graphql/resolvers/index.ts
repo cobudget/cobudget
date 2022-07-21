@@ -35,6 +35,7 @@ import { RoundTransaction } from "server/types";
 import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
+import stripe from "server/stripe";
 import { updateFundedPercentage } from "../resolvers/helpers";
 
 const { groupHasDiscourse, generateComment } = subscribers;
@@ -2123,12 +2124,40 @@ const resolvers = {
           },
         });
 
+        // TODO: what to do if the bucket has been cancelled once before?
+        // filter transactions to ones that are newer than the cancelled date if it exists
+        // TODO: also apply this logic to where we below also use incomingTransactions directly
+        // maybe possible to filter already in the prisma query for the transactions?
+
         const stripeSessionIds = bucket.statusAccount.incomingTransactions
           .map((t) => t.stripeSessionId)
           .filter(Boolean);
 
-        // TODO: reverse payment intents here in a big promise.all
-        // hopefully you can reverse a charge idempotently. yes use an idempotency key
+        const checkoutSessions = await Promise.all(
+          stripeSessionIds.map((sessionId) =>
+            stripe.checkout.sessions.retrieve(sessionId, {
+              stripeAccount: bucket.round.stripeAccountId,
+            })
+          )
+        );
+
+        // TODO: test and see that it actually refunds all charges. it seemed to miss 1
+        await Promise.all(
+          checkoutSessions
+            .map((session) => session.payment_intent as string)
+            .map((paymentId) =>
+              // TODO: add idempotency key. use the checkout or payment id
+              stripe.refunds.create(
+                {
+                  payment_intent: paymentId,
+                  refund_application_fee: true,
+                },
+                {
+                  stripeAccount: bucket.round.stripeAccountId,
+                }
+              )
+            )
+        );
 
         await prisma.$transaction([
           // moving money back to the participants that contributed
