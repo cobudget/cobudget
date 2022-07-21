@@ -43,6 +43,7 @@ const Layout = ({
       languageProgressResponse.languageProgressPage.forEach(
         (p) => (progress[p.code] = p.percentage)
       );
+      progress.en = 100;
       return progress;
     } catch (err) {
       return {};
@@ -94,14 +95,9 @@ const Layout = ({
           <select value={locale} onChange={(e) => changeLocale(e.target.value)}>
             {supportedLangs.map((option) => (
               <option key={option.value} value={option.value}>
-                {languageProgressLoading
+                {languageProgressLoading || !languageProgress[option.value]
                   ? option.label
-                  : option.label +
-                    " (" +
-                    (option.value === "en"
-                      ? 100
-                      : languageProgress[option.value] || 0) +
-                    "%)"}
+                  : option.label + " (" + languageProgress[option.value] + "%)"}
               </option>
             ))}
           </select>

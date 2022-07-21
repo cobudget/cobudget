@@ -54,16 +54,20 @@ const Filterbar = ({
   };
 
   const onChangeStatus = (statusFilterArray) => {
-    router.push({
-      pathname: "/[group]/[round]",
-      query: {
-        group: router.query.group,
-        round: router.query.round,
-        ...(tag && { tag }),
-        ...(!!input && { s: input }),
-        f: statusFilterArray,
+    router.push(
+      {
+        pathname: "/[group]/[round]",
+        query: {
+          group: router.query.group,
+          round: router.query.round,
+          ...(tag && { tag }),
+          ...(!!input && { s: input }),
+          f: statusFilterArray,
+        },
       },
-    });
+      undefined,
+      { scroll: false, shallow: true }
+    );
   };
   const onChangeView = (view) => {
     router.push({
@@ -155,9 +159,10 @@ const Filterbar = ({
             onChange: onChangeSortBy,
           }}
         >
-          <option value="">Default</option>
-          <option value="title">Bucket Name</option>
-          <option value="percentageFunded">Percentage Funded</option>
+          <option value="">Random</option>
+          <option value="createdAt">Newest</option>
+          <option value="percentageFunded">Most funded</option>
+          <option value="contributionsCount">Most contributions</option>
         </SelectField>
       </span>
     </div>

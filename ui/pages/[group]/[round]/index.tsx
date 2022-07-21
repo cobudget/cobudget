@@ -145,7 +145,7 @@ const Page = ({
       status: statusFilter,
       ...(orderBy && {
         orderBy,
-        orderDir: "asc",
+        orderDir: "desc",
       }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
@@ -308,7 +308,22 @@ const Page = ({
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
             key={bucket.id}
           >
-            <a className="flex focus:outline-none focus:ring rounded-lg">
+            <a
+              className="flex focus:outline-none focus:ring rounded-lg"
+              onClick={() => {
+                router.push(
+                  {
+                    pathname: "/[group]/[round]",
+                    query: {
+                      ...router.query,
+                      f: statusFilter,
+                    },
+                  },
+                  undefined,
+                  { shallow: true, scroll: false }
+                );
+              }}
+            >
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>

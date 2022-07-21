@@ -2,7 +2,11 @@ import dayjs from "dayjs";
 import { Prisma, User, AllocationType, RoundMember } from "@prisma/client";
 import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
-import { getRoundMember, bucketIncome } from "../graphql/resolvers/helpers";
+import {
+  getRoundMember,
+  bucketIncome,
+  updateContributionsCount,
+} from "../graphql/resolvers/helpers";
 import { updateFundedPercentage } from "../graphql/resolvers/helpers";
 
 export const allocateToMember = async ({
@@ -298,6 +302,8 @@ export const contribute = async ({
     contributingUser: user,
     amount,
   });
+
+  await updateContributionsCount(bucket);
 
   return bucket;
 };
