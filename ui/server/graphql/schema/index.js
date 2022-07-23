@@ -50,7 +50,7 @@ const schema = gql`
   }
 
   type Mutation {
-    createGroup(name: String!, logo: String, slug: String!): Group!
+    createGroup(name: String!, logo: String, slug: String!, registrationPolicy: RegistrationPolicy!): Group!
 
     editGroup(
       groupId: ID!
