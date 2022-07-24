@@ -1698,8 +1698,19 @@ const resolvers = {
     joinGroup: async (_, { groupId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
+      const group = await prisma.group.findUnique({
+        where: { id: groupId }
+      });
+
+      if (group.registrationPolicy === "INVITE_ONLY")
+        throw new Error("This group is invite only");
+
       return await prisma.groupMember.create({
-        data: { userId: user.id, groupId: groupId },
+        data: { 
+          userId: user.id,
+          groupId: groupId,
+          isApproved:  group.registrationPolicy === "OPEN"
+        },
       });
     },
     updateProfile: async (_, { name, username }, { user }) => {

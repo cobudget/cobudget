@@ -54,6 +54,8 @@ model GroupMember {
   discourseApiKey   String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  isApproved        Boolean  @default(true)
+  hasJoined         Boolean  @default(true)
 
   @@unique([groupId, userId])
   @@map("OrgMember")
