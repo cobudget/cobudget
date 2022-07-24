@@ -31,6 +31,7 @@ const schema = gql`
       search: String
       offset: Int
       limit: Int
+      isApproved: Boolean
     ): GroupMembersPage
     membersPage(
       roundId: ID!
@@ -361,6 +362,7 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
     email: String
     name: String
+    isApproved: Boolean
   }
 
   type GroupMembersPage {

@@ -412,10 +412,11 @@ const resolvers = {
     },
     groupMembersPage: combineResolvers(
       isGroupAdmin,
-      async (parent, { offset = 0, limit, groupId, search }, { user }) => {
+      async (parent, { offset = 0, limit, groupId, search, isApproved }, { user }) => {
         const groupMembersWithExtra = await prisma.groupMember.findMany({
           where: {
             groupId: groupId,
+            isApproved,
             ...(search && {
               user: {
                 OR: [
@@ -426,8 +427,8 @@ const resolvers = {
               },
             }),
           },
-          skip: offset,
-          take: limit + 1,
+          skip: offset || 0,
+          take: ((limit || 1e3) + 1),
         });
 
         return {

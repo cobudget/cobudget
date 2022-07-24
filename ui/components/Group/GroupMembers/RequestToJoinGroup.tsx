@@ -8,31 +8,45 @@ import {
   TableRow,
 } from "@material-ui/core";
 import toast from "react-hot-toast";
-import Avatar from "../Avatar";
-import Button from "../Button";
+import Avatar from "../../Avatar";
+import Button from "../../Button";
 import { FormattedMessage, useIntl, } from "react-intl";
+import { useQuery } from "urql";
+import { GROUP_MEMBERS_QUERY } from "./GroupMembersTable";
 
-const RequestToJoinTable = ({
-  requestsToJoin,
-  updateMember,
-  deleteMember,
-  roundId,
-}) => {
-  const intl = useIntl();
-  if (requestsToJoin.length === 0) return null;
+const RequestToJoinGroup = ({ currentGroup }) => {
 
-  return (
-    <>
-      <div className="mb-8">
-        <h2 className="text-xl mb-3 font-semibold">
-          <FormattedMessage
-            defaultMessage="{count} requests to join"
-            values={{
-              count: requestsToJoin.length,
-            }}
-          />
-        </h2>
-        <div className="bg-white rounded-lg shadow">
+    const intl = useIntl();
+    const [{ data, fetching, error }, executeQuery] = useQuery({
+        query: GROUP_MEMBERS_QUERY,
+        variables: {
+          groupId: currentGroup.id,
+          isApproved: false
+        },
+    });
+
+    if (fetching || error)
+        return null
+
+    const members = data.groupMembersPage.groupMembers;
+
+    if (members.length === 0)
+        return null;
+
+    const updateMember = async ({}) => "";
+    const deleteMember = async ({}) => "";
+
+    return (
+        <div className="mb-8">
+            <h2 className="text-xl mb-3 font-semibold">
+              <FormattedMessage
+                defaultMessage="{count} requests to join"
+                values={{
+                  count: members.length,
+                }}
+              />
+            </h2>
+            <div className="bg-white rounded-lg shadow">
           <TableContainer>
             <Table aria-label="simple table">
               <TableHead>
@@ -52,9 +66,10 @@ const RequestToJoinTable = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {requestsToJoin.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell component="th" scope="row">
+                {
+                    members.map((member) => (
+                        <TableRow key={member.id}>
+                            <TableCell component="th" scope="row">
                       <div className="flex space-x-3">
                         <Avatar user={member.user} />
                         <div>
@@ -84,7 +99,7 @@ const RequestToJoinTable = ({
                                 )
                               ) {
                                 deleteMember({
-                                  roundId,
+                                  groupId: currentGroup.id,
                                   memberId: member.id,
                                 }).then(({ error }) => {
                                   if (error) {
@@ -111,7 +126,7 @@ const RequestToJoinTable = ({
                               )
                             ) {
                               updateMember({
-                                roundId,
+                                groupId: currentGroup.id,
                                 memberId: member.id,
                                 isApproved: true,
                               }).then(({ error }) => {
@@ -127,15 +142,16 @@ const RequestToJoinTable = ({
                         </Button>
                       </Box>
                     </TableCell>
-                  </TableRow>
-                ))}
+                        </TableRow>
+                    ))
+                }
               </TableBody>
-            </Table>
-          </TableContainer>
+              </Table>
+            </TableContainer>
+            </div>
         </div>
-      </div>
-    </>
-  );
-};
+    )
 
-export default RequestToJoinTable;
+}
+
+  export default RequestToJoinGroup;

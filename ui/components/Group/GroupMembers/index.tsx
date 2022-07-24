@@ -7,6 +7,7 @@ import InviteMembersModal from "components/InviteMembersModal";
 import GroupMembersTable from "./GroupMembersTable";
 import SearchBar from "../../RoundMembers/SearchBar";
 import { FormattedMessage, useIntl } from "react-intl";
+import RequestToJoinGroup from "./RequestToJoinGroup";
 
 const UPDATE_GROUP_MEMBER = gql`
   mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
@@ -37,6 +38,7 @@ const GroupMembers = ({ currentGroup }) => {
   const intl = useIntl();
   return (
     <div>
+      <RequestToJoinGroup currentGroup={currentGroup} />
       <div className="flex justify-between mb-3 items-center">
         <SearchBar
           color={"anthracit"}
