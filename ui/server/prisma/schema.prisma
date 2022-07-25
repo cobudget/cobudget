@@ -120,6 +120,7 @@ model Group {
   stripeCurrentPeriodEnd DateTime?
 
   registrationPolicy RegistrationPolicy? @default(OPEN)
+  visibility         Visibility?         @default(PUBLIC)
 
   @@map("Organization")
 }

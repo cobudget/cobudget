@@ -19,13 +19,15 @@ const EDIT_GROUP = gql`
     $logo: String
     $slug: String
     $registrationPolicy: RegistrationPolicy
+    $visibility: Visibility
   ) {
-    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug, registrationPolicy: $registrationPolicy) {
+    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug, registrationPolicy: $registrationPolicy, visibility: $visibility) {
       id
       name
       logo
       slug
       registrationPolicy
+      visibility
     }
   }
 `;
@@ -105,6 +107,20 @@ const EditGroup = ({ group, currentUser }) => {
             startAdornment={process.env.DEPLOY_URL + "/"}
           />
         )}
+        <SelectField
+          name="visibility"
+          label={intl.formatMessage({ defaultMessage: "Visibility" })}
+          defaultValue={group.visibility}
+          inputRef={register}
+          className="my-4"
+        >
+          <option value="PUBLIC">
+            {intl.formatMessage({ defaultMessage: "Public" })}
+          </option>
+          <option value="HIDDEN">
+            {intl.formatMessage({ defaultMessage: "Hidden" })}
+          </option>
+        </SelectField>
         <SelectField
           name="registrationPolicy"
           label={intl.formatMessage({ defaultMessage: "Registration policy" })}

@@ -130,6 +130,7 @@ export const TOP_LEVEL_QUERY = gql`
       finishedTodos
       experimentalFeatures
       registrationPolicy
+      visibility
     }
     bucket(id: $bucketId) {
       id

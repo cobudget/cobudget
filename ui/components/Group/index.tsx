@@ -31,6 +31,7 @@ export const GROUP_PAGE_QUERY = gql`
       info
       finishedTodos
       registrationPolicy
+      visibility
     }
   }
 `;

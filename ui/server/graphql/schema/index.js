@@ -60,6 +60,7 @@ const schema = gql`
       logo: String
       slug: String
       registrationPolicy: RegistrationPolicy
+      visibility: Visibility
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -229,6 +230,7 @@ const schema = gql`
     finishedTodos: Boolean
     experimentalFeatures: Boolean
     registrationPolicy: RegistrationPolicy
+    visibility: Visibility
   }
 
   enum RoundType {

@@ -607,13 +607,12 @@ const resolvers = {
       isGroupAdmin,
       async (
         parent,
-        { groupId, name, info, slug, registrationPolicy, logo },
+        { groupId, name, info, slug, registrationPolicy, logo, visibility },
         { user, eventHub }
       ) => {
         if (name?.length === 0) throw new Error("Group name cannot be blank");
         if (slug?.length === 0) throw new Error("Group slug cannot be blank");
         if (info?.length > 500) throw new Error("Group info too long");
-
         const group = await prisma.group.update({
           where: {
             id: groupId,
@@ -623,6 +622,7 @@ const resolvers = {
             info,
             logo,
             registrationPolicy,
+            visibility,
             slug: slug !== undefined ? slugify(slug) : undefined,
           },
         });
