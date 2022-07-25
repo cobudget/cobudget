@@ -69,7 +69,17 @@ const GroupIndex = ({ currentUser }) => {
     variables: { groupSlug: router.query.group ?? "c" },
   });
 
-  if (!group) return null;
+  if (!fetching && !group) {
+    return (
+      <div className="text-center mt-7">
+        <FormattedMessage
+          defaultMessage="This group either doesn&apos;t exist or you don&apos;t have access to it"
+        />
+      </div>
+    );
+  }
+
+  if (!group || fetching) return null;
 
   const showTodos =
     currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;

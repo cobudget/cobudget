@@ -9,7 +9,7 @@ import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
-import { allocateToMember, bulkAllocate, contribute } from "../../controller";
+import { allocateToMember, bulkAllocate, contribute, getGroup } from "../../controller";
 import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
@@ -179,12 +179,11 @@ const resolvers = {
         select: { id: true },
       });
     },
-    group: async (parent, { groupSlug }) => {
+    group: async (parent, { groupSlug }, { user }) => {
       if (!groupSlug) return null;
       if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
         return null;
-
-      return prisma.group.findUnique({ where: { slug: groupSlug } });
+      return getGroup({ groupSlug, user });
     },
     groups: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.group.findMany();
@@ -2659,11 +2658,9 @@ const resolvers = {
     stripeIsConnected: combineResolvers(isCollOrGroupAdmin, (round) => {
       return stripeIsConnected({ round });
     }),
-    group: async (round) => {
+    group: async (round, _, { user }) => {
       if (round.singleRound) return null;
-      return prisma.group.findUnique({
-        where: { id: round.groupId },
-      });
+      return getGroup({ groupId: round.groupId, user });
     },
     bucketStatusCount: async (round, { groupSlug, roundSlug }, { user }) => {
       const currentMember = await prisma.roundMember.findFirst({

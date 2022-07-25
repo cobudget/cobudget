@@ -18,7 +18,7 @@ import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import Table from "../../../components/Table";
-import { FormattedNumber } from "react-intl";
+import { FormattedNumber, FormattedMessage } from "react-intl";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -506,7 +506,9 @@ const RoundPage = ({ currentUser }) => {
   if (!round && !fetching && router.isReady) {
     return (
       <div className="text-center mt-7">
-        This round either doesn&apos;t exist or you don&apos;t have access to it
+        <FormattedMessage
+          defaultMessage="This round either doesn&apos;t exist or you don&apos;t have access to it"
+        />
       </div>
     );
   }

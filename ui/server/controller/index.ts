@@ -145,6 +145,30 @@ export const bulkAllocate = async ({ roundId, amount, type, allocatedBy }) => {
   }
 };
 
+export const getGroup = async ({ groupId, groupSlug, user }: { groupId?: string, groupSlug?: string }) => {
+  try {
+    const prisma = importedPrisma;
+    const group = await prisma.group.findUnique({ where: groupId ? { id: groupId } : { slug: groupSlug }});
+    if (group.visibility === "PUBLIC")
+      return group;
+
+    if (!user)
+      throw "This group is private";
+
+    const currentGroupMember = await prisma.groupMember.findUnique({
+      where: {
+        groupId_userId: { groupId: group.id, userId: user.id },
+      },
+    });
+
+    if (currentGroupMember)
+      return group;
+    
+    throw "The group is private";
+  }
+  catch (err) {}
+}
+
 export const contribute = async ({
   roundId,
   bucketId,
