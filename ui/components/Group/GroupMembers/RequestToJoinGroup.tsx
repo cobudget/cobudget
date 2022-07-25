@@ -14,7 +14,7 @@ import { FormattedMessage, useIntl, } from "react-intl";
 import { useQuery } from "urql";
 import { GROUP_MEMBERS_QUERY } from "./GroupMembersTable";
 
-const RequestToJoinGroup = ({ currentGroup }) => {
+const RequestToJoinGroup = ({ currentGroup, updateMember, deleteMember }) => {
 
     const intl = useIntl();
     const [{ data, fetching, error }, executeQuery] = useQuery({
@@ -32,9 +32,6 @@ const RequestToJoinGroup = ({ currentGroup }) => {
 
     if (members.length === 0)
         return null;
-
-    const updateMember = async ({}) => "";
-    const deleteMember = async ({}) => "";
 
     return (
         <div className="mb-8">

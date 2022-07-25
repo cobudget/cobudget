@@ -167,6 +167,7 @@ const schema = gql`
       groupId: ID!
       memberId: ID!
       isAdmin: Boolean
+      isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(

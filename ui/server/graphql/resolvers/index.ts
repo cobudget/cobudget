@@ -1862,7 +1862,7 @@ const resolvers = {
     ),
     updateGroupMember: combineResolvers(
       isGroupAdmin,
-      async (parent, { groupId, memberId, isAdmin }, { user }) => {
+      async (parent, { groupId, memberId, isAdmin, isApproved }, { user }) => {
         const groupMember = await prisma.groupMember.findFirst({
           where: { id: memberId, groupId: groupId },
         });
@@ -1877,7 +1877,12 @@ const resolvers = {
             if (groupAdmins.length <= 1)
               throw new Error("You need at least 1 group admin");
           }
-          groupMember.isAdmin = isAdmin;
+          if (typeof isAdmin !== "undefined")
+            groupMember.isAdmin = isAdmin;
+          
+          if (typeof isApproved !== "undefined")
+            groupMember.isApproved = isApproved;
+
         }
         return await prisma.groupMember.update({
           where: { id: groupMember.id },
