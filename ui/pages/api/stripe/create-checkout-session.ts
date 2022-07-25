@@ -104,7 +104,7 @@ export default handler().post(async (req, res) => {
           userId: req.user.id,
           groupSlug: req.query.groupSlug,
           groupName: req.query.groupName,
-          registrationPolicy: req.query.registrationPolicy
+          registrationPolicy: req.query.registrationPolicy,
         },
         allow_promotion_codes: true,
         ...customerMetadata,

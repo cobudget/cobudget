@@ -161,9 +161,9 @@ export const client = (
             deleteGroupMember(result: any, { groupMemberId }, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "orgMembersPage")
+                .filter((field) => field.fieldName === "groupMembersPage")
                 .forEach((field) => {
-                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                  cache.invalidate("Query", "groupMembersPage", field.arguments);
                 });
             },
             updateMember(result: any, { isApproved }, cache) {
@@ -174,6 +174,17 @@ export const client = (
                   .filter((field) => field.fieldName === "membersPage")
                   .forEach((field) => {
                     cache.invalidate("Query", "membersPage", field.arguments);
+                  });
+            },
+
+            updateGroupMember(result: any, { isApproved }, cache) {
+              // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
+              if (isApproved)
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "groupMembersPage")
+                  .forEach((field) => {
+                    cache.invalidate("Query", "groupMembersPage", field.arguments);
                   });
             },
 

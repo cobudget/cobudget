@@ -10,7 +10,12 @@ import { FormattedMessage, useIntl } from "react-intl";
 import RequestToJoinGroup from "./RequestToJoinGroup";
 
 const UPDATE_GROUP_MEMBER = gql`
-  mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean, $isApproved: Boolean) {
+  mutation UpdateGroupMember(
+    $groupId: ID!
+    $memberId: ID!
+    $isAdmin: Boolean
+    $isApproved: Boolean
+  ) {
     updateGroupMember(
       groupId: $groupId
       memberId: $memberId
@@ -40,8 +45,8 @@ const GroupMembers = ({ currentGroup }) => {
   const intl = useIntl();
   return (
     <div>
-      <RequestToJoinGroup 
-        currentGroup={currentGroup} 
+      <RequestToJoinGroup
+        currentGroup={currentGroup}
         deleteMember={deleteGroupMember}
         updateMember={updateGroupMember}
       />

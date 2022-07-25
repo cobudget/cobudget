@@ -239,25 +239,26 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                       </NavItem>
                     )
                   }
-                  {
-                  !currentUser?.currentGroupMember && !round && group && (
-                    group.registrationPolicy === "OPEN" ?
-                    <NavItem
-                      primary
-                      roundColor={color}
-                      onClick={() => joinGroup({ groupId: group.id })}
-                    >
-                      <FormattedMessage defaultMessage="Join group" />
-                    </NavItem> :
-                     group.registrationPolicy === "REQUEST_TO_JOIN" ?
-                    <NavItem
-                    primary
-                    roundColor={color}
-                    onClick={() => joinGroup({ groupId: group.id })}
-                  >
-                    <FormattedMessage defaultMessage="Request to join" />
-                  </NavItem> : null
-                  )}
+                  {!currentUser?.currentGroupMember &&
+                    !round &&
+                    group &&
+                    (group.registrationPolicy === "OPEN" ? (
+                      <NavItem
+                        primary
+                        roundColor={color}
+                        onClick={() => joinGroup({ groupId: group.id })}
+                      >
+                        <FormattedMessage defaultMessage="Join group" />
+                      </NavItem>
+                    ) : group.registrationPolicy === "REQUEST_TO_JOIN" ? (
+                      <NavItem
+                        primary
+                        roundColor={color}
+                        onClick={() => joinGroup({ groupId: group.id })}
+                      >
+                        <FormattedMessage defaultMessage="Request to join" />
+                      </NavItem>
+                    ) : null)}
 
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown

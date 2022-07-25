@@ -506,9 +506,7 @@ const RoundPage = ({ currentUser }) => {
   if (!round && !fetching && router.isReady) {
     return (
       <div className="text-center mt-7">
-        <FormattedMessage
-          defaultMessage="This round either doesn&apos;t exist or you don&apos;t have access to it"
-        />
+        <FormattedMessage defaultMessage="This round either doesn't exist or you don't have access to it" />
       </div>
     );
   }

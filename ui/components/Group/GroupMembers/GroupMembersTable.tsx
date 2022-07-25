@@ -183,7 +183,13 @@ const Page = ({
     return members;
   }, [data?.groupMembersPage?.groupMembers, fetching]);
 
-  const [approvedMembers, pendingMembers] = useMemo(() => [items.filter(i => i.isApproved), items.filter(i => !i.isApproved)], [items]);
+  const [approvedMembers, pendingMembers] = useMemo(
+    () => [
+      items.filter((i) => i.isApproved),
+      items.filter((i) => !i.isApproved),
+    ],
+    [items]
+  );
 
   useEffect(() => {
     debouncedSearchMembers();

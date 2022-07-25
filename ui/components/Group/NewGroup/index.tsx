@@ -85,7 +85,9 @@ export default function NewGroup({ currentUser }) {
               />
               <SelectField
                 name="registrationPolicy"
-                label={intl.formatMessage({ defaultMessage: "Registration policy" })}
+                label={intl.formatMessage({
+                  defaultMessage: "Registration policy",
+                })}
                 className="my-4"
                 onChange={(e) => window.alert(e)}
               >

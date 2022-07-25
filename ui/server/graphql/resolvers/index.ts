@@ -9,7 +9,12 @@ import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
-import { allocateToMember, bulkAllocate, contribute, getGroup } from "../../controller";
+import {
+  allocateToMember,
+  bulkAllocate,
+  contribute,
+  getGroup,
+} from "../../controller";
 import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
@@ -411,7 +416,11 @@ const resolvers = {
     },
     groupMembersPage: combineResolvers(
       isGroupAdmin,
-      async (parent, { offset = 0, limit, groupId, search, isApproved }, { user }) => {
+      async (
+        parent,
+        { offset = 0, limit, groupId, search, isApproved },
+        { user }
+      ) => {
         const groupMembersWithExtra = await prisma.groupMember.findMany({
           where: {
             groupId: groupId,
@@ -427,7 +436,7 @@ const resolvers = {
             }),
           },
           skip: offset || 0,
-          take: ((limit || 1e3) + 1),
+          take: (limit || 1e3) + 1,
         });
 
         return {
@@ -1699,17 +1708,17 @@ const resolvers = {
       if (!user) throw new Error("You need to be logged in.");
 
       const group = await prisma.group.findUnique({
-        where: { id: groupId }
+        where: { id: groupId },
       });
 
       if (group.registrationPolicy === "INVITE_ONLY")
         throw new Error("This group is invite only");
 
       return await prisma.groupMember.create({
-        data: { 
+        data: {
           userId: user.id,
           groupId: groupId,
-          isApproved:  group.registrationPolicy === "OPEN"
+          isApproved: group.registrationPolicy === "OPEN",
         },
       });
     },
@@ -1876,13 +1885,12 @@ const resolvers = {
             if (groupAdmins.length <= 1)
               throw new Error("You need at least 1 group admin");
           }
-          if (typeof isAdmin !== "undefined")
-            groupMember.isAdmin = isAdmin;
-          
-          if (typeof isApproved !== "undefined")
+          if (typeof isAdmin !== "undefined") groupMember.isAdmin = isAdmin;
+        }
+
+        if (typeof isApproved !== "undefined")
             groupMember.isApproved = isApproved;
 
-        }
         return await prisma.groupMember.update({
           where: { id: groupMember.id },
           data: { ...groupMember },

@@ -72,9 +72,7 @@ const GroupIndex = ({ currentUser }) => {
   if (!fetching && !group) {
     return (
       <div className="text-center mt-7">
-        <FormattedMessage
-          defaultMessage="This group either doesn&apos;t exist or you don&apos;t have access to it"
-        />
+        <FormattedMessage defaultMessage="This group either doesn't exist or you don't have access to it" />
       </div>
     );
   }

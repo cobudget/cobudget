@@ -145,15 +145,23 @@ export const bulkAllocate = async ({ roundId, amount, type, allocatedBy }) => {
   }
 };
 
-export const getGroup = async ({ groupId, groupSlug, user }: { groupId?: string, groupSlug?: string }) => {
+export const getGroup = async ({
+  groupId,
+  groupSlug,
+  user,
+}: {
+  groupId?: string;
+  groupSlug?: string;
+  user: { id: string };
+}) => {
   try {
     const prisma = importedPrisma;
-    const group = await prisma.group.findUnique({ where: groupId ? { id: groupId } : { slug: groupSlug }});
-    if (group.visibility === "PUBLIC")
-      return group;
+    const group = await prisma.group.findUnique({
+      where: groupId ? { id: groupId } : { slug: groupSlug },
+    });
+    if (group.visibility === "PUBLIC") return group;
 
-    if (!user)
-      throw "This group is private";
+    if (!user) throw "This group is private";
 
     const currentGroupMember = await prisma.groupMember.findUnique({
       where: {
@@ -161,13 +169,13 @@ export const getGroup = async ({ groupId, groupSlug, user }: { groupId?: string,
       },
     });
 
-    if (currentGroupMember)
-      return group;
-    
+    if (currentGroupMember) return group;
+
     throw "The group is private";
+  } catch (err) {
+    ("");
   }
-  catch (err) {}
-}
+};
 
 export const contribute = async ({
   roundId,

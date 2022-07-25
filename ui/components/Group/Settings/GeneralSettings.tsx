@@ -21,7 +21,14 @@ const EDIT_GROUP = gql`
     $registrationPolicy: RegistrationPolicy
     $visibility: Visibility
   ) {
-    editGroup(groupId: $groupId, name: $name, logo: $logo, slug: $slug, registrationPolicy: $registrationPolicy, visibility: $visibility) {
+    editGroup(
+      groupId: $groupId
+      name: $name
+      logo: $logo
+      slug: $slug
+      registrationPolicy: $registrationPolicy
+      visibility: $visibility
+    ) {
       id
       name
       logo
