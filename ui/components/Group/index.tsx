@@ -69,7 +69,7 @@ const GroupIndex = ({ currentUser }) => {
     variables: { groupSlug: router.query.group ?? "c" },
   });
 
-  if (!fetching && !group) {
+  if (!fetching && !group && router.query.group) {
     return (
       <div className="text-center mt-7">
         <FormattedMessage defaultMessage="This group either doesn't exist or you don't have access to it" />
