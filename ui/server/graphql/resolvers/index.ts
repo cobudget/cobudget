@@ -36,6 +36,7 @@ import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
 import { updateFundedPercentage } from "../resolvers/helpers";
+import { createGroupInvitationLink, deleteGroupInvitationLink, groupInvitationLink } from "./group";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -121,7 +122,7 @@ const isCollModOrAdmin = async (parent, { bucketId, roundId }, { user }) => {
   return skip;
 };
 
-const isGroupAdmin = async (parent, { groupId }, { user }) => {
+export const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
   const groupMember = await prisma.groupMember.findUnique({
     where: {
@@ -245,6 +246,9 @@ const resolvers = {
         return null;
       }
     },
+
+    groupInvitationLink,
+
     roundInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         !!user &&
@@ -750,6 +754,10 @@ const resolvers = {
         });
       }
     ),
+
+    createGroupInvitationLink,
+    deleteGroupInvitationLink,
+
     createRoundInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         (await !!user) &&

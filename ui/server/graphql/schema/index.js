@@ -12,6 +12,7 @@ const schema = gql`
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
     roundInvitationLink(roundId: ID): RoundInvitationLink
+    groupInvitationLink(groupId: ID): RoundInvitationLink
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -82,9 +83,14 @@ const schema = gql`
       discourseCategoryId: Int
     ): Round!
     deleteRound(roundId: ID!): Round
+
     createRoundInvitationLink(roundId: ID): RoundInvitationLink
     deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
     joinRoundInvitationLink(token: String): RoundMember
+
+    createGroupInvitationLink(groupId: ID): RoundInvitationLink
+    deleteGroupInvitationLink(groupId: ID): RoundInvitationLink
+    joinGroupInvitationLink(token: String): GroupMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
