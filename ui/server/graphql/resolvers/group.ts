@@ -8,7 +8,7 @@ export const createGroupInvitationLink = combineResolvers(
     isGroupAdmin,
     async (_, { groupId }) => {
         const inviteNonce = Date.now();
-        const round = await prisma.round.update({
+        const round = await prisma.group.update({
           where: { id: groupId },
           data: { inviteNonce },
         });
@@ -21,7 +21,7 @@ export const createGroupInvitationLink = combineResolvers(
 export const deleteGroupInvitationLink = combineResolvers(
     isGroupAdmin,
     async (_, { groupId }) => {
-        await prisma.round.update({
+        await prisma.group.update({
           where: { id: groupId },
           data: { inviteNonce: null },
         });

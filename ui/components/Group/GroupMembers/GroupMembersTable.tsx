@@ -157,7 +157,7 @@ const Page = ({
   const [{ data, fetching, error }, executeQuery] = useQuery({
     query: GROUP_MEMBERS_QUERY,
     variables: {
-      groupId: currentGroup.id,
+      groupId: currentGroup?.id,
       offset: variables.offset,
       limit: variables.limit,
       search: searchString,
