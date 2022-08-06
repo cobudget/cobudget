@@ -189,9 +189,9 @@ export const client = (
             deleteGroupMember(result: any, { groupMemberId }, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "orgMembersPage")
+                .filter((field) => field.fieldName === "groupMembersPage")
                 .forEach((field) => {
-                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                  cache.invalidate("Query", "groupMembersPage", field.arguments);
                 });
             },
             updateMember(result: any, { isApproved }, cache) {
