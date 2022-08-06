@@ -11,6 +11,10 @@ const JOIN_ROUND = gql`
         id
         slug
       }
+      group {
+        id
+        slug
+      }
     }
   }
 `;
@@ -28,9 +32,17 @@ function InviteToken() {
 
   useEffect(() => {
     if (data?.joinRoundInvitationLink?.id) {
-      router.push({
-        pathname: "/c/" + data?.joinRoundInvitationLink?.round?.slug,
-      });
+      if (data?.joinRoundInvitationLink?.group?.slug) {
+        router.push({
+          pathname: "/" + (data?.joinRoundInvitationLink?.group?.slug),
+        });
+      }
+      else {
+        window.alert(1);
+        router.push({
+          pathname: "/c/" + (data?.joinRoundInvitationLink?.round?.slug),
+        });
+      }
     }
   }, [data, router]);
 

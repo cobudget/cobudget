@@ -86,7 +86,7 @@ const schema = gql`
 
     createRoundInvitationLink(roundId: ID): RoundInvitationLink
     deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
-    joinRoundInvitationLink(token: String): RoundMember
+    joinRoundInvitationLink(token: String): InvitedMember
 
     createGroupInvitationLink(groupId: ID): RoundInvitationLink
     deleteGroupInvitationLink(groupId: ID): RoundInvitationLink
@@ -350,6 +350,12 @@ const schema = gql`
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
     acceptedTermsAt: Date
+  }
+
+  type InvitedMember {
+    id: ID!
+    group: Group
+    round: Round
   }
 
   type GroupMember {

@@ -810,31 +810,48 @@ const resolvers = {
         throw new Error("Invalid invitation link");
       }
 
-      const { roundId, nonce: inviteNonce } = payload;
+      const { roundId, groupId, nonce: inviteNonce } = payload;
 
-      const round = await prisma.round.findFirst({
-        where: { id: roundId, inviteNonce },
-      });
+      if (roundId) {
+        const round = await prisma.round.findFirst({
+          where: { id: roundId, inviteNonce },
+        });
 
-      if (!round) {
-        throw new Error("Round link expired");
+        if (!round) {
+          throw new Error("Round link expired");
+        }
+
+        const isApproved = true;
+        const roundMember = await prisma.roundMember.upsert({
+          where: { userId_roundId: { userId: user.id, roundId } },
+          create: {
+            round: { connect: { id: roundId } },
+            user: { connect: { id: user.id } },
+            isApproved,
+            statusAccount: { create: {} },
+            incomingAccount: { create: {} },
+            outgoingAccount: { create: {} },
+          },
+          update: { isApproved, hasJoined: true, isRemoved: false },
+        });
+
+        return {id: roundMember.id, roundId: roundMember.roundId};
       }
+      else {
+        const group = await prisma.group.findFirst({
+          where: { id: groupId, inviteNonce },
+        });
 
-      const isApproved = true;
-      const roundMember = await prisma.roundMember.upsert({
-        where: { userId_roundId: { userId: user.id, roundId } },
-        create: {
-          round: { connect: { id: roundId } },
-          user: { connect: { id: user.id } },
-          isApproved,
-          statusAccount: { create: {} },
-          incomingAccount: { create: {} },
-          outgoingAccount: { create: {} },
-        },
-        update: { isApproved, hasJoined: true, isRemoved: false },
-      });
+        if (!group) {
+          throw new Error("Group invitation link expired");
+        }
 
-      return roundMember;
+        const groupMember = await prisma.groupMember.create({
+          data: { userId: user.id, groupId: groupId },
+        });
+
+        return {id: groupMember.id, groupId: groupMember.groupId};
+      }
     },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,
@@ -2331,6 +2348,20 @@ const resolvers = {
       });
       return u.name;
     },
+  },
+  InvitedMember: {
+    round: async ({ roundId }) => {
+      if (roundId) {
+        return prisma.round.findUnique({ where: { id: roundId } });
+      }
+      return null;
+    },
+    group: async ({ groupId }) => {
+      if (groupId) {
+        return prisma.group.findUnique({ where: { id: groupId } });
+      }
+      return null;
+    }
   },
   GroupMember: {
     hasDiscourseApiKey: (groupMember) => !!groupMember.discourseApiKey,
