@@ -4,8 +4,8 @@ import { useMutation, gql } from "urql";
 import HappySpinner from "components/HappySpinner";
 
 const JOIN_ROUND = gql`
-  mutation JoinRoundInvitationLink($token: String!) {
-    joinRoundInvitationLink(token: $token) {
+  mutation JoinInvitationLink($token: String!) {
+    joinInvitationLink(token: $token) {
       id
       round {
         id
@@ -31,16 +31,16 @@ function InviteToken() {
   }, [router.query.token, joinRound]);
 
   useEffect(() => {
-    if (data?.joinRoundInvitationLink?.id) {
-      if (data?.joinRoundInvitationLink?.group?.slug) {
+    if (data?.joinInvitationLink?.id) {
+      if (data?.joinInvitationLink?.group?.slug) {
         router.push({
-          pathname: "/" + (data?.joinRoundInvitationLink?.group?.slug),
+          pathname: "/" + (data?.joinInvitationLink?.group?.slug),
         });
       }
       else {
         window.alert(1);
         router.push({
-          pathname: "/c/" + (data?.joinRoundInvitationLink?.round?.slug),
+          pathname: "/c/" + (data?.joinInvitationLink?.round?.slug),
         });
       }
     }

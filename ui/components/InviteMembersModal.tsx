@@ -41,8 +41,8 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
 `;
 
 const ROUND_INVITE_LINK = gql`
-  query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink(roundId: $roundId) {
+  query InvitationLink($roundId: ID!) {
+    invitationLink(roundId: $roundId) {
       link
     }
   }
@@ -57,8 +57,8 @@ const GROUP_INVITE_LINK = gql`
 `;
 
 const CREATE_ROUND_INVITE_LINK = gql`
-  mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink(roundId: $roundId) {
+  mutation CreateInvitationLink($roundId: ID!) {
+    createInvitationLink(roundId: $roundId) {
       link
     }
   }
@@ -73,8 +73,8 @@ const CREATE_GROUP_INVITE_LINK = gql`
 `;
 
 const DELETE_ROUND_INVITE_LINK = gql`
-  mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink(roundId: $roundId) {
+  mutation DeleteInvitationLink($roundId: ID!) {
+    deleteInvitationLink(roundId: $roundId) {
       link
     }
   }
@@ -141,7 +141,7 @@ const InviteMembersModal = ({
     roundId ? DELETE_ROUND_INVITE_LINK : DELETE_GROUP_INVITE_LINK
   );
 
-  const link = inviteLink?.roundInvitationLink?.link || inviteLink?.groupInvitationLink?.link;
+  const link = inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
 
   return (
     <>

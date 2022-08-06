@@ -249,7 +249,7 @@ const resolvers = {
 
     groupInvitationLink,
 
-    roundInvitationLink: async (parent, { roundId }, { user }) => {
+    invitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         !!user &&
         isCollAdmin({
@@ -758,7 +758,7 @@ const resolvers = {
     createGroupInvitationLink,
     deleteGroupInvitationLink,
 
-    createRoundInvitationLink: async (parent, { roundId }, { user }) => {
+    createInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         (await !!user) &&
         isCollAdmin({
@@ -779,7 +779,7 @@ const resolvers = {
         link: round.inviteNonce,
       };
     },
-    deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
+    deleteInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         (await !!user) &&
         isCollAdmin({
@@ -799,7 +799,7 @@ const resolvers = {
         link: null,
       };
     },
-    joinRoundInvitationLink: async (parent, { token }, { user }) => {
+    joinInvitationLink: async (parent, { token }, { user }) => {
       if (!user) {
         throw new Error("You need to be logged in to join the group");
       }

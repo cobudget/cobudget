@@ -108,15 +108,15 @@ export const client = (
                   });
               }
             },
-            deleteRoundInvitationLink(result, args, cache) {
-              if (result.deleteRoundInvitationLink) {
+            deleteInvitationLink(result, args, cache) {
+              if (result.deleteInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "invitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "invitationLink",
                       field.arguments
                     );
                   });
@@ -136,15 +136,15 @@ export const client = (
                   });
               }
             },
-            createRoundInvitationLink(result, args, cache) {
-              if (result.createRoundInvitationLink) {
+            createInvitationLink(result, args, cache) {
+              if (result.createInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "invitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "invitationLink",
                       field.arguments
                     );
                   });
