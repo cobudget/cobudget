@@ -397,7 +397,12 @@ export const client = (
                 cache.updateQuery(
                   {
                     query: GROUP_MEMBERS_QUERY,
-                    variables: { offset: 0, limit: 30, groupId:  _args.groupId, search: ""},
+                    variables: {
+                      offset: 0,
+                      limit: 30,
+                      groupId: _args.groupId,
+                      search: "",
+                    },
                   },
                   (data: any) => {
                     return {
