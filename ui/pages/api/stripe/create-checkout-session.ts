@@ -74,9 +74,11 @@ export default handler().post(async (req, res) => {
     if (typeof req.query?.plan !== "string")
       throw new Error("No plan specified");
     if (typeof req.query?.groupSlug !== "string")
-      throw new Error("No plan specified");
+      throw new Error("No group slug specified");
     if (typeof req.query?.groupName !== "string")
-      throw new Error("No plan specified");
+      throw new Error("No group name specified");
+    if (typeof req.query?.registrationPolicy !== "string")
+      throw new Error("No registration policy specified");
 
     //if (typeof req.query?.contribution !== "string")
 
@@ -104,13 +106,14 @@ export default handler().post(async (req, res) => {
           userId: req.user.id,
           groupSlug: req.query.groupSlug,
           groupName: req.query.groupName,
+          registrationPolicy: req.query.registrationPolicy,
         },
         allow_promotion_codes: true,
         ...customerMetadata,
         billing_address_collection: "auto",
         success_url: `${origin}/new-group/?upgraded=true&group=${slugify(
           req.query.groupSlug
-        )}`,
+        )}&registrationPolicy=${req.query.registrationPolicy}`,
         cancel_url: `${origin}/new-group/?upgraded=false`,
       });
       console.log({ session });

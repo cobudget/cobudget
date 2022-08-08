@@ -54,6 +54,8 @@ model GroupMember {
   discourseApiKey   String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  isApproved        Boolean  @default(true)
+  hasJoined         Boolean  @default(true)
 
   @@unique([groupId, userId])
   @@map("OrgMember")
@@ -117,6 +119,9 @@ model Group {
   stripeSubscriptionId   String?   @unique
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
+
+  registrationPolicy RegistrationPolicy? @default(OPEN)
+  visibility         Visibility?         @default(PUBLIC)
 
   @@map("Organization")
 }

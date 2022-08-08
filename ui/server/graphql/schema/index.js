@@ -32,6 +32,7 @@ const schema = gql`
       search: String
       offset: Int
       limit: Int
+      isApproved: Boolean
     ): GroupMembersPage
     membersPage(
       roundId: ID!
@@ -51,7 +52,12 @@ const schema = gql`
   }
 
   type Mutation {
-    createGroup(name: String!, logo: String, slug: String!): Group!
+    createGroup(
+      name: String!
+      logo: String
+      slug: String!
+      registrationPolicy: RegistrationPolicy!
+    ): Group!
 
     editGroup(
       groupId: ID!
@@ -59,6 +65,8 @@ const schema = gql`
       info: String
       logo: String
       slug: String
+      registrationPolicy: RegistrationPolicy
+      visibility: Visibility
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -171,6 +179,7 @@ const schema = gql`
       groupId: ID!
       memberId: ID!
       isAdmin: Boolean
+      isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(
@@ -231,6 +240,8 @@ const schema = gql`
     discourseUrl: String
     finishedTodos: Boolean
     experimentalFeatures: Boolean
+    registrationPolicy: RegistrationPolicy
+    visibility: Visibility
   }
 
   enum RoundType {
@@ -371,6 +382,7 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
     email: String
     name: String
+    isApproved: Boolean
   }
 
   type GroupMembersPage {
