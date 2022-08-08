@@ -404,10 +404,23 @@ const resolvers = {
 
       const todaySeed = dayjs().format("YYYY-MM-DD");
 
-      const shuffledBuckets = SeededShuffle.shuffle(
-        buckets,
-        user ? user.id + todaySeed : todaySeed
-      );
+      let shuffledBuckets = buckets;
+      if (!orderBy) {
+        SeededShuffle.shuffle(buckets, user ? user.id + todaySeed : todaySeed);
+      } else if (
+        orderBy === "percentageFunded" ||
+        orderBy === "contributionsCount"
+      ) {
+        // Move nulls to last manually. This feature is added to prisma but not pushed to release yet
+        // https://github.com/prisma/prisma-engines/pull/3036
+
+        const index = shuffledBuckets.findIndex((b) => b[orderBy] !== null);
+        const length = shuffledBuckets.length;
+
+        shuffledBuckets = shuffledBuckets
+          .splice(index, length - index)
+          .concat(shuffledBuckets);
+      }
 
       return {
         moreExist: shuffledBuckets.length > limit + offset,

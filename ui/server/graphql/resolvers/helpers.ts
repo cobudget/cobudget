@@ -400,6 +400,19 @@ export async function updateFundedPercentage(bucket) {
   }
 }
 
+export async function updateContributionsCount(bucket, inc = 1) {
+  try {
+    return prisma.bucket.update({
+      where: { id: bucket.id },
+      data: {
+        contributionsCount: (bucket.contributionsCount || 0) + inc,
+      },
+    });
+  } catch (err) {
+    return err;
+  }
+}
+
 export const getLanguageProgress = async () => {
   try {
     if (!process.env.CROWDIN_PROJECT_ID) return [];
