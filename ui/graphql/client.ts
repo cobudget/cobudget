@@ -163,7 +163,11 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "groupMembersPage")
                 .forEach((field) => {
-                  cache.invalidate("Query", "groupMembersPage", field.arguments);
+                  cache.invalidate(
+                    "Query",
+                    "groupMembersPage",
+                    field.arguments
+                  );
                 });
             },
             updateMember(result: any, { isApproved }, cache) {
@@ -184,7 +188,11 @@ export const client = (
                   .inspectFields("Query")
                   .filter((field) => field.fieldName === "groupMembersPage")
                   .forEach((field) => {
-                    cache.invalidate("Query", "groupMembersPage", field.arguments);
+                    cache.invalidate(
+                      "Query",
+                      "groupMembersPage",
+                      field.arguments
+                    );
                   });
             },
 

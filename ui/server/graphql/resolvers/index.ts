@@ -1889,7 +1889,7 @@ const resolvers = {
         }
 
         if (typeof isApproved !== "undefined")
-            groupMember.isApproved = isApproved;
+          groupMember.isApproved = isApproved;
 
         return await prisma.groupMember.update({
           where: { id: groupMember.id },
