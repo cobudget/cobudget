@@ -9,7 +9,12 @@ import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
 import discourse from "../../lib/discourse";
-import { allocateToMember, bulkAllocate, contribute } from "../../controller";
+import {
+  allocateToMember,
+  bulkAllocate,
+  contribute,
+  getGroup,
+} from "../../controller";
 import subscribers from "../../subscribers/discourse.subscriber";
 import {
   bucketIncome,
@@ -179,12 +184,11 @@ const resolvers = {
         select: { id: true },
       });
     },
-    group: async (parent, { groupSlug }) => {
+    group: async (parent, { groupSlug }, { user }) => {
       if (!groupSlug) return null;
       if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
         return null;
-
-      return prisma.group.findUnique({ where: { slug: groupSlug } });
+      return getGroup({ groupSlug, user });
     },
     groups: combineResolvers(isRootAdmin, async (parent, args) => {
       return prisma.group.findMany();
@@ -425,10 +429,15 @@ const resolvers = {
     },
     groupMembersPage: combineResolvers(
       isGroupAdmin,
-      async (parent, { offset = 0, limit, groupId, search }, { user }) => {
+      async (
+        parent,
+        { offset = 0, limit, groupId, search, isApproved },
+        { user }
+      ) => {
         const groupMembersWithExtra = await prisma.groupMember.findMany({
           where: {
             groupId: groupId,
+            isApproved,
             ...(search && {
               user: {
                 OR: [
@@ -439,8 +448,8 @@ const resolvers = {
               },
             }),
           },
-          skip: offset,
-          take: limit + 1,
+          skip: offset || 0,
+          take: (limit || 1e3) + 1,
         });
 
         return {
@@ -619,13 +628,12 @@ const resolvers = {
       isGroupAdmin,
       async (
         parent,
-        { groupId, name, info, slug, logo },
+        { groupId, name, info, slug, registrationPolicy, logo, visibility },
         { user, eventHub }
       ) => {
         if (name?.length === 0) throw new Error("Group name cannot be blank");
         if (slug?.length === 0) throw new Error("Group slug cannot be blank");
         if (info?.length > 500) throw new Error("Group info too long");
-
         const group = await prisma.group.update({
           where: {
             id: groupId,
@@ -634,6 +642,8 @@ const resolvers = {
             name,
             info,
             logo,
+            registrationPolicy,
+            visibility,
             slug: slug !== undefined ? slugify(slug) : undefined,
           },
         });
@@ -1710,8 +1720,19 @@ const resolvers = {
     joinGroup: async (_, { groupId }, { user }) => {
       if (!user) throw new Error("You need to be logged in.");
 
+      const group = await prisma.group.findUnique({
+        where: { id: groupId },
+      });
+
+      if (group.registrationPolicy === "INVITE_ONLY")
+        throw new Error("This group is invite only");
+
       return await prisma.groupMember.create({
-        data: { userId: user.id, groupId: groupId },
+        data: {
+          userId: user.id,
+          groupId: groupId,
+          isApproved: group.registrationPolicy === "OPEN",
+        },
       });
     },
     updateProfile: async (_, { name, username }, { user }) => {
@@ -1862,7 +1883,7 @@ const resolvers = {
     ),
     updateGroupMember: combineResolvers(
       isGroupAdmin,
-      async (parent, { groupId, memberId, isAdmin }, { user }) => {
+      async (parent, { groupId, memberId, isAdmin, isApproved }, { user }) => {
         const groupMember = await prisma.groupMember.findFirst({
           where: { id: memberId, groupId: groupId },
         });
@@ -1877,8 +1898,12 @@ const resolvers = {
             if (groupAdmins.length <= 1)
               throw new Error("You need at least 1 group admin");
           }
-          groupMember.isAdmin = isAdmin;
+          if (typeof isAdmin !== "undefined") groupMember.isAdmin = isAdmin;
         }
+
+        if (typeof isApproved !== "undefined")
+          groupMember.isApproved = isApproved;
+
         return await prisma.groupMember.update({
           where: { id: groupMember.id },
           data: { ...groupMember },
@@ -2654,11 +2679,9 @@ const resolvers = {
     stripeIsConnected: combineResolvers(isCollOrGroupAdmin, (round) => {
       return stripeIsConnected({ round });
     }),
-    group: async (round) => {
+    group: async (round, _, { user }) => {
       if (round.singleRound) return null;
-      return prisma.group.findUnique({
-        where: { id: round.groupId },
-      });
+      return getGroup({ groupId: round.groupId, user });
     },
     bucketStatusCount: async (round, { groupSlug, roundSlug }, { user }) => {
       const currentMember = await prisma.roundMember.findFirst({

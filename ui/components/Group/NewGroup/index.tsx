@@ -7,6 +7,7 @@ import { useIntl, FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import { useDebounce } from "react-use";
 import slugify from "../../../utils/slugify";
+import { SelectField } from "components/SelectInput";
 
 const GET_GROUP_QUERY = gql`
   query Group($groupSlug: String) {
@@ -21,6 +22,7 @@ export default function NewGroup({ currentUser }) {
   const intl = useIntl();
 
   const [plan, setPlan] = useState("MONTHLY");
+  const [registrationPolicy, setRegistrationPolicy] = useState("OPEN");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
 
@@ -51,7 +53,7 @@ export default function NewGroup({ currentUser }) {
           <FormattedMessage defaultMessage="Manage unlimited rounds and people in a group" />
         </p>
         <form
-          action={`/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}`}
+          action={`/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}&registrationPolicy=${registrationPolicy}`}
           method="POST"
         >
           <div className="space-y-16 max-w-lg mx-auto">
@@ -81,6 +83,24 @@ export default function NewGroup({ currentUser }) {
                 }}
                 startAdornment={process.env.DEPLOY_URL + "/"}
               />
+              <SelectField
+                name="registrationPolicy"
+                label={intl.formatMessage({
+                  defaultMessage: "Registration policy",
+                })}
+                className="my-4"
+                onChange={(e) => window.alert(e)}
+              >
+                <option value="OPEN">
+                  {intl.formatMessage({ defaultMessage: "Open" })}
+                </option>
+                <option value="REQUEST_TO_JOIN">
+                  {intl.formatMessage({ defaultMessage: "Request to join" })}
+                </option>
+                <option value="INVITE_ONLY">
+                  {intl.formatMessage({ defaultMessage: "Invite only" })}
+                </option>
+              </SelectField>
             </div>
             <div className="">
               <label className="text-sm font-medium mb-2 block">

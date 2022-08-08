@@ -428,14 +428,12 @@ export const getLanguageProgress = async () => {
     );
     const { data } = (await res.json()) as any;
     const progress = [];
-    console.log(data);
     data.forEach((lang) => {
       progress.push({
         code: lang.data.languageId.split("-")[0],
         percentage: lang.data.translationProgress,
       });
     });
-    console.log(progress);
     return progress;
   } catch (err) {
     return [];
