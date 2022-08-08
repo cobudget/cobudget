@@ -108,29 +108,57 @@ export const client = (
                   });
               }
             },
-            deleteRoundInvitationLink(result, args, cache) {
-              if (result.deleteRoundInvitationLink) {
+            deleteInvitationLink(result, args, cache) {
+              if (result.deleteInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "invitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "invitationLink",
                       field.arguments
                     );
                   });
               }
             },
-            createRoundInvitationLink(result, args, cache) {
-              if (result.createRoundInvitationLink) {
+            deleteGroupInvitationLink(result, args, cache) {
+              if (result.deleteGroupInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "groupInvitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "groupInvitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
+            createInvitationLink(result, args, cache) {
+              if (result.createInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "invitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "invitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
+            createGroupInvitationLink(result, args, cache) {
+              if (result.createGroupInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "groupInvitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "groupInvitationLink",
                       field.arguments
                     );
                   });

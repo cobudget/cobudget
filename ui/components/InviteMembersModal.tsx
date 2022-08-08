@@ -41,24 +41,48 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
 `;
 
 const ROUND_INVITE_LINK = gql`
-  query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink(roundId: $roundId) {
+  query InvitationLink($roundId: ID!) {
+    invitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const GROUP_INVITE_LINK = gql`
+  query GroupInvitationLink($groupId: ID!) {
+    groupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const CREATE_ROUND_INVITE_LINK = gql`
-  mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink(roundId: $roundId) {
+  mutation CreateInvitationLink($roundId: ID!) {
+    createInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const CREATE_GROUP_INVITE_LINK = gql`
+  mutation CreateGroupInvitationLink($groupId: ID!) {
+    createGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const DELETE_ROUND_INVITE_LINK = gql`
-  mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink(roundId: $roundId) {
+  mutation DeleteInvitationLink($roundId: ID!) {
+    deleteInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const DELETE_GROUP_INVITE_LINK = gql`
+  mutation DeleteGroupInvitationLink($groupId: ID!) {
+    deleteGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
@@ -99,18 +123,26 @@ const InviteMembersModal = ({
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
-  const [{ data: inviteLink }] = useQuery({
-    query: ROUND_INVITE_LINK,
-    variables: { roundId },
-  });
+  const [{ data: inviteLink }] = useQuery(
+    roundId
+      ? {
+          query: ROUND_INVITE_LINK,
+          variables: { roundId },
+        }
+      : {
+          query: GROUP_INVITE_LINK,
+          variables: { groupId: currentGroup?.id },
+        }
+  );
   const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
-    CREATE_ROUND_INVITE_LINK
+    roundId ? CREATE_ROUND_INVITE_LINK : CREATE_GROUP_INVITE_LINK
   );
   const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(
-    DELETE_ROUND_INVITE_LINK
+    roundId ? DELETE_ROUND_INVITE_LINK : DELETE_GROUP_INVITE_LINK
   );
 
-  const link = inviteLink?.roundInvitationLink?.link;
+  const link =
+    inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
 
   return (
     <>
@@ -227,9 +259,9 @@ const InviteMembersModal = ({
                   <span className="mt-2 ml-2">
                     <IconButton
                       onClick={() => {
-                        deleteInviteLink({
-                          roundId,
-                        }).then((result) => {
+                        deleteInviteLink(
+                          roundId ? { roundId } : { groupId: currentGroup?.id }
+                        ).then((result) => {
                           if (result.error) {
                             return toast.error(
                               intl.formatMessage({
@@ -264,9 +296,15 @@ const InviteMembersModal = ({
                 className="mr-2"
                 loading={createInviteLoading}
                 onClick={() => {
-                  createInviteLink({
-                    roundId,
-                  }).then((result) => {
+                  createInviteLink(
+                    roundId
+                      ? {
+                          roundId,
+                        }
+                      : {
+                          groupId: currentGroup?.id,
+                        }
+                  ).then((result) => {
                     if (result.error) {
                       return toast.error(
                         intl.formatMessage({

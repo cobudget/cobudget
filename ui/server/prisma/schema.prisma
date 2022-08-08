@@ -110,6 +110,7 @@ model Group {
   groupMembers GroupMember[]
   rounds       Round[]
   discourse    DiscourseConfig?
+  inviteNonce  Int?
 
   finishedTodos        Boolean @default(false)
   experimentalFeatures Boolean @default(false)

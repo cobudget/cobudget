@@ -41,6 +41,11 @@ import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
 import { updateFundedPercentage } from "../resolvers/helpers";
+import {
+  createGroupInvitationLink,
+  deleteGroupInvitationLink,
+  groupInvitationLink,
+} from "./group";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -126,7 +131,7 @@ const isCollModOrAdmin = async (parent, { bucketId, roundId }, { user }) => {
   return skip;
 };
 
-const isGroupAdmin = async (parent, { groupId }, { user }) => {
+export const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
   const groupMember = await prisma.groupMember.findUnique({
     where: {
@@ -249,7 +254,10 @@ const resolvers = {
         return null;
       }
     },
-    roundInvitationLink: async (parent, { roundId }, { user }) => {
+
+    groupInvitationLink,
+
+    invitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         !!user &&
         isCollAdmin({
@@ -760,7 +768,11 @@ const resolvers = {
         });
       }
     ),
-    createRoundInvitationLink: async (parent, { roundId }, { user }) => {
+
+    createGroupInvitationLink,
+    deleteGroupInvitationLink,
+
+    createInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         (await !!user) &&
         isCollAdmin({
@@ -781,7 +793,7 @@ const resolvers = {
         link: round.inviteNonce,
       };
     },
-    deleteRoundInvitationLink: async (parent, { roundId }, { user }) => {
+    deleteInvitationLink: async (parent, { roundId }, { user }) => {
       const isAdmin =
         (await !!user) &&
         isCollAdmin({
@@ -801,7 +813,7 @@ const resolvers = {
         link: null,
       };
     },
-    joinRoundInvitationLink: async (parent, { token }, { user }) => {
+    joinInvitationLink: async (parent, { token }, { user }) => {
       if (!user) {
         throw new Error("You need to be logged in to join the group");
       }
@@ -812,31 +824,47 @@ const resolvers = {
         throw new Error("Invalid invitation link");
       }
 
-      const { roundId, nonce: inviteNonce } = payload;
+      const { roundId, groupId, nonce: inviteNonce } = payload;
 
-      const round = await prisma.round.findFirst({
-        where: { id: roundId, inviteNonce },
-      });
+      if (roundId) {
+        const round = await prisma.round.findFirst({
+          where: { id: roundId, inviteNonce },
+        });
 
-      if (!round) {
-        throw new Error("Round link expired");
+        if (!round) {
+          throw new Error("Round link expired");
+        }
+
+        const isApproved = true;
+        const roundMember = await prisma.roundMember.upsert({
+          where: { userId_roundId: { userId: user.id, roundId } },
+          create: {
+            round: { connect: { id: roundId } },
+            user: { connect: { id: user.id } },
+            isApproved,
+            statusAccount: { create: {} },
+            incomingAccount: { create: {} },
+            outgoingAccount: { create: {} },
+          },
+          update: { isApproved, hasJoined: true, isRemoved: false },
+        });
+
+        return { id: roundMember.id, roundId: roundMember.roundId };
+      } else {
+        const group = await prisma.group.findFirst({
+          where: { id: groupId, inviteNonce },
+        });
+
+        if (!group) {
+          throw new Error("Group invitation link expired");
+        }
+
+        const groupMember = await prisma.groupMember.create({
+          data: { userId: user.id, groupId: groupId },
+        });
+
+        return { id: groupMember.id, groupId: groupMember.groupId };
       }
-
-      const isApproved = true;
-      const roundMember = await prisma.roundMember.upsert({
-        where: { userId_roundId: { userId: user.id, roundId } },
-        create: {
-          round: { connect: { id: roundId } },
-          user: { connect: { id: user.id } },
-          isApproved,
-          statusAccount: { create: {} },
-          incomingAccount: { create: {} },
-          outgoingAccount: { create: {} },
-        },
-        update: { isApproved, hasJoined: true, isRemoved: false },
-      });
-
-      return roundMember;
     },
     deleteRound: combineResolvers(
       isCollOrGroupAdmin,
@@ -2347,6 +2375,20 @@ const resolvers = {
         },
       });
       return u.name;
+    },
+  },
+  InvitedMember: {
+    round: async ({ roundId }) => {
+      if (roundId) {
+        return prisma.round.findUnique({ where: { id: roundId } });
+      }
+      return null;
+    },
+    group: async ({ groupId }) => {
+      if (groupId) {
+        return prisma.group.findUnique({ where: { id: groupId } });
+      }
+      return null;
     },
   },
   GroupMember: {
