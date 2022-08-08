@@ -36,7 +36,11 @@ import { sign, verify } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import validateUsername from "utils/validateUsername";
 import { updateFundedPercentage } from "../resolvers/helpers";
-import { createGroupInvitationLink, deleteGroupInvitationLink, groupInvitationLink } from "./group";
+import {
+  createGroupInvitationLink,
+  deleteGroupInvitationLink,
+  groupInvitationLink,
+} from "./group";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -835,9 +839,8 @@ const resolvers = {
           update: { isApproved, hasJoined: true, isRemoved: false },
         });
 
-        return {id: roundMember.id, roundId: roundMember.roundId};
-      }
-      else {
+        return { id: roundMember.id, roundId: roundMember.roundId };
+      } else {
         const group = await prisma.group.findFirst({
           where: { id: groupId, inviteNonce },
         });
@@ -850,7 +853,7 @@ const resolvers = {
           data: { userId: user.id, groupId: groupId },
         });
 
-        return {id: groupMember.id, groupId: groupMember.groupId};
+        return { id: groupMember.id, groupId: groupMember.groupId };
       }
     },
     deleteRound: combineResolvers(
@@ -2361,7 +2364,7 @@ const resolvers = {
         return prisma.group.findUnique({ where: { id: groupId } });
       }
       return null;
-    }
+    },
   },
   GroupMember: {
     hasDiscourseApiKey: (groupMember) => !!groupMember.discourseApiKey,

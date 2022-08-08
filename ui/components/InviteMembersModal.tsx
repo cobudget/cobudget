@@ -124,15 +124,15 @@ const InviteMembersModal = ({
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
   const [{ data: inviteLink }] = useQuery(
-    roundId ?
-    {
-      query: ROUND_INVITE_LINK,
-      variables: { roundId },
-    } :
-    {
-      query: GROUP_INVITE_LINK,
-      variables: { groupId: currentGroup?.id }
-    }
+    roundId
+      ? {
+          query: ROUND_INVITE_LINK,
+          variables: { roundId },
+        }
+      : {
+          query: GROUP_INVITE_LINK,
+          variables: { groupId: currentGroup?.id },
+        }
   );
   const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
     roundId ? CREATE_ROUND_INVITE_LINK : CREATE_GROUP_INVITE_LINK
@@ -141,7 +141,8 @@ const InviteMembersModal = ({
     roundId ? DELETE_ROUND_INVITE_LINK : DELETE_GROUP_INVITE_LINK
   );
 
-  const link = inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
+  const link =
+    inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
 
   return (
     <>
@@ -259,9 +260,7 @@ const InviteMembersModal = ({
                     <IconButton
                       onClick={() => {
                         deleteInviteLink(
-                          roundId ?
-                          { roundId } :
-                          { groupId: currentGroup?.id }
+                          roundId ? { roundId } : { groupId: currentGroup?.id }
                         ).then((result) => {
                           if (result.error) {
                             return toast.error(
@@ -297,11 +296,15 @@ const InviteMembersModal = ({
                 className="mr-2"
                 loading={createInviteLoading}
                 onClick={() => {
-                  createInviteLink(roundId ? {
-                    roundId,
-                  } : {
-                    groupId: currentGroup?.id
-                   }).then((result) => {
+                  createInviteLink(
+                    roundId
+                      ? {
+                          roundId,
+                        }
+                      : {
+                          groupId: currentGroup?.id,
+                        }
+                  ).then((result) => {
                     if (result.error) {
                       return toast.error(
                         intl.formatMessage({

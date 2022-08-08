@@ -34,13 +34,12 @@ function InviteToken() {
     if (data?.joinInvitationLink?.id) {
       if (data?.joinInvitationLink?.group?.slug) {
         router.push({
-          pathname: "/" + (data?.joinInvitationLink?.group?.slug),
+          pathname: "/" + data?.joinInvitationLink?.group?.slug,
         });
-      }
-      else {
+      } else {
         window.alert(1);
         router.push({
-          pathname: "/c/" + (data?.joinInvitationLink?.round?.slug),
+          pathname: "/c/" + data?.joinInvitationLink?.round?.slug,
         });
       }
     }
