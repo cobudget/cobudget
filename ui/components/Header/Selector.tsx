@@ -82,7 +82,7 @@ export default function Selector({
                           className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                         />
                       )}
-                      <p className="truncate">{groupMember.group.name}</p>
+                      <span className="truncate">{groupMember.group.name}</span>
                     </LinkItem>
                   )}
                 </Menu.Item>
@@ -120,9 +120,9 @@ export default function Selector({
                               className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                             />
                           )}
-                          <p className="truncate">
+                          <span className="truncate">
                             {roundMember.round.group.name}
-                          </p>
+                          </span>
                         </LinkItem>
                       )}
                     </Menu.Item>
