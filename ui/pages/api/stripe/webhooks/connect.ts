@@ -21,7 +21,7 @@ export default handler().post(async (req, res) => {
         event = stripe.webhooks.constructEvent(
             rawBody,
             sig,
-            process.env.STRIPE_WEBHOOK_SECRET
+            process.env.STRIPE_CONNECT_WEBHOOK_SECRET
         );
     } catch (err) {
         console.error("Webhook error:", err);
