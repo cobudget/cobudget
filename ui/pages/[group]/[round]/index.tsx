@@ -433,7 +433,7 @@ const getStandardFilter = (bucketStatusCount) => {
     const statusNames = Object.keys(bucketStatusCount);
     const values = Object.values(bucketStatusCount);
     stdFilter = statusNames
-      .filter((status, i) => !!values[i])
+      //.filter((status, i) => !!values[i])
       .filter((status) => status !== "__typename");
   }
   return stdFilter;
