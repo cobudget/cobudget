@@ -71,3 +71,53 @@ export const isCollMemberOrGroupAdmin = async (
     );
   return skip;
 };
+
+export const isBucketCocreatorOrCollAdminOrMod = async (
+  parent,
+  { bucketId },
+  { user }
+) => {
+  if (!user) throw new Error("You need to be logged in");
+  if (!bucketId) throw new Error("You need to provide bucketId");
+
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: bucketId },
+    include: { cocreators: true, round: true },
+  });
+
+  const roundMember = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: user.id,
+        roundId: bucket.roundId,
+      },
+    },
+  });
+
+  if (
+    !roundMember ||
+    (!bucket.cocreators.map((m) => m.id).includes(roundMember.id) &&
+      !roundMember.isAdmin &&
+      !roundMember.isModerator)
+  )
+    throw new Error("You are not a cocreator of this bucket.");
+
+  return skip;
+};
+
+export const isCollModOrAdmin = async (
+  parent,
+  { bucketId, roundId },
+  { user }
+) => {
+  if (!user) throw new Error("You need to be logged in");
+  const roundMember = await getRoundMember({
+    userId: user.id,
+    bucketId,
+    roundId,
+  });
+
+  if (!(roundMember?.isModerator || roundMember?.isAdmin))
+    throw new Error("You need to be admin or moderator of the round");
+  return skip;
+};
