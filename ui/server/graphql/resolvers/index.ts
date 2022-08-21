@@ -6,18 +6,17 @@ import { GraphQLJSONObject } from "graphql-type-json";
 import { Kind } from "graphql/language";
 import dayjs from "dayjs";
 import { combineResolvers, skip } from "graphql-resolvers";
-import { contribute, getGroup } from "../../controller";
+import { getGroup } from "../../controller";
 import {
   bucketIncome,
   bucketMinGoal,
   bucketTotalContributions,
   isCollOrGroupAdmin,
   isGrantingOpen,
-  roundMemberBalance,
   statusTypeToQuery,
   stripeIsConnected,
   bucketMaxGoal,
-  getLanguageProgress,
+  getLanguageProgress as languageProgressPage,
 } from "./helpers";
 
 //queries
@@ -35,6 +34,7 @@ import {
   roundMutations,
   bucketMutations,
 } from "./mutations";
+import { GroupMember, InvitedMember, RoundMember, User } from "./types";
 
 export const isGroupAdmin = async (parent, { groupId }, { user }) => {
   if (!user) throw new Error("You need to be logged in");
@@ -47,394 +47,26 @@ export const isGroupAdmin = async (parent, { groupId }, { user }) => {
   return skip;
 };
 
-const isBucketCocreatorOrCollAdminOrMod = async (
-  parent,
-  { bucketId },
-  { user }
-) => {
-  if (!user) throw new Error("You need to be logged in");
-  if (!bucketId) throw new Error("You need to provide bucketId");
-
-  const bucket = await prisma.bucket.findUnique({
-    where: { id: bucketId },
-    include: { cocreators: true, round: true },
-  });
-
-  const roundMember = await prisma.roundMember.findUnique({
-    where: {
-      userId_roundId: {
-        userId: user.id,
-        roundId: bucket.roundId,
-      },
-    },
-  });
-
-  if (
-    !roundMember ||
-    (!bucket.cocreators.map((m) => m.id).includes(roundMember.id) &&
-      !roundMember.isAdmin &&
-      !roundMember.isModerator)
-  )
-    throw new Error("You are not a cocreator of this bucket.");
-
-  return skip;
-};
-
 const resolvers = {
   Query: {
     ...userQueries,
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
-
-    languageProgressPage: async () => {
-      return getLanguageProgress();
-    },
+    languageProgressPage,
   },
   Mutation: {
     ...userMutations,
     ...groupMutations,
     ...roundMutations,
     ...bucketMutations,
-
-    addCustomField: combineResolvers(
-      isCollOrGroupAdmin,
-      async (
-        parent,
-        { roundId, customField: { name, description, type, limit, isRequired } }
-      ) => {
-        const customFields = await prisma.field.findMany({
-          where: { roundId: roundId },
-        });
-
-        const position =
-          customFields
-            .map((g) => g.position)
-            .reduce((a, b) => Math.max(a, b), 1000) + 1;
-
-        const customField = await prisma.field.create({
-          data: {
-            roundId: roundId,
-            name,
-            description,
-            type,
-            limit,
-            isRequired,
-            position,
-          },
-          include: { round: true },
-        });
-        return customField.round;
-      }
-    ),
-    // Based on https://softwareengineering.stackexchange.com/a/195317/54663
-    setCustomFieldPosition: combineResolvers(
-      isCollOrGroupAdmin,
-      async (parent, { roundId, fieldId, newPosition }) => {
-        const round = await prisma.round.findUnique({
-          where: { id: roundId },
-          include: { fields: true },
-        });
-        if (!round.fields.map((g) => g.id).includes(fieldId))
-          throw new Error("This field is not part of this round");
-
-        const field = await prisma.field.update({
-          where: { id: fieldId },
-          data: { position: newPosition },
-          include: { round: true },
-        });
-
-        return field.round;
-      }
-    ),
-    editCustomField: combineResolvers(
-      isCollOrGroupAdmin,
-      async (
-        parent,
-        {
-          roundId,
-          fieldId,
-          customField: { name, description, type, limit, isRequired },
-        }
-      ) => {
-        const round = await prisma.round.findUnique({
-          where: { id: roundId },
-          include: { fields: true },
-        });
-        if (!round.fields.map((g) => g.id).includes(fieldId))
-          throw new Error("This field is not part of this round");
-
-        const field = await prisma.field.update({
-          where: { id: fieldId },
-          data: { name, description, type, limit, isRequired },
-          include: { round: true },
-        });
-
-        return field.round;
-      }
-    ),
-    deleteCustomField: combineResolvers(
-      isCollOrGroupAdmin,
-      async (parent, { roundId, fieldId }) =>
-        prisma.round.update({
-          where: { id: roundId },
-          data: { fields: { delete: { id: fieldId } } },
-        })
-    ),
-
-    editBucketCustomField: combineResolvers(
-      isBucketCocreatorOrCollAdminOrMod,
-      async (
-        parent,
-        { bucketId, customField: { fieldId, value } },
-        { user, eventHub }
-      ) => {
-        const updated = await prisma.bucket.update({
-          where: { id: bucketId },
-          data: {
-            FieldValues: {
-              upsert: {
-                where: { bucketId_fieldId: { bucketId: bucketId, fieldId } },
-                create: { fieldId, value },
-                update: { value },
-              },
-            },
-          },
-          include: {
-            Images: true,
-            FieldValues: true,
-            BudgetItems: true,
-            round: {
-              include: {
-                fields: true,
-                group: {
-                  include: {
-                    discourse: true,
-                    groupMembers: { where: { userId: user.id } },
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        await eventHub.publish("edit-bucket", {
-          currentGroup: updated.round.group,
-          currentGroupMember: updated.round.group?.groupMembers?.[0],
-          round: updated.round,
-          bucket: updated,
-        });
-
-        return updated;
-      }
-    ),
-    contribute: async (_, { roundId, bucketId, amount }, { user }) => {
-      return contribute({ roundId, bucketId, amount, user });
-    },
   },
 
-  RoundMember: {
-    round: async (member) => {
-      return await prisma.round.findUnique({
-        where: { id: member.roundId },
-      });
-    },
-    user: async (member) =>
-      prisma.user.findUnique({
-        where: { id: member.userId },
-      }),
-    balance: async (member) => {
-      return roundMemberBalance(member);
-    },
-    email: async (member, _, { user }) => {
-      if (!user) return null;
-      const currentCollMember = await prisma.roundMember.findUnique({
-        where: {
-          userId_roundId: {
-            userId: user.id,
-            roundId: member.roundId,
-          },
-        },
-      });
+  RoundMember,
+  InvitedMember,
+  GroupMember,
+  User,
 
-      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
-        return null;
-
-      const u = await prisma.user.findFirst({
-        where: {
-          collMemberships: {
-            some: { id: member.id },
-          },
-        },
-      });
-      return u.email;
-    },
-    name: async (member, _, { user }) => {
-      if (!user) return null;
-      const currentCollMember = await prisma.roundMember.findUnique({
-        where: {
-          userId_roundId: {
-            userId: user.id,
-            roundId: member.roundId,
-          },
-        },
-      });
-
-      if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
-        return null;
-
-      const u = await prisma.user.findFirst({
-        where: {
-          collMemberships: {
-            some: { id: member.id },
-          },
-        },
-      });
-      return u.name;
-    },
-  },
-  InvitedMember: {
-    round: async ({ roundId }) => {
-      if (roundId) {
-        return prisma.round.findUnique({ where: { id: roundId } });
-      }
-      return null;
-    },
-    group: async ({ groupId }) => {
-      if (groupId) {
-        return prisma.group.findUnique({ where: { id: groupId } });
-      }
-      return null;
-    },
-  },
-  GroupMember: {
-    hasDiscourseApiKey: (groupMember) => !!groupMember.discourseApiKey,
-    user: async (groupMember) => {
-      return await prisma.user.findUnique({
-        where: { id: groupMember.userId },
-      });
-    },
-    email: async (member, _, { user }) => {
-      if (!user) return null;
-      const currentGroupMember = await prisma.groupMember.findUnique({
-        where: {
-          groupId_userId: {
-            groupId: member.groupId,
-            userId: user.id,
-          },
-        },
-      });
-
-      if (!(currentGroupMember?.isAdmin || currentGroupMember.id == member.id))
-        return null;
-
-      const u = await prisma.user.findFirst({
-        where: {
-          groupMemberships: {
-            some: { id: member.id },
-          },
-        },
-      });
-      return u.email;
-    },
-    name: async (member, _, { user }) => {
-      if (!user) return null;
-      const currentGroupMember = await prisma.groupMember.findUnique({
-        where: {
-          groupId_userId: {
-            groupId: member.groupId,
-            userId: user.id,
-          },
-        },
-      });
-
-      if (!(currentGroupMember?.isAdmin || currentGroupMember.id == member.id))
-        return null;
-
-      const u = await prisma.user.findFirst({
-        where: {
-          groupMemberships: {
-            some: { id: member.id },
-          },
-        },
-      });
-      return u.name;
-    },
-    group: async (groupMember) =>
-      prisma.group.findUnique({
-        where: { id: groupMember.groupId },
-      }),
-  },
-  User: {
-    currentGroupMember: async (parent, { groupSlug }, { user }) => {
-      if (user?.id !== parent.id) return null;
-      if (!groupSlug) return null;
-      if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c")
-        return null;
-
-      return prisma.groupMember.findFirst({
-        where: { group: { slug: groupSlug }, userId: user.id },
-      });
-    },
-    currentCollMember: async (parent, { groupSlug, roundSlug }, { user }) => {
-      if (user?.id !== parent.id) return null;
-      if (!roundSlug) return null;
-      return prisma.roundMember.findFirst({
-        where: {
-          round: {
-            slug: roundSlug,
-            group: { slug: groupSlug },
-          },
-          userId: user.id,
-        },
-      });
-    },
-    groupMemberships: async (user) =>
-      prisma.groupMember.findMany({ where: { userId: user.id } }),
-    roundMemberships: async (user) =>
-      prisma.roundMember.findMany({
-        where: { userId: user.id, round: { isNot: { deleted: true } } },
-      }),
-    isRootAdmin: () => false, //TODO: add field in prisma
-    avatar: () => null, //TODO: add avatars
-    email: (parent, _, { user }) => {
-      if (!user) return null;
-      if (parent.id !== user.id) return null;
-      if (parent.email) return parent.email;
-    },
-    // name: async (parent, _, { user }) => {
-    //   if (!user) return null;
-    //   if (parent.id !== user.id) return null;
-    //   if (parent.name) return parent.name;
-    //   // we end up here when requesting your own name but it's missing on the parent
-    //   return (
-    //     await prisma.user.findUnique({
-    //       where: { id: parent.id },
-    //       select: { name: true },
-    //     })
-    //   ).name;
-    // },
-    username: async (parent) => {
-      if (!parent.username && parent.id) {
-        return (
-          await prisma.user.findUnique({
-            where: { id: parent.id },
-            select: { username: true },
-          })
-        ).username;
-      }
-      return parent.username;
-    },
-    emailSettings: async (parent, args, { user }) => {
-      if (user?.id !== parent.id) return null;
-
-      return prisma.emailSettings.upsert({
-        where: { userId: parent.id },
-        create: { userId: parent.id },
-        update: {},
-      });
-    },
-  },
   Group: {
     info: (group) => {
       return group.info && group.info.length

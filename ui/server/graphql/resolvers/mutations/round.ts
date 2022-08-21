@@ -1,6 +1,6 @@
 import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
-import { isGroupAdmin } from "../auth";
+import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getRoundMember,
@@ -587,3 +587,138 @@ export const joinRound = async (parent, { roundId }, { user }) => {
 
   return roundMember;
 };
+
+export const addCustomField = combineResolvers(
+  isCollOrGroupAdmin,
+  async (
+    parent,
+    { roundId, customField: { name, description, type, limit, isRequired } }
+  ) => {
+    const customFields = await prisma.field.findMany({
+      where: { roundId: roundId },
+    });
+
+    const position =
+      customFields
+        .map((g) => g.position)
+        .reduce((a, b) => Math.max(a, b), 1000) + 1;
+
+    const customField = await prisma.field.create({
+      data: {
+        roundId: roundId,
+        name,
+        description,
+        type,
+        limit,
+        isRequired,
+        position,
+      },
+      include: { round: true },
+    });
+    return customField.round;
+  }
+);
+
+// Based on https://softwareengineering.stackexchange.com/a/195317/54663
+combineResolvers(
+  isCollOrGroupAdmin,
+  async (parent, { roundId, fieldId, newPosition }) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { fields: true },
+    });
+    if (!round.fields.map((g) => g.id).includes(fieldId))
+      throw new Error("This field is not part of this round");
+
+    const field = await prisma.field.update({
+      where: { id: fieldId },
+      data: { position: newPosition },
+      include: { round: true },
+    });
+
+    return field.round;
+  }
+);
+
+export const editCustomField = combineResolvers(
+  isCollOrGroupAdmin,
+  async (
+    parent,
+    {
+      roundId,
+      fieldId,
+      customField: { name, description, type, limit, isRequired },
+    }
+  ) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { fields: true },
+    });
+    if (!round.fields.map((g) => g.id).includes(fieldId))
+      throw new Error("This field is not part of this round");
+
+    const field = await prisma.field.update({
+      where: { id: fieldId },
+      data: { name, description, type, limit, isRequired },
+      include: { round: true },
+    });
+
+    return field.round;
+  }
+);
+
+export const deleteCustomField = combineResolvers(
+  isCollOrGroupAdmin,
+  async (parent, { roundId, fieldId }) =>
+    prisma.round.update({
+      where: { id: roundId },
+      data: { fields: { delete: { id: fieldId } } },
+    })
+);
+
+export const editBucketCustomField = combineResolvers(
+  isBucketCocreatorOrCollAdminOrMod,
+  async (
+    parent,
+    { bucketId, customField: { fieldId, value } },
+    { user, eventHub }
+  ) => {
+    const updated = await prisma.bucket.update({
+      where: { id: bucketId },
+      data: {
+        FieldValues: {
+          upsert: {
+            where: { bucketId_fieldId: { bucketId: bucketId, fieldId } },
+            create: { fieldId, value },
+            update: { value },
+          },
+        },
+      },
+      include: {
+        Images: true,
+        FieldValues: true,
+        BudgetItems: true,
+        round: {
+          include: {
+            fields: true,
+            group: {
+              include: {
+                discourse: true,
+                groupMembers: { where: { userId: user.id } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await eventHub.publish("edit-bucket", {
+      currentGroup: updated.round.group,
+      currentGroupMember: updated.round.group?.groupMembers?.[0],
+      round: updated.round,
+      bucket: updated,
+    });
+
+    return updated;
+  }
+);

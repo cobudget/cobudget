@@ -9,7 +9,8 @@ import dayjs from "dayjs";
 import { isAndGetCollMember, updateFundedPercentage } from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
-const { groupHasDiscourse, generateComment } = subscribers;
+import { contribute as contributeToBucket } from "server/controller";
+const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
   isCollMember,
@@ -810,3 +811,7 @@ export const cancelFunding = combineResolvers(
     return updated;
   }
 );
+
+export const contribute = async (_, { roundId, bucketId, amount }, { user }) => {
+  return contributeToBucket({ roundId, bucketId, amount, user });
+}
