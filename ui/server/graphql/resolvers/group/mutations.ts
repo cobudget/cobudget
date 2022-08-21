@@ -1,8 +1,10 @@
-import prisma from "../../prisma";
+import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
-import { isGroupAdmin } from "./auth";
+import { isGroupAdmin, isRootAdmin } from "../auth";
 import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
+import { getGroup } from "server/controller";
+import discourse from "../../../lib/discourse";
 
 export const createGroupInvitationLink = combineResolvers(
   isGroupAdmin,
@@ -27,23 +29,6 @@ export const deleteGroupInvitationLink = combineResolvers(
     });
     return {
       link: null,
-    };
-  }
-);
-
-export const groupInvitationLink = combineResolvers(
-  isGroupAdmin,
-  async (_, { groupId }) => {
-    const group = await prisma.group.findFirst({
-      where: {
-        id: groupId,
-      },
-    });
-    return {
-      link:
-        group.inviteNonce !== null
-          ? appLink("/invite/" + sign({ nonce: group.inviteNonce, groupId }))
-          : null,
     };
   }
 );
