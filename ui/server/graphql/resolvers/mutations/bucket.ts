@@ -812,6 +812,10 @@ export const cancelFunding = combineResolvers(
   }
 );
 
-export const contribute = async (_, { roundId, bucketId, amount }, { user }) => {
+export const contribute = async (
+  _,
+  { roundId, bucketId, amount },
+  { user }
+) => {
   return contributeToBucket({ roundId, bucketId, amount, user });
-}
+};
