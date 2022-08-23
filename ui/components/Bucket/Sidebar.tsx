@@ -20,6 +20,8 @@ import toast from "react-hot-toast";
 import Monster from "components/Monster";
 import capitalize from "utils/capitalize";
 import isRtl from "../../utils/isRTL";
+import dayjs from "dayjs";
+import Label from "../../components/Label";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -143,7 +145,13 @@ const css = {
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
+const BucketSidebar = ({
+  bucket,
+  currentUser,
+  currentGroup,
+  canEdit,
+  showBucketReview,
+}) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
@@ -156,6 +164,17 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
 
   const intl = useIntl();
+
+  const statusList = {
+    PENDING_APPROVAL: intl.formatMessage({
+      defaultMessage: "Pending Approval",
+    }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
+    COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
+    ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
+  };
 
   const canApproveBucket =
     (!bucket.round.requireBucketApproval && canEdit) ||
@@ -208,24 +227,24 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                   handleClose={() => setContributeModalOpen(false)}
                   bucket={bucket}
                   currentUser={currentUser}
+                  currentGroup={currentGroup}
                 />
               )}
             </>
           )}
-          {showBucketReview ||
-          canEdit ||
-          bucket.cocreators.find(
-            (co) => co.id === currentUser?.currentCollMember?.id
-          ) ? (
-            <Monster bucket={bucket} />
-          ) : null}
+          {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && (
             <Button
               color={bucket.round.color}
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to accept and finalize funding for this ${process.env.BUCKET_NAME_SINGULAR}? This can't be undone.`
+                  intl.formatMessage(
+                    {
+                      defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.`,
+                    },
+                    { bucketName: process.env.BUCKET_NAME_SINGULAR }
+                  )
                 ) &&
                 acceptFunding({ bucketId: bucket.id }).catch((err) =>
                   alert(err.message)
@@ -270,7 +289,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               fullWidth
               onClick={() =>
                 confirm(
-                  `Are you sure you would like to mark this ${process.env.BUCKET_NAME_SINGULAR} as completed? This can't be undone.`
+                  intl.formatMessage(
+                    {
+                      defaultMessage: `Are you sure you would like to mark this {bucketName} as completed? This can't be undone.`,
+                    },
+                    { bucketName: process.env.BUCKET_NAME_SINGULAR }
+                  )
                 ) &&
                 markAsCompleted({ bucketId: bucket.id }).then(
                   ({ data, error }) => {
@@ -285,7 +309,11 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           {canEdit && (
             <div className="relative">
               <div className="flex justify-end">
-                <Tooltip title="More actions" position="bottom" size="small">
+                <Tooltip
+                  title={intl.formatMessage({ defaultMessage: "More actions" })}
+                  position="bottom"
+                  size="small"
+                >
                   <IconButton onClick={() => setActionsDropdownOpen(true)}>
                     <DotsHorizontalIcon />
                   </IconButton>
@@ -348,7 +376,12 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                     className={css.dropdownButton}
                     onClick={() =>
                       confirm(
-                        `Are you sure you would like to delete this ${process.env.BUCKET_NAME_SINGULAR}?`
+                        intl.formatMessage(
+                          {
+                            defaultMessage: `Are you sure you would like to delete this {bucketName}?`,
+                          },
+                          { bucketName: process.env.BUCKET_NAME_SINGULAR }
+                        )
                       ) &&
                       deleteBucket({ bucketId: bucket.id }).then(
                         ({ error }) => {
@@ -365,7 +398,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                             toast.success(
                               `${capitalize(
                                 process.env.BUCKET_NAME_SINGULAR
-                              )} deleted`
+                              )} ${intl.formatMessage({
+                                defaultMessage: "deleted",
+                              })}`
                             );
                           }
                         }
@@ -381,9 +416,21 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
         </div>
       )}
       <div className="mt-5 space-y-5">
+        <div>
+          <div className="mr-2 font-medium ">
+            <FormattedMessage defaultMessage="Bucket Status" />
+          </div>
+          <span>
+            <Label className="mt-2 inline-block">
+              {statusList[bucket.status]}
+            </Label>
+          </span>
+        </div>
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">
-            <span className="mr-2 font-medium ">Co-creators</span>
+            <span className="mr-2 font-medium ">
+              <FormattedMessage defaultMessage="Co-creators" />
+            </span>
             {canEdit && (
               <div
                 className={
@@ -392,7 +439,9 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
                 }
               >
                 <Tooltip
-                  title="Edit co-creators"
+                  title={intl.formatMessage({
+                    defaultMessage: "Edit co-creators",
+                  })}
                   position="bottom"
                   size="small"
                 >
@@ -438,6 +487,7 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
               )}
             </div>
           </div>
+
           <EditCocreatorsModal
             open={cocreatorModalOpen}
             handleClose={() => setCocreatorModalOpen(false)}
@@ -447,6 +497,13 @@ const BucketSidebar = ({ bucket, currentUser, canEdit, showBucketReview }) => {
           />
         </div>
         <Tags bucket={bucket} canEdit={canEdit} />
+
+        <p className="italic text-gray-600 text-sm">
+          <FormattedMessage
+            defaultMessage="The bucket was created on {date}"
+            values={{ date: dayjs(bucket.createdAt).format("MMMM DD, YYYY") }}
+          />
+        </p>
       </div>
     </>
   );

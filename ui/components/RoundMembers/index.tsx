@@ -8,40 +8,10 @@ import LoadMore from "../LoadMore";
 import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/RoundMembers/SearchBar";
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
-export const ROUND_MEMBERS_QUERY = gql`
-  query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
-    approvedMembersPage: membersPage(
-      roundId: $roundId
-      isApproved: true
-      search: $search
-      offset: $offset
-      limit: $limit
-    ) {
-      moreExist
-      approvedMembers: members(
-        roundId: $roundId
-        isApproved: true
-        offset: $offset
-        limit: $limit
-      ) {
-        id
-        isAdmin
-        isModerator
-        isApproved
-        createdAt
-        balance
-        email
-        hasJoined
-        user {
-          id
-          username
-          name
-          verifiedEmail
-          avatar
-        }
-      }
-    }
+export const REQUESTS_TO_JOIN_QUERY = gql`
+  query Members($roundId: ID!) {
     requestsToJoinPage: membersPage(roundId: $roundId, isApproved: false) {
       requestsToJoin: members(roundId: $roundId, isApproved: false) {
         id
@@ -98,36 +68,19 @@ const DELETE_MEMBER = gql`
 `;
 
 const RoundMembers = ({ round, currentUser }) => {
-  const [searchString, setSearchString] = useState("");
-  const [{ data, fetching: loading, error }, searchApprovedMembers] = useQuery({
-    query: ROUND_MEMBERS_QUERY,
+  const [{ data, fetching: loading, error }] = useQuery({
+    query: REQUESTS_TO_JOIN_QUERY,
     variables: {
       roundId: round.id,
-      search: searchString,
       offset: 0,
       limit: 1000,
     },
-    pause: true,
   });
 
-  const moreExist = data?.approvedMembersPage?.moreExist || false;
+  const intl = useIntl();
   const requestsToJoin = data?.requestsToJoinPage?.requestsToJoin || [];
 
-  const debouncedSearchMembers = useMemo(() => {
-    return debounce(searchApprovedMembers, 300, { leading: true });
-  }, [searchApprovedMembers]);
-
-  const items = useMemo(() => {
-    const approvedMembers = data?.approvedMembersPage?.approvedMembers || [];
-    if (loading || !approvedMembers) {
-      return [];
-    }
-    return approvedMembers;
-  }, [data?.approvedMembersPage?.approvedMembers, loading]);
-
-  useEffect(() => {
-    debouncedSearchMembers();
-  }, [debouncedSearchMembers]);
+  const [searchString, setSearchString] = useState("");
 
   const [, updateMember] = useMutation(UPDATE_MEMBER);
 
@@ -160,14 +113,16 @@ const RoundMembers = ({ round, currentUser }) => {
           <SearchBar
             color={round.color}
             value={searchString}
-            placeholder="Search participants"
+            placeholder={intl.formatMessage({
+              defaultMessage: "Search participants",
+            })}
             onChange={(e) => setSearchString(e.target.value)}
             clearInput={() => setSearchString("")}
           />
           {isAdmin && (
             <div className="flex items-center space-x-2">
               <Button onClick={() => setInviteModalOpen(true)}>
-                Invite participants
+                <FormattedMessage defaultMessage="Invite participants" />
               </Button>
               {inviteModalOpen && (
                 <InviteMembersModal
@@ -180,22 +135,11 @@ const RoundMembers = ({ round, currentUser }) => {
         </div>
 
         <MembersTable
-          approvedMembers={items}
           updateMember={updateMember}
           deleteMember={deleteMember}
           round={round}
           isAdmin={isAdmin}
-        />
-        {/* TODO:fix */}
-        <LoadMore
-          moreExist={moreExist}
-          loading={loading}
-          onClick={
-            () => {
-              return;
-            }
-            //fetchMore({ variables: { offset: approvedMembers.length } })
-          }
+          searchString={searchString}
         />
       </div>
     </>

@@ -6,6 +6,7 @@ import Dependencies from "./Dependencies";
 import RealizersMissingIcon from "../RealizersMissingIcon";
 import Deliberations from "./Deliberations";
 import Markdown from "components/Markdown";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const LabelSpan = styled.span`
   font-weight: bold;
@@ -19,7 +20,9 @@ const CardSection = styled.div`
 const DetailViewBody = ({ node, isResp }) => (
   <CardBody>
     <CardText>
-      <LabelSpan>Guide:</LabelSpan>
+      <LabelSpan>
+        <FormattedMessage defaultMessage="Guide:" />
+      </LabelSpan>
       {node.guide &&
         (node.guide.name
           ? `${node.guide.name} (${node.guide.email})`
@@ -28,7 +31,9 @@ const DetailViewBody = ({ node, isResp }) => (
 
     {isResp && (
       <CardText>
-        <LabelSpan>Realizer:</LabelSpan>
+        <LabelSpan>
+          <FormattedMessage defaultMessage="Realizer:" />
+        </LabelSpan>
         {node.realizer &&
           (node.realizer.name
             ? `${node.realizer.name} (${node.realizer.email})`
@@ -38,7 +43,9 @@ const DetailViewBody = ({ node, isResp }) => (
     )}
 
     <CardSection>
-      <LabelSpan>Description:</LabelSpan>
+      <LabelSpan>
+        <FormattedMessage defaultMessage="Description:" />
+      </LabelSpan>
       <div>
         <Markdown source={node.description} />
       </div>
@@ -47,7 +54,9 @@ const DetailViewBody = ({ node, isResp }) => (
     {isResp && (
       <>
         <CardSection>
-          <LabelSpan>Related discussions:</LabelSpan>
+          <LabelSpan>
+            <FormattedMessage defaultMessage="Related discussions:" />
+          </LabelSpan>
           <Deliberations
             nodeType={node.__typename}
             nodeId={node.nodeId}
@@ -56,7 +65,9 @@ const DetailViewBody = ({ node, isResp }) => (
         </CardSection>
 
         <CardSection>
-          <LabelSpan>Depends on:</LabelSpan>
+          <LabelSpan>
+            <FormattedMessage defaultMessage="Depends on:" />
+          </LabelSpan>
           <Dependencies
             nodeType={node.__typename}
             nodeId={node.nodeId}
@@ -65,7 +76,9 @@ const DetailViewBody = ({ node, isResp }) => (
         </CardSection>
 
         <CardSection>
-          <LabelSpan>What depends on this:</LabelSpan>
+          <LabelSpan>
+            <FormattedMessage defaultMessage="What depends on this:" />
+          </LabelSpan>
           <Dependencies
             nodeType={node.__typename}
             nodeId={node.nodeId}

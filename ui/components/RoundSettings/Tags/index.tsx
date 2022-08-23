@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import TextField from "components/TextField";
 import Button from "components/Button";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const CREATE_TAG = gql`
   mutation createTag($roundId: ID!, $tagValue: String!) {
@@ -37,10 +38,13 @@ const Tags = ({ round, currentGroup }) => {
   } = useForm();
   const [{ fetching }, createTag] = useMutation(CREATE_TAG);
   const [{ fetching: fetchingDelete }, deleteTag] = useMutation(DELETE_TAG);
+  const intl = useIntl();
 
   return (
     <div className="mx-6">
-      <h1 className="text-2xl font-semibold mb-6">Tags</h1>
+      <h1 className="text-2xl font-semibold mb-6">
+        <FormattedMessage defaultMessage="Tags" />
+      </h1>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
         {round.tags.map((tag) => (
@@ -59,12 +63,15 @@ const Tags = ({ round, currentGroup }) => {
               disabled={fetchingDelete}
               onClick={() =>
                 confirm(
-                  "Are you sure you want to permanently delete this tag?"
+                  intl.formatMessage({
+                    defaultMessage:
+                      "Are you sure you want to permanently delete this tag?",
+                  })
                 ) && deleteTag({ roundId: round.id, tagId: tag.id })
               }
               className="ml-2 px-2 rounded-md bg-gray-400 hover:bg-gray-700 hover:text-gray-100"
             >
-              Delete
+              <FormattedMessage defaultMessage="Delete" />
             </button>
           </div>
         ))}
@@ -82,8 +89,8 @@ const Tags = ({ round, currentGroup }) => {
       >
         <TextField
           name="tagValue"
-          label="Create a new tag"
-          placeholder="New tag name"
+          label={intl.formatMessage({ defaultMessage: "Create a new tag" })}
+          placeholder={intl.formatMessage({ defaultMessage: "New tag name" })}
           inputRef={register}
           className="my-4"
         />
@@ -95,7 +102,7 @@ const Tags = ({ round, currentGroup }) => {
             disabled={!isDirty}
             loading={fetching}
           >
-            Create
+            <FormattedMessage defaultMessage="Create" />
           </Button>
         </div>
       </form>

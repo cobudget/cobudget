@@ -53,6 +53,39 @@ const send = async (mail: SendEmailInput) => {
   }
 };
 
+const sendBatch = async (mails: SendEmailInput[]) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "Not sending " + mails.length + " emails in development (batch)"
+    );
+  } else {
+    try {
+      // split into batches of 500 because of Postmark limit on emails per batch call
+      const batches = [];
+      for (let i = 0; i < mails.length; i += 500) {
+        batches.push(mails.slice(i, i + 500));
+      }
+
+      await Promise.all(
+        batches.map((batch) =>
+          client.sendEmailBatch(
+            batch.map((mail) => ({
+              From: process.env.FROM_EMAIL,
+              To: mail.to,
+              Subject: mail.subject,
+              TextBody: mail.text,
+              HtmlBody: mail.html,
+            }))
+          )
+        )
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+};
+
 const checkEnv = () => {
   if (!process.env.FROM_EMAIL) {
     throw new Error("Add FROM_EMAIL env variable.");
@@ -72,5 +105,5 @@ export const sendEmail = async (input: SendEmailInput) => {
 
 export const sendEmails = async (inputs: SendEmailInput[]) => {
   checkEnv();
-  await Promise.all(inputs.map((mail) => send(mail)));
+  await sendBatch(inputs);
 };

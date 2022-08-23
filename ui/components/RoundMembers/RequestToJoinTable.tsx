@@ -10,6 +10,7 @@ import {
 import toast from "react-hot-toast";
 import Avatar from "../Avatar";
 import Button from "../Button";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const RequestToJoinTable = ({
   requestsToJoin,
@@ -17,23 +18,37 @@ const RequestToJoinTable = ({
   deleteMember,
   roundId,
 }) => {
+  const intl = useIntl();
   if (requestsToJoin.length === 0) return null;
 
   return (
     <>
       <div className="mb-8">
         <h2 className="text-xl mb-3 font-semibold">
-          {requestsToJoin.length} requests to join
+          <FormattedMessage
+            defaultMessage="{count} requests to join"
+            values={{
+              count: requestsToJoin.length,
+            }}
+          />
         </h2>
         <div className="bg-white rounded-lg shadow">
           <TableContainer>
             <Table aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell>User</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Bio</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>
+                    <FormattedMessage defaultMessage="User" />
+                  </TableCell>
+                  <TableCell>
+                    <FormattedMessage defaultMessage="Email" />
+                  </TableCell>
+                  <TableCell>
+                    <FormattedMessage defaultMessage="Bio" />
+                  </TableCell>
+                  <TableCell align="right">
+                    <FormattedMessage defaultMessage="Actions" />
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -62,7 +77,10 @@ const RequestToJoinTable = ({
                             onClick={() => {
                               if (
                                 confirm(
-                                  "Are you sure you would like to delete this membership request?"
+                                  intl.formatMessage({
+                                    defaultMessage:
+                                      "Are you sure you would like to delete this membership request?",
+                                  })
                                 )
                               ) {
                                 deleteMember({
@@ -77,7 +95,7 @@ const RequestToJoinTable = ({
                               }
                             }}
                           >
-                            Delete
+                            <FormattedMessage defaultMessage="Delete" />
                           </Button>
                         </Box>
 
@@ -85,7 +103,12 @@ const RequestToJoinTable = ({
                           // variant="primary"
                           onClick={() => {
                             if (
-                              confirm("Are you sure you would like to approve?")
+                              confirm(
+                                intl.formatMessage({
+                                  defaultMessage:
+                                    "Are you sure you would like to approve?",
+                                })
+                              )
                             ) {
                               updateMember({
                                 roundId,
@@ -100,7 +123,7 @@ const RequestToJoinTable = ({
                             }
                           }}
                         >
-                          Approve
+                          <FormattedMessage defaultMessage="Approve" />
                         </Button>
                       </Box>
                     </TableCell>

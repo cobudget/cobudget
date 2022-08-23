@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 import StatusFilter from "./StatusFilter";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const Filterbar = ({
   textSearchTerm,
@@ -10,7 +11,12 @@ const Filterbar = ({
   round,
   statusFilter,
   bucketStatusCount,
+  currentUser,
+  view,
+  sortBy,
+  onChangeSortBy,
 }) => {
+  const intl = useIntl();
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
@@ -48,6 +54,22 @@ const Filterbar = ({
   };
 
   const onChangeStatus = (statusFilterArray) => {
+    router.push(
+      {
+        pathname: "/[group]/[round]",
+        query: {
+          group: router.query.group,
+          round: router.query.round,
+          ...(tag && { tag }),
+          ...(!!input && { s: input }),
+          f: statusFilterArray,
+        },
+      },
+      undefined,
+      { scroll: false, shallow: true }
+    );
+  };
+  const onChangeView = (view) => {
     router.push({
       pathname: "/[group]/[round]",
       query: {
@@ -55,7 +77,7 @@ const Filterbar = ({
         round: router.query.round,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
-        f: statusFilterArray,
+        view,
       },
     });
   };
@@ -68,7 +90,7 @@ const Filterbar = ({
       >
         <form onSubmit={onSubmitSearch}>
           <input
-            placeholder="Search..."
+            placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
             className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -95,20 +117,54 @@ const Filterbar = ({
       />
 
       <SelectField
-        className="bg-white sm:order-last"
+        className="bg-white sm:order-3"
         color={round.color}
         inputProps={{
-          value: tag || "All tags",
+          value: tag || intl.formatMessage({ defaultMessage: "All tags" }),
           onChange: onChangeTag,
         }}
       >
-        <option value="All tags">All tags</option>
+        <option value="All tags">
+          {intl.formatMessage({ defaultMessage: "All tags" })}
+        </option>
         {round.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
             {tag.value}
           </option>
         ))}
       </SelectField>
+      {(currentUser?.currentCollMember?.isAdmin ||
+        currentUser?.currentCollMember?.isModerator) && (
+        <span className="sm:order-last">
+          <SelectField
+            className="bg-white sm:order-3"
+            color={round.color}
+            inputProps={{
+              value:
+                view || intl.formatMessage({ defaultMessage: "Grid View" }),
+              onChange: (e) => onChangeView(e.target.value),
+            }}
+          >
+            <option value="grid">Grid View</option>
+            <option value="table">Table View</option>
+          </SelectField>
+        </span>
+      )}
+      <span>
+        <SelectField
+          className="bg-white sm:order-last"
+          color={round.color}
+          inputProps={{
+            value: sortBy,
+            onChange: onChangeSortBy,
+          }}
+        >
+          <option value="">Random</option>
+          <option value="createdAt">Newest</option>
+          <option value="percentageFunded">Most funded</option>
+          <option value="contributionsCount">Most contributions</option>
+        </SelectField>
+      </span>
     </div>
   );
 };

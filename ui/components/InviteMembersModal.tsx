@@ -11,6 +11,7 @@ import { DeleteIcon } from "components/Icons";
 import IconButton from "components/IconButton";
 import styled from "styled-components";
 import toast from "react-hot-toast";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -40,24 +41,48 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
 `;
 
 const ROUND_INVITE_LINK = gql`
-  query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink(roundId: $roundId) {
+  query InvitationLink($roundId: ID!) {
+    invitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const GROUP_INVITE_LINK = gql`
+  query GroupInvitationLink($groupId: ID!) {
+    groupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const CREATE_ROUND_INVITE_LINK = gql`
-  mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink(roundId: $roundId) {
+  mutation CreateInvitationLink($roundId: ID!) {
+    createInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const CREATE_GROUP_INVITE_LINK = gql`
+  mutation CreateGroupInvitationLink($groupId: ID!) {
+    createGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const DELETE_ROUND_INVITE_LINK = gql`
-  mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink(roundId: $roundId) {
+  mutation DeleteInvitationLink($roundId: ID!) {
+    deleteInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const DELETE_GROUP_INVITE_LINK = gql`
+  mutation DeleteGroupInvitationLink($groupId: ID!) {
+    deleteGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
@@ -94,21 +119,30 @@ const InviteMembersModal = ({
   currentGroup?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
+  const intl = useIntl();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
-  const [{ data: inviteLink }] = useQuery({
-    query: ROUND_INVITE_LINK,
-    variables: { roundId },
-  });
+  const [{ data: inviteLink }] = useQuery(
+    roundId
+      ? {
+          query: ROUND_INVITE_LINK,
+          variables: { roundId },
+        }
+      : {
+          query: GROUP_INVITE_LINK,
+          variables: { groupId: currentGroup?.id },
+        }
+  );
   const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
-    CREATE_ROUND_INVITE_LINK
+    roundId ? CREATE_ROUND_INVITE_LINK : CREATE_GROUP_INVITE_LINK
   );
   const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(
-    DELETE_ROUND_INVITE_LINK
+    roundId ? DELETE_ROUND_INVITE_LINK : DELETE_GROUP_INVITE_LINK
   );
 
-  const link = inviteLink?.roundInvitationLink?.link;
+  const link =
+    inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
 
   return (
     <>
@@ -119,7 +153,11 @@ const InviteMembersModal = ({
       >
         <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
           <h1 className="text-xl font-semibold mb-2">
-            Invite participants {roundId ? " to this round" : ""}
+            {roundId ? (
+              <FormattedMessage defaultMessage="Invite participants to this round" />
+            ) : (
+              <FormattedMessage defaultMessage="Invite participants" />
+            )}
           </h1>
           {/*
           <Banner
@@ -163,7 +201,9 @@ const InviteMembersModal = ({
             })}
           >
             <TextField
-              placeholder="Comma separated emails"
+              placeholder={intl.formatMessage({
+                defaultMessage: "Comma separated emails",
+              })}
               multiline
               rows={4}
               name="emails"
@@ -174,14 +214,17 @@ const InviteMembersModal = ({
                 required: "Required",
                 pattern: {
                   value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                  message: "Need to be a comma separated list of emails",
+                  message: intl.formatMessage({
+                    defaultMessage:
+                      "Need to be a comma separated list of emails",
+                  }),
                 },
               })}
             />
             {link && (
               <div className="mt-4">
                 <p className="text-sm font-medium mb-1 block">
-                  Anyone with this link will be able to join your round
+                  <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
                 <GridWrapper>
                   <p
@@ -189,11 +232,23 @@ const InviteMembersModal = ({
                     onClick={() => {
                       navigator.clipboard
                         .writeText(link)
-                        .then(() => toast.success("Invitation link copied"))
-                        .catch(() => toast.error("Error while copying link"));
+                        .then(() =>
+                          toast.success(
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link copied",
+                            })
+                          )
+                        )
+                        .catch(() =>
+                          toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "Error while copying link",
+                            })
+                          )
+                        );
                     }}
                   >
-                    Copy
+                    <FormattedMessage defaultMessage="Copy" />
                   </p>
                   <TextField
                     inputProps={{
@@ -204,15 +259,22 @@ const InviteMembersModal = ({
                   <span className="mt-2 ml-2">
                     <IconButton
                       onClick={() => {
-                        deleteInviteLink({
-                          roundId,
-                        }).then((result) => {
+                        deleteInviteLink(
+                          roundId ? { roundId } : { groupId: currentGroup?.id }
+                        ).then((result) => {
                           if (result.error) {
                             return toast.error(
-                              "Could not delete invitation link"
+                              intl.formatMessage({
+                                defaultMessage:
+                                  "Could not delete invitation link",
+                              })
                             );
                           }
-                          toast.success("Invitation link deleted");
+                          toast.success(
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link deleted",
+                            })
+                          );
                         });
                       }}
                     >
@@ -228,26 +290,40 @@ const InviteMembersModal = ({
                 variant="secondary"
                 onClick={handleClose}
               >
-                Close
+                <FormattedMessage defaultMessage="Close" />
               </Button>
               <Button
                 className="mr-2"
                 loading={createInviteLoading}
                 onClick={() => {
-                  createInviteLink({
-                    roundId,
-                  }).then((result) => {
+                  createInviteLink(
+                    roundId
+                      ? {
+                          roundId,
+                        }
+                      : {
+                          groupId: currentGroup?.id,
+                        }
+                  ).then((result) => {
                     if (result.error) {
-                      return toast.error("Could not create invite link");
+                      return toast.error(
+                        intl.formatMessage({
+                          defaultMessage: "Could not create invite link",
+                        })
+                      );
                     }
-                    toast.success("Invite link created");
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Invite link created",
+                      })
+                    );
                   });
                 }}
               >
-                Create Invite Link
+                <FormattedMessage defaultMessage="Create Invite Link" />
               </Button>
               <Button type="submit" loading={loading}>
-                Add people
+                <FormattedMessage defaultMessage="Add people" />
               </Button>
             </div>
           </form>

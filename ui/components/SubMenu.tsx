@@ -1,48 +1,83 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useIntl } from "react-intl";
 
-const bucketItems = ({ groupSlug, roundSlug, bucketId, bucket }) => {
+const bucketItems = (
+  { groupSlug, roundSlug, bucketId, bucket },
+  formatMessage
+) => {
   return [
-    { label: "Bucket", href: `/${groupSlug}/${roundSlug}/${bucketId}` },
     {
-      label: `Comments (${bucket.noOfComments})`,
+      label: formatMessage({ defaultMessage: "Bucket" }),
+      href: `/${groupSlug}/${roundSlug}/${bucketId}`,
+    },
+    {
+      label: formatMessage(
+        { defaultMessage: `Comments ({count})` },
+        { count: bucket.noOfComments }
+      ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/comments`,
     },
     {
-      label: `Funders (${bucket.noOfFunders})`,
+      label: formatMessage(
+        { defaultMessage: `Funders ({count})` },
+        { count: bucket.noOfFunders }
+      ),
       href: `/${groupSlug}/${roundSlug}/${bucketId}/funders`,
     },
   ];
 };
 
-const groupItems = ({ currentUser, groupSlug }) => {
+const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
   return [
-    { label: "Overview", href: `/${groupSlug == "c" ? "" : groupSlug}` },
+    {
+      label: formatMessage({ defaultMessage: "Overview" }),
+      href: `/${groupSlug == "c" ? "" : groupSlug}`,
+    },
     // { label: "Realities", href: "/realities" },
-    { label: "Members", href: `/${groupSlug ?? "c"}/members`, admin: true },
-    { label: "Settings", href: `/${groupSlug ?? "c"}/settings`, admin: true },
+    {
+      label: formatMessage({ defaultMessage: "Members" }),
+      href: `/${groupSlug ?? "c"}/members`,
+      admin: true,
+    },
+    {
+      label: formatMessage({ defaultMessage: "Settings" }),
+      href: `/${groupSlug ?? "c"}/settings`,
+      startsWithHref: true,
+      admin: true,
+    },
   ].filter((i) => (i.admin ? currentUser?.currentGroupMember?.isAdmin : true));
 };
 
-export const roundItems = ({ currentUser, groupSlug, roundSlug }) => {
+export const roundItems = (
+  { currentUser, groupSlug, roundSlug },
+  formatMessage
+) => {
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
 
   return [
-    { label: "Overview", href: `/${groupSlug}/${roundSlug}` },
-    { label: "About", href: `/${groupSlug}/${roundSlug}/about` },
     {
-      label: "Participants",
+      label: formatMessage({ defaultMessage: "Overview" }),
+      href: `/${groupSlug}/${roundSlug}`,
+    },
+    {
+      label: formatMessage({ defaultMessage: "About" }),
+      href: `/${groupSlug}/${roundSlug}/about`,
+    },
+    {
+      label: formatMessage({ defaultMessage: "Participants" }),
       href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,
     },
     {
-      label: "Transactions",
+      label: formatMessage({ defaultMessage: "Transactions" }),
       href: `/${groupSlug}/${roundSlug}/transactions`,
       admin: true,
     },
     {
-      label: "Settings",
+      label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug}/${roundSlug}/settings`,
+      startsWithHref: true,
       admin: true,
     },
   ].filter((i) => (i.admin ? isAdmin : true));
@@ -58,21 +93,37 @@ export default function SubMenu({
   currentUser: any;
 }) {
   const router = useRouter();
+  const intl = useIntl();
 
-  const items = router.query.bucket
-    ? bucketItems({
-        roundSlug: router.query.round,
-        groupSlug: router.query.group,
-        bucketId: router.query.bucket,
-        bucket,
-      })
+  const items: {
+    label: string;
+    href: string;
+    startsWithHref?: boolean;
+    admin?: boolean;
+    member?: boolean;
+  }[] = router.query.bucket
+    ? bucketItems(
+        {
+          roundSlug: router.query.round,
+          groupSlug: router.query.group,
+          bucketId: router.query.bucket,
+          bucket,
+        },
+        intl.formatMessage
+      )
     : router.query.round
-    ? roundItems({
-        currentUser,
-        roundSlug: router.query.round,
-        groupSlug: router.query.group,
-      })
-    : groupItems({ currentUser, groupSlug: router.query.group ?? "c" });
+    ? roundItems(
+        {
+          currentUser,
+          roundSlug: router.query.round,
+          groupSlug: router.query.group,
+        },
+        intl.formatMessage
+      )
+    : groupItems(
+        { currentUser, groupSlug: router.query.group ?? "c" },
+        intl.formatMessage
+      );
 
   const color = round?.color ?? "anthracit";
 
@@ -87,7 +138,11 @@ export default function SubMenu({
             <Link href={item.href} key={item.href} scroll={!bucket}>
               <a
                 className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
-                  item.href === router.asPath
+                  (
+                    item.startsWithHref
+                      ? router.asPath.startsWith(item.href)
+                      : item.href === router.asPath
+                  )
                     ? `border-${color} text-${color}`
                     : "border-transparent text-gray-500"
                 }`}

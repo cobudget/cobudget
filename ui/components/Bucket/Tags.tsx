@@ -2,6 +2,7 @@ import { gql, useMutation } from "urql";
 import Link from "next/link";
 import { CloseIcon } from "components/Icons";
 import AddTag from "./AddTag";
+import { FormattedMessage } from "react-intl";
 
 const REMOVE_TAG_MUTATION = gql`
   mutation RemoveTag($bucketId: ID!, $tagId: ID!) {
@@ -22,7 +23,9 @@ const Tags = ({ bucket, canEdit }) => {
 
   return (
     <div className="">
-      <h2 className="mb-2 font-medium hidden md:block relative">Tags</h2>
+      <h2 className="mb-2 font-medium hidden md:block relative">
+        <FormattedMessage defaultMessage="Tags" />
+      </h2>
 
       <div className="flex items-center flex-wrap gap-3 mb-4">
         {bucket.tags?.map((tag) => (

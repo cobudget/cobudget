@@ -11,7 +11,8 @@ const schema = gql`
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
-    roundInvitationLink(roundId: ID): RoundInvitationLink
+    invitationLink(roundId: ID): InvitationLink
+    groupInvitationLink(groupId: ID): InvitationLink
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -21,9 +22,18 @@ const schema = gql`
       offset: Int
       limit: Int
       status: [StatusType!]
+      orderBy: String
+      orderDir: String
     ): BucketsPage
+    languageProgressPage: [LanguageProgress]
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
-    groupMembersPage(groupId: ID!, offset: Int, limit: Int): GroupMembersPage
+    groupMembersPage(
+      groupId: ID!
+      search: String
+      offset: Int
+      limit: Int
+      isApproved: Boolean
+    ): GroupMembersPage
     membersPage(
       roundId: ID!
       isApproved: Boolean!
@@ -42,7 +52,12 @@ const schema = gql`
   }
 
   type Mutation {
-    createGroup(name: String!, logo: String, slug: String!): Group!
+    createGroup(
+      name: String!
+      logo: String
+      slug: String!
+      registrationPolicy: RegistrationPolicy!
+    ): Group!
 
     editGroup(
       groupId: ID!
@@ -50,6 +65,8 @@ const schema = gql`
       info: String
       logo: String
       slug: String
+      registrationPolicy: RegistrationPolicy
+      visibility: Visibility
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -74,9 +91,14 @@ const schema = gql`
       discourseCategoryId: Int
     ): Round!
     deleteRound(roundId: ID!): Round
-    createRoundInvitationLink(roundId: ID): RoundInvitationLink
-    deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
-    joinRoundInvitationLink(token: String): RoundMember
+
+    createInvitationLink(roundId: ID): InvitationLink
+    deleteInvitationLink(roundId: ID): InvitationLink
+    joinInvitationLink(token: String): InvitedMember
+
+    createGroupInvitationLink(groupId: ID): InvitationLink
+    deleteGroupInvitationLink(groupId: ID): InvitationLink
+    joinGroupInvitationLink(token: String): GroupMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
@@ -117,7 +139,11 @@ const schema = gql`
       summary: String
       images: [ImageInput]
       budgetItems: [BudgetItemInput]
-      tags: [String!]
+      directFundingEnabled: Boolean
+      directFundingType: DirectFundingType
+      exchangeDescription: String
+      exchangeMinimumContribution: Int
+      exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -153,6 +179,7 @@ const schema = gql`
       groupId: ID!
       memberId: ID!
       isAdmin: Boolean
+      isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(
@@ -176,6 +203,8 @@ const schema = gql`
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
       requireBucketApproval: Boolean
+      directFundingEnabled: Boolean
+      directFundingTerms: String
     ): Round
 
     allocate(
@@ -197,6 +226,7 @@ const schema = gql`
     acceptInvitation(roundId: ID!): RoundMember
     joinRound(roundId: ID!): RoundMember
 
+    acceptTerms: User
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
@@ -209,6 +239,9 @@ const schema = gql`
     rounds: [Round]
     discourseUrl: String
     finishedTodos: Boolean
+    experimentalFeatures: Boolean
+    registrationPolicy: RegistrationPolicy
+    visibility: Visibility
   }
 
   enum RoundType {
@@ -249,6 +282,9 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     requireBucketApproval: Boolean
+    stripeIsConnected: Boolean
+    directFundingEnabled: Boolean
+    directFundingTerms: String
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int
@@ -262,7 +298,7 @@ const schema = gql`
     inviteNonce: Int
   }
 
-  type RoundInvitationLink {
+  type InvitationLink {
     link: String
   }
 
@@ -324,6 +360,13 @@ const schema = gql`
     currentGroupMember(groupSlug: String): GroupMember
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
+    acceptedTermsAt: Date
+  }
+
+  type InvitedMember {
+    id: ID!
+    group: Group
+    round: Round
   }
 
   type GroupMember {
@@ -339,6 +382,7 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
     email: String
     name: String
+    isApproved: Boolean
   }
 
   type GroupMembersPage {
@@ -412,12 +456,29 @@ const schema = gql`
     completedAt: Date
     completed: Boolean
     canceledAt: Date
+    createdAt: Date
     canceled: Boolean
+    directFundingEnabled: Boolean
+    directFundingType: DirectFundingType
+    exchangeDescription: String
+    exchangeMinimumContribution: Int
+    exchangeVat: Int
+    percentageFunded: Float
+  }
+
+  enum DirectFundingType {
+    DONATION
+    EXCHANGE
   }
 
   type BucketsPage {
     moreExist: Boolean
     buckets: [Bucket]
+  }
+
+  type LanguageProgress {
+    code: String
+    percentage: Int
   }
 
   type Comment {

@@ -9,6 +9,7 @@ import Label from "../Label";
 import SubMenu from "../SubMenu";
 import PageHero from "../PageHero";
 import EditableField from "../EditableField";
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const GROUP_PAGE_QUERY = gql`
   query GroupPage($groupSlug: String!) {
@@ -29,6 +30,8 @@ export const GROUP_PAGE_QUERY = gql`
       slug
       info
       finishedTodos
+      registrationPolicy
+      visibility
     }
   }
 `;
@@ -54,6 +57,7 @@ const LinkCard = forwardRef((props: any, ref) => {
 
 const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
+  const intl = useIntl();
   useEffect(() => {
     if (router.query.group == "c") router.replace("/");
   }, [router]);
@@ -65,7 +69,15 @@ const GroupIndex = ({ currentUser }) => {
     variables: { groupSlug: router.query.group ?? "c" },
   });
 
-  if (!group) return null;
+  if (!fetching && !group && router.query.group) {
+    return (
+      <div className="text-center mt-7">
+        <FormattedMessage defaultMessage="This group either doesn't exist or you don't have access to it" />
+      </div>
+    );
+  }
+
+  if (!group || fetching) return null;
 
   const showTodos =
     currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
@@ -79,8 +91,11 @@ const GroupIndex = ({ currentUser }) => {
             <EditableField
               defaultValue={group?.info}
               name="info"
-              label="Add message"
-              placeholder={`# Welcome to ${group?.name}'s page`}
+              label={intl.formatMessage({ defaultMessage: "Add message" })}
+              placeholder={intl.formatMessage(
+                { defaultMessage: "# Welcome to {groupName}'s page" },
+                { groupName: group?.name }
+              )}
               canEdit={currentUser?.currentGroupMember?.isAdmin}
               className="h-10"
               MUTATION={gql`
@@ -100,7 +115,7 @@ const GroupIndex = ({ currentUser }) => {
             {currentUser?.currentGroupMember?.isAdmin && (
               <Link href={`/${group.slug}/new-round`}>
                 <Button size="large" color="anthracit" className="float-right">
-                  New round
+                  <FormattedMessage defaultMessage="New round" />
                 </Button>
               </Link>
             )}
@@ -128,7 +143,9 @@ const GroupIndex = ({ currentUser }) => {
               <LinkCard color={round.color}>
                 {round.title}
                 {round.archived && (
-                  <Label className="right-0 m-2">Archived</Label>
+                  <Label className="right-0 m-2">
+                    <FormattedMessage defaultMessage="Archived" />
+                  </Label>
                 )}
               </LinkCard>
             </Link>

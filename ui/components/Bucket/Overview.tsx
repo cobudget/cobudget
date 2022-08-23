@@ -8,6 +8,7 @@ import { FormattedMessage } from "react-intl";
 
 export default function Overview({
   currentUser,
+  currentGroup,
   fetching,
   error,
   bucket,
@@ -84,6 +85,7 @@ export default function Overview({
               <Sidebar
                 bucket={bucket}
                 currentUser={currentUser}
+                currentGroup={currentGroup}
                 canEdit={canEdit}
                 showBucketReview={showBucketReview}
               />

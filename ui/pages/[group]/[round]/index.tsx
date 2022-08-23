@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, gql, ssrExchange } from "urql";
 import Link from "next/link";
 import BucketCard from "../../../components/BucketCard";
@@ -17,6 +17,8 @@ import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
+import Table from "../../../components/Table";
+import { FormattedNumber, FormattedMessage } from "react-intl";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -28,6 +30,7 @@ export const ROUND_PAGE_QUERY = gql`
       color
       bucketCreationIsOpen
       totalInMembersBalances
+      allowStretchGoals
       currency
       tags {
         id
@@ -57,6 +60,8 @@ export const BUCKETS_QUERY = gql`
     $offset: Int
     $limit: Int
     $status: [StatusType!]
+    $orderBy: String
+    $orderDir: String
   ) {
     bucketsPage(
       groupSlug: $groupSlug
@@ -66,6 +71,8 @@ export const BUCKETS_QUERY = gql`
       offset: $offset
       limit: $limit
       status: $status
+      orderBy: $orderBy
+      orderDir: $orderDir
     ) {
       moreExist
       buckets {
@@ -75,12 +82,19 @@ export const BUCKETS_QUERY = gql`
         title
         minGoal
         maxGoal
+        flags {
+          type
+        }
+        noOfFunders
         income
         totalContributions
+        totalContributionsFromCurrentMember
         noOfComments
         published
         approved
         canceled
+        status
+        percentageFunded
         customFields {
           value
           customField {
@@ -112,17 +126,27 @@ const Page = ({
   router,
   round,
   statusFilter,
+  currentUser,
+  loading,
+  bucketTableView,
+  pause,
+  orderBy,
 }) => {
   const { tag, s } = router.query;
 
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
+    pause,
     variables: {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
       offset: variables.offset,
       limit: variables.limit,
       status: statusFilter,
+      ...(orderBy && {
+        orderBy,
+        orderDir: "desc",
+      }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
     },
@@ -131,22 +155,218 @@ const Page = ({
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
 
+  const columns = useMemo(() => {
+    const cols = [
+      {
+        Header: "Title",
+        accessor: "title",
+        Cell: ({ cell }) => (
+          <Link
+            href={`/${round?.group?.slug ?? "c"}/${round?.slug}/${
+              cell.row.original?.id
+            }`}
+          >
+            <span className="underline cursor-pointer text-ellipsis">
+              {cell.value.substr(0, 20) + (cell.value.length > 20 ? "..." : "")}
+            </span>
+          </Link>
+        ),
+      },
+      {
+        Header: "Goal",
+        accessor: "minGoal",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Resources",
+        accessor: "externalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Funded",
+        accessor: "internalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      /*{
+        Header: "Total",
+        accessor: "totalFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },*/
+      {
+        Header: "Needed",
+        accessor: "fundsNeeded",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      },
+      {
+        Header: "Progress",
+        accessor: "progress",
+        Cell: ({ cell }) => Math.round(cell.value) + "%",
+      },
+      {
+        Header: "Funders",
+        accessor: "fundersCount",
+      },
+      {
+        Header: "Approvals",
+        accessor: "goodFlagCount",
+      },
+      {
+        Header: "Flags",
+        accessor: "raiseFlagCount",
+      },
+    ];
+
+    /* 
+    if (currentUser) {
+      cols.splice(round?.allowStretchGoals ? 3 : 2, 0, {
+        Header: "Your Contribution",
+        accessor: "myFunding",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={cell.value / 100}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      });
+    }
+    */
+
+    if (round?.allowStretchGoals) {
+      cols.splice(7, 0, {
+        Header: "Stretch Progress",
+        accessor: "stretchGoalProgress",
+        Cell: ({ cell }) => Math.round(cell.value) + "%",
+      });
+      cols.splice(2, 0, {
+        Header: "Stretch Goal",
+        accessor: "stretchGoal",
+        Cell: ({ cell }) => (
+          <FormattedNumber
+            value={Math.round(Math.round(cell.value / 100))}
+            style="currency"
+            currencyDisplay={"symbol"}
+            currency={round?.currency}
+          />
+        ),
+      });
+    }
+
+    return cols;
+  }, [
+    round?.currency,
+    round?.allowStretchGoals,
+    round?.group?.slug,
+    round?.slug,
+  ]);
+
   if (error) {
     console.error(error);
   }
 
   return (
     <>
-      {buckets.map((bucket) => (
-        <Link
-          href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
-          key={bucket.id}
-        >
-          <a className="flex focus:outline-none focus:ring rounded-lg">
-            <BucketCard bucket={bucket} round={round} />
-          </a>
-        </Link>
-      ))}
+      {!bucketTableView ? (
+        buckets.map((bucket) => (
+          <Link
+            href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
+            key={bucket.id}
+          >
+            <a
+              className="flex focus:outline-none focus:ring rounded-lg"
+              onClick={() => {
+                router.push(
+                  {
+                    pathname: "/[group]/[round]",
+                    query: {
+                      ...router.query,
+                      f: statusFilter,
+                    },
+                  },
+                  undefined,
+                  { shallow: true, scroll: false }
+                );
+              }}
+            >
+              <BucketCard bucket={bucket} round={round} />
+            </a>
+          </Link>
+        ))
+      ) : !loading ? (
+        <Table
+          columns={columns}
+          data={buckets.map((bucket) => ({
+            id: bucket.id,
+            title: bucket.title,
+            minGoal: bucket.minGoal,
+            stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
+            myFunding: bucket.totalContributionsFromCurrentMember,
+            totalFunding: bucket.totalContributions + bucket.income,
+            externalFunding: bucket.income || 0,
+            goodFlagCount: bucket.flags.filter(
+              (f) => f.type === "ALL_GOOD_FLAG"
+            ).length,
+            raiseFlagCount: bucket.flags.filter((f) => f.type === "RAISE_FLAG")
+              .length,
+            fundersCount: bucket.noOfFunders || 0,
+            internalFunding: bucket.totalContributions || 0,
+            fundsNeeded:
+              bucket.minGoal - bucket.income - bucket.totalContributions > 0
+                ? bucket.minGoal - bucket.income - bucket.totalContributions
+                : 0,
+            progress:
+              Math.floor(
+                ((bucket.income + bucket.totalContributions || 0) /
+                  (bucket.minGoal || 1)) *
+                  10000
+              ) / 100,
+            stretchGoalProgress:
+              round.allowStretchGoals && bucket.maxGoal
+                ? bucket.maxGoal - bucket.minGoal > 0
+                  ? ((bucket.income + bucket.totalContributions || 0) /
+                      (bucket.maxGoal || 1)) *
+                    100
+                  : 0
+                : "-",
+          }))}
+        />
+      ) : null}
 
       {isFirstPage &&
         buckets.length === 0 &&
@@ -157,7 +377,7 @@ const Page = ({
             </h1>
           </div>
         ) : (
-          <div className="absolute w-full flex justify-center items-center h-64">
+          <div className="w-full flex justify-center items-center h-64">
             <HappySpinner />
           </div>
           // <div className="bg-white rounded-lg shadow-md animate-pulse overflow-hidden">
@@ -220,24 +440,26 @@ const getStandardFilter = (bucketStatusCount) => {
 };
 
 const RoundPage = ({ currentUser }) => {
+  const limit = 12;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
+  const [bucketTableView, setBucketTableView] = useState(false);
   const [pageVariables, setPageVariables] = useState([
-    { limit: 12, offset: 0 },
+    { limit: limit, offset: 0 },
   ]);
+  const [pause, setPause] = useState(true);
+  const [sortBy, setSortBy] = useState<string>();
   const router = useRouter();
 
   const [
     { data: { round } = { round: null }, fetching, error, stale },
   ] = useQuery({
     query: ROUND_PAGE_QUERY,
+    pause,
     variables: {
       roundSlug: router.query.round,
       groupSlug: router.query.group,
     },
   });
-
-  console.log({ round, fetching, error, stale });
-  // const round = data?.round;
 
   const [bucketStatusCount, setBucketStatusCount] = useState(
     round?.bucketStatusCount ?? {}
@@ -262,18 +484,44 @@ const RoundPage = ({ currentUser }) => {
     setStatusFilter(stringOrArrayIntoArray(filter));
   }, [bucketStatusCount, f]);
 
-  // if (!router.isReady || (fetching && !round)) {
-  //   return (
-  //     <div className="flex-grow flex justify-center items-center h-64">
-  //       <HappySpinner />
-  //     </div>
-  //   );
-  // }
+  useEffect(() => {
+    setBucketTableView(router.query.view === "table");
+    if (router.query.view === "table") {
+      setPageVariables([{ offset: 0, limit: 1000 }]);
+    }
+  }, [router?.asPath, router?.query?.view]);
+
+  useEffect(() => {
+    if (router.query.round && router.query.group && pause) {
+      setPause(false);
+    }
+  }, [router.query.round, router.query.group, pause]);
+
+  useEffect(() => {
+    if (router.isReady) {
+      const page = parseInt(router.query.page as string);
+      if (!isNaN(page)) {
+        const pageVariables = new Array(page)
+          .fill(0)
+          .map((_, i) => ({ limit: limit, offset: i * limit }));
+        setPageVariables(pageVariables);
+      }
+      setPause(false);
+    }
+  }, [router.isReady, router.query.page]);
+
+  if (pause || fetching) {
+    return (
+      <div className="w-full flex justify-center items-center h-64">
+        <HappySpinner />
+      </div>
+    );
+  }
 
   if (!round && !fetching && router.isReady) {
     return (
       <div className="text-center mt-7">
-        This round either doesn&apos;t exist or you don&apos;t have access to it
+        <FormattedMessage defaultMessage="This round either doesn't exist or you don't have access to it" />
       </div>
     );
   }
@@ -338,7 +586,6 @@ const RoundPage = ({ currentUser }) => {
                       </table>
                     </div>
                   </div>
-
                   <Button
                     size="large"
                     color={round.color}
@@ -358,7 +605,6 @@ const RoundPage = ({ currentUser }) => {
           </div>
         </div>
       </PageHero>
-
       <div className="page flex-1">
         <Filterbar
           round={round}
@@ -366,21 +612,47 @@ const RoundPage = ({ currentUser }) => {
           tag={tag}
           statusFilter={statusFilter}
           bucketStatusCount={bucketStatusCount}
+          view={bucketTableView ? "table" : "grid"}
+          currentUser={currentUser}
+          sortBy={sortBy}
+          onChangeSortBy={(e) => setSortBy(e.target.value)}
         />
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
+        <div
+          className={
+            bucketTableView
+              ? ""
+              : "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20"
+          }
+        >
           {pageVariables.map((variables, i) => {
             return (
               <Page
+                pause={pause}
                 router={router}
                 round={round}
                 key={"" + variables.limit + i}
                 variables={variables}
                 isFirstPage={i === 0}
                 isLastPage={i === pageVariables.length - 1}
+                currentUser={currentUser}
                 onLoadMore={({ limit, offset }) => {
+                  router.push(
+                    {
+                      pathname: "/[group]/[round]",
+                      query: {
+                        ...router.query,
+                        page: Math.floor(offset / limit) + 1,
+                      },
+                    },
+                    undefined,
+                    { shallow: true, scroll: false }
+                  );
                   setPageVariables([...pageVariables, { limit, offset }]);
                 }}
                 statusFilter={statusFilter}
+                loading={fetching}
+                bucketTableView={bucketTableView}
+                orderBy={sortBy}
               />
             );
           })}
@@ -416,7 +688,7 @@ const RoundPage = ({ currentUser }) => {
 //   //   .query(BUCKETS_QUERY, {
 //   //     ...variables,
 //   //     offset: 0,
-//   //     limit: 12,
+//   //     limit: limit,
 //   //     status: statusFilter,
 //   //   })
 //   //   .toPromise();

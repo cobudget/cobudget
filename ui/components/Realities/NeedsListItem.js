@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import colors from "lib/realities/colors";
 import ResponsibilitiesContainer from "./ResponsibilitiesContainer";
 import MissingRealizersOnNeed from "./MissingRealizersOnNeed";
+import { FormattedMessage, useIntl } from "react-intl";
 
 //const NeedsListGroupItem = styled(ListGroupItem)`
 //  display: flex;
@@ -70,17 +71,40 @@ const NeedsListItem = ({
         <Collapse in={isExpanded}>
           {need.fulfilledBy.length === 0 && (
             <div>
-              This Need doesn&apos;t contain any Responsibilities yet.{" "}
-              {currentUser ? "Click above to add one, or" : ""}{" "}
-              <SimpleLink
-                onClick={() => router.push(`/realities/need/${need.nodeId}`)}
-              >
-                {/* TODO: would want to put this button on the bar for the need but
+              {/* TODO: would want to put this button on the bar for the need but
                   that wasn't working properly with bootstrap. maybe do it
                   when we're switching to another style */}
-                {currentUser ? "click here" : "Click here"}
-              </SimpleLink>{" "}
-              to view the Need directly.
+              {currentUser ? (
+                <FormattedMessage
+                  defaultMessage="This need doesn't contain any responsibilities yet. <a>Click here</a> to view the need directly"
+                  values={{
+                    a: (msg) => (
+                      <SimpleLink
+                        onClick={() =>
+                          router.push(`/realities/need/${need.nodeId}`)
+                        }
+                      >
+                        {msg}
+                      </SimpleLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  defaultMessage="This need doesn't contain any responsibilities yet. Click above to add one, or <a>click here</a> to view the need directly"
+                  values={{
+                    a: (msg) => (
+                      <SimpleLink
+                        onClick={() =>
+                          router.push(`/realities/need/${need.nodeId}`)
+                        }
+                      >
+                        {msg}
+                      </SimpleLink>
+                    ),
+                  }}
+                />
+              )}
             </div>
           )}
           {isExpanded && <ResponsibilitiesContainer needId={need.nodeId} />}

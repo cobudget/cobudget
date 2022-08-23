@@ -3,10 +3,24 @@ import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const BucketCard = ({ bucket, round }) => {
+  const intl = useIntl();
+
+  const statusList = {
+    PENDING_APPROVAL: intl.formatMessage({
+      defaultMessage: "Pending Approval",
+    }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
+    COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
+    ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
+  };
+
   const showFundingStats =
-    (bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
+    !!(bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
   return (
     <div className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out">
       {bucket.images?.length ? (
@@ -17,8 +31,14 @@ const BucketCard = ({ bucket, round }) => {
       ) : (
         <div className={`w-full h-48 bg-${stringToColor(bucket.title)}`} />
       )}
-      {!bucket.published && (
-        <Label className="absolute right-0 m-2">Unpublished</Label>
+      {!bucket.published ? (
+        <Label className="absolute right-0 m-2">
+          <FormattedMessage defaultMessage="Unpublished" />
+        </Label>
+      ) : (
+        <Label className="absolute right-0 m-2">
+          {statusList[bucket.status]}
+        </Label>
       )}
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">

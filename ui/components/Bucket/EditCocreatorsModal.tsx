@@ -3,6 +3,7 @@ import { useQuery, useMutation, gql } from "urql";
 import Avatar from "../Avatar";
 import { AddIcon, DeleteIcon } from "../Icons";
 import { Modal } from "@material-ui/core";
+import { useIntl, FormattedMessage } from "react-intl";
 
 const SEARCH_MEMBERS_QUERY = gql`
   query SearchMembers($roundId: ID!, $isApproved: Boolean!) {
@@ -135,6 +136,7 @@ const EditCocreatorsModal = ({
   cocreators,
   currentUser,
 }) => {
+  const intl = useIntl();
   const [searchInput, setSearchInput] = useState("");
 
   const [, addCocreator] = useMutation(ADD_CO_CREATOR_MUTATION);
@@ -148,7 +150,9 @@ const EditCocreatorsModal = ({
     >
       <div className="bg-white rounded shadow p-6 grid grid-cols-2 gap-4 focus:outline-none">
         <div className="border-r pr-4">
-          <h2 className="font-medium mb-2">Co-creators</h2>
+          <h2 className="font-medium mb-2">
+            <FormattedMessage defaultMessage="Co-creators" />
+          </h2>
           {cocreators.map((member) => (
             <Member
               key={member.id}
@@ -157,7 +161,10 @@ const EditCocreatorsModal = ({
                 if (
                   member.id !== currentUser?.currentCollMember.id ||
                   confirm(
-                    "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)"
+                    intl.formatMessage({
+                      defaultMessage:
+                        "Are you sure you would like to remove yourself? This can't be undone (unless you are admin/guide)",
+                    })
                   )
                 ) {
                   removeCocreator({
@@ -170,11 +177,15 @@ const EditCocreatorsModal = ({
           ))}
         </div>
         <div>
-          <h2 className="font-medium mb-2">Add co-creator</h2>
+          <h2 className="font-medium mb-2">
+            <FormattedMessage defaultMessage="Add co-creator" />
+          </h2>
           <div>
             <input
               value={searchInput}
-              placeholder="Filter by name..."
+              placeholder={intl.formatMessage({
+                defaultMessage: "Filter by name...",
+              })}
               className="bg-gray-200 rounded py-2 px-3 mb-4 focus:outline-none focus:ring focus:bg-white"
               onChange={(e) => setSearchInput(e.target.value)}
             />

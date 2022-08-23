@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import Avatar from "./Avatar";
-import { modals } from "./Modal/index";
 import Link from "next/link";
 import thousandSeparator from "utils/thousandSeparator";
+import { FormattedMessage } from "react-intl";
 
 const css = {
   button:
     "text-left block px-2 py-1 text-gray-800 last:text-gray-500 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
-const ProfileDropdown = ({ currentUser, openModal }) => {
+const ProfileDropdown = ({ currentUser, setEditProfileModalOpen }) => {
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
@@ -85,18 +85,20 @@ const ProfileDropdown = ({ currentUser, openModal }) => {
 
             <button
               onClick={() => {
-                openModal(modals.EDIT_PROFILE);
+                setEditProfileModalOpen(true);
                 setOpen(false);
               }}
               className={css.button}
             >
-              Edit profile
+              <FormattedMessage defaultMessage="Edit profile" />
             </button>
             <Link href="/settings">
-              <a className={css.button}>Email settings</a>
+              <a className={css.button}>
+                <FormattedMessage defaultMessage="Email settings" />
+              </a>
             </Link>
             <a href="/api/auth/logout" className={css.button}>
-              Sign out
+              <FormattedMessage defaultMessage="Sign out" />
             </a>
           </div>
         </>

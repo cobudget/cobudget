@@ -6,6 +6,7 @@ import TextField from "components/TextField";
 import ExpandButton from "components/ExpandButton";
 import Markdown from "./Markdown";
 import Button from "./Button";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const GUIDELINE = "GUIDELINE";
 const MESSAGE = "MESSAGE";
@@ -34,11 +35,14 @@ const GuidelineComponent = ({ guideline }) => {
 const InputAction = ({ item, setChatItems, chatItems, color }) => {
   const [input, setInput] = useState("");
   const disabled = input.length === 0;
+
+  const intl = useIntl();
+
   return (
     <div className="my-2 mx-3 flex items-end">
       <TextField
         multiline
-        placeholder="Write here..."
+        placeholder={intl.formatMessage({ defaultMessage: "Write here..." })}
         color={color}
         className="flex-grow"
         autoFocus
@@ -109,16 +113,21 @@ const ALL_GOOD_FLAG_MUTATION = gql`
   }
 `;
 
-const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }) => [
+const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }, formatMessage) => [
   {
     type: ACTION,
-    message: "Which one?",
+    message: formatMessage({ defaultMessage: "Which one?" }),
     actions: guidelines.map((guideline) => ({
       label: guideline.title,
       chatItems: [
         {
           type: INPUT,
-          message: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the ${process.env.BUCKET_NAME_SINGULAR} creators.`,
+          message: formatMessage(
+            {
+              defaultMessage: `Please provide a reason, why do you think this guideline is not met? Your answer will be anonymous to the {bucketName} creators.`,
+            },
+            { bucketName: process.env.BUCKET_NAME_SINGULAR }
+          ),
           sideEffect: (answer) => {
             raiseFlag({
               bucketId,
@@ -131,7 +140,9 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }) => [
           chatItems: [
             {
               type: MESSAGE,
-              message: "Thank you! Your answer has been recorded.",
+              message: formatMessage({
+                defaultMessage: "Thank you! Your answer has been recorded.",
+              }),
             },
           ],
         },
@@ -143,8 +154,9 @@ const raiseFlagFlow = ({ guidelines, raiseFlag, bucketId }) => [
 const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
   {
     type: INPUT,
-    message:
-      "You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: ",
+    message: (
+      <FormattedMessage defaultMessage="You can resolve this flag if you feel the issue has been fixed or if it should not be raised. Please provide a comment: " />
+    ),
     sideEffect: (answer) => {
       resolveFlag({
         bucketId,
@@ -157,7 +169,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
     chatItems: [
       {
         type: MESSAGE,
-        message: "Thank you!",
+        message: <FormattedMessage defaultMessage="Thank you!" />,
       },
     ],
   },
@@ -166,6 +178,7 @@ const resolveFlagFlow = ({ flagId, resolveFlag, bucketId }) => [
 const Monster = ({ bucket }) => {
   const [open, setOpen] = useState(false);
   const [chatItems, setChatItems] = useState([]);
+  const intl = useIntl();
 
   const [, raiseFlag] = useMutation(RAISE_FLAG_MUTATION);
   const [, resolveFlag] = useMutation(RESOLVE_FLAG_MUTATION);
@@ -184,43 +197,75 @@ const Monster = ({ bucket }) => {
         setChatItems([
           {
             type: MESSAGE,
-            message: `This ${process.env.BUCKET_NAME_SINGULAR} has been flagged for breaking guidelines. Please help review it!`,
+            message: (
+              <FormattedMessage
+                defaultMessage="This {bucketName} has been flagged for breaking guidelines. Please help review it!"
+                values={{
+                  bucketName: process.env.BUCKET_NAME_SINGULAR,
+                }}
+              />
+            ),
           },
           {
             type: MESSAGE,
-            message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
+            message: (
+              <FormattedMessage
+                defaultMessage="Here are the guidelines that {bucketName} need to follow:"
+                values={{
+                  bucketName: process.env.BUCKET_NAME_PLURAL,
+                }}
+              />
+            ),
           },
           ...guidelineItems,
           ...raisedFlags.map((raisedFlag) => ({
             type: MESSAGE,
-            message: `Someone flagged this ${process.env.BUCKET_NAME_SINGULAR} for breaking the "${raisedFlag.guideline.title}" guideline with this comment:
-
-          "${raisedFlag.comment}"`,
+            message: (
+              <FormattedMessage
+                defaultMessage="Someone flagged this {bucketName} for breaking the {title} guideline with this comment: {comment}"
+                values={{
+                  bucketName: process.env.BUCKET_NAME_SINGULAR,
+                  title: raisedFlag.guideline.title,
+                  comment: raisedFlag.comment,
+                }}
+              />
+            ),
           })),
           {
             type: ACTION,
-            message: `Could you help review this?`,
+            message: (
+              <FormattedMessage defaultMessage="Could you help review this?" />
+            ),
             actions: [
               {
-                label: "It is breaking another guideline",
-                chatItems: raiseFlagFlow({
-                  guidelines: bucket.round.guidelines.filter(
-                    (guideline) =>
-                      !raisedFlags
-                        .map((flag) => flag.guideline.id)
-                        .includes(guideline.id)
-                  ),
-                  raiseFlag,
-                  bucketId: bucket.id,
-                }),
+                label: (
+                  <FormattedMessage defaultMessage="It is breaking another guideline" />
+                ),
+                chatItems: raiseFlagFlow(
+                  {
+                    guidelines: bucket.round.guidelines.filter(
+                      (guideline) =>
+                        !raisedFlags
+                          .map((flag) => flag.guideline.id)
+                          .includes(guideline.id)
+                    ),
+                    raiseFlag,
+                    bucketId: bucket.id,
+                  },
+                  intl.formatMessage
+                ),
               },
               raisedFlags.length > 1
                 ? {
-                    label: "I'd like to resolve a flag",
+                    label: (
+                      <FormattedMessage defaultMessage="I'd like to resolve a flag" />
+                    ),
                     chatItems: [
                       {
                         type: ACTION,
-                        message: "Which one?",
+                        message: (
+                          <FormattedMessage defaultMessage="Which one?" />
+                        ),
                         actions: raisedFlags.map((raisedFlag) => ({
                           label: `${raisedFlag.guideline.title}: ${raisedFlag.comment}`,
                           chatItems: resolveFlagFlow({
@@ -233,7 +278,9 @@ const Monster = ({ bucket }) => {
                     ],
                   }
                 : {
-                    label: "I'd like to resolve the flag",
+                    label: (
+                      <FormattedMessage defaultMessage="I'd like to resolve the flag" />
+                    ),
                     chatItems: resolveFlagFlow({
                       flagId: raisedFlags[0].id,
                       resolveFlag,
@@ -248,36 +295,64 @@ const Monster = ({ bucket }) => {
           ...[
             {
               type: MESSAGE,
-              message: `Please help review this ${process.env.BUCKET_NAME_SINGULAR}!`,
+              message: intl.formatMessage({
+                defaultMessage: `Please help review this $!`,
+              }),
             },
             {
               type: MESSAGE,
-              message: `Here are the guidelines that ${process.env.BUCKET_NAME_PLURAL} need to follow:`,
+              message: (
+                <FormattedMessage
+                  defaultMessage="Here are the guidelines that {bucketName} need to follow:"
+                  values={{
+                    bucketName: process.env.BUCKET_NAME_PLURAL,
+                  }}
+                />
+              ),
             },
           ],
           ...guidelineItems,
           ...[
             {
               type: ACTION,
-              message: `Does this ${process.env.BUCKET_NAME_SINGULAR} comply with the guidelines?`,
+              message: (
+                <FormattedMessage
+                  defaultMessage="Does this {bucketName} comply with the guidelines?"
+                  values={{
+                    bucketName: process.env.BUCKET_NAME_SINGULAR,
+                  }}
+                />
+              ),
               actions: [
                 {
-                  label: "Yes, looks good to me!",
+                  label: (
+                    <FormattedMessage defaultMessage="Yes, looks good to me!" />
+                  ),
                   sideEffect: () =>
                     allGoodFlag({ bucketId: bucket.id }).then(({ error }) => {
                       if (error) throw new Error(error.message);
                     }),
                   chatItems: [
-                    { type: MESSAGE, message: "Alright, thank you!" },
+                    {
+                      type: MESSAGE,
+                      message: (
+                        <FormattedMessage defaultMessage="Alright, thank you!" />
+                      ),
+                    },
                   ],
                 },
                 {
-                  label: "No, it's breaking a guideline",
-                  chatItems: raiseFlagFlow({
-                    guidelines: bucket.round.guidelines,
-                    raiseFlag,
-                    bucketId: bucket.id,
-                  }),
+                  label: (
+                    <FormattedMessage defaultMessage="No, it's breaking a guideline" />
+                  ),
+                  chatItems: raiseFlagFlow(
+                    {
+                      guidelines: bucket.round.guidelines,
+                      raiseFlag,
+                      bucketId: bucket.id,
+                    },
+                    intl.formatMessage
+                  ),
                 },
               ],
             },
@@ -286,6 +361,7 @@ const Monster = ({ bucket }) => {
       }
     }
   }, [
+    intl,
     allGoodFlag,
     bucket.id,
     chatItems,
@@ -346,12 +422,14 @@ const Monster = ({ bucket }) => {
           <div
             className={`bg-${bucket.round.color} text-lg text-white p-3 font-semibold flex items-center justify-center relative`}
           >
-            <div className="">Review</div>
+            <div className="">
+              <FormattedMessage defaultMessage="Review" />
+            </div>
             <button
               className="absolute mr-2 right-0 focus:outline-none"
               onClick={() => setOpen(false)}
             >
-              Close
+              <FormattedMessage defaultMessage="Close" />
             </button>
           </div>
           <div className="relative h-full">
@@ -406,7 +484,7 @@ const Monster = ({ bucket }) => {
               setOpen(true);
             }}
           >
-            Review
+            <FormattedMessage defaultMessage="Review" />
           </Button>
         </>
       )}

@@ -45,7 +45,7 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://guide.cobudget.co/">Discover how it works.</a></i></div>
+const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://cobudget.helpscoutdocs.com/">Discover how it works.</a></i></div>
 <br/>
 <div><a href="${appLink(
   "/settings"
@@ -202,13 +202,13 @@ export default {
       <br/><br/>
       <b>How to get started?</b>
       <ul>
-      <li>Check out our <a href="https://guide.cobudget.co/">Cobudget guide</a> for some simple how-to’s</li>
+      <li>Check out the <a href="https://cobudget.helpscoutdocs.com/">Cobudget docs</a> for some simple how-to’s</li>
       <li>${createYourFirst}</li>
       </ul>
       <br/>
       <b>Want to learn more?</b>
       <ul>
-      <li>Dig into our <a href="https://guide.cobudget.co/case-studies">case studies</a> to see how others are using the tool</li>
+      <li>Dig into our <a href="https://cobudget.helpscoutdocs.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
       <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
       </ul>
       <br/>
@@ -409,15 +409,35 @@ export default {
       subject: `${user.name}, you’ve received funds to spend in ${round.title}!`,
       html: `You have received ${(newAmount - oldAmount) / 100} ${
         round.currency
-      } in ${escape(round.title)}.
-      <br/><br/>
-      Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+      } in ${escape(
+        round.title
+      )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
         `/${group.slug}/${round.slug}`
-      )}">${escape(round.title)}</a>.
-      <br/><br/>
-      ${footer}
-      `,
+      )}">${escape(round.title)}</a>. <br/><br/>${footer}`,
     });
+  },
+  bulkAllocateNotification: async ({ roundId, membersData }) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
+    });
+    const emails = membersData
+      .filter((member) => member.emailSettings?.allocatedToYou ?? true)
+      .filter((member) => member.adjustedAmount > 0)
+      .map((member) => {
+        return {
+          to: member.user.email,
+          subject: `${member.user.name}, you’ve received funds to spend in ${round.title}!`,
+          html: `You have received ${member.adjustedAmount / 100} ${
+            round.currency
+          } in ${escape(
+            round.title
+          )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+            `/${round.group.slug}/${round.slug}`
+          )}">${escape(round.title)}</a>.<br/><br/> ${footer}`,
+        };
+      });
+    await sendEmails(emails);
   },
   cancelFundingNotification: async ({
     bucket,

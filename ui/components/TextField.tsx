@@ -21,7 +21,7 @@ const TextField = ({
   required,
   startAdornment,
   endAdornment,
-  color = "blue",
+  color = "anthracit",
   wysiwyg,
   enableMentions = false,
   mentionsCollId = null,
@@ -137,7 +137,7 @@ const TextField = ({
           )}
         </div>
       )}
-      {error && (
+      {error && helperText && (
         <span className="text-red px-4 py-1 text-xs font-medium">
           {helperText}
         </span>

@@ -11,7 +11,6 @@ import { devtoolsExchange } from "@urql/devtools";
 import { cacheExchange } from "@urql/exchange-graphcache";
 
 import { GROUP_MEMBERS_QUERY } from "../components/Group/GroupMembers/GroupMembersTable";
-import { ROUND_MEMBERS_QUERY } from "../components/RoundMembers";
 import { COMMENTS_QUERY, DELETE_COMMENT_MUTATION } from "../contexts/comment";
 import { BUCKETS_QUERY } from "pages/[group]/[round]";
 import { BUCKET_QUERY } from "pages/[group]/[round]/[bucket]";
@@ -109,29 +108,57 @@ export const client = (
                   });
               }
             },
-            deleteRoundInvitationLink(result, args, cache) {
-              if (result.deleteRoundInvitationLink) {
+            deleteInvitationLink(result, args, cache) {
+              if (result.deleteInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "invitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "invitationLink",
                       field.arguments
                     );
                   });
               }
             },
-            createRoundInvitationLink(result, args, cache) {
-              if (result.createRoundInvitationLink) {
+            deleteGroupInvitationLink(result, args, cache) {
+              if (result.deleteGroupInvitationLink) {
                 cache
                   .inspectFields("Query")
-                  .filter((field) => field.fieldName === "roundInvitationLink")
+                  .filter((field) => field.fieldName === "groupInvitationLink")
                   .forEach((field) => {
                     cache.invalidate(
                       "Query",
-                      "roundInvitationLink",
+                      "groupInvitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
+            createInvitationLink(result, args, cache) {
+              if (result.createInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "invitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "invitationLink",
+                      field.arguments
+                    );
+                  });
+              }
+            },
+            createGroupInvitationLink(result, args, cache) {
+              if (result.createGroupInvitationLink) {
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "groupInvitationLink")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "groupInvitationLink",
                       field.arguments
                     );
                   });
@@ -162,9 +189,13 @@ export const client = (
             deleteGroupMember(result: any, { groupMemberId }, cache) {
               cache
                 .inspectFields("Query")
-                .filter((field) => field.fieldName === "orgMembersPage")
+                .filter((field) => field.fieldName === "groupMembersPage")
                 .forEach((field) => {
-                  cache.invalidate("Query", "orgMembersPage", field.arguments);
+                  cache.invalidate(
+                    "Query",
+                    "groupMembersPage",
+                    field.arguments
+                  );
                 });
             },
             updateMember(result: any, { isApproved }, cache) {
@@ -175,6 +206,21 @@ export const client = (
                   .filter((field) => field.fieldName === "membersPage")
                   .forEach((field) => {
                     cache.invalidate("Query", "membersPage", field.arguments);
+                  });
+            },
+
+            updateGroupMember(result: any, { isApproved }, cache) {
+              // only invalidate if isApproved, this means we move a member from the request list to the approvedMembers list
+              if (isApproved)
+                cache
+                  .inspectFields("Query")
+                  .filter((field) => field.fieldName === "groupMembersPage")
+                  .forEach((field) => {
+                    cache.invalidate(
+                      "Query",
+                      "groupMembersPage",
+                      field.arguments
+                    );
                   });
             },
 
@@ -398,7 +444,12 @@ export const client = (
                 cache.updateQuery(
                   {
                     query: GROUP_MEMBERS_QUERY,
-                    variables: { offset: 0, limit: 30 },
+                    variables: {
+                      offset: 0,
+                      limit: 30,
+                      groupId: _args.groupId,
+                      search: "",
+                    },
                   },
                   (data: any) => {
                     return {
@@ -416,38 +467,13 @@ export const client = (
               }
             },
             inviteRoundMembers(result: any, { roundId }, cache) {
-              if (result.inviteRoundMembers) {
-                cache.updateQuery(
-                  {
-                    query: ROUND_MEMBERS_QUERY,
-                    variables: { roundId, offset: 0, limit: 1000, search: "" },
-                  },
-                  (data: any) => {
-                    const existingEmails =
-                      data.approvedMembersPage?.approvedMembers?.map(
-                        (member) => member.email
-                      ) || [];
-                    const newInvitedMembers = result.inviteRoundMembers?.filter(
-                      (member) => existingEmails.indexOf(member.email) === -1
-                    );
+              const queryFields = cache.inspectFields("Query");
 
-                    if (newInvitedMembers.length === 0) {
-                      return;
-                    }
-
-                    return {
-                      ...data,
-                      approvedMembersPage: {
-                        ...data.approvedMembersPage,
-                        approvedMembers: [
-                          ...newInvitedMembers,
-                          ...data.approvedMembersPage?.approvedMembers,
-                        ],
-                      },
-                    };
-                  }
-                );
-              }
+              queryFields
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
             },
             contribute(result, args, cache) {
               const queryFields = cache.inspectFields("Query");

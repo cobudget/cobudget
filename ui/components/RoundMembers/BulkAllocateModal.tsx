@@ -5,8 +5,8 @@ import { useMutation, gql } from "urql";
 import Button from "components/Button";
 import TextField from "components/TextField";
 import Switch from "components/Switch";
-import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
+import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const BULK_ALLOCATE_MUTATION = gql`
   mutation BulkAllocate($roundId: ID!, $amount: Int!, $type: AllocationType!) {
@@ -21,6 +21,7 @@ const BulkAllocateModal = ({ round, handleClose }) => {
   const [inputValue, setInputValue] = useState("");
   const [type, setSelectedType] = useState("Add");
   const amount = Math.round(Number(inputValue) * 100);
+  const intl = useIntl();
 
   const [{ fetching: loading }, bulkAllocate] = useMutation(
     BULK_ALLOCATE_MUTATION
@@ -36,7 +37,7 @@ const BulkAllocateModal = ({ round, handleClose }) => {
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm">
         <h1 className="text-xl font-semibold mb-4 break-words">
-          Manage all members balance
+          <FormattedMessage defaultMessage="Manage all members balance" />
         </h1>
         <Switch
           options={["Add", "Set"]}
@@ -56,7 +57,11 @@ const BulkAllocateModal = ({ round, handleClose }) => {
                 toast.error(error.message);
               } else {
                 handleClose();
-                toast.success("Allocated funds successfully");
+                toast.success(
+                  intl.formatMessage({
+                    defaultMessage: "Allocated funds successfully",
+                  })
+                );
               }
             });
           }}
@@ -74,23 +79,43 @@ const BulkAllocateModal = ({ round, handleClose }) => {
           />
           {type === "Add" ? (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Adding {thousandSeparator(amount / 100)} {round.currency} to{" "}
-              {round.numberOfApprovedMembers} members ={" "}
-              {thousandSeparator(total / 100)} {round.currency} total
+              <FormattedMessage defaultMessage="Adding" />{" "}
+              <FormattedNumber
+                value={amount / 100}
+                style="currency"
+                currencyDisplay={"symbol"}
+                currency={round.currency}
+              />{" "}
+              <FormattedMessage
+                defaultMessage=" to {count} {count, plural, one {member} other {members}}"
+                values={{
+                  count: round.numberOfApprovedMembers,
+                }}
+              />
             </p>
           ) : (
             <p className="text-center mb-4 text-gray-700 text-sm">
-              Setting {round.numberOfApprovedMembers} members balances to{" "}
-              {thousandSeparator(amount / 100)} {round.currency}
+              <FormattedMessage
+                defaultMessage="Setting {count} {count, plural, one {member} other {members}} {count, plural, one {balance} other {balances}} to"
+                values={{
+                  count: round.numberOfApprovedMembers,
+                }}
+              />{" "}
+              <FormattedNumber
+                value={amount / 100}
+                style="currency"
+                currencyDisplay={"symbol"}
+                currency={round.currency}
+              />
             </p>
           )}
 
           <div className="flex space-x-3 justify-end">
             <Button onClick={handleClose} variant="secondary">
-              Cancel
+              <FormattedMessage defaultMessage="Cancel" />
             </Button>
             <Button type="submit" loading={loading} disabled={disabled}>
-              Done
+              <FormattedMessage defaultMessage="Done" />
             </Button>
           </div>
         </form>

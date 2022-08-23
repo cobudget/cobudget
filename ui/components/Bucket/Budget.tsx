@@ -1,5 +1,4 @@
 import { useState } from "react";
-import thousandSeparator from "utils/thousandSeparator";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import { Tooltip } from "react-tippy";
@@ -79,11 +78,15 @@ const BucketBudget = ({
                             currencyDisplay={"symbol"}
                             currency={currency}
                           />
-                          {budgetItem.max &&
-                            ` - ${thousandSeparator(
-                              budgetItem.max / 100
-                            )}`}{" "}
-                          {currency}
+                          {budgetItem.max && " - "}
+                          {budgetItem.max && (
+                            <FormattedNumber
+                              value={budgetItem.max / 100}
+                              style="currency"
+                              currencyDisplay={"symbol"}
+                              currency={currency}
+                            />
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -101,10 +104,17 @@ const BucketBudget = ({
                           currencyDisplay={"symbol"}
                           currency={currency}
                         />
-                        {expenseTotalMax > 0
-                          ? " - " + thousandSeparator(expenseTotalMax / 100)
-                          : ""}{" "}
-                        {currency}
+                        {expenseTotalMax > 0 ? " - " : ""}
+                        {expenseTotalMax > 0 ? (
+                          <FormattedNumber
+                            value={expenseTotalMax / 100}
+                            style="currency"
+                            currencyDisplay={"symbol"}
+                            currency={currency}
+                          />
+                        ) : (
+                          ""
+                        )}
                       </td>
                     </tr>
                   </tbody>
@@ -117,7 +127,6 @@ const BucketBudget = ({
               <h3 className="font-lg font-medium mb-2">
                 <FormattedMessage defaultMessage="Existing funds" />
               </h3>
-
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
                 <table className="table-fixed w-full">
                   <tbody>
@@ -128,7 +137,12 @@ const BucketBudget = ({
                       >
                         <td className="px-4 py-2">{budgetItem.description}</td>
                         <td className="px-4 py-2">
-                          {thousandSeparator(budgetItem.min / 100)} {currency}
+                          <FormattedNumber
+                            value={budgetItem.min / 100}
+                            style="currency"
+                            currencyDisplay={"symbol"}
+                            currency={currency}
+                          />
                         </td>
                       </tr>
                     ))}
@@ -198,7 +212,12 @@ const BucketBudget = ({
                   {" "}
                   (<FormattedMessage defaultMessage="stretch goal:" />{" "}
                   <span className="font-bold">
-                    {thousandSeparator(goalTotalMax / 100)} {currency}
+                    <FormattedNumber
+                      value={goalTotalMax / 100}
+                      style="currency"
+                      currencyDisplay={"symbol"}
+                      currency={currency}
+                    />
                   </span>
                   )
                 </>

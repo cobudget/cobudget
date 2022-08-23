@@ -1,19 +1,27 @@
-name: "Deploy to dokku (branch: master)"
+name: "Migrate staging"
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
-  build:
+  staging:
+    name: Staging
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v1
-      - name: Dokku deploy
-        uses: vitalyliber/dokku-github-action@v6.1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - name: Install
+        run: cd ui && yarn install --frozen-lockfile --silent
+
+      - name: Run migrations
+        run: cd ui && yarn prisma migrate deploy
         env:
-          PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
-          HOST: api.dreams.wtf
-          PROJECT: dreams-api
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}

@@ -1,5 +1,37 @@
-import prisma from "../../prisma";
 import dayjs from "dayjs";
+import { skip } from "graphql-resolvers";
+import stripe from "server/stripe";
+import prisma from "../../prisma";
+import fetch from "node-fetch";
+
+export async function isCollOrGroupAdmin(
+  parent,
+  { roundId: roundIdArg },
+  { user }
+) {
+  if (!user) throw new Error("You need to be logged in");
+
+  const roundId = roundIdArg ?? parent.id;
+
+  const roundMember = await getRoundMember({
+    userId: user.id,
+    roundId,
+  });
+  let groupMember = null;
+  if (!roundMember?.isAdmin) {
+    const group = await prisma.group.findFirst({
+      where: { rounds: { some: { id: roundId } } },
+    });
+    groupMember = await getGroupMember({
+      userId: user.id,
+      groupId: group?.id,
+    });
+  }
+
+  if (!(roundMember?.isAdmin || groupMember?.isAdmin))
+    throw new Error("You need to be admin of the round or the group");
+  return skip;
+}
 
 export async function isCollAdmin({ roundId, userId }) {
   const roundMember = await getRoundMember({
@@ -172,6 +204,11 @@ export async function getCurrentGroupAndMember({
 
 /** contributions = donations */
 export async function bucketTotalContributions(bucket) {
+  const contributions = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .Contributions();
+  return contributions.reduce((acc, curr) => acc + curr.amount, 0);
+
   const {
     _sum: { amount },
   } = await prisma.contribution.aggregate({
@@ -185,29 +222,37 @@ export async function bucketTotalContributions(bucket) {
 
 /** income = existing funding */
 export async function bucketIncome(bucket) {
-  const {
-    _sum: { min },
-  } = await prisma.budgetItem.aggregate({
-    _sum: { min: true },
-    where: {
-      bucketId: bucket.id,
-      type: "INCOME",
-    },
-  });
-  return min;
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
+
+  return budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "INCOME" ? curr.min : 0),
+    0
+  );
 }
 
 export async function bucketMinGoal(bucket) {
-  const {
-    _sum: { min },
-  } = await prisma.budgetItem.aggregate({
-    _sum: { min: true },
-    where: {
-      bucketId: bucket.id,
-      type: "EXPENSE",
-    },
-  });
-  return min > 0 ? min : 0;
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
+  const sumMinExpenses = budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "EXPENSE" ? curr.min : 0),
+    0
+  );
+  return sumMinExpenses > 0 ? sumMinExpenses : 0;
+}
+
+export async function bucketMaxGoal(bucket) {
+  const budgetItems = await prisma.bucket
+    .findUnique({ where: { id: bucket.id } })
+    .BudgetItems();
+  const sumMaxExpenses = budgetItems.reduce(
+    (acc, curr) => acc + (curr.type == "EXPENSE" ? curr.max ?? curr.min : 0),
+    0
+  );
+
+  return sumMaxExpenses > 0 ? sumMaxExpenses : 0;
 }
 
 export function isGrantingOpen(round) {
@@ -324,3 +369,73 @@ export async function roundMemberBalance(member) {
 
   return totalAllocations - totalContributions;
 }
+
+/** only call this if you've verified the user is at least a round admin */
+export async function stripeIsConnected({ round }) {
+  if (!round.stripeAccountId) {
+    return false;
+  }
+
+  // this seems to take approx 400-700ms
+  const account = await stripe.accounts.retrieve(round.stripeAccountId);
+
+  return account.charges_enabled;
+}
+
+export async function updateFundedPercentage(bucket) {
+  try {
+    const total = await bucketTotalContributions(bucket);
+    const minGoal = await bucketMinGoal(bucket);
+    const income = await bucketIncome(bucket);
+    const percentageFunded =
+      Math.floor(((total + income) / minGoal) * 10000) / 100;
+    return prisma.bucket.update({
+      where: { id: bucket.id },
+      data: {
+        percentageFunded,
+      },
+    });
+  } catch (err) {
+    return err;
+  }
+}
+
+export async function updateContributionsCount(bucket, inc = 1) {
+  try {
+    return prisma.bucket.update({
+      where: { id: bucket.id },
+      data: {
+        contributionsCount: (bucket.contributionsCount || 0) + inc,
+      },
+    });
+  } catch (err) {
+    return err;
+  }
+}
+
+export const getLanguageProgress = async () => {
+  try {
+    if (!process.env.CROWDIN_PROJECT_ID) return [];
+
+    const res = await fetch(
+      `https://api.crowdin.com/api/v2/projects/${process.env.CROWDIN_PROJECT_ID}/languages/progress`,
+      {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + process.env.CROWDIN_API_TOKEN,
+        },
+      }
+    );
+    const { data } = (await res.json()) as any;
+    const progress = [];
+    data.forEach((lang) => {
+      progress.push({
+        code: lang.data.languageId.split("-")[0],
+        percentage: lang.data.translationProgress,
+      });
+    });
+    return progress;
+  } catch (err) {
+    return [];
+  }
+};
