@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Header from "./Header";
 import { FormattedMessage } from "react-intl";
 import "../lib/beacon";
