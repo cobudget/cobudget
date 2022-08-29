@@ -17,7 +17,7 @@ export const startSuperAdminSession = async (parent, args, { user, response }) =
             }
         });
 
-        const token = sign(session.id);
+        const token = sign({ id: session.id });
         response.setHeader("set-cookie", `ss=${token}; path=/; samesite=lax; httponly;`);
         return session;
     }

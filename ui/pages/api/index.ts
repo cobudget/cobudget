@@ -6,6 +6,8 @@ import resolvers from "../../server/graphql/resolvers";
 import EventHub from "../../server/services/eventHub.service";
 import handler from "../../server/api-handler";
 import subscribers from "../../server/subscribers";
+import cookieParser from "cookie-parser";
+import { verify } from "server/utils/jwt";
 
 export const config = {
   api: {
@@ -18,7 +20,8 @@ export interface GraphQLContext {
   prisma: typeof prisma;
   eventHub?: any;
   request?: any;
-  response?: any
+  response?: any;
+  ss?: { id: string }
 }
 
 const corsOptions = {
@@ -30,12 +33,17 @@ subscribers.initialize(EventHub);
 
 export default handler()
   .use(cors(corsOptions))
+  .use(cookieParser())
   .use(
     new ApolloServer({
       typeDefs: schema,
       resolvers,
       context: async ({ req, res }): Promise<GraphQLContext> => {
         const { user } = req;
+        let ss;
+        try {
+          ss = verify(req.cookies.ss);
+        } catch(err) {}
 
         return {
           user,
@@ -43,6 +51,7 @@ export default handler()
           request: req,
           eventHub: EventHub,
           response: res,
+          ss,
         };
       },
     }).createHandler({

@@ -8,6 +8,7 @@ import {
   userQueries,
   roundQueries,
   bucketQueries,
+  superAdminQueries,
 } from "./queries";
 
 import {
@@ -42,6 +43,7 @@ const resolvers = {
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
+    ...superAdminQueries,
     languageProgressPage,
   },
 

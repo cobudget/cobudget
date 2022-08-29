@@ -102,18 +102,34 @@ const SUPER_ADMIN_START = gql`
   }
 `;
 
+const GET_SUPER_ADMIN_SESSION = gql`
+  query GetSuperAdminSession {
+    getSuperAdminSession {
+      id,
+      duration,
+      start,
+      end,
+    }
+  }
+`;
+
 const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const intl = useIntl();
 
+  const [{data: superAdminSession}] = useQuery({ query: GET_SUPER_ADMIN_SESSION});
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
   const [, startSuperAdminSession] = useMutation(SUPER_ADMIN_START);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
+
+  useEffect(() => {
+    console.log('SuperAdminSession', superAdminSession);
+  }, []);
 
   const title = group
     ? round

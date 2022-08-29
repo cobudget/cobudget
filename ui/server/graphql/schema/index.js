@@ -5,6 +5,7 @@ const schema = gql`
   scalar JSONObject
 
   type Query {
+    getSuperAdminSession: SuperAdminSession
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
