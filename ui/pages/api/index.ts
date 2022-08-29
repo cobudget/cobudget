@@ -17,6 +17,8 @@ export interface GraphQLContext {
   user?: Express.User;
   prisma: typeof prisma;
   eventHub?: any;
+  request?: any;
+  response?: any
 }
 
 const corsOptions = {
@@ -32,13 +34,15 @@ export default handler()
     new ApolloServer({
       typeDefs: schema,
       resolvers,
-      context: async ({ req }): Promise<GraphQLContext> => {
+      context: async ({ req, res }): Promise<GraphQLContext> => {
         const { user } = req;
 
         return {
           user,
           prisma,
+          request: req,
           eventHub: EventHub,
+          response: res,
         };
       },
     }).createHandler({

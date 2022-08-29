@@ -438,3 +438,11 @@ model Transaction {
 
   stripeSessionId String?
 }
+
+model SuperAdminSession {
+  id        String    @id               @default(cuid())
+  start     DateTime  @default(now())
+  end       DateTime?
+  duration  Int
+  adminId   String
+}

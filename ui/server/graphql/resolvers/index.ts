@@ -33,6 +33,7 @@ import {
   groupMutations,
   roundMutations,
   bucketMutations,
+  superAdminMutations,
 } from "./mutations";
 
 const resolvers = {
@@ -49,6 +50,7 @@ const resolvers = {
     ...groupMutations,
     ...roundMutations,
     ...bucketMutations,
+    ...superAdminMutations,
   },
 
   RoundMember,

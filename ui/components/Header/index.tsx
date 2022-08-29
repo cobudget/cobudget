@@ -94,6 +94,14 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
+const SUPER_ADMIN_START = gql`
+  mutation StartSuperAdminSession ($duration: Int!) {
+    startSuperAdminSession (duration: $duration) {
+      id
+    }
+  }
+`;
+
 const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -102,6 +110,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
 
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
+  const [, startSuperAdminSession] = useMutation(SUPER_ADMIN_START);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
@@ -135,6 +144,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
         />
       </Head>
       <header className={`bg-${color} shadow-md w-full`}>
+      <button onClick={() => startSuperAdminSession({ duration: 15 })}>Admin</button>
         <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
           <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
             <GroupAndRoundHeader

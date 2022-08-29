@@ -121,3 +121,7 @@ export const isCollModOrAdmin = async (
     throw new Error("You need to be admin or moderator of the round");
   return skip;
 };
+
+export const isSuperAdmin = (user) => {
+  return !!user;
+}

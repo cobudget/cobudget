@@ -52,6 +52,14 @@ const schema = gql`
   }
 
   type Mutation {
+    startSuperAdminSession(
+      duration: Int!
+    ): SuperAdminSession
+
+    closeSuperAdminSession(
+      id: ID!
+    ): SuperAdminSession
+
     createGroup(
       name: String!
       logo: String
@@ -630,6 +638,14 @@ const schema = gql`
     id: ID!
     customField: CustomField
     value: JSON
+  }
+
+  type SuperAdminSession {
+    id: ID!
+    start: Date
+    duration: Int
+    end: Date
+    adminId: ID!
   }
 
   input CustomFieldValueInput {
