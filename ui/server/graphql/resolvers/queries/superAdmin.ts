@@ -1,6 +1,6 @@
 import prisma from "../../../prisma";
 
-export const getSuperAdminSession = async (parent, args, { user, ss }) => {
+export const getSuperAdminSession = async (parent, args, { ss }) => {
     try {
     if (!ss) {
         return null;
