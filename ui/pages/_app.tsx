@@ -180,22 +180,23 @@ const MyApp = ({ Component, pageProps, router }) => {
   const currentUser = useMemo(() => { 
     const { currentUser: c } = currentUserData ?? {};
     if (!c) return null;
+    if (!ss) return c;
     
-    if (c.currentCollMember && ss) {
+    if (c.currentCollMember && ss?.getSuperAdminSession) {
       c.currentCollMember.isAdmin = true;
     }
-    else if (ss) {
+    else if (ss?.getSuperAdminSession) {
       c.currentCollMember = { isAdmin: true }
     }
 
-    if (c.currentGroupMember && ss) {
+    if (c.currentGroupMember && ss?.getSuperAdminSession) {
       c.currentGroupMember.isAdmin = true;
     }
-    else if (ss) {
+    else if (ss?.getSuperAdminSession) {
       c.currentGroupMember = { isAdmin: true }
     }
     return c;
-  }, [currentUserData, ss]);
+  }, [currentUserData, ss?.getSuperAdminSession]);
 
   const [locale, setLocale] = useState(
     (() => {
