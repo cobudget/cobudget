@@ -46,12 +46,31 @@ export default handler().post(async (req, res) => {
       userId = missing(),
       groupName = missing(),
       groupSlug = missing(),
+      roundId = null,
     } = session.metadata;
 
     console.log("webhook: subscription", subscription);
 
     console.log({ subscription, userId });
 
+    // add existing round to group
+    if (roundId) {
+      const round = await prisma.round.findUnique({
+        where: { id: roundId },
+        include: { group: true },
+      });
+
+      const roundMember = await prisma.roundMember.findUnique({ where: { userId_roundId: { userId, roundId } } });
+
+      if (!round) {
+        throw new Error(`Round not found: ${roundId}`);
+      }
+
+      if (!roundMember.isAdmin) {
+        throw new Error(`User is not admin of round: ${roundId}`);
+      }
+      await prisma.round.update({ where: { id: roundId }, data: { singleRound: false } });
+    }
     try {
       await prisma.group.create({
         data: {
@@ -64,7 +83,14 @@ export default handler().post(async (req, res) => {
           stripeCustomerId: session.customer,
           stripePriceId: subscription.items.data[0].price.id,
           groupMembers: { create: { userId, isAdmin: true } },
-        },
+          ...!!roundId && {
+            rounds: {
+              connect: {
+                id: roundId,
+              }
+            }
+          },
+        }
       });
     } catch (error) {
       console.log(error);
@@ -83,6 +109,13 @@ export default handler().post(async (req, res) => {
           stripeCustomerId: session.customer,
           stripePriceId: subscription.items.data[0].price.id,
           groupMembers: { create: { userId, isAdmin: true } },
+          ...!!roundId && {
+            rounds: {
+              connect: {
+                id: roundId,
+              }
+            }
+          },
         },
       });
     }

@@ -34,6 +34,8 @@ export default function NewGroup({ currentUser }) {
 
   const [, cancel] = useDebounce(searchGroup, 300, [slug]);
 
+  const roundId = router.query.roundId;
+
   if (router.query.upgraded === "true") {
     router.push(`/${router.query.group}`);
     return (
@@ -47,13 +49,16 @@ export default function NewGroup({ currentUser }) {
     <>
       <PageHero className="">
         <h1 className="text-4xl text-center font-bold mb-4">
-          <FormattedMessage defaultMessage="Create a Group" />
+          <FormattedMessage defaultMessage={"Create a Group"} />
         </h1>
         <p className="text-center text-gray-600 text-xl mb-10">
           <FormattedMessage defaultMessage="Manage unlimited rounds and people in a group" />
         </p>
         <form
-          action={`/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}&registrationPolicy=${registrationPolicy}`}
+          action={
+            `/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}&registrationPolicy=${registrationPolicy}` +
+            (roundId ? `&roundId=${roundId}` : "")
+          }
           method="POST"
         >
           <div className="space-y-16 max-w-lg mx-auto">

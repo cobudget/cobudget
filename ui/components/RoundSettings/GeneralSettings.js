@@ -172,6 +172,16 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             >
               <FormattedMessage defaultMessage="Delete this round" />
             </Button>
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Upgrade to group" />
+            </h2>
+            <Button
+              href={`/new-group?roundId=${round.id}`}
+              nextJsLink={true}
+              variant="primary"
+            >
+              <FormattedMessage defaultMessage="Upgrade" />
+            </Button>
           </>
         )}
 

@@ -68,7 +68,7 @@ async function getTaxRates({
   return [taxRateId];
 }
 
-export default handler().post(async (req, res) => {
+export default handler().post(async (req: any, res) => {
   if (req.query?.mode === "paidplan") {
     if (!req.user) throw new Error("You need to be logged in");
     if (typeof req.query?.plan !== "string")
@@ -79,8 +79,6 @@ export default handler().post(async (req, res) => {
       throw new Error("No group name specified");
     if (typeof req.query?.registrationPolicy !== "string")
       throw new Error("No registration policy specified");
-
-    //if (typeof req.query?.contribution !== "string")
 
     const priceId = plans[req.query.plan];
     if (!priceId) throw new Error("Missing price ID for this plan.");
@@ -107,6 +105,7 @@ export default handler().post(async (req, res) => {
           groupSlug: req.query.groupSlug,
           groupName: req.query.groupName,
           registrationPolicy: req.query.registrationPolicy,
+          roundId: req.query.roundId,
         },
         allow_promotion_codes: true,
         ...customerMetadata,
