@@ -37,7 +37,6 @@ function InviteToken() {
           pathname: "/" + data?.joinInvitationLink?.group?.slug,
         });
       } else {
-        window.alert(1);
         router.push({
           pathname: "/c/" + data?.joinInvitationLink?.round?.slug,
         });
