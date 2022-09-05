@@ -6,7 +6,7 @@ export const user = async (groupMember) => {
     where: { id: groupMember.userId },
   });
 };
-export const email = async (member, _, { user }) => {
+export const email = async (member, _, { user, ss }) => {
   if (!user) return null;
   const currentGroupMember = await prisma.groupMember.findUnique({
     where: {
@@ -17,7 +17,7 @@ export const email = async (member, _, { user }) => {
     },
   });
 
-  if (!(currentGroupMember?.isAdmin || currentGroupMember.id == member.id))
+  if ((!(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id)) && !ss)
     return null;
 
   const u = await prisma.user.findFirst({
@@ -29,7 +29,7 @@ export const email = async (member, _, { user }) => {
   });
   return u.email;
 };
-export const name = async (member, _, { user }) => {
+export const name = async (member, _, { user, ss }) => {
   if (!user) return null;
   const currentGroupMember = await prisma.groupMember.findUnique({
     where: {
@@ -40,7 +40,7 @@ export const name = async (member, _, { user }) => {
     },
   });
 
-  if (!(currentGroupMember?.isAdmin || currentGroupMember.id == member.id))
+  if ((!(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id)) && !ss)
     return null;
 
   const u = await prisma.user.findFirst({

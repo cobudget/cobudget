@@ -32,6 +32,7 @@ const Layout = ({
   dir,
   locale,
   changeLocale,
+  ss
 }) => {
   const [
     { data: languageProgressResponse, fetching: languageProgressLoading },
@@ -59,6 +60,7 @@ const Layout = ({
           group={group}
           round={round}
           bucket={bucket}
+          ss={ss}
         />
         {children}
       </div>

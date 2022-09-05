@@ -162,7 +162,8 @@ const MyApp = ({ Component, pageProps, router }) => {
     pause: !router.isReady,
   });
 
-  const [{ data: ss }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
+  const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
+  const ss = ssQuery?.getSuperAdminSession;
 
   const [
     { data: currentUserData, fetching: fetchingUser, error: errorUser },
@@ -240,6 +241,7 @@ const MyApp = ({ Component, pageProps, router }) => {
         dir={isRTL(locale) ? "rtl" : "ltr"}
         locale={locale}
         changeLocale={changeLocale}
+        ss={ss}
       >
         <Component
           {...pageProps}

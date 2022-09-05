@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -11,6 +11,8 @@ import Head from "next/head";
 import { LoaderIcon } from "components/Icons";
 import EditProfileModal from "./EditProfile";
 import { FormattedMessage, useIntl } from "react-intl";
+import dayjs from "dayjs";
+import { toMS } from "utils/date";
 
 const css = {
   mobileProfileItem:
@@ -113,7 +115,7 @@ const GET_SUPER_ADMIN_SESSION = gql`
   }
 `;
 
-const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
+const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
@@ -126,10 +128,28 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
+  const [superAdminTime, setSuperAdminTime] = useState<HTMLElement>();
+  const [inSession, setInSession] = useState(false);
 
   useEffect(() => {
-    console.log('SuperAdminSession', superAdminSession);
-  }, []);
+    if ((ss?.start + (ss?.duration * 60000)) - Date.now() > 0) {
+      setInSession(true);
+    }
+    if (superAdminTime && superAdminTime) {
+      const interval = setInterval(() => {
+          const diff = (ss?.start + (ss?.duration * 60000)) - Date.now();
+          if (diff < 0) {
+            clearInterval(interval);
+            window.alert("Session Expired");
+            setInSession(false);
+          }
+          if(superAdminTime && superAdminTime?.innerHTML) {
+            superAdminTime.innerHTML = toMS(diff) + ""
+          }
+        }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [ss, superAdminTime]);
 
   const title = group
     ? round
@@ -160,7 +180,6 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
         />
       </Head>
       <header className={`bg-${color} shadow-md w-full`}>
-      <button onClick={() => startSuperAdminSession({ duration: 15 })}>Admin</button>
         <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
           <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
             <GroupAndRoundHeader
@@ -255,13 +274,15 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                           )
                         }
                       >
-                        {round.registrationPolicy === "REQUEST_TO_JOIN"
+                        {
+                        round.registrationPolicy === "REQUEST_TO_JOIN"
                           ? intl.formatMessage({
                               defaultMessage: "Request to join",
                             })
                           : intl.formatMessage({
                               defaultMessage: "Join round",
-                            })}
+                            })
+                        }
                       </NavItem>
                     )
                   }
@@ -286,6 +307,18 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                       </NavItem>
                     ) : null)}
 
+                  {
+                    (currentUser.isAdmin || true) &&
+                    
+                      inSession?
+                      <span className="text-white text-sm">
+                        <span className="cursor-pointer font-bold">✕</span>
+                        <span className="ml-4">Super Admin</span>
+                        <span className="ml-2 font-medium font-mono" ref={(ref) => setSuperAdminTime(ref)}>.</span>
+                      </span> : 
+                      <button onClick={() => startSuperAdminSession({ duration: 15 })}>Admin</button>
+                    
+                  }
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
                       currentUser={currentUser}

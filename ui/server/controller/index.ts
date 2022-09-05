@@ -165,7 +165,7 @@ export const getGroup = async ({
     const group = await prisma.group.findUnique({
       where: groupId ? { id: groupId } : { slug: groupSlug },
     });
-    if (group.visibility === "PUBLIC") return group;
+    if (group?.visibility === "PUBLIC") return group;
 
     if (!user) throw "This group is private";
 

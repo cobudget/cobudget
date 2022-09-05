@@ -7,9 +7,10 @@ import fetch from "node-fetch";
 export async function isCollOrGroupAdmin(
   parent,
   { roundId: roundIdArg },
-  { user }
+  { user, ss }
 ) {
   if (!user) throw new Error("You need to be logged in");
+  if (ss) return skip;
 
   const roundId = roundIdArg ?? parent.id;
 
