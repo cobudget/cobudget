@@ -57,9 +57,7 @@ const schema = gql`
       duration: Int!
     ): SuperAdminSession
 
-    closeSuperAdminSession(
-      id: ID!
-    ): SuperAdminSession
+    endSuperAdminSession: SuperAdminSession
 
     createGroup(
       name: String!

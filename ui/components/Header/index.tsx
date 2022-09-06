@@ -104,6 +104,14 @@ const SUPER_ADMIN_START = gql`
   }
 `;
 
+const SUPER_ADMIN_END = gql`
+  mutation EndSuperAdminSession {
+    endSuperAdminSession {
+      id
+    }
+  }
+`;
+
 const GET_SUPER_ADMIN_SESSION = gql`
   query GetSuperAdminSession {
     getSuperAdminSession {
@@ -125,6 +133,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
   const [, startSuperAdminSession] = useMutation(SUPER_ADMIN_START);
+  const [, endSuperAdminSession] = useMutation(SUPER_ADMIN_END);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
@@ -138,10 +147,11 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
     if (superAdminTime && superAdminTime) {
       const interval = setInterval(() => {
           const diff = (ss?.start + (ss?.duration * 60000)) - Date.now();
-          if (diff < 0) {
+          if (diff < 0 || !ss) {
             clearInterval(interval);
             window.alert("Session Expired");
             setInSession(false);
+            return;
           }
           if(superAdminTime && superAdminTime?.innerHTML) {
             superAdminTime.innerHTML = toMS(diff) + ""
@@ -312,11 +322,40 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                     
                       inSession?
                       <span className="text-white text-sm">
-                        <span className="cursor-pointer font-bold">✕</span>
+                        <span 
+                          className="cursor-pointer font-bold"
+                          onClick={() => {
+                            endSuperAdminSession();
+                          }}
+                        >
+                          ✕
+                        </span>
                         <span className="ml-4">Super Admin</span>
                         <span className="ml-2 font-medium font-mono" ref={(ref) => setSuperAdminTime(ref)}>.</span>
                       </span> : 
-                      <button onClick={() => startSuperAdminSession({ duration: 15 })}>Admin</button>
+                      <>
+                        <span className="text-white">Admin Session</span>
+                        <div className="inline-flex mx-4">
+                          <button 
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+                            onClick={() => startSuperAdminSession({ duration: 15 })}
+                          >
+                            15
+                          </button>
+                          <button 
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4"
+                            onClick={() => startSuperAdminSession({ duration: 30 })}
+                          >
+                            30
+                          </button>
+                          <button 
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+                            onClick={() => startSuperAdminSession({ duration: 60 })}
+                          >
+                            60
+                          </button>
+                        </div>
+                      </>
                     
                   }
                   <div className="hidden sm:block sm:ml-4">

@@ -58,6 +58,30 @@ export const client = (
         },
         updates: {
           Mutation: {
+            startSuperAdminSession(result, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "getSuperAdminSession")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "getSuperAdminSession",
+                    field.arguments
+                  )
+                })
+            },
+            endSuperAdminSession(result, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "getSuperAdminSession")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "getSuperAdminSession",
+                    field.arguments
+                  )
+                })
+            },
             allocate(result: any, args, cache) {
               cache
                 .inspectFields("Query")

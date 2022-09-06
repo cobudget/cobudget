@@ -26,6 +26,19 @@ export const startSuperAdminSession = async (parent, args, { user, response }) =
     }
 }
 
-export const closeSuperAdminSession = (parent, args, { superSession }) => {
-
+export const endSuperAdminSession = async (parent, args, { ss, response }) => {
+    console.log(ss);
+    if (ss) {
+        const session = await prisma.superAdminSession.update({
+            where: {
+                id: ss.id
+            },
+            data: {
+                end: new Date()
+            }
+        });
+        
+        response.setHeader("set-cookie", `ss=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`);
+        return session;
+    }
 }
