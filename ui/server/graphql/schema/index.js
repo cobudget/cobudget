@@ -6,6 +6,7 @@ const schema = gql`
 
   type Query {
     getSuperAdminSession: SuperAdminSession
+    getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
@@ -576,6 +577,11 @@ const schema = gql`
     contributions(roundId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
+  type superAdminSessionsPage {
+    moreExist: Boolean,
+    sessions: [SuperAdminSession]
+  }
+
   type Allocation implements Transaction {
     id: ID!
     round: Round!
@@ -645,6 +651,7 @@ const schema = gql`
     duration: Int
     end: Date
     adminId: ID!
+    user: User
   }
 
   input CustomFieldValueInput {
