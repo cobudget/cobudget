@@ -74,7 +74,7 @@ function SS () {
                     </TableHead>
                     <TableBody>
                         {
-                            sessions.map(ss => {
+                            sessions?.map(ss => {
                                 const end = ss.end || (ss.start + ss.duration * 60000)
                                 return (
                                 <TableRow key={ss.id}>

@@ -182,22 +182,21 @@ const MyApp = ({ Component, pageProps, router }) => {
     const { currentUser: c } = currentUserData ?? {};
     if (!c) return null;
     if (!ss) return c;
-    
-    if (c.currentCollMember && ss?.getSuperAdminSession) {
+    if (c.currentCollMember && ss) {
       c.currentCollMember.isAdmin = true;
     }
-    else if (ss?.getSuperAdminSession) {
+    else if (ss) {
       c.currentCollMember = { isAdmin: true }
     }
 
-    if (c.currentGroupMember && ss?.getSuperAdminSession) {
+    if (c.currentGroupMember && ss) {
       c.currentGroupMember.isAdmin = true;
     }
-    else if (ss?.getSuperAdminSession) {
+    else if (ss) {
       c.currentGroupMember = { isAdmin: true }
     }
     return c;
-  }, [currentUserData, ss?.getSuperAdminSession]);
+  }, [currentUserData, ss]);
 
   const [locale, setLocale] = useState(
     (() => {
