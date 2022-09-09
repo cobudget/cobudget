@@ -129,6 +129,8 @@ export const TOP_LEVEL_QUERY = gql`
       discourseUrl
       finishedTodos
       experimentalFeatures
+      registrationPolicy
+      visibility
     }
     bucket(id: $bucketId) {
       id

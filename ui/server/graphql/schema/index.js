@@ -11,7 +11,8 @@ const schema = gql`
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
-    roundInvitationLink(roundId: ID): RoundInvitationLink
+    invitationLink(roundId: ID): InvitationLink
+    groupInvitationLink(groupId: ID): InvitationLink
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -31,6 +32,7 @@ const schema = gql`
       search: String
       offset: Int
       limit: Int
+      isApproved: Boolean
     ): GroupMembersPage
     membersPage(
       roundId: ID!
@@ -50,7 +52,12 @@ const schema = gql`
   }
 
   type Mutation {
-    createGroup(name: String!, logo: String, slug: String!): Group!
+    createGroup(
+      name: String!
+      logo: String
+      slug: String!
+      registrationPolicy: RegistrationPolicy!
+    ): Group!
 
     editGroup(
       groupId: ID!
@@ -58,6 +65,8 @@ const schema = gql`
       info: String
       logo: String
       slug: String
+      registrationPolicy: RegistrationPolicy
+      visibility: Visibility
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -82,9 +91,14 @@ const schema = gql`
       discourseCategoryId: Int
     ): Round!
     deleteRound(roundId: ID!): Round
-    createRoundInvitationLink(roundId: ID): RoundInvitationLink
-    deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
-    joinRoundInvitationLink(token: String): RoundMember
+
+    createInvitationLink(roundId: ID): InvitationLink
+    deleteInvitationLink(roundId: ID): InvitationLink
+    joinInvitationLink(token: String): InvitedMember
+
+    createGroupInvitationLink(groupId: ID): InvitationLink
+    deleteGroupInvitationLink(groupId: ID): InvitationLink
+    joinGroupInvitationLink(token: String): GroupMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
@@ -165,6 +179,7 @@ const schema = gql`
       groupId: ID!
       memberId: ID!
       isAdmin: Boolean
+      isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     updateMember(
@@ -225,6 +240,8 @@ const schema = gql`
     discourseUrl: String
     finishedTodos: Boolean
     experimentalFeatures: Boolean
+    registrationPolicy: RegistrationPolicy
+    visibility: Visibility
   }
 
   enum RoundType {
@@ -281,7 +298,7 @@ const schema = gql`
     inviteNonce: Int
   }
 
-  type RoundInvitationLink {
+  type InvitationLink {
     link: String
   }
 
@@ -346,6 +363,12 @@ const schema = gql`
     acceptedTermsAt: Date
   }
 
+  type InvitedMember {
+    id: ID!
+    group: Group
+    round: Round
+  }
+
   type GroupMember {
     id: ID!
     group: Group!
@@ -359,6 +382,7 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
     email: String
     name: String
+    isApproved: Boolean
   }
 
   type GroupMembersPage {
