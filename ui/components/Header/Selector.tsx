@@ -105,6 +105,7 @@ export default function Selector({
                 return true;
               })
               .map((roundMember) => {
+                /*
                 if (roundMember.round.group)
                   return (
                     <Menu.Item key={roundMember.id}>
@@ -127,11 +128,14 @@ export default function Selector({
                       )}
                     </Menu.Item>
                   );
+                */
                 return (
                   <Menu.Item key={roundMember.id}>
                     {({ active }) => (
                       <LinkItem
-                        href={`/c/${roundMember.round.slug}`}
+                        href={`/${roundMember.round?.group?.slug || "c"}/${
+                          roundMember.round.slug
+                        }`}
                         active={active}
                         selected={roundMember.round.id === activeId}
                       >
