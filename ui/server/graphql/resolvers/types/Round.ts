@@ -188,15 +188,11 @@ export const group = async (round, _, { user }) => {
   return getGroup({ groupId: round.groupId, user });
 };
 
-export const bucketStatusCount = async (
-  round,
-  { groupSlug, roundSlug },
-  { user }
-) => {
+export const bucketStatusCount = async (round, _, { user }) => {
   const currentMember = await prisma.roundMember.findFirst({
     where: {
       userId: user?.id ?? "undefined",
-      round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+      roundId: round.id,
     },
   });
 
