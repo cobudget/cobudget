@@ -202,13 +202,13 @@ export default {
       <br/><br/>
       <b>How to get started?</b>
       <ul>
-      <li>Check out the <a href="https://cobudget.helpscoutdocs.com/">Cobudget docs</a> for some simple how-to’s</li>
+      <li>Check out the <a href="https://guide.cobudget.com/">Cobudget docs</a> for some simple how-to’s</li>
       <li>${createYourFirst}</li>
       </ul>
       <br/>
       <b>Want to learn more?</b>
       <ul>
-      <li>Dig into our <a href="https://cobudget.helpscoutdocs.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
+      <li>Dig into our <a href="https://guide.cobudget.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
       <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
       </ul>
       <br/>
