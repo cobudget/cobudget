@@ -24,7 +24,6 @@ export const isRootAdmin = (parent, args, { user }) => {
 export const isCollMember = async (parent, { roundId, bucketId }, { user, ss }) => {
   if (!user) throw new Error("You need to be logged in");
   if (ss) return skip;
-
   const roundMember = await getRoundMember({
     userId: user.id,
     roundId,

@@ -68,12 +68,13 @@ export const round = async (parent, { groupSlug, roundSlug }, { user }) => {
   }
 };
 
-export const invitationLink = async (parent, { roundId }, { user }) => {
+export const invitationLink = async (parent, { roundId }, { user, ss }) => {
   const isAdmin =
     !!user &&
     isCollAdmin({
       userId: user.id,
       roundId,
+      ss
     });
 
   if (!isAdmin) {
@@ -183,11 +184,12 @@ export const membersPage = combineResolvers(
   async (
     parent,
     { roundId, isApproved, search, offset = 0, limit = 10 },
-    { user }
+    { user, ss }
   ) => {
     const isAdmin = await isCollAdmin({
       userId: user.id,
       roundId,
+      ss
     });
     if (!isAdmin && !isApproved) return null;
 

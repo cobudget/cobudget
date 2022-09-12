@@ -34,7 +34,8 @@ export async function isCollOrGroupAdmin(
   return skip;
 }
 
-export async function isCollAdmin({ roundId, userId }) {
+export async function isCollAdmin({ roundId, userId, ss }) {
+  if (ss) return true;
   const roundMember = await getRoundMember({
     userId: userId,
     roundId,
