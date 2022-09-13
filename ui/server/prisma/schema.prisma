@@ -26,6 +26,7 @@ model User {
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?
   Transaction      Transaction[]
+  isSuperAdmin     Boolean?       @default(false)
 }
 
 model EmailSettings {

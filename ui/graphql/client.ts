@@ -67,8 +67,8 @@ export const client = (
                     "Query",
                     "getSuperAdminSession",
                     field.arguments
-                  )
-                })
+                  );
+                });
             },
             endSuperAdminSession(result, args, cache) {
               cache
@@ -79,8 +79,8 @@ export const client = (
                     "Query",
                     "getSuperAdminSession",
                     field.arguments
-                  )
-                })
+                  );
+                });
             },
             allocate(result: any, args, cache) {
               cache

@@ -21,7 +21,7 @@ export interface GraphQLContext {
   eventHub?: any;
   request?: any;
   response?: any;
-  ss?: { id: string }
+  ss?: { id: string };
 }
 
 const corsOptions = {
@@ -43,7 +43,9 @@ export default handler()
         let ss;
         try {
           ss = verify(req.cookies.ss);
-        } catch(err) {}
+        } catch (err) {
+          ss = null;
+        }
 
         return {
           user,

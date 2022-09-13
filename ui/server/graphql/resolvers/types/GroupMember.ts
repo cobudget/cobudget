@@ -17,7 +17,10 @@ export const email = async (member, _, { user, ss }) => {
     },
   });
 
-  if ((!(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id)) && !ss)
+  if (
+    !(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id) &&
+    !ss
+  )
     return null;
 
   const u = await prisma.user.findFirst({
@@ -40,7 +43,10 @@ export const name = async (member, _, { user, ss }) => {
     },
   });
 
-  if ((!(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id)) && !ss)
+  if (
+    !(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id) &&
+    !ss
+  )
     return null;
 
   const u = await prisma.user.findFirst({

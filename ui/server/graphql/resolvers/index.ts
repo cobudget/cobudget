@@ -26,7 +26,7 @@ import {
   Transaction,
   User,
   Date,
-  SuperAdminSession
+  SuperAdminSession,
 } from "./types";
 
 // mutations

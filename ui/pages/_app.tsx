@@ -22,6 +22,7 @@ export const CURRENT_USER_QUERY = gql`
       avatar
       email
       acceptedTermsAt
+      isSuperAdmin
 
       groupMemberships {
         id
@@ -142,10 +143,10 @@ export const TOP_LEVEL_QUERY = gql`
 const GET_SUPER_ADMIN_SESSION = gql`
   query GetSuperAdminSession {
     getSuperAdminSession {
-      id,
-      duration,
-      start,
-      end,
+      id
+      duration
+      start
+      end
     }
   }
 `;
@@ -178,22 +179,20 @@ const MyApp = ({ Component, pageProps, router }) => {
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};
-  const currentUser = useMemo(() => { 
+  const currentUser = useMemo(() => {
     const { currentUser: c } = currentUserData ?? {};
     if (!c) return null;
     if (!ss) return c;
     if (c.currentCollMember && ss) {
       c.currentCollMember.isAdmin = true;
-    }
-    else if (ss) {
-      c.currentCollMember = { isAdmin: true }
+    } else if (ss) {
+      c.currentCollMember = { isAdmin: true };
     }
 
     if (c.currentGroupMember && ss) {
       c.currentGroupMember.isAdmin = true;
-    }
-    else if (ss) {
-      c.currentGroupMember = { isAdmin: true }
+    } else if (ss) {
+      c.currentGroupMember = { isAdmin: true };
     }
     return c;
   }, [currentUserData, ss]);

@@ -32,7 +32,7 @@ const Layout = ({
   dir,
   locale,
   changeLocale,
-  ss
+  ss,
 }) => {
   const [
     { data: languageProgressResponse, fetching: languageProgressLoading },

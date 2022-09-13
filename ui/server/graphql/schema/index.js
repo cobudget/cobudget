@@ -54,9 +54,7 @@ const schema = gql`
   }
 
   type Mutation {
-    startSuperAdminSession(
-      duration: Int!
-    ): SuperAdminSession
+    startSuperAdminSession(duration: Int!): SuperAdminSession
 
     endSuperAdminSession: SuperAdminSession
 
@@ -369,6 +367,7 @@ const schema = gql`
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
     acceptedTermsAt: Date
+    isSuperAdmin: Boolean
   }
 
   type InvitedMember {
@@ -578,7 +577,7 @@ const schema = gql`
   }
 
   type superAdminSessionsPage {
-    moreExist: Boolean,
+    moreExist: Boolean
     sessions: [SuperAdminSession]
   }
 

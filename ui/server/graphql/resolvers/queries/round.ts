@@ -74,7 +74,7 @@ export const invitationLink = async (parent, { roundId }, { user, ss }) => {
     isCollAdmin({
       userId: user.id,
       roundId,
-      ss
+      ss,
     });
 
   if (!isAdmin) {
@@ -189,7 +189,7 @@ export const membersPage = combineResolvers(
     const isAdmin = await isCollAdmin({
       userId: user.id,
       roundId,
-      ss
+      ss,
     });
     if (!isAdmin && !isApproved) return null;
 

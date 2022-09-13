@@ -1,2 +1,2 @@
-
-export const toMS = (ms: number) => new Date(ms).toISOString().substring(14, 19)
+export const toMS = (ms: number) =>
+  new Date(ms).toISOString().substring(14, 19);

@@ -21,7 +21,11 @@ export const isRootAdmin = (parent, args, { user }) => {
     : new Error("You need to be root admin");
 };
 
-export const isCollMember = async (parent, { roundId, bucketId }, { user, ss }) => {
+export const isCollMember = async (
+  parent,
+  { roundId, bucketId },
+  { user, ss }
+) => {
   if (!user) throw new Error("You need to be logged in");
   if (ss) return skip;
   const roundMember = await getRoundMember({
@@ -127,5 +131,5 @@ export const isCollModOrAdmin = async (
 };
 
 export const isSuperAdmin = (user) => {
-  return !!user;
-}
+  return !!user.isSuperAdmin;
+};

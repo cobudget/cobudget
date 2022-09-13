@@ -33,7 +33,8 @@ const RoundMembersPage = ({ currentUser }) => {
   return (
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
-      {(currentUser?.currentCollMember?.isApproved || currentUser?.currentCollMember?.isAdmin) ? (
+      {currentUser?.currentCollMember?.isApproved ||
+      currentUser?.currentCollMember?.isAdmin ? (
         <Members round={round} currentUser={currentUser} />
       ) : (
         <PageHero>

@@ -153,12 +153,12 @@ export const getGroup = async ({
   groupId,
   groupSlug,
   user,
-  ss
+  ss,
 }: {
   groupId?: string;
   groupSlug?: string;
   user: { id: string };
-  ss?: {id: string}
+  ss?: { id: string };
 }) => {
   try {
     const prisma = importedPrisma;

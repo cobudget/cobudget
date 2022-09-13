@@ -110,13 +110,17 @@ export const editRound = combineResolvers(
   }
 );
 
-export const createInvitationLink = async (parent, { roundId }, { user, ss }) => {
+export const createInvitationLink = async (
+  parent,
+  { roundId },
+  { user, ss }
+) => {
   const isAdmin =
     (await !!user) &&
     isCollAdmin({
       userId: user?.id,
       roundId,
-      ss
+      ss,
     });
 
   if (!isAdmin) {
@@ -133,13 +137,17 @@ export const createInvitationLink = async (parent, { roundId }, { user, ss }) =>
   };
 };
 
-export const deleteInvitationLink = async (parent, { roundId }, { user, ss }) => {
+export const deleteInvitationLink = async (
+  parent,
+  { roundId },
+  { user, ss }
+) => {
   const isAdmin =
     (await !!user) &&
     isCollAdmin({
       userId: user?.id,
       roundId,
-      ss
+      ss,
     });
 
   if (!isAdmin) {
