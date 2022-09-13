@@ -89,7 +89,6 @@ export default function NewGroup({ currentUser }) {
                   defaultMessage: "Registration policy",
                 })}
                 className="my-4"
-                onChange={(e) => window.alert(e)}
               >
                 <option value="OPEN">
                   {intl.formatMessage({ defaultMessage: "Open" })}
