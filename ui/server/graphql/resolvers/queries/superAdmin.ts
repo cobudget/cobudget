@@ -10,7 +10,7 @@ export const getSuperAdminSession = async (parent, args, { ss }) => {
     });
     return session;
   } catch (err) {
-    console.log("ERROR", err);
+    return null;
   }
 };
 

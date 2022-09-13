@@ -32,7 +32,6 @@ export const startSuperAdminSession = async (
 };
 
 export const endSuperAdminSession = async (parent, args, { ss, response }) => {
-  console.log(ss);
   if (ss) {
     const session = await prisma.superAdminSession.update({
       where: {
