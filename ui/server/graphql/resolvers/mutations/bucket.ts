@@ -784,13 +784,24 @@ export const cancelFunding = combineResolvers(
             },
           },
         },
+      },
+    });
+
+    // only get transactions that are newer than the cancelled date if it exists, to not cancel transactions twice
+    const bucketTransactions = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
         statusAccount: {
           include: {
-            incomingTransactions: true,
+            incomingTransactions: {
+              where: { createdAt: { gt: bucket.canceledAt ?? new Date(0) } },
+            },
           },
         },
       },
     });
+    const incomingTransactions =
+      bucketTransactions.statusAccount.incomingTransactions;
 
     if (bucket.completedAt)
       throw new Error(
@@ -806,12 +817,7 @@ export const cancelFunding = combineResolvers(
       },
     });
 
-    // TODO: what to do if the bucket has been cancelled once before?
-    // filter transactions to ones that are newer than the cancelled date if it exists
-    // TODO: also apply this logic to where we below also use incomingTransactions directly
-    // maybe possible to filter already in the prisma query for the transactions?
-
-    const stripeSessionIds = bucket.statusAccount.incomingTransactions
+    const stripeSessionIds = incomingTransactions
       .map((t) => t.stripeSessionId)
       .filter(Boolean);
 
@@ -853,7 +859,7 @@ export const cancelFunding = combineResolvers(
         },
       }),
       prisma.transaction.createMany({
-        data: bucket.statusAccount.incomingTransactions.map(
+        data: incomingTransactions.map(
           ({
             amount,
             fromAccountId,
@@ -879,7 +885,7 @@ export const cancelFunding = combineResolvers(
         },
       }),
       prisma.transaction.createMany({
-        data: bucket.statusAccount.incomingTransactions
+        data: incomingTransactions
           .filter((t) => Boolean(t.stripeSessionId))
           .map(({ amount, fromAccountId, roundId, stripeSessionId }) => ({
             amount,
