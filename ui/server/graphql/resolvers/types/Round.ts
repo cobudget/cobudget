@@ -5,6 +5,7 @@ import {
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
+  stripeIsConnected as stripeIsConnectedHelper
 } from "../helpers";
 import { combineResolvers } from "graphql-resolvers";
 
@@ -179,7 +180,7 @@ export const bucketCreationIsOpen = (round) => {
 export const stripeIsConnected = combineResolvers(
   isCollOrGroupAdmin,
   (round) => {
-    return stripeIsConnected({ round });
+    return stripeIsConnectedHelper({ round });
   }
 );
 
