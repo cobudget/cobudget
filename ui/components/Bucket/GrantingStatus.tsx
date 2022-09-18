@@ -62,12 +62,14 @@ const GrantingStatus = ({ bucket }) => {
 
       <div className="text-sm text-gray-700 space-y-2">
         {bucket.funded && (
+          <p>
           <FormattedMessage
             defaultMessage="Funded on {day}"
             values={{
               day: dayjs(bucket.fundedAt).format("MMMM D, YYYY"),
             }}
           />
+          </p>
         )}
         {bucket.canceled && (
           <p>
