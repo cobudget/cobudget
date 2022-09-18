@@ -5,7 +5,7 @@ import {
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
-  stripeIsConnected as stripeIsConnectedHelper
+  stripeIsConnected as stripeIsConnectedHelper,
 } from "../helpers";
 import { combineResolvers } from "graphql-resolvers";
 
