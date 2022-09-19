@@ -1,4 +1,4 @@
-const Label = ({ children, className }) => (
+const Label = ({ children, className, }) => (
   <div
     className={`bg-red text-white rounded-full text-xs font-semibold shadow uppercase py-1 px-2 tracking-wide ${className}`}
   >

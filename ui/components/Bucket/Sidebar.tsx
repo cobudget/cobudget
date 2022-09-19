@@ -22,6 +22,7 @@ import capitalize from "utils/capitalize";
 import isRtl from "../../utils/isRTL";
 import dayjs from "dayjs";
 import Label from "../../components/Label";
+import getStatusColor from "utils/getStatusColor";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -421,7 +422,7 @@ const BucketSidebar = ({
             <FormattedMessage defaultMessage="Bucket Status" />
           </div>
           <span>
-            <Label className="mt-2 inline-block">
+            <Label className={"mt-2 inline-block " + getStatusColor(bucket.status)}>
               {statusList[bucket.status]}
             </Label>
           </span>
