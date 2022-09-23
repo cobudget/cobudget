@@ -41,7 +41,9 @@ function InviteToken() {
         });
       } else {
         router.push({
-          pathname: `/${data?.joinInvitationLink?.round.group?.slug || "c"}/` + data?.joinInvitationLink?.round?.slug,
+          pathname:
+            `/${data?.joinInvitationLink?.round.group?.slug || "c"}/` +
+            data?.joinInvitationLink?.round?.slug,
         });
       }
     }
