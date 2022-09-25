@@ -43,6 +43,14 @@ module.exports = {
       fontSize: {
         xxs: "9px",
       },
+      backgroundColor: {
+        "app-gray": "#4d4d4d",
+        "app-yellow": "#f6c429",
+        "app-orange": "#ff9301",
+        "app-purple": "#80529b",
+        "app-green": "#87c44a",
+        "app-red": "#ff5455"
+      },
       height: {
         88: "22rem",
         100: "25rem",

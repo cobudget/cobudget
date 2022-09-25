@@ -5,6 +5,7 @@ import {
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
+  stripeIsConnected as stripeIsConnectedHelper,
 } from "../helpers";
 import { combineResolvers } from "graphql-resolvers";
 
@@ -179,7 +180,7 @@ export const bucketCreationIsOpen = (round) => {
 export const stripeIsConnected = combineResolvers(
   isCollOrGroupAdmin,
   (round) => {
-    return stripeIsConnected({ round });
+    return stripeIsConnectedHelper({ round });
   }
 );
 
@@ -188,15 +189,11 @@ export const group = async (round, _, { user, ss }) => {
   return getGroup({ groupId: round.groupId, user, ss });
 };
 
-export const bucketStatusCount = async (
-  round,
-  { groupSlug, roundSlug },
-  { user }
-) => {
+export const bucketStatusCount = async (round, _, { user }) => {
   const currentMember = await prisma.roundMember.findFirst({
     where: {
       userId: user?.id ?? "undefined",
-      round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+      roundId: round.id,
     },
   });
 

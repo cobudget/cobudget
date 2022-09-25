@@ -10,6 +10,9 @@ const JOIN_ROUND = gql`
       round {
         id
         slug
+        group {
+          slug
+        }
       }
       group {
         id
@@ -37,9 +40,10 @@ function InviteToken() {
           pathname: "/" + data?.joinInvitationLink?.group?.slug,
         });
       } else {
-        window.alert(1);
         router.push({
-          pathname: "/c/" + data?.joinInvitationLink?.round?.slug,
+          pathname:
+            `/${data?.joinInvitationLink?.round.group?.slug || "c"}/` +
+            data?.joinInvitationLink?.round?.slug,
         });
       }
     }
