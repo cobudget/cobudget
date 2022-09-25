@@ -422,7 +422,11 @@ const BucketSidebar = ({
             <FormattedMessage defaultMessage="Bucket Status" />
           </div>
           <span>
-            <Label className={"mt-2 inline-block " + getStatusColor(bucket.status)}>
+            <Label
+              className={
+                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+              }
+            >
               {statusList[bucket.status]}
             </Label>
           </span>
