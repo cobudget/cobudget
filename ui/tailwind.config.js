@@ -49,7 +49,7 @@ module.exports = {
         "app-orange": "#ff9301",
         "app-purple": "#80529b",
         "app-green": "#87c44a",
-        "app-red": "#ff5455"
+        "app-red": "#ff5455",
       },
       height: {
         88: "22rem",
