@@ -40,6 +40,7 @@ export default handler()
       resolvers,
       context: async ({ req, res }): Promise<GraphQLContext> => {
         const { user } = req;
+        // 'ss' is SuperAdminSession
         let ss;
         try {
           ss = verify(req.cookies.ss);
