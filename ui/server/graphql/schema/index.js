@@ -5,6 +5,8 @@ const schema = gql`
   scalar JSONObject
 
   type Query {
+    getSuperAdminSession: SuperAdminSession
+    getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
@@ -52,6 +54,10 @@ const schema = gql`
   }
 
   type Mutation {
+    startSuperAdminSession(duration: Int!): SuperAdminSession
+
+    endSuperAdminSession: SuperAdminSession
+
     createGroup(
       name: String!
       logo: String
@@ -361,6 +367,7 @@ const schema = gql`
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
     acceptedTermsAt: Date
+    isSuperAdmin: Boolean
   }
 
   type InvitedMember {
@@ -569,6 +576,11 @@ const schema = gql`
     contributions(roundId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
+  type superAdminSessionsPage {
+    moreExist: Boolean
+    sessions: [SuperAdminSession]
+  }
+
   type Allocation implements Transaction {
     id: ID!
     round: Round!
@@ -630,6 +642,15 @@ const schema = gql`
     id: ID!
     customField: CustomField
     value: JSON
+  }
+
+  type SuperAdminSession {
+    id: ID!
+    start: Date
+    duration: Int
+    end: Date
+    adminId: ID!
+    user: User
   }
 
   input CustomFieldValueInput {

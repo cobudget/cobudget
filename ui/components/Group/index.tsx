@@ -81,7 +81,6 @@ const GroupIndex = ({ currentUser }) => {
 
   const showTodos =
     currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
-
   return (
     <>
       <SubMenu currentUser={currentUser} />

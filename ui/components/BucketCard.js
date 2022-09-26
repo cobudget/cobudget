@@ -37,7 +37,9 @@ const BucketCard = ({ bucket, round }) => {
           <FormattedMessage defaultMessage="Unpublished" />
         </Label>
       ) : (
-        <Label className={"absolute right-0 m-2 " + getStatusColor(bucket.status)}>
+        <Label
+          className={"absolute right-0 m-2 " + getStatusColor(bucket.status)}
+        >
           {statusList[bucket.status]}
         </Label>
       )}

@@ -117,7 +117,7 @@ const EditGroup = ({ group, currentUser }) => {
         <SelectField
           name="visibility"
           label={intl.formatMessage({ defaultMessage: "Visibility" })}
-          defaultValue={group.visibility}
+          defaultValue={group?.visibility}
           inputRef={register}
           className="my-4"
         >

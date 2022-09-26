@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -11,6 +11,8 @@ import Head from "next/head";
 import { LoaderIcon } from "components/Icons";
 import EditProfileModal from "./EditProfile";
 import { FormattedMessage, useIntl } from "react-intl";
+import dayjs from "dayjs";
+import { toMS } from "utils/date";
 
 const css = {
   mobileProfileItem:
@@ -94,17 +96,72 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
+const SUPER_ADMIN_START = gql`
+  mutation StartSuperAdminSession($duration: Int!) {
+    startSuperAdminSession(duration: $duration) {
+      id
+    }
+  }
+`;
+
+const SUPER_ADMIN_END = gql`
+  mutation EndSuperAdminSession {
+    endSuperAdminSession {
+      id
+    }
+  }
+`;
+
+const GET_SUPER_ADMIN_SESSION = gql`
+  query GetSuperAdminSession {
+    getSuperAdminSession {
+      id
+      duration
+      start
+      end
+    }
+  }
+`;
+
+const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const intl = useIntl();
 
+  const [{ data: superAdminSession }] = useQuery({
+    query: GET_SUPER_ADMIN_SESSION,
+  });
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
+  const [, startSuperAdminSession] = useMutation(SUPER_ADMIN_START);
+  const [, endSuperAdminSession] = useMutation(SUPER_ADMIN_END);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
+  const [superAdminTime, setSuperAdminTime] = useState<HTMLElement>();
+  const [inSession, setInSession] = useState(false);
+
+  useEffect(() => {
+    if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
+      setInSession(true);
+    }
+    if (superAdminTime && superAdminTime) {
+      const interval = setInterval(() => {
+        const diff = ss?.start + ss?.duration * 60000 - Date.now();
+        if (diff < 0 || !ss) {
+          clearInterval(interval);
+          window.alert("Session Expired");
+          setInSession(false);
+          return;
+        }
+        if (superAdminTime && superAdminTime?.innerHTML) {
+          superAdminTime.innerHTML = toMS(diff) + "";
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [ss, superAdminTime]);
 
   const title = group
     ? round
@@ -260,6 +317,56 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                       </NavItem>
                     ) : null)}
 
+                  {currentUser.isSuperAdmin &&
+                    (inSession ? (
+                      <span className="text-white text-sm">
+                        <span
+                          className="cursor-pointer font-bold"
+                          onClick={() => {
+                            endSuperAdminSession();
+                          }}
+                        >
+                          ✕
+                        </span>
+                        <span className="ml-4">Super Admin</span>
+                        <span
+                          className="ml-2 font-medium font-mono"
+                          ref={(ref) => setSuperAdminTime(ref)}
+                        >
+                          .
+                        </span>
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-white">Admin Session</span>
+                        <div className="inline-flex mx-4">
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 15 })
+                            }
+                          >
+                            15
+                          </button>
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 30 })
+                            }
+                          >
+                            30
+                          </button>
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 60 })
+                            }
+                          >
+                            60
+                          </button>
+                        </div>
+                      </>
+                    ))}
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
                       currentUser={currentUser}
