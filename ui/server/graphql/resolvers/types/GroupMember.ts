@@ -18,7 +18,8 @@ export const email = async (member, _, { user, ss }) => {
   });
 
   if (
-    !(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id) &&
+    !currentGroupMember?.isAdmin &&
+    !currentGroupMember?.id == member.id &&
     !ss
   )
     return null;
@@ -44,7 +45,8 @@ export const name = async (member, _, { user, ss }) => {
   });
 
   if (
-    !(currentGroupMember?.isAdmin || currentGroupMember?.id == member.id) &&
+    !currentGroupMember?.isAdmin &&
+    !currentGroupMember?.id == member.id &&
     !ss
   )
     return null;

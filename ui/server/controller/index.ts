@@ -179,7 +179,16 @@ export const getGroup = async ({
 
     throw "The group is private";
   } catch (err) {
-    ("");
+    const group = await importedPrisma.group.findUnique({
+      where: groupId ? { id: groupId } : { slug: groupSlug },
+    });
+    if (group) {
+      return {
+        slug: group.slug,
+        id: group.id,
+        name: group.name,
+      };
+    } else return null;
   }
 };
 
