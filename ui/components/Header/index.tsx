@@ -146,7 +146,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
     if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
       setInSession(true);
     }
-    if (superAdminTime && superAdminTime) {
+    if (superAdminTime) {
       const interval = setInterval(() => {
         const diff = ss?.start + ss?.duration * 60000 - Date.now();
         if (diff < 0 || !ss) {
