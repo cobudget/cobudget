@@ -1,5 +1,4 @@
 const getStatusColor = (status: string, bucket) => {
-  console.log("BUCKET", bucket);
   if (status === "PENDING_APPROVAL" && bucket.round?.requireBucketApproval)
     return "bg-app-red";
   else if (status === "PENDING_APPROVAL" && !bucket.published)
