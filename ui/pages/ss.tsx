@@ -81,7 +81,7 @@ function SS() {
                       {dayjs(end).format("MMM DD YYYY hh:mm a")}
                     </TableCell>
                     <TableCell>
-                      {toMS(end - ss.start)} / {ss.duration}
+                      {toMS(end - ss.start)} / {ss.duration}:00
                     </TableCell>
                   </TableRow>
                 );
