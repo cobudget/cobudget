@@ -8,6 +8,7 @@ import {
   userQueries,
   roundQueries,
   bucketQueries,
+  superAdminQueries,
 } from "./queries";
 
 import {
@@ -25,6 +26,7 @@ import {
   Transaction,
   User,
   Date,
+  SuperAdminSession,
 } from "./types";
 
 // mutations
@@ -33,6 +35,7 @@ import {
   groupMutations,
   roundMutations,
   bucketMutations,
+  superAdminMutations,
 } from "./mutations";
 
 const resolvers = {
@@ -41,6 +44,7 @@ const resolvers = {
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
+    ...superAdminQueries,
     languageProgressPage,
   },
 
@@ -49,6 +53,7 @@ const resolvers = {
     ...groupMutations,
     ...roundMutations,
     ...bucketMutations,
+    ...superAdminMutations,
   },
 
   RoundMember,
@@ -64,6 +69,7 @@ const resolvers = {
   Comment,
   Flag,
   Date,
+  SuperAdminSession,
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
   CustomFieldValue,

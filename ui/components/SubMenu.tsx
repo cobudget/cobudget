@@ -54,7 +54,6 @@ export const roundItems = (
   formatMessage
 ) => {
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
-
   return [
     {
       label: formatMessage({ defaultMessage: "Overview" }),

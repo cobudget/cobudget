@@ -6,10 +6,10 @@ import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
 
-export const group = async (parent, { groupSlug }, { user }) => {
+export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;
   if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c") return null;
-  return getGroup({ groupSlug, user });
+  return getGroup({ groupSlug, user, ss });
 };
 
 export const groups = combineResolvers(isRootAdmin, async (parent, args) => {

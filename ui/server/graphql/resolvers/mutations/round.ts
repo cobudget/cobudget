@@ -17,7 +17,7 @@ import dayjs from "dayjs";
 export const createRound = async (
   parent,
   { groupId, slug, title, currency, registrationPolicy },
-  { user }
+  { user, ss }
 ) => {
   let singleRound = false;
   if (!groupId) {
@@ -32,7 +32,7 @@ export const createRound = async (
     groupId = rootGroup.id;
     singleRound = true;
   } else {
-    await isGroupAdmin(null, { groupId }, { user });
+    await isGroupAdmin(null, { groupId }, { user, ss });
   }
   const round = await prisma.round.create({
     data: {
@@ -110,12 +110,17 @@ export const editRound = combineResolvers(
   }
 );
 
-export const createInvitationLink = async (parent, { roundId }, { user }) => {
+export const createInvitationLink = async (
+  parent,
+  { roundId },
+  { user, ss }
+) => {
   const isAdmin =
     (await !!user) &&
     isCollAdmin({
       userId: user?.id,
       roundId,
+      ss,
     });
 
   if (!isAdmin) {
@@ -132,12 +137,17 @@ export const createInvitationLink = async (parent, { roundId }, { user }) => {
   };
 };
 
-export const deleteInvitationLink = async (parent, { roundId }, { user }) => {
+export const deleteInvitationLink = async (
+  parent,
+  { roundId },
+  { user, ss }
+) => {
   const isAdmin =
     (await !!user) &&
     isCollAdmin({
       userId: user?.id,
       roundId,
+      ss,
     });
 
   if (!isAdmin) {
