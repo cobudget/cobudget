@@ -184,9 +184,9 @@ export const stripeIsConnected = combineResolvers(
   }
 );
 
-export const group = async (round, _, { user }) => {
+export const group = async (round, _, { user, ss }) => {
   if (round.singleRound) return null;
-  return getGroup({ groupId: round.groupId, user });
+  return getGroup({ groupId: round.groupId, user, ss });
 };
 
 export const bucketStatusCount = async (round, _, { user }) => {

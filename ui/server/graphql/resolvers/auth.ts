@@ -2,7 +2,8 @@ import prisma from "../../prisma";
 import { skip } from "graphql-resolvers";
 import { getGroupMember, getRoundMember } from "./helpers";
 
-export const isGroupAdmin = async (parent, { groupId }, { user }) => {
+export const isGroupAdmin = async (parent, { groupId }, { user, ss }) => {
+  if (ss) return skip;
   if (!user) throw new Error("You need to be logged in");
   const groupMember = await prisma.groupMember.findUnique({
     where: {
@@ -20,9 +21,13 @@ export const isRootAdmin = (parent, args, { user }) => {
     : new Error("You need to be root admin");
 };
 
-export const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
+export const isCollMember = async (
+  parent,
+  { roundId, bucketId },
+  { user, ss }
+) => {
   if (!user) throw new Error("You need to be logged in");
-
+  if (ss) return skip;
   const roundMember = await getRoundMember({
     userId: user.id,
     roundId,
@@ -45,9 +50,10 @@ export const isCollMember = async (parent, { roundId, bucketId }, { user }) => {
 export const isCollMemberOrGroupAdmin = async (
   parent,
   { roundId },
-  { user }
+  { user, ss }
 ) => {
   if (!user) throw new Error("You need to be logged in");
+  if (ss) return skip;
 
   const roundMember = await getRoundMember({
     userId: user.id,
@@ -75,10 +81,11 @@ export const isCollMemberOrGroupAdmin = async (
 export const isBucketCocreatorOrCollAdminOrMod = async (
   parent,
   { bucketId },
-  { user }
+  { user, ss }
 ) => {
   if (!user) throw new Error("You need to be logged in");
   if (!bucketId) throw new Error("You need to provide bucketId");
+  if (ss) return skip;
 
   const bucket = await prisma.bucket.findUnique({
     where: { id: bucketId },
@@ -108,9 +115,10 @@ export const isBucketCocreatorOrCollAdminOrMod = async (
 export const isCollModOrAdmin = async (
   parent,
   { bucketId, roundId },
-  { user }
+  { user, ss }
 ) => {
   if (!user) throw new Error("You need to be logged in");
+  if (ss) return skip;
   const roundMember = await getRoundMember({
     userId: user.id,
     bucketId,
@@ -120,4 +128,8 @@ export const isCollModOrAdmin = async (
   if (!(roundMember?.isModerator || roundMember?.isAdmin))
     throw new Error("You need to be admin or moderator of the round");
   return skip;
+};
+
+export const isSuperAdmin = (user) => {
+  return !!user.isSuperAdmin;
 };

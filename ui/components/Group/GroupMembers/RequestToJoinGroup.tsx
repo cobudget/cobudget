@@ -19,7 +19,7 @@ const RequestToJoinGroup = ({ currentGroup, updateMember, deleteMember }) => {
   const [{ data, fetching, error }, executeQuery] = useQuery({
     query: GROUP_MEMBERS_QUERY,
     variables: {
-      groupId: currentGroup.id,
+      groupId: currentGroup?.id,
       isApproved: false,
     },
   });
