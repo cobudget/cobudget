@@ -14,3 +14,4 @@ export * as RoundTransaction from "./RoundTransaction";
 export * as Comment from "./Comment";
 export * as Flag from "./Flag";
 export * as CustomFieldValue from "./CustomFieldValue";
+export * as SuperAdminSession from "./SuperAdminSession";

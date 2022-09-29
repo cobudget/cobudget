@@ -15,7 +15,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 
 const GridWrapper = styled.div`
   display: grid;
-  grid-template-columns: 80px calc(100% - 130px) 50px;
+  grid-template-columns: 50px calc(100% - 130px) 80px;
   background: rgba(243, 244, 246, 1);
   border-radius: 0.375rem;
 `;
@@ -227,35 +227,6 @@ const InviteMembersModal = ({
                   <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
                 <GridWrapper>
-                  <p
-                    className="mt-4 ml-4 text-sm font-medium cursor-pointer"
-                    onClick={() => {
-                      navigator.clipboard
-                        .writeText(link)
-                        .then(() =>
-                          toast.success(
-                            intl.formatMessage({
-                              defaultMessage: "Invitation link copied",
-                            })
-                          )
-                        )
-                        .catch(() =>
-                          toast.error(
-                            intl.formatMessage({
-                              defaultMessage: "Error while copying link",
-                            })
-                          )
-                        );
-                    }}
-                  >
-                    <FormattedMessage defaultMessage="Copy" />
-                  </p>
-                  <TextField
-                    inputProps={{
-                      disabled: true,
-                      value: link,
-                    }}
-                  />
                   <span className="mt-2 ml-2">
                     <IconButton
                       onClick={() => {
@@ -281,6 +252,35 @@ const InviteMembersModal = ({
                       <DeleteIcon className="h-5 w-5" />
                     </IconButton>
                   </span>
+                  <TextField
+                    inputProps={{
+                      disabled: true,
+                      value: link,
+                    }}
+                  />
+                  <p
+                    className="mt-4 ml-4 text-sm font-medium cursor-pointer"
+                    onClick={() => {
+                      navigator.clipboard
+                        .writeText(link)
+                        .then(() =>
+                          toast.success(
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link copied",
+                            })
+                          )
+                        )
+                        .catch(() =>
+                          toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "Error while copying link",
+                            })
+                          )
+                        );
+                    }}
+                  >
+                    <FormattedMessage defaultMessage="Copy" />
+                  </p>
                 </GridWrapper>
               </div>
             )}
