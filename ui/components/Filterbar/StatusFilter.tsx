@@ -31,7 +31,7 @@ export default function StatusFilter({
       placeholder: "Canceled",
     },
   ]
-    .filter((item) => !!bucketStatusCount[item.type])
+    //.filter((item) => !!bucketStatusCount[item.type])
     .map((item) => ({
       type: item.type,
       value: statusFilter.includes && statusFilter.includes(item.type),

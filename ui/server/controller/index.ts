@@ -153,17 +153,19 @@ export const getGroup = async ({
   groupId,
   groupSlug,
   user,
+  ss,
 }: {
   groupId?: string;
   groupSlug?: string;
   user: { id: string };
+  ss?: { id: string };
 }) => {
   try {
     const prisma = importedPrisma;
     const group = await prisma.group.findUnique({
       where: groupId ? { id: groupId } : { slug: groupSlug },
     });
-    if (group.visibility === "PUBLIC") return group;
+    if (group?.visibility === "PUBLIC") return group;
 
     if (!user) throw "This group is private";
 
@@ -173,11 +175,20 @@ export const getGroup = async ({
       },
     });
 
-    if (currentGroupMember) return group;
+    if (currentGroupMember || ss) return group;
 
     throw "The group is private";
   } catch (err) {
-    ("");
+    const group = await importedPrisma.group.findUnique({
+      where: groupId ? { id: groupId } : { slug: groupSlug },
+    });
+    if (group) {
+      return {
+        slug: group.slug,
+        id: group.id,
+        name: group.name,
+      };
+    } else return null;
   }
 };
 

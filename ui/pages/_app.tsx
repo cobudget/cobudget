@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "../styles.css";
 import "react-tippy/dist/tippy.css";
 import { withUrqlClient } from "next-urql";
@@ -25,6 +25,7 @@ export const CURRENT_USER_QUERY = gql`
       avatar
       email
       acceptedTermsAt
+      isSuperAdmin
 
       groupMemberships {
         id
@@ -142,6 +143,17 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
+const GET_SUPER_ADMIN_SESSION = gql`
+  query GetSuperAdminSession {
+    getSuperAdminSession {
+      id
+      duration
+      start
+      end
+    }
+  }
+`;
+
 const MyApp = ({ Component, pageProps, router }) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
@@ -153,6 +165,9 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
     pause: !router.isReady,
   });
+
+  const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
+  const ss = ssQuery?.getSuperAdminSession;
 
   const [
     { data: currentUserData, fetching: fetchingUser, error: errorUser },
@@ -167,7 +182,23 @@ const MyApp = ({ Component, pageProps, router }) => {
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};
-  const { currentUser = null } = currentUserData ?? {};
+  const currentUser = useMemo(() => {
+    const { currentUser: c } = currentUserData ?? {};
+    if (!c) return null;
+    if (!ss) return c;
+    if (c.currentCollMember && ss) {
+      c.currentCollMember.isAdmin = true;
+    } else if (ss) {
+      c.currentCollMember = { isAdmin: true };
+    }
+
+    if (c.currentGroupMember && ss) {
+      c.currentGroupMember.isAdmin = true;
+    } else if (ss) {
+      c.currentGroupMember = { isAdmin: true };
+    }
+    return c;
+  }, [currentUserData, ss]);
 
   const [locale, setLocale] = useState(
     (() => {
@@ -212,6 +243,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           dir={isRTL(locale) ? "rtl" : "ltr"}
           locale={locale}
           changeLocale={changeLocale}
+          ss={ss}
         >
           <Component
             {...pageProps}

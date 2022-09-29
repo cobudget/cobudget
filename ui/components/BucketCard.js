@@ -4,6 +4,7 @@ import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 import { FormattedMessage, useIntl } from "react-intl";
+import getStatusColor from "utils/getStatusColor";
 
 const BucketCard = ({ bucket, round }) => {
   const intl = useIntl();
@@ -32,11 +33,13 @@ const BucketCard = ({ bucket, round }) => {
         <div className={`w-full h-48 bg-${stringToColor(bucket.title)}`} />
       )}
       {!bucket.published ? (
-        <Label className="absolute right-0 m-2">
+        <Label className="absolute right-0 m-2 bg-app-gray">
           <FormattedMessage defaultMessage="Unpublished" />
         </Label>
       ) : (
-        <Label className="absolute right-0 m-2">
+        <Label
+          className={"absolute right-0 m-2 " + getStatusColor(bucket.status)}
+        >
           {statusList[bucket.status]}
         </Label>
       )}
