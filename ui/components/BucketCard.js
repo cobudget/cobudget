@@ -84,17 +84,16 @@ const BucketCard = ({ bucket, round }) => {
               </div>
             )}
 
-            {
-              showFundingStats && 
+            {showFundingStats && (
               <span className="ml-auto">
                 <FormattedNumber
-                  value={bucket.minGoal/100}
+                  value={bucket.minGoal / 100}
                   style="currency"
                   currencyDisplay={"symbol"}
                   currency={round.currency}
                 />
               </span>
-            }
+            )}
           </div>
         </div>
       </div>
