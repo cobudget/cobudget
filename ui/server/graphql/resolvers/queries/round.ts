@@ -49,20 +49,20 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   ).filter(Boolean);
 };
 
-export const round = async (parent, { groupSlug, roundSlug }, { user }) => {
+export const round = async (parent, { groupSlug, roundSlug }, { user, ss }) => {
   if (!roundSlug) return null;
 
-  const round = await prisma.round.findFirst({
+  const _round = await prisma.round.findFirst({
     where: {
       slug: roundSlug,
       group: { slug: groupSlug ?? "c" },
       deleted: { not: true },
     },
   });
-  if (!round) return null;
+  if (!_round) return null;
 
-  if (await canViewRound({ round: round, user })) {
-    return round;
+  if ((await canViewRound({ round: _round, user })) || ss) {
+    return _round;
   } else {
     return null;
   }
