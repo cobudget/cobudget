@@ -3,7 +3,7 @@ import { stringToColor } from "../utils/stringToHslColor";
 import ProgressBar from "./ProgressBar";
 import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, FormattedNumber, useIntl } from "react-intl";
 import getStatusColor from "utils/getStatusColor";
 
 const BucketCard = ({ bucket, round }) => {
@@ -62,7 +62,7 @@ const BucketCard = ({ bucket, round }) => {
             />
           )}
 
-          <div className="flex space-x-3 mt-1">
+          <div className="flex gap-x-3 mt-1">
             {showFundingStats && (
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
@@ -84,6 +84,17 @@ const BucketCard = ({ bucket, round }) => {
                   {bucket.noOfComments}
                 </span>
               </div>
+            )}
+
+            {showFundingStats && (
+              <span className="ml-auto">
+                <FormattedNumber
+                  value={bucket.minGoal / 100}
+                  style="currency"
+                  currencyDisplay={"symbol"}
+                  currency={round.currency}
+                />
+              </span>
             )}
           </div>
         </div>
