@@ -423,7 +423,9 @@ const BucketSidebar = ({
           </div>
           <span>
             <Label
-              className={"mt-2 inline-block " + getStatusColor(bucket.status)}
+              className={
+                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+              }
             >
               {statusList[bucket.status]}
             </Label>

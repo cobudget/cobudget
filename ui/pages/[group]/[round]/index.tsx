@@ -95,6 +95,9 @@ export const BUCKETS_QUERY = gql`
         canceled
         status
         percentageFunded
+        round {
+          requireBucketApproval
+        }
         customFields {
           value
           customField {

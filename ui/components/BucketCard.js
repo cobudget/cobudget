@@ -38,7 +38,9 @@ const BucketCard = ({ bucket, round }) => {
         </Label>
       ) : (
         <Label
-          className={"absolute right-0 m-2 " + getStatusColor(bucket.status)}
+          className={
+            "absolute right-0 m-2 " + getStatusColor(bucket.status, bucket)
+          }
         >
           {statusList[bucket.status]}
         </Label>
