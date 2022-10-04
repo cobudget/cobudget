@@ -371,7 +371,7 @@ const Page = ({
                       (bucket.maxGoal || 1)) *
                     100
                   : 0
-                : "-",
+                : 0,
           }))}
         />
       ) : null}
