@@ -11,7 +11,10 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
-import { allocateToMember } from "server/controller";
+import {
+  allocateToMember,
+  bulkAllocate as bulkAllocateController,
+} from "server/controller";
 import dayjs from "dayjs";
 
 export const createRound = async (
@@ -460,7 +463,6 @@ export const bulkAllocate = combineResolvers(
         isApproved: true,
       },
     });
-    //here
     const currentCollMember = await prisma.roundMember.findUnique({
       where: {
         userId_roundId: {
@@ -470,7 +472,7 @@ export const bulkAllocate = combineResolvers(
       },
     });
 
-    await bulkAllocate({
+    await bulkAllocateController({
       roundId,
       amount,
       type,
