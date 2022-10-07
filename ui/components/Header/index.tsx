@@ -191,7 +191,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <header className={`bg-${color} shadow-md w-full`}>
+      <header className={`bg-${color} shadow-md w-full z-10 relative`}>
         <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
           <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
             <GroupAndRoundHeader
