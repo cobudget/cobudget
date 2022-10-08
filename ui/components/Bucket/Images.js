@@ -2,7 +2,7 @@ import Modal from "@material-ui/core/Modal";
 import React from "react";
 import styled from "styled-components";
 import _Card from "../styled/Card";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import { FormattedMessage } from "react-intl";
@@ -53,10 +53,12 @@ const Images = ({ bucketId, images, size, canEdit, openImageModal }) => {
           </Gallery>
           {canEdit && (
             <div className="absolute top-0 right-0">
-              <Tooltip title="Edit images" position="bottom" size="small">
-                <IconButton onClick={openImageModal}>
-                  <EditIcon className="h-6 w-6" />
-                </IconButton>
+              <Tooltip content="Edit images" placement="bottom" arrow={false}>
+                <div>
+                  <IconButton onClick={openImageModal}>
+                    <EditIcon className="h-6 w-6" />
+                  </IconButton>
+                </div>
               </Tooltip>
             </div>
           )}

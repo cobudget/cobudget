@@ -11,7 +11,7 @@ import {
   Menu,
   MenuItem,
 } from "@material-ui/core";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
 import { gql, useMutation, useQuery } from "urql";
 
@@ -212,11 +212,12 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           {member.isModerator ? "Remove moderator" : "Make moderator"}
         </MenuItem>
         <Tooltip
-          title={intl.formatMessage({
+          content={intl.formatMessage({
             defaultMessage:
               "You can only remove a round participant with 0 balance",
           })}
           disabled={member.balance === 0}
+          arrow={false}
         >
           <MenuItem
             color="error.main"
@@ -284,7 +285,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
       </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (
-          <Tooltip position="bottom-start" size="small" title={member.bio}>
+          <Tooltip placement="bottom-start" arrow={false} content={member.bio}>
             <p className="truncate max-w-xs">{member.bio}</p>
           </Tooltip>
         )}
@@ -387,11 +388,11 @@ const RoundMembersTable = ({
                     </span>{" "}
                     {isAdmin && (
                       <Tooltip
-                        title={intl.formatMessage({
+                        content={intl.formatMessage({
                           defaultMessage: "Allocate to all members",
                         })}
-                        position="bottom"
-                        size="small"
+                        placement="bottom"
+                        arrow={false}
                       >
                         <IconButton
                           onClick={() => setBulkAllocateModalOpen(true)}

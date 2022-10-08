@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { useEffect, useMemo, useState } from "react";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
 import Markdown from "../../Markdown";
@@ -208,7 +208,7 @@ const BucketCustomField = ({
 
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit field" position="bottom" size="small">
+            <Tooltip content="Edit field" placement="bottom" arrow={false}>
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>

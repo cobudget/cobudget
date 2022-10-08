@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import Router from "next/router";
 import Link from "next/link";
 
@@ -83,9 +83,9 @@ export default function NewRoundPage({ currentGroup }) {
                   <div className="items-center flex">
                     Slug
                     <Tooltip
-                      title={`The part that comes after the domain in the URL`}
-                      position="bottom"
-                      size="small"
+                      content={`The part that comes after the domain in the URL`}
+                      placement="bottom"
+                      arrow={false}
                     >
                       <QuestionMarkIcon className="ml-1 w-5 h-5 text-gray-600 hover:text-black" />
                     </Tooltip>

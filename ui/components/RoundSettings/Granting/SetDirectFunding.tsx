@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "urql";
 import { Box, Button } from "@material-ui/core";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import SelectInput from "components/SelectInput";
@@ -50,7 +50,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <Tooltip
-              title={
+              content={
                 !round.stripeIsConnected
                   ? intl.formatMessage({
                       defaultMessage:
@@ -58,6 +58,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
                     })
                   : ""
               }
+              arrow={false}
             >
               <SelectInput
                 label={intl.formatMessage({

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -76,9 +76,9 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Edit title" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({ defaultMessage: "Edit title" })}
+              placement="bottom"
+              arrow={false}
             >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
