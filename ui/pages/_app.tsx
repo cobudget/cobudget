@@ -1,13 +1,13 @@
-import { useState, useEffect, useMemo } from "react";
 import "../styles.css";
-import "react-tippy/dist/tippy.css";
+import "tippy.js/dist/tippy.css";
+
+import { useState, useEffect, useMemo } from "react";
 import { withUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
 import { useQuery, gql } from "urql";
 import { Toaster } from "react-hot-toast";
 import RequiredActionsModal from "components/RequiredActions";
-import { useRouter } from "next/router";
 import { IntlProvider } from "react-intl";
 import lang, { supportedLangCodes } from "../lang";
 import isRTL from "../utils/isRTL";

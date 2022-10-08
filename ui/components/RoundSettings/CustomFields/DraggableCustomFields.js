@@ -1,7 +1,7 @@
 import { useMutation, gql } from "urql";
 import { sortableElement, sortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
@@ -81,9 +81,9 @@ const SortableItem = sortableElement(
           <h2 className="font-semibold text-lg">{customField.name}</h2>
           <div>
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Edit" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({ defaultMessage: "Edit" })}
+              placement="bottom"
+              arrow={false}
             >
               <IconButton
                 onClick={() => setEditingCustomField(customField)}
@@ -94,9 +94,9 @@ const SortableItem = sortableElement(
             </Tooltip>
 
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Delete" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({ defaultMessage: "Delete" })}
+              placement="bottom"
+              arrow={false}
             >
               <IconButton
                 loading={deleting}
@@ -119,9 +119,11 @@ const SortableItem = sortableElement(
             </Tooltip>
 
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Drag to reorder" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({
+                defaultMessage: "Drag to reorder",
+              })}
+              placement="bottom"
+              arrow={false}
             >
               <DragHandle />
             </Tooltip>

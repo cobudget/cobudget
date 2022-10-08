@@ -10,8 +10,9 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@material-ui/core";
+import Tooltip from "@tippyjs/react";
+
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
@@ -222,7 +223,7 @@ const Page = ({
               <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
                 <Tooltip
-                  title={intl.formatMessage({
+                  content={intl.formatMessage({
                     defaultMessage: "Email not verified",
                   })}
                   placement="right"

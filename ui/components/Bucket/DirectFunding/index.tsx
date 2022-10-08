@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, gql } from "urql";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 import HappySpinner from "components/HappySpinner";
 import IconButton from "components/IconButton";
@@ -107,11 +107,11 @@ const DirectFunding = ({ canEdit = false, round }) => {
         </div>
         {!editing && (
           <Tooltip
-            title={intl.formatMessage({
+            content={intl.formatMessage({
               defaultMessage: "Edit Direct funding",
             })}
-            position="bottom"
-            size="small"
+            placement="bottom"
+            arrow={false}
           >
             <IconButton onClick={() => setEditing(true)}>
               <EditIcon className="h-6 w-6" />
