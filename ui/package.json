@@ -103,6 +103,7 @@
     "remark-rehype": "10.1.0",
     "remirror": "1.0.36",
     "seededshuffle": "^0.2.0",
+    "sitemap-links": "^1.0.3",
     "store": "^2.0.12",
     "stripe": "8.216.0",
     "styled-components": "5.3.0",
