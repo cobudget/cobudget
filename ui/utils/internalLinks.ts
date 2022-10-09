@@ -1,8 +1,6 @@
 import isURL from "validator/lib/isURL";
 
-
 const { DEPLOY_URL = "localhost:3000" } = process.env;
-
 
 /** Depending on prod/dev, might return e.g. "https://cobudget.com"
  *

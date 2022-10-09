@@ -69,8 +69,8 @@ export const roundItems = (
       member: true,
     },
     {
-      label: formatMessage({ defaultMessage: "Transactions" }),
-      href: `/${groupSlug}/${roundSlug}/transactions`,
+      label: formatMessage({ defaultMessage: "History" }),
+      href: `/${groupSlug}/${roundSlug}/history`,
       admin: true,
     },
     {
