@@ -60,6 +60,7 @@ const Filterbar = ({
         query: {
           group: router.query.group,
           round: router.query.round,
+          ...router.query,
           ...(tag && { tag }),
           ...(!!input && { s: input }),
           f: statusFilterArray,
@@ -75,6 +76,7 @@ const Filterbar = ({
       query: {
         group: router.query.group,
         round: router.query.round,
+        ...router.query,
         ...(tag && { tag }),
         ...(!!input && { s: input }),
         view,
