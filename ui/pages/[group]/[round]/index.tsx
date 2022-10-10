@@ -31,6 +31,7 @@ export const ROUND_PAGE_QUERY = gql`
       bucketCreationIsOpen
       totalInMembersBalances
       allowStretchGoals
+      bucketReviewIsOpen
       currency
       tags {
         id
@@ -95,6 +96,9 @@ export const BUCKETS_QUERY = gql`
         canceled
         status
         percentageFunded
+        round {
+          requireBucketApproval
+        }
         customFields {
           value
           customField {
@@ -241,15 +245,18 @@ const Page = ({
         Header: "Funders",
         accessor: "fundersCount",
       },
-      {
+    ];
+
+    if (round?.bucketReviewIsOpen) {
+      cols.push({
         Header: "Approvals",
         accessor: "goodFlagCount",
-      },
-      {
+      });
+      cols.push({
         Header: "Flags",
         accessor: "raiseFlagCount",
-      },
-    ];
+      });
+    }
 
     /* 
     if (currentUser) {
@@ -294,6 +301,7 @@ const Page = ({
     round?.allowStretchGoals,
     round?.group?.slug,
     round?.slug,
+    round?.bucketReviewIsOpen,
   ]);
 
   if (error) {
@@ -363,7 +371,7 @@ const Page = ({
                       (bucket.maxGoal || 1)) *
                     100
                   : 0
-                : "-",
+                : 0,
           }))}
         />
       ) : null}
