@@ -119,6 +119,7 @@
     "@babel/core": "7.10.2",
     "@formatjs/cli": "^4.8.3",
     "@neojp/tailwindcss-line-clamp-utilities": "^1.0.1",
+    "@types/cookie-parser": "^1.4.3",
     "@types/lodash": "4.14.178",
     "@types/nodemailer": "6.4.4",
     "@types/passport": "1.0.7",
