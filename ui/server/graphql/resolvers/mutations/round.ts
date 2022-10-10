@@ -632,7 +632,7 @@ export const addCustomField = combineResolvers(
 );
 
 // Based on https://softwareengineering.stackexchange.com/a/195317/54663
-combineResolvers(
+export const setCustomFieldPosition = combineResolvers(
   isCollOrGroupAdmin,
   async (parent, { roundId, fieldId, newPosition }) => {
     const round = await prisma.round.findUnique({
