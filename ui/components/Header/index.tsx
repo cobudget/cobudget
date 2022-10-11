@@ -123,6 +123,30 @@ const GET_SUPER_ADMIN_SESSION = gql`
   }
 `;
 
+export const LandingPageLinks = ({ desktop }) => (
+  <>
+    <NavItem className={desktop ? "ml-4" : ""} href="/about">
+      <FormattedMessage id="about" defaultMessage="About" />
+    </NavItem>
+    <NavItem href="/support">
+      <FormattedMessage id="support" defaultMessage="Support" />
+    </NavItem>
+    <NavItem href="/resources">
+      <FormattedMessage id="resources" defaultMessage="Resources" />
+    </NavItem>
+    <NavItem
+      href="mailto:support@cobudget.com"
+      onCLick={(e) => {
+        window.open("mailto:support@boduget.com");
+        e.preventDefault();
+      }}
+      external
+    >
+      <FormattedMessage id="contactUs" defaultMessage="Contact us" />
+    </NavItem>
+  </>
+);
+
 const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -194,14 +218,48 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
       <header className={`bg-${color} shadow-md w-full z-10 relative`}>
         <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
           <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
-            <GroupAndRoundHeader
-              currentGroup={group}
-              round={round}
-              color={color}
-              currentUser={currentUser}
-              router={router}
-              bucket={bucket}
-            />
+            <div className="flex items-center max-w-screen overflow-hidden">
+              {process.env.SINGLE_GROUP_MODE !== "true" && (
+                <>
+                  <Link href="/">
+                    <a
+                      className={`p-1 text-white hover:text-white rounded-md font-medium flex space-x-4`}
+                    >
+                      <img
+                        src="/cobudget-logo.png"
+                        className="h-6 max-w-none"
+                      />
+                      {!currentUser &&
+                        !group &&
+                        !round &&
+                        !process.env.LANDING_PAGE_URL && (
+                          <h1 className="leading-normal">
+                            {process.env.PLATFORM_NAME}
+                          </h1>
+                        )}
+                    </a>
+                  </Link>
+
+                  {!currentUser &&
+                    !group &&
+                    !round &&
+                    process.env.LANDING_PAGE_URL && (
+                      <div className="hidden sm:flex items-center">
+                        <LandingPageLinks desktop />
+                      </div>
+                    )}
+                </>
+              )}
+
+              <GroupAndRoundHeader
+                currentGroup={group}
+                round={round}
+                color={color}
+                currentUser={currentUser}
+                router={router}
+                bucket={bucket}
+              />
+            </div>
 
             <div className="sm:hidden">
               <button
@@ -395,6 +453,10 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                   <NavItem href={`/signup`} roundColor={color} primary>
                     <FormattedMessage defaultMessage="Sign up" />
                   </NavItem>
+                  <div className="sm:hidden">
+                    <hr className="mt-4 mb-2 mx-4 opacity-25" />
+                    <LandingPageLinks desktop={false} />
+                  </div>
                 </>
               )}
             </div>
