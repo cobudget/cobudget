@@ -540,6 +540,31 @@ export default {
 
     await sendEmails(emails);
   },
+  stripeFundSuccess: async ({ user }) => {
+    const html = `
+    Hi [Username],
+
+    this is a confirmation of the payment you just made in the Cobudget round [insert name of round] to the bucket [insert bucket name].
+
+    Transaction details:
+    Contribution amount: [insert amount]
+    Tax: [insert amount][(tax rate)]
+    Tip to Cobudget: [insert amount]
+    Total paid: [insert amount]
+
+    For questions about this payment, please contact your Cobudget group/round administrator.
+
+    Thanks for using Cobudget!
+    <br/><br/>
+    ${footer}
+    `;
+    const subject = "Direct funding successfull";
+    sendEmail({
+      to: user.email,
+      html,
+      subject,
+    });
+  },
   contributionToBucketNotification: async ({
     round,
     bucket,
