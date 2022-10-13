@@ -575,7 +575,7 @@ const RoundPage = ({ currentUser }) => {
                     <tr>
                       <td className="pr-3">In your account</td>
                       <td className="font-bold">
-                        {currentUser.currentCollMember.balance / 100}
+                        {currentUser?.currentCollMember?.balance / 100}
                         {getCurrencySymbol(round.currency)}
                       </td>
                     </tr>
