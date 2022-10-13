@@ -572,17 +572,16 @@ const RoundPage = ({ currentUser }) => {
               <div>
                 <table>
                   <tbody>
-                    {
-                      currentUser?.currentCollMember?.isApproved &&
-                      currentUser?.currentCollMember?.hasJoined &&
-                    <tr>
-                      <td className="pr-3">In your account</td>
-                      <td className="font-bold">
-                        {currentUser.currentCollMember.balance / 100}
-                        {getCurrencySymbol(round.currency)}
-                      </td>
-                    </tr>
-                    }
+                    {currentUser?.currentCollMember?.isApproved &&
+                      currentUser?.currentCollMember?.hasJoined && (
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                      )}
                     <tr>
                       <td className="pr-3">In this round</td>
                       <td className="font-bold">
