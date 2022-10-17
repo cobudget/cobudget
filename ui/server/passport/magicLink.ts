@@ -18,8 +18,8 @@ const magicLink = new MagicLoginStrategy({
     }
 
     const email = payload.destination.toLowerCase().trim();
-    const mailUpdates = !!payload.mailUpdates; //user want to receive email updates
-    createOrGetUser({ email, mailUpdates })
+
+    createOrGetUser({ email })
       .then((user) => {
         callback(null, { ...user, redirect: payload.redirect });
       })

@@ -5,12 +5,10 @@ export async function createOrGetUser({
   email,
   facebookId,
   googleId,
-  mailUpdates,
 }: {
   email: string;
   facebookId?: string;
   googleId?: string;
-  mailUpdates?: boolean;
 }) {
   const olderUser = await prisma.user.findUnique({ where: { email } });
 
@@ -38,7 +36,6 @@ export async function createOrGetUser({
       ...(facebookId && { facebookId }),
       ...(googleId && { googleId }),
       verifiedEmail: true,
-      mailUpdates,
     },
     update: {
       verifiedEmail: true,
@@ -62,5 +59,6 @@ export async function createOrGetUser({
     // if true then it's a new user
     await emailService.welcomeEmail({ newUser: newerUser });
   }
+
   return newerUser;
 }
