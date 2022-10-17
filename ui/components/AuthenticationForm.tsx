@@ -17,6 +17,7 @@ export default function AuthenticationForm({
 }) {
   const [email, setEmail] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
+  const [mailUpdates, setMailUpdates] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { r } = router.query;
@@ -35,6 +36,7 @@ export default function AuthenticationForm({
               redirect,
               destination: email,
               rememberMe,
+              mailUpdates,
             }),
             headers: { "Content-Type": "application/json" },
           })
@@ -68,6 +70,18 @@ export default function AuthenticationForm({
             />
           }
           label={intl.formatMessage({ defaultMessage: "Keep me logged in" })}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              value={mailUpdates}
+              onChange={(evt) => setMailUpdates(evt.target.checked)}
+            />
+          }
+          label={intl.formatMessage({
+            defaultMessage:
+              "I would like occasional emails about product updates and Cobudget-related events, trainings, and support resources.",
+          })}
         />
         <Button
           type="submit"
@@ -104,7 +118,7 @@ export default function AuthenticationForm({
             fullWidth
             href={`/api/auth/facebook/?${
               fbEmailError ? "fb_no_email_scope=true&" : ""
-            }remember_me=true&${redirect ? `r=${redirect}` : ""}`}
+            }remember_me=true${redirect ? `&r=${redirect}` : ""}`}
             className="text-center"
             style={{ backgroundColor: "#1977f2" }}
           >
