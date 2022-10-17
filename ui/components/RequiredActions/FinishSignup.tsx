@@ -9,7 +9,11 @@ import validateUsername from "utils/validateUsername";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
 
 const FINISH_SIGNUP_MUTATION = gql`
-  mutation updateProfile($username: String, $name: String, $mailUpdates: Boolean) {
+  mutation updateProfile(
+    $username: String
+    $name: String
+    $mailUpdates: Boolean
+  ) {
     updateProfile(username: $username, name: $name, mailUpdates: $mailUpdates) {
       id
       username
@@ -123,26 +127,28 @@ export default function FinishSignup({ currentUser }) {
           type="submit"
           disabled={!username || !name || !acceptTerms}
           onClick={() =>
-            updateUser({ username, name, mailUpdates }).then(({ data, error }) => {
-              if (error) {
-                if (error.message.includes("Unique")) {
-                  toast.error(
-                    intl.formatMessage({
-                      defaultMessage: "Username already taken",
-                    })
-                  );
+            updateUser({ username, name, mailUpdates }).then(
+              ({ data, error }) => {
+                if (error) {
+                  if (error.message.includes("Unique")) {
+                    toast.error(
+                      intl.formatMessage({
+                        defaultMessage: "Username already taken",
+                      })
+                    );
+                  } else {
+                    toast.error(error.message);
+                  }
                 } else {
-                  toast.error(error.message);
+                  toast.success(
+                    intl.formatMessage(
+                      { defaultMessage: `Welcome to {bucketName}!` },
+                      { bucketName: process.env.PLATFORM_NAME }
+                    )
+                  );
                 }
-              } else {
-                toast.success(
-                  intl.formatMessage(
-                    { defaultMessage: `Welcome to {bucketName}!` },
-                    { bucketName: process.env.PLATFORM_NAME }
-                  )
-                );
               }
-            })
+            )
           }
         >
           <FormattedMessage defaultMessage="Finish sign up" />
