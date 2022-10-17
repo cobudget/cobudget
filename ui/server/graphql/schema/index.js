@@ -176,7 +176,7 @@ const schema = gql`
 
     joinGroup(groupId: ID!): GroupMember
 
-    updateProfile(username: String, name: String): User
+    updateProfile(username: String, name: String, mailUpdates: Boolean): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
 
     inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
@@ -358,6 +358,7 @@ const schema = gql`
     email: String
     name: String
     verifiedEmail: Boolean!
+    mailUpdates: Boolean
     isRootAdmin: Boolean
     groupMemberships: [GroupMember!]
     roundMemberships: [RoundMember!]

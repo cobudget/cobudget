@@ -6,13 +6,15 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
+import { Checkbox, FormControlLabel } from "@material-ui/core";
 
 const FINISH_SIGNUP_MUTATION = gql`
-  mutation updateProfile($username: String, $name: String) {
-    updateProfile(username: $username, name: $name) {
+  mutation updateProfile($username: String, $name: String, $mailUpdates: Boolean) {
+    updateProfile(username: $username, name: $name, mailUpdates: $mailUpdates) {
       id
       username
       name
+      mailUpdates
     }
     acceptTerms {
       id
@@ -25,6 +27,7 @@ export default function FinishSignup({ currentUser }) {
   const [, updateUser] = useMutation(FINISH_SIGNUP_MUTATION);
   const [username, setUsername] = useState(currentUser.username ?? "");
   const [name, setName] = useState(currentUser.name ?? "");
+  const [mailUpdates, setMailUpdates] = useState(false);
   const intl = useIntl();
 
   const [acceptTerms, setAcceptTerms] = useState(
@@ -69,6 +72,18 @@ export default function FinishSignup({ currentUser }) {
             onChange: (e) => setUsername(e.target.value),
           }}
         />
+        <FormControlLabel
+          control={
+            <Checkbox
+              value={mailUpdates}
+              onChange={(evt) => setMailUpdates(evt.target.checked)}
+            />
+          }
+          label={intl.formatMessage({
+            defaultMessage:
+              "I would like occasional emails about product updates and Cobudget-related events, trainings, and support resources.",
+          })}
+        />
         {process.env.TERMS_URL && (
           <label className="text-sm flex items-center space-x-2">
             <input
@@ -108,7 +123,7 @@ export default function FinishSignup({ currentUser }) {
           type="submit"
           disabled={!username || !name || !acceptTerms}
           onClick={() =>
-            updateUser({ username, name }).then(({ data, error }) => {
+            updateUser({ username, name, mailUpdates }).then(({ data, error }) => {
               if (error) {
                 if (error.message.includes("Unique")) {
                   toast.error(
