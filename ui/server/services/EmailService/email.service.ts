@@ -147,21 +147,25 @@ export default {
     });
 
     if (hasAccountAlready) {
-      await sendEmail({
-        to: destination,
-        subject: `Your ${process.env.PLATFORM_NAME} login link`,
-        html: `<a href="${link}">Click here to login</a>
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Your ${process.env.PLATFORM_NAME} login link`,
+          html: `<a href="${link}">Click here to login</a>
         <br/><br/>
         Verification code: ${code}
         <br/><br/>
         ${footer}
         `,
-      });
+        },
+        false
+      );
     } else {
-      await sendEmail({
-        to: destination,
-        subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
-        html: `Welcome!
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
+          html: `Welcome!
         <br/><br/>
         Your ${process.env.PLATFORM_NAME} account has been created! We're excited to welcome you to the community.
         <br/><br/>
@@ -169,7 +173,9 @@ export default {
         <br/><br/>
         ${footer}
       `,
-      });
+        },
+        false
+      );
     }
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {

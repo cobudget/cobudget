@@ -25,9 +25,9 @@ const getVerifiedEmails = async (emails: string[]) => {
     where: {
       email: { in: emails },
       verifiedEmail: true,
-    }
-  })
-}
+    },
+  });
+};
 
 const send = async (mail: SendEmailInput) => {
   if (process.env.NODE_ENV === "development") {
@@ -118,19 +118,25 @@ export const sendEmail = async (input: SendEmailInput, verifiedOnly = true) => {
   return 1;
 };
 
-export const sendEmails = async (inputs: SendEmailInput[], verifiedOnly = true) => {
+export const sendEmails = async (
+  inputs: SendEmailInput[],
+  verifiedOnly = true
+) => {
   checkEnv();
   if (verifiedOnly) {
-    const verifiedEmails = (await getVerifiedEmails(inputs.map(input => input.to))).map(u => u.email);
+    const verifiedEmails = (
+      await getVerifiedEmails(inputs.map((input) => input.to))
+    ).map((u) => u.email);
     // If there is no verified email, return
     if (verifiedEmails.length === 0) {
       return 0;
     }
-    const verifiedInputs = inputs.filter(input => verifiedEmails.indexOf(input.to) > -1);
+    const verifiedInputs = inputs.filter(
+      (input) => verifiedEmails.indexOf(input.to) > -1
+    );
     await sendBatch(verifiedInputs);
     return verifiedInputs.length;
-  }
-  else {
+  } else {
     await sendBatch(inputs);
     return inputs.length;
   }
