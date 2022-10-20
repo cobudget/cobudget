@@ -146,9 +146,12 @@ export const BUCKET_QUERY = gql`
 function Header ({ head }) {
   return (
       <Head>
+        {/*meta tags for preview*/}
         <meta property="og:title" content={head?.title} />
         <meta property="og:image" content={head?.image} />
         <meta property="og:description" content={head?.description} />
+        {/*Twitter card type*/}
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
   )
 }
