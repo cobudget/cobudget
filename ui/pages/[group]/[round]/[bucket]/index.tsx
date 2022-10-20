@@ -143,17 +143,17 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-function Header ({ head }) {
+function Header({ head }) {
   return (
-      <Head>
-        {/*meta tags for preview*/}
-        <meta property="og:title" content={head?.title} />
-        <meta property="og:image" content={head?.image} />
-        <meta property="og:description" content={head?.description} />
-        {/*Twitter card type*/}
-        <meta name="twitter:card" content="summary_large_image" />
-      </Head>
-  )
+    <Head>
+      {/*meta tags for preview*/}
+      <meta property="og:title" content={head?.title} />
+      <meta property="og:image" content={head?.image} />
+      <meta property="og:description" content={head?.description} />
+      {/*Twitter card type*/}
+      <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+  );
 }
 
 const BucketIndex = ({ head, currentUser, currentGroup }) => {
@@ -181,10 +181,10 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
   if ((!bucket && fetching) || !router.isReady) {
     return (
       <>
-      <Header head={head}/>
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
+        <Header head={head} />
+        <div className="flex-grow flex justify-center items-center h-64">
+          <HappySpinner />
+        </div>
       </>
     );
   }
@@ -192,11 +192,11 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
   if (!bucket && !fetching)
     return (
       <>
-      <Header head={head}/>
-      <div className="text-center mt-7">
-        This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
-        don&apos;t have access to it
-      </div>
+        <Header head={head} />
+        <div className="text-center mt-7">
+          This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or
+          you don&apos;t have access to it
+        </div>
       </>
     );
 
@@ -351,20 +351,24 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 // }
 
 export async function getServerSideProps(ctx) {
-  const bucket = await prisma.bucket.findUnique({ where: { id: ctx.params.bucket } })
-  const images = await prisma.bucket.findUnique({ where: { id: ctx.params.bucket } }).Images();
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: ctx.params.bucket },
+  });
+  const images = await prisma.bucket
+    .findUnique({ where: { id: ctx.params.bucket } })
+    .Images();
   if (!bucket) {
-    return {props: {head: null}}
+    return { props: { head: null } };
   }
   return {
-      props: {
-          head: {
-            title: bucket.title,
-            description: bucket.description || bucket.summary,
-            image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO
-          }
-      }, 
-  }
+    props: {
+      head: {
+        title: bucket.title,
+        description: bucket.description || bucket.summary,
+        image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO,
+      },
+    },
+  };
 }
 
 export default BucketIndex;
