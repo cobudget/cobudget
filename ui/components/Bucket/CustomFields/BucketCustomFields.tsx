@@ -30,7 +30,7 @@ const BucketCustomFields = ({ customFields, canEdit, roundId, bucketId }) => {
     },
   });
 
-  if (!data) {
+  if (!data || !data.round) {
     return null;
   }
 
