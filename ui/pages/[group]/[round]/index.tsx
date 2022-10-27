@@ -567,33 +567,36 @@ const RoundPage = ({ currentUser }) => {
             )}
           </div>
           <div className={`flex flex-col justify-end items-start`}>
+            <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+              <p className="font-bold my-0.5">Funds available</p>
+              <div>
+                <table>
+                  <tbody>
+                    {currentUser?.currentCollMember?.isApproved &&
+                      currentUser?.currentCollMember?.hasJoined && (
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                      )}
+                    <tr>
+                      <td className="pr-3">In this round</td>
+                      <td className="font-bold">
+                        {round.totalInMembersBalances / 100}
+                        {getCurrencySymbol(round.currency)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
-                    <p className="font-bold my-0.5">Funds available</p>
-                    <div>
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td className="pr-3">In your account</td>
-                            <td className="font-bold">
-                              {currentUser.currentCollMember.balance / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-3">In this round</td>
-                            <td className="font-bold">
-                              {round.totalInMembersBalances / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                   <Button
                     size="large"
                     color={round.color}
