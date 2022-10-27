@@ -102,7 +102,9 @@ const SortableItem = SortableElement(
               placement="bottom"
               arrow={false}
             >
-              <DragHandle />
+              <span>
+                <DragHandle />
+              </span>
             </Tooltip>
           </div>
         </div>
