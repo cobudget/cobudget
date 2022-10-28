@@ -491,10 +491,10 @@
     "@babel/helper-validator-identifier" "^7.15.7"
     to-fast-properties "^2.0.0"
 
-"@crowdin/cli@3":
-  version "3.7.8"
-  resolved "https://registry.yarnpkg.com/@crowdin/cli/-/cli-3.7.8.tgz#a32bb78836b20cefd91c83b193c3d003c906b2d6"
-  integrity sha512-DDA2ggfnYsfoprWmxNpZ5QOxO58RSsbFHHSi+558bqBJMag1z0RjSGSCriqfCQtvBnn2SIVnBsBOaw+HDWXF4w==
+"@crowdin/cli@3.8.1":
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/@crowdin/cli/-/cli-3.8.1.tgz#7884ff64af268a25f645b79630926734e4aed066"
+  integrity sha512-kSohd26AKqXVNo+G48C1cv+/TPBks44YbD2+nQLm8d/mUGGazhYHY6k6wU7yP+vkaT/F5WeL3br5Sffn0QoxRg==
   dependencies:
     njre "^0.2.0"
     shelljs "^0.8.4"
@@ -7671,6 +7671,13 @@ react-dom@17.0.2:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     scheduler "^0.20.2"
+
+react-error-boundary@3.1.4:
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.4.tgz#255db92b23197108757a888b01e5b729919abde0"
+  integrity sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
 
 react-fast-compare@^2.0.1:
   version "2.0.4"
