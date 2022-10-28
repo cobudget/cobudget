@@ -44,7 +44,7 @@ export const bucketsPage = async (
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
   const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
-  // If cancelled in not there in the status filter, explicitly qunselect canceled buckets
+  // If canceled in not there in the status filter, explicitly qunselect canceled buckets
   const showCanceled = status.indexOf('CANCELED') === -1;
   const buckets = await prisma.bucket.findMany({
     where: {
