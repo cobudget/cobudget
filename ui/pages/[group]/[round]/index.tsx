@@ -31,6 +31,7 @@ export const ROUND_PAGE_QUERY = gql`
       bucketCreationIsOpen
       totalInMembersBalances
       allowStretchGoals
+      bucketReviewIsOpen
       currency
       tags {
         id
@@ -95,6 +96,9 @@ export const BUCKETS_QUERY = gql`
         canceled
         status
         percentageFunded
+        round {
+          requireBucketApproval
+        }
         customFields {
           value
           customField {
@@ -241,15 +245,18 @@ const Page = ({
         Header: "Funders",
         accessor: "fundersCount",
       },
-      {
+    ];
+
+    if (round?.bucketReviewIsOpen) {
+      cols.push({
         Header: "Approvals",
         accessor: "goodFlagCount",
-      },
-      {
+      });
+      cols.push({
         Header: "Flags",
         accessor: "raiseFlagCount",
-      },
-    ];
+      });
+    }
 
     /* 
     if (currentUser) {
@@ -294,6 +301,7 @@ const Page = ({
     round?.allowStretchGoals,
     round?.group?.slug,
     round?.slug,
+    round?.bucketReviewIsOpen,
   ]);
 
   if (error) {
@@ -363,7 +371,7 @@ const Page = ({
                       (bucket.maxGoal || 1)) *
                     100
                   : 0
-                : "-",
+                : 0,
           }))}
         />
       ) : null}
@@ -559,33 +567,36 @@ const RoundPage = ({ currentUser }) => {
             )}
           </div>
           <div className={`flex flex-col justify-end items-start`}>
+            <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+              <p className="font-bold my-0.5">Funds available</p>
+              <div>
+                <table>
+                  <tbody>
+                    {currentUser?.currentCollMember?.isApproved &&
+                      currentUser?.currentCollMember?.hasJoined && (
+                        <tr>
+                          <td className="pr-3">In your account</td>
+                          <td className="font-bold">
+                            {currentUser.currentCollMember.balance / 100}
+                            {getCurrencySymbol(round.currency)}
+                          </td>
+                        </tr>
+                      )}
+                    <tr>
+                      <td className="pr-3">In this round</td>
+                      <td className="font-bold">
+                        {round.totalInMembersBalances / 100}
+                        {getCurrencySymbol(round.currency)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
                 <>
-                  <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
-                    <p className="font-bold my-0.5">Funds available</p>
-                    <div>
-                      <table>
-                        <tbody>
-                          <tr>
-                            <td className="pr-3">In your account</td>
-                            <td className="font-bold">
-                              {currentUser.currentCollMember.balance / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="pr-3">In this round</td>
-                            <td className="font-bold">
-                              {round.totalInMembersBalances / 100}
-                              {getCurrencySymbol(round.currency)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
                   <Button
                     size="large"
                     color={round.color}

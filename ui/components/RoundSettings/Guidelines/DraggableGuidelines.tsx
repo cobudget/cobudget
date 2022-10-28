@@ -1,12 +1,12 @@
 import { useMutation, gql } from "urql";
 import { SortableElement, SortableHandle } from "react-sortable-hoc";
 import { DraggableIcon } from "components/Icons";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import IconButton from "components/IconButton";
 import { DeleteIcon, EditIcon } from "components/Icons";
 import DraggableItems from "../DraggableItems";
 import Markdown from "components/Markdown";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
 
 const DELETE_GUIDELINE_MUTATION = gql`
   mutation DeleteGuideline($roundId: ID!, $guidelineId: ID!) {
@@ -63,9 +63,9 @@ const SortableItem = SortableElement(
           <h2 className="font-semibold text-lg">{guideline.title}</h2>
           <div>
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Edit" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({ defaultMessage: "Edit" })}
+              placement="bottom"
+              arrow={false}
             >
               <IconButton
                 onClick={() => setEditingGuideline(guideline)}
@@ -75,7 +75,7 @@ const SortableItem = SortableElement(
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Delete" position="bottom" size="small">
+            <Tooltip content="Delete" placement="bottom" arrow={false}>
               <IconButton
                 loading={deleting}
                 onClick={() =>
@@ -96,11 +96,15 @@ const SortableItem = SortableElement(
             </Tooltip>
 
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Drag to reorder" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({
+                defaultMessage: "Drag to reorder",
+              })}
+              placement="bottom"
+              arrow={false}
             >
-              <DragHandle />
+              <span>
+                <DragHandle />
+              </span>
             </Tooltip>
           </div>
         </div>

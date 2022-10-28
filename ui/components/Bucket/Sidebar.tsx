@@ -1,4 +1,4 @@
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
@@ -311,9 +311,11 @@ const BucketSidebar = ({
             <div className="relative">
               <div className="flex justify-end">
                 <Tooltip
-                  title={intl.formatMessage({ defaultMessage: "More actions" })}
-                  position="bottom"
-                  size="small"
+                  content={intl.formatMessage({
+                    defaultMessage: "More actions",
+                  })}
+                  placement="bottom"
+                  arrow={false}
                 >
                   <IconButton onClick={() => setActionsDropdownOpen(true)}>
                     <DotsHorizontalIcon />
@@ -423,7 +425,9 @@ const BucketSidebar = ({
           </div>
           <span>
             <Label
-              className={"mt-2 inline-block " + getStatusColor(bucket.status)}
+              className={
+                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+              }
             >
               {statusList[bucket.status]}
             </Label>
@@ -442,11 +446,11 @@ const BucketSidebar = ({
                 }
               >
                 <Tooltip
-                  title={intl.formatMessage({
+                  content={intl.formatMessage({
                     defaultMessage: "Edit co-creators",
                   })}
-                  position="bottom"
-                  size="small"
+                  placement="bottom"
+                  arrow={false}
                 >
                   <IconButton onClick={() => setCocreatorModalOpen(true)}>
                     <EditIcon className="h-5 w-5" />

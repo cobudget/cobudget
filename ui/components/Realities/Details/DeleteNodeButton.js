@@ -1,12 +1,12 @@
 import PropTypes from "prop-types";
 import styled from "styled-components";
 import {
-  Tooltip,
   Dialog,
   Button,
   DialogContent,
   DialogActions,
 } from "@material-ui/core";
+import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const Wrapper = styled.div`
@@ -24,7 +24,7 @@ const DeleteNodeButton = ({
 }) => {
   return (
     <Wrapper>
-      <Tooltip title={disabled && disabledReason ? disabledReason : ""}>
+      <Tooltip content={disabled && disabledReason ? disabledReason : ""}>
         <span>
           <Button
             color="secondary"

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
+
 import { FormattedMessage, FormattedNumber } from "react-intl";
 
 import EditBudgetModal from "./EditBudgetModal";
@@ -51,7 +52,7 @@ const BucketBudget = ({
             </h2>
             {canEdit && (
               <div>
-                <Tooltip title="Edit budget" position="bottom" size="small">
+                <Tooltip content="Edit budget" placement="bottom" arrow={false}>
                   <IconButton onClick={() => setEditing(true)}>
                     <EditIcon className="h-6 w-6" />
                   </IconButton>

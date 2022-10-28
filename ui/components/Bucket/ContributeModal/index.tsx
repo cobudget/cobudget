@@ -1,4 +1,6 @@
-import { Modal, Tooltip } from "@material-ui/core";
+import { Modal } from "@material-ui/core";
+import Tooltip from "@tippyjs/react";
+
 import { Tab } from "@headlessui/react";
 import { FormattedMessage } from "react-intl";
 import FromBalance from "./FromBalance";
@@ -56,11 +58,13 @@ const ContributeModal = ({
               disabled={!directFundingEnabled}
             >
               <Tooltip
-                title={
+                content={
                   directFundingEnabled
                     ? ""
                     : "Direct funding not enabled for this bucket and/or round"
                 }
+                placement="bottom"
+                arrow={false}
               >
                 <span>
                   <FormattedMessage defaultMessage="Direct with card" />

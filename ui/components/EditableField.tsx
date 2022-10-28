@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
+
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers";
 
@@ -114,12 +115,12 @@ const EditableField = ({
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip
-              title={intl.formatMessage(
+              content={intl.formatMessage(
                 { defaultMessage: `Edit {name}` },
                 { name: name }
               )}
-              position="bottom"
-              size="small"
+              placement="bottom"
+              arrow={false}
             >
               <IconButton onClick={() => setEditing(true)}>
                 <EditIcon className="h-6 w-6" />
