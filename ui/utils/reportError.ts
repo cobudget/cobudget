@@ -16,7 +16,6 @@ export default function reportError(error: Error) {
       new Blob([content], { type: "text/plain" }),
       "log-" + Date.now() + ".json"
     );
-    fd.append("avatar_url", "https://cobudget.com/favicon.ico");
 
     fetch(hookUrl, {
       method: "POST",
