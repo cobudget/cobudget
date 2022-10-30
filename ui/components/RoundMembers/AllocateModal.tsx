@@ -5,7 +5,6 @@ import { useMutation, gql } from "urql";
 import Switch from "components/Switch";
 import Button from "components/Button";
 import TextField from "components/TextField";
-import thousandSeparator from "utils/thousandSeparator";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 

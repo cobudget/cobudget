@@ -5,8 +5,6 @@ import { useRouter } from "next/router";
 import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import { FormattedMessage, useIntl } from "react-intl";
-
-import thousandSeparator from "utils/thousandSeparator";
 import capitalize from "utils/capitalize";
 import HappySpinner from "components/HappySpinner";
 
@@ -21,6 +19,7 @@ import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
+import FormattedCurrency from "components/FormattedCurrency";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -225,9 +224,10 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             )}
             secondary={
               round.maxAmountToBucketPerUser ? (
-                `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
-                  round.currency
-                }`
+                <FormattedCurrency
+                  value={round.maxAmountToBucketPerUser}
+                  currency={round.currency}
+                />
               ) : (
                 <FormattedMessage defaultMessage="Not set" />
               )
