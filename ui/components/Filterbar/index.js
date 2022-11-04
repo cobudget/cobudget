@@ -135,23 +135,19 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
-      {(currentUser?.currentCollMember?.isAdmin ||
-        currentUser?.currentCollMember?.isModerator) && (
-        <span className="sm:order-last">
-          <SelectField
-            className="bg-white sm:order-3"
-            color={round.color}
-            inputProps={{
-              value:
-                view || intl.formatMessage({ defaultMessage: "Grid View" }),
-              onChange: (e) => onChangeView(e.target.value),
-            }}
-          >
-            <option value="grid">Grid View</option>
-            <option value="table">Table View</option>
-          </SelectField>
-        </span>
-      )}
+      <span className="sm:order-last">
+        <SelectField
+          className="bg-white sm:order-3"
+          color={round.color}
+          inputProps={{
+            value: view || intl.formatMessage({ defaultMessage: "Grid View" }),
+            onChange: (e) => onChangeView(e.target.value),
+          }}
+        >
+          <option value="grid">Grid View</option>
+          <option value="table">Table View</option>
+        </SelectField>
+      </span>
       <span>
         <SelectField
           className="bg-white sm:order-last"
