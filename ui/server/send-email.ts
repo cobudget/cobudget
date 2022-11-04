@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import { Client } from "postmark";
+import prisma from "./prisma";
 export interface SendEmailInput {
   to: string;
   subject: string;
@@ -18,6 +19,15 @@ const smtpClient =
     port: 1025,
     secure: false,
   });
+
+const getVerifiedEmails = async (emails: string[]) => {
+  return prisma.user.findMany({
+    where: {
+      email: { in: emails },
+      verifiedEmail: true,
+    },
+  });
+};
 
 const send = async (mail: SendEmailInput) => {
   if (process.env.NODE_ENV === "development") {
@@ -98,12 +108,36 @@ const checkEnv = () => {
   }
 };
 
-export const sendEmail = async (input: SendEmailInput) => {
+export const sendEmail = async (input: SendEmailInput, verifiedOnly = true) => {
   checkEnv();
+  const emailVerified = (await getVerifiedEmails([input.to])).length === 1;
+  if (verifiedOnly && !emailVerified) {
+    return 0;
+  }
   await send(input);
+  return 1;
 };
 
-export const sendEmails = async (inputs: SendEmailInput[]) => {
+export const sendEmails = async (
+  inputs: SendEmailInput[],
+  verifiedOnly = true
+) => {
   checkEnv();
-  await sendBatch(inputs);
+  if (verifiedOnly) {
+    const verifiedEmails = (
+      await getVerifiedEmails(inputs.map((input) => input.to))
+    ).map((u) => u.email);
+    // If there is no verified email, return
+    if (verifiedEmails.length === 0) {
+      return 0;
+    }
+    const verifiedInputs = inputs.filter(
+      (input) => verifiedEmails.indexOf(input.to) > -1
+    );
+    await sendBatch(verifiedInputs);
+    return verifiedInputs.length;
+  } else {
+    await sendBatch(inputs);
+    return inputs.length;
+  }
 };
