@@ -60,6 +60,7 @@ const GroupAndRoundHeader = ({
                 className={
                   "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
                 }
+                data-testid="navbar-round-title"
               >
                 {capLength(round.title)}
               </a>
