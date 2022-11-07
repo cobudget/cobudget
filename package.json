@@ -12,7 +12,7 @@
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
     "test:open": "cypress open",
     "test:run": "cypress run",
-    "test": "./scripts/wait.sh 3001 && npm run test:run",
+    "test": "./scripts/wait.sh 3000 && npm run test:run",
     "typecheck": "yarn --cwd ui typecheck"
   },
   "devDependencies": {
@@ -20,7 +20,7 @@
     "@typescript-eslint/parser": "5.14.0",
     "concurrently": "3.5.1",
     "cypress": "6.3.0",
-    "cypress-terminal-report": "2.4.0",
+    "cypress-terminal-report": "^4.1.2",
     "eslint": "7.21.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-cypress": "2.12.1",
