@@ -54,7 +54,7 @@ const TextField = ({
 }) => {
   const LabelComponent = labelComponent;
   return (
-    <div className={`flex flex-col min-w-0 ${className}`}>
+    <div className={`flex flex-col min-w-0 ${className}`} data-testid={testid ? `text-field-container-${testid}` : ""}>
       {(label || labelComponent) && (
         <label htmlFor={name} className="text-sm font-medium mb-1 block">
           {label ? label : <LabelComponent />}

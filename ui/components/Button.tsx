@@ -17,6 +17,7 @@ const Button = forwardRef(
       onClick,
       nextJsLink,
       style,
+      testid,
       ...props
     }: {
       children: any;
@@ -31,6 +32,7 @@ const Button = forwardRef(
       href?: string;
       onClick?: () => void;
       nextJsLink?: boolean;
+      testid?: string;
       style?: any;
     },
     ref: any
@@ -78,6 +80,7 @@ const Button = forwardRef(
         className={classes}
         style={style}
         ref={ref}
+        data-testid={testid}
       >
         {loading && (
           <LoaderIcon className="w-5 h-5 absolute animation-spin animation-linear animation-2s" />

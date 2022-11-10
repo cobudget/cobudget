@@ -60,7 +60,7 @@ const SortableItem = SortableElement(
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg">{guideline.title}</h2>
+          <h2 className="font-semibold text-lg" data-testid={"guideline-view"}>{guideline.title}</h2>
           <div>
             <Tooltip
               content={intl.formatMessage({ defaultMessage: "Edit" })}
@@ -108,7 +108,9 @@ const SortableItem = SortableElement(
             </Tooltip>
           </div>
         </div>
-        <Markdown source={guideline.description} />
+        <div>
+          <Markdown source={guideline.description} />
+        </div>
       </li>
     );
   }
