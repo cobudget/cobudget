@@ -5,7 +5,7 @@ describe("Updates guidelines round settings", () => {
 
     const roundSlug = `empty`;
     const now = Date.now();
-
+    
     it("adds a guideline", () => {
         cy.visit(`c/${roundSlug}/settings/guidelines`);
         
@@ -39,12 +39,31 @@ describe("Updates guidelines round settings", () => {
         title
         .focus()
         .clear()
-        .type(`Updated ${now}`);
+        .type(`Updated title ${now}`);
 
         cy.get("[data-testid=submit-guideline]")
         .click();
 
-        cy.contains("[data-testid=guideline-view]", `Updated ${now}`);
+        cy.contains("[data-testid=guideline-view]", `Updated title ${now}`);
     });
 
+    it("edits guideline description", () => {
+        const now = Date.now();
+        cy.visit(`c/${roundSlug}/settings/guidelines`);
+
+        cy.get("[data-testid=edit-guideline]")
+        .eq(0)
+        .click();
+
+        cy.get("[data-testid=text-field-container-guideline-description]")
+        .get("[contenteditable=true]")
+        .focus()
+        .clear()
+        .type(`Updated description ${now}`);
+
+        cy.get("[data-testid=submit-guideline]")
+        .click();
+
+        cy.contains(".markdown", `Updated description ${now}`);
+    });
 });
