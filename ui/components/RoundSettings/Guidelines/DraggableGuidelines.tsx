@@ -67,12 +67,14 @@ const SortableItem = SortableElement(
               placement="bottom"
               arrow={false}
             >
+              <span data-testid="edit-guideline">
               <IconButton
                 onClick={() => setEditingGuideline(guideline)}
                 className="mx-1"
               >
                 <EditIcon className="h-6 w-6" />
               </IconButton>
+              </span>
             </Tooltip>
 
             <Tooltip content="Delete" placement="bottom" arrow={false}>

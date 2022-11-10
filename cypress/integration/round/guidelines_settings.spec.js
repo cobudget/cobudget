@@ -26,4 +26,25 @@ describe("Updates guidelines round settings", () => {
         cy.contains("[data-testid=guideline-view]", `Title ${now}`);
     });
 
+    it("edits a guideline title", () => {
+        const now = Date.now();
+        cy.visit(`c/${roundSlug}/settings/guidelines`);
+
+        cy.get("[data-testid=edit-guideline]")
+        .eq(0)
+        .click();
+
+        const title = cy.get("[data-testid=guideline-title]");
+
+        title
+        .focus()
+        .clear()
+        .type(`Updated ${now}`);
+
+        cy.get("[data-testid=submit-guideline]")
+        .click();
+
+        cy.contains("[data-testid=guideline-view]", `Updated ${now}`);
+    });
+
 });
