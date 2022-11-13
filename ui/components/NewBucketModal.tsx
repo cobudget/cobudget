@@ -75,6 +75,7 @@ const NewBucketModal = ({ round, handleClose, router }) => {
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
             color={round.color}
+            testid="new-bucket-title-input"
           />
 
           <div className="flex justify-end">

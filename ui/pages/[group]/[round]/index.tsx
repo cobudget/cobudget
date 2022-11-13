@@ -601,6 +601,7 @@ const RoundPage = ({ currentUser }) => {
                     size="large"
                     color={round.color}
                     onClick={() => setNewBucketModalOpen(true)}
+                    testid="create-new-bucket-button"
                   >
                     New {process.env.BUCKET_NAME_SINGULAR}
                   </Button>
