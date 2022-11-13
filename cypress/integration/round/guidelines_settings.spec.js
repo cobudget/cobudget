@@ -22,7 +22,6 @@ describe("Updates guidelines round settings", () => {
         cy.get("[data-testid=submit-guideline]")
         .click();
 
-        
         cy.contains("[data-testid=guideline-view]", `Title ${now}`);
     });
 

@@ -134,6 +134,7 @@ export default function AddOrEditCustomField({
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
               color={round.color}
+              testid="customfield-name-input"
             />
             <TextField
               placeholder={intl.formatMessage({
@@ -145,8 +146,10 @@ export default function AddOrEditCustomField({
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
               color={round.color}
+              testid="customfield-description-input"
             />
             <div className="flex">
+              <span data-testid="customfield-type-select">
               <SelectField
                 name={"customField.type"}
                 defaultValue={customField.type}
@@ -168,6 +171,7 @@ export default function AddOrEditCustomField({
                   {intl.formatMessage({ defaultMessage: "Yes/No" })}
                 </option>
               </SelectField>
+              </span>
               {typeInputValue == "TEXT" ||
               typeInputValue == "MULTILINE_TEXT" ? (
                 <TextField
@@ -186,6 +190,7 @@ export default function AddOrEditCustomField({
                     value: limit,
                     onChange: (e) => setLimit(e.target.value),
                   }}
+                  testid="customfield-limit-input"
                 />
               ) : null}
             </div>
@@ -224,7 +229,7 @@ export default function AddOrEditCustomField({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} color={round.color}>
+              <Button type="submit" loading={loading} color={round.color} testid="submit-custom-field-button">
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>
