@@ -1,5 +1,6 @@
 import login from "../login"
 import get from "../../utils/get";
+import { createBucket } from "../../utils/bucket";
 
 describe("Creates bucket", () => {
 
@@ -8,14 +9,7 @@ describe("Creates bucket", () => {
     const now = Date.now();
 
     it("creates a bucket", () => {
-        cy.visit(`c/${roundSlug}/`)
-
-        get("create-new-bucket-button")
-        .click();
-
-        get("new-bucket-title-input")
-        .type(`Bucket ${now}`)
-        .type("{enter}");
+        createBucket(roundSlug, `Bucket ${now}`);
 
         get("bucket-title-view")
         .contains(`Bucket ${now}`);

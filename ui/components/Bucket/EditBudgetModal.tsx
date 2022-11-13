@@ -115,6 +115,7 @@ const EditBudgetModal = ({
                     name={`budgetItems[${index}].description`}
                     defaultValue={description}
                     inputRef={register()}
+                    testid={`bucket-expense-item-description`}
                   />
                   <input
                     name={`budgetItems[${index}].type`}
@@ -138,6 +139,7 @@ const EditBudgetModal = ({
                     inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
                     endAdornment={currency}
+                    testid={`bucket-expense-item-min-amount`}
                   />
                 </div>
 
@@ -173,6 +175,7 @@ const EditBudgetModal = ({
               color={bucket.round.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
+              testid="add-bucket-cost-button"
             >
               <AddIcon className="h-5 w-5 mr-1" />{" "}
               <FormattedMessage defaultMessage="Add row" />
@@ -194,6 +197,7 @@ const EditBudgetModal = ({
                     name={`budgetItems[${index}].description`}
                     inputRef={register()}
                     defaultValue={description}
+                    testid={`bucket-existing-item-${fieldId}-description`}
                   />
                   <input
                     name={`budgetItems[${index}].type`}
@@ -216,6 +220,7 @@ const EditBudgetModal = ({
                     inputProps={{ type: "number", min: 0 }}
                     inputRef={register()}
                     endAdornment={currency}
+                    testid={`bucket-existing-item-${fieldId}-amount`}
                   />
                 </div>
 

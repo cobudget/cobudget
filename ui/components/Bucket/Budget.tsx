@@ -71,8 +71,8 @@ const BucketBudget = ({
                   <tbody>
                     {expenseItems.map((budgetItem, i) => (
                       <tr key={i} className="bg-gray-100 even:bg-white">
-                        <td className="px-4 py-2">{budgetItem.description}</td>
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-2" data-testid="bucket-cost-description-view">{budgetItem.description}</td>
+                        <td className="px-4 py-2" data-testid="bucket-cost-min-amount-view">
                           <FormattedNumber
                             value={budgetItem.min / 100}
                             style="currency"
@@ -228,6 +228,7 @@ const BucketBudget = ({
         </div>
       ) : canEdit ? (
         <button
+          data-testid="add-bucket-budget-button"
           onClick={() => setEditing(true)}
           className="block w-full h-32 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
         >
