@@ -1,5 +1,6 @@
-const Label = ({ children, className }) => (
+const Label = ({ children, className, testid=undefined }) => (
   <div
+    data-testid={testid}
     className={`bg-red text-white rounded-full text-xs font-semibold shadow uppercase py-1 px-2 tracking-wide ${className}`}
   >
     {children}
