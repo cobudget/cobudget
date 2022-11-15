@@ -39,7 +39,7 @@ export default function StatusFilter({
     }));
 
   return (
-    <div className={className}>
+    <div className={className} data-testid="bucket-status-filter-select">
       <Popover className="relative">
         <Popover.Button
           className={`w-full flex items-center bg-gray-100 border-3 border-gray-100 rounded py-3 px-4 pr-8 relative focus:outline-none focus:ring focus:ring-${color}`}
@@ -55,7 +55,7 @@ export default function StatusFilter({
         <Popover.Panel className="absolute z-10 w-56 bg-white p-4 rounded-lg shadow mt-2">
           <ul className="space-y-1">
             {items.map((item) => (
-              <li key={item.type}>
+              <li key={item.type} data-testid={`bucket-filter-options-${item.type}`}>
                 <label className="flex space-x-1.5 items-center">
                   <input
                     type="checkbox"
