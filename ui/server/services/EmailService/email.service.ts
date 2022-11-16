@@ -137,7 +137,7 @@ export default {
       <br/><br/>
       ${footer}
       `,
-    });
+    }, false);
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;
