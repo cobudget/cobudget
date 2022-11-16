@@ -79,10 +79,12 @@ export default function FinishSignup({ currentUser }) {
         />
         <FormControlLabel
           control={
-            <Checkbox
-              value={mailUpdates}
-              onChange={(evt) => setMailUpdates(evt.target.checked)}
-            />
+            <div className="-mt-12">
+              <Checkbox
+                value={mailUpdates}
+                onChange={(evt) => setMailUpdates(evt.target.checked)}
+              />
+            </div>
           }
           label={intl.formatMessage({
             defaultMessage:
