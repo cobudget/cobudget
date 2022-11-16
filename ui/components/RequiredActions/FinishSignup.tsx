@@ -79,7 +79,7 @@ export default function FinishSignup({ currentUser }) {
         />
         <FormControlLabel
           control={
-            <div className="-mt-12">
+            <div className="-mt-12 pt-0.5">
               <Checkbox
                 value={mailUpdates}
                 onChange={(evt) => setMailUpdates(evt.target.checked)}
