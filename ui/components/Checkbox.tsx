@@ -3,8 +3,8 @@ import { withStyles } from "@material-ui/core/styles";
 
 const checkBoxStyles = (theme) => ({
   root: {
-      scale: 0.8,
-      alignSelf: "start",
+    scale: 0.8,
+    alignSelf: "start",
     "&:hover": {
       background: "#3D70B211",
     },
