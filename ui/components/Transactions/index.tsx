@@ -1,11 +1,11 @@
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 
-import thousandSeparator from "utils/thousandSeparator";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import LoadMore from "components/LoadMore";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
+import FormattedCurrency from "components/FormattedCurrency";
 dayjs.extend(LocalizedFormat);
 
 export const TRANSACTIONS_QUERY = gql`
@@ -144,7 +144,10 @@ const Transactions = ({ round, currentGroup }) => {
                           : intl.formatMessage({
                               defaultMessage: "added",
                             })}{" "}
-                        {thousandSeparator(c.amount / 100)} {round.currency}{" "}
+                        <FormattedCurrency
+                          value={c.amount}
+                          currency={round.currency}
+                        />{" "}
                         {c.amount < 0
                           ? intl.formatMessage({ defaultMessage: "from" })
                           : intl.formatMessage({ defaultMessage: "to" })}{" "}
