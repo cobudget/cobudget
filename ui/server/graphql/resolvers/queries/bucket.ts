@@ -45,7 +45,7 @@ export const bucketsPage = async (
 
   const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
   // If canceled in not there in the status filter, explicitly qunselect canceled buckets
-  const showCanceled = status.indexOf('CANCELED') === -1;
+  const showCanceled = status.indexOf("CANCELED") === -1;
   const buckets = await prisma.bucket.findMany({
     where: {
       round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
