@@ -14,5 +14,13 @@
 // ***********************************************************
 
 import "./commands";
+import signup from "../utils/signup";
 
 require("cypress-terminal-report/src/installLogsCollector")();
+
+
+describe("INIT", () => {
+    it("registers a user", () => {
+        signup();
+    });
+});

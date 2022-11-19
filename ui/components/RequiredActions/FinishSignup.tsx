@@ -63,6 +63,7 @@ export default function FinishSignup({ currentUser }) {
             value: name,
             onChange: (e) => setName(e.target.value),
           }}
+          testid="signup-user-fullname"
         />
         <TextField
           label={intl.formatMessage({ defaultMessage: "Username" })}
@@ -75,6 +76,7 @@ export default function FinishSignup({ currentUser }) {
             value: username,
             onChange: (e) => setUsername(e.target.value),
           }}
+          testid="signup-user-username"
         />
         <FormControlLabel
           control={
@@ -125,6 +127,7 @@ export default function FinishSignup({ currentUser }) {
         </Button>
         <Button
           type="submit"
+          testid="finish-signup-button"
           disabled={!username || !name || !acceptTerms}
           onClick={() =>
             updateUser({ username, name, mailUpdates }).then(
