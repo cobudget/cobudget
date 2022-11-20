@@ -220,6 +220,7 @@ const InviteMembersModal = ({
                   }),
                 },
               })}
+              testid="invite-participants-emails"
             />
             {link && (
               <div className="mt-4">
@@ -322,7 +323,7 @@ const InviteMembersModal = ({
               >
                 <FormattedMessage defaultMessage="Create Invite Link" />
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button type="submit" loading={loading} testid="invite-participants-email-button">
                 <FormattedMessage defaultMessage="Add people" />
               </Button>
             </div>

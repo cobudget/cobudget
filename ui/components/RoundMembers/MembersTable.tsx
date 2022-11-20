@@ -272,7 +272,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p>{member.email}</p>
+        <p data-testid="invited-participtant-email">{member.email}</p>
         {!member.user.verifiedEmail ? (
           <p className="text-sm text-gray-500">
             (<FormattedMessage defaultMessage="not verified" />)

@@ -10,9 +10,8 @@ export default function signup () {
             get("signup-user-fullname")
             .type(`name${Date.now()}`);
             get("signup-user-username")
-            .type(`user${Date.now()}`)
-            .type("{enter}");
-            
+            .type(`user${Date.now()}`);
+
             get("finish-signup-button")
             .click();
         }

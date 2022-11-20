@@ -7,7 +7,7 @@ describe("Bucket filtering", () => {
     beforeEach(login);
 
     const now = Date.now();
-    const roundSlug = `round-1668454493478` || `round-${now}`;
+    const roundSlug = `round-${now}`;
 
     it("filters buckets on based on statuses", () => {
 
