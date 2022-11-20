@@ -9,6 +9,22 @@ describe("Test participants", () => {
     const username = participantEmail.split("@")[0];
     const roundSlug = `round-${Date.now()}`;
 
+    it("creates invitation link", () => {
+        createRound(roundSlug);
+
+        cy.visit(`c/${roundSlug}/participants`);
+        get("invite-participant-button")
+        .click();
+
+        get("create-invitation-link")
+        .click();
+
+        cy.wait(500);
+        get("invitation-link")
+        .should("exist");
+
+    });
+
     it("invites participants by email", () => {
 
         createRound(roundSlug);
