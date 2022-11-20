@@ -1,5 +1,5 @@
 import get from "../utils/get";
-import login from "../e2e/login";
+import login from "./login";
 
 export default function signup () {
     login();

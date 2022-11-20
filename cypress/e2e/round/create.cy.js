@@ -1,4 +1,4 @@
-import login from "../login";
+import login from "../../utils/login";
 
 describe("Create a round", () => {
     beforeEach(login)

@@ -1,4 +1,4 @@
-import login from "../login";
+import login from "../../utils/login";
 
 describe("Updates bucket review round settings", () => {
     beforeEach(login);

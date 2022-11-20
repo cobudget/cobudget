@@ -1,4 +1,4 @@
-import generateToken from "../utils/generateToken";
+import generateToken from "./generateToken";
 
 export default function () {
     const token = generateToken({ destination: Cypress.env("email") });

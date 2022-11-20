@@ -1,4 +1,4 @@
-import login from "../login";
+import login from "../../utils/login";
 import get from "../../utils/get";
 import { createBucket } from "../../utils/bucket";
 import { createRound } from "../../utils/round";

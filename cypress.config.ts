@@ -1,8 +1,9 @@
 import { defineConfig } from 'cypress'
+require("dotenv").config({ path: "./ui/.env.local" });
 
 export default defineConfig({
   chromeWebSecurity: false,
-  defaultCommandTimeout: 10000,
+  defaultCommandTimeout: 15000,
   e2e: {
     // We've imported your old cypress plugins here.
     // You may want to clean this up later by importing these.
@@ -11,7 +12,8 @@ export default defineConfig({
     },
     baseUrl: 'http://localhost:3000/',
     env: {
-      email: `user${Date.now()}@test.com`,
+      email: `user${Date.now()}@test.com`,  // This email will be used to register/login a user for testing
+      magicLinkSecret: process.env.MAGIC_LINK_SECRET
     }
   },
 })

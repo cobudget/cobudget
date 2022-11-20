@@ -1,4 +1,4 @@
-import login from "../login";
+import login from "../../utils/login";
 import get from "../../utils/get";
 
 describe("Update bucket form round settings", () => {

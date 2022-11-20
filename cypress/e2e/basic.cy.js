@@ -1,4 +1,4 @@
-import login from "./login";
+import login from "../utils/login";
 
 describe("Test basic functionality", () => {
   before(login);
