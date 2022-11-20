@@ -228,7 +228,7 @@ const InviteMembersModal = ({
                   <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
                 <GridWrapper>
-                  <span className="mt-2 ml-2">
+                  <span className="mt-2 ml-2" data-testid="delete-invitation-link">
                     <IconButton
                       onClick={() => {
                         deleteInviteLink(

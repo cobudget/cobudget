@@ -9,9 +9,12 @@ describe("Test participants", () => {
     const username = participantEmail.split("@")[0];
     const roundSlug = `round-${Date.now()}`;
 
-    it("creates invitation link", () => {
+    before(() => {
+        login();
         createRound(roundSlug);
+    });
 
+    it("creates invitation link", () => {
         cy.visit(`c/${roundSlug}/participants`);
         get("invite-participant-button")
         .click();
@@ -25,9 +28,21 @@ describe("Test participants", () => {
 
     });
 
-    it("invites participants by email", () => {
+    it("deletes invitation link", () => {
+        cy.visit(`c/${roundSlug}/participants`);
+        get("invite-participant-button")
+        .click();
 
-        createRound(roundSlug);
+        get("delete-invitation-link")
+        .click();
+
+        cy.wait(500);
+        get("invitation-link")
+        .should("not.exist");
+
+    });
+
+    it("invites participants by email", () => {
 
         cy.visit(`c/${roundSlug}/participants`);
 
