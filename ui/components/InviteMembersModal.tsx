@@ -258,6 +258,7 @@ const InviteMembersModal = ({
                       disabled: true,
                       value: link,
                     }}
+                    testid="invitation-link"
                   />
                   <p
                     className="mt-4 ml-4 text-sm font-medium cursor-pointer"
@@ -296,6 +297,7 @@ const InviteMembersModal = ({
               <Button
                 className="mr-2"
                 loading={createInviteLoading}
+                testid="create-invitation-link"
                 onClick={() => {
                   createInviteLink(
                     roundId

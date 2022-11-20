@@ -149,6 +149,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   };
   return (
     <>
+      <span data-testid={`participant-action-button-${member.email.split("@")[0]}`}>
       <MuiIconButton
         aria-label={intl.formatMessage({ defaultMessage: "more" })}
         aria-controls="simple-menu"
@@ -157,6 +158,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
       >
         <MoreVertIcon />
       </MuiIconButton>
+      </span>
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
@@ -219,6 +221,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           disabled={member.balance === 0}
           arrow={false}
         >
+          <span data-testid={`delete-participant-${member.email.split("@")[0]}`}>
           <MenuItem
             color="error.main"
             disabled={member.balance !== 0}
@@ -249,6 +252,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
               <FormattedMessage defaultMessage="Delete" />
             </Box>
           </MenuItem>
+          </span>
         </Tooltip>
       </Menu>
     </>
@@ -272,7 +276,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p data-testid="invited-participtant-email">{member.email}</p>
+        <p data-testid="invited-participant-email">{member.email}</p>
         {!member.user.verifiedEmail ? (
           <p className="text-sm text-gray-500">
             (<FormattedMessage defaultMessage="not verified" />)

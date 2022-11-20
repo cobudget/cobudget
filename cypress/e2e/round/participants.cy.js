@@ -5,7 +5,8 @@ import get from "../../utils/get";
 describe("Test participants", () => {
     beforeEach(login);
 
-    const participtantEmail = `participants${Date.now()}@test.com`;
+    const participantEmail = `participants${Date.now()}@test.com`;
+    const username = participantEmail.split("@")[0];
     const roundSlug = `round-${Date.now()}`;
 
     it("invites participants by email", () => {
@@ -18,15 +19,31 @@ describe("Test participants", () => {
         .click();
 
         get("invite-participants-emails")
-        .type(participtantEmail);
+        .type(participantEmail);
 
         get("invite-participants-email-button")
         .click();
 
         cy.wait(1000)
 
-        get("invited-participtant-email")
-        .contains(participtantEmail);
+        get("invited-participant-email")
+        .contains(participantEmail);
+    });
+
+    it("removes a participant", () => {
+        cy.visit(`c/${roundSlug}/participants`);
+
+        get(`participant-action-button-${participantEmail.split("@")[0]}`)
+        .click();
+
+        get(`delete-participant-${username}`)
+        .click();
+
+        cy.wait(500);
+
+        get("invited-participant-email")
+        .contains(participantEmail)
+        .should('not.exist');
     });
 
 });
