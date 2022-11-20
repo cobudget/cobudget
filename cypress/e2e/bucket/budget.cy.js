@@ -6,7 +6,7 @@ describe("Bucket budget", () => {
 
     beforeEach(login);
     const now = Date.now();
-    const roundSlug = `empty`;
+    const roundSlug = Cypress.env("roundSlug");
 
     it("adds budget item to bucket", () => {
         const minAmount = 1000;

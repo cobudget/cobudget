@@ -5,7 +5,7 @@ import { createBucket } from "../../utils/bucket";
 describe("Update bucket status", () => {
     beforeEach(login);
 
-    const roundSlug = `empty`;
+    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
 
     it("updates bucket status", () => {

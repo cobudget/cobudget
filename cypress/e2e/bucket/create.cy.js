@@ -5,7 +5,7 @@ import { createBucket } from "../../utils/bucket";
 describe("Creates bucket", () => {
 
     beforeEach(login);
-    const roundSlug = "empty";
+    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
 
     it("creates a bucket", () => {

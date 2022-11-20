@@ -13,7 +13,8 @@ export default defineConfig({
     baseUrl: 'http://localhost:3000/',
     env: {
       email: `user${Date.now()}@test.com`,  // This email will be used to register/login a user for testing
-      magicLinkSecret: process.env.MAGIC_LINK_SECRET
+      magicLinkSecret: process.env.MAGIC_LINK_SECRET, // use magic link secret from .env.local
+      roundSlug: `round${Date.now()}`, // default round slug
     }
   },
 })

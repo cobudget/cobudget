@@ -4,7 +4,7 @@ import get from "../../utils/get";
 describe("Update bucket form round settings", () => {
     beforeEach(login);
 
-    const roundSlug = `empty`;
+    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
     const limit = 10;
 

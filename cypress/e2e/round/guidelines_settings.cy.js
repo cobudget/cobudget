@@ -3,7 +3,7 @@ import login from "../../utils/login";
 describe("Updates guidelines round settings", () => {
     beforeEach(login);
 
-    const roundSlug = `empty`;
+    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
     
     it("adds a guideline", () => {
