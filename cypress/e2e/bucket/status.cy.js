@@ -1,12 +1,18 @@
 import login from "../../utils/login"
 import get from "../../utils/get";
 import { createBucket } from "../../utils/bucket";
+import { createRound } from "../../utils/round";
 
 describe("Update bucket status", () => {
     beforeEach(login);
 
-    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
+    const roundSlug = `round${now}`;
+
+    before(() => {
+        login();
+        createRound(roundSlug);
+    })
 
     it("updates bucket status", () => {
         createBucket(roundSlug, `Bucket ${now}`);
