@@ -9,12 +9,17 @@ describe("Bucket filtering", () => {
     const now = Date.now();
     const roundSlug = `round-${now}`;
 
+    before(() => {
+        login();
+        createRound(roundSlug);
+    });
+
     it("filters buckets on based on statuses", () => {
 
-        //createRound(roundSlug);
         for (let i = 0; i <= 3; i++) {
-            break;
             createBucket(roundSlug, `Bucket ${now}`);
+
+            cy.wait(10000);
 
             get("publish-bucket")
             .click();
@@ -79,11 +84,11 @@ describe("Bucket filtering", () => {
             .find("input[type=checkbox]");
 
             cb.check();
-            cb.wait(500);
+            cb.wait(2000);
 
             get("buckets-view")
             .find("a")
-            .find(["data-testid=bucket-card"])
+            .find("[data-testid=bucket-card]")
             .should("have.length", 1)
 
             cb.uncheck();

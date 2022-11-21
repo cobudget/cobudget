@@ -11,7 +11,7 @@
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix && yarn typecheck",
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
     "test:open": "cypress open",
-    "test:run": "cypress run",
+    "test:run": "cypress run --browser chrome --headless",
     "test": "./scripts/wait.sh 3000 && npm run test:run",
     "typecheck": "yarn --cwd ui typecheck"
   },

@@ -1,3 +1,4 @@
+import { createRound } from "../../utils/round";
 import login from "../../utils/login";
 
 describe("Create a round", () => {
@@ -15,10 +16,7 @@ describe("Create a round", () => {
     });
 
     it("creates a round", () => {
-        cy.visit("new-round")
-        cy.get("[data-testid=round-title]")
-        .type(roundSlug)
-        .type("{enter}");
+        createRound(roundSlug);
 
         cy.url().should("be.equal", `${Cypress.config("baseUrl")}c/${roundSlug}`);
     });

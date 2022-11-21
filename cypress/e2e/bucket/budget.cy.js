@@ -1,14 +1,16 @@
 import login from "../../utils/login";
 import { createBucket } from "../../utils/bucket";
 import get from "../../utils/get";
+import { createRound } from "../../utils/round";
 
 describe("Bucket budget", () => {
 
     beforeEach(login);
     const now = Date.now();
-    const roundSlug = Cypress.env("roundSlug");
+    const roundSlug = `round${Date.now()}`;
 
     it("adds budget item to bucket", () => {
+        createRound(roundSlug);
         const minAmount = 1000;
 
         cy.visit(`c/${roundSlug}`);

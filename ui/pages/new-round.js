@@ -130,7 +130,7 @@ export default function NewRoundPage({ currentGroup }) {
                 <option value="INVITE_ONLY">Invite only</option>
               </SelectField>
 
-              <Button className="" type="submit" fullWidth>
+              <Button className="" type="submit" fullWidth testid="create-round-button">
                 Create
               </Button>
             </form>

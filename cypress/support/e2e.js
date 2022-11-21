@@ -23,6 +23,5 @@ require("cypress-terminal-report/src/installLogsCollector")();
 describe("INIT", () => {
     it("registers a user", () => {
         signup();
-        createRound(Cypress.env("roundSlug"));
     });
 });
