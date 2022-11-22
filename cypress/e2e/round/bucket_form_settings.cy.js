@@ -1,15 +1,25 @@
 import login from "../../utils/login";
 import get from "../../utils/get";
+import { createRound } from "../../utils/round";
 
 describe("Update bucket form round settings", () => {
     beforeEach(login);
 
-    const roundSlug = Cypress.env("roundSlug");
     const now = Date.now();
+    const roundSlug = `round${now}`;
     const limit = 10;
+
+    before(() => {
+        login();
+        createRound(roundSlug);
+    });
 
     it("add long text", () => {
         cy.visit(`c/${roundSlug}/settings/bucket-form`);
+
+        get("customfield-name-view")
+        .invoke('text')
+        .then(d => cy.log(d))
 
         cy.get("[data-testid=add-form-item-button]")
         .click()
@@ -30,6 +40,8 @@ describe("Update bucket form round settings", () => {
 
         get("submit-custom-field-button")
         .click()
+
+        cy.wait(1000);
 
         get("customfield-name-view")
         .contains(`Long Name ${now}`);
@@ -63,6 +75,8 @@ describe("Update bucket form round settings", () => {
 
         get("submit-custom-field-button")
         .click()
+
+        cy.wait(1000);
 
         get("customfield-name-view")
         .contains(`Long Name ${now}`);
