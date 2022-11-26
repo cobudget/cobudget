@@ -1,9 +1,15 @@
 import login from "../../utils/login";
+import { createRound } from "../../utils/round";
 
 describe("Updates bucket review round settings", () => {
     beforeEach(login);
 
-    const roundSlug = `empty`;
+    const roundSlug = `round${Date.now()}`;
+
+    before(() => {
+        login();
+        createRound(roundSlug);
+    });
 
     it("should be updated to true", () => {
         cy.visit(`c/${roundSlug}/settings/bucket-review`);

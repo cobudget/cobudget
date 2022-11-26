@@ -1,10 +1,16 @@
+import { createRound } from "../../utils/round";
 import login from "../../utils/login";
 
 describe("Updates guidelines round settings", () => {
     beforeEach(login);
 
-    const roundSlug = Cypress.env("roundSlug");
+    const roundSlug = `round${Date.now()}`;
     const now = Date.now();
+    
+    before(() => {
+        login();
+        createRound(roundSlug);
+    });
     
     it("adds a guideline", () => {
         cy.visit(`c/${roundSlug}/settings/guidelines`);

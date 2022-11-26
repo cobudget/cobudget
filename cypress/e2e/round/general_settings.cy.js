@@ -1,11 +1,17 @@
+import { createRound } from "../../utils/round";
 import login from "../../utils/login";
 
 describe("Updates general round settings", () => {
     beforeEach(login);
 
-    const roundSlug = "updated-slug-1667852059009";
+    const roundSlug = `round-slug-${Date.now()}`;
     const updatedTitle = `updated-title-${Date.now()}`;
     const updatedSlug = `updated-slug-${Date.now()}`;
+
+    before(() => {
+        login();
+        createRound(roundSlug);
+    });
 
     it("updates round title", () => {
         cy.visit(`c/${roundSlug}/settings`);
