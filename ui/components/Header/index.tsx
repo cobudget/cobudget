@@ -376,12 +376,14 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                   <div data-cy="user-is-logged-in" />
                 </>
               ) : fetchingUser ? (
+                <span data-testid="fetching-user-icon">
                 <LoaderIcon
                   className="animate-spin"
                   fill="white"
                   width={20}
                   height={20}
                 />
+                </span>
               ) : (
                 <>
                   <NavItem

@@ -3,11 +3,9 @@ import login from "./login";
 
 export default function signup () {
     login();
-    cy.visit(Cypress.config("baseUrl"));
-    cy.wait(20000)
-    cy.get("body")
+
+     cy.get("body")
     .then(($body) => {
-        cy.log("Starting wait", $body.find("[data-testid=signup-user-fullname]").length)
         if ($body.find("[data-testid=signup-user-fullname]").length) {
             get("signup-user-fullname")
             .type(`name${Date.now()}`);
@@ -18,5 +16,4 @@ export default function signup () {
             .click();
         }
     });
-    cy.log("Hello waiting");
 }

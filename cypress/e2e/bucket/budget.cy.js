@@ -25,8 +25,10 @@ describe("Bucket budget", () => {
         get("bucket-expense-item-description")
         .type(`Budget ${now}`);
         get("bucket-expense-item-min-amount")
-        .type(minAmount)
-        .type("{enter}");
+        .type(minAmount);
+
+        get("add-budget-submit-buton")
+        .click();
 
         get("bucket-cost-description-view")
         .contains(`Budget ${now}`);
