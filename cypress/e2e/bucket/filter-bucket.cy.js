@@ -4,113 +4,101 @@ import { createBucket } from "../../utils/bucket";
 import { createRound } from "../../utils/round";
 
 describe("Bucket filtering", () => {
-    beforeEach(login);
+  beforeEach(login);
 
-    const now = Date.now();
-    const roundSlug = `round-${now}`;
+  const now = Date.now();
+  const roundSlug = `round-${now}`;
 
-    before(() => {
-        login();
-        createRound(roundSlug);
-    });
+  before(() => {
+    login();
+    createRound(roundSlug);
+  });
 
-    it("filters buckets on based on statuses", () => {
-        // Only 1 cancelled bucket is required
-        let cancelled = false;
-        for (let i = 0; i <= 4; i++) {
-            createBucket(roundSlug, `Bucket ${now}`);
+  it("filters buckets on based on statuses", () => {
+    // Only 1 cancelled bucket is required
+    let cancelled = false;
+    for (let i = 0; i <= 4; i++) {
+      createBucket(roundSlug, `Bucket ${now}`);
 
-            cy.wait(10000);
+      cy.wait(10000);
 
-            get("publish-bucket")
-            .click();
+      get("publish-bucket").click();
 
-            if (i === 0) continue;
+      if (i === 0) continue;
 
-            get("open-for-funding-button")
-            .click();
+      get("open-for-funding-button").click();
 
-            if (i === 1) continue;
+      if (i === 1) continue;
 
-            cy.reload();
+      cy.reload();
 
-            get("bucket-status-view")
-            .contains("Funding Open");
+      get("bucket-status-view").contains("Funding Open");
 
-            if (i === 2) continue;
-            if (!cancelled) {
-                get("bucket-more-edit-options-button")
-                .click();
+      if (i === 2) continue;
+      if (!cancelled) {
+        get("bucket-more-edit-options-button").click();
 
-                get("cancel-bucket-button")
-                .click();
+        get("cancel-bucket-button").click();
 
-                get("confirm-cancel-bucket-button")
-                .click();
-                
-                cancelled = true;
-                continue;
-            }
+        get("confirm-cancel-bucket-button").click();
 
-            get("accept-funding-button")
-            .click();
+        cancelled = true;
+        continue;
+      }
 
-            cy.on("window:confirm", (text) => {
-                expect(text)
-                .to
-                .satisfy((text) => {
-                    const confirmMsgs = [
-                        "Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.",
-                        "Are you sure you would like to mark this bucket as completed? This can't be undone."
-                    ];
-                    return confirmMsgs.indexOf(text) > -1;
-                })
+      get("accept-funding-button").click();
 
-                return true;
-            });
+      cy.on("window:confirm", (text) => {
+        expect(text).to.satisfy((text) => {
+          const confirmMsgs = [
+            "Are you sure you would like to accept and finalize funding for this bucket? This can't be undone.",
+            "Are you sure you would like to mark this bucket as completed? This can't be undone.",
+          ];
+          return confirmMsgs.indexOf(text) > -1;
+        });
 
-            cy.reload();
+        return true;
+      });
 
-            // Since we haven't added any budget for this bucket,
-            // it's status should be funded.
-            get("bucket-status-view")
-            .contains("Funded");
+      cy.reload();
 
-            if (i === 3) continue;
+      // Since we haven't added any budget for this bucket,
+      // it's status should be funded.
+      get("bucket-status-view").contains("Funded");
 
-            get("mark-as-completed-button")
-            .click();
+      if (i === 3) continue;
 
-            cy.reload();
+      get("mark-as-completed-button").click();
 
-            get("bucket-status-view")
-            .contains("Completed");
-        }
+      cy.reload();
 
-        cy.visit(`c/${roundSlug}/?f=HIDE_ALL`);
-        const items = ["PENDING_APPROVAL", "OPEN_FOR_FUNDING", "FUNDED", "COMPLETED", "CANCELED"];
-        for (let i = 0; i < items.length; i++) {
+      get("bucket-status-view").contains("Completed");
+    }
 
-            if (i === 0)
-            get("bucket-status-filter-select")
-            .find("button")
-            .click()
+    cy.visit(`c/${roundSlug}/?f=HIDE_ALL`);
+    const items = [
+      "PENDING_APPROVAL",
+      "OPEN_FOR_FUNDING",
+      "FUNDED",
+      "COMPLETED",
+      "CANCELED",
+    ];
+    for (let i = 0; i < items.length; i++) {
+      if (i === 0) get("bucket-status-filter-select").find("button").click();
 
-            const cb = get(`bucket-filter-options-${items[i]}`)
-            .find("input[type=checkbox]");
+      const cb = get(`bucket-filter-options-${items[i]}`).find(
+        "input[type=checkbox]"
+      );
 
-            cb.check();
-            cb.wait(2000);
+      cb.check();
+      cb.wait(2000);
 
-            get("buckets-view")
-            .find("a")
-            .find("[data-testid=bucket-card]")
-            .should("have.length", 1)
+      get("buckets-view")
+        .find("a")
+        .find("[data-testid=bucket-card]")
+        .should("have.length", 1);
 
-            cb.uncheck();
-
-        }
-
-    });
-
+      cb.uncheck();
+    }
+  });
 });

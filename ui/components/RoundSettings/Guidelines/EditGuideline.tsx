@@ -138,7 +138,12 @@ export default ({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} color={round.color} testid="submit-guideline">
+              <Button
+                type="submit"
+                loading={loading}
+                color={round.color}
+                testid="submit-guideline"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

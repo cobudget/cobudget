@@ -1,11 +1,9 @@
 import get from "../utils/get";
 
 export const createRound = (roundSlug) => {
-    cy.visit("new-round")
+  cy.visit("new-round");
 
-    cy.get("[data-testid=round-title]")
-    .type(roundSlug);
+  cy.get("[data-testid=round-title]").type(roundSlug);
 
-    get("create-round-button")
-    .click({ force: true });
-}
+  get("create-round-button").click({ force: true });
+};

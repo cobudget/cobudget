@@ -66,7 +66,13 @@ const Button = forwardRef(
 
     if (href || nextJsLink)
       return (
-        <a {...(href && { href })} ref={ref} className={classes} style={style} data-testid={testid}>
+        <a
+          {...(href && { href })}
+          ref={ref}
+          className={classes}
+          style={style}
+          data-testid={testid}
+        >
           {children}
         </a>
       );

@@ -71,8 +71,16 @@ const BucketBudget = ({
                   <tbody>
                     {expenseItems.map((budgetItem, i) => (
                       <tr key={i} className="bg-gray-100 even:bg-white">
-                        <td className="px-4 py-2" data-testid="bucket-cost-description-view">{budgetItem.description}</td>
-                        <td className="px-4 py-2" data-testid="bucket-cost-min-amount-view">
+                        <td
+                          className="px-4 py-2"
+                          data-testid="bucket-cost-description-view"
+                        >
+                          {budgetItem.description}
+                        </td>
+                        <td
+                          className="px-4 py-2"
+                          data-testid="bucket-cost-min-amount-view"
+                        >
                           <FormattedNumber
                             value={budgetItem.min / 100}
                             style="currency"

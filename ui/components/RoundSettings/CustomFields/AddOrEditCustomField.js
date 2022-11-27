@@ -150,27 +150,27 @@ export default function AddOrEditCustomField({
             />
             <div className="flex">
               <span data-testid="customfield-type-select">
-              <SelectField
-                name={"customField.type"}
-                defaultValue={customField.type}
-                inputRef={register}
-                className="mr-4"
-                color={round.color}
-                inputProps={{
-                  value: typeInputValue,
-                  onChange: (e) => setTypeInputValue(e.target.value),
-                }}
-              >
-                <option value="TEXT">
-                  {intl.formatMessage({ defaultMessage: "Short Text" })}
-                </option>
-                <option value="MULTILINE_TEXT">
-                  {intl.formatMessage({ defaultMessage: "Long Text" })}
-                </option>
-                <option value="BOOLEAN">
-                  {intl.formatMessage({ defaultMessage: "Yes/No" })}
-                </option>
-              </SelectField>
+                <SelectField
+                  name={"customField.type"}
+                  defaultValue={customField.type}
+                  inputRef={register}
+                  className="mr-4"
+                  color={round.color}
+                  inputProps={{
+                    value: typeInputValue,
+                    onChange: (e) => setTypeInputValue(e.target.value),
+                  }}
+                >
+                  <option value="TEXT">
+                    {intl.formatMessage({ defaultMessage: "Short Text" })}
+                  </option>
+                  <option value="MULTILINE_TEXT">
+                    {intl.formatMessage({ defaultMessage: "Long Text" })}
+                  </option>
+                  <option value="BOOLEAN">
+                    {intl.formatMessage({ defaultMessage: "Yes/No" })}
+                  </option>
+                </SelectField>
               </span>
               {typeInputValue == "TEXT" ||
               typeInputValue == "MULTILINE_TEXT" ? (
@@ -229,7 +229,12 @@ export default function AddOrEditCustomField({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} color={round.color} testid="submit-custom-field-button">
+              <Button
+                type="submit"
+                loading={loading}
+                color={round.color}
+                testid="submit-custom-field-button"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

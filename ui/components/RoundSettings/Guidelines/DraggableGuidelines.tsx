@@ -60,7 +60,9 @@ const SortableItem = SortableElement(
     return (
       <li className="group bg-white p-4 mb-3 rounded shadow list-none">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg" data-testid={"guideline-view"}>{guideline.title}</h2>
+          <h2 className="font-semibold text-lg" data-testid={"guideline-view"}>
+            {guideline.title}
+          </h2>
           <div>
             <Tooltip
               content={intl.formatMessage({ defaultMessage: "Edit" })}
@@ -68,12 +70,12 @@ const SortableItem = SortableElement(
               arrow={false}
             >
               <span data-testid="edit-guideline">
-              <IconButton
-                onClick={() => setEditingGuideline(guideline)}
-                className="mx-1"
-              >
-                <EditIcon className="h-6 w-6" />
-              </IconButton>
+                <IconButton
+                  onClick={() => setEditingGuideline(guideline)}
+                  className="mx-1"
+                >
+                  <EditIcon className="h-6 w-6" />
+                </IconButton>
               </span>
             </Tooltip>
 

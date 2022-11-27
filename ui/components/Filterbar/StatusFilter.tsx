@@ -55,7 +55,10 @@ export default function StatusFilter({
         <Popover.Panel className="absolute z-10 w-56 bg-white p-4 rounded-lg shadow mt-2">
           <ul className="space-y-1">
             {items.map((item) => (
-              <li key={item.type} data-testid={`bucket-filter-options-${item.type}`}>
+              <li
+                key={item.type}
+                data-testid={`bucket-filter-options-${item.type}`}
+              >
                 <label className="flex space-x-1.5 items-center">
                   <input
                     type="checkbox"

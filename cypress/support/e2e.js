@@ -19,9 +19,8 @@ import { createRound } from "../utils/round";
 
 require("cypress-terminal-report/src/installLogsCollector")();
 
-
 describe("INIT", () => {
-    it("registers a user", () => {
-        signup();
-    });
+  it("registers a user", () => {
+    signup();
+  });
 });

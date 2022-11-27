@@ -70,7 +70,10 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
   if (title) {
     return (
       <div className="flex items-start justify-between group relative">
-        <h1 className="mb-4 text-3xl font-medium text-center flex-1" data-testid="bucket-title-view">
+        <h1
+          className="mb-4 text-3xl font-medium text-center flex-1"
+          data-testid="bucket-title-view"
+        >
           {title}
         </h1>
         {canEdit && (

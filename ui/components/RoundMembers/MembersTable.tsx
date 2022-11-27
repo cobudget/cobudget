@@ -149,15 +149,17 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   };
   return (
     <>
-      <span data-testid={`participant-action-button-${member.email.split("@")[0]}`}>
-      <MuiIconButton
-        aria-label={intl.formatMessage({ defaultMessage: "more" })}
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        onClick={handleClick}
+      <span
+        data-testid={`participant-action-button-${member.email.split("@")[0]}`}
       >
-        <MoreVertIcon />
-      </MuiIconButton>
+        <MuiIconButton
+          aria-label={intl.formatMessage({ defaultMessage: "more" })}
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreVertIcon />
+        </MuiIconButton>
       </span>
       <Menu
         id="simple-menu"
@@ -221,37 +223,39 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           disabled={member.balance === 0}
           arrow={false}
         >
-          <span data-testid={`delete-participant-${member.email.split("@")[0]}`}>
-          <MenuItem
-            color="error.main"
-            disabled={member.balance !== 0}
-            onClick={() => {
-              if (
-                confirm(
-                  intl.formatMessage(
-                    {
-                      defaultMessage:
-                        "Are you sure you would like to delete membership from user with email {email}?",
-                    },
-                    { email: member.email }
+          <span
+            data-testid={`delete-participant-${member.email.split("@")[0]}`}
+          >
+            <MenuItem
+              color="error.main"
+              disabled={member.balance !== 0}
+              onClick={() => {
+                if (
+                  confirm(
+                    intl.formatMessage(
+                      {
+                        defaultMessage:
+                          "Are you sure you would like to delete membership from user with email {email}?",
+                      },
+                      { email: member.email }
+                    )
                   )
                 )
-              )
-                deleteMember({ roundId, memberId: member.id }).then(
-                  ({ error }) => {
-                    if (error) {
-                      console.error(error);
-                      toast.error(error.message);
+                  deleteMember({ roundId, memberId: member.id }).then(
+                    ({ error }) => {
+                      if (error) {
+                        console.error(error);
+                        toast.error(error.message);
+                      }
+                      handleClose();
                     }
-                    handleClose();
-                  }
-                );
-            }}
-          >
-            <Box color="error.main">
-              <FormattedMessage defaultMessage="Delete" />
-            </Box>
-          </MenuItem>
+                  );
+              }}
+            >
+              <Box color="error.main">
+                <FormattedMessage defaultMessage="Delete" />
+              </Box>
+            </MenuItem>
           </span>
         </Tooltip>
       </Menu>

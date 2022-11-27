@@ -98,12 +98,12 @@ export default function FinishSignup({ currentUser }) {
             <FormControlLabel
               control={
                 <span data-testid="accept-terms-checkbox">
-                <Checkbox
-                  value={acceptTerms.toString()}
-                  onChange={(e) => {
-                    setAcceptTerms(!acceptTerms);
-                  }}
-                />
+                  <Checkbox
+                    value={acceptTerms.toString()}
+                    onChange={(e) => {
+                      setAcceptTerms(!acceptTerms);
+                    }}
+                  />
                 </span>
               }
               label={

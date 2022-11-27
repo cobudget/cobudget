@@ -275,7 +275,11 @@ const EditBudgetModal = ({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} testid="add-budget-submit-buton">
+              <Button
+                type="submit"
+                loading={loading}
+                testid="add-budget-submit-buton"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

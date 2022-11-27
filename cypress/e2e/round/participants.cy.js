@@ -3,78 +3,62 @@ import { createRound } from "../../utils/round";
 import get from "../../utils/get";
 
 describe("Test participants", () => {
-    beforeEach(login);
+  beforeEach(login);
 
-    const participantEmail = `participants${Date.now()}@test.com`;
-    const username = participantEmail.split("@")[0];
-    const roundSlug = `round-${Date.now()}`;
+  const participantEmail = `participants${Date.now()}@test.com`;
+  const username = participantEmail.split("@")[0];
+  const roundSlug = `round-${Date.now()}`;
 
-    before(() => {
-        login();
-        createRound(roundSlug);
-    });
+  before(() => {
+    login();
+    createRound(roundSlug);
+  });
 
-    it("creates invitation link", () => {
-        cy.visit(`c/${roundSlug}/participants`);
-        get("invite-participant-button")
-        .click();
+  it("creates invitation link", () => {
+    cy.visit(`c/${roundSlug}/participants`);
+    get("invite-participant-button").click();
 
-        get("create-invitation-link")
-        .click();
+    get("create-invitation-link").click();
 
-        cy.wait(500);
-        get("invitation-link")
-        .should("exist");
+    cy.wait(500);
+    get("invitation-link").should("exist");
+  });
 
-    });
+  it("deletes invitation link", () => {
+    cy.visit(`c/${roundSlug}/participants`);
+    get("invite-participant-button").click();
 
-    it("deletes invitation link", () => {
-        cy.visit(`c/${roundSlug}/participants`);
-        get("invite-participant-button")
-        .click();
+    get("delete-invitation-link").click();
 
-        get("delete-invitation-link")
-        .click();
+    cy.wait(500);
+    get("invitation-link").should("not.exist");
+  });
 
-        cy.wait(500);
-        get("invitation-link")
-        .should("not.exist");
+  it("invites participants by email", () => {
+    cy.visit(`c/${roundSlug}/participants`);
 
-    });
+    get("invite-participant-button").click();
 
-    it("invites participants by email", () => {
+    get("invite-participants-emails").type(participantEmail);
 
-        cy.visit(`c/${roundSlug}/participants`);
+    get("invite-participants-email-button").click();
 
-        get("invite-participant-button")
-        .click();
+    cy.wait(1000);
 
-        get("invite-participants-emails")
-        .type(participantEmail);
+    get("invited-participant-email").contains(participantEmail);
+  });
 
-        get("invite-participants-email-button")
-        .click();
+  it("removes a participant", () => {
+    cy.visit(`c/${roundSlug}/participants`);
 
-        cy.wait(1000)
+    get(`participant-action-button-${participantEmail.split("@")[0]}`).click();
 
-        get("invited-participant-email")
-        .contains(participantEmail);
-    });
+    get(`delete-participant-${username}`).click();
 
-    it("removes a participant", () => {
-        cy.visit(`c/${roundSlug}/participants`);
+    cy.wait(500);
 
-        get(`participant-action-button-${participantEmail.split("@")[0]}`)
-        .click();
-
-        get(`delete-participant-${username}`)
-        .click();
-
-        cy.wait(500);
-
-        get("invited-participant-email")
-        .contains(participantEmail)
-        .should('not.exist');
-    });
-
+    get("invited-participant-email")
+      .contains(participantEmail)
+      .should("not.exist");
+  });
 });

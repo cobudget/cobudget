@@ -54,7 +54,10 @@ const TextField = ({
 }) => {
   const LabelComponent = labelComponent;
   return (
-    <div className={`flex flex-col min-w-0 ${className}`} data-testid={testid ? `text-field-container-${testid}` : ""}>
+    <div
+      className={`flex flex-col min-w-0 ${className}`}
+      data-testid={testid ? `text-field-container-${testid}` : ""}
+    >
       {(label || labelComponent) && (
         <label htmlFor={name} className="text-sm font-medium mb-1 block">
           {label ? label : <LabelComponent />}
@@ -142,7 +145,10 @@ const TextField = ({
         </div>
       )}
       {error && helperText && (
-        <span className="text-red px-4 py-1 text-xs font-medium" data-testid={testid ? `helpertext-${testid}` : undefined}>
+        <span
+          className="text-red px-4 py-1 text-xs font-medium"
+          data-testid={testid ? `helpertext-${testid}` : undefined}
+        >
           {helperText}
         </span>
       )}
