@@ -11,9 +11,11 @@ export default function signup () {
             .type(`name${Date.now()}`);
             get("signup-user-username")
             .type(`user${Date.now()}`);
-
+            
             if (Cypress.env('termsURL')) {
-                
+                get("accept-terms-checkbox")
+                .find("input[type=checkbox]")
+                .click();
             }
 
             get("finish-signup-button")

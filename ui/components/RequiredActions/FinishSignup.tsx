@@ -97,12 +97,14 @@ export default function FinishSignup({ currentUser }) {
           <label className="text-sm flex items-center space-x-2">
             <FormControlLabel
               control={
+                <span data-testid="accept-terms-checkbox">
                 <Checkbox
                   value={acceptTerms.toString()}
                   onChange={(e) => {
                     setAcceptTerms(!acceptTerms);
                   }}
                 />
+                </span>
               }
               label={
                 <FormattedMessage
