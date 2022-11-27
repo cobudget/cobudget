@@ -274,6 +274,7 @@ export function statusTypeToQuery(statusType) {
       return {
         approvedAt: null,
         deleted: false,
+        canceledAt: null,
       };
     case "OPEN_FOR_FUNDING":
       return {
