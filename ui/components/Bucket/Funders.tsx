@@ -1,4 +1,3 @@
-import thousandSeparator from "utils/thousandSeparator";
 import Avatar from "../Avatar";
 import { FormattedMessage, FormattedNumber } from "react-intl";
 

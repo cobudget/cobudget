@@ -119,14 +119,15 @@ export default {
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
-    await sendEmail({
-      to: email,
-      subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
-      html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
+    await sendEmail(
+      {
+        to: email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
-        groupCollName
-      )} on ${process.env.PLATFORM_NAME}.
+          groupCollName
+        )} on ${process.env.PLATFORM_NAME}.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
       ${
         htmlPurpose
@@ -137,7 +138,9 @@ export default {
       <br/><br/>
       ${footer}
       `,
-    });
+      },
+      false
+    );
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;

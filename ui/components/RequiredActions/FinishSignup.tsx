@@ -6,7 +6,8 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
-import { Checkbox, FormControlLabel } from "@material-ui/core";
+import { FormControlLabel } from "@material-ui/core";
+import Checkbox from "../Checkbox";
 
 const FINISH_SIGNUP_MUTATION = gql`
   mutation updateProfile(
@@ -80,10 +81,12 @@ export default function FinishSignup({ currentUser }) {
         />
         <FormControlLabel
           control={
-            <Checkbox
-              value={mailUpdates}
-              onChange={(evt) => setMailUpdates(evt.target.checked)}
-            />
+            <div className="-mt-12 pt-0.5">
+              <Checkbox
+                value={mailUpdates}
+                onChange={(evt) => setMailUpdates(evt.target.checked)}
+              />
+            </div>
           }
           label={intl.formatMessage({
             defaultMessage:
@@ -92,32 +95,34 @@ export default function FinishSignup({ currentUser }) {
         />
         {process.env.TERMS_URL && (
           <label className="text-sm flex items-center space-x-2">
-            <input
-              value={acceptTerms.toString()}
-              onChange={(e) => {
-                console.log(e.target.value);
-                setAcceptTerms(!acceptTerms);
-              }}
-              type="checkbox"
-            />{" "}
-            <span>
-              <FormattedMessage
-                defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
-                values={{
-                  bucketName: process.env.PLATFORM_NAME,
-                  a: (msg) => (
-                    <a
-                      className="text-blue underline"
-                      target="_blank"
-                      rel="noreferrer"
-                      href={process.env.TERMS_URL}
-                    >
-                      {msg}
-                    </a>
-                  ),
-                }}
-              />
-            </span>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  value={acceptTerms.toString()}
+                  onChange={(e) => {
+                    setAcceptTerms(!acceptTerms);
+                  }}
+                />
+              }
+              label={
+                <FormattedMessage
+                  defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
+                  values={{
+                    bucketName: process.env.PLATFORM_NAME,
+                    a: (msg) => (
+                      <a
+                        className="text-blue underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={process.env.TERMS_URL}
+                      >
+                        {msg}
+                      </a>
+                    ),
+                  }}
+                />
+              }
+            />
           </label>
         )}
       </div>

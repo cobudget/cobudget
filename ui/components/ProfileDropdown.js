@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Avatar from "./Avatar";
 import Link from "next/link";
-import thousandSeparator from "utils/thousandSeparator";
 import { FormattedMessage } from "react-intl";
 
 const css = {
