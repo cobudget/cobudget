@@ -25,6 +25,7 @@ describe("Updates guidelines round settings", () => {
         .get("[contenteditable=true]")
         .type(`Description ${now}`)
 
+        cy.wait(500);
         cy.get("[data-testid=submit-guideline]")
         .click();
 
@@ -65,6 +66,8 @@ describe("Updates guidelines round settings", () => {
         .focus()
         .clear()
         .type(`Updated description ${now}`);
+
+        cy.wait(500);
 
         cy.get("[data-testid=submit-guideline]")
         .click();
