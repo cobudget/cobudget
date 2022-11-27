@@ -124,6 +124,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
             <Button
               color="red"
               loading={fetching}
+              testid="confirm-cancel-bucket-button"
               onClick={() =>
                 cancelFunding({ bucketId }).then(({ error }) => {
                   if (error) alert(error.message);
@@ -322,7 +323,9 @@ const BucketSidebar = ({
                   arrow={false}
                 >
                   <IconButton onClick={() => setActionsDropdownOpen(true)}>
-                    <DotsHorizontalIcon />
+                    <span data-testid="bucket-more-edit-options-button">
+                      <DotsHorizontalIcon />
+                    </span>
                   </IconButton>
                 </Tooltip>
               </div>
@@ -357,6 +360,7 @@ const BucketSidebar = ({
                     <button
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
+                      data-testid="cancel-bucket-button"
                     >
                       <FormattedMessage defaultMessage="Cancel" />{" "}
                       {process.env.BUCKET_NAME_SINGULAR}

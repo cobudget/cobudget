@@ -15,8 +15,9 @@ describe("Bucket filtering", () => {
     });
 
     it("filters buckets on based on statuses", () => {
-
-        for (let i = 0; i <= 3; i++) {
+        // Only 1 cancelled bucket is required
+        let cancelled = false;
+        for (let i = 0; i <= 4; i++) {
             createBucket(roundSlug, `Bucket ${now}`);
 
             cy.wait(10000);
@@ -35,6 +36,21 @@ describe("Bucket filtering", () => {
 
             get("bucket-status-view")
             .contains("Funding Open");
+
+            if (i === 2) continue;
+            if (!cancelled) {
+                get("bucket-more-edit-options-button")
+                .click();
+
+                get("cancel-bucket-button")
+                .click();
+
+                get("confirm-cancel-bucket-button")
+                .click();
+                
+                cancelled = true;
+                continue;
+            }
 
             get("accept-funding-button")
             .click();
@@ -60,7 +76,7 @@ describe("Bucket filtering", () => {
             get("bucket-status-view")
             .contains("Funded");
 
-            if (i === 2) continue;
+            if (i === 3) continue;
 
             get("mark-as-completed-button")
             .click();
@@ -72,7 +88,7 @@ describe("Bucket filtering", () => {
         }
 
         cy.visit(`c/${roundSlug}/?f=HIDE_ALL`);
-        const items = ["PENDING_APPROVAL", "OPEN_FOR_FUNDING", "FUNDED", "COMPLETED"];
+        const items = ["CANCELED", "PENDING_APPROVAL", "OPEN_FOR_FUNDING", "FUNDED", "COMPLETED"];
         for (let i = 0; i < items.length; i++) {
 
             if (i === 0)
