@@ -12,6 +12,10 @@ export default function signup () {
             get("signup-user-username")
             .type(`user${Date.now()}`);
 
+            if (Cypress.env('termsURL')) {
+                
+            }
+
             get("finish-signup-button")
             .click();
         }

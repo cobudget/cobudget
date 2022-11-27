@@ -88,7 +88,7 @@ describe("Bucket filtering", () => {
         }
 
         cy.visit(`c/${roundSlug}/?f=HIDE_ALL`);
-        const items = ["CANCELED", "PENDING_APPROVAL", "OPEN_FOR_FUNDING", "FUNDED", "COMPLETED"];
+        const items = ["PENDING_APPROVAL", "OPEN_FOR_FUNDING", "FUNDED", "COMPLETED", "CANCELED"];
         for (let i = 0; i < items.length; i++) {
 
             if (i === 0)
