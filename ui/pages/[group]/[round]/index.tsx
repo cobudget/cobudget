@@ -578,8 +578,10 @@ const RoundPage = ({ currentUser }) => {
                         <tr>
                           <td className="pr-3">In your account</td>
                           <td className="font-bold">
-                            <FormattedCurrency 
-                              value={currentUser.currentCollMember.balance / 100}
+                            <FormattedCurrency
+                              value={
+                                currentUser.currentCollMember.balance / 100
+                              }
                               currency={round.currency}
                             />
                           </td>
@@ -588,7 +590,7 @@ const RoundPage = ({ currentUser }) => {
                     <tr>
                       <td className="pr-3">In this round</td>
                       <td className="font-bold">
-                        <FormattedCurrency 
+                        <FormattedCurrency
                           value={round.totalInMembersBalances / 100}
                           currency={round.currency}
                         />
