@@ -10,6 +10,7 @@ const SEARCH_MEMBERS_QUERY = gql`
     members(roundId: $roundId, isApproved: $isApproved) {
       id
       isApproved
+      hasJoined
       user {
         id
         username
@@ -103,7 +104,7 @@ const SearchMembersResult = ({
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
 
   // remove already added co-creators
-  let result = members.filter((member) => !cocreatorIds.includes(member.id));
+  let result = members.filter((member) => !cocreatorIds.includes(member.id) && member.hasJoined);
 
   if (searchInput) {
     result = result.filter((member) =>

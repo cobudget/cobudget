@@ -1,11 +1,11 @@
 interface BillBreakdown {
   title: string;
-  amount: string;
+  amount: string | React.ReactChild;
 }
 
 interface BillParts {
   title: string;
-  total: string;
+  total: string | React.ReactChild;
   breakdown: Array<BillBreakdown>;
 }
 
@@ -16,7 +16,7 @@ function BillBreakdown({
 }: {
   parts: Array<BillParts>;
   totalTitle: string;
-  totalAmount: string;
+  totalAmount: string | React.ReactChild;
 }) {
   return (
     <div className="shadow overflow-hidden">

@@ -2,7 +2,11 @@ import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
 import validateUsername from "utils/validateUsername";
 
-export const updateProfile = async (_, { name, username }, { user }) => {
+export const updateProfile = async (
+  _,
+  { name, username, mailUpdates },
+  { user }
+) => {
   if (!user) throw new Error("You need to be logged in..");
 
   if (!validateUsername(username)) throw new Error("Username is not valid");
@@ -19,6 +23,7 @@ export const updateProfile = async (_, { name, username }, { user }) => {
     data: {
       name,
       username,
+      mailUpdates,
     },
   });
 };
