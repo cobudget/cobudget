@@ -15,6 +15,7 @@ import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
+import Head from "next/head";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
@@ -142,7 +143,20 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ currentUser, currentGroup }) => {
+function Header({ head }) {
+  return (
+    <Head>
+      {/*meta tags for preview*/}
+      <meta property="og:title" content={head?.title} />
+      <meta property="og:image" content={head?.image} />
+      <meta property="og:description" content={head?.description} />
+      {/*Twitter card type*/}
+      <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+  );
+}
+
+const BucketIndex = ({ head, currentUser, currentGroup }) => {
   const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
@@ -166,18 +180,24 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
 
   if ((!bucket && fetching) || !router.isReady) {
     return (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
+      <>
+        <Header head={head} />
+        <div className="flex-grow flex justify-center items-center h-64">
+          <HappySpinner />
+        </div>
+      </>
     );
   }
 
   if (!bucket && !fetching)
     return (
-      <div className="text-center mt-7">
-        This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
-        don&apos;t have access to it
-      </div>
+      <>
+        <Header head={head} />
+        <div className="text-center mt-7">
+          This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or
+          you don&apos;t have access to it
+        </div>
+      </>
     );
 
   if (error) {
@@ -186,6 +206,7 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
 
   return (
     <>
+      <Header head={head} />
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
       <EditImagesModal
         open={editImagesModalOpen}
@@ -328,5 +349,26 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
 //     fallback: true, // false or 'blocking'
 //   };
 // }
+
+export async function getServerSideProps(ctx) {
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: ctx.params.bucket },
+  });
+  const images = await prisma.bucket
+    .findUnique({ where: { id: ctx.params.bucket } })
+    .Images();
+  if (!bucket) {
+    return { props: { head: null } };
+  }
+  return {
+    props: {
+      head: {
+        title: bucket.title,
+        description: bucket.description || bucket.summary,
+        image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO,
+      },
+    },
+  };
+}
 
 export default BucketIndex;
