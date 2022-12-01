@@ -7,15 +7,15 @@ const NavItem = ({
   className,
   children,
   primary,
-  roundColor,
+  roundColor = "anthracit",
   external,
 }: any) => {
   const active = currentPath === href;
 
-  const regularClasses = `ring-transparent text-gray-800 hover:bg-gray-300`;
+  const regularClasses = `ring-transparent text-gray-800 hover:text-gray-800 hover:bg-gray-300`;
   const primaryClasses = `ring-anthracit hover:bg-anthracit-dark hover:text-gray-200`;
-  const regularRoundClasses = `ring-transparent text-white hover:bg-${roundColor}-dark`;
-  const primaryRoundClasses = `ring-white text-white hover:bg-white hover:text-${roundColor}`;
+  const regularRoundClasses = `ring-transparent text-white hover:text-white hover:bg-${roundColor}-dark`;
+  const primaryRoundClasses = `ring-white text-${roundColor} hover:text-white bg-white hover:bg-${roundColor}`;
   const roundActiveClasses = `ring-transparent bg-${roundColor}-dark text-white`;
 
   const colorsClasses = roundColor
@@ -39,7 +39,13 @@ const NavItem = ({
   }
   if (external) {
     return (
-      <a href={href} className={classes}>
+      <a
+        href={href}
+        className={classes}
+        target="_blank"
+        rel="noreferrer"
+        onClick={onClick}
+      >
         {children}
       </a>
     );
