@@ -16,6 +16,7 @@ model User {
   name             String?
   verifiedEmail    Boolean        @default(false)
   emailVerified    DateTime?
+  mailUpdates      Boolean        @default(false)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   image            String?

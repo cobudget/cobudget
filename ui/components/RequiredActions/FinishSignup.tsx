@@ -6,13 +6,20 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
+import { FormControlLabel } from "@material-ui/core";
+import Checkbox from "../Checkbox";
 
 const FINISH_SIGNUP_MUTATION = gql`
-  mutation updateProfile($username: String, $name: String) {
-    updateProfile(username: $username, name: $name) {
+  mutation updateProfile(
+    $username: String
+    $name: String
+    $mailUpdates: Boolean
+  ) {
+    updateProfile(username: $username, name: $name, mailUpdates: $mailUpdates) {
       id
       username
       name
+      mailUpdates
     }
     acceptTerms {
       id
@@ -25,6 +32,7 @@ export default function FinishSignup({ currentUser }) {
   const [, updateUser] = useMutation(FINISH_SIGNUP_MUTATION);
   const [username, setUsername] = useState(currentUser.username ?? "");
   const [name, setName] = useState(currentUser.name ?? "");
+  const [mailUpdates, setMailUpdates] = useState(false);
   const intl = useIntl();
 
   const [acceptTerms, setAcceptTerms] = useState(
@@ -69,34 +77,50 @@ export default function FinishSignup({ currentUser }) {
             onChange: (e) => setUsername(e.target.value),
           }}
         />
+        <FormControlLabel
+          control={
+            <div className="-mt-12 pt-0.5">
+              <Checkbox
+                value={mailUpdates}
+                onChange={(evt) => setMailUpdates(evt.target.checked)}
+              />
+            </div>
+          }
+          label={intl.formatMessage({
+            defaultMessage:
+              "I would like occasional emails about product updates and Cobudget-related events, trainings, and support resources.",
+          })}
+        />
         {process.env.TERMS_URL && (
           <label className="text-sm flex items-center space-x-2">
-            <input
-              value={acceptTerms.toString()}
-              onChange={(e) => {
-                console.log(e.target.value);
-                setAcceptTerms(!acceptTerms);
-              }}
-              type="checkbox"
-            />{" "}
-            <span>
-              <FormattedMessage
-                defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
-                values={{
-                  bucketName: process.env.PLATFORM_NAME,
-                  a: (msg) => (
-                    <a
-                      className="text-blue underline"
-                      target="_blank"
-                      rel="noreferrer"
-                      href={process.env.TERMS_URL}
-                    >
-                      {msg}
-                    </a>
-                  ),
-                }}
-              />
-            </span>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  value={acceptTerms.toString()}
+                  onChange={(e) => {
+                    setAcceptTerms(!acceptTerms);
+                  }}
+                />
+              }
+              label={
+                <FormattedMessage
+                  defaultMessage="I accept the {bucketName} <a>Terms and Conditions</a>"
+                  values={{
+                    bucketName: process.env.PLATFORM_NAME,
+                    a: (msg) => (
+                      <a
+                        className="text-blue underline"
+                        target="_blank"
+                        rel="noreferrer"
+                        href={process.env.TERMS_URL}
+                      >
+                        {msg}
+                      </a>
+                    ),
+                  }}
+                />
+              }
+            />
           </label>
         )}
       </div>
@@ -108,26 +132,28 @@ export default function FinishSignup({ currentUser }) {
           type="submit"
           disabled={!username || !name || !acceptTerms}
           onClick={() =>
-            updateUser({ username, name }).then(({ data, error }) => {
-              if (error) {
-                if (error.message.includes("Unique")) {
-                  toast.error(
-                    intl.formatMessage({
-                      defaultMessage: "Username already taken",
-                    })
-                  );
+            updateUser({ username, name, mailUpdates }).then(
+              ({ data, error }) => {
+                if (error) {
+                  if (error.message.includes("Unique")) {
+                    toast.error(
+                      intl.formatMessage({
+                        defaultMessage: "Username already taken",
+                      })
+                    );
+                  } else {
+                    toast.error(error.message);
+                  }
                 } else {
-                  toast.error(error.message);
+                  toast.success(
+                    intl.formatMessage(
+                      { defaultMessage: `Welcome to {bucketName}!` },
+                      { bucketName: process.env.PLATFORM_NAME }
+                    )
+                  );
                 }
-              } else {
-                toast.success(
-                  intl.formatMessage(
-                    { defaultMessage: `Welcome to {bucketName}!` },
-                    { bucketName: process.env.PLATFORM_NAME }
-                  )
-                );
               }
-            })
+            )
           }
         >
           <FormattedMessage defaultMessage="Finish sign up" />

@@ -119,14 +119,15 @@ export default {
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
-    await sendEmail({
-      to: email,
-      subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
-      html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
+    await sendEmail(
+      {
+        to: email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
-        groupCollName
-      )} on ${process.env.PLATFORM_NAME}.
+          groupCollName
+        )} on ${process.env.PLATFORM_NAME}.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
       ${
         htmlPurpose
@@ -137,7 +138,9 @@ export default {
       <br/><br/>
       ${footer}
       `,
-    });
+      },
+      false
+    );
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;
@@ -147,21 +150,25 @@ export default {
     });
 
     if (hasAccountAlready) {
-      await sendEmail({
-        to: destination,
-        subject: `Your ${process.env.PLATFORM_NAME} login link`,
-        html: `<a href="${link}">Click here to login</a>
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Your ${process.env.PLATFORM_NAME} login link`,
+          html: `<a href="${link}">Click here to login</a>
         <br/><br/>
         Verification code: ${code}
         <br/><br/>
         ${footer}
         `,
-      });
+        },
+        false
+      );
     } else {
-      await sendEmail({
-        to: destination,
-        subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
-        html: `Welcome!
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
+          html: `Welcome!
         <br/><br/>
         Your ${process.env.PLATFORM_NAME} account has been created! We're excited to welcome you to the community.
         <br/><br/>
@@ -169,7 +176,9 @@ export default {
         <br/><br/>
         ${footer}
       `,
-      });
+        },
+        false
+      );
     }
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {

@@ -12,6 +12,9 @@ import { IntlProvider } from "react-intl";
 import lang, { supportedLangCodes } from "../lang";
 import isRTL from "../utils/isRTL";
 import Cookies from "js-cookie";
+import { ErrorBoundary } from "react-error-boundary";
+import reportError from "utils/reportError";
+import Fallback from "components/Fallback";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -230,26 +233,28 @@ const MyApp = ({ Component, pageProps, router }) => {
   return (
     <IntlProvider locale={locale} messages={lang[locale]}>
       <RequiredActionsModal currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        fetchingUser={fetchingUser}
-        group={group}
-        round={round}
-        bucket={bucket}
-        dir={isRTL(locale) ? "rtl" : "ltr"}
-        locale={locale}
-        changeLocale={changeLocale}
-        ss={ss}
-      >
-        <Component
-          {...pageProps}
+      <ErrorBoundary FallbackComponent={Fallback} onError={reportError}>
+        <Layout
           currentUser={currentUser}
-          router={router}
+          fetchingUser={fetchingUser}
+          group={group}
           round={round}
-          currentGroup={group}
-        />
-        <Toaster />
-      </Layout>
+          bucket={bucket}
+          dir={isRTL(locale) ? "rtl" : "ltr"}
+          locale={locale}
+          changeLocale={changeLocale}
+          ss={ss}
+        >
+          <Component
+            {...pageProps}
+            currentUser={currentUser}
+            router={router}
+            round={round}
+            currentGroup={group}
+          />
+          <Toaster />
+        </Layout>
+      </ErrorBoundary>
     </IntlProvider>
   );
 };
