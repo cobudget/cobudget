@@ -52,7 +52,7 @@ export const bucketsPage = async (
       deleted: { not: true },
       OR: statusFilter,
       ...(showCanceled && { canceledAt: null }),
-      ...(textSearchTerm && { title: { search: textSearchTerm } }),
+      ...(textSearchTerm && { title: { contains: textSearchTerm, mode: "insensitive"} }),
       ...(tagValue && {
         tags: { some: { value: tagValue } },
       }),
