@@ -10,6 +10,7 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import * as yup from "yup";
+import { useEffect, useState } from "react";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
@@ -55,6 +56,7 @@ const EditBudgetModal = ({
   open,
 }) => {
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_BUDGET_MUTATION);
+  const [maxAmountOpenInputs, setMaxAmountOpenInputs] = useState({});
   const intl = useIntl();
 
   const { handleSubmit, register, control } = useForm({
@@ -86,10 +88,10 @@ const EditBudgetModal = ({
             editBucket({
               bucketId: bucket.id,
               budgetItems: [
-                ...(variables.budgetItems?.map((item) => ({
+                ...(variables.budgetItems?.map((item, i) => ({
                   ...item,
                   min: Math.round(item.min * 100),
-                  ...(item.max && { max: Math.round(item.max * 100) }),
+                  ...((item.max && maxAmountOpenInputs[i]) && { max: Math.round(item.max * 100) }),
                 })) ?? []),
               ],
             })
@@ -107,7 +109,7 @@ const EditBudgetModal = ({
             const index = i + incomeItems.length;
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
+                <div className="mr-2 my-2 sm:my-0 flex-1">
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
@@ -124,7 +126,7 @@ const EditBudgetModal = ({
                     className="hidden"
                   />
                 </div>
-                <div className="mr-2 my-2 sm:my-0">
+                <div className="mr-2 my-2 sm:my-0 flex-1">
                   <TextField
                     placeholder={
                       allowStretchGoals
@@ -142,21 +144,47 @@ const EditBudgetModal = ({
                 </div>
 
                 {allowStretchGoals && (
-                  <div className="mr-2 my-2 sm:my-0">
-                    <TextField
-                      placeholder={intl.formatMessage({
-                        defaultMessage: "Max amount",
-                      })}
-                      name={`budgetItems[${index}].max`}
-                      defaultValue={
-                        typeof max === "undefined" || max === null
-                          ? null
-                          : String(max / 100)
-                      }
-                      inputProps={{ type: "number", min: 0 }}
-                      inputRef={register()}
-                      endAdornment={currency}
-                    />
+                  <div className="mr-2 my-2 sm:my-0 flex-1 relative">
+                    {
+                      maxAmountOpenInputs[i] ?
+                      <>
+                      <TextField
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Max amount",
+                        })}
+                        name={`budgetItems[${index}].max`}
+                        defaultValue={
+                          typeof max === "undefined" || max === null
+                            ? null
+                            : String(max / 100)
+                        }
+                        inputProps={{ type: "number", min: 0 }}
+                        inputRef={register()}
+                        endAdornment={currency}
+                      />
+                      <span 
+                        className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                        onClick={() => {
+                          setMaxAmountOpenInputs({
+                            ...maxAmountOpenInputs,
+                            [i]: false,
+                          });
+                        }}
+                      >
+                        ✖
+                      </span>
+                      </> :
+                      <span
+                        onClick={() => {
+                          setMaxAmountOpenInputs({
+                            ...maxAmountOpenInputs,
+                            [i]: true,
+                          });
+                        }}
+                      >
+                        + Add a range
+                      </span>
+                    }
                   </div>
                 )}
                 <div className="my-2">
