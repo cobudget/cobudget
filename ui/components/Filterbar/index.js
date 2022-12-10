@@ -4,6 +4,7 @@ import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 import StatusFilter from "./StatusFilter";
 import { useIntl } from "react-intl";
+import { debounce } from "lodash";
 
 const Filterbar = ({
   textSearchTerm,
@@ -21,13 +22,16 @@ const Filterbar = ({
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
 
+  const updateSearchQuery = useCallback(debounce((searchString) => {
+      router.query = {
+        ...router.query,
+        s: searchString
+      }
+      router.push(router, undefined, { shallow: true });
+    }, 300), [])
+
   const handleInputChange = useCallback((searchString) => {
-    router.query = {
-      ...router.query,
-      s: searchString
-    }
-    router.push(router, undefined, { shallow: true });
-    
+    updateSearchQuery(searchString);
     setInput(searchString);
   }, []);
 
