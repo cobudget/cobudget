@@ -73,6 +73,15 @@ const EditBudgetModal = ({
   const incomeItems = fields.filter((field) => field.type === "INCOME");
   const expenseItems = fields.filter((field) => field.type === "EXPENSE");
 
+  useEffect(() => {
+    const opened = {};
+    expenseItems.forEach((item, i) => {
+      if (item.max)
+       opened[i] = true;
+    });
+    setMaxAmountOpenInputs(opened);
+  }, [expenseItems]);
+
   return (
     <Modal
       open={open}
