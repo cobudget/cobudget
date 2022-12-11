@@ -174,16 +174,17 @@ const EditBudgetModal = ({
                         ✖
                       </span>
                       </> :
-                      <span
+                      <p
                         onClick={() => {
                           setMaxAmountOpenInputs({
                             ...maxAmountOpenInputs,
                             [i]: true,
                           });
                         }}
+                        className="underline cursor-pointer mt-4 text-sm text-color-gray"
                       >
                         + Add a range
-                      </span>
+                      </p>
                     }
                   </div>
                 )}
