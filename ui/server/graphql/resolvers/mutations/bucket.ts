@@ -257,23 +257,21 @@ export const deleteBucket = combineResolvers(
 export const addCocreator = combineResolvers(
   isBucketCocreatorOrCollAdminOrMod,
   async (parent, { bucketId, memberId }) => {
-
     const roundMember = await prisma.roundMember.findFirst({
       where: {
-        id: memberId
-      }
+        id: memberId,
+      },
     });
     if (roundMember?.hasJoined) {
-    return prisma.bucket.update({
-      where: { id: bucketId },
-      data: {
-        cocreators: {
-          connect: { id: memberId },
+      return prisma.bucket.update({
+        where: { id: bucketId },
+        data: {
+          cocreators: {
+            connect: { id: memberId },
+          },
         },
-      },
-    })
-    }
-    else {
+      });
+    } else {
       throw new Error("The member have not joined the round");
     }
   }

@@ -76,8 +76,7 @@ const EditBudgetModal = ({
   useEffect(() => {
     const opened = {};
     expenseItems.forEach((item, i) => {
-      if (item.max)
-       opened[i] = true;
+      if (item.max) opened[i] = true;
     });
     setMaxAmountOpenInputs(opened);
   }, [expenseItems]);
@@ -100,7 +99,10 @@ const EditBudgetModal = ({
                 ...(variables.budgetItems?.map((item, i) => ({
                   ...item,
                   min: Math.round(item.min * 100),
-                  ...((item.max && maxAmountOpenInputs[i]) && { max: Math.round(item.max * 100) }),
+                  ...(item.max &&
+                    maxAmountOpenInputs[i] && {
+                      max: Math.round(item.max * 100),
+                    }),
                 })) ?? []),
               ],
             })
@@ -154,35 +156,35 @@ const EditBudgetModal = ({
 
                 {allowStretchGoals && (
                   <div className="mr-2 my-2 sm:my-0 flex-1 relative">
-                    {
-                      maxAmountOpenInputs[i] ?
+                    {maxAmountOpenInputs[i] ? (
                       <>
-                      <TextField
-                        placeholder={intl.formatMessage({
-                          defaultMessage: "Max amount",
-                        })}
-                        name={`budgetItems[${index}].max`}
-                        defaultValue={
-                          typeof max === "undefined" || max === null
-                            ? null
-                            : String(max / 100)
-                        }
-                        inputProps={{ type: "number", min: 0 }}
-                        inputRef={register()}
-                        endAdornment={currency}
-                      />
-                      <span 
-                        className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
-                        onClick={() => {
-                          setMaxAmountOpenInputs({
-                            ...maxAmountOpenInputs,
-                            [i]: false,
-                          });
-                        }}
-                      >
-                        ✖
-                      </span>
-                      </> :
+                        <TextField
+                          placeholder={intl.formatMessage({
+                            defaultMessage: "Max amount",
+                          })}
+                          name={`budgetItems[${index}].max`}
+                          defaultValue={
+                            typeof max === "undefined" || max === null
+                              ? null
+                              : String(max / 100)
+                          }
+                          inputProps={{ type: "number", min: 0 }}
+                          inputRef={register()}
+                          endAdornment={currency}
+                        />
+                        <span
+                          className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                          onClick={() => {
+                            setMaxAmountOpenInputs({
+                              ...maxAmountOpenInputs,
+                              [i]: false,
+                            });
+                          }}
+                        >
+                          ✖
+                        </span>
+                      </>
+                    ) : (
                       <p
                         onClick={() => {
                           setMaxAmountOpenInputs({
@@ -194,7 +196,7 @@ const EditBudgetModal = ({
                       >
                         + Add a range
                       </p>
-                    }
+                    )}
                   </div>
                 )}
                 <div className="my-2">
