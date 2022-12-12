@@ -28,6 +28,7 @@ module.exports = (phase) => {
     REACT_APP_GRAPHQL_ENDPOINT: process.env.REACT_APP_GRAPHQL_ENDPOINT,
     REACT_APP_GRAPHQL_SUBSCRIPTION: process.env.REACT_APP_GRAPHQL_SUBSCRIPTION,
     HELPSCOUT_KEY: process.env.HELPSCOUT_KEY,
+    LANDING_PAGE_URL: process.env.LANDING_PAGE_URL,
   };
   return withBundleAnalyzer({
     env,

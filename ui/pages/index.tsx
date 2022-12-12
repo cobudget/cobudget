@@ -5,7 +5,7 @@ import parseHtml, { domToReact } from "html-react-parser";
 import get from "lodash/get";
 
 import GroupPage from "../components/Group";
-import { getWebflowProps } from "utils/webflow";
+import { getWebflowProps, webflowCss } from "utils/webflow";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -65,6 +65,7 @@ const IndexPage = ({ currentUser, landingPage }) => {
       <>
         <Head>{parseHtml(landingPage.headContent, parseOptions)}</Head>
         {parseHtml(landingPage.bodyContent, parseOptions)}
+        <style jsx>{webflowCss}</style>
       </>
     );
   }
