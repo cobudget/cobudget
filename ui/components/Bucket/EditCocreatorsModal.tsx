@@ -104,7 +104,9 @@ const SearchMembersResult = ({
   const cocreatorIds = cocreators.map((cocreator) => cocreator.id);
 
   // remove already added co-creators
-  let result = members.filter((member) => !cocreatorIds.includes(member.id) && member.hasJoined);
+  let result = members.filter(
+    (member) => !cocreatorIds.includes(member.id) && member.hasJoined
+  );
 
   if (searchInput) {
     result = result.filter((member) =>
