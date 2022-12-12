@@ -1,5 +1,5 @@
 import { defineConfig } from "cypress";
-require("dotenv").config({ path: "./ui/.env.local" });
+require("dotenv").config({ path: "./ui/.env.test" });
 
 export default defineConfig({
   chromeWebSecurity: false,
@@ -10,7 +10,7 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       return require("./cypress/plugins/index.js")(on, config);
     },
-    baseUrl: "http://localhost:3000/",
+    baseUrl: "http://localhost:3001/",
     env: {
       termsURL: process.env.TERMS_URL,
       email: `user${Date.now()}@test.com`, // This email will be used to register/login a user for testing
