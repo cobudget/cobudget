@@ -19,6 +19,7 @@ import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import Table from "../../../components/Table";
 import { FormattedNumber, FormattedMessage } from "react-intl";
+import FormattedCurrency from "components/FormattedCurrency";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -577,16 +578,22 @@ const RoundPage = ({ currentUser }) => {
                         <tr>
                           <td className="pr-3">In your account</td>
                           <td className="font-bold">
-                            {currentUser.currentCollMember.balance / 100}
-                            {getCurrencySymbol(round.currency)}
+                            <FormattedCurrency
+                              value={
+                                currentUser.currentCollMember.balance / 100
+                              }
+                              currency={round.currency}
+                            />
                           </td>
                         </tr>
                       )}
                     <tr>
                       <td className="pr-3">In this round</td>
                       <td className="font-bold">
-                        {round.totalInMembersBalances / 100}
-                        {getCurrencySymbol(round.currency)}
+                        <FormattedCurrency
+                          value={round.totalInMembersBalances / 100}
+                          currency={round.currency}
+                        />
                       </td>
                     </tr>
                   </tbody>
