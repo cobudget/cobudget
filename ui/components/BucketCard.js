@@ -67,7 +67,7 @@ const BucketCard = ({ bucket, round }) => {
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
-                  {Math.round(
+                  {Math.floor(
                     ((bucket.totalContributions + bucket.income) /
                       bucket.minGoal) *
                       100

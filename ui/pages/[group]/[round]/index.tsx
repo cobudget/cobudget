@@ -240,7 +240,7 @@ const Page = ({
       {
         Header: "Progress",
         accessor: "progress",
-        Cell: ({ cell }) => Math.round(cell.value) + "%",
+        Cell: ({ cell }) => Math.floor(cell.value) + "%",
       },
       {
         Header: "Funders",
