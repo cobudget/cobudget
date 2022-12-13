@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useMemo } from "react";
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -10,6 +10,10 @@ import SubMenu from "../SubMenu";
 import PageHero from "../PageHero";
 import EditableField from "../EditableField";
 import { FormattedMessage, useIntl } from "react-intl";
+import dayjs from "dayjs";
+import advancedDayjsFormatting from "dayjs/plugin/advancedFormat";
+
+dayjs.extend(advancedDayjsFormatting);
 
 export const GROUP_PAGE_QUERY = gql`
   query GroupPage($groupSlug: String!) {
@@ -23,6 +27,10 @@ export const GROUP_PAGE_QUERY = gql`
         id
         slug
       }
+      bucketStatusCount {
+        OPEN_FOR_FUNDING
+      }
+      updatedAt
     }
     group(groupSlug: $groupSlug) {
       id
@@ -68,6 +76,13 @@ const GroupIndex = ({ currentUser }) => {
     query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
+
+  const [activeRounds, archivedRounds] = useMemo(() => {
+    return [
+      rounds.filter((r) => !r.archived),
+      rounds.filter((r) => r.archived),
+    ];
+  }, [rounds]);
 
   if (!fetching && !group && router.query.group) {
     return (
@@ -155,6 +170,33 @@ const GroupIndex = ({ currentUser }) => {
             <TodoList currentGroup={group} />
           </div>
         )}
+      </div>
+
+      <div className="page">
+        {activeRounds.map((round, index) => (
+          <div
+            className={`p-8 border-2 border-gray-400 grid grid-cols-2 ${
+              index === 0 ? "" : " border-t-0"
+            }`}
+            key={round.id}
+          >
+            <div className="flex content-center">
+              <span className="underline-offset-4 underline font-medium text-blue-700">
+                <Link
+                  href={`/${round.group?.slug ?? "c"}/${round.slug}`}
+                  key={round.slug}
+                  passHref
+                >
+                  {round.title}
+                </Link>
+              </span>
+            </div>
+            <div className="flex flex-col content-end justify-end">
+              <span className="self-end font-medium text-gray-800">{round.bucketStatusCount.OPEN_FOR_FUNDING} { round.bucketStatusCount.OPEN_FOR_FUNDING === 1 ? process.env.BUCKET_NAME_SINGULAR : process.env.BUCKET_NAME_PLURAL }</span>
+              <span className="self-end text-sm text-gray-700">Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </>
   );
