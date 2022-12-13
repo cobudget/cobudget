@@ -12,6 +12,7 @@ import EditableField from "../EditableField";
 import { FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import advancedDayjsFormatting from "dayjs/plugin/advancedFormat";
+import FormattedCurrency from "components/FormattedCurrency";
 
 dayjs.extend(advancedDayjsFormatting);
 
@@ -23,6 +24,7 @@ export const GROUP_PAGE_QUERY = gql`
       title
       archived
       color
+      currency
       group {
         id
         slug
@@ -75,11 +77,27 @@ const GroupIndex = ({ currentUser }) => {
   }, [router]);
 
   const [
-    { data: { rounds, group } = { rounds: [], group: null }, error, fetching },
+    {
+      data: { rounds, group, balances } = {
+        rounds: [],
+        group: null,
+        balances: [],
+      },
+      error,
+      fetching,
+    },
   ] = useQuery({
     query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
+
+  const balancesMap = useMemo(() => {
+    const map = {};
+    balances.forEach((b) => {
+      map[b.roundId] = b.balance;
+    });
+    return map;
+  }, [balances]);
 
   const [activeRounds, archivedRounds] = useMemo(() => {
     return [
@@ -194,10 +212,27 @@ const GroupIndex = ({ currentUser }) => {
                   {round.title}
                 </Link>
               </span>
+              {balancesMap[round.id] ? (
+                <span>
+                  <span className="ml-2 text-gray-800 bg-yellow-200">
+                    <FormattedCurrency
+                      value={balancesMap[round.id]}
+                      currency={round.currency}
+                    />
+                  </span>
+                </span>
+              ) : null}
             </div>
             <div className="flex flex-col content-end justify-end">
-              <span className="self-end font-medium text-gray-800">{round.bucketStatusCount.OPEN_FOR_FUNDING} { round.bucketStatusCount.OPEN_FOR_FUNDING === 1 ? process.env.BUCKET_NAME_SINGULAR : process.env.BUCKET_NAME_PLURAL }</span>
-              <span className="self-end text-sm text-gray-700">Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}</span>
+              <span className="self-end font-medium text-gray-800">
+                {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
+                {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
+                  ? process.env.BUCKET_NAME_SINGULAR
+                  : process.env.BUCKET_NAME_PLURAL}
+              </span>
+              <span className="self-end text-sm text-gray-700">
+                Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
+              </span>
             </div>
           </div>
         ))}

@@ -86,44 +86,43 @@ export const categories = async (parent, { groupId }) => {
 
 export const balances = async (parent, { groupSlug }, { user }) => {
   try {
-    const group = await prisma.group.findFirst({ where: {
-      slug: groupSlug,
-    }})
+    const group = await prisma.group.findFirst({
+      where: {
+        slug: groupSlug,
+      },
+    });
     if (group) {
-    const rounds = await prisma.round.findMany({
-      where: {
-        groupId: group.id,
+      const rounds = await prisma.round.findMany({
+        where: {
+          groupId: group.id,
+        },
+      });
+      const roundIds = rounds.map((r) => r.id);
+
+      if (roundIds.length === 0) {
+        return [];
       }
-    });
-    const roundIds = rounds.map(r => r.id);
 
-    if (roundIds.length === 0) {
-      return [];
-    }
+      const memberships = await prisma.roundMember.findMany({
+        where: {
+          userId: user?.id,
+          roundId: { in: roundIds },
+        },
+      });
 
-    const memberships = await prisma.roundMember.findMany({
-      where: {
-        userId: user?.id,
-        roundId: {in: roundIds}
-      }
-    });
+      const balancePromises = memberships.map((m) => roundMemberBalance(m));
+      const balances = await Promise.all(balancePromises);
 
-    const balancePromises = memberships.map(m => roundMemberBalance(m));
-    const balances = await Promise.all(balancePromises);
-
-    return balances.map((balance, i) => ({
-      balance,
-      roundId: roundIds[i],
-    }));
-
-    }
-    else {
+      return balances.map((balance, i) => ({
+        balance,
+        roundId: roundIds[i],
+      }));
+    } else {
       return {
-        error: "Group not found"
-      }
+        error: "Group not found",
+      };
     }
-  }
-  catch (err) {
+  } catch (err) {
     return [];
   }
-}
+};
