@@ -41,6 +41,10 @@ export const GROUP_PAGE_QUERY = gql`
       registrationPolicy
       visibility
     }
+    balances(groupSlug: $groupSlug) {
+      roundId
+      balance
+    }
   }
 `;
 
