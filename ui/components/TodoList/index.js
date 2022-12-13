@@ -145,7 +145,7 @@ const TodoList = ({ currentGroup }) => {
         <FormattedMessage defaultMessage="👌 Let's get this ball rolling!" />
       </h1>
       <LoadingBar ratio={doneRatio} />
-      <div className="flex flex-col space-y-2">
+      <div className="sm:grid grid-cols-3 block">
         {todos.map((todo, index) =>
           todo.link ? (
             <Link key={index} href={todo.link}>

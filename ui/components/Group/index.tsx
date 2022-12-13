@@ -120,7 +120,6 @@ const GroupIndex = ({ currentUser }) => {
     currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
   return (
     <>
-      <SubMenu currentUser={currentUser} />
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="col-span-2">
@@ -158,37 +157,14 @@ const GroupIndex = ({ currentUser }) => {
           </div>
         </div>
       </PageHero>
+      <SubMenu currentUser={currentUser} />
       <div
-        className={`-mt-12 page flex-1 grid gap-10 grid-cols-1 ${
+        className={`page ${
           showTodos ? "md:grid-cols-5" : ""
         }`}
       >
-        <div
-          className={`grid gap-4 content-start ${
-            showTodos
-              ? "grid-cols-1 md:grid-cols-2 col-span-3"
-              : "grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4"
-          }`}
-        >
-          {rounds.map((round) => (
-            <Link
-              href={`/${round.group?.slug ?? "c"}/${round.slug}`}
-              key={round.slug}
-              passHref
-            >
-              <LinkCard color={round.color}>
-                {round.title}
-                {round.archived && (
-                  <Label className="right-0 m-2">
-                    <FormattedMessage defaultMessage="Archived" />
-                  </Label>
-                )}
-              </LinkCard>
-            </Link>
-          ))}
-        </div>
         {showTodos && (
-          <div className="col-span-2">
+          <div>
             <TodoList currentGroup={group} />
           </div>
         )}
