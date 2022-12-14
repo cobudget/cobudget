@@ -42,6 +42,7 @@ export const GROUP_PAGE_QUERY = gql`
       finishedTodos
       registrationPolicy
       visibility
+      logo
     }
     balances(groupSlug: $groupSlug) {
       roundId
@@ -121,8 +122,15 @@ const GroupIndex = ({ currentUser }) => {
   return (
     <>
       <PageHero>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-groupheading gap-6">
+          <div className="flex content-center justify-center">
+            <img 
+              src={group.logo}
+              alt={`${group.slug}_logo`}
+              className="object-cover h-32 w-32"
+            />
+          </div>
+          <div>
             <EditableField
               defaultValue={group?.info}
               name="info"
@@ -146,15 +154,6 @@ const GroupIndex = ({ currentUser }) => {
               required
             />
           </div>
-          <div>
-            {currentUser?.currentGroupMember?.isAdmin && (
-              <Link href={`/${group.slug}/new-round`}>
-                <Button size="large" color="anthracit" className="float-right">
-                  <FormattedMessage defaultMessage="New round" />
-                </Button>
-              </Link>
-            )}
-          </div>
         </div>
       </PageHero>
       <SubMenu currentUser={currentUser} />
@@ -169,8 +168,20 @@ const GroupIndex = ({ currentUser }) => {
           </div>
         )}
       </div>
-
+      
       <div className="page">
+        <div className="my-4">
+          <span className="font-medium">
+            <FormattedMessage defaultMessage="Active Rounds" />
+          </span>
+            {currentUser?.currentGroupMember?.isAdmin && (
+              <Link href={`/${group.slug}/new-round`}>
+                <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
+                  <FormattedMessage defaultMessage="Start new round" />
+                </span>
+              </Link>
+            )}
+        </div>
         {activeRounds.map((round, index) => (
           <div
             className={`p-8 border-2 border-gray-400 grid grid-cols-2 ${
