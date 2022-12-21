@@ -75,11 +75,11 @@ const EditBudgetModal = ({
 
   useEffect(() => {
     const opened = {};
-    expenseItems.forEach((item, i) => {
+    budgetItems.forEach((item, i) => {
       if (item.max) opened[i] = true;
     });
     setMaxAmountOpenInputs(opened);
-  }, [expenseItems]);
+  }, [budgetItems]);
 
   return (
     <Modal
