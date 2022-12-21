@@ -70,6 +70,50 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
+function RoundRow ({ round, index, balance }) {
+  return (
+    <div
+            className={`p-8 border-2 border-gray-400 grid grid-cols-2 ${
+              index === 0 ? "" : " border-t-0"
+            }`}
+            key={round.id}
+          >
+            <div className="flex content-center">
+              <span className="underline-offset-4 underline font-medium text-blue-700">
+                <Link
+                  href={`/${round.group?.slug ?? "c"}/${round.slug}`}
+                  key={round.slug}
+                  passHref
+                >
+                  {round.title}
+                </Link>
+              </span>
+              {balance ? (
+                <span>
+                  <span className="ml-2 text-gray-800 bg-highlight">
+                    <FormattedCurrency
+                      value={balance}
+                      currency={round.currency}
+                    />
+                  </span>
+                </span>
+              ) : null}
+            </div>
+            <div className="flex flex-col content-end justify-end">
+              <span className="self-end font-medium text-gray-800">
+                {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
+                {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
+                  ? process.env.BUCKET_NAME_SINGULAR
+                  : process.env.BUCKET_NAME_PLURAL}
+              </span>
+              <span className="self-end text-sm text-gray-700">
+                Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
+              </span>
+            </div>
+          </div>
+  )
+}
+
 const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
   const intl = useIntl();
@@ -183,46 +227,21 @@ const GroupIndex = ({ currentUser }) => {
             )}
         </div>
         {activeRounds.map((round, index) => (
-          <div
-            className={`p-8 border-2 border-gray-400 grid grid-cols-2 ${
-              index === 0 ? "" : " border-t-0"
-            }`}
-            key={round.id}
-          >
-            <div className="flex content-center">
-              <span className="underline-offset-4 underline font-medium text-blue-700">
-                <Link
-                  href={`/${round.group?.slug ?? "c"}/${round.slug}`}
-                  key={round.slug}
-                  passHref
-                >
-                  {round.title}
-                </Link>
-              </span>
-              {balancesMap[round.id] ? (
-                <span>
-                  <span className="ml-2 text-gray-800 bg-highlight">
-                    <FormattedCurrency
-                      value={balancesMap[round.id]}
-                      currency={round.currency}
-                    />
-                  </span>
-                </span>
-              ) : null}
-            </div>
-            <div className="flex flex-col content-end justify-end">
-              <span className="self-end font-medium text-gray-800">
-                {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
-                {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
-                  ? process.env.BUCKET_NAME_SINGULAR
-                  : process.env.BUCKET_NAME_PLURAL}
-              </span>
-              <span className="self-end text-sm text-gray-700">
-                Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
-              </span>
-            </div>
-          </div>
+          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]}/>
         ))}
+        {
+          archivedRounds.length > 0 &&
+          <>
+        <div className="my-4">
+          <span className="font-medium">
+            <FormattedMessage defaultMessage="Archived Rounds" />
+          </span>
+        </div>
+        {archivedRounds.map((round, index) => (
+          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]}/>
+        ))}
+        </>
+        }
       </div>
     </>
   );
