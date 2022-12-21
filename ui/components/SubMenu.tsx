@@ -56,7 +56,7 @@ export const roundItems = (
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
   return [
     {
-      label: formatMessage({ defaultMessage: "Rounds" }),
+      label: formatMessage({ defaultMessage: "Overview" }),
       href: `/${groupSlug}/${roundSlug}`,
     },
     {
