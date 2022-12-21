@@ -201,7 +201,7 @@ const GroupIndex = ({ currentUser }) => {
               </span>
               {balancesMap[round.id] ? (
                 <span>
-                  <span className="ml-2 text-gray-800 bg-yellow-200">
+                  <span className="ml-2 text-gray-800 bg-highlight">
                     <FormattedCurrency
                       value={balancesMap[round.id]}
                       currency={round.currency}

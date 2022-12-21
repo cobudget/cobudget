@@ -31,7 +31,7 @@ const bucketItems = (
 const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
   return [
     {
-      label: formatMessage({ defaultMessage: "Overview" }),
+      label: formatMessage({ defaultMessage: "Rounds" }),
       href: `/${groupSlug == "c" ? "" : groupSlug}`,
     },
     // { label: "Realities", href: "/realities" },
@@ -56,7 +56,7 @@ export const roundItems = (
   const isAdmin = currentUser?.currentCollMember?.isAdmin;
   return [
     {
-      label: formatMessage({ defaultMessage: "Overview" }),
+      label: formatMessage({ defaultMessage: "Rounds" }),
       href: `/${groupSlug}/${roundSlug}`,
     },
     {

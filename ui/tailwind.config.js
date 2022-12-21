@@ -45,6 +45,7 @@ module.exports = {
         xxs: "9px",
       },
       backgroundColor: {
+        "highlight": "#fce9b4",
         "app-gray": "#4d4d4d",
         "app-yellow": "#f6c429",
         "app-orange": "#ff9301",
