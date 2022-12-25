@@ -6,7 +6,7 @@ import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
 import { user } from "./user";
-import { roundMemberBalance } from "../helpers";
+import { getRoundMemberBalance, roundMemberBalance } from "../helpers";
 
 export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;
@@ -110,12 +110,12 @@ export const balances = async (parent, { groupSlug }, { user }) => {
         },
       });
 
-      const balancePromises = memberships.map((m) => roundMemberBalance(m));
+      const balancePromises = memberships.map((m) => getRoundMemberBalance(m));
       const balances = await Promise.all(balancePromises);
 
-      return balances.map((balance, i) => ({
+      return balances.map(({ balance, roundId }, i) => ({
         balance,
-        roundId: roundIds[i],
+        roundId,
       }));
     } else {
       return {
