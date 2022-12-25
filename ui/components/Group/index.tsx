@@ -73,7 +73,7 @@ const LinkCard = forwardRef((props: any, ref) => {
 function RoundRow ({ round, index, balance }) {
   return (
     <div
-            className={`p-8 border-2 border-gray-400 grid grid-cols-2 ${
+            className={`p-8 border-2 border-gray-400 sm:grid grid-cols-2 ${
               index === 0 ? "" : " border-t-0"
             }`}
             key={round.id}
@@ -100,13 +100,13 @@ function RoundRow ({ round, index, balance }) {
               ) : null}
             </div>
             <div className="flex flex-col content-end justify-end">
-              <span className="self-end font-medium text-gray-800">
+              <span className="mt-1 sm:mt-0 sm:self-end font-medium text-gray-800">
                 {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
                 {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
                   ? process.env.BUCKET_NAME_SINGULAR
                   : process.env.BUCKET_NAME_PLURAL}
               </span>
-              <span className="self-end text-sm text-gray-700">
+              <span className="sm:self-end text-sm text-gray-700">
                 Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
               </span>
             </div>
