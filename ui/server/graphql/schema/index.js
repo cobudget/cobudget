@@ -305,6 +305,7 @@ const schema = gql`
     inviteNonce: Int
     updatedAt: Date
     distributedAmount: Int
+    publishedBucketCount: Int
   }
 
   type InvitationLink {

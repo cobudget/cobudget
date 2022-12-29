@@ -29,12 +29,13 @@ export const GROUP_PAGE_QUERY = gql`
         id
         slug
       }
+      publishedBucketCount
       bucketStatusCount {
-        OPEN_FOR_FUNDING
+        FUNDED
       }
-      bucketStatusCount
       updatedAt
       distributedAmount
+      publishedBucketCount
     }
     group(groupSlug: $groupSlug) {
       id
@@ -72,58 +73,57 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
-function RoundRow ({ round, index, balance, showDistributedAmount }) {
+function RoundRow({
+  round,
+  index,
+  balance,
+  showDistributedAmount,
+  bucketCountHeading,
+}) {
   return (
     <div
-            className={`p-8 border-2 border-gray-400 sm:grid grid-cols-2 ${
-              index === 0 ? "" : " border-t-0"
-            }`}
-            key={round.id}
+      className={`p-8 border-2 border-gray-400 sm:grid grid-cols-2 ${
+        index === 0 ? "" : " border-t-0"
+      }`}
+      key={round.id}
+    >
+      <div className="flex content-center">
+        <span className="underline-offset-4 underline font-medium text-blue-700">
+          <Link
+            href={`/${round.group?.slug ?? "c"}/${round.slug}`}
+            key={round.slug}
+            passHref
           >
-            <div className="flex content-center">
-              <span className="underline-offset-4 underline font-medium text-blue-700">
-                <Link
-                  href={`/${round.group?.slug ?? "c"}/${round.slug}`}
-                  key={round.slug}
-                  passHref
-                >
-                  {round.title}
-                </Link>
-              </span>
-              {balance ? (
-                <span>
-                  <span className="ml-2 text-gray-800 bg-highlight">
-                    <FormattedCurrency
-                      value={balance}
-                      currency={round.currency}
-                    />
-                  </span>
-                </span>
-              ) : null}
-            </div>
-            <div className="flex flex-col content-end justify-end">
-              <span className="mt-1 sm:mt-0 sm:self-end font-medium text-gray-800">
-                {
-                  showDistributedAmount &&
-                  <>
-                    <FormattedCurrency 
-                      currency={round.currency}
-                      value={round.distributedAmount}
-                    />{" "}
-                    distributed •{" "}
-                  </>
-                }
-                {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
-                {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
-                  ? process.env.BUCKET_NAME_SINGULAR
-                  : process.env.BUCKET_NAME_PLURAL}
-              </span>
-              <span className="sm:self-end text-sm text-gray-700">
-                Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
-              </span>
-            </div>
-          </div>
-  )
+            {round.title}
+          </Link>
+        </span>
+        {balance ? (
+          <span>
+            <span className="ml-2 text-gray-800 bg-highlight">
+              <FormattedCurrency value={balance} currency={round.currency} />
+            </span>
+          </span>
+        ) : null}
+      </div>
+      <div className="flex flex-col content-end justify-end">
+        <span className="mt-1 sm:mt-0 sm:self-end font-medium text-gray-800">
+          {showDistributedAmount && (
+            <>
+              <FormattedCurrency
+                currency={round.currency}
+                value={round.distributedAmount}
+              />{" "}
+              distributed •{" "}
+            </>
+          )}
+          {bucketCountHeading}
+        </span>
+        <span className="sm:self-end text-sm text-gray-700">
+          Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
+        </span>
+      </div>
+    </div>
+  );
 }
 
 const GroupIndex = ({ currentUser }) => {
@@ -180,7 +180,7 @@ const GroupIndex = ({ currentUser }) => {
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-groupheading gap-6">
           <div className="flex content-center justify-center">
-            <img 
+            <img
               src={group.logo}
               alt={`${group.slug}_logo`}
               className="object-cover h-32 w-32"
@@ -213,53 +213,66 @@ const GroupIndex = ({ currentUser }) => {
         </div>
       </PageHero>
       <SubMenu currentUser={currentUser} />
-      <div
-        className={`page ${
-          showTodos ? "md:grid-cols-5" : ""
-        }`}
-      >
+      <div className={`page ${showTodos ? "md:grid-cols-5" : ""}`}>
         {showTodos && (
           <div>
             <TodoList currentGroup={group} />
           </div>
         )}
       </div>
-      
+
       <div className="page">
         <div className="my-4">
           <span className="font-medium">
             <FormattedMessage defaultMessage="Active Rounds" />
           </span>
-            {currentUser?.currentGroupMember?.isAdmin && (
-              <Link href={`/${group.slug}/new-round`}>
-                <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
-                  <FormattedMessage defaultMessage="Start new round" />
-                </span>
-              </Link>
-            )}
+          {currentUser?.currentGroupMember?.isAdmin && (
+            <Link href={`/${group.slug}/new-round`}>
+              <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
+                <FormattedMessage defaultMessage="Start new round" />
+              </span>
+            </Link>
+          )}
         </div>
         {activeRounds.map((round, index) => (
-          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]} showDistributedAmount={false} />
-        ))}
-        {
-          archivedRounds.length > 0 &&
-          <>
-        <div className="my-4">
-          <span className="font-medium">
-            <FormattedMessage defaultMessage="Archived Rounds" />
-          </span>
-        </div>
-        {archivedRounds.map((round, index) => (
-          <RoundRow 
-            round={round} 
-            index={index} 
-            key={index} 
+          <RoundRow
+            round={round}
+            index={index}
+            key={index}
             balance={balancesMap[round.id]}
-            showDistributedAmount
+            bucketCountHeading={`${round.publishedBucketCount} 
+            ${
+              round.publishedBucketCount === 1
+                ? process.env.BUCKET_NAME_SINGULAR
+                : process.env.BUCKET_NAME_PLURAL
+            }`}
+            showDistributedAmount={false}
           />
         ))}
-        </>
-        }
+        {archivedRounds.length > 0 && (
+          <>
+            <div className="my-4">
+              <span className="font-medium">
+                <FormattedMessage defaultMessage="Archived Rounds" />
+              </span>
+            </div>
+            {archivedRounds.map((round, index) => (
+              <RoundRow
+                round={round}
+                index={index}
+                key={index}
+                balance={balancesMap[round.id]}
+                bucketCountHeading={`${round.bucketStatusCount.FUNDED} funded 
+            ${
+              round.bucketStatusCount.FUNDED === 1
+                ? process.env.BUCKET_NAME_SINGULAR
+                : process.env.BUCKET_NAME_PLURAL
+            }`}
+                showDistributedAmount
+              />
+            ))}
+          </>
+        )}
       </div>
     </>
   );

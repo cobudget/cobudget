@@ -281,11 +281,27 @@ export const bucketStatusCount = async (round, _, { user }) => {
 };
 
 export const distributedAmount = async (round) => {
-  const buckets = await prisma.bucket.findMany({ where: { roundId: round.id }});
-  if (buckets.length === 0)
-    return 0;
-  const totalContributionsPromises = buckets.map(bucket => bucketTotalContributions(bucket));
+  const buckets = await prisma.bucket.findMany({
+    where: { roundId: round.id },
+  });
+  if (buckets.length === 0) return 0;
+  const totalContributionsPromises = buckets.map((bucket) =>
+    bucketTotalContributions(bucket)
+  );
   const totalContributions = await Promise.all(totalContributionsPromises);
 
   return totalContributions.reduce((total, current) => total + current, 0);
-}
+};
+
+// todo: publishedBucketCount should be added to bucketStatusCount
+export const publishedBucketCount = async (round) => {
+  const buckets = await prisma.bucket.findMany({
+    where: {
+      roundId: round.id,
+      NOT: {
+        publishedAt: null,
+      },
+    },
+  });
+  return buckets.length;
+};

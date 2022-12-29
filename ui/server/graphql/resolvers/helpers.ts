@@ -374,10 +374,11 @@ export async function roundMemberBalance(member) {
 }
 
 export async function getRoundMemberBalance(member) {
-  if (!member.statusAccountId) return {
-    balance: 0,
-    roundId: member.roundId,
-  }
+  if (!member.statusAccountId)
+    return {
+      balance: 0,
+      roundId: member.roundId,
+    };
 
   const {
     _sum: { amount: totalAllocations },
@@ -396,7 +397,7 @@ export async function getRoundMemberBalance(member) {
   return {
     balance: totalAllocations - totalContributions,
     roundId: member.roundId,
-  }
+  };
 }
 
 /** only call this if you've verified the user is at least a round admin */
