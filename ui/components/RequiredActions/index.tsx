@@ -38,6 +38,7 @@ export default function RequiredActions({ currentUser }) {
   const show = !!showModals.length;
 
   return (
+    <>
     <Transition appear show={show} as={Fragment}>
       <Dialog
         as="div"
@@ -79,5 +80,7 @@ export default function RequiredActions({ currentUser }) {
         </div>
       </Dialog>
     </Transition>
+    {currentUser.username && <span className="invisible" data-testid="signup-user-fullname" />}
+    </>
   );
 }

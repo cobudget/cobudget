@@ -4,8 +4,12 @@ import login from "./login";
 export default function signup() {
   login();
 
+  cy.get("[data-testid=signup-user-fullname]", { timeout: 30000 });
   cy.get("body").then(($body) => {
     if ($body.find("[data-testid=signup-user-fullname]").length) {
+      if ($body.find("[data-testid=signup-user-fullname]")[0].classList.contains("invisible")) {
+        return;
+      }
       get("signup-user-fullname").type(`name${Date.now()}`);
       get("signup-user-username").type(`user${Date.now()}`);
 
