@@ -32,7 +32,9 @@ export const GROUP_PAGE_QUERY = gql`
       bucketStatusCount {
         OPEN_FOR_FUNDING
       }
+      bucketStatusCount
       updatedAt
+      distributedAmount
     }
     group(groupSlug: $groupSlug) {
       id
@@ -70,7 +72,7 @@ const LinkCard = forwardRef((props: any, ref) => {
   );
 });
 
-function RoundRow ({ round, index, balance }) {
+function RoundRow ({ round, index, balance, showDistributedAmount }) {
   return (
     <div
             className={`p-8 border-2 border-gray-400 sm:grid grid-cols-2 ${
@@ -101,6 +103,16 @@ function RoundRow ({ round, index, balance }) {
             </div>
             <div className="flex flex-col content-end justify-end">
               <span className="mt-1 sm:mt-0 sm:self-end font-medium text-gray-800">
+                {
+                  showDistributedAmount &&
+                  <>
+                    <FormattedCurrency 
+                      currency={round.currency}
+                      value={round.distributedAmount}
+                    />{" "}
+                    distributed •{" "}
+                  </>
+                }
                 {round.bucketStatusCount.OPEN_FOR_FUNDING}{" "}
                 {round.bucketStatusCount.OPEN_FOR_FUNDING === 1
                   ? process.env.BUCKET_NAME_SINGULAR
@@ -227,7 +239,7 @@ const GroupIndex = ({ currentUser }) => {
             )}
         </div>
         {activeRounds.map((round, index) => (
-          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]}/>
+          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]} showDistributedAmount={false} />
         ))}
         {
           archivedRounds.length > 0 &&
@@ -238,7 +250,13 @@ const GroupIndex = ({ currentUser }) => {
           </span>
         </div>
         {archivedRounds.map((round, index) => (
-          <RoundRow round={round} index={index} key={index} balance={balancesMap[round.id]}/>
+          <RoundRow 
+            round={round} 
+            index={index} 
+            key={index} 
+            balance={balancesMap[round.id]}
+            showDistributedAmount
+          />
         ))}
         </>
         }

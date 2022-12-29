@@ -2,6 +2,7 @@ import prisma from "../../../prisma";
 import dayjs from "dayjs";
 import { getGroup } from "server/controller";
 import {
+  bucketTotalContributions,
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
@@ -278,3 +279,13 @@ export const bucketStatusCount = async (round, _, { user }) => {
     }),
   };
 };
+
+export const distributedAmount = async (round) => {
+  const buckets = await prisma.bucket.findMany({ where: { roundId: round.id }});
+  if (buckets.length === 0)
+    return 0;
+  const totalContributionsPromises = buckets.map(bucket => bucketTotalContributions(bucket));
+  const totalContributions = await Promise.all(totalContributionsPromises);
+
+  return totalContributions.reduce((total, current) => total + current, 0);
+}

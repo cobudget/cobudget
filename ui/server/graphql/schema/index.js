@@ -304,6 +304,7 @@ const schema = gql`
     bucketStatusCount: BucketStatusCount
     inviteNonce: Int
     updatedAt: Date
+    distributedAmount: Int
   }
 
   type InvitationLink {
