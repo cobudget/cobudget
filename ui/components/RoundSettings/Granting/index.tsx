@@ -185,7 +185,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             primary={intl.formatMessage({
               defaultMessage: "Allow stretch goals",
             })}
-            secondary={round.allowStretchGoals?.toString ? "Yes" : "No"}
+            secondary={round.allowStretchGoals ? "Yes" : "No"}
             isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
