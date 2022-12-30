@@ -87,7 +87,7 @@ export default function AboutPage({ router, round }) {
           <ListItem>
             <ListItemText
               primary="Allow stretch goals"
-              secondary={round.allowStretchGoals ? "Yes": "No"}
+              secondary={round.allowStretchGoals ? "Yes" : "No"}
             />
           </ListItem>
 
