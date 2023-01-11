@@ -185,7 +185,13 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             primary={intl.formatMessage({
               defaultMessage: "Allow stretch goals",
             })}
-            secondary={round.allowStretchGoals ? "Yes" : "No"}
+            secondary={
+              round.allowStretchGoals ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
             isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
@@ -204,7 +210,13 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
                 bucketName: process.env.BUCKET_NAME_PLURAL,
               }
             )}
-            secondary={round.requireBucketApproval ? "Yes" : "No"}
+            secondary={
+              round.requireBucketApproval ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
             isSet={typeof round.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
             canEdit={canEditSettings}
