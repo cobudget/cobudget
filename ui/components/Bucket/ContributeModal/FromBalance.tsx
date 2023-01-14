@@ -71,8 +71,7 @@ const FromBalance = ({ currentUser, bucket, handleClose }) => {
   }, [inputValue, currentUser.currentCollMember.balance]);
 
   const amountToMaxGoal =
-    Math.max(bucket.minGoal, bucket.maxGoal) -
-    bucket.totalContributions
+    Math.max(bucket.minGoal, bucket.maxGoal) - bucket.totalContributions;
 
   const memberBalance = currentUser.currentCollMember.balance;
 
