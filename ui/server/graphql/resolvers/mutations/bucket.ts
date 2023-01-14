@@ -10,6 +10,7 @@ import { isAndGetCollMember, updateFundedPercentage } from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
+import stripe from "server/stripe";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -780,7 +781,7 @@ export const acceptFunding = combineResolvers(
 
 export const cancelFunding = combineResolvers(
   isBucketCocreatorOrCollAdminOrMod,
-  async (_, { bucketId }, { eventHub }) => {
+  async (_, { bucketId }, { eventHub, user }) => {
     const bucket = await prisma.bucket.findUnique({
       where: { id: bucketId },
       include: {
@@ -796,22 +797,120 @@ export const cancelFunding = combineResolvers(
       },
     });
 
+    // only get transactions that are newer than the cancelled date if it exists, to not cancel transactions twice
+    const bucketTransactions = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
+        statusAccount: {
+          include: {
+            incomingTransactions: {
+              where: { createdAt: { gt: bucket.canceledAt ?? new Date(0) } },
+            },
+          },
+        },
+      },
+    });
+    const incomingTransactions =
+      bucketTransactions.statusAccount.incomingTransactions;
+
     if (bucket.completedAt)
       throw new Error(
         "This bucket has already been marked completed, can't cancel funding."
       );
 
-    const updated = await prisma.bucket.update({
-      where: { id: bucketId },
-      data: {
-        fundedAt: null,
-        approvedAt: null,
-        canceledAt: new Date(),
-        Contributions: { deleteMany: {} },
-        statusAccount: {
-          update: { incomingTransactions: { deleteMany: {} } },
+    const roundMemberCancelling = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: bucket.roundId,
         },
       },
+    });
+
+    const stripeSessionIds = incomingTransactions
+      .map((t) => t.stripeSessionId)
+      .filter(Boolean);
+
+    const checkoutSessions = await Promise.all(
+      stripeSessionIds.map((sessionId) =>
+        stripe.checkout.sessions.retrieve(sessionId, {
+          stripeAccount: bucket.round.stripeAccountId,
+        })
+      )
+    );
+
+    // TODO: test and see that it actually refunds all charges. it seemed to miss 1
+    await Promise.all(
+      checkoutSessions
+        .map((session) => session.payment_intent as string)
+        .map((paymentId) =>
+          // TODO: add idempotency key. use the checkout or payment id
+          stripe.refunds.create(
+            {
+              payment_intent: paymentId,
+              refund_application_fee: true,
+            },
+            {
+              stripeAccount: bucket.round.stripeAccountId,
+            }
+          )
+        )
+    );
+
+    await prisma.$transaction([
+      // moving money back to the participants that contributed
+      prisma.bucket.update({
+        where: { id: bucketId },
+        data: {
+          fundedAt: null,
+          approvedAt: null,
+          canceledAt: new Date(),
+          Contributions: { deleteMany: {} },
+        },
+      }),
+      prisma.transaction.createMany({
+        data: incomingTransactions.map(
+          ({
+            amount,
+            fromAccountId,
+            toAccountId,
+            roundId,
+            stripeSessionId,
+          }) => ({
+            amount,
+            fromAccountId: toAccountId,
+            toAccountId: fromAccountId,
+            roundId,
+            roundMemberId: roundMemberCancelling.id,
+            stripeSessionId,
+          })
+        ),
+      }),
+      // in the cases where the participant did direct funding, also move the money back out of the platform
+      prisma.allocation.deleteMany({
+        where: {
+          stripeSessionId: {
+            in: stripeSessionIds,
+          },
+        },
+      }),
+      prisma.transaction.createMany({
+        data: incomingTransactions
+          .filter((t) => Boolean(t.stripeSessionId))
+          .map(({ amount, fromAccountId, roundId, stripeSessionId }) => ({
+            amount,
+            fromAccountId,
+            toAccountId: roundMemberCancelling.outgoingAccountId,
+            roundId,
+            roundMemberId: roundMemberCancelling.id,
+            stripeSessionId,
+            // i think you can find the stripe refund object through checkout session->payment intent->charge->refund
+          })),
+      }),
+    ]);
+
+    const updated = await prisma.bucket.findUnique({
+      where: { id: bucketId },
     });
 
     await eventHub.publish("cancel-funding", {
