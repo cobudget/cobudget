@@ -48,10 +48,10 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
               fullWidth
             >
               <option value={true}>
-                {intl.formatMessage({ defaultMessage: "true" })}
+                {intl.formatMessage({ defaultMessage: "Yes" })}
               </option>
               <option value={false}>
-                {intl.formatMessage({ defaultMessage: "false" })}
+                {intl.formatMessage({ defaultMessage: "No" })}
               </option>
             </SelectInput>
           </Box>

@@ -60,10 +60,10 @@ const BucketReview = ({ round }) => {
           className="my-4"
         >
           <option value="true">
-            {intl.formatMessage({ defaultMessage: "true" })}
+            {intl.formatMessage({ defaultMessage: "Yes" })}
           </option>
           <option value="false">
-            {intl.formatMessage({ defaultMessage: "false" })}
+            {intl.formatMessage({ defaultMessage: "No" })}
           </option>
         </SelectField>
 
