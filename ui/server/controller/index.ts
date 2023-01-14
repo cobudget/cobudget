@@ -258,9 +258,7 @@ export const contribute = async ({
     0
   );
 
-  const income = await bucketIncome(bucket);
-
-  if (contributionsForBucket + amount + income > maxGoal)
+  if (contributionsForBucket + amount > maxGoal)
     throw new Error("You can't overfund this bucket.");
 
   // mark bucket as funded if it has reached its max goal
