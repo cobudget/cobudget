@@ -1,9 +1,10 @@
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SearchIcon } from "../Icons";
 import { SelectField } from "../SelectInput";
 import StatusFilter from "./StatusFilter";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useIntl } from "react-intl";
+import { debounce } from "lodash";
 
 const Filterbar = ({
   textSearchTerm,
@@ -20,6 +21,19 @@ const Filterbar = ({
   const router = useRouter();
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
+
+  const updateSearchQuery = useCallback(debounce((searchString) => {
+      router.query = {
+        ...router.query,
+        s: searchString
+      }
+      router.push(router, undefined, { shallow: true });
+    }, 300), [])
+
+  const handleInputChange = useCallback((searchString) => {
+    updateSearchQuery(searchString);
+    setInput(searchString);
+  }, []);
 
   useEffect(() => {
     setInput(textSearchTerm);
@@ -95,7 +109,7 @@ const Filterbar = ({
             placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
             className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
           />
           <button
             type="submit"
