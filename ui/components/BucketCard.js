@@ -59,7 +59,7 @@ const BucketCard = ({ bucket, round }) => {
             <ProgressBar
               color={round.color}
               ratio={
-                (bucket.totalContributions + bucket.income) / bucket.minGoal
+                (bucket.totalContributions) / bucket.minGoal
               }
               className="mt-2 mb-3"
             />
@@ -71,7 +71,7 @@ const BucketCard = ({ bucket, round }) => {
                 <CoinIcon className="w-5 h-5" />
                 <span className="block ml-1 text-sm">
                   {Math.floor(
-                    ((bucket.totalContributions + bucket.income) /
+                    ((bucket.totalContributions) /
                       bucket.minGoal) *
                       100
                   )}

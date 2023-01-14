@@ -63,7 +63,7 @@ const BucketBudget = ({
           {expenseItems.length > 0 && (
             <>
               <h3 className="font-lg font-medium mb-2">
-                <FormattedMessage defaultMessage="Costs" />
+                <FormattedMessage defaultMessage="Requested funding" />
               </h3>
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
