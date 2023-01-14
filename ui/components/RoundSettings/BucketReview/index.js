@@ -51,6 +51,7 @@ const BucketReview = ({ round }) => {
             //.then(() => null)
             .catch((error) => alert(error.message));
         })}
+        data-testid="bucket-review-settings-form"
       >
         <SelectField
           name="bucketReviewIsOpen"
@@ -95,6 +96,7 @@ const BucketReview = ({ round }) => {
             type="submit"
             disabled={!isDirty}
             loading={loading}
+            testid="submit-bucket-review-settings"
           >
             <FormattedMessage defaultMessage="Save" />
           </Button>

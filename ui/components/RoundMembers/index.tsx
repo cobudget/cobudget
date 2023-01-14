@@ -121,7 +121,10 @@ const RoundMembers = ({ round, currentUser }) => {
           />
           {isAdmin && (
             <div className="flex items-center space-x-2">
-              <Button onClick={() => setInviteModalOpen(true)}>
+              <Button
+                onClick={() => setInviteModalOpen(true)}
+                testid="invite-participant-button"
+              >
                 <FormattedMessage defaultMessage="Invite participants" />
               </Button>
               {inviteModalOpen && (

@@ -102,6 +102,7 @@ export default ({
             <TextField
               placeholder={intl.formatMessage({ defaultMessage: "Title" })}
               name="guideline.title"
+              testid="guideline-title"
               defaultValue={guideline.title}
               inputRef={register}
               error={errors.guideline?.title}
@@ -113,6 +114,7 @@ export default ({
               placeholder={intl.formatMessage({
                 defaultMessage: "Description",
               })}
+              testid="guideline-description"
               defaultValue={guideline.description}
               multiline
               rows={4}
@@ -136,7 +138,12 @@ export default ({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} color={round.color}>
+              <Button
+                type="submit"
+                loading={loading}
+                color={round.color}
+                testid="submit-guideline"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

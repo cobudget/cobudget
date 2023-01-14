@@ -220,6 +220,7 @@ const InviteMembersModal = ({
                   }),
                 },
               })}
+              testid="invite-participants-emails"
             />
             {link && (
               <div className="mt-4">
@@ -227,7 +228,10 @@ const InviteMembersModal = ({
                   <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
                 <GridWrapper>
-                  <span className="mt-2 ml-2">
+                  <span
+                    className="mt-2 ml-2"
+                    data-testid="delete-invitation-link"
+                  >
                     <IconButton
                       onClick={() => {
                         deleteInviteLink(
@@ -257,6 +261,7 @@ const InviteMembersModal = ({
                       disabled: true,
                       value: link,
                     }}
+                    testid="invitation-link"
                   />
                   <p
                     className="mt-4 ml-4 text-sm font-medium cursor-pointer"
@@ -295,6 +300,7 @@ const InviteMembersModal = ({
               <Button
                 className="mr-2"
                 loading={createInviteLoading}
+                testid="create-invitation-link"
                 onClick={() => {
                   createInviteLink(
                     roundId
@@ -322,7 +328,11 @@ const InviteMembersModal = ({
               >
                 <FormattedMessage defaultMessage="Create Invite Link" />
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button
+                type="submit"
+                loading={loading}
+                testid="invite-participants-email-button"
+              >
                 <FormattedMessage defaultMessage="Add people" />
               </Button>
             </div>

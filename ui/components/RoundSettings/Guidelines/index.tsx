@@ -37,6 +37,7 @@ const Guidelines = ({ round }) => {
           color={round.color}
           onClick={() => setAddGuidelineModalOpen(true)}
           className="flex-grow"
+          testid="add-guideline-button"
         >
           <AddIcon className="h-5 w-5 mr-1" />
           <FormattedMessage defaultMessage="Add guideline" />

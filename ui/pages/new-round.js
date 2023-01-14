@@ -63,7 +63,11 @@ export default function NewRoundPage({ currentGroup }) {
         <div className="mx-auto max-w-md space-y-8 mt-10">
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h1 className="text-2xl mb-2 font-semibold">New Round</h1>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-4"
+              data-testid="create-round-form"
+            >
               <TextField
                 name="title"
                 label="Title"
@@ -73,6 +77,7 @@ export default function NewRoundPage({ currentGroup }) {
                 className=""
                 error={errors.title}
                 helperText={errors.title?.message}
+                testid={"round-title"}
                 inputProps={{
                   onChange: (e) => setSlugValue(slugify(e.target.value)),
                 }}
@@ -129,7 +134,12 @@ export default function NewRoundPage({ currentGroup }) {
                 <option value="INVITE_ONLY">Invite only</option>
               </SelectField>
 
-              <Button className="" type="submit" fullWidth>
+              <Button
+                className=""
+                type="submit"
+                fullWidth
+                testid="create-round-button"
+              >
                 Create
               </Button>
             </form>

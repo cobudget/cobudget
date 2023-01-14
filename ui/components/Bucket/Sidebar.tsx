@@ -124,6 +124,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
             <Button
               color="red"
               loading={fetching}
+              testid="confirm-cancel-bucket-button"
               onClick={() =>
                 cancelFunding({ bucketId }).then(({ error }) => {
                   if (error) alert(error.message);
@@ -251,6 +252,7 @@ const BucketSidebar = ({
                   alert(err.message)
                 )
               }
+              testid="accept-funding-button"
             >
               <FormattedMessage defaultMessage="Accept funding" />
             </Button>
@@ -266,6 +268,7 @@ const BucketSidebar = ({
                 })
               }
               fullWidth
+              testid="publish-bucket"
             >
               <FormattedMessage defaultMessage="Publish" />
             </Button>
@@ -280,6 +283,7 @@ const BucketSidebar = ({
                   approved: true,
                 }).catch((err) => alert(err.message))
               }
+              testid="open-for-funding-button"
             >
               <FormattedMessage defaultMessage="Open for funding" />
             </Button>
@@ -303,6 +307,7 @@ const BucketSidebar = ({
                   }
                 )
               }
+              testid="mark-as-completed-button"
             >
               <FormattedMessage defaultMessage="Mark as completed" />
             </Button>
@@ -318,7 +323,9 @@ const BucketSidebar = ({
                   arrow={false}
                 >
                   <IconButton onClick={() => setActionsDropdownOpen(true)}>
-                    <DotsHorizontalIcon />
+                    <span data-testid="bucket-more-edit-options-button">
+                      <DotsHorizontalIcon />
+                    </span>
                   </IconButton>
                 </Tooltip>
               </div>
@@ -353,6 +360,7 @@ const BucketSidebar = ({
                     <button
                       className={css.dropdownButton}
                       onClick={() => setConfirmCancelBucketOpen(true)}
+                      data-testid="cancel-bucket-button"
                     >
                       <FormattedMessage defaultMessage="Cancel" />{" "}
                       {process.env.BUCKET_NAME_SINGULAR}
@@ -428,6 +436,7 @@ const BucketSidebar = ({
               className={
                 "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
               }
+              testid="bucket-status-view"
             >
               {statusList[bucket.status]}
             </Label>

@@ -608,6 +608,7 @@ const RoundPage = ({ currentUser }) => {
                     size="large"
                     color={round.color}
                     onClick={() => setNewBucketModalOpen(true)}
+                    testid="create-new-bucket-button"
                   >
                     New {process.env.BUCKET_NAME_SINGULAR}
                   </Button>
@@ -641,6 +642,7 @@ const RoundPage = ({ currentUser }) => {
               ? ""
               : "grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20"
           }
+          data-testid="buckets-view"
         >
           {pageVariables.map((variables, i) => {
             return (

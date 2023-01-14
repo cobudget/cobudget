@@ -86,6 +86,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
       >
         <TextField
           name="title"
+          testid="round-title"
           label={intl.formatMessage({ defaultMessage: "Title" })}
           placeholder={intl.formatMessage({ defaultMessage: "Title" })}
           defaultValue={round.title}
@@ -95,6 +96,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         <TextField
           name="slug"
+          testid="round-slug"
           label={intl.formatMessage({ defaultMessage: "URL" })}
           placeholder={intl.formatMessage({ defaultMessage: "Slug" })}
           defaultValue={round.slug}

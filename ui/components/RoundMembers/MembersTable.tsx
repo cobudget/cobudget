@@ -149,14 +149,18 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   };
   return (
     <>
-      <MuiIconButton
-        aria-label={intl.formatMessage({ defaultMessage: "more" })}
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        onClick={handleClick}
+      <span
+        data-testid={`participant-action-button-${member.email.split("@")[0]}`}
       >
-        <MoreVertIcon />
-      </MuiIconButton>
+        <MuiIconButton
+          aria-label={intl.formatMessage({ defaultMessage: "more" })}
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreVertIcon />
+        </MuiIconButton>
+      </span>
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
@@ -219,36 +223,40 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           disabled={member.balance === 0}
           arrow={false}
         >
-          <MenuItem
-            color="error.main"
-            disabled={member.balance !== 0}
-            onClick={() => {
-              if (
-                confirm(
-                  intl.formatMessage(
-                    {
-                      defaultMessage:
-                        "Are you sure you would like to delete membership from user with email {email}?",
-                    },
-                    { email: member.email }
+          <span
+            data-testid={`delete-participant-${member.email.split("@")[0]}`}
+          >
+            <MenuItem
+              color="error.main"
+              disabled={member.balance !== 0}
+              onClick={() => {
+                if (
+                  confirm(
+                    intl.formatMessage(
+                      {
+                        defaultMessage:
+                          "Are you sure you would like to delete membership from user with email {email}?",
+                      },
+                      { email: member.email }
+                    )
                   )
                 )
-              )
-                deleteMember({ roundId, memberId: member.id }).then(
-                  ({ error }) => {
-                    if (error) {
-                      console.error(error);
-                      toast.error(error.message);
+                  deleteMember({ roundId, memberId: member.id }).then(
+                    ({ error }) => {
+                      if (error) {
+                        console.error(error);
+                        toast.error(error.message);
+                      }
+                      handleClose();
                     }
-                    handleClose();
-                  }
-                );
-            }}
-          >
-            <Box color="error.main">
-              <FormattedMessage defaultMessage="Delete" />
-            </Box>
-          </MenuItem>
+                  );
+              }}
+            >
+              <Box color="error.main">
+                <FormattedMessage defaultMessage="Delete" />
+              </Box>
+            </MenuItem>
+          </span>
         </Tooltip>
       </Menu>
     </>
@@ -272,7 +280,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p>{member.email}</p>
+        <p data-testid="invited-participant-email">{member.email}</p>
         {!member.user.verifiedEmail ? (
           <p className="text-sm text-gray-500">
             (<FormattedMessage defaultMessage="not verified" />)
