@@ -373,6 +373,33 @@ export async function roundMemberBalance(member) {
   return totalAllocations - totalContributions;
 }
 
+export async function getRoundMemberBalance(member) {
+  if (!member.statusAccountId)
+    return {
+      balance: 0,
+      roundId: member.roundId,
+    };
+
+  const {
+    _sum: { amount: totalAllocations },
+  } = await prisma.allocation.aggregate({
+    where: { roundMemberId: member.id },
+    _sum: { amount: true },
+  });
+
+  const {
+    _sum: { amount: totalContributions },
+  } = await prisma.contribution.aggregate({
+    where: { roundMemberId: member.id },
+    _sum: { amount: true },
+  });
+
+  return {
+    balance: totalAllocations - totalContributions,
+    roundId: member.roundId,
+  };
+}
+
 /** only call this if you've verified the user is at least a round admin */
 export async function stripeIsConnected({ round }) {
   if (!round.stripeAccountId) {

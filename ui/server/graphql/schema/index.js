@@ -51,6 +51,7 @@ const schema = gql`
       offset: Int
       limit: Int
     ): RoundTransactionPage
+    balances(groupSlug: String!): [RoundBalance]
   }
 
   type Mutation {
@@ -302,6 +303,9 @@ const schema = gql`
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
     inviteNonce: Int
+    updatedAt: Date
+    distributedAmount: Int
+    publishedBucketCount: Int
   }
 
   type InvitationLink {
@@ -690,6 +694,11 @@ const schema = gql`
     limit: Int
     isRequired: Boolean!
     createdAt: Date
+  }
+
+  type RoundBalance {
+    roundId: ID
+    balance: Int
   }
 
   # type Log {

@@ -5,6 +5,8 @@ import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
+import { user } from "./user";
+import { getRoundMemberBalance, roundMemberBalance } from "../helpers";
 
 export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;
@@ -80,4 +82,47 @@ export const categories = async (parent, { groupId }) => {
   const categories = await discourse(group.discourse).categories.getAll();
 
   return categories;
+};
+
+export const balances = async (parent, { groupSlug }, { user }) => {
+  try {
+    const group = await prisma.group.findFirst({
+      where: {
+        slug: groupSlug,
+      },
+    });
+    if (group) {
+      const rounds = await prisma.round.findMany({
+        where: {
+          groupId: group.id,
+        },
+      });
+      const roundIds = rounds.map((r) => r.id);
+
+      if (roundIds.length === 0) {
+        return [];
+      }
+
+      const memberships = await prisma.roundMember.findMany({
+        where: {
+          userId: user?.id,
+          roundId: { in: roundIds },
+        },
+      });
+
+      const balancePromises = memberships.map((m) => getRoundMemberBalance(m));
+      const balances = await Promise.all(balancePromises);
+
+      return balances.map(({ balance, roundId }, i) => ({
+        balance,
+        roundId,
+      }));
+    } else {
+      return {
+        error: "Group not found",
+      };
+    }
+  } catch (err) {
+    return [];
+  }
 };

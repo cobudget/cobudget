@@ -36,6 +36,7 @@ module.exports = {
         // Bucket page layout
         sidebar: "minmax(0,1fr) 350px",
         funding: "auto minmax(100px, max-content)",
+        groupheading: "8rem calc(100% - 16rem)",
       },
       borderColor: {
         f: "rgb(172, 182, 192)",
@@ -44,6 +45,7 @@ module.exports = {
         xxs: "9px",
       },
       backgroundColor: {
+        highlight: "#fce9b4",
         "app-gray": "#4d4d4d",
         "app-yellow": "#f6c429",
         "app-orange": "#ff9301",
