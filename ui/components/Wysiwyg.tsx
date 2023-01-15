@@ -57,6 +57,8 @@ import {
   useRemirror,
   useRemirrorContext,
   useCommands,
+  useKeymap,
+  useActive,
 } from "@remirror/react";
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
@@ -67,6 +69,7 @@ import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
 import { FormattedMessage, useIntl } from "react-intl";
+import parseMDSource from "utils/parseMDSource";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -131,16 +134,18 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
   }
 `;
 
-const HardBreakButton = () => {
+const HardBreak = () => {
   const commands = useCommands();
-  return (
-    <input
-      type="button"
-      value="Line"
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={() => commands.insertHardBreak()}
-    />
-  );
+  const active  = useActive(false);
+
+  useKeymap("Enter", ({ next }) => {
+    if(active.bulletList() || active.orderedList() || active.codeBlock()) {
+      return next();
+    }
+    commands.insertHardBreak();
+    return true;
+  });
+  return null;
 };
 
 function MentionComponent({ roundId }) {
@@ -556,7 +561,7 @@ const Wysiwyg = ({
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
-            initialContent={defaultValue.replace(/\n/gi, '\n&#8203;')}
+            initialContent={parseMDSource(defaultValue)}
             onChange={debounce((param) => {
               onChange?.({
                 target: {
@@ -568,7 +573,7 @@ const Wysiwyg = ({
             <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
               <span>
-                <HardBreakButton />
+                <HardBreak />
               </span>
               <Toolbar
                 items={toolbarItems()}
