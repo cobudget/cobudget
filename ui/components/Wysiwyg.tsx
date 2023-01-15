@@ -146,16 +146,16 @@ const HardBreak = () => {
     if (active.bulletList() || active.orderedList() || active.codeBlock()) {
       return next();
     }
-    
+
     //deactivate these extensions on enter press if they are active
     const extensionsWithToggle = {
       bold: commands.toggleBold,
       italic: commands.toggleItalic,
       strike: commands.toggleStrike,
       code: commands.toggleCode,
-    }
+    };
 
-    for (let x in extensionsWithToggle) {
+    for (const x in extensionsWithToggle) {
       if (active[x]()) {
         extensionsWithToggle[x]();
       }
