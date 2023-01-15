@@ -136,10 +136,14 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
 
 const HardBreak = () => {
   const commands = useCommands();
-  const active  = useActive(false);
+  const active = useActive(false);
 
   useKeymap("Enter", ({ next }) => {
-    if(active.bulletList() || active.orderedList() || active.codeBlock()) {
+    // If following extensions are active, hard break is not required
+    // 1. bulletList
+    // 2. orderedList
+    // 3. codeBlock
+    if (active.bulletList() || active.orderedList() || active.codeBlock()) {
       return next();
     }
     commands.insertHardBreak();

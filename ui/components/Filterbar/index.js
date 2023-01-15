@@ -22,13 +22,16 @@ const Filterbar = ({
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
 
-  const updateSearchQuery = useCallback(debounce((searchString) => {
+  const updateSearchQuery = useCallback(
+    debounce((searchString) => {
       router.query = {
         ...router.query,
-        s: searchString
-      }
+        s: searchString,
+      };
       router.push(router, undefined, { shallow: true });
-    }, 300), [])
+    }, 300),
+    []
+  );
 
   const handleInputChange = useCallback((searchString) => {
     updateSearchQuery(searchString);
