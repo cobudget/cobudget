@@ -591,9 +591,7 @@ const Wysiwyg = ({
           >
             <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
-              <span>
-                <HardBreak />
-              </span>
+              <HardBreak />
               <Toolbar
                 items={toolbarItems()}
                 refocusEditor
