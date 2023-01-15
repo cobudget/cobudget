@@ -56,6 +56,9 @@ import {
   ToolbarItemUnion,
   useRemirror,
   useRemirrorContext,
+  useCommands,
+  useKeymap,
+  useActive,
 } from "@remirror/react";
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
@@ -66,6 +69,7 @@ import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import HappySpinner from "./HappySpinner";
 import { FormattedMessage, useIntl } from "react-intl";
+import parseMDSource from "utils/parseMDSource";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -129,6 +133,39 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
     }
   }
 `;
+
+const HardBreak = () => {
+  const commands = useCommands();
+  const active = useActive(false);
+
+  useKeymap("Enter", ({ next }) => {
+    // If following extensions are active, hard break is not required
+    // 1. bulletList
+    // 2. orderedList
+    // 3. codeBlock
+    if (active.bulletList() || active.orderedList() || active.codeBlock()) {
+      return next();
+    }
+
+    //deactivate these extensions on enter press if they are active
+    const extensionsWithToggle = {
+      bold: commands.toggleBold,
+      italic: commands.toggleItalic,
+      strike: commands.toggleStrike,
+      code: commands.toggleCode,
+    };
+
+    for (const x in extensionsWithToggle) {
+      if (active[x]()) {
+        extensionsWithToggle[x]();
+      }
+    }
+
+    commands.insertHardBreak();
+    return true;
+  });
+  return null;
+};
 
 function MentionComponent({ roundId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
@@ -543,7 +580,7 @@ const Wysiwyg = ({
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
-            initialContent={defaultValue}
+            initialContent={parseMDSource(defaultValue)}
             onChange={debounce((param) => {
               onChange?.({
                 target: {
@@ -554,6 +591,7 @@ const Wysiwyg = ({
           >
             <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
+              <HardBreak />
               <Toolbar
                 items={toolbarItems()}
                 refocusEditor

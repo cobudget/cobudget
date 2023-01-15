@@ -579,9 +579,7 @@ const RoundPage = ({ currentUser }) => {
                           <td className="pr-3">In your account</td>
                           <td className="font-bold">
                             <FormattedCurrency
-                              value={
-                                currentUser.currentCollMember.balance
-                              }
+                              value={currentUser.currentCollMember.balance}
                               currency={round.currency}
                             />
                           </td>
