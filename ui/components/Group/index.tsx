@@ -150,6 +150,10 @@ const GroupIndex = ({ currentUser }) => {
 
   const balancesMap = useMemo(() => {
     const map = {};
+    //balances can be null if the group is not found
+    if (!balances) {
+      return map;
+    }
     balances.forEach((b) => {
       map[b.roundId] = b.balance;
     });
