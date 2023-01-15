@@ -28,8 +28,6 @@ const BucketBudget = ({
   const incomeTotal = monetaryIncome
     .map((e) => e.min)
     .reduce((a, b) => a + b, 0);
-  const goalTotalMin = expenseTotalMin - incomeTotal;
-  const goalTotalMax = expenseTotalMax - incomeTotal;
 
   return (
     <>
@@ -63,7 +61,7 @@ const BucketBudget = ({
           {expenseItems.length > 0 && (
             <>
               <h3 className="font-lg font-medium mb-2">
-                <FormattedMessage defaultMessage="Costs" />
+                <FormattedMessage defaultMessage="Requested funding" />
               </h3>
 
               <div className="mb-8 rounded shadow overflow-hidden bg-gray-100">
@@ -203,14 +201,11 @@ const BucketBudget = ({
               <div className="font-bold">
                 <FormattedMessage defaultMessage="Funding goal:" />
               </div>
-              <div className="text-base">
-                <FormattedMessage defaultMessage="= Costs - Existing funds" />
-              </div>
             </div>
             <div className="self-end">
               <span className="font-bold">
                 <FormattedNumber
-                  value={goalTotalMin / 100}
+                  value={expenseTotalMin / 100}
                   style="currency"
                   currencyDisplay={"symbol"}
                   currency={currency}
@@ -222,7 +217,7 @@ const BucketBudget = ({
                   (<FormattedMessage defaultMessage="stretch goal:" />{" "}
                   <span className="font-bold">
                     <FormattedNumber
-                      value={goalTotalMax / 100}
+                      value={expenseTotalMax / 100}
                       style="currency"
                       currencyDisplay={"symbol"}
                       currency={currency}
