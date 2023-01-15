@@ -56,6 +56,7 @@ import {
   ToolbarItemUnion,
   useRemirror,
   useRemirrorContext,
+  useCommands,
 } from "@remirror/react";
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
@@ -129,6 +130,18 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
     }
   }
 `;
+
+const HardBreakButton = () => {
+  const commands = useCommands();
+  return (
+    <input
+      type="button"
+      value="Line"
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => commands.insertHardBreak()}
+    />
+  );
+};
 
 function MentionComponent({ roundId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
@@ -543,7 +556,7 @@ const Wysiwyg = ({
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
-            initialContent={defaultValue}
+            initialContent={defaultValue.replace(/\n/gi, '\n&#8203;')}
             onChange={debounce((param) => {
               onChange?.({
                 target: {
@@ -554,6 +567,9 @@ const Wysiwyg = ({
           >
             <ImperativeHandle ref={inputRef} />
             <div className="overflow-auto">
+              <span>
+                <HardBreakButton />
+              </span>
               <Toolbar
                 items={toolbarItems()}
                 refocusEditor

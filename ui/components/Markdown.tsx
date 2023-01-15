@@ -6,7 +6,7 @@ import { appLink } from "utils/internalLinks";
 const Markdown = ({ source, enableMentions = false, className = "" }) => {
   return (
     <ReactMarkdown
-      source={source}
+      source={source.replace(/\n/gi, '\n&#8203;')}
       className={"markdown " + className}
       plugins={[remarkGfm as any]}
       renderers={{
