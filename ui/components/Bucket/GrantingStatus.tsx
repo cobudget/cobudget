@@ -3,7 +3,7 @@ import { FormattedMessage, FormattedNumber } from "react-intl";
 import ProgressBar from "components/ProgressBar";
 
 const GrantingStatus = ({ bucket }) => {
-  const funding = bucket.totalContributions + bucket.income;
+  const funding = bucket.totalContributions;
   const ratio = isNaN(funding / bucket.minGoal) ? 0 : funding / bucket.minGoal;
   //const userName = (nameOrEmail) =>
   //  (nameOrEmail ?? "Somebody").match(/@/) === null ? nameOrEmail : "Somebody";

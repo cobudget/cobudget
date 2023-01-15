@@ -22,6 +22,8 @@ const Filterbar = ({
   const [input, setInput] = useState(textSearchTerm);
   const changed = input !== textSearchTerm;
 
+  // debounce function returns a function
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const updateSearchQuery = useCallback(
     debounce((searchString) => {
       router.query = {
@@ -30,13 +32,16 @@ const Filterbar = ({
       };
       router.push(router, undefined, { shallow: true });
     }, 300),
-    []
+    [router]
   );
 
-  const handleInputChange = useCallback((searchString) => {
-    updateSearchQuery(searchString);
-    setInput(searchString);
-  }, []);
+  const handleInputChange = useCallback(
+    (searchString) => {
+      updateSearchQuery(searchString);
+      setInput(searchString);
+    },
+    [updateSearchQuery]
+  );
 
   useEffect(() => {
     setInput(textSearchTerm);
