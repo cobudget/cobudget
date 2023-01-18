@@ -121,7 +121,7 @@ const TodoList = ({ currentGroup }) => {
     if (index === 0) {
       done = true;
     } else if (index === 1) {
-      done = data?.groupMembers?.length > 1;
+      done = data?.groupMembersPage?.groupMembers?.length > 1;
     } else if (index === 2) {
       done = data?.rounds.length > 0;
     }
