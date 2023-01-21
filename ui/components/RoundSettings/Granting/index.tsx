@@ -21,6 +21,7 @@ import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
 import FormattedCurrency from "components/FormattedCurrency";
 import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
+import SetCocreatorCanEditOpenBucket from "./SetCocreatorCanEditOpenBucket";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -44,6 +45,7 @@ const modals = {
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
+  SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
   SET_STRIPE: SetStripe,
   SET_DIRECT_FUNDING: SetDirectFunding,
@@ -66,6 +68,7 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
+      canCocreatorEditOpenBuckets
     }
   }
 `;
@@ -83,9 +86,9 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $directFundingEnabled: Boolean
     $directFundingTerms: String
     $canCocreatorStartFunding: Boolean
+    $canCocreatorEditOpenBuckets: Boolean
   ) {
     updateGrantingSettings(
-      canCocreatorStartFunding: $canCocreatorStartFunding
       roundId: $roundId
       currency: $currency
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
@@ -96,6 +99,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       requireBucketApproval: $requireBucketApproval
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
+      canCocreatorStartFunding: $canCocreatorStartFunding
+      canCocreatorEditOpenBuckets: $canCocreatorEditOpenBuckets
     ) {
       id
       currency
@@ -110,6 +115,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
+      canCocreatorEditOpenBuckets
     }
   }
 `;
@@ -235,7 +241,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             primary={intl.formatMessage(
               {
                 defaultMessage:
-                  "Can Co-creators open {bucketName} for funding",
+                  "Co-creators can open {bucketName} for funding",
               },
               {
                 bucketName: process.env.BUCKET_NAME_PLURAL,
@@ -253,7 +259,30 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             canEdit={canEditSettings}
             roundColor={round.color}
           />
+          <Divider />
 
+          <SettingsListItem
+            primary={intl.formatMessage(
+              {
+                defaultMessage:
+                  "Co-creators can edit their {bucketName} during funding",
+              },
+              {
+                bucketName: process.env.BUCKET_NAME_SINGULAR,
+              }
+            )}
+            secondary={
+              round.canCocreatorEditOpenBuckets ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
+            isSet={typeof round.canCocreatorEditOpenBuckets !== "undefined"}
+            openModal={() => handleOpen("SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
           <Divider />
 
           <SettingsListItem

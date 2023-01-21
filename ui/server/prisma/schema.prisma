@@ -157,6 +157,7 @@ model Round {
   bucketReviewIsOpen          Boolean?
   discourseCategoryId         Int?
   canCocreatorStartFunding    Boolean?  @default(false)
+  canCocreatorEditOpenBuckets Boolean?  @default(false)
 
   tags       Tag[]
   guidelines Guideline[]
