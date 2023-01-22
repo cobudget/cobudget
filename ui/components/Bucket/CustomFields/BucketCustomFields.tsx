@@ -20,7 +20,13 @@ const CUSTOM_FIELDS_QUERY = gql`
   }
 `;
 
-const BucketCustomFields = ({ customFields, canEdit, roundId, bucketId, isEditingAllowed }) => {
+const BucketCustomFields = ({
+  customFields,
+  canEdit,
+  roundId,
+  bucketId,
+  isEditingAllowed,
+}) => {
   const router = useRouter();
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,

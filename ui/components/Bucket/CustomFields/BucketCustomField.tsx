@@ -55,11 +55,10 @@ const BucketCustomField = ({
   const handleEdit = () => {
     if (isEditingAllowed) {
       setEditing(true);
-    }
-    else {
+    } else {
       toast.error(COCREATORS_CANT_EDIT);
     }
-  }
+  };
 
   const schema = useMemo(() => {
     const maxValue = yup

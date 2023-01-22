@@ -19,7 +19,8 @@ export default function Overview({
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    (isMemberOfBucket(currentUser, bucket) && bucket.round.canCocreatorStartFunding);
+    (isMemberOfBucket(currentUser, bucket) &&
+      bucket.round.canCocreatorStartFunding);
 
   if (fetching && !bucket) {
     return (

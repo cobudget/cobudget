@@ -16,7 +16,7 @@ const BucketBudget = ({
   allowStretchGoals,
   minGoal,
   maxGoal,
-  isEditingAllowed
+  isEditingAllowed,
 }) => {
   const { budgetItems } = bucket;
   const [editing, setEditing] = useState(false);
@@ -28,11 +28,10 @@ const BucketBudget = ({
   const handleEdit = () => {
     if (isEditingAllowed) {
       setEditing(true);
-    }
-    else {
+    } else {
       toast.error(COCREATORS_CANT_EDIT);
     }
-  }
+  };
 
   // All the below is in cents so needs to be divided by 100 when rendering
   const expenseTotalMin = minGoal;

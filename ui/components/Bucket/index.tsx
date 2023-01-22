@@ -17,9 +17,13 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
 
   const cocreatorsEditableStatuses = ["FUNDED", "COMPLETED"];
 
-  const isEditingAllowed = currentUser?.currentCollMember?.isAdmin ||
-  currentUser?.currentCollMember?.isModerator ||
-  (isMemberOfBucket(currentUser, bucket) && (bucket.canCocreatorEditOpenBuckets ? true : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
+  const isEditingAllowed =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator ||
+    (isMemberOfBucket(currentUser, bucket) &&
+      (bucket.canCocreatorEditOpenBuckets
+        ? true
+        : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
 
   return (
     <div className="bg-white border-b-default">
@@ -34,9 +38,10 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               openImageModal={() => {
                 if (isEditingAllowed) {
                   openImageModal();
-                }
-                else {
-                  toast.error("Funding has started, and you cannot edit your bucket. Please contact a moderator or admin for help.");
+                } else {
+                  toast.error(
+                    "Funding has started, and you cannot edit your bucket. Please contact a moderator or admin for help."
+                  );
                 }
               }}
             />
@@ -69,7 +74,11 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               isEditingAllowed={isEditingAllowed}
             />
 
-            <DirectFunding canEdit={canEdit} round={bucket.round} isEditingAllowed={isEditingAllowed} />
+            <DirectFunding
+              canEdit={canEdit}
+              round={bucket.round}
+              isEditingAllowed={isEditingAllowed}
+            />
           </div>
         </div>
       </div>

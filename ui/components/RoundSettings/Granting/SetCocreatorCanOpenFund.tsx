@@ -27,7 +27,8 @@ const SetCocreatorCanOpenFund = ({ closeModal, round }) => {
           onSubmit={handleSubmit((variables) => {
             updateGranting({
               roundId: round.id,
-              canCocreatorStartFunding: variables.canCocreatorStartFunding === "true",
+              canCocreatorStartFunding:
+                variables.canCocreatorStartFunding === "true",
             })
               .then(({ data }) => {
                 closeModal();

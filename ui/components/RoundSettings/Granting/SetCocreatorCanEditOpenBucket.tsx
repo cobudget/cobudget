@@ -27,7 +27,8 @@ const SetCocreatorCanEditOpenBucket = ({ closeModal, round }) => {
           onSubmit={handleSubmit((variables) => {
             updateGranting({
               roundId: round.id,
-              canCocreatorEditOpenBuckets: variables.canCocreatorEditOpenBuckets === "true",
+              canCocreatorEditOpenBuckets:
+                variables.canCocreatorEditOpenBuckets === "true",
             })
               .then(({ data }) => {
                 closeModal();

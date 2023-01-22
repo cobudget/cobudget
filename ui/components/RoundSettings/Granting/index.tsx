@@ -240,8 +240,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
           <SettingsListItem
             primary={intl.formatMessage(
               {
-                defaultMessage:
-                  "Co-creators can open {bucketName} for funding",
+                defaultMessage: "Co-creators can open {bucketName} for funding",
               },
               {
                 bucketName: process.env.BUCKET_NAME_PLURAL,

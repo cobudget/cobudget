@@ -60,11 +60,10 @@ const DirectFunding = ({ canEdit = false, round, isEditingAllowed }) => {
   const handleEdit = () => {
     if (isEditingAllowed) {
       setEditing(true);
-    }
-    else {
+    } else {
       toast.error(COCREATORS_CANT_EDIT);
     }
-  }
+  };
 
   const [{ data, fetching: fetchingQuery, error }] = useQuery({
     query: BUCKET_QUERY,
