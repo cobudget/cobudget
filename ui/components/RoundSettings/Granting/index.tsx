@@ -20,7 +20,6 @@ import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
 import FormattedCurrency from "components/FormattedCurrency";
-import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
 
 const useStyles = makeStyles((theme) => ({
   modal: {
@@ -43,7 +42,6 @@ const modals = {
   SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
-  SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
   SET_ABOUT: SetAbout,
   SET_STRIPE: SetStripe,
   SET_DIRECT_FUNDING: SetDirectFunding,
@@ -65,7 +63,6 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
-      canCocreatorStartFunding
     }
   }
 `;
@@ -82,10 +79,8 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $requireBucketApproval: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
-    $canCocreatorStartFunding: Boolean
   ) {
     updateGrantingSettings(
-      canCocreatorStartFunding: $canCocreatorStartFunding
       roundId: $roundId
       currency: $currency
       maxAmountToBucketPerUser: $maxAmountToBucketPerUser
@@ -109,7 +104,6 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       requireBucketApproval
       directFundingEnabled
       directFundingTerms
-      canCocreatorStartFunding
     }
   }
 `;
@@ -225,31 +219,6 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             }
             isSet={typeof round.requireBucketApproval !== "undefined"}
             openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
-            primary={intl.formatMessage(
-              {
-                defaultMessage:
-                  "Can Co-creators open {bucketName} for funding",
-              },
-              {
-                bucketName: process.env.BUCKET_NAME_PLURAL,
-              }
-            )}
-            secondary={
-              round.canCocreatorStartFunding ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.canCocreatorStartFunding !== "undefined"}
-            openModal={() => handleOpen("SET_COCREATOR_CAN_OPEN_FUNDING")}
             canEdit={canEditSettings}
             roundColor={round.color}
           />
