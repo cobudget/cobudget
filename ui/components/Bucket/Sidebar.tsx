@@ -1,5 +1,5 @@
 import Tooltip from "@tippyjs/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { Modal } from "@material-ui/core";
@@ -169,7 +169,10 @@ const BucketSidebar = ({
 
   const statusList = {
     PENDING_APPROVAL: intl.formatMessage({
-      defaultMessage: "Pending Approval",
+      defaultMessage: "Draft",
+    }),
+    IDEA: intl.formatMessage({
+      defaultMessage: "Idea",
     }),
     OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
@@ -202,12 +205,85 @@ const BucketSidebar = ({
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
-    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved;
+    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved && bucket.status === "IDEA";
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
   const showCancelFundingButton =
     bucket.approved && !bucket.canceled && canEdit;
+
+  const buttons = useMemo(() => {
+    return {
+      ACCEPT_FUNDING: () => <Button
+        color={bucket.round.color}
+        fullWidth
+        onClick={() =>
+          confirm(
+            intl.formatMessage(
+              {
+                defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.`,
+              },
+              { bucketName: process.env.BUCKET_NAME_SINGULAR }
+            )
+          ) &&
+          acceptFunding({ bucketId: bucket.id }).catch((err) =>
+            alert(err.message)
+          )
+        }
+        testid="accept-funding-button"
+      >
+        <FormattedMessage defaultMessage="Accept funding" />
+      </Button>,
+      PUBLISH_BUTTON: () => <Button
+      color={bucket.round.color}
+      onClick={() =>
+        publishBucket({
+          bucketId: bucket.id,
+          unpublish: bucket.published,
+        })
+      }
+      fullWidth
+      testid="publish-bucket"
+    >
+      <FormattedMessage defaultMessage="Publish" />
+      </Button>,
+      APPROVE_BUTTON: () => <Button
+        color={bucket.round.color}
+        fullWidth
+        onClick={() =>
+          approveForGranting({
+            bucketId: bucket.id,
+            approved: true,
+          }).catch((err) => alert(err.message))
+        }
+        testid="open-for-funding-button"
+      >
+        <FormattedMessage defaultMessage="Open for funding" />
+      </Button>,
+      MARK_AS_COMPLETED: () => <Button
+        color={bucket.round.color}
+        fullWidth
+        onClick={() =>
+          confirm(
+            intl.formatMessage(
+              {
+                defaultMessage: `Are you sure you would like to mark this {bucketName} as completed? This can't be undone.`,
+              },
+              { bucketName: process.env.BUCKET_NAME_SINGULAR }
+            )
+          ) &&
+          markAsCompleted({ bucketId: bucket.id }).then(
+            ({ data, error }) => {
+              if (error) toast.error(error.message);
+            }
+          )
+        }
+        testid="mark-as-completed-button"
+      >
+        <FormattedMessage defaultMessage="Mark as completed" />
+      </Button>
+    }
+  }, [bucket]);
 
   return (
     <>
@@ -236,81 +312,16 @@ const BucketSidebar = ({
           )}
           {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && (
-            <Button
-              color={bucket.round.color}
-              fullWidth
-              onClick={() =>
-                confirm(
-                  intl.formatMessage(
-                    {
-                      defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.`,
-                    },
-                    { bucketName: process.env.BUCKET_NAME_SINGULAR }
-                  )
-                ) &&
-                acceptFunding({ bucketId: bucket.id }).catch((err) =>
-                  alert(err.message)
-                )
-              }
-              testid="accept-funding-button"
-            >
-              <FormattedMessage defaultMessage="Accept funding" />
-            </Button>
+            <buttons.ACCEPT_FUNDING />
           )}
-
           {showPublishButton && (
-            <Button
-              color={bucket.round.color}
-              onClick={() =>
-                publishBucket({
-                  bucketId: bucket.id,
-                  unpublish: bucket.published,
-                })
-              }
-              fullWidth
-              testid="publish-bucket"
-            >
-              <FormattedMessage defaultMessage="Publish" />
-            </Button>
+            <buttons.PUBLISH_BUTTON />
           )}
           {showApproveButton && (
-            <Button
-              color={bucket.round.color}
-              fullWidth
-              onClick={() =>
-                approveForGranting({
-                  bucketId: bucket.id,
-                  approved: true,
-                }).catch((err) => alert(err.message))
-              }
-              testid="open-for-funding-button"
-            >
-              <FormattedMessage defaultMessage="Open for funding" />
-            </Button>
+            <buttons.APPROVE_BUTTON />
           )}
           {showMarkAsCompletedButton && (
-            <Button
-              color={bucket.round.color}
-              fullWidth
-              onClick={() =>
-                confirm(
-                  intl.formatMessage(
-                    {
-                      defaultMessage: `Are you sure you would like to mark this {bucketName} as completed? This can't be undone.`,
-                    },
-                    { bucketName: process.env.BUCKET_NAME_SINGULAR }
-                  )
-                ) &&
-                markAsCompleted({ bucketId: bucket.id }).then(
-                  ({ data, error }) => {
-                    if (error) toast.error(error.message);
-                  }
-                )
-              }
-              testid="mark-as-completed-button"
-            >
-              <FormattedMessage defaultMessage="Mark as completed" />
-            </Button>
+            <buttons.MARK_AS_COMPLETED />
           )}
           {canEdit && (
             <div className="relative">

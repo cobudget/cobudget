@@ -11,7 +11,10 @@ const BucketCard = ({ bucket, round }) => {
 
   const statusList = {
     PENDING_APPROVAL: intl.formatMessage({
-      defaultMessage: "Pending Approval",
+      defaultMessage: "Draft",
+    }),
+    IDEA: intl.formatMessage({
+      defaultMessage: "Idea",
     }),
     OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),

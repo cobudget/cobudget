@@ -6,10 +6,11 @@ import {
   isCollModOrAdmin,
 } from "../auth";
 import dayjs from "dayjs";
-import { isAndGetCollMember, updateFundedPercentage } from "../helpers";
+import { getRoundMember, isAndGetCollMember, updateFundedPercentage } from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
+import { skip } from "graphql-resolvers";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -718,6 +719,17 @@ export const approveForGranting = combineResolvers(
     const round = await prisma.round.findFirst({
       where: { buckets: { some: { id: args.bucketId } } },
     });
+
+    const roundMember = await getRoundMember({
+      userId: ctx.user?.id,
+      roundId: round.id,
+      bucketId: args.bucketId,
+    })
+
+    // Admin or moderator can approve
+    if (roundMember?.isModerator || roundMember?.isAdmin) {
+      return skip;
+    }
 
     if (round.requireBucketApproval) {
       return isCollModOrAdmin(parent, args, ctx);

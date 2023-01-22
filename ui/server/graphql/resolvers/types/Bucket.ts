@@ -193,5 +193,6 @@ export const status = (bucket, args, ctx) => {
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
+  if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
 };

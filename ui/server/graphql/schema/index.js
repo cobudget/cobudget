@@ -261,6 +261,7 @@ const schema = gql`
 
   enum StatusType {
     PENDING_APPROVAL
+    IDEA
     OPEN_FOR_FUNDING
     FUNDED
     CANCELED
