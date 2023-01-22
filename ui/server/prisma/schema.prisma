@@ -145,18 +145,17 @@ model Round {
   currency           String
   visibility         Visibility         @default(PUBLIC)
 
-  maxAmountToBucketPerUser    Int?
-  bucketCreationCloses        DateTime?
-  grantingOpens               DateTime?
-  grantingCloses              DateTime?
-  allowStretchGoals           Boolean?
-  requireBucketApproval       Boolean?
-  stripeAccountId             String?
-  directFundingEnabled        Boolean   @default(false)
-  directFundingTerms          String    @default("")
-  bucketReviewIsOpen          Boolean?
-  discourseCategoryId         Int?
-  canCocreatorStartFunding    Boolean?  @default(false)
+  maxAmountToBucketPerUser Int?
+  bucketCreationCloses     DateTime?
+  grantingOpens            DateTime?
+  grantingCloses           DateTime?
+  allowStretchGoals        Boolean?
+  requireBucketApproval    Boolean?
+  stripeAccountId          String?
+  directFundingEnabled     Boolean   @default(false)
+  directFundingTerms       String    @default("")
+  bucketReviewIsOpen       Boolean?
+  discourseCategoryId      Int?
 
   tags       Tag[]
   guidelines Guideline[]

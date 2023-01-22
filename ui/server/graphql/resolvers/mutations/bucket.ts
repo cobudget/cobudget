@@ -719,15 +719,9 @@ export const approveForGranting = combineResolvers(
       where: { buckets: { some: { id: args.bucketId } } },
     });
 
-    if (round.requireBucketApproval) {
-      return isCollModOrAdmin(parent, args, ctx);
-    }
-
-    if (round.canCocreatorStartFunding) {
-      return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
-    }
-
-    throw new Error("You are not allowed to perform this action");
+    return round.requireBucketApproval
+      ? isCollModOrAdmin(parent, args, ctx)
+      : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
   },
   async (_, { bucketId, approved }) =>
     prisma.bucket.update({
