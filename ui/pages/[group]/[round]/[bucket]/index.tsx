@@ -42,7 +42,6 @@ export const BUCKET_QUERY = gql`
       noOfFunders
       status
 
-
       directFundingEnabled
       directFundingType
       exchangeDescription

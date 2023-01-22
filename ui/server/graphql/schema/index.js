@@ -213,6 +213,7 @@ const schema = gql`
       directFundingEnabled: Boolean
       directFundingTerms: String
       canCocreatorStartFunding: Boolean
+      canCocreatorEditOpenBuckets: Boolean
     ): Round
 
     allocate(
@@ -294,6 +295,7 @@ const schema = gql`
     directFundingEnabled: Boolean
     directFundingTerms: String
     canCocreatorStartFunding: Boolean
+    canCocreatorEditOpenBuckets: Boolean
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int
