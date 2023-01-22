@@ -42,6 +42,7 @@ export const BUCKET_QUERY = gql`
       noOfFunders
       status
 
+
       directFundingEnabled
       directFundingType
       exchangeDescription
@@ -61,6 +62,7 @@ export const BUCKET_QUERY = gql`
         grantingIsOpen
         grantingHasClosed
         maxAmountToBucketPerUser
+        canCocreatorStartFunding
         guidelines {
           id
           title
