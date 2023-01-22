@@ -6,6 +6,8 @@ import Tooltip from "@tippyjs/react";
 import { FormattedMessage, FormattedNumber } from "react-intl";
 
 import EditBudgetModal from "./EditBudgetModal";
+import toast from "react-hot-toast";
+import { COCREATORS_CANT_EDIT } from "utils/messages";
 
 const BucketBudget = ({
   bucket,
@@ -14,6 +16,7 @@ const BucketBudget = ({
   allowStretchGoals,
   minGoal,
   maxGoal,
+  isEditingAllowed
 }) => {
   const { budgetItems } = bucket;
   const [editing, setEditing] = useState(false);
@@ -21,6 +24,15 @@ const BucketBudget = ({
   const monetaryIncome = incomeItems.filter((item) => item.min > 0);
   const nonMonetaryIncome = incomeItems.filter((item) => item.min === 0);
   const expenseItems = budgetItems.filter((item) => item.type === "EXPENSE");
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    }
+    else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  }
 
   // All the below is in cents so needs to be divided by 100 when rendering
   const expenseTotalMin = minGoal;
@@ -51,7 +63,7 @@ const BucketBudget = ({
             {canEdit && (
               <div>
                 <Tooltip content="Edit budget" placement="bottom" arrow={false}>
-                  <IconButton onClick={() => setEditing(true)}>
+                  <IconButton onClick={handleEdit}>
                     <EditIcon className="h-6 w-6" />
                   </IconButton>
                 </Tooltip>
@@ -232,7 +244,7 @@ const BucketBudget = ({
       ) : canEdit ? (
         <button
           data-testid="add-bucket-budget-button"
-          onClick={() => setEditing(true)}
+          onClick={handleEdit}
           className="block w-full h-32 text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
         >
           <FormattedMessage defaultMessage="+ Budget" />
