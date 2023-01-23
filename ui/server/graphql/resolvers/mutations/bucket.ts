@@ -324,6 +324,35 @@ export const publishBucket = combineResolvers(
   }
 );
 
+export const setReadyForFunding = combineResolvers(
+  isBucketCocreatorOrCollAdminOrMod,
+  async (_, { bucketId, isReadyForFunding}, { user, eventHub }) => {
+    const bucket = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
+        round: {
+          include: {
+            group: {
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const readyForFundingAt = isReadyForFunding ? new Date(): null;
+    const resultBucket = await prisma.bucket.update({
+      where: { id: bucket.id },
+      data: { readyForFundingAt },
+    });
+
+    return resultBucket;
+  }
+);
+
 export const addComment = combineResolvers(
   isCollMember,
   async (_, { content, bucketId }, { user, eventHub }) => {

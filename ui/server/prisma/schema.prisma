@@ -258,23 +258,24 @@ enum AllocationType {
 }
 
 model Bucket {
-  id          String        @id @default(cuid())
-  round       Round         @relation(fields: [roundId], references: [id])
-  roundId     String        @map("collectionId")
-  title       String
-  description String?
-  summary     String?
-  Images      Image[]
-  cocreators  RoundMember[]
-  BudgetItems BudgetItem[]
-  FieldValues FieldValue[]
-  comments    Comment[]
-  approvedAt  DateTime?
-  publishedAt DateTime?
-  fundedAt    DateTime?
-  canceledAt  DateTime?
-  completedAt DateTime?
-  archivedAt  DateTime?
+  id                String        @id @default(cuid())
+  round             Round         @relation(fields: [roundId], references: [id])
+  roundId           String        @map("collectionId")
+  title             String
+  description       String?
+  summary           String?
+  Images            Image[]
+  cocreators        RoundMember[]
+  BudgetItems       BudgetItem[]
+  FieldValues       FieldValue[]
+  comments          Comment[]
+  approvedAt        DateTime?
+  publishedAt       DateTime?
+  fundedAt          DateTime?
+  canceledAt        DateTime?
+  completedAt       DateTime?
+  archivedAt        DateTime?
+  readyForFundingAt DateTime?
 
   directFundingEnabled        Boolean           @default(false)
   directFundingType           DirectFundingType @default(DONATION)

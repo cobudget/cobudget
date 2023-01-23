@@ -19,8 +19,7 @@ export default function Overview({
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    (isMemberOfBucket(currentUser, bucket) &&
-      bucket.round.canCocreatorStartFunding);
+    isMemberOfBucket(currentUser, bucket);
 
   if (fetching && !bucket) {
     return (
@@ -89,6 +88,9 @@ export default function Overview({
                 currentGroup={currentGroup}
                 canEdit={canEdit}
                 showBucketReview={showBucketReview}
+                isAdminOrModerator={currentUser?.currentCollMember?.isAdmin ||
+                  currentUser?.currentCollMember?.isModerator}
+                isCocreator={isMemberOfBucket(currentUser, bucket)}
               />
             </div>
           </div>

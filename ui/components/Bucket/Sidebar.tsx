@@ -40,6 +40,7 @@ const PUBLISH_BUCKET_MUTATION = gql`
     publishBucket(bucketId: $bucketId, unpublish: $unpublish) {
       id
       published
+      status
     }
   }
 `;
@@ -82,6 +83,15 @@ const DELETE_BUCKET_MUTATION = gql`
   mutation DeleteBucket($bucketId: ID!) {
     deleteBucket(bucketId: $bucketId) {
       id
+    }
+  }
+`;
+
+const SET_READY_FOR_FUNDING = gql`
+  mutation SetReadyForFunding($bucketId: ID!, $isReadyForFunding: Boolean!) {
+    setReadyForFunding (bucketId: $bucketId, isReadyForFunding: $isReadyForFunding) {
+      id
+      readyForFunding
     }
   }
 `;
@@ -153,6 +163,8 @@ const BucketSidebar = ({
   currentGroup,
   canEdit,
   showBucketReview,
+  isAdminOrModerator,
+  isCocreator,
 }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
@@ -160,6 +172,7 @@ const BucketSidebar = ({
   const [confirmCancelBucketOpen, setConfirmCancelBucketOpen] = useState(false);
 
   const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
+  const [, readyForFunding] = useMutation(SET_READY_FOR_FUNDING);
   const [, publishBucket] = useMutation(PUBLISH_BUCKET_MUTATION);
   const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION);
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
@@ -205,12 +218,14 @@ const BucketSidebar = ({
   const showMarkAsCompletedButton =
     isRoundAdminOrGuide && bucket.funded && !bucket.completed;
   const showApproveButton =
-    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved && bucket.status === "IDEA";
+    canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved && bucket.status === "IDEA" && isAdminOrModerator;
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
   const showCancelFundingButton =
     bucket.approved && !bucket.canceled && canEdit;
+  //show ready for funding button only to co-creators when the bucket is in IDEA stage
+  const showReadyForFundingButton = bucket.status === "IDEA" && isCocreator && !isAdminOrModerator
 
   const buttons = useMemo(() => {
     return {
@@ -221,7 +236,7 @@ const BucketSidebar = ({
           confirm(
             intl.formatMessage(
               {
-                defaultMessage: `Are you sure you would like to accept and finalize funding for this {bucketName}? This can't be undone.`,
+                defaultMessage: `Are you sure you want to accept the funding, even if you have not reached your max goal? You will need to contact an admin to open the {bucketName} for funding again.`,
               },
               { bucketName: process.env.BUCKET_NAME_SINGULAR }
             )
@@ -281,6 +296,24 @@ const BucketSidebar = ({
         testid="mark-as-completed-button"
       >
         <FormattedMessage defaultMessage="Mark as completed" />
+      </Button>,
+      READY_FOR_FUNDING: () => <Button
+        color={bucket.round.color}
+        fullWidth
+        onClick={() =>
+          readyForFunding({ bucketId: bucket.id, isReadyForFunding: !bucket.readyForFunding }).then(
+            ({ data, error }) => {
+              if (error) toast.error(error.message);
+            }
+          )
+        }
+        testid="mark-as-completed-button"
+      >
+        {
+        bucket.readyForFunding ? 
+          <FormattedMessage defaultMessage="Mark as not ready" /> :
+          <FormattedMessage defaultMessage="Ready for funding" />
+        }
       </Button>
     }
   }, [bucket]);
@@ -322,6 +355,9 @@ const BucketSidebar = ({
           )}
           {showMarkAsCompletedButton && (
             <buttons.MARK_AS_COMPLETED />
+          )}
+          {showReadyForFundingButton && (
+            <buttons.READY_FOR_FUNDING />
           )}
           {canEdit && (
             <div className="relative">
