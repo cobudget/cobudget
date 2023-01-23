@@ -96,6 +96,16 @@ const SET_READY_FOR_FUNDING = gql`
   }
 `;
 
+const REOPEN_FUNDING = gql`
+  mutation ReopenFunding ($bucketId: ID!) {
+    reopenFunding(bucketId: $bucketId){
+      id
+      funded
+      status
+    }
+  }
+`;
+
 const ConfirmCancelBucket = ({ open, close, bucketId }) => {
   const [{ fetching }, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
 
@@ -177,6 +187,7 @@ const BucketSidebar = ({
   const [, markAsCompleted] = useMutation(MARK_AS_COMPLETED_MUTATION);
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
+  const [, reopenFunding] = useMutation(REOPEN_FUNDING);
 
   const intl = useIntl();
 
@@ -216,7 +227,8 @@ const BucketSidebar = ({
     bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
   const showMarkAsCompletedButton =
-    isRoundAdminOrGuide && bucket.funded && !bucket.completed;
+    isRoundAdminOrGuide && bucket.funded && !bucket.completed && isCocreator;
+  const showReopenFundingButton = bucket.funded && !bucket.completed && isAdminOrModerator && hasReachedMinGoal && hasNotReachedMaxGoal
   const showApproveButton =
     canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved && bucket.status === "IDEA" && isAdminOrModerator;
   const showUnapproveButton =
@@ -314,6 +326,20 @@ const BucketSidebar = ({
           <FormattedMessage defaultMessage="Mark as not ready" /> :
           <FormattedMessage defaultMessage="Ready for funding" />
         }
+      </Button>,
+      REOPEN_FUNDING: () => <Button
+        color={bucket.round.color}
+        fullWidth
+        onClick={() =>
+          reopenFunding({ bucketId: bucket.id }).then(
+            ({ data, error }) => {
+              if (error) toast.error(error.message);
+            }
+          )
+        }
+        testid="mark-as-completed-button"
+      >
+        <FormattedMessage defaultMessage="Re-open for funding" />
       </Button>
     }
   }, [bucket]);
@@ -359,6 +385,10 @@ const BucketSidebar = ({
           {showReadyForFundingButton && (
             <buttons.READY_FOR_FUNDING />
           )}
+          {
+            showReopenFundingButton &&
+            <buttons.REOPEN_FUNDING />
+          }
           {canEdit && (
             <div className="relative">
               <div className="flex justify-end">

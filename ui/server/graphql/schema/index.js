@@ -202,6 +202,7 @@ const schema = gql`
 
     approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
     setReadyForFunding(bucketId: ID!, isReadyForFunding: Boolean!): Bucket
+    reopenFunding(bucketId: ID!): Bucket
     updateGrantingSettings(
       roundId: ID!
       currency: String

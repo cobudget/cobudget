@@ -353,6 +353,34 @@ export const setReadyForFunding = combineResolvers(
   }
 );
 
+export const reopenFunding = combineResolvers(
+  isCollModOrAdmin,
+  async (_, { bucketId }, { user }) => {
+    const bucket = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
+        round: {
+          include: {
+            group: {
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const resultBucket = await prisma.bucket.update({
+      where: { id: bucket.id },
+      data: { fundedAt: null },
+    });
+
+    return resultBucket;
+  }
+);
+
 export const addComment = combineResolvers(
   isCollMember,
   async (_, { content, bucketId }, { user, eventHub }) => {
