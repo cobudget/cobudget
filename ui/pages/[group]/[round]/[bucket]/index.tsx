@@ -36,6 +36,7 @@ export const BUCKET_QUERY = gql`
       completedAt
       funded
       fundedAt
+      readyForFunding
       canceled
       canceledAt
       noOfComments

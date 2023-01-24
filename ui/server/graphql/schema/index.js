@@ -201,6 +201,8 @@ const schema = gql`
     deleteGroup(groupId: ID!): Group
 
     approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
+    setReadyForFunding(bucketId: ID!, isReadyForFunding: Boolean!): Bucket
+    reopenFunding(bucketId: ID!): Bucket
     updateGrantingSettings(
       roundId: ID!
       currency: String
@@ -261,6 +263,7 @@ const schema = gql`
 
   enum StatusType {
     PENDING_APPROVAL
+    IDEA
     OPEN_FOR_FUNDING
     FUNDED
     CANCELED
@@ -450,6 +453,7 @@ const schema = gql`
     customFields: [CustomFieldValue]
     approved: Boolean
     published: Boolean
+    readyForFunding: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
     status: StatusType

@@ -12,7 +12,11 @@ export default function StatusFilter({
   const items = [
     {
       type: "PENDING_APPROVAL",
-      placeholder: "Pending approval",
+      placeholder: "Draft",
+    },
+    {
+      type: "IDEA",
+      placeholder: "Idea",
     },
     {
       type: "OPEN_FOR_FUNDING",
