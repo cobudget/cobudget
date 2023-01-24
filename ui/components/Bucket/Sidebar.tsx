@@ -227,7 +227,7 @@ const BucketSidebar = ({
     bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
   const showMarkAsCompletedButton =
-    isRoundAdminOrGuide && bucket.funded && !bucket.completed && isCocreator;
+    bucket.funded && !bucket.completed && isCocreator;
   const showReopenFundingButton = bucket.funded && !bucket.completed && isAdminOrModerator && hasReachedMinGoal && hasNotReachedMaxGoal
   const showApproveButton =
     canApproveBucket && !bucket.round.grantingHasClosed && !bucket.approved && bucket.status === "IDEA" && isAdminOrModerator;

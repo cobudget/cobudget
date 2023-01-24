@@ -809,7 +809,7 @@ export const approveForGranting = combineResolvers(
 );
 
 export const markAsCompleted = combineResolvers(
-  isCollModOrAdmin,
+  isBucketCocreatorOrCollAdminOrMod,
   async (_, { bucketId }) =>
     prisma.bucket.update({
       where: { id: bucketId },
