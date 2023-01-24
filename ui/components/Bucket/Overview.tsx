@@ -5,6 +5,8 @@ import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
 import Summary from "./Summary";
 import { FormattedMessage } from "react-intl";
+import { COCREATORS_CANT_EDIT } from "utils/messages";
+import toast from "react-hot-toast";
 
 export default function Overview({
   currentUser,
@@ -20,6 +22,16 @@ export default function Overview({
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
     isMemberOfBucket(currentUser, bucket);
+
+  const cocreatorsEditableStatuses = ["FUNDED", "COMPLETED"];
+
+  const isEditingAllowed =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator ||
+    (isMemberOfBucket(currentUser, bucket) &&
+      (bucket.canCocreatorEditOpenBuckets
+        ? true
+        : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
 
   if (fetching && !bucket) {
     return (
@@ -58,11 +70,17 @@ export default function Overview({
       </Head>
       <div className="border-b border-b-default">
         <div className="max-w-screen-xl mx-auto py-14 px-2 md:px-4">
-          <Title title={bucket.title} bucketId={bucket.id} canEdit={canEdit} />
+          <Title
+            title={bucket.title}
+            bucketId={bucket.id}
+            canEdit={canEdit}
+            isEditingAllowed={isEditingAllowed}
+          />
           <Summary
             bucketId={bucket.id}
             summary={bucket.summary}
             canEdit={canEdit}
+            isEditingAllowed={isEditingAllowed}
           />
 
           <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
@@ -74,7 +92,13 @@ export default function Overview({
             ) : canEdit ? (
               <button
                 className={`w-full h-64 md:h-88 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100`}
-                onClick={openImageModal}
+                onClick={() => {
+                  if (isEditingAllowed) {
+                    openImageModal();
+                  } else {
+                    toast.error(COCREATORS_CANT_EDIT);
+                  }
+                }}
               >
                 <FormattedMessage defaultMessage="+ Cover image" />
               </button>
