@@ -6,7 +6,11 @@ import {
   isCollModOrAdmin,
 } from "../auth";
 import dayjs from "dayjs";
-import { getRoundMember, isAndGetCollMember, updateFundedPercentage } from "../helpers";
+import {
+  getRoundMember,
+  isAndGetCollMember,
+  updateFundedPercentage,
+} from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
@@ -326,7 +330,7 @@ export const publishBucket = combineResolvers(
 
 export const setReadyForFunding = combineResolvers(
   isBucketCocreatorOrCollAdminOrMod,
-  async (_, { bucketId, isReadyForFunding}, { user, eventHub }) => {
+  async (_, { bucketId, isReadyForFunding }, { user, eventHub }) => {
     const bucket = await prisma.bucket.findUnique({
       where: { id: bucketId },
       include: {
@@ -343,7 +347,7 @@ export const setReadyForFunding = combineResolvers(
       },
     });
 
-    const readyForFundingAt = isReadyForFunding ? new Date(): null;
+    const readyForFundingAt = isReadyForFunding ? new Date() : null;
     const resultBucket = await prisma.bucket.update({
       where: { id: bucket.id },
       data: { readyForFundingAt },
@@ -781,7 +785,7 @@ export const approveForGranting = combineResolvers(
       userId: ctx.user?.id,
       roundId: round.id,
       bucketId: args.bucketId,
-    })
+    });
 
     // Admin or moderator can approve
     if (roundMember?.isModerator || roundMember?.isAdmin) {

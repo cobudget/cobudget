@@ -393,7 +393,7 @@ export const client = (
                   );
                 });
             },
-            
+
             addComment(result: any, { content, bucketId }, cache) {
               if (result.addComment) {
                 cache.updateQuery(

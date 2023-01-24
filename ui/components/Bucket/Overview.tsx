@@ -88,8 +88,10 @@ export default function Overview({
                 currentGroup={currentGroup}
                 canEdit={canEdit}
                 showBucketReview={showBucketReview}
-                isAdminOrModerator={currentUser?.currentCollMember?.isAdmin ||
-                  currentUser?.currentCollMember?.isModerator}
+                isAdminOrModerator={
+                  currentUser?.currentCollMember?.isAdmin ||
+                  currentUser?.currentCollMember?.isModerator
+                }
                 isCocreator={isMemberOfBucket(currentUser, bucket)}
               />
             </div>
