@@ -90,8 +90,9 @@ export const editBucket = combineResolvers(
     }
 
     if (
-      round.canCocreatorEditOpenBuckets 
-      || (!round.canCocreatorEditOpenBuckets && getBucketStatus(bucket) !== "OPEN_FOR_FUNDING")
+      round.canCocreatorEditOpenBuckets ||
+      (!round.canCocreatorEditOpenBuckets &&
+        getBucketStatus(bucket) !== "OPEN_FOR_FUNDING")
     ) {
       return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
     }

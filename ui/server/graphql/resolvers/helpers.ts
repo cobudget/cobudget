@@ -477,4 +477,4 @@ export const getBucketStatus = (bucket) => {
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
-}
+};
