@@ -7,6 +7,7 @@ import {
 } from "../auth";
 import dayjs from "dayjs";
 import {
+  getBucketStatus,
   getRoundMember,
   isAndGetCollMember,
   updateFundedPercentage,
@@ -88,7 +89,10 @@ export const editBucket = combineResolvers(
       return skip;
     }
 
-    if (round.canCocreatorEditOpenBuckets && !bucket.approvedAt) {
+    if (
+      round.canCocreatorEditOpenBuckets 
+      || (!round.canCocreatorEditOpenBuckets && getBucketStatus(bucket) !== "OPEN_FOR_FUNDING")
+    ) {
       return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
     }
 
