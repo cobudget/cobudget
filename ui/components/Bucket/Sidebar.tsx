@@ -248,9 +248,8 @@ const BucketSidebar = ({
     !bucket.round.grantingHasClosed &&
     !bucket.approved &&
     bucket.status === "IDEA" &&
-    (isAdminOrModerator || (
-      isCocreator && bucket.round.canCocreatorStartFunding
-    ))
+    (isAdminOrModerator ||
+      (isCocreator && bucket.round.canCocreatorStartFunding));
 
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
@@ -259,7 +258,10 @@ const BucketSidebar = ({
     bucket.approved && !bucket.canceled && canEdit;
   //show ready for funding button only to co-creators when the bucket is in IDEA stage
   const showReadyForFundingButton =
-    bucket.status === "IDEA" && isCocreator && !isAdminOrModerator && !bucket.round.canCocreatorStartFunding;
+    bucket.status === "IDEA" &&
+    isCocreator &&
+    !isAdminOrModerator &&
+    !bucket.round.canCocreatorStartFunding;
 
   const buttons = useMemo(() => {
     return {
@@ -618,7 +620,7 @@ const BucketSidebar = ({
         </div>
         <Tags bucket={bucket} canEdit={canEdit} />
 
-        <Infobox 
+        <Infobox
           bucket={bucket}
           isAdminOrModerator={isAdminOrModerator}
           isCocreator={isCocreator}

@@ -15,7 +15,12 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
     currentUser?.currentCollMember?.isModerator ||
     isMemberOfBucket(currentUser, bucket);
 
-  const cocreatorsEditableStatuses = ["PENDING_APPROVAL", "IDEA", "FUNDED", "COMPLETED"];
+  const cocreatorsEditableStatuses = [
+    "PENDING_APPROVAL",
+    "IDEA",
+    "FUNDED",
+    "COMPLETED",
+  ];
 
   const isEditingAllowed =
     currentUser?.currentCollMember?.isAdmin ||
