@@ -8,6 +8,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
 import { FormControlLabel } from "@material-ui/core";
 import Checkbox from "../Checkbox";
+import { useRouter } from "next/router";
 
 const FINISH_SIGNUP_MUTATION = gql`
   mutation updateProfile(
@@ -34,6 +35,7 @@ export default function FinishSignup({ currentUser }) {
   const [name, setName] = useState(currentUser.name ?? "");
   const [mailUpdates, setMailUpdates] = useState(false);
   const intl = useIntl();
+  const router = useRouter();
 
   const [acceptTerms, setAcceptTerms] = useState(
     process.env.TERMS_URL ? false : true
@@ -156,6 +158,7 @@ export default function FinishSignup({ currentUser }) {
                       { bucketName: process.env.PLATFORM_NAME }
                     )
                   );
+                  router.push("/new-round");
                 }
               }
             )
