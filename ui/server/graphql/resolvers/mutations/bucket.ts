@@ -66,7 +66,35 @@ export const createBucket = combineResolvers(
 );
 
 export const editBucket = combineResolvers(
-  isBucketCocreatorOrCollAdminOrMod,
+  async (parent, args, ctx) => {
+    //here
+
+    const bucket = await prisma.bucket.findFirst({
+      where: { id: args.bucketId }
+    });
+
+    const round = await prisma.round.findFirst({
+      where: { buckets: { some: { id: args.bucketId } } },
+    });
+
+    const roundMember = await getRoundMember({
+      userId: ctx.user?.id,
+      roundId: round.id,
+      bucketId: args.bucketId,
+    });
+
+    // Admin or moderator can always edit
+    if (roundMember?.isModerator || roundMember?.isAdmin) {
+      return skip;
+    }
+
+    if (round.canCocreatorEditOpenBuckets && !bucket.approvedAt) {
+      return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+    }
+
+    throw new Error("You are not allowed to perform this action");
+    
+  },
   async (
     parent,
     {
