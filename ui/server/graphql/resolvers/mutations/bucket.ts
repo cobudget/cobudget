@@ -70,7 +70,7 @@ export const editBucket = combineResolvers(
     //here
 
     const bucket = await prisma.bucket.findFirst({
-      where: { id: args.bucketId }
+      where: { id: args.bucketId },
     });
 
     const round = await prisma.round.findFirst({
@@ -93,7 +93,6 @@ export const editBucket = combineResolvers(
     }
 
     throw new Error("You are not allowed to perform this action");
-    
   },
   async (
     parent,

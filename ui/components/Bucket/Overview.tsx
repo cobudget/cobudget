@@ -23,12 +23,12 @@ export default function Overview({
     currentUser?.currentCollMember?.isModerator ||
     isMemberOfBucket(currentUser, bucket);
 
-    const cocreatorsEditableStatuses = [
-      "PENDING_APPROVAL",
-      "IDEA",
-      "FUNDED",
-      "COMPLETED",
-    ];
+  const cocreatorsEditableStatuses = [
+    "PENDING_APPROVAL",
+    "IDEA",
+    "FUNDED",
+    "COMPLETED",
+  ];
 
   const isEditingAllowed =
     currentUser?.currentCollMember?.isAdmin ||
