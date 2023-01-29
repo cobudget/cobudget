@@ -29,7 +29,7 @@ export default function Overview({
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
     (isMemberOfBucket(currentUser, bucket) &&
-      (bucket.canCocreatorEditOpenBuckets
+      (bucket.round.canCocreatorEditOpenBuckets
         ? true
         : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
 

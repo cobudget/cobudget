@@ -23,6 +23,7 @@ import isRtl from "../../utils/isRTL";
 import dayjs from "dayjs";
 import Label from "../../components/Label";
 import getStatusColor from "utils/getStatusColor";
+import Infobox from "./Infobox";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -31,6 +32,7 @@ const APPROVE_FOR_GRANTING_MUTATION = gql`
       approved
       canceled
       canceledAt
+      status
     }
   }
 `;
@@ -51,6 +53,7 @@ const MARK_AS_COMPLETED_MUTATION = gql`
       id
       completedAt
       completed
+      status
     }
   }
 `;
@@ -61,6 +64,7 @@ const ACCEPT_FUNDING_MUTATION = gql`
       id
       fundedAt
       funded
+      status
     }
   }
 `;
@@ -75,6 +79,7 @@ const CANCEL_FUNDING_MUTATION = gql`
       canceledAt
       approved
       totalContributions
+      status
     }
   }
 `;
@@ -95,6 +100,7 @@ const SET_READY_FOR_FUNDING = gql`
     ) {
       id
       readyForFunding
+      status
     }
   }
 `;
@@ -242,7 +248,9 @@ const BucketSidebar = ({
     !bucket.round.grantingHasClosed &&
     !bucket.approved &&
     bucket.status === "IDEA" &&
-    isAdminOrModerator;
+    (isAdminOrModerator ||
+      (isCocreator && bucket.round.canCocreatorStartFunding));
+
   const showUnapproveButton =
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
@@ -250,7 +258,10 @@ const BucketSidebar = ({
     bucket.approved && !bucket.canceled && canEdit;
   //show ready for funding button only to co-creators when the bucket is in IDEA stage
   const showReadyForFundingButton =
-    bucket.status === "IDEA" && isCocreator && !isAdminOrModerator;
+    bucket.status === "IDEA" &&
+    isCocreator &&
+    !isAdminOrModerator &&
+    !bucket.round.canCocreatorStartFunding;
 
   const buttons = useMemo(() => {
     return {
@@ -608,6 +619,12 @@ const BucketSidebar = ({
           />
         </div>
         <Tags bucket={bucket} canEdit={canEdit} />
+
+        <Infobox
+          bucket={bucket}
+          isAdminOrModerator={isAdminOrModerator}
+          isCocreator={isCocreator}
+        />
 
         <p className="italic text-gray-600 text-sm">
           <FormattedMessage

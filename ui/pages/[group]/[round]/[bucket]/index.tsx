@@ -63,6 +63,7 @@ export const BUCKET_QUERY = gql`
         grantingHasClosed
         maxAmountToBucketPerUser
         canCocreatorStartFunding
+        canCocreatorEditOpenBuckets
         guidelines {
           id
           title
