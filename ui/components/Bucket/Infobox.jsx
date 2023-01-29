@@ -74,7 +74,7 @@ function Infobox ({
 
     if (message) {
         return (
-            <a className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
+            <a className="block mt-10 text-center rounded-lg border-2 border-yellow-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
                 {message}
             </a>
         );
