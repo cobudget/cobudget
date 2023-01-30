@@ -8,6 +8,8 @@ import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
+import { COCREATORS_CANT_EDIT } from "utils/messages";
+import toast from "react-hot-toast";
 
 const EDIT_TITLE_MUTATION = gql`
   mutation EditTitle($bucketId: ID!, $title: String) {
@@ -18,12 +20,21 @@ const EDIT_TITLE_MUTATION = gql`
   }
 `;
 
-const BucketTitle = ({ title, canEdit, bucketId }) => {
+const BucketTitle = ({ title, canEdit, bucketId, isEditingAllowed }) => {
   const intl = useIntl();
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_TITLE_MUTATION);
   const { handleSubmit, register, errors } = useForm();
 
   const [editing, setEditing] = useState(false);
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    } else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  };
+
   if (editing) {
     return (
       <>
@@ -83,7 +94,7 @@ const BucketTitle = ({ title, canEdit, bucketId }) => {
               placement="bottom"
               arrow={false}
             >
-              <IconButton onClick={() => setEditing(true)}>
+              <IconButton onClick={handleEdit}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
             </Tooltip>

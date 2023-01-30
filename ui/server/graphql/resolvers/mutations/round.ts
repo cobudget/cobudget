@@ -498,6 +498,8 @@ export const updateGrantingSettings = combineResolvers(
       requireBucketApproval,
       directFundingEnabled,
       directFundingTerms,
+      canCocreatorStartFunding,
+      canCocreatorEditOpenBuckets,
     }
   ) => {
     const round = await prisma.round.findUnique({
@@ -525,6 +527,8 @@ export const updateGrantingSettings = combineResolvers(
         requireBucketApproval,
         directFundingEnabled,
         directFundingTerms,
+        canCocreatorStartFunding,
+        canCocreatorEditOpenBuckets,
       },
     });
   }

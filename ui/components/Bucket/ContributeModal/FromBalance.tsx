@@ -12,6 +12,8 @@ const CONTRIBUTE_MUTATION = gql`
       totalContributions
       totalContributionsFromCurrentMember
       noOfFunders
+      status
+      funded
       funders {
         id
         amount

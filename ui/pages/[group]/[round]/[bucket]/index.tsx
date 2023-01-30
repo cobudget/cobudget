@@ -36,6 +36,7 @@ export const BUCKET_QUERY = gql`
       completedAt
       funded
       fundedAt
+      readyForFunding
       canceled
       canceledAt
       noOfComments
@@ -61,6 +62,8 @@ export const BUCKET_QUERY = gql`
         grantingIsOpen
         grantingHasClosed
         maxAmountToBucketPerUser
+        canCocreatorStartFunding
+        canCocreatorEditOpenBuckets
         guidelines {
           id
           title

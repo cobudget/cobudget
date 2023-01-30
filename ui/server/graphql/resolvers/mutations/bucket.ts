@@ -6,10 +6,16 @@ import {
   isCollModOrAdmin,
 } from "../auth";
 import dayjs from "dayjs";
-import { isAndGetCollMember, updateFundedPercentage } from "../helpers";
+import {
+  getBucketStatus,
+  getRoundMember,
+  isAndGetCollMember,
+  updateFundedPercentage,
+} from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
+import { skip } from "graphql-resolvers";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -61,7 +67,38 @@ export const createBucket = combineResolvers(
 );
 
 export const editBucket = combineResolvers(
-  isBucketCocreatorOrCollAdminOrMod,
+  async (parent, args, ctx) => {
+    //here
+
+    const bucket = await prisma.bucket.findFirst({
+      where: { id: args.bucketId },
+    });
+
+    const round = await prisma.round.findFirst({
+      where: { buckets: { some: { id: args.bucketId } } },
+    });
+
+    const roundMember = await getRoundMember({
+      userId: ctx.user?.id,
+      roundId: round.id,
+      bucketId: args.bucketId,
+    });
+
+    // Admin or moderator can always edit
+    if (roundMember?.isModerator || roundMember?.isAdmin) {
+      return skip;
+    }
+
+    if (
+      round.canCocreatorEditOpenBuckets ||
+      (!round.canCocreatorEditOpenBuckets &&
+        getBucketStatus(bucket) !== "OPEN_FOR_FUNDING")
+    ) {
+      return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+    }
+
+    throw new Error("You are not allowed to perform this action");
+  },
   async (
     parent,
     {
@@ -317,6 +354,63 @@ export const publishBucket = combineResolvers(
       round: bucket.round,
       bucket: bucket,
       unpublish,
+    });
+
+    return resultBucket;
+  }
+);
+
+export const setReadyForFunding = combineResolvers(
+  isBucketCocreatorOrCollAdminOrMod,
+  async (_, { bucketId, isReadyForFunding }, { user, eventHub }) => {
+    const bucket = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
+        round: {
+          include: {
+            group: {
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const readyForFundingAt = isReadyForFunding ? new Date() : null;
+    const resultBucket = await prisma.bucket.update({
+      where: { id: bucket.id },
+      data: { readyForFundingAt },
+    });
+
+    return resultBucket;
+  }
+);
+
+export const reopenFunding = combineResolvers(
+  isCollModOrAdmin,
+  async (_, { bucketId }, { user }) => {
+    const bucket = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      include: {
+        round: {
+          include: {
+            group: {
+              include: {
+                groupMembers: { where: { userId: user.id } },
+                discourse: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const resultBucket = await prisma.bucket.update({
+      where: { id: bucket.id },
+      data: { fundedAt: null },
     });
 
     return resultBucket;
@@ -719,9 +813,26 @@ export const approveForGranting = combineResolvers(
       where: { buckets: { some: { id: args.bucketId } } },
     });
 
-    return round.requireBucketApproval
-      ? isCollModOrAdmin(parent, args, ctx)
-      : isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+    const roundMember = await getRoundMember({
+      userId: ctx.user?.id,
+      roundId: round.id,
+      bucketId: args.bucketId,
+    });
+
+    // Admin or moderator can approve
+    if (roundMember?.isModerator || roundMember?.isAdmin) {
+      return skip;
+    }
+
+    if (round.requireBucketApproval) {
+      return isCollModOrAdmin(parent, args, ctx);
+    }
+
+    if (round.canCocreatorStartFunding) {
+      return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+    }
+
+    throw new Error("You are not allowed to perform this action");
   },
   async (_, { bucketId, approved }) =>
     prisma.bucket.update({
@@ -734,7 +845,7 @@ export const approveForGranting = combineResolvers(
 );
 
 export const markAsCompleted = combineResolvers(
-  isCollModOrAdmin,
+  isBucketCocreatorOrCollAdminOrMod,
   async (_, { bucketId }) =>
     prisma.bucket.update({
       where: { id: bucketId },

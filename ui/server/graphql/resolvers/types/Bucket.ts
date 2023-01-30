@@ -155,6 +155,7 @@ export const budgetItems = async (bucket) =>
   prisma.budgetItem.findMany({ where: { bucketId: bucket.id } });
 
 export const published = (bucket) => !!bucket.publishedAt;
+export const readyForFunding = (bucket) => !!bucket.readyForFundingAt;
 export const approved = (bucket) => !!bucket.approvedAt;
 export const canceled = (bucket) => !!bucket.canceledAt;
 export const funded = (bucket) => !!bucket.fundedAt;
@@ -193,5 +194,6 @@ export const status = (bucket, args, ctx) => {
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
+  if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
 };

@@ -12,6 +12,8 @@ import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
 import { FormattedMessage, useIntl } from "react-intl";
+import toast from "react-hot-toast";
+import { COCREATORS_CANT_EDIT } from "../../../utils/messages";
 
 const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
   mutation EditBucketCustomField(
@@ -44,10 +46,19 @@ const BucketCustomField = ({
   roundId,
   bucketId,
   canEdit,
+  isEditingAllowed,
 }) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
   const intl = useIntl();
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    } else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  };
 
   const schema = useMemo(() => {
     const maxValue = yup
@@ -209,7 +220,7 @@ const BucketCustomField = ({
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip content="Edit field" placement="bottom" arrow={false}>
-              <IconButton onClick={() => setEditing(true)}>
+              <IconButton onClick={handleEdit}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
             </Tooltip>
@@ -220,7 +231,7 @@ const BucketCustomField = ({
   } else if (canEdit) {
     return (
       <button
-        onClick={() => setEditing(true)}
+        onClick={handleEdit}
         className="w-full h-24 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       >
         + {defaultCustomField.name}
