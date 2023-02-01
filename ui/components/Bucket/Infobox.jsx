@@ -76,6 +76,10 @@ function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
   if (message) {
     return (
       <a className="block mt-10 text-center rounded-lg border-2 border-yellow-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
+        <span className="text-black">Next steps</span>{" "}
+        <span className="bg-yellow-400 rounded px-1 mr-0.5 text-white text-xs">
+          TIP
+        </span>{" "}
         {message}
       </a>
     );
