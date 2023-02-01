@@ -98,7 +98,7 @@ export const BUCKETS_QUERY = gql`
         status
         percentageFunded
         round {
-          requireBucketApproval
+          canCocreatorStartFunding
         }
         customFields {
           value

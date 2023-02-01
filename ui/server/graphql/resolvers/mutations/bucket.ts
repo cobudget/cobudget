@@ -824,10 +824,6 @@ export const approveForGranting = combineResolvers(
       return skip;
     }
 
-    if (round.requireBucketApproval) {
-      return isCollModOrAdmin(parent, args, ctx);
-    }
-
     if (round.canCocreatorStartFunding) {
       return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
     }

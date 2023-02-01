@@ -215,7 +215,7 @@ const BucketSidebar = ({
   };
 
   const canApproveBucket =
-    (!bucket.round.requireBucketApproval && canEdit) ||
+    (!bucket.round.canCocreatorStartFunding && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
   const isRoundAdminOrGuide =

@@ -211,7 +211,6 @@ const schema = gql`
       grantingCloses: Date
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
-      requireBucketApproval: Boolean
       directFundingEnabled: Boolean
       directFundingTerms: String
       canCocreatorStartFunding: Boolean
@@ -293,7 +292,6 @@ const schema = gql`
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
-    requireBucketApproval: Boolean
     stripeIsConnected: Boolean
     directFundingEnabled: Boolean
     directFundingTerms: String
