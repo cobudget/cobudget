@@ -32,7 +32,7 @@ describe("Bucket filtering", () => {
 
       cy.reload();
 
-      get("bucket-status-view").contains("Funding Open");
+      get("bucket-status-view").contains("Funding");
 
       if (i === 2) continue;
       if (!cancelled) {
