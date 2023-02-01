@@ -41,6 +41,7 @@ const PUBLISH_BUCKET_MUTATION = gql`
   mutation PublishBucket($bucketId: ID!, $unpublish: Boolean) {
     publishBucket(bucketId: $bucketId, unpublish: $unpublish) {
       id
+      fundedAt
       published
       status
     }
@@ -51,6 +52,7 @@ const MARK_AS_COMPLETED_MUTATION = gql`
   mutation MarkAsCompleted($bucketId: ID!) {
     markAsCompleted(bucketId: $bucketId) {
       id
+      fundedAt
       completedAt
       completed
       status
