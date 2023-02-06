@@ -866,14 +866,7 @@ export const acceptFunding = combineResolvers(
       _sum: { min: true },
     });
 
-    const {
-      _sum: { min: minIncome },
-    } = await prisma.budgetItem.aggregate({
-      where: { bucketId, type: "INCOME" },
-      _sum: { min: true },
-    });
-
-    const minGoal = minIncome - minExpenses;
+    const minGoal = minExpenses;
 
     if (contributionsForBucket < minGoal)
       throw new Error("Bucket has not reached its minimum goal yet.");
