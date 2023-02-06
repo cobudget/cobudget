@@ -16,7 +16,7 @@ export const balance = async (member) => {
   return roundMemberBalance(member);
 };
 
-export const email = async (member, _, { user }) => {
+export const email = async (member, _, { user, ss }) => {
   if (!user) return null;
   const currentCollMember = await prisma.roundMember.findUnique({
     where: {
@@ -27,7 +27,7 @@ export const email = async (member, _, { user }) => {
     },
   });
 
-  if (!(currentCollMember?.isAdmin || currentCollMember.id == member.id))
+  if (!(ss || currentCollMember?.isAdmin || currentCollMember?.id == member.id))
     return null;
 
   const u = await prisma.user.findFirst({
