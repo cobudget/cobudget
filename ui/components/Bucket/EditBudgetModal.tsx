@@ -10,7 +10,7 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import * as yup from "yup";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
@@ -75,12 +75,16 @@ const EditBudgetModal = ({
 
   useEffect(() => {
     const opened = {};
-
     budgetItems.forEach((item, i) => {
       if (item.max) opened[item.id] = true;
     });
     setMaxAmountOpenInputs(opened);
   }, [budgetItems]);
+
+  //for new rows, this function returns an id
+  const getPreId = useCallback((type, index) => {
+    return `${type}-${index}`;
+  }, []);
 
   return (
     <Modal
@@ -94,15 +98,16 @@ const EditBudgetModal = ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
+            console.log("Variables", variables.budgetItems)
             editBucket({
               bucketId: bucket.id,
               budgetItems: [
                 ...(variables.budgetItems?.map((item, i) => ({
                   ...item,
+                  id: undefined, //remove id
                   min: Math.round(item.min * 100),
-                  ...(item.max &&
-                    maxAmountOpenInputs[item.id] && {
-                      max: Math.round(item.max * 100),
+                  ...(item.max && maxAmountOpenInputs[item.id || getPreId(item.type, i)] && {
+                      max: Math.round(item.max * 100)
                     }),
                 })) ?? []),
               ],
@@ -122,6 +127,13 @@ const EditBudgetModal = ({
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-1">
+                  <input 
+                    name={`budgetItems[${index}].id`}
+                    value={id} 
+                    readOnly
+                    className="hidden"
+                    ref={register()}
+                  />
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
@@ -159,7 +171,7 @@ const EditBudgetModal = ({
 
                 {allowStretchGoals && (
                   <div className="mr-2 my-2 sm:my-0 flex-1 relative">
-                    {maxAmountOpenInputs[id] ? (
+                    {maxAmountOpenInputs[id || getPreId(type, i)] ? (
                       <>
                         <TextField
                           placeholder={intl.formatMessage({
@@ -180,7 +192,7 @@ const EditBudgetModal = ({
                           onClick={() => {
                             setMaxAmountOpenInputs({
                               ...maxAmountOpenInputs,
-                              [id]: false,
+                              [id || getPreId(type, i)]: false,
                             });
                           }}
                         >
@@ -192,7 +204,7 @@ const EditBudgetModal = ({
                         onClick={() => {
                           setMaxAmountOpenInputs({
                             ...maxAmountOpenInputs,
-                            [id]: true,
+                            [id || getPreId(type, i)]: true,
                           });
                         }}
                         className="underline cursor-pointer mt-4 text-sm text-color-gray"
@@ -227,10 +239,17 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Existing funding and resources" />
           </h2>
 
-          {incomeItems.map(({ fieldId, description, type, min }, index) => {
+          {incomeItems.map(({ id, fieldId, description, type, min }, index) => {
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
+                  <input 
+                    name={`budgetItems[${index}].id`}
+                    value={id} 
+                    readOnly
+                    className="hidden"
+                    ref={register()}
+                  />
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
