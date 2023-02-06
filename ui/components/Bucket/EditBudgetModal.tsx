@@ -75,8 +75,9 @@ const EditBudgetModal = ({
 
   useEffect(() => {
     const opened = {};
+
     budgetItems.forEach((item, i) => {
-      if (item.max) opened[i] = true;
+      if (item.max) opened[item.id] = true;
     });
     setMaxAmountOpenInputs(opened);
   }, [budgetItems]);
@@ -100,7 +101,7 @@ const EditBudgetModal = ({
                   ...item,
                   min: Math.round(item.min * 100),
                   ...(item.max &&
-                    maxAmountOpenInputs[i] && {
+                    maxAmountOpenInputs[item.id] && {
                       max: Math.round(item.max * 100),
                     }),
                 })) ?? []),
@@ -116,7 +117,7 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Costs" />
           </h2>
 
-          {expenseItems.map(({ fieldId, description, type, min, max }, i) => {
+          {expenseItems.map(({ id, fieldId, description, type, min, max }, i) => {
             const index = i + incomeItems.length;
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
@@ -158,7 +159,7 @@ const EditBudgetModal = ({
 
                 {allowStretchGoals && (
                   <div className="mr-2 my-2 sm:my-0 flex-1 relative">
-                    {maxAmountOpenInputs[i] ? (
+                    {maxAmountOpenInputs[id] ? (
                       <>
                         <TextField
                           placeholder={intl.formatMessage({
@@ -179,7 +180,7 @@ const EditBudgetModal = ({
                           onClick={() => {
                             setMaxAmountOpenInputs({
                               ...maxAmountOpenInputs,
-                              [i]: false,
+                              [id]: false,
                             });
                           }}
                         >
@@ -191,7 +192,7 @@ const EditBudgetModal = ({
                         onClick={() => {
                           setMaxAmountOpenInputs({
                             ...maxAmountOpenInputs,
-                            [i]: true,
+                            [id]: true,
                           });
                         }}
                         className="underline cursor-pointer mt-4 text-sm text-color-gray"
