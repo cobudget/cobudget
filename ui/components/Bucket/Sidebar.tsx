@@ -257,7 +257,7 @@ const BucketSidebar = ({
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
   const showCancelFundingButton =
-    bucket.approved && !bucket.canceled && canEdit;
+    bucket.approved && !bucket.canceled && canEdit && !bucket.completed;
   //show ready for funding button only to co-creators when the bucket is in IDEA stage
   const showReadyForFundingButton =
     bucket.status === "IDEA" &&
@@ -388,6 +388,10 @@ const BucketSidebar = ({
     publishBucket,
   ]);
 
+  const showDropdown = useMemo(() => {
+    return showCancelFundingButton || showUnapproveButton || showDeleteButton || bucket.published;
+  }, [showCancelFundingButton, showUnapproveButton, showDeleteButton, bucket]);
+
   return (
     <>
       {(bucket.minGoal || canEdit) && (
@@ -420,7 +424,7 @@ const BucketSidebar = ({
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
           {showReadyForFundingButton && <buttons.READY_FOR_FUNDING />}
           {showReopenFundingButton && <buttons.REOPEN_FUNDING />}
-          {canEdit && (
+          {canEdit && showDropdown && (
             <div className="relative">
               <div className="flex justify-end">
                 <Tooltip

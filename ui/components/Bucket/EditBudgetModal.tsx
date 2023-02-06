@@ -98,7 +98,6 @@ const EditBudgetModal = ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            console.log("Variables", variables.budgetItems)
             editBucket({
               bucketId: bucket.id,
               budgetItems: [
