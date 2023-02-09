@@ -828,6 +828,10 @@ export const approveForGranting = combineResolvers(
       return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
     }
 
+    if (ctx.ss) {
+      return skip;
+    }
+
     throw new Error("You are not allowed to perform this action");
   },
   async (_, { bucketId, approved }) =>
