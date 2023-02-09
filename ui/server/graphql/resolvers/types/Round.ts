@@ -275,7 +275,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
                 ],
               }
             : { publishedAt: { not: null } })),
-      }
+      },
     }),
     COMPLETED: await prisma.bucket.count({
       where: {

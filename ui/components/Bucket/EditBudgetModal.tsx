@@ -105,8 +105,9 @@ const EditBudgetModal = ({
                   ...item,
                   id: undefined, //remove id
                   min: Math.round(item.min * 100),
-                  ...(item.max && maxAmountOpenInputs[item.id || getPreId(item.type, i)] && {
-                      max: Math.round(item.max * 100)
+                  ...(item.max &&
+                    maxAmountOpenInputs[item.id || getPreId(item.type, i)] && {
+                      max: Math.round(item.max * 100),
                     }),
                 })) ?? []),
               ],
@@ -121,106 +122,108 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Costs" />
           </h2>
 
-          {expenseItems.map(({ id, fieldId, description, type, min, max }, i) => {
-            const index = i + incomeItems.length;
-            return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
-                <div className="mr-2 my-2 sm:my-0 flex-1">
-                  <input 
-                    name={`budgetItems[${index}].id`}
-                    value={id} 
-                    readOnly
-                    className="hidden"
-                    ref={register()}
-                  />
-                  <TextField
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Description",
-                    })}
-                    name={`budgetItems[${index}].description`}
-                    defaultValue={description}
-                    inputRef={register()}
-                    testid={`bucket-expense-item-description`}
-                  />
-                  <input
-                    name={`budgetItems[${index}].type`}
-                    value={type}
-                    ref={register()}
-                    readOnly
-                    className="hidden"
-                  />
-                </div>
-                <div className="mr-2 my-2 sm:my-0 flex-1">
-                  <TextField
-                    placeholder={
-                      allowStretchGoals
-                        ? intl.formatMessage({ defaultMessage: "Min amount" })
-                        : intl.formatMessage({ defaultMessage: "Amount" })
-                    }
-                    name={`budgetItems[${index}].min`}
-                    defaultValue={
-                      typeof min !== "undefined" ? String(min / 100) : null
-                    }
-                    inputProps={{ type: "number", min: 0 }}
-                    inputRef={register()}
-                    endAdornment={currency}
-                    testid={`bucket-expense-item-min-amount`}
-                  />
-                </div>
+          {expenseItems.map(
+            ({ id, fieldId, description, type, min, max }, i) => {
+              const index = i + incomeItems.length;
+              return (
+                <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
+                  <div className="mr-2 my-2 sm:my-0 flex-1">
+                    <input
+                      name={`budgetItems[${index}].id`}
+                      value={id}
+                      readOnly
+                      className="hidden"
+                      ref={register()}
+                    />
+                    <TextField
+                      placeholder={intl.formatMessage({
+                        defaultMessage: "Description",
+                      })}
+                      name={`budgetItems[${index}].description`}
+                      defaultValue={description}
+                      inputRef={register()}
+                      testid={`bucket-expense-item-description`}
+                    />
+                    <input
+                      name={`budgetItems[${index}].type`}
+                      value={type}
+                      ref={register()}
+                      readOnly
+                      className="hidden"
+                    />
+                  </div>
+                  <div className="mr-2 my-2 sm:my-0 flex-1">
+                    <TextField
+                      placeholder={
+                        allowStretchGoals
+                          ? intl.formatMessage({ defaultMessage: "Min amount" })
+                          : intl.formatMessage({ defaultMessage: "Amount" })
+                      }
+                      name={`budgetItems[${index}].min`}
+                      defaultValue={
+                        typeof min !== "undefined" ? String(min / 100) : null
+                      }
+                      inputProps={{ type: "number", min: 0 }}
+                      inputRef={register()}
+                      endAdornment={currency}
+                      testid={`bucket-expense-item-min-amount`}
+                    />
+                  </div>
 
-                {allowStretchGoals && (
-                  <div className="mr-2 my-2 sm:my-0 flex-1 relative">
-                    {maxAmountOpenInputs[id || getPreId(type, i)] ? (
-                      <>
-                        <TextField
-                          placeholder={intl.formatMessage({
-                            defaultMessage: "Max amount",
-                          })}
-                          name={`budgetItems[${index}].max`}
-                          defaultValue={
-                            typeof max === "undefined" || max === null
-                              ? null
-                              : String(max / 100)
-                          }
-                          inputProps={{ type: "number", min: 0 }}
-                          inputRef={register()}
-                          endAdornment={currency}
-                        />
-                        <span
-                          className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                  {allowStretchGoals && (
+                    <div className="mr-2 my-2 sm:my-0 flex-1 relative">
+                      {maxAmountOpenInputs[id || getPreId(type, i)] ? (
+                        <>
+                          <TextField
+                            placeholder={intl.formatMessage({
+                              defaultMessage: "Max amount",
+                            })}
+                            name={`budgetItems[${index}].max`}
+                            defaultValue={
+                              typeof max === "undefined" || max === null
+                                ? null
+                                : String(max / 100)
+                            }
+                            inputProps={{ type: "number", min: 0 }}
+                            inputRef={register()}
+                            endAdornment={currency}
+                          />
+                          <span
+                            className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                            onClick={() => {
+                              setMaxAmountOpenInputs({
+                                ...maxAmountOpenInputs,
+                                [id || getPreId(type, i)]: false,
+                              });
+                            }}
+                          >
+                            ✖
+                          </span>
+                        </>
+                      ) : (
+                        <p
                           onClick={() => {
                             setMaxAmountOpenInputs({
                               ...maxAmountOpenInputs,
-                              [id || getPreId(type, i)]: false,
+                              [id || getPreId(type, i)]: true,
                             });
                           }}
+                          className="underline cursor-pointer mt-4 text-sm text-color-gray"
                         >
-                          ✖
-                        </span>
-                      </>
-                    ) : (
-                      <p
-                        onClick={() => {
-                          setMaxAmountOpenInputs({
-                            ...maxAmountOpenInputs,
-                            [id || getPreId(type, i)]: true,
-                          });
-                        }}
-                        className="underline cursor-pointer mt-4 text-sm text-color-gray"
-                      >
-                        + Add a range
-                      </p>
-                    )}
+                          + Add a range
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="my-2">
+                    <IconButton onClick={() => remove(index)}>
+                      <DeleteIcon className="h-6 w-6 text-color-red" />
+                    </IconButton>
                   </div>
-                )}
-                <div className="my-2">
-                  <IconButton onClick={() => remove(index)}>
-                    <DeleteIcon className="h-6 w-6 text-color-red" />
-                  </IconButton>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
           <div className="flex mb-4">
             <Button
               variant="secondary"
@@ -242,9 +245,9 @@ const EditBudgetModal = ({
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <input 
+                  <input
                     name={`budgetItems[${index}].id`}
-                    value={id} 
+                    value={id}
                     readOnly
                     className="hidden"
                     ref={register()}

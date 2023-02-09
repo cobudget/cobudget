@@ -389,7 +389,12 @@ const BucketSidebar = ({
   ]);
 
   const showDropdown = useMemo(() => {
-    return showCancelFundingButton || showUnapproveButton || showDeleteButton || bucket.published;
+    return (
+      showCancelFundingButton ||
+      showUnapproveButton ||
+      showDeleteButton ||
+      bucket.published
+    );
   }, [showCancelFundingButton, showUnapproveButton, showDeleteButton, bucket]);
 
   return (
