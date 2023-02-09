@@ -323,6 +323,7 @@ const schema = gql`
     FUNDED: Int!
     CANCELED: Int!
     COMPLETED: Int!
+    IDEA: Int!
   }
 
   type Tag {
