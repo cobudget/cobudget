@@ -219,9 +219,9 @@ const BucketSidebar = ({
   const canApproveBucket =
     (!bucket.round.canCocreatorStartFunding && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
-    currentUser?.currentCollMember?.isModerator
-    || (isCocreator && bucket.round.canCocreatorStartFunding);
-    
+    currentUser?.currentCollMember?.isModerator ||
+    (isCocreator && bucket.round.canCocreatorStartFunding);
+
   const isRoundAdminOrGuide =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;

@@ -74,25 +74,21 @@ function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
   }, [userType, status, messages, bucket]);
 
   const showLabel = useMemo(() => {
-    const hidden = [
-      messages.admin.NOT_READY_FOR_FUNDING
-    ];
+    const hidden = [messages.admin.NOT_READY_FOR_FUNDING];
     return hidden.indexOf(message) === -1;
   }, [message]);
 
   if (message) {
     return (
       <a className="block mt-10 text-center rounded-lg border-2 border-yellow-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
-        {
-          showLabel &&
+        {showLabel && (
           <>
-        <span className="text-black">Next steps</span>{" "}
-        <span className="bg-yellow-400 rounded px-1 mr-0.5 text-white text-xs">
-          TIP
-        </span>
-        </>
-        }
-        {" "}
+            <span className="text-black">Next steps</span>{" "}
+            <span className="bg-yellow-400 rounded px-1 mr-0.5 text-white text-xs">
+              TIP
+            </span>
+          </>
+        )}{" "}
         {message}
       </a>
     );
