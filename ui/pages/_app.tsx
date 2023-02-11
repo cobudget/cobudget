@@ -102,7 +102,6 @@ export const TOP_LEVEL_QUERY = gql`
         value
       }
       allowStretchGoals
-      requireBucketApproval
       bucketReviewIsOpen
       discourseCategoryId
       totalInMembersBalances

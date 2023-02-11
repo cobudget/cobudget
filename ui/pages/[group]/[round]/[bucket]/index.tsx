@@ -56,7 +56,6 @@ export const BUCKET_QUERY = gql`
         currency
         allowStretchGoals
         bucketReviewIsOpen
-        requireBucketApproval
         directFundingEnabled
         directFundingTerms
         grantingIsOpen

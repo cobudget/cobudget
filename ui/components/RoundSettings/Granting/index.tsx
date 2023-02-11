@@ -14,7 +14,6 @@ import SetMaxAmountToBucket from "./SetMaxAmountToBucket";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
@@ -43,7 +42,6 @@ const modals = {
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
-  SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
   SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
   SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
@@ -63,7 +61,6 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
-      requireBucketApproval
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
@@ -82,7 +79,6 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $grantingCloses: Date
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
-    $requireBucketApproval: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
     $canCocreatorStartFunding: Boolean
@@ -96,7 +92,6 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingCloses: $grantingCloses
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
-      requireBucketApproval: $requireBucketApproval
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
       canCocreatorStartFunding: $canCocreatorStartFunding
@@ -111,7 +106,6 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
-      requireBucketApproval
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
@@ -206,31 +200,6 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             }
             isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
-
-          <Divider />
-
-          <SettingsListItem
-            primary={intl.formatMessage(
-              {
-                defaultMessage:
-                  "Require moderator approval of {bucketName} before funding",
-              },
-              {
-                bucketName: process.env.BUCKET_NAME_PLURAL,
-              }
-            )}
-            secondary={
-              round.requireBucketApproval ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.requireBucketApproval !== "undefined"}
-            openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
             canEdit={canEditSettings}
             roundColor={round.color}
           />

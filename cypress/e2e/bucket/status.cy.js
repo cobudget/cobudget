@@ -23,7 +23,7 @@ describe("Update bucket status", () => {
 
     cy.reload();
 
-    get("bucket-status-view").contains("Funding Open");
+    get("bucket-status-view").contains("Funding");
 
     get("accept-funding-button").click();
 

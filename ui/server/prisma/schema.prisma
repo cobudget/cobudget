@@ -150,7 +150,6 @@ model Round {
   grantingOpens               DateTime?
   grantingCloses              DateTime?
   allowStretchGoals           Boolean?
-  requireBucketApproval       Boolean?
   stripeAccountId             String?
   directFundingEnabled        Boolean   @default(false)
   directFundingTerms          String    @default("")

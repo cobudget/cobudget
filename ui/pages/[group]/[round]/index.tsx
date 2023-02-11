@@ -45,6 +45,7 @@ export const ROUND_PAGE_QUERY = gql`
       bucketStatusCount {
         PENDING_APPROVAL
         OPEN_FOR_FUNDING
+        IDEA
         FUNDED
         CANCELED
         COMPLETED
@@ -98,7 +99,7 @@ export const BUCKETS_QUERY = gql`
         status
         percentageFunded
         round {
-          requireBucketApproval
+          canCocreatorStartFunding
         }
         customFields {
           value

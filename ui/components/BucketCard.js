@@ -16,7 +16,7 @@ const BucketCard = ({ bucket, round }) => {
     IDEA: intl.formatMessage({
       defaultMessage: "Idea",
     }),
-    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
@@ -40,7 +40,7 @@ const BucketCard = ({ bucket, round }) => {
       )}
       {!bucket.published ? (
         <Label className="absolute right-0 m-2 bg-app-gray">
-          <FormattedMessage defaultMessage="Unpublished" />
+          <FormattedMessage defaultMessage="Draft" />
         </Label>
       ) : (
         <Label

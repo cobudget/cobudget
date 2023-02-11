@@ -272,9 +272,19 @@ export function statusTypeToQuery(statusType) {
   switch (statusType) {
     case "PENDING_APPROVAL":
       return {
+        publishedAt: null,
         approvedAt: null,
         deleted: false,
         canceledAt: null,
+      };
+    case "IDEA":
+      return {
+        publishedAt: { not: null },
+        approvedAt: null,
+        fundedAt: null,
+        completedAt: null,
+        canceledAt: null,
+        deleted: false,
       };
     case "OPEN_FOR_FUNDING":
       return {
@@ -298,6 +308,7 @@ export function statusTypeToQuery(statusType) {
       };
     case "COMPLETED":
       return {
+        publishedAt: { not: null },
         completedAt: { not: null },
         deleted: false,
       };

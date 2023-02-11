@@ -824,12 +824,12 @@ export const approveForGranting = combineResolvers(
       return skip;
     }
 
-    if (round.requireBucketApproval) {
-      return isCollModOrAdmin(parent, args, ctx);
-    }
-
     if (round.canCocreatorStartFunding) {
       return isBucketCocreatorOrCollAdminOrMod(parent, args, ctx);
+    }
+
+    if (ctx.ss) {
+      return skip;
     }
 
     throw new Error("You are not allowed to perform this action");
@@ -870,14 +870,7 @@ export const acceptFunding = combineResolvers(
       _sum: { min: true },
     });
 
-    const {
-      _sum: { min: minIncome },
-    } = await prisma.budgetItem.aggregate({
-      where: { bucketId, type: "INCOME" },
-      _sum: { min: true },
-    });
-
-    const minGoal = minIncome - minExpenses;
+    const minGoal = minExpenses;
 
     if (contributionsForBucket < minGoal)
       throw new Error("Bucket has not reached its minimum goal yet.");

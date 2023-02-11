@@ -262,6 +262,21 @@ export const bucketStatusCount = async (round, _, { user }) => {
             : { publishedAt: { not: null } })),
       },
     }),
+    IDEA: await prisma.bucket.count({
+      where: {
+        roundId: round.id,
+        ...statusTypeToQuery("IDEA"),
+        ...(!isAdminOrGuide &&
+          (currentMember
+            ? {
+                OR: [
+                  { publishedAt: { not: null } },
+                  { cocreators: { some: { id: currentMember.id } } },
+                ],
+              }
+            : { publishedAt: { not: null } })),
+      },
+    }),
     COMPLETED: await prisma.bucket.count({
       where: {
         roundId: round.id,

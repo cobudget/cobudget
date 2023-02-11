@@ -41,6 +41,7 @@ const PUBLISH_BUCKET_MUTATION = gql`
   mutation PublishBucket($bucketId: ID!, $unpublish: Boolean) {
     publishBucket(bucketId: $bucketId, unpublish: $unpublish) {
       id
+      fundedAt
       published
       status
     }
@@ -51,6 +52,7 @@ const MARK_AS_COMPLETED_MUTATION = gql`
   mutation MarkAsCompleted($bucketId: ID!) {
     markAsCompleted(bucketId: $bucketId) {
       id
+      fundedAt
       completedAt
       completed
       status
@@ -207,7 +209,7 @@ const BucketSidebar = ({
     IDEA: intl.formatMessage({
       defaultMessage: "Idea",
     }),
-    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding Open" }),
+    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
@@ -215,9 +217,11 @@ const BucketSidebar = ({
   };
 
   const canApproveBucket =
-    (!bucket.round.requireBucketApproval && canEdit) ||
+    (!bucket.round.canCocreatorStartFunding && canEdit) ||
     currentUser?.currentCollMember?.isAdmin ||
-    currentUser?.currentCollMember?.isModerator;
+    currentUser?.currentCollMember?.isModerator ||
+    (isCocreator && bucket.round.canCocreatorStartFunding);
+
   const isRoundAdminOrGuide =
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator;
@@ -255,7 +259,7 @@ const BucketSidebar = ({
     canApproveBucket && bucket.approved && !bucket.totalContributions;
   const showDeleteButton = canEdit && !bucket.totalContributions;
   const showCancelFundingButton =
-    bucket.approved && !bucket.canceled && canEdit;
+    bucket.approved && !bucket.canceled && canEdit && !bucket.completed;
   //show ready for funding button only to co-creators when the bucket is in IDEA stage
   const showReadyForFundingButton =
     bucket.status === "IDEA" &&
@@ -386,6 +390,15 @@ const BucketSidebar = ({
     publishBucket,
   ]);
 
+  const showDropdown = useMemo(() => {
+    return (
+      showCancelFundingButton ||
+      showUnapproveButton ||
+      showDeleteButton ||
+      bucket.published
+    );
+  }, [showCancelFundingButton, showUnapproveButton, showDeleteButton, bucket]);
+
   return (
     <>
       {(bucket.minGoal || canEdit) && (
@@ -418,7 +431,7 @@ const BucketSidebar = ({
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
           {showReadyForFundingButton && <buttons.READY_FOR_FUNDING />}
           {showReopenFundingButton && <buttons.REOPEN_FUNDING />}
-          {canEdit && (
+          {canEdit && showDropdown && (
             <div className="relative">
               <div className="flex justify-end">
                 <Tooltip
