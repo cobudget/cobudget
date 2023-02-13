@@ -17,6 +17,7 @@ module.exports = {
     content: [
       "./pages/**/*.{js,ts,jsx,tsx}",
       "./components/**/*.{js,ts,jsx,tsx}",
+      "./utils/**/*.{js,ts,jsx,tsx}",
     ],
     options: {
       // adding these colors to the safelist since they are often put together as a dynamic string concatenation
