@@ -362,15 +362,13 @@ const Page = ({
                 : 0,
             progress:
               Math.floor(
-                ((bucket.totalContributions || 0) /
-                  (bucket.minGoal || 1)) *
+                ((bucket.totalContributions || 0) / (bucket.minGoal || 1)) *
                   10000
               ) / 100,
             stretchGoalProgress:
               round.allowStretchGoals && bucket.maxGoal
                 ? bucket.maxGoal - bucket.minGoal > 0
-                  ? ((bucket.totalContributions || 0) /
-                      (bucket.maxGoal || 1)) *
+                  ? ((bucket.totalContributions || 0) / (bucket.maxGoal || 1)) *
                     100
                   : 0
                 : 0,
