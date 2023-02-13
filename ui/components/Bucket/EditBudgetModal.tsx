@@ -11,6 +11,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 
 import * as yup from "yup";
 import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
@@ -41,7 +42,10 @@ const schema = yup.object().shape({
         .nullable()
         .min(0)
         .integer()
-        .moreThan(yup.ref("min"), "Max should be > min"),
+        .moreThan(
+          yup.ref("min"),
+          "Max amount should be greater than min amount"
+        ),
       type: yup.string().required(),
     })
   ),
@@ -59,7 +63,12 @@ const EditBudgetModal = ({
   const [maxAmountOpenInputs, setMaxAmountOpenInputs] = useState({});
   const intl = useIntl();
 
-  const { handleSubmit, register, control } = useForm({
+  const {
+    handleSubmit,
+    register,
+    control,
+    formState: { errors },
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { budgetItems },
   });
@@ -72,6 +81,16 @@ const EditBudgetModal = ({
 
   const incomeItems = fields.filter((field) => field.type === "INCOME");
   const expenseItems = fields.filter((field) => field.type === "EXPENSE");
+
+  const checkErrors = () => {
+    if (errors?.budgetItems?.length > 0) {
+      const err = Object.keys(errors.budgetItems[0]);
+      if (err.length === 0) {
+        return;
+      }
+      toast.error(errors.budgetItems[0][err[0]].message);
+    }
+  };
 
   useEffect(() => {
     const opened = {};
@@ -116,7 +135,7 @@ const EditBudgetModal = ({
                 handleClose();
               })
               .catch((err) => alert(err.message));
-          })}
+          }, checkErrors)}
         >
           <h2 className="text-lg font-semibold mb-2">
             <FormattedMessage defaultMessage="Costs" />
