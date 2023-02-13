@@ -347,7 +347,7 @@ const Page = ({
             minGoal: bucket.minGoal,
             stretchGoal: round?.allowStretchGoals ? bucket.maxGoal : "-",
             myFunding: bucket.totalContributionsFromCurrentMember,
-            totalFunding: bucket.totalContributions + bucket.income,
+            totalFunding: bucket.totalContributions,
             externalFunding: bucket.income || 0,
             goodFlagCount: bucket.flags.filter(
               (f) => f.type === "ALL_GOOD_FLAG"
@@ -357,19 +357,19 @@ const Page = ({
             fundersCount: bucket.noOfFunders || 0,
             internalFunding: bucket.totalContributions || 0,
             fundsNeeded:
-              bucket.minGoal - bucket.income - bucket.totalContributions > 0
-                ? bucket.minGoal - bucket.income - bucket.totalContributions
+              bucket.minGoal - bucket.totalContributions > 0
+                ? bucket.minGoal - bucket.totalContributions
                 : 0,
             progress:
               Math.floor(
-                ((bucket.income + bucket.totalContributions || 0) /
+                ((bucket.totalContributions || 0) /
                   (bucket.minGoal || 1)) *
                   10000
               ) / 100,
             stretchGoalProgress:
               round.allowStretchGoals && bucket.maxGoal
                 ? bucket.maxGoal - bucket.minGoal > 0
-                  ? ((bucket.income + bucket.totalContributions || 0) /
+                  ? ((bucket.totalContributions || 0) /
                       (bucket.maxGoal || 1)) *
                     100
                   : 0
