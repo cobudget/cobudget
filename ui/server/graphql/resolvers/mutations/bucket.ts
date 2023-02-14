@@ -70,6 +70,14 @@ export const editBucket = combineResolvers(
   async (parent, args, ctx) => {
     //here
 
+    if (args.budgetItems) {
+      args.budgetItems.forEach((item) => {
+        if (item.min >= item.max) {
+          throw new Error("Min amount should be greater than max amount");
+        }
+      });
+    }
+
     const bucket = await prisma.bucket.findFirst({
       where: { id: args.bucketId },
     });
