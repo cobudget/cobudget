@@ -58,15 +58,6 @@ export const bucketsPage = async (
       ...(tagValue && {
         tags: { some: { value: tagValue } },
       }),
-      ...(!isAdminOrGuide &&
-        (currentMember
-          ? {
-              OR: [
-                { publishedAt: { not: null } },
-                { cocreators: { some: { id: currentMember.id } } },
-              ],
-            }
-          : { publishedAt: { not: null } })),
     },
     ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
   });
