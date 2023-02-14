@@ -63,12 +63,7 @@ const EditBudgetModal = ({
   const [maxAmountOpenInputs, setMaxAmountOpenInputs] = useState({});
   const intl = useIntl();
 
-  const {
-    handleSubmit,
-    register,
-    control,
-    formState: { errors },
-  } = useForm({
+  const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { budgetItems },
   });
@@ -82,7 +77,7 @@ const EditBudgetModal = ({
   const incomeItems = fields.filter((field) => field.type === "INCOME");
   const expenseItems = fields.filter((field) => field.type === "EXPENSE");
 
-  const checkErrors = () => {
+  const checkErrors = (errors) => {
     if (errors?.budgetItems?.length > 0) {
       const err = Object.keys(errors.budgetItems[0]);
       if (err.length === 0) {
