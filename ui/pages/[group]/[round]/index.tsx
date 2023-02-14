@@ -430,12 +430,14 @@ const getStandardFilter = (bucketStatusCount) => {
   // if there is either pending or open for funding buckets, show those categories
   if (
     bucketStatusCount["PENDING_APPROVAL"] ||
-    bucketStatusCount["OPEN_FOR_FUNDING"]
+    bucketStatusCount["OPEN_FOR_FUNDING"] ||
+    bucketStatusCount["IDEA"]
   ) {
     if (bucketStatusCount["PENDING_APPROVAL"])
       stdFilter.push("PENDING_APPROVAL");
     if (bucketStatusCount["OPEN_FOR_FUNDING"])
       stdFilter.push("OPEN_FOR_FUNDING");
+    if (bucketStatusCount["IDEA"]) stdFilter.push("IDEA");
   } else {
     // otherwise show every other
     const statusNames = Object.keys(bucketStatusCount);
