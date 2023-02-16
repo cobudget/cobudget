@@ -1,6 +1,6 @@
 import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Modal } from "@material-ui/core";
 
@@ -12,6 +12,7 @@ import IconButton from "components/IconButton";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
+import { extractEmail } from "utils/url";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -119,6 +120,7 @@ const InviteMembersModal = ({
   currentGroup?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
+  const [emails, setEmails] = useState("");
   const intl = useIntl();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
@@ -187,8 +189,19 @@ const InviteMembersModal = ({
           */}
           <form
             onSubmit={handleSubmit((variables) => {
+              // In case of group, wysiwyg editor is used to add people. Wysiwyg uses markdown.
+              // We need following code to extract emails
+              const list = emails
+                .split(",")
+                .map((t) => t.split(" "))
+                .flat()
+                .filter((i) => i);
+              const emailList = list.map((i) => extractEmail(i)).flat();
+              const uniqueEmails = Array.from(new Set(emailList)).join(",");
+
               inviteMembers({
                 ...variables,
+                ...(emails && currentGroup.id && { emails: uniqueEmails }),
                 ...(roundId ? { roundId } : { groupId: currentGroup.id }),
               })
                 .then(() => {
@@ -207,6 +220,9 @@ const InviteMembersModal = ({
               multiline
               rows={4}
               name="emails"
+              inputProps={{
+                onChange: (e) => setEmails(e.target.value),
+              }}
               autoFocus
               error={Boolean(errors.emails)}
               helperText={errors.emails && errors.emails.message}
@@ -221,6 +237,10 @@ const InviteMembersModal = ({
                 },
               })}
               testid="invite-participants-emails"
+              showWysiwygOptions={false}
+              mentionsGroupId={currentGroup.id}
+              enableMentions={!!currentGroup.id}
+              wysiwyg={!!currentGroup.id}
             />
             {link && (
               <div className="mt-4">

@@ -25,7 +25,9 @@ const TextField = ({
   wysiwyg,
   enableMentions = false,
   mentionsCollId = null,
+  mentionsGroupId = null,
   testid,
+  showWysiwygOptions = true,
 }: {
   inputRef?: any;
   inputProps?: any;
@@ -50,7 +52,9 @@ const TextField = ({
   wysiwyg?: boolean;
   enableMentions?: boolean;
   mentionsCollId?: string;
+  mentionsGroupId?: string;
   testid?: string;
+  showWysiwygOptions?: boolean;
 }) => {
   const LabelComponent = labelComponent;
   return (
@@ -75,6 +79,8 @@ const TextField = ({
             highlightColor={color}
             enableMentions={enableMentions}
             mentionsCollId={mentionsCollId}
+            mentionsGroupId={mentionsGroupId}
+            showWysiwygOptions={showWysiwygOptions}
           />
         ) : (
           <textarea

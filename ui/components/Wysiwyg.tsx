@@ -134,6 +134,21 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
   }
 `;
 
+const SEARCH_MENTIONS_GROUP_MEMBERS_QUERY = gql`
+  query SearchMentionMembers($groupId: ID!, $search: String!) {
+    groupMembersPage(groupId: $groupId, isApproved: true, search: $search) {
+      groupMembers {
+        id
+        user {
+          id
+          username
+          email
+        }
+      }
+    }
+  }
+`;
+
 const HardBreak = () => {
   const commands = useCommands();
   const active = useActive(false);
@@ -167,16 +182,19 @@ const HardBreak = () => {
   return null;
 };
 
-function MentionComponent({ roundId }) {
+function MentionComponent({ roundId, groupId }) {
   const [mentionState, setMentionState] = useState<MentionAtomState | null>();
 
   const searchString = mentionState?.query.full.toLowerCase() ?? "";
   const tooShortSearch = !searchString || searchString.length < 2;
 
   const [{ fetching, data }, searchMembers] = useQuery({
-    query: SEARCH_MENTION_MEMBERS_QUERY,
+    query: roundId
+      ? SEARCH_MENTION_MEMBERS_QUERY
+      : SEARCH_MENTIONS_GROUP_MEMBERS_QUERY,
     variables: {
       roundId,
+      groupId,
       search: searchString,
     },
     pause: true,
@@ -191,9 +209,16 @@ function MentionComponent({ roundId }) {
       return [];
     }
 
-    return data.membersPage.members.map(
+    const members =
+      (roundId
+        ? data.membersPage?.members
+        : data.groupMembersPage?.groupMembers) || [];
+
+    return members.map(
       (member): MentionAtomNodeAttributes => {
-        const userLink = appLink(`/user/${member.user.id}`);
+        const userLink = appLink(
+          `/user/${member.user.id}#${member.user.email}`
+        );
         return {
           id: userLink,
           label: `@${member.user.username}`,
@@ -201,7 +226,7 @@ function MentionComponent({ roundId }) {
         };
       }
     );
-  }, [data, fetching, tooShortSearch]);
+  }, [data, fetching, tooShortSearch, roundId]);
 
   useEffect(() => {
     if (tooShortSearch) return;
@@ -305,6 +330,8 @@ const Wysiwyg = ({
   highlightColor,
   enableMentions = false,
   mentionsCollId = null,
+  mentionsGroupId = null,
+  showWysiwygOptions = true,
 }) => {
   const extensions = useCallback(
     () => [
@@ -590,16 +617,23 @@ const Wysiwyg = ({
             }, 250)}
           >
             <ImperativeHandle ref={inputRef} />
-            <div className="overflow-auto">
-              <HardBreak />
-              <Toolbar
-                items={toolbarItems()}
-                refocusEditor
-                label={intl.formatMessage({ defaultMessage: "Top Toolbar" })}
-              />
-            </div>
+            {showWysiwygOptions && (
+              <div className="overflow-auto">
+                <HardBreak />
+                <Toolbar
+                  items={toolbarItems()}
+                  refocusEditor
+                  label={intl.formatMessage({ defaultMessage: "Top Toolbar" })}
+                />
+              </div>
+            )}
             <EditorComponent />
-            {enableMentions && <MentionComponent roundId={mentionsCollId} />}
+            {enableMentions && (
+              <MentionComponent
+                roundId={mentionsCollId}
+                groupId={mentionsGroupId}
+              />
+            )}
           </Remirror>
         </EditorCss>
       </ThemeProvider>
