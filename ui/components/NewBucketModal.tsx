@@ -9,6 +9,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
+import { MAX_BUCKET_TITLE_LENGTH } from "../constants";
 
 const CREATE_BUCKET = gql`
   mutation CreateBucket($roundId: ID!, $title: String!) {
@@ -71,6 +72,9 @@ const NewBucketModal = ({ round, handleClose, router }) => {
             inputRef={register({
               required: "Required",
             })}
+            inputProps={{
+              maxLength: MAX_BUCKET_TITLE_LENGTH,
+            }}
             autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}

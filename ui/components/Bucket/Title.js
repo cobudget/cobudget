@@ -10,6 +10,7 @@ import { EditIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 import { COCREATORS_CANT_EDIT } from "utils/messages";
 import toast from "react-hot-toast";
+import { MAX_BUCKET_TITLE_LENGTH } from "constants";
 
 const EDIT_TITLE_MUTATION = gql`
   mutation EditTitle($bucketId: ID!, $title: String) {
@@ -53,7 +54,7 @@ const BucketTitle = ({ title, canEdit, bucketId, isEditingAllowed }) => {
             size="large"
             inputRef={register({ required: "Required" })}
             inputProps={{
-              maxLength: 100,
+              maxLength: MAX_BUCKET_TITLE_LENGTH,
             }}
             autoFocus
             error={Boolean(errors.title)}
