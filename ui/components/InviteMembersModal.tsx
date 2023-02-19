@@ -114,10 +114,12 @@ const InviteMembersModal = ({
   handleClose,
   roundId,
   currentGroup,
+  roundGroup
 }: {
   handleClose: () => void;
   roundId?: string;
   currentGroup?: any;
+  roundGroup?: string;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
   const [emails, setEmails] = useState("");
@@ -201,8 +203,8 @@ const InviteMembersModal = ({
 
               inviteMembers({
                 ...variables,
-                ...(emails && currentGroup.id && { emails: uniqueEmails }),
-                ...(roundId ? { roundId } : { groupId: currentGroup.id }),
+                ...(emails && currentGroup?.id && { emails: uniqueEmails }),
+                ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
                 .then(() => {
                   reset();
@@ -238,9 +240,9 @@ const InviteMembersModal = ({
               })}
               testid="invite-participants-emails"
               showWysiwygOptions={false}
-              mentionsGroupId={currentGroup.id}
-              enableMentions={!!currentGroup.id}
-              wysiwyg={!!currentGroup.id}
+              mentionsGroupId={roundGroup}
+              enableMentions={!currentGroup?.id}
+              wysiwyg={!currentGroup?.id}
             />
             {link && (
               <div className="mt-4">

@@ -11,6 +11,9 @@ export const ROUND_QUERY = gql`
       color
       numberOfApprovedMembers
       currency
+      group {
+        id
+      }
     }
   }
 `;
