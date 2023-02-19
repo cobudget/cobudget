@@ -134,7 +134,7 @@ const SEARCH_MENTION_MEMBERS_QUERY = gql`
   }
 `;
 
-const SEARCH_MENTIONS_GROUP_MEMBERS_QUERY = gql`
+export const SEARCH_MENTIONS_GROUP_MEMBERS_QUERY = gql`
   query SearchMentionMembers($groupId: ID!, $search: String!) {
     groupMembersPage(groupId: $groupId, isApproved: true, search: $search) {
       groupMembers {

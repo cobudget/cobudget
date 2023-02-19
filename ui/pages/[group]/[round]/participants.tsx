@@ -13,6 +13,7 @@ export const ROUND_QUERY = gql`
       currency
       group {
         id
+        name
       }
     }
   }

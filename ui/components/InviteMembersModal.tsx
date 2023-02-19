@@ -1,6 +1,6 @@
 import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Modal } from "@material-ui/core";
 
@@ -13,6 +13,7 @@ import styled from "styled-components";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { extractEmail } from "utils/url";
+import { SEARCH_MENTIONS_GROUP_MEMBERS_QUERY } from "./Wysiwyg";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -119,10 +120,25 @@ const InviteMembersModal = ({
   handleClose: () => void;
   roundId?: string;
   currentGroup?: any;
-  roundGroup?: string;
+  roundGroup?: any;
 }) => {
   const { handleSubmit, register, errors, reset } = useForm();
+  const [groupMembers, fetchGroupMembers] = useQuery({
+    query: SEARCH_MENTIONS_GROUP_MEMBERS_QUERY,
+    pause: true,
+    variables: {
+      groupId: roundGroup.id,
+      isApproved: true,
+      search: "",
+    }
+  });
   const [emails, setEmails] = useState("");
+
+  // updatingEmails is used to implement a hack
+  // Wysiwyg TextField does not accept value prop; it only accepts default value
+  // This state is used to rerender Wysiwyg component
+
+  const [updatingEmails, setUpdatingEmails] = useState(false);
   const intl = useIntl();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
@@ -147,6 +163,39 @@ const InviteMembersModal = ({
 
   const link =
     inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
+
+  const handleAddAllFromGroup = () => {
+    fetchGroupMembers();
+  }
+
+  useEffect(() => {
+    if (groupMembers.data) {
+
+      const list = emails
+                .split(",")
+                .map((t) => t.split(" "))
+                .flat()
+                .filter((i) => i);
+      const emailList = list.map((i) => extractEmail(i)).flat();
+
+      const groupMembersList = groupMembers.data?.groupMembersPage?.groupMembers;
+
+      //If group member is already in invite list, dont add it.
+      const newGroupMembersList = groupMembersList.filter(member => {
+        return emailList.indexOf(member.user.email) === -1
+      });
+      setUpdatingEmails(true);
+      let newEmails = emails;
+      newGroupMembersList.forEach(member => {
+        newEmails += `[@${(member.user.username || member.user.email)}](http://localhost:3000/user/cl69dihpw0009s9lvd1l21fdz#alinauroze@hotmail.com) `;
+      });
+      setEmails(newEmails);
+    }
+  }, [groupMembers]);
+
+  useEffect(() => {
+    setUpdatingEmails(false);
+  }, [emails])
 
   return (
     <>
@@ -215,6 +264,8 @@ const InviteMembersModal = ({
                 });
             })}
           >
+            {
+              updatingEmails ? null :
             <TextField
               placeholder={intl.formatMessage({
                 defaultMessage: "Comma separated emails",
@@ -222,6 +273,7 @@ const InviteMembersModal = ({
               multiline
               rows={4}
               name="emails"
+              defaultValue={emails}
               inputProps={{
                 onChange: (e) => setEmails(e.target.value),
               }}
@@ -240,12 +292,29 @@ const InviteMembersModal = ({
               })}
               testid="invite-participants-emails"
               showWysiwygOptions={false}
-              mentionsGroupId={roundGroup}
+              mentionsGroupId={roundGroup.id}
               enableMentions={!currentGroup?.id}
               wysiwyg={!currentGroup?.id}
             />
+            }
+            {
+              roundGroup &&
+              <div className="mt-2">
+                <span 
+                  className="text-sm font-medium mb-1 inline-block text-purple-600 cursor-pointer"
+                  onClick={handleAddAllFromGroup}
+                >
+                <FormattedMessage 
+                  defaultMessage="Add all from group {groupName}"
+                  values={{
+                    groupName: roundGroup.name
+                  }}
+                />
+                </span>
+              </div>
+            }
             {link && (
-              <div className="mt-4">
+              <div className="mt-2">
                 <p className="text-sm font-medium mb-1 block">
                   <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
