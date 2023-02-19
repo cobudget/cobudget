@@ -128,7 +128,7 @@ const InviteMembersModal = ({
     query: SEARCH_MENTIONS_GROUP_MEMBERS_QUERY,
     pause: true,
     variables: {
-      groupId: roundGroup.id,
+      groupId: roundGroup?.id,
       isApproved: true,
       search: "",
     },
@@ -258,8 +258,8 @@ const InviteMembersModal = ({
               const uniqueEmails = Array.from(new Set(emailList)).join(",");
 
               inviteMembers({
+                ...(emails && roundGroup?.id && { emails: uniqueEmails }),
                 ...variables,
-                ...(emails && roundGroup.id && { emails: uniqueEmails }),
                 ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
                 .then(() => {
@@ -298,9 +298,9 @@ const InviteMembersModal = ({
                 })}
                 testid="invite-participants-emails"
                 showWysiwygOptions={false}
-                mentionsGroupId={roundGroup.id}
-                enableMentions={!currentGroup?.id}
-                wysiwyg={!currentGroup?.id}
+                mentionsGroupId={roundGroup?.id}
+                enableMentions={roundGroup?.id}
+                wysiwyg={roundGroup?.id}
               />
             )}
             {roundGroup && (
@@ -312,7 +312,7 @@ const InviteMembersModal = ({
                   <FormattedMessage
                     defaultMessage="Add all from group {groupName}"
                     values={{
-                      groupName: roundGroup.name,
+                      groupName: roundGroup?.name,
                     }}
                   />
                 </span>
