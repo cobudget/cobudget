@@ -116,7 +116,7 @@ const InviteMembersModal = ({
   handleClose,
   roundId,
   currentGroup,
-  roundGroup
+  roundGroup,
 }: {
   handleClose: () => void;
   roundId?: string;
@@ -131,7 +131,7 @@ const InviteMembersModal = ({
       groupId: roundGroup.id,
       isApproved: true,
       search: "",
-    }
+    },
   });
   const [emails, setEmails] = useState("");
 
@@ -167,30 +167,30 @@ const InviteMembersModal = ({
 
   const handleAddAllFromGroup = () => {
     fetchGroupMembers();
-  }
+  };
 
   useEffect(() => {
     if (groupMembers.data) {
-
       const list = emails
-                .split(",")
-                .map((t) => t.split(" "))
-                .flat()
-                .filter((i) => i);
+        .split(",")
+        .map((t) => t.split(" "))
+        .flat()
+        .filter((i) => i);
       const emailList = list.map((i) => extractEmail(i)).flat();
 
-      const groupMembersList = groupMembers.data?.groupMembersPage?.groupMembers;
+      const groupMembersList =
+        groupMembers.data?.groupMembersPage?.groupMembers;
 
       //If group member is already in invite list, dont add it.
-      const newGroupMembersList = groupMembersList.filter(member => {
-        return emailList.indexOf(member.user.email || member.email) === -1
+      const newGroupMembersList = groupMembersList.filter((member) => {
+        return emailList.indexOf(member.user.email || member.email) === -1;
       });
       let newEmails = emails;
-      newGroupMembersList.forEach(member => {
+      newGroupMembersList.forEach((member) => {
         const userLink = appLink(
           `/user/${member.user.id}#${member.user.email || member.email}`
         );
-        newEmails += `[@${(member.user.username || member.email)}](${userLink}) `;
+        newEmails += `[@${member.user.username || member.email}](${userLink}) `;
       });
       if (newEmails !== emails) {
         setUpdatingEmails(true);
@@ -198,11 +198,11 @@ const InviteMembersModal = ({
         toast.success("Added all members from group");
       }
     }
-  }, [groupMembers]);
+  }, [groupMembers, emails]);
 
   useEffect(() => {
     setUpdatingEmails(false);
-  }, [emails])
+  }, [emails]);
 
   return (
     <>
@@ -259,7 +259,7 @@ const InviteMembersModal = ({
 
               inviteMembers({
                 ...variables,
-                ...(emails && currentGroup?.id && { emails: uniqueEmails }),
+                ...(emails && roundGroup.id && { emails: uniqueEmails }),
                 ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
                 .then(() => {
@@ -271,55 +271,53 @@ const InviteMembersModal = ({
                 });
             })}
           >
-            {
-              updatingEmails ? null :
-            <TextField
-              placeholder={intl.formatMessage({
-                defaultMessage: "Comma separated emails",
-              })}
-              multiline
-              rows={4}
-              name="emails"
-              defaultValue={emails}
-              inputProps={{
-                onChange: (e) => setEmails(e.target.value),
-              }}
-              autoFocus
-              error={Boolean(errors.emails)}
-              helperText={errors.emails && errors.emails.message}
-              inputRef={register({
-                required: "Required",
-                pattern: {
-                  value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                  message: intl.formatMessage({
-                    defaultMessage:
-                      "Need to be a comma separated list of emails",
-                  }),
-                },
-              })}
-              testid="invite-participants-emails"
-              showWysiwygOptions={false}
-              mentionsGroupId={roundGroup.id}
-              enableMentions={!currentGroup?.id}
-              wysiwyg={!currentGroup?.id}
-            />
-            }
-            {
-              roundGroup &&
+            {updatingEmails ? null : (
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Comma separated emails",
+                })}
+                multiline
+                rows={4}
+                name="emails"
+                defaultValue={emails}
+                inputProps={{
+                  onChange: (e) => setEmails(e.target.value),
+                }}
+                autoFocus
+                error={Boolean(errors.emails)}
+                helperText={errors.emails && errors.emails.message}
+                inputRef={register({
+                  required: "Required",
+                  pattern: {
+                    value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
+                    message: intl.formatMessage({
+                      defaultMessage:
+                        "Need to be a comma separated list of emails",
+                    }),
+                  },
+                })}
+                testid="invite-participants-emails"
+                showWysiwygOptions={false}
+                mentionsGroupId={roundGroup.id}
+                enableMentions={!currentGroup?.id}
+                wysiwyg={!currentGroup?.id}
+              />
+            )}
+            {roundGroup && (
               <div className="mt-2">
-                <span 
+                <span
                   className="text-sm font-medium mb-1 inline-block text-purple-600 cursor-pointer"
                   onClick={handleAddAllFromGroup}
                 >
-                <FormattedMessage 
-                  defaultMessage="Add all from group {groupName}"
-                  values={{
-                    groupName: roundGroup.name
-                  }}
-                />
+                  <FormattedMessage
+                    defaultMessage="Add all from group {groupName}"
+                    values={{
+                      groupName: roundGroup.name,
+                    }}
+                  />
                 </span>
               </div>
-            }
+            )}
             {link && (
               <div className="mt-2">
                 <p className="text-sm font-medium mb-1 block">
