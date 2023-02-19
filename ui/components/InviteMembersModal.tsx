@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { extractEmail } from "utils/url";
 import { SEARCH_MENTIONS_GROUP_MEMBERS_QUERY } from "./Wysiwyg";
+import { appLink } from "utils/internalLinks";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -182,14 +183,20 @@ const InviteMembersModal = ({
 
       //If group member is already in invite list, dont add it.
       const newGroupMembersList = groupMembersList.filter(member => {
-        return emailList.indexOf(member.user.email) === -1
+        return emailList.indexOf(member.user.email || member.email) === -1
       });
-      setUpdatingEmails(true);
       let newEmails = emails;
       newGroupMembersList.forEach(member => {
-        newEmails += `[@${(member.user.username || member.email)}](http://localhost:3000/user/cl69dihpw0009s9lvd1l21fdz#alinauroze@hotmail.com) `;
+        const userLink = appLink(
+          `/user/${member.user.id}#${member.user.email || member.email}`
+        );
+        newEmails += `[@${(member.user.username || member.email)}](${userLink}) `;
       });
-      setEmails(newEmails);
+      if (newEmails !== emails) {
+        setUpdatingEmails(true);
+        setEmails(newEmails);
+        toast.success("Added all members from group");
+      }
     }
   }, [groupMembers]);
 
