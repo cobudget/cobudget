@@ -139,6 +139,7 @@ export const SEARCH_MENTIONS_GROUP_MEMBERS_QUERY = gql`
     groupMembersPage(groupId: $groupId, isApproved: true, search: $search) {
       groupMembers {
         id
+        email
         user {
           id
           username

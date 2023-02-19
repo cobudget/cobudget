@@ -187,7 +187,7 @@ const InviteMembersModal = ({
       setUpdatingEmails(true);
       let newEmails = emails;
       newGroupMembersList.forEach(member => {
-        newEmails += `[@${(member.user.username || member.user.email)}](http://localhost:3000/user/cl69dihpw0009s9lvd1l21fdz#alinauroze@hotmail.com) `;
+        newEmails += `[@${(member.user.username || member.email)}](http://localhost:3000/user/cl69dihpw0009s9lvd1l21fdz#alinauroze@hotmail.com) `;
       });
       setEmails(newEmails);
     }
