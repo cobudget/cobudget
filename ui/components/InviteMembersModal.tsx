@@ -247,8 +247,8 @@ const InviteMembersModal = ({
           */}
           <form
             onSubmit={handleSubmit((variables) => {
-              // In case of group, wysiwyg editor is used to add people. Wysiwyg uses markdown.
-              // We need following code to extract emails
+              // In case of round which is inside a group, wysiwyg editor is used to add people.
+              // Wysiwyg uses markdown. We need following code to extract emails
               const list = emails
                 .split(",")
                 .map((t) => t.split(" "))
