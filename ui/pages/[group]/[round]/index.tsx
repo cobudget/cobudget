@@ -20,7 +20,6 @@ import { TOP_LEVEL_QUERY } from "pages/_app";
 import Table from "../../../components/Table";
 import { FormattedNumber, FormattedMessage } from "react-intl";
 import FormattedCurrency from "components/FormattedCurrency";
-
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {

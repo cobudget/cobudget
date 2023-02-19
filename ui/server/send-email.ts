@@ -42,20 +42,52 @@ const send = async (mail: SendEmailInput) => {
     } catch {
       // if mailhog isn't running, print it to the terminal instead
       console.log(
-        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
-          mail.text ?? mail.html
+        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${mail.text ?? mail.html
         }\n`
       );
     }
   } else {
+    client.sendEmail({
+      From: process.env.FROM_EMAIL,
+      To: mail.to,
+      Subject: mail.subject,
+      TextBody: mail.text,
+      HtmlBody: mail.html,
+    }).then(data => {
+      console.log("Email successful");
+    }).catch(err => {
+      console.log(err);
+      throw err;
+    });
+  }
+};
+
+const sendBatch = async (mails: SendEmailInput[]) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "Not sending " + mails.length + " emails in development (batch)"
+    );
+  } else {
     try {
-      await client.sendEmail({
-        From: process.env.FROM_EMAIL,
-        To: mail.to,
-        Subject: mail.subject,
-        TextBody: mail.text,
-        HtmlBody: mail.html,
-      });
+      // split into batches of 500 because of Postmark limit on emails per batch call
+      const batches = [];
+      for (let i = 0; i < mails.length; i += 500) {
+        batches.push(mails.slice(i, i + 500));
+      }
+
+      await Promise.all(
+        batches.map((batch) =>
+          client.sendEmailBatch(
+            batch.map((mail) => ({
+              From: process.env.FROM_EMAIL,
+              To: mail.to,
+              Subject: mail.subject,
+              TextBody: mail.text,
+              HtmlBody: mail.html,
+            }))
+          )
+        )
+      );
     } catch (err) {
       console.log(err);
       throw err;

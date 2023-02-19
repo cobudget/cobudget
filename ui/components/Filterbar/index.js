@@ -105,6 +105,18 @@ const Filterbar = ({
       },
     });
   };
+  const onChangeView = (view) => {
+    router.push({
+      pathname: "/[group]/[round]",
+      query: {
+        group: router.query.group,
+        round: router.query.round,
+        ...(tag && { tag }),
+        ...(!!input && { s: input }),
+        view,
+      },
+    });
+  };
   if (!round) return null;
 
   return (

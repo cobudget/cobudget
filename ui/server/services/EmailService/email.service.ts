@@ -129,12 +129,11 @@ export default {
           groupCollName
         )} on ${process.env.PLATFORM_NAME}.
       Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
-      ${
-        htmlPurpose
+      ${htmlPurpose
           ? `<br/><br/>
             ${quotedSection(htmlPurpose)}`
           : ""
-      }
+        }
       <br/><br/>
       ${footer}
       `,
@@ -194,18 +193,16 @@ export default {
     const createYourFirst =
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
-            `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
-          )}">create your first Bucket</a>!`
+          `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
+        )}">create your first Dream</a>!`
         : `Jump right in and <a href="${appLink(
-            "/new-round"
-          )}">create your first Round</a>!`;
+          "/new-round"
+        )}">create your first Round</a>!`;
 
     await sendEmail({
       to: newUser.email,
       subject: `Welcome to ${process.env.PLATFORM_NAME}!`,
-      html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
-      <br/><br/>
-      Since 2014 we’ve been on a path to change the ways groups and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
+      html: `You’ve just taken your first step towards co-creating your dreams for the Borderland! Dreams is the virtual drawing board of The Borderland. Is is the place where we prototype the projects we'll realise during the week in Alversjö.
       <br/><br/>
       We are thrilled to have you with us!
       <br/><br/>
@@ -215,15 +212,7 @@ export default {
       <li>${createYourFirst}</li>
       </ul>
       <br/>
-      <b>Want to learn more?</b>
-      <ul>
-      <li>Dig into our <a href="https://guide.cobudget.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
-      <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
-      </ul>
-      <br/>
-      Ready to invite others to co-create and fund projects with you? <a href="${appLink(
-        "/new-round"
-      )}">Create a Round</a>!
+       If you need help with the Dreams platform, check out the <a href="https://dreams.theborderland.se/c/borderland-dreams-2022/about">Dreams guide</a> for some simple how-to’s or ask for help in the <a href="https://discord.gg/sYcsvxVve2">Borderland Discord</a>.
       `,
     });
   },
@@ -284,10 +273,10 @@ export default {
     const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
       (mentionedUser) => ({
         to: mentionedUser.email,
-        subject: `You were mentioned in a comment in the bucket ${bucket.title}`,
+        subject: `You were mentioned in a comment in the dream ${bucket.title}`,
         html: `${escape(
           currentUser.name
-        )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
+        )} has just mentioned you in a comment in the dream <a href="${bucketLink}">${escape(
           bucket.title
         )}</a>:
         <br/><br/>
@@ -323,10 +312,10 @@ export default {
       .map(
         (roundMember): SendEmailInput => ({
           to: roundMember.user.email,
-          subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
+          subject: `New comment by ${currentUser.name} in your dream ${bucket.title}`,
           html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
-          Your bucket “${escape(bucket.title)}” received a new comment.
+          Your dream “${escape(bucket.title)}” received a new comment.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -378,12 +367,12 @@ export default {
 
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
-        subject: `New comment by ${currentUser.name} in bucket ${bucket.title}`,
+        subject: `New comment by ${currentUser.name} in dream ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
-            bucket.title
-          )}” - <a href="${bucketLink}">have a look at the new comments</a>.
+          bucket.title
+        )}” - <a href="${bucketLink}">have a look at the new comments</a>.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -420,7 +409,7 @@ export default {
         round.currency
       } in ${escape(
         round.title
-      )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+      )}. <br/><br/>Decide now which dreams to allocate your funds to by checking out the current proposals in <a href="${appLink(
         `/${group.slug}/${round.slug}`
       )}">${escape(round.title)}</a>. <br/><br/>${footer}`,
     });
@@ -441,9 +430,31 @@ export default {
             round.currency
           } in ${escape(
             round.title
-          )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+          )}. <br/><br/>Decide now which dreams to allocate your funds to by checking out the current proposals in <a href="${appLink(
             `/${round.group.slug}/${round.slug}`
           )}">${escape(round.title)}</a>.<br/><br/> ${footer}`,
+        };
+      });
+    await sendEmails(emails);
+  },
+  bulkAllocateNotification: async ({ roundId, membersData }) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
+    });
+    const emails = membersData
+      .filter((member) => member.emailSettings?.allocatedToYou ?? true)
+      .filter((member) => member.adjustedAmount > 0)
+      .map((member) => {
+        return {
+          to: member.user.email,
+          subject: `${member.user.name}, you’ve received funds to spend in ${round.title}!`,
+          html: `You have received ${member.adjustedAmount / 100} ${round.currency
+            } in ${escape(
+              round.title
+            )}. <br/><br/>Decide now which dreams to allocate your funds to by checking out the current proposals in <a href="${appLink(
+              `/${round.group.slug}/${round.slug}`
+            )}">${escape(round.title)}</a>.<br/><br/> ${footer}`,
         };
       });
     await sendEmails(emails);
@@ -486,15 +497,15 @@ export default {
         return {
           to: collMember.user.email,
           subject: `${bucket.title} was cancelled`,
-          html: `The bucket “${escape(
+          html: `The dream “${escape(
             bucket.title
           )}” you have contributed to was cancelled in ${escape(
             bucket.round.title
           )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
         <br/><br/>
-        Explore other buckets you can fund in <a href="${appLink(
-          `/${bucket.round.group.slug}/${bucket.round.slug}`
-        )}">${escape(bucket.round.title)}</a>.
+        Explore other dreams you can fund in <a href="${appLink(
+            `/${bucket.round.group.slug}/${bucket.round.slug}`
+          )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
         ${footer}
         `,
@@ -538,10 +549,10 @@ export default {
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `There is a new bucket in ${round.title}!`,
+      subject: `There is a new dream in ${round.title}!`,
       html: `Creativity is flowing in ${escape(
         round.title
-      )}! <a href="${collLink}">Have a look at the new buckets in this round.</a>
+      )}! <a href="${collLink}">Have a look at the new dreams in this round.</a>
       <br/><br/>
       ${footer}
       `,
@@ -590,14 +601,13 @@ export default {
 
     const emails = usersToNotify.map((mailRecipient) => ({
       to: mailRecipient.email,
-      subject: `Your bucket “${bucket.title}” received funding!`,
-      html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
+      subject: `Your dream “${bucket.title}” received funding!`,
+      html: `Hooray - your dream <a href="${bucketLink}">“${escape(
         bucket.title
       )}”</a> just received some funds!<br/>
-      ${escape(contributingUser.name)} contributed ${amount / 100} ${
-        round.currency
-      }<br/>
-      Your bucket is now ${progressPercent}% funded!<br/>
+      ${escape(contributingUser.name)} contributed ${amount / 100} ${round.currency
+        }<br/>
+      Your dream is now ${progressPercent}% funded!<br/>
       <br/><br/>
       ${footer}
       `,

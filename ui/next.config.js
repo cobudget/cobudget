@@ -38,5 +38,24 @@ module.exports = (phase) => {
     compiler: {
       styledComponents: true,
     },
+    async redirects() {
+      return [
+        {
+          source: "/bll-auction/:path*",
+          destination: "/c/bll-auction/:path*",
+          permanent: true,
+        },
+        {
+          source: "/dream-generator/:path*",
+          destination: "/c/dream-generator/:path*",
+          permanent: true,
+        },
+        {
+          source: "/bll-dreams-platform-2022/:path*",
+          destination: "/c/bll-dreams-platform-2022/:path*",
+          permanent: true
+        }
+      ];
+    },
   });
 };

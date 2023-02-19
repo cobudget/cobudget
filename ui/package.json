@@ -114,6 +114,7 @@
     "unist-util-visit": "4.1.0",
     "urql": "2.2.0",
     "validator": "13.7.0",
+    "yarn": "^1.22.18",
     "yup": "^0.29.3"
   },
   "devDependencies": {

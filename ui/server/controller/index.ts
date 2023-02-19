@@ -26,6 +26,9 @@ export const allocateToMember = async ({
   stripeSessionId?: string;
   prisma: Prisma.TransactionClient;
 }) => {
+  let adjustedAmount, amountBefore;
+
+
   const {
     _sum: { amount: totalAllocations },
   } = await prisma.allocation.aggregate({
@@ -41,7 +44,6 @@ export const allocateToMember = async ({
   });
 
   const balance = totalAllocations - totalContributions;
-  let adjustedAmount;
   if (type === "ADD") {
     adjustedAmount = balance + amount >= 0 ? amount : -balance;
   } else if (type === "SET") {
@@ -230,16 +232,16 @@ export const contribute = async ({
 
   let bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
 
-  if (bucket.roundId !== roundId) throw new Error("Bucket not in round");
+  if (bucket.roundId !== roundId) throw new Error("Dream not in round");
 
-  if (!bucket.approvedAt) throw new Error("Bucket is not approved for funding");
+  if (!bucket.approvedAt) throw new Error("Dream is not approved for funding");
 
   if (bucket.canceledAt)
-    throw new Error("Funding has been canceled for bucket");
+    throw new Error("Funding has been canceled for dream");
 
-  if (bucket.fundedAt) throw new Error("Bucket has been funded");
+  if (bucket.fundedAt) throw new Error("Dream has been funded");
 
-  if (bucket.completedAt) throw new Error("Bucket is already completed");
+  if (bucket.completedAt) throw new Error("Dream is already completed");
 
   // Check that the max goal of the bucket is not exceeded
   const {
