@@ -131,6 +131,7 @@ const RoundMembers = ({ round, currentUser }) => {
                 <InviteMembersModal
                   handleClose={() => setInviteModalOpen(false)}
                   roundId={round.id}
+                  roundGroup={round.group}
                 />
               )}
             </div>
