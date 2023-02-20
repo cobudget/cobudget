@@ -197,7 +197,8 @@ const InviteMembersModal = ({
         toast.success("Added all members from group");
       }
     }
-  }, [groupMembers, emails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupMembers]);
 
   useEffect(() => {
     setUpdatingEmails(false);
