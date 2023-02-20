@@ -284,16 +284,20 @@ const InviteMembersModal = ({
                 autoFocus
                 error={Boolean(errors.emails)}
                 helperText={errors.emails && errors.emails.message}
-                inputRef={register({
-                  required: "Required",
-                  pattern: {
-                    value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                    message: intl.formatMessage({
-                      defaultMessage:
-                        "Need to be a comma separated list of emails",
-                    }),
-                  },
-                })}
+                inputRef={
+                  roundGroup?.id
+                    ? null
+                    : register({
+                        required: "Required",
+                        pattern: {
+                          value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
+                          message: intl.formatMessage({
+                            defaultMessage:
+                              "Need to be a comma separated list of emails",
+                          }),
+                        },
+                      })
+                }
                 testid="invite-participants-emails"
                 showWysiwygOptions={false}
                 mentionsGroupId={roundGroup?.id}
