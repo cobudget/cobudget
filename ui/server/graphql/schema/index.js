@@ -311,6 +311,7 @@ const schema = gql`
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int
+    ocCollective: OC_Collective
   }
 
   type InvitationLink {
@@ -439,6 +440,12 @@ const schema = gql`
   #   ADMIN
   #   GUIDE
   # }
+
+  type OC_Collective {
+    id: String!
+    name: String!
+    slug: String!
+  }
 
   type Bucket {
     id: ID!

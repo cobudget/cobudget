@@ -10,6 +10,11 @@ const GET_ROUND_INTEGRATIONS = gql`
   query GetRoundIntegrations($roundSlug: String!) {
     round(roundSlug: $roundSlug) {
       color
+      ocCollective {
+          id
+          name
+          slug
+      }
     }
   }
 `;
