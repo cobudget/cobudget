@@ -97,21 +97,29 @@ export const editRound = combineResolvers(
       ocCollectiveSlug,
     }
   ) => {
-    let collective;
+    let collectiveId;
     if (ocCollectiveSlug) {
-      collective = await getCollective({ slug: ocCollectiveSlug });
-      if (!collective) {
+      const collective = await getCollective({ slug: ocCollectiveSlug });
+      if (collective) {
+        collectiveId = collective.id;
+      }
+      else {
         // If collective slug is provided and collective not found
         // throw error
         throw new Error("Collective not found");
       }
+    }
+    else if (ocCollectiveSlug === "") {
+      // An empty string means the user wants to remove
+      // collective
+      collectiveId = null;
     }
 
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
-        openCollectiveId: collective.id,
+        openCollectiveId: collectiveId,
         title,
         archived,
         registrationPolicy,
