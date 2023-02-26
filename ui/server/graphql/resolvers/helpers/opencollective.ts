@@ -6,6 +6,12 @@ export const GET_COLLECTIVE = `
           id
           slug
           name
+          stats {
+                balance {
+                    currency
+                    valueInCents
+                }
+            }
         }
     }
 `;

@@ -14,6 +14,12 @@ const EDIT_ROUND = gql`
         id
         name
         slug
+        stats {
+          balance {
+            valueInCents
+            currency
+          }
+        }
       }
     }
   }

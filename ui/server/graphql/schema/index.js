@@ -442,10 +442,20 @@ const schema = gql`
   #   GUIDE
   # }
 
+  type OC_Amount {
+    currency: String
+    valueInCents: Float
+  }
+
+  type OC_Stats {
+    balance: OC_Amount
+  }
+
   type OC_Collective {
     id: String!
     name: String!
     slug: String!
+    stats: OC_Stats
   }
 
   type Bucket {
