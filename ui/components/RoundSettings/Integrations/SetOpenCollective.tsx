@@ -34,7 +34,7 @@ const SetOpenCollective = ({ closeModal, round }) => {
     <Card>
       <Box p={3}>
         <h1 className="text-3xl">
-          <FormattedMessage defaultMessage="Connect Open Collective" />
+          <FormattedMessage defaultMessage="Connect to your collective" />
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
@@ -64,7 +64,7 @@ const SetOpenCollective = ({ closeModal, round }) => {
           <Box m="15px 0">
             <TextField
               name="ocCollectiveSlug"
-              label={intl.formatMessage({ defaultMessage: "Collective Slug" })}
+              label={intl.formatMessage({ defaultMessage: "Collective or project URL" })}
               defaultValue={round.ocCollective?.slug}
               inputRef={register}
               fullWidth

@@ -42,6 +42,14 @@ export const ROUND_PAGE_QUERY = gql`
         id
         slug
       }
+      ocCollective {
+        stats {
+          balance {
+            currency
+            valueInCents
+          }
+        }
+      }
       bucketStatusCount {
         PENDING_APPROVAL
         OPEN_FOR_FUNDING
@@ -595,6 +603,18 @@ const RoundPage = ({ currentUser }) => {
                         />
                       </td>
                     </tr>
+                    {
+                      round?.ocCollective &&
+                      <tr>
+                        <td className="pr-3">Open Collective</td>
+                        <td className="font-bold">
+                          <FormattedCurrency
+                            value={round?.ocCollective?.stats?.balance?.valueInCents / 100}
+                            currency={round?.ocCollective?.stats?.balance?.currency}
+                          />
+                        </td>
+                      </tr>
+                    }
                   </tbody>
                 </table>
               </div>
