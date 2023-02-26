@@ -96,6 +96,7 @@ const schema = gql`
       about: String
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
+      ocCollectiveSlug: String
     ): Round!
     deleteRound(roundId: ID!): Round
 

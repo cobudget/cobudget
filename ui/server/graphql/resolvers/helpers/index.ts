@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
 import stripe from "server/stripe";
-import prisma from "../../prisma";
+import prisma from "../../../prisma";
 import fetch from "node-fetch";
+
+export * from "./opencollective";
 
 export async function isCollOrGroupAdmin(
   parent,

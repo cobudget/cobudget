@@ -1,19 +1,22 @@
-import { Divider, List } from "@material-ui/core";
+import { Divider, List, Modal } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useQuery } from "urql";
+import { useStyles } from "../Granting";
 import SettingsListItem from "../Granting/SettingsListItem";
+import SetOpenCollective from "./SetOpenCollective";
 
 const GET_ROUND_INTEGRATIONS = gql`
   query GetRoundIntegrations($roundSlug: String!) {
     round(roundSlug: $roundSlug) {
+      id
       color
       ocCollective {
-          id
-          name
-          slug
+        id
+        name
+        slug
       }
     }
   }
@@ -28,6 +31,20 @@ function Integrations() {
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
+  const classes = useStyles();
+
+  const modals = useMemo(
+    () => ({
+      SET_OPEN_COLLECTIVE: SetOpenCollective,
+    }),
+    []
+  );
+  const ModalContent = modals[openModal];
+
+  const handleClose = () => {
+    setOpenModal("");
+  };
+
   const round = data?.round;
 
   if (fetching) {
@@ -37,6 +54,20 @@ function Integrations() {
   if (round) {
     return (
       <div className="-mb-6">
+        <Modal
+          aria-labelledby="simple-modal-title"
+          aria-describedby="simple-modal-description"
+          open={Boolean(openModal)}
+          onClose={handleClose}
+          className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
+        >
+          <div className={classes.innerModal}>
+            {openModal && (
+              <ModalContent round={round} closeModal={handleClose} />
+            )}
+          </div>
+        </Modal>
+
         <h2 className="text-2xl font-semibold mb-3 px-6">
           <FormattedMessage defaultMessage="Integrations" />
         </h2>
@@ -49,7 +80,7 @@ function Integrations() {
               secondary={"ABC"}
               isSet={false}
               canEdit={true}
-              openModal={() => setOpenModal("SET_CURRENCY")}
+              openModal={() => setOpenModal("SET_OPEN_COLLECTIVE")}
               roundColor={round.color}
             />
           </List>

@@ -22,7 +22,7 @@ import FormattedCurrency from "components/FormattedCurrency";
 import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
 import SetCocreatorCanEditOpenBucket from "./SetCocreatorCanEditOpenBucket";
 
-const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles((theme) => ({
   modal: {
     display: "flex",
     padding: theme.spacing(1),

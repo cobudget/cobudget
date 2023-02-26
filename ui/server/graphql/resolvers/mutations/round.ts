@@ -3,6 +3,7 @@ import { combineResolvers } from "graphql-resolvers";
 import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
+  getCollective,
   getRoundMember,
   isCollAdmin,
   isCollOrGroupAdmin,
@@ -93,12 +94,19 @@ export const editRound = combineResolvers(
       about,
       bucketReviewIsOpen,
       discourseCategoryId,
+      ocCollectiveSlug,
     }
   ) => {
+    let collective;
+    if (ocCollectiveSlug) {
+      collective = await getCollective({ slug: ocCollectiveSlug });
+    }
+
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
+        openCollectiveId: collective.id,
         title,
         archived,
         registrationPolicy,
