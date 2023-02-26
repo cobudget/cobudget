@@ -102,14 +102,12 @@ export const editRound = combineResolvers(
       const collective = await getCollective({ slug: ocCollectiveSlug });
       if (collective) {
         collectiveId = collective.id;
-      }
-      else {
+      } else {
         // If collective slug is provided and collective not found
         // throw error
         throw new Error("Collective not found");
       }
-    }
-    else if (ocCollectiveSlug === "") {
+    } else if (ocCollectiveSlug === "") {
       // An empty string means the user wants to remove
       // collective
       collectiveId = null;

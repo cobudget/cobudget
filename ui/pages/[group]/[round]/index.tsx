@@ -603,18 +603,22 @@ const RoundPage = ({ currentUser }) => {
                         />
                       </td>
                     </tr>
-                    {
-                      round?.ocCollective &&
+                    {round?.ocCollective && (
                       <tr>
                         <td className="pr-3">Open Collective</td>
                         <td className="font-bold">
                           <FormattedCurrency
-                            value={round?.ocCollective?.stats?.balance?.valueInCents / 100}
-                            currency={round?.ocCollective?.stats?.balance?.currency}
+                            value={
+                              round?.ocCollective?.stats?.balance
+                                ?.valueInCents / 100
+                            }
+                            currency={
+                              round?.ocCollective?.stats?.balance?.currency
+                            }
                           />
                         </td>
                       </tr>
-                    }
+                    )}
                   </tbody>
                 </table>
               </div>

@@ -38,34 +38,67 @@ const SetOpenCollective = ({ closeModal, round }) => {
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
-            editRound({ ...variables, roundId: round.id })
-              .then(({ error }) => {
-                if (error) {
-                  toast.error(
-                    error.message.indexOf(GRAPHQL_COLLECTIVE_NOT_FOUND) > -1
-                      ? intl.formatMessage({
-                          defaultMessage: "Collective not found",
-                        })
-                      : intl.formatMessage({ defaultMessage: "Unknown Error" })
-                  );
-                } else {
-                  closeModal();
-                  toast.success(
-                    intl.formatMessage({ defaultMessage: "Collective updated" })
-                  );
+            try {
+              let ocCollectiveSlug = "";
+              let ocProjectSlug = "";
+              if (variables.ocCollectiveURL) {
+                const url = new URL(variables.ocCollectiveURL);
+                const pathTokens = url.pathname.split("/").filter((t) => t);
+                ocCollectiveSlug = pathTokens[0];
+                if (pathTokens[1] === "projects") {
+                  ocProjectSlug = pathTokens[2];
                 }
-              })
-              .catch((err) => {
-                console.log({ err });
-                alert(err.message);
-              });
+              }
+
+              editRound({ ...variables, roundId: round.id, ocCollectiveSlug })
+                .then(({ error }) => {
+                  if (error) {
+                    toast.error(
+                      error.message.indexOf(GRAPHQL_COLLECTIVE_NOT_FOUND) > -1
+                        ? intl.formatMessage({
+                            defaultMessage: "Collective not found",
+                          })
+                        : intl.formatMessage({
+                            defaultMessage: "Unknown Error",
+                          })
+                    );
+                  } else {
+                    closeModal();
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Collective updated",
+                      })
+                    );
+                  }
+                })
+                .catch((err) => {
+                  console.log({ err });
+                  alert(err.message);
+                });
+            } catch (err) {
+              let message = "";
+              if (err.message.indexOf("Invalid URL") > -1) {
+                message = intl.formatMessage({ defaultMessage: "Invalid URL" });
+              }
+              toast.error(
+                message ||
+                  err.message ||
+                  intl.formatMessage({ defaultMessage: "Unknown Error" })
+              );
+            }
           })}
         >
           <Box m="15px 0">
             <TextField
-              name="ocCollectiveSlug"
-              label={intl.formatMessage({ defaultMessage: "Collective or project URL" })}
-              defaultValue={round.ocCollective?.slug}
+              name="ocCollectiveURL"
+              label={intl.formatMessage({
+                defaultMessage: "Collective or project URL",
+              })}
+              defaultValue={
+                round.ocCollective?.slug
+                  ? "https://opencollective.com/" + round.ocCollective?.slug
+                  : ""
+              }
               inputRef={register}
               fullWidth
               variant="outlined"
