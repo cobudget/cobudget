@@ -100,6 +100,11 @@ export const editRound = combineResolvers(
     let collective;
     if (ocCollectiveSlug) {
       collective = await getCollective({ slug: ocCollectiveSlug });
+      if (!collective) {
+        // If collective slug is provided and collective not found
+        // throw error
+        throw new Error("Collective not found");
+      }
     }
 
     return prisma.round.update({

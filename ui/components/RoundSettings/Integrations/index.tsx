@@ -77,8 +77,21 @@ function Integrations() {
               primary={intl.formatMessage({
                 defaultMessage: "Connect round to Open Collective",
               })}
-              secondary={"ABC"}
-              isSet={false}
+              secondary={
+                round?.ocCollective ? (
+                  <a
+                    href={`https://opencollective.com/${round.ocCollective?.slug}`}
+                    className="hover:underline"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {round.ocCollective?.name}
+                  </a>
+                ) : (
+                  intl.formatMessage({ defaultMessage: "Not Set" })
+                )
+              }
+              isSet={!!round.ocCollective}
               canEdit={true}
               openModal={() => setOpenModal("SET_OPEN_COLLECTIVE")}
               roundColor={round.color}

@@ -3,6 +3,8 @@ import { useMutation, gql } from "urql";
 import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 import { FormattedMessage, useIntl } from "react-intl";
+import toast from "react-hot-toast";
+import { GRAPHQL_COLLECTIVE_NOT_FOUND } from "../../../constants";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $ocCollectiveSlug: String) {
@@ -18,7 +20,7 @@ const EDIT_ROUND = gql`
 `;
 
 const SetOpenCollective = ({ closeModal, round }) => {
-  const [, editRound] = useMutation(EDIT_ROUND);
+  const [{ fetching }, editRound] = useMutation(EDIT_ROUND);
   const { handleSubmit, register } = useForm();
   const intl = useIntl();
 
@@ -31,8 +33,21 @@ const SetOpenCollective = ({ closeModal, round }) => {
         <form
           onSubmit={handleSubmit((variables) => {
             editRound({ ...variables, roundId: round.id })
-              .then(() => {
-                closeModal();
+              .then(({ error }) => {
+                if (error) {
+                  toast.error(
+                    error.message.indexOf(GRAPHQL_COLLECTIVE_NOT_FOUND) > -1
+                      ? intl.formatMessage({
+                          defaultMessage: "Collective not found",
+                        })
+                      : intl.formatMessage({ defaultMessage: "Unknown Error" })
+                  );
+                } else {
+                  closeModal();
+                  toast.success(
+                    intl.formatMessage({ defaultMessage: "Collective updated" })
+                  );
+                }
               })
               .catch((err) => {
                 console.log({ err });
@@ -56,6 +71,7 @@ const SetOpenCollective = ({ closeModal, round }) => {
             size="large"
             variant="contained"
             color="primary"
+            disabled={fetching}
           >
             <FormattedMessage defaultMessage="Save" />
           </Button>
