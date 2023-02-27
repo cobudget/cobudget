@@ -4,6 +4,7 @@ import { getGroup } from "server/controller";
 import {
   bucketTotalContributions,
   getCollective,
+  getProject,
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
@@ -323,5 +324,9 @@ export const publishedBucketCount = async (round) => {
 };
 
 export const ocCollective = async (parent) => {
-  return getCollective({ id: parent.openCollectiveId });
+  if (parent.openCollectiveProjectId) {
+    return getProject({ id: parent.openCollectiveProjectId });
+  } else {
+    return getCollective({ id: parent.openCollectiveId });
+  }
 };

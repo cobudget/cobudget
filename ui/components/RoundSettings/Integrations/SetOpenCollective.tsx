@@ -7,13 +7,25 @@ import toast from "react-hot-toast";
 import { GRAPHQL_COLLECTIVE_NOT_FOUND } from "../../../constants";
 
 const EDIT_ROUND = gql`
-  mutation editRound($roundId: ID!, $ocCollectiveSlug: String) {
-    editRound(roundId: $roundId, ocCollectiveSlug: $ocCollectiveSlug) {
+  mutation editRound(
+    $roundId: ID!
+    $ocCollectiveSlug: String
+    $ocProjectSlug: String
+  ) {
+    editRound(
+      roundId: $roundId
+      ocCollectiveSlug: $ocCollectiveSlug
+      ocProjectSlug: $ocProjectSlug
+    ) {
       id
       ocCollective {
         id
         name
         slug
+        type
+        parent {
+          slug
+        }
         stats {
           balance {
             valueInCents
@@ -50,7 +62,12 @@ const SetOpenCollective = ({ closeModal, round }) => {
                 }
               }
 
-              editRound({ ...variables, roundId: round.id, ocCollectiveSlug })
+              editRound({
+                ...variables,
+                roundId: round.id,
+                ocCollectiveSlug,
+                ocProjectSlug,
+              })
                 .then(({ error }) => {
                   if (error) {
                     toast.error(

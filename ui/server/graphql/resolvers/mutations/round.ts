@@ -4,6 +4,7 @@ import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getCollective,
+  getProject,
   getRoundMember,
   isCollAdmin,
   isCollOrGroupAdmin,
@@ -95,13 +96,15 @@ export const editRound = combineResolvers(
       bucketReviewIsOpen,
       discourseCategoryId,
       ocCollectiveSlug,
+      ocProjectSlug,
     }
   ) => {
-    let collectiveId;
+    let ocCollectiveId, ocProjectId;
     if (ocCollectiveSlug) {
       const collective = await getCollective({ slug: ocCollectiveSlug });
       if (collective) {
-        collectiveId = collective.id;
+        ocCollectiveId = collective.id;
+        ocProjectId = null;
       } else {
         // If collective slug is provided and collective not found
         // throw error
@@ -110,14 +113,20 @@ export const editRound = combineResolvers(
     } else if (ocCollectiveSlug === "") {
       // An empty string means the user wants to remove
       // collective
-      collectiveId = null;
+      ocCollectiveId = null;
+    }
+
+    if (ocProjectSlug) {
+      const ocProject = await getProject({ slug: ocProjectSlug });
+      ocProjectId = ocProject?.id || null;
     }
 
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
-        openCollectiveId: collectiveId,
+        openCollectiveId: ocCollectiveId,
+        openCollectiveProjectId: ocProjectId,
         title,
         archived,
         registrationPolicy,

@@ -17,6 +17,12 @@ const GET_ROUND_INTEGRATIONS = gql`
         id
         name
         slug
+        type
+        parent {
+          id
+          name
+          slug
+        }
       }
     }
   }

@@ -97,6 +97,7 @@ const schema = gql`
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
       ocCollectiveSlug: String
+      ocProjectSlug: String
     ): Round!
     deleteRound(roundId: ID!): Round
 
@@ -451,11 +452,24 @@ const schema = gql`
     balance: OC_Amount
   }
 
+  enum OC_Type {
+    PROJECT
+    COLLECTIVE
+  }
+
+  type OC_Parent {
+    id: String!
+    name: String!
+    slug: String!
+  }
+
   type OC_Collective {
     id: String!
     name: String!
     slug: String!
     stats: OC_Stats
+    type: OC_Type!
+    parent: OC_Parent
   }
 
   type Bucket {
