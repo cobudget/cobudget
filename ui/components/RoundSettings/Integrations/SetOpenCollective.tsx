@@ -4,7 +4,10 @@ import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 import { FormattedMessage, useIntl } from "react-intl";
 import toast from "react-hot-toast";
-import { GRAPHQL_COLLECTIVE_NOT_FOUND } from "../../../constants";
+import {
+  GRAPHQL_COLLECTIVE_NOT_FOUND,
+  GRAPHQL_PROJECT_NOT_FOUND,
+} from "../../../constants";
 import { useMemo } from "react";
 
 const EDIT_ROUND = gql`
@@ -84,15 +87,23 @@ const SetOpenCollective = ({ closeModal, round }) => {
               })
                 .then(({ error }) => {
                   if (error) {
-                    toast.error(
+                    let errorMessage = intl.formatMessage({
+                      defaultMessage: "Unknown Error",
+                    });
+                    if (
                       error.message.indexOf(GRAPHQL_COLLECTIVE_NOT_FOUND) > -1
-                        ? intl.formatMessage({
-                            defaultMessage: "Collective not found",
-                          })
-                        : intl.formatMessage({
-                            defaultMessage: "Unknown Error",
-                          })
-                    );
+                    ) {
+                      errorMessage = intl.formatMessage({
+                        defaultMessage: "Collective not found",
+                      });
+                    } else if (
+                      error.message.indexOf(GRAPHQL_PROJECT_NOT_FOUND) > -1
+                    ) {
+                      errorMessage = intl.formatMessage({
+                        defaultMessage: "Project not found",
+                      });
+                    }
+                    toast.error(errorMessage);
                   } else {
                     closeModal();
                     toast.success(

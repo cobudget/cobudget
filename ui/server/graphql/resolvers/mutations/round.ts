@@ -120,6 +120,9 @@ export const editRound = combineResolvers(
     if (ocProjectSlug) {
       const ocProject = await getProject({ slug: ocProjectSlug });
       ocProjectId = ocProject?.id || null;
+      if (ocProjectId === null) {
+        throw new Error("Project not found");
+      }
     }
 
     return prisma.round.update({
