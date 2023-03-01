@@ -54,7 +54,11 @@ function Integrations() {
   const round = data?.round;
 
   if (fetching) {
-    return <HappySpinner />;
+    return (
+      <div className="flex justify-center items-center">
+        <HappySpinner />
+      </div>
+    );
   }
 
   if (round) {
