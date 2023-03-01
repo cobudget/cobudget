@@ -609,8 +609,7 @@ const RoundPage = ({ currentUser }) => {
                         <td className="font-bold">
                           <FormattedCurrency
                             value={
-                              round?.ocCollective?.stats?.balance
-                                ?.valueInCents / 100
+                              round?.ocCollective?.stats?.balance?.valueInCents
                             }
                             currency={
                               round?.ocCollective?.stats?.balance?.currency

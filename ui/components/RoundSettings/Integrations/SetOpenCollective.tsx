@@ -5,6 +5,7 @@ import { Box, Button, TextField } from "@material-ui/core";
 import { FormattedMessage, useIntl } from "react-intl";
 import toast from "react-hot-toast";
 import { GRAPHQL_COLLECTIVE_NOT_FOUND } from "../../../constants";
+import { useMemo } from "react";
 
 const EDIT_ROUND = gql`
   mutation editRound(
@@ -41,6 +42,19 @@ const SetOpenCollective = ({ closeModal, round }) => {
   const [{ fetching }, editRound] = useMutation(EDIT_ROUND);
   const { handleSubmit, register } = useForm();
   const intl = useIntl();
+
+  const openCollectiveURL = useMemo(() => {
+    const ocCollective = round?.ocCollective;
+    if (ocCollective) {
+      return `https://opencollective.com/${
+        ocCollective?.parent
+          ? `${ocCollective?.parent.slug}/projects/${ocCollective?.slug}`
+          : ocCollective.slug
+      }`;
+    } else {
+      return "";
+    }
+  }, [round]);
 
   return (
     <Card>
@@ -111,11 +125,7 @@ const SetOpenCollective = ({ closeModal, round }) => {
               label={intl.formatMessage({
                 defaultMessage: "Collective or project URL",
               })}
-              defaultValue={
-                round.ocCollective?.slug
-                  ? "https://opencollective.com/" + round.ocCollective?.slug
-                  : ""
-              }
+              defaultValue={openCollectiveURL}
               inputRef={register}
               fullWidth
               variant="outlined"

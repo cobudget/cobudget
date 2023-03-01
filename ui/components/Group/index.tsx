@@ -161,6 +161,10 @@ const GroupIndex = ({ currentUser }) => {
   }, [balances]);
 
   const [activeRounds, archivedRounds] = useMemo(() => {
+    if (!rounds) {
+      return [];
+    }
+
     return [
       rounds.filter((r) => !r.archived),
       rounds.filter((r) => r.archived),

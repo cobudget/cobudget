@@ -114,6 +114,7 @@ export const editRound = combineResolvers(
       // An empty string means the user wants to remove
       // collective
       ocCollectiveId = null;
+      ocProjectId = null;
     }
 
     if (ocProjectSlug) {
