@@ -71,7 +71,13 @@ const SetOpenCollective = ({ closeModal, round }) => {
               let ocCollectiveSlug = "";
               let ocProjectSlug = "";
               if (variables.ocCollectiveURL) {
-                const url = new URL(variables.ocCollectiveURL);
+                const urlInput =
+                  variables.ocCollectiveURL.indexOf("http://") === 0 ||
+                  variables.ocCollectiveURL.indexOf("https://") === 0
+                    ? variables.ocCollectiveURL
+                    : `https://${variables.ocCollectiveURL}`;
+
+                const url = new URL(urlInput);
                 const pathTokens = url.pathname.split("/").filter((t) => t);
                 ocCollectiveSlug = pathTokens[0];
                 if (pathTokens[1] === "projects") {
