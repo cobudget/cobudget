@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import { getGroup } from "server/controller";
 import {
   bucketTotalContributions,
+  getCollective,
+  getProject,
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
@@ -319,4 +321,12 @@ export const publishedBucketCount = async (round) => {
     },
   });
   return buckets.length;
+};
+
+export const ocCollective = async (parent) => {
+  if (parent.openCollectiveProjectId) {
+    return getProject({ id: parent.openCollectiveProjectId });
+  } else {
+    return getCollective({ id: parent.openCollectiveId });
+  }
 };

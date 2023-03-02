@@ -162,6 +162,9 @@ model Round {
   guidelines Guideline[]
   fields     Field[]
 
+  openCollectiveId          String?
+  openCollectiveProjectId   String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -3,6 +3,8 @@ import { combineResolvers } from "graphql-resolvers";
 import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
+  getCollective,
+  getProject,
   getRoundMember,
   isCollAdmin,
   isCollOrGroupAdmin,
@@ -93,12 +95,42 @@ export const editRound = combineResolvers(
       about,
       bucketReviewIsOpen,
       discourseCategoryId,
+      ocCollectiveSlug,
+      ocProjectSlug,
     }
   ) => {
+    let ocCollectiveId, ocProjectId;
+    if (ocCollectiveSlug) {
+      const collective = await getCollective({ slug: ocCollectiveSlug });
+      if (collective) {
+        ocCollectiveId = collective.id;
+        ocProjectId = null;
+      } else {
+        // If collective slug is provided and collective not found
+        // throw error
+        throw new Error("Collective not found");
+      }
+    } else if (ocCollectiveSlug === "") {
+      // An empty string means the user wants to remove
+      // collective
+      ocCollectiveId = null;
+      ocProjectId = null;
+    }
+
+    if (ocProjectSlug) {
+      const ocProject = await getProject({ slug: ocProjectSlug });
+      ocProjectId = ocProject?.id || null;
+      if (ocProjectId === null) {
+        throw new Error("Project not found");
+      }
+    }
+
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
+        openCollectiveId: ocCollectiveId,
+        openCollectiveProjectId: ocProjectId,
         title,
         archived,
         registrationPolicy,

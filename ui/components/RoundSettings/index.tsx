@@ -12,6 +12,7 @@ import Granting from "./Granting";
 import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
+import Integrations from "./Integrations";
 
 const RoundSettings = ({
   settingsTabSlug,
@@ -68,6 +69,11 @@ const RoundSettings = ({
         slug: "tags",
         name: intl.formatMessage({ defaultMessage: "Tags" }),
         component: Tags,
+      },
+      {
+        slug: "integrations",
+        name: intl.formatMessage({ defaultMessage: "Integrations" }),
+        component: Integrations,
       },
     ],
     [intl]
