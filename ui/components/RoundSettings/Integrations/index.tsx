@@ -9,8 +9,8 @@ import SettingsListItem from "../Granting/SettingsListItem";
 import SetOpenCollective from "./SetOpenCollective";
 
 const GET_ROUND_INTEGRATIONS = gql`
-  query GetRoundIntegrations($roundSlug: String!) {
-    round(roundSlug: $roundSlug) {
+  query GetRoundIntegrations($roundSlug: String!, $groupSlug: String) {
+    round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       color
       ocCollective {
@@ -32,7 +32,7 @@ function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
     query: GET_ROUND_INTEGRATIONS,
-    variables: { roundSlug: router.query.round },
+    variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
