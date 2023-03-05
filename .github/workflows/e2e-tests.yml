@@ -28,7 +28,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
-          node-version: ${{ matrix.node-version }}
           name: cypress-artifacts
           path: |
             cypress/screenshots/
