@@ -18,8 +18,6 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
-      - name: Node Version
-        run: node -v && npm -v
       - name: Migrations
         run: |
           yarn test:start-db &
