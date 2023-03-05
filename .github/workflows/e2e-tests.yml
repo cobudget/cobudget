@@ -19,10 +19,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn
       - name: Migrations
-        - run: |
+        run: |
           yarn test:start-db &
           yarn test:migrate
-        - run: |
+        run: |
           yarn test:run:servers &
           yarn test
       - uses: actions/upload-artifact@v3
