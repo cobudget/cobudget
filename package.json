@@ -14,7 +14,7 @@
     "test:run": "cypress run --browser chrome --headless",
     "test": "./scripts/wait.sh 3001 && npm run test:run",
     "typecheck": "yarn --cwd ui typecheck",
-    "test:migrate": "cd ui && yarn migrate && docker-compose down"
+    "test:migrate": "./scripts/wait.sh 35432 cd ui && yarn migrate && docker-compose down"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.14.0",
