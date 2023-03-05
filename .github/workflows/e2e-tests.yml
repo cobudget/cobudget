@@ -20,7 +20,7 @@ jobs:
       - run: yarn
       - name: Migrations
         run: |
-          sudo docker-compose up &
+          yarn test:start-db &
           yarn test:migrate
       - name: Run servers and test
         run: |
