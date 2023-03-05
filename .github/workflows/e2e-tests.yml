@@ -18,6 +18,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
+      - run: yarn migrate
+      - run: yarn build
+      - run: yarn start
+      - wait-on: "http://localhost:3000"
       - name: Run servers and test
         run: |
           yarn test:run:servers &
