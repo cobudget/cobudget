@@ -9,11 +9,12 @@
     "postinstall": "cd ui && yarn",
     "lint": "prettier --ignore-path .gitignore --check . && eslint . && yarn typecheck",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix && yarn typecheck",
-    "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"cd ui/ && yarn migrate && npm run test:run --prefix ui\"",
+    "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
     "test:open": "cypress open",
     "test:run": "cypress run --browser chrome --headless",
     "test": "./scripts/wait.sh 3001 && npm run test:run",
-    "typecheck": "yarn --cwd ui typecheck"
+    "typecheck": "yarn --cwd ui typecheck",
+    "test:migrate": "cd ui && yarn migrate && docker-compose down"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.14.0",
