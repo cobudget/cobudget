@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "start:ci": "INSECURE_AUTH=true yarn run start",
-    "test:run": "NODE_ENV=test next dev -p 3001",
+    "test:run": "NODE_ENV=test next dev -p 3000",
     "generate": "yarn run generate:prisma",
     "generate:prisma": "prisma generate",
     "migrate": "npx prisma migrate dev",
