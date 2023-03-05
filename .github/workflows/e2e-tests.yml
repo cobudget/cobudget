@@ -18,11 +18,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
+      - run: yarn test:run:servers
       - run: cd ui && yarn migrate
       - name: Run servers and test
-        run: |
-          yarn test:run:servers &
-          yarn test
+        run: yarn test
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
