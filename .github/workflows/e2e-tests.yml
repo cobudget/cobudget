@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: yarn
+      - run: yarn migrate
       - name: Run servers and test
         run: |
           yarn test:run:servers &
