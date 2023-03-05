@@ -25,7 +25,7 @@ jobs:
           yarn test:start-db &
           yarn test:migrate
       - name: Run servers and test
-        run: cd ui && npm run dev
+        run: cd ui && npm run dev & npm run test
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
