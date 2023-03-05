@@ -17,7 +17,7 @@
     "typecheck": "yarn --cwd ui typecheck",
     "test:migrate": "./scripts/wait.sh 35432 && cd ui && yarn migrate",
     "test:start-db": "cd ui && docker-compose up",
-    "test:switch-env": "ep .env.test .env.local"
+    "test:switch-env": "cp .env.test .env.local"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.14.0",
