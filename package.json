@@ -12,7 +12,7 @@
     "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo yarn dev\"",
     "test:open": "cypress open",
     "test:run": "cypress run --browser chrome --headless",
-    "test": "./scripts/wait.sh 3000 && npm run test:run --prefix ui",
+    "test": "./scripts/wait.sh 3000 && yarn test:run --prefix ui",
     "typecheck": "yarn --cwd ui typecheck",
     "test:migrate": "./scripts/wait.sh 35432 && cd ui && yarn migrate",
     "test:start-db": "cd ui && docker-compose up"
