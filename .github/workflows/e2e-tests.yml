@@ -26,6 +26,7 @@ jobs:
           yarn test:migrate
       - name: Run servers and test
         run: |
+          node -v &
           yarn test:run:servers
       - uses: actions/upload-artifact@v3
         if: failure()
