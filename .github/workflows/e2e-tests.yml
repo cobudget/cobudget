@@ -19,12 +19,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn
       - name: Migrations
-        run: node --version
         run: |
           yarn test:start-db &
           yarn test:migrate
       - name: Run servers and test
-        run: node --version
         run: |
           yarn test:run:servers &
           yarn test
