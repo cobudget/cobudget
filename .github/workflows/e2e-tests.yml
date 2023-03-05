@@ -17,11 +17,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn
-      - name: Run servers and test
+      - run: yarn test:switch-env && yarn
+      - name: Migrations
         run: |
-          yarn test:run:servers &
-          yarn test
+          yarn test:start-db &
+          yarn test:migrate
+      - name: Run servers and test
+        run: npm run test:switch-env && cd ui && npm run dev & npm run test
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
