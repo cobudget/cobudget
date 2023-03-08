@@ -6,16 +6,25 @@ import { isGroupAdmin } from "../auth";
 import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import subscribers from "../../../subscribers/discourse.subscriber";
-import { statusTypeToQuery } from "../helpers";
+import { canViewRound, statusTypeToQuery } from "../helpers";
 import discourse from "../../../lib/discourse";
+import { ROUND_IS_PRIVATE } from "../../../../constants";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
-export const bucket = async (parent, { id }) => {
+export const bucket = async (parent, { id }, { user, ss }) => {
   if (!id) return null;
   const bucket = await prisma.bucket.findUnique({ where: { id } });
   if (!bucket || bucket.deleted) return null;
-  return bucket;
+
+  const round = await prisma.round.findUnique({ where: { id: bucket.roundId } });
+  const p = await canViewRound({ user, round });
+  console.log("Per", p);
+  if (await canViewRound({ user, round }) || ss) {
+    return bucket;
+  }
+
+  throw new Error(ROUND_IS_PRIVATE);
 };
 
 export const bucketsPage = async (
