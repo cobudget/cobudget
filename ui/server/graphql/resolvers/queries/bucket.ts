@@ -17,14 +17,14 @@ export const bucket = async (parent, { id }, { user, ss }) => {
   const bucket = await prisma.bucket.findUnique({ where: { id } });
   if (!bucket || bucket.deleted) return null;
 
-  const round = await prisma.round.findUnique({ where: { id: bucket.roundId } });
-  const p = await canViewRound({ user, round });
-  console.log("Per", p);
-  if (await canViewRound({ user, round }) || ss) {
+  const round = await prisma.round.findUnique({
+    where: { id: bucket.roundId },
+  });
+  if ((await canViewRound({ user, round })) || ss) {
     return bucket;
   }
 
-  throw new Error(ROUND_IS_PRIVATE);
+  return null;
 };
 
 export const bucketsPage = async (
