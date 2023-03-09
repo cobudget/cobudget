@@ -15,7 +15,7 @@ export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;
   if (process.env.SINGLE_GROUP_MODE !== "true" && groupSlug == "c") return null;
 
-  const group = getGroup({ groupSlug, user, ss });
+  const group = await getGroup({ groupSlug, user, ss });
 
   if (ss || (await canViewGroup({ group, user }))) {
     return group;
