@@ -10,6 +10,8 @@ import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
+import { useIntl } from "react-intl";
+import { PUBLIC } from "../../constants";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
@@ -18,6 +20,7 @@ const CREATE_ROUND = gql`
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
+    $visibility: Visibility
   ) {
     createRound(
       groupId: $groupId
@@ -25,10 +28,12 @@ const CREATE_ROUND = gql`
       slug: $slug
       currency: $currency
       registrationPolicy: $registrationPolicy
+      visibility: $visibility
     ) {
       id
       slug
       title
+      visibility
     }
   }
 `;
@@ -38,6 +43,7 @@ export default function NewRoundPage({ currentGroup }) {
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
   const router = useRouter();
+  const intl = useIntl();
   const onSubmit = (variables) => {
     createRound({ ...variables, groupId: currentGroup.id })
       .then(({ data }) => {
@@ -109,6 +115,26 @@ export default function NewRoundPage({ currentGroup }) {
               </option>
             ))}
           </SelectField>
+          <SelectField
+            name="visibility"
+            label={intl.formatMessage({ defaultMessage: "Visibility" })}
+            inputRef={register}
+            className="my-4"
+          >
+            <option
+              value="PUBLIC"
+              selected={currentGroup?.visibility === PUBLIC}
+            >
+              {intl.formatMessage({ defaultMessage: "Public" })}
+            </option>
+            <option
+              value="HIDDEN"
+              selected={currentGroup?.visibility !== PUBLIC}
+            >
+              {intl.formatMessage({ defaultMessage: "Hidden" })}
+            </option>
+          </SelectField>
+
           <SelectField
             name="registrationPolicy"
             label="Registration policy"
