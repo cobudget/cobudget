@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Tooltip from "@tippyjs/react";
@@ -11,7 +11,8 @@ import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
 import { useIntl } from "react-intl";
-import { PUBLIC } from "../../constants";
+import { HIDDEN, PUBLIC } from "../../constants";
+import PublicRoundWarning from "components/RoundSettings/PublicRoundWarning";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
@@ -42,6 +43,7 @@ export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
+  const [isHidden, setIsHidden] = useState(currentGroup?.visibility === HIDDEN);
   const router = useRouter();
   const intl = useIntl();
   const onSubmit = (variables) => {
@@ -57,6 +59,12 @@ export default function NewRoundPage({ currentGroup }) {
         alert(err.message);
       });
   };
+
+  useEffect(() => {
+    if (currentGroup) {
+      setIsHidden(currentGroup?.visibility === HIDDEN);
+    }
+  }, [currentGroup]);
 
   return (
     <div className="page">
@@ -120,6 +128,11 @@ export default function NewRoundPage({ currentGroup }) {
             label={intl.formatMessage({ defaultMessage: "Visibility" })}
             inputRef={register}
             className="my-4"
+            inputProps={{
+              onChange: (e) => {
+                setIsHidden(e.target.value === HIDDEN);
+              },
+            }}
           >
             <option
               value="PUBLIC"
@@ -147,6 +160,11 @@ export default function NewRoundPage({ currentGroup }) {
             <option value="REQUEST_TO_JOIN">Request to join</option>
             <option value="INVITE_ONLY">Invite only</option>
           </SelectField>
+
+          <PublicRoundWarning
+            group={currentGroup}
+            visibility={isHidden ? HIDDEN : PUBLIC}
+          />
 
           <Button className="mt-2" type="submit">
             Create
