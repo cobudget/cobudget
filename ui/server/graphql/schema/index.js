@@ -83,6 +83,7 @@ const schema = gql`
       title: String!
       currency: String!
       registrationPolicy: RegistrationPolicy!
+      visibility: Visibility
     ): Round!
     editRound(
       roundId: ID!

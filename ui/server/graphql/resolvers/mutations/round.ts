@@ -21,7 +21,7 @@ import dayjs from "dayjs";
 
 export const createRound = async (
   parent,
-  { groupId, slug, title, currency, registrationPolicy },
+  { groupId, slug, title, currency, registrationPolicy, visibility },
   { user, ss }
 ) => {
   let singleRound = false;
@@ -44,6 +44,7 @@ export const createRound = async (
       slug,
       title,
       currency,
+      visibility,
       registrationPolicy,
       group: { connect: { id: groupId } },
       singleRound,

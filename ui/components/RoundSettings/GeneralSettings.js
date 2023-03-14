@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import TextField from "components/TextField";
@@ -10,6 +10,8 @@ import DeleteRoundModal from "./DeleteRoundModal";
 import toast from "react-hot-toast";
 import router from "next/router";
 import { FormattedMessage, useIntl } from "react-intl";
+import PublicRoundWarning from "./PublicRoundWarning";
+import { HIDDEN, PUBLIC } from "../../constants";
 
 const EDIT_ROUND = gql`
   mutation editRound(
@@ -45,6 +47,7 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
   const [{ fetching: loading }, editRound] = useMutation(EDIT_ROUND);
   const [color, setColor] = useState(round.color);
   const [isDeleteModalOpened, setIsDeleteModalOpened] = useState(false);
+  const [isHidden, setIsHidden] = useState();
   const intl = useIntl();
   const {
     handleSubmit,
@@ -58,6 +61,13 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
   const isAdmin =
     currentUser.currentGroupMember?.isAdmin ||
     currentUser.currentCollMember?.isAdmin;
+
+  useEffect(() => {
+    if (round) {
+      setIsHidden(round.visibility === HIDDEN);
+    }
+  }, [round]);
+
   return (
     <div className="px-6">
       <h2 className="text-2xl font-semibold">
@@ -115,6 +125,11 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
           label={intl.formatMessage({ defaultMessage: "Visibility" })}
           defaultValue={round.visibility}
           inputRef={register}
+          inputProps={{
+            onChange: (e) => {
+              setIsHidden(e.target.value === HIDDEN);
+            },
+          }}
           className="my-4"
         >
           <option value="PUBLIC">
@@ -124,6 +139,11 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
             {intl.formatMessage({ defaultMessage: "Hidden" })}
           </option>
         </SelectField>
+
+        <PublicRoundWarning
+          group={currentGroup}
+          visibility={isHidden ? HIDDEN : PUBLIC}
+        />
 
         <SelectField
           name="registrationPolicy"

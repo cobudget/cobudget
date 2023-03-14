@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Tooltip from "@tippyjs/react";
@@ -10,6 +10,9 @@ import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
+import { useIntl } from "react-intl";
+import { HIDDEN, PUBLIC } from "../../constants";
+import PublicRoundWarning from "components/RoundSettings/PublicRoundWarning";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
@@ -18,6 +21,7 @@ const CREATE_ROUND = gql`
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
+    $visibility: Visibility
   ) {
     createRound(
       groupId: $groupId
@@ -25,10 +29,12 @@ const CREATE_ROUND = gql`
       slug: $slug
       currency: $currency
       registrationPolicy: $registrationPolicy
+      visibility: $visibility
     ) {
       id
       slug
       title
+      visibility
     }
   }
 `;
@@ -37,7 +43,9 @@ export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
+  const [isHidden, setIsHidden] = useState(currentGroup?.visibility === HIDDEN);
   const router = useRouter();
+  const intl = useIntl();
   const onSubmit = (variables) => {
     createRound({ ...variables, groupId: currentGroup.id })
       .then(({ data }) => {
@@ -51,6 +59,12 @@ export default function NewRoundPage({ currentGroup }) {
         alert(err.message);
       });
   };
+
+  useEffect(() => {
+    if (currentGroup) {
+      setIsHidden(currentGroup?.visibility === HIDDEN);
+    }
+  }, [currentGroup]);
 
   return (
     <div className="page">
@@ -110,6 +124,31 @@ export default function NewRoundPage({ currentGroup }) {
             ))}
           </SelectField>
           <SelectField
+            name="visibility"
+            label={intl.formatMessage({ defaultMessage: "Visibility" })}
+            inputRef={register}
+            className="my-4"
+            inputProps={{
+              onChange: (e) => {
+                setIsHidden(e.target.value === HIDDEN);
+              },
+            }}
+          >
+            <option
+              value="PUBLIC"
+              selected={currentGroup?.visibility === PUBLIC}
+            >
+              {intl.formatMessage({ defaultMessage: "Public" })}
+            </option>
+            <option
+              value="HIDDEN"
+              selected={currentGroup?.visibility !== PUBLIC}
+            >
+              {intl.formatMessage({ defaultMessage: "Hidden" })}
+            </option>
+          </SelectField>
+
+          <SelectField
             name="registrationPolicy"
             label="Registration policy"
             className="my-2"
@@ -121,6 +160,11 @@ export default function NewRoundPage({ currentGroup }) {
             <option value="REQUEST_TO_JOIN">Request to join</option>
             <option value="INVITE_ONLY">Invite only</option>
           </SelectField>
+
+          <PublicRoundWarning
+            group={currentGroup}
+            visibility={isHidden ? HIDDEN : PUBLIC}
+          />
 
           <Button className="mt-2" type="submit">
             Create
