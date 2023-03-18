@@ -49,22 +49,26 @@ model ExpenseReceipt {
   description        String
   date               DateTime
   amount             Int
-  attachment         String   
+  attachment         String?
+  expense            Expense? @relation(fields: [expenseId], references: [id])
+  expenseId          String? 
 }
 
 model Expense {
-  id                  String   @id @default(cuid())
-  bucket              Bucket? @relation(fields: [bucketId], references: [id])
+  id                  String    @id @default(cuid())
+  bucket              Bucket?   @relation(fields: [bucketId], references: [id])
   bucketId            String?
 
   recipientName       String
   recipientEmail      String
-  swiftCode           String
-  iban                String
-  country             String
-  city                String
-  recipientAddress    String
+  swiftCode           String?   @default("")
+  iban                String?   @default("")
+  country             String    @default("")
+  city                String    @default("")
+  recipientAddress    String    
   recipientPostalCode String
+
+  receipts            ExpenseReceipt[]
 }
 
 model GroupMember {
@@ -294,6 +298,7 @@ model Bucket {
   BudgetItems       BudgetItem[]
   FieldValues       FieldValue[]
   comments          Comment[]
+  expenses          Expense[]
   approvedAt        DateTime?
   publishedAt       DateTime?
   fundedAt          DateTime?
