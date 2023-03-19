@@ -50,6 +50,11 @@ export const BUCKET_QUERY = gql`
       exchangeMinimumContribution
       exchangeVat
 
+      expenses {
+        id
+        title
+      }
+
       round {
         id
         slug
