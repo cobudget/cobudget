@@ -1,7 +1,10 @@
 import Button from "components/Button";
 import TextField from "components/TextField";
+import { GRAPHQL_EXPENSE_COCREATOR_ONLY } from "../../../constants";
+import { GRAPHQL_NOT_LOGGED_IN } from "../../../constants";
 import React from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation } from "urql";
 
@@ -45,6 +48,26 @@ function AddExpense({ bucketId, close }) {
     submitExpense({
       ...variables,
       bucketId,
+    }).then((data) => {
+      if (data.error?.message.indexOf(GRAPHQL_NOT_LOGGED_IN) > -1) {
+        toast.error(
+          intl.formatMessage({
+            defaultMessage: "You need to login to submit an expense",
+          })
+        );
+        return;
+      } else if (
+        data.error?.message.indexOf(GRAPHQL_EXPENSE_COCREATOR_ONLY) > -1
+      ) {
+        toast.error(
+          intl.formatMessage({
+            defaultMessage: "Only cocreators can add expense",
+          })
+        );
+        return;
+      }
+      toast.success(intl.formatMessage({ defaultMessage: "Expense Added" }));
+      close();
     });
   };
 
@@ -221,7 +244,7 @@ function AddExpense({ bucketId, close }) {
           <Button onClick={close} variant="secondary" className="mr-2">
             <FormattedMessage defaultMessage="Cancel" />
           </Button>
-          <Button type="submit" loading={false}>
+          <Button type="submit" loading={fetching}>
             <FormattedMessage defaultMessage="Save" />
           </Button>
         </div>

@@ -16,6 +16,10 @@ import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
+import {
+  GRAPHQL_EXPENSE_COCREATOR_ONLY,
+  GRAPHQL_NOT_LOGGED_IN,
+} from "../../../../constants";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -958,6 +962,10 @@ export const createExpense = async (
   },
   { user }
 ) => {
+  if (!user) {
+    throw new Error(GRAPHQL_NOT_LOGGED_IN);
+  }
+
   const data = prisma.bucket.findUnique({ where: { id: bucketId } });
   const bucket = await data;
   const cocreators = await data.cocreators();
@@ -991,6 +999,6 @@ export const createExpense = async (
       },
     });
   } else {
-    throw new Error("Only cocreators can add");
+    throw new Error(GRAPHQL_EXPENSE_COCREATOR_ONLY);
   }
 };
