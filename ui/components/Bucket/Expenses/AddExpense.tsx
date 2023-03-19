@@ -36,7 +36,7 @@ const SUBMIT_EXPENSE = gql`
   }
 `;
 
-function AddExpense({ bucketId }) {
+function AddExpense({ bucketId, close }) {
   const intl = useIntl();
 
   const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
@@ -218,7 +218,7 @@ function AddExpense({ bucketId }) {
         </div>
 
         <div className="flex justify-end mt-4">
-          <Button onClick={() => ""} variant="secondary" className="mr-2">
+          <Button onClick={close} variant="secondary" className="mr-2">
             <FormattedMessage defaultMessage="Cancel" />
           </Button>
           <Button type="submit" loading={false}>
