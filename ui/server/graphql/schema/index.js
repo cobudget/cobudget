@@ -156,6 +156,19 @@ const schema = gql`
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
+    createExpense(
+      bucketId: String!
+      title: String!
+      recipientName: String!
+      recipientEmail: String!
+      swiftCode: String
+      iban: String
+      country: String!
+      city: String!
+      recipientAddress: String!
+      recipientPostalCode: String!
+    ): Expense
+
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
 
@@ -470,6 +483,29 @@ const schema = gql`
     stats: OC_Stats
     type: OC_Type!
     parent: OC_Parent
+    expenseId: String!
+  }
+
+  type ExpenseReceipt {
+    id: String!
+    description: String
+    date: Date
+    amount: Int
+    attachment: String
+  }
+
+  type Expense {
+    id: String!
+    title: String!
+    bucketId: String!
+    recipientName: String
+    recipientEmail: String
+    swiftCode: String
+    iban: String
+    country: String
+    city: String
+    recipientAddress: String
+    recipientPostalCode: String
   }
 
   type Bucket {
@@ -515,6 +551,7 @@ const schema = gql`
     exchangeMinimumContribution: Int
     exchangeVat: Int
     percentageFunded: Float
+    expenses: [Expense]
   }
 
   enum DirectFundingType {

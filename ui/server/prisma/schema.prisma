@@ -59,6 +59,7 @@ model Expense {
   bucket              Bucket?   @relation(fields: [bucketId], references: [id])
   bucketId            String?
 
+  title               String
   recipientName       String
   recipientEmail      String
   swiftCode           String?   @default("")
