@@ -200,4 +200,4 @@ export const status = (bucket, args, ctx) => {
 
 export const expenses = ({ bucketId }) => {
   return prisma.expense.findMany({ where: { bucketId } });
-}
+};

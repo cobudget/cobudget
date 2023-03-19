@@ -15,6 +15,7 @@ const schema = gql`
     round(groupSlug: String, roundSlug: String): Round
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
+    expense(id: String!): Expense
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String

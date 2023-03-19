@@ -180,7 +180,10 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
     bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
 
-  const tabsList = useMemo(() => ["bucket", "comments", "funders"], []);
+  const tabsList = useMemo(
+    () => ["bucket", "comments", "funders", "expenses"],
+    []
+  );
   useEffect(() => {
     const index = tabsList.findIndex((tab) => tab === router.query.tab);
     setTab(index > -1 ? index : 0);
@@ -319,7 +322,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             <Funders bucket={bucket} currentUser={currentUser} />
           </Tab.Panel>
           <Tab.Panel>
-            <Expenses bucketId={bucket.id} />
+            <Expenses bucket={bucket} />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
