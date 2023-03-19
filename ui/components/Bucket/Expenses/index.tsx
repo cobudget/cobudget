@@ -4,7 +4,7 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddExpense";
 
-function Expenses() {
+function Expenses({ bucketId }) {
   return (
     <>
       <div className="bg-white border-b-default">
@@ -18,7 +18,7 @@ function Expenses() {
       </div>
 
       <Modal open={true} className="flex items-center justify-center p-4">
-        <AddExpense />
+        <AddExpense bucketId={bucketId} />
       </Modal>
     </>
   );

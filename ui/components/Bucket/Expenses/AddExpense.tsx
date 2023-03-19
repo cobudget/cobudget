@@ -3,13 +3,49 @@ import TextField from "components/TextField";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+import { gql, useMutation } from "urql";
 
-function AddExpense() {
+const SUBMIT_EXPENSE = gql`
+  mutation CreateExpense(
+    $bucketId: String!
+    $title: String!
+    $recipientName: String!
+    $recipientEmail: String!
+    $swiftCode: String
+    $iban: String
+    $country: String!
+    $city: String!
+    $recipientAddress: String!
+    $recipientPostalCode: String!
+  ) {
+    createExpense(
+      bucketId: $bucketId
+      title: $title
+      recipientName: $recipientName
+      recipientEmail: $recipientEmail
+      swiftCode: $swiftCode
+      iban: $iban
+      country: $country
+      city: $city
+      recipientAddress: $recipientAddress
+      recipientPostalCode: $recipientPostalCode
+    ) {
+      bucketId
+      title
+    }
+  }
+`;
+
+function AddExpense({ bucketId }) {
   const intl = useIntl();
 
+  const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
   const { handleSubmit, register, errors } = useForm();
-  const onSubmission = () => {
-    ("");
+  const onSubmission = (variables) => {
+    submitExpense({
+      ...variables,
+      bucketId,
+    });
   };
 
   return (

@@ -941,3 +941,56 @@ export const contribute = async (
 ) => {
   return contributeToBucket({ roundId, bucketId, amount, user });
 };
+
+export const createExpense = async (
+  _,
+  {
+    bucketId,
+    title,
+    recipientName,
+    recipientEmail,
+    swiftCode,
+    iban,
+    country,
+    city,
+    recipientAddress,
+    recipientPostalCode,
+  },
+  { user }
+) => {
+  const data = prisma.bucket.findUnique({ where: { id: bucketId } });
+  const bucket = await data;
+  const cocreators = await data.cocreators();
+  const isCocreator = cocreators.find((c) => c.userId === user.id);
+
+  if (isCocreator) {
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: bucket.roundId,
+        },
+      },
+    });
+
+    const submittedBy = roundMember.id;
+
+    return prisma.expense.create({
+      data: {
+        bucketId,
+        title,
+        recipientName,
+        recipientEmail,
+        swiftCode,
+        iban,
+        country,
+        city,
+        recipientAddress,
+        recipientPostalCode,
+        submittedBy,
+      },
+    });
+  } else {
+    throw new Error("Only cocreators can add");
+  }
+};

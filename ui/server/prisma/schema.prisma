@@ -68,6 +68,7 @@ model Expense {
   city                String    @default("")
   recipientAddress    String    
   recipientPostalCode String
+  submittedBy         String
 
   receipts            ExpenseReceipt[]
 }
