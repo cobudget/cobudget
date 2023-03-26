@@ -4,6 +4,7 @@ import FormattedCurrency from "components/FormattedCurrency";
 import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddExpense";
+import ExpenseTable from "./ExpenseTable";
 
 function Expenses({ bucket }) {
   const [openAdd, setOpenAdd] = useState(false);
@@ -23,21 +24,7 @@ function Expenses({ bucket }) {
                 <FormattedMessage defaultMessage="Expenses" />
               </p>
               <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
-                <table className="table-fixed w-full">
-                  <tbody>
-                    {bucket.expenses.map((expense) => (
-                      <tr
-                        className="bg-gray-100 even:bg-white"
-                        key={expense.id}
-                      >
-                        <td className="px-4 py-2">{expense.title}</td>
-                        <td className="px-4 py-2">
-                          <FormattedCurrency value={100} currency={"USD"} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <ExpenseTable expenses={bucket.expenses} />
               </div>
             </div>
           </div>
