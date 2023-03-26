@@ -3,7 +3,7 @@ import TextField from "components/TextField";
 import { GRAPHQL_EXPENSE_COCREATOR_ONLY } from "../../../constants";
 import { GRAPHQL_NOT_LOGGED_IN } from "../../../constants";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation } from "urql";
@@ -49,8 +49,16 @@ function AddExpense({ bucketId, close, round }) {
   const intl = useIntl();
 
   const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, errors, control } = useForm();
+  const { fields, append, insert, remove } = useFieldArray({
+    control,
+    name: "receipts",
+    keyName: "fieldId",
+  });
+
   const onSubmission = (variables) => {
+    console.log("Variables", variables);
+    return;
     submitExpense({
       ...variables,
       bucketId,
@@ -102,55 +110,69 @@ function AddExpense({ bucketId, close, round }) {
             <FormattedMessage defaultMessage="Receipts" />
           </h2>
 
-          <div className="mt-2">
-            <TextField
-              className="my-1"
-              name="description"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "Description",
-              })}
-              inputRef={register({})}
-              autoFocus
-              error={Boolean(errors.description)}
-              helperText={errors.description?.message}
-            />
-          </div>
+          {fields.map(({ fieldId, description }, index) => (
+            <>
+              <div className="mt-2" key={fieldId}>
+                <TextField
+                  className="my-1"
+                  name={`receipts[${index}].description`}
+                  size="small"
+                  placeholder={intl.formatMessage({
+                    defaultMessage: "Description",
+                  })}
+                  inputRef={register()}
+                  error={Boolean(errors.description)}
+                  helperText={errors.description?.message}
+                  defaultValue={description}
+                />
+                <input
+                  type="button"
+                  onClick={() => remove(index)}
+                  value="DEL"
+                />
+              </div>
 
-          <div className="flex flex-col sm:flex-row mt-2">
-            <div className="mr-2 sm:my-0 flex-1">
-              <TextField
-                className="my-1"
-                name="date"
-                size="small"
-                placeholder={intl.formatMessage({
-                  defaultMessage: "Date",
-                })}
-                inputRef={register({})}
-                inputProps={{ type: "date" }}
-                error={Boolean(errors.date)}
-                helperText={errors.date?.message}
-              />
-            </div>
-            <div className="mr-2 sm:my-0 flex-1">
-              <TextField
-                className="my-1"
-                name="amount"
-                size="small"
-                placeholder={intl.formatMessage({
-                  defaultMessage: "Amount",
-                })}
-                inputRef={register({})}
-                inputProps={{ type: "number", min: 0 }}
-                error={Boolean(errors.amount)}
-                helperText={errors.amount?.message}
-                endAdornment={round.currency}
-              />
-            </div>
-          </div>
+              <div className="flex flex-col sm:flex-row mt-2">
+                <div className="mr-2 sm:my-0 flex-1">
+                  <TextField
+                    className="my-1"
+                    name={`receipts[${index}].date`}
+                    size="small"
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Date",
+                    })}
+                    inputRef={register({})}
+                    inputProps={{ type: "date" }}
+                    error={Boolean(errors.date)}
+                    helperText={errors.date?.message}
+                  />
+                </div>
+                <div className="mr-2 sm:my-0 flex-1">
+                  <TextField
+                    className="my-1"
+                    name={`receipts[${index}].amount`}
+                    size="small"
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Amount",
+                    })}
+                    inputRef={register({})}
+                    inputProps={{ type: "number", min: 0 }}
+                    error={Boolean(errors.amount)}
+                    helperText={errors.amount?.message}
+                    endAdornment={round.currency}
+                  />
+                </div>
+              </div>
+            </>
+          ))}
 
           <div className="mt-2">
-            <Button fullWidth>
+            <Button
+              onClick={() => {
+                append({});
+              }}
+              fullWidth
+            >
               <FormattedMessage defaultMessage="+ Add receipt" />
             </Button>
           </div>
