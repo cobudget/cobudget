@@ -7,6 +7,8 @@ import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation } from "urql";
+import IconButton from "components/IconButton";
+import { DeleteIcon, AddIcon } from "components/Icons";
 import styled from "styled-components";
 
 const FormWrapper = styled.div`
@@ -111,27 +113,28 @@ function AddExpense({ bucketId, close, round }) {
           </h2>
 
           {fields.map(({ fieldId, description }, index) => (
-            <>
-              <div className="mt-2" key={fieldId}>
-                <TextField
-                  className="my-1"
-                  name={`receipts[${index}].description`}
-                  size="small"
-                  placeholder={intl.formatMessage({
-                    defaultMessage: "Description",
-                  })}
-                  inputRef={register()}
-                  error={Boolean(errors.description)}
-                  helperText={errors.description?.message}
-                  defaultValue={description}
-                />
-                <input
-                  type="button"
-                  onClick={() => remove(index)}
-                  value="DEL"
-                />
+            <div key={fieldId}>
+              <div className="flex gap-2 my-2">
+                <div className="flex-grow">
+                  <TextField
+                    className="my-1"
+                    name={`receipts[${index}].description`}
+                    size="small"
+                    placeholder={intl.formatMessage({
+                      defaultMessage: "Description",
+                    })}
+                    inputRef={register()}
+                    error={Boolean(errors.description)}
+                    helperText={errors.description?.message}
+                    defaultValue={description}
+                  />
+                </div>
+                <div className="my-2">
+                  <IconButton onClick={() => remove(index)}>
+                    <DeleteIcon className="h-6 w-6 text-color-red" />
+                  </IconButton>
+                </div>
               </div>
-
               <div className="flex flex-col sm:flex-row mt-2">
                 <div className="mr-2 sm:my-0 flex-1">
                   <TextField
@@ -163,7 +166,7 @@ function AddExpense({ bucketId, close, round }) {
                   />
                 </div>
               </div>
-            </>
+            </div>
           ))}
 
           <div className="mt-2">
@@ -173,7 +176,8 @@ function AddExpense({ bucketId, close, round }) {
               }}
               fullWidth
             >
-              <FormattedMessage defaultMessage="+ Add receipt" />
+              <AddIcon className="h-5 w-5 mr-1" />{" "}
+              <FormattedMessage defaultMessage="Add receipt" />
             </Button>
           </div>
 
