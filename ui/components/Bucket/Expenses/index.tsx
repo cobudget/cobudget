@@ -6,7 +6,7 @@ import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddExpense";
 import ExpenseTable from "./ExpenseTable";
 
-function Expenses({ bucket }) {
+function Expenses({ bucket, round }) {
   const [openAdd, setOpenAdd] = useState(false);
 
   return (
@@ -36,7 +36,11 @@ function Expenses({ bucket }) {
         className="flex items-center justify-center p-4"
         onClose={() => setOpenAdd(false)}
       >
-        <AddExpense bucketId={bucket.id} close={() => setOpenAdd(false)} />
+        <AddExpense
+          bucketId={bucket.id}
+          round={round}
+          close={() => setOpenAdd(false)}
+        />
       </Modal>
     </>
   );

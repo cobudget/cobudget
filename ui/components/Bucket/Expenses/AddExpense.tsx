@@ -7,6 +7,12 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation } from "urql";
+import styled from "styled-components";
+
+const FormWrapper = styled.div`
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+`;
 
 const SUBMIT_EXPENSE = gql`
   mutation CreateExpense(
@@ -39,7 +45,7 @@ const SUBMIT_EXPENSE = gql`
   }
 `;
 
-function AddExpense({ bucketId, close }) {
+function AddExpense({ bucketId, close, round }) {
   const intl = useIntl();
 
   const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
@@ -77,169 +83,226 @@ function AddExpense({ bucketId, close }) {
         <h1 className="text-xl font-semibold">
           <FormattedMessage defaultMessage="Submit Expense" />
         </h1>
+        <FormWrapper>
+          <TextField
+            className="my-1"
+            name="title"
+            size="small"
+            placeholder={intl.formatMessage({ defaultMessage: "Title" })}
+            inputRef={register({
+              required: "Required",
+            })}
+            autoFocus
+            error={Boolean(errors.title)}
+            helperText={errors.title?.message}
+            testid="new-bucket-title-input"
+          />
 
-        <TextField
-          className="my-1"
-          name="title"
-          size="small"
-          placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-          inputRef={register({
-            required: "Required",
-          })}
-          autoFocus
-          error={Boolean(errors.title)}
-          helperText={errors.title?.message}
-          testid="new-bucket-title-input"
-        />
+          <h2 className="text-xl font-semibold mt-2">
+            <FormattedMessage defaultMessage="Receipts" />
+          </h2>
 
-        <h2 className="text-xl font-semibold mt-2">
-          <FormattedMessage defaultMessage="Payment Method" />
-        </h2>
-
-        <div className="flex flex-col sm:flex-row mt-2">
-          <div className="mr-2 sm:my-0 flex-1">
+          <div className="mt-2">
             <TextField
               className="my-1"
-              name="recipientName"
+              name="description"
               size="small"
               placeholder={intl.formatMessage({
-                defaultMessage: "Full name of recipient",
+                defaultMessage: "Description",
               })}
-              inputRef={register({
-                required: "Required",
-              })}
+              inputRef={register({})}
               autoFocus
-              error={Boolean(errors.recipientName)}
-              helperText={errors.recipientName?.message}
-              testid="new-bucket-title-input"
+              error={Boolean(errors.description)}
+              helperText={errors.description?.message}
             />
           </div>
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="recipientEmail"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "Recipient Email",
-              })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.recipientEmail)}
-              helperText={errors.recipientEmail?.message}
-              testid="new-bucket-title-input"
-            />
-          </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row">
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="swiftCode"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "Bank code (BIC/SWIFT)",
-              })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.swiftCode)}
-              helperText={errors.swiftCode?.message}
-              testid="new-bucket-title-input"
-            />
+          <div className="flex flex-col sm:flex-row mt-2">
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="date"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Date",
+                })}
+                inputRef={register({})}
+                inputProps={{ type: "date" }}
+                error={Boolean(errors.date)}
+                helperText={errors.date?.message}
+              />
+            </div>
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="amount"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Amount",
+                })}
+                inputRef={register({})}
+                inputProps={{ type: "number", min: 0 }}
+                error={Boolean(errors.amount)}
+                helperText={errors.amount?.message}
+                endAdornment={round.currency}
+              />
+            </div>
           </div>
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="iban"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "IBAN number",
-              })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.iban)}
-              helperText={errors.iban?.message}
-              testid="new-bucket-title-input"
-            />
-          </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row">
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="country"
-              size="small"
-              placeholder={intl.formatMessage({ defaultMessage: "Country" })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.country)}
-              helperText={errors.country?.message}
-              testid="new-bucket-title-input"
-            />
+          <div className="mt-2">
+            <Button fullWidth>
+              <FormattedMessage defaultMessage="+ Add receipt" />
+            </Button>
           </div>
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="city"
-              size="small"
-              placeholder={intl.formatMessage({ defaultMessage: "City" })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.city)}
-              helperText={errors.city?.message}
-              testid="new-bucket-title-input"
-            />
-          </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row">
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="recipientAddress"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "Recipient Address",
-              })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.recipientAddress)}
-              helperText={errors.recipientAddress?.message}
-              testid="new-bucket-title-input"
-            />
-          </div>
-          <div className="mr-2 sm:my-0 flex-1">
-            <TextField
-              className="my-1"
-              name="recipientPostalCode"
-              size="small"
-              placeholder={intl.formatMessage({
-                defaultMessage: "Postal Code",
-              })}
-              inputRef={register({
-                required: "Required",
-              })}
-              autoFocus
-              error={Boolean(errors.recipientPostalCode)}
-              helperText={errors.recipientPostalCode?.message}
-              testid="new-bucket-title-input"
-            />
-          </div>
-        </div>
+          <h2 className="text-xl font-semibold mt-2">
+            <FormattedMessage defaultMessage="Payment Method" />
+          </h2>
 
+          <div className="flex flex-col sm:flex-row mt-2">
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="recipientName"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Full name of recipient",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.recipientName)}
+                helperText={errors.recipientName?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="recipientEmail"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Recipient Email",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.recipientEmail)}
+                helperText={errors.recipientEmail?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row">
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="swiftCode"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Bank code (BIC/SWIFT)",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.swiftCode)}
+                helperText={errors.swiftCode?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="iban"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "IBAN number",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.iban)}
+                helperText={errors.iban?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row">
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="country"
+                size="small"
+                placeholder={intl.formatMessage({ defaultMessage: "Country" })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.country)}
+                helperText={errors.country?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="city"
+                size="small"
+                placeholder={intl.formatMessage({ defaultMessage: "City" })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.city)}
+                helperText={errors.city?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row">
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="recipientAddress"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Recipient Address",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.recipientAddress)}
+                helperText={errors.recipientAddress?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+            <div className="mr-2 sm:my-0 flex-1">
+              <TextField
+                className="my-1"
+                name="recipientPostalCode"
+                size="small"
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Postal Code",
+                })}
+                inputRef={register({
+                  required: "Required",
+                })}
+                autoFocus
+                error={Boolean(errors.recipientPostalCode)}
+                helperText={errors.recipientPostalCode?.message}
+                testid="new-bucket-title-input"
+              />
+            </div>
+          </div>
+        </FormWrapper>
         <div className="flex justify-end mt-4">
           <Button onClick={close} variant="secondary" className="mr-2">
             <FormattedMessage defaultMessage="Cancel" />
