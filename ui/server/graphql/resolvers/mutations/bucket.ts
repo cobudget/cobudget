@@ -18,6 +18,8 @@ import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
 import {
   GRAPHQL_EXPENSE_COCREATOR_ONLY,
+  GRAPHQL_EXPENSE_NOT_FOUND,
+  GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER,
   GRAPHQL_NOT_LOGGED_IN,
 } from "../../../../constants";
 const { groupHasDiscourse } = subscribers;
@@ -944,6 +946,42 @@ export const contribute = async (
   { user }
 ) => {
   return contributeToBucket({ roundId, bucketId, amount, user });
+};
+
+export const createExpenseReceipt = async (
+  _,
+  { description, date, amount, expenseId, attachment },
+  { user }
+) => {
+  if (!user) {
+    throw new Error(GRAPHQL_NOT_LOGGED_IN);
+  }
+
+  const expense = await prisma.expense.findUnique({ where: { id: expenseId } });
+
+  if (!expense) {
+    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+  }
+
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: expense.bucketId },
+  });
+  const roundMember = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: user.id,
+        roundId: bucket?.roundId,
+      },
+    },
+  });
+
+  if (roundMember?.id === expense.submittedBy) {
+    return prisma.expenseReceipt.create({
+      data: { description, date, amount, expenseId, attachment },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+  }
 };
 
 export const createExpense = async (

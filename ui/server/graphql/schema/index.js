@@ -170,6 +170,14 @@ const schema = gql`
       recipientPostalCode: String!
     ): Expense
 
+    createExpenseReceipt(
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+      expenseId: String
+    ): ExpenseReceipt
+
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
 
@@ -493,6 +501,7 @@ const schema = gql`
     date: Date
     amount: Int
     attachment: String
+    expenseId: String
   }
 
   type Expense {

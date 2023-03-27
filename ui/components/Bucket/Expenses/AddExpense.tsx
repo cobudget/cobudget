@@ -41,8 +41,29 @@ const SUBMIT_EXPENSE = gql`
       recipientAddress: $recipientAddress
       recipientPostalCode: $recipientPostalCode
     ) {
+      id
       bucketId
       title
+    }
+  }
+`;
+
+const SUBMIT_RECEIPT = gql`
+  mutation CreateExpenseReceipt(
+    $description: String
+    $date: Date
+    $amount: Int
+    $attachment: String
+    $expenseId: String
+  ) {
+    createExpenseReceipt(
+      description: $description
+      date: $date
+      amount: $amount
+      attachment: $attachment
+      expenseId: $expenseId
+    ) {
+      id
     }
   }
 `;
@@ -51,8 +72,11 @@ function AddExpense({ bucketId, close, round }) {
   const intl = useIntl();
 
   const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
+  const [{ error: addReceiptError }, submitReceipt] = useMutation(
+    SUBMIT_RECEIPT
+  );
   const { handleSubmit, register, errors, control } = useForm();
-  const { fields, append, insert, remove } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control,
     name: "receipts",
     keyName: "fieldId",
@@ -60,11 +84,10 @@ function AddExpense({ bucketId, close, round }) {
 
   const onSubmission = (variables) => {
     console.log("Variables", variables);
-    return;
     submitExpense({
       ...variables,
       bucketId,
-    }).then((data) => {
+    }).then(async (data) => {
       if (data.error?.message.indexOf(GRAPHQL_NOT_LOGGED_IN) > -1) {
         toast.error(
           intl.formatMessage({
@@ -82,8 +105,26 @@ function AddExpense({ bucketId, close, round }) {
         );
         return;
       }
+
+      const expenseId = data.data.createExpense.id;
+
+      const receipts = variables.receipts.filter(
+        (f) => f.description && f.amount
+      );
+      if (receipts.length > 0) {
+        const promises = receipts.map((form) => {
+          return submitReceipt({
+            ...form,
+            expenseId,
+            amount: Number(form.amount) * 100,
+            date: new Date(form.date).getTime(),
+          });
+        });
+        await Promise.allSettled(promises);
+      }
+
       toast.success(intl.formatMessage({ defaultMessage: "Expense Added" }));
-      close();
+      //close();
     });
   };
 
