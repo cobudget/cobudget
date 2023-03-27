@@ -53,6 +53,7 @@ export const BUCKET_QUERY = gql`
       expenses {
         id
         title
+        amount
       }
 
       round {

@@ -15,3 +15,4 @@ export * as Comment from "./Comment";
 export * as Flag from "./Flag";
 export * as CustomFieldValue from "./CustomFieldValue";
 export * as SuperAdminSession from "./SuperAdminSession";
+export * as Expense from "./Expense";

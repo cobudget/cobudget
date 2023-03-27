@@ -27,6 +27,7 @@ import {
   User,
   Date,
   SuperAdminSession,
+  Expense,
 } from "./types";
 
 // mutations
@@ -69,6 +70,7 @@ const resolvers = {
   Comment,
   Flag,
   Date,
+  Expense,
   SuperAdminSession,
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,

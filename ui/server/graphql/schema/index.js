@@ -511,6 +511,7 @@ const schema = gql`
     recipientName: String
     recipientEmail: String
     swiftCode: String
+    amount: Int
     iban: String
     country: String
     city: String
