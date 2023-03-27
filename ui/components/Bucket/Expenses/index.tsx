@@ -1,11 +1,14 @@
 import { Modal } from "@material-ui/core";
 import Button from "components/Button";
+import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddExpense";
+import ExpenseDetails from "./ExpenseDetails";
 import ExpenseTable from "./ExpenseTable";
 
 function Expenses({ bucket, round }) {
+  const router = useRouter();
   const [openAdd, setOpenAdd] = useState(false);
 
   return (
@@ -18,14 +21,18 @@ function Expenses({ bucket, round }) {
                 <FormattedMessage defaultMessage="Submit Expense" />
               </Button>
             </div>
-            <div className="my-4">
-              <p className="font-lg font-medium">
-                <FormattedMessage defaultMessage="Expenses" />
-              </p>
-              <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
-                <ExpenseTable expenses={bucket.expenses} round={round} />
+            {router.query.expense ? (
+              <ExpenseDetails expenseId={router.query.expense} />
+            ) : (
+              <div className="my-4">
+                <p className="font-lg font-medium">
+                  <FormattedMessage defaultMessage="Expenses" />
+                </p>
+                <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
+                  <ExpenseTable expenses={bucket.expenses} round={round} />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

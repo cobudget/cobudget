@@ -562,7 +562,8 @@ const schema = gql`
     exchangeMinimumContribution: Int
     exchangeVat: Int
     percentageFunded: Float
-    expenses: [Expense]
+    expenses(bucketId: String): [Expense]
+    expense(id: String!): Expense
   }
 
   enum DirectFundingType {
