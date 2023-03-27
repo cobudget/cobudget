@@ -1,6 +1,7 @@
 import FormattedCurrency from "components/FormattedCurrency";
 import IconButton from "components/IconButton";
 import { ChevronArrowLeftIcon } from "components/Icons";
+import { useRouter } from "next/router";
 import React from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
@@ -23,6 +24,8 @@ const GET_EXPENSE = gql`
 `;
 
 function ExpenseDetails({ expenseId }) {
+  const router = useRouter();
+
   const [{ fetching, data }] = useQuery({
     query: GET_EXPENSE,
     variables: { expenseId: expenseId },
@@ -33,11 +36,16 @@ function ExpenseDetails({ expenseId }) {
     return <>Loading...</>;
   }
 
+  const handleBack = () => {
+    router.query.expense = undefined;
+    router.push(router);
+  };
+
   return (
     <div>
       <div className="flex mt-4 font-lg text-xl font-medium">
         <span>
-          <IconButton>
+          <IconButton onClick={handleBack}>
             <ChevronArrowLeftIcon />
           </IconButton>
         </span>
