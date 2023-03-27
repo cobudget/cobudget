@@ -1,6 +1,5 @@
 import { Modal } from "@material-ui/core";
 import Button from "components/Button";
-import FormattedCurrency from "components/FormattedCurrency";
 import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddExpense";
@@ -24,7 +23,7 @@ function Expenses({ bucket, round }) {
                 <FormattedMessage defaultMessage="Expenses" />
               </p>
               <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
-                <ExpenseTable expenses={bucket.expenses} />
+                <ExpenseTable expenses={bucket.expenses} round={round} />
               </div>
             </div>
           </div>

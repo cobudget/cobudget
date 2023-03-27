@@ -124,7 +124,7 @@ function AddExpense({ bucketId, close, round }) {
       }
 
       toast.success(intl.formatMessage({ defaultMessage: "Expense Added" }));
-      //close();
+      close();
     });
   };
 

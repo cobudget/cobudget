@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 
-function ExpenseTable({ expenses }) {
+function ExpenseTable({ expenses, round }) {
   const { pathname, query } = useRouter();
 
   return (
@@ -25,7 +25,10 @@ function ExpenseTable({ expenses }) {
               </Link>
             </td>
             <td className="px-4 py-2">
-              <FormattedCurrency value={100} currency={"USD"} />
+              <FormattedCurrency
+                value={expense.amount}
+                currency={round.currency}
+              />
             </td>
           </tr>
         ))}
