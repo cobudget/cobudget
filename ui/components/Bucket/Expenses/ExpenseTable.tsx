@@ -2,9 +2,14 @@ import FormattedCurrency from "components/FormattedCurrency";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
+import { FormattedMessage } from "react-intl";
 
 function ExpenseTable({ expenses, round }) {
   const { pathname, query } = useRouter();
+
+  const total = expenses.reduce((acc, expense) => {
+    return parseInt(acc || 0) + expense.amount;
+  });
 
   return (
     <table className="table-fixed w-full">
@@ -21,7 +26,9 @@ function ExpenseTable({ expenses, round }) {
                 shallow
                 replace
               >
-                <span className="underline">{expense.title}</span>
+                <span className="underline cursor-pointer">
+                  {expense.title}
+                </span>
               </Link>
             </td>
             <td className="px-4 py-2">
@@ -32,6 +39,14 @@ function ExpenseTable({ expenses, round }) {
             </td>
           </tr>
         ))}
+        <tr className="bg-gray-200 border-t-2 border-gray-300 font-medium">
+          <td className="px-4 py-2">
+            <FormattedMessage defaultMessage="Total" />
+          </td>
+          <td className="px-4 py-2">
+            <FormattedCurrency value={total} currency={round.currency} />
+          </td>
+        </tr>
       </tbody>
     </table>
   );
