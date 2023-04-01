@@ -7,9 +7,10 @@ import { FormattedMessage } from "react-intl";
 function ExpenseTable({ expenses, round }) {
   const { pathname, query } = useRouter();
 
-  const total = expenses.reduce((acc, expense) => {
-    return parseInt(acc || 0) + expense.amount;
-  });
+  const total =
+    expenses.reduce((acc, expense) => {
+      return parseInt(acc || 0) + (expense.amount || 0);
+    }, 0) || 0;
 
   return (
     <table className="table-fixed w-full">

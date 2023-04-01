@@ -47,7 +47,7 @@ function ExpenseDetails({ expenseId, round }) {
   const total =
     expense?.receipts?.reduce((acc, receipt) => {
       return parseInt(acc?.amount || 0) + (receipt.amount || 0);
-    }) || 0;
+    }, 0) || 0;
 
   const handleBack = () => {
     delete router.query.expense;

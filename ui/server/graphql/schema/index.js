@@ -563,7 +563,7 @@ const schema = gql`
     exchangeMinimumContribution: Int
     exchangeVat: Int
     percentageFunded: Float
-    expenses(bucketId: String): [Expense]
+    expenses: [Expense]
     expense(id: String!): Expense
   }
 

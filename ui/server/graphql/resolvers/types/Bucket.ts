@@ -198,8 +198,8 @@ export const status = (bucket, args, ctx) => {
   return "PENDING_APPROVAL";
 };
 
-export const expenses = async ({ bucketId }) => {
-  return prisma.expense.findMany({ where: { bucketId } });
+export const expenses = async ({ id }) => {
+  return prisma.expense.findMany({ where: { bucketId: id } });
 };
 
 export const expense = async ({ expenseId }) => {
