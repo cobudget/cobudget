@@ -19,6 +19,13 @@ const GET_EXPENSE = gql`
       city
       recipientAddress
       recipientPostalCode
+      receipts {
+        id
+        description
+        date
+        amount
+        attachment
+      }
     }
   }
 `;

@@ -517,6 +517,7 @@ const schema = gql`
     city: String
     recipientAddress: String
     recipientPostalCode: String
+    receipts: [ExpenseReceipt]
   }
 
   type Bucket {

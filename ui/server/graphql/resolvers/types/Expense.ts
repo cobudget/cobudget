@@ -11,3 +11,11 @@ export const amount = async ({ id }) => {
   });
   return result._sum.amount || 0;
 };
+
+export const receipts = async ({ id }) => {
+  return prisma.expenseReceipt.findMany({
+    where: {
+      expenseId: id,
+    }
+  });
+}
