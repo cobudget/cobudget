@@ -50,7 +50,7 @@ function ExpenseDetails({ expenseId, round }) {
     }) || 0;
 
   const handleBack = () => {
-    router.query.expense = undefined;
+    delete router.query.expense;
     router.push(router);
   };
 
