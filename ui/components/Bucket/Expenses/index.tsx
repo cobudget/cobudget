@@ -22,7 +22,7 @@ function Expenses({ bucket, round }) {
               </Button>
             </div>
             {router.query.expense ? (
-              <ExpenseDetails expenseId={router.query.expense} />
+              <ExpenseDetails expenseId={router.query.expense} round={round} />
             ) : (
               <div className="my-4">
                 <p className="font-lg font-medium">

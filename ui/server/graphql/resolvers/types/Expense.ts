@@ -16,6 +16,6 @@ export const receipts = async ({ id }) => {
   return prisma.expenseReceipt.findMany({
     where: {
       expenseId: id,
-    }
+    },
   });
-}
+};
