@@ -70,6 +70,8 @@ function ExpenseDetails({ expenseId, round }) {
         <p className="font-lg font-medium">
           <FormattedMessage defaultMessage="Receipts" />
         </p>
+      {
+        expense?.receipts?.length > 0 ?
         <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
           <table className="table-fixed w-full">
             <tbody>
@@ -98,7 +100,11 @@ function ExpenseDetails({ expenseId, round }) {
               </tr>
             </tbody>
           </table>
-        </div>
+        </div> : 
+        <p className="my-2 text-gray-400">
+          <FormattedMessage defaultMessage="The expense does not have a receipt" />
+        </p>
+      }
       </div>
 
       {/*Recipient Details*/}

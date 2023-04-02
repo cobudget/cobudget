@@ -12,7 +12,16 @@ function ExpenseTable({ expenses, round }) {
       return parseInt(acc || 0) + (expense.amount || 0);
     }, 0) || 0;
 
+  if (expenses.length === 0) {
+    return (
+      <p className="my-2 text-gray-400">
+        <FormattedMessage defaultMessage="This bucket does not have any expense" />
+      </p>
+    )
+  }
+
   return (
+    <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
     <table className="table-fixed w-full">
       <tbody>
         {expenses.map((expense) => (
@@ -50,6 +59,7 @@ function ExpenseTable({ expenses, round }) {
         </tr>
       </tbody>
     </table>
+    </div>
   );
 }
 

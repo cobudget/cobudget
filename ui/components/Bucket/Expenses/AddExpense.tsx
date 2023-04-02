@@ -108,9 +108,10 @@ function AddExpense({ bucketId, close, round }) {
 
       const expenseId = data.data.createExpense.id;
 
-      const receipts = variables.receipts.filter(
+      const receipts = variables.receipts?.filter(
         (f) => f.description && f.amount
-      );
+      ) || [];
+      
       if (receipts.length > 0) {
         const promises = receipts.map((form) => {
           return submitReceipt({

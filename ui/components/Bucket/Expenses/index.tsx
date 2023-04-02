@@ -28,9 +28,7 @@ function Expenses({ bucket, round }) {
                 <p className="font-lg font-medium">
                   <FormattedMessage defaultMessage="Expenses" />
                 </p>
-                <div className="my-2 mb-8 rounded shadow overflow-hidden bg-gray-100">
-                  <ExpenseTable expenses={bucket.expenses} round={round} />
-                </div>
+                <ExpenseTable expenses={bucket.expenses} round={round} />
               </div>
             )}
           </div>
