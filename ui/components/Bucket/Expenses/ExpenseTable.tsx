@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { FormattedMessage } from "react-intl";
+import ExpenseStatus from "./ExpenseStatus";
 
 function ExpenseTable({ expenses, round }) {
   const { pathname, query } = useRouter();
@@ -41,11 +42,12 @@ function ExpenseTable({ expenses, round }) {
                   </span>
                 </Link>
               </td>
-              <td className="px-4 py-2">
+              <td className="px-4 py-2 flex gap-1">
                 <FormattedCurrency
                   value={expense.amount}
                   currency={round.currency}
                 />
+                <ExpenseStatus expense={expense} />
               </td>
             </tr>
           ))}

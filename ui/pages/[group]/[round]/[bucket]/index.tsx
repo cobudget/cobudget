@@ -54,6 +54,7 @@ export const BUCKET_QUERY = gql`
         id
         title
         amount
+        status
       }
 
       round {

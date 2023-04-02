@@ -6,6 +6,7 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import dayjs from "dayjs";
+import ExpenseStatus from "./ExpenseStatus";
 
 const GET_EXPENSE = gql`
   query GET_EXPENSE($expenseId: String!) {
@@ -20,6 +21,7 @@ const GET_EXPENSE = gql`
       city
       recipientAddress
       recipientPostalCode
+      status
       receipts {
         id
         description
@@ -63,6 +65,10 @@ function ExpenseDetails({ expenseId, round }) {
           </IconButton>
         </span>
         <p className="ml-2 mt-0.5">{expense?.title}</p>
+      </div>
+
+      <div className="mt-4 flex">
+        <ExpenseStatus expense={expense} />
       </div>
 
       {/*Receipts*/}
