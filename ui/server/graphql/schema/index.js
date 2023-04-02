@@ -504,6 +504,12 @@ const schema = gql`
     expenseId: String
   }
 
+  enum ExpenseStatus {
+    SUBMITTED
+    PAID
+    REJECTED
+  }
+
   type Expense {
     id: String!
     title: String!
@@ -518,6 +524,7 @@ const schema = gql`
     recipientAddress: String
     recipientPostalCode: String
     receipts: [ExpenseReceipt]
+    status: ExpenseStatus
   }
 
   type Bucket {

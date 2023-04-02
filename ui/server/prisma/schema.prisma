@@ -54,6 +54,12 @@ model ExpenseReceipt {
   expenseId          String? 
 }
 
+enum ExpenseStatus {
+  SUBMITTED
+  PAID
+  REJECTED
+}
+
 model Expense {
   id                  String    @id @default(cuid())
   bucket              Bucket?   @relation(fields: [bucketId], references: [id])
@@ -69,6 +75,7 @@ model Expense {
   recipientAddress    String    
   recipientPostalCode String
   submittedBy         String
+  status              ExpenseStatus   @default(SUBMITTED)
 
   receipts            ExpenseReceipt[]
 }
