@@ -11,6 +11,7 @@ import ExpenseStatus from "./ExpenseStatus";
 const GET_EXPENSE = gql`
   query GET_EXPENSE($expenseId: String!) {
     expense(id: $expenseId) {
+      id
       title
       recipientName
       recipientEmail

@@ -170,6 +170,8 @@ const schema = gql`
       recipientPostalCode: String!
     ): Expense
 
+    updateExpenseStatus(id: String!, status: ExpenseStatus): Expense
+
     createExpenseReceipt(
       description: String
       date: Date

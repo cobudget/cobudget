@@ -17,10 +17,12 @@ import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
 import {
+  GRAPHQL_ADMIN_AND_MODERATOR_ONLY,
   GRAPHQL_EXPENSE_COCREATOR_ONLY,
   GRAPHQL_EXPENSE_NOT_FOUND,
   GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER,
   GRAPHQL_NOT_LOGGED_IN,
+  GRAPHQL_ROUND_NOT_FOUND,
 } from "../../../../constants";
 const { groupHasDiscourse } = subscribers;
 
@@ -1038,5 +1040,44 @@ export const createExpense = async (
     });
   } else {
     throw new Error(GRAPHQL_EXPENSE_COCREATOR_ONLY);
+  }
+};
+
+export const updateExpenseStatus = async (_, { id, status }, { user, ss }) => {
+  const expense = await prisma.expense.findFirst({
+    where: { id },
+    include: {
+      bucket: true,
+    },
+  });
+  const round = await prisma.round.findFirst({
+    where: { id: expense?.bucket?.roundId },
+  });
+
+  if (!round) {
+    throw new Error(GRAPHQL_ROUND_NOT_FOUND);
+  }
+
+  let isAdmin = !!ss;
+
+  if (!isAdmin) {
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: round.id,
+        },
+      },
+    });
+    isAdmin = roundMember?.isAdmin || roundMember?.isModerator;
+  }
+
+  if (isAdmin) {
+    return prisma.expense.update({
+      where: { id },
+      data: { status },
+    });
+  } else {
+    throw new Error(GRAPHQL_ADMIN_AND_MODERATOR_ONLY);
   }
 };
