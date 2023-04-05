@@ -34,7 +34,7 @@ const GET_EXPENSE = gql`
   }
 `;
 
-function ExpenseDetails({ expenseId, round }) {
+function ExpenseDetails({ expenseId, round, currentUser }) {
   const router = useRouter();
 
   const [{ fetching, data }] = useQuery({
@@ -69,7 +69,7 @@ function ExpenseDetails({ expenseId, round }) {
       </div>
 
       <div className="mt-4 flex">
-        <ExpenseStatus expense={expense} />
+        <ExpenseStatus expense={expense} currentUser={currentUser} />
       </div>
 
       {/*Receipts*/}

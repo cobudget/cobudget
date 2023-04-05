@@ -8,6 +8,7 @@ import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useMutation } from "urql";
 import { Menu, MenuItem } from "@material-ui/core";
+import { CheveronDownIcon } from "components/Icons";
 
 const UPDATE_EXPENSE_STATUS = `
   mutation UPDATE_EXPENSE_STATUS ($id: String!, $status: ExpenseStatus!) {
@@ -18,7 +19,7 @@ const UPDATE_EXPENSE_STATUS = `
   }
 `;
 
-function ExpenseStatus({ expense }) {
+function ExpenseStatus({ expense, currentUser }) {
   const intl = useIntl();
 
   const [{ fetching }, updateExpenseStatus] = useMutation(
@@ -37,14 +38,25 @@ function ExpenseStatus({ expense }) {
     else if (expense.status === EXPENSE_PAID) return "bg-app-green";
   }, [expense]);
 
+  const editingAllowed =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator;
   const handleClick = (e) => {
-    setAnchorEl(e.target);
+    if (editingAllowed || !fetching) {
+      setAnchorEl(e.target);
+    }
   };
 
   return expense ? (
     <>
-      <span onClick={handleClick} className="cursor-pointer">
-        <Label className={className}>{status[expense.status]}</Label>
+      <span
+        onClick={handleClick}
+        className={"cursor-pointer " + (fetching ? "opacity-50" : "")}
+      >
+        <Label className={className + " flex"}>
+          {status[expense.status]}
+          {editingAllowed ? <CheveronDownIcon height={16} width={16} /> : null}
+        </Label>
       </span>
       <Menu
         id="expense-status-setting"
@@ -55,36 +67,46 @@ function ExpenseStatus({ expense }) {
       >
         {expense?.status === EXPENSE_PAID ? (
           <MenuItem
-            onClick={() =>
-              updateExpenseStatus({ id: expense.id, status: EXPENSE_SUBMITTED })
-            }
+            onClick={() => {
+              setAnchorEl(undefined);
+              updateExpenseStatus({
+                id: expense.id,
+                status: EXPENSE_SUBMITTED,
+              });
+            }}
           >
             <FormattedMessage defaultMessage="Mark Unpaid" />
           </MenuItem>
         ) : expense?.status === EXPENSE_REJECTED ? (
           <MenuItem
-            onClick={() =>
-              updateExpenseStatus({ id: expense.id, status: EXPENSE_SUBMITTED })
-            }
+            onClick={() => {
+              setAnchorEl(undefined);
+              updateExpenseStatus({
+                id: expense.id,
+                status: EXPENSE_SUBMITTED,
+              });
+            }}
           >
             <FormattedMessage defaultMessage="Reset Status" />
           </MenuItem>
         ) : (
           <>
             <MenuItem
-              onClick={() =>
-                updateExpenseStatus({ id: expense.id, status: EXPENSE_PAID })
-              }
+              onClick={() => {
+                setAnchorEl(undefined);
+                updateExpenseStatus({ id: expense.id, status: EXPENSE_PAID });
+              }}
             >
               <FormattedMessage defaultMessage="Mark Paid" />
             </MenuItem>
             <MenuItem
-              onClick={() =>
+              onClick={() => {
+                setAnchorEl(undefined);
                 updateExpenseStatus({
                   id: expense.id,
                   status: EXPENSE_REJECTED,
-                })
-              }
+                });
+              }}
             >
               <span className="text-red">
                 <FormattedMessage defaultMessage="Reject" />

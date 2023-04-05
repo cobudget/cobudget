@@ -324,7 +324,11 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             <Funders bucket={bucket} currentUser={currentUser} />
           </Tab.Panel>
           <Tab.Panel>
-            <Expenses bucket={bucket} round={bucket.round} />
+            <Expenses
+              bucket={bucket}
+              round={bucket.round}
+              currentUser={currentUser}
+            />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

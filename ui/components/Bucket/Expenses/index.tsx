@@ -7,7 +7,7 @@ import AddExpense from "./AddExpense";
 import ExpenseDetails from "./ExpenseDetails";
 import ExpenseTable from "./ExpenseTable";
 
-function Expenses({ bucket, round }) {
+function Expenses({ bucket, round, currentUser }) {
   const router = useRouter();
   const [openAdd, setOpenAdd] = useState(false);
 
@@ -22,13 +22,21 @@ function Expenses({ bucket, round }) {
               </Button>
             </div>
             {router.query.expense ? (
-              <ExpenseDetails expenseId={router.query.expense} round={round} />
+              <ExpenseDetails
+                expenseId={router.query.expense}
+                round={round}
+                currentUser={currentUser}
+              />
             ) : (
               <div className="my-4">
                 <p className="font-lg font-medium">
                   <FormattedMessage defaultMessage="Expenses" />
                 </p>
-                <ExpenseTable expenses={bucket.expenses} round={round} />
+                <ExpenseTable
+                  expenses={bucket.expenses}
+                  round={round}
+                  currentUser={currentUser}
+                />
               </div>
             )}
           </div>

@@ -5,7 +5,7 @@ import React from "react";
 import { FormattedMessage } from "react-intl";
 import ExpenseStatus from "./ExpenseStatus";
 
-function ExpenseTable({ expenses, round }) {
+function ExpenseTable({ expenses, round, currentUser }) {
   const { pathname, query } = useRouter();
 
   const total =
@@ -47,7 +47,7 @@ function ExpenseTable({ expenses, round }) {
                   value={expense.amount}
                   currency={round.currency}
                 />
-                <ExpenseStatus expense={expense} />
+                <ExpenseStatus expense={expense} currentUser={currentUser} />
               </td>
             </tr>
           ))}
