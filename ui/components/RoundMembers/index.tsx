@@ -9,6 +9,8 @@ import MembersTable from "./MembersTable";
 import RequestsToJoinTable from "./RequestToJoinTable";
 import SearchBar from "components/RoundMembers/SearchBar";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
+import activityLog from "utils/activity-log";
+import { INVITE_BUTTON_CLIKED } from "../../constants";
 
 export const REQUESTS_TO_JOIN_QUERY = gql`
   query Members($roundId: ID!) {
@@ -122,7 +124,10 @@ const RoundMembers = ({ round, currentUser }) => {
           {isAdmin && (
             <div className="flex items-center space-x-2">
               <Button
-                onClick={() => setInviteModalOpen(true)}
+                onClick={() => {
+                  activityLog.log(INVITE_BUTTON_CLIKED);
+                  setInviteModalOpen(true);
+                }}
                 testid="invite-participant-button"
               >
                 <FormattedMessage defaultMessage="Invite participants" />
