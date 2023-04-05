@@ -1,9 +1,11 @@
-export default function reportError(error: Error) {
+export default function reportError(error: Error, currentUser?: any) {
   const { message, stack } = error;
   const hookUrl = process.env.ERROR_REPORTING_WEBHOOK;
   if (hookUrl) {
     const content = JSON.stringify(
       {
+        user: currentUser?.email || "GUEST",
+        userFullName: currentUser?.name || "GUEST",
         error,
         message,
         stack,
