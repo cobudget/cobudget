@@ -3,7 +3,7 @@ import Button from "components/Button";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
-import AddExpense from "./AddExpense";
+import AddExpense from "./AddEditExpense";
 import ExpenseDetails from "./ExpenseDetails";
 import ExpenseTable from "./ExpenseTable";
 

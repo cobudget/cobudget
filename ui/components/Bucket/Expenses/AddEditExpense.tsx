@@ -69,7 +69,7 @@ const SUBMIT_RECEIPT = gql`
   }
 `;
 
-function AddExpense({ bucketId, close, round }) {
+function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
   const intl = useIntl();
 
   const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
@@ -146,87 +146,90 @@ function AddExpense({ bucketId, close, round }) {
             autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
-            testid="new-bucket-title-input"
+            defaultValue={expenseToEdit?.title}
           />
+          {expenseToEdit ? null : (
+            <>
+              <h2 className="text-xl font-semibold mt-2">
+                <FormattedMessage defaultMessage="Receipts" />
+              </h2>
 
-          <h2 className="text-xl font-semibold mt-2">
-            <FormattedMessage defaultMessage="Receipts" />
-          </h2>
+              {fields.map(({ fieldId, description }, index) => (
+                <div key={fieldId}>
+                  <div className="flex gap-2 my-2">
+                    <div className="flex-grow">
+                      <TextField
+                        className="my-1"
+                        name={`receipts[${index}].description`}
+                        size="small"
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Description",
+                        })}
+                        inputRef={register()}
+                        error={Boolean(errors.description)}
+                        helperText={errors.description?.message}
+                        defaultValue={description}
+                      />
+                    </div>
+                    <div className="my-2">
+                      <IconButton onClick={() => remove(index)}>
+                        <DeleteIcon className="h-6 w-6 text-color-red" />
+                      </IconButton>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row mt-2">
+                    <UploadAttachment
+                      name={`receipts[${index}].attachment`}
+                      cloudinaryPreset="organization_logos"
+                      inputRef={register({})}
+                    />
 
-          {fields.map(({ fieldId, description }, index) => (
-            <div key={fieldId}>
-              <div className="flex gap-2 my-2">
-                <div className="flex-grow">
-                  <TextField
-                    className="my-1"
-                    name={`receipts[${index}].description`}
-                    size="small"
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Description",
-                    })}
-                    inputRef={register()}
-                    error={Boolean(errors.description)}
-                    helperText={errors.description?.message}
-                    defaultValue={description}
-                  />
+                    <div className="mr-2 sm:my-0 flex-1">
+                      <TextField
+                        className="my-1"
+                        name={`receipts[${index}].date`}
+                        size="small"
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Date",
+                        })}
+                        inputRef={register({})}
+                        inputProps={{ type: "date" }}
+                        error={Boolean(errors.date)}
+                        helperText={errors.date?.message}
+                      />
+                    </div>
+                    <div className="mr-2 sm:my-0 flex-1">
+                      <TextField
+                        className="my-1"
+                        name={`receipts[${index}].amount`}
+                        size="small"
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Amount",
+                        })}
+                        inputRef={register({})}
+                        inputProps={{ type: "number", min: 0 }}
+                        error={Boolean(errors.amount)}
+                        helperText={errors.amount?.message}
+                        endAdornment={round.currency}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div className="my-2">
-                  <IconButton onClick={() => remove(index)}>
-                    <DeleteIcon className="h-6 w-6 text-color-red" />
-                  </IconButton>
-                </div>
+              ))}
+
+              <div className="mt-2">
+                <Button
+                  onClick={() => {
+                    append({});
+                  }}
+                  fullWidth
+                >
+                  <AddIcon className="h-5 w-5 mr-1" />{" "}
+                  <FormattedMessage defaultMessage="Add receipt" />
+                </Button>
               </div>
-              <div className="flex flex-col sm:flex-row mt-2">
-                <UploadAttachment
-                  name={`receipts[${index}].attachment`}
-                  cloudinaryPreset="organization_logos"
-                  inputRef={register({})}
-                />
-
-                <div className="mr-2 sm:my-0 flex-1">
-                  <TextField
-                    className="my-1"
-                    name={`receipts[${index}].date`}
-                    size="small"
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Date",
-                    })}
-                    inputRef={register({})}
-                    inputProps={{ type: "date" }}
-                    error={Boolean(errors.date)}
-                    helperText={errors.date?.message}
-                  />
-                </div>
-                <div className="mr-2 sm:my-0 flex-1">
-                  <TextField
-                    className="my-1"
-                    name={`receipts[${index}].amount`}
-                    size="small"
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Amount",
-                    })}
-                    inputRef={register({})}
-                    inputProps={{ type: "number", min: 0 }}
-                    error={Boolean(errors.amount)}
-                    helperText={errors.amount?.message}
-                    endAdornment={round.currency}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="mt-2">
-            <Button
-              onClick={() => {
-                append({});
-              }}
-              fullWidth
-            >
-              <AddIcon className="h-5 w-5 mr-1" />{" "}
-              <FormattedMessage defaultMessage="Add receipt" />
-            </Button>
-          </div>
+            </>
+          )}
 
           <h2 className="text-xl font-semibold mt-2">
             <FormattedMessage defaultMessage="Payment Method" />
@@ -247,7 +250,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.recipientName)}
                 helperText={errors.recipientName?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.recipientName}
               />
             </div>
             <div className="mr-2 sm:my-0 flex-1">
@@ -264,7 +267,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.recipientEmail)}
                 helperText={errors.recipientEmail?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.recipientEmail}
               />
             </div>
           </div>
@@ -284,7 +287,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.swiftCode)}
                 helperText={errors.swiftCode?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.swiftCode}
               />
             </div>
             <div className="mr-2 sm:my-0 flex-1">
@@ -301,7 +304,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.iban)}
                 helperText={errors.iban?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.iban}
               />
             </div>
           </div>
@@ -319,7 +322,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.country)}
                 helperText={errors.country?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.country}
               />
             </div>
             <div className="mr-2 sm:my-0 flex-1">
@@ -334,7 +337,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.city)}
                 helperText={errors.city?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.city}
               />
             </div>
           </div>
@@ -354,7 +357,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.recipientAddress)}
                 helperText={errors.recipientAddress?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.recipientAddress}
               />
             </div>
             <div className="mr-2 sm:my-0 flex-1">
@@ -371,7 +374,7 @@ function AddExpense({ bucketId, close, round }) {
                 autoFocus
                 error={Boolean(errors.recipientPostalCode)}
                 helperText={errors.recipientPostalCode?.message}
-                testid="new-bucket-title-input"
+                defaultValue={expenseToEdit?.recipientPostalCode}
               />
             </div>
           </div>
@@ -381,7 +384,11 @@ function AddExpense({ bucketId, close, round }) {
             <FormattedMessage defaultMessage="Cancel" />
           </Button>
           <Button type="submit" loading={fetching}>
-            <FormattedMessage defaultMessage="Save" />
+            {expenseToEdit ? (
+              <FormattedMessage defaultMessage="Update" />
+            ) : (
+              <FormattedMessage defaultMessage="Save" />
+            )}
           </Button>
         </div>
       </form>
@@ -389,4 +396,4 @@ function AddExpense({ bucketId, close, round }) {
   );
 }
 
-export default AddExpense;
+export default AddEditExpense;
