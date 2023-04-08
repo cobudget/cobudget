@@ -33,6 +33,7 @@ function UploadAttachment({ name, cloudinaryPreset, inputRef }) {
     <div className="mr-2 sm:my-0 block">
       <div className="flex min-w-0 my-1">
         <button
+          type="button"
           onClick={() => fileInputField.current.click()}
           className="font-medium flex px-8 py-3 rounded-md  bg-gray-100 w-full border-3 border-transparent"
         >

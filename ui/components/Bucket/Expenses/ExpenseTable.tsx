@@ -42,7 +42,7 @@ function ExpenseTable({ expenses, round, currentUser }) {
                   </span>
                 </Link>
               </td>
-              <td className="px-4 py-2 flex gap-1">
+              <td className="px-4 py-2 flex gap-2">
                 <FormattedCurrency
                   value={expense.amount}
                   currency={round.currency}

@@ -83,7 +83,19 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
               <tbody>
                 {expense?.receipts?.map((receipt) => (
                   <tr className="bg-gray-100 even:bg-white" key={receipt.id}>
-                    <td className="px-4 py-2">📄</td>
+                    <td className="px-4 py-2">
+                      {receipt.attachment ? (
+                        <a
+                          target="_blank"
+                          rel="noreferrer"
+                          href={receipt.attachment}
+                        >
+                          📄
+                        </a>
+                      ) : (
+                        ""
+                      )}
+                    </td>
                     <td className="px-4 py-2">{receipt.description}</td>
                     <td className="px-4 py-2">
                       {dayjs(new Date(receipt.date)).format("MMM DD, YYYY")}
