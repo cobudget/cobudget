@@ -44,15 +44,14 @@ function UploadAttachment({ name, cloudinaryPreset, inputRef }) {
   }
 
   return (
-    <FileUploader handleChange={handleUpload}>
-      <div className="mr-2 sm:my-0 block">
-        <div className="flex min-w-0 my-1">
-          <button
-            type="button"
-            disabled={uploading}
-            onClick={(e) => e.preventDefault()}
-            className="font-medium flex px-8 py-3 rounded-md  bg-gray-100 w-full border-3 border-transparent"
-          >
+    <div className="mr-2 sm:my-0 block">
+      <div className="flex min-w-0 my-1">
+        <FileUploader
+          disables={uploading}
+          handleChange={handleUpload}
+          hoverTitle="&nbsp;"
+        >
+          <div className="font-medium flex px-8 py-3 rounded-md bg-gray-100 w-full border-3 border-transparent">
             <span className="mx-1 my-0.5">
               {uploading ? (
                 <LoaderIcon
@@ -66,21 +65,11 @@ function UploadAttachment({ name, cloudinaryPreset, inputRef }) {
               )}
             </span>
             <FormattedMessage defaultMessage="Upload Attachment" />
-          </button>
-          <input
-            type="file"
-            ref={fileInputField}
-            onChange={(e) => {
-              handleUpload([e.target.files[0]]);
-            }}
-            title=""
-            value=""
-            className="w-full absolute inset-0 opacity-0 hidden focus:outline-none -z-10"
-          />
-          <input type="hidden" name={name} value="" ref={inputRef} />
-        </div>
+          </div>
+        </FileUploader>
+        <input type="hidden" name={name} value="" ref={inputRef} />
       </div>
-    </FileUploader>
+    </div>
   );
 }
 
