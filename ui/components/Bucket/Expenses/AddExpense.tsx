@@ -10,6 +10,7 @@ import { gql, useMutation } from "urql";
 import IconButton from "components/IconButton";
 import { DeleteIcon, AddIcon } from "components/Icons";
 import styled from "styled-components";
+import UploadAttachment from "./UploadAttachment";
 
 const FormWrapper = styled.div`
   max-height: calc(100vh - 120px);
@@ -128,7 +129,7 @@ function AddExpense({ bucketId, close, round }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+    <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-md">
       <form onSubmit={handleSubmit(onSubmission)}>
         <h1 className="text-xl font-semibold">
           <FormattedMessage defaultMessage="Submit Expense" />
@@ -176,6 +177,12 @@ function AddExpense({ bucketId, close, round }) {
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row mt-2">
+                <UploadAttachment
+                  name={`receipts[${index}].attachment`}
+                  cloudinaryPreset="organization_logos"
+                  inputRef={register({})}
+                />
+
                 <div className="mr-2 sm:my-0 flex-1">
                   <TextField
                     className="my-1"
