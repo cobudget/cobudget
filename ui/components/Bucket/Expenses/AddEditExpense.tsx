@@ -69,10 +69,54 @@ const SUBMIT_RECEIPT = gql`
   }
 `;
 
+export const UPDATE_EXPENSE = gql`
+  mutation UpdateExpense(
+    $id: String!
+    $title: String
+    $recipientName: String
+    $recipientEmail: String
+    $swiftCode: String
+    $iban: String
+    $country: String
+    $city: String!
+    $recipientAddress: String
+    $recipientPostalCode: String
+  ) {
+    updateExpense(
+      id: $id
+      title: $title
+      recipientName: $recipientName
+      recipientEmail: $recipientEmail
+      swiftCode: $swiftCode
+      iban: $iban
+      country: $country
+      city: $city
+      recipientAddress: $recipientAddress
+      recipientPostalCode: $recipientPostalCode
+    ) {
+      id
+      title
+      recipientName
+      recipientEmail
+      swiftCode
+      iban
+      country
+      city
+      recipientAddress
+      recipientPostalCode
+    }
+  }
+`;
+
 function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
   const intl = useIntl();
 
-  const [{ fetching, error }, submitExpense] = useMutation(SUBMIT_EXPENSE);
+  const [{ fetching: submitFetching }, submitExpense] = useMutation(
+    SUBMIT_EXPENSE
+  );
+  const [{ fetching: updateFetching }, updateExpense] = useMutation(
+    UPDATE_EXPENSE
+  );
   const [{ error: addReceiptError }, submitReceipt] = useMutation(
     SUBMIT_RECEIPT
   );
@@ -84,49 +128,63 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
   });
 
   const onSubmission = (variables) => {
-    submitExpense({
-      ...variables,
-      bucketId,
-    }).then(async (data) => {
-      if (data.error?.message.indexOf(GRAPHQL_NOT_LOGGED_IN) > -1) {
-        toast.error(
-          intl.formatMessage({
-            defaultMessage: "You need to login to submit an expense",
-          })
+    if (expenseToEdit) {
+      updateExpense({
+        ...variables,
+        id: expenseToEdit.id,
+      }).then(() => {
+        toast.success(
+          intl.formatMessage({ defaultMessage: "Expense updated" })
         );
-        return;
-      } else if (
-        data.error?.message.indexOf(GRAPHQL_EXPENSE_COCREATOR_ONLY) > -1
-      ) {
-        toast.error(
-          intl.formatMessage({
-            defaultMessage: "Only cocreators can add expense",
-          })
-        );
-        return;
-      }
+        close();
+      });
+    } else {
+      submitExpense({
+        ...variables,
+        bucketId,
+      }).then(async (data) => {
+        if (data.error?.message.indexOf(GRAPHQL_NOT_LOGGED_IN) > -1) {
+          toast.error(
+            intl.formatMessage({
+              defaultMessage: "You need to login to submit an expense",
+            })
+          );
+          return;
+        } else if (
+          data.error?.message.indexOf(GRAPHQL_EXPENSE_COCREATOR_ONLY) > -1
+        ) {
+          toast.error(
+            intl.formatMessage({
+              defaultMessage: "Only cocreators can add expense",
+            })
+          );
+          return;
+        }
 
-      const expenseId = data.data.createExpense.id;
+        const expenseId = data.data.createExpense.id;
 
-      const receipts =
-        variables.receipts?.filter((f) => f.description && f.amount) || [];
+        const receipts =
+          variables.receipts?.filter((f) => f.description && f.amount) || [];
 
-      if (receipts.length > 0) {
-        const promises = receipts.map((form) => {
-          return submitReceipt({
-            ...form,
-            expenseId,
-            amount: Number(form.amount) * 100,
-            date: new Date(form.date).getTime(),
+        if (receipts.length > 0) {
+          const promises = receipts.map((form) => {
+            return submitReceipt({
+              ...form,
+              expenseId,
+              amount: Number(form.amount) * 100,
+              date: new Date(form.date).getTime(),
+            });
           });
-        });
-        await Promise.allSettled(promises);
-      }
+          await Promise.allSettled(promises);
+        }
 
-      toast.success(intl.formatMessage({ defaultMessage: "Expense Added" }));
-      close();
-    });
+        toast.success(intl.formatMessage({ defaultMessage: "Expense Added" }));
+        close();
+      });
+    }
   };
+
+  const fetching = submitFetching || updateFetching;
 
   return (
     <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-md">

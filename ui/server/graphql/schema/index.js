@@ -172,6 +172,19 @@ const schema = gql`
 
     updateExpenseStatus(id: String!, status: ExpenseStatus): Expense
 
+    updateExpense(
+      id: String!
+      title: String
+      recipientName: String
+      recipientEmail: String
+      swiftCode: String
+      iban: String
+      country: String
+      city: String
+      recipientAddress: String
+      recipientPostalCode: String
+    ): Expense
+
     createExpenseReceipt(
       description: String
       date: Date

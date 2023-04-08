@@ -1081,3 +1081,54 @@ export const updateExpenseStatus = async (_, { id, status }, { user, ss }) => {
     throw new Error(GRAPHQL_ADMIN_AND_MODERATOR_ONLY);
   }
 };
+
+export const updateExpense = async (
+  _,
+  {
+    id,
+    title,
+    recipientName,
+    recipientEmail,
+    swiftCode,
+    iban,
+    country,
+    city,
+    recipientAddress,
+    recipientPostalCode,
+  },
+  { user, ss }
+) => {
+  const expense = await prisma.expense.findUnique({
+    where: { id },
+    include: { bucket: true },
+  });
+
+  if (!expense) {
+    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+  }
+
+  const roundMember = await getRoundMember({
+    userId: user?.id,
+    roundId: expense.bucket?.roundId,
+    bucketId: expense.bucketId,
+  });
+
+  if (ss || roundMember?.id === expense.submittedBy) {
+    return prisma.expense.update({
+      where: { id },
+      data: {
+        title,
+        recipientName,
+        recipientEmail,
+        swiftCode,
+        iban,
+        country,
+        city,
+        recipientAddress,
+        recipientPostalCode,
+      },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+  }
+};
