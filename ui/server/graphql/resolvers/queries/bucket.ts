@@ -6,16 +6,25 @@ import { isGroupAdmin } from "../auth";
 import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import subscribers from "../../../subscribers/discourse.subscriber";
-import { statusTypeToQuery } from "../helpers";
+import { canViewRound, statusTypeToQuery } from "../helpers";
 import discourse from "../../../lib/discourse";
+import { ROUND_IS_PRIVATE } from "../../../../constants";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
-export const bucket = async (parent, { id }) => {
+export const bucket = async (parent, { id }, { user, ss }) => {
   if (!id) return null;
   const bucket = await prisma.bucket.findUnique({ where: { id } });
   if (!bucket || bucket.deleted) return null;
-  return bucket;
+
+  const round = await prisma.round.findUnique({
+    where: { id: bucket.roundId },
+  });
+  if ((await canViewRound({ user, round })) || ss) {
+    return bucket;
+  }
+
+  return null;
 };
 
 export const bucketsPage = async (
@@ -46,6 +55,19 @@ export const bucketsPage = async (
   const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
   // If canceled in not there in the status filter, explicitly qunselect canceled buckets
   const showCanceled = status.indexOf("CANCELED") === -1;
+  const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
+
+  // If a user is not an admin or moderator, then dont return all draft buckets
+  // Instead return the draft buckets which are created by the current user
+  if (showDraft && !isAdminOrGuide) {
+    statusFilter.forEach((filter) => {
+      if (filter.publishedAt === null) {
+        filter.publishedAt = { not: null };
+      }
+    });
+    statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+  }
+
   const buckets = await prisma.bucket.findMany({
     where: {
       round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },

@@ -3,6 +3,7 @@ import { skip } from "graphql-resolvers";
 import stripe from "server/stripe";
 import prisma from "../../../prisma";
 import fetch from "node-fetch";
+import { PUBLIC } from "../../../../constants";
 
 export * from "./opencollective";
 
@@ -335,6 +336,27 @@ export async function canViewRound({ round, user }) {
   if (roundMember?.isApproved) {
     return true;
   } else {
+    return false;
+  }
+}
+
+export async function canViewGroup({ group, user }) {
+  try {
+    if (group.visibility === PUBLIC) {
+      return true;
+    }
+
+    const groupMember = await prisma.groupMember.findUnique({
+      where: {
+        groupId_userId: {
+          userId: user?.id ?? "undefined",
+          groupId: group?.id,
+        },
+      },
+    });
+
+    return !!groupMember?.isApproved;
+  } catch (err) {
     return false;
   }
 }

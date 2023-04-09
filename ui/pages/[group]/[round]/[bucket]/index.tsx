@@ -214,10 +214,6 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
       </>
     );
 
-  if (error) {
-    <div className="text-center mt-7">{error.message}</div>;
-  }
-
   return (
     <>
       <Header head={head} />

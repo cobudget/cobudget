@@ -11,5 +11,7 @@ export const GRAPHQL_ADMIN_AND_MODERATOR_ONLY =
   "Only admins and moderators can perform this action";
 export const GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND = "Expense receipt not found";
 
+export const ROUND_IS_PRIVATE = "The round is private";
+
 //FRONTEND ERRORS
 export const COLLECTIVE_NOT_FOUND = "Collective not found";

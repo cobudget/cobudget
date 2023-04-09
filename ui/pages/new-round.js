@@ -12,7 +12,8 @@ import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
 import toast from "react-hot-toast";
-import PageHero from "../components/PageHero";
+import { useIntl } from "react-intl";
+import { PUBLIC } from "../constants";
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
@@ -21,6 +22,7 @@ const CREATE_ROUND = gql`
     $slug: String!
     $currency: String!
     $registrationPolicy: RegistrationPolicy!
+    $visibility: Visibility
   ) {
     createRound(
       groupId: $groupId
@@ -28,9 +30,11 @@ const CREATE_ROUND = gql`
       slug: $slug
       currency: $currency
       registrationPolicy: $registrationPolicy
+      visibility: $visibility
     ) {
       slug
       title
+      visibility
     }
   }
 `;
@@ -39,6 +43,8 @@ export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
   const { handleSubmit, register, errors } = useForm();
   const [slugValue, setSlugValue] = useState("");
+
+  const intl = useIntl();
 
   const onSubmit = (variables) => {
     createRound(variables).then(({ data, error }) => {
@@ -121,6 +127,22 @@ export default function NewRoundPage({ currentGroup }) {
                   </option>
                 ))}
               </SelectField>
+
+              <SelectField
+                name="visibility"
+                label={intl.formatMessage({ defaultMessage: "Visibility" })}
+                defaultValue={currentGroup?.visiblity || PUBLIC}
+                inputRef={register}
+                className="my-4"
+              >
+                <option value="PUBLIC">
+                  {intl.formatMessage({ defaultMessage: "Public" })}
+                </option>
+                <option value="HIDDEN">
+                  {intl.formatMessage({ defaultMessage: "Hidden" })}
+                </option>
+              </SelectField>
+
               <SelectField
                 name="registrationPolicy"
                 label="Registration policy"
