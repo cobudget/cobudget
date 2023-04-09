@@ -9,6 +9,7 @@ import dayjs from "dayjs";
 import ExpenseStatus from "./ExpenseStatus";
 import { Modal } from "@material-ui/core";
 import AddEditExpense from "./AddEditExpense";
+import EditReceipt from "./EditReceipt";
 
 const GET_EXPENSE = gql`
   query GET_EXPENSE($expenseId: String!) {
@@ -40,6 +41,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
   const router = useRouter();
 
   const [expenseToEdit, setExpenseToEdit] = useState();
+  const [receiptToEdit, setReceiptToEdit] = useState();
   const [{ fetching, data }] = useQuery({
     query: GET_EXPENSE,
     variables: { expenseId: expenseId },
@@ -90,7 +92,10 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
               <table className="table-fixed w-full">
                 <tbody>
                   {expense?.receipts?.map((receipt) => (
-                    <tr className="bg-gray-100 even:bg-white" key={receipt.id}>
+                    <tr
+                      className="group bg-gray-100 even:bg-white"
+                      key={receipt.id}
+                    >
                       <td className="px-4 py-2">
                         {receipt.attachment ? (
                           <a
@@ -113,6 +118,11 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                           value={receipt.amount}
                           currency={round.currency}
                         />
+                        <span className="float-right opacity-0 group-hover:opacity-100">
+                          <IconButton onClick={() => setReceiptToEdit(receipt)}>
+                            <EditIcon className="h-4 w-4" />
+                          </IconButton>
+                        </span>
                       </td>
                     </tr>
                   ))}
@@ -219,6 +229,17 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
           }
           expenseToEdit={expenseToEdit}
           close={() => setExpenseToEdit(undefined)}
+        />
+      </Modal>
+      <Modal
+        open={!!receiptToEdit}
+        onClose={() => setReceiptToEdit(undefined)}
+        className="flex items-center justify-center p-4"
+      >
+        <EditReceipt
+          receiptToEdit={receiptToEdit}
+          close={() => setReceiptToEdit(undefined)}
+          round={round}
         />
       </Modal>
     </>
