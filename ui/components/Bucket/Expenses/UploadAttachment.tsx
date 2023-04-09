@@ -5,9 +5,13 @@ import { FormattedMessage } from "react-intl";
 import uploadImageFiles from "utils/uploadImageFiles";
 import { FileUploader } from "react-drag-drop-files";
 
-function UploadAttachment({ name, cloudinaryPreset, inputRef }) {
-  const fileInputField = useRef(null);
-  const [link, setLink] = useState();
+function UploadAttachment({
+  name,
+  cloudinaryPreset,
+  inputRef,
+  defaultLink = "",
+}) {
+  const [link, setLink] = useState(defaultLink);
   const [uploading, setUploading] = useState(false);
 
   const removeLink = () => setLink(undefined);

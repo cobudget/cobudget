@@ -3,7 +3,7 @@ import Button from "components/Button";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { FormattedMessage } from "react-intl";
-import AddExpense from "./AddExpense";
+import AddExpense from "./AddEditExpense";
 import ExpenseDetails from "./ExpenseDetails";
 import ExpenseTable from "./ExpenseTable";
 
@@ -16,11 +16,15 @@ function Expenses({ bucket, round, currentUser }) {
       <div className="bg-white border-b-default">
         <div className="page grid gap-10 grid-cols-1 md:grid-cols-sidebar">
           <div>
-            <div className="flex">
-              <Button onClick={() => setOpenAdd(true)}>
-                <FormattedMessage defaultMessage="Submit Expense" />
-              </Button>
-            </div>
+            {bucket?.cocreators.find(
+              (c) => c.id === currentUser?.currentCollMember?.id
+            ) && (
+              <div className="flex">
+                <Button onClick={() => setOpenAdd(true)}>
+                  <FormattedMessage defaultMessage="Submit Expense" />
+                </Button>
+              </div>
+            )}
             {router.query.expense ? (
               <ExpenseDetails
                 expenseId={router.query.expense}

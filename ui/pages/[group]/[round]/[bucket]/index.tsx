@@ -55,6 +55,7 @@ export const BUCKET_QUERY = gql`
         title
         amount
         status
+        submittedBy
       }
 
       round {
@@ -290,18 +291,20 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             >
               Funders ({bucket?.noOfFunders})
             </Tab>
-            <Tab
-              className={({ selected }) =>
-                classNames(
-                  "block px-2 py-4 border-b-2 font-medium transition-colors",
-                  selected
-                    ? "border-anthracit text-anthracit"
-                    : "border-transparent text-gray-500"
-                )
-              }
-            >
-              Expenses
-            </Tab>
+            {bucket?.status === "FUNDED" || bucket?.status === "COMPLETED" ? (
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    "block px-2 py-4 border-b-2 font-medium transition-colors",
+                    selected
+                      ? "border-anthracit text-anthracit"
+                      : "border-transparent text-gray-500"
+                  )
+                }
+              >
+                Expenses
+              </Tab>
+            ) : null}
           </Tab.List>
         </div>
 

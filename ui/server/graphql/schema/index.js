@@ -172,12 +172,33 @@ const schema = gql`
 
     updateExpenseStatus(id: String!, status: ExpenseStatus): Expense
 
+    updateExpense(
+      id: String!
+      title: String
+      recipientName: String
+      recipientEmail: String
+      swiftCode: String
+      iban: String
+      country: String
+      city: String
+      recipientAddress: String
+      recipientPostalCode: String
+    ): Expense
+
     createExpenseReceipt(
       description: String
       date: Date
       amount: Int
       attachment: String
       expenseId: String
+    ): ExpenseReceipt
+
+    updateExpenseReceipt(
+      id: String!
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
     ): ExpenseReceipt
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
@@ -527,6 +548,7 @@ const schema = gql`
     recipientPostalCode: String
     receipts: [ExpenseReceipt]
     status: ExpenseStatus
+    submittedBy: String!
   }
 
   type Bucket {
