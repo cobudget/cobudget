@@ -11,6 +11,8 @@ import IconButton from "components/IconButton";
 import { DeleteIcon, AddIcon } from "components/Icons";
 import styled from "styled-components";
 import UploadAttachment from "./UploadAttachment";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers";
 
 const FormWrapper = styled.div`
   max-height: calc(100vh - 120px);
@@ -124,7 +126,29 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
   const [{ error: addReceiptError }, submitReceipt] = useMutation(
     SUBMIT_RECEIPT
   );
-  const { handleSubmit, register, errors, control } = useForm();
+
+  const schema = yup.object().shape({
+    receipts: yup.array().of(
+      yup.object().shape({
+        description: yup.string().required(),
+        date: yup.string().required(),
+        amount: yup.string().required(),
+      })
+    ),
+    title: yup.string().required(),
+    recipientName: yup.string().required(),
+    recipientEmail: yup
+      .string()
+      .email(intl.formatMessage({ defaultMessage: "Invalid email" })),
+    country: yup.string().required(),
+    city: yup.string().required(),
+    recipientAddress: yup.string().required(),
+    recipientPostalCode: yup.string().required(),
+  });
+
+  const { handleSubmit, register, errors, control } = useForm({
+    resolver: yupResolver(schema),
+  });
   const { fields, append, remove } = useFieldArray({
     control,
     name: "receipts",
