@@ -979,8 +979,12 @@ export const createExpenseReceipt = async (
   });
 
   if (ss || roundMember?.id === expense.submittedBy) {
-    return prisma.expenseReceipt.create({
+    const receipt = await prisma.expenseReceipt.create({
       data: { description, date, amount, expenseId, attachment },
+    });
+    return prisma.expenseReceipt.findFirst({
+      where: { id: receipt.id },
+      include: { expense: true },
     });
   } else {
     throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);

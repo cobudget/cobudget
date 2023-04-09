@@ -65,6 +65,10 @@ const SUBMIT_RECEIPT = gql`
       expenseId: $expenseId
     ) {
       id
+      expense {
+        id
+        amount
+      }
     }
   }
 `;

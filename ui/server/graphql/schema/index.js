@@ -525,6 +525,7 @@ const schema = gql`
     amount: Int
     attachment: String
     expenseId: String
+    expense: Expense
   }
 
   enum ExpenseStatus {
