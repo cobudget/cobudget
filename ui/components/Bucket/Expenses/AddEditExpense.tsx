@@ -2,7 +2,7 @@ import Button from "components/Button";
 import TextField from "components/TextField";
 import { GRAPHQL_EXPENSE_COCREATOR_ONLY } from "../../../constants";
 import { GRAPHQL_NOT_LOGGED_IN } from "../../../constants";
-import React from "react";
+import React, { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -184,6 +184,14 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
     }
   };
 
+  useEffect(() => {
+    // If expense is being added, add a receipt form
+    // by default
+    if (!expenseToEdit) {
+      append({});
+    }
+  }, [append, expenseToEdit]);
+
   const fetching = submitFetching || updateFetching;
 
   return (
@@ -201,7 +209,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             inputRef={register({
               required: "Required",
             })}
-            autoFocus
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
             defaultValue={expenseToEdit?.title}
@@ -305,7 +312,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.recipientName)}
                 helperText={errors.recipientName?.message}
                 defaultValue={expenseToEdit?.recipientName}
@@ -322,7 +328,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.recipientEmail)}
                 helperText={errors.recipientEmail?.message}
                 defaultValue={expenseToEdit?.recipientEmail}
@@ -342,7 +347,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.swiftCode)}
                 helperText={errors.swiftCode?.message}
                 defaultValue={expenseToEdit?.swiftCode}
@@ -359,7 +363,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.iban)}
                 helperText={errors.iban?.message}
                 defaultValue={expenseToEdit?.iban}
@@ -377,7 +380,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.country)}
                 helperText={errors.country?.message}
                 defaultValue={expenseToEdit?.country}
@@ -392,7 +394,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.city)}
                 helperText={errors.city?.message}
                 defaultValue={expenseToEdit?.city}
@@ -412,7 +413,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.recipientAddress)}
                 helperText={errors.recipientAddress?.message}
                 defaultValue={expenseToEdit?.recipientAddress}
@@ -429,7 +429,6 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                 inputRef={register({
                   required: "Required",
                 })}
-                autoFocus
                 error={Boolean(errors.recipientPostalCode)}
                 helperText={errors.recipientPostalCode?.message}
                 defaultValue={expenseToEdit?.recipientPostalCode}

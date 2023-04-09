@@ -63,7 +63,12 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
     setExpenseToEdit(expense);
   };
 
-  const isSubmittedByCurrentUser = currentUser?.currentCollMember?.id === expense?.submittedBy;
+  const isSubmittedByCurrentUser =
+    currentUser?.currentCollMember?.id === expense?.submittedBy;
+  const canViewDetails =
+    isSubmittedByCurrentUser ||
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator;
 
   if (fetching) {
     return <>Loading...</>;
@@ -86,72 +91,75 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         </div>
 
         {/*Receipts*/}
-        <div className="mt-4">
-          <p className="font-lg font-medium">
-            <FormattedMessage defaultMessage="Receipts" />
-          </p>
-          {expense?.receipts?.length > 0 ? (
-            <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
-              <table className="table-fixed w-full">
-                <tbody>
-                  {expense?.receipts?.map((receipt) => (
-                    <tr
-                      className="group bg-gray-100 even:bg-white"
-                      key={receipt.id}
-                    >
-                      <td className="px-4 py-2">
-                        {receipt.attachment ? (
-                          <a
-                            target="_blank"
-                            rel="noreferrer"
-                            href={receipt.attachment}
-                          >
-                            📄
-                          </a>
-                        ) : (
-                          ""
-                        )}
-                      </td>
-                      <td className="px-4 py-2">{receipt.description}</td>
-                      <td className="px-4 py-2">
-                        {dayjs(new Date(receipt.date)).format("MMM DD, YYYY")}
-                      </td>
+        {canViewDetails && (
+          <div className="mt-4">
+            <p className="font-lg font-medium">
+              <FormattedMessage defaultMessage="Receipts" />
+            </p>
+            {expense?.receipts?.length > 0 ? (
+              <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
+                <table className="table-fixed w-full">
+                  <tbody>
+                    {expense?.receipts?.map((receipt) => (
+                      <tr
+                        className="group bg-gray-100 even:bg-white"
+                        key={receipt.id}
+                      >
+                        <td className="px-4 py-2">
+                          {receipt.attachment ? (
+                            <a
+                              target="_blank"
+                              rel="noreferrer"
+                              href={receipt.attachment}
+                            >
+                              📄
+                            </a>
+                          ) : (
+                            ""
+                          )}
+                        </td>
+                        <td className="px-4 py-2">{receipt.description}</td>
+                        <td className="px-4 py-2">
+                          {dayjs(new Date(receipt.date)).format("MMM DD, YYYY")}
+                        </td>
+                        <td className="px-4 py-2">
+                          <FormattedCurrency
+                            value={receipt.amount}
+                            currency={round.currency}
+                          />
+                          {isSubmittedByCurrentUser && (
+                            <span className="float-right opacity-0 group-hover:opacity-100">
+                              <IconButton
+                                onClick={() => setReceiptToEdit(receipt)}
+                              >
+                                <EditIcon className="h-4 w-4" />
+                              </IconButton>
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="bg-gray-200">
+                      <td />
+                      <td />
+                      <td className="px-4 py-2 font-medium">Total</td>
                       <td className="px-4 py-2">
                         <FormattedCurrency
-                          value={receipt.amount}
+                          value={total}
                           currency={round.currency}
                         />
-                        {
-                          isSubmittedByCurrentUser &&
-                        <span className="float-right opacity-0 group-hover:opacity-100">
-                          <IconButton onClick={() => setReceiptToEdit(receipt)}>
-                            <EditIcon className="h-4 w-4" />
-                          </IconButton>
-                        </span>
-                        }
                       </td>
                     </tr>
-                  ))}
-                  <tr className="bg-gray-200">
-                    <td />
-                    <td />
-                    <td className="px-4 py-2 font-medium">Total</td>
-                    <td className="px-4 py-2">
-                      <FormattedCurrency
-                        value={total}
-                        currency={round.currency}
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="my-2 text-gray-400">
-              <FormattedMessage defaultMessage="The expense does not have a receipt" />
-            </p>
-          )}
-        </div>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="my-2 text-gray-400">
+                <FormattedMessage defaultMessage="The expense does not have a receipt" />
+              </p>
+            )}
+          </div>
+        )}
 
         {/*Recipient Details*/}
         {isSubmittedByCurrentUser && (
