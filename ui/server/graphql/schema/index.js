@@ -193,6 +193,14 @@ const schema = gql`
       expenseId: String
     ): ExpenseReceipt
 
+    updateExpenseReceipt(
+      id: String!
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+    ): ExpenseReceipt
+
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
 

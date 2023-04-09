@@ -9,6 +9,7 @@ export const GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER =
 export const GRAPHQL_ROUND_NOT_FOUND = "Round not found";
 export const GRAPHQL_ADMIN_AND_MODERATOR_ONLY =
   "Only admins and moderators can perform this action";
+export const GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND = "Expense receipt not found";
 
 //FRONTEND ERRORS
 export const COLLECTIVE_NOT_FOUND = "Collective not found";

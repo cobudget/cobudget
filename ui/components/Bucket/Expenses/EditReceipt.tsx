@@ -1,17 +1,52 @@
 import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import TextField from "components/TextField";
 import UploadAttachment from "./UploadAttachment";
 import dayjs from "dayjs";
 import Button from "components/Button";
+import { gql, useMutation } from "urql";
+import toast from "react-hot-toast";
+
+const UPDATE_RECEIPT = gql`
+  mutation UpdateExpenseReceipt(
+    $id: String!
+    $description: String
+    $date: Date
+    $amount: Int
+    $attachment: String
+  ) {
+    updateExpenseReceipt(
+      id: $id
+      description: $description
+      date: $date
+      amount: $amount
+      attachment: $attachment
+    ) {
+      id
+      description
+      date
+      amount
+      expenseId
+      attachment
+    }
+  }
+`;
 
 function EditReceipt({ receiptToEdit, close, round }) {
   const intl = useIntl();
   const { handleSubmit, register, errors } = useForm();
+  const [{ fetching }, updateReceipt] = useMutation(UPDATE_RECEIPT);
 
   const onSubmission = (variables) => {
-    ("");
+    updateReceipt({
+      ...variables,
+      id: receiptToEdit?.id,
+      amount: parseInt((variables.amount * 100).toFixed(0)),
+    }).then(() => {
+      close();
+      toast.success(intl.formatMessage({ defaultMessage: "Receipt updated" }));
+    });
   };
 
   return (
@@ -84,7 +119,7 @@ function EditReceipt({ receiptToEdit, close, round }) {
           <Button onClick={close} variant="secondary" className="mr-2">
             <FormattedMessage defaultMessage="Cancel" />
           </Button>
-          <Button type="submit" loading={false}>
+          <Button type="submit" loading={fetching}>
             <FormattedMessage defaultMessage="Update" />
           </Button>
         </div>
