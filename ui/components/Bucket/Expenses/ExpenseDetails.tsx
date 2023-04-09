@@ -26,6 +26,7 @@ const GET_EXPENSE = gql`
       recipientAddress
       recipientPostalCode
       status
+      submittedBy
       receipts {
         id
         description
@@ -48,10 +49,6 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
   });
   const expense = data?.expense;
 
-  if (fetching) {
-    return <>Loading...</>;
-  }
-
   const total =
     expense?.receipts?.reduce((acc, receipt) => {
       return parseInt(acc?.amount || 0) + (receipt.amount || 0);
@@ -65,6 +62,12 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
   const handleEditExpense = () => {
     setExpenseToEdit(expense);
   };
+
+  const isSubmittedByCurrentUser = currentUser?.currentCollMember?.id === expense?.submittedBy;
+
+  if (fetching) {
+    return <>Loading...</>;
+  }
 
   return (
     <>
@@ -118,11 +121,14 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                           value={receipt.amount}
                           currency={round.currency}
                         />
+                        {
+                          isSubmittedByCurrentUser &&
                         <span className="float-right opacity-0 group-hover:opacity-100">
                           <IconButton onClick={() => setReceiptToEdit(receipt)}>
                             <EditIcon className="h-4 w-4" />
                           </IconButton>
                         </span>
+                        }
                       </td>
                     </tr>
                   ))}
@@ -148,7 +154,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         </div>
 
         {/*Recipient Details*/}
-        {true && (
+        {isSubmittedByCurrentUser && (
           <div className="mt-4 flex justify-end">
             <span className="mr-4 mt-2 text-gray-600 text-sm">
               Edit expense details
