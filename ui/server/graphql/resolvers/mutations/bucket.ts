@@ -1021,10 +1021,11 @@ export const updateExpenseReceipt = async (
   });
 
   if (ss || roundMember?.id === expense.submittedBy) {
-    return prisma.expenseReceipt.update({
+    const newReceipt = await prisma.expenseReceipt.update({
       where: { id },
       data: { description, date, amount, attachment },
     });
+    return prisma.expenseReceipt.findFirst({ where: { id: newReceipt?.id }, include: { expense: true } })
   } else {
     throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
   }

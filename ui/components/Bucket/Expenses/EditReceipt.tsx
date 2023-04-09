@@ -29,6 +29,10 @@ const UPDATE_RECEIPT = gql`
       amount
       expenseId
       attachment
+      expense {
+        id
+        amount
+      }
     }
   }
 `;
