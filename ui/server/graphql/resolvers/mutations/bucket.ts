@@ -1025,7 +1025,10 @@ export const updateExpenseReceipt = async (
       where: { id },
       data: { description, date, amount, attachment },
     });
-    return prisma.expenseReceipt.findFirst({ where: { id: newReceipt?.id }, include: { expense: true } })
+    return prisma.expenseReceipt.findFirst({
+      where: { id: newReceipt?.id },
+      include: { expense: true },
+    });
   } else {
     throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
   }
