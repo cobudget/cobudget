@@ -398,7 +398,7 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucket")
                 .filter((field) => {
-                  return field.arguments.id === args.bucketId;
+                  return field.arguments?.id === args.bucketId;
                 })
                 .forEach((field) => {
                   cache.invalidate("Query", "bucket", field.arguments);
