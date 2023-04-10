@@ -178,3 +178,7 @@ export const commentSet = async (
     comments: shown,
   };
 };
+
+export const expense = async (_, { id }) => {
+  return prisma.expense.findUnique({ where: { id } });
+};

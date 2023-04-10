@@ -197,3 +197,11 @@ export const status = (bucket, args, ctx) => {
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
 };
+
+export const expenses = async ({ id }) => {
+  return prisma.expense.findMany({ where: { bucketId: id } });
+};
+
+export const expense = async ({ expenseId }) => {
+  return prisma.expense.findUnique({ where: { id: expenseId } });
+};

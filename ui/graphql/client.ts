@@ -393,7 +393,17 @@ export const client = (
                   );
                 });
             },
-
+            createExpense(result: any, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "bucket")
+                .filter((field) => {
+                  return field.arguments?.id === args.bucketId;
+                })
+                .forEach((field) => {
+                  cache.invalidate("Query", "bucket", field.arguments);
+                });
+            },
             addComment(result: any, { content, bucketId }, cache) {
               if (result.addComment) {
                 cache.updateQuery(

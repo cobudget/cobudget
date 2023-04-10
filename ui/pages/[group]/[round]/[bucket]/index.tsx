@@ -16,6 +16,7 @@ import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
 import Head from "next/head";
+import Expenses from "components/Bucket/Expenses";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
@@ -48,6 +49,14 @@ export const BUCKET_QUERY = gql`
       exchangeDescription
       exchangeMinimumContribution
       exchangeVat
+
+      expenses {
+        id
+        title
+        amount
+        status
+        submittedBy
+      }
 
       round {
         id
@@ -174,7 +183,10 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
     bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
 
-  const tabsList = useMemo(() => ["bucket", "comments", "funders"], []);
+  const tabsList = useMemo(
+    () => ["bucket", "comments", "funders", "expenses"],
+    []
+  );
   useEffect(() => {
     const index = tabsList.findIndex((tab) => tab === router.query.tab);
     setTab(index > -1 ? index : 0);
@@ -275,6 +287,20 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             >
               Funders ({bucket?.noOfFunders})
             </Tab>
+            {bucket?.status === "FUNDED" || bucket?.status === "COMPLETED" ? (
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    "block px-2 py-4 border-b-2 font-medium transition-colors",
+                    selected
+                      ? "border-anthracit text-anthracit"
+                      : "border-transparent text-gray-500"
+                  )
+                }
+              >
+                Expenses
+              </Tab>
+            ) : null}
           </Tab.List>
         </div>
 
@@ -295,6 +321,13 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
           </Tab.Panel>
           <Tab.Panel>
             <Funders bucket={bucket} currentUser={currentUser} />
+          </Tab.Panel>
+          <Tab.Panel>
+            <Expenses
+              bucket={bucket}
+              round={bucket.round}
+              currentUser={currentUser}
+            />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

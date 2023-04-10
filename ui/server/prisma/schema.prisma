@@ -44,6 +44,42 @@ model EmailSettings {
   userId                         String  @unique
 }
 
+model ExpenseReceipt {
+  id                 String   @id @default(cuid())
+  description        String
+  date               DateTime
+  amount             Int
+  attachment         String?
+  expense            Expense? @relation(fields: [expenseId], references: [id])
+  expenseId          String? 
+}
+
+enum ExpenseStatus {
+  SUBMITTED
+  PAID
+  REJECTED
+}
+
+model Expense {
+  id                  String    @id @default(cuid())
+  bucket              Bucket?   @relation(fields: [bucketId], references: [id])
+  bucketId            String?
+
+  title               String
+  recipientName       String
+  recipientEmail      String
+  swiftCode           String?   @default("")
+  iban                String?   @default("")
+  country             String    @default("")
+  city                String    @default("")
+  recipientAddress    String    
+  recipientPostalCode String
+  submittedBy         String
+  status              ExpenseStatus   @default(SUBMITTED)
+
+  receipts            ExpenseReceipt[]
+}
+
 model GroupMember {
   id                String   @id @default(cuid())
   group             Group    @relation(fields: [groupId], references: [id])
@@ -271,6 +307,7 @@ model Bucket {
   BudgetItems       BudgetItem[]
   FieldValues       FieldValue[]
   comments          Comment[]
+  expenses          Expense[]
   approvedAt        DateTime?
   publishedAt       DateTime?
   fundedAt          DateTime?

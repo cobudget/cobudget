@@ -16,6 +16,15 @@ import subscribers from "../../../subscribers/discourse.subscriber";
 import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
+import {
+  GRAPHQL_ADMIN_AND_MODERATOR_ONLY,
+  GRAPHQL_EXPENSE_COCREATOR_ONLY,
+  GRAPHQL_EXPENSE_NOT_FOUND,
+  GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER,
+  GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND,
+  GRAPHQL_NOT_LOGGED_IN,
+  GRAPHQL_ROUND_NOT_FOUND,
+} from "../../../../constants";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -940,4 +949,234 @@ export const contribute = async (
   { user }
 ) => {
   return contributeToBucket({ roundId, bucketId, amount, user });
+};
+
+export const createExpenseReceipt = async (
+  _,
+  { description, date, amount, expenseId, attachment },
+  { user, ss }
+) => {
+  if (!user) {
+    throw new Error(GRAPHQL_NOT_LOGGED_IN);
+  }
+
+  const expense = await prisma.expense.findUnique({ where: { id: expenseId } });
+
+  if (!expense) {
+    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+  }
+
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: expense.bucketId },
+  });
+  const roundMember = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: user.id,
+        roundId: bucket?.roundId,
+      },
+    },
+  });
+
+  if (ss || roundMember?.id === expense.submittedBy) {
+    const receipt = await prisma.expenseReceipt.create({
+      data: { description, date, amount, expenseId, attachment },
+    });
+    return prisma.expenseReceipt.findFirst({
+      where: { id: receipt.id },
+      include: { expense: true },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+  }
+};
+
+export const updateExpenseReceipt = async (
+  _,
+  { id, description, date, amount, attachment },
+  { ss, user }
+) => {
+  const receipt = await prisma.expenseReceipt.findFirst({ where: { id } });
+
+  if (!receipt) {
+    throw new Error(GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND);
+  }
+
+  const expense = await prisma.expense.findUnique({
+    where: { id: receipt?.expenseId },
+    include: { bucket: { select: { roundId: true } } },
+  });
+
+  if (!expense) {
+    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+  }
+
+  const roundMember = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: user.id,
+        roundId: expense?.bucket?.roundId,
+      },
+    },
+  });
+
+  if (ss || roundMember?.id === expense.submittedBy) {
+    const newReceipt = await prisma.expenseReceipt.update({
+      where: { id },
+      data: { description, date, amount, attachment },
+    });
+    return prisma.expenseReceipt.findFirst({
+      where: { id: newReceipt?.id },
+      include: { expense: true },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+  }
+};
+
+export const createExpense = async (
+  _,
+  {
+    bucketId,
+    title,
+    recipientName,
+    recipientEmail,
+    swiftCode,
+    iban,
+    country,
+    city,
+    recipientAddress,
+    recipientPostalCode,
+  },
+  { user }
+) => {
+  if (!user) {
+    throw new Error(GRAPHQL_NOT_LOGGED_IN);
+  }
+
+  const data = prisma.bucket.findUnique({ where: { id: bucketId } });
+  const bucket = await data;
+  const cocreators = await data.cocreators();
+  const isCocreator = cocreators.find((c) => c.userId === user.id);
+
+  if (isCocreator) {
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: bucket.roundId,
+        },
+      },
+    });
+
+    const submittedBy = roundMember.id;
+
+    return prisma.expense.create({
+      data: {
+        bucketId,
+        title,
+        recipientName,
+        recipientEmail,
+        swiftCode,
+        iban,
+        country,
+        city,
+        recipientAddress,
+        recipientPostalCode,
+        submittedBy,
+      },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_COCREATOR_ONLY);
+  }
+};
+
+export const updateExpenseStatus = async (_, { id, status }, { user, ss }) => {
+  const expense = await prisma.expense.findFirst({
+    where: { id },
+    include: {
+      bucket: true,
+    },
+  });
+  const round = await prisma.round.findFirst({
+    where: { id: expense?.bucket?.roundId },
+  });
+
+  if (!round) {
+    throw new Error(GRAPHQL_ROUND_NOT_FOUND);
+  }
+
+  let isAdmin = !!ss;
+
+  if (!isAdmin) {
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: round.id,
+        },
+      },
+    });
+    isAdmin = roundMember?.isAdmin || roundMember?.isModerator;
+  }
+
+  if (isAdmin) {
+    return prisma.expense.update({
+      where: { id },
+      data: { status },
+    });
+  } else {
+    throw new Error(GRAPHQL_ADMIN_AND_MODERATOR_ONLY);
+  }
+};
+
+export const updateExpense = async (
+  _,
+  {
+    id,
+    title,
+    recipientName,
+    recipientEmail,
+    swiftCode,
+    iban,
+    country,
+    city,
+    recipientAddress,
+    recipientPostalCode,
+  },
+  { user, ss }
+) => {
+  const expense = await prisma.expense.findUnique({
+    where: { id },
+    include: { bucket: true },
+  });
+
+  if (!expense) {
+    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+  }
+
+  const roundMember = await getRoundMember({
+    userId: user?.id,
+    roundId: expense.bucket?.roundId,
+    bucketId: expense.bucketId,
+  });
+
+  if (ss || roundMember?.id === expense.submittedBy) {
+    return prisma.expense.update({
+      where: { id },
+      data: {
+        title,
+        recipientName,
+        recipientEmail,
+        swiftCode,
+        iban,
+        country,
+        city,
+        recipientAddress,
+        recipientPostalCode,
+      },
+    });
+  } else {
+    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+  }
 };

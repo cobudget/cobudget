@@ -15,6 +15,7 @@ const schema = gql`
     round(groupSlug: String, roundSlug: String): Round
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
+    expense(id: String!): Expense
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -156,6 +157,50 @@ const schema = gql`
       exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
+
+    createExpense(
+      bucketId: String!
+      title: String!
+      recipientName: String!
+      recipientEmail: String!
+      swiftCode: String
+      iban: String
+      country: String!
+      city: String!
+      recipientAddress: String!
+      recipientPostalCode: String!
+    ): Expense
+
+    updateExpenseStatus(id: String!, status: ExpenseStatus): Expense
+
+    updateExpense(
+      id: String!
+      title: String
+      recipientName: String
+      recipientEmail: String
+      swiftCode: String
+      iban: String
+      country: String
+      city: String
+      recipientAddress: String
+      recipientPostalCode: String
+    ): Expense
+
+    createExpenseReceipt(
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+      expenseId: String
+    ): ExpenseReceipt
+
+    updateExpenseReceipt(
+      id: String!
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+    ): ExpenseReceipt
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
@@ -471,6 +516,41 @@ const schema = gql`
     stats: OC_Stats
     type: OC_Type!
     parent: OC_Parent
+    expenseId: String!
+  }
+
+  type ExpenseReceipt {
+    id: String!
+    description: String
+    date: Date
+    amount: Int
+    attachment: String
+    expenseId: String
+    expense: Expense
+  }
+
+  enum ExpenseStatus {
+    SUBMITTED
+    PAID
+    REJECTED
+  }
+
+  type Expense {
+    id: String!
+    title: String!
+    bucketId: String!
+    recipientName: String
+    recipientEmail: String
+    swiftCode: String
+    amount: Int
+    iban: String
+    country: String
+    city: String
+    recipientAddress: String
+    recipientPostalCode: String
+    receipts: [ExpenseReceipt]
+    status: ExpenseStatus
+    submittedBy: String!
   }
 
   type Bucket {
@@ -516,6 +596,8 @@ const schema = gql`
     exchangeMinimumContribution: Int
     exchangeVat: Int
     percentageFunded: Float
+    expenses: [Expense]
+    expense(id: String!): Expense
   }
 
   enum DirectFundingType {
