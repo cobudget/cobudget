@@ -25,6 +25,14 @@ import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 import { debounce } from "lodash";
 import LoadMore, { PortaledLoadMore } from "components/LoadMore";
+import activityLog from "utils/activity-log";
+import {
+  ALLOCATE_BALANCE_TO_RM,
+  ROUND_MEMBER_ROW_MENU_CLICKED,
+} from "../../constants";
+import { TOGGLE_ROUND_ADMIN } from "../../constants";
+import { RM_INVITED_AGAIN } from "../../constants";
+import { TOGGLE_ROUND_MODERATOR } from "../../constants";
 
 export const MEMBERS_QUERY = gql`
   query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
@@ -141,6 +149,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
+    activityLog.log(ROUND_MEMBER_ROW_MENU_CLICKED);
     setAnchorEl(event.currentTarget);
   };
 
@@ -169,9 +178,14 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
       >
         <MenuItem
           onClick={() => {
+            activityLog.log(TOGGLE_ROUND_ADMIN, {
+              roundId,
+              memberEmail: member.email,
+              newRole: member.isAdmin ? "Admin Removed" : "Made Admin",
+            });
+
             updateMember({
               roundId,
-
               memberId: member.id,
               isAdmin: !member.isAdmin,
             }).then(() => {
@@ -186,6 +200,10 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         {member.hasJoined ? null : (
           <MenuItem
             onClick={() => {
+              activityLog.log(RM_INVITED_AGAIN, {
+                roundId,
+                memberEmail: member.email,
+              });
               inviteAgain({
                 roundId,
                 emails: member.email,
@@ -204,6 +222,14 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         )}
         <MenuItem
           onClick={() => {
+            activityLog.log(TOGGLE_ROUND_MODERATOR, {
+              roundId,
+              memberEmail: member?.email,
+              newRole: member.isModerator
+                ? "Removed moderator"
+                : "Made moderator",
+            });
+
             updateMember({
               roundId,
               memberId: member.id,
@@ -314,7 +340,10 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         {isAdmin ? (
           <button
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
-            onClick={() => setAllocateModalOpen(true)}
+            onClick={() => {
+              setAllocateModalOpen(true);
+              activityLog.log(ALLOCATE_BALANCE_TO_RM);
+            }}
           >
             <FormattedNumber
               value={member.balance / 100}
