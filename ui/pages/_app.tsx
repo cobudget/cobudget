@@ -232,7 +232,10 @@ const MyApp = ({ Component, pageProps, router }) => {
   return (
     <IntlProvider locale={locale} messages={lang[locale]}>
       <RequiredActionsModal currentUser={currentUser} />
-      <ErrorBoundary FallbackComponent={Fallback} onError={reportError}>
+      <ErrorBoundary
+        FallbackComponent={Fallback}
+        onError={(error) => reportError(error, currentUser)}
+      >
         <Layout
           currentUser={currentUser}
           fetchingUser={fetchingUser}
