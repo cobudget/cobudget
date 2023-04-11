@@ -4,5 +4,3 @@ export * from "./activity";
 export const PUBLIC = "PUBLIC";
 export const HIDDEN = "HIDDEN";
 export * from "./enums";
-
-
