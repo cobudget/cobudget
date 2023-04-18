@@ -75,7 +75,7 @@ function ExpenseStatus({ expense, currentUser }) {
               });
             }}
           >
-            <FormattedMessage defaultMessage="Mark Unpaid" />
+            <FormattedMessage defaultMessage="Mark as Unpaid" />
           </MenuItem>
         ) : expense?.status === EXPENSE_REJECTED ? (
           <MenuItem
@@ -97,7 +97,7 @@ function ExpenseStatus({ expense, currentUser }) {
                 updateExpenseStatus({ id: expense.id, status: EXPENSE_PAID });
               }}
             >
-              <FormattedMessage defaultMessage="Mark Paid" />
+              <FormattedMessage defaultMessage="Mark as Paid" />
             </MenuItem>
             <MenuItem
               onClick={() => {

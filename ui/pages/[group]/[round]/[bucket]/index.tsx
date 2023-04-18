@@ -298,7 +298,10 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                   )
                 }
               >
-                Expenses {bucket?.expenses?.length ? `(${bucket?.expenses?.length})` : ""}
+                Expenses{" "}
+                {bucket?.expenses?.length
+                  ? `(${bucket?.expenses?.length})`
+                  : ""}
               </Tab>
             ) : null}
           </Tab.List>
