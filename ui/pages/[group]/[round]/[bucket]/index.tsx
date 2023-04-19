@@ -192,6 +192,10 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
     setTab(index > -1 ? index : 0);
   }, [router.query.tab, tabsList]);
 
+  const showExpensesTab =
+    currentGroup?.experimentalFeatures &&
+    (bucket?.status === "FUNDED" || bucket?.status === "COMPLETED");
+
   if ((!bucket && fetching) || !router.isReady) {
     return (
       <>
@@ -287,7 +291,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             >
               Funders ({bucket?.noOfFunders})
             </Tab>
-            {bucket?.status === "FUNDED" || bucket?.status === "COMPLETED" ? (
+            {showExpensesTab ? (
               <Tab
                 className={({ selected }) =>
                   classNames(
