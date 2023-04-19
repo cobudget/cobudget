@@ -159,7 +159,9 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   return (
     <>
       <span
-        data-testid={`participant-action-button-${member.email.split("@")[0]}`}
+        data-testid={`participant-action-button-${
+          member?.email?.split("@")[0]
+        }`}
       >
         <MuiIconButton
           aria-label={intl.formatMessage({ defaultMessage: "more" })}
@@ -250,7 +252,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
           arrow={false}
         >
           <span
-            data-testid={`delete-participant-${member.email.split("@")[0]}`}
+            data-testid={`delete-participant-${member?.email?.split("@")[0]}`}
           >
             <MenuItem
               color="error.main"
