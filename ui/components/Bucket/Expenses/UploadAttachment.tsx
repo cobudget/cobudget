@@ -1,9 +1,14 @@
 import IconButton from "components/IconButton";
 import { AddIcon, DeleteIcon, LoaderIcon } from "components/Icons";
-import React, { useRef, useState } from "react";
-import { FormattedMessage } from "react-intl";
+import React, { useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import uploadImageFiles from "utils/uploadImageFiles";
 import { FileUploader } from "react-drag-drop-files";
+import {
+  ALLOWED_EXPENSE_RECEIPT_TYPES,
+  MAX_FILE_SIZE,
+} from "../../../constants";
+import toast from "react-hot-toast";
 
 function UploadAttachment({
   name,
@@ -11,12 +16,27 @@ function UploadAttachment({
   inputRef,
   defaultLink = "",
 }) {
+  const intl = useIntl();
   const [link, setLink] = useState(defaultLink);
   const [uploading, setUploading] = useState(false);
+  const [filename, setFilename] = useState("");
 
   const removeLink = () => setLink(undefined);
 
-  const handleUpload = (file) =>
+  const handleFilename = (file) => {
+    const tokens = file.name.split(".");
+    const format = tokens.slice(-1)[0].toLowerCase();
+    const name = tokens.slice(0, tokens.length - 1).join(".");
+    const nameLength = 12;
+    setFilename(
+      `${name.slice(0, nameLength)}${
+        name.length > nameLength ? "..." : ""
+      }.${format}`
+    );
+  };
+
+  const handleUpload = (file) => {
+    handleFilename(file);
     uploadImageFiles({
       files: [file],
       setUploadingImages: [setUploading],
@@ -26,7 +46,9 @@ function UploadAttachment({
         },
       ],
       cloudinaryPreset,
+      resourceType: "auto",
     });
+  };
 
   if (link) {
     return (
@@ -39,7 +61,7 @@ function UploadAttachment({
           </span>
 
           <span className="flex mt-1.5 ml-1.5">
-            File Selected
+            {filename || "File Selected"}
             <input type="hidden" name={name} value={link} ref={inputRef} />
           </span>
         </div>
@@ -54,6 +76,20 @@ function UploadAttachment({
           disables={uploading}
           handleChange={handleUpload}
           hoverTitle="&nbsp;"
+          maxSize={MAX_FILE_SIZE}
+          onSizeError={() => {
+            toast.error(
+              intl.formatMessage({
+                defaultMessage: "File size should be less than 8mb",
+              })
+            );
+          }}
+          types={ALLOWED_EXPENSE_RECEIPT_TYPES}
+          onTypeError={() => {
+            toast.error(
+              intl.formatMessage({ defaultMessage: "Invalid file format" })
+            );
+          }}
         >
           <div className="font-medium flex px-8 py-3 rounded-md bg-gray-100 w-full border-3 border-transparent">
             <span className="mx-1 my-0.5">
