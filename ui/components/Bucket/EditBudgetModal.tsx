@@ -112,18 +112,26 @@ const EditBudgetModal = ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
+            const budgetTypeCount = {
+              EXPENSE: 0,
+              INCOME: 0,
+            };
             editBucket({
               bucketId: bucket.id,
               budgetItems: [
-                ...(variables.budgetItems?.map((item, i) => ({
-                  ...item,
-                  id: undefined, //remove id
-                  min: Math.round(item.min * 100),
-                  ...(item.max &&
-                    maxAmountOpenInputs[item.id || getPreId(item.type, i)] && {
-                      max: Math.round(item.max * 100),
-                    }),
-                })) ?? []),
+                ...(variables.budgetItems?.map((item, i) => {
+                  const preId = getPreId(item.type, budgetTypeCount[item.type]);
+                  budgetTypeCount[item.type]++;
+                  return {
+                    ...item,
+                    id: undefined, //remove id
+                    min: Math.round(item.min * 100),
+                    ...(item.max &&
+                      maxAmountOpenInputs[item.id || preId] && {
+                        max: Math.round(item.max * 100),
+                      }),
+                  };
+                }) ?? []),
               ],
             })
               .then(() => {
