@@ -297,7 +297,7 @@ const imageUploadHandler = (
   return uploadImageFiles({
     files,
     setUploadingImages: setProgression,
-    cloudinaryPreset: "organization_logos", //TODO: get new preset
+    cloudinaryPreset: "dreams", //TODO: get new preset
   }).map((imgPromise) => () =>
     imgPromise.then(
       (imgUrl: string): ImageAttributes => {
@@ -608,7 +608,7 @@ const Wysiwyg = ({
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
-            initialContent={parseMDSource(defaultValue)}
+            initialContent={defaultValue}
             onChange={debounce((param) => {
               onChange?.({
                 target: {
@@ -620,7 +620,6 @@ const Wysiwyg = ({
             <ImperativeHandle ref={inputRef} />
             {showWysiwygOptions && (
               <div className="overflow-auto">
-                <HardBreak />
                 <Toolbar
                   items={toolbarItems()}
                   refocusEditor
