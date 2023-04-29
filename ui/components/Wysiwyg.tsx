@@ -608,7 +608,7 @@ const Wysiwyg = ({
           <Remirror
             manager={manager}
             autoFocus={autoFocus}
-            initialContent={parseMDSource(defaultValue)}
+            initialContent={defaultValue}
             onChange={debounce((param) => {
               onChange?.({
                 target: {
@@ -620,7 +620,6 @@ const Wysiwyg = ({
             <ImperativeHandle ref={inputRef} />
             {showWysiwygOptions && (
               <div className="overflow-auto">
-                <HardBreak />
                 <Toolbar
                   items={toolbarItems()}
                   refocusEditor

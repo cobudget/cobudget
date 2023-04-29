@@ -117,3 +117,26 @@ h5 {
 .markdown a.mention {
   @apply pointer-events-none cursor-default;
 }
+
+.markdown blockquote {
+  margin: 10px 0px !important;
+  background-color: transparent;
+  color: rgb(80, 80, 80);
+}
+
+.markdown code {
+  margin: 15px 0px !important; /* Override default */
+  padding: 15px 20px !important;
+  border: 1px solid rgb(224, 224, 224);
+  background-color: rgb(250, 250, 250);
+  display: block;
+  border-radius: 3px;
+}
+
+.markdown h1:first-child {
+  margin-top: 20px;
+}
+
+.markdown li {
+  margin-top: 10px;
+}
