@@ -137,7 +137,7 @@ h5 {
   font-size: 14px;
 }
 
-.markdown>*:first-child {
+.markdown > *:first-child {
   margin-top: 35px;
 }
 
@@ -182,7 +182,7 @@ h5 {
   margin: 6px 0px;
 }
 
-.remirror-editor blockquote  p {
+.remirror-editor blockquote p {
   font-style: normal;
 }
 
@@ -196,7 +196,7 @@ h5 {
   font-size: 14px;
 }
 
-.remirror-editor>*:first-child   {
+.remirror-editor > *:first-child {
   margin-top: 0px !important;
 }
 
