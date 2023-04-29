@@ -203,6 +203,7 @@ h5 {
 .remirror-editor p {
   font-size: 16px;
   line-height: 24px;
+  margin-top: 10px !important;
 }
 
 .remirror-editor h1 {
@@ -228,5 +229,11 @@ h5 {
 
 .remirror-editor li {
   margin-top: 10px;
+}
+
+.remirror-editor pre {
+  background-color: transparent !important;
+  color: black !important;
+  padding: 0 !important;
 }
 /* Remirror Editor */
