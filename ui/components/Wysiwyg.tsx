@@ -297,7 +297,7 @@ const imageUploadHandler = (
   return uploadImageFiles({
     files,
     setUploadingImages: setProgression,
-    cloudinaryPreset: "organization_logos", //TODO: get new preset
+    cloudinaryPreset: "dreams", //TODO: get new preset
   }).map((imgPromise) => () =>
     imgPromise.then(
       (imgUrl: string): ImageAttributes => {
