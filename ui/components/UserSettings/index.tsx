@@ -2,6 +2,7 @@ import { useQuery, gql, useMutation } from "urql";
 import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
 import { FormattedMessage, useIntl } from "react-intl";
+import Link from "next/link";
 
 const USER_SETTINGS_QUERY = gql`
   query UserSettings {
@@ -128,6 +129,26 @@ const SettingsIndex = () => {
   ];
 
   if (fetching) return <HappySpinner />;
+
+  if (!fetching && data.currentUser === null) {
+    return (
+      <div className="page">
+        <FormattedMessage
+          defaultMessage="<login>Login</login> here to change your settings"
+          values={{
+            login: (t) => {
+              return (
+                <Link href="/login">
+                  <span className="underline cursor-pointer">{t[0]}</span>
+                </Link>
+              );
+            },
+          }}
+        />
+      </div>
+    );
+  }
+
   if (error) {
     return <div className="text-center">{error.message}</div>;
   }
@@ -142,7 +163,7 @@ const SettingsIndex = () => {
           <EmailSettingItem
             key={key}
             settingKey={key}
-            value={data.currentUser.emailSettings[key]}
+            value={data.currentUser?.emailSettings[key]}
             settingsMeta={settingsMeta}
           />
         ))}
@@ -153,7 +174,7 @@ const SettingsIndex = () => {
           <EmailSettingItem
             key={key}
             settingKey={key}
-            value={data.currentUser.emailSettings[key]}
+            value={data.currentUser?.emailSettings[key]}
             settingsMeta={adminSettingsMeta}
           />
         ))}
