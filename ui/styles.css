@@ -127,6 +127,10 @@ h5 {
   margin: 6px 0px;
 }
 
+.markdown blockquote p {
+  color: #888 !important;
+}
+
 .markdown code {
   margin: 15px 0px !important; /* Override default */
   padding: 15px 20px !important;
@@ -150,16 +154,19 @@ h5 {
   margin-top: 40px !important;
   font-size: 28px;
   line-height: 34px;
+  font-weight: 700 !important;
 }
 
 .markdown h2 {
   margin-top: 30px !important;
   font-size: 22px;
+  font-weight: 700 !important;
 }
 
 .markdown h3 {
   margin-top: 30px !important;
   font-size: 18px;
+  font-weight: 700 !important;
 }
 
 .markdown h4,
@@ -177,13 +184,12 @@ h5 {
 .remirror-editor blockquote {
   margin: 10px 0px !important;
   background-color: transparent;
-  color: rgb(80, 80, 80);
-  padding: 0px 22px;
-  margin: 6px 0px;
+  padding: 0px 22px !important;
 }
 
 .remirror-editor blockquote p {
   font-style: normal;
+  margin: 0 !important;
 }
 
 .remirror-editor code {
@@ -208,18 +214,18 @@ h5 {
 
 .remirror-editor h1 {
   margin-top: 40px !important;
-  font-size: 28px;
+  font-size: 28px !important;
   line-height: 34px;
 }
 
 .remirror-editor h2 {
   margin-top: 30px !important;
-  font-size: 22px;
+  font-size: 22px !important;
 }
 
 .remirror-editor h3 {
   margin-top: 30px !important;
-  font-size: 18px;
+  font-size: 18px !important;
 }
 
 .remirror-editor h4,
@@ -235,5 +241,7 @@ h5 {
   background-color: transparent !important;
   color: black !important;
   padding: 0 !important;
+  margin: 0 !important;
+  margin-bottom: -10px !important;
 }
 /* Remirror Editor */
