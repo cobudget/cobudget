@@ -8,16 +8,7 @@ import {
   ComponentItem,
 } from "@remirror/react";
 
-import {
-  ChangeEvent,
-  HTMLProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { createMarkPositioner } from "remirror/extensions";
+import { HTMLProps, useEffect, useRef, useState } from "react";
 
 const DelayAutoFocusInput = ({
   autoFocus,
@@ -47,6 +38,8 @@ export const AddEditLink = () => {
   const activeLink = active.link();
   const [isEditing, setIsEditing] = useState(false);
   const { empty } = useCurrentSelection();
+  const { focus, updateLink, removeLink } = useCommands();
+  const currentUrl = (useAttrs().link()?.href as string) ?? "";
 
   return (
     <>
@@ -82,18 +75,22 @@ export const AddEditLink = () => {
       >
         <button
           type="button"
-          className="ml-2"
+          className="ml-2 bg-gray-100 p-2 rounded"
           onClick={() => setIsEditing(true)}
         >
           Add Link
         </button>
-        <button
-          type="button"
-          className="ml-2"
-          onClick={() => setIsEditing(true)}
-        >
-          Remove Link
-        </button>
+        {activeLink && (
+          <button
+            type="button"
+            className="ml-2 bg-gray-100 p-2 rounded"
+            onClick={() => {
+              removeLink();
+            }}
+          >
+            Remove Link
+          </button>
+        )}
       </FloatingWrapper>
 
       <FloatingWrapper
@@ -106,21 +103,20 @@ export const AddEditLink = () => {
           style={{ zIndex: 20 }}
           autoFocus
           placeholder="Enter link..."
-          onChange={(event: ChangeEvent<HTMLInputElement>) =>
-            console.log(event.target.value)
-          }
-          value={"http://google.com"}
+          onBlur={() => {
+            setIsEditing(false);
+          }}
+          defaultValue={currentUrl}
           onKeyPress={(event) => {
-            event.preventDefault();
             const { code } = event;
-
             if (code === "Enter") {
+              updateLink({ href: event.currentTarget.value });
               setIsEditing(false);
-              alert("Update");
+              focus();
             }
-
             if (code === "Escape") {
-              alert("remove");
+              setIsEditing(false);
+              focus();
             }
           }}
         />
