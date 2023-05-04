@@ -125,36 +125,4 @@ export const AddEditLink = () => {
   );
 };
 
-function LinkButton() {
-  const active = useActive();
-  const { focus, updateLink, removeLink } = useCommands();
-  const url = (useAttrs().link()?.href as string) ?? "";
-
-  return active ? (
-    <>
-      <button
-        onClick={() => {
-          const href = window.prompt("Enter url", url);
-          updateLink({ href });
-          focus();
-        }}
-        type="button"
-      >
-        Add
-      </button>
-      <button
-        onClick={() => {
-          removeLink();
-          focus();
-        }}
-        type="button"
-      >
-        Remove
-      </button>
-    </>
-  ) : (
-    <p>ABC</p>
-  );
-}
-
 export default AddEditLink;
