@@ -7,7 +7,7 @@ import {
   FloatingWrapper,
   ComponentItem,
 } from "@remirror/react";
-import { DeleteIcon, EditIcon } from "components/Icons";
+import { DeleteIcon, ChainIcon } from "components/Icons";
 
 import { HTMLProps, useEffect, useRef, useState } from "react";
 
@@ -80,7 +80,7 @@ export const AddEditLink = () => {
           className="bg-gray-100 p-2"
           onClick={() => setIsEditing(true)}
         >
-          <EditIcon className="h-4 w-4" />
+          <ChainIcon className="h-4 w-4" />
         </button>
         {activeLink && (
           <button
