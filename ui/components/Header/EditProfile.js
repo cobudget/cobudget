@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useMutation, gql } from "urql";
 import TextField from "../TextField";
 import Button from "../Button";
@@ -18,10 +18,16 @@ const EDIT_PROFILE_MUTATION = gql`
 `;
 
 export default function EditProfile({ currentUser, isOpen, handleClose }) {
-  const [, updateProfile] = useMutation(EDIT_PROFILE_MUTATION);
+  const [{ error }, updateProfile] = useMutation(EDIT_PROFILE_MUTATION);
   const [username, setUsername] = useState(currentUser.username ?? "");
   const [name, setName] = useState(currentUser.name ?? "");
   const intl = useIntl();
+
+  const errorMessage = useMemo(() => {
+    const errorTokens = error?.message?.split(" ");
+    errorTokens?.shift();
+    return errorTokens ? errorTokens.join(" ") : undefined;
+  }, [error]);
 
   return (
     <Transition
@@ -86,6 +92,11 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
                     }}
                   />
                 </div>
+                {errorMessage && (
+                  <div className="mt-4 text-red text-s font-medium">
+                    {errorMessage}
+                  </div>
+                )}
                 <div className="mt-4 space-x-2 flex justify-end">
                   <Button variant="secondary" onClick={handleClose}>
                     <FormattedMessage defaultMessage="Cancel" />
@@ -96,17 +107,7 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
                     onClick={() =>
                       updateProfile({ username, name }).then(
                         ({ data, error }) => {
-                          if (error) {
-                            if (error.message.includes("Unique")) {
-                              toast.error(
-                                intl.formatMessage({
-                                  defaultMessage: "Username already taken",
-                                })
-                              );
-                            } else {
-                              toast.error(error.message);
-                            }
-                          } else {
+                          if (!error) {
                             toast.success(
                               intl.formatMessage({
                                 defaultMessage: `Profile updated`,
