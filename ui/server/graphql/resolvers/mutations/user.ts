@@ -10,13 +10,15 @@ export const updateProfile = async (
   if (!user) throw new Error("You need to be logged in..");
 
   if (!validateUsername(username)) throw new Error("Username is not valid");
+  if (username !== user?.username) {
+    // check case insensitive uniquness of username
+    // if the user is trying to change the username
+    const existingUser = await prisma.user.findFirst({
+      where: { username: { mode: "insensitive", equals: username } },
+    });
 
-  // check case insensitive uniquness of username
-  const existingUser = await prisma.user.findFirst({
-    where: { username: { mode: "insensitive", equals: username } },
-  });
-
-  if (existingUser) throw new Error("Username is already taken");
+    if (existingUser) throw new Error("Username is already taken");
+  }
 
   return prisma.user.update({
     where: { id: user.id },

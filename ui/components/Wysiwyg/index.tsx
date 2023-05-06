@@ -67,9 +67,9 @@ import { useQuery, gql } from "urql";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
-import HappySpinner from "./HappySpinner";
+import HappySpinner from "../HappySpinner";
 import { FormattedMessage, useIntl } from "react-intl";
-import parseMDSource from "utils/parseMDSource";
+import AddEditLink from "./AddEditLink";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -375,8 +375,8 @@ const Wysiwyg = ({
           ]
         : []),
       enableMentions
-        ? new MyLinkExtension({ autoLink: true })
-        : new LinkExtension({ autoLink: true }),
+        ? new MyLinkExtension({ selectTextOnClick: true })
+        : new LinkExtension({ selectTextOnClick: true }),
       new ImageExtension({
         enableResizing: false,
         uploadHandler: imageUploadHandler,
@@ -628,6 +628,7 @@ const Wysiwyg = ({
               </div>
             )}
             <EditorComponent />
+            <AddEditLink />
             {enableMentions && (
               <MentionComponent
                 roundId={mentionsCollId}
