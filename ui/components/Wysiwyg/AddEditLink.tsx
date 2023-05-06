@@ -7,6 +7,7 @@ import {
   FloatingWrapper,
   ComponentItem,
 } from "@remirror/react";
+import { DeleteIcon, EditIcon } from "components/Icons";
 
 import { HTMLProps, useEffect, useRef, useState } from "react";
 
@@ -72,23 +73,24 @@ export const AddEditLink = () => {
         placement="top-end"
         enabled={!isEditing && !empty}
         renderOutsideEditor
+        containerClass="shadow rounded overflow-hidden"
       >
         <button
           type="button"
-          className="ml-2 bg-gray-100 p-2 rounded"
+          className="bg-gray-100 p-2"
           onClick={() => setIsEditing(true)}
         >
-          Add Link
+          <EditIcon className="h-4 w-4" />
         </button>
         {activeLink && (
           <button
             type="button"
-            className="ml-2 bg-gray-100 p-2 rounded"
+            className="bg-gray-100 p-2 border-l-2"
             onClick={() => {
               removeLink();
             }}
           >
-            Remove Link
+            <DeleteIcon className="h-4 w-4" />
           </button>
         )}
       </FloatingWrapper>
@@ -102,6 +104,7 @@ export const AddEditLink = () => {
         <DelayAutoFocusInput
           style={{ zIndex: 20 }}
           autoFocus
+          className="block w-full px-2 py-2 text-xs focus:outline-none transition-colors ease-in-out duration-200 bg-gray-100 border-2 rounded"
           placeholder="Enter link..."
           onBlur={() => {
             setIsEditing(false);
