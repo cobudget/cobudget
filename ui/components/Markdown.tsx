@@ -7,7 +7,7 @@ import parseMDSource from "utils/parseMDSource";
 const Markdown = ({ source, enableMentions = false, className = "" }) => {
   return (
     <ReactMarkdown
-      source={parseMDSource(source)}
+      source={source}
       className={"markdown " + className}
       plugins={[remarkGfm as any]}
       renderers={{
