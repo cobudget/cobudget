@@ -60,7 +60,7 @@ function AddComment() {
         <div className="mr-4">
           <Avatar user={currentUser} />
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 w-full">
           <div className="mb-2">
             <TextField
               placeholder={intl.formatMessage({
