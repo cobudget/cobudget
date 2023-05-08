@@ -25,6 +25,7 @@ import {
   GRAPHQL_NOT_LOGGED_IN,
   GRAPHQL_ROUND_NOT_FOUND,
 } from "../../../../constants";
+import EventHub from "server/services/eventHub.service";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -628,6 +629,11 @@ export const raiseFlag = async (
 
   const logContent = `Someone flagged this bucket for the **${updated.round.guidelines[0].title}** guideline: \n> ${comment}`;
   const currentGroup = updated.round.group;
+  const currentGroupMember = prisma.groupMember.findUnique({
+    where: {
+      groupId_userId: { groupId: currentGroup.id, userId: user.id },
+    },
+  });
   if (groupHasDiscourse(currentGroup)) {
     if (!updated.discourseTopicId) {
       // TODO: break out create thread into separate function
@@ -676,6 +682,16 @@ export const raiseFlag = async (
       },
     });
   }
+
+  await EventHub.publish("email-comment", {
+    currentGroup,
+    currentGroupMember,
+    currentCollMember,
+    currentUser: user,
+    bucket: bucket,
+    round: bucket.round,
+    comment: { content: comment },
+  });
 
   return updated;
 };
