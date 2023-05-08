@@ -746,6 +746,11 @@ export const resolveFlag = async (
   });
   const currentGroup = updated.round.group;
   const resolvedFlagGuideline = bucket.flags[0].guideline;
+  const currentGroupMember = prisma.groupMember.findUnique({
+    where: {
+      groupId_userId: { groupId: currentGroup.id, userId: user.id },
+    },
+  });
 
   const logContent = `Someone resolved a flag for the **${resolvedFlagGuideline.title}** guideline: \n> ${comment}`;
 
@@ -793,6 +798,16 @@ export const resolveFlag = async (
       },
     });
   }
+
+  await EventHub.publish("email-comment", {
+    currentGroup,
+    currentGroupMember,
+    currentCollMember,
+    currentUser: user,
+    bucket: bucket,
+    round: bucket.round,
+    comment: { content: comment },
+  });
 
   return updated;
 };
