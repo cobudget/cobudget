@@ -4,6 +4,9 @@ export default {
     eventHub.subscribe("create-comment", "email", async (args) => {
       await emailService.sendCommentNotification(args);
     });
+    eventHub.subscribe("email-comment", "email", async (args) => {
+      await emailService.sendCommentNotification(args);
+    });
     eventHub.subscribe("allocate-to-member", "email", async (args) => {
       await emailService.allocateToMemberNotification(args);
     });
