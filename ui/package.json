@@ -46,6 +46,7 @@
     "@tippyjs/react": "^4.2.6",
     "@urql/devtools": "2.0.3",
     "@urql/exchange-graphcache": "4.3.6",
+    "@vercel/analytics": "^1.0.1",
     "apollo-server-micro": "^2.21.2",
     "autoprefixer": "^10.2.5",
     "bootstrap": "4.6.0",

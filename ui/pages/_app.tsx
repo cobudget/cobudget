@@ -15,6 +15,8 @@ import Cookies from "js-cookie";
 import { ErrorBoundary } from "react-error-boundary";
 import reportError from "utils/reportError";
 import Fallback from "components/Fallback";
+import type { AppProps } from 'next/app';
+import { Analytics } from '@vercel/analytics/react';
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -254,6 +256,7 @@ const MyApp = ({ Component, pageProps, router }) => {
             round={round}
             currentGroup={group}
           />
+          <Analytics />
           <Toaster />
         </Layout>
       </ErrorBoundary>
