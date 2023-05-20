@@ -47,11 +47,7 @@ function Expenses({ bucket, round, currentUser }) {
         </div>
       </div>
 
-      <Modal
-        open={openAdd}
-        className="flex items-center justify-center p-4"
-        onClose={() => setOpenAdd(false)}
-      >
+      <Modal open={openAdd} className="flex items-center justify-center p-4">
         <AddExpense
           bucketId={bucket.id}
           round={round}
