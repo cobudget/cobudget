@@ -1,5 +1,6 @@
-import { Divider, List, Modal } from "@material-ui/core";
+import { Divider, IconButton, List, ListItem, ListItemSecondaryAction, ListItemText, Modal } from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
+import { CopyIcon } from "components/Icons";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -108,6 +109,19 @@ function Integrations() {
             />
           </List>
           <Divider />
+          <List>
+            <ListItem>
+              <ListItemText 
+                primary="Open Collective Webhook"
+                secondary="https://cobudget.com/api/abc"
+              />
+              <ListItemSecondaryAction>
+                <IconButton>
+                  <CopyIcon className="h-5 w-5" />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          </List>
         </div>
       </div>
     );
