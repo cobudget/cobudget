@@ -1,8 +1,17 @@
-import { Divider, IconButton, List, ListItem, ListItemSecondaryAction, ListItemText, Modal } from "@material-ui/core";
+import {
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Modal,
+} from "@material-ui/core";
 import HappySpinner from "components/HappySpinner";
 import { CopyIcon } from "components/Icons";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useQuery } from "urql";
 import { useStyles } from "../Granting";
@@ -14,6 +23,7 @@ const GET_ROUND_INTEGRATIONS = gql`
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       color
+      ocWebhookUrl
       ocCollective {
         id
         name
@@ -111,12 +121,39 @@ function Integrations() {
           <Divider />
           <List>
             <ListItem>
-              <ListItemText 
+              <ListItemText
                 primary="Open Collective Webhook"
-                secondary="https://cobudget.com/api/abc"
+                secondary={
+                  round.ocCollective ? (
+                    <p className="w-4/5 overflow-hidden truncate whitespace-nowrap">
+                      {round.ocWebhookUrl}
+                    </p>
+                  ) : (
+                    <p className="italic">Connect to Open Collective</p>
+                  )
+                }
               />
               <ListItemSecondaryAction>
-                <IconButton>
+                <IconButton
+                  disabled={!round?.ocCollective}
+                  onClick={async () => {
+                    try {
+                      await window.navigator.clipboard.writeText(
+                        round?.ocWebhookUrl
+                      );
+                      toast.success(
+                        intl.formatMessage({
+                          defaultMessage: "Copied to clipboard",
+                        })
+                      );
+                    } catch (err) {
+                      console.log("ERR", err);
+                      toast.error(
+                        intl.formatMessage({ defaultMessage: "Unknown error" })
+                      );
+                    }
+                  }}
+                >
                   <CopyIcon className="h-5 w-5" />
                 </IconButton>
               </ListItemSecondaryAction>

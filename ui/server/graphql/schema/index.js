@@ -360,6 +360,7 @@ const schema = gql`
     distributedAmount: Int
     publishedBucketCount: Int
     ocCollective: OC_Collective
+    ocWebhookUrl: String
   }
 
   type InvitationLink {

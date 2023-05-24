@@ -5,12 +5,15 @@ import {
   bucketTotalContributions,
   getCollective,
   getProject,
+  isCollAdmin,
   isCollOrGroupAdmin,
   isGrantingOpen,
   statusTypeToQuery,
   stripeIsConnected as stripeIsConnectedHelper,
 } from "../helpers";
 import { combineResolvers } from "graphql-resolvers";
+import { sign } from "../../../utils/jwt";
+import { appLink } from "utils/internalLinks";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -329,4 +332,17 @@ export const ocCollective = async (parent) => {
   } else {
     return getCollective({ id: parent.openCollectiveId });
   }
+};
+
+export const ocWebhookUrl = async (parent, _, { ss, user }) => {
+  const isAdmin = await isCollAdmin({
+    roundId: parent.id,
+    ss,
+    userId: user?.id,
+  });
+  if (parent.openCollectiveId && isAdmin) {
+    const token = sign({ rid: parent.id });
+    return appLink(`/api/oc-hooks/${token}`);
+  }
+  return null;
 };
