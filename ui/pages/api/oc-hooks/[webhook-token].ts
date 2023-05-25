@@ -1,10 +1,15 @@
+import { verify } from "server/utils/jwt";
+
 function handleOCExpense(req, res) {
-  console.log(req.query["webhook-token"]);
+  const payload = verify(req.query["webhook-token"]);
 
-  console.log("Body");
-  console.log(req.body);
+  if (payload.rid) {
+    res.send({ status: "success" });
+  }
+  else {
+    res.send({ status: "error" });
+  }
 
-  res.send({ status: "success" });
 }
 
 export default handleOCExpense;
