@@ -691,6 +691,7 @@ export const raiseFlag = async (
     bucket: bucket,
     round: bucket.round,
     comment: { content: comment },
+    isFlag: true,
   });
 
   return updated;
@@ -807,6 +808,7 @@ export const resolveFlag = async (
     bucket: bucket,
     round: bucket.round,
     comment: { content: comment },
+    isFlag: true,
   });
 
   return updated;
