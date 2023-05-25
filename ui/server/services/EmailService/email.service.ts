@@ -234,6 +234,7 @@ export default {
     currentCollMember,
     currentUser,
     comment,
+    isFlag,
   }) => {
     const linkNodes = [];
 
@@ -323,7 +324,9 @@ export default {
       .map(
         (roundMember): SendEmailInput => ({
           to: roundMember.user.email,
-          subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
+          subject: isFlag
+            ? `New comment in your bucket ${bucket.title}`
+            : `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
           html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
           Your bucket “${escape(bucket.title)}” received a new comment.
@@ -378,7 +381,9 @@ export default {
 
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
-        subject: `New comment by ${currentUser.name} in bucket ${bucket.title}`,
+        subject: isFlag
+          ? `New comment in bucket ${bucket.title}`
+          : `New comment by ${currentUser.name} in bucket ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
