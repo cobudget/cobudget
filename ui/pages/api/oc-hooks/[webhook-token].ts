@@ -5,11 +5,9 @@ function handleOCExpense(req, res) {
 
   if (payload.rid) {
     res.send({ status: "success" });
-  }
-  else {
+  } else {
     res.send({ status: "error" });
   }
-
 }
 
 export default handleOCExpense;
