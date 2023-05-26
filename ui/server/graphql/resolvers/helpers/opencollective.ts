@@ -39,6 +39,36 @@ export const GET_PROJECT = `
     }
 `;
 
+export const GET_EXPENSES = `
+  query Expenses($account: AccountReferenceInput, $limit: Int!) {
+    expenses(account: $account, limit: $limit) {
+      nodes {
+        description
+        customData
+        id
+        createdByAccount {
+          id
+          name
+        }
+        invoiceInfo
+        payoutMethod {
+          data
+          type
+          name
+        }
+        items {
+          amount
+          url
+          description
+          createdAt
+        }
+        status
+      }
+      totalCount
+    }
+  }
+`;
+
 export const getCollective = async (filter: { slug?: string; id?: string }) => {
   try {
     const response = await graphqlClient.request(GET_COLLECTIVE, filter);
