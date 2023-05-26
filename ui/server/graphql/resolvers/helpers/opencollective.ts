@@ -69,6 +69,33 @@ export const GET_EXPENSES = `
   }
 `;
 
+export const GET_EXPENSE = `
+  query Expense($expense: ExpenseReferenceInput) {
+    expense(expense: $expense) {
+      description
+      createdAt
+      items {
+        amount
+        createdAt
+        file {
+          id
+          name
+          url
+        }
+      }
+      currency
+      customData
+      status
+      payoutMethod {
+        data
+        id
+        name
+        type
+      }
+    }
+  }
+`;
+
 export const getCollective = async (filter: { slug?: string; id?: string }) => {
   try {
     const response = await graphqlClient.request(GET_COLLECTIVE, filter);
