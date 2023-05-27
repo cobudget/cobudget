@@ -111,7 +111,7 @@ export const getCollective = async (filter: { slug?: string; id?: string }) => {
       account: {
         slug: filter.slug,
         id: filter.id,
-      }
+      },
     });
     return response.collective;
   } catch (err) {

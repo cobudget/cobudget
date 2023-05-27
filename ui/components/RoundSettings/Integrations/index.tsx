@@ -56,7 +56,9 @@ function Integrations() {
     query: GET_ROUND_INTEGRATIONS,
     variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
-  const [{ fetching:verifying }, verifyOpencollective] = useMutation(VERIFY_OPENCOLLECTIVE);
+  const [{ fetching: verifying }, verifyOpencollective] = useMutation(
+    VERIFY_OPENCOLLECTIVE
+  );
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -108,27 +110,29 @@ function Integrations() {
           <List>
             <SettingsListItem
               primary={
-              <div className="flex gap-3">
-                <FormattedMessage defaultMessage="Connect round to Open Collective" />
-                {
-                  round.ocVerified ?
-                  <span>
-                    <VerifiedIcon className="h-6 w-6" />
-                  </span> :
-                  <span>
-                    <Button 
-                      className="m-0 -mt-1" 
-                      size="small"
-                      onClick={() => {
-                        verifyOpencollective({ roundId: round.id })
-                        .then(d => console.log(d));
-                      }}
-                    >
-                      Verify
-                    </Button>
-                  </span>
-                }
-              </div>}
+                <div className="flex gap-3">
+                  <FormattedMessage defaultMessage="Connect round to Open Collective" />
+                  {round.ocVerified ? (
+                    <span>
+                      <VerifiedIcon className="h-6 w-6" />
+                    </span>
+                  ) : (
+                    <span>
+                      <Button
+                        className="m-0 -mt-1"
+                        size="small"
+                        onClick={() => {
+                          verifyOpencollective({
+                            roundId: round.id,
+                          }).then((d) => console.log(d));
+                        }}
+                      >
+                        Verify
+                      </Button>
+                    </span>
+                  )}
+                </div>
+              }
               secondary={
                 round?.ocCollective ? (
                   <a

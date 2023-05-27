@@ -86,9 +86,7 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy!
       visibility: Visibility
     ): Round!
-    verifyOpencollective(
-      roundId: ID!
-    ): Round
+    verifyOpencollective(roundId: ID!): Round
     editRound(
       roundId: ID!
       slug: String

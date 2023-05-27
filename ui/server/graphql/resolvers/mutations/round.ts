@@ -127,10 +127,19 @@ export const editRound = combineResolvers(
       }
     }
 
+    const existingRound = await prisma.round.findFirst({
+      where: { id: roundId },
+    });
+    const ocVerified =
+      ocCollectiveId && ocCollectiveId !== existingRound?.openCollectiveId
+        ? { ocVerified: false }
+        : undefined;
+
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
+        ...ocVerified,
         openCollectiveId: ocCollectiveId,
         openCollectiveProjectId: ocProjectId,
         title,
@@ -776,30 +785,37 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
     const isAdmin = await isCollAdmin({
       roundId,
       userId: user?.id,
-      ss
+      ss,
     });
     if (isAdmin) {
-      const round = await prisma.round.findFirst({ where: { id: roundId }});
+      const round = await prisma.round.findFirst({ where: { id: roundId } });
       const collective = await getCollective({ id: round?.openCollectiveId });
-      const webhooks = collective?.webhooks?.nodes?.map(w => w.webhookUrl) || [];
-      const link = "https://cobudget.com/api/oc-hooks" || appLink("/api/oc-hooks");
-      const ocVerified = webhooks.some(webhook => {
+      const webhooks =
+        collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
+      const link =
+        "https://cobudget.com/api/oc-hooks" || appLink("/api/oc-hooks");
+      const ocVerified = webhooks.some((webhook) => {
         if (webhook.indexOf(link) === 0) {
-          const [token] = webhook.split("/").map(t => t.trim()).filter(t => t.length > 0).slice(-1);
+          const [token] = webhook
+            .split("/")
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0)
+            .slice(-1);
           const payload = verify(token);
           return payload.rid === roundId;
         }
         return false;
       });
       if (ocVerified) {
-        return prisma.round.update({ where: {id: roundId}, data: { ocVerified } });
+        return prisma.round.update({
+          where: { id: roundId },
+          data: { ocVerified },
+        });
       }
-    }
-    else {
+    } else {
       return null;
     }
-  }
-  catch (err) {
+  } catch (err) {
     return null;
   }
-}
+};
