@@ -1,19 +1,26 @@
 import graphqlClient from "utils/graphqlClient";
 
 export const GET_COLLECTIVE = `
-    query ($slug: String, $id: String){
-        collective (slug:$slug, id: $id) {
-          id
-          slug
-          name
-          type
-          stats {
-                balance {
-                    currency
-                    valueInCents
-                }
-            }
+    query ($slug: String, $id: String, $limit: Int, $account: AccountReferenceInput!){
+      collective (slug:$slug, id: $id) {
+        id
+        slug
+        name
+        type
+        stats {
+          balance {
+            currency
+            valueInCents
+          }
         }
+        webhooks(limit: $limit, account: $account) {
+          totalCount
+          limit
+          nodes {
+            webhookUrl
+          }
+        }
+      }
     }
 `;
 
@@ -98,7 +105,14 @@ export const GET_EXPENSE = `
 
 export const getCollective = async (filter: { slug?: string; id?: string }) => {
   try {
-    const response = await graphqlClient.request(GET_COLLECTIVE, filter);
+    const response = await graphqlClient.request(GET_COLLECTIVE, {
+      ...filter,
+      limit: 100,
+      account: {
+        slug: filter.slug,
+        id: filter.id,
+      }
+    });
     return response.collective;
   } catch (err) {
     return null;
