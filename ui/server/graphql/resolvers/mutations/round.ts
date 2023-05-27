@@ -18,6 +18,7 @@ import {
   bulkAllocate as bulkAllocateController,
 } from "server/controller";
 import dayjs from "dayjs";
+import { appLink } from "utils/internalLinks";
 
 export const createRound = async (
   parent,
@@ -769,3 +770,36 @@ export const editBucketCustomField = combineResolvers(
     return updated;
   }
 );
+
+export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
+  try {
+    const isAdmin = await isCollAdmin({
+      roundId,
+      userId: user?.id,
+      ss
+    });
+    if (isAdmin) {
+      const round = await prisma.round.findFirst({ where: { id: roundId }});
+      const collective = await getCollective({ id: round?.openCollectiveId });
+      const webhooks = collective?.webhooks?.nodes?.map(w => w.webhookUrl) || [];
+      const link = "https://cobudget.com/api/oc-hooks" || appLink("/api/oc-hooks");
+      const ocVerified = webhooks.some(webhook => {
+        if (webhook.indexOf(link) === 0) {
+          const [token] = webhook.split("/").map(t => t.trim()).filter(t => t.length > 0).slice(-1);
+          const payload = verify(token);
+          return payload.rid === roundId;
+        }
+        return false;
+      });
+      if (ocVerified) {
+        return prisma.round.update({ where: {id: roundId}, data: { ocVerified } });
+      }
+    }
+    else {
+      return null;
+    }
+  }
+  catch (err) {
+    return null;
+  }
+}

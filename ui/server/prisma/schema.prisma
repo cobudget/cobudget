@@ -200,6 +200,7 @@ model Round {
 
   openCollectiveId          String?
   openCollectiveProjectId   String?
+  ocVerified                Boolean?   @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -209,7 +210,6 @@ model Round {
   allocations   Allocation[]
   contributions Contribution[]
   transactions  Transaction[]
-
 
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique

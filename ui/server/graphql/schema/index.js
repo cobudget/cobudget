@@ -86,6 +86,9 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy!
       visibility: Visibility
     ): Round!
+    verifyOpencollective(
+      roundId: ID!
+    ): Round
     editRound(
       roundId: ID!
       slug: String
@@ -359,8 +362,10 @@ const schema = gql`
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int
+
     ocCollective: OC_Collective
     ocWebhookUrl: String
+    ocVerified: Boolean
   }
 
   type InvitationLink {

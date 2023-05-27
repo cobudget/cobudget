@@ -7,13 +7,14 @@ import {
   ListItemText,
   Modal,
 } from "@material-ui/core";
+import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
-import { CopyIcon } from "components/Icons";
+import { CopyIcon, VerifiedIcon } from "components/Icons";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
-import { gql, useQuery } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 import { useStyles } from "../Granting";
 import SettingsListItem from "../Granting/SettingsListItem";
 import SetOpenCollective from "./SetOpenCollective";
@@ -23,6 +24,7 @@ const GET_ROUND_INTEGRATIONS = gql`
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       color
+      ocVerified
       ocWebhookUrl
       ocCollective {
         id
@@ -39,12 +41,22 @@ const GET_ROUND_INTEGRATIONS = gql`
   }
 `;
 
+const VERIFY_OPENCOLLECTIVE = gql`
+  mutation VerifyOpencollective($roundId: ID!) {
+    verifyOpencollective(roundId: $roundId) {
+      id
+      ocVerified
+    }
+  }
+`;
+
 function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
     query: GET_ROUND_INTEGRATIONS,
     variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
+  const [{ fetching:verifying }, verifyOpencollective] = useMutation(VERIFY_OPENCOLLECTIVE);
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -95,9 +107,28 @@ function Integrations() {
         <div className="border-t">
           <List>
             <SettingsListItem
-              primary={intl.formatMessage({
-                defaultMessage: "Connect round to Open Collective",
-              })}
+              primary={
+              <div className="flex gap-3">
+                <FormattedMessage defaultMessage="Connect round to Open Collective" />
+                {
+                  round.ocVerified ?
+                  <span>
+                    <VerifiedIcon className="h-6 w-6" />
+                  </span> :
+                  <span>
+                    <Button 
+                      className="m-0 -mt-1" 
+                      size="small"
+                      onClick={() => {
+                        verifyOpencollective({ roundId: round.id })
+                        .then(d => console.log(d));
+                      }}
+                    >
+                      Verify
+                    </Button>
+                  </span>
+                }
+              </div>}
               secondary={
                 round?.ocCollective ? (
                   <a
