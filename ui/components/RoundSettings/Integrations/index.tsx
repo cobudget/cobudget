@@ -124,7 +124,21 @@ function Integrations() {
                         onClick={() => {
                           verifyOpencollective({
                             roundId: round.id,
-                          }).then((d) => console.log(d));
+                          }).then((r) => {
+                            if (r?.data?.verifyOpencollective) {
+                              toast.success(
+                                intl.formatMessage({
+                                  defaultMessage: "Verified",
+                                })
+                              );
+                            } else {
+                              toast.error(
+                                intl.formatMessage({
+                                  defaultMessage: "Could not verify",
+                                })
+                              );
+                            }
+                          });
                         }}
                       >
                         Verify
