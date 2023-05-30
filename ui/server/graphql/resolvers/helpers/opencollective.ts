@@ -83,7 +83,9 @@ export const GET_EXPENSE = `
       description
       createdAt
       items {
+        id
         amount
+        description
         createdAt
         file {
           id

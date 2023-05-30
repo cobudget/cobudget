@@ -5,6 +5,7 @@ import prisma from "server/prisma";
 export const handleExpenseChange = async (req, res) => {
   try {
     const expenseId = req.body.data?.expense?.id;
+    let dbExpense; //expense in cobudget database
     if (expenseId) {
       const expense = await getExpense(expenseId);
       console.log("Expense", expense.items);
@@ -32,14 +33,38 @@ export const handleExpenseChange = async (req, res) => {
         where: { ocId: expense.id },
       });
       if (existingExpense) {
-        const updated = await prisma.expense.update({
+        dbExpense = await prisma.expense.update({
           where: { id: existingExpense.id },
           data: expenseData,
         });
       } else {
-        const added = await prisma.expense.create({ data: expenseData });
-        console.log("Added", added);
+        dbExpense = await prisma.expense.create({ data: expenseData });
       }
+
+      const items = expense.items.map(async (item) => {
+        const existing = await prisma.expenseReceipt.findFirst({
+          where: { ocExpenseReceiptId: item.id },
+        });
+        console.log("Item", item);
+        const receiptData = {
+          description: item.description,
+          amount: item.amount,
+          date: item.createdAt,
+          attachment: item.file.url,
+          expenseId: dbExpense.id as string,
+          ocExpenseReceiptId: item.id,
+        };
+        if (existing) {
+          return prisma.expenseReceipt.update({
+            where: { id: existing.id },
+            data: receiptData,
+          });
+        } else {
+          return prisma.expenseReceipt.create({
+            data: receiptData,
+          });
+        }
+      });
     } else {
       throw new Error("Expense id missing");
     }
