@@ -79,6 +79,7 @@ export const GET_EXPENSES = `
 export const GET_EXPENSE = `
   query Expense($expense: ExpenseReferenceInput) {
     expense(expense: $expense) {
+      id
       description
       createdAt
       items {
@@ -123,6 +124,17 @@ export const getProject = async (filter: { slug?: string; id?: string }) => {
   try {
     const response = await graphqlClient.request(GET_PROJECT, filter);
     return response.project;
+  } catch (err) {
+    return null;
+  }
+};
+
+export const getExpense = async (id: number) => {
+  try {
+    const response = await graphqlClient.request(GET_EXPENSE, {
+      expense: { legacyId: id },
+    });
+    return response.expense;
   } catch (err) {
     return null;
   }

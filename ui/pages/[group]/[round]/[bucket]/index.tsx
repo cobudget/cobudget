@@ -72,6 +72,12 @@ export const BUCKET_QUERY = gql`
         maxAmountToBucketPerUser
         canCocreatorStartFunding
         canCocreatorEditOpenBuckets
+        ocCollective {
+          slug
+          parent {
+            slug
+          }
+        }
         guidelines {
           id
           title

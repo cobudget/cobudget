@@ -11,6 +11,23 @@ function Expenses({ bucket, round, currentUser }) {
   const router = useRouter();
   const [openAdd, setOpenAdd] = useState(false);
 
+  const handleSubmitExpense = async () => {
+    console.log(currentUser);
+    if (round.ocCollective) {
+      window.open(
+        `http://opencollective.com/${
+          round.ocCollective.slug
+        }/expenses/new?customData=${JSON.stringify({
+          b: bucket.id,
+          u: currentUser?.currentCollMember?.id,
+        })}`,
+        "_blank"
+      );
+    } else {
+      setOpenAdd(true);
+    }
+  };
+
   return (
     <>
       <div className="bg-white border-b-default">
@@ -20,7 +37,7 @@ function Expenses({ bucket, round, currentUser }) {
               (c) => c.id === currentUser?.currentCollMember?.id
             ) && (
               <div className="flex">
-                <Button onClick={() => setOpenAdd(true)}>
+                <Button onClick={handleSubmitExpense}>
                   <FormattedMessage defaultMessage="Submit Expense" />
                 </Button>
               </div>

@@ -66,16 +66,18 @@ model Expense {
   bucketId            String?
 
   title               String
-  recipientName       String
-  recipientEmail      String
+  recipientName       String?
+  recipientEmail      String?
   swiftCode           String?   @default("")
   iban                String?   @default("")
-  country             String    @default("")
-  city                String    @default("")
-  recipientAddress    String    
-  recipientPostalCode String
-  submittedBy         String
+  country             String?   @default("")
+  city                String?   @default("")
+  recipientAddress    String?    
+  recipientPostalCode String?
+  submittedBy         String?
   status              ExpenseStatus   @default(SUBMITTED)
+
+  ocId                String?
 
   receipts            ExpenseReceipt[]
 }
