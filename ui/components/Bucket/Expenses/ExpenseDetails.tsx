@@ -27,6 +27,7 @@ const GET_EXPENSE = gql`
       recipientPostalCode
       status
       submittedBy
+      ocId
       receipts {
         id
         description

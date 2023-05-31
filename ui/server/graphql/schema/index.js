@@ -555,6 +555,7 @@ const schema = gql`
     receipts: [ExpenseReceipt]
     status: ExpenseStatus
     submittedBy: String!
+    ocId: String
   }
 
   type Bucket {

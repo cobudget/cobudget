@@ -39,8 +39,9 @@ function ExpenseStatus({ expense, currentUser }) {
   }, [expense]);
 
   const editingAllowed =
-    currentUser?.currentCollMember?.isAdmin ||
-    currentUser?.currentCollMember?.isModerator;
+    !expense.ocId &&
+    (currentUser?.currentCollMember?.isAdmin ||
+      currentUser?.currentCollMember?.isModerator);
   const handleClick = (e) => {
     if (editingAllowed || !fetching) {
       setAnchorEl(e.target);
