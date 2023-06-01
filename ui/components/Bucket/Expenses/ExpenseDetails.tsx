@@ -75,6 +75,8 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
     return <>Loading...</>;
   }
 
+  const isOcExpense = !!expense.ocId;
+
   return (
     <>
       <div>
@@ -163,7 +165,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         )}
 
         {/*Recipient Details*/}
-        {isSubmittedByCurrentUser && (
+        {isSubmittedByCurrentUser && !isOcExpense && (
           <div className="mt-4 flex justify-end">
             <span className="mr-4 mt-2 text-gray-600 text-sm">
               Edit expense details
@@ -173,49 +175,10 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
             </IconButton>
           </div>
         )}
-        <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
-          <table className="table-fixed w-full">
-            <tbody>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Name" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientName}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Email" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientEmail}</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="BIC/SWIFT" />
-                </td>
-                <td className="px-4 py-2">{expense?.swiftCode}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="IBAN" />
-                </td>
-                <td className="px-4 py-2">{expense?.iban}</td>
-              </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Country" />
-                </td>
-                <td className="px-4 py-2">{expense?.country}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="City" />
-                </td>
-                <td className="px-4 py-2">{expense?.city}</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Recipient Address" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientAddress}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Postal code" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientPostalCode}</td>
-              </tr>
+
+        {isOcExpense ? (
+          <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
+            <table className="table-fixed w-full">
               <tr className="bg-gray-200">
                 <td className="px-4 py-2" />
                 <td className="px-4 py-2" />
@@ -226,9 +189,69 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                   <FormattedCurrency value={total} currency={round.currency} />
                 </td>
               </tr>
-            </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+        ) : (
+          <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
+            <table className="table-fixed w-full">
+              <tbody>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Name" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientName}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Email" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientEmail}</td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="BIC/SWIFT" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.swiftCode}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="IBAN" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.iban}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Country" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.country}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="City" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.city}</td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Recipient Address" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientAddress}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Postal code" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientPostalCode}</td>
+                </tr>
+                <tr className="bg-gray-200">
+                  <td className="px-4 py-2" />
+                  <td className="px-4 py-2" />
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Total" />
+                  </td>
+                  <td className="px-4 py-2">
+                    <FormattedCurrency
+                      value={total}
+                      currency={round.currency}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
       <Modal
         open={!!expenseToEdit}
