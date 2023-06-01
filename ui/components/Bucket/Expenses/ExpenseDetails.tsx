@@ -252,6 +252,16 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
             </table>
           </div>
         )}
+
+        {
+          isOcExpense &&
+          <p className="text-sm italic text-gray-500">
+            <FormattedMessage 
+              defaultMessage="This expense is submitted through OpenCollective"
+            />
+          </p>
+        }
+
       </div>
       <Modal
         open={!!expenseToEdit}
