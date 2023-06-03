@@ -16,7 +16,6 @@ import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
 import subscibers from "server/subscribers/discourse.subscriber";
 import {
-  bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
@@ -580,11 +579,8 @@ export default {
       .filter((user) => user.emailSettings?.contributionToYourBucket ?? true);
 
     const totalContributions = await bucketTotalContributions(bucket);
-    const income = await bucketIncome(bucket);
     const minGoal = await bucketMinGoal(bucket);
-    const progressPercent = Math.floor(
-      ((totalContributions + income) / minGoal) * 100
-    );
+    const progressPercent = Math.floor((totalContributions / minGoal) * 100);
 
     const { group } = await prisma.round.findUnique({
       where: { id: round.id },
