@@ -79,6 +79,7 @@ model Expense {
   status              ExpenseStatus   @default(SUBMITTED)
 
   ocId                String?
+  roundId             String    @default("")
 
   receipts            ExpenseReceipt[]
 }

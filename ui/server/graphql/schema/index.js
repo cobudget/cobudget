@@ -364,6 +364,8 @@ const schema = gql`
     ocCollective: OC_Collective
     ocWebhookUrl: String
     ocVerified: Boolean
+
+    expenses: [Expense]
   }
 
   type InvitationLink {

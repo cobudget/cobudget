@@ -1,7 +1,22 @@
-import React from "react";
+import RoundExpenses from "components/RoundExpenses";
+import { useRouter } from "next/router";
+import SubMenu from "../../../../components/SubMenu";
 
-function Expenses () {
-    return "All Round Expenses";
-}
+const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
+  const router = useRouter();
 
-export default Expenses;
+  const isAdmin =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentGroupMember?.isAdmin;
+
+  if (!isAdmin || !round) return null;
+
+  return (
+    <div className="flex-1">
+        <SubMenu currentUser={currentUser} round={round} />
+        <RoundExpenses round={round} />
+    </div>
+  );
+};
+
+export default RoundSettingsPage;

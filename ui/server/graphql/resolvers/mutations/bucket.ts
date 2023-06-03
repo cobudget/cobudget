@@ -1115,6 +1115,7 @@ export const createExpense = async (
         recipientAddress,
         recipientPostalCode,
         submittedBy,
+        roundId: bucket.roundId,
       },
     });
   } else {
