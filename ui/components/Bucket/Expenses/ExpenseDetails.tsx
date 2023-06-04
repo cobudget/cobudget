@@ -253,15 +253,11 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
           </div>
         )}
 
-        {
-          isOcExpense &&
+        {isOcExpense && (
           <p className="text-sm italic text-gray-500">
-            <FormattedMessage 
-              defaultMessage="This expense is submitted through OpenCollective"
-            />
+            <FormattedMessage defaultMessage="This expense is submitted through OpenCollective" />
           </p>
-        }
-
+        )}
       </div>
       <Modal
         open={!!expenseToEdit}

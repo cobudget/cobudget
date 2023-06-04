@@ -13,8 +13,8 @@ const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
 
   return (
     <div className="flex-1">
-        <SubMenu currentUser={currentUser} round={round} />
-        <RoundExpenses round={round} />
+      <SubMenu currentUser={currentUser} round={round} />
+      <RoundExpenses round={round} />
     </div>
   );
 };

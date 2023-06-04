@@ -350,8 +350,7 @@ export const ocWebhookUrl = async (parent, _, { ss, user }) => {
 export const expenses = async (parent) => {
   try {
     return prisma.expense.findMany({ where: { roundId: parent.id } });
-  }
-  catch (err) {
+  } catch (err) {
     return [];
   }
-}
+};
