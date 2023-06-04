@@ -127,7 +127,7 @@ export default {
       You have been invited by ${escape(currentUser.name)} to ${escape(
           groupCollName
         )} on ${process.env.PLATFORM_NAME}.
-      Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
         htmlPurpose
           ? `<br/><br/>
