@@ -39,10 +39,14 @@ const BUCKETS_QUERY = gql`
   }
 `;
 
+type ExpenseToEdit = {
+  bucketId: string;
+};
+
 function RoundExpenses({ round }) {
   const intl = useIntl();
   const router = useRouter();
-  const [expenseToEdit, setExpenseToEdit] = useState();
+  const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
   const [{ data, fetching }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
@@ -142,7 +146,7 @@ function RoundExpenses({ round }) {
       </div>
       <Modal
         className="flex items-center justify-center p-4"
-        open={expenseToEdit}
+        open={!!expenseToEdit}
         onClose={() => setExpenseToEdit(undefined)}
       >
         <div className="z-50 inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
@@ -155,7 +159,9 @@ function RoundExpenses({ round }) {
                   label={intl.formatMessage({
                     defaultMessage: "Select Bucket",
                   })}
-                  defaultValue={expenseToEdit?.bucketId}
+                  defaultValue={
+                    expenseToEdit ? expenseToEdit?.bucketId : undefined
+                  }
                 >
                   {buckets?.map((bucket) => (
                     <option key={bucket.id} value={bucket.id}>
