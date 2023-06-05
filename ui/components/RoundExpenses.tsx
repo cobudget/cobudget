@@ -200,6 +200,13 @@ function RoundExpenses({ round }) {
                 <Button className="w-full" type="submit">
                   <FormattedMessage defaultMessage="Save" />
                 </Button>
+                <Button
+                  onClick={() => setExpenseToEdit(undefined)}
+                  variant="secondary"
+                  className="mt-2 w-full"
+                >
+                  <FormattedMessage defaultMessage="Cancel" />
+                </Button>
               </span>
             </form>
           </div>
