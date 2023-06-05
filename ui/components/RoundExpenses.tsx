@@ -10,8 +10,9 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
-import { gql, useQuery } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
 import { SelectField } from "./SelectInput";
@@ -39,14 +40,25 @@ const BUCKETS_QUERY = gql`
   }
 `;
 
+const UPDATE_EXPENSE_BUCKET = gql`
+  mutation UpdateExpense($id: String!, $bucketId: String!) {
+    updateExpense(id: $id, bucketId: $bucketId) {
+      id
+      bucketId
+    }
+  }
+`;
+
 type ExpenseToEdit = {
   bucketId: string;
+  id: string;
 };
 
 function RoundExpenses({ round }) {
   const intl = useIntl();
   const router = useRouter();
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
+  const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
   const [{ data, fetching }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
@@ -79,7 +91,19 @@ function RoundExpenses({ round }) {
 
   const handleBucketChange = async (e) => {
     e.preventDefault();
-    alert(1);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
+    const response = await updateExpenseBucket(data);
+    if (response.error) {
+      toast.error(
+        intl.formatMessage({ defaultMessage: "Failed to update bucket" })
+      );
+    } else {
+      toast.success(
+        intl.formatMessage({ defaultMessage: "Expense bucket updated" })
+      );
+      setExpenseToEdit(undefined);
+    }
   };
 
   return (
@@ -154,8 +178,10 @@ function RoundExpenses({ round }) {
           <p className="text-lg font-medium">Expense</p>
           <div className="mt-4">
             <form onSubmit={handleBucketChange}>
+              <input type="hidden" name="id" value={expenseToEdit?.id} />
               <span>
                 <SelectField
+                  name="bucketId"
                   label={intl.formatMessage({
                     defaultMessage: "Select Bucket",
                   })}

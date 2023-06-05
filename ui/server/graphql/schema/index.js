@@ -185,6 +185,7 @@ const schema = gql`
       city: String
       recipientAddress: String
       recipientPostalCode: String
+      bucketId: String
     ): Expense
 
     createExpenseReceipt(

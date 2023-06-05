@@ -10,6 +10,7 @@ import {
   getBucketStatus,
   getRoundMember,
   isAndGetCollMember,
+  isCollAdmin,
   updateFundedPercentage,
 } from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
@@ -1175,6 +1176,7 @@ export const updateExpense = async (
     city,
     recipientAddress,
     recipientPostalCode,
+    bucketId,
   },
   { user, ss }
 ) => {
@@ -1193,7 +1195,13 @@ export const updateExpense = async (
     bucketId: expense.bucketId,
   });
 
-  if (ss || roundMember?.id === expense.submittedBy) {
+  const allowEdit = await isCollAdmin({
+    ss,
+    roundId: expense.bucket?.roundId,
+    userId: user?.id,
+  });
+
+  if (allowEdit || roundMember?.id === expense.submittedBy) {
     return prisma.expense.update({
       where: { id },
       data: {
@@ -1206,6 +1214,7 @@ export const updateExpense = async (
         city,
         recipientAddress,
         recipientPostalCode,
+        bucketId,
       },
     });
   } else {
