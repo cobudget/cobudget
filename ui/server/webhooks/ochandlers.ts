@@ -33,6 +33,7 @@ export const handleExpenseChange = async (req, res) => {
         where: { ocId: expense.id },
       });
       if (existingExpense) {
+        delete expenseData.bucketId;
         dbExpense = await prisma.expense.update({
           where: { id: existingExpense.id },
           data: expenseData,
