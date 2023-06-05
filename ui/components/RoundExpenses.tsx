@@ -93,6 +93,11 @@ function RoundExpenses({ round }) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    if (typeof data.bucketId === "undefined") {
+      return toast.error(
+        intl.formatMessage({ defaultMessage: "Choose a bucket" })
+      );
+    }
     const response = await updateExpenseBucket(data);
     if (response.error) {
       toast.error(
@@ -158,7 +163,12 @@ function RoundExpenses({ round }) {
                           </span>
                         </>
                       ) : (
-                        <i>Assign Bucket</i>
+                        <i
+                          onClick={() => setExpenseToEdit(expense)}
+                          className="cursor-pointer"
+                        >
+                          Assign Bucket
+                        </i>
                       )}
                     </TableCell>
                   </TableRow>
@@ -189,6 +199,14 @@ function RoundExpenses({ round }) {
                     expenseToEdit ? expenseToEdit?.bucketId : undefined
                   }
                 >
+                  <option
+                    value=""
+                    disabled
+                    hidden
+                    selected={!expenseToEdit?.bucketId}
+                  >
+                    {intl.formatMessage({ defaultMessage: "Choose bucket" })}
+                  </option>
                   {buckets?.map((bucket) => (
                     <option key={bucket.id} value={bucket.id}>
                       {bucket.title}
