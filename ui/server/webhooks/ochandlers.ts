@@ -8,12 +8,11 @@ export const handleExpenseChange = async (req, res) => {
     let dbExpense; //expense in cobudget database
     if (expenseId) {
       const expense = await getExpense(expenseId);
-      console.log("Expense", expense.items);
       const expenseData = {
-        bucketId: expense.customData.b,
+        bucketId: expense.customData?.b,
         title: expense.description,
         status: OC_STATUS_MAP[expense.status],
-        submittedBy: expense.customData.u,
+        submittedBy: expense.customData?.u,
 
         recipientName: expense.payoutMethod?.data?.accountHolderName,
         recipientEmail: expense.payoutMethod?.data?.details?.email,
@@ -27,6 +26,7 @@ export const handleExpenseChange = async (req, res) => {
           expense.payoutMethod?.data?.details?.address?.recipientPostCode,
 
         ocId: expense.id,
+        roundId: req.roundId,
       };
 
       const existingExpense = await prisma.expense.findFirst({
@@ -45,7 +45,7 @@ export const handleExpenseChange = async (req, res) => {
         const existing = await prisma.expenseReceipt.findFirst({
           where: { ocExpenseReceiptId: item.id },
         });
-        console.log("Item", item);
+
         const receiptData = {
           description: item.description,
           amount: item.amount,

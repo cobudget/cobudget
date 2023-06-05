@@ -134,7 +134,7 @@ function RoundExpenses({ round }) {
                     <TableCell>{expense.title}</TableCell>
                     <TableCell>
                       <FormattedCurrency
-                        value={expense.amount / 100}
+                        value={expense.amount}
                         currency={round.currency}
                       />
                     </TableCell>

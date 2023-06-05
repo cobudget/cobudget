@@ -545,7 +545,7 @@ const schema = gql`
   type Expense {
     id: String!
     title: String!
-    bucketId: String!
+    bucketId: String
     recipientName: String
     recipientEmail: String
     swiftCode: String
