@@ -1189,17 +1189,22 @@ export const updateExpense = async (
     throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
   }
 
-  const roundMember = await getRoundMember({
-    userId: user?.id,
-    roundId: expense.bucket?.roundId,
-    bucketId: expense.bucketId,
-  });
+  let roundMember;
 
   const allowEdit = await isCollAdmin({
     ss,
-    roundId: expense.bucket?.roundId,
+    roundId: expense.roundId,
     userId: user?.id,
   });
+
+  // If the user is neither an admin nor a super-admin, retrieve the user to verify the expense creator.
+  if (!allowEdit) {
+    roundMember = await getRoundMember({
+      userId: user?.id,
+      roundId: expense.bucket?.roundId,
+      bucketId: expense.bucketId,
+    });
+  }
 
   if (allowEdit || roundMember?.id === expense.submittedBy) {
     return prisma.expense.update({
@@ -1218,6 +1223,7 @@ export const updateExpense = async (
       },
     });
   } else {
+    console.log("ERROR");
     throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
   }
 };

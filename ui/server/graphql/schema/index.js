@@ -557,7 +557,7 @@ const schema = gql`
     recipientPostalCode: String
     receipts: [ExpenseReceipt]
     status: ExpenseStatus
-    submittedBy: String!
+    submittedBy: String
     ocId: String
   }
 

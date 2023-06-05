@@ -15,6 +15,8 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
+import IconButton from "./IconButton";
+import { EditIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
 
 const BUCKETS_QUERY = gql`
@@ -93,6 +95,7 @@ function RoundExpenses({ round }) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    console.log(">>Data>>", data);
     if (typeof data.bucketId === "undefined") {
       return toast.error(
         intl.formatMessage({ defaultMessage: "Choose a bucket" })
@@ -131,6 +134,7 @@ function RoundExpenses({ round }) {
                   <TableCell>
                     <FormattedMessage defaultMessage="Bucket" />
                   </TableCell>
+                  <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -145,23 +149,15 @@ function RoundExpenses({ round }) {
                     </TableCell>
                     <TableCell>
                       {expense.bucketId ? (
-                        <>
-                          <Link
-                            href={`/${router.query.group}/${
-                              router.query.round
-                            }/${bucketsMap[expense.bucketId]?.id}`}
-                          >
-                            <span className="underline cursor-pointer">
-                              {bucketsMap[expense.bucketId]?.title}
-                            </span>
-                          </Link>
-                          <span
-                            onClick={() => setExpenseToEdit(expense)}
-                            className="ml-2"
-                          >
-                            Edit
+                        <Link
+                          href={`/${router.query.group}/${router.query.round}/${
+                            bucketsMap[expense.bucketId]?.id
+                          }`}
+                        >
+                          <span className="underline cursor-pointer">
+                            {bucketsMap[expense.bucketId]?.title}
                           </span>
-                        </>
+                        </Link>
                       ) : (
                         <i
                           onClick={() => setExpenseToEdit(expense)}
@@ -170,6 +166,18 @@ function RoundExpenses({ round }) {
                           Assign Bucket
                         </i>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-right">
+                        <span
+                          onClick={() => setExpenseToEdit(expense)}
+                          className="ml-2"
+                        >
+                          <IconButton>
+                            <EditIcon className="h-4 w-4" />
+                          </IconButton>
+                        </span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
