@@ -141,3 +141,18 @@ export const getExpense = async (id: number) => {
     return null;
   }
 };
+
+export const getExpenses = async (slug: string) => {
+  try {
+    const response = await graphqlClient.request(GET_EXPENSES, {
+      account: {
+        slug,
+      },
+      limit: 1e3,
+    });
+    return response.expenses.nodes || [];
+  }
+  catch (err) {
+    return [];
+  }
+}
