@@ -4,6 +4,7 @@ import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getCollective,
+  getExpenses,
   getProject,
   getRoundMember,
   isCollAdmin,
@@ -19,6 +20,10 @@ import {
 } from "server/controller";
 import dayjs from "dayjs";
 import { appLink } from "utils/internalLinks";
+import {
+  GRAPHQL_OC_NOT_INTEGRATED,
+  GRAPHQL_COLLECTIVE_NOT_VERIFIED,
+} from "../../../../constants";
 
 export const createRound = async (
   parent,
@@ -817,5 +822,23 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
     }
   } catch (err) {
     return null;
+  }
+};
+
+export const syncOCExpenses = async (_, { id }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id } });
+    if (!round.openCollectiveId) {
+      throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+    }
+    if (!round.ocVerified) {
+      throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+    }
+    const collective = await getCollective({ id: round.openCollectiveId });
+    console.log("Collective", collective);
+    const ocExpenses = await getExpenses(collective.slug);
+    console.log("Expenses", ocExpenses);
+  } catch (err) {
+    console.log("ERROR", err);
   }
 };

@@ -151,8 +151,7 @@ export const getExpenses = async (slug: string) => {
       limit: 1e3,
     });
     return response.expenses.nodes || [];
-  }
-  catch (err) {
+  } catch (err) {
     return [];
   }
-}
+};

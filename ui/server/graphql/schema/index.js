@@ -55,6 +55,10 @@ const schema = gql`
     balances(groupSlug: String!): [RoundBalance]
   }
 
+  type OCSyncResponse {
+    status: String!
+  }
+
   type Mutation {
     startSuperAdminSession(duration: Int!): SuperAdminSession
 
@@ -203,6 +207,8 @@ const schema = gql`
       amount: Int
       attachment: String
     ): ExpenseReceipt
+
+    syncOCExpenses(id: ID!): OCSyncResponse
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket

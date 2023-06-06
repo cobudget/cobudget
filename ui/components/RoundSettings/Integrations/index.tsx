@@ -50,6 +50,14 @@ const VERIFY_OPENCOLLECTIVE = gql`
   }
 `;
 
+const SYNC_OC_EXPENSES = gql`
+  mutation SyncOCExpenses($id: ID!) {
+    syncOCExpenses(id: $id) {
+      status
+    }
+  }
+`;
+
 function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
@@ -59,6 +67,7 @@ function Integrations() {
   const [{ fetching: verifying }, verifyOpencollective] = useMutation(
     VERIFY_OPENCOLLECTIVE
   );
+  const [{ fetching: syncing }, syncOCExpenses] = useMutation(SYNC_OC_EXPENSES);
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -208,6 +217,31 @@ function Integrations() {
               </ListItemSecondaryAction>
             </ListItem>
           </List>
+          {true && (
+            <>
+              <Divider />
+              <List>
+                <ListItem>
+                  <ListItemText
+                    primary={
+                      <FormattedMessage defaultMessage="Sync Open Collective Expenses" />
+                    }
+                    secondary={
+                      <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <Button
+                      onClick={() => syncOCExpenses({ id: round.id })}
+                      loading={syncing}
+                    >
+                      <FormattedMessage defaultMessage="Sync" />
+                    </Button>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              </List>
+            </>
+          )}
         </div>
       </div>
     );
