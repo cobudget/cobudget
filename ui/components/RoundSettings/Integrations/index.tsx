@@ -46,6 +46,7 @@ const VERIFY_OPENCOLLECTIVE = gql`
     verifyOpencollective(roundId: $roundId) {
       id
       ocVerified
+      ocWebhookUrl
     }
   }
 `;
@@ -125,7 +126,7 @@ function Integrations() {
                     <span>
                       <VerifiedIcon className="h-6 w-6" />
                     </span>
-                  ) : (
+                  ) : round?.ocCollective ? (
                     <span>
                       <Button
                         className="m-0 -mt-1"
@@ -153,7 +154,7 @@ function Integrations() {
                         Verify
                       </Button>
                     </span>
-                  )}
+                  ) : null}
                 </div>
               }
               secondary={
@@ -217,7 +218,7 @@ function Integrations() {
               </ListItemSecondaryAction>
             </ListItem>
           </List>
-          {true && (
+          {round.ocVerified && (
             <>
               <Divider />
               <List>
