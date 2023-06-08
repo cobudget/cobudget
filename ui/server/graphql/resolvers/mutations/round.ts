@@ -853,7 +853,9 @@ export const syncOCExpenses = async (_, { id }) => {
       const [data, isEditing, items] = expense;
       if (isEditing) {
         const cobudgetExpense = allExpenses.find((e) => e.ocId === data.ocId);
-        pendingReceipts.push(items);
+        pendingReceipts.push(
+          items.map((i) => ({ ...i, expenseId: cobudgetExpense.id }))
+        );
         return prisma.expense.update({
           where: { id: cobudgetExpense.id },
           data,
@@ -870,7 +872,25 @@ export const syncOCExpenses = async (_, { id }) => {
       }
     });
 
-    await Promise.allSettled(promises);
+    const existingReceipts = await prisma.expenseReceipt.findMany({
+      where: { expenseId: { in: allExpenses.map((e) => e.id) } },
+    });
+    const receiptPromises = pendingReceipts.flat().map((item) => {
+      const existingCobudgetReceipt = existingReceipts.find(
+        (r) => r.ocExpenseReceiptId === item.id
+      );
+      if (existingCobudgetReceipt) {
+        return prisma.expenseReceipt.update({
+          where: { id: existingCobudgetReceipt.id },
+          data: ocItemToCobudgetReceipt(item, { id: item.expenseId }),
+        });
+      } else {
+        return prisma.expenseReceipt.create({
+          data: ocItemToCobudgetReceipt(item, { id: item.expenseId }),
+        });
+      }
+    });
+    await Promise.allSettled([...promises, ...receiptPromises]);
   } catch (err) {
     console.log("ERROR", err);
   }
