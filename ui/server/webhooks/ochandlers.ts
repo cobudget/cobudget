@@ -19,7 +19,20 @@ export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
       roundId,
     },
     isEditing,
+    expense.items,
   ];
+};
+
+// helper
+export const ocItemToCobudgetReceipt = (item, expense) => {
+  return {
+    description: item.description,
+    amount: item.amount,
+    date: item.createdAt,
+    attachment: item.file?.url,
+    expenseId: expense.id,
+    ocExpenseReceiptId: item.id,
+  };
 };
 
 export const handleExpenseChange = async (req, res) => {

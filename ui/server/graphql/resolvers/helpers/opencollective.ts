@@ -64,10 +64,16 @@ export const GET_EXPENSES = `
           name
         }
         items {
+          id
           amount
           url
           description
           createdAt
+          file {
+            id
+            name
+            url
+          }
         }
         status
       }

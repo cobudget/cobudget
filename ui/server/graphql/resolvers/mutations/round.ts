@@ -24,7 +24,10 @@ import {
   GRAPHQL_OC_NOT_INTEGRATED,
   GRAPHQL_COLLECTIVE_NOT_VERIFIED,
 } from "../../../../constants";
-import { ocExpenseToCobudget } from "../../../../server/webhooks/ochandlers";
+import {
+  ocExpenseToCobudget,
+  ocItemToCobudgetReceipt,
+} from "../../../../server/webhooks/ochandlers";
 
 export const createRound = async (
   parent,
@@ -840,21 +843,30 @@ export const syncOCExpenses = async (_, { id }) => {
     const allExpenses = await prisma.expense.findMany({
       where: { roundId: id },
     });
-    const allExpensesIds = allExpenses.map((e) => e.ocId);
+    const allExpensesOCIds = allExpenses.map((e) => e.ocId);
     const expensesData = ocExpenses.map((e) =>
-      ocExpenseToCobudget(e, id, allExpensesIds.indexOf(e.id) > -1)
+      ocExpenseToCobudget(e, id, allExpensesOCIds.indexOf(e.id) > -1)
     );
 
-    const promises = expensesData.map((expense) => {
-      const [data, isEditing] = expense;
+    const pendingReceipts = [];
+    const promises = expensesData.map(async (expense) => {
+      const [data, isEditing, items] = expense;
       if (isEditing) {
         const cobudgetExpense = allExpenses.find((e) => e.ocId === data.ocId);
+        pendingReceipts.push(items);
         return prisma.expense.update({
           where: { id: cobudgetExpense.id },
           data,
         });
       } else {
-        return prisma.expense.create({ data });
+        const expense = await prisma.expense.create({ data });
+        return Promise.allSettled(
+          items.map((item) =>
+            prisma.expenseReceipt.create({
+              data: ocItemToCobudgetReceipt(item, expense),
+            })
+          )
+        );
       }
     });
 
