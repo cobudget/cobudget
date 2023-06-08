@@ -24,6 +24,7 @@ import {
   GRAPHQL_OC_NOT_INTEGRATED,
   GRAPHQL_COLLECTIVE_NOT_VERIFIED,
 } from "../../../../constants";
+import { ocExpenseToCobudget } from "../../../../server/webhooks/ochandlers";
 
 export const createRound = async (
   parent,
@@ -835,9 +836,29 @@ export const syncOCExpenses = async (_, { id }) => {
       throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
     }
     const collective = await getCollective({ id: round.openCollectiveId });
-    console.log("Collective", collective);
     const ocExpenses = await getExpenses(collective.slug);
-    console.log("Expenses", ocExpenses);
+    const allExpenses = await prisma.expense.findMany({
+      where: { roundId: id },
+    });
+    const allExpensesIds = allExpenses.map((e) => e.ocId);
+    const expensesData = ocExpenses.map((e) =>
+      ocExpenseToCobudget(e, id, allExpensesIds.indexOf(e.id) > -1)
+    );
+
+    const promises = expensesData.map((expense) => {
+      const [data, isEditing] = expense;
+      if (isEditing) {
+        const cobudgetExpense = allExpenses.find((e) => e.ocId === data.ocId);
+        return prisma.expense.update({
+          where: { id: cobudgetExpense.id },
+          data,
+        });
+      } else {
+        return prisma.expense.create({ data });
+      }
+    });
+
+    await Promise.allSettled(promises);
   } catch (err) {
     console.log("ERROR", err);
   }

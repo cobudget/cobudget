@@ -2,6 +2,26 @@ import { OC_STATUS_MAP } from "../../constants";
 import { getExpense } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 
+// helper
+export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
+  return [
+    {
+      // If editing expense, then dont include bucketId
+      ...(!isEditing && { bucketId: expense.customData?.b }),
+      title: expense.description,
+      status: OC_STATUS_MAP[expense.status],
+      submittedBy: expense.customData?.u,
+
+      recipientName: expense.payoutMethod?.data?.accountHolderName,
+      recipientEmail: expense.payoutMethod?.data?.details?.email,
+
+      ocId: expense.id,
+      roundId,
+    },
+    isEditing,
+  ];
+};
+
 export const handleExpenseChange = async (req, res) => {
   try {
     const expenseId = req.body.data?.expense?.id;
