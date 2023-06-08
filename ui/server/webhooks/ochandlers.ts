@@ -103,7 +103,6 @@ export const handleExpenseChange = async (req, res) => {
       throw new Error("Expense id missing");
     }
   } catch (err) {
-    console.log("ERROR", err);
     res.send({ status: "fail" });
   }
 };

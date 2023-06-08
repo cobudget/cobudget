@@ -95,7 +95,6 @@ function RoundExpenses({ round }) {
     e.preventDefault();
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
-    console.log(">>Data>>", data);
     if (typeof data.bucketId === "undefined") {
       return toast.error(
         intl.formatMessage({ defaultMessage: "Choose a bucket" })

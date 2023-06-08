@@ -1223,7 +1223,6 @@ export const updateExpense = async (
       },
     });
   } else {
-    console.log("ERROR");
     throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
   }
 };

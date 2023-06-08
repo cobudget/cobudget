@@ -12,7 +12,6 @@ function Expenses({ bucket, round, currentUser }) {
   const [openAdd, setOpenAdd] = useState(false);
 
   const handleSubmitExpense = async () => {
-    console.log(currentUser);
     if (round.ocCollective) {
       window.open(
         `http://opencollective.com/${

@@ -206,7 +206,6 @@ function Integrations() {
                         })
                       );
                     } catch (err) {
-                      console.log("ERR", err);
                       toast.error(
                         intl.formatMessage({ defaultMessage: "Unknown error" })
                       );
