@@ -30,6 +30,14 @@ model User {
   isSuperAdmin     Boolean?       @default(false)
 }
 
+model UserMeta {
+  id                  String         @id @default(cuid())
+  userId              String?         @unique
+  email               String?         @unique
+
+  lastMagicLinkDate   DateTime     
+}
+
 model EmailSettings {
   id                             String  @id @default(cuid())
   commentMentions                Boolean @default(true)
