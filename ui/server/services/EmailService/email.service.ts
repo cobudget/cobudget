@@ -16,7 +16,6 @@ import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
 import subscibers from "server/subscribers/discourse.subscriber";
 import {
-  bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
@@ -128,7 +127,7 @@ export default {
       You have been invited by ${escape(currentUser.name)} to ${escape(
           groupCollName
         )} on ${process.env.PLATFORM_NAME}.
-      Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
         htmlPurpose
           ? `<br/><br/>
@@ -580,11 +579,8 @@ export default {
       .filter((user) => user.emailSettings?.contributionToYourBucket ?? true);
 
     const totalContributions = await bucketTotalContributions(bucket);
-    const income = await bucketIncome(bucket);
     const minGoal = await bucketMinGoal(bucket);
-    const progressPercent = Math.floor(
-      ((totalContributions + income) / minGoal) * 100
-    );
+    const progressPercent = Math.floor((totalContributions / minGoal) * 100);
 
     const { group } = await prisma.round.findUnique({
       where: { id: round.id },
