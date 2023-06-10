@@ -20,6 +20,7 @@ import {
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
 import { tailwindHsl } from "utils/colors";
+import { shouldSendMagicLink } from "server/utils/user.meta";
 
 const { groupHasDiscourse } = subscibers;
 
@@ -143,7 +144,9 @@ export default {
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;
-
+    if (!(await shouldSendMagicLink(destination))) {
+      console.log("Should return");
+    }
     const hasAccountAlready = await prisma.user.findUnique({
       where: { email: destination },
     });
