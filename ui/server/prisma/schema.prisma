@@ -32,8 +32,8 @@ model User {
 
 model UserMeta {
   id                  String         @id @default(cuid())
-  userId              String         @unique
-  email               String         @unique
+  userId              String?         @unique
+  email               String?         @unique
 
   lastMagicLinkDate   DateTime     
 }
