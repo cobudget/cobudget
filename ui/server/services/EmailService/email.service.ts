@@ -162,7 +162,7 @@ export default {
         },
         false
       );
-    } else {
+    } /* else {
       await sendEmail(
         {
           to: destination,
@@ -178,7 +178,7 @@ export default {
         },
         false
       );
-    }
+    } */
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {
     const { collMemberships } = await prisma.user.findUnique({
