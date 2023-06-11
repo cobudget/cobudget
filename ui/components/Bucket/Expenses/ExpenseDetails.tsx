@@ -28,6 +28,7 @@ const GET_EXPENSE = gql`
       status
       submittedBy
       ocId
+      currency
       receipts {
         id
         description
@@ -128,7 +129,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                         <td className="px-4 py-2">
                           <FormattedCurrency
                             value={receipt.amount}
-                            currency={round.currency}
+                            currency={expense.currency || round.currency}
                           />
                           {isSubmittedByCurrentUser && (
                             <span className="float-right opacity-0 group-hover:opacity-100">
@@ -149,7 +150,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                       <td className="px-4 py-2">
                         <FormattedCurrency
                           value={total}
-                          currency={round.currency}
+                          currency={expense.currency || round.currency}
                         />
                       </td>
                     </tr>

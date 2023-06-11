@@ -54,7 +54,7 @@ function ExpenseTable({ expenses, round, currentUser }) {
                 <td className="px-4 py-2 flex gap-2">
                   <FormattedCurrency
                     value={expense.amount}
-                    currency={round.currency}
+                    currency={expense.currency || round.currency}
                   />
                   <ExpenseStatus expense={expense} currentUser={currentUser} />
                 </td>

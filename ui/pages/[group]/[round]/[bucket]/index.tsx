@@ -57,6 +57,7 @@ export const BUCKET_QUERY = gql`
         status
         submittedBy
         ocId
+        currency
       }
 
       round {

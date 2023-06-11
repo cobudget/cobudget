@@ -565,6 +565,7 @@ const schema = gql`
     status: ExpenseStatus
     submittedBy: String
     ocId: String
+    currency: String
   }
 
   type Bucket {
