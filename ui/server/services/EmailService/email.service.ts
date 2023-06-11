@@ -186,6 +186,7 @@ export default {
         false
       );
     }
+    await updateLastMagicLinkTime(destination);
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {
     const { collMemberships } = await prisma.user.findUnique({
