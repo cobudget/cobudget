@@ -63,6 +63,9 @@ export const GET_EXPENSES = `
           type
           name
         }
+        amountV2 {
+          currency
+        }
         items {
           id
           amount
@@ -88,6 +91,9 @@ export const GET_EXPENSE = `
       id
       description
       createdAt
+      amountV2 {
+        currency
+      }
       items {
         id
         amount

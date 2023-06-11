@@ -53,6 +53,8 @@ model ExpenseReceipt {
   expense            Expense? @relation(fields: [expenseId], references: [id])
   expenseId          String? 
   ocExpenseReceiptId String?
+
+  currency           String?
 }
 
 enum ExpenseStatus {
