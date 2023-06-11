@@ -18,7 +18,7 @@ function Login({ fbLoginEnabled, googleLoginEnabled }) {
     <div className="page">
       <Toaster />
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
-        Log in to {process.env.PLATFORM_NAME}
+        Log in to {process.env.PLATFORM_NAME} (limit to one email per {parseInt(process.env.MAGIC_LINK_TIME_LIMIT) / 60} minutes).
       </h1>
 
       <div className="max-w-sm bg-white mx-auto my-6 p-6 shadow rounded">
