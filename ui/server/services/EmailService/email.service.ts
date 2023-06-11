@@ -169,7 +169,7 @@ export default {
         },
         false
       );
-    }  else {
+    } else {
       await sendEmail(
         {
           to: destination,
