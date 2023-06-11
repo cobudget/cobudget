@@ -5,6 +5,7 @@ import TextField from "./TextField";
 import Button from "./Button";
 import Banner from "components/Banner";
 import { FormattedMessage, useIntl } from "react-intl";
+import toast from "react-hot-toast";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -40,11 +41,13 @@ export default function AuthenticationForm({
           })
             .then((res) => res.json())
             .then((json) => {
+              setLoading(false);
               if (json.success) {
                 router.push(
                   `/check-mailbox?e=${encodeURIComponent(email)}&c=${json.code}`
                 );
-                setLoading(false);
+              } else {
+                toast.error(json.error);
               }
             });
         }}
