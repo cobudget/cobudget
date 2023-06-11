@@ -801,7 +801,8 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
       const collective = await getCollective({ id: round?.openCollectiveId });
       const webhooks =
         collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
-      const link = appLink("/api/oc-hooks");
+      const link =
+        "https://cobudget.com/api/oc-hooks" || appLink("/api/oc-hooks");
       const ocVerified = webhooks.some((webhook) => {
         if (webhook.indexOf(link) === 0) {
           const [token] = webhook
