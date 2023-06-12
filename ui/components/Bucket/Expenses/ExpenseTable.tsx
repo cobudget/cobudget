@@ -1,9 +1,20 @@
 import FormattedCurrency from "components/FormattedCurrency";
+import { LoaderIcon } from "components/Icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
+import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
+
+const CONVERT_CURRENCY = gql`
+  query ConvertCurrency(
+    $amounts: [AmountConversionInput]!
+    $toCurrency: String!
+  ) {
+    convertCurrency(amounts: $amounts, toCurrency: $toCurrency)
+  }
+`;
 
 function ExpenseTable({ expenses, round, currentUser }) {
   const { pathname, query } = useRouter();
@@ -18,8 +29,24 @@ function ExpenseTable({ expenses, round, currentUser }) {
         sums[currency] = e.amount;
       }
     });
-    return sums;
+    return Object.keys(sums).map((key) => ({
+      currency: key,
+      amount: sums[key],
+    }));
   }, [expenses, round]);
+  const pauseConversion =
+    partialTotal.length === 0 ||
+    (partialTotal.length === 1 &&
+      partialTotal[0]?.currency === round?.currency);
+
+  const [{ fetching: converting, data: convertedTotal }] = useQuery({
+    query: CONVERT_CURRENCY,
+    pause: pauseConversion,
+    variables: {
+      amounts: partialTotal,
+      toCurrency: round.currency,
+    },
+  });
 
   const total =
     expenses.reduce((acc, expense) => {
@@ -79,8 +106,14 @@ function ExpenseTable({ expenses, round, currentUser }) {
               <FormattedMessage defaultMessage="Total" />
             </td>
             <td className="px-4 py-2">
-              {JSON.stringify(partialTotal)}
-              <FormattedCurrency value={total} currency={round.currency} />
+              {converting ? (
+                <LoaderIcon className="animate-spin" width={20} height={20} />
+              ) : (
+                <FormattedCurrency
+                  value={convertedTotal?.convertCurrency || total}
+                  currency={round.currency}
+                />
+              )}
             </td>
           </tr>
         </tbody>
