@@ -1,12 +1,25 @@
 import FormattedCurrency from "components/FormattedCurrency";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import ExpenseStatus from "./ExpenseStatus";
 
 function ExpenseTable({ expenses, round, currentUser }) {
   const { pathname, query } = useRouter();
+
+  const partialTotal = useMemo(() => {
+    const sums = {};
+    expenses.forEach((e) => {
+      const currency = e.currency || round.currency;
+      if (sums[currency]) {
+        sums[currency] += e.amount;
+      } else {
+        sums[currency] = e.amount;
+      }
+    });
+    return sums;
+  }, [expenses, round]);
 
   const total =
     expenses.reduce((acc, expense) => {
@@ -66,6 +79,7 @@ function ExpenseTable({ expenses, round, currentUser }) {
               <FormattedMessage defaultMessage="Total" />
             </td>
             <td className="px-4 py-2">
+              {JSON.stringify(partialTotal)}
               <FormattedCurrency value={total} currency={round.currency} />
             </td>
           </tr>
