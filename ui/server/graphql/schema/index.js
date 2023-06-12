@@ -4,6 +4,11 @@ const schema = gql`
   scalar JSON
   scalar JSONObject
 
+  input AmountConversionInput {
+    amount: Float!
+    currency: String!
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -29,6 +34,10 @@ const schema = gql`
       orderDir: String
     ): BucketsPage
     languageProgressPage: [LanguageProgress]
+    convertCurrency(
+      amounts: [AmountConversionInput]!
+      toCurrency: String!
+    ): Float!
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!

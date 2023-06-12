@@ -3,6 +3,7 @@ export * from "./errors";
 export * from "./activity";
 export * from "./enums";
 export * from "./oc";
+export * from "./keys";
 
 export const PUBLIC = "PUBLIC";
 export const HIDDEN = "HIDDEN";
