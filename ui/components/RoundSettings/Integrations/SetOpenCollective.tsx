@@ -23,6 +23,7 @@ const EDIT_ROUND = gql`
     ) {
       id
       ocVerified
+      ocWebhookUrl
       ocCollective {
         id
         name
