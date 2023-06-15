@@ -177,22 +177,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
           </div>
         )}
 
-        {isOcExpense ? (
-          <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
-            <table className="table-fixed w-full">
-              <tr className="bg-gray-200">
-                <td className="px-4 py-2" />
-                <td className="px-4 py-2" />
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Total" />
-                </td>
-                <td className="px-4 py-2">
-                  <FormattedCurrency value={total} currency={round.currency} />
-                </td>
-              </tr>
-            </table>
-          </div>
-        ) : (
+        {isOcExpense ? null : (
           <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
             <table className="table-fixed w-full">
               <tbody>
