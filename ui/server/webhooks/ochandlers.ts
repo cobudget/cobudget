@@ -86,7 +86,7 @@ export const handleExpenseChange = async (req, res) => {
           description: item.description,
           amount: item.amount,
           date: item.createdAt,
-          attachment: item.file.url,
+          attachment: item.file?.url,
           expenseId: dbExpense.id as string,
           ocExpenseReceiptId: item.id,
         };
