@@ -56,9 +56,19 @@ model ExpenseReceipt {
 }
 
 enum ExpenseStatus {
+  DRAFT
+  UNVERIFIED
+  PENDING
+  INCOMPLETE
+  APPROVED
   SUBMITTED
   PAID
   REJECTED
+  PROCESSING
+  ERROR
+  SCHEDULED_FOR_PAYMENT
+  SPAM
+  CANCELED
 }
 
 model Expense {

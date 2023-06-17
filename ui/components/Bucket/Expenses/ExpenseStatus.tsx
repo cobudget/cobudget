@@ -3,6 +3,7 @@ import {
   EXPENSE_SUBMITTED,
   EXPENSE_PAID,
   EXPENSE_REJECTED,
+  OC_STATUS_MAP,
 } from "../../../constants";
 import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -28,14 +29,32 @@ function ExpenseStatus({ expense, currentUser }) {
   const [anchorEl, setAnchorEl] = useState();
 
   const status = {
+    DRAFT: intl.formatMessage({ defaultMessage: "Draft" }),
+    UNVERIFIED: intl.formatMessage({ defaultMessage: "Unverified" }),
+    PENDING: intl.formatMessage({ defaultMessage: "Pending" }),
+    INCOMPLETE: intl.formatMessage({ defaultMessage: "Incomplete" }),
+    APPROVED: intl.formatMessage({ defaultMessage: "Approved" }),
+
     SUBMITTED: intl.formatMessage({ defaultMessage: "Submitted" }),
     PAID: intl.formatMessage({ defaultMessage: "Paid" }),
     REJECTED: intl.formatMessage({ defaultMessage: "Rejected" }),
+
+    PROCESSING: intl.formatMessage({ defaultMessage: "Processing" }),
+    ERROR: intl.formatMessage({ defaultMessage: "Error" }),
+    SCHEDULED_FOR_PAYMENT: intl.formatMessage({
+      defaultMessage: "Scheduled for payment",
+    }),
+    SPAM: intl.formatMessage({ defaultMessage: "Span" }),
+    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
   };
 
   const className = useMemo(() => {
     if (expense.status === EXPENSE_SUBMITTED) return "bg-app-gray";
-    else if (expense.status === EXPENSE_PAID) return "bg-app-green";
+    else if (
+      expense.status === EXPENSE_PAID ||
+      expense.status === OC_STATUS_MAP.APPROVED
+    )
+      return "bg-app-green";
   }, [expense]);
 
   const editingAllowed =

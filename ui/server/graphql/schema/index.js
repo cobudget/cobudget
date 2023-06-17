@@ -552,9 +552,19 @@ const schema = gql`
   }
 
   enum ExpenseStatus {
+    DRAFT
+    UNVERIFIED
+    PENDING
+    INCOMPLETE
+    APPROVED
     SUBMITTED
     PAID
     REJECTED
+    PROCESSING
+    ERROR
+    SCHEDULED_FOR_PAYMENT
+    SPAM
+    CANCELED
   }
 
   type Expense {
