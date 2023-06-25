@@ -90,6 +90,17 @@ export const createRound = async (
   return round;
 };
 
+export const editOCToken = combineResolvers(
+  isCollOrGroupAdmin,
+  async (parent, { roundId, ocToken }) => {
+    console.log("REQUEST Recevied");
+    return prisma.round.update({
+      where: { id: roundId },
+      data: { ocToken },
+    });
+  }
+);
+
 export const editRound = combineResolvers(
   isCollOrGroupAdmin,
   async (

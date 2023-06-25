@@ -100,6 +100,7 @@ const schema = gql`
       visibility: Visibility
     ): Round!
     verifyOpencollective(roundId: ID!): Round
+    editOCToken(roundId: ID!, ocToken: String): Round
     editRound(
       roundId: ID!
       slug: String

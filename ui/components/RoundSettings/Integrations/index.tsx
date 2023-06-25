@@ -19,6 +19,7 @@ import { gql, useMutation, useQuery } from "urql";
 import { useStyles } from "../Granting";
 import SettingsListItem from "../Granting/SettingsListItem";
 import SetOpenCollective from "./SetOpenCollective";
+import SetOCToken from "./SetOCToken";
 
 const GET_ROUND_INTEGRATIONS = gql`
   query GetRoundIntegrations($roundSlug: String!, $groupSlug: String) {
@@ -80,6 +81,7 @@ function Integrations() {
   const modals = useMemo(
     () => ({
       SET_OPEN_COLLECTIVE: SetOpenCollective,
+      SET_OC_TOKEN: SetOCToken,
     }),
     []
   );
@@ -189,7 +191,7 @@ function Integrations() {
                 </div>
               }
               secondary={
-                round.ocTokenStatus === TOKEN_STATUS.PROVIDED ? (
+                round.ocTokenStatus !== TOKEN_STATUS.EMPTY ? (
                   HIDDEN_TEXT
                 ) : (
                   <i>
@@ -198,9 +200,9 @@ function Integrations() {
                 )
               }
               canEdit={true}
-              isSet={false}
+              isSet={round.ocTokenStatus !== TOKEN_STATUS.EMPTY}
               roundColor={round.color}
-              openModal={() => ""}
+              openModal={() => setOpenModal("SET_OC_TOKEN")}
             />
           </List>
           <Divider />
