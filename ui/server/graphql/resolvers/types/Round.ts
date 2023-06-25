@@ -15,6 +15,7 @@ import { combineResolvers } from "graphql-resolvers";
 import { sign } from "../../../utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { TOKEN_STATUS } from "../../../../constants";
+import { getOCToken } from "server/utils/roundUtils";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -329,9 +330,12 @@ export const publishedBucketCount = async (round) => {
 
 export const ocCollective = async (parent) => {
   if (parent.openCollectiveProjectId) {
-    return getProject({ id: parent.openCollectiveProjectId });
+    return getProject(
+      { id: parent.openCollectiveProjectId },
+      getOCToken(parent)
+    );
   } else {
-    return getCollective({ id: parent.openCollectiveId });
+    return getCollective({ id: parent.openCollectiveId }, getOCToken(parent));
   }
 };
 

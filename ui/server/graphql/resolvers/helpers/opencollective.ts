@@ -1,4 +1,4 @@
-import graphqlClient from "utils/graphqlClient";
+import { customOCGqlClient } from "utils/graphqlClient";
 
 export const GET_COLLECTIVE = `
     query ($slug: String, $id: String, $limit: Int, $account: AccountReferenceInput!){
@@ -118,7 +118,11 @@ export const GET_EXPENSE = `
   }
 `;
 
-export const getCollective = async (filter: { slug?: string; id?: string }) => {
+export const getCollective = async (
+  filter: { slug?: string; id?: string },
+  token: string
+) => {
+  const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_COLLECTIVE, {
       ...filter,
@@ -134,7 +138,11 @@ export const getCollective = async (filter: { slug?: string; id?: string }) => {
   }
 };
 
-export const getProject = async (filter: { slug?: string; id?: string }) => {
+export const getProject = async (
+  filter: { slug?: string; id?: string },
+  token: string
+) => {
+  const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_PROJECT, filter);
     return response.project;
@@ -143,7 +151,8 @@ export const getProject = async (filter: { slug?: string; id?: string }) => {
   }
 };
 
-export const getExpense = async (id: number) => {
+export const getExpense = async (id: number, token: string) => {
+  const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_EXPENSE, {
       expense: { legacyId: id },
@@ -154,7 +163,8 @@ export const getExpense = async (id: number) => {
   }
 };
 
-export const getExpenses = async (slug: string) => {
+export const getExpenses = async (slug: string, token: string) => {
+  const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_EXPENSES, {
       account: {

@@ -28,6 +28,7 @@ import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
+import { getOCToken } from "server/utils/roundUtils";
 
 export const createRound = async (
   parent,
@@ -93,7 +94,6 @@ export const createRound = async (
 export const editOCToken = combineResolvers(
   isCollOrGroupAdmin,
   async (parent, { roundId, ocToken }) => {
-    console.log("REQUEST Recevied");
     return prisma.round.update({
       where: { id: roundId },
       data: { ocToken },
@@ -121,9 +121,16 @@ export const editRound = combineResolvers(
       ocProjectSlug,
     }
   ) => {
+    const existingRound = await prisma.round.findFirst({
+      where: { id: roundId },
+    });
+
     let ocCollectiveId, ocProjectId;
     if (ocCollectiveSlug) {
-      const collective = await getCollective({ slug: ocCollectiveSlug });
+      const collective = await getCollective(
+        { slug: ocCollectiveSlug },
+        getOCToken(existingRound)
+      );
       if (collective) {
         ocCollectiveId = collective.id;
         ocProjectId = null;
@@ -140,16 +147,16 @@ export const editRound = combineResolvers(
     }
 
     if (ocProjectSlug) {
-      const ocProject = await getProject({ slug: ocProjectSlug });
+      const ocProject = await getProject(
+        { slug: ocProjectSlug },
+        getOCToken(existingRound)
+      );
       ocProjectId = ocProject?.id || null;
       if (ocProjectId === null) {
         throw new Error("Project not found");
       }
     }
 
-    const existingRound = await prisma.round.findFirst({
-      where: { id: roundId },
-    });
     const ocVerified =
       ocCollectiveId && ocCollectiveId !== existingRound?.openCollectiveId
         ? { ocVerified: false }
@@ -809,7 +816,10 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
     });
     if (isAdmin) {
       const round = await prisma.round.findFirst({ where: { id: roundId } });
-      const collective = await getCollective({ id: round?.openCollectiveId });
+      const collective = await getCollective(
+        { id: round?.openCollectiveId },
+        getOCToken(round)
+      );
       const webhooks =
         collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
       const link =
@@ -849,8 +859,11 @@ export const syncOCExpenses = async (_, { id }) => {
     if (!round.ocVerified) {
       throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
     }
-    const collective = await getCollective({ id: round.openCollectiveId });
-    const ocExpenses = await getExpenses(collective.slug);
+    const collective = await getCollective(
+      { id: round.openCollectiveId },
+      getOCToken(round)
+    );
+    const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
     const allExpenses = await prisma.expense.findMany({
       where: { roundId: id },
     });

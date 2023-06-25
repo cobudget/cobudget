@@ -1,6 +1,7 @@
 import { OC_STATUS_MAP } from "../../constants";
 import { getExpense } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
+import { getOCToken } from "server/utils/roundUtils";
 
 // helper
 export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
@@ -38,10 +39,11 @@ export const ocItemToCobudgetReceipt = (item, expense) => {
 
 export const handleExpenseChange = async (req, res) => {
   try {
+    const round = await prisma.round.findFirst({ where: { id: req.round } });
     const expenseId = req.body.data?.expense?.id;
     let dbExpense; //expense in cobudget database
     if (expenseId) {
-      const expense = await getExpense(expenseId);
+      const expense = await getExpense(expenseId, getOCToken(round));
       const expenseData = {
         bucketId: expense.customData?.b,
         title: expense.description,
