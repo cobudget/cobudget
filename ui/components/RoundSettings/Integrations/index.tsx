@@ -125,6 +125,29 @@ function Integrations() {
           <List>
             <SettingsListItem
               primary={
+                <div>
+                  <FormattedMessage defaultMessage="Opencollective Token" />
+                </div>
+              }
+              secondary={
+                round.ocTokenStatus !== TOKEN_STATUS.EMPTY ? (
+                  HIDDEN_TEXT
+                ) : (
+                  <i>
+                    <FormattedMessage defaultMessage="Not provided" />
+                  </i>
+                )
+              }
+              canEdit={true}
+              isSet={round.ocTokenStatus !== TOKEN_STATUS.EMPTY}
+              roundColor={round.color}
+              openModal={() => setOpenModal("SET_OC_TOKEN")}
+            />
+          </List>
+          <Divider />
+          <List>
+            <SettingsListItem
+              primary={
                 <div className="flex gap-3">
                   <FormattedMessage defaultMessage="Connect round to Open Collective" />
                   {round.ocVerified ? (
@@ -180,29 +203,6 @@ function Integrations() {
               canEdit={true}
               openModal={() => setOpenModal("SET_OPEN_COLLECTIVE")}
               roundColor={round.color}
-            />
-          </List>
-          <Divider />
-          <List>
-            <SettingsListItem
-              primary={
-                <div>
-                  <FormattedMessage defaultMessage="Opencollective Token" />
-                </div>
-              }
-              secondary={
-                round.ocTokenStatus !== TOKEN_STATUS.EMPTY ? (
-                  HIDDEN_TEXT
-                ) : (
-                  <i>
-                    <FormattedMessage defaultMessage="Not provided" />
-                  </i>
-                )
-              }
-              canEdit={true}
-              isSet={round.ocTokenStatus !== TOKEN_STATUS.EMPTY}
-              roundColor={round.color}
-              openModal={() => setOpenModal("SET_OC_TOKEN")}
             />
           </List>
           <Divider />
