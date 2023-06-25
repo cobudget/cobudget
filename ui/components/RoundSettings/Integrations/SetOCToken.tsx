@@ -84,16 +84,32 @@ const SetOCToken = ({ closeModal, round }) => {
               variant="outlined"
             />
           </Box>
-
-          <Button
-            type="submit"
-            size="large"
-            variant="contained"
-            color="primary"
-            disabled={fetching}
-          >
-            <FormattedMessage defaultMessage="Save" />
-          </Button>
+          <Box>
+            <Button
+              type="submit"
+              size="large"
+              variant="contained"
+              color="primary"
+              disabled={fetching}
+            >
+              <FormattedMessage defaultMessage="Save" />
+            </Button>
+            <a
+              onClick={() => {
+                const username = window.prompt(
+                  intl.formatMessage({
+                    defaultMessage: "Your opencollective username",
+                  })
+                );
+                const url = `https://opencollective.com/${username}/admin/for-developers`;
+                window.open(url, "_blank");
+              }}
+              target="_blank"
+              className="float-right mt-3 cursor-pointer"
+            >
+              Generate Token
+            </a>
+          </Box>
         </form>
       </Box>
     </Card>

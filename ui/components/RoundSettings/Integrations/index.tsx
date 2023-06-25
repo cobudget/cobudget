@@ -209,14 +209,35 @@ function Integrations() {
           <List>
             <ListItem>
               <ListItemText
-                primary="Open Collective Webhook"
+                primary={
+                  <div className="flex gap-2">
+                    <span>
+                      <FormattedMessage defaultMessage="Open Collective Webhook URL" />
+                    </span>
+                    {round?.ocWebhookUrl && (
+                      <a
+                        rel="noreferrer"
+                        href={
+                          round?.ocCollective?.parent
+                            ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/${round?.ocCollective?.slug}/admin/webhooks`
+                            : `https://opencollective.com/${round?.ocCollective?.slug}/admin/webhooks`
+                        }
+                        target="_blank"
+                      >
+                        <Button className="m-0 -mt-1" size="small">
+                          <FormattedMessage defaultMessage="Create Webhook" />
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                }
                 secondary={
                   round.ocCollective ? (
-                    <p className="w-4/5 overflow-hidden truncate whitespace-nowrap">
+                    <p className="w-4/5 overflow-hidden truncate whitespace-nowrap mt-1">
                       {round.ocWebhookUrl}
                     </p>
                   ) : (
-                    <p className="italic">Connect to Open Collective</p>
+                    <p className="italic mt-1">Connect to Open Collective</p>
                   )
                 }
               />
