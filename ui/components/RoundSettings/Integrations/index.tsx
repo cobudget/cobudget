@@ -10,6 +10,7 @@ import {
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import { CopyIcon, VerifiedIcon } from "components/Icons";
+import { HIDDEN_TEXT } from "../../../constants";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -175,6 +176,29 @@ function Integrations() {
               canEdit={true}
               openModal={() => setOpenModal("SET_OPEN_COLLECTIVE")}
               roundColor={round.color}
+            />
+          </List>
+          <Divider />
+          <List>
+            <SettingsListItem
+              primary={
+                <div>
+                  <FormattedMessage defaultMessage="Opencollective token" />
+                </div>
+              }
+              secondary={
+                window ? (
+                  HIDDEN_TEXT
+                ) : (
+                  <i>
+                    <FormattedMessage defaultMessage="Not provided" />
+                  </i>
+                )
+              }
+              canEdit={true}
+              isSet={false}
+              roundColor={round.color}
+              openModal={() => ""}
             />
           </List>
           <Divider />
