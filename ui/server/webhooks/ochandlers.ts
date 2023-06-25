@@ -39,7 +39,7 @@ export const ocItemToCobudgetReceipt = (item, expense) => {
 
 export const handleExpenseChange = async (req, res) => {
   try {
-    const round = await prisma.round.findFirst({ where: { id: req.round } });
+    const round = await prisma.round.findFirst({ where: { id: req.roundId } });
     const expenseId = req.body.data?.expense?.id;
     let dbExpense; //expense in cobudget database
     if (expenseId) {
