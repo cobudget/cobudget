@@ -22,6 +22,9 @@ const EDIT_ROUND = gql`
       ocProjectSlug: $ocProjectSlug
     ) {
       id
+      ocTokenStatus
+      ocVerified
+      ocWebhookUrl
       ocCollective {
         id
         name
