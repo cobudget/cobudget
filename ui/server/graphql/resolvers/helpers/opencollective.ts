@@ -1,3 +1,4 @@
+import { UNAUTHORIZED } from "../../../../constants";
 import { customOCGqlClient } from "utils/graphqlClient";
 
 export const GET_COLLECTIVE = `
@@ -118,6 +119,13 @@ export const GET_EXPENSE = `
   }
 `;
 
+const handleOCError = (err) => {
+  if (err.response.status == 401) {
+    return { error: { status: 401, message: UNAUTHORIZED } };
+  }
+  return null;
+};
+
 export const getCollective = async (
   filter: { slug?: string; id?: string },
   token: string
@@ -134,7 +142,7 @@ export const getCollective = async (
     });
     return response.collective;
   } catch (err) {
-    return null;
+    return handleOCError(err);
   }
 };
 

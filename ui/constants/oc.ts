@@ -8,6 +8,9 @@ export const OC_EXPENSE_REJECTED = "collective.expense.rejected";
 export const OC_EXPENSE_CREATED = "collective.expense.created";
 export const OC_EXPENSE_UPDATED = "collective.expense.updated";
 
+export const UNAUTHORIZED = "UNAUTHORIZED";
+export const UNAUTHORIZED_STATUS = 401;
+
 export const TOKEN_STATUS = {
   PROVIDED: "PROVIDED",
   EMPTY: "EMPTY",

@@ -23,6 +23,8 @@ import { appLink } from "utils/internalLinks";
 import {
   GRAPHQL_OC_NOT_INTEGRATED,
   GRAPHQL_COLLECTIVE_NOT_VERIFIED,
+  UNAUTHORIZED_STATUS,
+  UNAUTHORIZED,
 } from "../../../../constants";
 import {
   ocExpenseToCobudget,
@@ -94,6 +96,10 @@ export const createRound = async (
 export const editOCToken = combineResolvers(
   isCollOrGroupAdmin,
   async (parent, { roundId, ocToken }) => {
+    const { error } = await getCollective({ slug: "cobudget" }, ocToken);
+    if (error?.status === UNAUTHORIZED_STATUS) {
+      throw new Error(UNAUTHORIZED);
+    }
     return prisma.round.update({
       where: { id: roundId },
       data: { ocToken },

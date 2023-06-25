@@ -4,10 +4,7 @@ import Card from "components/styled/Card";
 import { Box, Button, TextField } from "@material-ui/core";
 import { FormattedMessage, useIntl } from "react-intl";
 import toast from "react-hot-toast";
-import {
-  GRAPHQL_COLLECTIVE_NOT_FOUND,
-  GRAPHQL_PROJECT_NOT_FOUND,
-} from "../../../constants";
+import { UNAUTHORIZED } from "../../../constants";
 
 const EDIT_ROUND = gql`
   mutation editRound($roundId: ID!, $ocToken: String!) {
@@ -44,17 +41,9 @@ const SetOCToken = ({ closeModal, round }) => {
                     let errorMessage = intl.formatMessage({
                       defaultMessage: "Unknown Error",
                     });
-                    if (
-                      error.message.indexOf(GRAPHQL_COLLECTIVE_NOT_FOUND) > -1
-                    ) {
+                    if (error.message.indexOf(UNAUTHORIZED) > -1) {
                       errorMessage = intl.formatMessage({
-                        defaultMessage: "Collective not found",
-                      });
-                    } else if (
-                      error.message.indexOf(GRAPHQL_PROJECT_NOT_FOUND) > -1
-                    ) {
-                      errorMessage = intl.formatMessage({
-                        defaultMessage: "Project not found",
+                        defaultMessage: "Invalid token",
                       });
                     }
                     toast.error(errorMessage);
@@ -62,7 +51,7 @@ const SetOCToken = ({ closeModal, round }) => {
                     closeModal();
                     toast.success(
                       intl.formatMessage({
-                        defaultMessage: "Collective updated",
+                        defaultMessage: "Opencollective token updated",
                       })
                     );
                   }
