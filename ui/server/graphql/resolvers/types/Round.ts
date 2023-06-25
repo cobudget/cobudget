@@ -14,6 +14,7 @@ import {
 import { combineResolvers } from "graphql-resolvers";
 import { sign } from "../../../utils/jwt";
 import { appLink } from "utils/internalLinks";
+import { TOKEN_STATUS } from "../../../../constants";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -353,4 +354,10 @@ export const expenses = async (parent) => {
   } catch (err) {
     return [];
   }
+};
+
+export const ocTokenStatus = async (parent) => {
+  if (parent.ocToken) {
+    return TOKEN_STATUS.PROVIDED;
+  } else return TOKEN_STATUS.EMPTY;
 };

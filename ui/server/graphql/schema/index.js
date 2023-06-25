@@ -380,6 +380,7 @@ const schema = gql`
     ocCollective: OC_Collective
     ocWebhookUrl: String
     ocVerified: Boolean
+    ocTokenStatus: OC_TokenStatus
 
     expenses: [Expense]
   }
@@ -523,6 +524,11 @@ const schema = gql`
   enum OC_Type {
     PROJECT
     COLLECTIVE
+  }
+
+  enum OC_TokenStatus {
+    EMPTY
+    PROVIDED
   }
 
   type OC_Parent {

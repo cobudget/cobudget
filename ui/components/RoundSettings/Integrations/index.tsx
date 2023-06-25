@@ -10,7 +10,7 @@ import {
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import { CopyIcon, VerifiedIcon } from "components/Icons";
-import { HIDDEN_TEXT } from "../../../constants";
+import { HIDDEN_TEXT, TOKEN_STATUS } from "../../../constants";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -25,6 +25,7 @@ const GET_ROUND_INTEGRATIONS = gql`
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       color
+      ocTokenStatus
       ocVerified
       ocWebhookUrl
       ocCollective {
@@ -46,6 +47,7 @@ const VERIFY_OPENCOLLECTIVE = gql`
   mutation VerifyOpencollective($roundId: ID!) {
     verifyOpencollective(roundId: $roundId) {
       id
+      ocTokenStatus
       ocVerified
       ocWebhookUrl
     }
@@ -183,11 +185,11 @@ function Integrations() {
             <SettingsListItem
               primary={
                 <div>
-                  <FormattedMessage defaultMessage="Opencollective token" />
+                  <FormattedMessage defaultMessage="Opencollective Token" />
                 </div>
               }
               secondary={
-                window ? (
+                round.ocTokenStatus === TOKEN_STATUS.PROVIDED ? (
                   HIDDEN_TEXT
                 ) : (
                   <i>
