@@ -56,6 +56,8 @@ export const BUCKET_QUERY = gql`
         amount
         status
         submittedBy
+        ocId
+        currency
       }
 
       round {
@@ -72,6 +74,12 @@ export const BUCKET_QUERY = gql`
         maxAmountToBucketPerUser
         canCocreatorStartFunding
         canCocreatorEditOpenBuckets
+        ocCollective {
+          slug
+          parent {
+            slug
+          }
+        }
         guidelines {
           id
           title

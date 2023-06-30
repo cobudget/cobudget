@@ -18,3 +18,8 @@ export const ROUND_IS_PRIVATE = "The round is private";
 
 //FRONTEND ERRORS
 export const COLLECTIVE_NOT_FOUND = "Collective not found";
+
+//EXPENSES
+export const GRAPHQL_COLLECTIVE_NOT_VERIFIED = "Collective not verified";
+export const GRAPHQL_OC_NOT_INTEGRATED =
+  "Opencollective is not integrated for this round";

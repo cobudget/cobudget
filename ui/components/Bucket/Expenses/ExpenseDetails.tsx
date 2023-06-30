@@ -27,6 +27,8 @@ const GET_EXPENSE = gql`
       recipientPostalCode
       status
       submittedBy
+      ocId
+      currency
       receipts {
         id
         description
@@ -73,6 +75,8 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
   if (fetching) {
     return <>Loading...</>;
   }
+
+  const isOcExpense = !!expense.ocId;
 
   return (
     <>
@@ -125,7 +129,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                         <td className="px-4 py-2">
                           <FormattedCurrency
                             value={receipt.amount}
-                            currency={round.currency}
+                            currency={expense.currency || round.currency}
                           />
                           {isSubmittedByCurrentUser && (
                             <span className="float-right opacity-0 group-hover:opacity-100">
@@ -146,7 +150,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
                       <td className="px-4 py-2">
                         <FormattedCurrency
                           value={total}
-                          currency={round.currency}
+                          currency={expense.currency || round.currency}
                         />
                       </td>
                     </tr>
@@ -162,7 +166,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         )}
 
         {/*Recipient Details*/}
-        {isSubmittedByCurrentUser && (
+        {isSubmittedByCurrentUser && !isOcExpense && (
           <div className="mt-4 flex justify-end">
             <span className="mr-4 mt-2 text-gray-600 text-sm">
               Edit expense details
@@ -172,62 +176,74 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
             </IconButton>
           </div>
         )}
-        <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
-          <table className="table-fixed w-full">
-            <tbody>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Name" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientName}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Email" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientEmail}</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="BIC/SWIFT" />
-                </td>
-                <td className="px-4 py-2">{expense?.swiftCode}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="IBAN" />
-                </td>
-                <td className="px-4 py-2">{expense?.iban}</td>
-              </tr>
-              <tr className="bg-gray-100">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Country" />
-                </td>
-                <td className="px-4 py-2">{expense?.country}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="City" />
-                </td>
-                <td className="px-4 py-2">{expense?.city}</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Recipient Address" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientAddress}</td>
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Postal code" />
-                </td>
-                <td className="px-4 py-2">{expense?.recipientPostalCode}</td>
-              </tr>
-              <tr className="bg-gray-200">
-                <td className="px-4 py-2" />
-                <td className="px-4 py-2" />
-                <td className="px-4 py-2 font-medium">
-                  <FormattedMessage defaultMessage="Total" />
-                </td>
-                <td className="px-4 py-2">
-                  <FormattedCurrency value={total} currency={round.currency} />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+
+        {isOcExpense ? null : (
+          <div className="mt-4 mb-8 rounded shadow overflow-hidden bg-gray-100">
+            <table className="table-fixed w-full">
+              <tbody>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Name" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientName}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Email" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientEmail}</td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="BIC/SWIFT" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.swiftCode}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="IBAN" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.iban}</td>
+                </tr>
+                <tr className="bg-gray-100">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Country" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.country}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="City" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.city}</td>
+                </tr>
+                <tr className="bg-white">
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Recipient Address" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientAddress}</td>
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Postal code" />
+                  </td>
+                  <td className="px-4 py-2">{expense?.recipientPostalCode}</td>
+                </tr>
+                <tr className="bg-gray-200">
+                  <td className="px-4 py-2" />
+                  <td className="px-4 py-2" />
+                  <td className="px-4 py-2 font-medium">
+                    <FormattedMessage defaultMessage="Total" />
+                  </td>
+                  <td className="px-4 py-2">
+                    <FormattedCurrency
+                      value={total}
+                      currency={round.currency}
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {isOcExpense && (
+          <p className="text-sm italic text-gray-500">
+            <FormattedMessage defaultMessage="This expense is submitted through OpenCollective" />
+          </p>
+        )}
       </div>
       <Modal
         open={!!expenseToEdit}

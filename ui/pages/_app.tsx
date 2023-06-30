@@ -106,6 +106,14 @@ export const TOP_LEVEL_QUERY = gql`
       bucketReviewIsOpen
       discourseCategoryId
       totalInMembersBalances
+      expenses {
+        id
+        title
+        amount
+        ocId
+        bucketId
+        currency
+      }
       guidelines {
         id
         title
