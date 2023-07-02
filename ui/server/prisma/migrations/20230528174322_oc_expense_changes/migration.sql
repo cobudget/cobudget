@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Expense" ADD COLUMN     "ocId" TEXT,
+ALTER COLUMN "recipientName" DROP NOT NULL,
+ALTER COLUMN "recipientEmail" DROP NOT NULL,
+ALTER COLUMN "country" DROP NOT NULL,
+ALTER COLUMN "city" DROP NOT NULL,
+ALTER COLUMN "recipientAddress" DROP NOT NULL,
+ALTER COLUMN "recipientPostalCode" DROP NOT NULL,
+ALTER COLUMN "submittedBy" DROP NOT NULL;

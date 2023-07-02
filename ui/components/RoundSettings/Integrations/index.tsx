@@ -1,18 +1,34 @@
-import { Divider, List, Modal } from "@material-ui/core";
+import {
+  Divider,
+  IconButton,
+  List,
+  ListItem,
+  ListItemSecondaryAction,
+  ListItemText,
+  Modal,
+} from "@material-ui/core";
+import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
+import { CopyIcon, VerifiedIcon } from "components/Icons";
+import { HIDDEN_TEXT, TOKEN_STATUS } from "../../../constants";
 import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
-import { gql, useQuery } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 import { useStyles } from "../Granting";
 import SettingsListItem from "../Granting/SettingsListItem";
 import SetOpenCollective from "./SetOpenCollective";
+import SetOCToken from "./SetOCToken";
 
 const GET_ROUND_INTEGRATIONS = gql`
   query GetRoundIntegrations($roundSlug: String!, $groupSlug: String) {
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       color
+      ocTokenStatus
+      ocVerified
+      ocWebhookUrl
       ocCollective {
         id
         name
@@ -28,12 +44,35 @@ const GET_ROUND_INTEGRATIONS = gql`
   }
 `;
 
+const VERIFY_OPENCOLLECTIVE = gql`
+  mutation VerifyOpencollective($roundId: ID!) {
+    verifyOpencollective(roundId: $roundId) {
+      id
+      ocTokenStatus
+      ocVerified
+      ocWebhookUrl
+    }
+  }
+`;
+
+const SYNC_OC_EXPENSES = gql`
+  mutation SyncOCExpenses($id: ID!) {
+    syncOCExpenses(id: $id) {
+      status
+    }
+  }
+`;
+
 function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
     query: GET_ROUND_INTEGRATIONS,
     variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
+  const [{ fetching: verifying }, verifyOpencollective] = useMutation(
+    VERIFY_OPENCOLLECTIVE
+  );
+  const [{ fetching: syncing }, syncOCExpenses] = useMutation(SYNC_OC_EXPENSES);
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -42,6 +81,7 @@ function Integrations() {
   const modals = useMemo(
     () => ({
       SET_OPEN_COLLECTIVE: SetOpenCollective,
+      SET_OC_TOKEN: SetOCToken,
     }),
     []
   );
@@ -84,9 +124,67 @@ function Integrations() {
         <div className="border-t">
           <List>
             <SettingsListItem
-              primary={intl.formatMessage({
-                defaultMessage: "Connect round to Open Collective",
-              })}
+              primary={
+                <div>
+                  <FormattedMessage defaultMessage="Opencollective Token" />
+                </div>
+              }
+              secondary={
+                round.ocTokenStatus !== TOKEN_STATUS.EMPTY ? (
+                  HIDDEN_TEXT
+                ) : (
+                  <i>
+                    <FormattedMessage defaultMessage="Not provided" />
+                  </i>
+                )
+              }
+              canEdit={true}
+              isSet={round.ocTokenStatus !== TOKEN_STATUS.EMPTY}
+              roundColor={round.color}
+              openModal={() => setOpenModal("SET_OC_TOKEN")}
+            />
+          </List>
+          <Divider />
+          <List>
+            <SettingsListItem
+              primary={
+                <div className="flex gap-3">
+                  <FormattedMessage defaultMessage="Connect round to Open Collective" />
+                  {round.ocVerified ? (
+                    <span>
+                      <VerifiedIcon className="h-6 w-6" />
+                    </span>
+                  ) : round?.ocCollective ? (
+                    <span>
+                      <Button
+                        className="m-0 -mt-1"
+                        size="small"
+                        onClick={() => {
+                          verifyOpencollective({
+                            roundId: round.id,
+                          }).then((r) => {
+                            if (r?.data?.verifyOpencollective) {
+                              toast.success(
+                                intl.formatMessage({
+                                  defaultMessage: "Verified",
+                                })
+                              );
+                            } else {
+                              toast.error(
+                                intl.formatMessage({
+                                  defaultMessage: "Could not verify",
+                                })
+                              );
+                            }
+                          });
+                        }}
+                      >
+                        Verify
+                      </Button>
+                    </span>
+                  ) : null}
+                </div>
+              }
               secondary={
                 round?.ocCollective ? (
                   <a
@@ -108,6 +206,91 @@ function Integrations() {
             />
           </List>
           <Divider />
+          <List>
+            <ListItem>
+              <ListItemText
+                primary={
+                  <div className="flex gap-2">
+                    <span>
+                      <FormattedMessage defaultMessage="Open Collective Webhook URL" />
+                    </span>
+                    {round?.ocWebhookUrl && (
+                      <a
+                        rel="noreferrer"
+                        href={
+                          round?.ocCollective?.parent
+                            ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/${round?.ocCollective?.slug}/admin/webhooks`
+                            : `https://opencollective.com/${round?.ocCollective?.slug}/admin/webhooks`
+                        }
+                        target="_blank"
+                      >
+                        <Button className="m-0 -mt-1" size="small">
+                          <FormattedMessage defaultMessage="Create Webhook" />
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                }
+                secondary={
+                  round.ocCollective ? (
+                    <p className="w-4/5 overflow-hidden truncate whitespace-nowrap mt-1">
+                      {round.ocWebhookUrl}
+                    </p>
+                  ) : (
+                    <p className="italic mt-1">Connect to Open Collective</p>
+                  )
+                }
+              />
+              <ListItemSecondaryAction>
+                <IconButton
+                  disabled={!round?.ocCollective}
+                  onClick={async () => {
+                    try {
+                      await window.navigator.clipboard.writeText(
+                        round?.ocWebhookUrl
+                      );
+                      toast.success(
+                        intl.formatMessage({
+                          defaultMessage: "Copied to clipboard",
+                        })
+                      );
+                    } catch (err) {
+                      toast.error(
+                        intl.formatMessage({ defaultMessage: "Unknown error" })
+                      );
+                    }
+                  }}
+                >
+                  <CopyIcon className="h-5 w-5" />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          </List>
+          {round.ocVerified && (
+            <>
+              <Divider />
+              <List>
+                <ListItem>
+                  <ListItemText
+                    primary={
+                      <FormattedMessage defaultMessage="Sync Open Collective Expenses" />
+                    }
+                    secondary={
+                      <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <Button
+                      onClick={() => syncOCExpenses({ id: round.id })}
+                      loading={syncing}
+                    >
+                      <FormattedMessage defaultMessage="Sync" />
+                    </Button>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              </List>
+            </>
+          )}
         </div>
       </div>
     );

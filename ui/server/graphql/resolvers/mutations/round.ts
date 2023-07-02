@@ -4,6 +4,7 @@ import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getCollective,
+  getExpenses,
   getProject,
   getRoundMember,
   isCollAdmin,
@@ -18,6 +19,18 @@ import {
   bulkAllocate as bulkAllocateController,
 } from "server/controller";
 import dayjs from "dayjs";
+import { appLink } from "utils/internalLinks";
+import {
+  GRAPHQL_OC_NOT_INTEGRATED,
+  GRAPHQL_COLLECTIVE_NOT_VERIFIED,
+  UNAUTHORIZED_STATUS,
+  UNAUTHORIZED,
+} from "../../../../constants";
+import {
+  ocExpenseToCobudget,
+  ocItemToCobudgetReceipt,
+} from "../../../../server/webhooks/ochandlers";
+import { getOCToken } from "server/utils/roundUtils";
 
 export const createRound = async (
   parent,
@@ -80,6 +93,20 @@ export const createRound = async (
   return round;
 };
 
+export const editOCToken = combineResolvers(
+  isCollOrGroupAdmin,
+  async (parent, { roundId, ocToken }) => {
+    const { error } = await getCollective({ slug: "cobudget" }, ocToken);
+    if (error?.status === UNAUTHORIZED_STATUS) {
+      throw new Error(UNAUTHORIZED);
+    }
+    return prisma.round.update({
+      where: { id: roundId },
+      data: { ocToken },
+    });
+  }
+);
+
 export const editRound = combineResolvers(
   isCollOrGroupAdmin,
   async (
@@ -100,9 +127,16 @@ export const editRound = combineResolvers(
       ocProjectSlug,
     }
   ) => {
+    const existingRound = await prisma.round.findFirst({
+      where: { id: roundId },
+    });
+
     let ocCollectiveId, ocProjectId;
     if (ocCollectiveSlug) {
-      const collective = await getCollective({ slug: ocCollectiveSlug });
+      const collective = await getCollective(
+        { slug: ocCollectiveSlug },
+        getOCToken(existingRound)
+      );
       if (collective) {
         ocCollectiveId = collective.id;
         ocProjectId = null;
@@ -119,17 +153,26 @@ export const editRound = combineResolvers(
     }
 
     if (ocProjectSlug) {
-      const ocProject = await getProject({ slug: ocProjectSlug });
+      const ocProject = await getProject(
+        { slug: ocProjectSlug },
+        getOCToken(existingRound)
+      );
       ocProjectId = ocProject?.id || null;
       if (ocProjectId === null) {
         throw new Error("Project not found");
       }
     }
 
+    const ocVerified =
+      ocCollectiveId && ocCollectiveId !== existingRound?.openCollectiveId
+        ? { ocVerified: false }
+        : undefined;
+
     return prisma.round.update({
       where: { id: roundId },
       data: {
         ...(slug && { slug: slugify(slug) }),
+        ...ocVerified,
         openCollectiveId: ocCollectiveId,
         openCollectiveProjectId: ocProjectId,
         title,
@@ -769,3 +812,115 @@ export const editBucketCustomField = combineResolvers(
     return updated;
   }
 );
+
+export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
+  try {
+    const isAdmin = await isCollAdmin({
+      roundId,
+      userId: user?.id,
+      ss,
+    });
+    if (isAdmin) {
+      const round = await prisma.round.findFirst({ where: { id: roundId } });
+      const collective = await getCollective(
+        { id: round?.openCollectiveId },
+        getOCToken(round)
+      );
+      const webhooks =
+        collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
+      const link = appLink("/api/oc-hooks");
+      const ocVerified = webhooks.some((webhook) => {
+        if (webhook.indexOf(link) === 0) {
+          const [token] = webhook
+            .split("/")
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0)
+            .slice(-1);
+          const payload = verify(token);
+          return payload.rid === roundId;
+        }
+        return false;
+      });
+      if (ocVerified) {
+        return prisma.round.update({
+          where: { id: roundId },
+          data: { ocVerified },
+        });
+      }
+    } else {
+      return null;
+    }
+  } catch (err) {
+    return null;
+  }
+};
+
+export const syncOCExpenses = async (_, { id }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id } });
+    if (!round.openCollectiveId) {
+      throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+    }
+    if (!round.ocVerified) {
+      throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+    }
+    const collective = await getCollective(
+      { id: round.openCollectiveId },
+      getOCToken(round)
+    );
+    const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
+    const allExpenses = await prisma.expense.findMany({
+      where: { roundId: id },
+    });
+    const allExpensesOCIds = allExpenses.map((e) => e.ocId);
+    const expensesData = ocExpenses.map((e) =>
+      ocExpenseToCobudget(e, id, allExpensesOCIds.indexOf(e.id) > -1)
+    );
+
+    const pendingReceipts = [];
+    const promises = expensesData.map(async (expense) => {
+      const [data, isEditing, items] = expense;
+      if (isEditing) {
+        const cobudgetExpense = allExpenses.find((e) => e.ocId === data.ocId);
+        pendingReceipts.push(
+          items.map((i) => ({ ...i, expenseId: cobudgetExpense.id }))
+        );
+        return prisma.expense.update({
+          where: { id: cobudgetExpense.id },
+          data,
+        });
+      } else {
+        const expense = await prisma.expense.create({ data });
+        return Promise.allSettled(
+          items.map((item) =>
+            prisma.expenseReceipt.create({
+              data: ocItemToCobudgetReceipt(item, expense),
+            })
+          )
+        );
+      }
+    });
+
+    const existingReceipts = await prisma.expenseReceipt.findMany({
+      where: { expenseId: { in: allExpenses.map((e) => e.id) } },
+    });
+    const receiptPromises = pendingReceipts.flat().map((item) => {
+      const existingCobudgetReceipt = existingReceipts.find(
+        (r) => r.ocExpenseReceiptId === item.id
+      );
+      if (existingCobudgetReceipt) {
+        return prisma.expenseReceipt.update({
+          where: { id: existingCobudgetReceipt.id },
+          data: ocItemToCobudgetReceipt(item, { id: item.expenseId }),
+        });
+      } else {
+        return prisma.expenseReceipt.create({
+          data: ocItemToCobudgetReceipt(item, { id: item.expenseId }),
+        });
+      }
+    });
+    await Promise.allSettled([...promises, ...receiptPromises]);
+  } catch (err) {
+    console.log("ERROR", err);
+  }
+};

@@ -4,6 +4,11 @@ const schema = gql`
   scalar JSON
   scalar JSONObject
 
+  input AmountConversionInput {
+    amount: Float!
+    currency: String!
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -29,6 +34,10 @@ const schema = gql`
       orderDir: String
     ): BucketsPage
     languageProgressPage: [LanguageProgress]
+    convertCurrency(
+      amounts: [AmountConversionInput]!
+      toCurrency: String!
+    ): Float!
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!
@@ -53,6 +62,10 @@ const schema = gql`
       limit: Int
     ): RoundTransactionPage
     balances(groupSlug: String!): [RoundBalance]
+  }
+
+  type OCSyncResponse {
+    status: String!
   }
 
   type Mutation {
@@ -86,6 +99,8 @@ const schema = gql`
       registrationPolicy: RegistrationPolicy!
       visibility: Visibility
     ): Round!
+    verifyOpencollective(roundId: ID!): Round
+    editOCToken(roundId: ID!, ocToken: String): Round
     editRound(
       roundId: ID!
       slug: String
@@ -184,6 +199,7 @@ const schema = gql`
       city: String
       recipientAddress: String
       recipientPostalCode: String
+      bucketId: String
     ): Expense
 
     createExpenseReceipt(
@@ -201,6 +217,8 @@ const schema = gql`
       amount: Int
       attachment: String
     ): ExpenseReceipt
+
+    syncOCExpenses(id: ID!): OCSyncResponse
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
@@ -359,7 +377,13 @@ const schema = gql`
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int
+
     ocCollective: OC_Collective
+    ocWebhookUrl: String
+    ocVerified: Boolean
+    ocTokenStatus: OC_TokenStatus
+
+    expenses: [Expense]
   }
 
   type InvitationLink {
@@ -503,6 +527,11 @@ const schema = gql`
     COLLECTIVE
   }
 
+  enum OC_TokenStatus {
+    EMPTY
+    PROVIDED
+  }
+
   type OC_Parent {
     id: String!
     name: String!
@@ -530,15 +559,25 @@ const schema = gql`
   }
 
   enum ExpenseStatus {
+    DRAFT
+    UNVERIFIED
+    PENDING
+    INCOMPLETE
+    APPROVED
     SUBMITTED
     PAID
     REJECTED
+    PROCESSING
+    ERROR
+    SCHEDULED_FOR_PAYMENT
+    SPAM
+    CANCELED
   }
 
   type Expense {
     id: String!
     title: String!
-    bucketId: String!
+    bucketId: String
     recipientName: String
     recipientEmail: String
     swiftCode: String
@@ -550,7 +589,9 @@ const schema = gql`
     recipientPostalCode: String
     receipts: [ExpenseReceipt]
     status: ExpenseStatus
-    submittedBy: String!
+    submittedBy: String
+    ocId: String
+    currency: String
   }
 
   type Bucket {

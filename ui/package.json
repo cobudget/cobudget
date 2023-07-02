@@ -69,6 +69,7 @@
     "jsonwebtoken": "^8.5.1",
     "keycloak-admin": "^1.14.22",
     "lodash": "^4.17.21",
+    "memory-cache": "^0.2.0",
     "micro": "^9.3.4",
     "next": "12.2.5",
     "next-connect": "^0.10.2",

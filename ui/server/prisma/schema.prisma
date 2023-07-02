@@ -60,12 +60,23 @@ model ExpenseReceipt {
   attachment         String?
   expense            Expense? @relation(fields: [expenseId], references: [id])
   expenseId          String? 
+  ocExpenseReceiptId String?
 }
 
 enum ExpenseStatus {
+  DRAFT
+  UNVERIFIED
+  PENDING
+  INCOMPLETE
+  APPROVED
   SUBMITTED
   PAID
   REJECTED
+  PROCESSING
+  ERROR
+  SCHEDULED_FOR_PAYMENT
+  SPAM
+  CANCELED
 }
 
 model Expense {
@@ -74,18 +85,23 @@ model Expense {
   bucketId            String?
 
   title               String
-  recipientName       String
-  recipientEmail      String
+  recipientName       String?
+  recipientEmail      String?
   swiftCode           String?   @default("")
   iban                String?   @default("")
-  country             String    @default("")
-  city                String    @default("")
-  recipientAddress    String    
-  recipientPostalCode String
-  submittedBy         String
+  country             String?   @default("")
+  city                String?   @default("")
+  recipientAddress    String?    
+  recipientPostalCode String?
+  submittedBy         String?
   status              ExpenseStatus   @default(SUBMITTED)
 
+  ocId                String?
+  roundId             String    @default("")
+
   receipts            ExpenseReceipt[]
+
+  currency            String?
 }
 
 model GroupMember {
@@ -208,6 +224,8 @@ model Round {
 
   openCollectiveId          String?
   openCollectiveProjectId   String?
+  ocVerified                Boolean?   @default(false)
+  ocToken                   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -217,7 +235,6 @@ model Round {
   allocations   Allocation[]
   contributions Contribution[]
   transactions  Transaction[]
-
 
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique

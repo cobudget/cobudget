@@ -10,6 +10,7 @@ import {
   getBucketStatus,
   getRoundMember,
   isAndGetCollMember,
+  isCollAdmin,
   updateFundedPercentage,
 } from "../helpers";
 import subscribers from "../../../subscribers/discourse.subscriber";
@@ -1117,6 +1118,7 @@ export const createExpense = async (
         recipientAddress,
         recipientPostalCode,
         submittedBy,
+        roundId: bucket.roundId,
       },
     });
   } else {
@@ -1176,6 +1178,7 @@ export const updateExpense = async (
     city,
     recipientAddress,
     recipientPostalCode,
+    bucketId,
   },
   { user, ss }
 ) => {
@@ -1188,13 +1191,24 @@ export const updateExpense = async (
     throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
   }
 
-  const roundMember = await getRoundMember({
+  let roundMember;
+
+  const allowEdit = await isCollAdmin({
+    ss,
+    roundId: expense.roundId,
     userId: user?.id,
-    roundId: expense.bucket?.roundId,
-    bucketId: expense.bucketId,
   });
 
-  if (ss || roundMember?.id === expense.submittedBy) {
+  // If the user is neither an admin nor a super-admin, retrieve the user to verify the expense creator.
+  if (!allowEdit) {
+    roundMember = await getRoundMember({
+      userId: user?.id,
+      roundId: expense.bucket?.roundId,
+      bucketId: expense.bucketId,
+    });
+  }
+
+  if (allowEdit || roundMember?.id === expense.submittedBy) {
     return prisma.expense.update({
       where: { id },
       data: {
@@ -1207,6 +1221,7 @@ export const updateExpense = async (
         city,
         recipientAddress,
         recipientPostalCode,
+        bucketId,
       },
     });
   } else {

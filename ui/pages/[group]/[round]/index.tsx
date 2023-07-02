@@ -50,6 +50,7 @@ export const ROUND_PAGE_QUERY = gql`
           }
         }
       }
+      ocWebhookUrl
       bucketStatusCount {
         PENDING_APPROVAL
         OPEN_FOR_FUNDING
