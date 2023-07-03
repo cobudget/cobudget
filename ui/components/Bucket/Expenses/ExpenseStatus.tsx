@@ -62,7 +62,7 @@ function ExpenseStatus({ expense, currentUser }) {
     (currentUser?.currentCollMember?.isAdmin ||
       currentUser?.currentCollMember?.isModerator);
   const handleClick = (e) => {
-    if (editingAllowed || !fetching) {
+    if (editingAllowed && !fetching) {
       setAnchorEl(e.target);
     }
   };

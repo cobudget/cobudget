@@ -40,3 +40,11 @@ export const receipts = async (
     throw new Error("Not allowed");
   }
 };
+
+export const ocMeta = async (parent) => {
+  try {
+    return JSON.parse(parent.ocMeta);
+  } catch (err) {
+    return null;
+  }
+};

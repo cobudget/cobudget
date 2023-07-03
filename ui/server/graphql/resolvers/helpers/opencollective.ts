@@ -53,6 +53,7 @@ export const GET_EXPENSES = `
       nodes {
         description
         customData
+        legacyId
         id
         createdByAccount {
           id
@@ -91,6 +92,7 @@ export const GET_EXPENSE = `
     expense(expense: $expense) {
       id
       description
+      legacyId
       createdAt
       amountV2 {
         currency

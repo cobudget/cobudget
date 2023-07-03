@@ -13,6 +13,8 @@ import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
+import { arraySortByStringKey } from "utils/sorting";
+import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
 import IconButton from "./IconButton";
@@ -56,7 +58,7 @@ type ExpenseToEdit = {
   id: string;
 };
 
-function RoundExpenses({ round }) {
+function RoundExpenses({ round, currentUser }) {
   const intl = useIntl();
   const router = useRouter();
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
@@ -113,6 +115,13 @@ function RoundExpenses({ round }) {
     }
   };
 
+  const sortedBuckets = useMemo(() => {
+    if (buckets) {
+      return arraySortByStringKey(buckets, "title");
+    }
+    return [];
+  }, [buckets]);
+
   return (
     <>
       <div className="page">
@@ -128,6 +137,9 @@ function RoundExpenses({ round }) {
                     <FormattedMessage defaultMessage="Expense" />
                   </TableCell>
                   <TableCell>
+                    <FormattedMessage defaultMessage="Status" />
+                  </TableCell>
+                  <TableCell>
                     <FormattedMessage defaultMessage="Amount" />
                   </TableCell>
                   <TableCell>
@@ -139,7 +151,32 @@ function RoundExpenses({ round }) {
               <TableBody>
                 {round.expenses.map((expense) => (
                   <TableRow key={expense.id}>
-                    <TableCell>{expense.title}</TableCell>
+                    <TableCell>
+                      {expense?.ocId ? (
+                        <a
+                          target="_blank"
+                          className="underline"
+                          href={
+                            round?.ocCollective?.parent
+                              ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                              : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                          }
+                          rel="noreferrer"
+                        >
+                          {expense.title}
+                        </a>
+                      ) : (
+                        <span>{expense.title}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-block">
+                        <ExpenseStatus
+                          expense={expense}
+                          currentUser={currentUser}
+                        />
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <FormattedCurrency
                         value={expense.amount}
@@ -214,7 +251,7 @@ function RoundExpenses({ round }) {
                   >
                     {intl.formatMessage({ defaultMessage: "Choose bucket" })}
                   </option>
-                  {buckets?.map((bucket) => (
+                  {sortedBuckets?.map((bucket) => (
                     <option key={bucket.id} value={bucket.id}>
                       {bucket.title}
                     </option>
