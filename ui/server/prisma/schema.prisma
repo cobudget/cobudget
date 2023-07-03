@@ -98,6 +98,7 @@ model Expense {
 
   ocId                String?
   roundId             String    @default("")
+  ocMeta              String?   @default("")
 
   receipts            ExpenseReceipt[]
 
