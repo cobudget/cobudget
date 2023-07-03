@@ -27,6 +27,9 @@ const GET_EXPENSE = gql`
       recipientPostalCode
       status
       submittedBy
+      ocMeta {
+        legacyId
+      }
       ocId
       currency
       receipts {
@@ -76,7 +79,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
     return <>Loading...</>;
   }
 
-  const isOcExpense = !!expense.ocId;
+  const isOcExpense = !!expense?.ocId;
 
   return (
     <>
@@ -242,7 +245,11 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         {isOcExpense && (
           <a
             target="_blank"
-            href={`https://opencollective.com/cobudget-testing-final/expenses/146039`}
+            href={
+              round?.ocCollective?.parent
+                ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+            }
             rel="noreferrer"
           >
             <p className="text-sm italic text-gray-500">

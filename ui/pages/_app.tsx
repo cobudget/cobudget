@@ -108,6 +108,9 @@ export const TOP_LEVEL_QUERY = gql`
       totalInMembersBalances
       expenses {
         id
+        ocMeta {
+          legacyId
+        }
         title
         amount
         ocId

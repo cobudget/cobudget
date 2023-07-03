@@ -574,6 +574,10 @@ const schema = gql`
     CANCELED
   }
 
+  type OCMeta {
+    legacyId: Int
+  }
+
   type Expense {
     id: String!
     title: String!
@@ -592,7 +596,7 @@ const schema = gql`
     submittedBy: String
     ocId: String
     currency: String
-    ocMeta: String
+    ocMeta: OCMeta
   }
 
   type Bucket {

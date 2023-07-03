@@ -52,6 +52,9 @@ export const BUCKET_QUERY = gql`
 
       expenses {
         id
+        ocMeta {
+          legacyId
+        }
         title
         amount
         status
