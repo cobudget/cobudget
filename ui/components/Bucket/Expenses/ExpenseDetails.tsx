@@ -240,9 +240,15 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         )}
 
         {isOcExpense && (
-          <p className="text-sm italic text-gray-500">
-            <FormattedMessage defaultMessage="This expense is submitted through OpenCollective" />
-          </p>
+          <a
+            target="_blank"
+            href={`https://opencollective.com/cobudget-testing-final/expenses/146039`}
+            rel="noreferrer"
+          >
+            <p className="text-sm italic text-gray-500">
+              <FormattedMessage defaultMessage="See this expense on Open Collective" />
+            </p>
+          </a>
         )}
       </div>
       <Modal

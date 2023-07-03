@@ -592,6 +592,7 @@ const schema = gql`
     submittedBy: String
     ocId: String
     currency: String
+    ocMeta: String
   }
 
   type Bucket {
