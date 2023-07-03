@@ -1,4 +1,7 @@
 //BACKED ERRORS
+export const MAGIC_LINK_LIMIT = `Only 1 email can be sent per ${Math.ceil(
+  parseInt(process.env.MAGIC_LINK_TIME_LIMIT) / 60
+)} minutes. Please try again later.`;
 export const GRAPHQL_COLLECTIVE_NOT_FOUND = "Collective not found";
 export const GRAPHQL_PROJECT_NOT_FOUND = "Project not found";
 export const GRAPHQL_EXPENSE_COCREATOR_ONLY = "Only cocreators can add expense";
