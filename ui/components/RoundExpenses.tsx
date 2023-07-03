@@ -13,6 +13,7 @@ import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
+import { arraySortByStringKey } from "utils/sorting";
 import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
@@ -113,6 +114,13 @@ function RoundExpenses({ round, currentUser }) {
       setExpenseToEdit(undefined);
     }
   };
+
+  const sortedBuckets = useMemo(() => {
+    if (buckets) {
+      return arraySortByStringKey(buckets, "title");
+    }
+    return [];
+  }, [buckets]);
 
   return (
     <>
@@ -243,7 +251,7 @@ function RoundExpenses({ round, currentUser }) {
                   >
                     {intl.formatMessage({ defaultMessage: "Choose bucket" })}
                   </option>
-                  {buckets?.map((bucket) => (
+                  {sortedBuckets?.map((bucket) => (
                     <option key={bucket.id} value={bucket.id}>
                       {bucket.title}
                     </option>
