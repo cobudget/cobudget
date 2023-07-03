@@ -13,6 +13,7 @@ import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
+import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
 import IconButton from "./IconButton";
@@ -56,7 +57,7 @@ type ExpenseToEdit = {
   id: string;
 };
 
-function RoundExpenses({ round }) {
+function RoundExpenses({ round, currentUser }) {
   const intl = useIntl();
   const router = useRouter();
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
@@ -128,6 +129,9 @@ function RoundExpenses({ round }) {
                     <FormattedMessage defaultMessage="Expense" />
                   </TableCell>
                   <TableCell>
+                    <FormattedMessage defaultMessage="Status" />
+                  </TableCell>
+                  <TableCell>
                     <FormattedMessage defaultMessage="Amount" />
                   </TableCell>
                   <TableCell>
@@ -140,6 +144,14 @@ function RoundExpenses({ round }) {
                 {round.expenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell>{expense.title}</TableCell>
+                    <TableCell>
+                      <span className="inline-block">
+                        <ExpenseStatus
+                          expense={expense}
+                          currentUser={currentUser}
+                        />
+                      </span>
+                    </TableCell>
                     <TableCell>
                       <FormattedCurrency
                         value={expense.amount}

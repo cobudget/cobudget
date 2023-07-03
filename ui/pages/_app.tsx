@@ -116,6 +116,7 @@ export const TOP_LEVEL_QUERY = gql`
         ocId
         bucketId
         currency
+        status
       }
       guidelines {
         id
