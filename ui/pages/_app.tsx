@@ -106,6 +106,12 @@ export const TOP_LEVEL_QUERY = gql`
       bucketReviewIsOpen
       discourseCategoryId
       totalInMembersBalances
+      ocCollective {
+        slug
+        parent {
+          slug
+        }
+      }
       expenses {
         id
         ocMeta {

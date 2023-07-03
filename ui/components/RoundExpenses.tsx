@@ -143,7 +143,24 @@ function RoundExpenses({ round, currentUser }) {
               <TableBody>
                 {round.expenses.map((expense) => (
                   <TableRow key={expense.id}>
-                    <TableCell>{expense.title}</TableCell>
+                    <TableCell>
+                      {expense?.ocId ? (
+                        <a
+                          target="_blank"
+                          className="underline"
+                          href={
+                            round?.ocCollective?.parent
+                              ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                              : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                          }
+                          rel="noreferrer"
+                        >
+                          {expense.title}
+                        </a>
+                      ) : (
+                        <span>{expense.title}</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <span className="inline-block">
                         <ExpenseStatus
