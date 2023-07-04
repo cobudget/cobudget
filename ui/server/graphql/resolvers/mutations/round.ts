@@ -867,11 +867,14 @@ export const syncOCExpenses = async (_, { id }) => {
     if (!round.ocVerified) {
       throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
     }
-    const collective = await getCollective(
-      { id: round.openCollectiveId },
+    const collective = await getCollectiveOrProject(
+      { id: round.openCollectiveProjectId || round.openCollectiveId },
+      round.openCollectiveProjectId,
       getOCToken(round)
     );
+
     const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
+
     const allExpenses = await prisma.expense.findMany({
       where: { roundId: id },
     });
