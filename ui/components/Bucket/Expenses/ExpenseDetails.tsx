@@ -27,6 +27,9 @@ const GET_EXPENSE = gql`
       recipientPostalCode
       status
       submittedBy
+      ocMeta {
+        legacyId
+      }
       ocId
       currency
       receipts {
@@ -76,7 +79,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
     return <>Loading...</>;
   }
 
-  const isOcExpense = !!expense.ocId;
+  const isOcExpense = !!expense?.ocId;
 
   return (
     <>
@@ -240,9 +243,19 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
         )}
 
         {isOcExpense && (
-          <p className="text-sm italic text-gray-500">
-            <FormattedMessage defaultMessage="This expense is submitted through OpenCollective" />
-          </p>
+          <a
+            target="_blank"
+            href={
+              round?.ocCollective?.parent
+                ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+            }
+            rel="noreferrer"
+          >
+            <p className="text-sm italic text-gray-500">
+              <FormattedMessage defaultMessage="See this expense on Open Collective" />
+            </p>
+          </a>
         )}
       </div>
       <Modal
