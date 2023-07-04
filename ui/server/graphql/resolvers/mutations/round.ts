@@ -4,6 +4,7 @@ import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getCollective,
+  getCollectiveOrProject,
   getExpenses,
   getProject,
   getRoundMember,
@@ -822,13 +823,15 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
     });
     if (isAdmin) {
       const round = await prisma.round.findFirst({ where: { id: roundId } });
-      const collective = await getCollective(
-        { id: round?.openCollectiveId },
+      const collective = await getCollectiveOrProject(
+        { id: round?.openCollectiveProjectId || round?.openCollectiveId },
+        round?.openCollectiveProjectId,
         getOCToken(round)
       );
       const webhooks =
         collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
-      const link = appLink("/api/oc-hooks");
+      const link =
+        "https://cobudget.com/api/oc-hooks" || appLink("/api/oc-hooks");
       const ocVerified = webhooks.some((webhook) => {
         if (webhook.indexOf(link) === 0) {
           const [token] = webhook
