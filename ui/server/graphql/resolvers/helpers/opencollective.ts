@@ -26,12 +26,19 @@ export const GET_COLLECTIVE = `
 `;
 
 export const GET_PROJECT = `
-    query ($slug: String, $id: String) {
+    query ($slug: String, $id: String,  $limit: Int, $account: AccountReferenceInput!) {
         project (slug:$slug, id: $id) {
           id
           slug
           name
           type
+          webhooks(limit: $limit, account: $account) {
+            totalCount
+            limit
+            nodes {
+              webhookUrl
+            }
+          }
           parent {
             id
             name
@@ -154,11 +161,26 @@ export const getProject = async (
 ) => {
   const graphqlClient = customOCGqlClient(token);
   try {
-    const response = await graphqlClient.request(GET_PROJECT, filter);
+    const response = await graphqlClient.request(GET_PROJECT, {
+      ...filter,
+      limit: 100,
+      account: {
+        slug: filter.slug,
+        id: filter.id,
+      },
+    });
     return response.project;
   } catch (err) {
     return null;
   }
+};
+
+export const getCollectiveOrProject = async (
+  filter: { slug?: string; id?: string },
+  isProject,
+  token: string
+) => {
+  return isProject ? getProject(filter, token) : getCollective(filter, token);
 };
 
 export const getExpense = async (id: number, token: string) => {
