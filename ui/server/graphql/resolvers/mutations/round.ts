@@ -4,6 +4,7 @@ import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
 import {
   getCollective,
+  getCollectiveOrProject,
   getExpenses,
   getProject,
   getRoundMember,
@@ -822,8 +823,9 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
     });
     if (isAdmin) {
       const round = await prisma.round.findFirst({ where: { id: roundId } });
-      const collective = await getCollective(
-        { id: round?.openCollectiveId },
+      const collective = await getCollectiveOrProject(
+        { id: round?.openCollectiveProjectId || round?.openCollectiveId },
+        round?.openCollectiveProjectId,
         getOCToken(round)
       );
       const webhooks =
@@ -864,11 +866,14 @@ export const syncOCExpenses = async (_, { id }) => {
     if (!round.ocVerified) {
       throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
     }
-    const collective = await getCollective(
-      { id: round.openCollectiveId },
+    const collective = await getCollectiveOrProject(
+      { id: round.openCollectiveProjectId || round.openCollectiveId },
+      round.openCollectiveProjectId,
       getOCToken(round)
     );
+
     const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
+
     const allExpenses = await prisma.expense.findMany({
       where: { roundId: id },
     });
