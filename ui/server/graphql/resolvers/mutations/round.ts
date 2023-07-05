@@ -832,7 +832,7 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
         collective?.webhooks?.nodes?.map((w) => w.webhookUrl) || [];
       const link = appLink("/api/oc-hooks");
       const ocVerified = webhooks.some((webhook) => {
-        if (webhook.indexOf(link) === 0) {
+        if (webhook?.indexOf(link) === 0) {
           const [token] = webhook
             .split("/")
             .map((t) => t.trim())
