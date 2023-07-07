@@ -96,7 +96,7 @@ model Expense {
   submittedBy         String?
   status              ExpenseStatus   @default(SUBMITTED)
 
-  ocId                String?
+  ocId                String?   @unique
   roundId             String    @default("")
   ocMeta              String?   @default("")
 
