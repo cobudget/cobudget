@@ -925,6 +925,15 @@ export const syncOCExpenses = async (_, { id }) => {
       }
     });
     await Promise.allSettled([...promises, ...receiptPromises]);
+
+    //Delete expenses which are deleted from opencollective
+    const ocExpensesIds = ocExpenses.map((x) => x.id);
+    const deletedFromOC = allExpensesOCIds.filter(
+      (i) => i && ocExpensesIds.indexOf(i) === -1
+    );
+    await prisma.expense.deleteMany({
+      where: { ocId: { in: deletedFromOC } },
+    });
   } catch (err) {
     console.log("ERROR", err);
   }
