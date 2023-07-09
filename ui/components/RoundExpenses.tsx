@@ -21,6 +21,7 @@ import IconButton from "./IconButton";
 import { EditIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
 import HappySpinner from "./HappySpinner";
+import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -160,11 +161,9 @@ function RoundExpenses({ round, currentUser }) {
     return [];
   }, [buckets]);
 
-  if (fetching || expensesFetching) {
-    return <HappySpinner />;
-  }
-
-  const expenses = expensesData?.expenses || [];
+  const expenses = useMemo(() => {
+    return expensesData?.expenses || [];
+  }, [expensesData]);
 
   return (
     <>
@@ -172,99 +171,111 @@ function RoundExpenses({ round, currentUser }) {
         <p className="text-2xl font-semibold">
           <FormattedMessage defaultMessage="Expenses" />
         </p>
-        <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <FormattedMessage defaultMessage="Expense" />
-                  </TableCell>
-                  <TableCell>
-                    <FormattedMessage defaultMessage="Status" />
-                  </TableCell>
-                  <TableCell>
-                    <FormattedMessage defaultMessage="Amount" />
-                  </TableCell>
-                  <TableCell>
-                    <FormattedMessage defaultMessage="Bucket" />
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {expenses.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>
-                      {expense?.ocId ? (
-                        <a
-                          target="_blank"
-                          className="underline"
-                          href={
-                            round?.ocCollective?.parent
-                              ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
-                              : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
-                          }
-                          rel="noreferrer"
-                        >
-                          {expense.title}
-                        </a>
-                      ) : (
-                        <span>{expense.title}</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-block">
-                        <ExpenseStatus
-                          expense={expense}
-                          currentUser={currentUser}
-                        />
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <FormattedCurrency
-                        value={expense.amount}
-                        currency={expense.currency || round.currency}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {expense.bucketId ? (
-                        <Link
-                          href={`/${router.query.group}/${router.query.round}/${
-                            bucketsMap[expense.bucketId]?.id
-                          }`}
-                        >
-                          <span className="underline cursor-pointer">
-                            {bucketsMap[expense.bucketId]?.title}
-                          </span>
-                        </Link>
-                      ) : (
-                        <i
-                          onClick={() => setExpenseToEdit(expense)}
-                          className="cursor-pointer"
-                        >
-                          Assign Bucket
-                        </i>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-right">
-                        <span
-                          onClick={() => setExpenseToEdit(expense)}
-                          className="ml-2"
-                        >
-                          <IconButton>
-                            <EditIcon className="h-4 w-4" />
-                          </IconButton>
-                        </span>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+        <div className="mt-4">
+          <RoundExpensesFilter
+            filters={expensesFilter}
+            onFilterChange={(filter) => setExpensesFilter(filter)}
+          />
         </div>
+        {fetching || expensesFetching ? (
+          <div className="flex justify-center items-center mt-8">
+            <HappySpinner />
+          </div>
+        ) : (
+          <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>
+                      <FormattedMessage defaultMessage="Expense" />
+                    </TableCell>
+                    <TableCell>
+                      <FormattedMessage defaultMessage="Status" />
+                    </TableCell>
+                    <TableCell>
+                      <FormattedMessage defaultMessage="Amount" />
+                    </TableCell>
+                    <TableCell>
+                      <FormattedMessage defaultMessage="Bucket" />
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {expenses.map((expense) => (
+                    <TableRow key={expense.id}>
+                      <TableCell>
+                        {expense?.ocId ? (
+                          <a
+                            target="_blank"
+                            className="underline"
+                            href={
+                              round?.ocCollective?.parent
+                                ? `https://opencollective.com/${round?.ocCollective?.parent?.slug}/projects/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                                : `https://opencollective.com/${round?.ocCollective?.slug}/expenses/${expense?.ocMeta?.legacyId}`
+                            }
+                            rel="noreferrer"
+                          >
+                            {expense.title}
+                          </a>
+                        ) : (
+                          <span>{expense.title}</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className="inline-block">
+                          <ExpenseStatus
+                            expense={expense}
+                            currentUser={currentUser}
+                          />
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <FormattedCurrency
+                          value={expense.amount}
+                          currency={expense.currency || round.currency}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {expense.bucketId ? (
+                          <Link
+                            href={`/${router.query.group}/${
+                              router.query.round
+                            }/${bucketsMap[expense.bucketId]?.id}`}
+                          >
+                            <span className="underline cursor-pointer">
+                              {bucketsMap[expense.bucketId]?.title}
+                            </span>
+                          </Link>
+                        ) : (
+                          <i
+                            onClick={() => setExpenseToEdit(expense)}
+                            className="cursor-pointer"
+                          >
+                            Assign Bucket
+                          </i>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-right">
+                          <span
+                            onClick={() => setExpenseToEdit(expense)}
+                            className="ml-2"
+                          >
+                            <IconButton>
+                              <EditIcon className="h-4 w-4" />
+                            </IconButton>
+                          </span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </div>
+        )}
       </div>
       <Modal
         className="flex items-center justify-center p-4"
