@@ -175,6 +175,8 @@ function RoundExpenses({ round, currentUser }) {
           <RoundExpensesFilter
             filters={expensesFilter}
             onFilterChange={(filter) => setExpensesFilter(filter)}
+            round={round}
+            buckets={buckets}
           />
         </div>
         {fetching || expensesFetching ? (
