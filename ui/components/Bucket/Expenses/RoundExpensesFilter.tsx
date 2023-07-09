@@ -1,9 +1,47 @@
+import MultiSelect from "components/MultiSelect";
 import { SelectField } from "components/SelectInput";
-import React from "react";
+import {
+  EXPENSE_APPROVED,
+  EXPENSE_ERROR,
+  EXPENSE_INCOMPLETE,
+  EXPENSE_PAID,
+  EXPENSE_REJECTED,
+  EXPENSE_SUBMITTED,
+} from "../../../constants";
+import React, { useMemo } from "react";
 import { useIntl } from "react-intl";
 
 function RoundExpensesFilter({ onFilterChange, filters, round, buckets }) {
   const intl = useIntl();
+
+  const expenseStatusTypes = useMemo(() => {
+    return [
+      {
+        value: EXPENSE_SUBMITTED,
+        label: intl.formatMessage({ defaultMessage: "Submitted" }),
+      },
+      {
+        value: EXPENSE_APPROVED,
+        label: intl.formatMessage({ defaultMessage: "Approved" }),
+      },
+      {
+        value: EXPENSE_INCOMPLETE,
+        label: intl.formatMessage({ defaultMessage: "Incomplete" }),
+      },
+      {
+        value: EXPENSE_PAID,
+        label: intl.formatMessage({ defaultMessage: "Paid" }),
+      },
+      {
+        value: EXPENSE_REJECTED,
+        label: intl.formatMessage({ defaultMessage: "Rejected" }),
+      },
+      {
+        value: EXPENSE_ERROR,
+        label: intl.formatMessage({ defaultMessage: "Error" }),
+      },
+    ];
+  }, [intl]);
 
   return (
     <div className="flex gap-2">
@@ -41,6 +79,21 @@ function RoundExpensesFilter({ onFilterChange, filters, round, buckets }) {
             );
           })}
         </SelectField>
+      </div>
+      <div>
+        <MultiSelect
+          items={expenseStatusTypes}
+          onChange={(status) => {
+            if (status.length === 0) {
+              onFilterChange({ ...filters, status: undefined });
+            } else {
+              onFilterChange({ ...filters, status });
+            }
+          }}
+          value={filters.status || []}
+          color={round?.color}
+          label={intl.formatMessage({ defaultMessage: "Filter by status" })}
+        />
       </div>
     </div>
   );

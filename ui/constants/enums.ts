@@ -1,3 +1,6 @@
 export const EXPENSE_SUBMITTED = "SUBMITTED";
 export const EXPENSE_PAID = "PAID";
 export const EXPENSE_REJECTED = "REJECTED";
+export const EXPENSE_INCOMPLETE = "INCOMPLETE";
+export const EXPENSE_ERROR = "ERROR";
+export const EXPENSE_APPROVED = "APPROVED";
