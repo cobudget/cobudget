@@ -20,6 +20,7 @@ import FormattedCurrency from "./FormattedCurrency";
 import IconButton from "./IconButton";
 import { EditIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
+import HappySpinner from "./HappySpinner";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -44,6 +45,38 @@ const BUCKETS_QUERY = gql`
   }
 `;
 
+const EXPENSES_QUERY = gql`
+  query ExpensesQuery(
+    $roundId: String!
+    $limit: Int
+    $offset: Int
+    $status: [ExpenseStatus!]
+    $search: String
+    $bucketId: String
+  ) {
+    expenses(
+      roundId: $roundId
+      limit: $limit
+      offset: $offset
+      status: $status
+      search: $search
+      bucketId: $bucketId
+    ) {
+      id
+      title
+      amount
+      currency
+      status
+      bucketId
+      ocId
+      ocMeta {
+        legacyId
+      }
+      bucketId
+    }
+  }
+`;
+
 const UPDATE_EXPENSE_BUCKET = gql`
   mutation UpdateExpense($id: String!, $bucketId: String!) {
     updateExpense(id: $id, bucketId: $bucketId) {
@@ -62,7 +95,12 @@ function RoundExpenses({ round, currentUser }) {
   const intl = useIntl();
   const router = useRouter();
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
+  const [expensesFilter, setExpensesFilter] = useState({ roundId: round.id });
   const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
+  const [{ data: expensesData, fetching: expensesFetching }] = useQuery({
+    query: EXPENSES_QUERY,
+    variables: expensesFilter,
+  });
   const [{ data, fetching }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
@@ -122,6 +160,12 @@ function RoundExpenses({ round, currentUser }) {
     return [];
   }, [buckets]);
 
+  if (fetching || expensesFetching) {
+    return <HappySpinner />;
+  }
+
+  const expenses = expensesData?.expenses || [];
+
   return (
     <>
       <div className="page">
@@ -149,7 +193,7 @@ function RoundExpenses({ round, currentUser }) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {round.expenses.map((expense) => (
+                {expenses.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell>
                       {expense?.ocId ? (

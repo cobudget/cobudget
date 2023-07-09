@@ -2,11 +2,10 @@ import prisma from "server/prisma";
 
 export const expenses = async (
   _,
-  { limit, offset, roundSlug, groupSlug, search, status, bucketId }
+  { limit, offset, roundId, search, status, bucketId }
 ) => {
-  const group = await prisma.group.findFirst({ where: { slug: groupSlug } });
   const round = await prisma.round.findFirst({
-    where: { slug: roundSlug, groupId: group?.id },
+    where: { id: roundId },
   });
   if (!round) {
     return [];
