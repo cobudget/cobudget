@@ -895,7 +895,19 @@ export const syncOCExpenses = async (_, { id }) => {
           data,
         });
       } else {
-        const expense = await prisma.expense.create({ data });
+        let expense;
+        try {
+          expense = await prisma.expense.create({ data });
+        } catch (err) {
+          if (err.code === "P2003") {
+            expense = await prisma.expense.create({
+              data: { ...data, bucketId: undefined },
+            });
+          }
+        }
+        if (!expense) {
+          return Promise.allSettled([]);
+        }
         return Promise.allSettled(
           items.map((item) =>
             prisma.expenseReceipt.create({
@@ -934,6 +946,7 @@ export const syncOCExpenses = async (_, { id }) => {
     await prisma.expense.deleteMany({
       where: { ocId: { in: deletedFromOC } },
     });
+    return {};
   } catch (err) {
     console.log("ERROR", err);
   }

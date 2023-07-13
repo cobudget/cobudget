@@ -26,6 +26,7 @@ const schema = gql`
       limit: Int
       offset: Int
     ): [Expense]
+    allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
     expense(id: String!): Expense
@@ -605,6 +606,7 @@ const schema = gql`
     ocId: String
     currency: String
     ocMeta: OCMeta
+    roundId: String
   }
 
   type Bucket {
