@@ -21,3 +21,7 @@ export const expenses = async (
     skip: offset || 0,
   });
 };
+
+export const allExpenses = async () => {
+  return prisma.expense.findMany();
+};
