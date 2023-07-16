@@ -35,11 +35,11 @@ export default function AuthenticationForm({
           onSubmit={(evt) => {
             evt.preventDefault();
             window.grecaptcha.ready(async () => {
+              setLoading(true);
               const captchaToken = await window.grecaptcha.execute(
                 process.env.RECAPTCHA_SITE_KEY,
                 { action: "submit" }
               );
-              setLoading(true);
               fetch(`/api/auth/magiclink`, {
                 method: `POST`,
                 body: JSON.stringify({
