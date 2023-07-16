@@ -29,6 +29,7 @@ module.exports = (phase) => {
     REACT_APP_GRAPHQL_SUBSCRIPTION: process.env.REACT_APP_GRAPHQL_SUBSCRIPTION,
     HELPSCOUT_KEY: process.env.HELPSCOUT_KEY,
     LANDING_PAGE_URL: process.env.LANDING_PAGE_URL,
+    RECAPTCHA_SITE_KEY: process.env.RECAPTCHA_SITE_KEY,
   };
   return withBundleAnalyzer({
     env,
