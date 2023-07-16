@@ -6,6 +6,7 @@ import Button from "./Button";
 import Banner from "components/Banner";
 import { FormattedMessage, useIntl } from "react-intl";
 import toast from "react-hot-toast";
+import Script from "next/script";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -25,110 +26,124 @@ export default function AuthenticationForm({
   const intl = useIntl();
 
   return (
-    <div>
-      <form
-        onSubmit={(evt) => {
-          evt.preventDefault();
-          setLoading(true);
-          fetch(`/api/auth/magiclink`, {
-            method: `POST`,
-            body: JSON.stringify({
-              redirect,
-              destination: email,
-              rememberMe,
-            }),
-            headers: { "Content-Type": "application/json" },
-          })
-            .then((res) => res.json())
-            .then((json) => {
-              setLoading(false);
-              if (json.success) {
-                router.push(
-                  `/check-mailbox?e=${encodeURIComponent(email)}&c=${json.code}`
-                );
-              } else {
-                toast.error(json.error);
-              }
+    <>
+      <Script
+        src={`https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`}
+      />
+      <div>
+        <form
+          onSubmit={(evt) => {
+            evt.preventDefault();
+            window.grecaptcha.ready(async () => {
+              setLoading(true);
+              const captchaToken = await window.grecaptcha.execute(
+                process.env.RECAPTCHA_SITE_KEY,
+                { action: "submit" }
+              );
+              fetch(`/api/auth/magiclink`, {
+                method: `POST`,
+                body: JSON.stringify({
+                  redirect,
+                  destination: email,
+                  rememberMe,
+                  captchaToken,
+                }),
+                headers: { "Content-Type": "application/json" },
+              })
+                .then((res) => res.json())
+                .then((json) => {
+                  setLoading(false);
+                  if (json.success) {
+                    router.push(
+                      `/check-mailbox?e=${encodeURIComponent(email)}&c=${
+                        json.code
+                      }`
+                    );
+                  } else {
+                    toast.error(json.error);
+                  }
+                });
             });
-        }}
-      >
-        <TextField
-          name="email"
-          inputProps={{
-            type: "email",
-            value: email,
-            onChange: (evt) => setEmail(evt.target.value),
           }}
-          label={intl.formatMessage({ defaultMessage: "Email" })}
-          className="mb-4"
-          placeholder="me@hello.com"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              value={rememberMe}
-              onChange={(evt) => setRememberMe(evt.target.checked)}
-            />
-          }
-          label={intl.formatMessage({ defaultMessage: "Keep me logged in" })}
-        />
-        <Button
-          type="submit"
-          fullWidth
-          disabled={!email?.length}
-          loading={loading}
         >
-          <FormattedMessage defaultMessage="Send magic link" />
-        </Button>
-      </form>
+          <TextField
+            name="email"
+            inputProps={{
+              type: "email",
+              value: email,
+              onChange: (evt) => setEmail(evt.target.value),
+            }}
+            label={intl.formatMessage({ defaultMessage: "Email" })}
+            className="mb-4"
+            placeholder="me@hello.com"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                value={rememberMe}
+                onChange={(evt) => setRememberMe(evt.target.checked)}
+              />
+            }
+            label={intl.formatMessage({ defaultMessage: "Keep me logged in" })}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            disabled={!email?.length}
+            loading={loading}
+          >
+            <FormattedMessage defaultMessage="Send magic link" />
+          </Button>
+        </form>
 
-      {(fbLoginEnabled || googleLoginEnabled) && (
-        <div className="w-full h-px bg-gray-300 my-5"></div>
-      )}
+        {(fbLoginEnabled || googleLoginEnabled) && (
+          <div className="w-full h-px bg-gray-300 my-5"></div>
+        )}
 
-      {fbLoginEnabled && (
-        <div>
-          {fbEmailError && (
-            <Banner
-              className={"mb-4"}
-              variant="critical"
-              title="Problem logging in with Facebook"
-            >
-              <FormattedMessage
-                defaultMessage="
+        {fbLoginEnabled && (
+          <div>
+            {fbEmailError && (
+              <Banner
+                className={"mb-4"}
+                variant="critical"
+                title="Problem logging in with Facebook"
+              >
+                <FormattedMessage
+                  defaultMessage="
               To log in with Facebook, please allow us to get your email
               address. This is needed to notify you of important events in the
               app. You can always change what emails you receive from us.
               "
-              />
-            </Banner>
-          )}
-          <Button
-            fullWidth
-            href={`/api/auth/facebook/?${
-              fbEmailError ? "fb_no_email_scope=true&" : ""
-            }remember_me=true&${redirect ? `r=${redirect}` : ""}`}
-            className="text-center"
-            style={{ backgroundColor: "#1977f2" }}
-          >
-            <FormattedMessage defaultMessage="Log in with Facebook" />
-          </Button>
-        </div>
-      )}
-      {googleLoginEnabled && (
-        <div>
-          <Button
-            fullWidth
-            href="/api/auth/google/?remember_me=true"
-            className="mt-5 text-center shadow-lg border-default flex"
-            color="white"
-            variant="secondary"
-          >
-            <img src="/google-icon.png" className="h-8 max-w-none mr-2" />
-            <FormattedMessage defaultMessage="Log in with Google" />
-          </Button>
-        </div>
-      )}
-    </div>
+                />
+              </Banner>
+            )}
+            <Button
+              fullWidth
+              href={`/api/auth/facebook/?${
+                fbEmailError ? "fb_no_email_scope=true&" : ""
+              }remember_me=true&${redirect ? `r=${redirect}` : ""}`}
+              className="text-center"
+              style={{ backgroundColor: "#1977f2" }}
+            >
+              <FormattedMessage defaultMessage="Log in with Facebook" />
+            </Button>
+          </div>
+        )}
+        {googleLoginEnabled && (
+          <div>
+            <Button
+              fullWidth
+              href="/api/auth/google/?remember_me=true"
+              className="mt-5 text-center shadow-lg border-default flex"
+              color="white"
+              variant="secondary"
+            >
+              <img src="/google-icon.png" className="h-8 max-w-none mr-2" />
+              <FormattedMessage defaultMessage="Log in with Google" />
+            </Button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
