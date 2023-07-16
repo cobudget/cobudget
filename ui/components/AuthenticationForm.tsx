@@ -35,7 +35,7 @@ export default function AuthenticationForm({
           onSubmit={(evt) => {
             evt.preventDefault();
             window.grecaptcha.ready(async () => {
-              const gr = await window.grecaptcha.execute(
+              const captchaToken = await window.grecaptcha.execute(
                 process.env.RECAPTCHA_SITE_KEY,
                 { action: "submit" }
               );
@@ -46,6 +46,7 @@ export default function AuthenticationForm({
                   redirect,
                   destination: email,
                   rememberMe,
+                  captchaToken,
                 }),
                 headers: { "Content-Type": "application/json" },
               })
