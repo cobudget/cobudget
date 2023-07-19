@@ -874,6 +874,9 @@ export const syncOCExpenses = async (_, { id }) => {
 
     const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
     const ocExpensesIds = ocExpenses.map((x) => x.id);
+    const ocReceiptsIds = ocExpenses
+      .map((x) => x.items.map((i) => i.id))
+      .flat();
 
     const allExpenses = await prisma.expense.findMany({
       where: {
@@ -947,6 +950,23 @@ export const syncOCExpenses = async (_, { id }) => {
     );
     await prisma.expense.deleteMany({
       where: { ocId: { in: deletedFromOC } },
+    });
+
+    //Delete expenses receipts which are deletec from opencollective
+    const localExpenses = await prisma.expense.findMany({
+      where: { roundId: id },
+    });
+    const localExpensesIds = localExpenses.map((e) => e.id);
+    const localReceipts = await prisma.expenseReceipt.findMany({
+      where: { expenseId: { in: localExpensesIds } },
+    });
+    const localReceiptsIds = localReceipts.map((r) => r.ocExpenseReceiptId);
+    const deletedReceiptsIds = localReceiptsIds.filter((r) => {
+      return r && ocReceiptsIds.indexOf(r) === -1;
+    });
+
+    await prisma.expenseReceipt.deleteMany({
+      where: { ocExpenseReceiptId: { in: deletedReceiptsIds } },
     });
     return {};
   } catch (err) {
