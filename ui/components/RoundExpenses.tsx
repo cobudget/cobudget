@@ -63,17 +63,21 @@ const EXPENSES_QUERY = gql`
       search: $search
       bucketId: $bucketId
     ) {
-      id
-      title
-      amount
-      currency
-      status
-      bucketId
-      ocId
-      ocMeta {
-        legacyId
+      moreExist
+      total
+      expenses {
+        id
+        title
+        amount
+        currency
+        status
+        bucketId
+        ocId
+        ocMeta {
+          legacyId
+        }
+        bucketId
       }
-      bucketId
     }
   }
 `;
@@ -165,7 +169,7 @@ function RoundExpenses({ round, currentUser }) {
   }, [buckets]);
 
   const expenses = useMemo(() => {
-    return expensesData?.expenses || [];
+    return expensesData?.expenses?.expenses || [];
   }, [expensesData]);
 
   return (
