@@ -22,6 +22,8 @@ import { EditIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
 import HappySpinner from "./HappySpinner";
 import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
+import usePaginatedQuery from "utils/usePaginatedQuery";
+import LoadMore from "./LoadMore";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -105,10 +107,35 @@ function RoundExpenses({ round, currentUser }) {
     limit: 10e4,
   });
   const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
-  const [{ data: expensesData, fetching: expensesFetching }] = useQuery({
+  const {
+    data: expensesData,
+    fetching: expensesFetching,
+    fetchMore,
+  } = usePaginatedQuery({
     query: EXPENSES_QUERY,
     variables: expensesFilter,
+    toFullPage: (pagesMap) => {
+      const pages: Array<{
+        expenses: { expenses: any; total: number; moreExist: boolean };
+      }> = Object.values(pagesMap);
+      return pages.reduce(
+        (acc, page) => {
+          return {
+            total: page.expenses.total,
+            moreExists: page.expenses.moreExist,
+            expenses: [...acc.expenses, ...page.expenses.expenses],
+          };
+        },
+        {
+          total: 0,
+          expenses: [],
+          moreExists: true,
+        }
+      );
+    },
+    limit: 10,
   });
+
   const [{ data, fetching }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
@@ -169,7 +196,7 @@ function RoundExpenses({ round, currentUser }) {
   }, [buckets]);
 
   const expenses = useMemo(() => {
-    return expensesData?.expenses?.expenses || [];
+    return expensesData?.expenses || [];
   }, [expensesData]);
 
   return (
@@ -186,7 +213,7 @@ function RoundExpenses({ round, currentUser }) {
             buckets={buckets}
           />
         </div>
-        {fetching || expensesFetching ? (
+        {fetching ? (
           <div className="flex justify-center items-center mt-8">
             <HappySpinner />
           </div>
@@ -285,6 +312,12 @@ function RoundExpenses({ round, currentUser }) {
             </TableContainer>
           </div>
         )}
+        <LoadMore
+          onClick={fetchMore}
+          moreExist={expensesData?.moreExists}
+          loading={expensesFetching}
+          autoLoadMore
+        />
       </div>
       <Modal
         className="flex items-center justify-center p-4"
