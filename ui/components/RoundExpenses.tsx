@@ -104,7 +104,6 @@ function RoundExpenses({ round, currentUser }) {
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
   const [expensesFilter, setExpensesFilter] = useState({
     roundId: round.id,
-    limit: 10e4,
   });
   const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
   const {
@@ -133,7 +132,7 @@ function RoundExpenses({ round, currentUser }) {
         }
       );
     },
-    limit: 10,
+    limit: 100,
   });
 
   const [{ data, fetching }] = useQuery({
