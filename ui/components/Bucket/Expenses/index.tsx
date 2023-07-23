@@ -56,6 +56,16 @@ function Expenses({ bucket, round, currentUser }) {
                   expenses={bucket.expenses}
                   round={round}
                   currentUser={currentUser}
+                  rejected={false}
+                />
+                <p className="font-lg font-medium">
+                  <FormattedMessage defaultMessage="Rejected" />
+                </p>
+                <ExpenseTable
+                  expenses={bucket.expenses}
+                  round={round}
+                  currentUser={currentUser}
+                  rejected={true}
                 />
               </div>
             )}

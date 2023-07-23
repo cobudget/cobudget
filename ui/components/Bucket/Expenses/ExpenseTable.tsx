@@ -2,10 +2,11 @@ import FormattedCurrency from "components/FormattedCurrency";
 import { LoaderIcon } from "components/Icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
+import { EXPENSE_REJECTED } from "../../../constants";
 
 const CONVERT_CURRENCY = gql`
   query ConvertCurrency(
@@ -16,8 +17,21 @@ const CONVERT_CURRENCY = gql`
   }
 `;
 
-function ExpenseTable({ expenses, round, currentUser }) {
+function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   const { pathname, query } = useRouter();
+
+  const expenses = useMemo(() => {
+    if (!allExpenses) {
+      return [];
+    }
+    if (typeof rejected === "undefined") {
+      return allExpenses;
+    }
+    if (rejected) {
+      return allExpenses.filter((e) => e.status === EXPENSE_REJECTED);
+    }
+    return allExpenses.filter((e) => e.status !== EXPENSE_REJECTED);
+  }, [allExpenses, rejected]);
 
   const partialTotal = useMemo(() => {
     const sums = {};
@@ -56,7 +70,12 @@ function ExpenseTable({ expenses, round, currentUser }) {
   if (expenses.length === 0) {
     return (
       <p className="my-2 text-gray-400">
-        <FormattedMessage defaultMessage="This bucket does not have any expense" />
+        <FormattedMessage
+          defaultMessage="This bucket does not have any {type} expense"
+          values={{
+            type: rejected ? "rejected" : "",
+          }}
+        />
       </p>
     );
   }
