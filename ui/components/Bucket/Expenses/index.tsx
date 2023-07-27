@@ -6,6 +6,8 @@ import { FormattedMessage } from "react-intl";
 import AddExpense from "./AddEditExpense";
 import ExpenseDetails from "./ExpenseDetails";
 import ExpenseTable from "./ExpenseTable";
+import RequestedFundingTable from "../RequestedFundingTable";
+import FormattedCurrency from "components/FormattedCurrency";
 
 function Expenses({ bucket, round, currentUser }) {
   const router = useRouter();
@@ -49,16 +51,45 @@ function Expenses({ bucket, round, currentUser }) {
               />
             ) : (
               <div className="my-4">
-                <p className="font-lg font-medium">
+                <p className="text-2xl font-medium">
                   <FormattedMessage defaultMessage="Expenses" />
                 </p>
                 <ExpenseTable
                   expenses={bucket.expenses}
                   round={round}
                   currentUser={currentUser}
+                  rejected={false}
+                />
+                <p className="font-lg font-medium">
+                  <FormattedMessage defaultMessage="Rejected" />
+                </p>
+                <ExpenseTable
+                  expenses={bucket.expenses}
+                  round={round}
+                  currentUser={currentUser}
+                  rejected={true}
                 />
               </div>
             )}
+            <div className="my-4">
+              <p className="text-2xl font-medium">
+                <FormattedMessage defaultMessage="Budget" />
+              </p>
+              <div className="my-2">
+                <RequestedFundingTable round={round} bucket={bucket} />
+              </div>
+            </div>
+            <div className="my-2">
+              <p className="text-lg font-bold">
+                <FormattedMessage defaultMessage="Received Funding" />
+                <span className="float-right">
+                  <FormattedCurrency
+                    value={bucket.totalContributions}
+                    currency={round.currency}
+                  />
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
