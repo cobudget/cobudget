@@ -9,6 +9,12 @@ const schema = gql`
     currency: String!
   }
 
+  type ExpensesResponse {
+    total: Int
+    moreExist: Boolean
+    expenses: [Expense]
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -25,7 +31,7 @@ const schema = gql`
       search: String
       limit: Int
       offset: Int
-    ): [Expense]
+    ): ExpensesResponse
     allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink

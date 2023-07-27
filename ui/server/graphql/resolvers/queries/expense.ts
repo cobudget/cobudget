@@ -10,7 +10,7 @@ export const expenses = async (
   if (!round) {
     return [];
   }
-  return prisma.expense.findMany({
+  const response = await prisma.expense.findMany({
     where: {
       roundId: round.id,
       bucketId,
@@ -20,6 +20,20 @@ export const expenses = async (
     take: limit || 10,
     skip: offset || 0,
   });
+  const total = await prisma.expense.count({
+    where: {
+      roundId: round.id,
+      bucketId,
+      status: { in: status },
+      title: { contains: search, mode: "insensitive" },
+    },
+  });
+
+  return {
+    expenses: response,
+    total,
+    moreExist: total > offset + limit,
+  };
 };
 
 export const allExpenses = async () => {
