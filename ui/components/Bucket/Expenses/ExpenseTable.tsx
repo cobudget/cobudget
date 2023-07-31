@@ -2,10 +2,11 @@ import FormattedCurrency from "components/FormattedCurrency";
 import { LoaderIcon } from "components/Icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
+import { EXPENSE_REJECTED } from "../../../constants";
 
 const CONVERT_CURRENCY = gql`
   query ConvertCurrency(
@@ -16,8 +17,21 @@ const CONVERT_CURRENCY = gql`
   }
 `;
 
-function ExpenseTable({ expenses, round, currentUser }) {
+function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   const { pathname, query } = useRouter();
+
+  const expenses = useMemo(() => {
+    if (!allExpenses) {
+      return [];
+    }
+    if (typeof rejected === "undefined") {
+      return allExpenses;
+    }
+    if (rejected) {
+      return allExpenses.filter((e) => e.status === EXPENSE_REJECTED);
+    }
+    return allExpenses.filter((e) => e.status !== EXPENSE_REJECTED);
+  }, [allExpenses, rejected]);
 
   const partialTotal = useMemo(() => {
     const sums = {};
@@ -56,7 +70,12 @@ function ExpenseTable({ expenses, round, currentUser }) {
   if (expenses.length === 0) {
     return (
       <p className="my-2 text-gray-400">
-        <FormattedMessage defaultMessage="This bucket does not have any expense" />
+        <FormattedMessage
+          defaultMessage="This bucket does not have any {type} expense"
+          values={{
+            type: rejected ? "rejected" : "",
+          }}
+        />
       </p>
     );
   }
@@ -66,30 +85,22 @@ function ExpenseTable({ expenses, round, currentUser }) {
       <table className="table-fixed w-full">
         <tbody>
           {expenses.map((expense) => {
-            const canViewDetails =
-              currentUser?.currentCollMember?.isAdmin ||
-              currentUser?.currentCollMember?.isModerator ||
-              currentUser?.currentCollMember?.id === expense?.submittedBy;
             return (
               <tr className="bg-gray-100 even:bg-white" key={expense.id}>
                 <td className="px-4 py-2">
-                  {canViewDetails ? (
-                    <Link
-                      href={{
-                        pathname: pathname,
-                        query: { ...query, expense: expense.id },
-                      }}
-                      passHref
-                      shallow
-                      replace
-                    >
-                      <span className="underline cursor-pointer">
-                        {expense.title}
-                      </span>
-                    </Link>
-                  ) : (
-                    <span>{expense.title}</span>
-                  )}
+                  <Link
+                    href={{
+                      pathname: pathname,
+                      query: { ...query, expense: expense.id },
+                    }}
+                    passHref
+                    shallow
+                    replace
+                  >
+                    <span className="underline cursor-pointer">
+                      {expense.title}
+                    </span>
+                  </Link>
                 </td>
                 <td className="px-4 py-2 flex gap-2">
                   <FormattedCurrency
