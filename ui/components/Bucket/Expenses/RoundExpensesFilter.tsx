@@ -44,8 +44,8 @@ function RoundExpensesFilter({ onFilterChange, filters, round, buckets }) {
   }, [intl]);
 
   return (
-    <div className="flex gap-2">
-      <div className="flex-1 bg-white shadow-sm rounded-md border-transparent focus-within:border-gray-900 border-3 px-1 relative pr-10 flex items-center overflow-hidden">
+    <div className="grid sm:grid-cols-5 grid-cold-4 gap-2">
+      <div className="sm:col-span-3 col-span-2 flex flex-1 bg-white shadow-sm rounded-md border-transparent focus-within:border-gray-900 border-3 px-1 relative pr-10 items-center overflow-hidden">
         <input
           placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
           className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
