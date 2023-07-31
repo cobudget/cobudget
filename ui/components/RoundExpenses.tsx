@@ -75,6 +75,7 @@ const EXPENSES_QUERY = gql`
         status
         bucketId
         ocId
+        createdAt
         ocMeta {
           legacyId
         }
@@ -234,6 +235,9 @@ function RoundExpenses({ round, currentUser }) {
                     <TableCell>
                       <FormattedMessage defaultMessage="Bucket" />
                     </TableCell>
+                    <TableCell>
+                      <FormattedMessage defaultMessage="Date Created" />
+                    </TableCell>
                     <TableCell />
                   </TableRow>
                 </TableHead>
@@ -291,6 +295,9 @@ function RoundExpenses({ round, currentUser }) {
                             Assign Bucket
                           </i>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(expense.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <div className="text-right">

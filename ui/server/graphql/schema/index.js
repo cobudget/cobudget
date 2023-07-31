@@ -613,6 +613,7 @@ const schema = gql`
     currency: String
     ocMeta: OCMeta
     roundId: String
+    createdAt: Date
   }
 
   type Bucket {
