@@ -56,6 +56,8 @@ const EXPENSES_QUERY = gql`
     $status: [ExpenseStatus!]
     $search: String
     $bucketId: String
+    $sortBy: ExpenseSortByOptions
+    $sortOrder: SortOrderOptions
   ) {
     expenses(
       roundId: $roundId
@@ -64,6 +66,8 @@ const EXPENSES_QUERY = gql`
       status: $status
       search: $search
       bucketId: $bucketId
+      sortBy: $sortBy
+      sortOrder: $sortOrder
     ) {
       moreExist
       total
@@ -105,6 +109,8 @@ function RoundExpenses({ round, currentUser }) {
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
   const [expensesFilter, setExpensesFilter] = useState({
     roundId: round.id,
+    sortBy: "createdAt",
+    sortOrder: "desc",
   });
   const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
   const {
@@ -224,10 +230,36 @@ function RoundExpenses({ round, currentUser }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Expense" />
+                      <span
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "title",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Expense" />
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Status" />
+                      <span
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "status",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Status" />
+                      </span>
                     </TableCell>
                     <TableCell>
                       <FormattedMessage defaultMessage="Amount" />
@@ -236,7 +268,20 @@ function RoundExpenses({ round, currentUser }) {
                       <FormattedMessage defaultMessage="Bucket" />
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Date Created" />
+                      <span
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "createdAt",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Date Created" />
+                      </span>
                     </TableCell>
                     <TableCell />
                   </TableRow>

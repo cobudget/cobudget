@@ -2,7 +2,7 @@ import prisma from "server/prisma";
 
 export const expenses = async (
   _,
-  { limit, offset, roundId, search, status, bucketId }
+  { limit, offset, roundId, search, status, bucketId, sortBy, sortOrder }
 ) => {
   const round = await prisma.round.findFirst({
     where: { id: roundId },
@@ -19,6 +19,9 @@ export const expenses = async (
     },
     take: limit || 10,
     skip: offset || 0,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
+    },
   });
   const total = await prisma.expense.count({
     where: {
