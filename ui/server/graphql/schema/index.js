@@ -357,6 +357,7 @@ const schema = gql`
     createdAt
     title
     status
+    bucketTitle
   }
 
   enum SortOrderOptions {

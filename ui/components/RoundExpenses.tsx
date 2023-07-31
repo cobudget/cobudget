@@ -265,7 +265,20 @@ function RoundExpenses({ round, currentUser }) {
                       <FormattedMessage defaultMessage="Amount" />
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Bucket" />
+                      <span
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "bucketTitle",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Bucket" />
+                      </span>
                     </TableCell>
                     <TableCell>
                       <span

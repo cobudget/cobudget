@@ -1182,49 +1182,53 @@ export const updateExpense = async (
   },
   { user, ss }
 ) => {
-  const expense = await prisma.expense.findUnique({
-    where: { id },
-    include: { bucket: true },
-  });
-
-  if (!expense) {
-    throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
-  }
-
-  let roundMember;
-
-  const allowEdit = await isCollAdmin({
-    ss,
-    roundId: expense.roundId,
-    userId: user?.id,
-  });
-
-  // If the user is neither an admin nor a super-admin, retrieve the user to verify the expense creator.
-  if (!allowEdit) {
-    roundMember = await getRoundMember({
-      userId: user?.id,
-      roundId: expense.bucket?.roundId,
-      bucketId: expense.bucketId,
-    });
-  }
-
-  if (allowEdit || roundMember?.id === expense.submittedBy) {
-    return prisma.expense.update({
+  try {
+    const expense = await prisma.expense.findUnique({
       where: { id },
-      data: {
-        title,
-        recipientName,
-        recipientEmail,
-        swiftCode,
-        iban,
-        country,
-        city,
-        recipientAddress,
-        recipientPostalCode,
-        bucketId,
-      },
+      include: { bucket: true },
     });
-  } else {
-    throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+
+    if (!expense) {
+      throw new Error(GRAPHQL_EXPENSE_NOT_FOUND);
+    }
+
+    let roundMember;
+
+    const allowEdit = await isCollAdmin({
+      ss,
+      roundId: expense.roundId,
+      userId: user?.id,
+    });
+
+    // If the user is neither an admin nor a super-admin, retrieve the user to verify the expense creator.
+    if (!allowEdit) {
+      roundMember = await getRoundMember({
+        userId: user?.id,
+        roundId: expense.bucket?.roundId,
+        bucketId: expense.bucketId,
+      });
+    }
+
+    if (allowEdit || roundMember?.id === expense.submittedBy) {
+      return prisma.expense.update({
+        where: { id },
+        data: {
+          title,
+          recipientName,
+          recipientEmail,
+          swiftCode,
+          iban,
+          country,
+          city,
+          recipientAddress,
+          recipientPostalCode,
+          bucketId,
+        },
+      });
+    } else {
+      throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
+    }
+  } catch (e) {
+    console.log(e);
   }
 };
