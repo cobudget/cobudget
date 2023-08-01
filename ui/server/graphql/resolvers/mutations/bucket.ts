@@ -1229,6 +1229,6 @@ export const updateExpense = async (
       throw new Error(GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER);
     }
   } catch (e) {
-    console.log(e);
+    return null;
   }
 };
