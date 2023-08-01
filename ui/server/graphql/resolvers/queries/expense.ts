@@ -11,7 +11,11 @@ export const expenses = async (
     where: { id: roundId },
   });
   if (!round) {
-    return [];
+    return {
+      expenses: [],
+      total: 0,
+      moreExist: false,
+    };
   }
 
   if (sortBy === "amount") {
