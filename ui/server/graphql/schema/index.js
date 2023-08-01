@@ -358,6 +358,7 @@ const schema = gql`
     title
     status
     bucketTitle
+    amount
   }
 
   enum SortOrderOptions {
