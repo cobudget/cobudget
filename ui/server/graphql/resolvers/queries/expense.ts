@@ -24,7 +24,7 @@ export const expenses = async (
       status: { in: status },
       title: { contains: search, mode: "insensitive" },
     },
-    ...{
+    ...(sortBy === "bucketTitle" && {
       include: {
         bucket: {
           select: {
@@ -32,7 +32,7 @@ export const expenses = async (
           },
         },
       },
-    },
+    }),
     take: limit || 10,
     skip: offset || 0,
     ...(isSimpleSort && {
