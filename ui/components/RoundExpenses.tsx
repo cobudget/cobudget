@@ -18,7 +18,7 @@ import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
 import IconButton from "./IconButton";
-import { EditIcon } from "./Icons";
+import { EditIcon, SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
 import HappySpinner from "./HappySpinner";
 import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
@@ -205,6 +205,18 @@ function RoundExpenses({ round, currentUser }) {
     return expensesData?.expenses || [];
   }, [expensesData]);
 
+  const getSortIcon = (name: string) => {
+    if (name === expensesFilter.sortBy) {
+      if (expensesFilter.sortOrder === "asc") {
+        return <SortUpIcon className="h-3 w-3 text-gray-500" />;
+      } else {
+        return <SortDownIcon className="h-3 w-3 text-gray-500" />;
+      }
+    } else {
+      return <SortIcon className="h-3 w-3 text-gray-500" />;
+    }
+  };
+
   return (
     <>
       <div className="page">
@@ -231,6 +243,7 @@ function RoundExpenses({ round, currentUser }) {
                   <TableRow>
                     <TableCell>
                       <span
+                        className="cursor-pointer select-none"
                         onClick={() => {
                           setExpensesFilter({
                             ...expensesFilter,
@@ -243,10 +256,14 @@ function RoundExpenses({ round, currentUser }) {
                         }}
                       >
                         <FormattedMessage defaultMessage="Expense" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("title")}
+                        </span>
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
+                        className="cursor-pointer select-none"
                         onClick={() => {
                           setExpensesFilter({
                             ...expensesFilter,
@@ -259,10 +276,14 @@ function RoundExpenses({ round, currentUser }) {
                         }}
                       >
                         <FormattedMessage defaultMessage="Status" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("status")}
+                        </span>
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
+                        className="cursor-pointer select-none"
                         onClick={() => {
                           setExpensesFilter({
                             ...expensesFilter,
@@ -275,10 +296,14 @@ function RoundExpenses({ round, currentUser }) {
                         }}
                       >
                         <FormattedMessage defaultMessage="Amount" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("amount")}
+                        </span>
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
+                        className="cursor-pointer select-none"
                         onClick={() => {
                           setExpensesFilter({
                             ...expensesFilter,
@@ -291,10 +316,14 @@ function RoundExpenses({ round, currentUser }) {
                         }}
                       >
                         <FormattedMessage defaultMessage="Bucket" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("bucketTitle")}
+                        </span>
                       </span>
                     </TableCell>
                     <TableCell>
                       <span
+                        className="cursor-pointer select-none"
                         onClick={() => {
                           setExpensesFilter({
                             ...expensesFilter,
@@ -307,6 +336,9 @@ function RoundExpenses({ round, currentUser }) {
                         }}
                       >
                         <FormattedMessage defaultMessage="Date Created" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("createdAt")}
+                        </span>
                       </span>
                     </TableCell>
                     <TableCell />
