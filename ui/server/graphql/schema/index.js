@@ -31,6 +31,8 @@ const schema = gql`
       search: String
       limit: Int
       offset: Int
+      sortBy: ExpenseSortByOptions
+      sortOrder: SortOrderOptions
     ): ExpensesResponse
     allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
@@ -351,6 +353,19 @@ const schema = gql`
     ARCHIVED
   }
 
+  enum ExpenseSortByOptions {
+    createdAt
+    title
+    status
+    bucketTitle
+    amount
+  }
+
+  enum SortOrderOptions {
+    asc
+    desc
+  }
+
   type Round {
     id: ID!
     slug: String!
@@ -613,6 +628,7 @@ const schema = gql`
     currency: String
     ocMeta: OCMeta
     roundId: String
+    createdAt: Date
   }
 
   type Bucket {
