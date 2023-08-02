@@ -88,6 +88,7 @@ export const GET_EXPENSES = `
           }
         }
         status
+        createdAt
       }
       totalCount
     }
@@ -118,6 +119,7 @@ export const GET_EXPENSE = `
       currency
       customData
       status
+      createdAt
       payoutMethod {
         data
         id

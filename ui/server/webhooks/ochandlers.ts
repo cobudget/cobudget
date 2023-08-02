@@ -14,6 +14,7 @@ export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
       submittedBy: expense.customData?.u,
       currency: expense.amountV2?.currency,
       ocMeta: JSON.stringify({ legacyId: expense.legacyId }),
+      createdAt: expense.createdAt,
 
       recipientName: expense.payoutMethod?.data?.accountHolderName,
       recipientEmail: expense.payoutMethod?.data?.details?.email,
@@ -52,6 +53,7 @@ export const handleExpenseChange = async (req, res) => {
         submittedBy: expense.customData?.u,
         currency: expense.amountV2?.currency,
         ocMeta: JSON.stringify({ legacyId: expense.legacyId }),
+        createdAt: expense.createdAt,
 
         recipientName: expense.payoutMethod?.data?.accountHolderName,
         recipientEmail: expense.payoutMethod?.data?.details?.email,

@@ -103,6 +103,8 @@ model Expense {
   receipts            ExpenseReceipt[]
 
   currency            String?
+
+  createdAt           DateTime  @default(now())
 }
 
 model GroupMember {
