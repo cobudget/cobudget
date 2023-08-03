@@ -229,7 +229,7 @@ function RoundExpenses({ round, currentUser }) {
             filters={expensesFilter}
             onFilterChange={(filter) => setExpensesFilter(filter)}
             round={round}
-            buckets={buckets}
+            buckets={sortedBuckets}
           />
         </div>
         {fetching ? (
