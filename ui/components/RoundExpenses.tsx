@@ -24,6 +24,7 @@ import HappySpinner from "./HappySpinner";
 import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 import LoadMore from "./LoadMore";
+import dayjs from "dayjs";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -400,7 +401,9 @@ function RoundExpenses({ round, currentUser }) {
                         )}
                       </TableCell>
                       <TableCell>
-                        {new Date(expense.createdAt).toLocaleDateString()}
+                        {expense.createdAt
+                          ? dayjs(expense.createdAt).format("DD/MM/YYYY")
+                          : null}
                       </TableCell>
                       <TableCell>
                         <div className="text-right">
