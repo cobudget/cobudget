@@ -517,7 +517,7 @@ const RoundPage = ({ currentUser }) => {
   }, [router.query.round, router.query.group, pause]);
 
   useEffect(() => {
-    if (router.isReady) {
+    if (router.isReady && router.query.view !== "table") {
       const page = parseInt(router.query.page as string);
       if (!isNaN(page)) {
         const pageVariables = new Array(page)
@@ -527,7 +527,7 @@ const RoundPage = ({ currentUser }) => {
       }
       setPause(false);
     }
-  }, [router.isReady, router.query.page]);
+  }, [router.isReady, router.query.page, router.query.view]);
 
   if (pause || fetching) {
     return (
