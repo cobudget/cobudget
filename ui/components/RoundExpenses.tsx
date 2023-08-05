@@ -18,12 +18,13 @@ import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
 import IconButton from "./IconButton";
-import { EditIcon } from "./Icons";
+import { EditIcon, SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 import { SelectField } from "./SelectInput";
 import HappySpinner from "./HappySpinner";
 import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 import LoadMore from "./LoadMore";
+import dayjs from "dayjs";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -56,6 +57,8 @@ const EXPENSES_QUERY = gql`
     $status: [ExpenseStatus!]
     $search: String
     $bucketId: String
+    $sortBy: ExpenseSortByOptions
+    $sortOrder: SortOrderOptions
   ) {
     expenses(
       roundId: $roundId
@@ -64,6 +67,8 @@ const EXPENSES_QUERY = gql`
       status: $status
       search: $search
       bucketId: $bucketId
+      sortBy: $sortBy
+      sortOrder: $sortOrder
     ) {
       moreExist
       total
@@ -75,6 +80,7 @@ const EXPENSES_QUERY = gql`
         status
         bucketId
         ocId
+        createdAt
         ocMeta {
           legacyId
         }
@@ -104,6 +110,8 @@ function RoundExpenses({ round, currentUser }) {
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
   const [expensesFilter, setExpensesFilter] = useState({
     roundId: round.id,
+    sortBy: "createdAt",
+    sortOrder: "desc",
   });
   const [, updateExpenseBucket] = useMutation(UPDATE_EXPENSE_BUCKET);
   const {
@@ -198,6 +206,18 @@ function RoundExpenses({ round, currentUser }) {
     return expensesData?.expenses || [];
   }, [expensesData]);
 
+  const getSortIcon = (name: string) => {
+    if (name === expensesFilter.sortBy) {
+      if (expensesFilter.sortOrder === "asc") {
+        return <SortUpIcon className="h-3 w-3 text-gray-500" />;
+      } else {
+        return <SortDownIcon className="h-3 w-3 text-gray-500" />;
+      }
+    } else {
+      return <SortIcon className="h-3 w-3 text-gray-500" />;
+    }
+  };
+
   return (
     <>
       <div className="page">
@@ -209,7 +229,7 @@ function RoundExpenses({ round, currentUser }) {
             filters={expensesFilter}
             onFilterChange={(filter) => setExpensesFilter(filter)}
             round={round}
-            buckets={buckets}
+            buckets={sortedBuckets}
           />
         </div>
         {fetching ? (
@@ -223,16 +243,104 @@ function RoundExpenses({ round, currentUser }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Expense" />
+                      <span
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "title",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Expense" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("title")}
+                        </span>
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Status" />
+                      <span
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "status",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Status" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("status")}
+                        </span>
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Amount" />
+                      <span
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "amount",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Amount" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("amount")}
+                        </span>
+                      </span>
                     </TableCell>
                     <TableCell>
-                      <FormattedMessage defaultMessage="Bucket" />
+                      <span
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "bucketTitle",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Bucket" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("bucketTitle")}
+                        </span>
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className="cursor-pointer select-none"
+                        onClick={() => {
+                          setExpensesFilter({
+                            ...expensesFilter,
+                            sortBy: "createdAt",
+                            sortOrder:
+                              expensesFilter.sortOrder === "asc"
+                                ? "desc"
+                                : "asc",
+                          });
+                        }}
+                      >
+                        <FormattedMessage defaultMessage="Date Created" />
+                        <span className="float-right mt-2">
+                          {getSortIcon("createdAt")}
+                        </span>
+                      </span>
                     </TableCell>
                     <TableCell />
                   </TableRow>
@@ -291,6 +399,11 @@ function RoundExpenses({ round, currentUser }) {
                             Assign Bucket
                           </i>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        {expense.createdAt
+                          ? dayjs(expense.createdAt).format("DD/MM/YYYY")
+                          : null}
                       </TableCell>
                       <TableCell>
                         <div className="text-right">
