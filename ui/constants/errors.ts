@@ -13,6 +13,8 @@ export const GRAPHQL_ROUND_NOT_FOUND = "Round not found";
 export const GRAPHQL_ADMIN_AND_MODERATOR_ONLY =
   "Only admins and moderators can perform this action";
 export const GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND = "Expense receipt not found";
+export const GRAPHQL_EXPENSES_PARTICIPANT_ONLY =
+  "Only participants can view the expenses";
 
 export const ROUND_IS_PRIVATE = "The round is private";
 
