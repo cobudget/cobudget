@@ -1,7 +1,7 @@
 import RoundExpenses from "components/RoundExpenses";
 import SubMenu from "../../../../components/SubMenu";
 
-const RoundSettingsPage = ({ round, currentUser }) => {
+const RoundSettingsPage = ({ round, currentUser, currentGroup }) => {
   if (!round) return null;
 
   return (
