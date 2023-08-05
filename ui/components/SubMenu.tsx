@@ -74,6 +74,10 @@ export const roundItems = (
       admin: true,
     },
     {
+      label: formatMessage({ defaultMessage: "Expenses" }),
+      href: `/${groupSlug}/${roundSlug}/expenses`,
+    },
+    {
       label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug}/${roundSlug}/settings`,
       startsWithHref: true,

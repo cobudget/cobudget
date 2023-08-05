@@ -106,6 +106,11 @@ type ExpenseToEdit = {
 
 function RoundExpenses({ round, currentUser }) {
   const intl = useIntl();
+
+  const isAdmin =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentGroupMember?.isAdmin;
+
   const router = useRouter();
   const [expenseToEdit, setExpenseToEdit] = useState<ExpenseToEdit>();
   const [expensesFilter, setExpensesFilter] = useState({
@@ -406,16 +411,18 @@ function RoundExpenses({ round, currentUser }) {
                           : null}
                       </TableCell>
                       <TableCell>
-                        <div className="text-right">
-                          <span
-                            onClick={() => setExpenseToEdit(expense)}
-                            className="ml-2"
-                          >
-                            <IconButton>
-                              <EditIcon className="h-4 w-4" />
-                            </IconButton>
-                          </span>
-                        </div>
+                        {isAdmin && (
+                          <div className="text-right">
+                            <span
+                              onClick={() => setExpenseToEdit(expense)}
+                              className="ml-2"
+                            >
+                              <IconButton>
+                                <EditIcon className="h-4 w-4" />
+                              </IconButton>
+                            </span>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}

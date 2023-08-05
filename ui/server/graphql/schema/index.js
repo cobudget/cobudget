@@ -13,6 +13,7 @@ const schema = gql`
     total: Int
     moreExist: Boolean
     expenses: [Expense]
+    error: String
   }
 
   type Query {
