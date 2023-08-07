@@ -1,9 +1,15 @@
 import prisma from "server/prisma";
 import arraySort from "array-sort";
+import {
+  GRAPHQL_EXPENSES_PARTICIPANT_ONLY,
+  HIDDEN,
+} from "../../../../constants";
+import { getRoundMember } from "../helpers";
 
 export const expenses = async (
   _,
-  { limit, offset, roundId, search, status, bucketId, sortBy, sortOrder }
+  { limit, offset, roundId, search, status, bucketId, sortBy, sortOrder },
+  { user, ss }
 ) => {
   let response = [];
 
@@ -16,6 +22,24 @@ export const expenses = async (
       total: 0,
       moreExist: false,
     };
+  }
+
+  if (round.visibility === HIDDEN) {
+    let roundMember;
+    if (user) {
+      roundMember = await getRoundMember({
+        userId: user?.id,
+        roundId,
+      });
+    }
+    if (!roundMember?.isApproved) {
+      return {
+        expenses: [],
+        total: 0,
+        moreExist: false,
+        error: GRAPHQL_EXPENSES_PARTICIPANT_ONLY,
+      };
+    }
   }
 
   if (sortBy === "amount") {
