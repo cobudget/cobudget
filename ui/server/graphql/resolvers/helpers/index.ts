@@ -513,3 +513,15 @@ export const getBucketStatus = (bucket) => {
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
 };
+
+export const isFundingOpen = async ({ roundId }) => {
+  const round = await prisma.round.findUnique({ where: { id: roundId } });
+  let isOpen = true;
+  if (round.grantingOpens) {
+    isOpen = round.grantingOpens.getTime() < Date.now();
+  }
+  if (round.grantingCloses) {
+    isOpen = isOpen && round.grantingCloses.getTime() > Date.now();
+  }
+  return isOpen;
+};

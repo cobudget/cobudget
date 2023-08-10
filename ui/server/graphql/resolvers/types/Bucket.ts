@@ -4,6 +4,7 @@ import {
   bucketMaxGoal,
   bucketMinGoal,
   bucketTotalContributions,
+  isFundingOpen,
 } from "../helpers";
 
 export const cocreators = async (bucket) => {
@@ -189,7 +190,7 @@ export const maxGoal = async (bucket) => {
 
   return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
 };
-export const status = (bucket, args, ctx) => {
+export const status = async (bucket, args, ctx) => {
   if (bucket.completedAt) return "COMPLETED";
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
