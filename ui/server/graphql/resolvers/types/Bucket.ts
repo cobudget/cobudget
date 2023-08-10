@@ -4,6 +4,7 @@ import {
   bucketMaxGoal,
   bucketMinGoal,
   bucketTotalContributions,
+  getRoundFundingStatuses,
   isFundingOpen,
 } from "../helpers";
 
@@ -194,7 +195,16 @@ export const status = async (bucket, args, ctx) => {
   if (bucket.completedAt) return "COMPLETED";
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
-  if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
+  if (bucket.approvedAt) {
+    const status = await getRoundFundingStatuses({ roundId: bucket.roundId });
+    if (status.hasEnded) {
+      return "FUNDED";
+    } else if (status.hasStarted) {
+      return "OPEN_FOR_FUNDING";
+    } else {
+      return "IDEA";
+    }
+  }
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
 };

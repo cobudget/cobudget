@@ -525,3 +525,48 @@ export const isFundingOpen = async ({ roundId }) => {
   }
   return isOpen;
 };
+
+export const hasFundingStarted = async ({ roundId }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    if (round.grantingOpens) {
+      return round.grantingOpens.getTime() < Date.now();
+    }
+    return true;
+  } catch (err) {
+    //log error
+    return true;
+  }
+};
+
+export const hasFundingEnded = async ({ roundId }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    if (round.grantingCloses) {
+      return round.grantingCloses.getTime() < Date.now();
+    }
+    return false;
+  } catch (err) {
+    //log error
+    return false;
+  }
+};
+
+export const getRoundFundingStatuses = async ({ roundId }) => {
+  try {
+    const s = {
+      hasStarted: true,
+      hasEnded: false,
+    };
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    s.hasStarted = round.grantingOpens
+      ? round.grantingOpens.getTime() < Date.now()
+      : true;
+    s.hasEnded = round.grantingCloses
+      ? round.grantingCloses.getTime() < Date.now()
+      : false;
+    return s;
+  } catch (err) {
+    //log error
+  }
+};
