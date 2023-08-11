@@ -271,7 +271,11 @@ export function isGrantingOpen(round) {
   return grantingHasOpened && !grantingHasClosed;
 }
 
-export function statusTypeToQuery(statusType) {
+export function statusTypeToQuery(
+  statusType,
+  fundingStatus: { hasStarted: boolean; hasEnded: boolean }
+) {
+  const isFundingOpen = fundingStatus.hasStarted && !fundingStatus.hasEnded;
   switch (statusType) {
     case "PENDING_APPROVAL":
       return {
@@ -280,8 +284,8 @@ export function statusTypeToQuery(statusType) {
         deleted: false,
         canceledAt: null,
       };
-    case "IDEA":
-      return {
+    case "IDEA": {
+      const filter = {
         publishedAt: { not: null },
         approvedAt: null,
         fundedAt: null,
@@ -289,21 +293,58 @@ export function statusTypeToQuery(statusType) {
         canceledAt: null,
         deleted: false,
       };
+      if (!fundingStatus.hasStarted) {
+        return {
+          OR: [
+            filter,
+            {
+              publishedAt: { not: null },
+              approvedAt: { not: null },
+              fundedAt: null,
+              completedAt: null,
+              canceledAt: null,
+              deleted: false,
+            },
+          ],
+        };
+      }
+      return filter;
+    }
     case "OPEN_FOR_FUNDING":
       return {
-        approvedAt: { not: null },
+        ...(isFundingOpen
+          ? { approvedAt: { not: null } }
+          : {
+              AND: [{ approvedAt: { not: null } }, { approvedAt: null }],
+            }),
         fundedAt: null,
         completedAt: null,
         canceledAt: null,
         deleted: false,
       };
-    case "FUNDED":
-      return {
+    case "FUNDED": {
+      const filter = {
         fundedAt: { not: null },
         canceledAt: null,
         completedAt: null,
         deleted: false,
       };
+      if (fundingStatus.hasEnded) {
+        return {
+          OR: [
+            filter,
+            {
+              fundedAt: null,
+              canceledAt: null,
+              completedAt: null,
+              deleted: false,
+              publishedAt: { not: null },
+            },
+          ],
+        };
+      }
+      return filter;
+    }
     case "CANCELED":
       return {
         canceledAt: { not: null },
@@ -512,4 +553,61 @@ export const getBucketStatus = (bucket) => {
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";
+};
+
+export const isFundingOpen = async ({ roundId }) => {
+  const round = await prisma.round.findUnique({ where: { id: roundId } });
+  let isOpen = true;
+  if (round.grantingOpens) {
+    isOpen = round.grantingOpens.getTime() < Date.now();
+  }
+  if (round.grantingCloses) {
+    isOpen = isOpen && round.grantingCloses.getTime() > Date.now();
+  }
+  return isOpen;
+};
+
+export const hasFundingStarted = async ({ roundId }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    if (round.grantingOpens) {
+      return round.grantingOpens.getTime() < Date.now();
+    }
+    return true;
+  } catch (err) {
+    //log error
+    return true;
+  }
+};
+
+export const hasFundingEnded = async ({ roundId }) => {
+  try {
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    if (round.grantingCloses) {
+      return round.grantingCloses.getTime() < Date.now();
+    }
+    return false;
+  } catch (err) {
+    //log error
+    return false;
+  }
+};
+
+export const getRoundFundingStatuses = async ({ roundId }) => {
+  try {
+    const s = {
+      hasStarted: true,
+      hasEnded: false,
+    };
+    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    s.hasStarted = round.grantingOpens
+      ? round.grantingOpens.getTime() < Date.now()
+      : true;
+    s.hasEnded = round.grantingCloses
+      ? round.grantingCloses.getTime() < Date.now()
+      : false;
+    return s;
+  } catch (err) {
+    //log error
+  }
 };
