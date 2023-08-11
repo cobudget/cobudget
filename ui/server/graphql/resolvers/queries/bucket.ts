@@ -6,7 +6,11 @@ import { isGroupAdmin } from "../auth";
 import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import subscribers from "../../../subscribers/discourse.subscriber";
-import { canViewRound, statusTypeToQuery } from "../helpers";
+import {
+  canViewRound,
+  getRoundFundingStatuses,
+  statusTypeToQuery,
+} from "../helpers";
 import discourse from "../../../lib/discourse";
 import { ROUND_IS_PRIVATE } from "../../../../constants";
 
@@ -42,6 +46,14 @@ export const bucketsPage = async (
   },
   { user }
 ) => {
+  const round = await prisma.round.findFirst({
+    where: {
+      slug: roundSlug,
+      group: { slug: groupSlug ?? "c" },
+      deleted: { not: true },
+    },
+  });
+  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
   const currentMember = await prisma.roundMember.findFirst({
     where: {
       userId: user?.id ?? "undefined",
@@ -52,7 +64,9 @@ export const bucketsPage = async (
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-  const statusFilter = status.map(statusTypeToQuery).filter((s) => s);
+  const statusFilter = status
+    .map((s) => statusTypeToQuery(s, fundingStatus))
+    .filter((s) => s);
   // If canceled in not there in the status filter, explicitly qunselect canceled buckets
   const showCanceled = status.indexOf("CANCELED") === -1;
   const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
