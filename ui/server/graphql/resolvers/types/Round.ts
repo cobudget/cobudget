@@ -5,6 +5,7 @@ import {
   bucketTotalContributions,
   getCollective,
   getProject,
+  getRoundFundingStatuses,
   isCollAdmin,
   isCollOrGroupAdmin,
   isGrantingOpen,
@@ -208,11 +209,13 @@ export const bucketStatusCount = async (round, _, { user }) => {
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
+  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
+
   return {
     PENDING_APPROVAL: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("PENDING_APPROVAL"),
+        ...statusTypeToQuery("PENDING_APPROVAL", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
@@ -227,7 +230,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
     OPEN_FOR_FUNDING: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("OPEN_FOR_FUNDING"),
+        ...statusTypeToQuery("OPEN_FOR_FUNDING", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
@@ -242,7 +245,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
     FUNDED: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("FUNDED"),
+        ...statusTypeToQuery("FUNDED", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
@@ -257,7 +260,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
     CANCELED: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("CANCELED"),
+        ...statusTypeToQuery("CANCELED", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
@@ -272,7 +275,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
     IDEA: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("IDEA"),
+        ...statusTypeToQuery("IDEA", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
@@ -287,7 +290,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
     COMPLETED: await prisma.bucket.count({
       where: {
         roundId: round.id,
-        ...statusTypeToQuery("COMPLETED"),
+        ...statusTypeToQuery("COMPLETED", fundingStatus),
         ...(!isAdminOrGuide &&
           (currentMember
             ? {
