@@ -379,16 +379,17 @@ export const deleteGuideline = combineResolvers(
     })
 );
 
-export const inviteRoundMembers = combineResolvers(
+const inviteRoundMembers_ = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
+    const start = Date.now();
     const round = await prisma.round.findUnique({
       where: { id: roundId },
       include: { group: true },
     });
     const emails = emailsString.split(",");
 
-    if (emails.length > 1000)
+    if (emails.length > 10000)
       throw new Error("You can only invite 1000 people at a time");
 
     const invitedRoundMembers = [];
@@ -446,7 +447,63 @@ export const inviteRoundMembers = combineResolvers(
 
       invitedRoundMembers.push(updated.collMemberships?.[0]);
     }
+    console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
     return invitedRoundMembers;
+  }
+);
+
+export const inviteRoundMembers = combineResolvers(
+  isCollOrGroupAdmin,
+  async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
+    try {
+      const start = Date.now();
+      const round = await prisma.round.findUnique({
+        where: { id: roundId },
+        include: { group: true },
+      });
+      const emails = emailsString.split(",");
+      if (emails.length > 10000) {
+        throw new Error("You can only invite 1000 people at a time");
+      }
+
+      const roundMembers = await prisma.roundMember.findMany({
+        where: { roundId: round.id },
+        include: {
+          user: true,
+        },
+      });
+
+      const existingMemberEmails = {};
+      roundMembers.forEach((m) => {
+        existingMemberEmails[m.user.email] = m;
+      });
+
+      const alreadyMembers = [];
+      const alreadyVerifiedMembers = [];
+      const newMemberEmails: Array<string> = [];
+
+      emails.forEach((m) => {
+        if (existingMemberEmails[m]) {
+          if (existingMemberEmails[m].isApproved) {
+            alreadyVerifiedMembers.push(m);
+          } else {
+            alreadyMembers.push(m);
+          }
+        } else {
+          newMemberEmails.push(m);
+        }
+      });
+      console.log("New", newMemberEmails.length, newMemberEmails[0]);
+      console.log("Existing", alreadyMembers.length, alreadyMembers[0]);
+      console.log(
+        "Verified",
+        alreadyVerifiedMembers.length,
+        alreadyVerifiedMembers[0]
+      );
+      console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
+    } catch (err) {
+      console.log(err);
+    }
   }
 );
 
