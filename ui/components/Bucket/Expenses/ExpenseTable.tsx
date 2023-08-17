@@ -17,6 +17,15 @@ const CONVERT_CURRENCY = gql`
   }
 `;
 
+const EXCHANGE_RATES = gql`
+  query ExchangeRates($currencies: [String]) {
+    exchangeRates(currencies: $currencies) {
+      currency
+      rate
+    }
+  }
+`;
+
 function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   const { pathname, query } = useRouter();
 
@@ -69,6 +78,28 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
     return allCurrencies.some((c) => c !== round?.currency);
   }, [partialTotal, round?.currency]);
 
+  const [{ data: exchangeRates }] = useQuery({
+    query: EXCHANGE_RATES,
+    pause: !otherCurrency,
+    variables: {
+      currencies: [
+        ...Array.from(new Set(allExpenses.map((e) => e.currency))),
+        round?.currency,
+      ],
+    },
+  });
+
+  const roundConversionRates = useMemo(() => {
+    const map = {};
+    const roundRate = exchangeRates?.exchangeRates?.find(
+      (r) => r.currency === round?.currency
+    )?.rate;
+    exchangeRates?.exchangeRates?.forEach((r) => {
+      map[r.currency] = r.rate / roundRate;
+    });
+    return map;
+  }, [round?.currency, exchangeRates]);
+
   const total =
     expenses.reduce((acc, expense) => {
       return parseInt(acc || 0) + (expense.amount || 0);
@@ -119,8 +150,10 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                 {otherCurrency && (
                   <td className="px-4 py-2">
                     <FormattedCurrency
-                      value={expense.amount}
-                      currency={expense.currency || round.currency}
+                      value={
+                        expense.amount / roundConversionRates[expense.currency]
+                      }
+                      currency={round.currency}
                     />
                   </td>
                 )}
