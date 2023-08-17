@@ -633,6 +633,8 @@ const schema = gql`
     submittedBy: String
     ocId: String
     currency: String
+    exchangeRate: Float
+    paidAt: Date
     ocMeta: OCMeta
     roundId: String
     createdAt: Date

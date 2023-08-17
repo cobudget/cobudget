@@ -6,7 +6,8 @@ import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
-import { EXPENSE_REJECTED } from "../../../constants";
+import { EXPENSE_PAID, EXPENSE_REJECTED } from "../../../constants";
+import { ConversionReason, FrozenExpenseAmount } from "./ConversionElements";
 
 const CONVERT_CURRENCY = gql`
   query ConvertCurrency(
@@ -149,11 +150,35 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                 </td>
                 {otherCurrency && (
                   <td className="px-4 py-2">
-                    <FormattedCurrency
-                      value={
-                        expense.amount / roundConversionRates[expense.currency]
+                    {expense.status === EXPENSE_PAID &&
+                    expense.exchangeRate &&
+                    expense.currency !== round?.currency ? (
+                      <FrozenExpenseAmount
+                        expense={expense}
+                        round={round}
+                        roundCurrencyRate={
+                          exchangeRates?.exchangeRates?.find(
+                            (e) => e.currency === round?.currency
+                          )?.rate
+                        }
+                      />
+                    ) : (
+                      <FormattedCurrency
+                        value={
+                          expense.amount /
+                          roundConversionRates[expense.currency]
+                        }
+                        currency={round.currency}
+                      />
+                    )}
+                    <ConversionReason
+                      expense={expense}
+                      round={round}
+                      roundCurrencyRate={
+                        exchangeRates?.exchangeRates?.find(
+                          (e) => e.currency === round?.currency
+                        )?.rate
                       }
-                      currency={round.currency}
                     />
                   </td>
                 )}
