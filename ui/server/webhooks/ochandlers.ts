@@ -1,10 +1,24 @@
-import { OC_STATUS_MAP } from "../../constants";
+import { EXPENSE_PAID, OC_STATUS_MAP } from "../../constants";
 import { getExpense } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 import { getOCToken } from "server/utils/roundUtils";
 
 // helper
-export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
+export const ocExpenseToCobudget = (
+  expense,
+  roundId,
+  isEditing,
+  exchangeRate?: number
+) => {
+  const paidExpenseFields: {
+    paidAt?: Date;
+    exchangeRate?: number;
+  } = { paidAt: null, exchangeRate: null };
+  if (OC_STATUS_MAP[expense.status] === EXPENSE_PAID) {
+    paidExpenseFields.paidAt = new Date();
+    paidExpenseFields.exchangeRate = exchangeRate;
+  }
+
   return [
     {
       // If editing expense, then dont include bucketId
@@ -21,6 +35,8 @@ export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
 
       ocId: expense.id,
       roundId,
+
+      ...paidExpenseFields,
     },
     isEditing,
     expense.items,
