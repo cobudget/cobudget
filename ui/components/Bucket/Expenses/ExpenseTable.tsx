@@ -62,6 +62,13 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
     },
   });
 
+  // Other currency is true, if an expense contains amount
+  // other than the round currency
+  const otherCurrency = useMemo(() => {
+    const allCurrencies = Object.keys(partialTotal);
+    return allCurrencies.some((c) => c !== round?.currency);
+  }, [partialTotal, round?.currency]);
+
   const total =
     expenses.reduce((acc, expense) => {
       return parseInt(acc || 0) + (expense.amount || 0);
@@ -109,6 +116,14 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                   />
                   <ExpenseStatus expense={expense} currentUser={currentUser} />
                 </td>
+                {otherCurrency && (
+                  <td className="px-4 py-2">
+                    <FormattedCurrency
+                      value={expense.amount}
+                      currency={expense.currency || round.currency}
+                    />
+                  </td>
+                )}
               </tr>
             );
           })}
@@ -116,6 +131,7 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
             <td className="px-4 py-2">
               <FormattedMessage defaultMessage="Total" />
             </td>
+            {otherCurrency && <td />}
             <td className="px-4 py-2">
               {converting ? (
                 <LoaderIcon className="animate-spin" width={20} height={20} />
