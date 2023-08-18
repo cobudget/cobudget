@@ -1,6 +1,7 @@
 import FormattedCurrency from "components/FormattedCurrency";
 import { EXPENSE_PAID } from "../../../constants";
 import dayjs from "dayjs";
+import { useState } from "react";
 
 export const FrozenExpenseAmount = ({ expense, round, roundCurrencyRate }) => {
   const rate = (expense.amount / expense.exchangeRate) * roundCurrencyRate;
@@ -9,29 +10,41 @@ export const FrozenExpenseAmount = ({ expense, round, roundCurrencyRate }) => {
 };
 
 export const ConversionReason = ({ expense, round, roundCurrencyRate }) => {
+  const [mouseIn, setMouseIn] = useState(false);
+
   if (expense.currency === round?.currency) {
     return null;
   }
   if (expense.status === EXPENSE_PAID && expense.exchangeRate) {
     return (
-      <span className="group">
-        <span className="text-sm cursor-pointer text-white font-bold rounded-full bg-gray-700 ml-2 w-4 h-4 inline-flex justify-center items-center">
+      <span
+        className="group"
+        onMouseEnter={() => {
+          setMouseIn(true);
+        }}
+        onMouseLeave={() => {
+          setMouseIn(false);
+        }}
+      >
+        <span className="absolute mt-1 text-sm cursor-pointer text-white font-bold rounded-full bg-gray-700 ml-2 w-4 h-4 inline-flex justify-center items-center">
           ?
         </span>
-        <div className="w-96 opacity-0 group-hover:opacity-100 absolute duration-300 z-10 inline-block px-3 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg shadow-sm">
-          The expense was paid at{" "}
-          {dayjs(expense.paidAt).format("DD/MM/YYYY hh:mm a")}. The exchange
-          rate was <FormattedCurrency value={100} currency={round?.currency} />{" "}
-          ={" "}
-          <FormattedCurrency
-            value={parseInt(
-              (expense.exchangeRate / roundCurrencyRate) * 100 + ""
-            )}
-            currency={expense.currency}
-          />{" "}
-          at that time.
-          <div className="tooltip-arrow" data-popper-arrow></div>
-        </div>
+        {mouseIn && (
+          <div className="right-0 md:right-auto mt-6 w-full md:w-96 opacity-0 group-hover:opacity-100 absolute duration-300 z-10 inline-block px-3 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg shadow-sm">
+            The expense was paid at{" "}
+            {dayjs(expense.paidAt).format("DD/MM/YYYY hh:mm a")}. The exchange
+            rate was{" "}
+            <FormattedCurrency value={100} currency={round?.currency} /> ={" "}
+            <FormattedCurrency
+              value={parseInt(
+                (expense.exchangeRate / roundCurrencyRate) * 100 + ""
+              )}
+              currency={expense.currency}
+            />{" "}
+            at that time.
+            <div className="tooltip-arrow" data-popper-arrow></div>
+          </div>
+        )}
       </span>
     );
   }
