@@ -396,13 +396,15 @@ function RoundExpenses({ round, currentUser }) {
                               {bucketsMap[expense.bucketId]?.title}
                             </span>
                           </Link>
-                        ) : (
+                        ) : isAdmin ? (
                           <i
                             onClick={() => setExpenseToEdit(expense)}
                             className="cursor-pointer"
                           >
                             Assign Bucket
                           </i>
+                        ) : (
+                          <i>No Bucket Assigned</i>
                         )}
                       </TableCell>
                       <TableCell>
