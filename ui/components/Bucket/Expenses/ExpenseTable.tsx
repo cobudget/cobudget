@@ -80,7 +80,7 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
     return allCurrencies.some((c) => c !== round?.currency);
   }, [partialTotal, round?.currency]);
 
-  const [{ data: exchangeRates }] = useQuery({
+  const [{ data: exchangeRates, fetching: conversionRatesLoading }] = useQuery({
     query: EXCHANGE_RATES,
     pause: !otherCurrency,
     variables: {
@@ -159,9 +159,15 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                       setMouseInConversion(undefined);
                     }}
                   >
-                    {expense.status === EXPENSE_PAID &&
-                    expense.exchangeRate &&
-                    expense.currency !== round?.currency ? (
+                    {conversionRatesLoading ? (
+                      <LoaderIcon
+                        className="animate-spin"
+                        width={20}
+                        height={20}
+                      />
+                    ) : expense.status === EXPENSE_PAID &&
+                      expense.exchangeRate &&
+                      expense.currency !== round?.currency ? (
                       <FrozenExpenseAmount
                         expense={expense}
                         round={round}
