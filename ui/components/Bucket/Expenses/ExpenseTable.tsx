@@ -2,7 +2,7 @@ import FormattedCurrency from "components/FormattedCurrency";
 import { LoaderIcon } from "components/Icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
@@ -29,6 +29,7 @@ const EXCHANGE_RATES = gql`
 
 function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   const { pathname, query } = useRouter();
+  const [mouseInConversion, setMouseInConversion] = useState();
 
   const expenses = useMemo(() => {
     if (!allExpenses) {
@@ -149,7 +150,15 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                   <ExpenseStatus expense={expense} currentUser={currentUser} />
                 </td>
                 {otherCurrency && (
-                  <td className="px-4 py-2">
+                  <td
+                    className="px-4 py-2"
+                    onMouseEnter={() => {
+                      setMouseInConversion(expense.id);
+                    }}
+                    onMouseLeave={() => {
+                      setMouseInConversion(undefined);
+                    }}
+                  >
                     {expense.status === EXPENSE_PAID &&
                     expense.exchangeRate &&
                     expense.currency !== round?.currency ? (
@@ -171,16 +180,18 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                         currency={round.currency}
                       />
                     )}
-                    <ConversionReason
-                      expense={expense}
-                      round={round}
-                      roundCurrencyRate={
-                        exchangeRates?.exchangeRates?.find(
-                          (e) => e.currency === round?.currency
-                        )?.rate
-                      }
-                      roundConversionRates={roundConversionRates}
-                    />
+                    {mouseInConversion === expense.id && (
+                      <ConversionReason
+                        expense={expense}
+                        round={round}
+                        roundCurrencyRate={
+                          exchangeRates?.exchangeRates?.find(
+                            (e) => e.currency === round?.currency
+                          )?.rate
+                        }
+                        roundConversionRates={roundConversionRates}
+                      />
+                    )}
                   </td>
                 )}
               </tr>
