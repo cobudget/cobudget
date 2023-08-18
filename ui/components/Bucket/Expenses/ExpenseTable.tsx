@@ -179,6 +179,7 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                           (e) => e.currency === round?.currency
                         )?.rate
                       }
+                      roundConversionRates={roundConversionRates}
                     />
                   </td>
                 )}
