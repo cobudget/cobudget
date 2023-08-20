@@ -1,15 +1,10 @@
 import { EXPENSE_PAID, OC_STATUS_MAP } from "../../constants";
 import { getExpense } from "server/graphql/resolvers/helpers";
+import getExchangeRate from "server/graphql/resolvers/helpers/getExchangeRate";
 import prisma from "server/prisma";
 import { getOCToken } from "server/utils/roundUtils";
 
-// helper
-export const ocExpenseToCobudget = (
-  expense,
-  roundId,
-  isEditing,
-  exchangeRate?: number
-) => {
+const getPaidExpenseFields = ({ expense, exchangeRate }) => {
   const paidExpenseFields: {
     paidAt?: Date;
     exchangeRate?: number;
@@ -18,6 +13,17 @@ export const ocExpenseToCobudget = (
     paidExpenseFields.paidAt = new Date();
     paidExpenseFields.exchangeRate = exchangeRate;
   }
+  return paidExpenseFields;
+};
+
+// helper
+export const ocExpenseToCobudget = (
+  expense,
+  roundId,
+  isEditing,
+  exchangeRate?: number
+) => {
+  const paidExpenseFields = getPaidExpenseFields({ expense, exchangeRate });
 
   return [
     {
@@ -62,6 +68,17 @@ export const handleExpenseChange = async (req, res) => {
     let dbExpense; //expense in cobudget database
     if (expenseId) {
       const expense = await getExpense(expenseId, getOCToken(round));
+      const exchangeRate =
+        round.currency !== expense.amountV2?.currency
+          ? await getExchangeRate(expense.amountV2?.currency)
+          : null;
+      const paidExpenseFields = exchangeRate
+        ? getPaidExpenseFields({
+            expense,
+            exchangeRate: parseFloat(exchangeRate.rate),
+          })
+        : undefined;
+
       const expenseData = {
         bucketId: expense.customData?.b,
         title: expense.description,
@@ -84,6 +101,8 @@ export const handleExpenseChange = async (req, res) => {
 
         ocId: expense.id,
         roundId: req.roundId,
+
+        ...paidExpenseFields,
       };
 
       const existingExpense = await prisma.expense.findFirst({
