@@ -76,8 +76,10 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   // Other currency is true, if an expense contains amount
   // other than the round currency
   const otherCurrency = useMemo(() => {
-    const allCurrencies = Object.keys(partialTotal);
-    return allCurrencies.some((c) => c !== round?.currency);
+    const allCurrencies = partialTotal.map((t) => t.currency);
+    return allCurrencies.some((c) => {
+      return c !== round?.currency;
+    });
   }, [partialTotal, round?.currency]);
 
   const [{ data: exchangeRates, fetching: conversionRatesLoading }] = useQuery({
