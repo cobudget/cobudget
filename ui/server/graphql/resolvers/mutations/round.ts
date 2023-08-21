@@ -32,7 +32,7 @@ import {
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
 import { getOCToken } from "server/utils/roundUtils";
-import { getExchangeRates } from "../helpers/getExchangeRate";
+import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 
 export const createRound = async (
   parent,
@@ -891,7 +891,11 @@ export const syncOCExpenses = async (_, { id }) => {
         e,
         id,
         allExpensesOCIds.indexOf(e.id) > -1,
-        parseFloat(rates[e.amountV2?.currency]?.rate)
+        convertAmount({
+          rates,
+          from: e.amountV2?.currency,
+          to: round?.currency,
+        })
       )
     );
 

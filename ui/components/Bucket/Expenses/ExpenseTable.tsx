@@ -170,15 +170,7 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                     ) : expense.status === EXPENSE_PAID &&
                       expense.exchangeRate &&
                       expense.currency !== round?.currency ? (
-                      <FrozenExpenseAmount
-                        expense={expense}
-                        round={round}
-                        roundCurrencyRate={
-                          exchangeRates?.exchangeRates?.find(
-                            (e) => e.currency === round?.currency
-                          )?.rate
-                        }
-                      />
+                      <FrozenExpenseAmount expense={expense} round={round} />
                     ) : (
                       <FormattedCurrency
                         value={

@@ -13,6 +13,19 @@ export async function getExchangeRates() {
   return currencies;
 }
 
+export function convertAmount({
+  rates,
+  from,
+  to,
+}: {
+  rates?: unknown;
+  from: string;
+  to: string;
+}) {
+  const rate = rates[from]?.rate / rates[to]?.rate;
+  return rate;
+}
+
 async function getExchangeRate(currency: string) {
   let currencies = cache.get(CURRENCY_CACHE);
   if (!currencies) {

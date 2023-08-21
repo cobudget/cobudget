@@ -4,8 +4,8 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { FormattedMessage } from "react-intl";
 
-export const FrozenExpenseAmount = ({ expense, round, roundCurrencyRate }) => {
-  const rate = (expense.amount / expense.exchangeRate) * roundCurrencyRate;
+export const FrozenExpenseAmount = ({ expense, round }) => {
+  const rate = expense.amount / expense.exchangeRate;
 
   return <FormattedCurrency currency={round?.currency} value={rate} />;
 };
