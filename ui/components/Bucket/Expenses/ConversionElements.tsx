@@ -37,18 +37,23 @@ export const ConversionReason = ({
         </span>
         {mouseIn && (
           <div className="right-0 md:right-auto mt-6 w-full md:w-96 opacity-0 group-hover:opacity-100 absolute duration-300 z-10 inline-block px-3 py-2 text-sm font-medium text-white bg-gray-700 rounded-lg shadow-sm">
-            The expense was paid at{" "}
-            {dayjs(expense.paidAt).format("DD/MM/YYYY hh:mm a")}. The exchange
-            rate was{" "}
-            <FormattedCurrency value={100} currency={round?.currency} /> ={" "}
-            <FormattedCurrency
-              value={parseInt(
-                (expense.exchangeRate / roundCurrencyRate) * 100 + ""
-              )}
-              currency={expense.currency}
-            />{" "}
-            at that time.
-            <div className="tooltip-arrow" data-popper-arrow></div>
+            <FormattedMessage
+              defaultMessage="The expense was paid at {paidAt}. The exchange rate was {c1} = {c2} at that time."
+              values={{
+                paidAt: dayjs(expense.paidAt).format("DD/MM/YYYY hh:mm a"),
+                c1: (
+                  <FormattedCurrency value={100} currency={round?.currency} />
+                ),
+                c2: (
+                  <FormattedCurrency
+                    value={parseInt(
+                      (expense.exchangeRate / roundCurrencyRate) * 100 + ""
+                    )}
+                    currency={expense.currency}
+                  />
+                ),
+              }}
+            />
           </div>
         )}
       </span>
