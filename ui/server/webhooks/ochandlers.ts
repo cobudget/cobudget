@@ -83,16 +83,25 @@ export const handleExpenseChange = async (req, res) => {
             to: round?.currency,
           })
         : undefined;
-      const paidExpenseFields = exchangeRate
-        ? getPaidExpenseFields({
-            expense,
-            exchangeRate: exchangeRate,
-          })
-        : undefined;
+      const paidExpenseFields = getPaidExpenseFields({
+        expense,
+        exchangeRate: exchangeRate,
+      });
 
       const existingExpense = await prisma.expense.findFirst({
         where: { ocId: expense.id },
       });
+
+      // Update expense paid expense fields and set them to null when:
+      // expense was paid and new paid expense fields are null
+      // Update expense paid expense fields and save non-null values when:
+      // expense was not paid and new expense fields are non-null
+      // In the other two cases, don't update paid expense fields.
+      const updatePaidExpenseFields =
+        (existingExpense?.status === EXPENSE_PAID &&
+          paidExpenseFields.paidAt === null) ||
+        (existingExpense?.status !== EXPENSE_PAID &&
+          paidExpenseFields.paidAt !== null);
 
       const expenseData = {
         bucketId: expense.customData?.b,
@@ -117,7 +126,7 @@ export const handleExpenseChange = async (req, res) => {
         ocId: expense.id,
         roundId: req.roundId,
 
-        ...(existingExpense?.status !== EXPENSE_PAID && paidExpenseFields),
+        ...(updatePaidExpenseFields && paidExpenseFields),
       };
 
       if (existingExpense) {
