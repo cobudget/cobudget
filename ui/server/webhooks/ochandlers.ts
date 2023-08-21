@@ -24,7 +24,8 @@ export const ocExpenseToCobudget = (
   expense,
   roundId,
   isEditing,
-  exchangeRate?: number
+  exchangeRate?: number,
+  dbExpense?
 ) => {
   const paidExpenseFields = getPaidExpenseFields({ expense, exchangeRate });
 
@@ -45,7 +46,7 @@ export const ocExpenseToCobudget = (
       ocId: expense.id,
       roundId,
 
-      ...paidExpenseFields,
+      ...(dbExpense?.status !== EXPENSE_PAID && paidExpenseFields),
     },
     isEditing,
     expense.items,
@@ -89,6 +90,10 @@ export const handleExpenseChange = async (req, res) => {
           })
         : undefined;
 
+      const existingExpense = await prisma.expense.findFirst({
+        where: { ocId: expense.id },
+      });
+
       const expenseData = {
         bucketId: expense.customData?.b,
         title: expense.description,
@@ -112,12 +117,9 @@ export const handleExpenseChange = async (req, res) => {
         ocId: expense.id,
         roundId: req.roundId,
 
-        ...paidExpenseFields,
+        ...(existingExpense?.status !== EXPENSE_PAID && paidExpenseFields),
       };
 
-      const existingExpense = await prisma.expense.findFirst({
-        where: { ocId: expense.id },
-      });
       if (existingExpense) {
         delete expenseData.bucketId;
         dbExpense = await prisma.expense.update({

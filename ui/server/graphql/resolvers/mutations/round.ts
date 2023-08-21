@@ -895,6 +895,9 @@ export const syncOCExpenses = async (_, { id }) => {
           rates,
           from: e.amountV2?.currency,
           to: round?.currency,
+        }),
+        allExpenses.find((x) => {
+          return x.ocId === e.id;
         })
       )
     );
