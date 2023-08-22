@@ -103,6 +103,8 @@ model Expense {
   receipts            ExpenseReceipt[]
 
   currency            String?
+  exchangeRate        Float?    ///exchange rate in relation to the dollar
+  paidAt              DateTime?
 
   createdAt           DateTime  @default(now())
 }

@@ -11,6 +11,7 @@ import {
 import { RoundTransaction } from "server/types";
 import cache from "memory-cache";
 import { CURRENCY_CACHE } from "../../../../constants";
+import { getExchangeRates } from "../helpers/getExchangeRate";
 
 export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   if (!groupSlug) return null;
@@ -245,4 +246,16 @@ export const convertCurrency = async (_, { amounts, toCurrency }) => {
   });
 
   return sum;
+};
+
+export const exchangeRates = async (_, { currencies }) => {
+  const rates = (await getExchangeRates()).rates || {};
+  const response = [];
+  currencies.forEach((currency) => {
+    response.push({
+      currency,
+      rate: rates[currency]?.rate,
+    });
+  });
+  return response;
 };

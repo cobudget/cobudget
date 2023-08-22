@@ -16,6 +16,11 @@ const schema = gql`
     error: String
   }
 
+  type ExchangeRateResponse {
+    currency: String
+    rate: Float
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -56,6 +61,7 @@ const schema = gql`
       amounts: [AmountConversionInput]!
       toCurrency: String!
     ): Float!
+    exchangeRates(currencies: [String]): [ExchangeRateResponse]
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!
@@ -627,6 +633,8 @@ const schema = gql`
     submittedBy: String
     ocId: String
     currency: String
+    exchangeRate: Float
+    paidAt: Date
     ocMeta: OCMeta
     roundId: String
     createdAt: Date
