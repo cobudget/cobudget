@@ -61,6 +61,8 @@ export const BUCKET_QUERY = gql`
         submittedBy
         ocId
         currency
+        paidAt
+        exchangeRate
       }
 
       round {
