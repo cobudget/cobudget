@@ -1,10 +1,34 @@
-import { OC_STATUS_MAP } from "../../constants";
+import { EXPENSE_PAID, OC_STATUS_MAP } from "../../constants";
 import { getExpense } from "server/graphql/resolvers/helpers";
+import {
+  convertAmount,
+  getExchangeRates,
+} from "server/graphql/resolvers/helpers/getExchangeRate";
 import prisma from "server/prisma";
 import { getOCToken } from "server/utils/roundUtils";
 
+const getPaidExpenseFields = ({ expense, exchangeRate }) => {
+  const paidExpenseFields: {
+    paidAt?: Date;
+    exchangeRate?: number;
+  } = { paidAt: null, exchangeRate: null };
+  if (OC_STATUS_MAP[expense.status] === EXPENSE_PAID) {
+    paidExpenseFields.paidAt = new Date();
+    paidExpenseFields.exchangeRate = exchangeRate;
+  }
+  return paidExpenseFields;
+};
+
 // helper
-export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
+export const ocExpenseToCobudget = (
+  expense,
+  roundId,
+  isEditing,
+  exchangeRate?: number,
+  dbExpense?
+) => {
+  const paidExpenseFields = getPaidExpenseFields({ expense, exchangeRate });
+
   return [
     {
       // If editing expense, then dont include bucketId
@@ -21,6 +45,8 @@ export const ocExpenseToCobudget = (expense, roundId, isEditing) => {
 
       ocId: expense.id,
       roundId,
+
+      ...(dbExpense?.status !== EXPENSE_PAID && paidExpenseFields),
     },
     isEditing,
     expense.items,
@@ -46,6 +72,37 @@ export const handleExpenseChange = async (req, res) => {
     let dbExpense; //expense in cobudget database
     if (expenseId) {
       const expense = await getExpense(expenseId, getOCToken(round));
+      const rates =
+        round.currency !== expense.amountV2?.currency
+          ? (await getExchangeRates())?.rates
+          : null;
+      const exchangeRate = rates
+        ? convertAmount({
+            rates,
+            from: expense.amountV2?.currency,
+            to: round?.currency,
+          })
+        : undefined;
+      const paidExpenseFields = getPaidExpenseFields({
+        expense,
+        exchangeRate: exchangeRate,
+      });
+
+      const existingExpense = await prisma.expense.findFirst({
+        where: { ocId: expense.id },
+      });
+
+      // Update expense paid expense fields and set them to null when:
+      // expense was paid and new paid expense fields are null
+      // Update expense paid expense fields and save non-null values when:
+      // expense was not paid and new expense fields are non-null
+      // In the other two cases, don't update paid expense fields.
+      const updatePaidExpenseFields =
+        (existingExpense?.status === EXPENSE_PAID &&
+          paidExpenseFields.paidAt === null) ||
+        (existingExpense?.status !== EXPENSE_PAID &&
+          paidExpenseFields.paidAt !== null);
+
       const expenseData = {
         bucketId: expense.customData?.b,
         title: expense.description,
@@ -68,11 +125,10 @@ export const handleExpenseChange = async (req, res) => {
 
         ocId: expense.id,
         roundId: req.roundId,
+
+        ...(updatePaidExpenseFields && paidExpenseFields),
       };
 
-      const existingExpense = await prisma.expense.findFirst({
-        where: { ocId: expense.id },
-      });
       if (existingExpense) {
         delete expenseData.bucketId;
         dbExpense = await prisma.expense.update({

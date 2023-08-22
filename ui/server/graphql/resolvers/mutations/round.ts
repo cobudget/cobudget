@@ -32,6 +32,7 @@ import {
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
 import { getOCToken } from "server/utils/roundUtils";
+import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 
 export const createRound = async (
   parent,
@@ -883,9 +884,22 @@ export const syncOCExpenses = async (_, { id }) => {
         OR: [{ roundId: id }, { ocId: { in: ocExpensesIds } }],
       },
     });
+    const rates = (await getExchangeRates()).rates || {};
     const allExpensesOCIds = allExpenses.map((e) => e.ocId);
     const expensesData = ocExpenses.map((e) =>
-      ocExpenseToCobudget(e, id, allExpensesOCIds.indexOf(e.id) > -1)
+      ocExpenseToCobudget(
+        e,
+        id,
+        allExpensesOCIds.indexOf(e.id) > -1,
+        convertAmount({
+          rates,
+          from: e.amountV2?.currency,
+          to: round?.currency,
+        }),
+        allExpenses.find((x) => {
+          return x.ocId === e.id;
+        })
+      )
     );
 
     const pendingReceipts = [];
