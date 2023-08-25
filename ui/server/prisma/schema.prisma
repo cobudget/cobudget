@@ -60,7 +60,7 @@ model ExpenseReceipt {
   attachment         String?
   expense            Expense? @relation(fields: [expenseId], references: [id])
   expenseId          String? 
-  ocExpenseReceiptId String?
+  ocExpenseReceiptId String?  @unique
 }
 
 enum ExpenseStatus {
