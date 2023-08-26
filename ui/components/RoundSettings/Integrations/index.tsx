@@ -281,7 +281,23 @@ function Integrations() {
                   />
                   <ListItemSecondaryAction>
                     <Button
-                      onClick={() => syncOCExpenses({ id: round.id })}
+                      onClick={() => {
+                        syncOCExpenses({ id: round.id }).then((r) => {
+                          if (r.data.syncOCExpenses?.status === "success") {
+                            toast.success(
+                              intl.formatMessage({
+                                defaultMessage: "Synced successfully",
+                              })
+                            );
+                          } else {
+                            toast.error(
+                              intl.formatMessage({
+                                defaultMessage: "Failed to sync expenses",
+                              })
+                            );
+                          }
+                        });
+                      }}
                       loading={syncing}
                     >
                       <FormattedMessage defaultMessage="Sync" />

@@ -982,8 +982,9 @@ export const syncOCExpenses = async (_, { id }) => {
     await prisma.expenseReceipt.deleteMany({
       where: { ocExpenseReceiptId: { in: deletedReceiptsIds } },
     });
-    return {};
+    return { status: "success" };
   } catch (err) {
     console.log("ERROR", err);
+    return err;
   }
 };
