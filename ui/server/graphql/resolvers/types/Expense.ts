@@ -1,7 +1,14 @@
 import prisma from "server/prisma";
 import { getRoundMember } from "../helpers";
 
-export const amount = async ({ id }) => {
+export const amount = async ({ id, receipts }) => {
+  if (receipts) {
+    return receipts.reduce((sum, item) => {
+      return item.amount + sum;
+    }, 0);
+  }
+  // Deprecated code below
+  // Should be removed soon
   const result = await prisma.expenseReceipt.aggregate({
     _sum: {
       amount: true,

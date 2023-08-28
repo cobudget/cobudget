@@ -210,7 +210,16 @@ export const status = async (bucket, args, ctx) => {
 };
 
 export const expenses = async ({ id }) => {
-  return prisma.expense.findMany({ where: { bucketId: id } });
+  return prisma.expense.findMany({
+    where: { bucketId: id },
+    include: {
+      receipts: {
+        select: {
+          amount: true,
+        },
+      },
+    },
+  });
 };
 
 export const expense = async ({ expenseId }) => {
