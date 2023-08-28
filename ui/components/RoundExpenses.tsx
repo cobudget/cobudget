@@ -439,7 +439,7 @@ function RoundExpenses({ round, currentUser }) {
           onClick={fetchMore}
           moreExist={expensesData?.moreExists}
           loading={expensesFetching}
-          autoLoadMore
+          autoLoadMore={false}
         />
       </div>
       <Modal
