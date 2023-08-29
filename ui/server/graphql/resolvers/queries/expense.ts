@@ -69,6 +69,13 @@ export const expenses = async (
       where: {
         id: { in: expenseIds },
       },
+      include: {
+        receipts: {
+          select: {
+            amount: true,
+          },
+        },
+      },
     });
     const expensesWithAmount = expenses.map((e) => ({
       ...e,
@@ -91,8 +98,20 @@ export const expenses = async (
         status: { in: status },
         title: { contains: search, mode: "insensitive" },
       },
+      include: {
+        receipts: {
+          select: {
+            amount: true,
+          },
+        },
+      },
       ...(sortBy === "bucketTitle" && {
         include: {
+          receipts: {
+            select: {
+              amount: true,
+            },
+          },
           bucket: {
             select: {
               title: true,
@@ -134,5 +153,5 @@ export const expenses = async (
 };
 
 export const allExpenses = async () => {
-  return prisma.expense.findMany();
+  return [];
 };
