@@ -63,6 +63,14 @@ const SYNC_OC_EXPENSES = gql`
   }
 `;
 
+const REMOVE_DELETED__OC_EXPENSES = gql`
+  mutation DeleteRemovedOCExpenses($id: ID!) {
+    removeDeletedOCExpenses(id: $id) {
+      status
+    }
+  }
+`;
+
 function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
@@ -72,7 +80,15 @@ function Integrations() {
   const [{ fetching: verifying }, verifyOpencollective] = useMutation(
     VERIFY_OPENCOLLECTIVE
   );
-  const [{ fetching: syncing }, syncOCExpenses] = useMutation(SYNC_OC_EXPENSES);
+  const [{ fetching: addingAndUpdatingExpenses }, syncOCExpenses] = useMutation(
+    SYNC_OC_EXPENSES
+  );
+  const [
+    { fetching: removingDeletedExpenses },
+    removeDeletedOCExpenses,
+  ] = useMutation(REMOVE_DELETED__OC_EXPENSES);
+  const syncing = addingAndUpdatingExpenses || removingDeletedExpenses;
+
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -281,7 +297,11 @@ function Integrations() {
                   />
                   <ListItemSecondaryAction>
                     <Button
-                      onClick={() => syncOCExpenses({ id: round.id })}
+                      onClick={() => {
+                        syncOCExpenses({ id: round.id }).then(() => {
+                          removeDeletedOCExpenses({ id: round.id });
+                        });
+                      }}
                       loading={syncing}
                     >
                       <FormattedMessage defaultMessage="Sync" />
