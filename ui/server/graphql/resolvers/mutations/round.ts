@@ -866,16 +866,31 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
 
 export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
   try {
-    const round = await prisma.round.findUnique({
-      select: {
-        openCollectiveId: true,
-        openCollectiveProjectId: true,
-        ocVerified: true,
-        ocToken: true,
-        currency: true,
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: id,
+        },
       },
-      where: { id },
+      include: {
+        round: {
+          select: {
+            openCollectiveId: true,
+            openCollectiveProjectId: true,
+            ocVerified: true,
+            ocToken: true,
+          },
+        },
+      },
     });
+
+    const isAdmin = roundMember.isAdmin;
+    const round = roundMember.round;
+
+    if (!isAdmin) {
+      throw new Error(GRAPHQL_ADMIN_ONLY);
+    }
 
     if (!round.openCollectiveId) {
       throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
@@ -910,7 +925,7 @@ export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
     });
     const allExpensesOCIds = allExpenses.map((e) => e.ocId);
 
-    //Delete expenses which are deleted from opencollective
+    //PART III: Delete expenses which are deleted from opencollective
     const deletedFromOC = allExpensesOCIds.filter(
       (i) => i && ocExpensesIds.indexOf(i) === -1
     );
@@ -926,27 +941,31 @@ export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
 
 export const syncOCExpenses = async (_, { id }, { user, ss }) => {
   try {
-    const isAdmin =
-      (await !!user) &&
-      isCollAdmin({
-        userId: user?.id,
-        roundId: id,
-        ss,
-      });
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: id,
+        },
+      },
+      include: {
+        round: {
+          select: {
+            openCollectiveId: true,
+            openCollectiveProjectId: true,
+            ocVerified: true,
+            ocToken: true,
+            currency: true,
+          },
+        },
+      },
+    });
+
+    const isAdmin = roundMember.isAdmin;
+    const round = roundMember.round;
     if (!isAdmin) {
       throw new Error(GRAPHQL_ADMIN_ONLY);
     }
-
-    const round = await prisma.round.findUnique({
-      select: {
-        openCollectiveId: true,
-        openCollectiveProjectId: true,
-        ocVerified: true,
-        ocToken: true,
-        currency: true,
-      },
-      where: { id },
-    });
 
     if (!round.openCollectiveId) {
       throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
