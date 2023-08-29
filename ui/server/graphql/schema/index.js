@@ -243,8 +243,11 @@ const schema = gql`
     ): ExpenseReceipt
 
     syncOCExpenses(id: ID!): OCSyncResponse
+    removeDeletedOCExpenses(id: ID!): OCSyncResponse
     deprecatedSyncOCExpenses(id: ID!): OCSyncResponse
-      @deprecated(reason: "Use syncOCExpenses instead. This mutation is slow")
+      @deprecated(
+        reason: "Use syncOCExpenses and removeDeletedOCExpenses instead. This mutation is slow"
+      )
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket

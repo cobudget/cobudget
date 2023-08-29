@@ -864,7 +864,7 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
   }
 };
 
-export const syncOCExpenses = async (_, { id }, { isAdmin }) => {
+export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
   try {
     const round = await prisma.round.findUnique({
       select: {
@@ -877,9 +877,76 @@ export const syncOCExpenses = async (_, { id }, { isAdmin }) => {
       where: { id },
     });
 
+    if (!round.openCollectiveId) {
+      throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+    }
+
+    if (!round.ocVerified) {
+      throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+    }
+
+    // PART II: Fetch data from opencollective
+    const collective = await getCollectiveOrProject(
+      { id: round.openCollectiveProjectId || round.openCollectiveId },
+      round.openCollectiveProjectId,
+      getOCToken(round)
+    );
+
+    const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
+    const ocExpensesIds = ocExpenses.map((x) => x.id);
+
+    const allExpenses = await prisma.expense.findMany({
+      select: {
+        ocId: true,
+        id: true,
+        roundId: true,
+        currency: true,
+        title: true,
+        status: true,
+      },
+      where: {
+        OR: [{ roundId: id }, { ocId: { in: ocExpensesIds } }],
+      },
+    });
+    const allExpensesOCIds = allExpenses.map((e) => e.ocId);
+
+    //Delete expenses which are deleted from opencollective
+    const deletedFromOC = allExpensesOCIds.filter(
+      (i) => i && ocExpensesIds.indexOf(i) === -1
+    );
+    await prisma.expense.deleteMany({
+      where: { ocId: { in: deletedFromOC } },
+    });
+
+    return { status: "success" };
+  } catch (err) {
+    return err;
+  }
+};
+
+export const syncOCExpenses = async (_, { id }, { user, ss }) => {
+  try {
+    const isAdmin =
+      (await !!user) &&
+      isCollAdmin({
+        userId: user?.id,
+        roundId: id,
+        ss,
+      });
     if (!isAdmin) {
       throw new Error(GRAPHQL_ADMIN_ONLY);
     }
+
+    const round = await prisma.round.findUnique({
+      select: {
+        openCollectiveId: true,
+        openCollectiveProjectId: true,
+        ocVerified: true,
+        ocToken: true,
+        currency: true,
+      },
+      where: { id },
+    });
 
     if (!round.openCollectiveId) {
       throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
@@ -1022,6 +1089,7 @@ export const syncOCExpenses = async (_, { id }, { isAdmin }) => {
 
     return { status: "success" };
   } catch (err) {
+    console.log(err);
     return err;
   }
 };
