@@ -153,16 +153,21 @@ export const handleExpenseChange = async (req, res) => {
           ocExpenseReceiptId: item.id,
         };
 
-        prisma.expenseReceipt.upsert({
+        await prisma.expenseReceipt.upsert({
           where: { ocExpenseReceiptId: item.id },
           create: receiptData,
           update: receiptData,
         });
+
+        return {};
       });
     } else {
-      throw new Error("Expense id missing");
+      // log this error
+      // throw new Error("Expense id missing");
+      return {};
     }
   } catch (err) {
+    console.log(err);
     res.send({ status: "fail" });
   }
 };
