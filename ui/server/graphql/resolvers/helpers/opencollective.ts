@@ -95,6 +95,14 @@ export const GET_EXPENSES = `
   }
 `;
 
+export const GET_EXPENSES_COUNT = `
+  query Expenses($account: AccountReferenceInput, $limit: Int) {
+    expenses(account: $account, limit: $limit) {
+      totalCount
+    }
+  }
+`;
+
 export const GET_EXPENSE = `
   query Expense($expense: ExpenseReferenceInput) {
     expense(expense: $expense) {
@@ -209,5 +217,23 @@ export const getExpenses = async (slug: string, token: string) => {
     return response.expenses.nodes || [];
   } catch (err) {
     return [];
+  }
+};
+
+export const getExpensesCount = async (slug: string, token: string) => {
+  try {
+    const graphqlClient = customOCGqlClient(token);
+    const response = await graphqlClient.request(GET_EXPENSES_COUNT, {
+      account: {
+        slug,
+      },
+      limit: 1000,
+    });
+    return {
+      count: response.totalCount,
+      error: "totalCount" in response,
+    };
+  } catch (error) {
+    return { error };
   }
 };
