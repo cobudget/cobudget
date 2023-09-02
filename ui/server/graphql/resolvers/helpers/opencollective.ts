@@ -230,7 +230,7 @@ export const getExpensesCount = async (slug: string, token: string) => {
       limit: 1000,
     });
     return {
-      count: response.totalCount,
+      count: response.expenses.totalCount,
       error: "totalCount" in response,
     };
   } catch (error) {

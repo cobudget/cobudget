@@ -71,12 +71,22 @@ const REMOVE_DELETED__OC_EXPENSES = gql`
   }
 `;
 
+const GET_EXPENSES_COUNT = gql`
+  query ExpensesCount($roundId: ID!) {
+    expensesCount(roundId: $roundId) {
+      count
+      error
+    }
+  }
+`;
+
 function Integrations() {
   const router = useRouter();
   const [{ data, error, fetching }] = useQuery({
     query: GET_ROUND_INTEGRATIONS,
     variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
+
   const [{ fetching: verifying }, verifyOpencollective] = useMutation(
     VERIFY_OPENCOLLECTIVE
   );
@@ -108,6 +118,14 @@ function Integrations() {
   };
 
   const round = data?.round;
+
+  const [{ data: expensesCountQuery }] = useQuery({
+    query: GET_EXPENSES_COUNT,
+    variables: {
+      roundId: round?.id,
+    },
+    pause: !round,
+  });
 
   if (fetching) {
     return (

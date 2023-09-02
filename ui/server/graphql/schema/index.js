@@ -45,7 +45,7 @@ const schema = gql`
       sortBy: ExpenseSortByOptions
       sortOrder: SortOrderOptions
     ): ExpensesResponse
-    expensesCount(roundId: String): ExpensesCount
+    expensesCount(roundId: ID!): ExpensesCount
     allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
