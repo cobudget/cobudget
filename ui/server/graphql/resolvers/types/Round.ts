@@ -337,7 +337,7 @@ export const ocCollective = async (parent) => {
       { id: parent.openCollectiveProjectId },
       getOCToken(parent)
     );
-  } else {
+  } else if (parent.openCollectiveId) {
     return getCollective({ id: parent.openCollectiveId }, getOCToken(parent));
   }
 };
