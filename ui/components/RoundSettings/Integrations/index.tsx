@@ -56,8 +56,8 @@ const VERIFY_OPENCOLLECTIVE = gql`
 `;
 
 const SYNC_OC_EXPENSES = gql`
-  mutation SyncOCExpenses($id: ID!) {
-    syncOCExpenses(id: $id) {
+  mutation SyncOCExpenses($id: ID!, $limit: Int!, $offset: Int!) {
+    syncOCExpenses(id: $id, limit: $limit, offset: $offset) {
       status
     }
   }
@@ -119,13 +119,37 @@ function Integrations() {
 
   const round = data?.round;
 
-  const [{ data: expensesCountQuery }] = useQuery({
+  const [
+    { data: expensesCountQuery, fetching: fetchingExpensesCount },
+  ] = useQuery({
     query: GET_EXPENSES_COUNT,
     variables: {
       roundId: round?.id,
     },
     pause: !round,
   });
+
+  const handleSync = async () => {
+    if (fetchingExpensesCount) {
+      return toast.error(
+        intl.formatMessage({ defaultMessage: "Expense count not available" })
+      );
+    }
+    const requests = [];
+    const expensesCount = expensesCountQuery.expensesCount.count || 1000;
+    const BATCH_SIZE = 1000;
+    for (let i = 0; i < expensesCount; i += BATCH_SIZE) {
+      requests.push(
+        syncOCExpenses({
+          id: round.id,
+          limit: BATCH_SIZE,
+          offset: i,
+        })
+      );
+    }
+    await Promise.allSettled(requests);
+    await removeDeletedOCExpenses({ id: round.id });
+  };
 
   if (fetching) {
     return (
@@ -314,14 +338,7 @@ function Integrations() {
                     }
                   />
                   <ListItemSecondaryAction>
-                    <Button
-                      onClick={() => {
-                        syncOCExpenses({ id: round.id }).then(() => {
-                          removeDeletedOCExpenses({ id: round.id });
-                        });
-                      }}
-                      loading={syncing}
-                    >
+                    <Button onClick={handleSync} loading={syncing}>
                       <FormattedMessage defaultMessage="Sync" />
                     </Button>
                   </ListItemSecondaryAction>

@@ -55,8 +55,8 @@ export const GET_PROJECT = `
 `;
 
 export const GET_EXPENSES = `
-  query Expenses($account: AccountReferenceInput, $limit: Int!) {
-    expenses(account: $account, limit: $limit) {
+  query Expenses($account: AccountReferenceInput, $limit: Int!, $offset: Int!) {
+    expenses(account: $account, limit: $limit, offset: $offset) {
       nodes {
         description
         customData
@@ -205,17 +205,22 @@ export const getExpense = async (id: number, token: string) => {
   }
 };
 
-export const getExpenses = async (slug: string, token: string) => {
+export const getExpenses = async (
+  { slug, offset, limit }: { slug: string; offset: number; limit: number },
+  token: string
+) => {
   const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_EXPENSES, {
       account: {
         slug,
       },
-      limit: 1e3,
+      limit,
+      offset,
     });
     return response.expenses.nodes || [];
   } catch (err) {
+    console.log(err);
     return [];
   }
 };

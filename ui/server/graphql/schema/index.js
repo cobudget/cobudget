@@ -248,7 +248,7 @@ const schema = gql`
       attachment: String
     ): ExpenseReceipt
 
-    syncOCExpenses(id: ID!): OCSyncResponse
+    syncOCExpenses(id: ID!, limit: Int!, offset: Int!): OCSyncResponse
     removeDeletedOCExpenses(id: ID!): OCSyncResponse
     deprecatedSyncOCExpenses(id: ID!): OCSyncResponse
       @deprecated(
