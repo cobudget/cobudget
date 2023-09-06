@@ -241,7 +241,9 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             });
           }}
         >
-          {member.isModerator ? "Remove moderator" : "Make moderator"}
+          {member.isModerator
+            ? intl.formatMessage({ defaultMessage: "Remove moderator" })
+            : intl.formatMessage({ defaultMessage: "Make moderator" })}
         </MenuItem>
         <Tooltip
           content={intl.formatMessage({
