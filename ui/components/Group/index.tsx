@@ -113,7 +113,7 @@ function RoundRow({
                 currency={round.currency}
                 value={round.distributedAmount}
               />{" "}
-              distributed •{" "}
+              <FormattedMessage defaultMessage="distributed" /> •{" "}
             </>
           )}
           {bucketCountHeading}
