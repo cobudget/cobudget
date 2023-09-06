@@ -107,7 +107,7 @@ const SetOCToken = ({ closeModal, round }) => {
               target="_blank"
               className="float-right mt-3 cursor-pointer"
             >
-              Generate Token
+              <FormattedMessage defaultMessage="Generate Token" />
             </a>
           </Box>
         </form>

@@ -40,7 +40,10 @@ const BulkAllocateModal = ({ round, handleClose }) => {
           <FormattedMessage defaultMessage="Manage all members balance" />
         </h1>
         <Switch
-          options={["Add", "Set"]}
+          options={[
+            intl.formatMessage({ defaultMessage: "Add" }),
+            intl.formatMessage({ defaultMessage: "Set" }),
+          ]}
           setSelected={setSelectedType}
           selected={type}
           className="mx-auto"
