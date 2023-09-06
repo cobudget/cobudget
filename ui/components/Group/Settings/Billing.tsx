@@ -13,7 +13,7 @@ export default function Subscription({ group, currentUser }) {
           "/api/stripe/create-stripe-billing-portal-url?groupId=" + group.id
         }
       >
-        Manage billing in Stripe portal
+        <FormattedMessage defaultMessage="Manage billing in Stripe portal" />
       </Button>
     </div>
   );
