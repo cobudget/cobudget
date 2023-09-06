@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 
 function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
+  const intl = useIntl();
   const userType = useMemo(() => {
     if (isAdminOrModerator) {
       return "admin";
@@ -25,35 +27,57 @@ function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
   const messages = useMemo(
     () => ({
       admin: {
-        READY_FOR_FUNDING: "Ready to be opened for funding",
-        NOT_READY_FOR_FUNDING: "Not ready for funding yet",
+        READY_FOR_FUNDING: intl.formatMessage({
+          defaultMessage: "Ready to be opened for funding",
+        }),
+        NOT_READY_FOR_FUNDING: intl.formatMessage({
+          defaultMessage: "Not ready for funding yet",
+        }),
       },
       cocreator: {
         PENDING_APPROVAL: {
-          allowed: "Publish your bucket to move it to the idea phase",
-          notAllowed: "Publish your bucket to move it to the idea phase",
+          allowed: intl.formatMessage({
+            defaultMessage: "Publish your bucket to move it to the idea phase",
+          }),
+          notAllowed: intl.formatMessage({
+            defaultMessage: "Publish your bucket to move it to the idea phase",
+          }),
         },
         IDEA: {
-          allowed:
-            "To start collecting funds for this bucket, open it for funding.",
-          notAllowed:
-            "This bucket is waiting for an admin to open it for funding.",
+          allowed: intl.formatMessage({
+            defaultMessage:
+              "To start collecting funds for this bucket, open it for funding.",
+          }),
+          notAllowed: intl.formatMessage({
+            defaultMessage:
+              "This bucket is waiting for an admin to open it for funding.",
+          }),
         },
         OPEN_FOR_FUNDING: {
-          allowed:
-            "To accept funding, funds raised must match your budget. Edit your budget below to match the funding you received.",
-          notAllowed:
-            "To accept funding, funds raised must match your budget. Only admins can edit budgets after funding starts.",
+          allowed: intl.formatMessage({
+            defaultMessage:
+              "To accept funding, funds raised must match your budget. Edit your budget below to match the funding you received.",
+          }),
+          notAllowed: intl.formatMessage({
+            defaultMessage:
+              "To accept funding, funds raised must match your budget. Only admins can edit budgets after funding starts.",
+          }),
         },
         FUNDED: {
-          allowed:
-            "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
-          notAllowed:
-            "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
+          allowed: intl.formatMessage({
+            defaultMessage:
+              "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
+          }),
+          notAllowed: intl.formatMessage({
+            defaultMessage:
+              "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
+          }),
         },
       },
       user: {
-        IDEA: "This bucket is waiting to be opened for funding.",
+        IDEA: intl.formatMessage({
+          defaultMessage: "This bucket is waiting to be opened for funding.",
+        }),
       },
     }),
     []
@@ -83,9 +107,11 @@ function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
       <a className="block mt-10 text-center rounded-lg border-2 border-yellow-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
         {showLabel && (
           <>
-            <span className="text-black">Next steps</span>{" "}
+            <span className="text-black">
+              <FormattedMessage defaultMessage="Next steps" />
+            </span>{" "}
             <span className="bg-yellow-400 rounded px-1 mr-0.5 text-white text-xs">
-              TIP
+              <FormattedMessage defaultMessage="TIP" />
             </span>
           </>
         )}{" "}

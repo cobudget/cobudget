@@ -579,14 +579,18 @@ const RoundPage = ({ currentUser }) => {
           </div>
           <div className={`flex flex-col justify-end items-start`}>
             <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
-              <p className="font-bold my-0.5">Funds available</p>
+              <p className="font-bold my-0.5">
+                <FormattedMessage defaultMessage="Funds available" />
+              </p>
               <div>
                 <table>
                   <tbody>
                     {currentUser?.currentCollMember?.isApproved &&
                       currentUser?.currentCollMember?.hasJoined && (
                         <tr>
-                          <td className="pr-3">In your account</td>
+                          <td className="pr-3">
+                            <FormattedMessage defaultMessage="In your account" />
+                          </td>
                           <td className="font-bold">
                             <FormattedCurrency
                               value={currentUser.currentCollMember.balance}
@@ -596,7 +600,9 @@ const RoundPage = ({ currentUser }) => {
                         </tr>
                       )}
                     <tr>
-                      <td className="pr-3">In this round</td>
+                      <td className="pr-3">
+                        <FormattedMessage defaultMessage="In this round" />
+                      </td>
                       <td className="font-bold">
                         <FormattedCurrency
                           value={round.totalInMembersBalances}
@@ -606,7 +612,9 @@ const RoundPage = ({ currentUser }) => {
                     </tr>
                     {round?.ocCollective && (
                       <tr>
-                        <td className="pr-3">Open Collective</td>
+                        <td className="pr-3">
+                          <FormattedMessage defaultMessage="Open Collective" />
+                        </td>
                         <td className="font-bold">
                           <FormattedCurrency
                             value={
@@ -633,7 +641,8 @@ const RoundPage = ({ currentUser }) => {
                     onClick={() => setNewBucketModalOpen(true)}
                     testid="create-new-bucket-button"
                   >
-                    New {process.env.BUCKET_NAME_SINGULAR}
+                    <FormattedMessage defaultMessage="New" />{" "}
+                    {process.env.BUCKET_NAME_SINGULAR}
                   </Button>
                   {newBucketModalOpen && (
                     <NewBucketModal

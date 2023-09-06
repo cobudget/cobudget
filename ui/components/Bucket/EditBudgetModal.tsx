@@ -232,7 +232,7 @@ const EditBudgetModal = ({
                           }}
                           className="underline cursor-pointer mt-4 text-sm text-color-gray"
                         >
-                          + Add a range
+                          <FormattedMessage defaultMessage="+ Add a range" />
                         </p>
                       )}
                     </div>
