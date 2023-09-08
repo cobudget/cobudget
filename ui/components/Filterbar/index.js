@@ -166,8 +166,12 @@ const Filterbar = ({
             onChange: (e) => onChangeView(e.target.value),
           }}
         >
-          <option value="grid">Grid View</option>
-          <option value="table">Table View</option>
+          <option value="grid">
+            {intl.formatMessage({ defaultMessage: "Grid View" })}
+          </option>
+          <option value="table">
+            {intl.formatMessage({ defaultMessage: "Table View" })}
+          </option>
         </SelectField>
       </span>
       <span>
@@ -179,10 +183,18 @@ const Filterbar = ({
             onChange: onChangeSortBy,
           }}
         >
-          <option value="">Random</option>
-          <option value="createdAt">Newest</option>
-          <option value="percentageFunded">Most funded</option>
-          <option value="contributionsCount">Most contributions</option>
+          <option value="">
+            {intl.formatMessage({ defaultMessage: "Random" })}
+          </option>
+          <option value="createdAt">
+            {intl.formatMessage({ defaultMessage: "Newest" })}
+          </option>
+          <option value="percentageFunded">
+            {intl.formatMessage({ defaultMessage: "Most funded" })}
+          </option>
+          <option value="contributionsCount">
+            {intl.formatMessage({ defaultMessage: "Most contributions" })}
+          </option>
         </SelectField>
       </span>
     </div>
