@@ -6,6 +6,8 @@ import {
   getCollective,
   getCollectiveOrProject,
   getExpenses,
+  getExpensesCount,
+  getExpensesIds,
   getProject,
   getRoundMember,
   isCollAdmin,
@@ -27,6 +29,7 @@ import {
   UNAUTHORIZED_STATUS,
   UNAUTHORIZED,
   GRAPHQL_ADMIN_ONLY,
+  GRAPHQL_OC_EXPENSES_NOT_FOUND,
 } from "../../../../constants";
 import {
   ocExpenseToCobudget,
@@ -866,8 +869,7 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
 
 export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
   try {
-    const limit = 1000;
-    const offset = 0;
+    const BATCH_SIZE = 2;
     const roundMember = await prisma.roundMember.findUnique({
       where: {
         userId_roundId: {
@@ -908,12 +910,35 @@ export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
       round.openCollectiveProjectId,
       getOCToken(round)
     );
-
-    const ocExpenses = await getExpenses(
-      { slug: collective.slug, limit, offset },
+    const { count, error } = await getExpensesCount(
+      collective.slug,
       getOCToken(round)
     );
-    const ocExpensesIds = ocExpenses.map((x) => x.id);
+    if (error) {
+      throw new Error(error);
+    }
+
+    const requests = [];
+    for (let i = 0; i < count; i += BATCH_SIZE) {
+      requests.push(
+        getExpensesIds(
+          { slug: collective.slug, limit: BATCH_SIZE, offset: 0 },
+          getOCToken(round)
+        )
+      );
+    }
+    const expensesResponse = await Promise.all(requests);
+    const isError = expensesResponse.some((r) => r.error);
+
+    if (isError) {
+      throw new Error(GRAPHQL_OC_EXPENSES_NOT_FOUND);
+    }
+
+    const ocExpensesIds = expensesResponse
+      .flat()
+      .map((r) => r.expensesIds)
+      .flat()
+      .map((e) => e.id);
 
     const allExpenses = await prisma.expense.findMany({
       select: {

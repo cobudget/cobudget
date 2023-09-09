@@ -54,6 +54,16 @@ export const GET_PROJECT = `
     }
 `;
 
+export const GET_EXPENSES_IDS = `
+  query Expenses($account: AccountReferenceInput, $limit: Int!, $offset: Int!) {
+    expenses(account: $account, limit: $limit, offset: $offset) {
+      nodes {
+        id
+      }
+    }
+  }
+`;
+
 export const GET_EXPENSES = `
   query Expenses($account: AccountReferenceInput, $limit: Int!, $offset: Int!) {
     expenses(account: $account, limit: $limit, offset: $offset) {
@@ -222,6 +232,30 @@ export const getExpenses = async (
   } catch (err) {
     console.log(err);
     return [];
+  }
+};
+
+export const getExpensesIds = async (
+  { slug, offset, limit }: { slug: string; offset: number; limit: number },
+  token: string
+) => {
+  const graphqlClient = customOCGqlClient(token);
+  try {
+    const response = await graphqlClient.request(GET_EXPENSES_IDS, {
+      account: {
+        slug,
+      },
+      limit,
+      offset,
+    });
+    return {
+      expensesIds: response.expenses.nodes || null,
+      error: !response.expenses.nodes,
+    };
+  } catch (err) {
+    return {
+      error: true,
+    };
   }
 };
 
