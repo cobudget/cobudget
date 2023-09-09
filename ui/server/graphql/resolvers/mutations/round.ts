@@ -869,7 +869,7 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
 
 export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
   try {
-    const BATCH_SIZE = 2;
+    const BATCH_SIZE = 1000;
     const roundMember = await prisma.roundMember.findUnique({
       where: {
         userId_roundId: {

@@ -334,11 +334,19 @@ function Integrations() {
                       <FormattedMessage defaultMessage="Sync Open Collective Expenses" />
                     }
                     secondary={
-                      <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                      fetchingExpensesCount ? (
+                        <FormattedMessage defaultMessage="Fetching expense count..." />
+                      ) : (
+                        <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                      )
                     }
                   />
                   <ListItemSecondaryAction>
-                    <Button onClick={handleSync} loading={syncing}>
+                    <Button
+                      onClick={handleSync}
+                      loading={syncing}
+                      disabled={fetchingExpensesCount}
+                    >
                       <FormattedMessage defaultMessage="Sync" />
                     </Button>
                   </ListItemSecondaryAction>
