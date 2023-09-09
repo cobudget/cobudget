@@ -922,7 +922,7 @@ export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
     for (let i = 0; i < count; i += BATCH_SIZE) {
       requests.push(
         getExpensesIds(
-          { slug: collective.slug, limit: BATCH_SIZE, offset: 0 },
+          { slug: collective.slug, limit: BATCH_SIZE, offset: i },
           getOCToken(round)
         )
       );
