@@ -1108,7 +1108,42 @@ export const syncOCExpenses = async (
       updateQueries.push(r);
     }
 
-    await Promise.allSettled([...addQueries, ...updateQueries]);
+    const r = await Promise.allSettled([...addQueries, ...updateQueries]);
+    const failedInsert = [];
+    r.forEach((response, i) => {
+      if (response.status === "rejected" && response.reason.code === "P2003") {
+        failedInsert.push(i);
+      }
+    });
+
+    // Edge Case 1: Bucket deleted from database
+    // handle failed insert queries due to foreign key constraint failed
+    if (failedInsert.length > 0) {
+      const buckets = await prisma.bucket.findMany({
+        where: { roundId: id },
+        select: {
+          id: true,
+        },
+      });
+      const ids = buckets.map((b) => b.id);
+      const filteredToAdd = [];
+      failedInsert.forEach((i) => {
+        filteredToAdd.push(expenseToAdd.slice(i, i + BATCH_SIZE));
+      });
+      //todo: filter expenses: where ids.indexOf(expense.bucketId) == -1
+      const toAdd = filteredToAdd.flat();
+      toAdd.forEach((e) => {
+        if (ids.indexOf(e.bucketId) === -1) {
+          delete e.bucketId;
+        }
+      });
+      const d = await prisma.expense.createMany({
+        data: toAdd,
+      });
+      console.log(d);
+    }
+    //todo: remove return
+    return {};
 
     //Part 4: Add Receipts
     const newlyAddedExpenses = await prisma.expense.findMany({
