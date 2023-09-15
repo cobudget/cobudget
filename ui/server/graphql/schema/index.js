@@ -3,6 +3,7 @@ import { gql } from "apollo-server-micro";
 const schema = gql`
   scalar JSON
   scalar JSONObject
+  scalar BigInt
 
   input AmountConversionInput {
     amount: Float!
@@ -411,7 +412,7 @@ const schema = gql`
     totalContributions: Int
     totalContributionsFunding: Int
     totalContributionsFunded: Int
-    totalInMembersBalances: Int
+    totalInMembersBalances: BigInt
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
