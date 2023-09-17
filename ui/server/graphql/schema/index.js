@@ -21,6 +21,11 @@ const schema = gql`
     rate: Float
   }
 
+  type ExpensesCount {
+    error: Boolean
+    count: Int
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -40,6 +45,7 @@ const schema = gql`
       sortBy: ExpenseSortByOptions
       sortOrder: SortOrderOptions
     ): ExpensesResponse
+    expensesCount(roundId: ID!): ExpensesCount
     allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
@@ -242,7 +248,7 @@ const schema = gql`
       attachment: String
     ): ExpenseReceipt
 
-    syncOCExpenses(id: ID!): OCSyncResponse
+    syncOCExpenses(id: ID!, limit: Int!, offset: Int!): OCSyncResponse
     removeDeletedOCExpenses(id: ID!): OCSyncResponse
     deprecatedSyncOCExpenses(id: ID!): OCSyncResponse
       @deprecated(
