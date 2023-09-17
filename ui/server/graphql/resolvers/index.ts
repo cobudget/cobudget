@@ -39,6 +39,7 @@ import {
   bucketMutations,
   superAdminMutations,
 } from "./mutations";
+import { BigInt } from "./types/Scalars";
 
 const resolvers = {
   Query: {
@@ -76,6 +77,7 @@ const resolvers = {
   SuperAdminSession,
   JSON: GraphQLJSON,
   JSONObject: GraphQLJSONObject,
+  BigInt,
   CustomFieldValue,
 };
 
