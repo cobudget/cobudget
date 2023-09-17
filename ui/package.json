@@ -14,7 +14,7 @@
     "generate:prisma": "prisma generate",
     "migrate": "npx prisma migrate dev",
     "typecheck": "tsc --noEmit",
-    "extract": "formatjs extract 'components/**/*.*s*' --ignore='**/*.d.ts' --out-file lang/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]' --format ../scripts/formatter.js",
+    "extract": "formatjs extract '(components||pages)/**/*.*s*' --ignore='**/*.d.ts' --out-file lang/en.json --id-interpolation-pattern '[sha512:contenthash:base64:6]' --format ../scripts/formatter.js",
     "crowdin": "crowdin",
     "crowdin:download": "../scripts/crowdin.sh download",
     "crowdin:upload": "../scripts/crowdin.sh upload"
