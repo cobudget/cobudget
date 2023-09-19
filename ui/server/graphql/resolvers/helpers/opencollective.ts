@@ -54,9 +54,19 @@ export const GET_PROJECT = `
     }
 `;
 
+export const GET_EXPENSES_IDS = `
+  query Expenses($account: AccountReferenceInput, $limit: Int!, $offset: Int!) {
+    expenses(account: $account, limit: $limit, offset: $offset) {
+      nodes {
+        id
+      }
+    }
+  }
+`;
+
 export const GET_EXPENSES = `
-  query Expenses($account: AccountReferenceInput, $limit: Int!) {
-    expenses(account: $account, limit: $limit) {
+  query Expenses($account: AccountReferenceInput, $limit: Int!, $offset: Int!) {
+    expenses(account: $account, limit: $limit, offset: $offset) {
       nodes {
         description
         customData
@@ -90,6 +100,14 @@ export const GET_EXPENSES = `
         status
         createdAt
       }
+      totalCount
+    }
+  }
+`;
+
+export const GET_EXPENSES_COUNT = `
+  query Expenses($account: AccountReferenceInput, $limit: Int) {
+    expenses(account: $account, limit: $limit) {
       totalCount
     }
   }
@@ -197,17 +215,64 @@ export const getExpense = async (id: number, token: string) => {
   }
 };
 
-export const getExpenses = async (slug: string, token: string) => {
+export const getExpenses = async (
+  { slug, offset, limit }: { slug: string; offset: number; limit: number },
+  token: string
+) => {
   const graphqlClient = customOCGqlClient(token);
   try {
     const response = await graphqlClient.request(GET_EXPENSES, {
       account: {
         slug,
       },
-      limit: 1e3,
+      limit,
+      offset,
     });
     return response.expenses.nodes || [];
   } catch (err) {
+    console.log(err);
     return [];
+  }
+};
+
+export const getExpensesIds = async (
+  { slug, offset, limit }: { slug: string; offset: number; limit: number },
+  token: string
+) => {
+  const graphqlClient = customOCGqlClient(token);
+  try {
+    const response = await graphqlClient.request(GET_EXPENSES_IDS, {
+      account: {
+        slug,
+      },
+      limit,
+      offset,
+    });
+    return {
+      expensesIds: response.expenses.nodes || null,
+      error: !response.expenses.nodes,
+    };
+  } catch (err) {
+    return {
+      error: true,
+    };
+  }
+};
+
+export const getExpensesCount = async (slug: string, token: string) => {
+  try {
+    const graphqlClient = customOCGqlClient(token);
+    const response = await graphqlClient.request(GET_EXPENSES_COUNT, {
+      account: {
+        slug,
+      },
+      limit: 1000,
+    });
+    return {
+      count: response.expenses.totalCount,
+      error: "totalCount" in response,
+    };
+  } catch (error) {
+    return { error };
   }
 };

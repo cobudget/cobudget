@@ -10,7 +10,7 @@ import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import { QuestionMarkIcon } from "components/Icons";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { HIDDEN, PUBLIC } from "../../constants";
 import PublicRoundWarning from "components/RoundSettings/PublicRoundWarning";
 
@@ -69,7 +69,9 @@ export default function NewRoundPage({ currentGroup }) {
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
-        <h1 className="text-2xl mb-2 font-semibold">New round</h1>
+        <h1 className="text-2xl mb-2 font-semibold">
+          <FormattedMessage defaultMessage="New round" />
+        </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
             name="title"
@@ -88,9 +90,11 @@ export default function NewRoundPage({ currentGroup }) {
             name="slug"
             labelComponent={() => (
               <div className="items-center flex">
-                Slug
+                <FormattedMessage defaultMessage="Slug" />
                 <Tooltip
-                  content={`The part that comes after the domain in the URL`}
+                  content={intl.formatMessage({
+                    defaultMessage: `The part that comes after the domain in the URL`,
+                  })}
                   placement="bottom"
                   arrow={false}
                 >
@@ -98,7 +102,7 @@ export default function NewRoundPage({ currentGroup }) {
                 </Tooltip>
               </div>
             )}
-            placeholder="Slug"
+            placeholder={intl.formatMessage({ defaultMessage: "Slug" })}
             inputRef={register({ required: "Required" })}
             className="mb-2"
             error={errors.slug}
@@ -111,7 +115,7 @@ export default function NewRoundPage({ currentGroup }) {
           />
           <SelectField
             name="currency"
-            label="Currency"
+            label={intl.formatMessage({ defaultMessage: "Currency" })}
             className="mb-2"
             inputRef={register({
               required: "Required",
@@ -156,9 +160,15 @@ export default function NewRoundPage({ currentGroup }) {
               required: "Required",
             })}
           >
-            <option value="OPEN">Open</option>
-            <option value="REQUEST_TO_JOIN">Request to join</option>
-            <option value="INVITE_ONLY">Invite only</option>
+            <option value="OPEN">
+              {intl.formatMessage({ defaultMessage: "Open" })}
+            </option>
+            <option value="REQUEST_TO_JOIN">
+              {intl.formatMessage({ defaultMessage: "Request to join" })}
+            </option>
+            <option value="INVITE_ONLY">
+              {intl.formatMessage({ defaultMessage: "Invite only" })}
+            </option>
           </SelectField>
 
           <PublicRoundWarning
@@ -167,7 +177,7 @@ export default function NewRoundPage({ currentGroup }) {
           />
 
           <Button className="mt-2" type="submit">
-            Create
+            {intl.formatMessage({ defaultMessage: "Create" })}
           </Button>
         </form>
       </div>

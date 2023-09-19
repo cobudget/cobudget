@@ -3,6 +3,7 @@ import { gql } from "apollo-server-micro";
 const schema = gql`
   scalar JSON
   scalar JSONObject
+  scalar BigInt
 
   input AmountConversionInput {
     amount: Float!
@@ -19,6 +20,11 @@ const schema = gql`
   type ExchangeRateResponse {
     currency: String
     rate: Float
+  }
+
+  type ExpensesCount {
+    error: Boolean
+    count: Int
   }
 
   type Query {
@@ -40,6 +46,7 @@ const schema = gql`
       sortBy: ExpenseSortByOptions
       sortOrder: SortOrderOptions
     ): ExpensesResponse
+    expensesCount(roundId: ID!): ExpensesCount
     allExpenses: [Expense]
     invitationLink(roundId: ID): InvitationLink
     groupInvitationLink(groupId: ID): InvitationLink
@@ -242,7 +249,7 @@ const schema = gql`
       attachment: String
     ): ExpenseReceipt
 
-    syncOCExpenses(id: ID!): OCSyncResponse
+    syncOCExpenses(id: ID!, limit: Int!, offset: Int!): OCSyncResponse
     removeDeletedOCExpenses(id: ID!): OCSyncResponse
     deprecatedSyncOCExpenses(id: ID!): OCSyncResponse
       @deprecated(
@@ -411,7 +418,7 @@ const schema = gql`
     totalContributions: Int
     totalContributionsFunding: Int
     totalContributionsFunded: Int
-    totalInMembersBalances: Int
+    totalInMembersBalances: BigInt
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
