@@ -11,7 +11,7 @@
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix && yarn typecheck",
     "test:run:servers": "cd ui && sudo yarn dev",
     "test:open": "cypress open",
-    "test:run": "cypress run --browser chrome --headless",
+    "test:run": "cypress run --browser electron --headless",
     "test": "./scripts/wait.sh 3000 && yarn test:switch-env && yarn test:run",
     "typecheck": "yarn --cwd ui typecheck",
     "test:migrate": "./scripts/wait.sh 35432 && cd ui && yarn migrate",
