@@ -1128,22 +1128,20 @@ export const syncOCExpenses = async (
       const ids = buckets.map((b) => b.id);
       const filteredToAdd = [];
       failedInsert.forEach((i) => {
-        filteredToAdd.push(expenseToAdd.slice(i, i + BATCH_SIZE));
+        filteredToAdd.push(
+          expenseToAdd.slice(i * BATCH_SIZE, i * BATCH_SIZE + BATCH_SIZE)
+        );
       });
-      //todo: filter expenses: where ids.indexOf(expense.bucketId) == -1
       const toAdd = filteredToAdd.flat();
       toAdd.forEach((e) => {
         if (ids.indexOf(e.bucketId) === -1) {
           delete e.bucketId;
         }
       });
-      const d = await prisma.expense.createMany({
+      await prisma.expense.createMany({
         data: toAdd,
       });
-      console.log(d);
     }
-    //todo: remove return
-    return {};
 
     //Part 4: Add Receipts
     const newlyAddedExpenses = await prisma.expense.findMany({
