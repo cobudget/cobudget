@@ -237,7 +237,7 @@ function Integrations() {
                           });
                         }}
                       >
-                        Verify
+                        <FormattedMessage defaultMessage="Verify" />
                       </Button>
                     </span>
                   ) : null}
@@ -295,7 +295,9 @@ function Integrations() {
                       {round.ocWebhookUrl}
                     </p>
                   ) : (
-                    <p className="italic mt-1">Connect to Open Collective</p>
+                    <p className="italic mt-1">
+                      <FormattedMessage defaultMessage="Connect to Open Collective" />
+                    </p>
                   )
                 }
               />

@@ -1,5 +1,4 @@
 import { Popover } from "@headlessui/react";
-import { gql, useQuery } from "urql";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export default function StatusFilter({
@@ -9,30 +8,31 @@ export default function StatusFilter({
   bucketStatusCount,
   className = "",
 }) {
+  const intl = useIntl();
   const items = [
     {
       type: "PENDING_APPROVAL",
-      placeholder: "Draft",
+      placeholder: intl.formatMessage({ defaultMessage: "Draft" }),
     },
     {
       type: "IDEA",
-      placeholder: "Idea",
+      placeholder: intl.formatMessage({ defaultMessage: "Idea" }),
     },
     {
       type: "OPEN_FOR_FUNDING",
-      placeholder: "Open for funding",
+      placeholder: intl.formatMessage({ defaultMessage: "Open for funding" }),
     },
     {
       type: "FUNDED",
-      placeholder: "Funded",
+      placeholder: intl.formatMessage({ defaultMessage: "Funded" }),
     },
     {
       type: "COMPLETED",
-      placeholder: "Delivered",
+      placeholder: intl.formatMessage({ defaultMessage: "Delivered" }),
     },
     {
       type: "CANCELED",
-      placeholder: "Canceled",
+      placeholder: intl.formatMessage({ defaultMessage: "Canceled" }),
     },
   ]
     //.filter((item) => !!bucketStatusCount[item.type])

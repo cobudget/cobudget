@@ -86,7 +86,9 @@ export default function AboutPage({ router, round }) {
 
           <ListItem>
             <ListItemText
-              primary="Allow stretch goals"
+              primary={intl.formatMessage({
+                defaultMessage: "Allow stretch goals",
+              })}
               secondary={
                 round.allowStretchGoals ? (
                   <FormattedMessage defaultMessage="Yes" />
