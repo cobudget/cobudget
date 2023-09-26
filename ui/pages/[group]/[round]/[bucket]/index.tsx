@@ -17,6 +17,7 @@ import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
 import Head from "next/head";
 import Expenses from "components/Bucket/Expenses";
+import { FormattedMessage } from "react-intl";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
@@ -288,7 +289,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                 )
               }
             >
-              Comments{" "}
+              <FormattedMessage defaultMessage="Comments" />{" "}
               {!bucket?.round?.group?.discourseUrl &&
                 `(${bucket?.noOfComments})`}
             </Tab>
@@ -302,7 +303,8 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                 )
               }
             >
-              Funders ({bucket?.noOfFunders})
+              <FormattedMessage defaultMessage="Funders" /> (
+              {bucket?.noOfFunders})
             </Tab>
             {showExpensesTab ? (
               <Tab
@@ -315,7 +317,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                   )
                 }
               >
-                Expenses{" "}
+                <FormattedMessage defaultMessage="Expenses" />{" "}
                 {bucket?.expenses?.length
                   ? `(${bucket?.expenses?.length})`
                   : ""}
