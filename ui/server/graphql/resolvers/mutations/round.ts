@@ -1108,9 +1108,12 @@ export const syncOCExpenses = async (
       updateQueries.push(r);
     }
 
-    const r = await Promise.allSettled([...addQueries, ...updateQueries]);
+    const queryResults = await Promise.allSettled([
+      ...addQueries,
+      ...updateQueries,
+    ]);
     const failedInsert = [];
-    r.forEach((response, i) => {
+    queryResults.forEach((response, i) => {
       if (response.status === "rejected" && response.reason.code === "P2003") {
         failedInsert.push(i);
       }
