@@ -475,13 +475,15 @@ export const inviteRoundMembers = combineResolvers(
       if (emails.length > 10000) {
         throw new Error("You can only invite 10000 people at a time");
       }
-
+      console.log("H12", roundId)
       const roundMembers = await prisma.roundMember.findMany({
         where: { roundId: round.id },
         include: {
           user: true,
         },
       });
+
+      console.log("HERE");
 
       const existingMemberEmails = {};
       roundMembers.forEach((m) => {
@@ -554,21 +556,21 @@ export const inviteRoundMembers = combineResolvers(
         },
       });
 
-      await prisma.$transaction(
-        newlyAddedUsers.map((user) =>
-          prisma.roundMember.create({
-            data: {
-              isApproved: true,
-              hasJoined: false,
-              round: { connect: { id: roundId } },
-              user: { connect: { id: user.id } },
-              statusAccount: { create: {} },
-              incomingAccount: { create: {} },
-              outgoingAccount: { create: {} },
-            },
-          })
-        )
-      );
+      //await prisma.$transaction(
+      //  newlyAddedUsers.map((user) =>
+      //    prisma.roundMember.create({
+      //      data: {
+      //        isApproved: true,
+      //        hasJoined: false,
+      //        round: { connect: { id: roundId } },
+      //        user: { connect: { id: user.id } },
+      //        statusAccount: { create: {} },
+      //        incomingAccount: { create: {} },
+      //        outgoingAccount: { create: {} },
+      //      },
+      //    })
+      //  )
+      //);
     } catch (err) {
       console.log(err);
     }
