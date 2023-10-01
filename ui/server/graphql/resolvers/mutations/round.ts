@@ -491,7 +491,6 @@ export const inviteRoundMembers = combineResolvers(
       const joinedMembers = []; // Members who have joined
       const alreadyMembers = []; // Members who have requested to join but are not approved yet
       const alreadyApprovedMembers = []; // Members who are approved but they haven't joined yet
-      const newMembers = []; // Users who have joined cobudget but not current round
       const newUsers = []; // User who have neither joined cobudget nor round
 
       emails.forEach((m) => {
@@ -555,12 +554,21 @@ export const inviteRoundMembers = combineResolvers(
         },
       });
 
-      await prisma.roundMember.createMany({
-        data: newlyAddedUsers.map((user) => ({
-          userId: user.id,
-          roundId: roundId,
-        })),
-      });
+      await prisma.$transaction(
+        newlyAddedUsers.map((user) =>
+          prisma.roundMember.create({
+            data: {
+              isApproved: true,
+              hasJoined: false,
+              round: { connect: { id: roundId } },
+              user: { connect: { id: user.id } },
+              statusAccount: { create: {} },
+              incomingAccount: { create: {} },
+              outgoingAccount: { create: {} },
+            },
+          })
+        )
+      );
     } catch (err) {
       console.log(err);
     }
