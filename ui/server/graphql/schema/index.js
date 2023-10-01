@@ -282,6 +282,10 @@ const schema = gql`
     updateProfile(username: String, name: String, mailUpdates: Boolean): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
 
+    deprecatedInviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
+      @deprecated(
+        reason: "Use inviteRoundMembers instead instead. This mutation is slow"
+      )
     inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
     inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
     updateGroupMember(
