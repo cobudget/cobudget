@@ -390,7 +390,7 @@ export const deleteGuideline = combineResolvers(
 );
 
 export const deprecatedInviteRoundMembers = combineResolvers(
-  isCollOrGroupAdmin,
+  //isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     const start = Date.now();
     const round = await prisma.round.findUnique({
@@ -463,7 +463,7 @@ export const deprecatedInviteRoundMembers = combineResolvers(
 );
 
 export const inviteRoundMembers = combineResolvers(
-  isCollOrGroupAdmin,
+  //isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     try {
       const start = Date.now();
