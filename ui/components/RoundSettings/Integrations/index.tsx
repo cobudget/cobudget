@@ -56,9 +56,26 @@ const VERIFY_OPENCOLLECTIVE = gql`
 `;
 
 const SYNC_OC_EXPENSES = gql`
-  mutation SyncOCExpenses($id: ID!) {
-    syncOCExpenses(id: $id) {
+  mutation SyncOCExpenses($id: ID!, $limit: Int!, $offset: Int!) {
+    syncOCExpenses(id: $id, limit: $limit, offset: $offset) {
       status
+    }
+  }
+`;
+
+const REMOVE_DELETED__OC_EXPENSES = gql`
+  mutation DeleteRemovedOCExpenses($id: ID!) {
+    removeDeletedOCExpenses(id: $id) {
+      status
+    }
+  }
+`;
+
+const GET_EXPENSES_COUNT = gql`
+  query ExpensesCount($roundId: ID!) {
+    expensesCount(roundId: $roundId) {
+      count
+      error
     }
   }
 `;
@@ -69,10 +86,19 @@ function Integrations() {
     query: GET_ROUND_INTEGRATIONS,
     variables: { roundSlug: router.query.round, groupSlug: router.query.group },
   });
+
   const [{ fetching: verifying }, verifyOpencollective] = useMutation(
     VERIFY_OPENCOLLECTIVE
   );
-  const [{ fetching: syncing }, syncOCExpenses] = useMutation(SYNC_OC_EXPENSES);
+  const [{ fetching: addingAndUpdatingExpenses }, syncOCExpenses] = useMutation(
+    SYNC_OC_EXPENSES
+  );
+  const [
+    { fetching: removingDeletedExpenses },
+    removeDeletedOCExpenses,
+  ] = useMutation(REMOVE_DELETED__OC_EXPENSES);
+  const syncing = addingAndUpdatingExpenses || removingDeletedExpenses;
+
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
@@ -92,6 +118,38 @@ function Integrations() {
   };
 
   const round = data?.round;
+
+  const [
+    { data: expensesCountQuery, fetching: fetchingExpensesCount },
+  ] = useQuery({
+    query: GET_EXPENSES_COUNT,
+    variables: {
+      roundId: round?.id,
+    },
+    pause: !round,
+  });
+
+  const handleSync = async () => {
+    if (fetchingExpensesCount) {
+      return toast.error(
+        intl.formatMessage({ defaultMessage: "Expense count not available" })
+      );
+    }
+    const requests = [];
+    const expensesCount = expensesCountQuery.expensesCount.count || 1000;
+    const BATCH_SIZE = 1000;
+    for (let i = 0; i < expensesCount; i += BATCH_SIZE) {
+      requests.push(
+        syncOCExpenses({
+          id: round.id,
+          limit: BATCH_SIZE,
+          offset: i,
+        })
+      );
+    }
+    await Promise.allSettled(requests);
+    await removeDeletedOCExpenses({ id: round.id });
+  };
 
   if (fetching) {
     return (
@@ -179,7 +237,7 @@ function Integrations() {
                           });
                         }}
                       >
-                        Verify
+                        <FormattedMessage defaultMessage="Verify" />
                       </Button>
                     </span>
                   ) : null}
@@ -237,7 +295,9 @@ function Integrations() {
                       {round.ocWebhookUrl}
                     </p>
                   ) : (
-                    <p className="italic mt-1">Connect to Open Collective</p>
+                    <p className="italic mt-1">
+                      <FormattedMessage defaultMessage="Connect to Open Collective" />
+                    </p>
                   )
                 }
               />
@@ -276,13 +336,18 @@ function Integrations() {
                       <FormattedMessage defaultMessage="Sync Open Collective Expenses" />
                     }
                     secondary={
-                      <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                      fetchingExpensesCount ? (
+                        <FormattedMessage defaultMessage="Fetching expense count..." />
+                      ) : (
+                        <FormattedMessage defaultMessage="Sync Open Collective expenses with cobudget" />
+                      )
                     }
                   />
                   <ListItemSecondaryAction>
                     <Button
-                      onClick={() => syncOCExpenses({ id: round.id })}
+                      onClick={handleSync}
                       loading={syncing}
+                      disabled={fetchingExpensesCount}
                     >
                       <FormattedMessage defaultMessage="Sync" />
                     </Button>

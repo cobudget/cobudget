@@ -12,9 +12,12 @@ export const GRAPHQL_EXPENSE_NOT_SUBMITTED_BY_CURRENT_USER =
 export const GRAPHQL_ROUND_NOT_FOUND = "Round not found";
 export const GRAPHQL_ADMIN_AND_MODERATOR_ONLY =
   "Only admins and moderators can perform this action";
+export const GRAPHQL_ADMIN_ONLY = "Only round admins can sync expenses";
 export const GRAPHQL_EXPENSE_RECEIPT_NOT_FOUND = "Expense receipt not found";
 export const GRAPHQL_EXPENSES_PARTICIPANT_ONLY =
   "Only participants can view the expenses";
+export const GRAPHQL_OC_EXPENSES_NOT_FOUND =
+  "Unable to fetch expenses from opencollective";
 
 export const ROUND_IS_PRIVATE = "The round is private";
 

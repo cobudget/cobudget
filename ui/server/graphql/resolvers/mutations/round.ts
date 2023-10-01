@@ -6,6 +6,8 @@ import {
   getCollective,
   getCollectiveOrProject,
   getExpenses,
+  getExpensesCount,
+  getExpensesIds,
   getProject,
   getRoundMember,
   isCollAdmin,
@@ -26,12 +28,20 @@ import {
   GRAPHQL_COLLECTIVE_NOT_VERIFIED,
   UNAUTHORIZED_STATUS,
   UNAUTHORIZED,
+  GRAPHQL_ADMIN_ONLY,
+  GRAPHQL_OC_EXPENSES_NOT_FOUND,
 } from "../../../../constants";
 import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
 import { getOCToken } from "server/utils/roundUtils";
+import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
+import getMap from "server/utils/getMap";
+import {
+  getExpenseHash,
+  getExpenseUpdateRawQuery,
+} from "server/utils/expenses";
 
 export const createRound = async (
   parent,
@@ -914,8 +924,297 @@ export const verifyOpencollective = async (_, { roundId }, { ss, user }) => {
   }
 };
 
-export const syncOCExpenses = async (_, { id }) => {
+export const removeDeletedOCExpenses = async (_, { id }, { user, ss }) => {
   try {
+    const BATCH_SIZE = 1000;
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: id,
+        },
+      },
+      include: {
+        round: {
+          select: {
+            openCollectiveId: true,
+            openCollectiveProjectId: true,
+            ocVerified: true,
+            ocToken: true,
+          },
+        },
+      },
+    });
+
+    const isAdmin = roundMember.isAdmin;
+    const round = roundMember.round;
+
+    if (!isAdmin) {
+      throw new Error(GRAPHQL_ADMIN_ONLY);
+    }
+
+    if (!round.openCollectiveId) {
+      throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+    }
+
+    if (!round.ocVerified) {
+      throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+    }
+
+    // PART II: Fetch data from opencollective
+    const collective = await getCollectiveOrProject(
+      { id: round.openCollectiveProjectId || round.openCollectiveId },
+      round.openCollectiveProjectId,
+      getOCToken(round)
+    );
+    const { count, error } = await getExpensesCount(
+      collective.slug,
+      getOCToken(round)
+    );
+    if (error) {
+      throw new Error(error);
+    }
+
+    const requests = [];
+    for (let i = 0; i < count; i += BATCH_SIZE) {
+      requests.push(
+        getExpensesIds(
+          { slug: collective.slug, limit: BATCH_SIZE, offset: i },
+          getOCToken(round)
+        )
+      );
+    }
+    const expensesResponse = await Promise.all(requests);
+    const isError = expensesResponse.some((r) => r.error);
+
+    if (isError) {
+      throw new Error(GRAPHQL_OC_EXPENSES_NOT_FOUND);
+    }
+
+    const ocExpensesIds = expensesResponse
+      .flat()
+      .map((r) => r.expensesIds)
+      .flat()
+      .map((e) => e.id);
+
+    const allExpenses = await prisma.expense.findMany({
+      select: {
+        ocId: true,
+        id: true,
+        roundId: true,
+        currency: true,
+        title: true,
+        status: true,
+      },
+      where: {
+        OR: [{ roundId: id }, { ocId: { in: ocExpensesIds } }],
+      },
+    });
+    const allExpensesOCIds = allExpenses.map((e) => e.ocId);
+
+    //PART III: Delete expenses which are deleted from opencollective
+    const deletedFromOC = allExpensesOCIds.filter(
+      (i) => i && ocExpensesIds.indexOf(i) === -1
+    );
+    await prisma.expense.deleteMany({
+      where: { ocId: { in: deletedFromOC } },
+    });
+
+    return { status: "success" };
+  } catch (err) {
+    return err;
+  }
+};
+
+export const syncOCExpenses = async (
+  _,
+  { id, limit, offset },
+  { user, ss }
+) => {
+  try {
+    const roundMember = await prisma.roundMember.findUnique({
+      where: {
+        userId_roundId: {
+          userId: user.id,
+          roundId: id,
+        },
+      },
+      include: {
+        round: {
+          select: {
+            openCollectiveId: true,
+            openCollectiveProjectId: true,
+            ocVerified: true,
+            ocToken: true,
+            currency: true,
+          },
+        },
+      },
+    });
+
+    const isAdmin = roundMember.isAdmin;
+    const round = roundMember.round;
+    if (!isAdmin) {
+      throw new Error(GRAPHQL_ADMIN_ONLY);
+    }
+
+    if (!round.openCollectiveId) {
+      throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+    }
+
+    if (!round.ocVerified) {
+      throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+    }
+
+    // PART II: Fetch data from opencollective
+    const collective = await getCollectiveOrProject(
+      { id: round.openCollectiveProjectId || round.openCollectiveId },
+      round.openCollectiveProjectId,
+      getOCToken(round)
+    );
+
+    const ocExpenses = await getExpenses(
+      {
+        slug: collective.slug,
+        limit,
+        offset,
+      },
+      getOCToken(round)
+    );
+    const ocExpensesIds = ocExpenses.map((x) => x.id);
+
+    const allExpenses = await prisma.expense.findMany({
+      select: {
+        ocId: true,
+        id: true,
+        roundId: true,
+        currency: true,
+        title: true,
+        status: true,
+      },
+      where: {
+        OR: [{ roundId: id }, { ocId: { in: ocExpensesIds } }],
+      },
+    });
+    const allExpensesMap = getMap(allExpenses, "ocId");
+    const rates = (await getExchangeRates()).rates || {};
+    const allExpensesOCIds = allExpenses.map((e) => e.ocId);
+
+    const expensesData = ocExpenses.map((e) =>
+      ocExpenseToCobudget(
+        e,
+        id,
+        allExpensesOCIds.indexOf(e.id) > -1,
+        convertAmount({
+          rates,
+          from: e.amountV2?.currency,
+          to: round?.currency,
+        }),
+        allExpenses.find((x) => {
+          return x.ocId === e.id;
+        })
+      )
+    );
+
+    // PART 3: Update data
+    const receipts = [];
+    const expenseToAdd = [];
+    const expenseToUpdate = [];
+    const BATCH_SIZE = 200;
+
+    expensesData.forEach((expense) => {
+      const [data, isEditing, items] = expense;
+      if (isEditing) {
+        const cobudgetExpense = allExpensesMap[data.ocId];
+        expenseToUpdate.push({
+          where: { id: cobudgetExpense.id },
+          data,
+        });
+      } else {
+        expenseToAdd.push(data);
+      }
+      receipts.push(items.map((item) => ({ ...item, ocExpenseId: data.ocId })));
+    });
+
+    const addQueries = [];
+    for (let i = 0; i < expenseToAdd.length; i += BATCH_SIZE) {
+      addQueries.push(
+        prisma.expense.createMany({
+          data: expenseToAdd.slice(i, i + BATCH_SIZE),
+        })
+      );
+    }
+
+    const changedExpenses = expenseToUpdate.filter((e) => {
+      const h1 = getExpenseHash(e.data);
+      const h2 = getExpenseHash(allExpensesMap[e.data.ocId]);
+      return h1 !== h2;
+    });
+
+    const updateQueries = [];
+    const raw = [];
+
+    for (let i = 0; i < changedExpenses.length; i += BATCH_SIZE) {
+      const query = getExpenseUpdateRawQuery(
+        changedExpenses
+          .slice(i, i + BATCH_SIZE)
+          .map((c) => ({ ...c.data, ...c.where }))
+      );
+      raw.push(query);
+      const r = prisma.$executeRawUnsafe(query);
+      updateQueries.push(r);
+    }
+
+    await Promise.allSettled([...addQueries, ...updateQueries]);
+
+    //Part 4: Add Receipts
+    const newlyAddedExpenses = await prisma.expense.findMany({
+      select: { id: true, ocId: true },
+      where: { ocId: { in: expenseToAdd.map((e) => e.ocId) } },
+    });
+    const newlyAddedExpensesMap = getMap(newlyAddedExpenses, "ocId");
+    const localExpensesIds = [
+      ...newlyAddedExpenses.map((e) => e.id),
+      ...allExpenses.map((e) => e.id),
+    ];
+    // add expense ids to receipts
+    const receiptsData = receipts
+      .flat()
+      .map((r) => {
+        const expense =
+          allExpensesMap[r.ocExpenseId] || newlyAddedExpensesMap[r.ocExpenseId];
+        return ocItemToCobudgetReceipt({ ...r, expenseId: r?.id }, expense);
+      })
+      .filter((r) => r.expenseId);
+
+    await prisma.expenseReceipt.deleteMany({
+      where: {
+        OR: [
+          { expenseId: { in: localExpensesIds } },
+          {
+            ocExpenseReceiptId: {
+              in: receiptsData.map((r) => r.ocExpenseReceiptId),
+            },
+          },
+        ],
+      },
+    });
+
+    await prisma.expenseReceipt.createMany({
+      data: receiptsData,
+    });
+
+    return { status: "success" };
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
+};
+
+export const deprecatedSyncOCExpenses = async (_, { id }) => {
+  try {
+    const limit = 1000;
+    const offset = 0;
     const round = await prisma.round.findUnique({ where: { id } });
     if (!round.openCollectiveId) {
       throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
@@ -929,7 +1228,14 @@ export const syncOCExpenses = async (_, { id }) => {
       getOCToken(round)
     );
 
-    const ocExpenses = await getExpenses(collective.slug, getOCToken(round));
+    const ocExpenses = await getExpenses(
+      {
+        slug: collective.slug,
+        limit,
+        offset,
+      },
+      getOCToken(round)
+    );
     const ocExpensesIds = ocExpenses.map((x) => x.id);
     const ocReceiptsIds = ocExpenses
       .map((x) => x.items.map((i) => i.id))
@@ -940,9 +1246,22 @@ export const syncOCExpenses = async (_, { id }) => {
         OR: [{ roundId: id }, { ocId: { in: ocExpensesIds } }],
       },
     });
+    const rates = (await getExchangeRates()).rates || {};
     const allExpensesOCIds = allExpenses.map((e) => e.ocId);
     const expensesData = ocExpenses.map((e) =>
-      ocExpenseToCobudget(e, id, allExpensesOCIds.indexOf(e.id) > -1)
+      ocExpenseToCobudget(
+        e,
+        id,
+        allExpensesOCIds.indexOf(e.id) > -1,
+        convertAmount({
+          rates,
+          from: e.amountV2?.currency,
+          to: round?.currency,
+        }),
+        allExpenses.find((x) => {
+          return x.ocId === e.id;
+        })
+      )
     );
 
     const pendingReceipts = [];

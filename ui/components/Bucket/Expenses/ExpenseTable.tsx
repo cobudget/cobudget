@@ -2,11 +2,12 @@ import FormattedCurrency from "components/FormattedCurrency";
 import { LoaderIcon } from "components/Icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import ExpenseStatus from "./ExpenseStatus";
-import { EXPENSE_REJECTED } from "../../../constants";
+import { EXPENSE_PAID, EXPENSE_REJECTED } from "../../../constants";
+import { ConversionReason, FrozenExpenseAmount } from "./ConversionElements";
 
 const CONVERT_CURRENCY = gql`
   query ConvertCurrency(
@@ -17,8 +18,18 @@ const CONVERT_CURRENCY = gql`
   }
 `;
 
+const EXCHANGE_RATES = gql`
+  query ExchangeRates($currencies: [String]) {
+    exchangeRates(currencies: $currencies) {
+      currency
+      rate
+    }
+  }
+`;
+
 function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
   const { pathname, query } = useRouter();
+  const [mouseInConversion, setMouseInConversion] = useState();
 
   const expenses = useMemo(() => {
     if (!allExpenses) {
@@ -61,6 +72,37 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
       toCurrency: round.currency,
     },
   });
+
+  // Other currency is true, if an expense contains amount
+  // other than the round currency
+  const otherCurrency = useMemo(() => {
+    const allCurrencies = partialTotal.map((t) => t.currency);
+    return allCurrencies.some((c) => {
+      return c !== round?.currency;
+    });
+  }, [partialTotal, round?.currency]);
+
+  const [{ data: exchangeRates, fetching: conversionRatesLoading }] = useQuery({
+    query: EXCHANGE_RATES,
+    pause: !otherCurrency,
+    variables: {
+      currencies: [
+        ...Array.from(new Set(allExpenses.map((e) => e.currency))),
+        round?.currency,
+      ],
+    },
+  });
+
+  const roundConversionRates = useMemo(() => {
+    const map = {};
+    const roundRate = exchangeRates?.exchangeRates?.find(
+      (r) => r.currency === round?.currency
+    )?.rate;
+    exchangeRates?.exchangeRates?.forEach((r) => {
+      map[r.currency] = r.rate / roundRate;
+    });
+    return map;
+  }, [round?.currency, exchangeRates]);
 
   const total =
     expenses.reduce((acc, expense) => {
@@ -109,6 +151,49 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
                   />
                   <ExpenseStatus expense={expense} currentUser={currentUser} />
                 </td>
+                {otherCurrency && (
+                  <td
+                    className="px-4 py-2"
+                    onMouseEnter={() => {
+                      setMouseInConversion(expense.id);
+                    }}
+                    onMouseLeave={() => {
+                      setMouseInConversion(undefined);
+                    }}
+                  >
+                    {conversionRatesLoading ? (
+                      <LoaderIcon
+                        className="animate-spin"
+                        width={20}
+                        height={20}
+                      />
+                    ) : expense.status === EXPENSE_PAID &&
+                      expense.exchangeRate &&
+                      expense.currency !== round?.currency ? (
+                      <FrozenExpenseAmount expense={expense} round={round} />
+                    ) : (
+                      <FormattedCurrency
+                        value={
+                          expense.amount /
+                          roundConversionRates[expense.currency]
+                        }
+                        currency={round.currency}
+                      />
+                    )}
+                    {mouseInConversion === expense.id && (
+                      <ConversionReason
+                        expense={expense}
+                        round={round}
+                        roundCurrencyRate={
+                          exchangeRates?.exchangeRates?.find(
+                            (e) => e.currency === round?.currency
+                          )?.rate
+                        }
+                        roundConversionRates={roundConversionRates}
+                      />
+                    )}
+                  </td>
+                )}
               </tr>
             );
           })}
@@ -116,6 +201,7 @@ function ExpenseTable({ expenses: allExpenses, round, currentUser, rejected }) {
             <td className="px-4 py-2">
               <FormattedMessage defaultMessage="Total" />
             </td>
+            {otherCurrency && <td />}
             <td className="px-4 py-2">
               {converting ? (
                 <LoaderIcon className="animate-spin" width={20} height={20} />

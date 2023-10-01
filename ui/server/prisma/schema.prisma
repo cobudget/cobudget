@@ -60,7 +60,7 @@ model ExpenseReceipt {
   attachment         String?
   expense            Expense? @relation(fields: [expenseId], references: [id])
   expenseId          String? 
-  ocExpenseReceiptId String?
+  ocExpenseReceiptId String?  @unique
 }
 
 enum ExpenseStatus {
@@ -103,6 +103,8 @@ model Expense {
   receipts            ExpenseReceipt[]
 
   currency            String?
+  exchangeRate        Float?    ///exchange rate in relation to the dollar
+  paidAt              DateTime?
 
   createdAt           DateTime  @default(now())
 }

@@ -5,12 +5,21 @@ import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import {
   canViewRound,
+  getCollectiveOrProject,
+  getExpensesCount,
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
 } from "../helpers";
 import { RoundTransaction } from "server/types";
 import cache from "memory-cache";
-import { CURRENCY_CACHE } from "../../../../constants";
+import {
+  CURRENCY_CACHE,
+  GRAPHQL_ADMIN_ONLY,
+  GRAPHQL_COLLECTIVE_NOT_VERIFIED,
+  GRAPHQL_OC_NOT_INTEGRATED,
+} from "../../../../constants";
+import { getExchangeRates } from "../helpers/getExchangeRate";
+import { getOCToken } from "server/utils/roundUtils";
 
 export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   if (!groupSlug) return null;
@@ -245,4 +254,61 @@ export const convertCurrency = async (_, { amounts, toCurrency }) => {
   });
 
   return sum;
+};
+
+export const exchangeRates = async (_, { currencies }) => {
+  const rates = (await getExchangeRates()).rates || {};
+  const response = [];
+  currencies.forEach((currency) => {
+    response.push({
+      currency,
+      rate: rates[currency]?.rate,
+    });
+  });
+  return response;
+};
+
+export const expensesCount = async (_, { roundId }, { user }) => {
+  const roundMember = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: user.id,
+        roundId,
+      },
+    },
+    include: {
+      round: {
+        select: {
+          openCollectiveId: true,
+          openCollectiveProjectId: true,
+          ocVerified: true,
+          ocToken: true,
+          currency: true,
+        },
+      },
+    },
+  });
+
+  const isAdmin = roundMember.isAdmin;
+  const round = roundMember.round;
+
+  if (!isAdmin) {
+    throw new Error(GRAPHQL_ADMIN_ONLY);
+  }
+
+  if (!round.openCollectiveId) {
+    throw new Error(GRAPHQL_OC_NOT_INTEGRATED);
+  }
+
+  if (!round.ocVerified) {
+    throw new Error(GRAPHQL_COLLECTIVE_NOT_VERIFIED);
+  }
+
+  const collective = await getCollectiveOrProject(
+    { id: round.openCollectiveProjectId || round.openCollectiveId },
+    round.openCollectiveProjectId,
+    getOCToken(round)
+  );
+
+  return getExpensesCount(collective.slug, getOCToken(round));
 };

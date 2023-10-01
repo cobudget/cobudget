@@ -337,7 +337,7 @@ export const ocCollective = async (parent) => {
       { id: parent.openCollectiveProjectId },
       getOCToken(parent)
     );
-  } else {
+  } else if (parent.openCollectiveId) {
     return getCollective({ id: parent.openCollectiveId }, getOCToken(parent));
   }
 };
@@ -357,7 +357,16 @@ export const ocWebhookUrl = async (parent, _, { ss, user }) => {
 
 export const expenses = async (parent) => {
   try {
-    return prisma.expense.findMany({ where: { roundId: parent.id } });
+    return prisma.expense.findMany({
+      where: { roundId: parent.id },
+      include: {
+        receipts: {
+          select: {
+            amount: true,
+          },
+        },
+      },
+    });
   } catch (err) {
     return [];
   }

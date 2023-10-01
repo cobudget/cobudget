@@ -56,7 +56,7 @@ function ExpenseDetails({ expenseId, round, currentUser }) {
 
   const total =
     expense?.receipts?.reduce((acc, receipt) => {
-      return parseInt(acc?.amount || 0) + (receipt.amount || 0);
+      return parseInt(acc || 0) + (receipt.amount || 0);
     }, 0) || 0;
 
   const handleBack = () => {

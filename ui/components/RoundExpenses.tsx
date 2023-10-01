@@ -392,17 +392,21 @@ function RoundExpenses({ round, currentUser }) {
                               router.query.round
                             }/${bucketsMap[expense.bucketId]?.id}`}
                           >
-                            <span className="underline cursor-pointer">
-                              {bucketsMap[expense.bucketId]?.title}
-                            </span>
+                            <a>
+                              <span className="underline cursor-pointer">
+                                {bucketsMap[expense.bucketId]?.title}
+                              </span>
+                            </a>
                           </Link>
-                        ) : (
+                        ) : isAdmin ? (
                           <i
                             onClick={() => setExpenseToEdit(expense)}
                             className="cursor-pointer"
                           >
                             Assign Bucket
                           </i>
+                        ) : (
+                          <i>No Bucket Assigned</i>
                         )}
                       </TableCell>
                       <TableCell>
@@ -435,7 +439,7 @@ function RoundExpenses({ round, currentUser }) {
           onClick={fetchMore}
           moreExist={expensesData?.moreExists}
           loading={expensesFetching}
-          autoLoadMore
+          autoLoadMore={false}
         />
       </div>
       <Modal

@@ -9,7 +9,7 @@ import Label from "../Label";
 import SubMenu from "../SubMenu";
 import PageHero from "../PageHero";
 import EditableField from "../EditableField";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import advancedDayjsFormatting from "dayjs/plugin/advancedFormat";
 import FormattedCurrency from "components/FormattedCurrency";
@@ -113,13 +113,19 @@ function RoundRow({
                 currency={round.currency}
                 value={round.distributedAmount}
               />{" "}
-              distributed •{" "}
+              <FormattedMessage defaultMessage="distributed" /> •{" "}
             </>
           )}
           {bucketCountHeading}
         </span>
         <span className="sm:self-end text-sm text-gray-700">
-          Last Updated {dayjs(round.updatedAt).format("MMM Do, YYYY")}
+          <FormattedMessage defaultMessage="Last Updated" />{" "}
+          <FormattedDate
+            value={round.updatedAt}
+            day="numeric"
+            month="short"
+            year="numeric"
+          />
         </span>
       </div>
     </div>
@@ -270,7 +276,9 @@ const GroupIndex = ({ currentUser }) => {
                 index={index}
                 key={index}
                 balance={balancesMap[round.id]}
-                bucketCountHeading={`${round.bucketStatusCount.FUNDED} funded 
+                bucketCountHeading={`${
+                  round.bucketStatusCount.FUNDED
+                } ${intl.formatMessage({ defaultMessage: "funded" })} 
             ${
               round.bucketStatusCount.FUNDED === 1
                 ? process.env.BUCKET_NAME_SINGULAR
