@@ -473,7 +473,7 @@ export const inviteRoundMembers = combineResolvers(
       });
       const emails = emailsString.split(",");
       if (emails.length > 10000) {
-        throw new Error("You can only invite 1000 people at a time");
+        throw new Error("You can only invite 10000 people at a time");
       }
 
       const roundMembers = await prisma.roundMember.findMany({
@@ -488,29 +488,79 @@ export const inviteRoundMembers = combineResolvers(
         existingMemberEmails[m.user.email] = m;
       });
 
-      const alreadyMembers = [];
-      const alreadyVerifiedMembers = [];
-      const newMemberEmails: Array<string> = [];
+      const joinedMembers = []; // Members who have joined
+      const alreadyMembers = []; // Members who have requested to join but are not approved yet
+      const alreadyApprovedMembers = []; // Members who are approved but they haven't joined yet
+      const newMembers = []; // Users who have joined cobudget but not current round
+      const newUsers = []; // User who have neither joined cobudget nor round
 
       emails.forEach((m) => {
         if (existingMemberEmails[m]) {
-          if (existingMemberEmails[m].isApproved) {
-            alreadyVerifiedMembers.push(m);
-          } else {
-            alreadyMembers.push(m);
+          if (
+            existingMemberEmails[m].isApproved &&
+            existingMemberEmails[m].hasJoined
+          ) {
+            joinedMembers.push(existingMemberEmails[m]);
+          } else if (existingMemberEmails[m].isApproved) {
+            alreadyApprovedMembers.push(existingMemberEmails[m]);
+          } else if (existingMemberEmails[m].hasJoined) {
+            alreadyMembers.push(existingMemberEmails[m]);
           }
         } else {
-          newMemberEmails.push(m);
+          newUsers.push(m);
         }
       });
-      console.log("New", newMemberEmails.length, newMemberEmails[0]);
-      console.log("Existing", alreadyMembers.length, alreadyMembers[0]);
-      console.log(
-        "Verified",
-        alreadyVerifiedMembers.length,
-        alreadyVerifiedMembers[0]
-      );
+
+      console.log("New", newUsers.length, newUsers);
+      console.log("Existing", alreadyMembers.length, alreadyMembers);
+      console.log("Verified", alreadyApprovedMembers);
+      console.log("Joined", joinedMembers);
       console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
+
+      let approveMembers;
+      const addMembers = [];
+
+      // Approve members who have requested to join but they are not approved yet
+      if (alreadyMembers.length > 0) {
+        approveMembers = prisma.roundMember.updateMany({
+          data: { isApproved: true },
+          where: { id: { in: alreadyMembers.map((member) => member.id) } },
+        });
+      }
+
+      // Add new members to database
+      if (newUsers.length > 0) {
+        const BATCH_SIZE = 4;
+        for (let i = 0; i < newUsers.length; i += BATCH_SIZE) {
+          addMembers.push(
+            prisma.user.createMany({
+              data: newUsers
+                .slice(i, i + BATCH_SIZE)
+                .map((email) => ({ email })),
+              skipDuplicates: true,
+            })
+          );
+        }
+      }
+
+      await Promise.all([...addMembers, approveMembers]);
+
+      const newlyAddedUsers = await prisma.user.findMany({
+        where: {
+          email: { in: newUsers },
+        },
+        select: {
+          email: true,
+          id: true,
+        },
+      });
+
+      await prisma.roundMember.createMany({
+        data: newlyAddedUsers.map((user) => ({
+          userId: user.id,
+          roundId: roundId,
+        })),
+      });
     } catch (err) {
       console.log(err);
     }
