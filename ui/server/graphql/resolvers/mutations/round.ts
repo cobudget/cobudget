@@ -455,7 +455,7 @@ export const deprecatedinviteRoundMembers = combineResolvers(
 
       await emailService.inviteMember({ email, currentUser, round });
 
-      invitedRoundMembers.push(updated.collMemberships?.[0]);
+      //invitedRoundMembers.push(updated.collMemberships?.[0]);
     }
     console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
     return invitedRoundMembers;
