@@ -389,7 +389,7 @@ export const deleteGuideline = combineResolvers(
     })
 );
 
-export const deprecatedinviteRoundMembers = combineResolvers(
+export const deprecatedInviteRoundMembers = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     const start = Date.now();
