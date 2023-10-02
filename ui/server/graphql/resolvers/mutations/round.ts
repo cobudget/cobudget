@@ -35,13 +35,15 @@ import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
-import { getOCToken } from "server/utils/roundUtils";
+import { getAccountsInsertRawQuery, getOCToken } from "server/utils/roundUtils";
 import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 import getMap from "server/utils/getMap";
 import {
   getExpenseHash,
   getExpenseUpdateRawQuery,
 } from "server/utils/expenses";
+import interator from "server/utils/interator";
+import cuid from "cuid";
 
 export const createRound = async (
   parent,
@@ -453,9 +455,9 @@ export const deprecatedInviteRoundMembers = combineResolvers(
         include: { collMemberships: { where: { roundId } } },
       });
 
-      await emailService.inviteMember({ email, currentUser, round });
+      //await emailService.inviteMember({ email, currentUser, round });
 
-      //invitedRoundMembers.push(updated.collMemberships?.[0]);
+      invitedRoundMembers.push(updated.collMemberships?.[0]);
     }
     console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
     return invitedRoundMembers;
@@ -554,6 +556,23 @@ export const inviteRoundMembers = combineResolvers(
           email: true,
           id: true,
         },
+      });
+
+      const ids = interator(newlyAddedUsers.length * 3, () => cuid());
+      const accounts = await prisma.account.createMany({
+        data: ids.map(id => ({ id })),
+      })
+
+      await prisma.roundMember.createMany({
+        data: newlyAddedUsers.map(user => ({
+          isApproved: true,
+          hasJoined: false,
+          roundId,
+          userId: user.id,
+          statusAccountId: ids.pop(),
+          incomingAccountId: ids.pop(),
+          outgoingAccountId: ids.pop(),
+        }))
       });
 
       //await prisma.$transaction(
