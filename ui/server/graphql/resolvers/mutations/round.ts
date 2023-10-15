@@ -35,13 +35,15 @@ import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
-import { getOCToken } from "server/utils/roundUtils";
+import { getAccountsInsertRawQuery, getOCToken } from "server/utils/roundUtils";
 import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 import getMap from "server/utils/getMap";
 import {
   getExpenseHash,
   getExpenseUpdateRawQuery,
 } from "server/utils/expenses";
+import cuid from "cuid";
+import interator from "utils/interator";
 
 export const createRound = async (
   parent,
@@ -389,7 +391,7 @@ export const deleteGuideline = combineResolvers(
     })
 );
 
-export const deprecatedinviteRoundMembers = combineResolvers(
+export const deprecatedInviteRoundMembers = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     const start = Date.now();
@@ -453,7 +455,7 @@ export const deprecatedinviteRoundMembers = combineResolvers(
         include: { collMemberships: { where: { roundId } } },
       });
 
-      await emailService.inviteMember({ email, currentUser, round });
+      //await emailService.inviteMember({ email, currentUser, round });
 
       invitedRoundMembers.push(updated.collMemberships?.[0]);
     }
@@ -510,12 +512,6 @@ export const inviteRoundMembers = combineResolvers(
         }
       });
 
-      console.log("New", newUsers.length, newUsers);
-      console.log("Existing", alreadyMembers.length, alreadyMembers);
-      console.log("Verified", alreadyApprovedMembers);
-      console.log("Joined", joinedMembers);
-      console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
-
       let approveMembers;
       const addMembers = [];
 
@@ -554,21 +550,22 @@ export const inviteRoundMembers = combineResolvers(
         },
       });
 
-      await prisma.$transaction(
-        newlyAddedUsers.map((user) =>
-          prisma.roundMember.create({
-            data: {
-              isApproved: true,
-              hasJoined: false,
-              round: { connect: { id: roundId } },
-              user: { connect: { id: user.id } },
-              statusAccount: { create: {} },
-              incomingAccount: { create: {} },
-              outgoingAccount: { create: {} },
-            },
-          })
-        )
-      );
+      const ids = interator(newlyAddedUsers.length * 3, () => cuid());
+      const accounts = await prisma.account.createMany({
+        data: ids.map((id) => ({ id })),
+      });
+
+      await prisma.roundMember.createMany({
+        data: newlyAddedUsers.map((user) => ({
+          isApproved: true,
+          hasJoined: false,
+          roundId,
+          userId: user.id,
+          statusAccountId: ids.pop(),
+          incomingAccountId: ids.pop(),
+          outgoingAccountId: ids.pop(),
+        })),
+      });
     } catch (err) {
       console.log(err);
     }
@@ -1404,6 +1401,6 @@ export const deprecatedSyncOCExpenses = async (_, { id }) => {
     });
     return {};
   } catch (err) {
-    console.log("ERROR", err);
+    ""
   }
 };
