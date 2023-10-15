@@ -35,7 +35,7 @@ import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
-import { getAccountsInsertRawQuery, getOCToken } from "server/utils/roundUtils";
+import { getOCToken } from "server/utils/roundUtils";
 import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 import getMap from "server/utils/getMap";
 import {
