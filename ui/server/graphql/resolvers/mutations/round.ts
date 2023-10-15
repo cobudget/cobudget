@@ -1401,6 +1401,6 @@ export const deprecatedSyncOCExpenses = async (_, { id }) => {
     });
     return {};
   } catch (err) {
-    ""
+    ("");
   }
 };
