@@ -566,6 +566,14 @@ export const inviteRoundMembers = combineResolvers(
           outgoingAccountId: ids.pop(),
         })),
       });
+
+      const membersToInvite = newlyAddedUsers.concat(alreadyApprovedMembers);
+      await emailService.bulkInviteMembers({
+        membersToInvite,
+        round,
+        currentGroup: round.group,
+        currentUser,
+      });
     } catch (err) {
       console.log(err);
     }
