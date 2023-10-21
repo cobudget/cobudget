@@ -55,6 +55,7 @@
     "cookie-parser": "^1.4.6",
     "cookie-session": "^1.4.0",
     "cors": "^2.8.5",
+    "csvtojson": "^2.0.10",
     "cuid": "^3.0.0",
     "dayjs": "^1.8.20",
     "downshift": "^6.1.3",
