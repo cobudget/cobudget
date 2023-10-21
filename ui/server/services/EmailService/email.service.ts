@@ -114,7 +114,9 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+      `/${currentGroup?.slug ?? round.group.slug}/${
+        round?.slug ?? ""
+      }?invitation_through=email`
     );
 
     const groupCollName = currentGroup?.name ?? round.title;
