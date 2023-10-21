@@ -459,7 +459,6 @@ export const deprecatedInviteRoundMembers = combineResolvers(
 
       invitedRoundMembers.push(updated.collMemberships?.[0]);
     }
-    console.log("Time consumed", ((Date.now() - start) / 1000).toFixed(2));
     return invitedRoundMembers;
   }
 );
@@ -468,7 +467,6 @@ export const inviteRoundMembers = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     try {
-      const start = Date.now();
       const round = await prisma.round.findUnique({
         where: { id: roundId },
         include: { group: true },
@@ -484,6 +482,25 @@ export const inviteRoundMembers = combineResolvers(
           user: true,
         },
       });
+      let limit;
+      const isFree = round.group.slug === "c";
+      if (round.maxMembers) {
+        limit = round.maxMembers;
+      } else if (isFree) {
+        limit = process.env.FREE_ROUND_MEMBERS_LIMIT;
+      } else {
+        limit = process.env.PAID_ROUND_MEMBERS_LIMIT;
+      }
+
+      if (roundMembers.length + emails.length > limit) {
+        throw new Error(
+          `Your round can have ${limit} members. ${
+            isFree
+              ? `Upgrade your round to increase limit to ${process.env.PAID_ROUND_MEMBERS_LIMIT}`
+              : ""
+          }`
+        );
+      }
 
       const existingMemberEmails = {};
       roundMembers.forEach((m) => {
@@ -575,7 +592,7 @@ export const inviteRoundMembers = combineResolvers(
         currentUser,
       });
     } catch (err) {
-      console.log(err);
+      throw new Error(err);
     }
   }
 );

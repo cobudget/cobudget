@@ -211,7 +211,7 @@ const InviteMembersModal = ({
         onClose={handleClose}
         className="flex items-center justify-center p-4"
       >
-        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm max-h-screen overflow-auto">
           <h1 className="text-xl font-semibold mb-2">
             {roundId ? (
               <FormattedMessage defaultMessage="Invite participants to this round" />
@@ -255,13 +255,15 @@ const InviteMembersModal = ({
                 .filter((i) => i);
               const emailList = list.map((i) => extractEmail(i)).flat();
               const uniqueEmails = Array.from(new Set(emailList)).join(",");
-
               inviteMembers({
                 ...(emails && roundGroup?.id && { emails: uniqueEmails }),
                 ...variables,
                 ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
-                .then(() => {
+                .then(({ error }) => {
+                  if (error?.graphQLErrors?.[0]?.message) {
+                    return toast.error(error.graphQLErrors[0]?.message);
+                  }
                   reset();
                   handleClose();
                 })
@@ -303,7 +305,6 @@ const InviteMembersModal = ({
                 showWysiwygOptions={false}
                 mentionsGroupId={roundGroup?.id}
                 enableMentions={roundGroup?.id}
-                wysiwyg={roundGroup?.id}
               />
             )}
             {roundGroup && (
