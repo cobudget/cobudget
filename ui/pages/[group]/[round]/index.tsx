@@ -537,6 +537,33 @@ const RoundPage = ({ currentUser }) => {
     );
   }
 
+  if (
+    !round &&
+    !fetching &&
+    router.isReady &&
+    router.query["invitation_through"] === "email"
+  ) {
+    return (
+      <div className="w-full flex justify-center items-center h-96 flex-col gap-4">
+        <span className="font-medium text-gray-800">
+          <FormattedMessage defaultMessage="You have been invited to this round. To accept this invitation, please log in or sign up." />
+        </span>
+        <span className="flex gap-4">
+          <Link href={`/login?r=${window.location.pathname}`}>
+            <span className="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-md cursor-pointer hover:bg-gray-100">
+              <FormattedMessage defaultMessage="Log in" />
+            </span>
+          </Link>
+          <Link href={`/signup?r=${window.location.pathname}`}>
+            <span className="px-4 py-2 bg-gray-800 text-white font-medium rounded-md cursor-pointer hover:bg-gray-700">
+              <FormattedMessage defaultMessage="Sign up" />
+            </span>
+          </Link>
+        </span>
+      </div>
+    );
+  }
+
   if (!round && !fetching && router.isReady) {
     return (
       <div className="text-center mt-7">
