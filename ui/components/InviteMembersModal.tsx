@@ -1,6 +1,6 @@
 import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Modal } from "@material-ui/core";
 
@@ -15,6 +15,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { extractEmail } from "utils/url";
 import { SEARCH_MENTIONS_GROUP_MEMBERS_QUERY } from "./Wysiwyg";
 import { appLink } from "utils/internalLinks";
+import csv from "csvtojson";
 
 const GridWrapper = styled.div`
   display: grid;
@@ -134,6 +135,7 @@ const InviteMembersModal = ({
     },
   });
   const [emails, setEmails] = useState("");
+  const uploadCSVRef = useRef();
 
   // updatingEmails is used to implement a hack
   // Wysiwyg TextField does not accept value prop; it only accepts default value
@@ -211,7 +213,48 @@ const InviteMembersModal = ({
         onClose={handleClose}
         className="flex items-center justify-center p-4"
       >
-        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm max-h-screen overflow-auto">
+          <input
+            type="file"
+            accept=".csv"
+            className="w-0 h-0 m-0 hidden"
+            ref={uploadCSVRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  if (event.target) {
+                    const text = event.target.result as string;
+                    csv()
+                      .fromString(text.trim())
+                      .then((fields) => {
+                        if (fields.length === 0) {
+                          return toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "CSV file has no data",
+                            })
+                          );
+                        }
+                        if (!("email" in fields[0] || "Email" in fields[0])) {
+                          return toast.error(
+                            intl.formatMessage({
+                              defaultMessage:
+                                "Email column missing in CSV file",
+                            })
+                          );
+                        }
+                        const emails = fields.map(
+                          (row) => row["email"] || row["Email"]
+                        );
+                        setEmails(emails.join(","));
+                      });
+                  }
+                };
+                reader.readAsText(file);
+              }
+            }}
+          />
           <h1 className="text-xl font-semibold mb-2">
             {roundId ? (
               <FormattedMessage defaultMessage="Invite participants to this round" />
@@ -255,13 +298,15 @@ const InviteMembersModal = ({
                 .filter((i) => i);
               const emailList = list.map((i) => extractEmail(i)).flat();
               const uniqueEmails = Array.from(new Set(emailList)).join(",");
-
               inviteMembers({
                 ...(emails && roundGroup?.id && { emails: uniqueEmails }),
                 ...variables,
                 ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
-                .then(() => {
+                .then(({ error }) => {
+                  if (error?.graphQLErrors?.[0]?.message) {
+                    return toast.error(error.graphQLErrors[0]?.message);
+                  }
                   reset();
                   handleClose();
                 })
@@ -303,7 +348,6 @@ const InviteMembersModal = ({
                 showWysiwygOptions={false}
                 mentionsGroupId={roundGroup?.id}
                 enableMentions={roundGroup?.id}
-                wysiwyg={roundGroup?.id}
               />
             )}
             {roundGroup && (
@@ -318,6 +362,16 @@ const InviteMembersModal = ({
                       groupName: roundGroup?.name,
                     }}
                   />
+                </span>
+                <span
+                  className="text-sm font-medium mb-1 inline-block text-purple-600 cursor-pointer float-right"
+                  onClick={() => {
+                    if (uploadCSVRef?.current) {
+                      (uploadCSVRef.current as HTMLInputElement).click();
+                    }
+                  }}
+                >
+                  <FormattedMessage defaultMessage="Invite using CSV file" />
                 </span>
               </div>
             )}

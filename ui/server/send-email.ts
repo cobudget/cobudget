@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { Client } from "postmark";
+import { Client, ServerClient } from "postmark";
 import prisma from "./prisma";
 export interface SendEmailInput {
   to: string;
@@ -11,6 +11,10 @@ export interface SendEmailInput {
 const client =
   process.env.NODE_ENV !== "development" &&
   new Client(process.env.POSTMARK_API_TOKEN);
+
+const broadcastClient = new ServerClient(
+  process.env.POSTMARK_BROADCAST_API_TOKEN
+);
 
 const smtpClient =
   process.env.NODE_ENV === "development" &&
@@ -96,6 +100,27 @@ const sendBatch = async (mails: SendEmailInput[]) => {
   }
 };
 
+const broadcastMail = async (mails: SendEmailInput[]) => {
+  const batches = [];
+  for (let i = 0; i < mails.length; i += 500) {
+    batches.push(mails.slice(i, i + 500));
+  }
+  await Promise.all(
+    batches.map((batch) =>
+      broadcastClient.sendEmailBatch(
+        batch.map((mail) => ({
+          From: process.env.FROM_EMAIL,
+          To: mail.to,
+          Subject: mail.subject,
+          TextBody: mail.text,
+          HtmlBody: mail.html,
+          MessageStream: "broadcast",
+        }))
+      )
+    )
+  );
+};
+
 const checkEnv = () => {
   if (!process.env.FROM_EMAIL) {
     throw new Error("Add FROM_EMAIL env variable.");
@@ -120,9 +145,11 @@ export const sendEmail = async (input: SendEmailInput, verifiedOnly = true) => {
 
 export const sendEmails = async (
   inputs: SendEmailInput[],
-  verifiedOnly = true
+  verifiedOnly = true,
+  broadcast = false
 ) => {
   checkEnv();
+  const batchMail = broadcast ? broadcastMail : sendBatch;
   if (verifiedOnly) {
     const verifiedEmails = (
       await getVerifiedEmails(inputs.map((input) => input.to))
@@ -134,10 +161,10 @@ export const sendEmails = async (
     const verifiedInputs = inputs.filter(
       (input) => verifiedEmails.indexOf(input.to) > -1
     );
-    await sendBatch(verifiedInputs);
+    await batchMail(verifiedInputs);
     return verifiedInputs.length;
   } else {
-    await sendBatch(inputs);
+    await batchMail(inputs);
     return inputs.length;
   }
 };

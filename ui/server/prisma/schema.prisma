@@ -245,6 +245,7 @@ model Round {
   statusAccountId String?  @unique
 
   inviteNonce Int?
+  maxMembers  Int?
 
   @@unique([groupId, slug])
   @@map("Collection")
