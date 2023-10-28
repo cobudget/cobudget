@@ -15,6 +15,11 @@ export const ROUND_QUERY = gql`
         id
         name
       }
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
     }
   }
 `;

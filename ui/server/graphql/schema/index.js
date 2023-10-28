@@ -27,6 +27,12 @@ const schema = gql`
     count: Int
   }
 
+  type MembersLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -435,6 +441,7 @@ const schema = gql`
     ocWebhookUrl: String
     ocVerified: Boolean
     ocTokenStatus: OC_TokenStatus
+    membersLimit: MembersLimit
 
     expenses: [Expense]
   }

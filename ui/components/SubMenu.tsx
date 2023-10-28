@@ -129,7 +129,11 @@ export default function SubMenu({
       );
 
   const color = round?.color ?? "anthracit";
-  const showUpgradeMessage = true;
+
+  const showUpgradeMessage =
+    router.query.group === "c" &&
+    round?.membersLimit?.consumedPercentage > 75 &&
+    currentUser?.currentCollMember?.isAdmin;
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;
@@ -170,7 +174,9 @@ export default function SubMenu({
                 }}
               />
               <span className="float-right text-blue-700 font-medium">
-                <Link href={`/new-group?roundId=${round.id}`}>Upgrade Now</Link>
+                <Link href={`/new-group?roundId=${round?.id}`}>
+                  Upgrade Now
+                </Link>
               </span>
             </span>
           </div>
