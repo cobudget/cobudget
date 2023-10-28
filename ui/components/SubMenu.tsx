@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const bucketItems = (
   { groupSlug, roundSlug, bucketId, bucket },
@@ -129,33 +129,53 @@ export default function SubMenu({
       );
 
   const color = round?.color ?? "anthracit";
+  const showUpgradeMessage = true;
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;
 
   return (
-    <div className="space-x-2 bg-white border-b border-b-default">
-      <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
-        {items.map((item) => {
-          return (
-            <Link href={item.href} key={item.href} scroll={!bucket}>
-              <a
-                className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
-                  (
-                    item.startsWithHref
-                      ? router.asPath.startsWith(item.href)
-                      : item.href === router.asPath
-                  )
-                    ? `border-${color} text-${color}`
-                    : "border-transparent text-gray-500"
-                }`}
-              >
-                {item.label}
-              </a>
-            </Link>
-          );
-        })}
+    <>
+      <div className="space-x-2 bg-white border-b border-b-default">
+        <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
+          {items.map((item) => {
+            return (
+              <Link href={item.href} key={item.href} scroll={!bucket}>
+                <a
+                  className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
+                    (
+                      item.startsWithHref
+                        ? router.asPath.startsWith(item.href)
+                        : item.href === router.asPath
+                    )
+                      ? `border-${color} text-${color}`
+                      : "border-transparent text-gray-500"
+                  }`}
+                >
+                  {item.label}
+                </a>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-    </div>
+      {showUpgradeMessage && (
+        <div className="space-x-2 bg-white border-b border-b-default bg-yellow-100">
+          <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto py-4">
+            <span className="text-md font-medium w-full block">
+              <FormattedMessage
+                defaultMessage="<b>Upgrade your account</b> - Group is nearing the 100 member limit with over 75 members."
+                values={{
+                  b: (msg) => <span className="font-bold">{msg}</span>,
+                }}
+              />
+              <span className="float-right text-blue-700 font-medium">
+                <Link href={`/new-group?roundId=${round.id}`}>Upgrade Now</Link>
+              </span>
+            </span>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
