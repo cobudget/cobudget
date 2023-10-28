@@ -167,12 +167,23 @@ export default function SubMenu({
         <div className="space-x-2 bg-white border-b border-b-default bg-yellow-100">
           <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto py-4">
             <span className="text-md font-medium w-full block">
-              <FormattedMessage
-                defaultMessage="<b>Upgrade your account</b> - Group is nearing the 100 member limit with over 75 members."
-                values={{
-                  b: (msg) => <span className="font-bold">{msg}</span>,
-                }}
-              />
+              {round?.membersLimit.currentCount >= round?.membersLimit.limit ? (
+                <FormattedMessage
+                  defaultMessage="<b>Upgrade your account</b> - Round has reached its members limit. To invite more members, consider upgrading your round."
+                  values={{
+                    b: (msg) => <span className="font-bold">{msg}</span>,
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  defaultMessage="<b>Upgrade your account</b> - Round is nearing the {limit} member limit with {count} members."
+                  values={{
+                    b: (msg) => <span className="font-bold">{msg}</span>,
+                    count: round.membersLimit.currentCount,
+                    limit: round.membersLimit.limit,
+                  }}
+                />
+              )}
               <span className="float-right text-blue-700 font-medium">
                 <Link href={`/new-group?roundId=${round?.id}`}>
                   Upgrade Now
