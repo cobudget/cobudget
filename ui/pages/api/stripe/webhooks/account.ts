@@ -105,6 +105,16 @@ export default handler().post(async (req, res) => {
             singleRound: false,
           },
         });
+
+        const roundMembers = await prisma.roundMember.findMany({
+          where: { roundId, isAdmin: false },
+        });
+        await prisma.groupMember.createMany({
+          data: roundMembers.map((member) => ({
+            userId: member.userId,
+            groupId: group.id,
+          })),
+        });
       }
     }
   } else {
