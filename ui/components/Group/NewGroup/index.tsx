@@ -26,7 +26,6 @@ export default function NewGroup({ currentUser }) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const roundId = router.query.roundId;
-  console.log("RoundId", roundId);
 
   const [{ data: { group } = { group: null } }, searchGroup] = useQuery({
     query: GET_GROUP_QUERY,
