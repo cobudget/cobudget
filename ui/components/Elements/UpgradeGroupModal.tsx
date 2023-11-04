@@ -1,4 +1,5 @@
 import Button from "components/Button";
+import Link from "next/link";
 import React from "react";
 import { FormattedMessage } from "react-intl";
 
@@ -12,9 +13,14 @@ function UpgradeGroupModal() {
         <p className="my-4">
           <FormattedMessage defaultMessage="Group subscription has expired. To continue using the group, please upgrade your subscription." />
         </p>
-        <Button>
-          <FormattedMessage defaultMessage="Upgrade Now" />
-        </Button>
+        <div className="flex justify-between">
+          <Button>
+            <FormattedMessage defaultMessage="Upgrade Now" />
+          </Button>
+          <Link href="/">
+            <span className="mt-2 cursor-pointer">Home</span>
+          </Link>
+        </div>
       </div>
     </div>
   );
