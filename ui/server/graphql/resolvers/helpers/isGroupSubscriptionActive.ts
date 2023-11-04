@@ -1,0 +1,39 @@
+import { GROUP_NOT_SUBSCRIBED } from "../../../../constants";
+import prisma from "server/prisma";
+import stripe from "server/stripe";
+
+const isGroupSubscriptionActive = async ({
+  group,
+  groupId,
+}: {
+  group?: {
+    slug: string;
+    isFree: boolean;
+    stripeSubscriptionId: null | string;
+  };
+  groupId?: string;
+}) => {
+  if (!group && !groupId) {
+    throw new Error("Group or group id is required");
+  }
+
+  let groupToCheck: any = group;
+
+  if (!groupToCheck) {
+    groupToCheck = await prisma.group.findFirst({ where: { id: groupId } });
+  }
+
+  if (groupToCheck?.slug === "c" || group?.isFree) {
+    return;
+  }
+
+  const subscription = await stripe.subscriptions.retrieve(
+    group.stripeSubscriptionId
+  );
+
+  if (subscription.status !== "active") {
+    throw new Error(GROUP_NOT_SUBSCRIBED);
+  }
+};
+
+export default isGroupSubscriptionActive;
