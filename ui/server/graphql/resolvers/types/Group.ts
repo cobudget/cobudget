@@ -38,7 +38,7 @@ export const subscriptionStatus = async (group) => {
       group.stripeSubscriptionId
     );
     return {
-      isActive: subscription.status === "active",
+      isActive: group.isFree || subscription.status === "active",
     };
   } else {
     return null;
