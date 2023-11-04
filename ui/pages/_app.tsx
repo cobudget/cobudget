@@ -279,7 +279,9 @@ const MyApp = ({ Component, pageProps, router }) => {
           />
           <Analytics />
           <Toaster />
-          <UpgradeGroupModal />
+          {group?.subscriptionStatus?.isActive === false && (
+            <UpgradeGroupModal />
+          )}
         </Layout>
       </ErrorBoundary>
     </IntlProvider>

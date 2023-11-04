@@ -33,7 +33,7 @@ export const discourseUrl = async (group) => {
 };
 
 export const subscriptionStatus = async (group) => {
-  if (group.stripeSubscriptionId) {
+  if (group.stripeSubscriptionId && group.slug !== "c") {
     const subscription = await stripe.subscriptions.retrieve(
       group.stripeSubscriptionId
     );
