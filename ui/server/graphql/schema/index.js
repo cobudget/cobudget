@@ -346,6 +346,10 @@ const schema = gql`
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
+  type GroupSubscriptionStatus {
+    isActive: Boolean
+  }
+
   type Group {
     id: ID!
     name: String!
@@ -358,6 +362,7 @@ const schema = gql`
     experimentalFeatures: Boolean
     registrationPolicy: RegistrationPolicy
     visibility: Visibility
+    subscriptionStatus: GroupSubscriptionStatus
   }
 
   enum RoundType {

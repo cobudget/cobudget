@@ -187,6 +187,7 @@ export const getGroup = async ({
         slug: group.slug,
         id: group.id,
         name: group.name,
+        stripeSubscriptionId: group.stripeSubscriptionId,
       };
     } else return null;
   }
