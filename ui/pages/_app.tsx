@@ -16,6 +16,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import reportError from "utils/reportError";
 import Fallback from "components/Fallback";
 import { Analytics } from "@vercel/analytics/react";
+import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -278,6 +279,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           />
           <Analytics />
           <Toaster />
+          <UpgradeGroupModal />
         </Layout>
       </ErrorBoundary>
     </IntlProvider>
