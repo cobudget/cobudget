@@ -28,7 +28,7 @@ const isGroupSubscriptionActive = async ({
   }
 
   const subscription = await stripe.subscriptions.retrieve(
-    group.stripeSubscriptionId
+    groupToCheck.stripeSubscriptionId
   );
 
   if (subscription.status !== "active") {

@@ -27,6 +27,7 @@ import {
   GRAPHQL_ROUND_NOT_FOUND,
 } from "../../../../constants";
 import EventHub from "server/services/eventHub.service";
+import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -43,6 +44,9 @@ export const createBucket = combineResolvers(
         },
       },
     });
+
+    // check if group subscription is active
+    await isGroupSubscriptionActive({ group: round.group });
 
     const currentGroupMember = round?.group?.groupMembers?.[0];
 
