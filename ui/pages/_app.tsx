@@ -296,7 +296,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           />
           <Analytics />
           <Toaster />
-          {groupToUpdate && <UpgradeGroupModal />}
+          {groupToUpdate && <UpgradeGroupModal hide={() => setGroupToUpdate(undefined)} />}
         </Layout>
       </ErrorBoundary>
     </IntlProvider>

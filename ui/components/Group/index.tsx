@@ -244,7 +244,7 @@ const GroupIndex = ({ currentUser }) => {
             <FormattedMessage defaultMessage="Active Rounds" />
           </span>
           {currentUser?.currentGroupMember?.isAdmin &&
-            (group?.subscriptionStatus.isActive ? (
+            (group?.subscriptionStatus?.isActive ? (
               <Link href={`/${group.slug}/new-round`}>
                 <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
                   <FormattedMessage defaultMessage="Start new round" />

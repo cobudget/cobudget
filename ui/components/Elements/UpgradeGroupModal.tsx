@@ -3,7 +3,7 @@ import Link from "next/link";
 import React from "react";
 import { FormattedMessage } from "react-intl";
 
-function UpgradeGroupModal() {
+function UpgradeGroupModal({ hide }) {
   return (
     <div className="z-50 top-0 left-0 fixed w-screen h-screen bg-black bg-opacity-30 flex justify-center items-center">
       <div className="bg-white rounded-lg p-8 w-96">
@@ -17,9 +17,9 @@ function UpgradeGroupModal() {
           <Button>
             <FormattedMessage defaultMessage="Upgrade Now" />
           </Button>
-          <Link href="/">
-            <span className="mt-2 cursor-pointer">Home</span>
-          </Link>
+            <span className="mt-2 cursor-pointer" onClick={hide}>
+              <FormattedMessage defaultMessage="Upgrade Later" />
+            </span>
         </div>
       </div>
     </div>
