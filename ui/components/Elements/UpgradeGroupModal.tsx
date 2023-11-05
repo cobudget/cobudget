@@ -17,9 +17,9 @@ function UpgradeGroupModal({ hide }) {
           <Button>
             <FormattedMessage defaultMessage="Upgrade Now" />
           </Button>
-            <span className="mt-2 cursor-pointer" onClick={hide}>
-              <FormattedMessage defaultMessage="Upgrade Later" />
-            </span>
+          <span className="mt-2 cursor-pointer" onClick={hide}>
+            <FormattedMessage defaultMessage="Upgrade Later" />
+          </span>
         </div>
       </div>
     </div>
