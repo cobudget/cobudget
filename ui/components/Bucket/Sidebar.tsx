@@ -409,7 +409,17 @@ const BucketSidebar = ({
               <Button
                 color={bucket.round.color}
                 fullWidth
-                onClick={() => setContributeModalOpen(true)}
+                onClick={() => {
+                  if (!bucket?.round?.group?.subscriptionStatus?.isActive) {
+                    const event = new CustomEvent(
+                      "show-upgrade-group-message",
+                      { detail: { groupId: bucket?.round?.group?.id } }
+                    );
+                    window.dispatchEvent(event);
+                    return;
+                  }
+                  setContributeModalOpen(true);
+                }}
               >
                 <FormattedMessage defaultMessage="Fund" />
               </Button>

@@ -187,6 +187,7 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
     pause: !router.isReady,
   });
+  const [groupToUpdate, setGroupToUpdate] = useState();
 
   const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
   const ss = ssQuery?.getSuperAdminSession;
@@ -240,6 +241,22 @@ const MyApp = ({ Component, pageProps, router }) => {
     if (locale) {
       setLocale(locale);
     }
+
+    // Upgrade group message
+    const showUpgradeGroupMessage = (event) => {
+      setGroupToUpdate(event.detail.groupId);
+    };
+    window.addEventListener(
+      "show-upgrade-group-message",
+      showUpgradeGroupMessage
+    );
+
+    return () => {
+      window.removeEventListener(
+        "show-upgrade-group-message",
+        showUpgradeGroupMessage
+      );
+    };
   }, []);
 
   const changeLocale = (locale) => {
@@ -279,9 +296,7 @@ const MyApp = ({ Component, pageProps, router }) => {
           />
           <Analytics />
           <Toaster />
-          {group?.subscriptionStatus?.isActive === false && false && (
-            <UpgradeGroupModal />
-          )}
+          {groupToUpdate && <UpgradeGroupModal />}
         </Layout>
       </ErrorBoundary>
     </IntlProvider>
