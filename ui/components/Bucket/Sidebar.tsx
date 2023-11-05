@@ -410,7 +410,9 @@ const BucketSidebar = ({
                 color={bucket.round.color}
                 fullWidth
                 onClick={() => {
-                  if (!bucket?.round?.group?.subscriptionStatus?.isActive) {
+                  if (
+                    bucket?.round?.group?.subscriptionStatus?.isActive === false
+                  ) {
                     const event = new CustomEvent(
                       "show-upgrade-group-message",
                       { detail: { groupId: bucket?.round?.group?.id } }

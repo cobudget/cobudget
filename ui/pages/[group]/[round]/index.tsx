@@ -41,6 +41,9 @@ export const ROUND_PAGE_QUERY = gql`
       group {
         id
         slug
+        subscriptionStatus {
+          isActive
+        }
       }
       ocCollective {
         stats {
@@ -665,7 +668,17 @@ const RoundPage = ({ currentUser }) => {
                   <Button
                     size="large"
                     color={round.color}
-                    onClick={() => setNewBucketModalOpen(true)}
+                    onClick={() => {
+                      if (round.group.subscriptionStatus === false) {
+                        const event = new CustomEvent(
+                          "show-upgrade-group-message",
+                          { detail: { groupId: round?.group?.id } }
+                        );
+                        window.dispatchEvent(event);
+                        return;
+                      }
+                      setNewBucketModalOpen(true);
+                    }}
                     testid="create-new-bucket-button"
                   >
                     <FormattedMessage defaultMessage="New" />{" "}
