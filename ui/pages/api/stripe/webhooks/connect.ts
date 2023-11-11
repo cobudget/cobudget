@@ -11,7 +11,7 @@ export const config = {
 };
 
 export default handler().post(async (req, res) => {
-  console.log('Request received');
+  console.log("Request received");
   const sig = req.headers["stripe-signature"];
 
   const rawBody = await getRawBody(req);
