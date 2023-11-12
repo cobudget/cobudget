@@ -152,6 +152,7 @@ export default handler().post(async (req, res) => {
       metadata: {
         userId: req.user.id,
         groupId,
+        eventType: "upgradepaidplan",
       },
       allow_promotion_codes: true,
       ...customerMetadata,

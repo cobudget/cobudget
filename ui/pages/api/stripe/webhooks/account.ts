@@ -41,6 +41,22 @@ export default handler().post(async (req, res) => {
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
+    const { eventType } = session.metadata;
+    if (eventType === "upgradepaidplan") {
+      const { groupId, userId } = session.metadata;
+      await prisma.group.update({
+        where: { id: groupId },
+        data: {
+          stripeCurrentPeriodEnd: secondsToMsDate(
+            subscription.current_period_end
+          ),
+          stripeSubscriptionId: subscription.id,
+          stripeCustomerId: session.customer,
+          stripePriceId: subscription.items.data[0].price.id,
+        },
+      });
+      return;
+    }
 
     const {
       userId = missing(),
