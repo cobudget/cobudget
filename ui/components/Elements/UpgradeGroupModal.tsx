@@ -1,11 +1,10 @@
 import Button from "components/Button";
 import { PriceButton } from "components/Group/NewGroup";
-import Link from "next/link";
 import React, { useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 function UpgradeGroupModal({ hide, group }) {
-  const [plan, setPlan] = useState("");
+  const [plan, setPlan] = useState("MONTHLY");
   const intl = useIntl();
 
   return (
