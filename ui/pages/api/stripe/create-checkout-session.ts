@@ -89,6 +89,9 @@ export default handler().post(async (req, res) => {
       customer_email: req.user.email,
     };
     const origin = getRequestOrigin(req);
+    const roundId = Array.isArray(req.query.roundId)
+      ? req.query.roundId[0]
+      : req.query.roundId;
     try {
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
@@ -107,13 +110,16 @@ export default handler().post(async (req, res) => {
           groupSlug: req.query.groupSlug,
           groupName: req.query.groupName,
           registrationPolicy: req.query.registrationPolicy,
+          roundId,
         },
         allow_promotion_codes: true,
         ...customerMetadata,
         billing_address_collection: "auto",
         success_url: `${origin}/new-group/?upgraded=true&group=${slugify(
           req.query.groupSlug
-        )}&registrationPolicy=${req.query.registrationPolicy}`,
+        )}&registrationPolicy=${req.query.registrationPolicy}&${
+          roundId ? `roundId=${roundId}` : ""
+        }`,
         cancel_url: `${origin}/new-group/?upgraded=false`,
       });
       console.log({ session });

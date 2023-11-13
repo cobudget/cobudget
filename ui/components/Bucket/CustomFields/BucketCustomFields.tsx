@@ -7,6 +7,11 @@ const CUSTOM_FIELDS_QUERY = gql`
   query CustomFields($groupSlug: String!, $roundSlug: String!) {
     round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       customFields {
         id
         name

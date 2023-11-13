@@ -50,6 +50,11 @@ export const ROUND_PAGE_QUERY = gql`
           }
         }
       }
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       ocWebhookUrl
       bucketStatusCount {
         PENDING_APPROVAL

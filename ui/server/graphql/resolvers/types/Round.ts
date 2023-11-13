@@ -377,3 +377,21 @@ export const ocTokenStatus = async (parent) => {
     return TOKEN_STATUS.PROVIDED;
   } else return TOKEN_STATUS.EMPTY;
 };
+
+export const membersLimit = async (round) => {
+  const group = await prisma.group.findFirst({ where: { id: round.groupId } });
+  const roundLimit = round.membersLimit || 0;
+  const limit =
+    roundLimit ||
+    (group?.slug !== "c"
+      ? process.env.PAID_ROUND_MEMBERS_LIMIT
+      : process.env.FREE_ROUND_MEMBERS_LIMIT);
+  const currentCount = await prisma.roundMember.count({
+    where: { roundId: round.id },
+  });
+  return {
+    limit,
+    currentCount,
+    consumedPercentage: parseInt((currentCount / limit) * 100 + ""),
+  };
+};

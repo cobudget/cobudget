@@ -25,6 +25,7 @@ export default function NewGroup({ currentUser }) {
   const [registrationPolicy, setRegistrationPolicy] = useState("OPEN");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const roundId = router.query.roundId;
 
   const [{ data: { group } = { group: null } }, searchGroup] = useQuery({
     query: GET_GROUP_QUERY,
@@ -53,7 +54,9 @@ export default function NewGroup({ currentUser }) {
           <FormattedMessage defaultMessage="Manage unlimited rounds and people in a group" />
         </p>
         <form
-          action={`/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}&registrationPolicy=${registrationPolicy}`}
+          action={`/api/stripe/create-checkout-session?mode=paidplan&plan=${plan}&groupSlug=${slug}&groupName=${name}&registrationPolicy=${registrationPolicy}&${
+            roundId ? `roundId=${roundId}` : ""
+          }`}
           method="POST"
         >
           <div className="space-y-16 max-w-lg mx-auto">
