@@ -20,6 +20,8 @@ export const GRAPHQL_OC_EXPENSES_NOT_FOUND =
   "Unable to fetch expenses from opencollective";
 
 export const ROUND_IS_PRIVATE = "The round is private";
+export const GROUP_NOT_SUBSCRIBED =
+  "This group does not have subscription or the subscription is over";
 
 //FRONTEND ERRORS
 export const COLLECTIVE_NOT_FOUND = "Collective not found";

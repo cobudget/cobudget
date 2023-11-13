@@ -99,6 +99,9 @@ export const BUCKET_QUERY = gql`
           id
           slug
           discourseUrl
+          subscriptionStatus {
+            isActive
+          }
         }
       }
       funders {

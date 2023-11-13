@@ -366,10 +366,12 @@ export const client = (
               cache
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
-                .filter(
-                  (field) =>
-                    field.arguments.roundSlug === result.createBucket.round.slug
-                )
+                .filter((field) => {
+                  return (
+                    field.arguments.roundSlug ===
+                    result.createBucket?.round?.slug
+                  );
+                })
                 .forEach((field) => {
                   cache.invalidate("Query", "bucketsPage", field.arguments);
                 });

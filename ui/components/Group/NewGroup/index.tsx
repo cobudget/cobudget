@@ -154,7 +154,14 @@ export default function NewGroup({ currentUser }) {
   );
 }
 
-function PriceButton({ heading, subheading, price, period, active, onClick }) {
+export function PriceButton({
+  heading,
+  subheading,
+  price,
+  period,
+  active,
+  onClick,
+}) {
   return (
     <button
       type="button"
