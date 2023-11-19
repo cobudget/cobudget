@@ -1,10 +1,12 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
 
 import GeneralSettings from "./GeneralSettings";
 import Billing from "./Billing";
+import SuperAdmin from "./SuperAdmin";
+import AppContext from "contexts/AppContext";
 
 const GroupSettings = ({
   settingsTabSlug,
@@ -18,6 +20,15 @@ const GroupSettings = ({
   const intl = useIntl();
   const router = useRouter();
 
+  const { ss } = useContext(AppContext);
+
+  const inSession = useMemo(() => {
+    if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
+      return true;
+    }
+    return false;
+  }, [ss]);
+
   const tabs = useMemo(
     () => [
       {
@@ -30,8 +41,17 @@ const GroupSettings = ({
         name: intl.formatMessage({ defaultMessage: "Billing" }),
         component: Billing,
       },
+      ...(inSession
+        ? [
+            {
+              slug: "superadmin",
+              name: "Super Admin",
+              component: SuperAdmin,
+            },
+          ]
+        : []),
     ],
-    [intl]
+    [intl, inSession]
   );
 
   const currentTab =
