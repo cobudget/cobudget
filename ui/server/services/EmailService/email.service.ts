@@ -95,7 +95,7 @@ export default {
     membersToInvite,
     currentUser,
     round,
-    currentGroup,
+    currentGroup = null,
   }) => {
     const inviteLink = appLink(
       `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
