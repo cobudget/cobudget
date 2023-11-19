@@ -16,6 +16,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import reportError from "utils/reportError";
 import Fallback from "components/Fallback";
 import { Analytics } from "@vercel/analytics/react";
+import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -98,6 +99,11 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       tags {
         id
         value
@@ -153,6 +159,9 @@ export const TOP_LEVEL_QUERY = gql`
       experimentalFeatures
       registrationPolicy
       visibility
+      subscriptionStatus {
+        isActive
+      }
     }
     bucket(id: $bucketId) {
       id
@@ -183,6 +192,7 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
     pause: !router.isReady,
   });
+  const [groupToUpdate, setGroupToUpdate] = useState();
 
   const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
   const ss = ssQuery?.getSuperAdminSession;
@@ -236,6 +246,22 @@ const MyApp = ({ Component, pageProps, router }) => {
     if (locale) {
       setLocale(locale);
     }
+
+    // Upgrade group message
+    const showUpgradeGroupMessage = (event) => {
+      setGroupToUpdate(event.detail.groupId);
+    };
+    window.addEventListener(
+      "show-upgrade-group-message",
+      showUpgradeGroupMessage
+    );
+
+    return () => {
+      window.removeEventListener(
+        "show-upgrade-group-message",
+        showUpgradeGroupMessage
+      );
+    };
   }, []);
 
   const changeLocale = (locale) => {
@@ -275,6 +301,12 @@ const MyApp = ({ Component, pageProps, router }) => {
           />
           <Analytics />
           <Toaster />
+          {groupToUpdate && (
+            <UpgradeGroupModal
+              group={group}
+              hide={() => setGroupToUpdate(undefined)}
+            />
+          )}
         </Layout>
       </ErrorBoundary>
     </IntlProvider>

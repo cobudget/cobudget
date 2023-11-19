@@ -7,6 +7,7 @@ import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
 import emailService from "server/services/EmailService/email.service";
+import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 
 export const createGroupInvitationLink = combineResolvers(
   isGroupAdmin,
@@ -132,6 +133,8 @@ export const inviteGroupMembers = combineResolvers(
 
     if (emails.length > 1000)
       throw new Error("You can only invite 1000 people at a time");
+
+    await isGroupSubscriptionActive({ groupId });
 
     const newGroupMembers = [];
 

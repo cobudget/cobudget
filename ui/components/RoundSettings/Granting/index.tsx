@@ -66,6 +66,11 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       directFundingTerms
       canCocreatorStartFunding
       canCocreatorEditOpenBuckets
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
     }
   }
 `;

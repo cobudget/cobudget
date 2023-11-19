@@ -29,6 +29,11 @@ const GET_ROUND_INTEGRATIONS = gql`
       ocTokenStatus
       ocVerified
       ocWebhookUrl
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       ocCollective {
         id
         name

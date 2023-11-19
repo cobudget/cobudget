@@ -5,11 +5,7 @@ import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
-import {
-  canViewGroup,
-  getRoundMemberBalance,
-  roundMemberBalance,
-} from "../helpers";
+import { canViewGroup, getRoundMemberBalance } from "../helpers";
 
 export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;

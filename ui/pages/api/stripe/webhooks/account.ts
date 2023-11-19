@@ -41,6 +41,22 @@ export default handler().post(async (req, res) => {
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription
     );
+    const { eventType } = session.metadata;
+    if (eventType === "upgradepaidplan") {
+      const { groupId, userId } = session.metadata;
+      await prisma.group.update({
+        where: { id: groupId },
+        data: {
+          stripeCurrentPeriodEnd: secondsToMsDate(
+            subscription.current_period_end
+          ),
+          stripeSubscriptionId: subscription.id,
+          stripeCustomerId: session.customer,
+          stripePriceId: subscription.items.data[0].price.id,
+        },
+      });
+      return;
+    }
 
     const {
       userId = missing(),
@@ -48,12 +64,16 @@ export default handler().post(async (req, res) => {
       groupSlug = missing(),
     } = session.metadata;
 
+    const { roundId } = session.metadata;
+
     console.log("webhook: subscription", subscription);
 
     console.log({ subscription, userId });
 
+    let group;
+
     try {
-      await prisma.group.create({
+      group = await prisma.group.create({
         data: {
           name: groupName,
           slug: slugify(groupSlug),
@@ -70,7 +90,7 @@ export default handler().post(async (req, res) => {
       console.log(error);
 
       // try again with randomness added to slug
-      await prisma.group.create({
+      group = await prisma.group.create({
         data: {
           name: groupName,
           slug: slugify(
@@ -85,6 +105,33 @@ export default handler().post(async (req, res) => {
           groupMembers: { create: { userId, isAdmin: true } },
         },
       });
+    }
+
+    if (roundId) {
+      const round = await prisma.round.findFirst({
+        where: { id: roundId },
+        select: { group: { select: { slug: true } } },
+      });
+      // Only upgrade round, if the round group is the root group
+      if (round.group.slug === "c") {
+        await prisma.round.update({
+          where: { id: roundId },
+          data: {
+            groupId: group.id,
+            singleRound: false,
+          },
+        });
+
+        const roundMembers = await prisma.roundMember.findMany({
+          where: { roundId, isAdmin: false },
+        });
+        await prisma.groupMember.createMany({
+          data: roundMembers.map((member) => ({
+            userId: member.userId,
+            groupId: group.id,
+          })),
+        });
+      }
     }
   } else {
     console.log(`Unhandled event type ${event.type}`);
