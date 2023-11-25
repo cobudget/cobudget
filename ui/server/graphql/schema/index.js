@@ -302,6 +302,7 @@ const schema = gql`
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     changeGroupFreeStatus(groupId: ID!, freeStatus: Boolean): Group
+    moveRoundToGroup(roundId: ID!, groupId: ID!): Round
     updateMember(
       roundId: ID!
       memberId: ID!

@@ -8,6 +8,7 @@ import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
 import emailService from "server/services/EmailService/email.service";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import { moveRoundToGroup as moveRoundToGroupHelper } from "../helpers/group";
 
 export const createGroupInvitationLink = combineResolvers(
   isGroupAdmin,
@@ -227,4 +228,12 @@ export const changeGroupFreeStatus = async (
       isFree: freeStatus,
     },
   });
+};
+
+export const moveRoundToGroup = async (
+  _,
+  { groupId, roundId },
+  { user, ss }
+) => {
+  return moveRoundToGroupHelper({ groupId, roundId });
 };
