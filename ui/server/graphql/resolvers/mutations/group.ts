@@ -212,3 +212,19 @@ export const deleteGroupMember = combineResolvers(
     });
   }
 );
+
+export const changeGroupFreeStatus = async (
+  _,
+  { groupId, freeStatus },
+  { ss }
+) => {
+  if (!ss) {
+    throw new Error("Only superadmins can perform this action");
+  }
+  return prisma.group.update({
+    where: { id: groupId },
+    data: {
+      isFree: freeStatus,
+    },
+  });
+};

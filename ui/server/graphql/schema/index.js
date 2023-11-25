@@ -301,6 +301,7 @@ const schema = gql`
       isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
+    changeGroupFreeStatus(groupId: ID!, freeStatus: Boolean): Group
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -369,6 +370,7 @@ const schema = gql`
     registrationPolicy: RegistrationPolicy
     visibility: Visibility
     subscriptionStatus: GroupSubscriptionStatus
+    isFree: Boolean
   }
 
   enum RoundType {

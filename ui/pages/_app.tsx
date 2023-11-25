@@ -160,6 +160,7 @@ export const TOP_LEVEL_QUERY = gql`
       experimentalFeatures
       registrationPolicy
       visibility
+      isFree
       subscriptionStatus {
         isActive
       }
