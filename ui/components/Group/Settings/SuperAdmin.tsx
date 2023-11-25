@@ -42,8 +42,12 @@ function SuperAdmin({ group, currentUser }) {
               },
             }}
           >
-            <option value={"YES"}>Yes</option>
-            <option value={"NO"}>No</option>
+            <option value={"YES"}>
+              <FormattedMessage defaultMessage="Yes" />
+            </option>
+            <option value={"NO"}>
+              <FormattedMessage defaultMessage="No" />
+            </option>
           </SelectField>
         </div>
       </div>
