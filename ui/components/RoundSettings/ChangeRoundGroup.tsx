@@ -4,7 +4,7 @@ import SelectInput, { SelectField } from "components/SelectInput";
 import Link from "next/link";
 import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { gql, useQuery } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 
 const GET_ADMIN_GROUPS = gql`
   query Query {
@@ -17,8 +17,20 @@ const GET_ADMIN_GROUPS = gql`
   }
 `;
 
-function ChangeRoundGroup() {
+const MOVE_GROUP = gql`
+  mutation MoveRoundToGroup($roundId: ID!, $groupId: ID!) {
+    moveRoundToGroup(roundId: $roundId, groupId: $groupId) {
+      slug
+      group {
+        slug
+      }
+    }
+  }
+`;
+
+function ChangeRoundGroup({ round }) {
   const [{ fetching, data }] = useQuery({ query: GET_ADMIN_GROUPS });
+  const [{ fetching: moving }, moveToGroup] = useMutation(MOVE_GROUP);
   const [groupId, setGroupId] = useState();
   const groups = data?.adminGroups;
   const intl = useIntl();
@@ -26,6 +38,23 @@ function ChangeRoundGroup() {
   const group = useMemo(() => {
     return groups?.find((group) => group.id === groupId);
   }, [groupId, groups]);
+
+  const handleSubmit = async () => {
+    if (
+      window.confirm(
+        intl.formatMessage(
+          {
+            defaultMessage:
+              "Are you sure you want to move this round to {groupName}? Please note that this action is irreversible.",
+          },
+          { groupName: group?.name }
+        )
+      )
+    ) {
+      const result = await moveToGroup({ roundId: round?.id, groupId });
+      console.log("Result", result);
+    }
+  };
 
   return (
     <div className="z-50 top-0 left-0 fixed w-screen h-screen bg-black bg-opacity-30 flex justify-center items-center">
@@ -75,7 +104,12 @@ function ChangeRoundGroup() {
               </Link>
             )}
             <div className="w-full">
-              <Button className="w-full" disabled={!groupId}>
+              <Button
+                className="w-full"
+                disabled={!groupId}
+                onClick={handleSubmit}
+                loading={moving}
+              >
                 <FormattedMessage defaultMessage="Move to Group" />
               </Button>
             </div>

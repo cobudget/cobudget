@@ -42,7 +42,7 @@ function GroupSettings({ round, currentUser, currentGroup }: any) {
           )}
         </div>
       </div>
-      {showChangeRoundGroup && <ChangeRoundGroup />}
+      {showChangeRoundGroup && <ChangeRoundGroup round={round} />}
     </>
   );
 }
