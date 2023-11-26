@@ -39,6 +39,7 @@ const schema = gql`
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
+    adminGroups: [Group!]
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
