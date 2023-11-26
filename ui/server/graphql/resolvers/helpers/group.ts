@@ -1,6 +1,24 @@
 import prisma from "server/prisma";
 
-export const moveRoundToGroup = async ({ roundId, groupId }) => {
+export const moveRoundToGroup = async ({ roundId, groupId, user, ss }) => {
+  // Auth
+  if (!user) {
+    throw new Error("User not found");
+  } else if (!ss) {
+    const isRoundAdmin = await prisma.roundMember.findFirst({
+      where: { userId: user?.id, roundId, isAdmin: true },
+    });
+    if (!isRoundAdmin) {
+      throw new Error("You need to be round admin to perform this action");
+    }
+    const isGroupAdmin = await prisma.groupMember.findFirst({
+      where: { userId: user?.id, groupId, isAdmin: true },
+    });
+    if (!isGroupAdmin) {
+      throw new Error("You need to be group admin to perform this action");
+    }
+  }
+
   // Round validations
   const round = await prisma.round.findUnique({
     where: { id: roundId },

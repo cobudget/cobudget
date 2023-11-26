@@ -235,5 +235,5 @@ export const moveRoundToGroup = async (
   { groupId, roundId },
   { user, ss }
 ) => {
-  return moveRoundToGroupHelper({ groupId, roundId });
+  return moveRoundToGroupHelper({ groupId, roundId, user, ss });
 };

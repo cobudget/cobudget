@@ -126,6 +126,11 @@ function ChangeRoundGroup({ round, hide }) {
                 </a>
               </Link>
             )}
+            <div className="my-4">
+              <p className="text-sm">
+                <FormattedMessage defaultMessage="You can move this round to the groups where you are admin" />
+              </p>
+            </div>
             <div className="w-full">
               <Button
                 className="w-full"
