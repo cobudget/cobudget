@@ -42,7 +42,12 @@ function GroupSettings({ round, currentUser, currentGroup }: any) {
           )}
         </div>
       </div>
-      {showChangeRoundGroup && <ChangeRoundGroup round={round} />}
+      {showChangeRoundGroup && (
+        <ChangeRoundGroup
+          round={round}
+          hide={() => setShowChangeRoundGroup(false)}
+        />
+      )}
     </>
   );
 }

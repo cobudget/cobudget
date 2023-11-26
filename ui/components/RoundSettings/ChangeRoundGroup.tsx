@@ -2,7 +2,9 @@ import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import SelectInput, { SelectField } from "components/SelectInput";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
 
@@ -28,12 +30,13 @@ const MOVE_GROUP = gql`
   }
 `;
 
-function ChangeRoundGroup({ round }) {
+function ChangeRoundGroup({ round, hide }) {
   const [{ fetching, data }] = useQuery({ query: GET_ADMIN_GROUPS });
   const [{ fetching: moving }, moveToGroup] = useMutation(MOVE_GROUP);
   const [groupId, setGroupId] = useState();
   const groups = data?.adminGroups;
   const intl = useIntl();
+  const router = useRouter();
 
   const group = useMemo(() => {
     return groups?.find((group) => group.id === groupId);
@@ -52,7 +55,24 @@ function ChangeRoundGroup({ round }) {
       )
     ) {
       const result = await moveToGroup({ roundId: round?.id, groupId });
-      console.log("Result", result);
+      const { slug, group: updatedGroup } =
+        result?.data?.moveRoundToGroup || {};
+      if (slug && updatedGroup) {
+        router.push(`/${updatedGroup.slug}/${slug}/settings/group`);
+        toast.success(
+          intl.formatMessage(
+            { defaultMessage: "This group has been moved to {groupName}" },
+            { groupName: group?.name }
+          )
+        );
+        hide();
+      } else {
+        toast.error(
+          intl.formatMessage({
+            defaultMessage: "Error occurred while moving this round to group",
+          })
+        );
+      }
     }
   };
 
@@ -61,6 +81,9 @@ function ChangeRoundGroup({ round }) {
       <div className="bg-white rounded-lg p-8 w-96">
         <p className="font-bold">
           <FormattedMessage defaultMessage="Move to group" />
+          <span className="float-right cursor-pointer" onClick={hide}>
+            ✕
+          </span>
         </p>
         {fetching ? (
           <div className="flex justify-center items-center">
