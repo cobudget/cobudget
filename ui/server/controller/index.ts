@@ -8,6 +8,7 @@ import {
   updateContributionsCount,
 } from "../graphql/resolvers/helpers";
 import { updateFundedPercentage } from "../graphql/resolvers/helpers";
+import isGroupSubscriptionActive from "server/graphql/resolvers/helpers/isGroupSubscriptionActive";
 
 export const allocateToMember = async ({
   roundId,
@@ -187,6 +188,7 @@ export const getGroup = async ({
         slug: group.slug,
         id: group.id,
         name: group.name,
+        stripeSubscriptionId: group.stripeSubscriptionId,
       };
     } else return null;
   }
@@ -214,6 +216,8 @@ export const contribute = async ({
   });
 
   const { round } = roundMember;
+
+  await isGroupSubscriptionActive({ groupId: round?.groupId });
 
   if (amount <= 0) throw new Error("Value needs to be more than zero");
 

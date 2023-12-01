@@ -5,11 +5,7 @@ import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
-import {
-  canViewGroup,
-  getRoundMemberBalance,
-  roundMemberBalance,
-} from "../helpers";
+import { canViewGroup, getRoundMemberBalance } from "../helpers";
 
 export const group = async (parent, { groupSlug }, { user, ss }) => {
   if (!groupSlug) return null;
@@ -27,6 +23,14 @@ export const group = async (parent, { groupSlug }, { user, ss }) => {
 export const groups = combineResolvers(isRootAdmin, async (parent, args) => {
   return prisma.group.findMany();
 });
+
+export const adminGroups = async (_1, _2, { user }) => {
+  const groupMemberships = await prisma.groupMember.findMany({
+    where: { userId: user?.id, isAdmin: true },
+  });
+  const groupIds = groupMemberships.map((membership) => membership.groupId);
+  return prisma.group.findMany({ where: { id: { in: groupIds } } });
+};
 
 export const groupInvitationLink = combineResolvers(
   isGroupAdmin,

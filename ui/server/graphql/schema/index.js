@@ -27,12 +27,19 @@ const schema = gql`
     count: Int
   }
 
+  type MembersLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
+    adminGroups: [Group!]
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
@@ -295,6 +302,8 @@ const schema = gql`
       isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
+    changeGroupFreeStatus(groupId: ID!, freeStatus: Boolean): Group
+    moveRoundToGroup(roundId: ID!, groupId: ID!): Round
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -346,6 +355,10 @@ const schema = gql`
     setEmailSetting(settingKey: String!, value: Boolean!): User
   }
 
+  type GroupSubscriptionStatus {
+    isActive: Boolean
+  }
+
   type Group {
     id: ID!
     name: String!
@@ -358,6 +371,8 @@ const schema = gql`
     experimentalFeatures: Boolean
     registrationPolicy: RegistrationPolicy
     visibility: Visibility
+    subscriptionStatus: GroupSubscriptionStatus
+    isFree: Boolean
   }
 
   enum RoundType {
@@ -435,6 +450,7 @@ const schema = gql`
     ocWebhookUrl: String
     ocVerified: Boolean
     ocTokenStatus: OC_TokenStatus
+    membersLimit: MembersLimit
 
     expenses: [Expense]
   }

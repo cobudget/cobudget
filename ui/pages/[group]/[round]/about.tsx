@@ -30,6 +30,11 @@ export const ROUND_QUERY = gql`
       totalInMembersBalances
       totalContributionsFunding
       totalContributionsFunded
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
     }
   }
 `;

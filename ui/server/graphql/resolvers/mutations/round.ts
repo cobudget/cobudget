@@ -44,6 +44,7 @@ import {
 } from "server/utils/expenses";
 import cuid from "cuid";
 import interator from "utils/interator";
+import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 
 export const createRound = async (
   parent,
@@ -65,6 +66,9 @@ export const createRound = async (
   } else {
     await isGroupAdmin(null, { groupId }, { user, ss });
   }
+
+  await isGroupSubscriptionActive({ groupId });
+
   const round = await prisma.round.create({
     data: {
       slug,
@@ -588,7 +592,6 @@ export const inviteRoundMembers = combineResolvers(
       await emailService.bulkInviteMembers({
         membersToInvite,
         round,
-        currentGroup: round.group,
         currentUser,
       });
     } catch (err) {

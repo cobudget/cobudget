@@ -61,7 +61,18 @@ const GroupMembers = ({ currentGroup }) => {
           clearInput={() => setSearchString("")}
         />
         <div>
-          <Button onClick={() => setInviteModalOpen(true)}>
+          <Button
+            onClick={() => {
+              if (currentGroup?.subscriptionStatus?.isActive === false) {
+                const event = new CustomEvent("show-upgrade-group-message", {
+                  detail: { groupId: currentGroup?.id },
+                });
+                window.dispatchEvent(event);
+                return;
+              }
+              setInviteModalOpen(true);
+            }}
+          >
             <FormattedMessage defaultMessage="Invite members" />
           </Button>
           {inviteModalOpen && (

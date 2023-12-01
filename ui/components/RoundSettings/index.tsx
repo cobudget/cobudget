@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
@@ -13,6 +13,8 @@ import Tags from "./Tags";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 import Integrations from "./Integrations";
+import AppContext from "contexts/AppContext";
+import GroupSettings from "./GroupSettings";
 
 const RoundSettings = ({
   settingsTabSlug,
@@ -27,6 +29,14 @@ const RoundSettings = ({
 }) => {
   const intl = useIntl();
   const router = useRouter();
+
+  const { ss } = useContext(AppContext);
+  const inSession = useMemo(() => {
+    if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
+      return true;
+    }
+    return false;
+  }, [ss]);
 
   const defaultTabs = useMemo(
     () => [
@@ -74,6 +84,11 @@ const RoundSettings = ({
         slug: "integrations",
         name: intl.formatMessage({ defaultMessage: "Integrations" }),
         component: Integrations,
+      },
+      {
+        slug: "group",
+        name: intl.formatMessage({ defaultMessage: "Group" }),
+        component: GroupSettings,
       },
     ],
     [intl]

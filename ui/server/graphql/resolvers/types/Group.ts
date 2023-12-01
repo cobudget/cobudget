@@ -1,3 +1,4 @@
+import stripe from "server/stripe";
 import prisma from "../../../prisma";
 
 export const info = (group) => {
@@ -29,4 +30,17 @@ export const discourseUrl = async (group) => {
     where: { groupId: group.id },
   });
   return discourseConfig?.url ?? null;
+};
+
+export const subscriptionStatus = async (group) => {
+  if (group.stripeSubscriptionId && group.slug !== "c") {
+    const subscription = await stripe.subscriptions.retrieve(
+      group.stripeSubscriptionId
+    );
+    return {
+      isActive: group.isFree || subscription.status === "active",
+    };
+  } else {
+    return null;
+  }
 };

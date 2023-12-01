@@ -187,6 +187,8 @@ model Group {
   stripePriceId          String?
   stripeCurrentPeriodEnd DateTime?
 
+  isFree                 Boolean   @default(false)
+
   registrationPolicy RegistrationPolicy? @default(OPEN)
   visibility         Visibility?         @default(PUBLIC)
 

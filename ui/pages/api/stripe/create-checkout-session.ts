@@ -89,6 +89,9 @@ export default handler().post(async (req, res) => {
       customer_email: req.user.email,
     };
     const origin = getRequestOrigin(req);
+    const roundId = Array.isArray(req.query.roundId)
+      ? req.query.roundId[0]
+      : req.query.roundId;
     try {
       const session = await stripe.checkout.sessions.create({
         mode: "subscription",
@@ -107,13 +110,16 @@ export default handler().post(async (req, res) => {
           groupSlug: req.query.groupSlug,
           groupName: req.query.groupName,
           registrationPolicy: req.query.registrationPolicy,
+          roundId,
         },
         allow_promotion_codes: true,
         ...customerMetadata,
         billing_address_collection: "auto",
         success_url: `${origin}/new-group/?upgraded=true&group=${slugify(
           req.query.groupSlug
-        )}&registrationPolicy=${req.query.registrationPolicy}`,
+        )}&registrationPolicy=${req.query.registrationPolicy}&${
+          roundId ? `roundId=${roundId}` : ""
+        }`,
         cancel_url: `${origin}/new-group/?upgraded=false`,
       });
       console.log({ session });
@@ -121,6 +127,49 @@ export default handler().post(async (req, res) => {
     } catch (err) {
       console.log({ err });
     }
+  } else if (req.query?.mode === "upgradepaidplan") {
+    if (typeof req.query?.plan !== "string")
+      throw new Error("No plan specified");
+
+    const priceId = plans[req.query.plan];
+    if (!priceId) throw new Error("Missing price ID for this plan.");
+
+    const groupId = Array.isArray(req.query.groupId)
+      ? req.query.groupId[0]
+      : req.query.groupId;
+    const group = await prisma.group.findFirst({ where: { id: groupId } });
+
+    const customerMetadata = {
+      customer_email: req.user.email,
+    };
+    const origin = getRequestOrigin(req);
+    const session = await stripe.checkout.sessions.create({
+      mode: "subscription",
+      payment_method_types: ["card"],
+      tax_id_collection: {
+        enabled: true,
+      },
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId: req.user.id,
+        groupId,
+        eventType: "upgradepaidplan",
+      },
+      allow_promotion_codes: true,
+      ...customerMetadata,
+      billing_address_collection: "auto",
+      success_url: `${origin}/new-group/?upgraded=true&group=${slugify(
+        group?.slug
+      )}&registrationPolicy=${req.query.registrationPolicy}`,
+      cancel_url: `${origin}/${group?.slug}/?upgraded=false`,
+    });
+    console.log({ session });
+    res.redirect(303, session.url);
   } else {
     if (typeof req.query?.bucketId !== "string")
       throw new Error("Bad bucketId");
