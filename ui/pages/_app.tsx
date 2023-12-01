@@ -1,7 +1,7 @@
 import "../styles.css";
 import "tippy.js/dist/tippy.css";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, createContext } from "react";
 import { withUrqlClient } from "next-urql";
 import { client } from "../graphql/client";
 import Layout from "../components/Layout";
@@ -17,6 +17,7 @@ import reportError from "utils/reportError";
 import Fallback from "components/Fallback";
 import { Analytics } from "@vercel/analytics/react";
 import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
+import AppContext from "contexts/AppContext";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -159,6 +160,7 @@ export const TOP_LEVEL_QUERY = gql`
       experimentalFeatures
       registrationPolicy
       visibility
+      isFree
       subscriptionStatus {
         isActive
       }
@@ -269,6 +271,12 @@ const MyApp = ({ Component, pageProps, router }) => {
     setLocale(locale);
   };
 
+  const appContext = useMemo(() => {
+    return {
+      ss,
+    };
+  }, [ss]);
+
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
@@ -281,33 +289,35 @@ const MyApp = ({ Component, pageProps, router }) => {
         FallbackComponent={Fallback}
         onError={(error) => reportError(error, currentUser)}
       >
-        <Layout
-          currentUser={currentUser}
-          fetchingUser={fetchingUser}
-          group={group}
-          round={round}
-          bucket={bucket}
-          dir={isRTL(locale) ? "rtl" : "ltr"}
-          locale={locale}
-          changeLocale={changeLocale}
-          ss={ss}
-        >
-          <Component
-            {...pageProps}
+        <AppContext.Provider value={appContext}>
+          <Layout
             currentUser={currentUser}
-            router={router}
+            fetchingUser={fetchingUser}
+            group={group}
             round={round}
-            currentGroup={group}
-          />
-          <Analytics />
-          <Toaster />
-          {groupToUpdate && (
-            <UpgradeGroupModal
-              group={group}
-              hide={() => setGroupToUpdate(undefined)}
+            bucket={bucket}
+            dir={isRTL(locale) ? "rtl" : "ltr"}
+            locale={locale}
+            changeLocale={changeLocale}
+            ss={ss}
+          >
+            <Component
+              {...pageProps}
+              currentUser={currentUser}
+              router={router}
+              round={round}
+              currentGroup={group}
             />
-          )}
-        </Layout>
+            <Analytics />
+            <Toaster />
+            {groupToUpdate && (
+              <UpgradeGroupModal
+                group={group}
+                hide={() => setGroupToUpdate(undefined)}
+              />
+            )}
+          </Layout>
+        </AppContext.Provider>
       </ErrorBoundary>
     </IntlProvider>
   );
