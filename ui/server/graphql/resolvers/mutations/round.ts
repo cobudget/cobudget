@@ -592,7 +592,6 @@ export const inviteRoundMembers = combineResolvers(
       await emailService.bulkInviteMembers({
         membersToInvite,
         round,
-        currentGroup: round.group,
         currentUser,
       });
     } catch (err) {

@@ -24,6 +24,14 @@ export const groups = combineResolvers(isRootAdmin, async (parent, args) => {
   return prisma.group.findMany();
 });
 
+export const adminGroups = async (_1, _2, { user }) => {
+  const groupMemberships = await prisma.groupMember.findMany({
+    where: { userId: user?.id, isAdmin: true },
+  });
+  const groupIds = groupMemberships.map((membership) => membership.groupId);
+  return prisma.group.findMany({ where: { id: { in: groupIds } } });
+};
+
 export const groupInvitationLink = combineResolvers(
   isGroupAdmin,
   async (_, { groupId }) => {

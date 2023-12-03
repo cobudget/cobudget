@@ -8,6 +8,7 @@ import { getGroup } from "server/controller";
 import discourse from "../../../lib/discourse";
 import emailService from "server/services/EmailService/email.service";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import { moveRoundToGroup as moveRoundToGroupHelper } from "../helpers/group";
 
 export const createGroupInvitationLink = combineResolvers(
   isGroupAdmin,
@@ -212,3 +213,27 @@ export const deleteGroupMember = combineResolvers(
     });
   }
 );
+
+export const changeGroupFreeStatus = async (
+  _,
+  { groupId, freeStatus },
+  { ss }
+) => {
+  if (!ss) {
+    throw new Error("Only superadmins can perform this action");
+  }
+  return prisma.group.update({
+    where: { id: groupId },
+    data: {
+      isFree: freeStatus,
+    },
+  });
+};
+
+export const moveRoundToGroup = async (
+  _,
+  { groupId, roundId },
+  { user, ss }
+) => {
+  return moveRoundToGroupHelper({ groupId, roundId, user, ss });
+};
