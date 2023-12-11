@@ -126,7 +126,6 @@ export default {
       `,
       };
     });
-
     sendEmails(emailsToSend, false, true);
   },
   inviteMember: async ({
