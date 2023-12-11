@@ -294,6 +294,7 @@ const schema = gql`
         reason: "Use inviteRoundMembers instead instead. This mutation is slow"
       )
     inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
+    inviteRoundMembersAgain(roundId: ID!, emails: String!): [RoundMember]
     inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
     updateGroupMember(
       groupId: ID!
