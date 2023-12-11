@@ -467,6 +467,41 @@ export const deprecatedInviteRoundMembers = combineResolvers(
   }
 );
 
+export const inviteRoundMembersAgain = combineResolvers(
+  isCollOrGroupAdmin,
+  async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
+    });
+
+    const emails = emailsString.split(",");
+    if (emails.length > 10000) {
+      throw new Error("You can only invite 10000 people at a time");
+    }
+
+    const users = await prisma.user.findMany({
+      where: { email: { in: emails } },
+    });
+
+    const roundMembers = await prisma.roundMember.findMany({
+      where: { userId: { in: users.map((u) => u.id) } },
+    });
+    const roundMembersUserIds = roundMembers.map((member) => member.userId);
+    const membersToInvite = users.filter(
+      (user) => roundMembersUserIds.indexOf(user.id) > -1
+    );
+
+    await emailService.bulkInviteMembers({
+      membersToInvite,
+      round,
+      currentUser,
+    });
+
+    return roundMembers;
+  }
+);
+
 export const inviteRoundMembers = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {

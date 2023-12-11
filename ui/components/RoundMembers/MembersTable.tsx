@@ -12,7 +12,6 @@ import {
   MenuItem,
 } from "@material-ui/core";
 import Tooltip from "@tippyjs/react";
-import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
 import { gql, useMutation, useQuery } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
@@ -33,6 +32,27 @@ import {
 import { TOGGLE_ROUND_ADMIN } from "../../constants";
 import { RM_INVITED_AGAIN } from "../../constants";
 import { TOGGLE_ROUND_MODERATOR } from "../../constants";
+
+export const INVITE_ROUND_MEMBERS_AGAIN_MUTATION = gql`
+  mutation InviteRoundMembers($emails: String!, $roundId: ID!) {
+    inviteRoundMembersAgain(emails: $emails, roundId: $roundId) {
+      id
+      isAdmin
+      isModerator
+      isApproved
+      createdAt
+      balance
+      email
+      name
+      user {
+        id
+        username
+        verifiedEmail
+        avatar
+      }
+    }
+  }
+`;
 
 export const MEMBERS_QUERY = gql`
   query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
@@ -143,7 +163,7 @@ const Page = ({
 const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_MUTATION);
+  const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_AGAIN_MUTATION);
 
   const intl = useIntl();
   const open = Boolean(anchorEl);

@@ -674,7 +674,7 @@ const RoundPage = ({ currentUser }) => {
                     size="large"
                     color={round.color}
                     onClick={() => {
-                      if (round.group.subscriptionStatus === false) {
+                      if (round.group?.subscriptionStatus === false) {
                         const event = new CustomEvent(
                           "show-upgrade-group-message",
                           { detail: { groupId: round?.group?.id } }
