@@ -11,10 +11,15 @@ const magicLink = new MagicLoginStrategy({
   secret: process.env.MAGIC_LINK_SECRET,
   callbackUrl: "/api/auth/magiclink/callback",
   sendMagicLink: async (destination, href, code, req) => {
-    await prisma.user.update({
+    const user = await prisma.user.findUnique({
       where: { email: destination },
-      data: { magiclinkCode: code },
     });
+    if (user) {
+      await prisma.user.update({
+        where: { email: destination },
+        data: { magiclinkCode: code },
+      });
+    }
     await emailService.loginMagicLink({ destination, href, code, req });
   },
   verify: (payload, callback) => {
