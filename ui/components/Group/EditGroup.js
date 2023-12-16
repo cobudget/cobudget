@@ -40,7 +40,6 @@ const EDIT_GROUP = gql`
 
 const EditGroup = ({ group, currentUser }) => {
   const router = useRouter();
-  const fromRealities = router.query.from === "realities";
   const [logoImage, setLogoImage] = useState(group?.logo);
   const [{ fetching: loading }, createGroup] = useMutation(CREATE_GROUP);
   const [{ fetching: editLoading }, editGroup] = useMutation(EDIT_GROUP);
@@ -136,13 +135,7 @@ const EditGroup = ({ group, currentUser }) => {
               onBlur: (e) => setSlugValue(slugify(e.target.value)),
             }}
             helperText={errors.slug?.message}
-            startAdornment={
-              fromRealities ? (
-                <span>{process.env.REALITIES_DEPLOY_URL}/</span>
-              ) : (
-                <span>{process.env.DEPLOY_URL}/</span>
-              )
-            }
+            startAdornment={<span>{process.env.DEPLOY_URL}/</span>}
           />
         )}
 
