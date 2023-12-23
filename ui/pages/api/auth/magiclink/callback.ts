@@ -11,7 +11,11 @@ export default handler()
     const user = await prisma.user.findUnique({
       where: { email: payload.destination },
     });
-    if (user && user?.magiclinkCode !== payload.code) {
+    if (
+      process.env.ALLOW_REUSE_LOGIN_LINK !== "1" &&
+      user &&
+      user?.magiclinkCode !== payload.code
+    ) {
       return res.redirect("/login?error=invalid-token");
     }
     next();
