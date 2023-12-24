@@ -34,6 +34,11 @@ export const discourseUrl = async (group) => {
 
 export const subscriptionStatus = async (group) => {
   try {
+    if (!group.stripeSubscriptionId && group.slug !== "c") {
+      return {
+        isActive: false,
+      };
+    }
     if (group.stripeSubscriptionId && group.slug !== "c") {
       const subscription = await stripe.subscriptions.retrieve(
         group.stripeSubscriptionId
