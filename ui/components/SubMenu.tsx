@@ -34,7 +34,6 @@ const groupItems = ({ currentUser, groupSlug }, formatMessage) => {
       label: formatMessage({ defaultMessage: "Rounds" }),
       href: `/${groupSlug == "c" ? "" : groupSlug}`,
     },
-    // { label: "Realities", href: "/realities" },
     {
       label: formatMessage({ defaultMessage: "Members" }),
       href: `/${groupSlug ?? "c"}/members`,

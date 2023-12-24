@@ -15,6 +15,20 @@ export default function Subscription({ group, currentUser }) {
       >
         <FormattedMessage defaultMessage="Manage billing in Stripe portal" />
       </Button>
+      {group?.subscriptionStatus?.isActive === false && (
+        <div className="mt-4">
+          <Button
+            onClick={() => {
+              const event = new CustomEvent("show-upgrade-group-message", {
+                detail: { groupId: group?.id },
+              });
+              window.dispatchEvent(event);
+            }}
+          >
+            <FormattedMessage defaultMessage="Upgrade Group" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
