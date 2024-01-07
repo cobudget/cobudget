@@ -514,6 +514,8 @@ model Transaction {
   fromAccountId String
   toAccountId   String
 
+  deleted       Boolean?
+
   stripeSessionId String?
 }
 
