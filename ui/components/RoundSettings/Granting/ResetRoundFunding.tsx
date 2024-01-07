@@ -74,7 +74,10 @@ export default ({ round, handleClose }) => {
           <div className="">
             <Button
               onClick={() => {
-                resetRoundFunding({ roundId: round?.id }).then(() => {
+                resetRoundFunding({ roundId: round?.id }).then((data) => {
+                  if (data.error) {
+                    return toast.error(data.error.message);
+                  }
                   handleClose();
                   toast.success(
                     intl.formatMessage({

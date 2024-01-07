@@ -1505,56 +1505,55 @@ export const deprecatedSyncOCExpenses = async (_, { id }) => {
   }
 };
 
-export const resetRoundFunding = async (_, { roundId }) => {
-  try {
-    const transactions = await prisma.transaction.findMany({
-      select: { id: true },
-      where: { roundId },
-    });
-    const transationsIds = transactions.map((transaction) => transaction.id);
-
-    const contributions = await prisma.contribution.findMany({
-      select: { id: true },
-      where: { roundId },
-    });
-    const contributionIds = contributions.map(
-      (contribution) => contribution.id
-    );
-
-    const allocations = await prisma.allocation.findMany({
-      select: { id: true },
-      where: { roundId },
-    });
-    const allocationIds = allocations.map((allocation) => allocation.id);
-
-    activityLog.log({
-      message: "ROUND_FUNDING_RESET",
-      data: {
-        transationsIds,
-        contributionIds,
-        allocationIds,
-      },
-    });
-
-    await Promise.all([
-      prisma.transaction.updateMany({
-        where: {},
-        data: {
-          deleted: true,
-        },
-      }),
-      prisma.contribution.updateMany({
-        where: {},
-        data: { deleted: true },
-      }),
-      prisma.allocation.updateMany({
-        where: {},
-        data: { deleted: true },
-      }),
-    ]);
-
-    return transactions;
-  } catch (err) {
-    console.log(err);
+export const resetRoundFunding = async (_, { roundId }, { user, ss }) => {
+  const isAdmin = await isCollAdmin({ ss, userId: user?.id, roundId });
+  if (!isAdmin) {
+    throw new Error("Only admins can perform this action");
   }
+
+  const transactions = await prisma.transaction.findMany({
+    select: { id: true },
+    where: { roundId },
+  });
+  const transationsIds = transactions.map((transaction) => transaction.id);
+
+  const contributions = await prisma.contribution.findMany({
+    select: { id: true },
+    where: { roundId },
+  });
+  const contributionIds = contributions.map((contribution) => contribution.id);
+
+  const allocations = await prisma.allocation.findMany({
+    select: { id: true },
+    where: { roundId },
+  });
+  const allocationIds = allocations.map((allocation) => allocation.id);
+
+  activityLog.log({
+    message: "ROUND_FUNDING_RESET",
+    data: {
+      transationsIds,
+      contributionIds,
+      allocationIds,
+    },
+  });
+
+  await Promise.all([
+    prisma.transaction.updateMany({
+      where: {},
+      data: {
+        deleted: true,
+      },
+    }),
+    prisma.contribution.updateMany({
+      where: {},
+      data: { deleted: true },
+    }),
+    prisma.allocation.updateMany({
+      where: {},
+      data: { deleted: true },
+    }),
+  ]);
+
+  return transactions;
 };
