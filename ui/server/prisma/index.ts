@@ -17,4 +17,14 @@ if (process.env.NODE_ENV === "production") {
   prisma = global.cachedPrisma;
 }
 
+async function main() {
+  try {
+    prisma.$use(async (params, next) => {
+      return next(params);
+    });
+  } catch (err) {}
+}
+
+main();
+
 export default prisma;
