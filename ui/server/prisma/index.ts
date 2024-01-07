@@ -28,7 +28,8 @@ async function main() {
           params.action === "count" ||
           params.action === "findFirst" ||
           params.action === "findMany" ||
-          params.action === "findUnique")
+          params.action === "findUnique" ||
+          (params as any).action === "groupBy")
       ) {
         params.args["where"] = { OR: [{ deleted: null }, { deleted: false }] };
       }
