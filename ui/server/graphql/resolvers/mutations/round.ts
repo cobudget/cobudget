@@ -45,6 +45,7 @@ import {
 import cuid from "cuid";
 import interator from "utils/interator";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import activityLog from "utils/activity-log";
 
 export const createRound = async (
   parent,
@@ -1508,13 +1509,13 @@ export const resetRoundFunding = async (_, { roundId }) => {
   try {
     const transactions = await prisma.transaction.findMany({
       select: { id: true },
-      where: { roundId, deleted: { not: true } },
+      where: { roundId },
     });
     const transationsIds = transactions.map((transaction) => transaction.id);
 
     const contributions = await prisma.contribution.findMany({
-      select: { id: true, deleted: true },
-      where: { roundId, deleted: true },
+      select: { id: true },
+      where: { roundId },
     });
     const contributionIds = contributions.map(
       (contribution) => contribution.id
@@ -1522,11 +1523,20 @@ export const resetRoundFunding = async (_, { roundId }) => {
 
     const allocations = await prisma.allocation.findMany({
       select: { id: true },
-      where: { roundId, deleted: { not: true } },
+      where: { roundId },
     });
     const allocationIds = allocations.map((allocation) => allocation.id);
 
-    const data = await Promise.all([
+    activityLog.log({
+      message: "ROUND_FUNDING_RESET",
+      data: {
+        transationsIds,
+        contributionIds,
+        allocationIds,
+      },
+    });
+
+    await Promise.all([
       prisma.transaction.updateMany({
         where: {},
         data: {

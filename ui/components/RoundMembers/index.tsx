@@ -125,7 +125,9 @@ const RoundMembers = ({ round, currentUser }) => {
             <div className="flex items-center space-x-2">
               <Button
                 onClick={() => {
-                  activityLog.log(INVITE_BUTTON_CLIKED);
+                  activityLog.log({
+                    message: INVITE_BUTTON_CLIKED,
+                  });
                   setInviteModalOpen(true);
                 }}
                 testid="invite-participant-button"
