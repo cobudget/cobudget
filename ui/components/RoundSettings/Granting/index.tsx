@@ -170,7 +170,10 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
         <div className={classes.innerModal}>
-          <ResetRoundFunding round={round} handleClose={() => setOpenResetModal(false)}/>
+          <ResetRoundFunding
+            round={round}
+            handleClose={() => setOpenResetModal(false)}
+          />
         </div>
       </Modal>
       <Modal
@@ -353,18 +356,17 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
 
           <Divider />
           <div className="px-3 my-3">
-          <h2 className="text-xl font-semibold mt-8 mb-4">
-            <FormattedMessage defaultMessage="Danger Zone" />
-          </h2>
-          <Button
-            onClick={() => setOpenResetModal(true)}
-            variant="secondary"
-            color="red"
-          >
-            <FormattedMessage defaultMessage="Reset funding" />
-          </Button>
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Danger Zone" />
+            </h2>
+            <Button
+              onClick={() => setOpenResetModal(true)}
+              variant="secondary"
+              color="red"
+            >
+              <FormattedMessage defaultMessage="Reset funding" />
+            </Button>
           </div>
-
 
           {currentGroup?.experimentalFeatures && (
             <>

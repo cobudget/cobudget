@@ -1503,3 +1503,20 @@ export const deprecatedSyncOCExpenses = async (_, { id }) => {
     ("");
   }
 };
+
+export const resetRoundFunding = async (_, { roundId }) => {
+  const transactions = await prisma.transaction.findMany({
+    select: { id: true },
+    where: { roundId },
+  });
+  const transationsIds = transactions.map((transaction) => transaction.id);
+
+  await prisma.transaction.updateMany({
+    where: { id: { in: transationsIds } },
+    data: {
+      deleted: true,
+    },
+  });
+
+  return transactions;
+};
