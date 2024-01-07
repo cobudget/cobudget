@@ -140,6 +140,7 @@ export const roundTransactions = combineResolvers(
         (
           SELECT 
             "id", 
+            "deleted",
             "collectionMemberId" as "roundMemberId", 
             null as "allocatedById", 
             "amount",
@@ -148,21 +149,22 @@ export const roundTransactions = combineResolvers(
             null as "allocationType",
             'CONTRIBUTION' as "transactionType",
             "createdAt"
-          FROM "Contribution" where "collectionId" = ${roundId}
+          FROM "Contribution" where ("deleted" IS NULL OR "deleted" = false) AND "collectionId" = ${roundId}
           
           UNION ALL
           
           SELECT 
             "id", 
+            "deleted",
             "collectionMemberId" as "roundMemberId", 
-            "allocatedById", 
+            "allocatedById",
             "amount",
             null as "bucketId",
             "amountBefore", 
             "allocationType",
             'ALLOCATION' as "transactionType",
             "createdAt"
-          FROM "Allocation" where "collectionId" = ${roundId}
+          FROM "Allocation" where ("deleted" IS NULL OR "deleted" = false) AND "collectionId" = ${roundId}
         ) ORDER BY "createdAt" DESC LIMIT ${limit} OFFSET ${offset};
       `;
 
