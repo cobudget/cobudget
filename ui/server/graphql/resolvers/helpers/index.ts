@@ -436,7 +436,7 @@ export async function roundMemberBalance(member) {
   const {
     _sum: { amount: totalContributions },
   } = await prisma.contribution.aggregate({
-    where: { roundMemberId: member.id },
+    where: { roundMemberId: member.id, deleted: { not: true } },
     _sum: { amount: true },
   });
 

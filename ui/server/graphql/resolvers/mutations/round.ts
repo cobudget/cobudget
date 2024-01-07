@@ -1506,41 +1506,45 @@ export const deprecatedSyncOCExpenses = async (_, { id }) => {
 
 export const resetRoundFunding = async (_, { roundId }) => {
   try {
-  const transactions = await prisma.transaction.findMany({
-    select: { id: true },
-    where: { roundId, deleted: { not: true } },
-  });
-  const transationsIds = transactions.map((transaction) => transaction.id);
+    const transactions = await prisma.transaction.findMany({
+      select: { id: true },
+      where: { roundId, deleted: { not: true } },
+    });
+    const transationsIds = transactions.map((transaction) => transaction.id);
 
-  const contributions = await prisma.contribution.findMany({
-    select: { id: true },
-    where: { roundId, deleted: { not: true } },
-  });
-  const contributionIds = contributions.map((contribution) => contribution.id);
+    const contributions = await prisma.contribution.findMany({
+      select: { id: true, deleted: true },
+      where: { roundId, deleted: true },
+    });
+    const contributionIds = contributions.map(
+      (contribution) => contribution.id
+    );
 
-  const allocations = await prisma.allocation.findMany({
-    select: { id: true },
-    where: { roundId, deleted: { not: true } },
-  });
-  const allocationIds = allocations.map((allocation) => allocation.id);
+    const allocations = await prisma.allocation.findMany({
+      select: { id: true },
+      where: { roundId, deleted: { not: true } },
+    });
+    const allocationIds = allocations.map((allocation) => allocation.id);
 
-  const data = await Promise.all([
-    prisma.transaction.updateMany({
-      where: { id: { in: transationsIds } },
-      data: {
-        deleted: true,
-      },
-    }),
-    prisma.contribution.updateMany({
-      where: { id: { in: contributionIds } },
-      data: { deleted: true },
-    }),
-    prisma.allocation.updateMany({
-      where: { id: { in: allocationIds } },
-      data: { deleted: true },
-    }),
-  ]);
+    const data = await Promise.all([
+      prisma.transaction.updateMany({
+        where: {},
+        data: {
+          deleted: true,
+        },
+      }),
+      prisma.contribution.updateMany({
+        where: {},
+        data: { deleted: true },
+      }),
+      prisma.allocation.updateMany({
+        where: {},
+        data: { deleted: true },
+      }),
+    ]);
 
-  return transactions;
-  }catch(err){console.log(err)}
+    return transactions;
+  } catch (err) {
+    console.log(err);
+  }
 };

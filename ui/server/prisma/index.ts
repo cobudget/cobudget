@@ -20,6 +20,18 @@ if (process.env.NODE_ENV === "production") {
 async function main() {
   try {
     prisma.$use(async (params, next) => {
+      if (
+        (params.model === "Contribution" ||
+          params.model === "Allocation" ||
+          params.model === "Transaction") &&
+        (params.action === "aggregate" ||
+          params.action === "count" ||
+          params.action === "findFirst" ||
+          params.action === "findMany" ||
+          params.action === "findUnique")
+      ) {
+        params.args["where"] = { OR: [{ deleted: null }, { deleted: false }] };
+      }
       return next(params);
     });
   } catch (err) {
