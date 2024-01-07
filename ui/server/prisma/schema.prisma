@@ -448,6 +448,8 @@ model Allocation {
   allocationType AllocationType @default(ADD)
   createdAt      DateTime       @default(now())
 
+  deleted        Boolean?
+
   stripeSessionId String?
 }
 
@@ -462,6 +464,8 @@ model Contribution {
   amount        Int
   amountBefore  Int?
   createdAt     DateTime    @default(now())
+
+  deleted       Boolean?
 
   stripeSessionId String?
 }

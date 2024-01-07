@@ -22,7 +22,9 @@ async function main() {
     prisma.$use(async (params, next) => {
       return next(params);
     });
-  } catch (err) {}
+  } catch (err) {
+    ("");
+  }
 }
 
 main();
