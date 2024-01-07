@@ -73,7 +73,16 @@ export default ({ round, handleClose }) => {
         <div className="mt-4">
           <div className="">
             <Button
-              onClick={() => resetRoundFunding({ roundId: round?.id })}
+              onClick={() => {
+                resetRoundFunding({ roundId: round?.id }).then(() => {
+                  handleClose();
+                  toast.success(
+                    intl.formatMessage({
+                      defaultMessage: "Funding has been reset",
+                    })
+                  );
+                });
+              }}
               loading={loading}
               disabled={!allowDelete}
               color="red"
