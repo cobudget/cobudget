@@ -92,9 +92,9 @@ export const funders = async (bucket) => {
 };
 
 export const noOfFunders = async (bucket) => {
-  const contributions = await prisma.bucket
-    .findUnique({ where: { id: bucket.id } })
-    .Contributions();
+  const contributions = await prisma.contribution.findMany({
+    where: { bucketId: bucket.id },
+  });
   // group contributions by roundMemberId
   const funders = contributions.reduce((acc, contribution) => {
     const { roundMemberId } = contribution;

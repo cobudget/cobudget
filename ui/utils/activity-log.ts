@@ -7,7 +7,15 @@ class ActivityLog {
     this.queue = [];
   }
 
-  log(message: string, data: unknown = {}) {
+  log({
+    message,
+    data = {},
+    comment,
+  }: {
+    message: string;
+    data?: unknown;
+    comment?: string;
+  }) {
     if (this.queue.length >= this.limit) {
       this.queue = this.queue.slice(1 - this.limit).concat([{ message, data }]);
     } else {

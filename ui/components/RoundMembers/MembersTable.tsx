@@ -169,7 +169,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
-    activityLog.log(ROUND_MEMBER_ROW_MENU_CLICKED);
+    activityLog.log({ message: ROUND_MEMBER_ROW_MENU_CLICKED });
     setAnchorEl(event.currentTarget);
   };
 
@@ -200,10 +200,13 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
       >
         <MenuItem
           onClick={() => {
-            activityLog.log(TOGGLE_ROUND_ADMIN, {
-              roundId,
-              memberEmail: member.email,
-              newRole: member.isAdmin ? "Admin Removed" : "Made Admin",
+            activityLog.log({
+              message: TOGGLE_ROUND_ADMIN,
+              data: {
+                roundId,
+                memberEmail: member.email,
+                newRole: member.isAdmin ? "Admin Removed" : "Made Admin",
+              },
             });
 
             updateMember({
@@ -222,9 +225,12 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         {member.hasJoined ? null : (
           <MenuItem
             onClick={() => {
-              activityLog.log(RM_INVITED_AGAIN, {
-                roundId,
-                memberEmail: member.email,
+              activityLog.log({
+                message: RM_INVITED_AGAIN,
+                data: {
+                  roundId,
+                  memberEmail: member.email,
+                },
               });
               inviteAgain({
                 roundId,
@@ -244,12 +250,15 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         )}
         <MenuItem
           onClick={() => {
-            activityLog.log(TOGGLE_ROUND_MODERATOR, {
-              roundId,
-              memberEmail: member?.email,
-              newRole: member.isModerator
-                ? "Removed moderator"
-                : "Made moderator",
+            activityLog.log({
+              message: TOGGLE_ROUND_MODERATOR,
+              data: {
+                roundId,
+                memberEmail: member?.email,
+                newRole: member.isModerator
+                  ? "Removed moderator"
+                  : "Made moderator",
+              },
             });
 
             updateMember({
@@ -366,7 +375,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
             onClick={() => {
               setAllocateModalOpen(true);
-              activityLog.log(ALLOCATE_BALANCE_TO_RM);
+              activityLog.log({ message: ALLOCATE_BALANCE_TO_RM });
             }}
           >
             <FormattedNumber
