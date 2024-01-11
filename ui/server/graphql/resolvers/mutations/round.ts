@@ -35,7 +35,7 @@ import {
   ocExpenseToCobudget,
   ocItemToCobudgetReceipt,
 } from "../../../../server/webhooks/ochandlers";
-import { getOCToken } from "server/utils/roundUtils";
+import { getAccountsInsertRawQuery, getOCToken } from "server/utils/roundUtils";
 import { convertAmount, getExchangeRates } from "../helpers/getExchangeRate";
 import getMap from "server/utils/getMap";
 import {
@@ -504,7 +504,7 @@ export const inviteRoundMembersAgain = combineResolvers(
 );
 
 export const inviteRoundMembers = combineResolvers(
-  isCollOrGroupAdmin,
+  //isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
     try {
       const round = await prisma.round.findUnique({
@@ -515,7 +515,7 @@ export const inviteRoundMembers = combineResolvers(
       if (emails.length > 10000) {
         throw new Error("You can only invite 10000 people at a time");
       }
-
+      console.log("H12", roundId)
       const roundMembers = await prisma.roundMember.findMany({
         where: { roundId: round.id },
         include: {
@@ -541,6 +541,8 @@ export const inviteRoundMembers = combineResolvers(
           }`
         );
       }
+
+      console.log("HERE");
 
       const existingMemberEmails = {};
       roundMembers.forEach((m) => {

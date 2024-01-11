@@ -5,7 +5,5 @@ export const getOCToken = (round) => {
 };
 
 export const getAccountsInsertRawQuery = (count: number) => {
-  return `INSERT INTO "Account" () VALUES ${interator(count, () => "()").join(
-    ", "
-  )};`;
-};
+  return `INSERT INTO "Account" () VALUES ${interator(count, () => "()").join(", ")};`;
+}
