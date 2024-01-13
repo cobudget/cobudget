@@ -9,10 +9,12 @@ import {
   getExpensesCount,
   getExpensesIds,
   getProject,
+  getRoundFundingStatuses,
   getRoundMember,
   isCollAdmin,
   isCollOrGroupAdmin,
   roundMemberBalance,
+  statusTypeToQuery,
   stripeIsConnected,
 } from "../helpers";
 import { verify } from "server/utils/jwt";
@@ -46,6 +48,7 @@ import cuid from "cuid";
 import interator from "utils/interator";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
+import { Prisma } from "@prisma/client";
 
 export const createRound = async (
   parent,
@@ -1529,16 +1532,38 @@ export const resetRoundFunding = async (_, { roundId }, { user, ss }) => {
   });
   const allocationIds = allocations.map((allocation) => allocation.id);
 
+  const fundingStatus = await getRoundFundingStatuses({ roundId });
+  const statusFilter = ["FUNDED", "COMPLETED"]
+    .map((s) => statusTypeToQuery(s, fundingStatus))
+    .filter((s) => s);
+
+  const buckets = await prisma.bucket.findMany({
+    where: {
+      roundId,
+      OR: statusFilter as Array<Prisma.BucketWhereInput>,
+    },
+  });
+  const bucketIds = buckets.map(({ id }) => id);
+
   activityLog.log({
     message: "ROUND_FUNDING_RESET",
     data: {
+      roundId,
       transationsIds,
       contributionIds,
       allocationIds,
+      bucketIds,
     },
   });
 
   await Promise.all([
+    prisma.bucket.updateMany({
+      where: { id: { in: bucketIds } },
+      data: {
+        fundedAt: null,
+        completedAt: null,
+      },
+    }),
     prisma.transaction.updateMany({
       where: {},
       data: {
