@@ -39,6 +39,9 @@ export async function isCollOrGroupAdmin(
 
 export async function isCollAdmin({ roundId, userId, ss }) {
   if (ss) return true;
+  if (!userId) {
+    return false;
+  }
   const roundMember = await getRoundMember({
     userId: userId,
     roundId,
@@ -209,9 +212,9 @@ export async function getCurrentGroupAndMember({
 
 /** contributions = donations */
 export async function bucketTotalContributions(bucket) {
-  const contributions = await prisma.bucket
-    .findUnique({ where: { id: bucket.id } })
-    .Contributions();
+  const contributions = await prisma.contribution.findMany({
+    where: { bucketId: bucket.id },
+  });
   return contributions.reduce((acc, curr) => acc + curr.amount, 0);
 
   const {
@@ -436,7 +439,7 @@ export async function roundMemberBalance(member) {
   const {
     _sum: { amount: totalContributions },
   } = await prisma.contribution.aggregate({
-    where: { roundMemberId: member.id },
+    where: { roundMemberId: member.id, deleted: { not: true } },
     _sum: { amount: true },
   });
 

@@ -21,6 +21,8 @@ import SetDirectFunding from "./SetDirectFunding";
 import FormattedCurrency from "components/FormattedCurrency";
 import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
 import SetCocreatorCanEditOpenBucket from "./SetCocreatorCanEditOpenBucket";
+import Button from "components/Button";
+import ResetRoundFunding from "./ResetRoundFunding";
 
 export const useStyles = makeStyles((theme) => ({
   modal: {
@@ -54,6 +56,8 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       currency
+      title
+      slug
       maxAmountToBucketPerUser
       grantingOpens
       grantingCloses
@@ -123,6 +127,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
   const router = useRouter();
 
   const [open, setOpen] = React.useState(null);
+  const [openResetModal, setOpenResetModal] = React.useState(false);
   const intl = useIntl();
 
   const [{ data, error, fetching }] = useQuery({
@@ -160,6 +165,20 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
       <Modal
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
+        open={openResetModal}
+        onClose={handleClose}
+        className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
+      >
+        <div className={classes.innerModal}>
+          <ResetRoundFunding
+            round={round}
+            handleClose={() => setOpenResetModal(false)}
+          />
+        </div>
+      </Modal>
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
         open={Boolean(open)}
         onClose={handleClose}
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
@@ -175,7 +194,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
         </div>
       </Modal>
 
-      <h2 className="text-2xl font-semibold mb-3 px-6">
+      <h2 className="text-2xl font-semibold mb-3 px-3">
         <FormattedMessage defaultMessage="Funding" />
       </h2>
       <div className="border-t">
@@ -334,6 +353,20 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             canEdit={canEditSettings}
             roundColor={round.color}
           />
+
+          <Divider />
+          <div className="px-3 my-3">
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Danger Zone" />
+            </h2>
+            <Button
+              onClick={() => setOpenResetModal(true)}
+              variant="secondary"
+              color="red"
+            >
+              <FormattedMessage defaultMessage="Reset funding" />
+            </Button>
+          </div>
 
           {currentGroup?.experimentalFeatures && (
             <>

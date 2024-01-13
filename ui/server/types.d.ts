@@ -8,4 +8,5 @@ export interface RoundTransaction {
   allocationType?: string;
   transactionType: string;
   createdAt: Date;
+  deleted: boolean;
 }

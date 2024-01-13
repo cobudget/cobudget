@@ -154,6 +154,7 @@ const schema = gql`
       ocCollectiveSlug: String
       ocProjectSlug: String
     ): Round!
+    resetRoundFunding(roundId: ID!): [Transaction]
     deleteRound(roundId: ID!): Round
 
     createInvitationLink(roundId: ID): InvitationLink
