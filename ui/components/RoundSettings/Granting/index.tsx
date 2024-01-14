@@ -354,20 +354,6 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             roundColor={round.color}
           />
 
-          <Divider />
-          <div className="px-3 my-3">
-            <h2 className="text-xl font-semibold mt-8 mb-4">
-              <FormattedMessage defaultMessage="Danger Zone" />
-            </h2>
-            <Button
-              onClick={() => setOpenResetModal(true)}
-              variant="secondary"
-              color="red"
-            >
-              <FormattedMessage defaultMessage="Reset funding" />
-            </Button>
-          </div>
-
           {currentGroup?.experimentalFeatures && (
             <>
               <Divider />
@@ -397,6 +383,20 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               />
             </>
           )}
+
+          <Divider />
+          <div className="px-3 my-3">
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Danger Zone" />
+            </h2>
+            <Button
+              onClick={() => setOpenResetModal(true)}
+              variant="secondary"
+              color="red"
+            >
+              <FormattedMessage defaultMessage="Reset funding" />
+            </Button>
+          </div>
         </List>
       </div>
     </div>
