@@ -380,7 +380,7 @@ export const ocTokenStatus = async (parent) => {
 
 export const membersLimit = async (round) => {
   const group = await prisma.group.findFirst({ where: { id: round.groupId } });
-  const roundLimit = round.membersLimit || 0;
+  const roundLimit = round.maxMembers || 0;
   const limit =
     roundLimit ||
     (group?.slug !== "c"
