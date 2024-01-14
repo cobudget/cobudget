@@ -28,6 +28,10 @@ function RoundSuperAdmin({ round, currentGroup }) {
       roundId: round?.id,
       maxMembers: count,
     });
+
+    if (response.error) {
+      toast.error("Error occurred");
+    }
   };
 
   return (
