@@ -1582,3 +1582,21 @@ export const resetRoundFunding = async (_, { roundId }, { user, ss }) => {
 
   return transactions;
 };
+
+export const changeRoundSize = async (_, { roundId, maxMembers }, { ss }) => {
+  if (ss) {
+    if (maxMembers <= 0) {
+      throw new Error("Invalid maximum member count");
+    }
+
+    const round = await prisma.round.update({
+      where: { id: roundId },
+      data: {
+        maxMembers,
+      },
+    });
+    return round;
+  } else {
+    throw new Error("Only superadmins can perform this action");
+  }
+};
