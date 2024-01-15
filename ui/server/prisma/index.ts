@@ -17,4 +17,29 @@ if (process.env.NODE_ENV === "production") {
   prisma = global.cachedPrisma;
 }
 
+async function main() {
+  try {
+    prisma.$use(async (params, next) => {
+      if (
+        (params.model === "Contribution" ||
+          params.model === "Allocation" ||
+          params.model === "Transaction") &&
+        (params.action === "aggregate" ||
+          params.action === "count" ||
+          params.action === "findFirst" ||
+          params.action === "findMany" ||
+          params.action === "findUnique" ||
+          (params as any).action === "groupBy")
+      ) {
+        params.args["where"] = { OR: [{ deleted: null }, { deleted: false }] };
+      }
+      return next(params);
+    });
+  } catch (err) {
+    ("");
+  }
+}
+
+main();
+
 export default prisma;

@@ -10,7 +10,6 @@ export const BigInt = new GraphQLScalarType({
     return null;
   },
   parseValue: (value) => {
-    console.log("Parsing...");
     if (typeof value === "string") {
       return parseInt(value);
     }
