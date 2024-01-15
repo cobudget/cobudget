@@ -527,7 +527,12 @@ export const inviteRoundMembers = combineResolvers(
       });
       let limit;
       const isFree = round.group.slug === "c";
-      if (round.maxMembers) {
+      if (!isFree && round.maxMembers) {
+        limit = Math.max(
+          parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT),
+          round.maxMembers
+        );
+      } else if (round.maxMembers) {
         limit = round.maxMembers;
       } else if (isFree) {
         limit = process.env.FREE_ROUND_MEMBERS_LIMIT;
