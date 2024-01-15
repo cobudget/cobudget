@@ -31,7 +31,7 @@ async function main() {
           params.action === "findUnique" ||
           (params as any).action === "groupBy")
       ) {
-        params.args["where"] = { OR: [{ deleted: null }, { deleted: false }] };
+        params.args.where.deleted = null;
       }
       return next(params);
     });
