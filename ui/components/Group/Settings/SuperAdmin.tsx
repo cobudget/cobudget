@@ -1,6 +1,7 @@
 import { SelectField } from "components/SelectInput";
 import AppContext from "contexts/AppContext";
 import React, { useContext } from "react";
+import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation } from "urql";
 
@@ -38,6 +39,10 @@ function SuperAdmin({ group, currentUser }) {
                 changeFreeStatus({
                   freeStatus: e.target.value === "YES",
                   groupId: group?.id,
+                }).then(() => {
+                  toast.success(
+                    intl.formatMessage({ defaultMessage: "Status updated" })
+                  );
                 });
               },
             }}
