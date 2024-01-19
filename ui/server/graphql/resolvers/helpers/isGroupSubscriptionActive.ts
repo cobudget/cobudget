@@ -23,7 +23,7 @@ const isGroupSubscriptionActive = async ({
     groupToCheck = await prisma.group.findFirst({ where: { id: groupId } });
   }
 
-  if (groupToCheck?.slug === "c" || group?.isFree) {
+  if (groupToCheck?.slug === "c" || groupToCheck?.isFree) {
     return;
   }
 
