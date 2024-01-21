@@ -46,7 +46,9 @@ import {
 } from "server/utils/expenses";
 import cuid from "cuid";
 import interator from "utils/interator";
-import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import isGroupSubscriptionActive, {
+  getIsGroupSubscriptionActive,
+} from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
 import { Prisma } from "@prisma/client";
 
@@ -527,7 +529,10 @@ export const inviteRoundMembers = combineResolvers(
       });
       let limit;
       const isFree = round.group.slug === "c";
-      if (!isFree && round.maxMembers) {
+      const isSubscriptionActive = await getIsGroupSubscriptionActive({
+        group: round.group,
+      });
+      if (!isFree && round.maxMembers && isSubscriptionActive) {
         limit = Math.max(
           parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT),
           round.maxMembers
