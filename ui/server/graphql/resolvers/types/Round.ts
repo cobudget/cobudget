@@ -382,11 +382,12 @@ export const ocTokenStatus = async (parent) => {
 export const membersLimit = async (round) => {
   const group = await prisma.group.findFirst({ where: { id: round.groupId } });
 
-  let isSubscribed: void | boolean = false;
+  let isSubscribed = false;
   try {
-    isSubscribed = await isGroupSubscriptionActive({
+    await isGroupSubscriptionActive({
       group,
     });
+    isSubscribed = true;
   } catch (err) {
     ("");
   }
