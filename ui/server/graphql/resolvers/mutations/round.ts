@@ -46,7 +46,9 @@ import {
 } from "server/utils/expenses";
 import cuid from "cuid";
 import interator from "utils/interator";
-import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import isGroupSubscriptionActive, {
+  getIsGroupSubscriptionActive,
+} from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
 import { Prisma } from "@prisma/client";
 
@@ -527,7 +529,15 @@ export const inviteRoundMembers = combineResolvers(
       });
       let limit;
       const isFree = round.group.slug === "c";
-      if (round.maxMembers) {
+      const isSubscriptionActive = await getIsGroupSubscriptionActive({
+        group: round.group,
+      });
+      if (!isFree && round.maxMembers && isSubscriptionActive) {
+        limit = Math.max(
+          parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT),
+          round.maxMembers
+        );
+      } else if (round.maxMembers) {
         limit = round.maxMembers;
       } else if (isFree) {
         limit = process.env.FREE_ROUND_MEMBERS_LIMIT;
@@ -1581,4 +1591,22 @@ export const resetRoundFunding = async (_, { roundId }, { user, ss }) => {
   ]);
 
   return transactions;
+};
+
+export const changeRoundSize = async (_, { roundId, maxMembers }, { ss }) => {
+  if (ss) {
+    if (maxMembers <= 0) {
+      throw new Error("Invalid maximum member count");
+    }
+
+    const round = await prisma.round.update({
+      where: { id: roundId },
+      data: {
+        maxMembers,
+      },
+    });
+    return round;
+  } else {
+    throw new Error("Only superadmins can perform this action");
+  }
 };

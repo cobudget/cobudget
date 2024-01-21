@@ -15,6 +15,7 @@ import Discourse from "./Discourse";
 import Integrations from "./Integrations";
 import AppContext from "contexts/AppContext";
 import GroupSettings from "./GroupSettings";
+import RoundSuperAdmin from "./SuperAdmin";
 
 const RoundSettings = ({
   settingsTabSlug,
@@ -90,8 +91,17 @@ const RoundSettings = ({
         name: intl.formatMessage({ defaultMessage: "Group" }),
         component: GroupSettings,
       },
+      ...(inSession
+        ? [
+            {
+              slug: "superadmin",
+              name: intl.formatMessage({ defaultMessage: "Super Admin" }),
+              component: RoundSuperAdmin,
+            },
+          ]
+        : []),
     ],
-    [intl]
+    [intl, inSession]
   );
 
   const tabs = useMemo(

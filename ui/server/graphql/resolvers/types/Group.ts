@@ -34,6 +34,11 @@ export const discourseUrl = async (group) => {
 
 export const subscriptionStatus = async (group) => {
   try {
+    if (group.isFree) {
+      return {
+        isActive: true,
+      };
+    }
     if (!group.stripeSubscriptionId && group.slug !== "c") {
       return {
         isActive: false,

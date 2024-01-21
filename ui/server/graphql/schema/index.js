@@ -191,6 +191,8 @@ const schema = gql`
     ): Round!
     deleteCustomField(roundId: ID!, fieldId: ID!): Round!
 
+    changeRoundSize(roundId: ID!, maxMembers: Int): Round
+
     editBucketCustomField(
       bucketId: ID!
       customField: CustomFieldValueInput!
