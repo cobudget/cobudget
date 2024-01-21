@@ -17,6 +17,7 @@ import { sign } from "../../../utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { TOKEN_STATUS } from "../../../../constants";
 import { getOCToken } from "server/utils/roundUtils";
+import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -380,7 +381,23 @@ export const ocTokenStatus = async (parent) => {
 
 export const membersLimit = async (round) => {
   const group = await prisma.group.findFirst({ where: { id: round.groupId } });
-  const roundLimit = round.membersLimit || 0;
+
+  let isSubscribed = false;
+  try {
+    await isGroupSubscriptionActive({
+      group,
+    });
+    isSubscribed = true;
+  } catch (err) {
+    ("");
+  }
+
+  const roundLimit = isSubscribed
+    ? Math.max(
+        round.maxMembers || 0,
+        parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT)
+      )
+    : round.maxMembers || 0;
   const limit =
     roundLimit ||
     (group?.slug !== "c"
