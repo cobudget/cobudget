@@ -23,7 +23,7 @@ const isGroupSubscriptionActive = async ({
     groupToCheck = await prisma.group.findFirst({ where: { id: groupId } });
   }
 
-  if (groupToCheck?.slug === "c" || group?.isFree) {
+  if (groupToCheck?.slug === "c" || groupToCheck?.isFree) {
     return;
   }
 
@@ -37,6 +37,25 @@ const isGroupSubscriptionActive = async ({
 
   if (subscription.status !== "active") {
     throw new Error(GROUP_NOT_SUBSCRIBED);
+  }
+};
+
+export const getIsGroupSubscriptionActive = async ({
+  group,
+  groupId,
+}: {
+  group?: {
+    slug: string;
+    isFree: boolean;
+    stripeSubscriptionId: null | string;
+  };
+  groupId?: string;
+}) => {
+  try {
+    await isGroupSubscriptionActive({ group, groupId });
+    return true;
+  } catch (err) {
+    return false;
   }
 };
 

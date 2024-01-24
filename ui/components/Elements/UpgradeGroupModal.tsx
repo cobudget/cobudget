@@ -9,12 +9,24 @@ function UpgradeGroupModal({ hide, group }) {
 
   return (
     <div className="z-50 top-0 left-0 fixed w-screen h-screen bg-black bg-opacity-30 flex justify-center items-center">
-      <div className="bg-white rounded-lg p-8 w-[200px]">
+      <div className="bg-white rounded-lg p-8 w-10/12 md:w-1/2">
         <p className="text-xl font-semibold">
           <FormattedMessage defaultMessage="Subscription Over" />
         </p>
         <p className="my-4">
-          <FormattedMessage defaultMessage="Group subscription has expired. To continue using the group, please upgrade your subscription." />
+          <FormattedMessage
+            defaultMessage={`Group subscription has expired. To continue using the group, please upgrade your subscription. Groups can have up to 1000 participants per round, and an unlimited number of rounds. For even larger rounds, <a>get in touch</a>.`}
+            values={{
+              a: (v) => (
+                <a
+                  className="underline"
+                  href="mailto:hello@cobudget.com?subject=Custom size round"
+                >
+                  {v}
+                </a>
+              ),
+            }}
+          />
         </p>
         <div>
           <div className="my-6">
