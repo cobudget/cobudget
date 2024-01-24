@@ -40,4 +40,23 @@ const isGroupSubscriptionActive = async ({
   }
 };
 
+export const getIsGroupSubscriptionActive = async ({
+  group,
+  groupId,
+}: {
+  group?: {
+    slug: string;
+    isFree: boolean;
+    stripeSubscriptionId: null | string;
+  };
+  groupId?: string;
+}) => {
+  try {
+    await isGroupSubscriptionActive({ group, groupId });
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
 export default isGroupSubscriptionActive;
