@@ -105,6 +105,21 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
               testid="new-bucket-title-input"
             />
 
+            {bucketsLimit?.consumedPercentage >= 75 &&
+              bucketsLimit.status === "free" && (
+                <p className="my-2 text-red-600">
+                  <FormattedMessage
+                    defaultMessage="{remainingCount} free {remainingCount, plural, one {bucket} other {buckets}} left which can be funded. Upgrade to increase your funded buckets count."
+                    values={{
+                      remainingCount: Math.max(
+                        bucketsLimit.limit - bucketsLimit.currentCount,
+                        0
+                      ),
+                    }}
+                  />
+                </p>
+              )}
+
             <div className="flex justify-end">
               <Button
                 size="large"
