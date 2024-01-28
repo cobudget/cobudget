@@ -419,7 +419,7 @@ export const bucketsLimit = async (round) => {
   });
   const limit = parseInt(process.env.MAX_FREE_BUCKETS);
   const consumedPercentage = Math.round((currentCount / limit) * 100);
-  const isLimitOver = currentCount > limit;
+  const isLimitOver = currentCount >= limit;
   const status = "free";
   return {
     currentCount,

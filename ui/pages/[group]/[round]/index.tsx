@@ -701,6 +701,7 @@ const RoundPage = ({ currentUser }) => {
                       round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
                       router={router}
+                      bucketsLimit={round.bucketsLimit}
                     />
                   )}
                 </>
