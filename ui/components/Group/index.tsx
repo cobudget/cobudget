@@ -13,6 +13,7 @@ import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import advancedDayjsFormatting from "dayjs/plugin/advancedFormat";
 import FormattedCurrency from "components/FormattedCurrency";
+import ImportRound from "./ImportRound";
 
 dayjs.extend(advancedDayjsFormatting);
 
@@ -265,6 +266,8 @@ const GroupIndex = ({ currentUser }) => {
               </span>
             ))}
         </div>
+        {rounds.length === 0 && <ImportRound group={group} />}
+
         {activeRounds.map((round, index) => (
           <RoundRow
             round={round}
