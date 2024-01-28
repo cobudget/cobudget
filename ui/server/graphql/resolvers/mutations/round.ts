@@ -1575,17 +1575,23 @@ export const resetRoundFunding = async (_, { roundId }, { user, ss }) => {
       },
     }),
     prisma.transaction.updateMany({
-      where: {},
+      where: {
+        roundId,
+      },
       data: {
         deleted: true,
       },
     }),
     prisma.contribution.updateMany({
-      where: {},
+      where: {
+        roundId,
+      },
       data: { deleted: true },
     }),
     prisma.allocation.updateMany({
-      where: {},
+      where: {
+        roundId,
+      },
       data: { deleted: true },
     }),
   ]);
