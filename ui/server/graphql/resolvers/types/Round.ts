@@ -414,13 +414,20 @@ export const membersLimit = async (round) => {
 };
 
 export const bucketsLimit = async (round) => {
+  const group = await prisma.group.findUnique({ where: { id: round.groupId } });
+  const status = group.slug === "c" ? "free" : "paid";
+
   const currentCount = await prisma.bucket.count({
     where: { roundId: round.id },
   });
-  const limit = parseInt(process.env.MAX_FREE_BUCKETS);
+  const limit = parseInt(
+    status === "free"
+      ? process.env.MAX_FREE_BUCKETS
+      : process.env.MAX_PAID_BUCKETS
+  );
   const consumedPercentage = Math.round((currentCount / limit) * 100);
   const isLimitOver = currentCount >= limit;
-  const status = "free";
+
   return {
     currentCount,
     limit,
