@@ -37,6 +37,8 @@ const schema = gql`
     limit: Int
     currentCount: Int
     consumedPercentage: Int
+    isLimitOver: Boolean
+    status: String
   }
 
   type Query {
