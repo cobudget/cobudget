@@ -58,6 +58,11 @@ export const ROUND_PAGE_QUERY = gql`
         currentCount
         limit
       }
+      bucketsLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       ocWebhookUrl
       bucketStatusCount {
         PENDING_APPROVAL

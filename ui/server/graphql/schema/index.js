@@ -33,6 +33,12 @@ const schema = gql`
     consumedPercentage: Int
   }
 
+  type ResourceLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -455,7 +461,7 @@ const schema = gql`
     ocVerified: Boolean
     ocTokenStatus: OC_TokenStatus
     membersLimit: MembersLimit
-
+    bucketsLimit: ResourceLimit
     expenses: [Expense]
   }
 

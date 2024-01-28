@@ -412,3 +412,16 @@ export const membersLimit = async (round) => {
     consumedPercentage: parseInt((currentCount / limit) * 100 + ""),
   };
 };
+
+export const bucketsLimit = async (round) => {
+  const currentCount = await prisma.bucket.count({
+    where: { roundId: round.id },
+  });
+  const limit = parseInt(process.env.MAX_FREE_BUCKETS);
+  const consumedPercentage = Math.round((currentCount / limit) * 100);
+  return {
+    currentCount,
+    limit,
+    consumedPercentage,
+  };
+};
