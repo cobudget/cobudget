@@ -265,10 +265,11 @@ export const adminRounds = async (_1, _2, { user }) => {
       OR: [{ isAdmin: true }, { isModerator: true }],
     },
   });
+  const defaultGroup = await prisma.group.findUnique({ where: { slug: "c" } });
   const roundIds = roundMemberships.map((membership) => membership.roundId);
   return prisma.round.findMany({
     where: {
-      singleRound: true,
+      groupId: defaultGroup?.id,
       id: { in: roundIds },
     },
   });
