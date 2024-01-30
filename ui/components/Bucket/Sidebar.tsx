@@ -413,7 +413,7 @@ const BucketSidebar = ({
                   if (bucket.round?.bucketsLimit?.isLimitOver) {
                     const event = new CustomEvent(
                       "show-bucket-limit-over-popup",
-                      { detail: {} }
+                      { detail: { isAdmin: isAdminOrModerator } }
                     );
                     window.dispatchEvent(event);
                     return;

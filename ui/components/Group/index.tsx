@@ -266,7 +266,9 @@ const GroupIndex = ({ currentUser }) => {
               </span>
             ))}
         </div>
-        {rounds.length === 0 && <ImportRound group={group} />}
+        {rounds.length === 0 && currentUser?.currentGroupMember?.isAdmin && (
+          <ImportRound group={group} />
+        )}
 
         {activeRounds.map((round, index) => (
           <RoundRow
