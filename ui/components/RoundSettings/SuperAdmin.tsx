@@ -57,6 +57,24 @@ function RoundSuperAdmin({ round, currentGroup }) {
           </Button>
         </div>
       </div>
+      {!currentGroup && (
+        <div className="my-6 px-6 border-b border-b-default pb-2 flex justify-between">
+          <div>
+            <p className="font-bold">
+              <FormattedMessage defaultMessage={"Change funded bucket limit"} />
+            </p>
+            <p>
+              <FormattedMessage defaultMessage={"Current size is "} />{" "}
+              {round?.bucketsLimit?.limit}
+            </p>
+          </div>
+          <div>
+            <Button loading={fetching} onClick={handleChange}>
+              Change
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -106,6 +106,10 @@ export const TOP_LEVEL_QUERY = gql`
         currentCount
         limit
       }
+      bucketsLimit {
+        isLimitOver
+        limit
+      }
       tags {
         id
         value
