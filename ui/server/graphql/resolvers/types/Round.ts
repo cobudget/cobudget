@@ -18,6 +18,7 @@ import { appLink } from "utils/internalLinks";
 import { TOKEN_STATUS } from "../../../../constants";
 import { getOCToken } from "server/utils/roundUtils";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import { Prisma } from "@prisma/client";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -417,9 +418,18 @@ export const bucketsLimit = async (round) => {
   const group = await prisma.group.findUnique({ where: { id: round.groupId } });
   const status = group.slug === "c" ? "free" : "paid";
 
+  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
+  const statusFilter = ["FUNDED", "COMPLETED"]
+    .map((s) => statusTypeToQuery(s, fundingStatus))
+    .filter((s) => s);
+
   const currentCount = await prisma.bucket.count({
-    where: { roundId: round.id },
+    where: {
+      roundId: round.id,
+      OR: statusFilter as Array<Prisma.BucketWhereInput>,
+    },
   });
+
   const limit = parseInt(
     status === "free"
       ? process.env.MAX_FREE_BUCKETS
