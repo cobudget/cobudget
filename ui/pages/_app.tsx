@@ -18,6 +18,7 @@ import Fallback from "components/Fallback";
 import { Analytics } from "@vercel/analytics/react";
 import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
 import AppContext from "contexts/AppContext";
+import BucketLimitOver from "components/BucketLimitOver";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -195,6 +196,9 @@ const MyApp = ({ Component, pageProps, router }) => {
     pause: !router.isReady,
   });
   const [groupToUpdate, setGroupToUpdate] = useState();
+  const [limitBucketOver, setLimitBucketOver] = useState<{
+    isAdmin: boolean;
+  }>();
 
   const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
   const ss = ssQuery?.getSuperAdminSession;
@@ -253,15 +257,29 @@ const MyApp = ({ Component, pageProps, router }) => {
     const showUpgradeGroupMessage = (event) => {
       setGroupToUpdate(event.detail.groupId);
     };
+
+    const showBucketLimitOver = (event) => {
+      setLimitBucketOver(event.detail);
+    };
+
     window.addEventListener(
       "show-upgrade-group-message",
       showUpgradeGroupMessage
+    );
+
+    window.addEventListener(
+      "show-bucket-limit-over-popup",
+      showBucketLimitOver
     );
 
     return () => {
       window.removeEventListener(
         "show-upgrade-group-message",
         showUpgradeGroupMessage
+      );
+      window.removeEventListener(
+        "show-bucket-limit-over-popup",
+        showBucketLimitOver
       );
     };
   }, []);
@@ -314,6 +332,12 @@ const MyApp = ({ Component, pageProps, router }) => {
               <UpgradeGroupModal
                 group={group}
                 hide={() => setGroupToUpdate(undefined)}
+              />
+            )}
+            {limitBucketOver && (
+              <BucketLimitOver
+                isAdmin={limitBucketOver?.isAdmin}
+                hide={() => setLimitBucketOver(undefined)}
               />
             )}
           </Layout>
