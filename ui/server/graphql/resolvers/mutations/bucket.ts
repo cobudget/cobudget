@@ -28,11 +28,13 @@ import {
 } from "../../../../constants";
 import EventHub from "server/services/eventHub.service";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
+import { isBucketLimitOver } from "../helpers/round";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
   isCollMember,
   async (parent, { roundId, title }, { user, eventHub }) => {
+    await isBucketLimitOver({ roundId });
     const round = await prisma.round.findUnique({
       where: { id: roundId },
       include: {

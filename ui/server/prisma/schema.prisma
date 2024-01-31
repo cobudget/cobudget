@@ -247,8 +247,9 @@ model Round {
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce Int?
-  maxMembers  Int?
+  inviteNonce     Int?
+  maxMembers      Int?
+  maxFreeBuckets  Int?
 
   @@unique([groupId, slug])
   @@map("Collection")

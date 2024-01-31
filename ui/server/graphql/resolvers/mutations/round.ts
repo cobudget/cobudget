@@ -1616,3 +1616,25 @@ export const changeRoundSize = async (_, { roundId, maxMembers }, { ss }) => {
     throw new Error("Only superadmins can perform this action");
   }
 };
+
+export const changeBucketLimit = async (
+  _,
+  { roundId, maxFreeBuckets },
+  { ss }
+) => {
+  if (ss) {
+    if (maxFreeBuckets <= 0) {
+      throw new Error("Invalid maximum free bucket count");
+    }
+
+    const round = await prisma.round.update({
+      where: { id: roundId },
+      data: {
+        maxFreeBuckets,
+      },
+    });
+    return round;
+  } else {
+    throw new Error("Only superadmins can perform this action");
+  }
+};

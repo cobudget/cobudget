@@ -70,6 +70,14 @@ export const client = (
                   );
                 });
             },
+            moveRoundToGroup(result, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "rounds")
+                .forEach((field) => {
+                  cache.invalidate("Query", "rounds", field.arguments);
+                });
+            },
             endSuperAdminSession(result, args, cache) {
               cache
                 .inspectFields("Query")

@@ -410,6 +410,14 @@ const BucketSidebar = ({
                 color={bucket.round.color}
                 fullWidth
                 onClick={() => {
+                  if (bucket.round?.bucketsLimit?.isLimitOver) {
+                    const event = new CustomEvent(
+                      "show-bucket-limit-over-popup",
+                      { detail: { isAdmin: isAdminOrModerator } }
+                    );
+                    window.dispatchEvent(event);
+                    return;
+                  }
                   if (
                     bucket?.round?.group?.subscriptionStatus?.isActive === false
                   ) {
