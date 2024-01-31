@@ -8,6 +8,7 @@ export const isBucketLimitOver = async ({ roundId }) => {
       id: roundId,
     },
     select: {
+      maxFreeBuckets: true,
       group: true,
     },
   });
@@ -29,11 +30,15 @@ export const isBucketLimitOver = async ({ roundId }) => {
     },
   });
 
-  const limit = parseInt(
-    status === "free"
-      ? process.env.MAX_FREE_BUCKETS
-      : process.env.MAX_PAID_BUCKETS
+  const limit = Math.max(
+    round.maxFreeBuckets,
+    parseInt(
+      status === "free"
+        ? process.env.MAX_FREE_BUCKETS
+        : process.env.MAX_PAID_BUCKETS
+    )
   );
+
   const isLimitOver = currentCount >= limit;
 
   if (isLimitOver) {
