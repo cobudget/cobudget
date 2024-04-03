@@ -61,7 +61,7 @@ function ChangeRoundGroup({ round, hide }) {
         router.push(`/${updatedGroup.slug}/${slug}/settings/group`);
         toast.success(
           intl.formatMessage(
-            { defaultMessage: "This group has been moved to {groupName}" },
+            { defaultMessage: "This round has been moved to {groupName}" },
             { groupName: group?.name }
           )
         );

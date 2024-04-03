@@ -258,6 +258,23 @@ export const convertCurrency = async (_, { amounts, toCurrency }) => {
   return sum;
 };
 
+export const adminRounds = async (_1, _2, { user }) => {
+  const roundMemberships = await prisma.roundMember.findMany({
+    where: {
+      userId: user?.id,
+      OR: [{ isAdmin: true }, { isModerator: true }],
+    },
+  });
+  const defaultGroup = await prisma.group.findUnique({ where: { slug: "c" } });
+  const roundIds = roundMemberships.map((membership) => membership.roundId);
+  return prisma.round.findMany({
+    where: {
+      groupId: defaultGroup?.id,
+      id: { in: roundIds },
+    },
+  });
+};
+
 export const exchangeRates = async (_, { currencies }) => {
   const rates = (await getExchangeRates()).rates || {};
   const response = [];
