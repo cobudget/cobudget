@@ -15,7 +15,7 @@ function UpgradeGroupModal({ hide, group }) {
         </p>
         <p className="my-4">
           <FormattedMessage
-            defaultMessage={`Group subscription has expired. To continue using the group, please upgrade your subscription. Groups can have up to 1000 participants per round, and an unlimited number of rounds. For even larger rounds, <a>get in touch</a>.`}
+            defaultMessage={`Group subscription has expired. To continue using the group, please upgrade your subscription. Groups can have up to 250 participants per round, and an unlimited number of rounds. For even larger rounds, <a>get in touch</a>.`}
             values={{
               a: (v) => (
                 <a
