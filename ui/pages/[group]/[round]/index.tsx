@@ -58,6 +58,13 @@ export const ROUND_PAGE_QUERY = gql`
         currentCount
         limit
       }
+      bucketsLimit {
+        consumedPercentage
+        currentCount
+        limit
+        isLimitOver
+        status
+      }
       ocWebhookUrl
       bucketStatusCount {
         PENDING_APPROVAL
@@ -694,6 +701,7 @@ const RoundPage = ({ currentUser }) => {
                       round={round}
                       handleClose={() => setNewBucketModalOpen(false)}
                       router={router}
+                      bucketsLimit={round.bucketsLimit}
                     />
                   )}
                 </>

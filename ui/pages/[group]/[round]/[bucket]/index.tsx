@@ -80,6 +80,10 @@ export const BUCKET_QUERY = gql`
         maxAmountToBucketPerUser
         canCocreatorStartFunding
         canCocreatorEditOpenBuckets
+        bucketsLimit {
+          isLimitOver
+          status
+        }
         ocCollective {
           slug
           parent {
