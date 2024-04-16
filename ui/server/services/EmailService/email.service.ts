@@ -49,7 +49,7 @@ function quotedSection(html: string) {
   return `<div style="background-color: ${tailwindHsl.anthracit[200]}; padding: 1px 15px;">${html}</div>`;
 }
 
-const footer = `<div><i>Cobudget helps groups collaboratively ideate, gather and distribute funds to projects that matter to them. <a href="https://cobudget.helpscoutdocs.com/">Discover how it works.</a></i></div>
+const footer = `<div><i>Dreams helps groups collaboratively ideate, gather and distribute hearts to projects that matter to them. <a href="https://dreams.midburn.org/">Discover how it works.</a></i></div>
 <br/>
 <div><a href="${appLink(
   "/settings"
@@ -114,7 +114,7 @@ export default {
       You have been invited by ${escape(currentUser.name)} to ${escape(
           groupCollName
         )} on ${process.env.PLATFORM_NAME}.
-      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
+      Accept your invitation by signing in to Dreams with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
         htmlPurpose
           ? `<br/><br/>
@@ -171,7 +171,7 @@ export default {
       You have been invited by ${escape(currentUser.name)} to ${escape(
           groupCollName
         )} on ${process.env.PLATFORM_NAME}.
-      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
+      Accept your invitation by signing in to Dreams with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
         htmlPurpose
           ? `<br/><br/>
@@ -241,35 +241,32 @@ export default {
       collMemberships.length > 0
         ? `Jump right in and <a href="${appLink(
             `/${collMemberships[0].round.group.slug}/${collMemberships[0].round.slug}`
-          )}">create your first Bucket</a>!`
+          )}">create your first Dream</a>!`
         : `Jump right in and <a href="${appLink(
             "/new-round"
-          )}">create your first Round</a>!`;
+          )}">create your first Project</a>!`;
 
     await sendEmail({
       to: newUser.email,
       subject: `Welcome to ${process.env.PLATFORM_NAME}!`,
-      html: `You’ve just taken your first step towards co-creating and funding projects that matter to you and your crew.
-      <br/><br/>
-      Since 2014 we’ve been on a path to change the ways groups and communities make decisions about how to spend their money, making this process more participatory, collaborative and transparent. Cobudget is a tool that encourages participation at every stage; people propose ideas, co-create and refine them with others, and finally distribute funds to the projects they most want to see.
+      html: `You’ve just taken your first step towards co-creating ${process.env.PLATFORM_NAME}!
       <br/><br/>
       We are thrilled to have you with us!
       <br/><br/>
       <b>How to get started?</b>
       <ul>
-      <li>Check out the <a href="https://guide.cobudget.com/">Cobudget docs</a> for some simple how-to’s</li>
+      <li>Check out the <a href="https://dreams.midburn.org/">Dreams platform</a></li>
       <li>${createYourFirst}</li>
       </ul>
       <br/>
       <b>Want to learn more?</b>
       <ul>
-      <li>Dig into our <a href="https://guide.cobudget.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
-      <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
+      <li>Dig into <a href="https://dreams.midburn.org">Dreams</a> to see how others are using the tool</li>
       </ul>
       <br/>
-      Ready to invite others to co-create and fund projects with you? <a href="${appLink(
+      Ready to invite others to co-create projects with you? <a href="${appLink(
         "/new-round"
-      )}">Create a Round</a>!
+      )}">Create a Project</a>!
       `,
     });
   },
@@ -466,12 +463,12 @@ export default {
 
     await sendEmail({
       to: user.email,
-      subject: `${user.name}, you’ve received funds to spend in ${round.title}!`,
+      subject: `${user.name}, you’ve received hearts to spend in ${round.title}!`,
       html: `You have received ${(newAmount - oldAmount) / 100} ${
         round.currency
       } in ${escape(
         round.title
-      )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+      )}. <br/><br/>Decide now which dreams to allocate your hearts to by checking out the current proposals in <a href="${appLink(
         `/${group.slug}/${round.slug}`
       )}">${escape(round.title)}</a>. <br/><br/>${footer}`,
     });
@@ -487,12 +484,12 @@ export default {
       .map((member) => {
         return {
           to: member.user.email,
-          subject: `${member.user.name}, you’ve received funds to spend in ${round.title}!`,
+          subject: `${member.user.name}, you’ve received hearts to spend in ${round.title}!`,
           html: `You have received ${member.adjustedAmount / 100} ${
             round.currency
           } in ${escape(
             round.title
-          )}. <br/><br/>Decide now which buckets to allocate your funds to by checking out the current proposals in <a href="${appLink(
+          )}. <br/><br/>Decide now which dreams to allocate your hearts to by checking out the current proposals in <a href="${appLink(
             `/${round.group.slug}/${round.slug}`
           )}">${escape(round.title)}</a>.<br/><br/> ${footer}`,
         };
@@ -541,9 +538,9 @@ export default {
             bucket.title
           )}” you have contributed to was cancelled in ${escape(
             bucket.round.title
-          )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
+          )}. You've been rehearted ${amount / 100} ${bucket.round.currency}.
         <br/><br/>
-        Explore other buckets you can fund in <a href="${appLink(
+        Explore other dreams you can heart in <a href="${appLink(
           `/${bucket.round.group.slug}/${bucket.round.slug}`
         )}">${escape(bucket.round.title)}</a>.
         <br/><br/>
@@ -589,10 +586,10 @@ export default {
 
     const emails = usersToNotify.map((user) => ({
       to: user.email,
-      subject: `There is a new bucket in ${round.title}!`,
+      subject: `There is a new dream in ${round.title}!`,
       html: `Creativity is flowing in ${escape(
         round.title
-      )}! <a href="${collLink}">Have a look at the new buckets in this round.</a>
+      )}! <a href="${collLink}">Have a look at the new dreams in this project.</a>
       <br/><br/>
       ${footer}
       `,
@@ -638,14 +635,14 @@ export default {
 
     const emails = usersToNotify.map((mailRecipient) => ({
       to: mailRecipient.email,
-      subject: `Your bucket “${bucket.title}” received funding!`,
-      html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
+      subject: `Your dream “${bucket.title}” received hearts!`,
+      html: `Hooray - your dream <a href="${bucketLink}">“${escape(
         bucket.title
-      )}”</a> just received some funds!<br/>
+      )}”</a> just received some hearts!<br/>
       ${escape(contributingUser.name)} contributed ${amount / 100} ${
         round.currency
       }<br/>
-      Your bucket is now ${progressPercent}% funded!<br/>
+      Your dream is now ${progressPercent}% fully hearted!<br/>
       <br/><br/>
       ${footer}
       `,
