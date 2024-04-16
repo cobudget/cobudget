@@ -328,10 +328,10 @@ export default {
     const mentionEmails: SendEmailInput[] = mentionedUsersToEmail.map(
       (mentionedUser) => ({
         to: mentionedUser.email,
-        subject: `You were mentioned in a comment in the bucket ${bucket.title}`,
+        subject: `You were mentioned in a comment in the dream ${bucket.title}`,
         html: `${escape(
           currentUser.name
-        )} has just mentioned you in a comment in the bucket <a href="${bucketLink}">${escape(
+        )} has just mentioned you in a comment in the dream <a href="${bucketLink}">${escape(
           bucket.title
         )}</a>:
         <br/><br/>
@@ -368,11 +368,11 @@ export default {
         (roundMember): SendEmailInput => ({
           to: roundMember.user.email,
           subject: isFlag
-            ? `New comment in your bucket ${bucket.title}`
-            : `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
+            ? `New comment in your dream ${bucket.title}`
+            : `New comment by ${currentUser.name} ${currentUser.email} in your dream ${bucket.title}`,
           html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
-          Your bucket “${escape(bucket.title)}” received a new comment.
+          Your dream “${escape(bucket.title)}” received a new comment.
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -425,8 +425,8 @@ export default {
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
         subject: isFlag
-          ? `New comment in bucket ${bucket.title}`
-          : `New comment by ${currentUser.name} in bucket ${bucket.title}`,
+          ? `New comment in dream ${bucket.title}`
+          : `New comment by ${currentUser.name} - ${currentUser.email} in dream ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(

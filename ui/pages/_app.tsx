@@ -101,15 +101,6 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
-      membersLimit {
-        consumedPercentage
-        currentCount
-        limit
-      }
-      bucketsLimit {
-        isLimitOver
-        limit
-      }
       tags {
         id
         value
