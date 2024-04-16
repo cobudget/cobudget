@@ -1,5 +1,5 @@
 import Tooltip from "@tippyjs/react";
-import { useMemo, useState } from "react";
+import {useContext, useMemo, useState} from "react";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { Modal } from "@material-ui/core";
@@ -24,6 +24,7 @@ import dayjs from "dayjs";
 import Label from "../../components/Label";
 import getStatusColor from "utils/getStatusColor";
 import Infobox from "./Infobox";
+import Context from "../../contexts/comment";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -199,6 +200,7 @@ const BucketSidebar = ({
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
   const [, reopenFunding] = useMutation(REOPEN_FUNDING);
+  const { addComment } = useContext<any>(Context);
 
   const intl = useIntl();
 
@@ -305,6 +307,26 @@ const BucketSidebar = ({
         >
           <FormattedMessage defaultMessage="Publish" />
         </Button>
+      ),
+      JOIN_BUTTON: () => (
+          <Button
+              color={bucket.round.color}
+              onClick={() =>
+                  addComment({ bucketId: bucket.id, content: "I would like to join! - אשמח להצטרף לחלום"})
+                      .then(({ error }) => {
+                        if (error) {
+                            return toast.error(error.message);
+                        }else {
+                            return toast.success("Joined Dream Successfully 😎 - Dreamer got an email - הצטרפת בהצלחה - החולם קיבל מייל", {duration: 10000});
+                        }
+
+                      })
+              }
+              fullWidth
+              testid="publish-bucket"
+          >
+            Join Dream
+          </Button>
       ),
       APPROVE_BUTTON: () => (
         <Button
@@ -447,6 +469,7 @@ const BucketSidebar = ({
           {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}
           {showPublishButton && <buttons.PUBLISH_BUTTON />}
+          <buttons.JOIN_BUTTON />
           {showApproveButton && <buttons.APPROVE_BUTTON />}
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
           {showReadyForFundingButton && <buttons.READY_FOR_FUNDING />}

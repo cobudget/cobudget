@@ -7,6 +7,8 @@ import Summary from "./Summary";
 import { FormattedMessage } from "react-intl";
 import { COCREATORS_CANT_EDIT } from "utils/messages";
 import toast from "react-hot-toast";
+import Context, { useCommentContext } from "../../contexts/comment";
+
 
 export default function Overview({
   currentUser,
@@ -17,6 +19,14 @@ export default function Overview({
   openImageModal,
   showBucketReview,
 }) {
+  const context = useCommentContext({
+    from: 0,
+    limit: 10,
+    order: "desc",
+    currentUser,
+    bucket,
+  });
+
   if (!bucket) return null;
   const canEdit =
     currentUser?.currentCollMember?.isAdmin ||
@@ -111,6 +121,7 @@ export default function Overview({
               <div className="w-full h-64 md:h-88 block border-3 border-dashed rounded-lg"></div>
             )}
             <div className="">
+              <Context.Provider value={context}>
               <Sidebar
                 bucket={bucket}
                 currentUser={currentUser}
@@ -123,6 +134,7 @@ export default function Overview({
                 }
                 isCocreator={isMemberOfBucket(currentUser, bucket)}
               />
+              </Context.Provider>
             </div>
           </div>
         </div>
