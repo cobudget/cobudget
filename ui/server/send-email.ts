@@ -12,9 +12,9 @@ const client =
   process.env.NODE_ENV !== "development" &&
   new Client(process.env.POSTMARK_API_TOKEN);
 
-// const broadcastClient = new ServerClient(
-//   process.env.POSTMARK_BROADCAST_API_TOKEN
-// );
+const broadcastClient = new ServerClient(
+  process.env.POSTMARK_BROADCAST_API_TOKEN
+);
 
 const smtpClient =
   process.env.NODE_ENV === "development" &&
