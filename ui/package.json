@@ -19,9 +19,6 @@
     "crowdin:download": "../scripts/crowdin.sh download",
     "crowdin:upload": "../scripts/crowdin.sh upload"
   },
-  "engines": {
-    "node": "18.x"
-  },
   "dependencies": {
     "@apollo/client": "^3.4.11",
     "@crowdin/cli": "3.8.1",
