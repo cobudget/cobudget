@@ -81,20 +81,6 @@ export default function FinishSignup({ currentUser }) {
           }}
           testid="signup-user-username"
         />
-        <FormControlLabel
-          control={
-            <div className="-mt-12 pt-0.5">
-              <Checkbox
-                value={mailUpdates}
-                onChange={(evt) => setMailUpdates(evt.target.checked)}
-              />
-            </div>
-          }
-          label={intl.formatMessage({
-            defaultMessage:
-              "I would like occasional emails about product updates and Cobudget-related events, trainings, and support resources.",
-          })}
-        />
         {process.env.TERMS_URL && (
           <label className="text-sm flex items-center space-x-2">
             <FormControlLabel
