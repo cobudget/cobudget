@@ -373,6 +373,16 @@ model Bucket {
   contributionsCount Int?          @default(0)
 }
 
+model FavoriteBucket {
+  id                String        @id @default(cuid())
+  bucketId          String
+  userId            String
+
+  createdAt         DateTime      @default(now())
+
+  @@unique([bucketId, userId])
+}
+
 enum DirectFundingType {
   DONATION
   EXCHANGE
