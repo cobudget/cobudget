@@ -4,11 +4,12 @@ import Log from "./Log";
 import Context, { useCommentContext } from "../../../contexts/comment";
 import LoadMore from "components/LoadMore";
 import { FormattedMessage } from "react-intl";
+import Button from "components/Button";
 
 const Comments = ({ currentUser, bucket, router }) => {
   const context = useCommentContext({
     from: 0,
-    limit: 10,
+    limit: 1000,  // The limit might be a problem
     order: "desc",
     currentUser,
     bucket,
@@ -16,6 +17,26 @@ const Comments = ({ currentUser, bucket, router }) => {
   const { comments, setFrom, limit, total, loading } = context;
 
   if (!bucket) return null;
+
+  const exportCommenters = () => {
+    const commenters = comments.map((comment) => comment.roundMember.user).reduce((acc, cur) => {
+      if (acc.hasOwnProperty(cur.id))  // Get only unique users who commented
+        return acc;
+      else
+        return { ...acc, [cur.id]: cur };
+    }, []);
+    const csvContent = "data:text/csv;charset=utf-8," +
+      "Name,Email,Phone Number\n" +
+      Object.values(commenters).map((commenter: any) =>
+        `${commenter.name},${commenter.email},${commenter.phoneNumber}`
+      ).join("\n")
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "users_commented_on_my_dream.csv");
+    document.body.appendChild(link);
+    link.click();
+  };
 
   return (
     <div className="bg-white border-b-default">
@@ -37,6 +58,11 @@ const Comments = ({ currentUser, bucket, router }) => {
                     </h2>
                   )}
 
+                  {currentUser.currentCollMember.isAdmin &&
+                    <Button variant="primary" onClick={exportCommenters}>
+                      <FormattedMessage defaultMessage="Export" />
+                    </Button>
+                  }
                   {bucket?.discourseTopicUrl && (
                     <a
                       target="_blank"

@@ -28,6 +28,8 @@ export const COMMENTS_QUERY = gql`
             id
             name
             username
+            email
+            phoneNumber
             avatar
           }
         }
@@ -51,6 +53,7 @@ const ADD_COMMENT_MUTATION = gql`
           id
           name
           username
+          email
           avatar
         }
       }
