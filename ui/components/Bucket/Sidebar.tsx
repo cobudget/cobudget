@@ -211,7 +211,7 @@ const BucketSidebar = ({
     IDEA: intl.formatMessage({
       defaultMessage: "Idea",
     }),
-    OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding" }),
+    OPEN_FOR_FUNDING: "Published",
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
@@ -424,6 +424,11 @@ const BucketSidebar = ({
 
   return (
     <>
+      { showJoinDreamButton && (
+          <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
+            <buttons.JOIN_BUTTON />
+          </div>
+      )}
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
           {/* <GrantingStatus bucket={bucket} /> */}
@@ -470,7 +475,6 @@ const BucketSidebar = ({
           {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}
           {showPublishButton && <buttons.PUBLISH_BUTTON />}
-          {showJoinDreamButton && <buttons.JOIN_BUTTON />}
           {showApproveButton && <buttons.APPROVE_BUTTON />}
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
           {showReadyForFundingButton && <buttons.READY_FOR_FUNDING />}
