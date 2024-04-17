@@ -374,7 +374,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
           </p>
         )}
       </TableCell>
-      {/* <TableCell align="right">
+      <TableCell align="right">
         {isAdmin ? (
           <button
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
@@ -408,7 +408,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
             handleClose={() => setAllocateModalOpen(false)}
           />
         )}
-      </TableCell> */}
+      </TableCell>
       {isAdmin && (
         <TableCell align="right" padding="none">
           <ActionsDropdown
@@ -459,7 +459,7 @@ const RoundMembersTable = ({
                 <TableCell align="right">
                   <FormattedMessage defaultMessage="Role" />
                 </TableCell>
-                {/* <TableCell align="right">
+                <TableCell align="right">
                   <div className="flex items-center justify-end space-x-1">
                     <span className="block">
                       <FormattedMessage defaultMessage="Balance" />
@@ -486,7 +486,7 @@ const RoundMembersTable = ({
                       handleClose={() => setBulkAllocateModalOpen(false)}
                     />
                   )}
-                </TableCell> */}
+                </TableCell>
                 {isAdmin && (
                   <TableCell align="right">
                     <FormattedMessage defaultMessage="Actions" />
