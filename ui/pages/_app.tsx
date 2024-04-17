@@ -204,7 +204,7 @@ const MyApp = ({ Component, pageProps, router }) => {
     query: CURRENT_USER_QUERY,
     variables: {
       groupSlug:
-        process.env.SINGLE_GROUP_MODE == "true" ? "c" : router.query.group,
+        "c" ,
       roundSlug: router.query.round,
     },
     pause: !router.isReady,
