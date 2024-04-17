@@ -9,7 +9,6 @@ export interface SendEmailInput {
 }
 
 const client =
-  process.env.NODE_ENV !== "development" &&
   new Client(process.env.POSTMARK_API_TOKEN);
 
 const broadcastClient = new ServerClient(
@@ -34,24 +33,24 @@ const getVerifiedEmails = async (emails: string[]) => {
 };
 
 const send = async (mail: SendEmailInput) => {
-  if (process.env.NODE_ENV === "development") {
-    try {
-      await smtpClient.sendMail({
-        from: process.env.FROM_EMAIL,
-        to: mail.to,
-        subject: mail.subject,
-        text: mail.text,
-        html: mail.html,
-      });
-    } catch {
-      // if mailhog isn't running, print it to the terminal instead
-      console.log(
-        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
-          mail.text ?? mail.html
-        }\n`
-      );
-    }
-  } else {
+  // if (process.env.NODE_ENV === "development") {
+  //   try {
+  //     await smtpClient.sendMail({
+  //       from: process.env.FROM_EMAIL,
+  //       to: mail.to,
+  //       subject: mail.subject,
+  //       text: mail.text,
+  //       html: mail.html,
+  //     });
+  //   } catch {
+  //     // if mailhog isn't running, print it to the terminal instead
+  //     console.log(
+  //       `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
+  //         mail.text ?? mail.html
+  //       }\n`
+  //     );
+  //   }
+  // } else {
     try {
       await client.sendEmail({
         From: process.env.FROM_EMAIL,
@@ -64,7 +63,7 @@ const send = async (mail: SendEmailInput) => {
       console.log(err);
       throw err;
     }
-  }
+  // }
 };
 
 const sendBatch = async (mails: SendEmailInput[]) => {

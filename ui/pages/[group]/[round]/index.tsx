@@ -284,7 +284,7 @@ const Page = ({
       });
     }
 
-    /* 
+    /*
     if (currentUser) {
       cols.splice(round?.allowStretchGoals ? 3 : 2, 0, {
         Header: "Your Contribution",
@@ -620,7 +620,7 @@ const RoundPage = ({ currentUser }) => {
             )}
           </div>
           <div className={`flex flex-col justify-end items-start`}>
-            <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
+            {/* <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
               <p className="font-bold my-0.5">
                 <FormattedMessage defaultMessage="Funds available" />
               </p>
@@ -672,7 +672,7 @@ const RoundPage = ({ currentUser }) => {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </div> */}
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
