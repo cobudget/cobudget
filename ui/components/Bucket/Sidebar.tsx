@@ -241,6 +241,7 @@ const BucketSidebar = ({
   const showAcceptFundingButton =
     bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
+  const showJoinDreamButton = !isCocreator && bucket.published;
   const showMarkAsCompletedButton =
     bucket.funded && !bucket.completed && isCocreator;
   const showReopenFundingButton =
@@ -469,7 +470,7 @@ const BucketSidebar = ({
           {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}
           {showPublishButton && <buttons.PUBLISH_BUTTON />}
-          <buttons.JOIN_BUTTON />
+          {showJoinDreamButton && <buttons.JOIN_BUTTON />}
           {showApproveButton && <buttons.APPROVE_BUTTON />}
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
           {showReadyForFundingButton && <buttons.READY_FOR_FUNDING />}
