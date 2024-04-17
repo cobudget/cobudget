@@ -1,6 +1,7 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
@@ -28,7 +29,7 @@ model User {
   emailSettings    EmailSettings?
   Transaction      Transaction[]
   isSuperAdmin     Boolean?       @default(false)
-  magiclinkCode    String?        
+  magiclinkCode    String?
 }
 
 model UserMeta {
@@ -36,7 +37,7 @@ model UserMeta {
   userId              String?         @unique
   email               String?         @unique
 
-  lastMagicLinkDate   DateTime     
+  lastMagicLinkDate   DateTime
 }
 
 model EmailSettings {
@@ -60,7 +61,7 @@ model ExpenseReceipt {
   amount             Int
   attachment         String?
   expense            Expense? @relation(fields: [expenseId], references: [id])
-  expenseId          String? 
+  expenseId          String?
   ocExpenseReceiptId String?  @unique
 }
 
@@ -92,7 +93,7 @@ model Expense {
   iban                String?   @default("")
   country             String?   @default("")
   city                String?   @default("")
-  recipientAddress    String?    
+  recipientAddress    String?
   recipientPostalCode String?
   submittedBy         String?
   status              ExpenseStatus   @default(SUBMITTED)
