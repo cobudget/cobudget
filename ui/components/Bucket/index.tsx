@@ -69,7 +69,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               isEditingAllowed={isEditingAllowed}
             />
 
-            <Budget
+            {/* <Budget
               bucket={bucket}
               canEdit={canEdit}
               currency={bucket.round.currency}
@@ -77,7 +77,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
               isEditingAllowed={isEditingAllowed}
-            />
+            /> */}
 
             <DirectFunding
               canEdit={canEdit}
