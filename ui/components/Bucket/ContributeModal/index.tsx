@@ -40,7 +40,7 @@ const ContributeModal = ({
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-sm m-auto">
         <h1 className="text-2xl mb-2 font-semibold">
-          <FormattedMessage defaultMessage="Contribute to" /> {bucket.title}
+          <FormattedMessage defaultMessage="Join" /> {bucket.title}
         </h1>
         <Tab.Group
           defaultIndex={currentUser.currentCollMember.balance > 0 ? 0 : 1}

@@ -300,7 +300,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
               {!bucket?.round?.group?.discourseUrl &&
                 `(${bucket?.noOfComments})`}
             </Tab>
-            <Tab
+            {/* <Tab
               className={({ selected }) =>
                 classNames(
                   "block px-2 py-4 border-b-2 font-medium transition-colors",
@@ -312,7 +312,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             >
               <FormattedMessage defaultMessage="Funders" /> (
               {bucket?.noOfFunders})
-            </Tab>
+            </Tab> */}
             {showExpensesTab ? (
               <Tab
                 className={({ selected }) =>
