@@ -369,10 +369,12 @@ export default {
           to: roundMember.user.email,
           subject: isFlag
             ? `New comment in your dream ${bucket.title}`
-            : `New comment by ${currentUser.name} ${currentUser.email} in your dream ${bucket.title}`,
+            : `New comment by ${currentUser.name} in your dream ${bucket.title}`,
           html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
           Your dream “${escape(bucket.title)}” received a new comment.
+          <br/><br/>
+          ${currentUser.name}(${currentUser.email}):
           <br/><br/>
           ${commentAsHtml}
           <br/><br/>
@@ -426,7 +428,7 @@ export default {
         to: recipient.email,
         subject: isFlag
           ? `New comment in dream ${bucket.title}`
-          : `New comment by ${currentUser.name} - ${currentUser.email} in dream ${bucket.title}`,
+          : `New comment by ${currentUser.name} in dream ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
