@@ -426,8 +426,8 @@ const BucketSidebar = ({
     <>
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-          <GrantingStatus bucket={bucket} />
-          {showFundButton && (
+          {/* <GrantingStatus bucket={bucket} /> */}
+          {/* {showFundButton && (
             <>
               <Button
                 color={bucket.round.color}
@@ -466,7 +466,7 @@ const BucketSidebar = ({
                 />
               )}
             </>
-          )}
+          )} */}
           {showBucketReview ? <Monster bucket={bucket} /> : null}
           {showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}
           {showPublishButton && <buttons.PUBLISH_BUTTON />}
