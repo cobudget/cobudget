@@ -117,6 +117,15 @@ const REOPEN_FUNDING = gql`
   }
 `;
 
+const TOGGLE_FAVORITE_BUCKET = gql`
+  mutation ToggleFavoriteBucket($bucketId: ID!) {
+    toggleFavoriteBucket(bucketId: $bucketId) {
+      id
+      isFavorite
+    }
+  }
+`;
+
 const ConfirmCancelBucket = ({ open, close, bucketId }) => {
   const [{ fetching }, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
 
@@ -199,6 +208,9 @@ const BucketSidebar = ({
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
   const [, reopenFunding] = useMutation(REOPEN_FUNDING);
+  const [{ fetching: togglingFavorite }, toggleFavorite] = useMutation(
+    TOGGLE_FAVORITE_BUCKET
+  );
 
   const intl = useIntl();
 
@@ -566,20 +578,27 @@ const BucketSidebar = ({
         </div>
       )}
       <div className="mt-5 space-y-5">
-        <div>
-          <div className="mr-2 font-medium ">
-            <FormattedMessage defaultMessage="Bucket Status" />
+        <div className="grid grid-cols-6">
+          <div className="col-span-5">
+            <div className="mr-2 font-medium ">
+              <FormattedMessage defaultMessage="Bucket Status" />
+            </div>
+            <span>
+              <Label
+                className={
+                  "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+                }
+                testid="bucket-status-view"
+              >
+                {statusList[bucket.status]}
+              </Label>
+            </span>
           </div>
-          <span>
-            <Label
-              className={
-                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
-              }
-              testid="bucket-status-view"
-            >
-              {statusList[bucket.status]}
-            </Label>
-          </span>
+          <div className="flex items-center justify-end">
+            <span onClick={() => toggleFavorite({ bucketId: bucket.id })}>
+              Fav
+            </span>
+          </div>
         </div>
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">

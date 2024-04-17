@@ -43,3 +43,22 @@ export const unmarkBucketAsFavorite = async ({
 
   return bucket;
 };
+
+export const isBucketFavorite = async ({
+  bucketId,
+  userId,
+}: {
+  bucketId: string;
+  userId: string;
+}) => {
+  const row = await prisma.favoriteBucket.findFirst({
+    where: {
+      bucketId,
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !!row;
+};

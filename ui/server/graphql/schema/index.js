@@ -224,6 +224,8 @@ const schema = gql`
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
+    toggleFavoriteBucket(bucketId: ID!): Bucket
+
     createExpense(
       bucketId: String!
       title: String!
@@ -731,6 +733,7 @@ const schema = gql`
     percentageFunded: Float
     expenses: [Expense]
     expense(id: String!): Expense
+    isFavorite: Boolean
   }
 
   enum DirectFundingType {

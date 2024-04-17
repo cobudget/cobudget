@@ -29,6 +29,11 @@ import {
 import EventHub from "server/services/eventHub.service";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import { isBucketLimitOver } from "../helpers/round";
+import {
+  isBucketFavorite,
+  markBucketAsFavorite,
+  unmarkBucketAsFavorite,
+} from "../helpers/bucket";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -1236,5 +1241,24 @@ export const updateExpense = async (
     }
   } catch (e) {
     return null;
+  }
+};
+
+export const toggleFavoriteBucket = async (
+  _: unknown,
+  { bucketId }: { bucketId: string },
+  { user }
+) => {
+  const markedFavorite = await isBucketFavorite({ userId: user?.id, bucketId });
+  if (markedFavorite) {
+    return unmarkBucketAsFavorite({
+      bucketId,
+      userId: user?.id,
+    });
+  } else {
+    return markBucketAsFavorite({
+      bucketId,
+      userId: user?.id,
+    });
   }
 };
