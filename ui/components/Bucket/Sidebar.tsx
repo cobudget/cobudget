@@ -192,6 +192,7 @@ const BucketSidebar = ({
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
   const [confirmCancelBucketOpen, setConfirmCancelBucketOpen] = useState(false);
+  const [enabledJoinDreamButton, setEnabledJoinDreamButton] = useState(true);
 
   const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [, readyForFunding] = useMutation(SET_READY_FOR_FUNDING);
@@ -311,10 +312,23 @@ const BucketSidebar = ({
           <FormattedMessage defaultMessage="Publish" />
         </Button>
       ),
+        JOIN_BUTTON_DISABLED: () => (
+            <Button
+                disabled={true}
+                color={bucket.round.color}
+                fullWidth
+                testid="publish-bucket"
+            >
+                Join Dream
+            </Button>
+        ),
       JOIN_BUTTON: () => (
           <Button
+              disabled={!enabledJoinDreamButton}
               color={bucket.round.color}
               onClick={() =>
+                {
+                  setEnabledJoinDreamButton(false);
                   addComment({ bucketId: bucket.id, content: "I would like to join! - אשמח להצטרף לחלום"})
                       .then(({ error }) => {
                         if (error) {
@@ -324,6 +338,7 @@ const BucketSidebar = ({
                         }
 
                       })
+                }
               }
               fullWidth
               testid="publish-bucket"
@@ -428,7 +443,8 @@ const BucketSidebar = ({
     <>
       { showJoinDreamButton && (
           <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-            <buttons.JOIN_BUTTON />
+              { enabledJoinDreamButton && (<buttons.JOIN_BUTTON />)}
+              {!enabledJoinDreamButton && (<buttons.JOIN_BUTTON_DISABLED />)}
           </div>
       )}
       {(bucket.minGoal || canEdit) && (
