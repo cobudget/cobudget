@@ -7,6 +7,7 @@ import {
   getRoundFundingStatuses,
   isFundingOpen,
 } from "../helpers";
+import { isBucketFavorite } from "../helpers/bucket";
 
 export const cocreators = async (bucket) => {
   return prisma.bucket.findUnique({ where: { id: bucket.id } }).cocreators();
@@ -224,4 +225,11 @@ export const expenses = async ({ id }) => {
 
 export const expense = async ({ expenseId }) => {
   return prisma.expense.findUnique({ where: { id: expenseId } });
+};
+
+export const isFavorite = async ({ id }, _: unknown, { user }) => {
+  return isBucketFavorite({
+    bucketId: id,
+    userId: user?.id,
+  });
 };

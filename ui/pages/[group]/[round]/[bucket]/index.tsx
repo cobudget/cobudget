@@ -44,6 +44,7 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+      isFavorite
 
       directFundingEnabled
       directFundingType

@@ -596,7 +596,7 @@ const BucketSidebar = ({
           </div>
           <div className="flex items-center justify-end">
             <span onClick={() => toggleFavorite({ bucketId: bucket.id })}>
-              Fav
+              {bucket.isFavorite ? "Unfav" : "Fav"}
             </span>
           </div>
         </div>
