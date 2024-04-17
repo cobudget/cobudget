@@ -44,6 +44,7 @@ export default function AboutPage({ router, round }) {
         </>
       )}
 
+      { /**
       <h2 className="text-xl font-semibold mb-3">
         <FormattedMessage defaultMessage="Funding settings" />
       </h2>
@@ -151,7 +152,8 @@ export default function AboutPage({ router, round }) {
       <h2 className="text-xl font-semibold mb-3">
         <FormattedMessage defaultMessage="Funding status" />
       </h2>
-      <div className="bg-white rounded-lg shadow mb-6">
+
+       <div className="bg-white rounded-lg shadow mb-6">
         <BillBreakdown
           parts={[
             {
@@ -221,6 +223,7 @@ export default function AboutPage({ router, round }) {
           }
         />
       </div>
+         **/}
     </div>
   );
 }

@@ -301,6 +301,8 @@ const BucketSidebar = ({
             publishBucket({
               bucketId: bucket.id,
               unpublish: bucket.published,
+            }).then(() => {
+                toast.success("Dream Is Live 😎 - החלום פורסם", {duration: 10000})
             })
           }
           fullWidth
@@ -473,7 +475,7 @@ const BucketSidebar = ({
             </>
           )} */}
           {showBucketReview ? <Monster bucket={bucket} /> : null}
-          {showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}
+          {/*{showAcceptFundingButton && <buttons.ACCEPT_FUNDING />}*/}
           {showPublishButton && <buttons.PUBLISH_BUTTON />}
           {showApproveButton && <buttons.APPROVE_BUTTON />}
           {showMarkAsCompletedButton && <buttons.MARK_AS_COMPLETED />}
@@ -508,7 +510,9 @@ const BucketSidebar = ({
                       publishBucket({
                         bucketId: bucket.id,
                         unpublish: true,
-                      }).then(() => setActionsDropdownOpen(false))
+                      }).then(() => setActionsDropdownOpen(false)).then(() => {
+                          toast.success("Dream Unpublished 💩 - החלום חזר למגירה", {duration: 10000})
+                      })
                     }
                   >
                     <FormattedMessage defaultMessage="Unpublish" />
