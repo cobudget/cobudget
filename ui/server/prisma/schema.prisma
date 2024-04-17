@@ -29,6 +29,7 @@ model User {
   Transaction      Transaction[]
   isSuperAdmin     Boolean?       @default(false)
   magiclinkCode    String?
+  phoneNumber      String?
 }
 
 model UserMeta {

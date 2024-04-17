@@ -6,13 +6,15 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
+import validatePhoneNumber from "utils/validatePhoneNumber";
 
 const EDIT_PROFILE_MUTATION = gql`
-  mutation updateProfile($username: String, $name: String) {
-    updateProfile(username: $username, name: $name) {
+  mutation updateProfile($username: String, $name: String, $phoneNumber: String) {
+    updateProfile(username: $username, name: $name, phoneNumber: $phoneNumber) {
       id
       username
       name
+      phoneNumber
     }
   }
 `;
@@ -21,6 +23,7 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
   const [{ error }, updateProfile] = useMutation(EDIT_PROFILE_MUTATION);
   const [username, setUsername] = useState(currentUser.username ?? "");
   const [name, setName] = useState(currentUser.name ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber ?? "");
   const intl = useIntl();
 
   const errorMessage = useMemo(() => {
@@ -91,6 +94,18 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
                       onChange: (e) => setUsername(e.target.value),
                     }}
                   />
+                   <TextField
+                    label={intl.formatMessage({ defaultMessage: "Phone Number" })}
+                    error={!validatePhoneNumber(phoneNumber)}
+                    helperText={intl.formatMessage({
+                      defaultMessage:
+                        "Phone number can start with a + and should contain only numbers",
+                    })}
+                    inputProps={{
+                      value: phoneNumber,
+                      onChange: (e) => setPhoneNumber(e.target.value),
+                    }}
+                  />
                 </div>
                 {errorMessage && (
                   <div className="mt-4 text-red text-s font-medium">
@@ -105,7 +120,7 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
                     type="submit"
                     disabled={!validateUsername(username) || !name}
                     onClick={() =>
-                      updateProfile({ username, name }).then(
+                      updateProfile({ username, name, phoneNumber }).then(
                         ({ data, error }) => {
                           if (!error) {
                             toast.success(

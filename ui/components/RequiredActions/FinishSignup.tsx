@@ -9,17 +9,20 @@ import validateUsername from "utils/validateUsername";
 import { FormControlLabel } from "@material-ui/core";
 import Checkbox from "../Checkbox";
 import { useRouter } from "next/router";
+import validatePhoneNumber from "utils/validatePhoneNumber";
 
 const FINISH_SIGNUP_MUTATION = gql`
   mutation updateProfile(
     $username: String
     $name: String
+    $phoneNumber: String
     $mailUpdates: Boolean
   ) {
-    updateProfile(username: $username, name: $name, mailUpdates: $mailUpdates) {
+    updateProfile(username: $username, name: $name, phoneNumber: $phoneNumber, mailUpdates: $mailUpdates) {
       id
       username
       name
+      phoneNumber
       mailUpdates
     }
     acceptTerms {
@@ -33,6 +36,7 @@ export default function FinishSignup({ currentUser }) {
   const [, updateUser] = useMutation(FINISH_SIGNUP_MUTATION);
   const [username, setUsername] = useState(currentUser.username ?? "");
   const [name, setName] = useState(currentUser.name ?? "");
+  const [phoneNumber, setPhoneNumber] = useState(currentUser.phoneNumber ?? "");
   const [mailUpdates, setMailUpdates] = useState(false);
   const intl = useIntl();
   const router = useRouter();
@@ -81,6 +85,19 @@ export default function FinishSignup({ currentUser }) {
           }}
           testid="signup-user-username"
         />
+        <TextField
+          label={intl.formatMessage({ defaultMessage: "Phone Number" })}
+          error={!validatePhoneNumber(phoneNumber)}
+          helperText={intl.formatMessage({
+            defaultMessage:
+            "Phone number can start with a + and should contain only numbers",
+          })}
+          inputProps={{
+            value: phoneNumber,
+            onChange: (e) => setPhoneNumber(e.target.value),
+          }}
+          testid="signup-user-phonenumber"
+        />
         {process.env.TERMS_URL && (
           <label className="text-sm flex items-center space-x-2">
             <FormControlLabel
@@ -125,7 +142,7 @@ export default function FinishSignup({ currentUser }) {
           testid="finish-signup-button"
           disabled={!username || !name || !acceptTerms}
           onClick={() =>
-            updateUser({ username, name, mailUpdates }).then(
+            updateUser({ username, name, phoneNumber, mailUpdates }).then(
               ({ data, error }) => {
                 if (error) {
                   if (error.message.includes("Unique")) {
