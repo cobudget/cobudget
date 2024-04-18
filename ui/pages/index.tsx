@@ -6,6 +6,8 @@ import get from "lodash/get";
 
 import GroupPage from "../components/Group";
 import { getWebflowProps, webflowCss } from "utils/webflow";
+import HomePage from "./home";
+
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -59,7 +61,7 @@ function replace(node) {
 
 const parseOptions = { replace };
 
-const IndexPage = ({ currentUser, landingPage }) => {
+const IndexPage = ({ currentUser, landingPage, homePage }) => {
   if (landingPage) {
     return (
       <>
@@ -68,6 +70,12 @@ const IndexPage = ({ currentUser, landingPage }) => {
         <style jsx>{webflowCss}</style>
       </>
     );
+  }
+
+  if (homePage) {
+    return (
+        <HomePage currentUser={currentUser}/>
+    )
   }
 
   return <GroupPage currentUser={currentUser} />;

@@ -135,9 +135,9 @@ export const LandingPageLinks = ({ desktop }) => (
       <FormattedMessage id="resources" defaultMessage="Resources" />
     </NavItem>
     <NavItem
-      href="mailto:hello@cobudget.com"
+      href="mailto:dreams@midburn.org"
       onCLick={(e) => {
-        window.open("mailto:hello@boduget.com");
+        window.open("mailto:dreams@midburn.org");
         e.preventDefault();
       }}
       external
