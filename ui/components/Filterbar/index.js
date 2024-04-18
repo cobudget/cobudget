@@ -1,10 +1,10 @@
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
-import { SearchIcon } from "../Icons";
-import { SelectField } from "../SelectInput";
-import StatusFilter from "./StatusFilter";
-import { useIntl } from "react-intl";
-import { debounce } from "lodash";
+import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
+import { SearchIcon } from '../Icons';
+import { SelectField } from '../SelectInput';
+import StatusFilter from './StatusFilter';
+import { useIntl } from 'react-intl';
+import { debounce } from 'lodash';
 
 const Filterbar = ({
   textSearchTerm,
@@ -51,7 +51,7 @@ const Filterbar = ({
     e.preventDefault();
 
     router.push({
-      pathname: "/[group]/[round]",
+      pathname: '/[group]/[round]',
       query: {
         group: router.query.group,
         round: router.query.round,
@@ -62,10 +62,10 @@ const Filterbar = ({
   };
 
   const onChangeTag = (e) => {
-    const tag = e.target.value === "All tags" ? null : e.target.value;
+    const tag = e.target.value === 'All tags' ? null : e.target.value;
 
     router.push({
-      pathname: "/[group]/[round]",
+      pathname: '/[group]/[round]',
       query: {
         group: router.query.group,
         round: router.query.round,
@@ -78,7 +78,7 @@ const Filterbar = ({
   const onChangeStatus = (statusFilterArray) => {
     router.push(
       {
-        pathname: "/[group]/[round]",
+        pathname: '/[group]/[round]',
         query: {
           group: router.query.group,
           round: router.query.round,
@@ -94,7 +94,7 @@ const Filterbar = ({
   };
   const onChangeView = (view) => {
     router.push({
-      pathname: "/[group]/[round]",
+      pathname: '/[group]/[round]',
       query: {
         group: router.query.group,
         round: router.query.round,
@@ -114,7 +114,7 @@ const Filterbar = ({
       >
         <form onSubmit={onSubmitSearch}>
           <input
-            placeholder={intl.formatMessage({ defaultMessage: "Search..." })}
+            placeholder={intl.formatMessage({ defaultMessage: 'Search...' })}
             className="appearance-none block px-3 py-2 w-full placeholder-gray-400 text-gray-600 focus:text-gray-800 focus:outline-none"
             value={input}
             onChange={(e) => handleInputChange(e.target.value)}
@@ -123,8 +123,8 @@ const Filterbar = ({
             type="submit"
             className={
               `h-full absolute inset-y-0 right-0 flex items-center p-3 focus:outline-none transition-colors` +
-              " " +
-              (changed ? `bg-${round.color} text-white` : "text-gray-400")
+              ' ' +
+              (changed ? `bg-${round.color} text-white` : 'text-gray-400')
             }
           >
             <SearchIcon className="h-5 w-5" />
@@ -144,12 +144,12 @@ const Filterbar = ({
         className="bg-white sm:order-3"
         color={round.color}
         inputProps={{
-          value: tag || intl.formatMessage({ defaultMessage: "All tags" }),
+          value: tag || intl.formatMessage({ defaultMessage: 'All tags' }),
           onChange: onChangeTag,
         }}
       >
         <option value="All tags">
-          {intl.formatMessage({ defaultMessage: "All tags" })}
+          {intl.formatMessage({ defaultMessage: 'All tags' })}
         </option>
         {round.tags.map((tag) => (
           <option key={tag.id} value={tag.value}>
@@ -157,7 +157,7 @@ const Filterbar = ({
           </option>
         ))}
       </SelectField>
-      <span className="sm:order-last">
+      {/* <span className="sm:order-last">
         <SelectField
           className="bg-white sm:order-3"
           color={round.color}
@@ -173,7 +173,7 @@ const Filterbar = ({
             {intl.formatMessage({ defaultMessage: "Table View" })}
           </option>
         </SelectField>
-      </span>
+      </span> */}
       <span>
         <SelectField
           className="bg-white sm:order-last"
@@ -184,16 +184,16 @@ const Filterbar = ({
           }}
         >
           <option value="">
-            {intl.formatMessage({ defaultMessage: "Random" })}
+            {intl.formatMessage({ defaultMessage: 'Random' })}
           </option>
           <option value="createdAt">
-            {intl.formatMessage({ defaultMessage: "Newest" })}
+            {intl.formatMessage({ defaultMessage: 'Newest' })}
           </option>
           <option value="percentageFunded">
-            {intl.formatMessage({ defaultMessage: "Most funded" })}
+            {intl.formatMessage({ defaultMessage: 'Most funded' })}
           </option>
           <option value="contributionsCount">
-            {intl.formatMessage({ defaultMessage: "Most contributions" })}
+            {intl.formatMessage({ defaultMessage: 'Most contributions' })}
           </option>
         </SelectField>
       </span>
