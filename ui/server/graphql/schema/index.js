@@ -299,7 +299,7 @@ const schema = gql`
 
     joinGroup(groupId: ID!): GroupMember
 
-    updateProfile(username: String, name: String, mailUpdates: Boolean): User
+    updateProfile(username: String, name: String, phoneNumber: String, mailUpdates: Boolean): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
 
     deprecatedInviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
@@ -535,6 +535,7 @@ const schema = gql`
     emailSettings: JSON
     acceptedTermsAt: Date
     isSuperAdmin: Boolean
+    phoneNumber: String
   }
 
   type InvitedMember {

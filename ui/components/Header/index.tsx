@@ -192,8 +192,8 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
       ? `${round.title} | ${group.name}`
       : group.name
     : round
-    ? round.title
-    : process.env.PLATFORM_NAME;
+      ? round.title
+      : process.env.PLATFORM_NAME;
 
   const notAMember =
     !fetchingUser &&
@@ -205,6 +205,40 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
     (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
 
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
+
+  useEffect(() => {
+    const showJoinRoundButton2 = round &&  // A copy to be evaluated on component mount
+      round.registrationPolicy !== "INVITE_ONLY" &&
+      !fetchingUser &&
+      (!currentUser?.currentCollMember ||
+        (!currentUser?.currentCollMember.isApproved &&
+          currentUser?.currentCollMember.isRemoved)
+      );
+
+    if (showJoinRoundButton2) {
+      joinRound({ roundId: round?.id }).then(
+        ({ data, error }) => {
+          console.log({ data });
+          if (error) {
+            toast.error(error.message);
+          } else {
+            toast.success(
+              round.registrationPolicy === "REQUEST_TO_JOIN"
+                ? intl.formatMessage({
+                  defaultMessage: "Request sent!",
+                })
+                : intl.formatMessage({
+                  defaultMessage:
+                    "You joined this round!",
+                })
+            );
+          }
+        }
+      )
+    }
+  }, [round])
+
+
 
   return (
     <>
@@ -286,13 +320,13 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
           <nav
             className={`${
               isMenuOpen ? "block" : "hidden"
-            } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
+              } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
           >
             <div className="py-2 sm:flex sm:p-0 sm:items-center">
               {currentUser ? (
                 <>
                   {currentUser?.currentCollMember?.isApproved &&
-                  currentUser?.currentCollMember?.hasJoined === false ? (
+                    currentUser?.currentCollMember?.hasJoined === false ? (
                     <NavItem
                       primary
                       roundColor={color}
@@ -316,7 +350,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                       <FormattedMessage defaultMessage="Accept Invitation" />
                     </NavItem>
                   ) : null}
-                  {
+                  {/* {
                     // you can ask to be a member if you've either never been a member, or been a member but been removed
                     showJoinRoundButton && (
                       <NavItem
@@ -332,12 +366,12 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                                 toast.success(
                                   round.registrationPolicy === "REQUEST_TO_JOIN"
                                     ? intl.formatMessage({
-                                        defaultMessage: "Request sent!",
-                                      })
+                                      defaultMessage: "Request sent!",
+                                    })
                                     : intl.formatMessage({
-                                        defaultMessage:
-                                          "You joined this round!",
-                                      })
+                                      defaultMessage:
+                                        "You joined this round!",
+                                    })
                                 );
                               }
                             }
@@ -346,14 +380,14 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                       >
                         {round.registrationPolicy === "REQUEST_TO_JOIN"
                           ? intl.formatMessage({
-                              defaultMessage: "Request to join",
-                            })
+                            defaultMessage: "Request to join",
+                          })
                           : intl.formatMessage({
-                              defaultMessage: "Join round",
-                            })}
+                            defaultMessage: "Join round",
+                          })}
                       </NavItem>
                     )
-                  }
+                  } */}
                   {!currentUser?.currentGroupMember &&
                     !round &&
                     group &&
@@ -445,9 +479,8 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
               ) : (
                 <>
                   <NavItem
-                    href={`/login${
-                      router.pathname === `/login` ? "" : "?r=" + router.asPath
-                    }`}
+                    href={`/login${router.pathname === `/login` ? "" : "?r=" + router.asPath
+                      }`}
                     roundColor={color}
                   >
                     <FormattedMessage defaultMessage="Log in" />

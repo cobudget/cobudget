@@ -27,6 +27,7 @@ export const REQUESTS_TO_JOIN_QUERY = gql`
           id
           username
           name
+          phoneNumber
           verifiedEmail
           avatar
         }

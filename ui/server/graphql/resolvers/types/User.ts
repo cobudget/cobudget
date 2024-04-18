@@ -62,6 +62,17 @@ export const username = async (parent) => {
   }
   return parent.username;
 };
+export const phoneNumber = async (parent) => {
+  if (!parent.phoneNumber && parent.id) {
+    return (
+      await prisma.user.findUnique({
+        where: { id: parent.id },
+        select: { phoneNumber: true },
+      })
+    ).phoneNumber;
+  }
+  return parent.phoneNumber;
+};
 export const emailSettings = async (parent, args, { user }) => {
   if (user?.id !== parent.id) return null;
 

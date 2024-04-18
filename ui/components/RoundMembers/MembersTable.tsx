@@ -47,6 +47,7 @@ export const INVITE_ROUND_MEMBERS_AGAIN_MUTATION = gql`
       user {
         id
         username
+        phoneNumber
         verifiedEmail
         avatar
       }
@@ -82,6 +83,7 @@ export const MEMBERS_QUERY = gql`
           id
           username
           name
+          phoneNumber
           verifiedEmail
           avatar
         }
@@ -350,6 +352,9 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
           </p>
         ) : null}
       </TableCell>
+      <TableCell>
+        <p data-testid="invited-participant-phonenumber">{member.user.phoneNumber}</p>
+      </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (
           <Tooltip placement="bottom-start" arrow={false} content={member.bio}>
@@ -444,6 +449,9 @@ const RoundMembersTable = ({
                 </TableCell>
                 <TableCell>
                   <FormattedMessage defaultMessage="Email" />
+                </TableCell>
+                <TableCell>
+                  <FormattedMessage defaultMessage="Phone Number" />
                 </TableCell>
                 <TableCell>
                   <FormattedMessage defaultMessage="Bio" />

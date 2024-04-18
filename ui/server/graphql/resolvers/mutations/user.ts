@@ -4,7 +4,7 @@ import validateUsername from "utils/validateUsername";
 
 export const updateProfile = async (
   _,
-  { name, username, mailUpdates },
+  { name, username, phoneNumber, mailUpdates },
   { user }
 ) => {
   if (!user) throw new Error("You need to be logged in..");
@@ -25,6 +25,7 @@ export const updateProfile = async (
     data: {
       name,
       username,
+      phoneNumber,
       mailUpdates,
     },
   });

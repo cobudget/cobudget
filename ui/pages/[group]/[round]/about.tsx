@@ -83,9 +83,9 @@ export default function AboutPage({ currentUser }) {
           </div>
         </div>
       </PageHero>
-      <div className="page">
+      {/* <div className="page">
         <About router={router} round={round} />
-      </div>
+      </div> */}
     </>
   );
 }
