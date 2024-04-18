@@ -42,7 +42,7 @@ const ProjectCard = ({ project }) => {
 const HomePage = ({ currentUser }) => {
     return (
         <>
-        <div className="mt-28 lg:ml-28">
+        <div className="mt-28 lg:ml-28 lg:mr-28">
             <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 relative pb-20">
                 {projects.map((project) => (
                 <Link

@@ -95,11 +95,12 @@ export default function EditProfile({ currentUser, isOpen, handleClose }) {
                     }}
                   />
                    <TextField
-                    label={intl.formatMessage({ defaultMessage: "Phone Number" })}
+                    label={intl.formatMessage({ defaultMessage: "Phone Number", id: "phonenumber" })}
                     error={!validatePhoneNumber(phoneNumber)}
                     helperText={intl.formatMessage({
                       defaultMessage:
                         "Phone number can start with a + and should contain only numbers",
+                      id: "phonenumberhelper"
                     })}
                     inputProps={{
                       value: phoneNumber,

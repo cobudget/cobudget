@@ -33,6 +33,7 @@ function Login({ fbLoginEnabled, googleLoginEnabled }) {
     <div className="page">
       <Toaster />
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
+        התחברי ל {process.env.PLATFORM_NAME}
         Log in to {process.env.PLATFORM_NAME}
       </h1>
 

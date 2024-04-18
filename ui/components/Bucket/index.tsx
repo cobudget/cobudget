@@ -51,7 +51,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               }}
             />
 
-            {bucket.description && (
+            {/**bucket.description && (
               <Description
                 // We no longer use this field for new buckets.
                 // Eventually we will migrate all current descriptions to custom fields.
@@ -59,7 +59,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
                 bucketId={bucket.id}
                 canEdit={canEdit}
               />
-            )}
+            ) **/}
 
             <BucketCustomFields
               roundId={bucket.round.id}

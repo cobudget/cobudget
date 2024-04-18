@@ -4,6 +4,8 @@ function Signup({ fbLoginEnabled, googleLoginEnabled }) {
   return (
     <div className="page">
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
+          הירשם לחלומות מידברן
+          <br/>
         Sign up to {process.env.PLATFORM_NAME}
       </h1>
 

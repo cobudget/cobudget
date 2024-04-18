@@ -405,7 +405,7 @@ const Page = ({
         (!fetching ? (
           <div className="absolute w-full flex justify-center items-center h-20">
             <h1 className="text-3xl text-gray-500 text-center mt-10 mb-20">
-              No {process.env.BUCKET_NAME_PLURAL}...
+              <FormattedMessage id="nodreams" defaultMessage="No Dreams" />
             </h1>
           </div>
         ) : (
@@ -693,8 +693,7 @@ const RoundPage = ({ currentUser }) => {
                     }}
                     testid="create-new-bucket-button"
                   >
-                    <FormattedMessage defaultMessage="New" />{" "}
-                    {process.env.BUCKET_NAME_SINGULAR}
+                    <FormattedMessage defaultMessage="New Dream" id="newdreams" />
                   </Button>
                   {newBucketModalOpen && (
                     <NewBucketModal
