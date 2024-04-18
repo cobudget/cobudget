@@ -28,6 +28,31 @@ export const COMMENTS_QUERY = gql`
             id
             name
             username
+            avatar
+          }
+        }
+        __typename
+      }
+    }
+  }
+`;
+
+export const COL_ADMIN_COMMENTS_QUERY = gql`
+  query Comments($bucketId: ID!, $from: Int, $limit: Int, $order: String) {
+    commentSet(bucketId: $bucketId, from: $from, limit: $limit, order: $order) {
+      total(bucketId: $bucketId, order: $order)
+      comments(bucketId: $bucketId, order: $order) {
+        id
+        content
+        htmlContent
+        createdAt
+        isLog
+        roundMember {
+          id
+          user {
+            id
+            name
+            username
             email
             phoneNumber
             avatar
@@ -93,7 +118,7 @@ export const useCommentContext = (initialInput) => {
   const [order, setOrder] = useState(initialInput.order);
 
   const [{ data, fetching: loading }] = useQuery({
-    query: COMMENTS_QUERY,
+    query: initialInput.currentUser.currentCollMember.isAdmin ? COL_ADMIN_COMMENTS_QUERY : COMMENTS_QUERY,
     variables: { bucketId: initialInput.bucket.id, from, limit, order },
     //notifyOnNetworkStatusChange: true,
   });
