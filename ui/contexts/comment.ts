@@ -118,7 +118,7 @@ export const useCommentContext = (initialInput) => {
   const [order, setOrder] = useState(initialInput.order);
 
   const [{ data, fetching: loading }] = useQuery({
-    query: initialInput.currentUser.currentCollMember.isAdmin ? COL_ADMIN_COMMENTS_QUERY : COMMENTS_QUERY,
+    query: initialInput?.currentUser?.currentCollMember?.isAdmin ? COL_ADMIN_COMMENTS_QUERY : COMMENTS_QUERY,
     variables: { bucketId: initialInput.bucket.id, from, limit, order },
     //notifyOnNetworkStatusChange: true,
   });
