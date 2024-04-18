@@ -135,9 +135,9 @@ export const LandingPageLinks = ({ desktop }) => (
       <FormattedMessage id="resources" defaultMessage="Resources" />
     </NavItem>
     <NavItem
-      href="mailto:hello@cobudget.com"
+      href="mailto:dreams@midburn.org"
       onCLick={(e) => {
-        window.open("mailto:hello@boduget.com");
+        window.open("mailto:dreams@midburn.org");
         e.preventDefault();
       }}
       external
@@ -210,6 +210,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
     const showJoinRoundButton2 = round &&  // A copy to be evaluated on component mount
       round.registrationPolicy !== "INVITE_ONLY" &&
       !fetchingUser &&
+      currentUser &&
       (!currentUser?.currentCollMember ||
         (!currentUser?.currentCollMember.isApproved &&
           currentUser?.currentCollMember.isRemoved)
@@ -318,8 +319,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
           </div>
 
           <nav
-            className={`${
-              isMenuOpen ? "block" : "hidden"
+            className={`${isMenuOpen ? "block" : "hidden"
               } sm:m-0 sm:block bg-${color} sm:bg-transparent`}
           >
             <div className="py-2 sm:flex sm:p-0 sm:items-center">

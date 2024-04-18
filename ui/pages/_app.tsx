@@ -317,6 +317,7 @@ const MyApp = ({ Component, pageProps, router }) => {
             <Component
               {...pageProps}
               currentUser={currentUser}
+              homePage={process.env.HOME_PAGE}
               router={router}
               round={round}
               currentGroup={group}
