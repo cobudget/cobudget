@@ -25,6 +25,7 @@ module.exports = (phase) => {
     ERROR_REPORTING_WEBHOOK: process.env.ERROR_REPORTING_WEBHOOK,
     HELPSCOUT_KEY: process.env.HELPSCOUT_KEY,
     LANDING_PAGE_URL: process.env.LANDING_PAGE_URL,
+    HOME_PAGE: process.env.HOME_PAGE,
     RECAPTCHA_SITE_KEY: process.env.RECAPTCHA_SITE_KEY,
   };
   return withBundleAnalyzer({
