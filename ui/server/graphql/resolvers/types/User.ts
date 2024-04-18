@@ -36,7 +36,7 @@ export const isRootAdmin = () => false; //TODO: add field in prisma
 export const avatar = () => null; //TODO: add avatars
 export const email = (parent, _, { user }) => {
   if (!user) return null;
-  if (parent.id !== user.id) return null;
+  // if (parent.id !== user.id) return null;
   if (parent.email) return parent.email;
 };
 // name: async (parent, _, { user }) => {
