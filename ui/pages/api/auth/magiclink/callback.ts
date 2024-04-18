@@ -26,5 +26,5 @@ export default handler()
       where: { email: req.user?.email },
       data: { magiclinkCode: "" },
     });
-    res.redirect(req.user?.redirect || "/");
+    res.redirect("/");
   });

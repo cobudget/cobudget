@@ -161,7 +161,7 @@ export default function FinishSignup({ currentUser }) {
                       { bucketName: process.env.PLATFORM_NAME }
                     )
                   );
-                  if (router.pathname === "/") router.push("/new-round");
+                  // if (router.pathname === "/") router.push("/new-round");
                 }
               }
             )
