@@ -1,5 +1,5 @@
-import { createContext, useState } from "react";
-import { gql, useQuery, useMutation } from "urql";
+import { createContext, useState } from 'react';
+import { gql, useQuery, useMutation } from 'urql';
 
 export default createContext({});
 
@@ -54,6 +54,7 @@ const ADD_COMMENT_MUTATION = gql`
           name
           username
           email
+          phoneNumber
           avatar
         }
       }
@@ -76,6 +77,8 @@ const EDIT_COMMENT_MUTATION = gql`
           id
           name
           username
+          phoneNumber
+          email
           avatar
         }
       }

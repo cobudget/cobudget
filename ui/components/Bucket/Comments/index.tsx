@@ -1,16 +1,16 @@
-import AddComment from "./AddComment";
-import Comment from "./Comment";
-import Log from "./Log";
-import Context, { useCommentContext } from "../../../contexts/comment";
-import LoadMore from "components/LoadMore";
-import { FormattedMessage } from "react-intl";
-import Button from "components/Button";
+import AddComment from './AddComment';
+import Comment from './Comment';
+import Log from './Log';
+import Context, { useCommentContext } from '../../../contexts/comment';
+import LoadMore from 'components/LoadMore';
+import { FormattedMessage } from 'react-intl';
+import Button from 'components/Button';
 
 const Comments = ({ currentUser, bucket, router }) => {
   const context = useCommentContext({
     from: 0,
-    limit: 1000,  // The limit might be a problem
-    order: "desc",
+    limit: 1000, // The limit might be a problem
+    order: 'desc',
     currentUser,
     bucket,
   });
@@ -19,21 +19,28 @@ const Comments = ({ currentUser, bucket, router }) => {
   if (!bucket) return null;
 
   const exportCommenters = () => {
-    const commenters = comments.map((comment) => comment.roundMember.user).reduce((acc, cur) => {
-      if (acc.hasOwnProperty(cur.id))  // Get only unique users who commented
-        return acc;
-      else
-        return { ...acc, [cur.id]: cur };
-    }, []);
-    const csvContent = "data:text/csv;charset=utf-8," +
-      "Name,Email,Phone Number\n" +
-      Object.values(commenters).map((commenter: any) =>
-        `${commenter.name},${commenter.email},${commenter.phoneNumber}`
-      ).join("\n")
+    const commenters = comments
+      .map((comment) => comment.roundMember.user)
+      .reduce((acc, cur) => {
+        if (acc.hasOwnProperty(cur.id))
+          // Get only unique users who commented
+          return acc;
+        else return { ...acc, [cur.id]: cur };
+      }, []);
+    console.log('FLAG __ index[28]', commenters);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      'Name,Email,Phone Number\n' +
+      Object.values(commenters)
+        .map(
+          (commenter: any) =>
+            `${commenter.name},${commenter.email},${commenter.phoneNumber}`
+        )
+        .join('\n');
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "users_commented_on_my_dream.csv");
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'users_commented_on_my_dream.csv');
     document.body.appendChild(link);
     link.click();
   };
@@ -58,11 +65,11 @@ const Comments = ({ currentUser, bucket, router }) => {
                     </h2>
                   )}
 
-                  {currentUser.currentCollMember.isAdmin &&
+                  {currentUser.currentCollMember.isAdmin && (
                     <Button variant="primary" onClick={exportCommenters}>
                       <FormattedMessage defaultMessage="Export" />
                     </Button>
-                  }
+                  )}
                   {bucket?.discourseTopicUrl && (
                     <a
                       target="_blank"
@@ -83,7 +90,7 @@ const Comments = ({ currentUser, bucket, router }) => {
               </>
             )}
             {comments.map((comment, index) => {
-              if (comment._type === "LOG")
+              if (comment._type === 'LOG')
                 return <Log log={comment} key={index} />;
               return (
                 <Comment
