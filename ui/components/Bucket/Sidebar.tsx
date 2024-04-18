@@ -319,7 +319,7 @@ const BucketSidebar = ({
                 fullWidth
                 testid="publish-bucket"
             >
-                Join Dream
+                <FormattedMessage defaultMessage="Join Dream" id="joinddream"/>
             </Button>
         ),
       JOIN_BUTTON: () => (
@@ -343,7 +343,7 @@ const BucketSidebar = ({
               fullWidth
               testid="publish-bucket"
           >
-            Join Dream
+              <FormattedMessage defaultMessage="Join Dream" id="joinddream"/>
           </Button>
       ),
       APPROVE_BUTTON: () => (
