@@ -60,6 +60,7 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
             <h1 className="text-xl font-semibold">
               <FormattedMessage
                 defaultMessage="New {bucketName}"
+                id="newdreams"
                 values={{
                   bucketName: process.env.BUCKET_NAME_SINGULAR,
                 }}
@@ -81,6 +82,7 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
             <h1 className="text-xl font-semibold">
               <FormattedMessage
                 defaultMessage="New {bucketName}"
+                id="newdreams"
                 values={{
                   bucketName: process.env.BUCKET_NAME_SINGULAR,
                 }}

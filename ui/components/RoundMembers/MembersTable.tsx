@@ -451,7 +451,7 @@ const RoundMembersTable = ({
                   <FormattedMessage defaultMessage="Email" />
                 </TableCell>
                 <TableCell>
-                  <FormattedMessage defaultMessage="Phone Number" />
+                  <FormattedMessage defaultMessage="Phone Number" id="phonenumber"/>
                 </TableCell>
                 <TableCell>
                   <FormattedMessage defaultMessage="Bio" />

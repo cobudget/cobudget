@@ -284,7 +284,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                 )
               }
             >
-              {capitalize(process.env.BUCKET_NAME_SINGULAR)}
+                <FormattedMessage defaultMessage="Bucket" />
             </Tab>
             <Tab
               className={({ selected }) =>
