@@ -1,23 +1,23 @@
-import { useQuery, gql, ssrExchange } from "urql";
-import { useState, useEffect, useMemo } from "react";
-import EditImagesModal from "../../../../components/Bucket/EditImagesModal";
-import Bucket from "../../../../components/Bucket";
-import Overview from "../../../../components/Bucket/Overview";
-import { Tab } from "@headlessui/react";
-import Funders from "components/Bucket/Funders";
-import Comments from "components/Bucket/Comments";
+import { useQuery, gql, ssrExchange } from 'urql';
+import { useState, useEffect, useMemo } from 'react';
+import EditImagesModal from '../../../../components/Bucket/EditImagesModal';
+import Bucket from '../../../../components/Bucket';
+import Overview from '../../../../components/Bucket/Overview';
+import { Tab } from '@headlessui/react';
+import Funders from 'components/Bucket/Funders';
+import Comments from 'components/Bucket/Comments';
 
-import classNames from "utils/classNames";
-import HappySpinner from "components/HappySpinner";
-import { useRouter } from "next/router";
-import { initUrqlClient } from "next-urql";
-import { client as createClientConfig } from "graphql/client";
-import prisma from "server/prisma";
-import { TOP_LEVEL_QUERY } from "pages/_app";
-import capitalize from "utils/capitalize";
-import Head from "next/head";
-import Expenses from "components/Bucket/Expenses";
-import { FormattedMessage } from "react-intl";
+import classNames from 'utils/classNames';
+import HappySpinner from 'components/HappySpinner';
+import { useRouter } from 'next/router';
+import { initUrqlClient } from 'next-urql';
+import { client as createClientConfig } from 'graphql/client';
+import prisma from 'server/prisma';
+import { TOP_LEVEL_QUERY } from 'pages/_app';
+import capitalize from 'utils/capitalize';
+import Head from 'next/head';
+import Expenses from 'components/Bucket/Expenses';
+import { FormattedMessage } from 'react-intl';
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
@@ -205,7 +205,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
     bucket?.published;
 
   const tabsList = useMemo(
-    () => ["bucket", "comments", "funders", "expenses"],
+    () => ['bucket', 'comments', 'funders', 'expenses'],
     []
   );
   useEffect(() => {
@@ -215,7 +215,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 
   const showExpensesTab =
     currentGroup?.experimentalFeatures &&
-    (bucket?.status === "FUNDED" || bucket?.status === "COMPLETED");
+    (bucket?.status === 'FUNDED' || bucket?.status === 'COMPLETED');
 
   if ((!bucket && fetching) || !router.isReady) {
     return (
@@ -277,29 +277,31 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
             <Tab
               className={({ selected }) =>
                 classNames(
-                  "block px-2 py-4 border-b-2 font-medium transition-colors",
+                  'block px-2 py-4 border-b-2 font-medium transition-colors',
                   selected
-                    ? "border-anthracit text-anthracit"
-                    : "border-transparent text-gray-500"
+                    ? 'border-anthracit text-anthracit'
+                    : 'border-transparent text-gray-500'
                 )
               }
             >
-                <FormattedMessage defaultMessage="Bucket" />
+              <FormattedMessage defaultMessage="Bucket" />
             </Tab>
-            <Tab
-              className={({ selected }) =>
-                classNames(
-                  "block px-2 py-4 border-b-2 font-medium transition-colors",
-                  selected
-                    ? "border-anthracit text-anthracit"
-                    : "border-transparent text-gray-500"
-                )
-              }
-            >
-              <FormattedMessage defaultMessage="Comments" />{" "}
-              {!bucket?.round?.group?.discourseUrl &&
-                `(${bucket?.noOfComments})`}
-            </Tab>
+            {currentUser && (
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    'block px-2 py-4 border-b-2 font-medium transition-colors',
+                    selected
+                      ? 'border-anthracit text-anthracit'
+                      : 'border-transparent text-gray-500'
+                  )
+                }
+              >
+                <FormattedMessage defaultMessage="Comments" />{' '}
+                {!bucket?.round?.group?.discourseUrl &&
+                  `(${bucket?.noOfComments})`}
+              </Tab>
+            )}
             {/* <Tab
               className={({ selected }) =>
                 classNames(
@@ -317,17 +319,17 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
               <Tab
                 className={({ selected }) =>
                   classNames(
-                    "block px-2 py-4 border-b-2 font-medium transition-colors",
+                    'block px-2 py-4 border-b-2 font-medium transition-colors',
                     selected
-                      ? "border-anthracit text-anthracit"
-                      : "border-transparent text-gray-500"
+                      ? 'border-anthracit text-anthracit'
+                      : 'border-transparent text-gray-500'
                   )
                 }
               >
-                <FormattedMessage defaultMessage="Expenses" />{" "}
+                <FormattedMessage defaultMessage="Expenses" />{' '}
                 {bucket?.expenses?.length
                   ? `(${bucket?.expenses?.length})`
-                  : ""}
+                  : ''}
               </Tab>
             ) : null}
           </Tab.List>

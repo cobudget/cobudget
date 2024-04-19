@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import AuthenticationForm from "../components/AuthenticationForm";
-import toast, { Toaster } from "react-hot-toast";
-import { useRouter } from "next/router";
-import { useIntl } from "react-intl";
+import { useEffect, useState } from 'react';
+import AuthenticationForm from '../components/AuthenticationForm';
+import toast, { Toaster } from 'react-hot-toast';
+import { useRouter } from 'next/router';
+import { useIntl } from 'react-intl';
 
 function Login({ fbLoginEnabled, googleLoginEnabled }) {
   const router = useRouter();
@@ -10,20 +10,20 @@ function Login({ fbLoginEnabled, googleLoginEnabled }) {
   const intl = useIntl();
 
   useEffect(() => {
-    if (window.location.href.indexOf("err=INVALID_TOKEN") > -1) {
-      toast.error("The magic link is invalid. Please login again.");
+    if (window.location.href.indexOf('err=INVALID_TOKEN') > -1) {
+      toast.error('The magic link is invalid. Please login again.');
     }
-    if (window.location.href.indexOf("err=FACEBOOK_NO_EMAIL") > -1) {
+    if (window.location.href.indexOf('err=FACEBOOK_NO_EMAIL') > -1) {
       setFbEmailError(true);
     }
   }, []);
 
   useEffect(() => {
-    if (router.query.error === "invalid-token") {
+    if (router.query.error === 'invalid-token') {
       toast.error(
         intl.formatMessage({
           defaultMessage:
-            "The login link is expired or is invalid. Enter your email to receive a new link",
+            'The login link is expired or is invalid. Enter your email to receive a new link',
         })
       );
     }
@@ -33,7 +33,6 @@ function Login({ fbLoginEnabled, googleLoginEnabled }) {
     <div className="page">
       <Toaster />
       <h1 className="mt-10 text-gray-700 text-center text-xl font-medium">
-        התחברי ל {process.env.PLATFORM_NAME}
         Log in to {process.env.PLATFORM_NAME}
       </h1>
 

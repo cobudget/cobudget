@@ -1,30 +1,30 @@
-import Tooltip from "@tippyjs/react";
-import {useContext, useMemo, useState} from "react";
-import { useMutation, gql } from "urql";
-import Router from "next/router";
-import { Modal } from "@material-ui/core";
-import { useIntl, FormattedMessage } from "react-intl";
+import Tooltip from '@tippyjs/react';
+import { useContext, useMemo, useState } from 'react';
+import { useMutation, gql } from 'urql';
+import Router from 'next/router';
+import { Modal } from '@material-ui/core';
+import { useIntl, FormattedMessage } from 'react-intl';
 
-import Dropdown from "../Dropdown";
-import { EditIcon, DotsHorizontalIcon } from "../Icons";
-import Avatar from "../Avatar";
-import IconButton from "../IconButton";
-import Button from "../Button";
+import Dropdown from '../Dropdown';
+import { EditIcon, DotsHorizontalIcon } from '../Icons';
+import Avatar from '../Avatar';
+import IconButton from '../IconButton';
+import Button from '../Button';
 
-import ContributeModal from "./ContributeModal";
-import EditCocreatorsModal from "./EditCocreatorsModal";
-import GrantingStatus from "./GrantingStatus";
+import ContributeModal from './ContributeModal';
+import EditCocreatorsModal from './EditCocreatorsModal';
+import GrantingStatus from './GrantingStatus';
 
-import Tags from "./Tags";
-import toast from "react-hot-toast";
-import Monster from "components/Monster";
-import capitalize from "utils/capitalize";
-import isRtl from "../../utils/isRTL";
-import dayjs from "dayjs";
-import Label from "../../components/Label";
-import getStatusColor from "utils/getStatusColor";
-import Infobox from "./Infobox";
-import Context from "../../contexts/comment";
+import Tags from './Tags';
+import toast from 'react-hot-toast';
+import Monster from 'components/Monster';
+import capitalize from 'utils/capitalize';
+import isRtl from '../../utils/isRTL';
+import dayjs from 'dayjs';
+import Label from '../../components/Label';
+import getStatusColor from 'utils/getStatusColor';
+import Infobox from './Infobox';
+import Context from '../../contexts/comment';
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -176,7 +176,7 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
 
 const css = {
   dropdownButton:
-    "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
+    'text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200',
 };
 
 const BucketSidebar = ({
@@ -207,16 +207,16 @@ const BucketSidebar = ({
 
   const statusList = {
     PENDING_APPROVAL: intl.formatMessage({
-      defaultMessage: "Draft",
+      defaultMessage: 'Draft',
     }),
     IDEA: intl.formatMessage({
-      defaultMessage: "Idea",
+      defaultMessage: 'Idea',
     }),
-    OPEN_FOR_FUNDING: "Published",
-    FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
-    CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
-    COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
-    ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
+    OPEN_FOR_FUNDING: 'Published',
+    FUNDED: intl.formatMessage({ defaultMessage: 'Funded' }),
+    CANCELED: intl.formatMessage({ defaultMessage: 'Canceled' }),
+    COMPLETED: intl.formatMessage({ defaultMessage: 'Completed' }),
+    ARCHIVED: intl.formatMessage({ defaultMessage: 'Archived' }),
   };
 
   const canApproveBucket =
@@ -255,7 +255,7 @@ const BucketSidebar = ({
     canApproveBucket &&
     !bucket.round.grantingHasClosed &&
     !bucket.approved &&
-    bucket.status === "IDEA" &&
+    bucket.status === 'IDEA' &&
     (isAdminOrModerator ||
       (isCocreator && bucket.round.canCocreatorStartFunding));
 
@@ -266,7 +266,7 @@ const BucketSidebar = ({
     bucket.approved && !bucket.canceled && canEdit && !bucket.completed;
   //show ready for funding button only to co-creators when the bucket is in IDEA stage
   const showReadyForFundingButton =
-    bucket.status === "IDEA" &&
+    bucket.status === 'IDEA' &&
     isCocreator &&
     !isAdminOrModerator &&
     !bucket.round.canCocreatorStartFunding;
@@ -303,7 +303,9 @@ const BucketSidebar = ({
               bucketId: bucket.id,
               unpublish: bucket.published,
             }).then(() => {
-                toast.success("Dream Is Live 😎 - החלום פורסם", {duration: 10000})
+              toast.success('Dream Is Live 😎 - החלום פורסם', {
+                duration: 10000,
+              });
             })
           }
           fullWidth
@@ -312,39 +314,41 @@ const BucketSidebar = ({
           <FormattedMessage defaultMessage="Publish" />
         </Button>
       ),
-        JOIN_BUTTON_DISABLED: () => (
-            <Button
-                disabled={true}
-                color={bucket.round.color}
-                fullWidth
-                testid="publish-bucket"
-            >
-                <FormattedMessage defaultMessage="Join Dream" id="joinddream"/>
-            </Button>
-        ),
+      JOIN_BUTTON_DISABLED: () => (
+        <Button
+          disabled={true}
+          color={bucket.round.color}
+          fullWidth
+          testid="publish-bucket"
+        >
+          <FormattedMessage defaultMessage="Join Dream" id="joinddream" />
+        </Button>
+      ),
       JOIN_BUTTON: () => (
-          <Button
-              disabled={!enabledJoinDreamButton}
-              color={bucket.round.color}
-              onClick={() =>
-                {
-                  setEnabledJoinDreamButton(false);
-                  addComment({ bucketId: bucket.id, content: "I would like to join! - אשמח להצטרף לחלום"})
-                      .then(({ error }) => {
-                        if (error) {
-                            return toast.error(error.message);
-                        }else {
-                            return toast.success("Joined Dream Successfully 😎 - Dreamer got an email - הצטרפת בהצלחה - החולם קיבל מייל", {duration: 10000});
-                        }
-
-                      })
-                }
+        <Button
+          disabled={!enabledJoinDreamButton || !currentUser}
+          color={bucket.round.color}
+          onClick={() => {
+            setEnabledJoinDreamButton(false);
+            addComment({
+              bucketId: bucket.id,
+              content: 'I would like to join! - אשמח להצטרף לחלום',
+            }).then(({ error }) => {
+              if (error) {
+                return toast.error(error.message);
+              } else {
+                return toast.success(
+                  'Joined Dream Successfully 😎 - Dreamer got an email - הצטרפת בהצלחה - החולם קיבל מייל',
+                  { duration: 10000 }
+                );
               }
-              fullWidth
-              testid="publish-bucket"
-          >
-              <FormattedMessage defaultMessage="Join Dream" id="joinddream"/>
-          </Button>
+            });
+          }}
+          fullWidth
+          testid="publish-bucket"
+        >
+          <FormattedMessage defaultMessage="Join Dream" id="joinddream" />
+        </Button>
       ),
       APPROVE_BUTTON: () => (
         <Button
@@ -441,11 +445,11 @@ const BucketSidebar = ({
 
   return (
     <>
-      { showJoinDreamButton && (
-          <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
-              { enabledJoinDreamButton && (<buttons.JOIN_BUTTON />)}
-              {!enabledJoinDreamButton && (<buttons.JOIN_BUTTON_DISABLED />)}
-          </div>
+      {showJoinDreamButton && (
+        <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
+          {enabledJoinDreamButton && <buttons.JOIN_BUTTON />}
+          {!enabledJoinDreamButton && <buttons.JOIN_BUTTON_DISABLED />}
+        </div>
       )}
       {(bucket.minGoal || canEdit) && (
         <div className="bg-white rounded-lg shadow-md p-5 space-y-2">
@@ -502,7 +506,7 @@ const BucketSidebar = ({
               <div className="flex justify-end">
                 <Tooltip
                   content={intl.formatMessage({
-                    defaultMessage: "More actions",
+                    defaultMessage: 'More actions',
                   })}
                   placement="bottom"
                   arrow={false}
@@ -526,9 +530,14 @@ const BucketSidebar = ({
                       publishBucket({
                         bucketId: bucket.id,
                         unpublish: true,
-                      }).then(() => setActionsDropdownOpen(false)).then(() => {
-                          toast.success("Dream Unpublished 💩 - החלום חזר למגירה", {duration: 10000})
                       })
+                        .then(() => setActionsDropdownOpen(false))
+                        .then(() => {
+                          toast.success(
+                            'Dream Unpublished 💩 - החלום חזר למגירה',
+                            { duration: 10000 }
+                          );
+                        })
                     }
                   >
                     <FormattedMessage defaultMessage="Unpublish" />
@@ -549,7 +558,7 @@ const BucketSidebar = ({
                       onClick={() => setConfirmCancelBucketOpen(true)}
                       data-testid="cancel-bucket-button"
                     >
-                      <FormattedMessage defaultMessage="Cancel" />{" "}
+                      <FormattedMessage defaultMessage="Cancel" />{' '}
                       {process.env.BUCKET_NAME_SINGULAR}
                     </button>
                   </>
@@ -588,8 +597,8 @@ const BucketSidebar = ({
                           } else {
                             setActionsDropdownOpen(false);
                             Router.push(
-                              "/[group]/[round]",
-                              `/${bucket.round.group?.slug ?? "c"}/${
+                              '/[group]/[round]',
+                              `/${bucket.round.group?.slug ?? 'c'}/${
                                 bucket.round.slug
                               }`
                             );
@@ -597,7 +606,7 @@ const BucketSidebar = ({
                               `${capitalize(
                                 process.env.BUCKET_NAME_SINGULAR
                               )} ${intl.formatMessage({
-                                defaultMessage: "deleted",
+                                defaultMessage: 'deleted',
                               })}`
                             );
                           }
@@ -621,7 +630,7 @@ const BucketSidebar = ({
           <span>
             <Label
               className={
-                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+                'mt-2 inline-block ' + getStatusColor(bucket.status, bucket)
               }
               testid="bucket-status-view"
             >
@@ -637,13 +646,13 @@ const BucketSidebar = ({
             {canEdit && (
               <div
                 className={
-                  "absolute top-0 " +
-                  (isRtl(intl.locale) ? "left-0" : "right-0")
+                  'absolute top-0 ' +
+                  (isRtl(intl.locale) ? 'left-0' : 'right-0')
                 }
               >
                 <Tooltip
                   content={intl.formatMessage({
-                    defaultMessage: "Edit co-creators",
+                    defaultMessage: 'Edit co-creators',
                   })}
                   placement="bottom"
                   arrow={false}
@@ -663,11 +672,11 @@ const BucketSidebar = ({
                 key={member.user.id}
                 className="flex items-center mr-2 md:mr-3 sm:mb-2 space-x-2"
               >
-                <Avatar user={member.user} />{" "}
+                <Avatar user={member.user} />{' '}
                 <span
                   className={
-                    "items-center space-x-1 hidden md:block " +
-                    (isRtl(intl.locale) ? "space-x-reverse" : "")
+                    'items-center space-x-1 hidden md:block ' +
+                    (isRtl(intl.locale) ? 'space-x-reverse' : '')
                   }
                 >
                   <span className="font-medium text-gray-900">
@@ -710,7 +719,7 @@ const BucketSidebar = ({
         <p className="italic text-gray-600 text-sm">
           <FormattedMessage
             defaultMessage="The bucket was created on {date}"
-            values={{ date: dayjs(bucket.createdAt).format("MMMM DD, YYYY") }}
+            values={{ date: dayjs(bucket.createdAt).format('MMMM DD, YYYY') }}
           />
         </p>
       </div>
