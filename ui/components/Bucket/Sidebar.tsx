@@ -6,7 +6,7 @@ import { Modal } from "@material-ui/core";
 import { useIntl, FormattedMessage } from "react-intl";
 
 import Dropdown from "../Dropdown";
-import { EditIcon, DotsHorizontalIcon } from "../Icons";
+import { EditIcon, DotsHorizontalIcon, Star } from "../Icons";
 import Avatar from "../Avatar";
 import IconButton from "../IconButton";
 import Button from "../Button";
@@ -595,8 +595,42 @@ const BucketSidebar = ({
             </span>
           </div>
           <div className="flex items-center justify-end">
-            <span onClick={() => toggleFavorite({ bucketId: bucket.id })}>
-              {bucket.isFavorite ? "Unfav" : "Fav"}
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite({ bucketId: bucket.id }).then(() => {
+                  if (bucket.isFavorite) {
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Bucket removed from favorites",
+                      })
+                    );
+                  } else {
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Bucket added to favorites",
+                      })
+                    );
+                  }
+                });
+              }}
+              className="cursor-pointer"
+            >
+              {bucket.isFavorite ? (
+                <Star
+                  height={"48"}
+                  width={"48"}
+                  fillColor={"#333"}
+                  lineColor={"#333333"}
+                />
+              ) : (
+                <Star
+                  height={"48"}
+                  width={"48"}
+                  fillColor={"transparent"}
+                  lineColor={"#333333"}
+                />
+              )}
             </span>
           </div>
         </div>
