@@ -18,6 +18,7 @@ import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
 import {
+  FavoriteBucketReason,
   GRAPHQL_ADMIN_AND_MODERATOR_ONLY,
   GRAPHQL_EXPENSE_COCREATOR_ONLY,
   GRAPHQL_EXPENSE_NOT_FOUND,
@@ -75,6 +76,13 @@ export const createBucket = combineResolvers(
           },
         },
       },
+    });
+
+    // star buckets
+    markBucketAsFavorite({
+      bucketId: bucket.id,
+      userId: user?.id,
+      reason: FavoriteBucketReason.CREATOR,
     });
 
     await eventHub.publish("create-bucket", {
@@ -330,6 +338,11 @@ export const addCocreator = combineResolvers(
       },
     });
     if (roundMember?.hasJoined) {
+      markBucketAsFavorite({
+        bucketId,
+        userId: roundMember.userId,
+        reason: FavoriteBucketReason.COCREATOR,
+      });
       return prisma.bucket.update({
         where: { id: bucketId },
         data: {

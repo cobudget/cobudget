@@ -3,9 +3,11 @@ import prisma from "server/prisma";
 export const markBucketAsFavorite = async ({
   bucketId,
   userId,
+  reason,
 }: {
   bucketId: string;
   userId: string;
+  reason?: string;
 }) => {
   const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
   const roundMembership = await prisma.roundMember.findFirst({
@@ -26,6 +28,7 @@ export const markBucketAsFavorite = async ({
       data: {
         bucketId,
         roundMemberId: roundMembership.id,
+        reason,
       },
     });
   } catch (err) {
