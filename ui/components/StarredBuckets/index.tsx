@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { gql, useQuery } from "urql";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 
@@ -52,19 +53,33 @@ const STARRED_BUCKETS = gql`
 `;
 
 function StarredBuckets() {
+    const [variables] = useState({});
   const { fetching, fetchMore, data } = usePaginatedQuery({
     query: STARRED_BUCKETS,
     limit: 12,
     toFullPage: (pagesMap) => {
-      const data = Object.values(pagesMap);
-      console.log(">>>", data);
+      const pages: any = Object.values(pagesMap);
+      return pages.reduce(
+        (acc, page) => {
+          return {
+            moreExist: page.starredBuckets.moreExist,
+            buckets: [...acc.buckets, ...page.starredBuckets.buckets],
+          };
+        },
+        {
+          buckets: [],
+          moreExist: true,
+        }
+      );
     },
-    variables: {},
+    variables,
   });
 
-  if (fetching) return <>...</>;
-
-  return <>Fav</>;
+  return (
+    <>
+        <h1 className="text-center my-6 text-2xl">★ Starred Buckets</h1>
+    </>
+  )
 }
 
 export default StarredBuckets;
