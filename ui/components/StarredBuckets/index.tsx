@@ -1,3 +1,7 @@
+import BucketCard from "components/BucketCard";
+import LoadMore from "components/LoadMore";
+import PageHero from "components/PageHero";
+import Link from "next/link";
 import { useState } from "react";
 import { gql, useQuery } from "urql";
 import usePaginatedQuery from "utils/usePaginatedQuery";
@@ -28,6 +32,11 @@ const STARRED_BUCKETS = gql`
         percentageFunded
         round {
           canCocreatorStartFunding
+          id
+          slug
+          group {
+            slug
+          }
         }
         customFields {
           value
@@ -53,16 +62,16 @@ const STARRED_BUCKETS = gql`
 `;
 
 function StarredBuckets() {
-    const [variables] = useState({});
+  const [variables] = useState({});
   const { fetching, fetchMore, data } = usePaginatedQuery({
     query: STARRED_BUCKETS,
-    limit: 12,
+    limit: 18,
     toFullPage: (pagesMap) => {
       const pages: any = Object.values(pagesMap);
       return pages.reduce(
         (acc, page) => {
           return {
-            moreExist: page.starredBuckets.moreExist,
+            moreExist: page.starredBuckets.moreExist && acc.moreExist,
             buckets: [...acc.buckets, ...page.starredBuckets.buckets],
           };
         },
@@ -76,10 +85,35 @@ function StarredBuckets() {
   });
 
   return (
-    <>
-        <h1 className="text-center my-6 text-2xl">★ Starred Buckets</h1>
-    </>
-  )
+    <PageHero>
+      <h1 className="text-center my-6 text-2xl">★ Starred Buckets</h1>
+      <div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {data.buckets.map((bucket) => (
+            <Link
+              href={`/${bucket.round.group?.slug || "c"}/${bucket.round.slug}/${
+                bucket.id
+              }`}
+              key={bucket.id}
+            >
+              <a>
+                <BucketCard bucket={bucket} round={bucket.round} />
+              </a>
+            </Link>
+          ))}
+        </div>
+        <div className="flex justify-center items-center">
+          {data.moreExist && (
+            <LoadMore
+              moreExist={data.moreExist}
+              onClick={fetchMore}
+              loading={fetching}
+            />
+          )}
+        </div>
+      </div>
+    </PageHero>
+  );
 }
 
 export default StarredBuckets;
