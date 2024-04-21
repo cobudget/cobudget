@@ -150,12 +150,13 @@ model RoundMember {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  buckets       Bucket[]
-  allocations   Allocation[]
-  contributions Contribution[]
-  comments      Comment[]
-  flags         Flag[]
-  allocatedBy   Allocation[]   @relation("allocatedBy")
+  buckets           Bucket[]
+  allocations       Allocation[]
+  contributions     Contribution[]
+  comments          Comment[]
+  flags             Flag[]
+  allocatedBy       Allocation[]   @relation("allocatedBy")
+  favoriteBuckets   FavoriteBucket[]
 
   incomingAccount   Account? @relation(name: "incoming", fields: [incomingAccountId], references: [id])
   statusAccount     Account? @relation(name: "status", fields: [statusAccountId], references: [id])
@@ -376,11 +377,13 @@ model Bucket {
 model FavoriteBucket {
   id                String        @id @default(cuid())
   bucketId          String
-  userId            String
+  roundMemberId     String    
+  roundMember       RoundMember   @relation(fields: [roundMemberId], references: [id])
+  reason            String?       // reason for automatic marking bucket as favorite
 
   createdAt         DateTime      @default(now())
 
-  @@unique([bucketId, userId])
+  @@unique([bucketId, roundMemberId])
 }
 
 enum DirectFundingType {

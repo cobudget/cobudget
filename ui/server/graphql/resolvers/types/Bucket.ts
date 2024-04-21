@@ -227,9 +227,21 @@ export const expense = async ({ expenseId }) => {
   return prisma.expense.findUnique({ where: { id: expenseId } });
 };
 
-export const isFavorite = async ({ id }, _: unknown, { user }) => {
-  return isBucketFavorite({
-    bucketId: id,
-    userId: user?.id,
+export const isFavorite = async ({ id, roundId }, _: unknown, { user }) => {
+  const roundMembership = await prisma.roundMember.findFirst({
+    where: {
+      userId: user?.id,
+      roundId,
+      hasJoined: true,
+      isApproved: true,
+    },
   });
+  if (roundMembership) {
+    return isBucketFavorite({
+      bucketId: id,
+      userId: user?.id,
+    });
+  } else {
+    return false;
+  }
 };

@@ -598,7 +598,10 @@ const BucketSidebar = ({
             <span
               onClick={(e) => {
                 e.stopPropagation();
-                toggleFavorite({ bucketId: bucket.id }).then(() => {
+                toggleFavorite({ bucketId: bucket.id }).then(({ error }) => {
+                  if (error?.graphQLErrors?.length > 0) {
+                    return toast.error(error.graphQLErrors[0].message);
+                  }
                   if (bucket.isFavorite) {
                     toast.success(
                       intl.formatMessage({

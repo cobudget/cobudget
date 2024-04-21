@@ -8,12 +8,24 @@ export const markBucketAsFavorite = async ({
   userId: string;
 }) => {
   const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
-
+  const roundMembership = await prisma.roundMember.findFirst({
+    where: {
+      userId: userId,
+      roundId: bucket.roundId,
+      hasJoined: true,
+      isApproved: true,
+    },
+  });
+  if (!roundMembership) {
+    throw new Error(
+      "You are not member of this round. Join this round to mark buckets as favorite."
+    );
+  }
   try {
     await prisma.favoriteBucket.create({
       data: {
         bucketId,
-        userId,
+        roundMemberId: roundMembership.id,
       },
     });
   } catch (err) {
@@ -31,12 +43,20 @@ export const unmarkBucketAsFavorite = async ({
   userId: string;
 }) => {
   const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
+  const roundMembership = await prisma.roundMember.findUnique({
+    where: {
+      userId_roundId: {
+        userId: userId,
+        roundId: bucket.roundId,
+      },
+    },
+  });
 
   await prisma.favoriteBucket.delete({
     where: {
-      bucketId_userId: {
-        bucketId,
-        userId,
+      bucketId_roundMemberId: {
+        bucketId: bucket.id,
+        roundMemberId: roundMembership?.id,
       },
     },
   });
@@ -51,10 +71,22 @@ export const isBucketFavorite = async ({
   bucketId: string;
   userId: string;
 }) => {
-  const row = await prisma.favoriteBucket.findFirst({
+  const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
+  const roundMembership = await prisma.roundMember.findUnique({
     where: {
-      bucketId,
-      userId,
+      userId_roundId: {
+        userId: userId,
+        roundId: bucket.roundId,
+      },
+    },
+  });
+
+  const row = await prisma.favoriteBucket.findUnique({
+    where: {
+      bucketId_roundMemberId: {
+        bucketId,
+        roundMemberId: roundMembership?.id,
+      },
     },
     select: {
       id: true,
@@ -72,9 +104,16 @@ export const getStarredBuckets = async ({
   take: number;
   skip: number;
 }) => {
-  return prisma.favoriteBucket.findMany({
+  const memberships = await prisma.roundMember.findMany({
     where: {
       userId,
+    },
+  });
+  return prisma.favoriteBucket.findMany({
+    where: {
+      roundMemberId: {
+        in: memberships.map((member) => member.id),
+      },
     },
     take,
     skip,
@@ -93,14 +132,18 @@ export const getStarredBucketsCount = async ({
   take: number;
   skip: number;
 }) => {
-  return prisma.favoriteBucket.count({
+  const memberships = await prisma.roundMember.findMany({
     where: {
       userId,
+      hasJoined: true,
+      isApproved: true,
     },
-    take,
-    skip,
-    orderBy: {
-      createdAt: "desc",
+  });
+  return prisma.favoriteBucket.count({
+    where: {
+      roundMemberId: {
+        in: memberships.map((member) => member.id),
+      },
     },
   });
 };
