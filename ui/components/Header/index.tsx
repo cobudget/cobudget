@@ -486,6 +486,9 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                       <FormattedMessage defaultMessage="Email settings" />
                     </a>
                   </Link>
+                  <Link href={"/starred-buckets"}>
+                    <a className={css.mobileProfileItem}>★ Buckets</a>
+                  </Link>
                   <a
                     href={"/api/auth/logout"}
                     className={css.mobileProfileItem}

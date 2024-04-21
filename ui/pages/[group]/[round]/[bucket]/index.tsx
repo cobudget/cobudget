@@ -44,6 +44,7 @@ export const BUCKET_QUERY = gql`
       noOfComments
       noOfFunders
       status
+      isFavorite
 
       directFundingEnabled
       directFundingType
@@ -80,6 +81,10 @@ export const BUCKET_QUERY = gql`
         maxAmountToBucketPerUser
         canCocreatorStartFunding
         canCocreatorEditOpenBuckets
+        bucketsLimit {
+          isLimitOver
+          status
+        }
         ocCollective {
           slug
           parent {

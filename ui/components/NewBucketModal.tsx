@@ -10,6 +10,7 @@ import Button from "components/Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { MAX_BUCKET_TITLE_LENGTH } from "../constants";
+import Link from "next/link";
 
 const CREATE_BUCKET = gql`
   mutation CreateBucket($roundId: ID!, $title: String!) {
@@ -24,7 +25,7 @@ const CREATE_BUCKET = gql`
   }
 `;
 
-const NewBucketModal = ({ round, handleClose, router }) => {
+const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
   const intl = useIntl();
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
@@ -54,54 +55,92 @@ const NewBucketModal = ({ round, handleClose, router }) => {
       className="flex items-center justify-center p-4"
     >
       <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
-        <form onSubmit={handleSubmit(onSubmitCreate)}>
-          <h1 className="text-xl font-semibold">
-            <FormattedMessage
-              defaultMessage="New {bucketName}"
-              values={{
-                bucketName: process.env.BUCKET_NAME_SINGULAR,
-              }}
-            />
-          </h1>
-
-          <TextField
-            className="my-3"
-            name="title"
-            size="large"
-            placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-            inputRef={register({
-              required: "Required",
-            })}
-            inputProps={{
-              maxLength: MAX_BUCKET_TITLE_LENGTH,
-            }}
-            autoFocus
-            error={Boolean(errors.title)}
-            helperText={errors.title?.message}
-            color={round.color}
-            testid="new-bucket-title-input"
-          />
-
-          <div className="flex justify-end">
-            <Button
-              size="large"
-              variant="secondary"
-              onClick={handleClose}
-              className="mr-3"
-              color={round.color}
-            >
-              <FormattedMessage defaultMessage="Cancel" />
-            </Button>
-            <Button
-              size="large"
-              type="submit"
-              loading={loading}
-              color={round.color}
-            >
-              <FormattedMessage defaultMessage="Create" />
-            </Button>
+        {bucketsLimit?.isLimitOver ? (
+          <div>
+            <h1 className="text-xl font-semibold">
+              <FormattedMessage
+                defaultMessage="New {bucketName}"
+                values={{
+                  bucketName: process.env.BUCKET_NAME_SINGULAR,
+                }}
+              />
+            </h1>
+            <p>
+              <FormattedMessage defaultMessage="Move this round to a paid group or create a new group to add more buckets to this round" />
+            </p>
+            <div className="my-2">
+              <Link href="/new-group">
+                <Button>
+                  <FormattedMessage defaultMessage="New Group" />
+                </Button>
+              </Link>
+            </div>
           </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit(onSubmitCreate)}>
+            <h1 className="text-xl font-semibold">
+              <FormattedMessage
+                defaultMessage="New {bucketName}"
+                values={{
+                  bucketName: process.env.BUCKET_NAME_SINGULAR,
+                }}
+              />
+            </h1>
+
+            <TextField
+              className="my-3"
+              name="title"
+              size="large"
+              placeholder={intl.formatMessage({ defaultMessage: "Title" })}
+              inputRef={register({
+                required: "Required",
+              })}
+              inputProps={{
+                maxLength: MAX_BUCKET_TITLE_LENGTH,
+              }}
+              autoFocus
+              error={Boolean(errors.title)}
+              helperText={errors.title?.message}
+              color={round.color}
+              testid="new-bucket-title-input"
+            />
+
+            {bucketsLimit?.consumedPercentage >= 75 &&
+              bucketsLimit.status === "free" && (
+                <p className="my-2 text-red-600">
+                  <FormattedMessage
+                    defaultMessage="{remainingCount} free {remainingCount, plural, one {bucket} other {buckets}} left which can be funded. Upgrade to increase your funded buckets count."
+                    values={{
+                      remainingCount: Math.max(
+                        bucketsLimit.limit - bucketsLimit.currentCount,
+                        0
+                      ),
+                    }}
+                  />
+                </p>
+              )}
+
+            <div className="flex justify-end">
+              <Button
+                size="large"
+                variant="secondary"
+                onClick={handleClose}
+                className="mr-3"
+                color={round.color}
+              >
+                <FormattedMessage defaultMessage="Cancel" />
+              </Button>
+              <Button
+                size="large"
+                type="submit"
+                loading={loading}
+                color={round.color}
+              >
+                <FormattedMessage defaultMessage="Create" />
+              </Button>
+            </div>
+          </form>
+        )}
       </div>
     </Modal>
   );

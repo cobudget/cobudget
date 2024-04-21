@@ -33,6 +33,14 @@ const schema = gql`
     consumedPercentage: Int
   }
 
+  type ResourceLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+    isLimitOver: Boolean
+    status: String
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -40,6 +48,7 @@ const schema = gql`
     user(userId: ID!): User!
     groups: [Group!]
     adminGroups: [Group!]
+    adminRounds: [Round]!
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
@@ -70,6 +79,7 @@ const schema = gql`
       orderBy: String
       orderDir: String
     ): BucketsPage
+    starredBuckets(take: Int, skip: Int): BucketsPage
     languageProgressPage: [LanguageProgress]
     convertCurrency(
       amounts: [AmountConversionInput]!
@@ -192,6 +202,7 @@ const schema = gql`
     deleteCustomField(roundId: ID!, fieldId: ID!): Round!
 
     changeRoundSize(roundId: ID!, maxMembers: Int): Round
+    changeBucketLimit(roundId: ID!, maxFreeBuckets: Int): Round
 
     editBucketCustomField(
       bucketId: ID!
@@ -213,6 +224,8 @@ const schema = gql`
       exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
+
+    toggleFavoriteBucket(bucketId: ID!): Bucket
 
     createExpense(
       bucketId: String!
@@ -455,7 +468,7 @@ const schema = gql`
     ocVerified: Boolean
     ocTokenStatus: OC_TokenStatus
     membersLimit: MembersLimit
-
+    bucketsLimit: ResourceLimit
     expenses: [Expense]
   }
 
@@ -721,6 +734,7 @@ const schema = gql`
     percentageFunded: Float
     expenses: [Expense]
     expense(id: String!): Expense
+    isFavorite: Boolean
   }
 
   enum DirectFundingType {
