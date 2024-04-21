@@ -6,7 +6,7 @@ import { Modal } from "@material-ui/core";
 import { useIntl, FormattedMessage } from "react-intl";
 
 import Dropdown from "../Dropdown";
-import { EditIcon, DotsHorizontalIcon } from "../Icons";
+import { EditIcon, DotsHorizontalIcon, Star } from "../Icons";
 import Avatar from "../Avatar";
 import IconButton from "../IconButton";
 import Button from "../Button";
@@ -117,6 +117,15 @@ const REOPEN_FUNDING = gql`
   }
 `;
 
+const TOGGLE_FAVORITE_BUCKET = gql`
+  mutation ToggleFavoriteBucket($bucketId: ID!) {
+    toggleFavoriteBucket(bucketId: $bucketId) {
+      id
+      isFavorite
+    }
+  }
+`;
+
 const ConfirmCancelBucket = ({ open, close, bucketId }) => {
   const [{ fetching }, cancelFunding] = useMutation(CANCEL_FUNDING_MUTATION);
 
@@ -199,6 +208,9 @@ const BucketSidebar = ({
   const [, acceptFunding] = useMutation(ACCEPT_FUNDING_MUTATION);
   const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
   const [, reopenFunding] = useMutation(REOPEN_FUNDING);
+  const [{ fetching: togglingFavorite }, toggleFavorite] = useMutation(
+    TOGGLE_FAVORITE_BUCKET
+  );
 
   const intl = useIntl();
 
@@ -566,20 +578,64 @@ const BucketSidebar = ({
         </div>
       )}
       <div className="mt-5 space-y-5">
-        <div>
-          <div className="mr-2 font-medium ">
-            <FormattedMessage defaultMessage="Bucket Status" />
+        <div className="grid grid-cols-6">
+          <div className="col-span-5">
+            <div className="mr-2 font-medium ">
+              <FormattedMessage defaultMessage="Bucket Status" />
+            </div>
+            <span>
+              <Label
+                className={
+                  "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
+                }
+                testid="bucket-status-view"
+              >
+                {statusList[bucket.status]}
+              </Label>
+            </span>
           </div>
-          <span>
-            <Label
-              className={
-                "mt-2 inline-block " + getStatusColor(bucket.status, bucket)
-              }
-              testid="bucket-status-view"
+          <div className="flex items-center justify-end">
+            <span
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite({ bucketId: bucket.id }).then(({ error }) => {
+                  if (error?.graphQLErrors?.length > 0) {
+                    return toast.error(error.graphQLErrors[0].message);
+                  }
+                  if (bucket.isFavorite) {
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Bucket removed from favorites",
+                      })
+                    );
+                  } else {
+                    toast.success(
+                      intl.formatMessage({
+                        defaultMessage: "Bucket added to favorites",
+                      })
+                    );
+                  }
+                });
+              }}
+              className="cursor-pointer"
             >
-              {statusList[bucket.status]}
-            </Label>
-          </span>
+              {bucket.isFavorite ? (
+                <Star
+                  height={"40"}
+                  width={"40"}
+                  fillColor={"#333"}
+                  lineColor={"#333333"}
+                />
+              ) : (
+                <Star
+                  height={"40"}
+                  width={"40"}
+                  fillColor={"transparent"}
+                  lineColor={"#333333"}
+                />
+              )}
+            </span>
+          </div>
         </div>
         <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">

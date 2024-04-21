@@ -18,6 +18,7 @@ import discourse from "server/lib/discourse";
 import { contribute as contributeToBucket } from "server/controller";
 import { skip } from "graphql-resolvers";
 import {
+  FavoriteBucketReason,
   GRAPHQL_ADMIN_AND_MODERATOR_ONLY,
   GRAPHQL_EXPENSE_COCREATOR_ONLY,
   GRAPHQL_EXPENSE_NOT_FOUND,
@@ -29,6 +30,11 @@ import {
 import EventHub from "server/services/eventHub.service";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import { isBucketLimitOver } from "../helpers/round";
+import {
+  isBucketFavorite,
+  markBucketAsFavorite,
+  unmarkBucketAsFavorite,
+} from "../helpers/bucket";
 const { groupHasDiscourse } = subscribers;
 
 export const createBucket = combineResolvers(
@@ -70,6 +76,13 @@ export const createBucket = combineResolvers(
           },
         },
       },
+    });
+
+    // star buckets
+    markBucketAsFavorite({
+      bucketId: bucket.id,
+      userId: user?.id,
+      reason: FavoriteBucketReason.CREATOR,
     });
 
     await eventHub.publish("create-bucket", {
@@ -325,6 +338,11 @@ export const addCocreator = combineResolvers(
       },
     });
     if (roundMember?.hasJoined) {
+      markBucketAsFavorite({
+        bucketId,
+        userId: roundMember.userId,
+        reason: FavoriteBucketReason.COCREATOR,
+      });
       return prisma.bucket.update({
         where: { id: bucketId },
         data: {
@@ -1236,5 +1254,24 @@ export const updateExpense = async (
     }
   } catch (e) {
     return null;
+  }
+};
+
+export const toggleFavoriteBucket = async (
+  _: unknown,
+  { bucketId }: { bucketId: string },
+  { user }
+) => {
+  const markedFavorite = await isBucketFavorite({ userId: user?.id, bucketId });
+  if (markedFavorite) {
+    return unmarkBucketAsFavorite({
+      bucketId,
+      userId: user?.id,
+    });
+  } else {
+    return markBucketAsFavorite({
+      bucketId,
+      userId: user?.id,
+    });
   }
 };

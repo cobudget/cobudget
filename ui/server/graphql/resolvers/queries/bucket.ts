@@ -13,6 +13,7 @@ import {
 } from "../helpers";
 import discourse from "../../../lib/discourse";
 import { ROUND_IS_PRIVATE } from "../../../../constants";
+import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -122,6 +123,31 @@ export const bucketsPage = async (
     moreExist: shuffledBuckets.length > limit + offset,
     buckets: shuffledBuckets.slice(offset, limit + offset),
   };
+};
+
+export const starredBuckets = async (_, { take, skip }, { user }) => {
+  if (user) {
+    const favorites = await getStarredBuckets({
+      userId: user?.id,
+      take,
+      skip,
+    });
+    const buckets = await prisma.bucket.findMany({
+      where: {
+        id: { in: favorites.map((favorite) => favorite.bucketId) },
+      },
+    });
+    const moreExist = favorites.length === take;
+    return {
+      buckets,
+      moreExist,
+    };
+  } else {
+    return {
+      moreExist: false,
+      buckets: [],
+    };
+  }
 };
 
 export const commentSet = async (

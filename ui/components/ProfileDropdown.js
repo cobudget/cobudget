@@ -96,6 +96,11 @@ const ProfileDropdown = ({ currentUser, setEditProfileModalOpen }) => {
                 <FormattedMessage defaultMessage="Email settings" />
               </a>
             </Link>
+            <Link href={"/starred-buckets"}>
+              <a className={css.button} onClick={() => setOpen(false)}>
+                ★ Buckets
+              </a>
+            </Link>
             <a href="/api/auth/logout" className={css.button}>
               <FormattedMessage defaultMessage="Sign out" />
             </a>
