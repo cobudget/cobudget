@@ -21,3 +21,9 @@ export const ALLOWED_EXPENSE_RECEIPT_TYPES = [
   "CSV",
   "HTML",
 ];
+
+export const FavoriteBucketReason = {
+  CREATOR: "CREATOR",
+  COCREATOR: "COCREATOR",
+  FUNDED: "FUNDED",
+};

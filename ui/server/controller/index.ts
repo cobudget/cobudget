@@ -10,6 +10,8 @@ import {
 import { updateFundedPercentage } from "../graphql/resolvers/helpers";
 import isGroupSubscriptionActive from "server/graphql/resolvers/helpers/isGroupSubscriptionActive";
 import { isBucketLimitOver } from "server/graphql/resolvers/helpers/round";
+import { markBucketAsFavorite } from "server/graphql/resolvers/helpers/bucket";
+import { FavoriteBucketReason } from "../../constants";
 
 export const allocateToMember = async ({
   roundId,
@@ -351,6 +353,13 @@ export const contribute = async ({
   });
 
   await updateContributionsCount(bucket);
+
+  // star bucket
+  await markBucketAsFavorite({
+    userId: user?.id,
+    bucketId,
+    reason: FavoriteBucketReason.FUNDED,
+  });
 
   return bucket;
 };

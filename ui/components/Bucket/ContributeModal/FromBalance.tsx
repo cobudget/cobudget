@@ -14,6 +14,7 @@ const CONTRIBUTE_MUTATION = gql`
       noOfFunders
       status
       funded
+      isFavorite
       fundedAt
       funders {
         id
