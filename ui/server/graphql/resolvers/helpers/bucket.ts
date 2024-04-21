@@ -62,3 +62,45 @@ export const isBucketFavorite = async ({
   });
   return !!row;
 };
+
+export const getStarredBuckets = async ({
+  userId,
+  take,
+  skip,
+}: {
+  userId: string;
+  take: number;
+  skip: number;
+}) => {
+  return prisma.favoriteBucket.findMany({
+    where: {
+      userId,
+    },
+    take,
+    skip,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const getStarredBucketsCount = async ({
+  userId,
+  take,
+  skip,
+}: {
+  userId: string;
+  take: number;
+  skip: number;
+}) => {
+  return prisma.favoriteBucket.count({
+    where: {
+      userId,
+    },
+    take,
+    skip,
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};

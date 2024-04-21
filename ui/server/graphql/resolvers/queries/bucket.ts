@@ -13,6 +13,7 @@ import {
 } from "../helpers";
 import discourse from "../../../lib/discourse";
 import { ROUND_IS_PRIVATE } from "../../../../constants";
+import { getStarredBuckets, getStarredBucketsCount } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -122,6 +123,31 @@ export const bucketsPage = async (
     moreExist: shuffledBuckets.length > limit + offset,
     buckets: shuffledBuckets.slice(offset, limit + offset),
   };
+};
+
+export const starredBuckets = async (_, { take, skip }, { user }) => {
+  if (user) {
+    const buckets = await getStarredBuckets({
+      userId: user?.id,
+      take,
+      skip,
+    });
+    const count = await getStarredBucketsCount({
+      userId: user?.id,
+      take,
+      skip,
+    });
+    const moreExists = count <= skip + take;
+    return {
+      buckets,
+      moreExists,
+    };
+  } else {
+    return {
+      moreExist: false,
+      buckets: [],
+    };
+  }
 };
 
 export const commentSet = async (
