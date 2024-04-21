@@ -13,7 +13,7 @@ import {
 } from "../helpers";
 import discourse from "../../../lib/discourse";
 import { ROUND_IS_PRIVATE } from "../../../../constants";
-import { getStarredBuckets, getStarredBucketsCount } from "../helpers/bucket";
+import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -127,20 +127,20 @@ export const bucketsPage = async (
 
 export const starredBuckets = async (_, { take, skip }, { user }) => {
   if (user) {
-    const buckets = await getStarredBuckets({
+    const favorites = await getStarredBuckets({
       userId: user?.id,
       take,
       skip,
     });
-    const count = await getStarredBucketsCount({
-      userId: user?.id,
-      take,
-      skip,
+    const buckets = await prisma.bucket.findMany({
+      where: {
+        id: { in: favorites.map((favorite) => favorite.bucketId) },
+      },
     });
-    const moreExists = count <= skip + take;
+    const moreExist = favorites.length === take;
     return {
       buckets,
-      moreExists,
+      moreExist,
     };
   } else {
     return {

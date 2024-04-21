@@ -1,3 +1,4 @@
+import StarredBuckets from "components/StarredBuckets";
 import Head from "next/head";
 
 function StarredBucketsPage() {
@@ -6,7 +7,9 @@ function StarredBucketsPage() {
       <Head>
         <title>Favorite Buckets</title>
       </Head>
-      <main></main>
+      <main>
+        <StarredBuckets />
+      </main>
     </>
   );
 }
