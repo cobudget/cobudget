@@ -494,8 +494,9 @@ export const Star = ({ height, width, lineColor, fillColor }) => {
       height={height}
       fill={lineColor}
       stroke={lineColor}
+      strokeWidth={4}
       version="1.1"
-      viewBox="0 0 64 64"
+      viewBox="-5 -5 72 72"
       xmlSpace="preserve"
     >
       <path

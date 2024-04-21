@@ -618,15 +618,15 @@ const BucketSidebar = ({
             >
               {bucket.isFavorite ? (
                 <Star
-                  height={"48"}
-                  width={"48"}
+                  height={"40"}
+                  width={"40"}
                   fillColor={"#333"}
                   lineColor={"#333333"}
                 />
               ) : (
                 <Star
-                  height={"48"}
-                  width={"48"}
+                  height={"40"}
+                  width={"40"}
                   fillColor={"transparent"}
                   lineColor={"#333333"}
                 />
