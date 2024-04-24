@@ -5,6 +5,7 @@ import { SelectField } from "components/SelectInput";
 import Link from "next/link";
 import { CURRENT_USER_QUERY } from "pages/_app";
 import { useMemo, useState } from "react";
+import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 
@@ -149,6 +150,13 @@ function StarredBuckets() {
       </div>
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {data.buckets.length === 0 && !fetching && (
+            <div className="flex justify-center items-center w-full col-span-3 my-6 font-bold text-gray-400">
+              <span>
+                <FormattedMessage defaultMessage="No bucket found" />
+              </span>
+            </div>
+          )}
           {data.buckets.map((bucket) => (
             <Link
               href={`/${bucket.round.group?.slug || "c"}/${bucket.round.slug}/${
