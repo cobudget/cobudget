@@ -102,21 +102,40 @@ export const getStarredBuckets = async ({
   userId,
   take,
   skip,
+  roundId,
 }: {
   userId: string;
   take: number;
   skip: number;
+  roundId: string;
 }) => {
   const memberships = await prisma.roundMember.findMany({
     where: {
       userId,
     },
   });
+  let bucketIds = [];
+  if (roundId) {
+    const buckets = await prisma.bucket.findMany({
+      where: {
+        roundId,
+      },
+      select: {
+        id: true,
+      },
+    });
+    bucketIds = buckets.map((bucket) => bucket.id);
+  }
   return prisma.favoriteBucket.findMany({
     where: {
       roundMemberId: {
         in: memberships.map((member) => member.id),
       },
+      ...(roundId && {
+        bucketId: {
+          in: bucketIds,
+        },
+      }),
     },
     take,
     skip,
