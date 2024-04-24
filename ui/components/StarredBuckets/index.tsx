@@ -1,8 +1,10 @@
 import BucketCard from "components/BucketCard";
 import LoadMore from "components/LoadMore";
 import PageHero from "components/PageHero";
+import { SelectField } from "components/SelectInput";
 import Link from "next/link";
-import { useState } from "react";
+import { CURRENT_USER_QUERY } from "pages/_app";
+import { useMemo, useState } from "react";
 import { gql, useQuery } from "urql";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 
@@ -62,7 +64,10 @@ const STARRED_BUCKETS = gql`
 `;
 
 function StarredBuckets() {
-  const [variables] = useState({});
+  const [variables, setVariables] = useState<{ roundId?: string }>({});
+  const [{ data: currentUserResponse }] = useQuery({
+    query: CURRENT_USER_QUERY,
+  });
   const { fetching, fetchMore, data } = usePaginatedQuery({
     query: STARRED_BUCKETS,
     limit: 18,
@@ -84,9 +89,56 @@ function StarredBuckets() {
     variables,
   });
 
+  const currentUser = currentUserResponse?.currentUser;
+  const { roundOptions, groupOptions } = useMemo(() => {
+    if (currentUser) {
+      const groups = { Rounds: [{ title: "All" }] };
+      currentUser.roundMemberships?.forEach((member) => {
+        if (member.round.group) {
+          if (groups[member.round.group.name]) {
+            groups[member.round.group.name].push(member.round);
+          } else {
+            groups[member.round.group.name] = [member.round];
+          }
+        } else {
+          groups["Rounds"].push(member.round);
+        }
+      });
+      return {
+        roundOptions: groups,
+        groupOptions: Object.keys(groups),
+      };
+    } else
+      return {
+        roundOptions: [],
+        groupOptions: [],
+      };
+  }, [currentUser]);
+
   return (
     <PageHero>
-      <h1 className="text-center my-6 text-2xl">★ Starred Buckets</h1>
+      <div className="flex my-6 justify-between items-center">
+        <h1 className="text-2xl">★ Starred Buckets</h1>
+        <span>
+          <SelectField
+            className="bg-white sm:order-last"
+            inputProps={{
+              value: variables.roundId,
+              onChange: (e) => setVariables({ roundId: e.target.value }),
+            }}
+          >
+            {groupOptions.map((option) => (
+              <optgroup label={option} key={option}>
+                {roundOptions[option].map((option) => (
+                  <option value={option.id} key={option.id}>
+                    {option.title}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </SelectField>
+        </span>
+      </div>
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {data.buckets.map((bucket) => (

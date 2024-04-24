@@ -6,7 +6,7 @@ import Label from "./Label";
 import { FormattedMessage, FormattedNumber, useIntl } from "react-intl";
 import getStatusColor from "utils/getStatusColor";
 
-const BucketCard = ({ bucket, round }) => {
+const BucketCard = ({ bucket, round, showRound = false }) => {
   const intl = useIntl();
 
   const statusList = {
