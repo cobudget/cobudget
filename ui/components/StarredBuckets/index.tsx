@@ -36,6 +36,8 @@ const STARRED_BUCKETS = gql`
         round {
           canCocreatorStartFunding
           id
+          currency
+          color
           slug
           group {
             slug
