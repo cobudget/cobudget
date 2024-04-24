@@ -39,8 +39,10 @@ const STARRED_BUCKETS = gql`
           currency
           color
           slug
+          title
           group {
             slug
+            name
           }
         }
         customFields {
@@ -167,7 +169,7 @@ function StarredBuckets() {
               key={bucket.id}
             >
               <a>
-                <BucketCard bucket={bucket} round={bucket.round} />
+                <BucketCard bucket={bucket} round={bucket.round} showRound />
               </a>
             </Link>
           ))}
