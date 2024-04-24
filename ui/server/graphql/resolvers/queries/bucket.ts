@@ -125,12 +125,13 @@ export const bucketsPage = async (
   };
 };
 
-export const starredBuckets = async (_, { take, skip }, { user }) => {
+export const starredBuckets = async (_, { take, skip, roundId }, { user }) => {
   if (user) {
     const favorites = await getStarredBuckets({
       userId: user?.id,
       take,
       skip,
+      roundId,
     });
     const buckets = await prisma.bucket.findMany({
       where: {
