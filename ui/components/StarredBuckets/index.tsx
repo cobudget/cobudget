@@ -9,8 +9,8 @@ import { gql, useQuery } from "urql";
 import usePaginatedQuery from "utils/usePaginatedQuery";
 
 const STARRED_BUCKETS = gql`
-  query StarredBuckets($limit: Int, $offset: Int) {
-    starredBuckets(take: $limit, skip: $offset) {
+  query StarredBuckets($limit: Int, $offset: Int, $roundId: ID) {
+    starredBuckets(take: $limit, skip: $offset, roundId: $roundId) {
       moreExist
       buckets {
         id
@@ -120,11 +120,19 @@ function StarredBuckets() {
       <div className="flex my-6 justify-between items-center">
         <h1 className="text-2xl">★ Starred Buckets</h1>
         <span>
+          <p className="font-semibold my-1">Round</p>
           <SelectField
             className="bg-white sm:order-last"
             inputProps={{
               value: variables.roundId,
-              onChange: (e) => setVariables({ roundId: e.target.value }),
+              onChange: (e) => {
+                if (e.target.value === "All") {
+                  delete variables.roundId;
+                  setVariables({ ...variables });
+                } else {
+                  setVariables({ roundId: e.target.value });
+                }
+              },
             }}
           >
             {groupOptions.map((option) => (
