@@ -79,7 +79,7 @@ const schema = gql`
       orderBy: String
       orderDir: String
     ): BucketsPage
-    starredBuckets(take: Int, skip: Int): BucketsPage
+    starredBuckets(take: Int, skip: Int, roundId: ID): BucketsPage
     languageProgressPage: [LanguageProgress]
     convertCurrency(
       amounts: [AmountConversionInput]!
