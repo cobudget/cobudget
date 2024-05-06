@@ -68,7 +68,7 @@ export const bucketsPage = async (
   const statusFilter = status
     .map((s) => statusTypeToQuery(s, fundingStatus))
     .filter((s) => s);
-  // If canceled in not there in the status filter, explicitly qunselect canceled buckets
+  // If canceled in not there in the status filter, explicitly unselect canceled buckets
   const showCanceled = status.indexOf("CANCELED") === -1;
   const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
 
@@ -80,7 +80,9 @@ export const bucketsPage = async (
         filter.publishedAt = { not: null };
       }
     });
-    statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+    if (currentMember) {
+      statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+    }
   }
 
   const buckets = await prisma.bucket.findMany({
