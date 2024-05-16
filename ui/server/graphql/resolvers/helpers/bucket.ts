@@ -74,6 +74,9 @@ export const isBucketFavorite = async ({
   bucketId: string;
   userId: string;
 }) => {
+  if (!userId) {
+    return false;
+  }
   const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
   const roundMembership = await prisma.roundMember.findUnique({
     where: {
@@ -83,6 +86,10 @@ export const isBucketFavorite = async ({
       },
     },
   });
+
+  if (!roundMembership) {
+    return false;
+  }
 
   const row = await prisma.favoriteBucket.findUnique({
     where: {
