@@ -5,9 +5,11 @@ import { CoinIcon, CommentIcon } from "./Icons";
 import Label from "./Label";
 import { FormattedMessage, FormattedNumber, useIntl } from "react-intl";
 import getStatusColor from "utils/getStatusColor";
+import { useRouter } from "next/router";
 
-const BucketCard = ({ bucket, round }) => {
+const BucketCard = ({ bucket, round, showRound = false }) => {
   const intl = useIntl();
+  const router = useRouter();
 
   const statusList = {
     PENDING_APPROVAL: intl.formatMessage({
@@ -53,6 +55,29 @@ const BucketCard = ({ bucket, round }) => {
       )}
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
+          {showRound && (
+            <span
+              className="font-semibold my-1 text-gray-600"
+              onClick={(e) => {
+                e.preventDefault();
+                const link = round.group
+                  ? `/${round.group.slug}/${round.slug}`
+                  : `/c/${round.slug}`;
+                router.push(link);
+              }}
+            >
+              <p className="text-sm">
+                {round.group ? (
+                  <>
+                    <b className="font-bold">{round.group.name}</b>{" "}
+                    <span className="text-xs"> | </span> <>{round.title}</>
+                  </>
+                ) : (
+                  round.title
+                )}
+              </p>
+            </span>
+          )}
           <h3 className="text-xl font-medium mb-1 truncate">{bucket.title}</h3>
 
           <div className="text-gray-800">{bucket.summary}</div>

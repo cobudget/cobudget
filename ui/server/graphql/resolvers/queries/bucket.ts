@@ -13,6 +13,7 @@ import {
 } from "../helpers";
 import discourse from "../../../lib/discourse";
 import { ROUND_IS_PRIVATE } from "../../../../constants";
+import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
@@ -67,7 +68,7 @@ export const bucketsPage = async (
   const statusFilter = status
     .map((s) => statusTypeToQuery(s, fundingStatus))
     .filter((s) => s);
-  // If canceled in not there in the status filter, explicitly qunselect canceled buckets
+  // If canceled in not there in the status filter, explicitly unselect canceled buckets
   const showCanceled = status.indexOf("CANCELED") === -1;
   const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
 
@@ -79,7 +80,9 @@ export const bucketsPage = async (
         filter.publishedAt = { not: null };
       }
     });
-    statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+    if (currentMember) {
+      statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+    }
   }
 
   const buckets = await prisma.bucket.findMany({
@@ -122,6 +125,32 @@ export const bucketsPage = async (
     moreExist: shuffledBuckets.length > limit + offset,
     buckets: shuffledBuckets.slice(offset, limit + offset),
   };
+};
+
+export const starredBuckets = async (_, { take, skip, roundId }, { user }) => {
+  if (user) {
+    const favorites = await getStarredBuckets({
+      userId: user?.id,
+      take,
+      skip,
+      roundId,
+    });
+    const buckets = await prisma.bucket.findMany({
+      where: {
+        id: { in: favorites.map((favorite) => favorite.bucketId) },
+      },
+    });
+    const moreExist = favorites.length === take;
+    return {
+      buckets,
+      moreExist,
+    };
+  } else {
+    return {
+      moreExist: false,
+      buckets: [],
+    };
+  }
 };
 
 export const commentSet = async (

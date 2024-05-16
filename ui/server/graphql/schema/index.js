@@ -79,6 +79,7 @@ const schema = gql`
       orderBy: String
       orderDir: String
     ): BucketsPage
+    starredBuckets(take: Int, skip: Int, roundId: ID): BucketsPage
     languageProgressPage: [LanguageProgress]
     convertCurrency(
       amounts: [AmountConversionInput]!
@@ -223,6 +224,8 @@ const schema = gql`
       exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
+
+    toggleFavoriteBucket(bucketId: ID!): Bucket
 
     createExpense(
       bucketId: String!
@@ -731,6 +734,7 @@ const schema = gql`
     percentageFunded: Float
     expenses: [Expense]
     expense(id: String!): Expense
+    isFavorite: Boolean
   }
 
   enum DirectFundingType {
