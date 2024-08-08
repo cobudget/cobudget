@@ -20,6 +20,10 @@ const EDIT_BUDGET_MUTATION = gql`
       minGoal
       maxGoal
       income
+      status
+      funded
+      isFavorite
+      fundedAt
       budgetItems {
         id
         description
