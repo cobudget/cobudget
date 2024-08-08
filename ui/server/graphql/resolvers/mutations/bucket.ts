@@ -7,6 +7,8 @@ import {
 } from "../auth";
 import dayjs from "dayjs";
 import {
+  bucketIncome,
+  bucketMinGoal,
   getBucketStatus,
   getRoundMember,
   isAndGetCollMember,
@@ -168,6 +170,7 @@ export const editBucket = combineResolvers(
     ) {
       throw new Error("VAT must be a percentage from 0 to 100");
     }
+    const bucket = await prisma.bucket.findUnique({ where: { id: bucketId } });
 
     let updated = await prisma.bucket.update({
       where: { id: bucketId },
@@ -214,6 +217,40 @@ export const editBucket = combineResolvers(
       round: updated.round,
       bucket: updated,
     });
+
+    if (
+      (bucket.fundedAt || bucket.completedAt) &&
+      budgetItems &&
+      budgetItems.length > 0
+    ) {
+      const minGoal = await bucketMinGoal(bucket);
+      const income = await bucketIncome(bucket);
+      if (minGoal > income) {
+        updated = await prisma.bucket.update({
+          where: { id: bucket.id },
+          data: {
+            fundedAt: null,
+            completedAt: null,
+          },
+          include: {
+            Images: true,
+            FieldValues: true,
+            BudgetItems: true,
+            round: {
+              include: {
+                fields: true,
+                group: {
+                  include: {
+                    discourse: true,
+                    groupMembers: { where: { userId: user.id } },
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+    }
 
     updated = await updateFundedPercentage(updated);
 
