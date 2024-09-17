@@ -7,6 +7,7 @@ import Banner from "components/Banner";
 import { FormattedMessage, useIntl } from "react-intl";
 import toast from "react-hot-toast";
 import Script from "next/script";
+import { useEffect } from "react";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -25,47 +26,56 @@ export default function AuthenticationForm({
   const redirect = r?.toString();
   const intl = useIntl();
 
+  const handleSubmit = async (evt) => {
+    evt.preventDefault();
+    setLoading(true);
+
+    let captchaToken = '';
+    if (!process.env.SKIP_RECAPTCHA) {
+      captchaToken = await window.grecaptcha.execute(
+        process.env.RECAPTCHA_SITE_KEY,
+        { action: "submit" }
+      );
+    }
+
+    fetch(`/api/auth/magiclink`, {
+      method: `POST`,
+      body: JSON.stringify({
+        redirect,
+        destination: email,
+        rememberMe,
+        captchaToken,
+      }),
+      headers: { "Content-Type": "application/json" },
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        setLoading(false);
+        if (json.success) {
+          router.push(
+            `/check-mailbox?e=${encodeURIComponent(email)}&c=${
+              json.code
+            }`
+          );
+        } else {
+          toast.error(json.error);
+        }
+      });
+  };
+
+  useEffect(() => {
+    if (!process.env.SKIP_RECAPTCHA) {
+      const script = document.createElement('script');
+      script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   return (
     <>
-      <Script
-        src={`https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`}
-      />
       <div>
-        <form
-          onSubmit={(evt) => {
-            evt.preventDefault();
-            window.grecaptcha.ready(async () => {
-              setLoading(true);
-              const captchaToken = await window.grecaptcha.execute(
-                process.env.RECAPTCHA_SITE_KEY,
-                { action: "submit" }
-              );
-              fetch(`/api/auth/magiclink`, {
-                method: `POST`,
-                body: JSON.stringify({
-                  redirect,
-                  destination: email,
-                  rememberMe,
-                  captchaToken,
-                }),
-                headers: { "Content-Type": "application/json" },
-              })
-                .then((res) => res.json())
-                .then((json) => {
-                  setLoading(false);
-                  if (json.success) {
-                    router.push(
-                      `/check-mailbox?e=${encodeURIComponent(email)}&c=${
-                        json.code
-                      }`
-                    );
-                  } else {
-                    toast.error(json.error);
-                  }
-                });
-            });
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <TextField
             name="email"
             inputProps={{
