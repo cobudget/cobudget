@@ -4,6 +4,10 @@ import magicLink from "../../../../server/passport/magicLink";
 export default handler().post(async (req: any, res: any) => {
   const { captchaToken } = req.body;
 
+  if (process.env.SKIP_RECAPTCHA === 'true') {
+    return magicLink.send(req, res);
+  }
+
   if (!captchaToken) {
     res.status(400).send({ error: "No captcha token" });
     return;
