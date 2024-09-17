@@ -1,13 +1,11 @@
-import { useRouter } from "next/router";
-import { useState } from "react";
 import { Checkbox, FormControlLabel } from "@material-ui/core";
-import TextField from "./TextField";
-import Button from "./Button";
 import Banner from "components/Banner";
-import { FormattedMessage, useIntl } from "react-intl";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Script from "next/script";
-import { useEffect } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import Button from "./Button";
+import TextField from "./TextField";
 
 export default function AuthenticationForm({
   fbEmailError = false,
@@ -30,7 +28,7 @@ export default function AuthenticationForm({
     evt.preventDefault();
     setLoading(true);
 
-    let captchaToken = '';
+    let captchaToken = "";
     if (!process.env.SKIP_RECAPTCHA) {
       captchaToken = await window.grecaptcha.execute(
         process.env.RECAPTCHA_SITE_KEY,
@@ -53,9 +51,7 @@ export default function AuthenticationForm({
         setLoading(false);
         if (json.success) {
           router.push(
-            `/check-mailbox?e=${encodeURIComponent(email)}&c=${
-              json.code
-            }`
+            `/check-mailbox?e=${encodeURIComponent(email)}&c=${json.code}`
           );
         } else {
           toast.error(json.error);
@@ -65,7 +61,7 @@ export default function AuthenticationForm({
 
   useEffect(() => {
     if (!process.env.SKIP_RECAPTCHA) {
-      const script = document.createElement('script');
+      const script = document.createElement("script");
       script.src = `https://www.google.com/recaptcha/api.js?render=${process.env.RECAPTCHA_SITE_KEY}`;
       script.async = true;
       document.body.appendChild(script);
