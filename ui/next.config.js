@@ -26,6 +26,7 @@ module.exports = (phase) => {
     HELPSCOUT_KEY: process.env.HELPSCOUT_KEY,
     LANDING_PAGE_URL: process.env.LANDING_PAGE_URL,
     RECAPTCHA_SITE_KEY: process.env.RECAPTCHA_SITE_KEY,
+    SKIP_RECAPTCHA: process.env.SKIP_RECAPTCHA,
   };
   return withBundleAnalyzer({
     env,

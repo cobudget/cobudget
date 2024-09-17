@@ -29,7 +29,7 @@ export default function AuthenticationForm({
     setLoading(true);
 
     let captchaToken = "";
-    if (process.env.NEXT_PUBLIC_SKIP_RECAPTCHA !== 'true') {
+    if (process.env.SKIP_RECAPTCHA !== "true") {
       captchaToken = await window.grecaptcha.execute(
         process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
         { action: "submit" }
@@ -42,7 +42,7 @@ export default function AuthenticationForm({
         redirect,
         destination: email,
         rememberMe,
-        ...(process.env.NEXT_PUBLIC_SKIP_RECAPTCHA !== 'true' && { captchaToken }),
+        ...(process.env.SKIP_RECAPTCHA !== "true" && { captchaToken }),
       }),
       headers: { "Content-Type": "application/json" },
     })

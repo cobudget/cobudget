@@ -1,24 +1,24 @@
-import "../styles.css";
 import "tippy.js/dist/tippy.css";
+import "../styles.css";
 
-import { useState, useEffect, useMemo, createContext } from "react";
-import { withUrqlClient } from "next-urql";
-import { client } from "../graphql/client";
-import Layout from "../components/Layout";
-import { useQuery, gql } from "urql";
-import { Toaster } from "react-hot-toast";
+import { Analytics } from "@vercel/analytics/react";
+import BucketLimitOver from "components/BucketLimitOver";
+import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
+import Fallback from "components/Fallback";
 import RequiredActionsModal from "components/RequiredActions";
+import AppContext from "contexts/AppContext";
+import Cookies from "js-cookie";
+import { withUrqlClient } from "next-urql";
+import { useEffect, useMemo, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { Toaster } from "react-hot-toast";
 import { IntlProvider } from "react-intl";
+import { gql, useQuery } from "urql";
+import reportError from "utils/reportError";
+import Layout from "../components/Layout";
+import { client } from "../graphql/client";
 import lang, { supportedLangCodes } from "../lang";
 import isRTL from "../utils/isRTL";
-import Cookies from "js-cookie";
-import { ErrorBoundary } from "react-error-boundary";
-import reportError from "utils/reportError";
-import Fallback from "components/Fallback";
-import { Analytics } from "@vercel/analytics/react";
-import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
-import AppContext from "contexts/AppContext";
-import BucketLimitOver from "components/BucketLimitOver";
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
