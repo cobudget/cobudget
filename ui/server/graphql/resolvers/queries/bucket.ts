@@ -1,18 +1,13 @@
-import prisma from "../../../prisma";
 import dayjs from "dayjs";
 import SeededShuffle from "seededshuffle";
-import { combineResolvers } from "graphql-resolvers";
-import { isGroupAdmin } from "../auth";
-import { sign } from "server/utils/jwt";
-import { appLink } from "utils/internalLinks";
+import discourse from "../../../lib/discourse";
+import prisma from "../../../prisma";
 import subscribers from "../../../subscribers/discourse.subscriber";
 import {
   canViewRound,
   getRoundFundingStatuses,
   statusTypeToQuery,
 } from "../helpers";
-import discourse from "../../../lib/discourse";
-import { ROUND_IS_PRIVATE } from "../../../../constants";
 import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
