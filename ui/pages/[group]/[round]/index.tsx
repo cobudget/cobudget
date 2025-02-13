@@ -1,25 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, gql, ssrExchange } from "urql";
-import Link from "next/link";
-import BucketCard from "../../../components/BucketCard";
-import Filterbar from "../../../components/Filterbar";
-import SubMenu from "../../../components/SubMenu";
-import PageHero from "../../../components/PageHero";
-import Button from "../../../components/Button";
-import NewBucketModal from "../../../components/NewBucketModal";
-import EditableField from "../../../components/EditableField";
-import LoadMore from "../../../components/LoadMore";
-import getCurrencySymbol from "utils/getCurrencySymbol";
-import { useRouter } from "next/router";
+import FormattedCurrency from "components/FormattedCurrency";
 import HappySpinner from "components/HappySpinner";
 import { HeaderSkeleton } from "components/Skeleton";
-import { initUrqlClient } from "next-urql";
-import { client as createClientConfig } from "graphql/client";
-import prisma from "server/prisma";
-import { TOP_LEVEL_QUERY } from "pages/_app";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useMemo, useState } from "react";
+import { FormattedMessage, FormattedNumber } from "react-intl";
+import { gql, useQuery } from "urql";
+import BucketCard from "../../../components/BucketCard";
+import Button from "../../../components/Button";
+import EditableField from "../../../components/EditableField";
+import Filterbar from "../../../components/Filterbar";
+import LoadMore from "../../../components/LoadMore";
+import NewBucketModal from "../../../components/NewBucketModal";
+import PageHero from "../../../components/PageHero";
+import SubMenu from "../../../components/SubMenu";
 import Table from "../../../components/Table";
-import { FormattedNumber, FormattedMessage } from "react-intl";
-import FormattedCurrency from "components/FormattedCurrency";
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -30,6 +25,7 @@ export const ROUND_PAGE_QUERY = gql`
       info
       color
       bucketCreationIsOpen
+      grantingHasClosed
       totalInMembersBalances
       allowStretchGoals
       bucketReviewIsOpen
@@ -514,9 +510,15 @@ const RoundPage = ({ currentUser }) => {
 
   // apply standard filter (hidden from URL)
   useEffect(() => {
-    const filter = f ?? getStandardFilter(bucketStatusCount);
-    setStatusFilter(stringOrArrayIntoArray(filter));
-  }, [bucketStatusCount, f]);
+    // If the round is ended, override the default with ["FUNDED"]
+    if (round?.grantingHasClosed) {
+      setStatusFilter(["FUNDED"]);
+    } else {
+      // Otherwise do the standard logic as before
+      const filter = f ?? getStandardFilter(bucketStatusCount);
+      setStatusFilter(stringOrArrayIntoArray(filter));
+    }
+  }, [bucketStatusCount, f, round?.grantingHasClosed]);
 
   useEffect(() => {
     setBucketTableView(router.query.view === "table");

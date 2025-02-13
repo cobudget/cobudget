@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
@@ -64,6 +64,16 @@ function Infobox({ bucket, isAdminOrModerator, isCocreator }) {
           }),
         },
         FUNDED: {
+          allowed: intl.formatMessage({
+            defaultMessage:
+              "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
+          }),
+          notAllowed: intl.formatMessage({
+            defaultMessage:
+              "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",
+          }),
+        },
+        PARTIAL_FUNDING: {
           allowed: intl.formatMessage({
             defaultMessage:
               "When you have used your funding, you can mark this bucket as completed. Remember that it is usually appreciated to write a short message in the comments about how it turned out.",

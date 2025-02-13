@@ -1,11 +1,10 @@
-import Link from "next/link";
-import { stringToColor } from "../utils/stringToHslColor";
-import ProgressBar from "./ProgressBar";
-import { CoinIcon, CommentIcon } from "./Icons";
-import Label from "./Label";
+import { useRouter } from "next/router";
 import { FormattedMessage, FormattedNumber, useIntl } from "react-intl";
 import getStatusColor from "utils/getStatusColor";
-import { useRouter } from "next/router";
+import { stringToColor } from "../utils/stringToHslColor";
+import { CoinIcon, CommentIcon } from "./Icons";
+import Label from "./Label";
+import ProgressBar from "./ProgressBar";
 
 const BucketCard = ({ bucket, round, showRound = false }) => {
   const intl = useIntl();
@@ -20,6 +19,7 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
     }),
     OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    PARTIAL_FUNDING: intl.formatMessage({ defaultMessage: "Partial Funding" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
     ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),

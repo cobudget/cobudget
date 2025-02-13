@@ -403,6 +403,7 @@ const schema = gql`
     IDEA
     OPEN_FOR_FUNDING
     FUNDED
+    PARTIAL_FUNDING
     CANCELED
     COMPLETED
     ARCHIVED

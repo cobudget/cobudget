@@ -1,29 +1,29 @@
-import Tooltip from "@tippyjs/react";
-import { useMemo, useState } from "react";
-import { useMutation, gql } from "urql";
-import Router from "next/router";
 import { Modal } from "@material-ui/core";
-import { useIntl, FormattedMessage } from "react-intl";
+import Tooltip from "@tippyjs/react";
+import Router from "next/router";
+import { useMemo, useState } from "react";
+import { FormattedMessage, useIntl } from "react-intl";
+import { gql, useMutation } from "urql";
 
-import Dropdown from "../Dropdown";
-import { EditIcon, DotsHorizontalIcon, Star } from "../Icons";
 import Avatar from "../Avatar";
-import IconButton from "../IconButton";
 import Button from "../Button";
+import Dropdown from "../Dropdown";
+import IconButton from "../IconButton";
+import { DotsHorizontalIcon, EditIcon, Star } from "../Icons";
 
 import ContributeModal from "./ContributeModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
-import Tags from "./Tags";
-import toast from "react-hot-toast";
 import Monster from "components/Monster";
-import capitalize from "utils/capitalize";
-import isRtl from "../../utils/isRTL";
 import dayjs from "dayjs";
-import Label from "../../components/Label";
+import toast from "react-hot-toast";
+import capitalize from "utils/capitalize";
 import getStatusColor from "utils/getStatusColor";
+import Label from "../../components/Label";
+import isRtl from "../../utils/isRTL";
 import Infobox from "./Infobox";
+import Tags from "./Tags";
 
 const APPROVE_FOR_GRANTING_MUTATION = gql`
   mutation ApproveForGranting($bucketId: ID!, $approved: Boolean!) {
@@ -223,6 +223,7 @@ const BucketSidebar = ({
     }),
     OPEN_FOR_FUNDING: intl.formatMessage({ defaultMessage: "Funding" }),
     FUNDED: intl.formatMessage({ defaultMessage: "Funded" }),
+    PARTIAL_FUNDING: intl.formatMessage({ defaultMessage: "Partially funded" }),
     CANCELED: intl.formatMessage({ defaultMessage: "Canceled" }),
     COMPLETED: intl.formatMessage({ defaultMessage: "Completed" }),
     ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),

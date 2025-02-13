@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 import { skip } from "graphql-resolvers";
-import stripe from "server/stripe";
-import prisma from "../../../prisma";
 import fetch from "node-fetch";
+import stripe from "server/stripe";
 import { PUBLIC } from "../../../../constants";
+import prisma from "../../../prisma";
 
 export * from "./opencollective";
 
@@ -337,6 +337,7 @@ export function statusTypeToQuery(
           OR: [
             filter,
             {
+              approvedAt: { not: null },
               fundedAt: null,
               canceledAt: null,
               completedAt: null,
@@ -553,6 +554,7 @@ export const getBucketStatus = (bucket) => {
   if (bucket.completedAt) return "COMPLETED";
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
+  if (bucket.partiallyFundedAt) return "PARTIAL_FUNDING";
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";

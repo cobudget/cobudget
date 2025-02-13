@@ -5,7 +5,6 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   getRoundFundingStatuses,
-  isFundingOpen,
 } from "../helpers";
 import { isBucketFavorite } from "../helpers/bucket";
 
@@ -171,42 +170,38 @@ export const minGoal = async (bucket) => {
 };
 export const maxGoal = async (bucket) => {
   return bucketMaxGoal(bucket);
-  const {
-    _sum: { min },
-  } = await prisma.budgetItem.aggregate({
-    _sum: { min: true },
-    where: {
-      bucketId: bucket.id,
-      type: "EXPENSE",
-    },
-  });
-
-  const budgetItems = await prisma.budgetItem.findMany({
-    where: { bucketId: bucket.id, type: "EXPENSE" },
-  });
-
-  const maxGoal = budgetItems.reduce(
-    (acc, item) => acc + (item.max ? item.max : item.min),
-    0
-  );
-
-  return maxGoal > 0 && maxGoal !== min ? maxGoal : null;
 };
-export const status = async (bucket, args, ctx) => {
+export const status = async (bucket) => {
+  // COMPLETED overrides all else
   if (bucket.completedAt) return "COMPLETED";
+  // CANCELED overrides any other logic as well
   if (bucket.canceledAt) return "CANCELED";
+  // If fully funded, we call it FUNDED
   if (bucket.fundedAt) return "FUNDED";
+
+  // If approved, we check where we are in the funding timeline
   if (bucket.approvedAt) {
-    const status = await getRoundFundingStatuses({ roundId: bucket.roundId });
-    if (status.hasEnded) {
-      return "FUNDED";
-    } else if (status.hasStarted) {
-      return "OPEN_FOR_FUNDING";
-    } else {
-      return "IDEA";
+    const { hasEnded, hasStarted } = await getRoundFundingStatuses({
+      roundId: bucket.roundId,
+    });
+
+    if (hasEnded) {
+      // Only call it PARTIAL_FUNDING if there’s > 0 total contributions
+      const total = await bucketTotalContributions(bucket);
+      return total > 0 ? "PARTIAL_FUNDING" : "IDEA";
     }
+
+    // If the round is ongoing, call it OPEN_FOR_FUNDING
+    if (hasStarted) return "OPEN_FOR_FUNDING";
+
+    // Otherwise, if not started, we consider it an IDEA
+    return "IDEA";
   }
+
+  // If not approved yet, but it’s published, call it IDEA
   if (bucket.publishedAt) return "IDEA";
+
+  // Finally, if it’s neither approved nor published, it’s still PENDING_APPROVAL
   return "PENDING_APPROVAL";
 };
 

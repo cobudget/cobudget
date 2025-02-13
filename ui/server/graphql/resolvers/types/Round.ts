@@ -1,6 +1,12 @@
-import prisma from "../../../prisma";
+import { Prisma } from "@prisma/client";
 import dayjs from "dayjs";
+import { combineResolvers } from "graphql-resolvers";
 import { getGroup } from "server/controller";
+import { getOCToken } from "server/utils/roundUtils";
+import { appLink } from "utils/internalLinks";
+import { TOKEN_STATUS } from "../../../../constants";
+import prisma from "../../../prisma";
+import { sign } from "../../../utils/jwt";
 import {
   bucketTotalContributions,
   getCollective,
@@ -12,13 +18,7 @@ import {
   statusTypeToQuery,
   stripeIsConnected as stripeIsConnectedHelper,
 } from "../helpers";
-import { combineResolvers } from "graphql-resolvers";
-import { sign } from "../../../utils/jwt";
-import { appLink } from "utils/internalLinks";
-import { TOKEN_STATUS } from "../../../../constants";
-import { getOCToken } from "server/utils/roundUtils";
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
-import { Prisma } from "@prisma/client";
 
 export const color = (round) => round.color ?? "anthracit";
 export const info = (round) => {
@@ -255,6 +255,7 @@ export const bucketStatusCount = async (round, _, { user }) => {
                   { publishedAt: { not: null } },
                   { cocreators: { some: { id: currentMember.id } } },
                 ],
+                AND: { approvedAt: { not: null } },
               }
             : { publishedAt: { not: null } })),
       },

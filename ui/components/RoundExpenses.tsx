@@ -7,24 +7,24 @@ import {
   TableHead,
   TableRow,
 } from "@material-ui/core";
+import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
 import { arraySortByStringKey } from "utils/sorting";
+import usePaginatedQuery from "utils/usePaginatedQuery";
 import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
+import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
+import HappySpinner from "./HappySpinner";
 import IconButton from "./IconButton";
 import { EditIcon, SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
-import { SelectField } from "./SelectInput";
-import HappySpinner from "./HappySpinner";
-import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
-import usePaginatedQuery from "utils/usePaginatedQuery";
 import LoadMore from "./LoadMore";
-import dayjs from "dayjs";
+import { SelectField } from "./SelectInput";
 
 const BUCKETS_QUERY = gql`
   query BucketsQuery(
@@ -158,6 +158,7 @@ function RoundExpenses({ round, currentUser }) {
       status: [
         "PENDING_APPROVAL",
         "OPEN_FOR_FUNDING",
+        "PARTIAL_FUNDING",
         "IDEA",
         "FUNDED",
         "CANCELED",
