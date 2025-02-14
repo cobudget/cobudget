@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage, FormattedNumber } from "react-intl";
-import { gql, useQuery } from "urql";
+import { gql, useQuery, useMutation } from "urql";
+import toast from "react-hot-toast";
 import BucketCard from "../../../components/BucketCard";
 import Button from "../../../components/Button";
 import EditableField from "../../../components/EditableField";
@@ -15,6 +16,28 @@ import NewBucketModal from "../../../components/NewBucketModal";
 import PageHero from "../../../components/PageHero";
 import SubMenu from "../../../components/SubMenu";
 import Table from "../../../components/Table";
+
+const ACCEPT_INVITATION = gql`
+  mutation AcceptInvitation($roundId: ID!) {
+    acceptInvitation(roundId: $roundId) {
+      id
+      isAdmin
+      isModerator
+      isApproved
+      hasJoined
+      balance
+      round {
+        id
+        title
+        slug
+        group {
+          id
+          slug
+        }
+      }
+    }
+  }
+`;
 
 export const ROUND_PAGE_QUERY = gql`
   query RoundPage($roundSlug: String!, $groupSlug: String) {
@@ -144,6 +167,43 @@ export const BUCKETS_QUERY = gql`
     }
   }
 `;
+
+function AcceptInvitationModal({
+  isOpen,
+  onClose,
+  onAccept,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onAccept: () => void;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed z-50 top-0 left-0 w-screen h-screen bg-black bg-opacity-30 flex justify-center items-center">
+      <div className="bg-white rounded-lg p-8 w-11/12 md:w-1/2">
+        <h2 className="text-xl font-semibold mb-4">You have an invitation!</h2>
+        <p className="mb-6">
+          You’ve been invited to participate in this round. Accept your invitation to get access to all round features.
+        </p>
+        <div className="flex justify-end gap-4">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-200"
+          >
+            Maybe Later
+          </button>
+          <button
+            onClick={onAccept}
+            className="px-4 py-2 bg-anthracit text-white rounded-md hover:bg-anthracit-dark"
+          >
+            Accept Invitation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const Page = ({
   variables,
@@ -551,6 +611,30 @@ const RoundPage = ({ currentUser }) => {
     }
   }, [router.isReady, router.query.page, router.query.view]);
 
+  const [invitationModalOpen, setInvitationModalOpen] = useState(false);
+  const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
+
+  useEffect(() => {
+    if (
+      currentUser?.currentCollMember?.isApproved &&
+      currentUser?.currentCollMember?.hasJoined === false
+    ) {
+      setInvitationModalOpen(true);
+    }
+  }, [currentUser]);
+
+  const handleAcceptInvitation = () => {
+    acceptInvitation({ roundId: round?.id }).then(({ data, error }) => {
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Invitation Accepted");
+        setInvitationModalOpen(false);
+        // Optionally refetch or update the currentUser data here.
+      }
+    });
+  };
+
   if (pause || fetching) {
     return (
       <div className="w-full flex justify-center items-center h-64">
@@ -770,6 +854,11 @@ const RoundPage = ({ currentUser }) => {
           })}
         </div>
       </div>
+      <AcceptInvitationModal
+        isOpen={invitationModalOpen}
+        onClose={() => setInvitationModalOpen(false)}
+        onAccept={handleAcceptInvitation}
+      />
     </div>
   );
 };
