@@ -39,8 +39,6 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
     !fundingHasEnded &&
     !round.grantingHasClosed;
 
-  console.log("round", round);
-
   return (
     <div
       data-testid="bucket-card"

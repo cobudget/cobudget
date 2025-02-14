@@ -511,14 +511,18 @@ const RoundPage = ({ currentUser }) => {
 
   // apply standard filter (hidden from URL)
   useEffect(() => {
-    // If the round is ended, override the default with ["FUNDED"]
-    if (round?.grantingHasClosed) {
+    const userFilter = stringOrArrayIntoArray(f);
+
+    // If user hasn't selected anything (userFilter = []) and the round ended:
+    if (round?.grantingHasClosed && userFilter.length === 0) {
+      // Just default to ["FUNDED"], but still allow the user to change it afterwards
       setStatusFilter(["FUNDED"]);
-    } else {
-      // Otherwise do the standard logic as before
-      const filter = f ?? getStandardFilter(bucketStatusCount);
-      setStatusFilter(stringOrArrayIntoArray(filter));
+      return;
     }
+
+    // Otherwise, either use the user’s filter if present or fall back to your standard logic
+    const fallback = getStandardFilter(bucketStatusCount);
+    setStatusFilter(userFilter.length > 0 ? userFilter : fallback);
   }, [bucketStatusCount, f, round?.grantingHasClosed]);
 
   useEffect(() => {
@@ -769,65 +773,5 @@ const RoundPage = ({ currentUser }) => {
     </div>
   );
 };
-
-// export async function getStaticProps(ctx) {
-//   const ssrCache = ssrExchange({
-//     isClient: false,
-//   });
-//   const client = initUrqlClient(createClientConfig(ssrCache), false);
-
-//   // This query is used to populate the cache for the query
-//   // used on this page.
-//   const variables = {
-//     groupSlug: ctx.params.group,
-//     roundSlug: ctx.params.round,
-//   };
-//   console.log({ variables });
-
-//   const roundPageQuery = await client
-//     .query(ROUND_PAGE_QUERY, variables)
-//     .toPromise();
-//   console.log({ roundPageQuery });
-//   // TODO: try to get static generation of bucket list to work (it does not revalidate)
-//   // const statusFilter = stringOrArrayIntoArray(
-//   //   getStandardFilter(data?.round?.bucketStatusCount ?? {})
-//   // );
-//   // await client
-//   //   .query(BUCKETS_QUERY, {
-//   //     ...variables,
-//   //     offset: 0,
-//   //     limit: limit,
-//   //     status: statusFilter,
-//   //   })
-//   //   .toPromise();
-
-//   const topLevelQuery = await client
-//     .query(TOP_LEVEL_QUERY, variables)
-//     .toPromise();
-//   console.log({ topLevelQuery });
-
-//   return {
-//     props: {
-//       // urqlState is a keyword here so withUrqlClient can pick it up.
-//       urqlState: ssrCache.extractData(),
-//     },
-//     revalidate: 60,
-//   };
-// }
-
-// export async function getStaticPaths() {
-//   const rounds = await prisma.round.findMany({
-//     where: { visibility: "PUBLIC" },
-//     include: { group: true },
-//   });
-
-//   return {
-//     // paths: rounds.map((round) => ({
-//     //   params: { group: round.group.slug, round: round.slug },
-//     // })),
-//     paths: [],
-//     fallback: true, // false or 'blocking'
-//   };
-// }
 
 export default RoundPage;
