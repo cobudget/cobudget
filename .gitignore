@@ -38,3 +38,4 @@ cypress/videos/
 cypress/screenshots/
 cypress/fixtures/
 .aider*
+.env
