@@ -240,3 +240,20 @@ export const isFavorite = async ({ id, roundId }, _: unknown, { user }) => {
     return false;
   }
 };
+
+export const awardedAmount = async (bucket) => {
+  // 1) Check round status
+  const { hasEnded } = await getRoundFundingStatuses({
+    roundId: bucket.roundId,
+  });
+  if (!hasEnded) {
+    // Round still ongoing, so no final “awarded” amount yet
+    return null;
+  }
+
+  // 2) Get total contributions
+  const total = await bucketTotalContributions(bucket);
+
+  // 3) If total > 0, return it. Otherwise return null
+  return total > 0 ? total : null;
+};

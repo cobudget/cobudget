@@ -110,6 +110,7 @@ export const BUCKETS_QUERY = gql`
         }
         noOfFunders
         income
+        awardedAmount
         totalContributions
         totalContributionsFromCurrentMember
         noOfComments

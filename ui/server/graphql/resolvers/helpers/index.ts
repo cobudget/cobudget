@@ -554,7 +554,6 @@ export const getBucketStatus = (bucket) => {
   if (bucket.completedAt) return "COMPLETED";
   if (bucket.canceledAt) return "CANCELED";
   if (bucket.fundedAt) return "FUNDED";
-  if (bucket.partiallyFundedAt) return "PARTIAL_FUNDING";
   if (bucket.approvedAt) return "OPEN_FOR_FUNDING";
   if (bucket.publishedAt) return "IDEA";
   return "PENDING_APPROVAL";

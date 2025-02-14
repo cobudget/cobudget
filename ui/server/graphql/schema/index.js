@@ -713,6 +713,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     income: Int
+    awardedAmount: Int
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
     noOfComments: Int

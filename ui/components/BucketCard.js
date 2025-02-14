@@ -25,8 +25,22 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
     ARCHIVED: intl.formatMessage({ defaultMessage: "Archived" }),
   };
 
+  // Use these to detect if funding has ended and if there is an awarded amount:
+  const fundingHasEnded = ["FUNDED", "PARTIAL_FUNDING", "COMPLETED"].includes(
+    bucket.status
+  );
+  const hasAwardedAmount = bucket.awardedAmount > 0;
+
+  // Show the usual progress bar, etc. only if round not ended
   const showFundingStats =
-    !!(bucket.minGoal || bucket.maxGoal) && bucket.approved && !bucket.canceled;
+    !!(bucket.minGoal || bucket.maxGoal) &&
+    bucket.approved &&
+    !bucket.canceled &&
+    !fundingHasEnded &&
+    !round.grantingHasClosed;
+
+  console.log("round", round);
+
   return (
     <div
       data-testid="bucket-card"
@@ -36,10 +50,12 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
         <img
           src={bucket.images[0].small}
           className="w-full h-48 object-cover object-center"
+          alt="Bucket cover"
         />
       ) : (
         <div className={`w-full h-48 bg-${stringToColor(bucket.title)}`} />
       )}
+
       {!bucket.published ? (
         <Label className="absolute right-0 m-2 bg-app-gray">
           <FormattedMessage defaultMessage="Draft" />
@@ -53,11 +69,12 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
           {statusList[bucket.status]}
         </Label>
       )}
+
       <div className="p-4 pt-3 flex-grow flex flex-col justify-between">
         <div className="mb-2">
           {showRound && (
             <span
-              className="font-semibold my-1 text-gray-600"
+              className="font-semibold my-1 text-gray-600 cursor-pointer"
               onClick={(e) => {
                 e.preventDefault();
                 const link = round.group
@@ -70,7 +87,7 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
                 {round.group ? (
                   <>
                     <b className="font-bold">{round.group.name}</b>{" "}
-                    <span className="text-xs"> | </span> <>{round.title}</>
+                    <span className="text-xs"> | </span> {round.title}
                   </>
                 ) : (
                   round.title
@@ -78,11 +95,14 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
               </p>
             </span>
           )}
-          <h3 className="text-xl font-medium mb-1 truncate">{bucket.title}</h3>
 
+          <h3 className="text-xl font-medium mb-1 truncate">{bucket.title}</h3>
           <div className="text-gray-800">{bucket.summary}</div>
         </div>
+
+        {/* Funding / awarding area */}
         <div>
+          {/* 1) If the round is still ongoing, show the progress bar */}
           {showFundingStats && (
             <ProgressBar
               color={round.color}
@@ -91,7 +111,8 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
             />
           )}
 
-          <div className="flex gap-x-3 mt-1">
+          <div className="flex gap-x-3 mt-1 items-center">
+            {/* 2) Show % funded if progress bar is visible */}
             {showFundingStats && (
               <div className="flex items-center text-gray-700">
                 <CoinIcon className="w-5 h-5" />
@@ -104,6 +125,7 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
               </div>
             )}
 
+            {/* 3) Show comment count if > 0 */}
             {parseInt(bucket.noOfComments) > 0 && (
               <div className="flex items-center text-gray-700">
                 <CommentIcon className="w-5 h-5" />
@@ -113,16 +135,38 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
               </div>
             )}
 
+            {/* 4a) If still in funding, show minGoal as normal */}
             {showFundingStats && (
               <span className="ml-auto">
                 <FormattedNumber
                   value={bucket.minGoal / 100}
                   style="currency"
-                  currencyDisplay={"symbol"}
+                  currencyDisplay="symbol"
                   currency={round.currency}
                 />
               </span>
             )}
+
+            {/* 4b) If funding ended, show "Awarded" if the awardedAmount is > 0 */}
+            {fundingHasEnded && hasAwardedAmount && (
+              <div className="ml-auto flex items-center text-gray-700 gap-1">
+                <span className="ml-auto font-medium">
+                  <FormattedMessage defaultMessage="Awarded" />
+                </span>
+                <span className="ml-auto">
+                  <FormattedNumber
+                    value={bucket.awardedAmount / 100}
+                    style="currency"
+                    currencyDisplay="symbol"
+                    currency={round.currency}
+                    minimumFractionDigits={0}
+                    maximumFractionDigits={0}
+                  />
+                </span>
+              </div>
+            )}
+
+            {/* If funding ended but awardedAmount = 0, show nothing. */}
           </div>
         </div>
       </div>
