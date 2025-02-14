@@ -31,7 +31,7 @@ export default function AuthenticationForm({
     let captchaToken = "";
     if (process.env.SKIP_RECAPTCHA !== "true") {
       captchaToken = await window.grecaptcha.execute(
-        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY,
+        process.env.RECAPTCHA_SITE_KEY,
         { action: "submit" }
       );
     }
