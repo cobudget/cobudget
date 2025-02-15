@@ -10,6 +10,7 @@ import {
   bucketQueries,
   superAdminQueries,
   expensesQueries,
+  randomRoundImages,
 } from "./queries";
 
 import {
@@ -49,6 +50,7 @@ const resolvers = {
     ...bucketQueries,
     ...superAdminQueries,
     ...expensesQueries,
+    randomRoundImages,
     languageProgressPage,
   },
 

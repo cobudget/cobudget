@@ -4,6 +4,12 @@
 
 @tailwind utilities;
 
+.break-inside-avoid {
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+}
+
 * {
   @apply antialiased;
 }
@@ -245,3 +251,29 @@ h5 {
   margin-bottom: -10px !important;
 }
 /* Remirror Editor */
+
+
+/* New masonry layout */
+.image-feed-masonry {
+  /* Base (mobile): one column */
+  column-gap: 1rem;
+  column-count: 1;
+}
+
+@media (min-width: 640px) {
+  .image-feed-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 768px) {
+  .image-feed-masonry {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1024px) {
+  .image-feed-masonry {
+    column-count: 4;
+  }
+}

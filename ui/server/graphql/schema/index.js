@@ -41,6 +41,18 @@ const schema = gql`
     status: String
   }
 
+  type ImageFeedEntry {
+    id: ID!
+    small: String
+    large: String
+    bucketId: String
+  }
+
+  type RoundImagesFeed {
+    images: [ImageFeedEntry]
+    moreExist: Boolean
+  }
+
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -110,6 +122,12 @@ const schema = gql`
       limit: Int
     ): RoundTransactionPage
     balances(groupSlug: String!): [RoundBalance]
+    randomRoundImages(
+      groupSlug: String!
+      roundSlug: String!
+      offset: Int
+      limit: Int
+    ): RoundImagesFeed!
   }
 
   type OCSyncResponse {

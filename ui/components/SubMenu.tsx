@@ -63,6 +63,10 @@ export const roundItems = (
       href: `/${groupSlug}/${roundSlug}/about`,
     },
     {
+      label: formatMessage({ defaultMessage: "Feed" }),
+      href: `/${groupSlug}/${roundSlug}/image-feed`,
+    },
+    {
       label: formatMessage({ defaultMessage: "Participants" }),
       href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,

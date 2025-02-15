@@ -139,6 +139,13 @@ module.exports = {
     },
   },
   plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.break-inside-avoid': {
+          'break-inside': 'avoid',
+        },
+      });
+    },
     require("tailwindcss-animations"),
     require("tailwindcss-font-inter")(),
     require("@neojp/tailwindcss-line-clamp-utilities"),
