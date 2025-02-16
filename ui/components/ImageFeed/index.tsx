@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import HappySpinner from "components/HappySpinner";
 import Link from "next/link";
 import { FC } from "react";
@@ -50,14 +49,12 @@ const ImageFeed: FC<ImageFeedProps> = ({
     <>
       <div className="p-4 image-feed-masonry">
         {images.map((img) => (
-          <motion.div
+          <div
             key={img.id}
-            className="mb-4 break-inside-avoid"
-            layout
-            transition={{ layout: { duration: 0.5, ease: "easeInOut" } }}
+            className="mb-4 break-inside-avoid animate-fadeIn"
           >
             <ImageFeedItem image={img} groupSlug={groupSlug} roundSlug={roundSlug} />
-          </motion.div>
+          </div>
         ))}
       </div>
 
