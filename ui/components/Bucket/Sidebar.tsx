@@ -650,45 +650,6 @@ const BucketSidebar = ({
     <FormattedMessage defaultMessage="Delete" />
   </button>
 )}
-                {showDeleteButton && (
-                  <button
-                    className={css.dropdownButton}
-                    onClick={() =>
-                      confirm(
-                        intl.formatMessage(
-                          {
-                            defaultMessage: `Are you sure you would like to delete this {bucketName}?`,
-                          },
-                          { bucketName: process.env.BUCKET_NAME_SINGULAR }
-                        )
-                      ) &&
-                      deleteBucket({ bucketId: bucket.id }).then(
-                        ({ error }) => {
-                          if (error) {
-                            toast.error(error.message);
-                          } else {
-                            setActionsDropdownOpen(false);
-                            Router.push(
-                              "/[group]/[round]",
-                              `/${bucket.round.group?.slug ?? "c"}/${
-                                bucket.round.slug
-                              }`
-                            );
-                            toast.success(
-                              `${capitalize(
-                                process.env.BUCKET_NAME_SINGULAR
-                              )} ${intl.formatMessage({
-                                defaultMessage: "deleted",
-                              })}`
-                            );
-                          }
-                        }
-                      )
-                    }
-                  >
-                    <FormattedMessage defaultMessage="Delete" />
-                  </button>
-                )}
               </Dropdown>
             </div>
           )}
