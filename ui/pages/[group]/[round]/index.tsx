@@ -897,7 +897,7 @@ export const PINNED_BUCKETS_QUERY = gql`
         pinnedAt
         minGoal
         maxGoal
-        // (Include any other fields needed by BucketCard)
+        # (Include any other fields needed by BucketCard)
       }
     }
   }
