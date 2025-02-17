@@ -839,6 +839,13 @@ const BucketSidebar = ({
           />
         </p>
       </div>
+      {confirmDeleteBucketOpen && (
+        <ConfirmDeleteBucket
+          open={confirmDeleteBucketOpen}
+          close={() => setConfirmDeleteBucketOpen(false)}
+          bucket={bucket}
+        />
+      )}
     </>
   );
 };
