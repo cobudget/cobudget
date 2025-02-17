@@ -825,6 +825,21 @@ const RoundPage = ({ currentUser }) => {
           sortBy={sortBy}
           onChangeSortBy={(e) => setSortBy(e.target.value)}
         />
+        const [{ data: pinnedData }] = useQuery({
+          query: PINNED_BUCKETS_QUERY,
+          variables: {
+            groupSlug: router.query.group,
+            roundSlug: router.query.round,
+            status: statusFilter,
+          },
+          pause: !router.isReady || bucketTableView,
+        });
+        const pinnedBuckets = (pinnedData?.bucketsPage?.buckets ?? [])
+          .filter((b) => b.pinnedAt !== null)
+          .sort(
+            (a, b) =>
+              new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
+          );
         <div
           className={
             bucketTableView
