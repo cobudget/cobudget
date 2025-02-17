@@ -623,7 +623,23 @@ const RoundPage = ({ currentUser }) => {
       setPause(false);
     }
   }, [router.isReady, router.query.page, router.query.view]);
-
+  
+  const [{ data: pinnedData }] = useQuery({
+    query: PINNED_BUCKETS_QUERY,
+    variables: {
+      groupSlug: router.query.group,
+      roundSlug: router.query.round,
+      status: statusFilter,
+    },
+    pause: !router.isReady || bucketTableView,
+  });
+  const pinnedBuckets = (pinnedData?.bucketsPage?.buckets ?? [])
+    .filter((b) => b.pinnedAt !== null)
+    .sort(
+      (a, b) =>
+        new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
+    );
+  
   const [invitationModalOpen, setInvitationModalOpen] = useState(false);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
