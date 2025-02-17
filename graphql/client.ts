@@ -9,7 +9,7 @@ export const DELETE_BUCKET_MUTATION = gql`
 `;
 
 export const updateDeleteBucket = (bucketId: string) => (data: any) => {
-  if (!data || !data.bucketsPage || !data.bucketsPage.buckets) {
+  if (!data?.bucketsPage?.buckets) {
     return data;
   }
   data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
