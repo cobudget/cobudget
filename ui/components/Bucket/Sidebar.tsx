@@ -234,7 +234,9 @@ const ConfirmDeleteBucket = ({ open, close, bucket }) => {
                       `/${bucket.round.group?.slug ?? "c"}/${bucket.round.slug}`
                     );
                     toast.success(
-                      `${capitalize(process.env.BUCKET_NAME_SINGULAR)} ${intl.formatMessage({
+                      `${capitalize(
+                        process.env.BUCKET_NAME_SINGULAR
+                      )} ${intl.formatMessage({
                         defaultMessage: "deleted",
                       })}`
                     );
@@ -253,7 +255,7 @@ const ConfirmDeleteBucket = ({ open, close, bucket }) => {
 
 const css = {
   dropdownButton:
-    "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
+    "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
 };
 
 const BucketSidebar = ({
@@ -605,51 +607,55 @@ const BucketSidebar = ({
                     <FormattedMessage defaultMessage="Unapprove for funding" />
                   </button>
                 )}
-{isAdminOrModerator && (
-  <>
-    {bucket.pinnedAt ? (
-      <button
-        className={`${css.dropdownButton} !text-black`}
-        onClick={() =>
-          pinBucket({ bucketId: bucket.id, pin: false }).then(({ error }) => {
-            if (error) {
-              toast.error(error.message);
-            } else {
-              toast.success("Bucket unpinned");
-              setActionsDropdownOpen(false);
-            }
-          })
-        }
-      >
-        Unpin
-      </button>
-    ) : (
-      <button
-        className={`${css.dropdownButton} !text-black`}
-        onClick={() =>
-          pinBucket({ bucketId: bucket.id, pin: true }).then(({ error }) => {
-            if (error) {
-              toast.error(error.message);
-            } else {
-              toast.success("Bucket pinned");
-              setActionsDropdownOpen(false);
-            }
-          })
-        }
-      >
-        Pin
-      </button>
-    )}
-  </>
-)}
-{showDeleteButton && (
-  <button
-    className={css.dropdownButton}
-    onClick={() => setConfirmDeleteBucketOpen(true)}
-  >
-    <FormattedMessage defaultMessage="Delete" />
-  </button>
-)}
+                {isAdminOrModerator && (
+                  <>
+                    {bucket.pinnedAt ? (
+                      <button
+                        className={`${css.dropdownButton} !text-black`}
+                        onClick={() =>
+                          pinBucket({ bucketId: bucket.id, pin: false }).then(
+                            ({ error }) => {
+                              if (error) {
+                                toast.error(error.message);
+                              } else {
+                                toast.success("Bucket unpinned");
+                                setActionsDropdownOpen(false);
+                              }
+                            }
+                          )
+                        }
+                      >
+                        Unpin
+                      </button>
+                    ) : (
+                      <button
+                        className={`${css.dropdownButton} !text-black`}
+                        onClick={() =>
+                          pinBucket({ bucketId: bucket.id, pin: true }).then(
+                            ({ error }) => {
+                              if (error) {
+                                toast.error(error.message);
+                              } else {
+                                toast.success("Bucket pinned");
+                                setActionsDropdownOpen(false);
+                              }
+                            }
+                          )
+                        }
+                      >
+                        Pin
+                      </button>
+                    )}
+                  </>
+                )}
+                {showDeleteButton && (
+                  <button
+                    className={css.dropdownButton}
+                    onClick={() => setConfirmDeleteBucketOpen(true)}
+                  >
+                    <FormattedMessage defaultMessage="Delete" />
+                  </button>
+                )}
               </Dropdown>
             </div>
           )}

@@ -4,9 +4,9 @@ import { HeaderSkeleton } from "components/Skeleton";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
-import { FormattedMessage, FormattedNumber } from "react-intl";
-import { gql, useQuery, useMutation } from "urql";
 import toast from "react-hot-toast";
+import { FormattedMessage, FormattedNumber } from "react-intl";
+import { gql, useMutation, useQuery } from "urql";
 import BucketCard from "../../../components/BucketCard";
 import Button from "../../../components/Button";
 import EditableField from "../../../components/EditableField";
@@ -92,6 +92,66 @@ export const ROUND_PAGE_QUERY = gql`
         FUNDED
         CANCELED
         COMPLETED
+      }
+    }
+  }
+`;
+
+export const PINNED_BUCKETS_QUERY = gql`
+  query PinnedBuckets(
+    $groupSlug: String
+    $roundSlug: String!
+    $status: [StatusType!]
+  ) {
+    bucketsPage(
+      groupSlug: $groupSlug
+      roundSlug: $roundSlug
+      status: $status
+      limit: 1000
+    ) {
+      buckets {
+        id
+        description
+        summary
+        pinnedAt
+        title
+        minGoal
+        maxGoal
+        flags {
+          type
+        }
+        noOfFunders
+        income
+        awardedAmount
+        totalContributions
+        totalContributionsFromCurrentMember
+        noOfComments
+        published
+        approved
+        canceled
+        status
+        percentageFunded
+        round {
+          canCocreatorStartFunding
+        }
+        customFields {
+          value
+          customField {
+            id
+            name
+            type
+            limit
+            description
+            isRequired
+            position
+            createdAt
+          }
+        }
+        images {
+          id
+          small
+          large
+        }
       }
     }
   }
@@ -185,7 +245,8 @@ function AcceptInvitationModal({
       <div className="bg-white rounded-lg p-8 w-11/12 md:w-1/2">
         <h2 className="text-xl font-semibold mb-4">You have an invitation!</h2>
         <p className="mb-6">
-          You’ve been invited to participate in this round. Accept your invitation to get access to all round features.
+          You’ve been invited to participate in this round. Accept your
+          invitation to get access to all round features.
         </p>
         <div className="flex justify-end gap-4">
           <button
@@ -623,7 +684,7 @@ const RoundPage = ({ currentUser }) => {
       setPause(false);
     }
   }, [router.isReady, router.query.page, router.query.view]);
-  
+
   const [{ data: pinnedData }] = useQuery({
     query: PINNED_BUCKETS_QUERY,
     variables: {
@@ -636,10 +697,9 @@ const RoundPage = ({ currentUser }) => {
   const pinnedBuckets = (pinnedData?.bucketsPage?.buckets ?? [])
     .filter((b) => b.pinnedAt !== null)
     .sort(
-      (a, b) =>
-        new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
+      (a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
     );
-  
+
   const [invitationModalOpen, setInvitationModalOpen] = useState(false);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
 
@@ -894,27 +954,3 @@ const RoundPage = ({ currentUser }) => {
 };
 
 export default RoundPage;
-export const PINNED_BUCKETS_QUERY = gql`
-  query PinnedBuckets(
-    $groupSlug: String
-    $roundSlug: String!
-    $status: [StatusType!]
-  ) {
-    bucketsPage(
-      groupSlug: $groupSlug
-      roundSlug: $roundSlug
-      status: $status
-      limit: 1000
-    ) {
-      buckets {
-        id
-        title
-        summary
-        pinnedAt
-        minGoal
-        maxGoal
-        # (Include any other fields needed by BucketCard)
-      }
-    }
-  }
-`;
