@@ -125,6 +125,7 @@ export const BUCKETS_QUERY = gql`
         id
         description
         summary
+        pinnedAt
         title
         minGoal
         maxGoal
