@@ -240,22 +240,6 @@ const Page = ({
       ...(!!tag && { tag }),
     },
   });
-  const [{ data: pinnedData }] = useQuery({
-    query: PINNED_BUCKETS_QUERY,
-    variables: {
-      groupSlug: router.query.group,
-      roundSlug: router.query.round,
-      status: statusFilter,
-    },
-    // Only fetch when in grid view (not table)
-    pause: !router.isReady || bucketTableView,
-  });
-  const pinnedBuckets =
-    pinnedData?.bucketsPage?.buckets?.filter((b) => b.pinnedAt !== null) ??
-    [];
-  pinnedBuckets.sort(
-    (a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
-  );
 
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
