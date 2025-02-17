@@ -609,7 +609,7 @@ const BucketSidebar = ({
   <>
     {bucket.pinnedAt ? (
       <button
-        className={css.dropdownButton}
+        className={`${css.dropdownButton} !text-black`}
         onClick={() =>
           pinBucket({ bucketId: bucket.id, pin: false }).then(({ error }) => {
             if (error) {
@@ -625,7 +625,7 @@ const BucketSidebar = ({
       </button>
     ) : (
       <button
-        className={css.dropdownButton}
+        className={`${css.dropdownButton} !text-black`}
         onClick={() =>
           pinBucket({ bucketId: bucket.id, pin: true }).then(({ error }) => {
             if (error) {
