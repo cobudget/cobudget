@@ -219,6 +219,7 @@ const Page = ({
   bucketTableView,
   pause,
   orderBy,
+  pinnedBuckets,
 }) => {
   const { tag, s } = router.query;
 
@@ -239,16 +240,35 @@ const Page = ({
       ...(!!tag && { tag }),
     },
   });
+  const [{ data: pinnedData }] = useQuery({
+    query: PINNED_BUCKETS_QUERY,
+    variables: {
+      groupSlug: router.query.group,
+      roundSlug: router.query.round,
+      status: statusFilter,
+    },
+    // Only fetch when in grid view (not table)
+    pause: !router.isReady || bucketTableView,
+  });
+  const pinnedBuckets =
+    pinnedData?.bucketsPage?.buckets?.filter((b) => b.pinnedAt !== null) ??
+    [];
+  pinnedBuckets.sort(
+    (a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
+  );
 
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
   let finalBuckets = buckets;
   if (!bucketTableView) {
-    const pinned = buckets
-      .filter(b => b.pinnedAt !== null)
-      .sort((a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime());
-    const unpinned = buckets.filter(b => b.pinnedAt === null);
-    finalBuckets = [...pinned, ...unpinned];
+    if (isFirstPage && pinnedBuckets && pinnedBuckets.length > 0) {
+      // On page 1, merge all pinned buckets (fetched separately) with unpinned ones from this page.
+      const unpinned = buckets.filter((b) => b.pinnedAt === null);
+      finalBuckets = [...pinnedBuckets, ...unpinned];
+    } else {
+      // On subsequent pages, show only unpinned buckets.
+      finalBuckets = buckets.filter((b) => b.pinnedAt === null);
+    }
   }
 
   const columns = useMemo(() => {
@@ -858,6 +878,7 @@ const RoundPage = ({ currentUser }) => {
                 loading={fetching}
                 bucketTableView={bucketTableView}
                 orderBy={sortBy}
+                pinnedBuckets={i === 0 ? pinnedBuckets : []}
               />
             );
           })}
@@ -873,3 +894,27 @@ const RoundPage = ({ currentUser }) => {
 };
 
 export default RoundPage;
+export const PINNED_BUCKETS_QUERY = gql`
+  query PinnedBuckets(
+    $groupSlug: String
+    $roundSlug: String!
+    $status: [StatusType!]
+  ) {
+    bucketsPage(
+      groupSlug: $groupSlug
+      roundSlug: $roundSlug
+      status: $status
+      limit: 1000
+    ) {
+      buckets {
+        id
+        title
+        summary
+        pinnedAt
+        minGoal
+        maxGoal
+        // (Include any other fields needed by BucketCard)
+      }
+    }
+  }
+`;
