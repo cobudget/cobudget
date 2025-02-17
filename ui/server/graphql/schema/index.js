@@ -388,6 +388,7 @@ const schema = gql`
 
     acceptTerms: User
     setEmailSetting(settingKey: String!, value: Boolean!): User
+    pinBucket(bucketId: ID!, pin: Boolean!): Bucket
   }
 
   type GroupSubscriptionStatus {
@@ -714,6 +715,7 @@ const schema = gql`
     title: String!
     description: String
     summary: String
+    pinnedAt: DateTime
     images: [Image!]
     cocreators: [RoundMember]!
     budgetItems: [BudgetItem!]

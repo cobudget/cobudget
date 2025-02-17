@@ -44,6 +44,15 @@ const BucketCard = ({ bucket, round, showRound = false }) => {
       data-testid="bucket-card"
       className="relative bg-white rounded-lg shadow-md overflow-hidden flex flex-col w-full hover:shadow-lg transition-shadow duration-75 ease-in-out"
     >
+      {bucket.pinnedAt && (
+        <div className="absolute left-0 top-0 m-2 flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-sm rounded shadow">
+          <svg className="w-4 h-4 mr-1">
+            {/* SVG content for pushpin */}
+            <path d="M12 2L15 8H9L12 2Z" />
+          </svg>
+          Pinned
+        </div>
+      )}
       {bucket.images?.length ? (
         <img
           src={bucket.images[0].small}

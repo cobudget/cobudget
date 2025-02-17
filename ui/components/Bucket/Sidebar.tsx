@@ -47,6 +47,14 @@ const PUBLISH_BUCKET_MUTATION = gql`
     }
   }
 `;
+const PIN_BUCKET_MUTATION = gql`
+  mutation PinBucket($bucketId: ID!, $pin: Boolean!) {
+    pinBucket(bucketId: $bucketId, pin: $pin) {
+      id
+      pinnedAt
+    }
+  }
+`;
 
 const MARK_AS_COMPLETED_MUTATION = gql`
   mutation MarkAsCompleted($bucketId: ID!) {
@@ -533,6 +541,43 @@ const BucketSidebar = ({
                   >
                     <FormattedMessage defaultMessage="Unapprove for funding" />
                   </button>
+                )}
+                {isAdminOrModerator && (
+                  <>
+                    {bucket.pinnedAt ? (
+                      <button
+                        className={css.dropdownButton}
+                        onClick={() => {
+                          pinBucket({ bucketId: bucket.id, pin: false }).then(({ error }) => {
+                            if (error) {
+                              toast.error(error.message);
+                            } else {
+                              toast.success("Bucket unpinned");
+                              setActionsDropdownOpen(false);
+                            }
+                          });
+                        }}
+                      >
+                        Unpin
+                      </button>
+                    ) : (
+                      <button
+                        className={css.dropdownButton}
+                        onClick={() => {
+                          pinBucket({ bucketId: bucket.id, pin: true }).then(({ error }) => {
+                            if (error) {
+                              toast.error(error.message);
+                            } else {
+                              toast.success("Bucket pinned");
+                              setActionsDropdownOpen(false);
+                            }
+                          });
+                        }}
+                      >
+                        Pin
+                      </button>
+                    )}
+                  </>
                 )}
                 {showDeleteButton && (
                   <button

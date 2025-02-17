@@ -722,6 +722,22 @@ export const raiseFlag = async (
   return updated;
 };
 
+export const pinBucket = combineResolvers(
+  isCollModOrAdmin, // only admins/mods can pin
+  async (
+    _,
+    { bucketId, pin }: { bucketId: string; pin: boolean },
+    { user }
+  ) => {
+    const pinnedAt = pin ? new Date() : null;
+    const updated = await prisma.bucket.update({
+      where: { id: bucketId },
+      data: { pinnedAt },
+    });
+    return updated;
+  }
+);
+
 export const resolveFlag = async (
   parent,
   { bucketId, flagId, comment },

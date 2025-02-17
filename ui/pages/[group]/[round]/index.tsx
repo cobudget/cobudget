@@ -241,6 +241,14 @@ const Page = ({
 
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
+  let finalBuckets = buckets;
+  if (!bucketTableView) {
+    const pinned = buckets
+      .filter(b => b.pinnedAt !== null)
+      .sort((a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime());
+    const unpinned = buckets.filter(b => b.pinnedAt === null);
+    finalBuckets = [...pinned, ...unpinned];
+  }
 
   const columns = useMemo(() => {
     const cols = [
@@ -394,7 +402,7 @@ const Page = ({
   return (
     <>
       {!bucketTableView ? (
-        buckets.map((bucket) => (
+        finalBuckets.map((bucket) => (
           <Link
             href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
             key={bucket.id}
