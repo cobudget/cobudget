@@ -715,7 +715,7 @@ const schema = gql`
     title: String!
     description: String
     summary: String
-    pinnedAt: DateTime
+    pinnedAt: Date
     images: [Image!]
     cocreators: [RoundMember]!
     budgetItems: [BudgetItem!]
