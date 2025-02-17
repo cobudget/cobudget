@@ -543,43 +543,43 @@ const BucketSidebar = ({
                     <FormattedMessage defaultMessage="Unapprove for funding" />
                   </button>
                 )}
-                {isAdminOrModerator && (
-                  <>
-                    {bucket.pinnedAt ? (
-                      <button
-                        className={css.dropdownButton}
-                        onClick={() => {
-                          pinBucket({ bucketId: bucket.id, pin: false }).then(({ error }) => {
-                            if (error) {
-                              toast.error(error.message);
-                            } else {
-                              toast.success("Bucket unpinned");
-                              setActionsDropdownOpen(false);
-                            }
-                          });
-                        }}
-                      >
-                        Unpin
-                      </button>
-                    ) : (
-                      <button
-                        className={css.dropdownButton}
-                        onClick={() => {
-                          pinBucket({ bucketId: bucket.id, pin: true }).then(({ error }) => {
-                            if (error) {
-                              toast.error(error.message);
-                            } else {
-                              toast.success("Bucket pinned");
-                              setActionsDropdownOpen(false);
-                            }
-                          });
-                        }}
-                      >
-                        Pin
-                      </button>
-                    )}
-                  </>
-                )}
+{isAdminOrModerator && (
+  <>
+    {bucket.pinnedAt ? (
+      <button
+        className={css.dropdownButton}
+        onClick={() =>
+          pinBucket({ bucketId: bucket.id, pin: false }).then(({ error }) => {
+            if (error) {
+              toast.error(error.message);
+            } else {
+              toast.success("Bucket unpinned");
+              setActionsDropdownOpen(false);
+            }
+          })
+        }
+      >
+        Unpin
+      </button>
+    ) : (
+      <button
+        className={css.dropdownButton}
+        onClick={() =>
+          pinBucket({ bucketId: bucket.id, pin: true }).then(({ error }) => {
+            if (error) {
+              toast.error(error.message);
+            } else {
+              toast.success("Bucket pinned");
+              setActionsDropdownOpen(false);
+            }
+          })
+        }
+      >
+        Pin
+      </button>
+    )}
+  </>
+)}
                 {showDeleteButton && (
                   <button
                     className={css.dropdownButton}
