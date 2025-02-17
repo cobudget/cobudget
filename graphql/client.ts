@@ -9,14 +9,19 @@ export const DELETE_BUCKET_MUTATION = gql`
 `;
 
 export const updateDeleteBucket = (bucketId: string) => (data: any) => {
-  if (data == null || data.bucketsPage == null) {
+  if (!data || !data.bucketsPage || !data.bucketsPage.buckets) {
     return data;
   }
   if (!Array.isArray(data.bucketsPage.buckets)) {
     return data;
   }
-  data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
-    (bucket: any) => bucket.id !== bucketId
-  );
-  return data;
+  return {
+    ...data,
+    bucketsPage: {
+      ...data.bucketsPage,
+      buckets: data.bucketsPage.buckets.filter(
+        (bucket: any) => bucket?.id !== bucketId
+      ),
+    },
+  };
 };
