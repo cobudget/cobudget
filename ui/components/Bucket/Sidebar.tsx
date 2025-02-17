@@ -190,6 +190,67 @@ const ConfirmCancelBucket = ({ open, close, bucketId }) => {
   );
 };
 
+const ConfirmDeleteBucket = ({ open, close, bucket }) => {
+  const [, deleteBucket] = useMutation(DELETE_BUCKET_MUTATION);
+  const intl = useIntl();
+  return (
+    <Modal open={open} className="flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <div className="font-bold text-lg mb-2">
+          <FormattedMessage
+            defaultMessage="Are you absolutely sure you want to delete this {bucketName}?"
+            values={{ bucketName: process.env.BUCKET_NAME_SINGULAR }}
+          />
+        </div>
+        <div className="mb-2">
+          <FormattedMessage
+            defaultMessage="This action cannot be undone. All data associated with this {bucketName} will be permanently removed."
+            values={{ bucketName: process.env.BUCKET_NAME_SINGULAR }}
+          />
+        </div>
+        <div className="font-bold">
+          <FormattedMessage defaultMessage="Warning: Irreversible Operation" />
+        </div>
+        <div className="mt-4 flex justify-end items-center">
+          <div className="flex">
+            <Button
+              color="white"
+              variant="secondary"
+              onClick={close}
+              disabled={false}
+            >
+              <FormattedMessage defaultMessage="Cancel" />
+            </Button>
+            <Button
+              color="red"
+              onClick={() =>
+                deleteBucket({ bucketId: bucket.id }).then(({ error }) => {
+                  if (error) {
+                    toast.error(error.message);
+                  } else {
+                    close();
+                    Router.push(
+                      "/[group]/[round]",
+                      `/${bucket.round.group?.slug ?? "c"}/${bucket.round.slug}`
+                    );
+                    toast.success(
+                      `${capitalize(process.env.BUCKET_NAME_SINGULAR)} ${intl.formatMessage({
+                        defaultMessage: "deleted",
+                      })}`
+                    );
+                  }
+                })
+              }
+            >
+              <FormattedMessage defaultMessage="Delete" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const css = {
   dropdownButton:
     "text-left block mx-2 px-2 py-1 mb-1 text-gray-800 last:text-red hover:bg-gray-200 rounded-lg focus:outline-none focus:bg-gray-200",
@@ -208,6 +269,7 @@ const BucketSidebar = ({
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
   const [confirmCancelBucketOpen, setConfirmCancelBucketOpen] = useState(false);
+  const [confirmDeleteBucketOpen, setConfirmDeleteBucketOpen] = useState(false);
 
   const [, approveForGranting] = useMutation(APPROVE_FOR_GRANTING_MUTATION);
   const [, readyForFunding] = useMutation(SET_READY_FOR_FUNDING);
@@ -583,32 +645,7 @@ const BucketSidebar = ({
 {showDeleteButton && (
   <button
     className={css.dropdownButton}
-    onClick={() =>
-      confirm(
-        intl.formatMessage(
-          {
-            defaultMessage: "Are you sure you would like to delete this {bucketName}?",
-          },
-          { bucketName: process.env.BUCKET_NAME_SINGULAR }
-        )
-      ) &&
-      deleteBucket({ bucketId: bucket.id }).then(({ error }) => {
-        if (error) {
-          toast.error(error.message);
-        } else {
-          setActionsDropdownOpen(false);
-          Router.push(
-            "/[group]/[round]",
-            `/${bucket.round.group?.slug ?? "c"}/${bucket.round.slug}`
-          );
-          toast.success(
-            `${capitalize(process.env.BUCKET_NAME_SINGULAR)} ${intl.formatMessage({
-              defaultMessage: "deleted",
-            })}`
-          );
-        }
-      })
-    }
+    onClick={() => setConfirmDeleteBucketOpen(true)}
   >
     <FormattedMessage defaultMessage="Delete" />
   </button>
@@ -806,4 +843,11 @@ const BucketSidebar = ({
   );
 };
 
+{confirmDeleteBucketOpen && (
+  <ConfirmDeleteBucket
+    open={confirmDeleteBucketOpen}
+    close={() => setConfirmDeleteBucketOpen(false)}
+    bucket={bucket}
+  />
+)}
 export default BucketSidebar;
