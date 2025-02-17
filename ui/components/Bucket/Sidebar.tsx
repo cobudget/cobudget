@@ -843,11 +843,4 @@ const BucketSidebar = ({
   );
 };
 
-{confirmDeleteBucketOpen && (
-  <ConfirmDeleteBucket
-    open={confirmDeleteBucketOpen}
-    close={() => setConfirmDeleteBucketOpen(false)}
-    bucket={bucket}
-  />
-)}
 export default BucketSidebar;
