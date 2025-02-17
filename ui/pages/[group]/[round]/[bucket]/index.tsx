@@ -23,6 +23,7 @@ export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
     bucket(id: $id) {
       id
+      pinnedAt
       description
       summary
       title
