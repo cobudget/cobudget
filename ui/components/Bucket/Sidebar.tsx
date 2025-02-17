@@ -219,6 +219,7 @@ const BucketSidebar = ({
   const [{ fetching: togglingFavorite }, toggleFavorite] = useMutation(
     TOGGLE_FAVORITE_BUCKET
   );
+  const [, pinBucket] = useMutation(PIN_BUCKET_MUTATION);
 
   const intl = useIntl();
 
