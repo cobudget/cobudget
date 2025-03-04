@@ -55,6 +55,11 @@ export const client = (
           CommentSet: () => null,
           BucketsPage: () => null,
           BucketStatusCount: () => null,
+          MembersLimit: () => null,
+          RoundImagesFeed: () => null,
+          ResourceLimit: () => null,
+          OC_Collective: () => null,
+          OC_Parent: () => null,
         },
         updates: {
           Mutation: {

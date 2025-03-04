@@ -40,7 +40,12 @@ export const randomRoundImages = combineResolvers(
   
       // 3) Gather images from all buckets in this round.
       const bucketsWithImages = await prisma.bucket.findMany({
-        where: { roundId: round.id, deleted: { not: true } },
+        where: {
+          roundId: round.id,
+          deleted: { not: true },
+          publishedAt: { not: null },   // Exclude unpublished/draft buckets
+          canceledAt: null              // Exclude cancelled buckets
+        },
         include: { Images: true },
       });
   
