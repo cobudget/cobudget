@@ -145,6 +145,50 @@ export const expenses = async (
     },
   });
 
+  // Determine if the current user is allowed to view protected fields
+  let canViewProtectedFields = false;
+
+  if (user) {
+    // Check for superadmin (assumes user.isSuperAdmin flag is set)
+    if (user.isSuperAdmin) {
+      canViewProtectedFields = true;
+    } else {
+      // Check if the user is a round admin
+      const roundMember = await getRoundMember({ userId: user.id, roundId });
+      if (roundMember && roundMember.isAdmin) {
+        canViewProtectedFields = true;
+      }
+      // If not a round admin, check if the user is a group admin
+      else if (round.groupId) {
+        const groupAdmin = await prisma.groupMember.findFirst({
+          where: {
+            groupId: round.groupId,
+            userId: user.id,
+            isAdmin: true,
+          },
+        });
+        if (groupAdmin) {
+          canViewProtectedFields = true;
+        }
+      }
+    }
+  }
+
+  // If the user is not allowed, remove protected fields from all expenses
+  if (!canViewProtectedFields) {
+    response = response.map((expense) => ({
+      ...expense,
+      recipientName: null,
+      recipientEmail: null,
+      swiftCode: null,
+      iban: null,
+      country: null,
+      city: null,
+      recipientAddress: null,
+      recipientPostalCode: null,
+    }));
+  }
+
   return {
     expenses: response,
     total,
