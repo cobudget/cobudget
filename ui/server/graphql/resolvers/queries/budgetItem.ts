@@ -92,7 +92,7 @@ export const budgetItems = async (
   }
 
   // 3. Build the filter.
-  const where: any = { roundId };
+  const where: any = { Bucket: { roundId } };
 
   if (bucketId) {
     where.bucketId = bucketId;
@@ -118,12 +118,20 @@ export const budgetItems = async (
   }
 
   // 4. Query budget items (including the minimal bucket info needed).
-  const mappedOrderBy =
-    orderBy === "minBudget"
-      ? "min"
-      : orderBy === "stretchBudget"
-      ? "max"
-      : orderBy;
+  // Determine the correct ordering mapping
+  let mappedOrderBy = {};
+  if (orderBy === "minBudget") {
+    mappedOrderBy = { min: orderDir };
+  } else if (orderBy === "stretchBudget") {
+    mappedOrderBy = { max: orderDir };
+  } else if (orderBy === "description") {
+    mappedOrderBy = { description: orderDir };
+  } else if (orderBy === "createdAt") {
+    // Order by the Bucket's createdAt field
+    mappedOrderBy = { Bucket: { createdAt: orderDir } };
+  } else {
+    mappedOrderBy = { id: orderDir };
+  }
 
   const [items, total] = await Promise.all([
     prisma.budgetItem.findMany({
@@ -138,14 +146,13 @@ export const budgetItems = async (
             fundedAt: true,
             canceledAt: true,
             completedAt: true,
+            createdAt: true,
           },
         },
       },
       skip: offset,
       take: limit,
-      orderBy: {
-        [mappedOrderBy]: orderDir,
-      },
+      orderBy: mappedOrderBy,
     }),
     prisma.budgetItem.count({ where }),
   ]);
