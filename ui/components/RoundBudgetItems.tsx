@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
 import Label from "./Label";
@@ -53,6 +53,37 @@ function RoundBudgetItems({ round, currentUser }) {
     },
   ]);
 
+  // Sorting state: key is the column to sort by, direction is "asc" or "desc"
+  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
+    key: null,
+    direction: "asc",
+  });
+  
+  // Toggle sort order for a given column key
+  const handleSort = (key: string) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
+  
+  // Compute the sorted items: sorts numerically when applicable, otherwise uses string comparison
+  const sortedBudgetItems = useMemo(() => {
+    if (!sortConfig.key) return budgetItems;
+    return [...budgetItems].sort((a, b) => {
+      const aValue = a[sortConfig.key];
+      const bValue = b[sortConfig.key];
+      if (typeof aValue === "number" && typeof bValue === "number") {
+        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
+      }
+      return sortConfig.direction === "asc"
+        ? String(aValue).localeCompare(String(bValue))
+        : String(bValue).localeCompare(String(aValue));
+    });
+  }, [budgetItems, sortConfig]);
+
   const handleLoadMore = () => {
     // Append additional dummy items
     const moreDummy = [
@@ -96,38 +127,43 @@ function RoundBudgetItems({ round, currentUser }) {
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("description")}
               >
-                Description
+                Description {sortConfig.key === "description" && (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("minBudget")}
               >
-                Minimum Budget
+                Minimum Budget {sortConfig.key === "minBudget" && (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("stretchBudget")}
               >
-                Stretch Budget
+                Stretch Budget {sortConfig.key === "stretchBudget" && (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("bucketName")}
               >
-                Bucket
+                Bucket {sortConfig.key === "bucketName" && (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                onClick={() => handleSort("bucketStatus")}
               >
-                Bucket Status
+                Bucket Status {sortConfig.key === "bucketStatus" && (sortConfig.direction === "asc" ? "↑" : "↓")}
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {budgetItems.map((item) => (
+            {sortedBudgetItems.map((item) => (
               <tr key={item.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{item.description}</td>
                 <td className="px-6 py-4 whitespace-nowrap">${item.minBudget}</td>
