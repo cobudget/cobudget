@@ -73,6 +73,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
 
   const [offset, setOffset] = useState(0);
   const limit = 10;
+  const [budgetItemsList, setBudgetItemsList] = useState([]);
   
   // Sort state
   const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
@@ -112,24 +113,32 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
     pause: !round?.id,
   });
 
-  // Transform the data for display - convert cents to dollars (divide by 100)
-  const budgetItems = useMemo(() => {
-    if (!data?.budgetItems?.budgetItems) return [];
-    
-    return data.budgetItems.budgetItems.map(item => ({
-      id: item.id,
-      description: item.description,
-      minBudget: item.minBudget != null ? item.minBudget / 100 : item.minBudget,
-      stretchBudget: item.stretchBudget != null ? item.stretchBudget / 100 : item.stretchBudget,
-      bucket: item.bucket,  // added for linking
-      bucketName: item.bucket?.title || "Unknown",
-      bucketStatus: item.bucket?.status || "UNKNOWN",
-    }));
-  }, [data]);
+  // Transform the data for display and accumulate results
+  useEffect(() => {
+    if (data?.budgetItems?.budgetItems) {
+      const mappedItems = data.budgetItems.budgetItems.map(item => ({
+        id: item.id,
+        description: item.description,
+        minBudget: item.minBudget != null ? item.minBudget / 100 : item.minBudget,
+        stretchBudget: item.stretchBudget != null ? item.stretchBudget / 100 : item.stretchBudget,
+        bucket: item.bucket,  // added for linking
+        bucketName: item.bucket?.title || "Unknown",
+        bucketStatus: item.bucket?.status || "UNKNOWN",
+      }));
+
+      // On a fresh load (offset 0), replace the list; otherwise, append
+      if (offset === 0) {
+        setBudgetItemsList(mappedItems);
+      } else {
+        setBudgetItemsList(prev => [...prev, ...mappedItems]);
+      }
+    }
+  }, [data, offset]);
 
   // Reset offset when filters change
   useEffect(() => {
     setOffset(0);
+    setBudgetItemsList([]); // clear previous results on filter/sort change
   }, [filters, sortConfig]);
 
   // Toggle sort order for a given column key
@@ -240,20 +249,20 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {fetching && !budgetItems.length ? (
+              {fetching && budgetItemsList.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     Loading budget items...
                   </TableCell>
                 </TableRow>
-              ) : budgetItems.length === 0 ? (
+              ) : budgetItemsList.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     No budget items found matching your criteria.
                   </TableCell>
                 </TableRow>
               ) : (
-                budgetItems.map((item) => (
+                budgetItemsList.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell>{item.minBudget}</TableCell>
