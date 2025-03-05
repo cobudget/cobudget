@@ -2,6 +2,53 @@ import prisma from "server/prisma";
 import { HIDDEN } from "../../../../constants";
 import { getRoundMember } from "../helpers";
 
+// Helper function to determine bucket status based on its fields
+const computeBucketStatus = (bucket) => {
+  if (bucket.canceledAt) return "CANCELED";
+  if (bucket.completedAt) return "COMPLETED";
+  if (bucket.fundedAt) return "FUNDED";
+  if (bucket.readyForFundingAt) return "OPEN_FOR_FUNDING";
+  if (bucket.publishedAt) return "PENDING_APPROVAL";
+  return "IDEA";
+};
+
+// Helper to convert status filter to Prisma query conditions
+const statusTypeToQuery = (status) => {
+  switch (status) {
+    case "CANCELED":
+      return { canceledAt: { not: null } };
+    case "COMPLETED":
+      return { completedAt: { not: null } };
+    case "FUNDED":
+      return { fundedAt: { not: null }, canceledAt: null, completedAt: null };
+    case "OPEN_FOR_FUNDING":
+      return { 
+        readyForFundingAt: { not: null }, 
+        fundedAt: null,
+        canceledAt: null, 
+        completedAt: null 
+      };
+    case "PENDING_APPROVAL":
+      return { 
+        publishedAt: { not: null }, 
+        readyForFundingAt: null,
+        fundedAt: null,
+        canceledAt: null, 
+        completedAt: null 
+      };
+    case "IDEA":
+      return { 
+        publishedAt: null, 
+        readyForFundingAt: null,
+        fundedAt: null,
+        canceledAt: null, 
+        completedAt: null 
+      };
+    default:
+      return null;
+  }
+};
+
 export const budgetItems = async (
   _,
   {
@@ -54,8 +101,14 @@ export const budgetItems = async (
     where.description = { contains: search, mode: "insensitive" };
   }
   if (status && status.length) {
-    // Filtering via a relation (assumes budgetItem has a relation to Bucket)
-    where.bucket = { status: { in: status } };
+    // Build OR conditions for each status
+    const orConditions = status
+      .map(s => statusTypeToQuery(s))
+      .filter(Boolean);
+    
+    if (orConditions.length > 0) {
+      where.Bucket = { OR: orConditions };
+    }
   }
   if (typeof minBudget === "number") {
     where.min = { gte: minBudget };
@@ -80,7 +133,11 @@ export const budgetItems = async (
           select: {
             id: true,
             title: true,
-            status: true,
+            publishedAt: true,
+            readyForFundingAt: true,
+            fundedAt: true,
+            canceledAt: true,
+            completedAt: true,
           },
         },
       },
@@ -98,11 +155,11 @@ export const budgetItems = async (
     description: it.description,
     minBudget: it.min,
     stretchBudget: it.max,
-    bucket: it.bucket
+    bucket: it.Bucket
       ? {
-          id: it.bucket.id,
-          title: it.bucket.title,
-          status: it.bucket.status,
+          id: it.Bucket.id,
+          title: it.Bucket.title,
+          status: computeBucketStatus(it.Bucket),
         }
       : null,
   }));
