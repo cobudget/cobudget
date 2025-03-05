@@ -6,6 +6,7 @@ import Label from "./Label";
 import getStatusColor from "../utils/getStatusColor";
 import { SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 import { gql, useQuery } from "urql";
+import Link from "next/link";
 
 // Mapping of bucket statuses to their display labels (as used in BucketCard)
 const bucketStatusLabels = {
@@ -120,6 +121,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
       description: item.description,
       minBudget: item.minBudget != null ? item.minBudget / 100 : item.minBudget,
       stretchBudget: item.stretchBudget != null ? item.stretchBudget / 100 : item.stretchBudget,
+      bucket: item.bucket,  // added for linking
       bucketName: item.bucket?.title || "Unknown",
       bucketStatus: item.bucket?.status || "UNKNOWN",
     }));
@@ -256,7 +258,15 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     <TableCell>{item.description}</TableCell>
                     <TableCell>{item.minBudget}</TableCell>
                     <TableCell>{item.stretchBudget != null ? item.stretchBudget : '-'}</TableCell>
-                    <TableCell>{item.bucketName}</TableCell>
+                    <TableCell>
+                      {item.bucket ? (
+                        <Link href={`/${currentGroup.slug}/${round.slug}/bucket/${item.bucket.id}`} passHref shallow>
+                          <a className="text-blue-500 hover:underline">{item.bucketName}</a>
+                        </Link>
+                      ) : (
+                        item.bucketName
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
                         {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
