@@ -1,5 +1,40 @@
 import prisma from "server/prisma";
 
+/**
+ * Converts a status string to a Prisma query object
+ */
+export const statusTypeToQuery = (s: string) => {
+  if (s === "PENDING_APPROVAL") {
+    return { publishedAt: null };
+  }
+  if (s === "OPEN_FOR_FUNDING") {
+    return { publishedAt: { not: null }, canceledAt: null, completedAt: null };
+  }
+  if (s === "FUNDED") {
+    return { publishedAt: { not: null }, completedAt: null, canceledAt: null, funded: true };
+  }
+  if (s === "COMPLETED") {
+    return { completedAt: { not: null } };
+  }
+  if (s === "CANCELED") {
+    return { canceledAt: { not: null } };
+  }
+  return null;
+};
+
+/**
+ * Computes a bucket's status based on its fields
+ */
+export const computeBucketStatus = (bucket: any) => {
+  if (!bucket) return null;
+  if (bucket.canceledAt) return "CANCELED";
+  if (bucket.completedAt) return "COMPLETED";
+  if (!bucket.publishedAt) return "PENDING_APPROVAL";
+  if (bucket.funded) return "FUNDED";
+  if (bucket.publishedAt) return "OPEN_FOR_FUNDING";
+  return null;
+};
+
 export const markBucketAsFavorite = async ({
   bucketId,
   userId,

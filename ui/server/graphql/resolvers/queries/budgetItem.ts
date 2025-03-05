@@ -1,6 +1,7 @@
 import prisma from "server/prisma";
 import { HIDDEN } from "../../../../constants";
 import { getRoundMember } from "../helpers";
+import { statusTypeToQuery, computeBucketStatus } from "../helpers/bucket";
 
 export const budgetItems = async (
   _,
@@ -54,8 +55,14 @@ export const budgetItems = async (
     where.description = { contains: search, mode: "insensitive" };
   }
   if (status && status.length) {
-    // Filtering via a relation (assumes budgetItem has a relation to Bucket)
-    where.bucket = { status: { in: status } };
+    // Convert status strings to actual database conditions
+    const orConditions = status
+      .map((s: string) => statusTypeToQuery(s))
+      .filter(Boolean);
+    
+    if (orConditions.length > 0) {
+      where.bucket = { OR: orConditions };
+    }
   }
   if (typeof minBudget === "number") {
     where.min = { gte: minBudget };
@@ -80,7 +87,10 @@ export const budgetItems = async (
           select: {
             id: true,
             title: true,
-            status: true,
+            publishedAt: true,
+            canceledAt: true,
+            completedAt: true,
+            funded: true,
           },
         },
       },
@@ -102,7 +112,7 @@ export const budgetItems = async (
       ? {
           id: it.bucket.id,
           title: it.bucket.title,
-          status: it.bucket.status,
+          status: computeBucketStatus(it.bucket),
         }
       : null,
   }));

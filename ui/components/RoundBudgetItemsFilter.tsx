@@ -1,6 +1,19 @@
 import React from "react";
 import MultiSelect from "./MultiSelect";
 import { SelectField } from "./SelectInput";
+import { gql, useQuery } from "urql";
+
+// Query to get buckets for the dropdown
+const BUCKETS_QUERY = gql`
+  query BucketsForFilter($roundId: ID!) {
+    bucketsPage(roundSlug: "", groupSlug: "", limit: 100, offset: 0, roundId: $roundId) {
+      buckets {
+        id
+        title
+      }
+    }
+  }
+`;
 
 function RoundBudgetItemsFilter({
   filters,
@@ -22,7 +35,17 @@ function RoundBudgetItemsFilter({
     { value: "OPEN_FOR_FUNDING", label: "Open for Funding" },
     { value: "FUNDED", label: "Funded" },
     { value: "COMPLETED", label: "Completed" },
+    { value: "CANCELED", label: "Canceled" },
   ];
+
+  // Fetch buckets for the dropdown
+  const [{ data: bucketsData }] = useQuery({
+    query: BUCKETS_QUERY,
+    variables: { roundId: round?.id },
+    pause: !round?.id,
+  });
+
+  const buckets = bucketsData?.bucketsPage?.buckets || [];
 
   return (
     <div className="grid grid-cols-5 gap-2">
@@ -50,9 +73,11 @@ function RoundBudgetItemsFilter({
           }}
         >
           <option value="">All Buckets</option>
-          <option value="bucketA">Bucket A</option>
-          <option value="bucketB">Bucket B</option>
-          <option value="bucketC">Bucket C</option>
+          {buckets.map(bucket => (
+            <option key={bucket.id} value={bucket.id}>
+              {bucket.title}
+            </option>
+          ))}
         </SelectField>
       </div>
 

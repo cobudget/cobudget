@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
 import Label from "./Label";
 import getStatusColor from "../utils/getStatusColor";
 import { SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
+import { gql, useQuery } from "urql";
 
 // Mapping of bucket statuses to their display labels (as used in BucketCard)
 const bucketStatusLabels = {
@@ -18,6 +19,49 @@ const bucketStatusLabels = {
   ARCHIVED: "Archived",
 };
 
+const BUDGET_ITEMS_QUERY = gql`
+  query BudgetItems(
+    $roundId: ID!
+    $search: String
+    $bucketId: ID
+    $status: [StatusType]
+    $minBudget: Int
+    $stretchBudget: Int
+    $offset: Int
+    $limit: Int
+    $orderBy: String
+    $orderDir: SortOrderOptions
+  ) {
+    budgetItems(
+      roundId: $roundId
+      search: $search
+      bucketId: $bucketId
+      status: $status
+      minBudget: $minBudget
+      stretchBudget: $stretchBudget
+      offset: $offset
+      limit: $limit
+      orderBy: $orderBy
+      orderDir: $orderDir
+    ) {
+      total
+      moreExist
+      budgetItems {
+        id
+        description
+        minBudget
+        stretchBudget
+        bucket {
+          id
+          title
+          status
+        }
+      }
+      error
+    }
+  }
+`;
+
 function RoundBudgetItems({ round, currentUser }) {
   const [filters, setFilters] = useState({
     search: "",
@@ -27,40 +71,67 @@ function RoundBudgetItems({ round, currentUser }) {
     stretchBudget: "",
   });
 
-  // Dummy data for now
-  const [budgetItems, setBudgetItems] = useState([
-    {
-      id: "1",
-      description: "Development Team",
-      minBudget: 2000,
-      stretchBudget: 3500,
-      bucketName: "Bucket A",
-      bucketStatus: "OPEN_FOR_FUNDING",
-    },
-    {
-      id: "2",
-      description: "Marketing Campaign",
-      minBudget: 1500,
-      stretchBudget: 2000,
-      bucketName: "Bucket B",
-      bucketStatus: "FUNDED",
-    },
-    {
-      id: "3",
-      description: "Conference Sponsorship",
-      minBudget: 500,
-      stretchBudget: 750,
-      bucketName: "Bucket C",
-      bucketStatus: "PENDING_APPROVAL",
-    },
-  ]);
-
-  // Sorting state: key is the column to sort by, direction is "asc" or "desc"
+  const [offset, setOffset] = useState(0);
+  const limit = 10;
+  
+  // Sort state
   const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
-    key: null,
+    key: "description",
     direction: "asc",
   });
+
+  // Convert sort config to GraphQL variables
+  const orderBy = sortConfig.key === "minBudget" 
+    ? "minBudget" 
+    : sortConfig.key === "stretchBudget" 
+      ? "stretchBudget" 
+      : sortConfig.key === "description" 
+        ? "description" 
+        : "createdAt";
   
+  const orderDir = sortConfig.direction as "asc" | "desc";
+
+  // Parse numeric filters
+  const minBudgetNum = filters.minBudget ? parseInt(filters.minBudget) : undefined;
+  const stretchBudgetNum = filters.stretchBudget ? parseInt(filters.stretchBudget) : undefined;
+
+  // Fetch budget items from GraphQL
+  const [{ data, fetching, error }, refetchBudgetItems] = useQuery({
+    query: BUDGET_ITEMS_QUERY,
+    variables: {
+      roundId: round?.id,
+      search: filters.search || undefined,
+      bucketId: filters.bucketId || undefined,
+      status: filters.status.length > 0 ? filters.status : undefined,
+      minBudget: minBudgetNum,
+      stretchBudget: stretchBudgetNum,
+      offset,
+      limit,
+      orderBy,
+      orderDir,
+    },
+    pause: !round?.id,
+  });
+
+  // Transform the data for display
+  const budgetItems = useMemo(() => {
+    if (!data?.budgetItems?.budgetItems) return [];
+    
+    return data.budgetItems.budgetItems.map(item => ({
+      id: item.id,
+      description: item.description,
+      minBudget: item.minBudget,
+      stretchBudget: item.stretchBudget,
+      bucketName: item.bucket?.title || "Unknown",
+      bucketStatus: item.bucket?.status || "UNKNOWN",
+    }));
+  }, [data]);
+
+  // Reset offset when filters change
+  useEffect(() => {
+    setOffset(0);
+  }, [filters, sortConfig]);
+
   // Toggle sort order for a given column key
   const handleSort = (key: string) => {
     setSortConfig((prev) => {
@@ -81,43 +152,11 @@ function RoundBudgetItems({ round, currentUser }) {
     }
     return <SortIcon className="h-3 w-3 text-gray-500" />;
   };
-  
-  // Compute the sorted items: sorts numerically when applicable, otherwise uses string comparison
-  const sortedBudgetItems = useMemo(() => {
-    if (!sortConfig.key) return budgetItems;
-    return [...budgetItems].sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      if (typeof aValue === "number" && typeof bValue === "number") {
-        return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
-      }
-      return sortConfig.direction === "asc"
-        ? String(aValue).localeCompare(String(bValue))
-        : String(bValue).localeCompare(String(aValue));
-    });
-  }, [budgetItems, sortConfig]);
 
   const handleLoadMore = () => {
-    // Append additional dummy items
-    const moreDummy = [
-      {
-        id: "4",
-        description: "Community Workshops",
-        minBudget: 1000,
-        stretchBudget: 1200,
-        bucketName: "Bucket D",
-        bucketStatus: "PENDING_APPROVAL",
-      },
-      {
-        id: "5",
-        description: "Design & Branding",
-        minBudget: 800,
-        stretchBudget: 1000,
-        bucketName: "Bucket E",
-        bucketStatus: "OPEN_FOR_FUNDING",
-      },
-    ];
-    setBudgetItems((prev) => [...prev, ...moreDummy]);
+    if (data?.budgetItems?.moreExist && !fetching) {
+      setOffset(prev => prev + limit);
+    }
   };
 
   return (
@@ -132,6 +171,20 @@ function RoundBudgetItems({ round, currentUser }) {
           round={round}
         />
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
+          Error loading budget items: {error.message}
+        </div>
+      )}
+
+      {/* API error message */}
+      {data?.budgetItems?.error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
+          {data.budgetItems.error}
+        </div>
+      )}
 
       {/* Budget Items table — reusing the same Material‑UI components as in the Expenses table */}
       <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
@@ -187,19 +240,33 @@ function RoundBudgetItems({ round, currentUser }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sortedBudgetItems.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>${item.minBudget}</TableCell>
-                  <TableCell>${item.stretchBudget}</TableCell>
-                  <TableCell>{item.bucketName}</TableCell>
-                  <TableCell>
-                    <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
-                      {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
-                    </Label>
+              {fetching && !budgetItems.length ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    Loading budget items...
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : budgetItems.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-8">
+                    No budget items found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                budgetItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.description}</TableCell>
+                    <TableCell>${item.minBudget}</TableCell>
+                    <TableCell>${item.stretchBudget || '-'}</TableCell>
+                    <TableCell>{item.bucketName}</TableCell>
+                    <TableCell>
+                      <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
+                        {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
+                      </Label>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -208,8 +275,8 @@ function RoundBudgetItems({ round, currentUser }) {
       {/* Load More button */}
       <div className="mt-4">
         <LoadMore
-          moreExist={true}
-          loading={false}
+          moreExist={data?.budgetItems?.moreExist || false}
+          loading={fetching}
           onClick={handleLoadMore}
           autoLoadMore={false}
         />
