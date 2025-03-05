@@ -25,9 +25,9 @@ function RoundBudgetItemsFilter({
   ];
 
   return (
-    <div className="grid sm:grid-cols-5 grid-cols-4 gap-2">
+    <div className="grid grid-cols-5 gap-2">
       {/* Search input */}
-      <div className="sm:col-span-2 col-span-2 flex flex-1 bg-white shadow-sm rounded-md border-transparent focus-within:border-gray-900 border-3 px-1 relative pr-10 items-center overflow-hidden">
+      <div className="bg-white shadow-sm rounded-md px-1 max-w-[150px]">
         <input
           type="text"
           placeholder="Search..."
@@ -68,7 +68,7 @@ function RoundBudgetItemsFilter({
       </div>
 
       {/* Minimum Budget filter */}
-      <div>
+      <div className="max-w-[150px]">
         <input
           type="number"
           placeholder="Min. Budget"
@@ -81,7 +81,7 @@ function RoundBudgetItemsFilter({
       </div>
 
       {/* Stretch Budget filter */}
-      <div>
+      <div className="max-w-[150px]">
         <input
           type="number"
           placeholder="Stretch Budget"
