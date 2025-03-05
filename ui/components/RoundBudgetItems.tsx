@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
 import Label from "./Label";
 import getStatusColor from "../utils/getStatusColor";
+import { SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 
 // Mapping of bucket statuses to their display labels (as used in BucketCard)
 const bucketStatusLabels = {
@@ -69,6 +71,17 @@ function RoundBudgetItems({ round, currentUser }) {
     });
   };
   
+  const getSortIcon = (column: string) => {
+    if (sortConfig.key === column) {
+      return sortConfig.direction === "asc" ? (
+        <SortUpIcon className="h-3 w-3 text-gray-500" />
+      ) : (
+        <SortDownIcon className="h-3 w-3 text-gray-500" />
+      );
+    }
+    return <SortIcon className="h-3 w-3 text-gray-500" />;
+  };
+  
   // Compute the sorted items: sorts numerically when applicable, otherwise uses string comparison
   const sortedBudgetItems = useMemo(() => {
     if (!sortConfig.key) return budgetItems;
@@ -120,64 +133,76 @@ function RoundBudgetItems({ round, currentUser }) {
         />
       </div>
 
-      {/* Table of budget items (using same design as expenses page) */}
-      <div className="mt-4 shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("description")}
-              >
-                Description {sortConfig.key === "description" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("minBudget")}
-              >
-                Minimum Budget {sortConfig.key === "minBudget" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("stretchBudget")}
-              >
-                Stretch Budget {sortConfig.key === "stretchBudget" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("bucketName")}
-              >
-                Bucket {sortConfig.key === "bucketName" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort("bucketStatus")}
-              >
-                Bucket Status {sortConfig.key === "bucketStatus" && (sortConfig.direction === "asc" ? "↑" : "↓")}
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedBudgetItems.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap">{item.description}</td>
-                <td className="px-6 py-4 whitespace-nowrap">${item.minBudget}</td>
-                <td className="px-6 py-4 whitespace-nowrap">${item.stretchBudget}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.bucketName}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
-                    {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
-                  </Label>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Budget Items table — reusing the same Material‑UI components as in the Expenses table */}
+      <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("description")}
+                  >
+                    Description
+                    <span className="float-right mt-2">{getSortIcon("description")}</span>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("minBudget")}
+                  >
+                    Minimum Budget
+                    <span className="float-right mt-2">{getSortIcon("minBudget")}</span>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("stretchBudget")}
+                  >
+                    Stretch Budget
+                    <span className="float-right mt-2">{getSortIcon("stretchBudget")}</span>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("bucketName")}
+                  >
+                    Bucket
+                    <span className="float-right mt-2">{getSortIcon("bucketName")}</span>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("bucketStatus")}
+                  >
+                    Bucket Status
+                    <span className="float-right mt-2">{getSortIcon("bucketStatus")}</span>
+                  </span>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {sortedBudgetItems.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>{item.description}</TableCell>
+                  <TableCell>${item.minBudget}</TableCell>
+                  <TableCell>${item.stretchBudget}</TableCell>
+                  <TableCell>{item.bucketName}</TableCell>
+                  <TableCell>
+                    <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
+                      {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
+                    </Label>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
 
       {/* Load More button */}
