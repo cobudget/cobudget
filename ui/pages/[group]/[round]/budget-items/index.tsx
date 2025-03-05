@@ -7,7 +7,7 @@ const RoundBudgetItemsPage: NextPage<{
   round?: any;
   currentUser?: any;
   currentGroup?: any;
-}> = ({ round, currentUser }) => {
+}> = ({ round, currentUser, currentGroup }) => {
   if (!round) return null;
   return (
     <div className="flex-1">
