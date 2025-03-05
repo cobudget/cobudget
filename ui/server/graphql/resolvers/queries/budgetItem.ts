@@ -66,12 +66,12 @@ export const budgetItems = async (
 
   // 4. Query budget items (including the minimal bucket info needed).
   const mappedOrderBy =
-    orderBy === 'minBudget'
-      ? 'min'
-      : orderBy === 'stretchBudget'
-        ? 'max'
-        : orderBy;
-        
+    orderBy === "minBudget"
+      ? "min"
+      : orderBy === "stretchBudget"
+      ? "max"
+      : orderBy;
+
   const [items, total] = await Promise.all([
     prisma.budgetItem.findMany({
       where,
