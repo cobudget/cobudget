@@ -5,6 +5,7 @@ const getStatusColor = (status: string, bucket) => {
   else if (status === "FUNDED") return "bg-app-green";
   else if (status === "PARTIAL_FUNDING") return "bg-app-light-green";
   else if (status === "COMPLETED") return "bg-app-purple";
+  else return "bg-app-gray"; // Default fallback color
 };
 
 export default getStatusColor;

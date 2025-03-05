@@ -134,7 +134,7 @@ function RoundBudgetItems({ round, currentUser }) {
                 <td className="px-6 py-4 whitespace-nowrap">${item.stretchBudget}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.bucketName}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Label className={getStatusColor(item.bucketStatus, item)}>
+                  <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
                     {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
                   </Label>
                 </td>
