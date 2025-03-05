@@ -91,9 +91,9 @@ function RoundBudgetItems({ round, currentUser }) {
   
   const orderDir = sortConfig.direction as "asc" | "desc";
 
-  // Parse numeric filters
-  const minBudgetNum = filters.minBudget ? parseInt(filters.minBudget) : undefined;
-  const stretchBudgetNum = filters.stretchBudget ? parseInt(filters.stretchBudget) : undefined;
+  // Parse numeric filters - convert dollars to cents (multiply by 100)
+  const minBudgetNum = filters.minBudget ? parseInt(filters.minBudget) * 100 : undefined;
+  const stretchBudgetNum = filters.stretchBudget ? parseInt(filters.stretchBudget) * 100 : undefined;
 
   // Fetch budget items from GraphQL
   const [{ data, fetching, error }, refetchBudgetItems] = useQuery({
@@ -113,15 +113,15 @@ function RoundBudgetItems({ round, currentUser }) {
     pause: !round?.id,
   });
 
-  // Transform the data for display
+  // Transform the data for display - convert cents to dollars (divide by 100)
   const budgetItems = useMemo(() => {
     if (!data?.budgetItems?.budgetItems) return [];
     
     return data.budgetItems.budgetItems.map(item => ({
       id: item.id,
       description: item.description,
-      minBudget: item.minBudget,
-      stretchBudget: item.stretchBudget,
+      minBudget: item.minBudget != null ? item.minBudget / 100 : item.minBudget,
+      stretchBudget: item.stretchBudget != null ? item.stretchBudget / 100 : item.stretchBudget,
       bucketName: item.bucket?.title || "Unknown",
       bucketStatus: item.bucket?.status || "UNKNOWN",
     }));
@@ -256,8 +256,8 @@ function RoundBudgetItems({ round, currentUser }) {
                 budgetItems.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
-                    <TableCell>${item.minBudget}</TableCell>
-                    <TableCell>${item.stretchBudget || '-'}</TableCell>
+                    <TableCell>{item.minBudget}</TableCell>
+                    <TableCell>{item.stretchBudget != null ? item.stretchBudget : '-'}</TableCell>
                     <TableCell>{item.bucketName}</TableCell>
                     <TableCell>
                       <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
