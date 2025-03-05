@@ -1,6 +1,20 @@
 import React, { useState } from "react";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
+import Label from "./Label";
+import getStatusColor from "../utils/getStatusColor";
+
+// Mapping of bucket statuses to their display labels (as used in BucketCard)
+const bucketStatusLabels = {
+  PENDING_APPROVAL: "Draft",
+  IDEA: "Idea",
+  OPEN_FOR_FUNDING: "Funding",
+  FUNDED: "Funded",
+  PARTIAL_FUNDING: "Partial Funding",
+  CANCELED: "Canceled",
+  COMPLETED: "Completed",
+  ARCHIVED: "Archived",
+};
 
 function RoundBudgetItems({ round, currentUser }) {
   const [filters, setFilters] = useState({
@@ -119,7 +133,11 @@ function RoundBudgetItems({ round, currentUser }) {
                 <td className="px-6 py-4 whitespace-nowrap">${item.minBudget}</td>
                 <td className="px-6 py-4 whitespace-nowrap">${item.stretchBudget}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{item.bucketName}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{item.bucketStatus}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <Label className={getStatusColor(item.bucketStatus, item)}>
+                    {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
+                  </Label>
+                </td>
               </tr>
             ))}
           </tbody>
