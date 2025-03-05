@@ -75,26 +75,51 @@ function RoundBudgetItems({ round, currentUser }) {
         />
       </div>
 
-      {/* Table of budget items */}
-      <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
-        <table className="table-fixed w-full">
-          <thead>
+      {/* Table of budget items (using same design as expenses page) */}
+      <div className="mt-4 shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-2">Description</th>
-              <th className="px-4 py-2">Minimum Budget</th>
-              <th className="px-4 py-2">Stretch Budget</th>
-              <th className="px-4 py-2">Bucket</th>
-              <th className="px-4 py-2">Bucket Status</th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Description
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Minimum Budget
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Stretch Budget
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Bucket
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Bucket Status
+              </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {budgetItems.map((item) => (
-              <tr key={item.id} className="bg-gray-100 even:bg-white">
-                <td className="px-4 py-2">{item.description}</td>
-                <td className="px-4 py-2">${item.minBudget}</td>
-                <td className="px-4 py-2">${item.stretchBudget}</td>
-                <td className="px-4 py-2">{item.bucketName}</td>
-                <td className="px-4 py-2">{item.bucketStatus}</td>
+              <tr key={item.id}>
+                <td className="px-6 py-4 whitespace-nowrap">{item.description}</td>
+                <td className="px-6 py-4 whitespace-nowrap">${item.minBudget}</td>
+                <td className="px-6 py-4 whitespace-nowrap">${item.stretchBudget}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.bucketName}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{item.bucketStatus}</td>
               </tr>
             ))}
           </tbody>
