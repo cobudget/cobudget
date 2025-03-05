@@ -47,11 +47,11 @@ const ImageFeed: FC<ImageFeedProps> = ({
 }) => {
   return (
     <>
-      <div className="p-4 image-feed-masonry">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((img) => (
           <div
             key={img.id}
-            className="mb-4 break-inside-avoid animate-fadeIn"
+            className="mb-4 animate-fadeIn"
           >
             <ImageFeedItem image={img} groupSlug={groupSlug} roundSlug={roundSlug} />
           </div>

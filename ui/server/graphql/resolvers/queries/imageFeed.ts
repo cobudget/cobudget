@@ -1,6 +1,7 @@
 import { combineResolvers } from "graphql-resolvers";
 import dayjs from "dayjs";
 import SeededShuffle from "seededshuffle";
+import seedrandom from "seedrandom";
 import prisma from "../../../prisma";
 import { canViewRound } from "../helpers";
 
@@ -61,15 +62,23 @@ export const randomRoundImages = combineResolvers(
         }
       }
   
-      // 4) Shuffle images using a seeded shuffle.
-      const seed = user
+      // 4) Generate a stable random order using a per-image rank.
+      const baseSeed = user
         ? user.id + dayjs().format("YYYY-MM-DD")
         : dayjs().format("YYYY-MM-DD");
-      SeededShuffle.shuffle(allImages, seed);
-  
-      // 5) Slice out our page of images.
-      const sliced = allImages.slice(offset, offset + limit);
-      const moreExist = allImages.length > offset + sliced.length;
+      
+      // Attach a stable random rank to each image
+      const rankedImages = allImages.map((img) => ({
+        ...img,
+        rank: seedrandom(baseSeed + img.id)(), // returns a consistent float in [0,1)
+      }));
+      
+      // Sort images by the random rank
+      rankedImages.sort((a, b) => a.rank - b.rank);
+      
+      // 5) Slice out our page of images from the stable ordered list
+      const sliced = rankedImages.slice(offset, offset + limit);
+      const moreExist = rankedImages.length > offset + sliced.length;
       return { images: sliced, moreExist };
     } catch (error) {
       console.error("Error in randomRoundImages resolver:", error);
