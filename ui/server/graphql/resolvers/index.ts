@@ -84,3 +84,30 @@ const resolvers = {
 };
 
 export default resolvers;
+import { userQueries, groupQueries, roundQueries, bucketQueries, superAdminQueries, expensesQueries, budgetItemQueries, randomRoundImages } from "./queries";
+import { userMutations, groupMutations, roundMutations, bucketMutations, superAdminMutations, expensesMutations } from "./mutations";
+
+const Query = {
+  ...userQueries,
+  ...groupQueries,
+  ...roundQueries,
+  ...bucketQueries,
+  ...superAdminQueries,
+  ...expensesQueries,
+  ...budgetItemQueries,
+  randomRoundImages
+};
+
+const Mutation = {
+  ...userMutations,
+  ...groupMutations,
+  ...roundMutations,
+  ...bucketMutations,
+  ...superAdminMutations,
+  ...expensesMutations
+};
+
+export default {
+  Query,
+  Mutation
+};
