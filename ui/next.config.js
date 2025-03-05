@@ -36,5 +36,12 @@ module.exports = (phase) => {
     compiler: {
       styledComponents: true,
     },
+    webpack: (config) => {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "styled-components": require.resolve("styled-components"),
+      };
+      return config;
+    },
   });
 };
