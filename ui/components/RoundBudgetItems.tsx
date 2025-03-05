@@ -9,8 +9,8 @@ import { gql, useQuery } from "urql";
 
 // Query to get buckets for the dropdown
 const BUCKETS_QUERY = gql`
-  query BucketsForFilter($roundId: ID!) {
-    round(id: $roundId) {
+  query BucketsForFilter($groupSlug: String!, $roundSlug: String!) {
+    bucketsPage(groupSlug: $groupSlug, roundSlug: $roundSlug, limit: 100, offset: 0) {
       buckets {
         id
         title
@@ -90,11 +90,12 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
   const [{ data: bucketsData }] = useQuery({
     query: BUCKETS_QUERY,
     variables: {
-      roundId: round?.id,
+      groupSlug: currentGroup?.slug,
+      roundSlug: round?.slug,
     },
-    pause: !round?.id,
+    pause: !round?.slug || !currentGroup?.slug,
   });
-  const buckets = bucketsData?.round?.buckets || [];
+  const buckets = bucketsData?.bucketsPage?.buckets || [];
   
   // Sort state
   const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
