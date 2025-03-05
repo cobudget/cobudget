@@ -6,18 +6,15 @@ function RoundBudgetItemsFilter({
   filters,
   onChangeFilters,
   round,
-  buckets,
 }: {
   filters: {
     search: string;
-    bucketId?: string;
     status: string[];
     minBudget: string;
     stretchBudget: string;
   };
   onChangeFilters: (newFilters: any) => void;
   round?: any;
-  buckets: Array<{ id: string; title: string }>;
 }) {
   const statusOptions = [
     { value: "PENDING_APPROVAL", label: "Pending Approval" },
@@ -28,7 +25,7 @@ function RoundBudgetItemsFilter({
   ];
 
   return (
-    <div className="grid grid-cols-5 gap-2">
+    <div className="grid grid-cols-4 gap-2">
       {/* Search input */}
       <div className="bg-white shadow-sm rounded-md px-1 max-w-[150px]">
         <input
@@ -40,25 +37,6 @@ function RoundBudgetItemsFilter({
             onChangeFilters({ ...filters, search: e.target.value })
           }
         />
-      </div>
-
-      {/* Bucket filter */}
-      <div>
-        <SelectField
-          color={round?.color}
-          inputProps={{
-            value: filters.bucketId || "",
-            onChange: (e) =>
-              onChangeFilters({ ...filters, bucketId: e.target.value === "" ? undefined : e.target.value }),
-          }}
-        >
-          <option value="">All Buckets</option>
-          {buckets.map(bucket => (
-            <option key={bucket.id} value={bucket.id}>
-              {bucket.title}
-            </option>
-          ))}
-        </SelectField>
       </div>
 
       {/* Status multi-select */}

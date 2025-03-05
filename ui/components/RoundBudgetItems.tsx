@@ -7,18 +7,6 @@ import getStatusColor from "../utils/getStatusColor";
 import { SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 import { gql, useQuery } from "urql";
 
-// Query to get buckets for the dropdown
-const BUCKETS_QUERY = gql`
-  query BucketsForFilter($groupSlug: String!, $roundSlug: String!) {
-    bucketsPage(groupSlug: $groupSlug, roundSlug: $roundSlug, limit: 100, offset: 0) {
-      buckets {
-        id
-        title
-      }
-    }
-  }
-`;
-
 // Mapping of bucket statuses to their display labels (as used in BucketCard)
 const bucketStatusLabels = {
   PENDING_APPROVAL: "Draft",
@@ -77,7 +65,6 @@ const BUDGET_ITEMS_QUERY = gql`
 function RoundBudgetItems({ round, currentUser, currentGroup }) {
   const [filters, setFilters] = useState({
     search: "",
-    bucketId: undefined,
     status: [] as string[],
     minBudget: "",
     stretchBudget: "",
@@ -85,17 +72,6 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
 
   const [offset, setOffset] = useState(0);
   const limit = 10;
-  
-  // Fetch buckets for the dropdown
-  const [{ data: bucketsData }] = useQuery({
-    query: BUCKETS_QUERY,
-    variables: {
-      groupSlug: currentGroup?.slug,
-      roundSlug: round?.slug,
-    },
-    pause: !round?.slug || !currentGroup?.slug,
-  });
-  const buckets = bucketsData?.bucketsPage?.buckets || [];
   
   // Sort state
   const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
@@ -124,7 +100,6 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
     variables: {
       roundId: round?.id,
       search: filters.search || undefined,
-      bucketId: filters.bucketId || undefined,
       status: filters.status.length > 0 ? filters.status : undefined,
       minBudget: minBudgetNum,
       stretchBudget: stretchBudgetNum,
@@ -192,7 +167,6 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
           filters={filters}
           onChangeFilters={setFilters}
           round={round}
-          buckets={buckets}
         />
       </div>
 
