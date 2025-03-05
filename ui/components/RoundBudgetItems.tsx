@@ -261,7 +261,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     <TableCell>
                       {item.bucket ? (
                         <Link href={`/${currentGroup.slug}/${round.slug}/bucket/${item.bucket.id}`} passHref shallow>
-                          <a className="text-blue-500 hover:underline">{item.bucketName}</a>
+                          <span className="underline cursor-pointer text-black">{item.bucketName}</span>
                         </Link>
                       ) : (
                         item.bucketName
