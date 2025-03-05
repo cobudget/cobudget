@@ -22,27 +22,27 @@ const statusTypeToQuery = (status) => {
     case "FUNDED":
       return { fundedAt: { not: null }, canceledAt: null, completedAt: null };
     case "OPEN_FOR_FUNDING":
-      return { 
-        readyForFundingAt: { not: null }, 
+      return {
+        readyForFundingAt: { not: null },
         fundedAt: null,
-        canceledAt: null, 
-        completedAt: null 
+        canceledAt: null,
+        completedAt: null,
       };
     case "PENDING_APPROVAL":
-      return { 
-        publishedAt: { not: null }, 
+      return {
+        publishedAt: { not: null },
         readyForFundingAt: null,
         fundedAt: null,
-        canceledAt: null, 
-        completedAt: null 
+        canceledAt: null,
+        completedAt: null,
       };
     case "IDEA":
-      return { 
-        publishedAt: null, 
+      return {
+        publishedAt: null,
         readyForFundingAt: null,
         fundedAt: null,
-        canceledAt: null, 
-        completedAt: null 
+        canceledAt: null,
+        completedAt: null,
       };
     default:
       return null;
@@ -103,9 +103,9 @@ export const budgetItems = async (
   if (status && status.length) {
     // Build OR conditions for each status
     const orConditions = status
-      .map(s => statusTypeToQuery(s))
+      .map((s) => statusTypeToQuery(s))
       .filter(Boolean);
-    
+
     if (orConditions.length > 0) {
       where.Bucket = { OR: orConditions };
     }

@@ -1,16 +1,16 @@
-import GraphQLJSON from "graphql-type-json";
-import { GraphQLJSONObject } from "graphql-type-json";
+import GraphQLJSON, { GraphQLJSONObject } from "graphql-type-json";
 import { getLanguageProgress as languageProgressPage } from "./helpers";
 
 // queries
 import {
-  groupQueries,
-  userQueries,
-  roundQueries,
   bucketQueries,
-  superAdminQueries,
+  budgetItemQueries,
   expensesQueries,
+  groupQueries,
   randomRoundImages,
+  roundQueries,
+  superAdminQueries,
+  userQueries,
 } from "./queries";
 
 import {
@@ -18,6 +18,8 @@ import {
   Comment,
   Contribution,
   CustomFieldValue,
+  Date,
+  Expense,
   Flag,
   Group,
   GroupMember,
@@ -25,21 +27,20 @@ import {
   Round,
   RoundMember,
   RoundTransaction,
+  SuperAdminSession,
   Transaction,
   User,
-  Date,
-  SuperAdminSession,
-  Expense,
 } from "./types";
 
 // mutations
 import {
-  userMutations,
+  bucketMutations,
   groupMutations,
   roundMutations,
-  bucketMutations,
   superAdminMutations,
+  userMutations,
 } from "./mutations";
+
 import { BigInt } from "./types/Scalars";
 
 const resolvers = {
@@ -48,6 +49,7 @@ const resolvers = {
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
+    ...budgetItemQueries,
     ...superAdminQueries,
     ...expensesQueries,
     randomRoundImages,
@@ -84,30 +86,3 @@ const resolvers = {
 };
 
 export default resolvers;
-import { userQueries, groupQueries, roundQueries, bucketQueries, superAdminQueries, expensesQueries, budgetItemQueries, randomRoundImages } from "./queries";
-import { userMutations, groupMutations, roundMutations, bucketMutations, superAdminMutations, expensesMutations } from "./mutations";
-
-const Query = {
-  ...userQueries,
-  ...groupQueries,
-  ...roundQueries,
-  ...bucketQueries,
-  ...superAdminQueries,
-  ...expensesQueries,
-  ...budgetItemQueries,
-  randomRoundImages
-};
-
-const Mutation = {
-  ...userMutations,
-  ...groupMutations,
-  ...roundMutations,
-  ...bucketMutations,
-  ...superAdminMutations,
-  ...expensesMutations
-};
-
-export default {
-  Query,
-  Mutation
-};
