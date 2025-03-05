@@ -81,6 +81,10 @@ export const roundItems = (
       href: `/${groupSlug}/${roundSlug}/expenses`,
     },
     {
+      label: formatMessage({ defaultMessage: "Budget Items" }),
+      href: `/${groupSlug}/${roundSlug}/budget-items`,
+    },
+    {
       label: formatMessage({ defaultMessage: "Settings" }),
       href: `/${groupSlug}/${roundSlug}/settings`,
       startsWithHref: true,
