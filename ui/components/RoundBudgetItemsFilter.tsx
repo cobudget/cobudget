@@ -1,34 +1,23 @@
 import React from "react";
 import MultiSelect from "./MultiSelect";
 import { SelectField } from "./SelectInput";
-import { gql, useQuery } from "urql";
-
-// Query to get buckets for the dropdown
-const BUCKETS_QUERY = gql`
-  query BucketsForFilter($roundId: ID!) {
-    bucketsPage(roundSlug: "", groupSlug: "", limit: 100, offset: 0, roundId: $roundId) {
-      buckets {
-        id
-        title
-      }
-    }
-  }
-`;
 
 function RoundBudgetItemsFilter({
   filters,
   onChangeFilters,
   round,
+  buckets,
 }: {
   filters: {
     search: string;
-    bucketId: string;
+    bucketId?: string;
     status: string[];
     minBudget: string;
     stretchBudget: string;
   };
   onChangeFilters: (newFilters: any) => void;
   round?: any;
+  buckets: Array<{ id: string; title: string }>;
 }) {
   const statusOptions = [
     { value: "PENDING_APPROVAL", label: "Pending Approval" },
@@ -37,15 +26,6 @@ function RoundBudgetItemsFilter({
     { value: "COMPLETED", label: "Completed" },
     { value: "CANCELED", label: "Canceled" },
   ];
-
-  // Fetch buckets for the dropdown
-  const [{ data: bucketsData }] = useQuery({
-    query: BUCKETS_QUERY,
-    variables: { roundId: round?.id },
-    pause: !round?.id,
-  });
-
-  const buckets = bucketsData?.bucketsPage?.buckets || [];
 
   return (
     <div className="grid grid-cols-5 gap-2">
@@ -67,9 +47,9 @@ function RoundBudgetItemsFilter({
         <SelectField
           color={round?.color}
           inputProps={{
-            value: filters.bucketId,
+            value: filters.bucketId || "",
             onChange: (e) =>
-              onChangeFilters({ ...filters, bucketId: e.target.value }),
+              onChangeFilters({ ...filters, bucketId: e.target.value === "" ? undefined : e.target.value }),
           }}
         >
           <option value="">All Buckets</option>

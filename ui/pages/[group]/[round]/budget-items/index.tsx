@@ -12,7 +12,7 @@ const RoundBudgetItemsPage: NextPage<{
   return (
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
-      <RoundBudgetItems round={round} currentUser={currentUser} />
+      <RoundBudgetItems round={round} currentUser={currentUser} currentGroup={currentGroup} />
     </div>
   );
 };
