@@ -128,6 +128,18 @@ const schema = gql`
       offset: Int
       limit: Int
     ): RoundImagesFeed!
+    budgetItems(
+      roundId: ID
+      search: String
+      bucketId: ID
+      status: [StatusType]
+      minBudget: Int
+      stretchBudget: Int
+      offset: Int
+      limit: Int
+      orderBy: String
+      orderDir: SortOrderOptions
+    ): BudgetItemsResponse
   }
 
   type OCSyncResponse {
@@ -980,6 +992,33 @@ const schema = gql`
   type RoundBalance {
     roundId: ID
     balance: Int
+  }
+
+  type BudgetItemsResponse {
+    total: Int
+    moreExist: Boolean
+    budgetItems: [BudgetItemWithBucket]
+    error: String
+  }
+
+  """
+  A helper type that combines the BudgetItem data with its parent Bucket data.
+  """
+  type BudgetItemWithBucket {
+    id: ID!
+    description: String!
+    minBudget: Int!
+    stretchBudget: Int
+    bucket: BucketWithStatus
+  }
+
+  """
+  A minimal subset of fields from Bucket needed in the UI.
+  """
+  type BucketWithStatus {
+    id: ID!
+    title: String
+    status: StatusType
   }
 
   # type Log {
