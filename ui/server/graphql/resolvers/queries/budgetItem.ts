@@ -58,13 +58,20 @@ export const budgetItems = async (
     where.bucket = { status: { in: status } };
   }
   if (typeof minBudget === "number") {
-    where.minBudget = { gte: minBudget };
+    where.min = { gte: minBudget };
   }
   if (typeof stretchBudget === "number") {
-    where.stretchBudget = { gte: stretchBudget };
+    where.max = { gte: stretchBudget };
   }
 
   // 4. Query budget items (including the minimal bucket info needed).
+  const mappedOrderBy =
+    orderBy === 'minBudget'
+      ? 'min'
+      : orderBy === 'stretchBudget'
+        ? 'max'
+        : orderBy;
+        
   const [items, total] = await Promise.all([
     prisma.budgetItem.findMany({
       where,
@@ -80,7 +87,7 @@ export const budgetItems = async (
       skip: offset,
       take: limit,
       orderBy: {
-        [orderBy]: orderDir,
+        [mappedOrderBy]: orderDir,
       },
     }),
     prisma.budgetItem.count({ where }),
@@ -89,8 +96,8 @@ export const budgetItems = async (
   const results = items.map((it) => ({
     id: it.id,
     description: it.description,
-    minBudget: it.minBudget,
-    stretchBudget: it.stretchBudget,
+    minBudget: it.min,
+    stretchBudget: it.max,
     bucket: it.bucket
       ? {
           id: it.bucket.id,
