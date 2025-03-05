@@ -72,7 +72,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
   });
 
   const [offset, setOffset] = useState(0);
-  const limit = 10;
+  const limit = 100;
   const [budgetItemsList, setBudgetItemsList] = useState([]);
   
   // Sort state
