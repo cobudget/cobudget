@@ -35,8 +35,6 @@
     "typescript": "4.4.3"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "seededshuffle": "0.2.0",
-    "seedrandom": "3.0.5"
+    "dotenv": "^16.0.3"
   }
 }
