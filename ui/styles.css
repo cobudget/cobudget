@@ -148,7 +148,11 @@ h5 {
 }
 
 .markdown > *:first-child {
-  margin-top: 35px;
+  margin-top: 15px;
+}
+
+.markdown > *:last-child {
+  margin-bottom: 30px; 
 }
 
 .markdown p {
