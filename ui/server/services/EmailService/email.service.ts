@@ -128,6 +128,45 @@ export default {
     });
     sendEmails(emailsToSend, false, true);
   },
+  bulkInviteMembersCustom: async ({
+    membersToInvite,
+    currentUser,
+    round,
+    customHtml,
+    currentGroup = null,
+  }) => {
+    const inviteLink = appLink(
+      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+    );
+
+    const groupCollName = currentGroup?.name ?? round.title;
+    const mdPurpose = currentGroup?.info ?? round?.info ?? "";
+    const htmlPurpose = await mdToHtml(mdPurpose);
+
+    const emailsToSend = membersToInvite.map((member) => {
+      return {
+        to: member.email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${member.name ? ` ${escape(member.name)}` : ""}!
+      <br/><br/>
+      You have been invited to ${escape(groupCollName)} on ${
+          process.env.PLATFORM_NAME
+        }.
+      ${customHtml ? customHtml : ""}
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
+      ${
+        htmlPurpose
+          ? `<br/><br/>
+            ${quotedSection(htmlPurpose)}`
+          : ""
+      }
+      <br/><br/>
+      ${footer}
+      `,
+      };
+    });
+    sendEmails(emailsToSend, false, true);
+  },
   inviteMember: async ({
     email,
     currentUser,

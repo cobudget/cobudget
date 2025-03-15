@@ -19,7 +19,7 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
-import { SendEmailInput, sendEmails } from "server/send-email";
+import { inviteRoundMembersHelper } from "../helpers/inviteRoundMemberHelpers";
 import {
   allocateToMember,
   bulkAllocate as bulkAllocateController,
@@ -45,11 +45,7 @@ import {
   getExpenseHash,
   getExpenseUpdateRawQuery,
 } from "server/utils/expenses";
-import cuid from "cuid";
-import interator from "utils/interator";
-import isGroupSubscriptionActive, {
-  getIsGroupSubscriptionActive,
-} from "../helpers/isGroupSubscriptionActive";
+import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
 import { Prisma } from "@prisma/client";
 
@@ -402,78 +398,6 @@ export const deleteGuideline = combineResolvers(
     })
 );
 
-export const deprecatedInviteRoundMembers = combineResolvers(
-  isCollOrGroupAdmin,
-  async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
-    const start = Date.now();
-    const round = await prisma.round.findUnique({
-      where: { id: roundId },
-      include: { group: true },
-    });
-    const emails = emailsString.split(",");
-
-    if (emails.length > 10000)
-      throw new Error("You can only invite 1000 people at a time");
-
-    const invitedRoundMembers = [];
-
-    for (let email of emails) {
-      email = email.trim().toLowerCase();
-
-      const user = await prisma.user.findUnique({
-        where: { email },
-      });
-
-      const updated = await prisma.user.upsert({
-        where: { email },
-        create: {
-          email,
-          collMemberships: {
-            create: {
-              isApproved: true,
-              round: { connect: { id: roundId } },
-              hasJoined: false,
-              statusAccount: { create: {} },
-              incomingAccount: { create: {} },
-              outgoingAccount: { create: {} },
-            },
-          },
-        },
-        update: {
-          collMemberships: {
-            upsert: {
-              create: {
-                isApproved: true,
-                round: { connect: { id: roundId } },
-                hasJoined: false,
-                statusAccount: { create: {} },
-                incomingAccount: { create: {} },
-                outgoingAccount: { create: {} },
-              },
-              update: {
-                isApproved: true,
-                isRemoved: false,
-              },
-              where: {
-                userId_roundId: {
-                  userId: user?.id ?? "undefined",
-                  roundId,
-                },
-              },
-            },
-          },
-        },
-        include: { collMemberships: { where: { roundId } } },
-      });
-
-      //await emailService.inviteMember({ email, currentUser, round });
-
-      invitedRoundMembers.push(updated.collMemberships?.[0]);
-    }
-    return invitedRoundMembers;
-  }
-);
-
 export const inviteRoundMembersAgain = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
@@ -511,142 +435,36 @@ export const inviteRoundMembersAgain = combineResolvers(
 
 export const inviteRoundMembers = combineResolvers(
   isCollOrGroupAdmin,
-  async (_, { emails: emailsString, roundId }, { user: currentUser }) => {
-    try {
-      const round = await prisma.round.findUnique({
-        where: { id: roundId },
-        include: { group: true },
-      });
-      const emails = emailsString.split(",");
-      if (emails.length > 10000) {
-        throw new Error("You can only invite 10000 people at a time");
-      }
+  async (_, { roundId, emails }, { user: currentUser }) => {
+    return inviteRoundMembersHelper({
+      roundId,
+      emailsString: emails,
+      currentUser,
+      onMembersToInvite: (membersToInvite, round, currentUser) =>
+        emailService.bulkInviteMembers({
+          membersToInvite,
+          round,
+          currentUser,
+        }),
+    });
+  }
+);
 
-      const roundMembers = await prisma.roundMember.findMany({
-        where: { roundId: round.id },
-        include: {
-          user: true,
-        },
-      });
-      let limit;
-      const isFree = round.group.slug === "c";
-      const isSubscriptionActive = await getIsGroupSubscriptionActive({
-        group: round.group,
-      });
-      if (!isFree && round.maxMembers && isSubscriptionActive) {
-        limit = Math.max(
-          parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT),
-          round.maxMembers
-        );
-      } else if (round.maxMembers) {
-        limit = round.maxMembers;
-      } else if (isFree) {
-        limit = process.env.FREE_ROUND_MEMBERS_LIMIT;
-      } else {
-        limit = process.env.PAID_ROUND_MEMBERS_LIMIT;
-      }
-
-      if (roundMembers.length + emails.length > limit) {
-        throw new Error(
-          `Your round can have ${limit} members. ${
-            isFree
-              ? `Upgrade your round to increase limit to ${process.env.PAID_ROUND_MEMBERS_LIMIT}`
-              : ""
-          }`
-        );
-      }
-
-      const existingMemberEmails = {};
-      roundMembers.forEach((m) => {
-        existingMemberEmails[m.user.email] = m;
-      });
-
-      const joinedMembers = []; // Members who have joined
-      const alreadyMembers = []; // Members who have requested to join but are not approved yet
-      const alreadyApprovedMembers = []; // Members who are approved but they haven't joined yet
-      const newUsers = []; // User who have neither joined cobudget nor round
-
-      emails.forEach((m) => {
-        if (existingMemberEmails[m]) {
-          if (
-            existingMemberEmails[m].isApproved &&
-            existingMemberEmails[m].hasJoined
-          ) {
-            joinedMembers.push(existingMemberEmails[m]);
-          } else if (existingMemberEmails[m].isApproved) {
-            alreadyApprovedMembers.push(existingMemberEmails[m]);
-          } else if (existingMemberEmails[m].hasJoined) {
-            alreadyMembers.push(existingMemberEmails[m]);
-          }
-        } else {
-          newUsers.push(m);
-        }
-      });
-
-      let approveMembers;
-      const addMembers = [];
-
-      // Approve members who have requested to join but they are not approved yet
-      if (alreadyMembers.length > 0) {
-        approveMembers = prisma.roundMember.updateMany({
-          data: { isApproved: true },
-          where: { id: { in: alreadyMembers.map((member) => member.id) } },
-        });
-      }
-
-      // Add new members to database
-      if (newUsers.length > 0) {
-        const BATCH_SIZE = 4;
-        for (let i = 0; i < newUsers.length; i += BATCH_SIZE) {
-          addMembers.push(
-            prisma.user.createMany({
-              data: newUsers
-                .slice(i, i + BATCH_SIZE)
-                .map((email) => ({ email })),
-              skipDuplicates: true,
-            })
-          );
-        }
-      }
-
-      await Promise.all([...addMembers, approveMembers]);
-
-      const newlyAddedUsers = await prisma.user.findMany({
-        where: {
-          email: { in: newUsers },
-        },
-        select: {
-          email: true,
-          id: true,
-        },
-      });
-
-      const ids = interator(newlyAddedUsers.length * 3, () => cuid());
-      const accounts = await prisma.account.createMany({
-        data: ids.map((id) => ({ id })),
-      });
-
-      await prisma.roundMember.createMany({
-        data: newlyAddedUsers.map((user) => ({
-          isApproved: true,
-          hasJoined: false,
-          roundId,
-          userId: user.id,
-          statusAccountId: ids.pop(),
-          incomingAccountId: ids.pop(),
-          outgoingAccountId: ids.pop(),
-        })),
-      });
-
-      const membersToInvite = newlyAddedUsers.concat(alreadyApprovedMembers);
-      await emailService.bulkInviteMembers({
-        membersToInvite,
-        round,
-        currentUser,
-      });
-    } catch (err) {
-      throw new Error(err);
-    }
+export const inviteRoundMembersCustomEmail = combineResolvers(
+  isCollOrGroupAdmin,
+  async (_, { roundId, emails, customHtml }, { user: currentUser }) => {
+    return inviteRoundMembersHelper({
+      roundId,
+      emailsString: emails,
+      currentUser,
+      onMembersToInvite: (membersToInvite, round, currentUser) =>
+        emailService.bulkInviteMembersCustom({
+          membersToInvite,
+          round,
+          currentUser,
+          customHtml,
+        }),
+    });
   }
 );
 
@@ -1011,87 +829,6 @@ export const editBucketCustomField = combineResolvers(
     });
 
     return updated;
-  }
-);
-
-export const inviteRoundMembersCustomEmail = combineResolvers(
-  isCollOrGroupAdmin,
-  async (
-    _,
-    { roundId, emails: emailsString, customHtml },
-    { user: currentUser }
-  ) => {
-    // 1. parse emails
-    const emails = emailsString
-      .split(",")
-      .map((e) => e.trim().toLowerCase())
-      .filter(Boolean);
-
-    if (!emails.length) throw new Error("No valid emails provided.");
-    if (emails.length > 1000) {
-      throw new Error("Max 1000 addresses allowed at once.");
-    }
-
-    // 2. find round (and group, if needed)
-    const round = await prisma.round.findUnique({
-      where: { id: roundId },
-      include: { group: true },
-    });
-    if (!round) throw new Error("Round not found.");
-
-    await isGroupSubscriptionActive({ groupId: round.groupId });
-
-    // We'll collect newly created or updated membership records
-    const createdMemberships = [];
-
-    // 3. Upsert user + membership in two steps for each email
-    for (const address of emails) {
-      // A) Upsert user:
-      let user = await prisma.user.findUnique({ where: { email: address } });
-      if (!user) {
-        user = await prisma.user.create({
-          data: { email: address },
-        });
-      }
-
-      // B) Upsert membership
-      const membership = await prisma.roundMember.upsert({
-        where: {
-          userId_roundId: {
-            userId: user.id,
-            roundId: round.id,
-          },
-        },
-        create: {
-          user: { connect: { id: user.id } },
-          round: { connect: { id: roundId } },
-          isApproved: true,
-          hasJoined: false,
-          statusAccount: { create: {} },
-          incomingAccount: { create: {} },
-          outgoingAccount: { create: {} },
-        },
-        update: {
-          isApproved: true,
-          isRemoved: false,
-        },
-      });
-
-      createdMemberships.push(membership);
-    }
-
-    // 4. Send emails with your customHtml
-    const roundLink = appLink(`/${round.group.slug}/${round.slug}`);
-    const mailData = emails.map((to) => ({
-      to,
-      subject: `Join ${round.title} on Cobudget`,
-      html: `
-        ${customHtml}
-      `,
-    }));
-    await sendEmails(mailData, false);
-
-    return createdMemberships;
   }
 );
 
