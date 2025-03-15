@@ -69,9 +69,14 @@ const send = async (mail: SendEmailInput) => {
 
 const sendBatch = async (mails: SendEmailInput[]) => {
   if (process.env.NODE_ENV === "development") {
-    console.log(
-      "Not sending " + mails.length + " emails in development (batch)"
-    );
+    // console log emails in development
+    mails.forEach((mail) => {
+      console.log(
+        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
+          mail.text ?? mail.html
+        }\n`
+      );
+    });
   } else {
     try {
       // split into batches of 500 because of Postmark limit on emails per batch call

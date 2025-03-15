@@ -19,6 +19,7 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
+import { SendEmailInput, sendEmails } from "server/send-email";
 import {
   allocateToMember,
   bulkAllocate as bulkAllocateController,
@@ -1010,6 +1011,87 @@ export const editBucketCustomField = combineResolvers(
     });
 
     return updated;
+  }
+);
+
+export const inviteRoundMembersCustomEmail = combineResolvers(
+  isCollOrGroupAdmin,
+  async (
+    _,
+    { roundId, emails: emailsString, customHtml },
+    { user: currentUser }
+  ) => {
+    // 1. parse emails
+    const emails = emailsString
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!emails.length) throw new Error("No valid emails provided.");
+    if (emails.length > 1000) {
+      throw new Error("Max 1000 addresses allowed at once.");
+    }
+
+    // 2. find round (and group, if needed)
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      include: { group: true },
+    });
+    if (!round) throw new Error("Round not found.");
+
+    await isGroupSubscriptionActive({ groupId: round.groupId });
+
+    // We'll collect newly created or updated membership records
+    const createdMemberships = [];
+
+    // 3. Upsert user + membership in two steps for each email
+    for (const address of emails) {
+      // A) Upsert user:
+      let user = await prisma.user.findUnique({ where: { email: address } });
+      if (!user) {
+        user = await prisma.user.create({
+          data: { email: address },
+        });
+      }
+
+      // B) Upsert membership
+      const membership = await prisma.roundMember.upsert({
+        where: {
+          userId_roundId: {
+            userId: user.id,
+            roundId: round.id,
+          },
+        },
+        create: {
+          user: { connect: { id: user.id } },
+          round: { connect: { id: roundId } },
+          isApproved: true,
+          hasJoined: false,
+          statusAccount: { create: {} },
+          incomingAccount: { create: {} },
+          outgoingAccount: { create: {} },
+        },
+        update: {
+          isApproved: true,
+          isRemoved: false,
+        },
+      });
+
+      createdMemberships.push(membership);
+    }
+
+    // 4. Send emails with your customHtml
+    const roundLink = appLink(`/${round.group.slug}/${round.slug}`);
+    const mailData = emails.map((to) => ({
+      to,
+      subject: `Join ${round.title} on Cobudget`,
+      html: `
+        ${customHtml}
+      `,
+    }));
+    await sendEmails(mailData, false);
+
+    return createdMemberships;
   }
 );
 

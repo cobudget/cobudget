@@ -342,6 +342,12 @@ const schema = gql`
     inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
     inviteRoundMembersAgain(roundId: ID!, emails: String!): [RoundMember]
     inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
+    inviteRoundMembersCustomEmail(
+      roundId: ID!
+      emails: String!
+      customHtml: String!
+    ): [RoundMember]
+
     updateGroupMember(
       groupId: ID!
       memberId: ID!
