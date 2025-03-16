@@ -152,12 +152,11 @@ export default {
       You have been invited to ${escape(groupCollName)} on ${
           process.env.PLATFORM_NAME
         }.
-      ${customHtml ? customHtml : ""}
       Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
-        htmlPurpose
+        customHtml
           ? `<br/><br/>
-            ${quotedSection(htmlPurpose)}`
+            ${quotedSection(customHtml)}`
           : ""
       }
       <br/><br/>
