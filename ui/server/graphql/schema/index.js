@@ -133,6 +133,7 @@ const schema = gql`
       search: String
       bucketId: ID
       status: [StatusType]
+      type: BudgetItemType
       minBudget: Int
       stretchBudget: Int
       offset: Int
@@ -1015,6 +1016,7 @@ const schema = gql`
     description: String!
     minBudget: Int!
     stretchBudget: Int
+    type: BudgetItemType
     bucket: BucketWithStatus
   }
 

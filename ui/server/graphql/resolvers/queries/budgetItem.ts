@@ -126,6 +126,8 @@ export const budgetItems = async (
     mappedOrderBy = { max: orderDir };
   } else if (orderBy === "description") {
     mappedOrderBy = { description: orderDir };
+  } else if (orderBy === "type") {
+    mappedOrderBy = { type: orderDir };
   } else if (orderBy === "createdAt") {
     // Order by the Bucket's createdAt field
     mappedOrderBy = { Bucket: { createdAt: orderDir } };
@@ -162,6 +164,7 @@ export const budgetItems = async (
     description: it.description,
     minBudget: it.min,
     stretchBudget: it.max,
+    type: it.type,
     bucket: it.Bucket
       ? {
           id: it.Bucket.id,

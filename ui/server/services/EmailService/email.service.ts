@@ -140,8 +140,6 @@ export default {
     );
 
     const groupCollName = currentGroup?.name ?? round.title;
-    const mdPurpose = currentGroup?.info ?? round?.info ?? "";
-    const htmlPurpose = await mdToHtml(mdPurpose);
 
     const emailsToSend = membersToInvite.map((member) => {
       return {
