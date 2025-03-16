@@ -1,5 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@material-ui/core";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
 import Label from "./Label";
@@ -26,6 +33,7 @@ const BUDGET_ITEMS_QUERY = gql`
     $search: String
     $bucketId: ID
     $status: [StatusType]
+    $type: BudgetItemType
     $minBudget: Int
     $stretchBudget: Int
     $offset: Int
@@ -38,6 +46,7 @@ const BUDGET_ITEMS_QUERY = gql`
       search: $search
       bucketId: $bucketId
       status: $status
+      type: $type
       minBudget: $minBudget
       stretchBudget: $stretchBudget
       offset: $offset
@@ -52,6 +61,7 @@ const BUDGET_ITEMS_QUERY = gql`
         description
         minBudget
         stretchBudget
+        type
         bucket {
           id
           title
@@ -74,27 +84,37 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
   const [offset, setOffset] = useState(0);
   const limit = 100;
   const [budgetItemsList, setBudgetItemsList] = useState([]);
-  
+
   // Sort state
-  const [sortConfig, setSortConfig] = useState<{ key: string | null; direction: string }>({
+  const [sortConfig, setSortConfig] = useState<{
+    key: string | null;
+    direction: string;
+  }>({
     key: "description",
     direction: "asc",
   });
 
   // Convert sort config to GraphQL variables
-  const orderBy = sortConfig.key === "minBudget" 
-    ? "minBudget" 
-    : sortConfig.key === "stretchBudget" 
-      ? "stretchBudget" 
-      : sortConfig.key === "description" 
-        ? "description" 
-        : "createdAt";
-  
+  const orderBy =
+    sortConfig.key === "minBudget"
+      ? "minBudget"
+      : sortConfig.key === "stretchBudget"
+      ? "stretchBudget"
+      : sortConfig.key === "description"
+      ? "description"
+      : sortConfig.key === "type"
+      ? "type"
+      : "createdAt";
+
   const orderDir = sortConfig.direction as "asc" | "desc";
 
   // Parse numeric filters - convert dollars to cents (multiply by 100)
-  const minBudgetNum = filters.minBudget ? parseInt(filters.minBudget) * 100 : undefined;
-  const stretchBudgetNum = filters.stretchBudget ? parseInt(filters.stretchBudget) * 100 : undefined;
+  const minBudgetNum = filters.minBudget
+    ? parseInt(filters.minBudget) * 100
+    : undefined;
+  const stretchBudgetNum = filters.stretchBudget
+    ? parseInt(filters.stretchBudget) * 100
+    : undefined;
 
   // Fetch budget items from GraphQL
   const [{ data, fetching, error }, refetchBudgetItems] = useQuery({
@@ -116,12 +136,17 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
   // Transform the data for display and accumulate results
   useEffect(() => {
     if (data?.budgetItems?.budgetItems) {
-      const mappedItems = data.budgetItems.budgetItems.map(item => ({
+      const mappedItems = data.budgetItems.budgetItems.map((item) => ({
         id: item.id,
         description: item.description,
-        minBudget: item.minBudget != null ? item.minBudget / 100 : item.minBudget,
-        stretchBudget: item.stretchBudget != null ? item.stretchBudget / 100 : item.stretchBudget,
-        bucket: item.bucket,  // added for linking
+        type: item.type,
+        minBudget:
+          item.minBudget != null ? item.minBudget / 100 : item.minBudget,
+        stretchBudget:
+          item.stretchBudget != null
+            ? item.stretchBudget / 100
+            : item.stretchBudget,
+        bucket: item.bucket, // added for linking
         bucketName: item.bucket?.title || "Unknown",
         bucketStatus: item.bucket?.status || "UNKNOWN",
       }));
@@ -130,7 +155,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
       if (offset === 0) {
         setBudgetItemsList(mappedItems);
       } else {
-        setBudgetItemsList(prev => [...prev, ...mappedItems]);
+        setBudgetItemsList((prev) => [...prev, ...mappedItems]);
       }
     }
   }, [data, offset]);
@@ -150,7 +175,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
       return { key, direction: "asc" };
     });
   };
-  
+
   const getSortIcon = (column: string) => {
     if (sortConfig.key === column) {
       return sortConfig.direction === "asc" ? (
@@ -164,7 +189,7 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
 
   const handleLoadMore = () => {
     if (data?.budgetItems?.moreExist && !fetching) {
-      setOffset(prev => prev + limit);
+      setOffset((prev) => prev + limit);
     }
   };
 
@@ -207,7 +232,9 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     onClick={() => handleSort("description")}
                   >
                     Description
-                    <span className="float-right mt-2">{getSortIcon("description")}</span>
+                    <span className="float-right mt-2">
+                      {getSortIcon("description")}
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell>
@@ -216,7 +243,9 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     onClick={() => handleSort("minBudget")}
                   >
                     Minimum Budget
-                    <span className="float-right mt-2">{getSortIcon("minBudget")}</span>
+                    <span className="float-right mt-2">
+                      {getSortIcon("minBudget")}
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell>
@@ -225,7 +254,20 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     onClick={() => handleSort("stretchBudget")}
                   >
                     Stretch Budget
-                    <span className="float-right mt-2">{getSortIcon("stretchBudget")}</span>
+                    <span className="float-right mt-2">
+                      {getSortIcon("stretchBudget")}
+                    </span>
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span
+                    className="cursor-pointer select-none"
+                    onClick={() => handleSort("type")}
+                  >
+                    Type
+                    <span className="float-right mt-2">
+                      {getSortIcon("type")}
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell>
@@ -234,7 +276,9 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     onClick={() => handleSort("bucketName")}
                   >
                     Bucket
-                    <span className="float-right mt-2">{getSortIcon("bucketName")}</span>
+                    <span className="float-right mt-2">
+                      {getSortIcon("bucketName")}
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell>
@@ -243,7 +287,9 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                     onClick={() => handleSort("bucketStatus")}
                   >
                     Bucket Status
-                    <span className="float-right mt-2">{getSortIcon("bucketStatus")}</span>
+                    <span className="float-right mt-2">
+                      {getSortIcon("bucketStatus")}
+                    </span>
                   </span>
                 </TableCell>
               </TableRow>
@@ -266,19 +312,40 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                   <TableRow key={item.id}>
                     <TableCell>{item.description}</TableCell>
                     <TableCell>{item.minBudget}</TableCell>
-                    <TableCell>{item.stretchBudget != null ? item.stretchBudget : '-'}</TableCell>
+                    <TableCell>
+                      {item.stretchBudget != null ? item.stretchBudget : "-"}
+                    </TableCell>
+                    <TableCell>
+                      {item.type === "EXPENSE"
+                        ? "Requested"
+                        : item.type === "INCOME"
+                        ? "Gifted"
+                        : item.type}
+                    </TableCell>
                     <TableCell>
                       {item.bucket ? (
-                        <Link href={`/${currentGroup.slug}/${round.slug}/${item.bucket.id}`} passHref shallow>
-                          <span className="underline cursor-pointer text-black">{item.bucketName}</span>
+                        <Link
+                          href={`/${currentGroup.slug}/${round.slug}/${item.bucket.id}`}
+                          passHref
+                          shallow
+                        >
+                          <span className="underline cursor-pointer text-black">
+                            {item.bucketName}
+                          </span>
                         </Link>
                       ) : (
                         item.bucketName
                       )}
                     </TableCell>
                     <TableCell>
-                      <Label className={`${getStatusColor(item.bucketStatus, item)} inline-block w-auto`}>
-                        {bucketStatusLabels[item.bucketStatus] || item.bucketStatus}
+                      <Label
+                        className={`${getStatusColor(
+                          item.bucketStatus,
+                          item
+                        )} inline-block w-auto`}
+                      >
+                        {bucketStatusLabels[item.bucketStatus] ||
+                          item.bucketStatus}
                       </Label>
                     </TableCell>
                   </TableRow>
