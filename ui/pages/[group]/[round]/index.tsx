@@ -326,10 +326,11 @@ const Page = ({
             href={`/${round?.group?.slug ?? "c"}/${round?.slug}/${
               cell.row.original?.id
             }`}
+            passHref
           >
-            <span className="underline cursor-pointer text-ellipsis">
+            <a className="underline cursor-pointer text-ellipsis focus:outline-none focus:ring rounded">
               {cell.value.substr(0, 20) + (cell.value.length > 20 ? "..." : "")}
-            </span>
+            </a>
           </Link>
         ),
       },
@@ -470,25 +471,21 @@ const Page = ({
       {!bucketTableView ? (
         finalBuckets.map((bucket) => (
           <Link
-            href={`/${round.group?.slug ?? "c"}/${round.slug}/${bucket.id}`}
             key={bucket.id}
+            href={{
+              pathname: "/[group]/[round]/[bucketId]",
+              query: {
+                ...router.query,
+                group: round.group?.slug ?? "c",
+                round: round.slug,
+                bucketId: bucket.id,
+                f: statusFilter,
+              },
+            }}
+            shallow
+            scroll={false}
           >
-            <a
-              className="flex focus:outline-none focus:ring rounded-lg"
-              onClick={() => {
-                router.push(
-                  {
-                    pathname: "/[group]/[round]",
-                    query: {
-                      ...router.query,
-                      f: statusFilter,
-                    },
-                  },
-                  undefined,
-                  { shallow: true, scroll: false }
-                );
-              }}
-            >
+            <a className="flex focus:outline-none focus:ring rounded-lg">
               <BucketCard bucket={bucket} round={round} />
             </a>
           </Link>
