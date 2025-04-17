@@ -35,39 +35,29 @@ const corsOptions = {
 
 subscribers.initialize(EventHub);
 
+// ─── Apollo Server ────────────────────────────────────────────────────────────
+const isProd = process.env.NODE_ENV === "production";
+
+const apolloServer = new ApolloServer({
+  typeDefs: schema,
+  resolvers,
+  introspection: !isProd,
+  plugins: isProd
+    ? [ApolloServerPluginLandingPageDisabled()]
+    : [ApolloServerPluginLandingPageGraphQLPlayground()],
+  context: async ({ req, res }): Promise<GraphQLContext> => {
+    const { user } = req;
+    let ss;
+    try {
+      ss = verify(req.cookies.ss);
+    } catch {
+      ss = null;
+    }
+    return { user, prisma, request: req, response: res, eventHub: EventHub, ss };
+  },
+});
+
 export default handler()
   .use(cors(corsOptions))
   .use(cookieParser())
-  .use(
-    const isProd = process.env.NODE_ENV === "production";
-    
-    new ApolloServer({
-      typeDefs: schema,
-      resolvers,
-      introspection: !isProd,                              // evita schema >4 MB en prod
-      plugins: isProd
-        ? [ApolloServerPluginLandingPageDisabled()]        // desactiva landing page
-        : [ApolloServerPluginLandingPageGraphQLPlayground()],
-      context: async ({ req, res }): Promise<GraphQLContext> => {
-        const { user } = req;
-        // 'ss' is SuperAdminSession
-        let ss;
-        try {
-          ss = verify(req.cookies.ss);
-        } catch (err) {
-          ss = null;
-        }
-
-        return {
-          user,
-          prisma,
-          request: req,
-          eventHub: EventHub,
-          response: res,
-          ss,
-        };
-      },
-    }).createHandler({
-      path: "/api",
-    })
-  );
+  .use(apolloServer.createHandler({ path: "/api" }));
