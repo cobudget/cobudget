@@ -98,45 +98,34 @@ export const categories = async (parent, { groupId }) => {
   return categories;
 };
 
-export const balances = async (parent, { groupSlug }, { user }) => {
-  try {
-    const group = await prisma.group.findFirst({
-      where: {
-        slug: groupSlug,
-      },
-    });
-    if (group) {
-      const rounds = await prisma.round.findMany({
-        where: {
-          groupId: group.id,
-        },
-      });
-      const roundIds = rounds.map((r) => r.id);
+export const balances = async (_parent, { groupSlug }, { user }) => {
+  // caller not logged‑in → nothing to compute
+  if (!user?.id) return [];
 
-      if (roundIds.length === 0) {
-        return [];
-      }
+  /* 1) get *all* roundIds of this user inside the group – ONE query */
+  const memberships = await prisma.roundMember.findMany({
+    where: {
+      userId: user.id,
+      round: { group: { slug: groupSlug } },
+    },
+    select: { roundId: true },
+  });
+  const roundIds = memberships.map((m) => m.roundId);
+  if (roundIds.length === 0) return [];
 
-      const memberships = await prisma.roundMember.findMany({
-        where: {
-          userId: user?.id,
-          roundId: { in: roundIds },
-        },
-      });
+  /* 2) aggregate the user's balance per round – ONE query */
+  const aggregates = await prisma.transaction.groupBy({
+    by: ["roundId"],
+    where: {
+      roundId: { in: roundIds },
+      userId: user.id,
+    },
+    _sum: { amount: true },
+  });
 
-      const balancePromises = memberships.map((m) => getRoundMemberBalance(m));
-      const balances = await Promise.all(balancePromises);
-
-      return balances.map(({ balance, roundId }, i) => ({
-        balance,
-        roundId,
-      }));
-    } else {
-      return {
-        error: "Group not found",
-      };
-    }
-  } catch (err) {
-    return [];
-  }
+  /* 3) map result to GraphQL shape */
+  return aggregates.map((a) => ({
+    roundId: a.roundId,
+    balance: a._sum?.amount ?? 0,
+  }));
 };
