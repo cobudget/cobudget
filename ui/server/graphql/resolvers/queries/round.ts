@@ -33,31 +33,67 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
       })
     : null;
 
+  let rounds: any[];
+
   // if admin show all rounds (current or archived)
   if (currentGroupMember?.isAdmin) {
-    return prisma.round.findMany({
+    rounds = await prisma.round.findMany({
       where: { group: { slug: groupSlug }, deleted: { not: true } },
       take: limit,
     });
+  } else {
+    const allRounds = await prisma.round.findMany({
+      where: {
+        group: { slug: groupSlug },
+        archived: { not: true },
+        deleted: { not: true },
+      },
+      take: limit,
+    });
+
+    // filter away colls the current user shouldn't be able to view
+    rounds = (
+      await Promise.all(
+        allRounds.map(async (r) =>
+          (await canViewRound({ round: r, user })) ? r : undefined
+        )
+      )
+    ).filter(Boolean);
   }
 
-  const allRounds = await prisma.round.findMany({
-    where: {
-      group: { slug: groupSlug },
-      archived: { not: true },
-      deleted: { not: true },
-    },
-    take: limit,
+  if (!rounds.length) return [];
+
+  const roundIds = rounds.map((r) => r.id);
+
+  /* --- bucket counters (PUBLISHED & FUNDED) --------------------------- */
+  const bucketAgg = await prisma.bucket.groupBy({
+    by: ["roundId", "status"],
+    where: { roundId: { in: roundIds } },
+    _count: { _all: true },
+  });
+  const bucketMap: Record<string, Record<string, number>> = {};
+  bucketAgg.forEach((b) => {
+    bucketMap[b.roundId] = bucketMap[b.roundId] || {};
+    bucketMap[b.roundId][b.status] = b._count._all;
   });
 
-  // filter away colls the current user shouldn't be able to view
-  return (
-    await Promise.all(
-      allRounds.map(async (coll) =>
-        (await canViewRound({ round: coll, user })) ? coll : undefined
-      )
-    )
-  ).filter(Boolean);
+  /* --- distributedAmount --------------------------------------------- */
+  const amountAgg = await prisma.expense.groupBy({
+    by: ["roundId"],
+    where: { bucket: { roundId: { in: roundIds } } },
+    _sum: { amount: true },
+  });
+  const amountMap = Object.fromEntries(
+    amountAgg.map((a) => [a.roundId, a._sum.amount ?? 0]),
+  );
+
+  /* --- attach the aggregates and return ------------------------------ */
+  return rounds.map((r) => ({
+    ...r,
+    publishedBucketCount: bucketMap[r.id]?.PUBLISHED ?? 0,
+    bucketStatusCount: { FUNDED: bucketMap[r.id]?.FUNDED ?? 0 },
+    distributedAmount: amountMap[r.id] ?? 0,
+  }));
 };
 
 export const round = async (parent, { groupSlug, roundSlug }, { user, ss }) => {
