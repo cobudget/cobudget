@@ -311,7 +311,6 @@ const Page = ({
   if (!bucketTableView) {
     if (isFirstPage && pinnedBuckets && pinnedBuckets.length > 0) {
       // On page 1, merge all pinned buckets (fetched separately) with unpinned ones from this page.
-      const unpinned = buckets.filter((b) => b.pinnedAt === null);
       const unpinned = buckets.filter((b) => b?.pinnedAt === null);
       finalBuckets = [...pinnedBuckets, ...unpinned];
     } else {
