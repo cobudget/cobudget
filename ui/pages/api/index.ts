@@ -8,6 +8,10 @@ import handler from "../../server/api-handler";
 import subscribers from "../../server/subscribers";
 import cookieParser from "cookie-parser";
 import { verify } from "server/utils/jwt";
+import {
+  ApolloServerPluginLandingPageDisabled,
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} from "apollo-server-core";
 
 export const config = {
   api: {
@@ -35,9 +39,15 @@ export default handler()
   .use(cors(corsOptions))
   .use(cookieParser())
   .use(
+    const isProd = process.env.NODE_ENV === "production";
+    
     new ApolloServer({
       typeDefs: schema,
       resolvers,
+      introspection: !isProd,                              // evita schema >4 MB en prod
+      plugins: isProd
+        ? [ApolloServerPluginLandingPageDisabled()]        // desactiva landing page
+        : [ApolloServerPluginLandingPageGraphQLPlayground()],
       context: async ({ req, res }): Promise<GraphQLContext> => {
         const { user } = req;
         // 'ss' is SuperAdminSession
