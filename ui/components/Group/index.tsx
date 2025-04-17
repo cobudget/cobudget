@@ -143,20 +143,14 @@ const GroupIndex = ({ currentUser }) => {
     if (router.query.group == "c") router.replace("/");
   }, [router]);
 
-  const [
-    {
-      data: { rounds, group, balances } = {
-        rounds: [],
-        group: null,
-        balances: [],
-      },
-      error,
-      fetching,
-    },
-  ] = useQuery({
+  const [{ data, error, fetching }] = useQuery({
     query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
+
+  const rounds    = data?.rounds    ?? [];
+  const group     = data?.group     ?? null;
+  const balances  = data?.balances  ?? [];
 
   const balancesMap = useMemo(() => {
     const map = {};
