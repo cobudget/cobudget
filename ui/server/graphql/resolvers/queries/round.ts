@@ -73,51 +73,48 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   });
   const bucketIds = bucketRecords.map((b) => b.id);
 
-  /* --- bucket counters (PUBLISHED & FUNDED) --------------------------- */
-  let bucketMap: Record<string, Record<string, number>> = {};
+  /* ---------- bucket counters (published / funded) -------------------- */
+  let publishedMap: Record<string, number> = {};
+  let fundedMap: Record<string, number> = {};
+
   try {
-    const bucketAgg = await prisma.bucket.groupBy({
-      by: ["roundId", "status"],
-      where: { roundId: { in: roundIds } },
+    const publishedAgg = await prisma.bucket.groupBy({
+      by: ["roundId"],
+      where: {
+        roundId: { in: roundIds },
+        publishedAt: { not: null },
+        deleted: { not: true },
+      },
       _count: { _all: true },
     });
-    
-    bucketAgg.forEach((b) => {
-      bucketMap[b.roundId] = bucketMap[b.roundId] || {};
-      bucketMap[b.roundId][b.status] = b._count._all;
+    publishedAgg.forEach((r) => {
+      publishedMap[r.roundId] = r._count._all;
+    });
+
+    const fundedAgg = await prisma.bucket.groupBy({
+      by: ["roundId"],
+      where: {
+        roundId: { in: roundIds },
+        fundedAt: { not: null },
+        deleted: { not: true },
+      },
+      _count: { _all: true },
+    });
+    fundedAgg.forEach((r) => {
+      fundedMap[r.roundId] = r._count._all;
     });
   } catch (e) {
-    console.error("rounds resolver – bucket aggregation failed:", e);
-    // bucketMap stays empty; downstream will default to 0
+    console.error("rounds resolver – bucket counters failed:", e);
   }
 
   /* --- distributedAmount --------------------------------------------- */
-  let amountMap: Record<string, number> = {};
-  try {
-    const amountAgg = await prisma.expense.groupBy({
-      by: ["bucketId"],
-      where: { bucketId: { in: bucketIds } },
-      _sum: { amount: true },
-    });
-
-    /* Collapse bucket‑level sums into one per round */
-    amountAgg.forEach((a) => {
-      const roundId = bucketRecords.find(
-        (b) => b.id === a.bucketId
-      )?.roundId;
-      if (!roundId) return;
-      amountMap[roundId] = (amountMap[roundId] || 0) + (a._sum.amount ?? 0);
-    });
-  } catch (e) {
-    console.error("rounds resolver – distributedAmount aggregation failed:", e);
-    // amountMap remains empty; downstream will use 0
-  }
+  const amountMap: Record<string, number> = {}; // leave all amounts at 0
 
   /* --- attach the aggregates and return ------------------------------ */
   return roundsList.map((r) => ({
     ...r,
-    publishedBucketCount: bucketMap[r.id]?.PUBLISHED ?? 0,
-    bucketStatusCount: { FUNDED: bucketMap[r.id]?.FUNDED ?? 0 },
+    publishedBucketCount: publishedMap[r.id] ?? 0,
+    bucketStatusCount: { FUNDED: fundedMap[r.id] ?? 0 },
     distributedAmount: amountMap[r.id] ?? 0,
   }));
 };
