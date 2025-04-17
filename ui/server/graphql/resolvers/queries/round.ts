@@ -33,13 +33,13 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
       })
     : null;
 
-  let rounds: any[];
+  let roundsList: any[];
 
   // if admin show all rounds (current or archived)
   if (currentGroupMember?.isAdmin) {
-    rounds = await prisma.round.findMany({
+    roundsList = await prisma.round.findMany({
       where: { group: { slug: groupSlug }, deleted: { not: true } },
-      take: limit,
+      ...(limit ? { take: limit } : {}),
     });
   } else {
     const allRounds = await prisma.round.findMany({
@@ -48,11 +48,11 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
         archived: { not: true },
         deleted: { not: true },
       },
-      take: limit,
+      ...(limit ? { take: limit } : {}),
     });
 
     // filter away colls the current user shouldn't be able to view
-    rounds = (
+    roundsList = (
       await Promise.all(
         allRounds.map(async (r) =>
           (await canViewRound({ round: r, user })) ? r : undefined
@@ -61,9 +61,9 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
     ).filter(Boolean);
   }
 
-  if (!rounds.length) return [];
+  if (!roundsList.length) return [];
 
-  const roundIds = rounds.map((r) => r.id);
+  const roundIds = roundsList.map((r) => r.id);
 
   /* --- bucket counters (PUBLISHED & FUNDED) --------------------------- */
   const bucketAgg = await prisma.bucket.groupBy({
@@ -88,7 +88,7 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   );
 
   /* --- attach the aggregates and return ------------------------------ */
-  return rounds.map((r) => ({
+  return roundsList.map((r) => ({
     ...r,
     publishedBucketCount: bucketMap[r.id]?.PUBLISHED ?? 0,
     bucketStatusCount: { FUNDED: bucketMap[r.id]?.FUNDED ?? 0 },
