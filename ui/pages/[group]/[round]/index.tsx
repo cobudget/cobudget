@@ -303,16 +303,20 @@ const Page = ({
   });
 
   const moreExist = data?.bucketsPage.moreExist;
-  const buckets = data?.bucketsPage.buckets ?? [];
+  const buckets: typeof data.bucketsPage.buckets =               // keep the type
+    (data?.bucketsPage?.buckets ?? []).filter(                   // strip null / undefined
+      (b): b is NonNullable<typeof b> => Boolean(b)
+    );
   let finalBuckets = buckets;
   if (!bucketTableView) {
     if (isFirstPage && pinnedBuckets && pinnedBuckets.length > 0) {
       // On page 1, merge all pinned buckets (fetched separately) with unpinned ones from this page.
       const unpinned = buckets.filter((b) => b.pinnedAt === null);
+      const unpinned = buckets.filter((b) => b?.pinnedAt === null);
       finalBuckets = [...pinnedBuckets, ...unpinned];
     } else {
       // On subsequent pages, show only unpinned buckets.
-      finalBuckets = buckets.filter((b) => b.pinnedAt === null);
+      finalBuckets = buckets.filter((b) => b?.pinnedAt === null);
     }
   }
 
@@ -691,11 +695,13 @@ const RoundPage = ({ currentUser }) => {
     },
     pause: !router.isReady || bucketTableView,
   });
-  const pinnedBuckets = (pinnedData?.bucketsPage?.buckets ?? [])
-    .filter((b) => b.pinnedAt !== null)
-    .sort(
-      (a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
-    );
+  const pinnedBuckets =
+    (pinnedData?.bucketsPage?.buckets ?? [])
+      .filter(
+        (b): b is NonNullable<typeof b> => Boolean(b)             // remove nulls
+      )
+      .filter((b) => b.pinnedAt !== null)                         // now safe
+      .sort((a, b) => new Date(a.pinnedAt!).getTime() - new Date(b.pinnedAt!).getTime());
 
   const [invitationModalOpen, setInvitationModalOpen] = useState(false);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
