@@ -65,6 +65,13 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
 
   const roundIds = roundsList.map((r) => r.id);
 
+  /* fetch all bucket ids for these rounds – ONE query, cheap */
+  const bucketRecords = await prisma.bucket.findMany({
+    where: { roundId: { in: roundIds } },
+    select: { id: true, roundId: true },
+  });
+  const bucketIds = bucketRecords.map((b) => b.id);
+
   /* --- bucket counters (PUBLISHED & FUNDED) --------------------------- */
   const bucketAgg = await prisma.bucket.groupBy({
     by: ["roundId", "status"],
@@ -78,14 +85,26 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   });
 
   /* --- distributedAmount --------------------------------------------- */
-  const amountAgg = await prisma.expense.groupBy({
-    by: ["roundId"],
-    where: { bucket: { roundId: { in: roundIds } } },
-    _sum: { amount: true },
-  });
-  const amountMap = Object.fromEntries(
-    amountAgg.map((a) => [a.roundId, a._sum.amount ?? 0]),
-  );
+  let amountMap: Record<string, number> = {};
+  try {
+    const amountAgg = await prisma.expense.groupBy({
+      by: ["bucketId"],
+      where: { bucketId: { in: bucketIds } },
+      _sum: { amount: true },
+    });
+
+    /* Collapse bucket‑level sums into one per round */
+    amountAgg.forEach((a) => {
+      const roundId = bucketRecords.find(
+        (b) => b.id === a.bucketId
+      )?.roundId;
+      if (!roundId) return;
+      amountMap[roundId] = (amountMap[roundId] || 0) + (a._sum.amount ?? 0);
+    });
+  } catch (e) {
+    console.error("rounds resolver – distributedAmount aggregation failed:", e);
+    // amountMap remains empty; downstream will use 0
+  }
 
   /* --- attach the aggregates and return ------------------------------ */
   return roundsList.map((r) => ({
