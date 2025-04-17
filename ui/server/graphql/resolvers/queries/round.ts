@@ -73,16 +73,22 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
   const bucketIds = bucketRecords.map((b) => b.id);
 
   /* --- bucket counters (PUBLISHED & FUNDED) --------------------------- */
-  const bucketAgg = await prisma.bucket.groupBy({
-    by: ["roundId", "status"],
-    where: { roundId: { in: roundIds } },
-    _count: { _all: true },
-  });
-  const bucketMap: Record<string, Record<string, number>> = {};
-  bucketAgg.forEach((b) => {
-    bucketMap[b.roundId] = bucketMap[b.roundId] || {};
-    bucketMap[b.roundId][b.status] = b._count._all;
-  });
+  let bucketMap: Record<string, Record<string, number>> = {};
+  try {
+    const bucketAgg = await prisma.bucket.groupBy({
+      by: ["roundId", "status"],
+      where: { roundId: { in: roundIds } },
+      _count: { _all: true },
+    });
+    
+    bucketAgg.forEach((b) => {
+      bucketMap[b.roundId] = bucketMap[b.roundId] || {};
+      bucketMap[b.roundId][b.status] = b._count._all;
+    });
+  } catch (e) {
+    console.error("rounds resolver – bucket aggregation failed:", e);
+    // bucketMap stays empty; downstream will default to 0
+  }
 
   /* --- distributedAmount --------------------------------------------- */
   let amountMap: Record<string, number> = {};
