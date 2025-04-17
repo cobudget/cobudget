@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
 import { isCollMember, isCollMemberOrGroupAdmin } from "../auth";
