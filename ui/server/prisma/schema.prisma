@@ -338,7 +338,7 @@ model Bucket {
   title             String
   description       String?
   summary           String?
-  pinnedAt    DateTime?  // <-- new field for pinning
+  pinnedAt          DateTime?
   Images            Image[]
   cocreators        RoundMember[]
   BudgetItems       BudgetItem[]
