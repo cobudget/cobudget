@@ -217,7 +217,9 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 
   const showExpensesTab =
     currentGroup?.experimentalFeatures &&
-    (bucket?.status === "FUNDED" || bucket?.status === "COMPLETED");
+    (bucket?.status === "FUNDED" ||
+      bucket?.status === "COMPLETED" ||
+      bucket?.status === "PARTIAL_FUNDING");
 
   if ((!bucket && fetching) || !router.isReady) {
     return (
