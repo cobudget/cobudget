@@ -389,7 +389,7 @@ export const membersLimit = async (round) => {
     await isGroupSubscriptionActive({
       group,
     });
-    isSubscribed = true;
+    isSubscribed = group?.slug !== "c"; // isGroupSubscriptionActive passes OK for root group (default, unpaid)
   } catch (err) {
     ("");
   }

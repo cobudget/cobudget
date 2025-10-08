@@ -48,6 +48,7 @@ import {
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
 import { Prisma } from "@prisma/client";
+import { membersLimit } from '../types/Round';
 
 export const createRound = async (
   parent,
@@ -670,6 +671,12 @@ export const joinRound = async (parent, { roundId }, { user }) => {
     round.registrationPolicy === "INVITE_ONLY"
   )
     throw new Error("This round is invite only");
+
+  const roundMemberLimits = await membersLimit(round);
+  if (
+    roundMemberLimits.currentCount >= roundMemberLimits.limit
+  )
+    throw new Error("This round has reached the maximum number of members");
 
   const isApproved =
     currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN";
