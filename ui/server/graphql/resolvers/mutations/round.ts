@@ -19,7 +19,10 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
-import { inviteRoundMembersHelper } from "../helpers/inviteRoundMemberHelpers";
+import {
+  inviteRoundMembersHelper,
+  limitCheckedRoundMembers
+} from "../helpers/inviteRoundMemberHelpers";
 import {
   allocateToMember,
   bulkAllocate as bulkAllocateController,
@@ -279,11 +282,18 @@ export const joinInvitationLink = async (parent, { token }, { user }) => {
   if (roundId) {
     const round = await prisma.round.findFirst({
       where: { id: roundId, inviteNonce },
+      include: { group: true },
     });
 
     if (!round) {
       throw new Error("Round link expired");
     }
+
+    await limitCheckedRoundMembers({
+      round,
+      group: round.group,
+      qtyNewAdditions: 1,
+    });
 
     const isApproved = true;
     const roundMember = await prisma.roundMember.upsert({
