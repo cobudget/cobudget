@@ -1,6 +1,9 @@
+import { Box, Typography } from "@material-ui/core";
+import WarningIcon from "@material-ui/icons/Warning";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { FormattedMessage, useIntl } from "react-intl";
+import Button from "./Button";
 
 const bucketItems = (
   { groupSlug, roundSlug, bucketId, bucket },
@@ -172,31 +175,80 @@ export default function SubMenu({
       </div>
       {showUpgradeMessage && (
         <div className="space-x-2 bg-white border-b border-b-default bg-yellow-100">
-          <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto py-4">
-            <span className="text-md font-medium w-full block">
-              {round?.membersLimit.currentCount >= round?.membersLimit.limit ? (
+          <div className="max-w-screen-xl mx-auto flex flex-col items-start px-2 md:px-4 overflow-x-auto py-4">
+            <Box className="title mx-10 flex items-center px-2 md:px-4 overflow-x-auto py-2">
+              <WarningIcon className="text-gray-500" style={{ fontSize: 50 }} />
+              <Typography
+                component="span"
+                variant="h6"
+                style={{ marginLeft: 12 }}
+              >
+                {round?.membersLimit.currentCount >=
+                round?.membersLimit.limit ? (
+                  <FormattedMessage
+                    defaultMessage="You’ve reached the {limit} user limit."
+                    values={{
+                      b: (msg) => <span>{msg}</span>,
+                      limit: round.membersLimit.limit,
+                    }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    defaultMessage="Round is nearing the {limit} member limit."
+                    values={{
+                      b: (msg) => <span>{msg}</span>,
+                      limit: round.membersLimit.limit,
+                    }}
+                  />
+                )}
+              </Typography>
+            </Box>
+            <Box className="text mx-10 px-2 md:px-4 overflow-x-auto">
+              <Typography className="py-1" variant="body1">
+                <FormattedMessage defaultMessage="Cobudget is an open-source project run by a volunteer team." />
+              </Typography>
+              <Typography className="py-1" variant="body1">
                 <FormattedMessage
-                  defaultMessage="<b>Upgrade your account</b> - Round has reached its members limit. To invite more members, consider upgrading your round."
-                  values={{
-                    b: (msg) => <span className="font-bold">{msg}</span>,
-                  }}
+                  defaultMessage="To keep Cobudget available, we depend on our users to financially contribute within their means. 
+  Please choose a contribution amount below to continue using Cobudget."
                 />
-              ) : (
-                <FormattedMessage
-                  defaultMessage="<b>Upgrade your account</b> - Round is nearing the {limit} member limit with {count} members."
-                  values={{
-                    b: (msg) => <span className="font-bold">{msg}</span>,
-                    count: round.membersLimit.currentCount,
-                    limit: round.membersLimit.limit,
-                  }}
-                />
-              )}
-              <span className="float-right text-blue-700 font-medium">
-                <Link href={`/new-group?roundId=${round?.id}`}>
-                  Upgrade Now
-                </Link>
-              </span>
-            </span>
+              </Typography>
+            </Box>
+            <Box className="selector mx-10 px-2 md:px-4 overflow-x-auto py-4">
+              <Button href={`/new-group?roundId=${round?.id}`}>
+                <FormattedMessage defaultMessage="Choose amount" />
+              </Button>
+            </Box>
+            <Box className="learn-more mx-10 px-2 md:px-4 overflow-x-auto">
+              <Link href={`/new-group?roundId=${round?.id}`}>
+                <Typography
+                  variant="body2"
+                  className="text-blue-700"
+                  style={{ textDecoration: "underline", cursor: "pointer" }}
+                >
+                  <FormattedMessage defaultMessage="Learn more about this project." />
+                </Typography>
+              </Link>
+            </Box>
+            <Box className="contact mx-10 px-2 md:px-4 overflow-x-auto py-4">
+              <Typography variant="body2">
+                <FormattedMessage defaultMessage="Please contact us to discuss if:" />
+                <ul style={{ listStyleType: "disc", marginLeft: 20 }}>
+                  <li>
+                    <FormattedMessage defaultMessage="You’d like to contribute a different sum." />
+                  </li>
+                  <li>
+                    <FormattedMessage defaultMessage="A financial contribution would hinder your use of Cobudget." />
+                  </li>
+                  <li>
+                    <FormattedMessage defaultMessage="You’re managing multiple rounds for the same group of people, and want to group them under one payment." />
+                  </li>
+                  <li>
+                    <FormattedMessage defaultMessage="You have other questions about our self-set pricing model." />
+                  </li>
+                </ul>
+              </Typography>
+            </Box>
           </div>
         </div>
       )}
