@@ -1,11 +1,33 @@
 import Button from "components/Button";
-import { PriceButton } from "components/Group/NewGroup";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
+import {
+  StripePriceSelect,
+  useStripeProductPrices,
+} from "components/StripePricing";
 
 function UpgradeGroupModal({ hide, group }) {
-  const [plan, setPlan] = useState("MONTHLY");
   const intl = useIntl();
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
+  const {
+    prices,
+    loading: loadingPrices,
+    error: priceError,
+  } = useStripeProductPrices();
+
+  useEffect(() => {
+    if (loadingPrices) return;
+    if (!prices.length) {
+      setSelectedPriceId(null);
+      return;
+    }
+    const currentExists =
+      selectedPriceId &&
+      prices.some((price) => price.id === selectedPriceId);
+    if (!currentExists) {
+      setSelectedPriceId((prices.find((p) => p.default) || prices[0]).id);
+    }
+  }, [loadingPrices, prices, selectedPriceId]);
 
   return (
     <div className="z-50 top-0 left-0 fixed w-screen h-screen bg-black bg-opacity-30 flex justify-center items-center">
@@ -15,7 +37,7 @@ function UpgradeGroupModal({ hide, group }) {
         </p>
         <p className="my-4">
           <FormattedMessage
-            defaultMessage={`Group subscription has expired. To continue using the group, please upgrade your subscription. Groups can have up to 250 participants per round, and an unlimited number of rounds. For even larger rounds, <a>get in touch</a>.`}
+            defaultMessage={`Group subscription has expired. To continue using the group, please upgrade your subscription. Groups can have up to 1000 participants per round, and an unlimited number of rounds. For even larger rounds, <a>get in touch</a>.`}
             values={{
               a: (v) => (
                 <a
@@ -31,42 +53,45 @@ function UpgradeGroupModal({ hide, group }) {
         <div>
           <div className="my-6">
             <label className="text-sm font-medium mb-2 block">
-              <FormattedMessage defaultMessage="Billing period" />
+              <FormattedMessage defaultMessage="Subscription plan" />
             </label>
-            <div className="grid grid-cols-2 gap-4">
-              <PriceButton
-                heading={intl.formatMessage({
-                  defaultMessage: "Monthly billing",
+            <div className="mt-4">
+              <StripePriceSelect
+                options={prices}
+                value={selectedPriceId}
+                onChange={setSelectedPriceId}
+                disabled={loadingPrices || !!priceError}
+                label={intl.formatMessage({
+                  defaultMessage: "Choose a plan",
                 })}
-                subheading={intl.formatMessage({
-                  defaultMessage: "Most flexible",
-                })}
-                price="€20"
-                period={intl.formatMessage({ defaultMessage: "month" })}
-                onClick={() => setPlan("MONTHLY")}
-                active={plan === "MONTHLY"}
-              />
-              <PriceButton
-                heading={intl.formatMessage({
-                  defaultMessage: "Yearly billing",
-                })}
-                subheading={intl.formatMessage({
-                  defaultMessage: "Best price",
-                })}
-                price="€200"
-                period={intl.formatMessage({ defaultMessage: "year" })}
-                onClick={() => setPlan("YEARLY")}
-                active={plan === "YEARLY"}
               />
             </div>
+            {loadingPrices && (
+              <p className="text-sm text-gray-500 mt-2">
+                <FormattedMessage defaultMessage="Loading subscription options..." />
+              </p>
+            )}
+            {priceError && (
+              <p className="text-sm text-red-500 mt-2">
+                <FormattedMessage defaultMessage="We were unable to load the available subscription plans. Please try again later." />
+              </p>
+            )}
           </div>
         </div>
         <div className="flex justify-between">
           <form
-            action={`/api/stripe/create-checkout-session?mode=upgradepaidplan&plan=${plan}&groupId=${group?.id}`}
+            action={`/api/stripe/create-checkout-session?mode=upgradepaidplan&priceId=${
+              selectedPriceId ?? ""
+            }&groupId=${group?.id}`}
             method="POST"
           >
-            <Button type="submit">
+            <input type="hidden" name="priceId" value={selectedPriceId ?? ""} />
+            <Button
+              type="submit"
+              disabled={
+                !selectedPriceId || loadingPrices || !!priceError || !group?.id
+              }
+            >
               <FormattedMessage defaultMessage="Upgrade Now" />
             </Button>
           </form>

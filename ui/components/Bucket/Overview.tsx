@@ -18,10 +18,13 @@ export default function Overview({
   showBucketReview,
 }) {
   if (!bucket) return null;
+  
+  const actionsAreDisabled = bucket.round?.membersLimit.currentCount >= bucket.round?.membersLimit.limit;
   const canEdit =
-    currentUser?.currentCollMember?.isAdmin ||
+    !actionsAreDisabled &&
+    (currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    isMemberOfBucket(currentUser, bucket);
+    isMemberOfBucket(currentUser, bucket));
 
   const cocreatorsEditableStatuses = [
     "PENDING_APPROVAL",

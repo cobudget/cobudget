@@ -7,6 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
   IconButton as MuiIconButton,
   Menu,
   MenuItem,
@@ -99,6 +100,7 @@ const Page = ({
   updateMember,
   isAdmin,
   searchString,
+  actionsDisabled
 }) => {
   const [{ data, fetching, error }, executeQuery] = useQuery({
     query: MEMBERS_QUERY,
@@ -139,6 +141,7 @@ const Page = ({
           updateMember={updateMember}
           round={round}
           isAdmin={isAdmin}
+          disabled={actionsDisabled}
         />
       ))}
 
@@ -322,7 +325,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   );
 };
 
-const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
+const Row = ({ member, deleteMember, updateMember, round, isAdmin, disabled }) => {
   const [allocateModalOpen, setAllocateModalOpen] = useState(false);
 
   return (
@@ -373,17 +376,20 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         {isAdmin ? (
           <button
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
+            disabled={disabled}
             onClick={() => {
               setAllocateModalOpen(true);
               activityLog.log({ message: ALLOCATE_BALANCE_TO_RM });
             }}
           >
+            <Typography component="span" variant="body2" style={{ color: disabled ? 'gray' : 'inherit' }}>
             <FormattedNumber
               value={member.balance / 100}
               style="currency"
               currencyDisplay={"symbol"}
               currency={round.currency}
             />
+            </Typography>
           </button>
         ) : (
           <span>
@@ -432,6 +438,7 @@ const RoundMembersTable = ({
     { limit: 30, offset: 0 },
   ]);
 
+  const actionsAreDisabled = round?.membersLimit.currentCount >= round?.membersLimit.limit;
   return (
     <>
       <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -465,9 +472,10 @@ const RoundMembersTable = ({
                         arrow={false}
                       >
                         <IconButton
+                          disabled={actionsAreDisabled}
                           onClick={() => setBulkAllocateModalOpen(true)}
                         >
-                          <AddIcon className="h-4 w-4" />
+                          <AddIcon className="h-4 w-4" color={actionsAreDisabled ? "gray" : "currentColor"} />
                         </IconButton>
                       </Tooltip>
                     )}
@@ -501,6 +509,7 @@ const RoundMembersTable = ({
                     isAdmin={isAdmin}
                     round={round}
                     searchString={searchString}
+                    actionsDisabled={actionsAreDisabled}
                   />
                 );
               })}

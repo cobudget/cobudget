@@ -99,6 +99,7 @@ const RoundMembers = ({ round, currentUser }) => {
     return null;
   }
 
+  const actionsAreDisabled = round?.membersLimit.currentCount >= round?.membersLimit.limit;
   return (
     <>
       <div className="page">
@@ -131,6 +132,7 @@ const RoundMembers = ({ round, currentUser }) => {
                   setInviteModalOpen(true);
                 }}
                 testid="invite-participant-button"
+                disabled={actionsAreDisabled}
               >
                 <FormattedMessage defaultMessage="Invite participants" />
               </Button>

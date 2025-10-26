@@ -9,6 +9,7 @@ function IconButton(
     tabIndex,
     loading,
     type = "button",
+    disabled
   }: {
     children: ReactNode;
     className?: string;
@@ -16,6 +17,7 @@ function IconButton(
     tabIndex?: number;
     loading?: boolean;
     type?: "button" | "submit" | "reset";
+    disabled?: boolean;
   },
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
@@ -25,7 +27,7 @@ function IconButton(
       onClick={onClick}
       tabIndex={tabIndex}
       type={type}
-      disabled={loading}
+      disabled={disabled || loading}
       ref={ref}
     >
       {loading && (

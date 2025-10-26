@@ -50,6 +50,7 @@ export default function AboutPage({ currentUser }) {
       roundSlug: router.query.round,
     },
   });
+  const actionsAreDisabled = round?.membersLimit.currentCount >= round?.membersLimit.limit;
   return (
     <>
       <SubMenu currentUser={currentUser} round={round} />
@@ -61,10 +62,10 @@ export default function AboutPage({ currentUser }) {
                 defaultValue={round.about}
                 label="Add about text"
                 placeholder={`# About ${round.title}`}
-                canEdit={
+                canEdit={ !actionsAreDisabled && (
                   currentUser?.currentGroupMember?.isAdmin ||
                   currentUser?.currentCollMember?.isAdmin
-                }
+                )}
                 name="about"
                 className="h-10"
                 MUTATION={gql`

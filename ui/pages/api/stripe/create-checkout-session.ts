@@ -4,7 +4,7 @@ import handler from "server/api-handler";
 import { getRoundMember } from "server/graphql/resolvers/helpers";
 import prisma from "server/prisma";
 import stripe from "server/stripe";
-import { plans } from "server/stripe/plans";
+import { getConfiguredProductPrice } from "server/stripe/pricing";
 import { getRequestOrigin } from "server/get-request-origin";
 import slugify from "server/utils/slugify";
 
@@ -71,8 +71,8 @@ async function getTaxRates({
 export default handler().post(async (req, res) => {
   if (req.query?.mode === "paidplan") {
     if (!req.user) throw new Error("You need to be logged in");
-    if (typeof req.query?.plan !== "string")
-      throw new Error("No plan specified");
+    if (typeof req.query?.priceId !== "string")
+      throw new Error("No price selected");
     if (typeof req.query?.groupSlug !== "string")
       throw new Error("No group slug specified");
     if (typeof req.query?.groupName !== "string")
@@ -82,8 +82,7 @@ export default handler().post(async (req, res) => {
 
     //if (typeof req.query?.contribution !== "string")
 
-    const priceId = plans[req.query.plan];
-    if (!priceId) throw new Error("Missing price ID for this plan.");
+    const price = await getConfiguredProductPrice(req.query.priceId);
 
     const customerMetadata = {
       customer_email: req.user.email,
@@ -101,7 +100,7 @@ export default handler().post(async (req, res) => {
         },
         line_items: [
           {
-            price: priceId,
+            price: price.id,
             quantity: 1,
           },
         ],
@@ -128,11 +127,10 @@ export default handler().post(async (req, res) => {
       console.log({ err });
     }
   } else if (req.query?.mode === "upgradepaidplan") {
-    if (typeof req.query?.plan !== "string")
-      throw new Error("No plan specified");
+    if (typeof req.query?.priceId !== "string")
+      throw new Error("No price selected");
 
-    const priceId = plans[req.query.plan];
-    if (!priceId) throw new Error("Missing price ID for this plan.");
+    const price = await getConfiguredProductPrice(req.query.priceId);
 
     const groupId = Array.isArray(req.query.groupId)
       ? req.query.groupId[0]
@@ -151,7 +149,7 @@ export default handler().post(async (req, res) => {
       },
       line_items: [
         {
-          price: priceId,
+          price: price.id,
           quantity: 1,
         },
       ],
