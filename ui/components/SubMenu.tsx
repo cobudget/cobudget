@@ -2,8 +2,12 @@ import { Box, Typography } from "@material-ui/core";
 import WarningIcon from "@material-ui/icons/Warning";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import Button from "./Button";
+import {
+  StripePriceSelect,
+  useStripeProductPrices,
+} from "components/StripePricing";
 
 const bucketItems = (
   { groupSlug, roundSlug, bucketId, bucket },
@@ -107,6 +111,30 @@ export default function SubMenu({
 }) {
   const router = useRouter();
   const intl = useIntl();
+  const [initialPriceId, setInitialPriceId] = useState<string | null>(null);
+
+  const {
+    prices,
+    loading: loadingPrices,
+    error: priceError,
+  } = useStripeProductPrices();
+
+  useEffect(() => {
+    if (loadingPrices) return;
+
+    if (!prices.length) {
+      setInitialPriceId(null);
+      return;
+    }
+
+    const hasSelection =
+      initialPriceId &&
+      prices.some((price) => price.id === initialPriceId);
+
+    if (!hasSelection) {
+      setInitialPriceId((prices.find((p) => p.default) || prices[0]).id);
+    }
+  }, [loadingPrices, prices, initialPriceId]);
 
   const items: {
     label: string;
@@ -215,12 +243,18 @@ export default function SubMenu({
               </Typography>
             </Box>
             <Box className="selector mx-10 px-2 md:px-4 overflow-x-auto py-4">
-              <Button href={`/new-group?roundId=${round?.id}`}>
-                <FormattedMessage defaultMessage="Choose amount" />
-              </Button>
+                <StripePriceSelect
+                  options={prices}
+                  value={initialPriceId}
+                  onChange={(selectedPriceId) => router.push(`/new-group?roundId=${round?.id}&priceId=${selectedPriceId}`)}
+                  disabled={loadingPrices || !!priceError}
+                  label={intl.formatMessage({
+                    defaultMessage: "Choose a plan",
+                  })}
+                />
             </Box>
             <Box className="learn-more mx-10 px-2 md:px-4 overflow-x-auto">
-              <Link href={`/new-group?roundId=${round?.id}`}>
+              <a href="https://cobudget.com/about" target="_blank" rel="noreferrer">
                 <Typography
                   variant="body2"
                   className="text-blue-700"
@@ -228,7 +262,7 @@ export default function SubMenu({
                 >
                   <FormattedMessage defaultMessage="Learn more about this project." />
                 </Typography>
-              </Link>
+              </a>
             </Box>
             <Box className="contact mx-10 px-2 md:px-4 overflow-x-auto py-4">
               <Typography variant="body2">

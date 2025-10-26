@@ -11,6 +11,7 @@ export type StripePriceOption = {
   productName?: string;
   metadata?: Record<string, string>;
   trialPeriodDays?: number | null;
+  default?: boolean | null;
 };
 
 type FetchState = {

@@ -30,6 +30,7 @@ export default function NewGroup({ currentUser }) {
   const [slug, setSlug] = useState("");
   const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
   const roundId = router.query.roundId;
+  const preSelectedPriceId = router.query.priceId as string | undefined;
 
   const {
     prices,
@@ -58,9 +59,12 @@ export default function NewGroup({ currentUser }) {
       prices.some((price) => price.id === selectedPriceId);
 
     if (!hasSelection) {
-      setSelectedPriceId((prices.find((p) => p.default) || prices[0]).id);
+      const initialPriceId = preSelectedPriceId && prices.some((p) => p.id === preSelectedPriceId)
+        ? preSelectedPriceId
+        : (prices.find((p) => p.default) || prices[0]).id;
+      setSelectedPriceId(initialPriceId);
     }
-  }, [loadingPrices, prices, selectedPriceId]);
+  }, [loadingPrices, prices, selectedPriceId, preSelectedPriceId]);
 
   if (router.query.upgraded === "true") {
     router.push(`/${router.query.group}`);
