@@ -18,6 +18,7 @@ import capitalize from "utils/capitalize";
 import Head from "next/head";
 import Expenses from "components/Bucket/Expenses";
 import { FormattedMessage } from "react-intl";
+import UpgradeMessage from "components/UpgradeMessage";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
@@ -108,6 +109,11 @@ export const BUCKET_QUERY = gql`
           subscriptionStatus {
             isActive
           }
+        }
+        membersLimit {
+          consumedPercentage
+          currentCount
+          limit
         }
       }
       funders {
@@ -241,6 +247,13 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
       </>
     );
 
+    
+
+  const showUpgradeMessage =
+    router.query.group === "c" &&
+    bucket.round?.membersLimit?.consumedPercentage > 75 &&
+    currentUser?.currentCollMember?.isAdmin;
+
   return (
     <>
       <Header head={head} />
@@ -251,6 +264,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
         handleClose={() => setEditImagesModalOpen(false)}
         bucketId={bucket?.id}
       />
+      {showUpgradeMessage && <UpgradeMessage round={bucket.round} />}
       <Overview
         bucket={bucket}
         fetching={fetching}
@@ -427,7 +441,7 @@ export async function getServerSideProps(ctx) {
       head: {
         title: bucket.title,
         description: bucket.description || bucket.summary,
-        image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO,
+        image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO ?? '',
       },
     },
   };

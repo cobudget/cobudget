@@ -314,6 +314,7 @@ const BucketSidebar = ({
   const hasNotReachedMaxGoal =
     bucket.totalContributions < Math.max(bucket.minGoal, bucket.maxGoal);
   const hasReachedMinGoal = bucket.totalContributions >= bucket.minGoal;
+  const actionsAreDisabled = bucket.round?.membersLimit.currentCount >= bucket.round?.membersLimit.limit;
 
   const showFundButton =
     bucket.approved &&
@@ -494,6 +495,7 @@ const BucketSidebar = ({
             <>
               <Button
                 color={bucket.round.color}
+                disabled={actionsAreDisabled}
                 fullWidth
                 onClick={() => {
                   if (bucket.round?.bucketsLimit?.isLimitOver) {
