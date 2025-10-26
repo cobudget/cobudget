@@ -251,8 +251,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 
   const showUpgradeMessage =
     router.query.group === "c" &&
-    bucket.round?.membersLimit?.consumedPercentage > 75 &&
-    currentUser?.currentCollMember?.isAdmin;
+    bucket.round?.membersLimit?.consumedPercentage > 75;
 
   return (
     <>
@@ -264,7 +263,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
         handleClose={() => setEditImagesModalOpen(false)}
         bucketId={bucket?.id}
       />
-      {showUpgradeMessage && <UpgradeMessage round={bucket.round} />}
+      {showUpgradeMessage && <UpgradeMessage round={bucket.round} forAdmin={currentUser?.currentCollMember?.isAdmin} />}
       <Overview
         bucket={bucket}
         fetching={fetching}

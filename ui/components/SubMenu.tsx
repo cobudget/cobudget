@@ -170,8 +170,7 @@ export default function SubMenu({
 
   const showUpgradeMessage =
     router.query.group === "c" &&
-    round?.membersLimit?.consumedPercentage > 75 &&
-    currentUser?.currentCollMember?.isAdmin;
+    round?.membersLimit?.consumedPercentage > 75;
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;
@@ -201,7 +200,7 @@ export default function SubMenu({
           })}
         </div>
       </div>
-      {showUpgradeMessage && <UpgradeMessage round={round} />}
+      {showUpgradeMessage && <UpgradeMessage round={round} forAdmin={currentUser?.currentCollMember?.isAdmin} />}
     </>
   );
 }
