@@ -151,25 +151,23 @@ const EditBudgetModal = ({
                 <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                   <div className="mr-2 my-2 sm:my-0 flex-1">
                     <input
-                      name={`budgetItems[${index}].id`}
                       value={id}
                       readOnly
                       className="hidden"
-                      ref={register()}
+                      {...register(`budgetItems.${index}.id`)}
                     />
                     <TextField
                       placeholder={intl.formatMessage({
                         defaultMessage: "Description",
                       })}
-                      name={`budgetItems[${index}].description`}
                       defaultValue={description}
-                      inputRef={register()}
+                      inputRef={register(`budgetItems.${index}.description`).ref}
+                      inputProps={register(`budgetItems.${index}.description`)}
                       testid={`bucket-expense-item-description`}
                     />
                     <input
-                      name={`budgetItems[${index}].type`}
                       value={type}
-                      ref={register()}
+                      {...register(`budgetItems.${index}.type`)}
                       readOnly
                       className="hidden"
                     />
@@ -181,12 +179,11 @@ const EditBudgetModal = ({
                           ? intl.formatMessage({ defaultMessage: "Min amount" })
                           : intl.formatMessage({ defaultMessage: "Amount" })
                       }
-                      name={`budgetItems[${index}].min`}
                       defaultValue={
                         typeof min !== "undefined" ? String(min / 100) : null
                       }
-                      inputProps={{ type: "number", min: 0 }}
-                      inputRef={register()}
+                      inputRef={register(`budgetItems.${index}.min`).ref}
+                      inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
                       endAdornment={currency}
                       testid={`bucket-expense-item-min-amount`}
                     />
@@ -200,14 +197,13 @@ const EditBudgetModal = ({
                             placeholder={intl.formatMessage({
                               defaultMessage: "Max amount",
                             })}
-                            name={`budgetItems[${index}].max`}
                             defaultValue={
                               typeof max === "undefined" || max === null
                                 ? null
                                 : String(max / 100)
                             }
-                            inputProps={{ type: "number", min: 0 }}
-                            inputRef={register()}
+                            inputRef={register(`budgetItems.${index}.max`).ref}
+                            inputProps={{ ...register(`budgetItems.${index}.max`), type: "number", min: 0 }}
                             endAdornment={currency}
                           />
                           <span
@@ -268,25 +264,23 @@ const EditBudgetModal = ({
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
                   <input
-                    name={`budgetItems[${index}].id`}
                     value={id}
                     readOnly
                     className="hidden"
-                    ref={register()}
+                    {...register(`budgetItems.${index}.id`)}
                   />
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
                     })}
-                    name={`budgetItems[${index}].description`}
-                    inputRef={register()}
+                    inputRef={register(`budgetItems.${index}.description`).ref}
+                    inputProps={register(`budgetItems.${index}.description`)}
                     defaultValue={description}
                     testid={`bucket-existing-item-${fieldId}-description`}
                   />
                   <input
-                    name={`budgetItems[${index}].type`}
                     value={type}
-                    ref={register()}
+                    {...register(`budgetItems.${index}.type`)}
                     readOnly
                     className="hidden"
                   />
@@ -297,12 +291,11 @@ const EditBudgetModal = ({
                     placeholder={intl.formatMessage({
                       defaultMessage: "Amount",
                     })}
-                    name={`budgetItems[${index}].min`}
                     defaultValue={
                       typeof min !== "undefined" ? String(min / 100) : null
                     }
-                    inputProps={{ type: "number", min: 0 }}
-                    inputRef={register()}
+                    inputRef={register(`budgetItems.${index}.min`).ref}
+                    inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
                     endAdornment={currency}
                     testid={`bucket-existing-item-${fieldId}-amount`}
                   />

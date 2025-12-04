@@ -49,11 +49,11 @@ const BucketTitle = ({ title, canEdit, bucketId, isEditingAllowed }) => {
           <TextField
             className="mb-2"
             placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-            name="title"
             defaultValue={title}
             size="large"
-            inputRef={register({ required: "Required" })}
+            inputRef={register("title", { required: "Required" }).ref}
             inputProps={{
+              ...register("title", { required: "Required" }),
               maxLength: MAX_BUCKET_TITLE_LENGTH,
             }}
             autoFocus

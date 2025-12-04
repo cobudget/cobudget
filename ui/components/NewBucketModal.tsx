@@ -89,13 +89,11 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
 
             <TextField
               className="my-3"
-              name="title"
               size="large"
               placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-              inputRef={register({
-                required: "Required",
-              })}
+              inputRef={register("title", { required: "Required" }).ref}
               inputProps={{
+                ...register("title", { required: "Required" }),
                 maxLength: MAX_BUCKET_TITLE_LENGTH,
               }}
               autoFocus

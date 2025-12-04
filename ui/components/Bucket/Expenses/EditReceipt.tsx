@@ -63,12 +63,12 @@ function EditReceipt({ receiptToEdit, close, round }) {
           <div className="flex-grow">
             <TextField
               className="my-1"
-              name="description"
               size="small"
               placeholder={intl.formatMessage({
                 defaultMessage: "Description",
               })}
-              inputRef={register()}
+              inputRef={register("description").ref}
+              inputProps={register("description")}
               error={Boolean(errors.description)}
               helperText={errors.description?.message}
               defaultValue={receiptToEdit?.description}
@@ -79,20 +79,19 @@ function EditReceipt({ receiptToEdit, close, round }) {
           <UploadAttachment
             name="attachment"
             cloudinaryPreset="organization_logos"
-            inputRef={register({})}
+            inputRef={register("attachment").ref}
             defaultLink={receiptToEdit?.attachment}
           />
 
           <div className="mr-2 sm:my-0 flex-1">
             <TextField
               className="my-1"
-              name={"date"}
               size="small"
               placeholder={intl.formatMessage({
                 defaultMessage: "Date",
               })}
-              inputRef={register({})}
-              inputProps={{ type: "date" }}
+              inputRef={register("date").ref}
+              inputProps={{ ...register("date"), type: "date" }}
               error={Boolean(errors.date)}
               helperText={errors.date?.message}
               defaultValue={
@@ -105,13 +104,12 @@ function EditReceipt({ receiptToEdit, close, round }) {
           <div className="mr-2 sm:my-0 flex-1">
             <TextField
               className="my-1"
-              name={"amount"}
               size="small"
               placeholder={intl.formatMessage({
                 defaultMessage: "Amount",
               })}
-              inputRef={register({})}
-              inputProps={{ type: "number", min: 0 }}
+              inputRef={register("amount").ref}
+              inputProps={{ ...register("amount"), type: "number", min: 0 }}
               error={Boolean(errors.amount)}
               helperText={errors.amount?.message}
               endAdornment={round.currency}

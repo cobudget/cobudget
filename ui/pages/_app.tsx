@@ -2,7 +2,7 @@ import "tippy.js/dist/tippy.css";
 import "../styles.css";
 
 import { Analytics } from "@vercel/analytics/react";
-import { ThemeProvider, createTheme, StyledEngineProvider } from "@mui/material/styles";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { CacheProvider, EmotionCache } from "@emotion/react";
 import CssBaseline from "@mui/material/CssBaseline";
 import BucketLimitOver from "components/BucketLimitOver";
@@ -323,54 +323,52 @@ const MyApp = ({ Component, pageProps, router, emotionCache = clientSideEmotionC
 
   return (
     <CacheProvider value={emotionCache}>
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={muiTheme}>
-          <CssBaseline />
-          <IntlProvider locale={locale} messages={lang[locale]}>
-        <RequiredActionsModal currentUser={currentUser} />
-        <ErrorBoundary
-          FallbackComponent={Fallback}
-          onError={(error) => reportError(error, currentUser)}
-        >
-          <AppContext.Provider value={appContext}>
-            <Layout
-              currentUser={currentUser}
-              fetchingUser={fetchingUser}
-              group={group}
-              round={round}
-              bucket={bucket}
-              dir={isRTL(locale) ? "rtl" : "ltr"}
-              locale={locale}
-              changeLocale={changeLocale}
-              ss={ss}
-            >
-              <Component
-                {...pageProps}
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <IntlProvider locale={locale} messages={lang[locale]}>
+          <RequiredActionsModal currentUser={currentUser} />
+          <ErrorBoundary
+            FallbackComponent={Fallback}
+            onError={(error) => reportError(error, currentUser)}
+          >
+            <AppContext.Provider value={appContext}>
+              <Layout
                 currentUser={currentUser}
-                router={router}
+                fetchingUser={fetchingUser}
+                group={group}
                 round={round}
-                currentGroup={group}
-              />
-              <Analytics />
-              <Toaster />
-              {groupToUpdate && (
-                <UpgradeGroupModal
-                  group={group}
-                  hide={() => setGroupToUpdate(undefined)}
+                bucket={bucket}
+                dir={isRTL(locale) ? "rtl" : "ltr"}
+                locale={locale}
+                changeLocale={changeLocale}
+                ss={ss}
+              >
+                <Component
+                  {...pageProps}
+                  currentUser={currentUser}
+                  router={router}
+                  round={round}
+                  currentGroup={group}
                 />
-              )}
-              {limitBucketOver && (
-                <BucketLimitOver
-                  isAdmin={limitBucketOver?.isAdmin}
-                  hide={() => setLimitBucketOver(undefined)}
-                />
-              )}
-            </Layout>
-          </AppContext.Provider>
-        </ErrorBoundary>
-          </IntlProvider>
-        </ThemeProvider>
-      </StyledEngineProvider>
+                <Analytics />
+                <Toaster />
+                {groupToUpdate && (
+                  <UpgradeGroupModal
+                    group={group}
+                    hide={() => setGroupToUpdate(undefined)}
+                  />
+                )}
+                {limitBucketOver && (
+                  <BucketLimitOver
+                    isAdmin={limitBucketOver?.isAdmin}
+                    hide={() => setLimitBucketOver(undefined)}
+                  />
+                )}
+              </Layout>
+            </AppContext.Provider>
+          </ErrorBoundary>
+        </IntlProvider>
+      </ThemeProvider>
     </CacheProvider>
   );
 };

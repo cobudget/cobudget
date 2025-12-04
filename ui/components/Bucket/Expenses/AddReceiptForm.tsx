@@ -10,15 +10,15 @@ function AddReceiptForm({ index, register, errors, round }) {
       <div className="mt-2">
         <TextField
           className="my-1"
-          name="description"
           size="small"
           placeholder={intl.formatMessage({
             defaultMessage: "Description",
           })}
-          inputRef={register("description.0")}
+          inputRef={register(`receipts.${index}.description`).ref}
+          inputProps={register(`receipts.${index}.description`)}
           autoFocus
-          error={Boolean(errors.description)}
-          helperText={errors.description?.message}
+          error={Boolean(errors.receipts?.[index]?.description)}
+          helperText={errors.receipts?.[index]?.description?.message}
         />
       </div>
 
@@ -26,29 +26,27 @@ function AddReceiptForm({ index, register, errors, round }) {
         <div className="mr-2 sm:my-0 flex-1">
           <TextField
             className="my-1"
-            name="date"
             size="small"
             placeholder={intl.formatMessage({
               defaultMessage: "Date",
             })}
-            inputRef={register({})}
-            inputProps={{ type: "date" }}
-            error={Boolean(errors.date)}
-            helperText={errors.date?.message}
+            inputRef={register(`receipts.${index}.date`).ref}
+            inputProps={{ ...register(`receipts.${index}.date`), type: "date" }}
+            error={Boolean(errors.receipts?.[index]?.date)}
+            helperText={errors.receipts?.[index]?.date?.message}
           />
         </div>
         <div className="mr-2 sm:my-0 flex-1">
           <TextField
             className="my-1"
-            name="amount"
             size="small"
             placeholder={intl.formatMessage({
               defaultMessage: "Amount",
             })}
-            inputRef={register({})}
-            inputProps={{ type: "number", min: 0 }}
-            error={Boolean(errors.amount)}
-            helperText={errors.amount?.message}
+            inputRef={register(`receipts.${index}.amount`).ref}
+            inputProps={{ ...register(`receipts.${index}.amount`), type: "number", min: 0 }}
+            error={Boolean(errors.receipts?.[index]?.amount)}
+            helperText={errors.receipts?.[index]?.amount?.message}
             endAdornment={round.currency}
           />
         </div>
