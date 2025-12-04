@@ -4,14 +4,30 @@ import { CheveronDownIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 import ReactDOM from "react-dom";
 import { useInViewport } from "react-in-viewport";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const PortaledLoadMore = ({ children }) => {
-  if (typeof window !== "undefined")
-    return ReactDOM.createPortal(
-      children,
-      document.getElementById("load-more")
+  // Use state to ensure consistent SSR/client hydration
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Always render the same fallback initially for SSR consistency
+  if (!mounted) {
+    return (
+      <TableRow>
+        <TableCell></TableCell>
+      </TableRow>
     );
+  }
+
+  const target = document.getElementById("load-more");
+  if (target) {
+    return ReactDOM.createPortal(children, target);
+  }
+
   return (
     <TableRow>
       <TableCell></TableCell>
