@@ -255,23 +255,21 @@ const MyApp = ({ Component, pageProps, router, emotionCache = clientSideEmotionC
     return c;
   }, [currentUserData, ss]);
 
-  const [locale, setLocale] = useState(
-    (() => {
-      if (typeof window !== "undefined") {
-        const locale = window.navigator.language;
-        const langCode = locale.split("-")[0];
-        if (supportedLangCodes.indexOf(langCode) > -1) {
-          return langCode;
-        }
-      }
-      return "en";
-    })()
-  );
+  // Always initialize with "en" to ensure consistent SSR/client hydration
+  const [locale, setLocale] = useState("en");
 
   useEffect(() => {
-    const locale = Cookies.get("locale");
-    if (locale) {
-      setLocale(locale);
+    // First check for cookie preference
+    const savedLocale = Cookies.get("locale");
+    if (savedLocale && supportedLangCodes.indexOf(savedLocale) > -1) {
+      setLocale(savedLocale);
+    } else {
+      // Fall back to browser language
+      const browserLocale = window.navigator.language;
+      const langCode = browserLocale.split("-")[0];
+      if (supportedLangCodes.indexOf(langCode) > -1) {
+        setLocale(langCode);
+      }
     }
 
     // Upgrade group message
