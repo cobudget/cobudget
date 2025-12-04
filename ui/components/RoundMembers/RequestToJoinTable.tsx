@@ -6,11 +6,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import toast from "react-hot-toast";
 import Avatar from "../Avatar";
 import Button from "../Button";
-import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 const RequestToJoinTable = ({
   requestsToJoin,

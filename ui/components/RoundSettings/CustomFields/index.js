@@ -43,6 +43,7 @@ const CustomFields = ({ round }) => {
           color={round.color}
           onClick={() => setAddCustomFieldModalOpen(true)}
           className="flex-grow"
+          testid="add-form-item-button"
         >
           <AddIcon className="h-5 w-5 mr-1" />{" "}
           <FormattedMessage defaultMessage="Add form item" />

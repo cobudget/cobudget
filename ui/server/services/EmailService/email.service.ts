@@ -16,11 +16,15 @@ import prisma from "../../prisma";
 import { getRequestOrigin } from "../../get-request-origin";
 import subscibers from "server/subscribers/discourse.subscriber";
 import {
-  bucketIncome,
   bucketTotalContributions,
   bucketMinGoal,
 } from "server/graphql/resolvers/helpers";
 import { tailwindHsl } from "utils/colors";
+import {
+  shouldSendMagicLink,
+  updateLastMagicLinkTime,
+} from "server/utils/user.meta";
+import { MAGIC_LINK_LIMIT } from "../../../constants";
 
 const { groupHasDiscourse } = subscibers;
 
@@ -87,6 +91,79 @@ export default {
 
     await sendEmails(adminEmails);
   },
+  bulkInviteMembers: async ({
+    membersToInvite,
+    currentUser,
+    round,
+    currentGroup = null,
+  }) => {
+    const inviteLink = appLink(
+      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+    );
+
+    const groupCollName = currentGroup?.name ?? round.title;
+    const mdPurpose = currentGroup?.info ?? round?.info ?? "";
+    const htmlPurpose = await mdToHtml(mdPurpose);
+
+    const emailsToSend = membersToInvite.map((member) => {
+      return {
+        to: member.email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${member.name ? ` ${escape(member.name)}` : ""}!
+      <br/><br/>
+      You have been invited by ${escape(currentUser.name)} to ${escape(
+          groupCollName
+        )} on ${process.env.PLATFORM_NAME}.
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
+      ${
+        htmlPurpose
+          ? `<br/><br/>
+            ${quotedSection(htmlPurpose)}`
+          : ""
+      }
+      <br/><br/>
+      ${footer}
+      `,
+      };
+    });
+    sendEmails(emailsToSend, false, true);
+  },
+  bulkInviteMembersCustom: async ({
+    membersToInvite,
+    currentUser,
+    round,
+    customHtml,
+    currentGroup = null,
+  }) => {
+    const inviteLink = appLink(
+      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+    );
+
+    const groupCollName = currentGroup?.name ?? round.title;
+
+    const emailsToSend = membersToInvite.map((member) => {
+      return {
+        to: member.email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${member.name ? ` ${escape(member.name)}` : ""}!
+      <br/><br/>
+      You have been invited to ${escape(groupCollName)} on ${
+          process.env.PLATFORM_NAME
+        }.
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
+      ${
+        customHtml
+          ? `<br/><br/>
+            ${quotedSection(customHtml)}`
+          : ""
+      }
+      <br/><br/>
+      ${footer}
+      `,
+      };
+    });
+    sendEmails(emailsToSend, false, true);
+  },
   inviteMember: async ({
     email,
     currentUser,
@@ -110,7 +187,9 @@ export default {
     });
 
     const inviteLink = appLink(
-      `/${currentGroup?.slug ?? round.group.slug}/${round?.slug ?? ""}`
+      `/${currentGroup?.slug ?? round.group.slug}/${
+        round?.slug ?? ""
+      }?invitation_through=email`
     );
 
     const groupCollName = currentGroup?.name ?? round.title;
@@ -119,15 +198,16 @@ export default {
 
     const htmlPurpose = await mdToHtml(mdPurpose);
 
-    await sendEmail({
-      to: email,
-      subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
-      html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
+    await sendEmail(
+      {
+        to: email,
+        subject: `${currentUser.name} invited you to join "${groupCollName}" on ${process.env.PLATFORM_NAME}!`,
+        html: `Hi${invitedUser.name ? ` ${escape(invitedUser.name)}` : ""}!
       <br/><br/>
       You have been invited by ${escape(currentUser.name)} to ${escape(
-        groupCollName
-      )} on ${process.env.PLATFORM_NAME}.
-      Accept your invitation by <a href="${inviteLink}">Clicking here</a>.
+          groupCollName
+        )} on ${process.env.PLATFORM_NAME}.
+      Accept your invitation by signing in to Cobudget with your email, <a href="${inviteLink}">going to the round</a> and clicking the button in the top right corner to accept invitation.
       ${
         htmlPurpose
           ? `<br/><br/>
@@ -137,31 +217,39 @@ export default {
       <br/><br/>
       ${footer}
       `,
-    });
+      },
+      false
+    );
   },
   loginMagicLink: async ({ destination, href, code, req }) => {
     const link = `${getRequestOrigin(req)}${href}`;
-
+    if (!(await shouldSendMagicLink(destination))) {
+      throw MAGIC_LINK_LIMIT;
+    }
     const hasAccountAlready = await prisma.user.findUnique({
       where: { email: destination },
     });
 
     if (hasAccountAlready) {
-      await sendEmail({
-        to: destination,
-        subject: `Your ${process.env.PLATFORM_NAME} login link`,
-        html: `<a href="${link}">Click here to login</a>
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Your ${process.env.PLATFORM_NAME} login link`,
+          html: `<a href="${link}">Click here to login</a>
         <br/><br/>
         Verification code: ${code}
         <br/><br/>
         ${footer}
         `,
-      });
+        },
+        false
+      );
     } else {
-      await sendEmail({
-        to: destination,
-        subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
-        html: `Welcome!
+      await sendEmail(
+        {
+          to: destination,
+          subject: `Welcome to ${process.env.PLATFORM_NAME} - confirm your account and get started!`,
+          html: `Welcome!
         <br/><br/>
         Your ${process.env.PLATFORM_NAME} account has been created! We're excited to welcome you to the community.
         <br/><br/>
@@ -169,8 +257,11 @@ export default {
         <br/><br/>
         ${footer}
       `,
-      });
+        },
+        false
+      );
     }
+    await updateLastMagicLinkTime(destination);
   },
   welcomeEmail: async ({ newUser }: { newUser: { email: string } }) => {
     const { collMemberships } = await prisma.user.findUnique({
@@ -202,13 +293,13 @@ export default {
       <br/><br/>
       <b>How to get started?</b>
       <ul>
-      <li>Check out the <a href="https://cobudget.helpscoutdocs.com/">Cobudget docs</a> for some simple how-to’s</li>
+      <li>Check out the <a href="https://guide.cobudget.com/">Cobudget docs</a> for some simple how-to’s</li>
       <li>${createYourFirst}</li>
       </ul>
       <br/>
       <b>Want to learn more?</b>
       <ul>
-      <li>Dig into our <a href="https://cobudget.helpscoutdocs.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
+      <li>Dig into our <a href="https://guide.cobudget.com/article/12-case-studies">case studies</a> to see how others are using the tool</li>
       <li>Learn more about <a href="https://www.greaterthan.works/resources/sharing-power-by-sharing-money">Cobudget’s history</a>.</li>
       </ul>
       <br/>
@@ -225,6 +316,7 @@ export default {
     currentCollMember,
     currentUser,
     comment,
+    isFlag,
   }) => {
     const linkNodes = [];
 
@@ -314,7 +406,9 @@ export default {
       .map(
         (roundMember): SendEmailInput => ({
           to: roundMember.user.email,
-          subject: `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
+          subject: isFlag
+            ? `New comment in your bucket ${bucket.title}`
+            : `New comment by ${currentUser.name} in your bucket ${bucket.title}`,
           html: `Hey ${escape(roundMember.user.name)}!
           <br/><br/>
           Your bucket “${escape(bucket.title)}” received a new comment.
@@ -369,7 +463,9 @@ export default {
 
       const commenterEmails = commentersToEmail.map((recipient) => ({
         to: recipient.email,
-        subject: `New comment by ${currentUser.name} in bucket ${bucket.title}`,
+        subject: isFlag
+          ? `New comment in bucket ${bucket.title}`
+          : `New comment by ${currentUser.name} in bucket ${bucket.title}`,
         html: `Hey ${escape(recipient.name)}!
           <br/><br/>
           People are talking about “${escape(
@@ -566,11 +662,8 @@ export default {
       .filter((user) => user.emailSettings?.contributionToYourBucket ?? true);
 
     const totalContributions = await bucketTotalContributions(bucket);
-    const income = await bucketIncome(bucket);
     const minGoal = await bucketMinGoal(bucket);
-    const progressPercent = Math.floor(
-      ((totalContributions + income) / minGoal) * 100
-    );
+    const progressPercent = Math.floor((totalContributions / minGoal) * 100);
 
     const { group } = await prisma.round.findUnique({
       where: { id: round.id },

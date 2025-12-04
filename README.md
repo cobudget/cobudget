@@ -9,7 +9,7 @@ Next.js, Urql, Apollo, Prisma, PostgreSQL
 ### Prerequisites
 
 - [Install and run](https://docs.docker.com/compose/install/) Docker-compose
-- [Install Node.js](https://nodejs.org/en/) version >= 14.
+- [Install Node.js](https://nodejs.org/en/) version >= 18.
   - Or run `nvm use` in this directory
 - Install dependencies in `/ui`
   - `yarn`

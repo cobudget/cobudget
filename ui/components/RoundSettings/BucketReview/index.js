@@ -51,6 +51,7 @@ const BucketReview = ({ round }) => {
             //.then(() => null)
             .catch((error) => alert(error.message));
         })}
+        data-testid="bucket-review-settings-form"
       >
         <SelectField
           name="bucketReviewIsOpen"
@@ -60,10 +61,10 @@ const BucketReview = ({ round }) => {
           className="my-4"
         >
           <option value="true">
-            {intl.formatMessage({ defaultMessage: "true" })}
+            {intl.formatMessage({ defaultMessage: "Yes" })}
           </option>
           <option value="false">
-            {intl.formatMessage({ defaultMessage: "false" })}
+            {intl.formatMessage({ defaultMessage: "No" })}
           </option>
         </SelectField>
 
@@ -95,6 +96,7 @@ const BucketReview = ({ round }) => {
             type="submit"
             disabled={!isDirty}
             loading={loading}
+            testid="submit-bucket-review-settings"
           >
             <FormattedMessage defaultMessage="Save" />
           </Button>

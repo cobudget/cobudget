@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import remarkGfm from "remark-gfm";
 import { appLink } from "utils/internalLinks";
+import parseMDSource from "utils/parseMDSource";
 
 const Markdown = ({ source, enableMentions = false, className = "" }) => {
   return (

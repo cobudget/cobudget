@@ -15,11 +15,15 @@ import { client as createClientConfig } from "graphql/client";
 import prisma from "server/prisma";
 import { TOP_LEVEL_QUERY } from "pages/_app";
 import capitalize from "utils/capitalize";
+import Head from "next/head";
+import Expenses from "components/Bucket/Expenses";
+import { FormattedMessage } from "react-intl";
 
 export const BUCKET_QUERY = gql`
   query Bucket($id: ID) {
     bucket(id: $id) {
       id
+      pinnedAt
       description
       summary
       title
@@ -31,20 +35,38 @@ export const BUCKET_QUERY = gql`
       approved
       published
       completed
+      createdAt
       completedAt
       funded
       fundedAt
+      readyForFunding
       canceled
       canceledAt
       noOfComments
       noOfFunders
       status
+      isFavorite
 
       directFundingEnabled
       directFundingType
       exchangeDescription
       exchangeMinimumContribution
       exchangeVat
+
+      expenses {
+        id
+        ocMeta {
+          legacyId
+        }
+        title
+        amount
+        status
+        submittedBy
+        ocId
+        currency
+        paidAt
+        exchangeRate
+      }
 
       round {
         id
@@ -53,12 +75,23 @@ export const BUCKET_QUERY = gql`
         currency
         allowStretchGoals
         bucketReviewIsOpen
-        requireBucketApproval
         directFundingEnabled
         directFundingTerms
         grantingIsOpen
         grantingHasClosed
         maxAmountToBucketPerUser
+        canCocreatorStartFunding
+        canCocreatorEditOpenBuckets
+        bucketsLimit {
+          isLimitOver
+          status
+        }
+        ocCollective {
+          slug
+          parent {
+            slug
+          }
+        }
         guidelines {
           id
           title
@@ -72,6 +105,9 @@ export const BUCKET_QUERY = gql`
           id
           slug
           discourseUrl
+          subscriptionStatus {
+            isActive
+          }
         }
       }
       funders {
@@ -141,7 +177,20 @@ export const BUCKET_QUERY = gql`
   }
 `;
 
-const BucketIndex = ({ currentUser, currentGroup }) => {
+function Header({ head }) {
+  return (
+    <Head>
+      {/*meta tags for preview*/}
+      <meta property="og:title" content={head?.title} />
+      <meta property="og:image" content={head?.image} />
+      <meta property="og:description" content={head?.description} />
+      {/*Twitter card type*/}
+      <meta name="twitter:card" content="summary_large_image" />
+    </Head>
+  );
+}
+
+const BucketIndex = ({ head, currentUser, currentGroup }) => {
   const router = useRouter();
   const [{ data, fetching, error }] = useQuery({
     query: BUCKET_QUERY,
@@ -157,34 +206,44 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
     bucket?.round?.guidelines.length > 0 &&
     bucket?.published;
 
-  const tabsList = useMemo(() => ["bucket", "comments", "funders"], []);
+  const tabsList = useMemo(
+    () => ["bucket", "comments", "funders", "expenses"],
+    []
+  );
   useEffect(() => {
     const index = tabsList.findIndex((tab) => tab === router.query.tab);
     setTab(index > -1 ? index : 0);
   }, [router.query.tab, tabsList]);
 
+  const showExpensesTab =
+    currentGroup?.experimentalFeatures &&
+    (bucket?.status === "FUNDED" || bucket?.status === "COMPLETED");
+
   if ((!bucket && fetching) || !router.isReady) {
     return (
-      <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
-      </div>
+      <>
+        <Header head={head} />
+        <div className="flex-grow flex justify-center items-center h-64">
+          <HappySpinner />
+        </div>
+      </>
     );
   }
 
   if (!bucket && !fetching)
     return (
-      <div className="text-center mt-7">
-        This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or you
-        don&apos;t have access to it
-      </div>
+      <>
+        <Header head={head} />
+        <div className="text-center mt-7">
+          This {process.env.BUCKET_NAME_SINGULAR} either doesn&apos;t exist or
+          you don&apos;t have access to it
+        </div>
+      </>
     );
-
-  if (error) {
-    <div className="text-center mt-7">{error.message}</div>;
-  }
 
   return (
     <>
+      <Header head={head} />
       {/* EditImagesModal is here temporarily to work for both cover image and image thing, eventually we can make cover image its own thing. */}
       <EditImagesModal
         open={editImagesModalOpen}
@@ -201,7 +260,6 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
         showBucketReview={showBucketReview}
         openImageModal={() => setEditImagesModalOpen(true)}
       />
-
       <Tab.Group
         defaultIndex={tab}
         onChange={(tab) => {
@@ -240,7 +298,7 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
                 )
               }
             >
-              Comments{" "}
+              <FormattedMessage defaultMessage="Comments" />{" "}
               {!bucket?.round?.group?.discourseUrl &&
                 `(${bucket?.noOfComments})`}
             </Tab>
@@ -254,8 +312,26 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
                 )
               }
             >
-              Funders ({bucket?.noOfFunders})
+              <FormattedMessage defaultMessage="Funders" /> (
+              {bucket?.noOfFunders})
             </Tab>
+            {showExpensesTab ? (
+              <Tab
+                className={({ selected }) =>
+                  classNames(
+                    "block px-2 py-4 border-b-2 font-medium transition-colors",
+                    selected
+                      ? "border-anthracit text-anthracit"
+                      : "border-transparent text-gray-500"
+                  )
+                }
+              >
+                <FormattedMessage defaultMessage="Expenses" />{" "}
+                {bucket?.expenses?.length
+                  ? `(${bucket?.expenses?.length})`
+                  : ""}
+              </Tab>
+            ) : null}
           </Tab.List>
         </div>
 
@@ -276,6 +352,13 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
           </Tab.Panel>
           <Tab.Panel>
             <Funders bucket={bucket} currentUser={currentUser} />
+          </Tab.Panel>
+          <Tab.Panel>
+            <Expenses
+              bucket={bucket}
+              round={bucket.round}
+              currentUser={currentUser}
+            />
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
@@ -328,5 +411,26 @@ const BucketIndex = ({ currentUser, currentGroup }) => {
 //     fallback: true, // false or 'blocking'
 //   };
 // }
+
+export async function getServerSideProps(ctx) {
+  const bucket = await prisma.bucket.findUnique({
+    where: { id: ctx.params.bucket },
+  });
+  const images = await prisma.bucket
+    .findUnique({ where: { id: ctx.params.bucket } })
+    .Images();
+  if (!bucket) {
+    return { props: { head: null } };
+  }
+  return {
+    props: {
+      head: {
+        title: bucket.title,
+        description: bucket.description || bucket.summary,
+        image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO,
+      },
+    },
+  };
+}
 
 export default BucketIndex;

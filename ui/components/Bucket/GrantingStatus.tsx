@@ -3,7 +3,7 @@ import { FormattedMessage, FormattedNumber } from "react-intl";
 import ProgressBar from "components/ProgressBar";
 
 const GrantingStatus = ({ bucket }) => {
-  const funding = bucket.totalContributions + bucket.income;
+  const funding = bucket.totalContributions;
   const ratio = isNaN(funding / bucket.minGoal) ? 0 : funding / bucket.minGoal;
   //const userName = (nameOrEmail) =>
   //  (nameOrEmail ?? "Somebody").match(/@/) === null ? nameOrEmail : "Somebody";
@@ -62,12 +62,14 @@ const GrantingStatus = ({ bucket }) => {
 
       <div className="text-sm text-gray-700 space-y-2">
         {bucket.funded && (
-          <FormattedMessage
-            defaultMessage="Funded on {day}"
-            values={{
-              day: dayjs(bucket.fundedAt).format("MMMM D, YYYY"),
-            }}
-          />
+          <p>
+            <FormattedMessage
+              defaultMessage="Funded on {day}"
+              values={{
+                day: dayjs(bucket.fundedAt).format("MMMM D, YYYY"),
+              }}
+            />
+          </p>
         )}
         {bucket.canceled && (
           <p>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import { useMutation, gql } from "urql";
 
 import Button from "components/Button";
@@ -40,7 +40,10 @@ const BulkAllocateModal = ({ round, handleClose }) => {
           <FormattedMessage defaultMessage="Manage all members balance" />
         </h1>
         <Switch
-          options={["Add", "Set"]}
+          options={[
+            intl.formatMessage({ defaultMessage: "Add" }),
+            intl.formatMessage({ defaultMessage: "Set" }),
+          ]}
           setSelected={setSelectedType}
           selected={type}
           className="mx-auto"

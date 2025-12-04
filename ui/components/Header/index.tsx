@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, gql, useQuery } from "urql";
 import ProfileDropdown from "components/ProfileDropdown";
 import Avatar from "components/Avatar";
@@ -11,6 +11,8 @@ import Head from "next/head";
 import { LoaderIcon } from "components/Icons";
 import EditProfileModal from "./EditProfile";
 import { FormattedMessage, useIntl } from "react-intl";
+import dayjs from "dayjs";
+import { toMS } from "utils/date";
 
 const css = {
   mobileProfileItem:
@@ -94,17 +96,96 @@ const JOIN_ROUND_MUTATION = gql`
   }
 `;
 
-const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
+const SUPER_ADMIN_START = gql`
+  mutation StartSuperAdminSession($duration: Int!) {
+    startSuperAdminSession(duration: $duration) {
+      id
+    }
+  }
+`;
+
+const SUPER_ADMIN_END = gql`
+  mutation EndSuperAdminSession {
+    endSuperAdminSession {
+      id
+    }
+  }
+`;
+
+const GET_SUPER_ADMIN_SESSION = gql`
+  query GetSuperAdminSession {
+    getSuperAdminSession {
+      id
+      duration
+      start
+      end
+    }
+  }
+`;
+
+export const LandingPageLinks = ({ desktop }) => (
+  <>
+    <NavItem className={desktop ? "ml-4" : ""} href="/about">
+      <FormattedMessage id="about" defaultMessage="About" />
+    </NavItem>
+    <NavItem href="/support">
+      <FormattedMessage id="support" defaultMessage="Support" />
+    </NavItem>
+    <NavItem href="/resources">
+      <FormattedMessage id="resources" defaultMessage="Resources" />
+    </NavItem>
+    <NavItem
+      href="mailto:hello@cobudget.com"
+      onCLick={(e) => {
+        window.open("mailto:hello@boduget.com");
+        e.preventDefault();
+      }}
+      external
+    >
+      <FormattedMessage id="contactUs" defaultMessage="Contact us" />
+    </NavItem>
+  </>
+);
+
+const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const router = useRouter();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [editProfileModalOpen, setEditProfileModalOpen] = useState(false);
   const intl = useIntl();
 
+  const [{ data: superAdminSession }] = useQuery({
+    query: GET_SUPER_ADMIN_SESSION,
+  });
   const [, joinGroup] = useMutation(JOIN_GROUP_MUTATION);
   const [, acceptInvitation] = useMutation(ACCEPT_INVITATION);
+  const [, startSuperAdminSession] = useMutation(SUPER_ADMIN_START);
+  const [, endSuperAdminSession] = useMutation(SUPER_ADMIN_END);
 
   const [, joinRound] = useMutation(JOIN_ROUND_MUTATION);
   const color = round?.color ?? "anthracit";
+  const [superAdminTime, setSuperAdminTime] = useState<HTMLElement>();
+  const [inSession, setInSession] = useState(false);
+
+  useEffect(() => {
+    if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
+      setInSession(true);
+    }
+    if (superAdminTime) {
+      const interval = setInterval(() => {
+        const diff = ss?.start + ss?.duration * 60000 - Date.now();
+        if (diff < 0 || !ss) {
+          clearInterval(interval);
+          window.alert("Session Expired");
+          setInSession(false);
+          return;
+        }
+        if (superAdminTime && superAdminTime?.innerHTML) {
+          superAdminTime.innerHTML = toMS(diff) + "";
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [ss, superAdminTime]);
 
   const title = group
     ? round
@@ -121,7 +202,8 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
         currentUser?.currentCollMember.isRemoved));
   const isGroupAdmin = currentUser?.currentGroupMember?.isAdmin;
   const allowedToJoinOrRequest =
-    (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
+    round?.membersLimit?.currentCount < round?.membersLimit?.limit
+    && ((round?.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin);
 
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
 
@@ -134,17 +216,51 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
           content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no"
         />
       </Head>
-      <header className={`bg-${color} shadow-md w-full`}>
+      <header className={`bg-${color} shadow-md w-full z-10 relative`}>
         <div className=" sm:flex sm:justify-between sm:items-center sm:py-2 md:px-4 max-w-screen-xl mx-auto">
           <div className="flex items-center justify-between py-2 px-2 sm:p-0 relative min-w-0">
-            <GroupAndRoundHeader
-              currentGroup={group}
-              round={round}
-              color={color}
-              currentUser={currentUser}
-              router={router}
-              bucket={bucket}
-            />
+            <div className="flex items-center max-w-screen overflow-hidden">
+              {process.env.SINGLE_GROUP_MODE !== "true" && (
+                <>
+                  <Link href="/">
+                    <a
+                      className={`p-1 text-white hover:text-white rounded-md font-medium flex space-x-4`}
+                    >
+                      <img
+                        src="/cobudget-logo.png"
+                        className="h-6 max-w-none"
+                      />
+                      {!currentUser &&
+                        !group &&
+                        !round &&
+                        !process.env.LANDING_PAGE_URL && (
+                          <h1 className="leading-normal">
+                            {process.env.PLATFORM_NAME}
+                          </h1>
+                        )}
+                    </a>
+                  </Link>
+
+                  {!currentUser &&
+                    !group &&
+                    !round &&
+                    process.env.LANDING_PAGE_URL && (
+                      <div className="hidden sm:flex items-center">
+                        <LandingPageLinks desktop />
+                      </div>
+                    )}
+                </>
+              )}
+
+              <GroupAndRoundHeader
+                currentGroup={group}
+                round={round}
+                color={color}
+                currentUser={currentUser}
+                router={router}
+                bucket={bucket}
+              />
+            </div>
 
             <div className="sm:hidden">
               <button
@@ -239,16 +355,77 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                       </NavItem>
                     )
                   }
-                  {!currentUser?.currentGroupMember && !round && group && (
-                    <NavItem
-                      primary
-                      roundColor={color}
-                      onClick={() => joinGroup({ groupId: group.id })}
-                    >
-                      <FormattedMessage defaultMessage="Join group" />
-                    </NavItem>
-                  )}
+                  {!currentUser?.currentGroupMember &&
+                    !round &&
+                    group &&
+                    (group.registrationPolicy === "OPEN" ? (
+                      <NavItem
+                        primary
+                        roundColor={color}
+                        onClick={() => joinGroup({ groupId: group.id })}
+                      >
+                        <FormattedMessage defaultMessage="Join group" />
+                      </NavItem>
+                    ) : group.registrationPolicy === "REQUEST_TO_JOIN" ? (
+                      <NavItem
+                        primary
+                        roundColor={color}
+                        onClick={() => joinGroup({ groupId: group.id })}
+                      >
+                        <FormattedMessage defaultMessage="Request to join" />
+                      </NavItem>
+                    ) : null)}
 
+                  {currentUser.isSuperAdmin &&
+                    (inSession ? (
+                      <span className="text-white text-sm">
+                        <span
+                          className="cursor-pointer font-bold"
+                          onClick={() => {
+                            endSuperAdminSession();
+                          }}
+                        >
+                          ✕
+                        </span>
+                        <span className="ml-4">Super Admin</span>
+                        <span
+                          className="ml-2 font-medium font-mono"
+                          ref={(ref) => setSuperAdminTime(ref)}
+                        >
+                          .
+                        </span>
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-white">Admin Session</span>
+                        <div className="inline-flex mx-4">
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 15 })
+                            }
+                          >
+                            15
+                          </button>
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 30 })
+                            }
+                          >
+                            30
+                          </button>
+                          <button
+                            className="text-xs bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r"
+                            onClick={() =>
+                              startSuperAdminSession({ duration: 60 })
+                            }
+                          >
+                            60
+                          </button>
+                        </div>
+                      </>
+                    ))}
                   <div className="hidden sm:block sm:ml-4">
                     <ProfileDropdown
                       currentUser={currentUser}
@@ -258,12 +435,14 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                   <div data-cy="user-is-logged-in" />
                 </>
               ) : fetchingUser ? (
-                <LoaderIcon
-                  className="animate-spin"
-                  fill="white"
-                  width={20}
-                  height={20}
-                />
+                <span data-testid="fetching-user-icon">
+                  <LoaderIcon
+                    className="animate-spin"
+                    fill="white"
+                    width={20}
+                    height={20}
+                  />
+                </span>
               ) : (
                 <>
                   <NavItem
@@ -277,6 +456,10 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                   <NavItem href={`/signup`} roundColor={color} primary>
                     <FormattedMessage defaultMessage="Sign up" />
                   </NavItem>
+                  <div className="sm:hidden">
+                    <hr className="mt-4 mb-2 mx-4 opacity-25" />
+                    <LandingPageLinks desktop={false} />
+                  </div>
                 </>
               )}
             </div>
@@ -303,6 +486,9 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket }) => {
                     <a className={css.mobileProfileItem}>
                       <FormattedMessage defaultMessage="Email settings" />
                     </a>
+                  </Link>
+                  <Link href={"/starred-buckets"}>
+                    <a className={css.mobileProfileItem}>★ Buckets</a>
                   </Link>
                   <a
                     href={"/api/auth/logout"}

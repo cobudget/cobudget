@@ -82,7 +82,7 @@ export default function Selector({
                           className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                         />
                       )}
-                      <p className="truncate">{groupMember.group.name}</p>
+                      <span className="truncate">{groupMember.group.name}</span>
                     </LinkItem>
                   )}
                 </Menu.Item>
@@ -105,6 +105,7 @@ export default function Selector({
                 return true;
               })
               .map((roundMember) => {
+                /*
                 if (roundMember.round.group)
                   return (
                     <Menu.Item key={roundMember.id}>
@@ -120,18 +121,21 @@ export default function Selector({
                               className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
                             />
                           )}
-                          <p className="truncate">
+                          <span className="truncate">
                             {roundMember.round.group.name}
-                          </p>
+                          </span>
                         </LinkItem>
                       )}
                     </Menu.Item>
                   );
+                */
                 return (
                   <Menu.Item key={roundMember.id}>
                     {({ active }) => (
                       <LinkItem
-                        href={`/c/${roundMember.round.slug}`}
+                        href={`/${roundMember.round?.group?.slug || "c"}/${
+                          roundMember.round.slug
+                        }`}
                         active={active}
                         selected={roundMember.round.id === activeId}
                       >

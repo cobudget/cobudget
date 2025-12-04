@@ -1,8 +1,8 @@
 import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -12,10 +12,14 @@ import IconButton from "components/IconButton";
 import styled from "styled-components";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
+import { extractEmail } from "utils/url";
+import { SEARCH_MENTIONS_GROUP_MEMBERS_QUERY } from "./Wysiwyg";
+import { appLink } from "utils/internalLinks";
+import csv from "csvtojson";
 
 const GridWrapper = styled.div`
   display: grid;
-  grid-template-columns: 80px calc(100% - 130px) 50px;
+  grid-template-columns: 50px calc(100% - 130px) 80px;
   background: rgba(243, 244, 246, 1);
   border-radius: 0.375rem;
 `;
@@ -41,24 +45,48 @@ const INVITE_GROUP_MEMBERS_MUTATION = gql`
 `;
 
 const ROUND_INVITE_LINK = gql`
-  query RoundInvitationLink($roundId: ID!) {
-    roundInvitationLink(roundId: $roundId) {
+  query InvitationLink($roundId: ID!) {
+    invitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const GROUP_INVITE_LINK = gql`
+  query GroupInvitationLink($groupId: ID!) {
+    groupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const CREATE_ROUND_INVITE_LINK = gql`
-  mutation CreateRoundInvitationLink($roundId: ID!) {
-    createRoundInvitationLink(roundId: $roundId) {
+  mutation CreateInvitationLink($roundId: ID!) {
+    createInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const CREATE_GROUP_INVITE_LINK = gql`
+  mutation CreateGroupInvitationLink($groupId: ID!) {
+    createGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
 `;
 
 const DELETE_ROUND_INVITE_LINK = gql`
-  mutation DeleteRoundInvitationLink($roundId: ID!) {
-    deleteRoundInvitationLink(roundId: $roundId) {
+  mutation DeleteInvitationLink($roundId: ID!) {
+    deleteInvitationLink(roundId: $roundId) {
+      link
+    }
+  }
+`;
+
+const DELETE_GROUP_INVITE_LINK = gql`
+  mutation DeleteGroupInvitationLink($groupId: ID!) {
+    deleteGroupInvitationLink(groupId: $groupId) {
       link
     }
   }
@@ -89,28 +117,94 @@ const InviteMembersModal = ({
   handleClose,
   roundId,
   currentGroup,
+  roundGroup,
 }: {
   handleClose: () => void;
   roundId?: string;
   currentGroup?: any;
+  roundGroup?: any;
 }) => {
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, formState: { errors }, reset } = useForm();
+  const [groupMembers, fetchGroupMembers] = useQuery({
+    query: SEARCH_MENTIONS_GROUP_MEMBERS_QUERY,
+    pause: true,
+    variables: {
+      groupId: roundGroup?.id,
+      isApproved: true,
+      search: "",
+    },
+  });
+  const [emails, setEmails] = useState("");
+  const uploadCSVRef = useRef();
+
+  // updatingEmails is used to implement a hack
+  // Wysiwyg TextField does not accept value prop; it only accepts default value
+  // This state is used to rerender Wysiwyg component
+
+  const [updatingEmails, setUpdatingEmails] = useState(false);
   const intl = useIntl();
   const [{ fetching: loading, error }, inviteMembers] = useMutation(
     roundId ? INVITE_ROUND_MEMBERS_MUTATION : INVITE_GROUP_MEMBERS_MUTATION
   );
-  const [{ data: inviteLink }] = useQuery({
-    query: ROUND_INVITE_LINK,
-    variables: { roundId },
-  });
+  const [{ data: inviteLink }] = useQuery(
+    roundId
+      ? {
+          query: ROUND_INVITE_LINK,
+          variables: { roundId },
+        }
+      : {
+          query: GROUP_INVITE_LINK,
+          variables: { groupId: currentGroup?.id },
+        }
+  );
   const [{ fetching: createInviteLoading }, createInviteLink] = useMutation(
-    CREATE_ROUND_INVITE_LINK
+    roundId ? CREATE_ROUND_INVITE_LINK : CREATE_GROUP_INVITE_LINK
   );
   const [{ fetching: deleteInviteLoading }, deleteInviteLink] = useMutation(
-    DELETE_ROUND_INVITE_LINK
+    roundId ? DELETE_ROUND_INVITE_LINK : DELETE_GROUP_INVITE_LINK
   );
 
-  const link = inviteLink?.roundInvitationLink?.link;
+  const link =
+    inviteLink?.invitationLink?.link || inviteLink?.groupInvitationLink?.link;
+
+  const handleAddAllFromGroup = () => {
+    fetchGroupMembers();
+  };
+
+  useEffect(() => {
+    if (groupMembers.data) {
+      const list = (emails?.split(",") || [])
+        .map((t) => t.split(" "))
+        .flat()
+        .filter((i) => i);
+      const emailList = list.map((i) => extractEmail(i)).flat();
+
+      const groupMembersList =
+        groupMembers.data?.groupMembersPage?.groupMembers;
+
+      //If group member is already in invite list, dont add it.
+      const newGroupMembersList = groupMembersList.filter((member) => {
+        return emailList.indexOf(member.user.email || member.email) === -1;
+      });
+      let newEmails = emails;
+      newGroupMembersList.forEach((member) => {
+        const userLink = appLink(
+          `/user/${member.user.id}#${member.user.email || member.email}`
+        );
+        newEmails += `[@${member.user.username || member.email}](${userLink}) `;
+      });
+      if (newEmails !== emails) {
+        setUpdatingEmails(true);
+        setEmails(newEmails);
+        toast.success("Added all members from group");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupMembers]);
+
+  useEffect(() => {
+    setUpdatingEmails(false);
+  }, [emails]);
 
   return (
     <>
@@ -119,7 +213,48 @@ const InviteMembersModal = ({
         onClose={handleClose}
         className="flex items-center justify-center p-4"
       >
-        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm">
+        <div className="bg-white rounded-lg shadow p-6 focus:outline-none flex-1 max-w-screen-sm max-h-screen overflow-auto">
+          <input
+            type="file"
+            accept=".csv"
+            className="w-0 h-0 m-0 hidden"
+            ref={uploadCSVRef}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  if (event.target) {
+                    const text = event.target.result as string;
+                    csv()
+                      .fromString(text.trim())
+                      .then((fields) => {
+                        if (fields.length === 0) {
+                          return toast.error(
+                            intl.formatMessage({
+                              defaultMessage: "CSV file has no data",
+                            })
+                          );
+                        }
+                        if (!("email" in fields[0] || "Email" in fields[0])) {
+                          return toast.error(
+                            intl.formatMessage({
+                              defaultMessage:
+                                "Email column missing in CSV file",
+                            })
+                          );
+                        }
+                        const emails = fields.map(
+                          (row) => row["email"] || row["Email"]
+                        );
+                        setEmails(emails.join(","));
+                      });
+                  }
+                };
+                reader.readAsText(file);
+              }
+            }}
+          />
           <h1 className="text-xl font-semibold mb-2">
             {roundId ? (
               <FormattedMessage defaultMessage="Invite participants to this round" />
@@ -155,11 +290,23 @@ const InviteMembersModal = ({
           */}
           <form
             onSubmit={handleSubmit((variables) => {
+              // In case of round which is inside a group, wysiwyg editor is used to add people.
+              // Wysiwyg uses markdown. We need following code to extract emails
+              const list = (emails?.split(",") || [])
+                .map((t) => t.split(" "))
+                .flat()
+                .filter((i) => i);
+              const emailList = list.map((i) => extractEmail(i)).flat();
+              const uniqueEmails = Array.from(new Set(emailList)).join(",");
               inviteMembers({
+                ...(emails && roundGroup?.id && { emails: uniqueEmails }),
                 ...variables,
-                ...(roundId ? { roundId } : { groupId: currentGroup.id }),
+                ...(roundId ? { roundId } : { groupId: currentGroup?.id }),
               })
-                .then(() => {
+                .then(({ error }) => {
+                  if (error?.graphQLErrors?.[0]?.message) {
+                    return toast.error(error.graphQLErrors[0]?.message);
+                  }
                   reset();
                   handleClose();
                 })
@@ -168,33 +315,107 @@ const InviteMembersModal = ({
                 });
             })}
           >
-            <TextField
-              placeholder={intl.formatMessage({
-                defaultMessage: "Comma separated emails",
-              })}
-              multiline
-              rows={4}
-              name="emails"
-              autoFocus
-              error={Boolean(errors.emails)}
-              helperText={errors.emails && errors.emails.message}
-              inputRef={register({
-                required: "Required",
-                pattern: {
-                  value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
-                  message: intl.formatMessage({
-                    defaultMessage:
-                      "Need to be a comma separated list of emails",
-                  }),
-                },
-              })}
-            />
+            {updatingEmails ? null : (
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Comma separated emails",
+                })}
+                multiline
+                rows={4}
+                name="emails"
+                defaultValue={emails}
+                inputProps={{
+                  onChange: (e) => setEmails(e.target.value),
+                }}
+                autoFocus
+                error={Boolean(errors.emails)}
+                helperText={errors.emails && errors.emails.message}
+                inputRef={
+                  roundGroup?.id
+                    ? null
+                    : register({
+                        required: "Required",
+                        pattern: {
+                          value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
+                          message: intl.formatMessage({
+                            defaultMessage:
+                              "Need to be a comma separated list of emails",
+                          }),
+                        },
+                      })
+                }
+                testid="invite-participants-emails"
+                showWysiwygOptions={false}
+                mentionsGroupId={roundGroup?.id}
+                enableMentions={roundGroup?.id}
+              />
+            )}
+            {roundGroup && (
+              <div className="mt-2">
+                <span
+                  className="text-sm font-medium mb-1 inline-block text-purple-600 cursor-pointer"
+                  onClick={handleAddAllFromGroup}
+                >
+                  <FormattedMessage
+                    defaultMessage="Add all from group {groupName}"
+                    values={{
+                      groupName: roundGroup?.name,
+                    }}
+                  />
+                </span>
+                <span
+                  className="text-sm font-medium mb-1 inline-block text-purple-600 cursor-pointer float-right"
+                  onClick={() => {
+                    if (uploadCSVRef?.current) {
+                      (uploadCSVRef.current as HTMLInputElement).click();
+                    }
+                  }}
+                >
+                  <FormattedMessage defaultMessage="Invite using CSV file" />
+                </span>
+              </div>
+            )}
             {link && (
-              <div className="mt-4">
+              <div className="mt-2">
                 <p className="text-sm font-medium mb-1 block">
                   <FormattedMessage defaultMessage="Anyone with this link will be able to join your round" />
                 </p>
                 <GridWrapper>
+                  <span
+                    className="mt-2 ml-2"
+                    data-testid="delete-invitation-link"
+                  >
+                    <IconButton
+                      onClick={() => {
+                        deleteInviteLink(
+                          roundId ? { roundId } : { groupId: currentGroup?.id }
+                        ).then((result) => {
+                          if (result.error) {
+                            return toast.error(
+                              intl.formatMessage({
+                                defaultMessage:
+                                  "Could not delete invitation link",
+                              })
+                            );
+                          }
+                          toast.success(
+                            intl.formatMessage({
+                              defaultMessage: "Invitation link deleted",
+                            })
+                          );
+                        });
+                      }}
+                    >
+                      <DeleteIcon className="h-5 w-5" />
+                    </IconButton>
+                  </span>
+                  <TextField
+                    inputProps={{
+                      disabled: true,
+                      value: link,
+                    }}
+                    testid="invitation-link"
+                  />
                   <p
                     className="mt-4 ml-4 text-sm font-medium cursor-pointer"
                     onClick={() => {
@@ -218,37 +439,6 @@ const InviteMembersModal = ({
                   >
                     <FormattedMessage defaultMessage="Copy" />
                   </p>
-                  <TextField
-                    inputProps={{
-                      disabled: true,
-                      value: link,
-                    }}
-                  />
-                  <span className="mt-2 ml-2">
-                    <IconButton
-                      onClick={() => {
-                        deleteInviteLink({
-                          roundId,
-                        }).then((result) => {
-                          if (result.error) {
-                            return toast.error(
-                              intl.formatMessage({
-                                defaultMessage:
-                                  "Could not delete invitation link",
-                              })
-                            );
-                          }
-                          toast.success(
-                            intl.formatMessage({
-                              defaultMessage: "Invitation link deleted",
-                            })
-                          );
-                        });
-                      }}
-                    >
-                      <DeleteIcon className="h-5 w-5" />
-                    </IconButton>
-                  </span>
                 </GridWrapper>
               </div>
             )}
@@ -263,10 +453,17 @@ const InviteMembersModal = ({
               <Button
                 className="mr-2"
                 loading={createInviteLoading}
+                testid="create-invitation-link"
                 onClick={() => {
-                  createInviteLink({
-                    roundId,
-                  }).then((result) => {
+                  createInviteLink(
+                    roundId
+                      ? {
+                          roundId,
+                        }
+                      : {
+                          groupId: currentGroup?.id,
+                        }
+                  ).then((result) => {
                     if (result.error) {
                       return toast.error(
                         intl.formatMessage({
@@ -284,7 +481,11 @@ const InviteMembersModal = ({
               >
                 <FormattedMessage defaultMessage="Create Invite Link" />
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button
+                type="submit"
+                loading={loading}
+                testid="invite-participants-email-button"
+              >
                 <FormattedMessage defaultMessage="Add people" />
               </Button>
             </div>

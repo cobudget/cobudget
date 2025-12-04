@@ -1,11 +1,11 @@
-import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
+import { List, ListItem, ListItemText, Divider } from "@mui/material";
 import dayjs from "dayjs";
 import { sortBy } from "lodash";
 import Markdown from "components/Markdown";
-import thousandSeparator from "utils/thousandSeparator";
 import BillBreakdown from "components/BillBreakdown";
 import capitalize from "utils/capitalize";
 import { FormattedMessage, useIntl } from "react-intl";
+import FormattedCurrency from "components/FormattedCurrency";
 
 export default function AboutPage({ router, round }) {
   const intl = useIntl();
@@ -86,8 +86,16 @@ export default function AboutPage({ router, round }) {
 
           <ListItem>
             <ListItemText
-              primary="Allow stretch goals"
-              secondary={round.allowStretchGoals?.toString() ?? "false"}
+              primary={intl.formatMessage({
+                defaultMessage: "Allow stretch goals",
+              })}
+              secondary={
+                round.allowStretchGoals ? (
+                  <FormattedMessage defaultMessage="Yes" />
+                ) : (
+                  <FormattedMessage defaultMessage="No" />
+                )
+              }
             />
           </ListItem>
 
@@ -148,9 +156,12 @@ export default function AboutPage({ router, round }) {
           parts={[
             {
               title: intl.formatMessage({ defaultMessage: "Allocated funds" }),
-              total: `${thousandSeparator(round.totalContributions / 100)} ${
-                round.currency
-              }`,
+              total: (
+                <FormattedCurrency
+                  value={round.totalContributions}
+                  currency={round.currency}
+                />
+              ),
               breakdown: [
                 {
                   title: intl.formatMessage(
@@ -161,9 +172,12 @@ export default function AboutPage({ router, round }) {
                       bucketName: process.env.BUCKET_NAME_SINGULAR,
                     }
                   ),
-                  amount: `${thousandSeparator(
-                    round.totalContributionsFunding / 100
-                  )} ${round.currency}`,
+                  amount: (
+                    <FormattedCurrency
+                      value={round.totalContributionsFunding}
+                      currency={round.currency}
+                    />
+                  ),
                 },
                 {
                   title: intl.formatMessage(
@@ -174,9 +188,12 @@ export default function AboutPage({ router, round }) {
                       bucketName: process.env.BUCKET_NAME_PLURAL,
                     }
                   ),
-                  amount: `${thousandSeparator(
-                    round.totalContributionsFunded / 100
-                  )} ${round.currency}`,
+                  amount: (
+                    <FormattedCurrency
+                      value={round.totalContributionsFunded}
+                      currency={round.currency}
+                    />
+                  ),
                 },
               ],
             },
@@ -184,18 +201,24 @@ export default function AboutPage({ router, round }) {
               title: intl.formatMessage({
                 defaultMessage: "Unallocated funds",
               }),
-              total: `${thousandSeparator(
-                round.totalInMembersBalances / 100
-              )} ${round.currency}`,
+              total: (
+                <FormattedCurrency
+                  value={round.totalInMembersBalances}
+                  currency={round.currency}
+                />
+              ),
               breakdown: [],
             },
           ]}
           totalTitle={intl.formatMessage({
             defaultMessage: "Total funds available",
           })}
-          totalAmount={`${thousandSeparator(round.totalAllocations / 100)} ${
-            round.currency
-          }`}
+          totalAmount={
+            <FormattedCurrency
+              value={round.totalAllocations}
+              currency={round.currency}
+            />
+          }
         />
       </div>
     </div>

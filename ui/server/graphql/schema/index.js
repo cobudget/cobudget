@@ -1,17 +1,84 @@
-import { gql } from "apollo-server-micro";
+import gql from "graphql-tag";
 
 const schema = gql`
   scalar JSON
   scalar JSONObject
+  scalar BigInt
+
+  input AmountConversionInput {
+    amount: Float!
+    currency: String!
+  }
+
+  type ExpensesResponse {
+    total: Int
+    moreExist: Boolean
+    expenses: [Expense]
+    error: String
+  }
+
+  type ExchangeRateResponse {
+    currency: String
+    rate: Float
+  }
+
+  type ExpensesCount {
+    error: Boolean
+    count: Int
+  }
+
+  type MembersLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+  }
+
+  type ResourceLimit {
+    limit: Int
+    currentCount: Int
+    consumedPercentage: Int
+    isLimitOver: Boolean
+    status: String
+  }
+
+  type ImageFeedEntry {
+    id: ID!
+    small: String
+    large: String
+    bucketId: String
+  }
+
+  type RoundImagesFeed {
+    images: [ImageFeedEntry]
+    moreExist: Boolean
+  }
 
   type Query {
+    getSuperAdminSession: SuperAdminSession
+    getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
+    adminGroups: [Group!]
+    adminRounds: [Round]!
     group(groupSlug: String): Group
     rounds(groupSlug: String!, limit: Int): [Round!]
     round(groupSlug: String, roundSlug: String): Round
-    roundInvitationLink(roundId: ID): RoundInvitationLink
+    expenses(
+      roundId: String
+      bucketId: String
+      status: [ExpenseStatus!]
+      search: String
+      limit: Int
+      offset: Int
+      sortBy: ExpenseSortByOptions
+      sortOrder: SortOrderOptions
+    ): ExpensesResponse
+    expensesCount(roundId: ID!): ExpensesCount
+    allExpenses: [Expense]
+    invitationLink(roundId: ID): InvitationLink
+    groupInvitationLink(groupId: ID): InvitationLink
+    expense(id: String!): Expense
     bucket(id: ID): Bucket
     bucketsPage(
       groupSlug: String
@@ -21,13 +88,23 @@ const schema = gql`
       offset: Int
       limit: Int
       status: [StatusType!]
+      orderBy: String
+      orderDir: String
     ): BucketsPage
+    starredBuckets(take: Int, skip: Int, roundId: ID): BucketsPage
+    languageProgressPage: [LanguageProgress]
+    convertCurrency(
+      amounts: [AmountConversionInput]!
+      toCurrency: String!
+    ): Float!
+    exchangeRates(currencies: [String]): [ExchangeRateResponse]
     commentSet(bucketId: ID!, from: Int, limit: Int, order: String): CommentSet!
     groupMembersPage(
       groupId: ID!
       search: String
       offset: Int
       limit: Int
+      isApproved: Boolean
     ): GroupMembersPage
     membersPage(
       roundId: ID!
@@ -44,10 +121,43 @@ const schema = gql`
       offset: Int
       limit: Int
     ): RoundTransactionPage
+    balances(groupSlug: String!): [RoundBalance]
+    randomRoundImages(
+      groupSlug: String!
+      roundSlug: String!
+      offset: Int
+      limit: Int
+    ): RoundImagesFeed!
+    budgetItems(
+      roundId: ID
+      search: String
+      bucketId: ID
+      status: [StatusType]
+      type: BudgetItemType
+      minBudget: Int
+      stretchBudget: Int
+      offset: Int
+      limit: Int
+      orderBy: String
+      orderDir: SortOrderOptions
+    ): BudgetItemsResponse
+  }
+
+  type OCSyncResponse {
+    status: String!
   }
 
   type Mutation {
-    createGroup(name: String!, logo: String, slug: String!): Group!
+    startSuperAdminSession(duration: Int!): SuperAdminSession
+
+    endSuperAdminSession: SuperAdminSession
+
+    createGroup(
+      name: String!
+      logo: String
+      slug: String!
+      registrationPolicy: RegistrationPolicy!
+    ): Group!
 
     editGroup(
       groupId: ID!
@@ -55,6 +165,8 @@ const schema = gql`
       info: String
       logo: String
       slug: String
+      registrationPolicy: RegistrationPolicy
+      visibility: Visibility
     ): Group!
     setTodosFinished(groupId: ID!): Group
 
@@ -64,7 +176,10 @@ const schema = gql`
       title: String!
       currency: String!
       registrationPolicy: RegistrationPolicy!
+      visibility: Visibility
     ): Round!
+    verifyOpencollective(roundId: ID!): Round
+    editOCToken(roundId: ID!, ocToken: String): Round
     editRound(
       roundId: ID!
       slug: String
@@ -77,11 +192,19 @@ const schema = gql`
       about: String
       bucketReviewIsOpen: Boolean
       discourseCategoryId: Int
+      ocCollectiveSlug: String
+      ocProjectSlug: String
     ): Round!
+    resetRoundFunding(roundId: ID!): [Transaction]
     deleteRound(roundId: ID!): Round
-    createRoundInvitationLink(roundId: ID): RoundInvitationLink
-    deleteRoundInvitationLink(roundId: ID): RoundInvitationLink
-    joinRoundInvitationLink(token: String): RoundMember
+
+    createInvitationLink(roundId: ID): InvitationLink
+    deleteInvitationLink(roundId: ID): InvitationLink
+    joinInvitationLink(token: String): InvitedMember
+
+    createGroupInvitationLink(groupId: ID): InvitationLink
+    deleteGroupInvitationLink(groupId: ID): InvitationLink
+    joinGroupInvitationLink(token: String): GroupMember
 
     addGuideline(roundId: ID!, guideline: GuidelineInput!): Round!
     editGuideline(
@@ -109,6 +232,9 @@ const schema = gql`
     ): Round!
     deleteCustomField(roundId: ID!, fieldId: ID!): Round!
 
+    changeRoundSize(roundId: ID!, maxMembers: Int): Round
+    changeBucketLimit(roundId: ID!, maxFreeBuckets: Int): Round
+
     editBucketCustomField(
       bucketId: ID!
       customField: CustomFieldValueInput!
@@ -129,6 +255,60 @@ const schema = gql`
       exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
+
+    toggleFavoriteBucket(bucketId: ID!): Bucket
+
+    createExpense(
+      bucketId: String!
+      title: String!
+      recipientName: String!
+      recipientEmail: String!
+      swiftCode: String
+      iban: String
+      country: String!
+      city: String!
+      recipientAddress: String!
+      recipientPostalCode: String!
+    ): Expense
+
+    updateExpenseStatus(id: String!, status: ExpenseStatus): Expense
+
+    updateExpense(
+      id: String!
+      title: String
+      recipientName: String
+      recipientEmail: String
+      swiftCode: String
+      iban: String
+      country: String
+      city: String
+      recipientAddress: String
+      recipientPostalCode: String
+      bucketId: String
+    ): Expense
+
+    createExpenseReceipt(
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+      expenseId: String
+    ): ExpenseReceipt
+
+    updateExpenseReceipt(
+      id: String!
+      description: String
+      date: Date
+      amount: Int
+      attachment: String
+    ): ExpenseReceipt
+
+    syncOCExpenses(id: ID!, limit: Int!, offset: Int!): OCSyncResponse
+    removeDeletedOCExpenses(id: ID!): OCSyncResponse
+    deprecatedSyncOCExpenses(id: ID!): OCSyncResponse
+      @deprecated(
+        reason: "Use syncOCExpenses and removeDeletedOCExpenses instead. This mutation is slow"
+      )
 
     addImage(bucketId: ID!, image: ImageInput!): Bucket
     deleteImage(bucketId: ID!, imageId: ID!): Bucket
@@ -153,17 +333,31 @@ const schema = gql`
 
     joinGroup(groupId: ID!): GroupMember
 
-    updateProfile(username: String, name: String): User
+    updateProfile(username: String, name: String, mailUpdates: Boolean): User
     updateBio(collMemberId: ID!, bio: String): RoundMember
 
+    deprecatedInviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
+      @deprecated(
+        reason: "Use inviteRoundMembers instead instead. This mutation is slow"
+      )
     inviteRoundMembers(roundId: ID!, emails: String!): [RoundMember]
+    inviteRoundMembersAgain(roundId: ID!, emails: String!): [RoundMember]
     inviteGroupMembers(groupId: ID!, emails: String!): [GroupMember]
+    inviteRoundMembersCustomEmail(
+      roundId: ID!
+      emails: String!
+      customHtml: String!
+    ): [RoundMember]
+
     updateGroupMember(
       groupId: ID!
       memberId: ID!
       isAdmin: Boolean
+      isApproved: Boolean
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
+    changeGroupFreeStatus(groupId: ID!, freeStatus: Boolean): Group
+    moveRoundToGroup(roundId: ID!, groupId: ID!): Round
     updateMember(
       roundId: ID!
       memberId: ID!
@@ -176,6 +370,8 @@ const schema = gql`
     deleteGroup(groupId: ID!): Group
 
     approveForGranting(bucketId: ID!, approved: Boolean!): Bucket
+    setReadyForFunding(bucketId: ID!, isReadyForFunding: Boolean!): Bucket
+    reopenFunding(bucketId: ID!): Bucket
     updateGrantingSettings(
       roundId: ID!
       currency: String
@@ -184,9 +380,10 @@ const schema = gql`
       grantingCloses: Date
       bucketCreationCloses: Date
       allowStretchGoals: Boolean
-      requireBucketApproval: Boolean
       directFundingEnabled: Boolean
       directFundingTerms: String
+      canCocreatorStartFunding: Boolean
+      canCocreatorEditOpenBuckets: Boolean
     ): Round
 
     allocate(
@@ -210,6 +407,11 @@ const schema = gql`
 
     acceptTerms: User
     setEmailSetting(settingKey: String!, value: Boolean!): User
+    pinBucket(bucketId: ID!, pin: Boolean!): Bucket
+  }
+
+  type GroupSubscriptionStatus {
+    isActive: Boolean
   }
 
   type Group {
@@ -222,6 +424,10 @@ const schema = gql`
     discourseUrl: String
     finishedTodos: Boolean
     experimentalFeatures: Boolean
+    registrationPolicy: RegistrationPolicy
+    visibility: Visibility
+    subscriptionStatus: GroupSubscriptionStatus
+    isFree: Boolean
   }
 
   enum RoundType {
@@ -232,11 +438,26 @@ const schema = gql`
 
   enum StatusType {
     PENDING_APPROVAL
+    IDEA
     OPEN_FOR_FUNDING
     FUNDED
+    PARTIAL_FUNDING
     CANCELED
     COMPLETED
     ARCHIVED
+  }
+
+  enum ExpenseSortByOptions {
+    createdAt
+    title
+    status
+    bucketTitle
+    amount
+  }
+
+  enum SortOrderOptions {
+    asc
+    desc
   }
 
   type Round {
@@ -261,24 +482,36 @@ const schema = gql`
     guidelines: [Guideline]
     about: String
     allowStretchGoals: Boolean
-    requireBucketApproval: Boolean
     stripeIsConnected: Boolean
     directFundingEnabled: Boolean
     directFundingTerms: String
+    canCocreatorStartFunding: Boolean
+    canCocreatorEditOpenBuckets: Boolean
     customFields: [CustomField]
     bucketReviewIsOpen: Boolean
     totalAllocations: Int
     totalContributions: Int
     totalContributionsFunding: Int
     totalContributionsFunded: Int
-    totalInMembersBalances: Int
+    totalInMembersBalances: BigInt
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
     inviteNonce: Int
+    updatedAt: Date
+    distributedAmount: Int
+    publishedBucketCount: Int
+
+    ocCollective: OC_Collective
+    ocWebhookUrl: String
+    ocVerified: Boolean
+    ocTokenStatus: OC_TokenStatus
+    membersLimit: MembersLimit
+    bucketsLimit: ResourceLimit
+    expenses: [Expense]
   }
 
-  type RoundInvitationLink {
+  type InvitationLink {
     link: String
   }
 
@@ -288,6 +521,7 @@ const schema = gql`
     FUNDED: Int!
     CANCELED: Int!
     COMPLETED: Int!
+    IDEA: Int!
   }
 
   type Tag {
@@ -332,6 +566,7 @@ const schema = gql`
     email: String
     name: String
     verifiedEmail: Boolean!
+    mailUpdates: Boolean
     isRootAdmin: Boolean
     groupMemberships: [GroupMember!]
     roundMemberships: [RoundMember!]
@@ -341,6 +576,13 @@ const schema = gql`
     currentCollMember(groupSlug: String, roundSlug: String): RoundMember
     emailSettings: JSON
     acceptedTermsAt: Date
+    isSuperAdmin: Boolean
+  }
+
+  type InvitedMember {
+    id: ID!
+    group: Group
+    round: Round
   }
 
   type GroupMember {
@@ -356,6 +598,7 @@ const schema = gql`
     hasDiscourseApiKey: Boolean
     email: String
     name: String
+    isApproved: Boolean
   }
 
   type GroupMembersPage {
@@ -395,18 +638,110 @@ const schema = gql`
   #   GUIDE
   # }
 
+  type OC_Amount {
+    currency: String
+    valueInCents: Float
+  }
+
+  type OC_Stats {
+    balance: OC_Amount
+  }
+
+  enum OC_Type {
+    PROJECT
+    COLLECTIVE
+  }
+
+  enum OC_TokenStatus {
+    EMPTY
+    PROVIDED
+  }
+
+  type OC_Parent {
+    id: String!
+    name: String!
+    slug: String!
+  }
+
+  type OC_Collective {
+    id: String!
+    name: String!
+    slug: String!
+    stats: OC_Stats
+    type: OC_Type!
+    parent: OC_Parent
+    expenseId: String!
+  }
+
+  type ExpenseReceipt {
+    id: String!
+    description: String
+    date: Date
+    amount: Int
+    attachment: String
+    expenseId: String
+    expense: Expense
+  }
+
+  enum ExpenseStatus {
+    DRAFT
+    UNVERIFIED
+    PENDING
+    INCOMPLETE
+    APPROVED
+    SUBMITTED
+    PAID
+    REJECTED
+    PROCESSING
+    ERROR
+    SCHEDULED_FOR_PAYMENT
+    SPAM
+    CANCELED
+  }
+
+  type OCMeta {
+    legacyId: Int
+  }
+
+  type Expense {
+    id: String!
+    title: String!
+    bucketId: String
+    recipientName: String
+    recipientEmail: String
+    swiftCode: String
+    amount: Int
+    iban: String
+    country: String
+    city: String
+    recipientAddress: String
+    recipientPostalCode: String
+    receipts: [ExpenseReceipt]
+    status: ExpenseStatus
+    submittedBy: String
+    ocId: String
+    currency: String
+    exchangeRate: Float
+    paidAt: Date
+    ocMeta: OCMeta
+    roundId: String
+    createdAt: Date
+  }
+
   type Bucket {
     id: ID!
     round: Round!
     title: String!
     description: String
     summary: String
+    pinnedAt: Date
     images: [Image!]
     cocreators: [RoundMember]!
     budgetItems: [BudgetItem!]
     customFields: [CustomFieldValue]
     approved: Boolean
     published: Boolean
+    readyForFunding: Boolean
     flags: [Flag]
     raisedFlags: [Flag]
     status: StatusType
@@ -417,6 +752,7 @@ const schema = gql`
     minGoal: Int
     maxGoal: Int
     income: Int
+    awardedAmount: Int
     totalContributions: Int
     totalContributionsFromCurrentMember: Int
     noOfComments: Int
@@ -429,12 +765,17 @@ const schema = gql`
     completedAt: Date
     completed: Boolean
     canceledAt: Date
+    createdAt: Date
     canceled: Boolean
     directFundingEnabled: Boolean
     directFundingType: DirectFundingType
     exchangeDescription: String
     exchangeMinimumContribution: Int
     exchangeVat: Int
+    percentageFunded: Float
+    expenses: [Expense]
+    expense(id: String!): Expense
+    isFavorite: Boolean
   }
 
   enum DirectFundingType {
@@ -445,6 +786,11 @@ const schema = gql`
   type BucketsPage {
     moreExist: Boolean
     buckets: [Bucket]
+  }
+
+  type LanguageProgress {
+    code: String
+    percentage: Int
   }
 
   type Comment {
@@ -535,6 +881,11 @@ const schema = gql`
     contributions(roundId: ID!, offset: Int, limit: Int): [Contribution]
   }
 
+  type superAdminSessionsPage {
+    moreExist: Boolean
+    sessions: [SuperAdminSession]
+  }
+
   type Allocation implements Transaction {
     id: ID!
     round: Round!
@@ -598,6 +949,15 @@ const schema = gql`
     value: JSON
   }
 
+  type SuperAdminSession {
+    id: ID!
+    start: Date
+    duration: Int
+    end: Date
+    adminId: ID!
+    user: User
+  }
+
   input CustomFieldValueInput {
     fieldId: ID!
     roundId: ID!
@@ -634,6 +994,39 @@ const schema = gql`
     limit: Int
     isRequired: Boolean!
     createdAt: Date
+  }
+
+  type RoundBalance {
+    roundId: ID
+    balance: Int
+  }
+
+  type BudgetItemsResponse {
+    total: Int
+    moreExist: Boolean
+    budgetItems: [BudgetItemWithBucket]
+    error: String
+  }
+
+  """
+  A helper type that combines the BudgetItem data with its parent Bucket data.
+  """
+  type BudgetItemWithBucket {
+    id: ID!
+    description: String!
+    minBudget: Int!
+    stretchBudget: Int
+    type: BudgetItemType
+    bucket: BucketWithStatus
+  }
+
+  """
+  A minimal subset of fields from Bucket needed in the UI.
+  """
+  type BucketWithStatus {
+    id: ID!
+    title: String
+    status: StatusType
   }
 
   # type Log {

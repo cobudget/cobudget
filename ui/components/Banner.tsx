@@ -1,8 +1,8 @@
 import { LoaderIcon } from "./Icons";
 
-import ErrorIcon from "@material-ui/icons/ErrorOutline";
-import WarningIcon from "@material-ui/icons/WarningOutlined";
-import CheckCircleIcon from "@material-ui/icons/CheckCircleOutline";
+import ErrorIcon from "@mui/icons-material/ErrorOutline";
+import WarningIcon from "@mui/icons-material/WarningOutlined";
+import CheckCircleIcon from "@mui/icons-material/CheckCircleOutline";
 
 const Banner = ({
   children,
@@ -18,7 +18,7 @@ const Banner = ({
   loading?: boolean;
   title: string;
   disabled?: false;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) => {
   return (
     <div

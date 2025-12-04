@@ -7,6 +7,11 @@ const CUSTOM_FIELDS_QUERY = gql`
   query CustomFields($groupSlug: String!, $roundSlug: String!) {
     round(groupSlug: $groupSlug, roundSlug: $roundSlug) {
       id
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
       customFields {
         id
         name
@@ -20,7 +25,13 @@ const CUSTOM_FIELDS_QUERY = gql`
   }
 `;
 
-const BucketCustomFields = ({ customFields, canEdit, roundId, bucketId }) => {
+const BucketCustomFields = ({
+  customFields,
+  canEdit,
+  roundId,
+  bucketId,
+  isEditingAllowed,
+}) => {
   const router = useRouter();
   const [{ data }] = useQuery({
     query: CUSTOM_FIELDS_QUERY,
@@ -30,7 +41,7 @@ const BucketCustomFields = ({ customFields, canEdit, roundId, bucketId }) => {
     },
   });
 
-  if (!data) {
+  if (!data || !data.round) {
     return null;
   }
 
@@ -55,6 +66,7 @@ const BucketCustomFields = ({ customFields, canEdit, roundId, bucketId }) => {
               roundId={roundId}
               bucketId={bucketId}
               canEdit={canEdit}
+              isEditingAllowed={isEditingAllowed}
             />
           );
         })}

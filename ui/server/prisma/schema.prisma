@@ -16,6 +16,7 @@ model User {
   name             String?
   verifiedEmail    Boolean        @default(false)
   emailVerified    DateTime?
+  mailUpdates      Boolean        @default(false)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   image            String?
@@ -26,6 +27,16 @@ model User {
   collMemberships  RoundMember[]
   emailSettings    EmailSettings?
   Transaction      Transaction[]
+  isSuperAdmin     Boolean?       @default(false)
+  magiclinkCode    String?        
+}
+
+model UserMeta {
+  id                  String         @id @default(cuid())
+  userId              String?         @unique
+  email               String?         @unique
+
+  lastMagicLinkDate   DateTime     
 }
 
 model EmailSettings {
@@ -42,6 +53,63 @@ model EmailSettings {
   userId                         String  @unique
 }
 
+model ExpenseReceipt {
+  id                 String   @id @default(cuid())
+  description        String
+  date               DateTime
+  amount             Int
+  attachment         String?
+  expense            Expense? @relation(fields: [expenseId], references: [id])
+  expenseId          String? 
+  ocExpenseReceiptId String?  @unique
+}
+
+enum ExpenseStatus {
+  DRAFT
+  UNVERIFIED
+  PENDING
+  INCOMPLETE
+  APPROVED
+  SUBMITTED
+  PAID
+  REJECTED
+  PROCESSING
+  ERROR
+  SCHEDULED_FOR_PAYMENT
+  SPAM
+  CANCELED
+}
+
+model Expense {
+  id                  String    @id @default(cuid())
+  bucket              Bucket?   @relation(fields: [bucketId], references: [id])
+  bucketId            String?
+
+  title               String
+  recipientName       String?
+  recipientEmail      String?
+  swiftCode           String?   @default("")
+  iban                String?   @default("")
+  country             String?   @default("")
+  city                String?   @default("")
+  recipientAddress    String?    
+  recipientPostalCode String?
+  submittedBy         String?
+  status              ExpenseStatus   @default(SUBMITTED)
+
+  ocId                String?   @unique
+  roundId             String    @default("")
+  ocMeta              String?   @default("")
+
+  receipts            ExpenseReceipt[]
+
+  currency            String?
+  exchangeRate        Float?    ///exchange rate in relation to the dollar
+  paidAt              DateTime?
+
+  createdAt           DateTime  @default(now())
+}
+
 model GroupMember {
   id                String   @id @default(cuid())
   group             Group    @relation(fields: [groupId], references: [id])
@@ -54,6 +122,8 @@ model GroupMember {
   discourseApiKey   String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  isApproved        Boolean  @default(true)
+  hasJoined         Boolean  @default(true)
 
   @@unique([groupId, userId])
   @@map("OrgMember")
@@ -80,12 +150,13 @@ model RoundMember {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  buckets       Bucket[]
-  allocations   Allocation[]
-  contributions Contribution[]
-  comments      Comment[]
-  flags         Flag[]
-  allocatedBy   Allocation[]   @relation("allocatedBy")
+  buckets           Bucket[]
+  allocations       Allocation[]
+  contributions     Contribution[]
+  comments          Comment[]
+  flags             Flag[]
+  allocatedBy       Allocation[]   @relation("allocatedBy")
+  favoriteBuckets   FavoriteBucket[]
 
   incomingAccount   Account? @relation(name: "incoming", fields: [incomingAccountId], references: [id])
   statusAccount     Account? @relation(name: "status", fields: [statusAccountId], references: [id])
@@ -108,9 +179,20 @@ model Group {
   groupMembers GroupMember[]
   rounds       Round[]
   discourse    DiscourseConfig?
+  inviteNonce  Int?
 
-  finishedTodos Boolean @default(false)
+  finishedTodos        Boolean @default(false)
   experimentalFeatures Boolean @default(false)
+
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+
+  isFree                 Boolean   @default(false)
+
+  registrationPolicy RegistrationPolicy? @default(OPEN)
+  visibility         Visibility?         @default(PUBLIC)
 
   @@map("Organization")
 }
@@ -132,21 +214,27 @@ model Round {
   currency           String
   visibility         Visibility         @default(PUBLIC)
 
-  maxAmountToBucketPerUser Int?
-  bucketCreationCloses     DateTime?
-  grantingOpens            DateTime?
-  grantingCloses           DateTime?
-  allowStretchGoals        Boolean?
-  requireBucketApproval    Boolean?
-  stripeAccountId          String?
-  directFundingEnabled     Boolean   @default(false)
-  directFundingTerms       String    @default("")
-  bucketReviewIsOpen       Boolean?
-  discourseCategoryId      Int?
+  maxAmountToBucketPerUser    Int?
+  bucketCreationCloses        DateTime?
+  grantingOpens               DateTime?
+  grantingCloses              DateTime?
+  allowStretchGoals           Boolean?
+  stripeAccountId             String?
+  directFundingEnabled        Boolean   @default(false)
+  directFundingTerms          String    @default("")
+  bucketReviewIsOpen          Boolean?
+  discourseCategoryId         Int?
+  canCocreatorStartFunding    Boolean?  @default(false)
+  canCocreatorEditOpenBuckets Boolean?  @default(false)
 
   tags       Tag[]
   guidelines Guideline[]
   fields     Field[]
+
+  openCollectiveId          String?
+  openCollectiveProjectId   String?
+  ocVerified                Boolean?   @default(false)
+  ocToken                   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -157,11 +245,12 @@ model Round {
   contributions Contribution[]
   transactions  Transaction[]
 
-
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce Int?
+  inviteNonce     Int?
+  maxMembers      Int?
+  maxFreeBuckets  Int?
 
   @@unique([groupId, slug])
   @@map("Collection")
@@ -243,23 +332,26 @@ enum AllocationType {
 }
 
 model Bucket {
-  id          String        @id @default(cuid())
-  round       Round         @relation(fields: [roundId], references: [id])
-  roundId     String        @map("collectionId")
-  title       String
-  description String?
-  summary     String?
-  Images      Image[]
-  cocreators  RoundMember[]
-  BudgetItems BudgetItem[]
-  FieldValues FieldValue[]
-  comments    Comment[]
-  approvedAt  DateTime?
-  publishedAt DateTime?
-  fundedAt    DateTime?
-  canceledAt  DateTime?
-  completedAt DateTime?
-  archivedAt  DateTime?
+  id                String        @id @default(cuid())
+  round             Round         @relation(fields: [roundId], references: [id])
+  roundId           String        @map("collectionId")
+  title             String
+  description       String?
+  summary           String?
+  pinnedAt    DateTime?  // <-- new field for pinning
+  Images            Image[]
+  cocreators        RoundMember[]
+  BudgetItems       BudgetItem[]
+  FieldValues       FieldValue[]
+  comments          Comment[]
+  expenses          Expense[]
+  approvedAt        DateTime?
+  publishedAt       DateTime?
+  fundedAt          DateTime?
+  canceledAt        DateTime?
+  completedAt       DateTime?
+  archivedAt        DateTime?
+  readyForFundingAt DateTime?
 
   directFundingEnabled        Boolean           @default(false)
   directFundingType           DirectFundingType @default(DONATION)
@@ -278,6 +370,21 @@ model Bucket {
   statusAccountId   String?        @unique
   outgoingAccount   Account?       @relation(name: "bucketOutgoing", fields: [outgoingAccountId], references: [id])
   outgoingAccountId String?        @unique
+
+  percentageFunded  Float?         @default(0)
+  contributionsCount Int?          @default(0)
+}
+
+model FavoriteBucket {
+  id                String        @id @default(cuid())
+  bucketId          String
+  roundMemberId     String    
+  roundMember       RoundMember   @relation(fields: [roundMemberId], references: [id])
+  reason            String?       // reason for automatic marking bucket as favorite
+
+  createdAt         DateTime      @default(now())
+
+  @@unique([bucketId, roundMemberId])
 }
 
 enum DirectFundingType {
@@ -356,6 +463,8 @@ model Allocation {
   allocationType AllocationType @default(ADD)
   createdAt      DateTime       @default(now())
 
+  deleted        Boolean?
+
   stripeSessionId String?
 }
 
@@ -370,6 +479,8 @@ model Contribution {
   amount        Int
   amountBefore  Int?
   createdAt     DateTime    @default(now())
+
+  deleted       Boolean?
 
   stripeSessionId String?
 }
@@ -422,5 +533,15 @@ model Transaction {
   fromAccountId String
   toAccountId   String
 
+  deleted       Boolean?
+
   stripeSessionId String?
+}
+
+model SuperAdminSession {
+  id        String    @id               @default(cuid())
+  start     DateTime  @default(now())
+  end       DateTime?
+  duration  Int
+  adminId   String
 }

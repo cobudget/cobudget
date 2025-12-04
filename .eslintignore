@@ -4,6 +4,7 @@ ui/server/mongo
 cypress
 next.config.js
 tailwind.config.js
+cypress.config.ts
 
 # https://typescript-eslint.io/docs/linting/type-linting#i-get-errors-telling-me-the-file-must-be-included-in-at-least-one-of-the-projects-provided
 .eslintrc.js

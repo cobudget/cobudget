@@ -1,12 +1,9 @@
 import React from "react";
-import { Modal, List, Divider } from "@material-ui/core";
+import { Modal, List, Divider, Box } from "@mui/material";
 import { gql, useQuery } from "urql";
 import { useRouter } from "next/router";
-import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import { FormattedMessage, useIntl } from "react-intl";
-
-import thousandSeparator from "utils/thousandSeparator";
 import capitalize from "utils/capitalize";
 import HappySpinner from "components/HappySpinner";
 
@@ -16,24 +13,15 @@ import SetMaxAmountToBucket from "./SetMaxAmountToBucket";
 import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
-import SetRequireBucketApproval from "./SetRequireBucketApproval";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
-
-const useStyles = makeStyles((theme) => ({
-  modal: {
-    display: "flex",
-    padding: theme.spacing(1),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerModal: {
-    outline: "none",
-    flex: "0 1 500px",
-  },
-}));
+import FormattedCurrency from "components/FormattedCurrency";
+import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
+import SetCocreatorCanEditOpenBucket from "./SetCocreatorCanEditOpenBucket";
+import Button from "components/Button";
+import ResetRoundFunding from "./ResetRoundFunding";
 
 const modals = {
   SET_CURRENCY: SetCurrency,
@@ -42,7 +30,8 @@ const modals = {
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
-  SET_REQUIRE_BUCKET_APPROVAL: SetRequireBucketApproval,
+  SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
+  SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
   SET_STRIPE: SetStripe,
   SET_DIRECT_FUNDING: SetDirectFunding,
@@ -53,6 +42,8 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
     round(roundSlug: $roundSlug, groupSlug: $groupSlug) {
       id
       currency
+      title
+      slug
       maxAmountToBucketPerUser
       grantingOpens
       grantingCloses
@@ -60,10 +51,16 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
-      requireBucketApproval
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
+      canCocreatorStartFunding
+      canCocreatorEditOpenBuckets
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
     }
   }
 `;
@@ -77,9 +74,10 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $grantingCloses: Date
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
-    $requireBucketApproval: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
+    $canCocreatorStartFunding: Boolean
+    $canCocreatorEditOpenBuckets: Boolean
   ) {
     updateGrantingSettings(
       roundId: $roundId
@@ -89,9 +87,10 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingCloses: $grantingCloses
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
-      requireBucketApproval: $requireBucketApproval
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
+      canCocreatorStartFunding: $canCocreatorStartFunding
+      canCocreatorEditOpenBuckets: $canCocreatorEditOpenBuckets
     ) {
       id
       currency
@@ -102,9 +101,10 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
-      requireBucketApproval
       directFundingEnabled
       directFundingTerms
+      canCocreatorStartFunding
+      canCocreatorEditOpenBuckets
     }
   }
 `;
@@ -113,6 +113,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
   const router = useRouter();
 
   const [open, setOpen] = React.useState(null);
+  const [openResetModal, setOpenResetModal] = React.useState(false);
   const intl = useIntl();
 
   const [{ data, error, fetching }] = useQuery({
@@ -129,8 +130,6 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
   const handleClose = () => {
     setOpen(null);
   };
-
-  const classes = useStyles();
 
   const ModalContent = modals[open];
 
@@ -150,11 +149,25 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
       <Modal
         aria-labelledby="simple-modal-title"
         aria-describedby="simple-modal-description"
+        open={openResetModal}
+        onClose={handleClose}
+        className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
+      >
+        <Box sx={{ outline: "none", flex: "0 1 500px" }}>
+          <ResetRoundFunding
+            round={round}
+            handleClose={() => setOpenResetModal(false)}
+          />
+        </Box>
+      </Modal>
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
         open={Boolean(open)}
         onClose={handleClose}
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
-        <div className={classes.innerModal}>
+        <Box sx={{ outline: "none", flex: "0 1 500px" }}>
           {open && (
             <ModalContent
               round={round}
@@ -162,10 +175,10 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               currentGroup={currentGroup}
             />
           )}
-        </div>
+        </Box>
       </Modal>
 
-      <h2 className="text-2xl font-semibold mb-3 px-6">
+      <h2 className="text-2xl font-semibold mb-3 px-3">
         <FormattedMessage defaultMessage="Funding" />
       </h2>
       <div className="border-t">
@@ -186,7 +199,13 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             primary={intl.formatMessage({
               defaultMessage: "Allow stretch goals",
             })}
-            secondary={round.allowStretchGoals?.toString() ?? "false"}
+            secondary={
+              round.allowStretchGoals ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
             isSet={typeof round.allowStretchGoals !== "undefined"}
             openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
             canEdit={canEditSettings}
@@ -198,20 +217,48 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
           <SettingsListItem
             primary={intl.formatMessage(
               {
-                defaultMessage:
-                  "Require moderator approval of {bucketName} before funding",
+                defaultMessage: "Co-creators can open {bucketName} for funding",
               },
               {
                 bucketName: process.env.BUCKET_NAME_PLURAL,
               }
             )}
-            secondary={round.requireBucketApproval?.toString() ?? "false"}
-            isSet={typeof round.requireBucketApproval !== "undefined"}
-            openModal={() => handleOpen("SET_REQUIRE_BUCKET_APPROVAL")}
+            secondary={
+              round.canCocreatorStartFunding ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
+            isSet={typeof round.canCocreatorStartFunding !== "undefined"}
+            openModal={() => handleOpen("SET_COCREATOR_CAN_OPEN_FUNDING")}
             canEdit={canEditSettings}
             roundColor={round.color}
           />
+          <Divider />
 
+          <SettingsListItem
+            primary={intl.formatMessage(
+              {
+                defaultMessage:
+                  "Co-creators can edit their {bucketName} during funding",
+              },
+              {
+                bucketName: process.env.BUCKET_NAME_SINGULAR,
+              }
+            )}
+            secondary={
+              round.canCocreatorEditOpenBuckets ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
+            isSet={typeof round.canCocreatorEditOpenBuckets !== "undefined"}
+            openModal={() => handleOpen("SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
           <Divider />
 
           <SettingsListItem
@@ -225,9 +272,10 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             )}
             secondary={
               round.maxAmountToBucketPerUser ? (
-                `${thousandSeparator(round.maxAmountToBucketPerUser / 100)} ${
-                  round.currency
-                }`
+                <FormattedCurrency
+                  value={round.maxAmountToBucketPerUser}
+                  currency={round.currency}
+                />
               ) : (
                 <FormattedMessage defaultMessage="Not set" />
               )
@@ -319,6 +367,20 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               />
             </>
           )}
+
+          <Divider />
+          <div className="px-3 my-3">
+            <h2 className="text-xl font-semibold mt-8 mb-4">
+              <FormattedMessage defaultMessage="Danger Zone" />
+            </h2>
+            <Button
+              onClick={() => setOpenResetModal(true)}
+              variant="secondary"
+              color="red"
+            >
+              <FormattedMessage defaultMessage="Reset funding" />
+            </Button>
+          </div>
         </List>
       </div>
     </div>

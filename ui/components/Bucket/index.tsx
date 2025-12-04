@@ -5,6 +5,7 @@ import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
 import DirectFunding from "./DirectFunding";
+import toast from "react-hot-toast";
 
 const Bucket = ({ bucket, currentUser, openImageModal }) => {
   if (!bucket) return null;
@@ -13,6 +14,22 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
     currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
     isMemberOfBucket(currentUser, bucket);
+
+  const cocreatorsEditableStatuses = [
+    "PENDING_APPROVAL",
+    "IDEA",
+    "FUNDED",
+    "COMPLETED",
+  ];
+
+  const isEditingAllowed =
+    currentUser?.currentCollMember?.isAdmin ||
+    currentUser?.currentCollMember?.isModerator ||
+    (isMemberOfBucket(currentUser, bucket) &&
+      (bucket.round.canCocreatorEditOpenBuckets
+        ? true
+        : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
+
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
@@ -23,14 +40,22 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               size={100}
               canEdit={canEdit}
               bucketId={bucket.id}
-              openImageModal={openImageModal}
+              openImageModal={() => {
+                if (isEditingAllowed) {
+                  openImageModal();
+                } else {
+                  toast.error(
+                    "Funding has started, and you cannot edit your bucket. Please contact a moderator or admin for help."
+                  );
+                }
+              }}
             />
 
             {bucket.description && (
               <Description
                 // We no longer use this field for new buckets.
                 // Eventually we will migrate all current descriptions to custom fields.
-                description={bucket.description}
+                description={bucket.description || ""}
                 bucketId={bucket.id}
                 canEdit={canEdit}
               />
@@ -41,6 +66,7 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               bucketId={bucket.id}
               customFields={bucket.customFields}
               canEdit={canEdit}
+              isEditingAllowed={isEditingAllowed}
             />
 
             <Budget
@@ -50,9 +76,14 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
               allowStretchGoals={bucket.round.allowStretchGoals}
               minGoal={bucket.minGoal}
               maxGoal={bucket.maxGoal}
+              isEditingAllowed={isEditingAllowed}
             />
 
-            <DirectFunding canEdit={canEdit} round={bucket.round} />
+            <DirectFunding
+              canEdit={canEdit}
+              round={bucket.round}
+              isEditingAllowed={isEditingAllowed}
+            />
           </div>
         </div>
       </div>

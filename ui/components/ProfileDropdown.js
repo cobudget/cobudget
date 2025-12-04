@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import Avatar from "./Avatar";
 import Link from "next/link";
-import thousandSeparator from "utils/thousandSeparator";
 import { FormattedMessage } from "react-intl";
 
 const css = {
@@ -95,6 +94,11 @@ const ProfileDropdown = ({ currentUser, setEditProfileModalOpen }) => {
             <Link href="/settings">
               <a className={css.button}>
                 <FormattedMessage defaultMessage="Email settings" />
+              </a>
+            </Link>
+            <Link href={"/starred-buckets"}>
+              <a className={css.button} onClick={() => setOpen(false)}>
+                ★ Buckets
               </a>
             </Link>
             <a href="/api/auth/logout" className={css.button}>

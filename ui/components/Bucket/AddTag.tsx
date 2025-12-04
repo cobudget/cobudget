@@ -62,7 +62,7 @@ const AddTag = ({ items: roundTags, bucket }) => {
               {...getRootProps({} as any, { suppressRefError: true })}
             >
               <input
-                {...getInputProps({ onFocus: openMenu })}
+                {...getInputProps({ onFocus: () => openMenu() })}
                 className="bg-gray-100 px-3 py-2 rounded w-full"
                 placeholder="Add tag"
                 onBlur={() => {

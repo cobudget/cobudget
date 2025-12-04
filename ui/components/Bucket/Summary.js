@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
+import { COCREATORS_CANT_EDIT } from "utils/messages";
+import toast from "react-hot-toast";
 
 const EDIT_SUMMARY_MUTATION = gql`
   mutation EditSummary($bucketId: ID!, $summary: String) {
@@ -18,7 +20,7 @@ const EDIT_SUMMARY_MUTATION = gql`
   }
 `;
 
-const BucketSummary = ({ summary, canEdit, bucketId }) => {
+const BucketSummary = ({ summary, canEdit, bucketId, isEditingAllowed }) => {
   const intl = useIntl();
   const [{ fetching: loading }, editBucket] = useMutation(
     EDIT_SUMMARY_MUTATION
@@ -28,6 +30,15 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
 
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(summary ?? "");
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    } else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  };
+
   if (editing)
     return (
       <>
@@ -81,11 +92,11 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
         {canEdit && (
           <div className="absolute top-0 right-0">
             <Tooltip
-              title={intl.formatMessage({ defaultMessage: "Edit summary" })}
-              position="bottom"
-              size="small"
+              content={intl.formatMessage({ defaultMessage: "Edit summary" })}
+              placement="bottom"
+              arrow={false}
             >
-              <IconButton onClick={() => setEditing(true)}>
+              <IconButton onClick={handleEdit}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
             </Tooltip>
@@ -97,7 +108,7 @@ const BucketSummary = ({ summary, canEdit, bucketId }) => {
   if (canEdit)
     return (
       <button
-        onClick={() => setEditing(true)}
+        onClick={handleEdit}
         className="block w-full h-20 text-gray-600 font-semibold rounded-lg border-3 border-dashed hover:bg-gray-100 mb-4 focus:outline-none focus:bg-gray-100"
       >
         <FormattedMessage defaultMessage="+ Summary" />

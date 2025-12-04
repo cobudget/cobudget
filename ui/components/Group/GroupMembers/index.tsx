@@ -7,16 +7,24 @@ import InviteMembersModal from "components/InviteMembersModal";
 import GroupMembersTable from "./GroupMembersTable";
 import SearchBar from "../../RoundMembers/SearchBar";
 import { FormattedMessage, useIntl } from "react-intl";
+import RequestToJoinGroup from "./RequestToJoinGroup";
 
 const UPDATE_GROUP_MEMBER = gql`
-  mutation UpdateGroupMember($groupId: ID!, $memberId: ID!, $isAdmin: Boolean) {
+  mutation UpdateGroupMember(
+    $groupId: ID!
+    $memberId: ID!
+    $isAdmin: Boolean
+    $isApproved: Boolean
+  ) {
     updateGroupMember(
       groupId: $groupId
       memberId: $memberId
       isAdmin: $isAdmin
+      isApproved: $isApproved
     ) {
       id
       isAdmin
+      isApproved
     }
   }
 `;
@@ -37,6 +45,11 @@ const GroupMembers = ({ currentGroup }) => {
   const intl = useIntl();
   return (
     <div>
+      <RequestToJoinGroup
+        currentGroup={currentGroup}
+        deleteMember={deleteGroupMember}
+        updateMember={updateGroupMember}
+      />
       <div className="flex justify-between mb-3 items-center">
         <SearchBar
           color={"anthracit"}
@@ -48,7 +61,18 @@ const GroupMembers = ({ currentGroup }) => {
           clearInput={() => setSearchString("")}
         />
         <div>
-          <Button onClick={() => setInviteModalOpen(true)}>
+          <Button
+            onClick={() => {
+              if (currentGroup?.subscriptionStatus?.isActive === false) {
+                const event = new CustomEvent("show-upgrade-group-message", {
+                  detail: { groupId: currentGroup?.id },
+                });
+                window.dispatchEvent(event);
+                return;
+              }
+              setInviteModalOpen(true);
+            }}
+          >
             <FormattedMessage defaultMessage="Invite members" />
           </Button>
           {inviteModalOpen && (

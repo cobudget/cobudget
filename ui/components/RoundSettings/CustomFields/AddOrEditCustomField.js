@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Checkbox, Modal } from "@material-ui/core";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { Checkbox, Modal } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
@@ -134,6 +134,7 @@ export default function AddOrEditCustomField({
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
               color={round.color}
+              testid="customfield-name-input"
             />
             <TextField
               placeholder={intl.formatMessage({
@@ -145,29 +146,32 @@ export default function AddOrEditCustomField({
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
               color={round.color}
+              testid="customfield-description-input"
             />
             <div className="flex">
-              <SelectField
-                name={"customField.type"}
-                defaultValue={customField.type}
-                inputRef={register}
-                className="mr-4"
-                color={round.color}
-                inputProps={{
-                  value: typeInputValue,
-                  onChange: (e) => setTypeInputValue(e.target.value),
-                }}
-              >
-                <option value="TEXT">
-                  {intl.formatMessage({ defaultMessage: "Short Text" })}
-                </option>
-                <option value="MULTILINE_TEXT">
-                  {intl.formatMessage({ defaultMessage: "Long Text" })}
-                </option>
-                <option value="BOOLEAN">
-                  {intl.formatMessage({ defaultMessage: "Yes/No" })}
-                </option>
-              </SelectField>
+              <span data-testid="customfield-type-select">
+                <SelectField
+                  name={"customField.type"}
+                  defaultValue={customField.type}
+                  inputRef={register}
+                  className="mr-4"
+                  color={round.color}
+                  inputProps={{
+                    value: typeInputValue,
+                    onChange: (e) => setTypeInputValue(e.target.value),
+                  }}
+                >
+                  <option value="TEXT">
+                    {intl.formatMessage({ defaultMessage: "Short Text" })}
+                  </option>
+                  <option value="MULTILINE_TEXT">
+                    {intl.formatMessage({ defaultMessage: "Long Text" })}
+                  </option>
+                  <option value="BOOLEAN">
+                    {intl.formatMessage({ defaultMessage: "Yes/No" })}
+                  </option>
+                </SelectField>
+              </span>
               {typeInputValue == "TEXT" ||
               typeInputValue == "MULTILINE_TEXT" ? (
                 <TextField
@@ -186,6 +190,7 @@ export default function AddOrEditCustomField({
                     value: limit,
                     onChange: (e) => setLimit(e.target.value),
                   }}
+                  testid="customfield-limit-input"
                 />
               ) : null}
             </div>
@@ -224,7 +229,12 @@ export default function AddOrEditCustomField({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading} color={round.color}>
+              <Button
+                type="submit"
+                loading={loading}
+                color={round.color}
+                testid="submit-custom-field-button"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

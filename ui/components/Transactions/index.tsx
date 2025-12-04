@@ -1,11 +1,11 @@
 import { useQuery, gql } from "urql";
 import Link from "next/link";
 
-import thousandSeparator from "utils/thousandSeparator";
 import dayjs from "dayjs";
 import LocalizedFormat from "dayjs/plugin/localizedFormat";
 import LoadMore from "components/LoadMore";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
+import FormattedCurrency from "components/FormattedCurrency";
 dayjs.extend(LocalizedFormat);
 
 export const TRANSACTIONS_QUERY = gql`
@@ -132,48 +132,59 @@ const Transactions = ({ round, currentGroup }) => {
                     <span className="text-gray-500 mr-4">
                       {dayjs(c.createdAt).format("LLL")}
                     </span>
-                    {c.allocatedBy
-                      ? `@${c.allocatedBy.user.username}`
-                      : intl.formatMessage({ defaultMessage: "Admin" })}
 
                     {c.allocationType === "ADD" ? (
-                      <>
-                        {" "}
-                        {c.amount < 0
-                          ? intl.formatMessage({ defaultMessage: "deducted" })
-                          : intl.formatMessage({
-                              defaultMessage: "added",
-                            })}{" "}
-                        {thousandSeparator(c.amount / 100)} {round.currency}{" "}
-                        {c.amount < 0
-                          ? intl.formatMessage({ defaultMessage: "from" })
-                          : intl.formatMessage({ defaultMessage: "to" })}{" "}
-                        @
+                      c.amount < 0 ? (
                         <FormattedMessage
-                          defaultMessage="{username}'s balance"
+                          defaultMessage="{by} deducted {amount} from @{username}'s balance"
                           values={{
+                            by: c.allocatedBy
+                              ? `@${c.allocatedBy.user.username}`
+                              : intl.formatMessage({ defaultMessage: "Admin" }),
                             username: c.roundMember.user.username,
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        {" "}
-                        <FormattedMessage
-                          defaultMessage="set @{username}'s balance to {m}"
-                          values={{
-                            username: c.roundMember.user.username,
-                            m: intl.formatNumber(
-                              (c.amount + c.amountBefore) / 100,
-                              {
-                                style: "currency",
-                                currencyDisplay: "symbol",
-                                currency: round.currency,
-                              }
+                            amount: (
+                              <FormattedCurrency
+                                value={c.amount}
+                                currency={round.currency}
+                              />
                             ),
                           }}
                         />
-                      </>
+                      ) : (
+                        <FormattedMessage
+                          defaultMessage="{by} added {amount} to @{username}'s balance"
+                          values={{
+                            by: c.allocatedBy
+                              ? `@${c.allocatedBy.user.username}`
+                              : intl.formatMessage({ defaultMessage: "Admin" }),
+                            username: c.roundMember.user.username,
+                            amount: (
+                              <FormattedCurrency
+                                value={c.amount}
+                                currency={round.currency}
+                              />
+                            ),
+                          }}
+                        />
+                      )
+                    ) : (
+                      <FormattedMessage
+                        defaultMessage="{by} set @{username}'s balance to {m}"
+                        values={{
+                          by: c.allocatedBy
+                            ? `@${c.allocatedBy.user.username}`
+                            : intl.formatMessage({ defaultMessage: "Admin" }),
+                          username: c.roundMember.user.username,
+                          m: intl.formatNumber(
+                            (c.amount + c.amountBefore) / 100,
+                            {
+                              style: "currency",
+                              currencyDisplay: "symbol",
+                              currency: round.currency,
+                            }
+                          ),
+                        }}
+                      />
                     )}
                   </div>
                   {showBalance && (

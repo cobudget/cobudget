@@ -6,7 +6,7 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
-import { CheckRounded } from "@material-ui/icons";
+import { CheckRounded } from "@mui/icons-material";
 
 const ACCEPT_TERMS_MUTATION = gql`
   mutation acceptTerms {

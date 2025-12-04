@@ -10,10 +10,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Tooltip,
-} from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
+} from "@mui/material";
+import Tooltip from "@tippyjs/react";
+
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";
@@ -28,12 +29,14 @@ export const GROUP_MEMBERS_QUERY = gql`
     $offset: Int
     $limit: Int
     $search: String
+    $isApproved: Boolean
   ) {
     groupMembersPage(
       groupId: $groupId
       offset: $offset
       limit: $limit
       search: $search
+      isApproved: $isApproved
     ) {
       moreExist
       groupMembers {
@@ -41,6 +44,7 @@ export const GROUP_MEMBERS_QUERY = gql`
         isAdmin
         bio
         email
+        isApproved
         user {
           id
           name
@@ -157,7 +161,7 @@ const Page = ({
   const [{ data, fetching, error }, executeQuery] = useQuery({
     query: GROUP_MEMBERS_QUERY,
     variables: {
-      groupId: currentGroup.id,
+      groupId: currentGroup?.id,
       offset: variables.offset,
       limit: variables.limit,
       search: searchString,
@@ -180,6 +184,14 @@ const Page = ({
     return members;
   }, [data?.groupMembersPage?.groupMembers, fetching]);
 
+  const [approvedMembers, pendingMembers] = useMemo(
+    () => [
+      items.filter((i) => i.isApproved),
+      items.filter((i) => !i.isApproved),
+    ],
+    [items]
+  );
+
   useEffect(() => {
     debouncedSearchMembers();
   }, [debouncedSearchMembers]);
@@ -191,7 +203,7 @@ const Page = ({
 
   return (
     <>
-      {items.map((member) => (
+      {approvedMembers.map((member) => (
         <TableRow key={member.id}>
           <TableCell component="th" scope="row">
             <div className="flex space-x-3">
@@ -211,7 +223,7 @@ const Page = ({
               <Box m="0 8px 0">{member.email}</Box>
               {!member.user.verifiedEmail && (
                 <Tooltip
-                  title={intl.formatMessage({
+                  content={intl.formatMessage({
                     defaultMessage: "Email not verified",
                   })}
                   placement="right"

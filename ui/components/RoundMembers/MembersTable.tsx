@@ -10,21 +10,49 @@ import {
   IconButton as MuiIconButton,
   Menu,
   MenuItem,
-} from "@material-ui/core";
-import { Tooltip } from "react-tippy";
-import { INVITE_ROUND_MEMBERS_MUTATION } from "../InviteMembersModal";
+} from "@mui/material";
+import Tooltip from "@tippyjs/react";
 import { gql, useMutation, useQuery } from "urql";
 
 import BulkAllocateModal from "./BulkAllocateModal";
 import IconButton from "components/IconButton";
 import { AddIcon } from "components/Icons";
 import Avatar from "components/Avatar";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AllocateModal from "./AllocateModal";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 import { debounce } from "lodash";
 import LoadMore, { PortaledLoadMore } from "components/LoadMore";
+import activityLog from "utils/activity-log";
+import {
+  ALLOCATE_BALANCE_TO_RM,
+  ROUND_MEMBER_ROW_MENU_CLICKED,
+} from "../../constants";
+import { TOGGLE_ROUND_ADMIN } from "../../constants";
+import { RM_INVITED_AGAIN } from "../../constants";
+import { TOGGLE_ROUND_MODERATOR } from "../../constants";
+
+export const INVITE_ROUND_MEMBERS_AGAIN_MUTATION = gql`
+  mutation InviteRoundMembers($emails: String!, $roundId: ID!) {
+    inviteRoundMembersAgain(emails: $emails, roundId: $roundId) {
+      id
+      isAdmin
+      isModerator
+      isApproved
+      createdAt
+      balance
+      email
+      name
+      user {
+        id
+        username
+        verifiedEmail
+        avatar
+      }
+    }
+  }
+`;
 
 export const MEMBERS_QUERY = gql`
   query Members($roundId: ID!, $search: String!, $offset: Int, $limit: Int) {
@@ -135,12 +163,13 @@ const Page = ({
 const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_MUTATION);
+  const [, inviteAgain] = useMutation(INVITE_ROUND_MEMBERS_AGAIN_MUTATION);
 
   const intl = useIntl();
   const open = Boolean(anchorEl);
 
   const handleClick = (event) => {
+    activityLog.log({ message: ROUND_MEMBER_ROW_MENU_CLICKED });
     setAnchorEl(event.currentTarget);
   };
 
@@ -149,14 +178,20 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
   };
   return (
     <>
-      <MuiIconButton
-        aria-label={intl.formatMessage({ defaultMessage: "more" })}
-        aria-controls="simple-menu"
-        aria-haspopup="true"
-        onClick={handleClick}
+      <span
+        data-testid={`participant-action-button-${
+          member?.email?.split("@")[0]
+        }`}
       >
-        <MoreVertIcon />
-      </MuiIconButton>
+        <MuiIconButton
+          aria-label={intl.formatMessage({ defaultMessage: "more" })}
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={handleClick}
+        >
+          <MoreVertIcon />
+        </MuiIconButton>
+      </span>
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
@@ -165,9 +200,17 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
       >
         <MenuItem
           onClick={() => {
+            activityLog.log({
+              message: TOGGLE_ROUND_ADMIN,
+              data: {
+                roundId,
+                memberEmail: member.email,
+                newRole: member.isAdmin ? "Admin Removed" : "Made Admin",
+              },
+            });
+
             updateMember({
               roundId,
-
               memberId: member.id,
               isAdmin: !member.isAdmin,
             }).then(() => {
@@ -182,6 +225,13 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         {member.hasJoined ? null : (
           <MenuItem
             onClick={() => {
+              activityLog.log({
+                message: RM_INVITED_AGAIN,
+                data: {
+                  roundId,
+                  memberEmail: member.email,
+                },
+              });
               inviteAgain({
                 roundId,
                 emails: member.email,
@@ -200,6 +250,17 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
         )}
         <MenuItem
           onClick={() => {
+            activityLog.log({
+              message: TOGGLE_ROUND_MODERATOR,
+              data: {
+                roundId,
+                memberEmail: member?.email,
+                newRole: member.isModerator
+                  ? "Removed moderator"
+                  : "Made moderator",
+              },
+            });
+
             updateMember({
               roundId,
               memberId: member.id,
@@ -209,45 +270,52 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             });
           }}
         >
-          {member.isModerator ? "Remove moderator" : "Make moderator"}
+          {member.isModerator
+            ? intl.formatMessage({ defaultMessage: "Remove moderator" })
+            : intl.formatMessage({ defaultMessage: "Make moderator" })}
         </MenuItem>
         <Tooltip
-          title={intl.formatMessage({
+          content={intl.formatMessage({
             defaultMessage:
               "You can only remove a round participant with 0 balance",
           })}
           disabled={member.balance === 0}
+          arrow={false}
         >
-          <MenuItem
-            color="error.main"
-            disabled={member.balance !== 0}
-            onClick={() => {
-              if (
-                confirm(
-                  intl.formatMessage(
-                    {
-                      defaultMessage:
-                        "Are you sure you would like to delete membership from user with email {email}?",
-                    },
-                    { email: member.email }
+          <span
+            data-testid={`delete-participant-${member?.email?.split("@")[0]}`}
+          >
+            <MenuItem
+              color="error.main"
+              disabled={member.balance !== 0}
+              onClick={() => {
+                if (
+                  confirm(
+                    intl.formatMessage(
+                      {
+                        defaultMessage:
+                          "Are you sure you would like to delete membership from user with email {email}?",
+                      },
+                      { email: member.email }
+                    )
                   )
                 )
-              )
-                deleteMember({ roundId, memberId: member.id }).then(
-                  ({ error }) => {
-                    if (error) {
-                      console.error(error);
-                      toast.error(error.message);
+                  deleteMember({ roundId, memberId: member.id }).then(
+                    ({ error }) => {
+                      if (error) {
+                        console.error(error);
+                        toast.error(error.message);
+                      }
+                      handleClose();
                     }
-                    handleClose();
-                  }
-                );
-            }}
-          >
-            <Box color="error.main">
-              <FormattedMessage defaultMessage="Delete" />
-            </Box>
-          </MenuItem>
+                  );
+              }}
+            >
+              <Box color="error.main">
+                <FormattedMessage defaultMessage="Delete" />
+              </Box>
+            </MenuItem>
+          </span>
         </Tooltip>
       </Menu>
     </>
@@ -271,7 +339,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         </div>
       </TableCell>
       <TableCell>
-        <p>{member.email}</p>
+        <p data-testid="invited-participant-email">{member.email}</p>
         {!member.user.verifiedEmail ? (
           <p className="text-sm text-gray-500">
             (<FormattedMessage defaultMessage="not verified" />)
@@ -284,7 +352,7 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
       </TableCell>
       <TableCell component="th" scope="row">
         {member.bio && (
-          <Tooltip position="bottom-start" size="small" title={member.bio}>
+          <Tooltip placement="bottom-start" arrow={false} content={member.bio}>
             <p className="truncate max-w-xs">{member.bio}</p>
           </Tooltip>
         )}
@@ -305,7 +373,10 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
         {isAdmin ? (
           <button
             className="py-1 px-2 whitespace-nowrap rounded bg-gray-100 hover:bg-gray-200"
-            onClick={() => setAllocateModalOpen(true)}
+            onClick={() => {
+              setAllocateModalOpen(true);
+              activityLog.log({ message: ALLOCATE_BALANCE_TO_RM });
+            }}
           >
             <FormattedNumber
               value={member.balance / 100}
@@ -387,11 +458,11 @@ const RoundMembersTable = ({
                     </span>{" "}
                     {isAdmin && (
                       <Tooltip
-                        title={intl.formatMessage({
+                        content={intl.formatMessage({
                           defaultMessage: "Allocate to all members",
                         })}
-                        position="bottom"
-                        size="small"
+                        placement="bottom"
+                        arrow={false}
                       >
                         <IconButton
                           onClick={() => setBulkAllocateModalOpen(true)}

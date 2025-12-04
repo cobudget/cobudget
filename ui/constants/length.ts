@@ -1,0 +1,1 @@
+export const MAX_BUCKET_TITLE_LENGTH = 100;

@@ -3,9 +3,9 @@ import {
   ListItemText,
   ListItemSecondaryAction,
   IconButton,
-} from "@material-ui/core";
+} from "@mui/material";
 import Button from "components/Button";
-import { Edit as EditIcon } from "@material-ui/icons";
+import { Edit as EditIcon } from "@mui/icons-material";
 import { AddIcon } from "components/Icons";
 import { FormattedMessage } from "react-intl";
 

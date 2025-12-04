@@ -1,17 +1,34 @@
-import { useState, useEffect } from "react";
+import "tippy.js/dist/tippy.css";
 import "../styles.css";
-import "react-tippy/dist/tippy.css";
-import { withUrqlClient } from "next-urql";
-import { client } from "../graphql/client";
-import Layout from "../components/Layout";
-import { useQuery, gql } from "urql";
-import { Toaster } from "react-hot-toast";
+
+import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { CacheProvider, EmotionCache } from "@emotion/react";
+import CssBaseline from "@mui/material/CssBaseline";
+import BucketLimitOver from "components/BucketLimitOver";
+import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
+import Fallback from "components/Fallback";
 import RequiredActionsModal from "components/RequiredActions";
-import { useRouter } from "next/router";
+import AppContext from "contexts/AppContext";
+import Cookies from "js-cookie";
+import { withUrqlClient } from "next-urql";
+import { useEffect, useMemo, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { Toaster } from "react-hot-toast";
 import { IntlProvider } from "react-intl";
+import { gql, useQuery } from "urql";
+import reportError from "utils/reportError";
+import Layout from "../components/Layout";
+import { client } from "../graphql/client";
 import lang, { supportedLangCodes } from "../lang";
 import isRTL from "../utils/isRTL";
-import Cookies from "js-cookie";
+import createEmotionCache from "../lib/createEmotionCache";
+
+// Create a default MUI theme
+const muiTheme = createTheme();
+
+// Client-side cache, shared for the whole session of the user in the browser
+const clientSideEmotionCache = createEmotionCache();
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -22,6 +39,7 @@ export const CURRENT_USER_QUERY = gql`
       avatar
       email
       acceptedTermsAt
+      isSuperAdmin
 
       groupMemberships {
         id
@@ -93,15 +111,41 @@ export const TOP_LEVEL_QUERY = gql`
       grantingIsOpen
       numberOfApprovedMembers
       about
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
+      bucketsLimit {
+        isLimitOver
+        limit
+      }
       tags {
         id
         value
       }
       allowStretchGoals
-      requireBucketApproval
       bucketReviewIsOpen
       discourseCategoryId
       totalInMembersBalances
+      ocCollective {
+        slug
+        parent {
+          slug
+        }
+      }
+      expenses {
+        id
+        ocMeta {
+          legacyId
+        }
+        title
+        amount
+        ocId
+        bucketId
+        currency
+        status
+      }
       guidelines {
         id
         title
@@ -129,6 +173,12 @@ export const TOP_LEVEL_QUERY = gql`
       discourseUrl
       finishedTodos
       experimentalFeatures
+      registrationPolicy
+      visibility
+      isFree
+      subscriptionStatus {
+        isActive
+      }
     }
     bucket(id: $bucketId) {
       id
@@ -137,7 +187,25 @@ export const TOP_LEVEL_QUERY = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps, router }) => {
+const GET_SUPER_ADMIN_SESSION = gql`
+  query GetSuperAdminSession {
+    getSuperAdminSession {
+      id
+      duration
+      start
+      end
+    }
+  }
+`;
+
+interface MyAppProps {
+  Component: any;
+  pageProps: any;
+  router: any;
+  emotionCache?: EmotionCache;
+}
+
+const MyApp = ({ Component, pageProps, router, emotionCache = clientSideEmotionCache }: MyAppProps) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -148,6 +216,13 @@ const MyApp = ({ Component, pageProps, router }) => {
     },
     pause: !router.isReady,
   });
+  const [groupToUpdate, setGroupToUpdate] = useState();
+  const [limitBucketOver, setLimitBucketOver] = useState<{
+    isAdmin: boolean;
+  }>();
+
+  const [{ data: ssQuery }] = useQuery({ query: GET_SUPER_ADMIN_SESSION });
+  const ss = ssQuery?.getSuperAdminSession;
 
   const [
     { data: currentUserData, fetching: fetchingUser, error: errorUser },
@@ -162,7 +237,23 @@ const MyApp = ({ Component, pageProps, router }) => {
   });
 
   const { round = null, group = null, bucket = null } = data ?? {};
-  const { currentUser = null } = currentUserData ?? {};
+  const currentUser = useMemo(() => {
+    const { currentUser: c } = currentUserData ?? {};
+    if (!c) return null;
+    if (!ss) return c;
+    if (c.currentCollMember && ss) {
+      c.currentCollMember.isAdmin = true;
+    } else if (ss) {
+      c.currentCollMember = { isAdmin: true };
+    }
+
+    if (c.currentGroupMember && ss) {
+      c.currentGroupMember.isAdmin = true;
+    } else if (ss) {
+      c.currentGroupMember = { isAdmin: true };
+    }
+    return c;
+  }, [currentUserData, ss]);
 
   const [locale, setLocale] = useState(
     (() => {
@@ -182,6 +273,36 @@ const MyApp = ({ Component, pageProps, router }) => {
     if (locale) {
       setLocale(locale);
     }
+
+    // Upgrade group message
+    const showUpgradeGroupMessage = (event) => {
+      setGroupToUpdate(event.detail.groupId);
+    };
+
+    const showBucketLimitOver = (event) => {
+      setLimitBucketOver(event.detail);
+    };
+
+    window.addEventListener(
+      "show-upgrade-group-message",
+      showUpgradeGroupMessage
+    );
+
+    window.addEventListener(
+      "show-bucket-limit-over-popup",
+      showBucketLimitOver
+    );
+
+    return () => {
+      window.removeEventListener(
+        "show-upgrade-group-message",
+        showUpgradeGroupMessage
+      );
+      window.removeEventListener(
+        "show-bucket-limit-over-popup",
+        showBucketLimitOver
+      );
+    };
   }, []);
 
   const changeLocale = (locale) => {
@@ -189,34 +310,66 @@ const MyApp = ({ Component, pageProps, router }) => {
     setLocale(locale);
   };
 
+  const appContext = useMemo(() => {
+    return {
+      ss,
+    };
+  }, [ss]);
+
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
   }
 
   return (
-    <IntlProvider locale={locale} messages={lang[locale]}>
-      <RequiredActionsModal currentUser={currentUser} />
-      <Layout
-        currentUser={currentUser}
-        fetchingUser={fetchingUser}
-        group={group}
-        round={round}
-        bucket={bucket}
-        dir={isRTL(locale) ? "rtl" : "ltr"}
-        locale={locale}
-        changeLocale={changeLocale}
-      >
-        <Component
-          {...pageProps}
-          currentUser={currentUser}
-          router={router}
-          round={round}
-          currentGroup={group}
-        />
-        <Toaster />
-      </Layout>
-    </IntlProvider>
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <IntlProvider locale={locale} messages={lang[locale]}>
+          <RequiredActionsModal currentUser={currentUser} />
+          <ErrorBoundary
+            FallbackComponent={Fallback}
+            onError={(error) => reportError(error, currentUser)}
+          >
+            <AppContext.Provider value={appContext}>
+              <Layout
+                currentUser={currentUser}
+                fetchingUser={fetchingUser}
+                group={group}
+                round={round}
+                bucket={bucket}
+                dir={isRTL(locale) ? "rtl" : "ltr"}
+                locale={locale}
+                changeLocale={changeLocale}
+                ss={ss}
+              >
+                <Component
+                  {...pageProps}
+                  currentUser={currentUser}
+                  router={router}
+                  round={round}
+                  currentGroup={group}
+                />
+                <Analytics />
+                <Toaster />
+                {groupToUpdate && (
+                  <UpgradeGroupModal
+                    group={group}
+                    hide={() => setGroupToUpdate(undefined)}
+                  />
+                )}
+                {limitBucketOver && (
+                  <BucketLimitOver
+                    isAdmin={limitBucketOver?.isAdmin}
+                    hide={() => setLimitBucketOver(undefined)}
+                  />
+                )}
+              </Layout>
+            </AppContext.Provider>
+          </ErrorBoundary>
+        </IntlProvider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 };
 

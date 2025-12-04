@@ -8,21 +8,23 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [22.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn
-      - name: Run servers and test
+      - run: yarn test:switch-env && yarn
+      - name: Migrations
         run: |
-          yarn test:run:servers &
-          yarn test
-      - uses: actions/upload-artifact@v2
+          yarn test:start-db &
+          yarn test:migrate
+      - name: Run servers and test
+        run: npm run test:switch-env && cd ui && npm run dev & npm run test && killall node
+      - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-artifacts

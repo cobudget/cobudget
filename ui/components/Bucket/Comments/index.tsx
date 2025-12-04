@@ -48,6 +48,7 @@ const Comments = ({ currentUser, bucket, router }) => {
                   )}
                 </div>
                 <LoadMore
+                  autoLoadMore={false}
                   moreExist={total > comments.length}
                   loading={loading}
                   reverse

@@ -11,12 +11,13 @@ const Button = forwardRef(
       variant = "primary",
       className,
       type = "button",
-      color = "blue",
+      color = "anthracit",
       fullWidth = false,
       href,
       onClick,
       nextJsLink,
       style,
+      testid,
       ...props
     }: {
       children: any;
@@ -31,6 +32,7 @@ const Button = forwardRef(
       href?: string;
       onClick?: () => void;
       nextJsLink?: boolean;
+      testid?: string;
       style?: any;
     },
     ref: any
@@ -64,7 +66,13 @@ const Button = forwardRef(
 
     if (href || nextJsLink)
       return (
-        <a {...(href && { href })} ref={ref} className={classes} style={style}>
+        <a
+          {...(href && { href })}
+          ref={ref}
+          className={classes}
+          style={style}
+          data-testid={testid}
+        >
           {children}
         </a>
       );
@@ -78,6 +86,7 @@ const Button = forwardRef(
         className={classes}
         style={style}
         ref={ref}
+        data-testid={testid}
       >
         {loading && (
           <LoaderIcon className="w-5 h-5 absolute animation-spin animation-linear animation-2s" />

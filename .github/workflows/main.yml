@@ -1,0 +1,27 @@
+name: "Migrate staging"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  staging:
+    name: Staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install
+        run: cd ui && yarn install --frozen-lockfile --silent
+
+      - name: Run migrations
+        run: cd ui && yarn prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}

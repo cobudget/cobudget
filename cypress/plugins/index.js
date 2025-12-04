@@ -14,12 +14,6 @@
 /**
  * @type {Cypress.PluginConfig}
  */
-module.exports = async (on /*, config*/) => {
-  // `on` is used to hook into various events Cypress emits
-  // `config` is the resolved Cypress config
-  const plugin = await import("cypress-terminal-report/src/installLogsPrinter");
-  plugin(on, {
-    // default is 'onFail'
-    //printLogsToConsole: 'always',
-  });
+module.exports = (on) => {
+  require("cypress-terminal-report/src/installLogsPrinter")(on);
 };

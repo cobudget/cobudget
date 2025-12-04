@@ -1,4 +1,4 @@
-name: "Migrate (branch: prod)"
+name: "Migrate production"
 
 on:
   push:
@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: "14"
+          node-version: "22"
 
       - name: Install
         run: cd ui && yarn install --frozen-lockfile --silent

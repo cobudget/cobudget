@@ -1,15 +1,11 @@
 import Link from "next/link";
-import Button from "components/Button";
 import Head from "next/head";
 
 import parseHtml, { domToReact } from "html-react-parser";
 import get from "lodash/get";
-import { gql, ssrExchange, useQuery } from "urql";
-import { initUrqlClient } from "next-urql";
-import { client as createClientConfig } from "graphql/client";
-import GroupPage, { GROUP_PAGE_QUERY } from "../components/Group";
 
-import { TOP_LEVEL_QUERY } from "./_app";
+import GroupPage from "../components/Group";
+import { getWebflowProps, webflowCss } from "utils/webflow";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -67,8 +63,9 @@ const IndexPage = ({ currentUser, landingPage }) => {
   if (landingPage) {
     return (
       <>
-        <Head>{parseHtml(landingPage.headContent)}</Head>
+        <Head>{parseHtml(landingPage.headContent, parseOptions)}</Head>
         {parseHtml(landingPage.bodyContent, parseOptions)}
+        <style jsx>{webflowCss}</style>
       </>
     );
   }
@@ -76,51 +73,6 @@ const IndexPage = ({ currentUser, landingPage }) => {
   return <GroupPage currentUser={currentUser} />;
 };
 
-export async function getStaticProps(ctx) {
-  if (process.env.LANDING_PAGE_URL) {
-    // Import modules in here that aren't needed in the component
-    const cheerio = await import(`cheerio`);
-    const axios = (await import(`axios`)).default;
-
-    // Fetch HTML
-    const res: any = await axios(process.env.LANDING_PAGE_URL).catch((err) => {
-      console.error(err);
-    });
-
-    const html = res.data;
-
-    // Parse HTML with Cheerio
-    const $ = cheerio.load(html);
-    const bodyContent = $(`body`).html();
-    const headContent = $(`head`).html();
-
-    // Send HTML to component via props
-    return {
-      props: {
-        landingPage: { bodyContent, headContent },
-      },
-    };
-  } else if (process.env.SINGLE_GROUP_MODE == "true") {
-    // const ssrCache = ssrExchange({ isClient: false });
-    // const client = initUrqlClient(createClientConfig(ssrCache), false);
-
-    // This query is used to populate the cache for the query
-    // used on this page.
-    // await client.query(GROUP_PAGE_QUERY, { groupSlug: "c" }).toPromise();
-    // await client.query(TOP_LEVEL_QUERY, { groupSlug: "c" }).toPromise();
-
-    return {
-      props: {
-        // urqlState is a keyword here so withUrqlClient can pick it up.
-        //urqlState: ssrCache.extractData(),
-      },
-      //revalidate: 60,
-    };
-  }
-
-  return {
-    props: {},
-  };
-}
+export const getStaticProps = getWebflowProps("");
 
 export default IndexPage;

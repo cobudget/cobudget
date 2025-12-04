@@ -9,26 +9,32 @@
     "postinstall": "cd ui && yarn",
     "lint": "prettier --ignore-path .gitignore --check . && eslint . && yarn typecheck",
     "fix": "prettier --ignore-path .gitignore --write . && eslint . --fix && yarn typecheck",
-    "test:run:servers": "sudo pwd && concurrently \"cd ui/ && sudo docker-compose up\" \"npm run test:run --prefix ui\"",
+    "test:run:servers": "cd ui && sudo yarn dev",
     "test:open": "cypress open",
-    "test:run": "cypress run",
-    "test": "./scripts/wait.sh 3001 && npm run test:run",
-    "typecheck": "yarn --cwd ui typecheck"
+    "test:run": "cypress run --browser electron --headless",
+    "test": "./scripts/wait.sh 3000 && yarn test:switch-env && yarn test:run",
+    "typecheck": "yarn --cwd ui typecheck",
+    "test:migrate": "./scripts/wait.sh 35432 && cd ui && yarn migrate",
+    "test:start-db": "cd ui && docker-compose up",
+    "test:switch-env": "cp ./ui/.env.test ./ui/.env.local"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "5.14.0",
-    "@typescript-eslint/parser": "5.14.0",
-    "concurrently": "3.5.1",
-    "cypress": "6.3.0",
-    "cypress-terminal-report": "2.4.0",
-    "eslint": "7.21.0",
-    "eslint-config-prettier": "8.1.0",
-    "eslint-plugin-cypress": "2.12.1",
-    "eslint-plugin-react": "7.22.0",
-    "eslint-plugin-react-hooks": "4.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.17.0",
+    "@typescript-eslint/parser": "^8.17.0",
+    "concurrently": "^9.1.0",
+    "cypress": "^13.16.1",
+    "cypress-terminal-report": "^7.0.3",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-cypress": "^4.1.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "jsonwebtoken": "^9.0.2",
     "npm-run-all": "^4.1.5",
-    "prettier": "2.2.1",
-    "typescript": "4.4.3"
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "dotenv": "^16.0.3"
+  }
 }

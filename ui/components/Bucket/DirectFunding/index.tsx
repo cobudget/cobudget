@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useQuery, useMutation, gql } from "urql";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 import HappySpinner from "components/HappySpinner";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import Form from "./Form";
+import { COCREATORS_CANT_EDIT } from "utils/messages";
 
 const BUCKET_QUERY = gql`
   query Bucket($id: ID!) {
@@ -49,12 +50,20 @@ const EDIT_BUCKET_MUTATION = gql`
   }
 `;
 
-const DirectFunding = ({ canEdit = false, round }) => {
+const DirectFunding = ({ canEdit = false, round, isEditingAllowed }) => {
   const intl = useIntl();
   const router = useRouter();
   const bucketId = router.query.bucket;
 
   const [editing, setEditing] = useState(false);
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    } else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  };
 
   const [{ data, fetching: fetchingQuery, error }] = useQuery({
     query: BUCKET_QUERY,
@@ -107,13 +116,13 @@ const DirectFunding = ({ canEdit = false, round }) => {
         </div>
         {!editing && (
           <Tooltip
-            title={intl.formatMessage({
+            content={intl.formatMessage({
               defaultMessage: "Edit Direct funding",
             })}
-            position="bottom"
-            size="small"
+            placement="bottom"
+            arrow={false}
           >
-            <IconButton onClick={() => setEditing(true)}>
+            <IconButton onClick={handleEdit}>
               <EditIcon className="h-6 w-6" />
             </IconButton>
           </Tooltip>

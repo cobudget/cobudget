@@ -1,17 +1,18 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import { useEffect, useMemo, useState } from "react";
-import { Tooltip } from "react-tippy";
+import Tooltip from "@tippyjs/react";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Markdown from "../../Markdown";
 import IconButton from "../../IconButton";
 import { EditIcon } from "../../Icons";
 import TextField from "../../TextField";
-import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
 import { FormattedMessage, useIntl } from "react-intl";
+import toast from "react-hot-toast";
+import { COCREATORS_CANT_EDIT } from "../../../utils/messages";
 
 const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
   mutation EditBucketCustomField(
@@ -44,10 +45,19 @@ const BucketCustomField = ({
   roundId,
   bucketId,
   canEdit,
+  isEditingAllowed,
 }) => {
   const defaultValue = customField ? customField.value : null;
   const [editing, setEditing] = useState(false);
   const intl = useIntl();
+
+  const handleEdit = () => {
+    if (isEditingAllowed) {
+      setEditing(true);
+    } else {
+      toast.error(COCREATORS_CANT_EDIT);
+    }
+  };
 
   const schema = useMemo(() => {
     const maxValue = yup
@@ -56,6 +66,8 @@ const BucketCustomField = ({
 
     return yup.object().shape({
       customField: yup.object().shape({
+        fieldId: yup.string(),
+        roundId: yup.string(),
         value: defaultCustomField.isRequired
           ? maxValue.required("Required")
           : maxValue,
@@ -63,7 +75,7 @@ const BucketCustomField = ({
     });
   }, [defaultCustomField]);
 
-  const { handleSubmit, register, setValue, watch, errors } = useForm({
+  const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
   const inputValue = watch("customField.value", defaultValue ?? "");
@@ -74,9 +86,7 @@ const BucketCustomField = ({
 
   useEffect(() => {
     if (defaultCustomField.type !== "BOOLEAN") {
-      register({
-        name: "customField.value",
-      });
+      register("customField.value");
     }
   }, [register, defaultCustomField.type]);
 
@@ -97,15 +107,15 @@ const BucketCustomField = ({
             {defaultCustomField.name}
           </h3>
           <p className="my-2 text-gray-700">{defaultCustomField.description}</p>
-          <HiddenTextField
-            name="customField.fieldId"
+          <input
+            type="hidden"
             defaultValue={defaultCustomField.id}
-            inputRef={register()}
+            {...register("customField.fieldId")}
           />
-          <HiddenTextField
-            name="customField.roundId"
+          <input
+            type="hidden"
             defaultValue={roundId}
-            inputRef={register()}
+            {...register("customField.roundId")}
           />
           <div className="my-2">
             {defaultCustomField.type === "TEXT" ||
@@ -116,7 +126,7 @@ const BucketCustomField = ({
                 autoFocus
                 multiline={defaultCustomField.type == "MULTILINE_TEXT"}
                 rows={7}
-                error={errors.customField?.value}
+                error={Boolean(errors.customField?.value)}
                 helperText={errors.customField?.value?.message}
                 inputProps={{
                   onChange: (e) =>
@@ -126,17 +136,16 @@ const BucketCustomField = ({
               />
             ) : defaultCustomField.type === "BOOLEAN" ? (
               <SelectInput
-                name="customField.value"
                 defaultValue={defaultValue}
-                inputRef={register}
                 fullWidth
+                {...register("customField.value")}
               >
                 <option value={""}></option>
                 <option value={"true"}>
-                  <FormattedMessage defaultMessage="Yes" />
+                  {intl.formatMessage({ defaultMessage: "Yes" })}
                 </option>
                 <option value={"false"}>
-                  <FormattedMessage defaultMessage="No" />
+                  {intl.formatMessage({ defaultMessage: "No" })}
                 </option>
               </SelectInput>
             ) : null}
@@ -208,8 +217,8 @@ const BucketCustomField = ({
 
         {canEdit && (
           <div className="absolute top-0 right-0">
-            <Tooltip title="Edit field" position="bottom" size="small">
-              <IconButton onClick={() => setEditing(true)}>
+            <Tooltip content="Edit field" placement="bottom" arrow={false}>
+              <IconButton onClick={handleEdit}>
                 <EditIcon className="h-6 w-6" />
               </IconButton>
             </Tooltip>
@@ -220,7 +229,7 @@ const BucketCustomField = ({
   } else if (canEdit) {
     return (
       <button
-        onClick={() => setEditing(true)}
+        onClick={handleEdit}
         className="w-full h-24 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100 mb-4"
       >
         + {defaultCustomField.name}

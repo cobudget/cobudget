@@ -1,7 +1,7 @@
 import { useMutation, gql } from "urql";
 import { useForm, useFieldArray } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
-import { Modal } from "@material-ui/core";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Modal } from "@mui/material";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -10,6 +10,8 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import * as yup from "yup";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const EDIT_BUDGET_MUTATION = gql`
   mutation EditBudget($bucketId: ID!, $budgetItems: [BudgetItemInput]) {
@@ -40,7 +42,10 @@ const schema = yup.object().shape({
         .nullable()
         .min(0)
         .integer()
-        .moreThan(yup.ref("min"), "Max should be > min"),
+        .moreThan(
+          yup.ref("min"),
+          "Max amount should be greater than min amount"
+        ),
       type: yup.string().required(),
     })
   ),
@@ -55,6 +60,7 @@ const EditBudgetModal = ({
   open,
 }) => {
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_BUDGET_MUTATION);
+  const [maxAmountOpenInputs, setMaxAmountOpenInputs] = useState({});
   const intl = useIntl();
 
   const { handleSubmit, register, control } = useForm({
@@ -71,6 +77,29 @@ const EditBudgetModal = ({
   const incomeItems = fields.filter((field) => field.type === "INCOME");
   const expenseItems = fields.filter((field) => field.type === "EXPENSE");
 
+  const checkErrors = (errors) => {
+    if (errors?.budgetItems?.length > 0) {
+      const err = Object.keys(errors.budgetItems[0]);
+      if (err.length === 0) {
+        return;
+      }
+      toast.error(errors.budgetItems[0][err[0]].message);
+    }
+  };
+
+  useEffect(() => {
+    const opened = {};
+    budgetItems.forEach((item, i) => {
+      if (item.max) opened[item.id] = true;
+    });
+    setMaxAmountOpenInputs(opened);
+  }, [budgetItems]);
+
+  //for new rows, this function returns an id
+  const getPreId = useCallback((type, index) => {
+    return `${type}-${index}`;
+  }, []);
+
   return (
     <Modal
       open={open}
@@ -83,96 +112,143 @@ const EditBudgetModal = ({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
+            const budgetTypeCount = {
+              EXPENSE: 0,
+              INCOME: 0,
+            };
             editBucket({
               bucketId: bucket.id,
               budgetItems: [
-                ...(variables.budgetItems?.map((item) => ({
-                  ...item,
-                  min: Math.round(item.min * 100),
-                  ...(item.max && { max: Math.round(item.max * 100) }),
-                })) ?? []),
+                ...(variables.budgetItems?.map((item, i) => {
+                  const preId = getPreId(item.type, budgetTypeCount[item.type]);
+                  budgetTypeCount[item.type]++;
+                  return {
+                    ...item,
+                    id: undefined, //remove id
+                    min: Math.round(item.min * 100),
+                    ...(item.max &&
+                      maxAmountOpenInputs[item.id || preId] && {
+                        max: Math.round(item.max * 100),
+                      }),
+                  };
+                }) ?? []),
               ],
             })
               .then(() => {
                 handleClose();
               })
               .catch((err) => alert(err.message));
-          })}
+          }, checkErrors)}
         >
           <h2 className="text-lg font-semibold mb-2">
             <FormattedMessage defaultMessage="Costs" />
           </h2>
 
-          {expenseItems.map(({ fieldId, description, type, min, max }, i) => {
-            const index = i + incomeItems.length;
-            return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <TextField
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Description",
-                    })}
-                    name={`budgetItems[${index}].description`}
-                    defaultValue={description}
-                    inputRef={register()}
-                  />
-                  <input
-                    name={`budgetItems[${index}].type`}
-                    value={type}
-                    ref={register()}
-                    readOnly
-                    className="hidden"
-                  />
-                </div>
-                <div className="mr-2 my-2 sm:my-0">
-                  <TextField
-                    placeholder={
-                      allowStretchGoals
-                        ? intl.formatMessage({ defaultMessage: "Min amount" })
-                        : intl.formatMessage({ defaultMessage: "Amount" })
-                    }
-                    name={`budgetItems[${index}].min`}
-                    defaultValue={
-                      typeof min !== "undefined" ? String(min / 100) : null
-                    }
-                    inputProps={{ type: "number", min: 0 }}
-                    inputRef={register()}
-                    endAdornment={currency}
-                  />
-                </div>
-
-                {allowStretchGoals && (
-                  <div className="mr-2 my-2 sm:my-0">
+          {expenseItems.map(
+            ({ id, fieldId, description, type, min, max }, i) => {
+              const index = i + incomeItems.length;
+              return (
+                <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
+                  <div className="mr-2 my-2 sm:my-0 flex-1">
+                    <input
+                      value={id}
+                      readOnly
+                      className="hidden"
+                      {...register(`budgetItems.${index}.id`)}
+                    />
                     <TextField
                       placeholder={intl.formatMessage({
-                        defaultMessage: "Max amount",
+                        defaultMessage: "Description",
                       })}
-                      name={`budgetItems[${index}].max`}
-                      defaultValue={
-                        typeof max === "undefined" || max === null
-                          ? null
-                          : String(max / 100)
-                      }
-                      inputProps={{ type: "number", min: 0 }}
-                      inputRef={register()}
-                      endAdornment={currency}
+                      defaultValue={description}
+                      inputRef={register(`budgetItems.${index}.description`).ref}
+                      inputProps={register(`budgetItems.${index}.description`)}
+                      testid={`bucket-expense-item-description`}
+                    />
+                    <input
+                      value={type}
+                      {...register(`budgetItems.${index}.type`)}
+                      readOnly
+                      className="hidden"
                     />
                   </div>
-                )}
-                <div className="my-2">
-                  <IconButton onClick={() => remove(index)}>
-                    <DeleteIcon className="h-6 w-6 text-color-red" />
-                  </IconButton>
+                  <div className="mr-2 my-2 sm:my-0 flex-1">
+                    <TextField
+                      placeholder={
+                        allowStretchGoals
+                          ? intl.formatMessage({ defaultMessage: "Min amount" })
+                          : intl.formatMessage({ defaultMessage: "Amount" })
+                      }
+                      defaultValue={
+                        typeof min !== "undefined" ? String(min / 100) : null
+                      }
+                      inputRef={register(`budgetItems.${index}.min`).ref}
+                      inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
+                      endAdornment={currency}
+                      testid={`bucket-expense-item-min-amount`}
+                    />
+                  </div>
+
+                  {allowStretchGoals && (
+                    <div className="mr-2 my-2 sm:my-0 flex-1 relative">
+                      {maxAmountOpenInputs[id || getPreId(type, i)] ? (
+                        <>
+                          <TextField
+                            placeholder={intl.formatMessage({
+                              defaultMessage: "Max amount",
+                            })}
+                            defaultValue={
+                              typeof max === "undefined" || max === null
+                                ? null
+                                : String(max / 100)
+                            }
+                            inputRef={register(`budgetItems.${index}.max`).ref}
+                            inputProps={{ ...register(`budgetItems.${index}.max`), type: "number", min: 0 }}
+                            endAdornment={currency}
+                          />
+                          <span
+                            className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                            onClick={() => {
+                              setMaxAmountOpenInputs({
+                                ...maxAmountOpenInputs,
+                                [id || getPreId(type, i)]: false,
+                              });
+                            }}
+                          >
+                            ✖
+                          </span>
+                        </>
+                      ) : (
+                        <p
+                          onClick={() => {
+                            setMaxAmountOpenInputs({
+                              ...maxAmountOpenInputs,
+                              [id || getPreId(type, i)]: true,
+                            });
+                          }}
+                          className="underline cursor-pointer mt-4 text-sm text-color-gray"
+                        >
+                          <FormattedMessage defaultMessage="+ Add a range" />
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="my-2">
+                    <IconButton onClick={() => remove(index)}>
+                      <DeleteIcon className="h-6 w-6 text-color-red" />
+                    </IconButton>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
           <div className="flex mb-4">
             <Button
               variant="secondary"
               color={bucket.round.color}
               onClick={() => append({ type: "EXPENSE" })}
               className="flex-grow"
+              testid="add-bucket-cost-button"
             >
               <AddIcon className="h-5 w-5 mr-1" />{" "}
               <FormattedMessage defaultMessage="Add row" />
@@ -183,22 +259,28 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Existing funding and resources" />
           </h2>
 
-          {incomeItems.map(({ fieldId, description, type, min }, index) => {
+          {incomeItems.map(({ id, fieldId, description, type, min }, index) => {
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
+                  <input
+                    value={id}
+                    readOnly
+                    className="hidden"
+                    {...register(`budgetItems.${index}.id`)}
+                  />
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
                     })}
-                    name={`budgetItems[${index}].description`}
-                    inputRef={register()}
+                    inputRef={register(`budgetItems.${index}.description`).ref}
+                    inputProps={register(`budgetItems.${index}.description`)}
                     defaultValue={description}
+                    testid={`bucket-existing-item-${fieldId}-description`}
                   />
                   <input
-                    name={`budgetItems[${index}].type`}
                     value={type}
-                    ref={register()}
+                    {...register(`budgetItems.${index}.type`)}
                     readOnly
                     className="hidden"
                   />
@@ -209,13 +291,13 @@ const EditBudgetModal = ({
                     placeholder={intl.formatMessage({
                       defaultMessage: "Amount",
                     })}
-                    name={`budgetItems[${index}].min`}
                     defaultValue={
                       typeof min !== "undefined" ? String(min / 100) : null
                     }
-                    inputProps={{ type: "number", min: 0 }}
-                    inputRef={register()}
+                    inputRef={register(`budgetItems.${index}.min`).ref}
+                    inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
                     endAdornment={currency}
+                    testid={`bucket-existing-item-${fieldId}-amount`}
                   />
                 </div>
 
@@ -270,7 +352,11 @@ const EditBudgetModal = ({
               >
                 <FormattedMessage defaultMessage="Cancel" />
               </Button>
-              <Button type="submit" loading={loading}>
+              <Button
+                type="submit"
+                loading={loading}
+                testid="add-budget-submit-buton"
+              >
                 <FormattedMessage defaultMessage="Save" />
               </Button>
             </div>

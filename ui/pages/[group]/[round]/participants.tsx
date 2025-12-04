@@ -11,6 +11,15 @@ export const ROUND_QUERY = gql`
       color
       numberOfApprovedMembers
       currency
+      group {
+        id
+        name
+      }
+      membersLimit {
+        consumedPercentage
+        currentCount
+        limit
+      }
     }
   }
 `;
@@ -33,7 +42,8 @@ const RoundMembersPage = ({ currentUser }) => {
   return (
     <div className="flex-1">
       <SubMenu currentUser={currentUser} round={round} />
-      {currentUser?.currentCollMember?.isApproved ? (
+      {currentUser?.currentCollMember?.isApproved ||
+      currentUser?.currentCollMember?.isAdmin ? (
         <Members round={round} currentUser={currentUser} />
       ) : (
         <PageHero>
@@ -47,6 +57,11 @@ const RoundMembersPage = ({ currentUser }) => {
       )}
     </div>
   );
+};
+
+// Force SSR to avoid MUI theme context issues during static generation
+export const getServerSideProps = async () => {
+  return { props: {} };
 };
 
 export default RoundMembersPage;

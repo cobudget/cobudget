@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import AuthenticationForm from "../components/AuthenticationForm";
 import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/router";
+import { useIntl } from "react-intl";
 
 function Login({ fbLoginEnabled, googleLoginEnabled }) {
+  const router = useRouter();
   const [fbEmailError, setFbEmailError] = useState(false);
+  const intl = useIntl();
 
   useEffect(() => {
     if (window.location.href.indexOf("err=INVALID_TOKEN") > -1) {
@@ -13,6 +17,17 @@ function Login({ fbLoginEnabled, googleLoginEnabled }) {
       setFbEmailError(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (router.query.error === "invalid-token") {
+      toast.error(
+        intl.formatMessage({
+          defaultMessage:
+            "The login link is expired or is invalid. Enter your email to receive a new link",
+        })
+      );
+    }
+  }, [router.isReady, intl, router.query.error]);
 
   return (
     <div className="page">

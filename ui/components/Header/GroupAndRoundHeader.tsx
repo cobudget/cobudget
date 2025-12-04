@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { useQuery, gql } from "urql";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { SlashIcon } from "../Icons";
+
+import NavItem from "./NavItem";
 import Selector from "./Selector";
 
 const capLength = (title: string) =>
@@ -16,18 +18,7 @@ const GroupAndRoundHeader = ({
   bucket,
 }) => {
   return (
-    <div className="flex items-center max-w-screen overflow-hidden">
-      {process.env.SINGLE_GROUP_MODE !== "true" && (
-        <Link href="/">
-          <a className={`p-1 text-white rounded-md font-medium flex space-x-4`}>
-            <img src="/cobudget-logo.png" className="h-6 max-w-none" />
-            {!currentUser && !currentGroup && !round && (
-              <h1 className="leading-normal">{process.env.PLATFORM_NAME}</h1>
-            )}
-          </a>
-        </Link>
-      )}
-
+    <>
       {(currentGroup || round || currentUser) && (
         <>
           {process.env.SINGLE_GROUP_MODE !== "true" && (
@@ -60,6 +51,7 @@ const GroupAndRoundHeader = ({
                 className={
                   "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
                 }
+                data-testid="navbar-round-title"
               >
                 {capLength(round.title)}
               </a>
@@ -105,7 +97,7 @@ const GroupAndRoundHeader = ({
           </span>
         </>
       )}
-    </div>
+    </>
   );
 };
 

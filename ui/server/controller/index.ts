@@ -2,7 +2,16 @@ import dayjs from "dayjs";
 import { Prisma, User, AllocationType, RoundMember } from "@prisma/client";
 import importedPrisma from "../prisma";
 import eventHub from "server/services/eventHub.service";
-import { getRoundMember } from "../graphql/resolvers/helpers";
+import {
+  getRoundMember,
+  bucketIncome,
+  updateContributionsCount,
+} from "../graphql/resolvers/helpers";
+import { updateFundedPercentage } from "../graphql/resolvers/helpers";
+import isGroupSubscriptionActive from "server/graphql/resolvers/helpers/isGroupSubscriptionActive";
+import { isBucketLimitOver } from "server/graphql/resolvers/helpers/round";
+import { markBucketAsFavorite } from "server/graphql/resolvers/helpers/bucket";
+import { FavoriteBucketReason } from "../../constants";
 
 export const allocateToMember = async ({
   roundId,
@@ -144,6 +153,50 @@ export const bulkAllocate = async ({ roundId, amount, type, allocatedBy }) => {
   }
 };
 
+export const getGroup = async ({
+  groupId,
+  groupSlug,
+  user,
+  ss,
+}: {
+  groupId?: string;
+  groupSlug?: string;
+  user: { id: string };
+  ss?: { id: string };
+}) => {
+  try {
+    const prisma = importedPrisma;
+    const group = await prisma.group.findUnique({
+      where: groupId ? { id: groupId } : { slug: groupSlug },
+    });
+    if (group?.visibility === "PUBLIC") return group;
+
+    if (!user) throw "This group is private";
+
+    const currentGroupMember = await prisma.groupMember.findUnique({
+      where: {
+        groupId_userId: { groupId: group.id, userId: user.id },
+      },
+    });
+
+    if (currentGroupMember || ss) return group;
+
+    throw "The group is private";
+  } catch (err) {
+    const group = await importedPrisma.group.findUnique({
+      where: groupId ? { id: groupId } : { slug: groupSlug },
+    });
+    if (group) {
+      return {
+        slug: group.slug,
+        id: group.id,
+        name: group.name,
+        stripeSubscriptionId: group.stripeSubscriptionId,
+      };
+    } else return null;
+  }
+};
+
 export const contribute = async ({
   roundId,
   bucketId,
@@ -159,6 +212,7 @@ export const contribute = async ({
   stripeSessionId?: string;
   prisma?: Prisma.TransactionClient;
 }) => {
+  await isBucketLimitOver({ roundId });
   const roundMember = await getRoundMember({
     roundId,
     userId: user.id,
@@ -166,6 +220,8 @@ export const contribute = async ({
   });
 
   const { round } = roundMember;
+
+  await isGroupSubscriptionActive({ groupId: round?.groupId });
 
   if (amount <= 0) throw new Error("Value needs to be more than zero");
 
@@ -287,11 +343,22 @@ export const contribute = async ({
     },
   });
 
+  await updateFundedPercentage(bucket);
+
   await eventHub.publish("contribute-to-bucket", {
     round,
     bucket,
     contributingUser: user,
     amount,
+  });
+
+  await updateContributionsCount(bucket);
+
+  // star bucket
+  await markBucketAsFavorite({
+    userId: user?.id,
+    bucketId,
+    reason: FavoriteBucketReason.FUNDED,
   });
 
   return bucket;
