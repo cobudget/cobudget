@@ -2,7 +2,7 @@ import { useMutation, gql, useQuery } from "urql";
 import { useForm } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -124,7 +124,7 @@ const InviteMembersModal = ({
   currentGroup?: any;
   roundGroup?: any;
 }) => {
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, formState: { errors }, reset } = useForm();
   const [groupMembers, fetchGroupMembers] = useQuery({
     query: SEARCH_MENTIONS_GROUP_MEMBERS_QUERY,
     pause: true,

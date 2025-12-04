@@ -299,3 +299,8 @@ h5 {
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-in-out;
 }
+
+/* Draggable sorting helper - needs high z-index to appear above modals */
+.draggable-sorting-helper {
+  z-index: 1400;
+}

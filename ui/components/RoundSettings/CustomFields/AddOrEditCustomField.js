@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useMutation, gql } from "urql";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Checkbox, Modal } from "@material-ui/core";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { Checkbox, Modal } from "@mui/material";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";

@@ -1,4 +1,4 @@
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import Button from "components/Button";
 import { useRouter } from "next/router";
 import React, { useState } from "react";

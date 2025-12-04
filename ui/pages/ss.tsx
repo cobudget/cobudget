@@ -7,7 +7,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import { gql, useQuery } from "urql";
 import HappySpinner from "components/HappySpinner";
 import LoadMore from "components/LoadMore";

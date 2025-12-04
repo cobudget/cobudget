@@ -44,7 +44,7 @@ const EditGroup = ({ group, currentUser }) => {
   const [{ fetching: loading }, createGroup] = useMutation(CREATE_GROUP);
   const [{ fetching: editLoading }, editGroup] = useMutation(EDIT_GROUP);
 
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, formState: { errors }, reset } = useForm();
   const intl = useIntl();
 
   const [slugValue, setSlugValue] = useState(group?.slug ?? "");

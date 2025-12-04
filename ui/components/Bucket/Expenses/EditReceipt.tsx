@@ -39,7 +39,7 @@ const UPDATE_RECEIPT = gql`
 
 function EditReceipt({ receiptToEdit, close, round }) {
   const intl = useIntl();
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors } } = useForm();
   const [{ fetching }, updateReceipt] = useMutation(UPDATE_RECEIPT);
 
   const onSubmission = (variables) => {

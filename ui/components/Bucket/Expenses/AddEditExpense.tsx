@@ -12,7 +12,7 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import styled from "styled-components";
 import UploadAttachment from "./UploadAttachment";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const FormWrapper = styled.div`
   max-height: calc(100vh - 120px);
@@ -146,7 +146,7 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
     recipientPostalCode: yup.string().required(),
   });
 
-  const { handleSubmit, register, errors, control } = useForm({
+  const { handleSubmit, register, formState: { errors }, control } = useForm({
     resolver: yupResolver(schema),
   });
   const { fields, append, remove } = useFieldArray({

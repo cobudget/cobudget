@@ -1,4 +1,4 @@
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import Tooltip from "@tippyjs/react";
 
 import { Tab } from "@headlessui/react";

@@ -1,4 +1,4 @@
-import { TableCell, TableRow } from "@material-ui/core";
+import { TableCell, TableRow } from "@mui/material";
 import HappySpinner from "components/HappySpinner";
 import { CheveronDownIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";

@@ -41,7 +41,7 @@ const CREATE_ROUND = gql`
 
 export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors } } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const intl = useIntl();

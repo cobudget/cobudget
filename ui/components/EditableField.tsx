@@ -4,7 +4,7 @@ import { useMutation } from "urql";
 import Tooltip from "@tippyjs/react";
 
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -51,7 +51,7 @@ const EditableField = ({
     });
   }, [maxLength, required, name, intl]);
 
-  const { handleSubmit, register, setValue, errors } = useForm({
+  const { handleSubmit, register, setValue, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
 

@@ -5,8 +5,14 @@ import {
   useAttrs,
   FloatingToolbar,
   FloatingWrapper,
-  ComponentItem,
 } from "@remirror/react";
+
+// ComponentItem enum was removed in newer remirror versions - define locally
+const ComponentItem = {
+  ToolbarGroup: "group" as const,
+  ToolbarCommandButton: "command" as const,
+  ToolbarButton: "button" as const,
+};
 import { DeleteIcon, ChainIcon } from "components/Icons";
 
 import { HTMLProps, useEffect, useRef, useState } from "react";

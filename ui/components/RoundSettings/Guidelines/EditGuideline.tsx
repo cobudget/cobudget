@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useMutation, gql } from "urql";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -67,12 +67,12 @@ export default ({
     editing ? EDIT_GUIDELINE_MUTATION : ADD_GUIDELINE_MUTATION
   );
 
-  const { handleSubmit, register, errors, setValue } = useForm({
+  const { handleSubmit, register, formState: { errors }, setValue } = useForm({
     resolver: yupResolver(schema),
   });
 
   useEffect(() => {
-    register({ name: "guideline.description" });
+    register("guideline.description");
   }, [register]);
 
   return (

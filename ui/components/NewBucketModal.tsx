@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
@@ -29,7 +29,7 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
   const intl = useIntl();
   const [{ fetching: loading }, createBucket] = useMutation(CREATE_BUCKET);
 
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors } } = useForm();
 
   const onSubmitCreate = (variables) => {
     createBucket({ ...variables, roundId: round.id }).then(

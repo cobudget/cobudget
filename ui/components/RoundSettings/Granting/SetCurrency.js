@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 
-import { Box, Button } from "@material-ui/core";
-import { Alert } from "@material-ui/lab";
+import { Box, Button } from "@mui/material";
+import { Alert } from "@mui/lab";
 
 import currencies from "utils/currencies";
 import SelectInput from "components/SelectInput";

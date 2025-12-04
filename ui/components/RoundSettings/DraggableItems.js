@@ -1,15 +1,6 @@
 import { useState, useEffect } from "react";
-import { makeStyles } from "@material-ui/core";
 import { sortableContainer } from "react-sortable-hoc";
 import { cloneDeep } from "lodash";
-
-// We need to make sure that the zIndex is bigger the material design
-// modal otherwise the component disappear when dragged
-export const useStyles = makeStyles((theme) => ({
-  sorting: {
-    zIndex: theme.zIndex.modal + 100,
-  },
-}));
 
 const SortableContainer = sortableContainer(({ children }) => {
   return <ul className="select-none">{children}</ul>;
@@ -33,8 +24,6 @@ const DraggableItems = ({
       setLocalItems(cloneDeep(items));
     }
   }, [items, setPositionLoading]);
-
-  const classes = useStyles();
 
   // Extract the position of the items before and after the new index to calculate the new
   // item position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
@@ -75,7 +64,7 @@ const DraggableItems = ({
     <SortableContainer
       onSortEnd={onSortEnd}
       useDragHandle
-      helperClass={classes.sorting}
+      helperClass="draggable-sorting-helper"
     >
       {localItems &&
         localItems

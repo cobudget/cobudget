@@ -1,7 +1,7 @@
 import { useMutation, gql } from "urql";
 import { useForm, useFieldArray } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers";
-import { Modal } from "@material-ui/core";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Modal } from "@mui/material";
 
 import TextField from "components/TextField";
 import Button from "components/Button";

@@ -1,4 +1,5 @@
 import {
+  Box,
   Divider,
   IconButton,
   List,
@@ -6,7 +7,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Modal,
-} from "@material-ui/core";
+} from "@mui/material";
 import Button from "components/Button";
 import HappySpinner from "components/HappySpinner";
 import { CopyIcon, VerifiedIcon } from "components/Icons";
@@ -16,7 +17,6 @@ import React, { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
-import { useStyles } from "../Granting";
 import SettingsListItem from "../Granting/SettingsListItem";
 import SetOpenCollective from "./SetOpenCollective";
 import SetOCToken from "./SetOCToken";
@@ -107,8 +107,6 @@ function Integrations() {
   const [openModal, setOpenModal] = useState("");
   const intl = useIntl();
 
-  const classes = useStyles();
-
   const modals = useMemo(
     () => ({
       SET_OPEN_COLLECTIVE: SetOpenCollective,
@@ -174,11 +172,11 @@ function Integrations() {
           onClose={handleClose}
           className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
         >
-          <div className={classes.innerModal}>
+          <Box sx={{ outline: "none", flex: "0 1 500px" }}>
             {openModal && (
               <ModalContent round={round} closeModal={handleClose} />
             )}
-          </div>
+          </Box>
         </Modal>
 
         <h2 className="text-2xl font-semibold mb-3 px-6">

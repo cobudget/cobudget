@@ -6,7 +6,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import RoundBudgetItemsFilter from "./RoundBudgetItemsFilter";
 import LoadMore from "./LoadMore";
 import Label from "./Label";

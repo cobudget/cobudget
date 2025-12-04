@@ -10,8 +10,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { FormattedMessage, useIntl } from "react-intl";
 
 const ActionsDropdown = ({ deleteGroup, updateGroup, group }) => {

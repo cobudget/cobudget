@@ -7,7 +7,7 @@ import { FormattedMessage } from "react-intl";
 import { gql, useQuery } from "urql";
 import dayjs from "dayjs";
 import ExpenseStatus from "./ExpenseStatus";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import AddEditExpense from "./AddEditExpense";
 import EditReceipt from "./EditReceipt";
 

@@ -1,5 +1,4 @@
 import {
-  dedupExchange,
   fetchExchange,
   errorExchange,
   gql,
@@ -46,7 +45,6 @@ export const client = (
       //   // },
       // }),
       devtoolsExchange,
-      dedupExchange,
       cacheExchange({
         keys: {
           GroupMembersPage: () => null,

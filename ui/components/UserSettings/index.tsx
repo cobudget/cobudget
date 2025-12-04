@@ -1,5 +1,5 @@
 import { useQuery, gql, useMutation } from "urql";
-import { Checkbox, FormControlLabel, FormGroup } from "@material-ui/core";
+import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
 import HappySpinner from "components/HappySpinner";
 import { FormattedMessage, useIntl } from "react-intl";
 import Link from "next/link";

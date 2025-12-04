@@ -3,7 +3,7 @@ import Context from "contexts/comment";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import TextField from "components/TextField";
@@ -21,13 +21,13 @@ function AddComment() {
   const intl = useIntl();
   const { addComment, currentUser, bucket } = useContext<any>(Context);
 
-  const { handleSubmit, register, errors, setValue, watch } = useForm({
+  const { handleSubmit, register, formState: { errors }, setValue, watch } = useForm({
     resolver: yupResolver(schema),
   });
   const content = watch("content", "");
 
   useEffect(() => {
-    register({ name: "content" });
+    register("content");
   }, [register]);
 
   if (

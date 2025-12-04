@@ -1,8 +1,7 @@
 import React from "react";
-import { Modal, List, Divider } from "@material-ui/core";
+import { Modal, List, Divider, Box } from "@mui/material";
 import { gql, useQuery } from "urql";
 import { useRouter } from "next/router";
-import { makeStyles } from "@material-ui/core/styles";
 import dayjs from "dayjs";
 import { FormattedMessage, useIntl } from "react-intl";
 import capitalize from "utils/capitalize";
@@ -23,19 +22,6 @@ import SetCocreatorCanOpenFund from "./SetCocreatorCanOpenFund";
 import SetCocreatorCanEditOpenBucket from "./SetCocreatorCanEditOpenBucket";
 import Button from "components/Button";
 import ResetRoundFunding from "./ResetRoundFunding";
-
-export const useStyles = makeStyles((theme) => ({
-  modal: {
-    display: "flex",
-    padding: theme.spacing(1),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  innerModal: {
-    outline: "none",
-    flex: "0 1 500px",
-  },
-}));
 
 const modals = {
   SET_CURRENCY: SetCurrency,
@@ -145,8 +131,6 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
     setOpen(null);
   };
 
-  const classes = useStyles();
-
   const ModalContent = modals[open];
 
   const canEditSettings = true;
@@ -169,12 +153,12 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
         onClose={handleClose}
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
-        <div className={classes.innerModal}>
+        <Box sx={{ outline: "none", flex: "0 1 500px" }}>
           <ResetRoundFunding
             round={round}
             handleClose={() => setOpenResetModal(false)}
           />
-        </div>
+        </Box>
       </Modal>
       <Modal
         aria-labelledby="simple-modal-title"
@@ -183,7 +167,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
         onClose={handleClose}
         className="flex items-start justify-center p-4 sm:pt-24 overflow-y-scroll"
       >
-        <div className={classes.innerModal}>
+        <Box sx={{ outline: "none", flex: "0 1 500px" }}>
           {open && (
             <ModalContent
               round={round}
@@ -191,7 +175,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
               currentGroup={currentGroup}
             />
           )}
-        </div>
+        </Box>
       </Modal>
 
       <h2 className="text-2xl font-semibold mb-3 px-3">

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, gql } from "urql";
 import Avatar from "../Avatar";
 import { AddIcon, DeleteIcon } from "../Icons";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import { useIntl, FormattedMessage } from "react-intl";
 
 const SEARCH_MEMBERS_QUERY = gql`
