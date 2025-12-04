@@ -10,11 +10,11 @@ import {
   IconButton,
   Menu,
   MenuItem,
-} from "@material-ui/core";
+} from "@mui/material";
 import Tooltip from "@tippyjs/react";
 
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import HelpOutlineOutlinedIcon from "@material-ui/icons/HelpOutlineOutlined";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import ReactDOM from "react-dom";
 import toast from "react-hot-toast";
 import { useQuery, gql } from "urql";

@@ -1,9 +1,11 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
-import { Box, Button } from "@material-ui/core";
-import { DateTimePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
-import DayjsUtils from "@date-io/dayjs";
+import { Box, Button } from "@mui/material";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 import capitalize from "utils/capitalize";
 import Card from "components/styled/Card";
 import { UPDATE_GRANTING_SETTINGS } from ".";
@@ -11,11 +13,11 @@ import { FormattedMessage, useIntl } from "react-intl";
 
 const SetBucketCreationCloses = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
-  const { handleSubmit, register } = useForm();
+  const { handleSubmit } = useForm();
   const intl = useIntl();
 
   const [selectedDate, handleDateChange] = React.useState(
-    round.bucketCreationCloses
+    round.bucketCreationCloses ? dayjs(round.bucketCreationCloses) : null
   );
 
   return (
@@ -33,11 +35,10 @@ const SetBucketCreationCloses = ({ closeModal, round }) => {
         <form
           onSubmit={handleSubmit(() => {
             updateGranting({
-              bucketCreationCloses: selectedDate,
+              bucketCreationCloses: selectedDate ? selectedDate.toISOString() : null,
               roundId: round.id,
             })
               .then(() => {
-                // console.log({ data });
                 closeModal();
               })
               .catch((err) => {
@@ -47,21 +48,22 @@ const SetBucketCreationCloses = ({ closeModal, round }) => {
           })}
         >
           <Box m="15px 0">
-            <MuiPickersUtilsProvider utils={DayjsUtils}>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateTimePicker
                 label={intl.formatMessage(
                   { defaultMessage: "{bucketName} creation close date" },
                   { bucketName: capitalize(process.env.BUCKET_NAME_SINGULAR) }
                 )}
-                variant="inline"
                 value={selectedDate}
                 onChange={handleDateChange}
-                inputVariant="outlined"
-                name="bucketCreationCloses"
-                inputRef={register}
-                fullWidth
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    variant: "outlined",
+                  },
+                }}
               />
-            </MuiPickersUtilsProvider>
+            </LocalizationProvider>
           </Box>
 
           <div className="flex space-x-2">

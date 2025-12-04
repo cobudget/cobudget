@@ -59,4 +59,9 @@ const RoundMembersPage = ({ currentUser }) => {
   );
 };
 
+// Force SSR to avoid MUI theme context issues during static generation
+export const getServerSideProps = async () => {
+  return { props: {} };
+};
+
 export default RoundMembersPage;

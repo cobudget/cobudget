@@ -10,7 +10,7 @@ import {
   IconButton as MuiIconButton,
   Menu,
   MenuItem,
-} from "@material-ui/core";
+} from "@mui/material";
 import Tooltip from "@tippyjs/react";
 import { gql, useMutation, useQuery } from "urql";
 
@@ -18,7 +18,7 @@ import BulkAllocateModal from "./BulkAllocateModal";
 import IconButton from "components/IconButton";
 import { AddIcon } from "components/Icons";
 import Avatar from "components/Avatar";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AllocateModal from "./AllocateModal";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";

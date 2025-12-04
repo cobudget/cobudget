@@ -3,12 +3,11 @@ import { useMutation, gql } from "urql";
 import { useEffect, useMemo, useState } from "react";
 import Tooltip from "@tippyjs/react";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Markdown from "../../Markdown";
 import IconButton from "../../IconButton";
 import { EditIcon } from "../../Icons";
 import TextField from "../../TextField";
-import HiddenTextField from "../../HiddenTextField";
 import SelectInput from "../../SelectInput";
 import Button from "../../Button";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -67,6 +66,8 @@ const BucketCustomField = ({
 
     return yup.object().shape({
       customField: yup.object().shape({
+        fieldId: yup.string(),
+        roundId: yup.string(),
         value: defaultCustomField.isRequired
           ? maxValue.required("Required")
           : maxValue,
@@ -74,7 +75,7 @@ const BucketCustomField = ({
     });
   }, [defaultCustomField]);
 
-  const { handleSubmit, register, setValue, watch, errors } = useForm({
+  const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
   const inputValue = watch("customField.value", defaultValue ?? "");
@@ -85,9 +86,7 @@ const BucketCustomField = ({
 
   useEffect(() => {
     if (defaultCustomField.type !== "BOOLEAN") {
-      register({
-        name: "customField.value",
-      });
+      register("customField.value");
     }
   }, [register, defaultCustomField.type]);
 
@@ -108,15 +107,15 @@ const BucketCustomField = ({
             {defaultCustomField.name}
           </h3>
           <p className="my-2 text-gray-700">{defaultCustomField.description}</p>
-          <HiddenTextField
-            name="customField.fieldId"
+          <input
+            type="hidden"
             defaultValue={defaultCustomField.id}
-            inputRef={register()}
+            {...register("customField.fieldId")}
           />
-          <HiddenTextField
-            name="customField.roundId"
+          <input
+            type="hidden"
             defaultValue={roundId}
-            inputRef={register()}
+            {...register("customField.roundId")}
           />
           <div className="my-2">
             {defaultCustomField.type === "TEXT" ||
@@ -127,7 +126,7 @@ const BucketCustomField = ({
                 autoFocus
                 multiline={defaultCustomField.type == "MULTILINE_TEXT"}
                 rows={7}
-                error={errors.customField?.value}
+                error={Boolean(errors.customField?.value)}
                 helperText={errors.customField?.value?.message}
                 inputProps={{
                   onChange: (e) =>
@@ -137,10 +136,9 @@ const BucketCustomField = ({
               />
             ) : defaultCustomField.type === "BOOLEAN" ? (
               <SelectInput
-                name="customField.value"
                 defaultValue={defaultValue}
-                inputRef={register}
                 fullWidth
+                {...register("customField.value")}
               >
                 <option value={""}></option>
                 <option value={"true"}>

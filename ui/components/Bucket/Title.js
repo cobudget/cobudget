@@ -24,7 +24,7 @@ const EDIT_TITLE_MUTATION = gql`
 const BucketTitle = ({ title, canEdit, bucketId, isEditingAllowed }) => {
   const intl = useIntl();
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_TITLE_MUTATION);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors } } = useForm();
 
   const [editing, setEditing] = useState(false);
 
@@ -49,11 +49,11 @@ const BucketTitle = ({ title, canEdit, bucketId, isEditingAllowed }) => {
           <TextField
             className="mb-2"
             placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-            name="title"
             defaultValue={title}
             size="large"
-            inputRef={register({ required: "Required" })}
+            inputRef={register("title", { required: "Required" }).ref}
             inputProps={{
+              ...register("title", { required: "Required" }),
               maxLength: MAX_BUCKET_TITLE_LENGTH,
             }}
             autoFocus

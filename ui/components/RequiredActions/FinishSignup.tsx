@@ -6,7 +6,7 @@ import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import validateUsername from "utils/validateUsername";
-import { FormControlLabel } from "@material-ui/core";
+import { FormControlLabel } from "@mui/material";
 import Checkbox from "../Checkbox";
 import { useRouter } from "next/router";
 

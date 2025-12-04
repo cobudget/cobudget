@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-micro";
+import gql from "graphql-tag";
 
 const schema = gql`
   scalar JSON

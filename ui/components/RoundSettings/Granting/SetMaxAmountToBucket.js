@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
-import { Box, Button, TextField } from "@material-ui/core";
+import { Box, Button, TextField } from "@mui/material";
 import Card from "components/styled/Card";
 import { FormattedMessage, useIntl } from "react-intl";
 import { UPDATE_GRANTING_SETTINGS } from ".";

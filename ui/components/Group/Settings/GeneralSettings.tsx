@@ -44,7 +44,7 @@ const EditGroup = ({ group, currentUser }) => {
   const [logoImage, setLogoImage] = useState(group?.logo);
   const [{ fetching }, editGroup] = useMutation(EDIT_GROUP);
 
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, formState: { errors }, reset } = useForm();
   const intl = useIntl();
 
   const [slugValue, setSlugValue] = useState(group?.slug ?? "");
@@ -80,20 +80,19 @@ const EditGroup = ({ group, currentUser }) => {
           <FormattedMessage defaultMessage="General" />
         </h1>
         <TextField
-          name="name"
           label="Name"
           placeholder={intl.formatMessage(
             { defaultMessage: "{name}'s community" },
             { name: currentUser.name }
           )}
-          inputRef={register({ required: "Required" })}
+          inputRef={register("name", { required: "Required" }).ref}
+          inputProps={register("name", { required: "Required" })}
           defaultValue={group?.name}
           error={errors.name}
           helperText={errors.name?.message}
         />
         {process.env.SINGLE_GROUP_MODE !== "true" && (
           <TextField
-            name="slug"
             label={intl.formatMessage({ defaultMessage: "URL" })}
             placeholder={slugify(
               intl.formatMessage(
@@ -101,9 +100,10 @@ const EditGroup = ({ group, currentUser }) => {
                 { name: currentUser.name }
               )
             )}
-            inputRef={register({ required: "Required" })}
+            inputRef={register("slug", { required: "Required" }).ref}
             error={errors.slug}
             inputProps={{
+              ...register("slug", { required: "Required" }),
               value: slugValue,
               onChange: (e) => {
                 setSlugValue(e.target.value);
@@ -115,10 +115,10 @@ const EditGroup = ({ group, currentUser }) => {
           />
         )}
         <SelectField
-          name="visibility"
           label={intl.formatMessage({ defaultMessage: "Visibility" })}
           defaultValue={group?.visibility}
-          inputRef={register}
+          inputRef={register("visibility").ref}
+          inputProps={register("visibility")}
           className="my-4"
         >
           <option value="PUBLIC">
@@ -129,10 +129,10 @@ const EditGroup = ({ group, currentUser }) => {
           </option>
         </SelectField>
         <SelectField
-          name="registrationPolicy"
           label={intl.formatMessage({ defaultMessage: "Registration policy" })}
           defaultValue={group.registrationPolicy}
-          inputRef={register}
+          inputRef={register("registrationPolicy").ref}
+          inputProps={register("registrationPolicy")}
           className="my-4"
         >
           <option value="OPEN">

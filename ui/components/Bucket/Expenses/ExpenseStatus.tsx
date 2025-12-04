@@ -8,7 +8,7 @@ import {
 import React, { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useMutation } from "urql";
-import { Menu, MenuItem } from "@material-ui/core";
+import { Menu, MenuItem } from "@mui/material";
 import { CheveronDownIcon } from "components/Icons";
 
 const UPDATE_EXPENSE_STATUS = `

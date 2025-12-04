@@ -45,7 +45,6 @@ import {
 // switch to this one for react tables
 //import { TableExtension } from "@remirror/extension-react-tables";
 import {
-  ComponentItem,
   EditorComponent,
   MentionAtomPopupComponent,
   MentionAtomState,
@@ -60,6 +59,13 @@ import {
   useKeymap,
   useActive,
 } from "@remirror/react";
+
+// ComponentItem enum was removed in newer remirror versions - define locally
+const ComponentItem = {
+  ToolbarGroup: "group" as const,
+  ToolbarCommandButton: "command" as const,
+  ToolbarButton: "button" as const,
+};
 import { AllStyledComponent } from "@remirror/styles/emotion";
 import { debounce } from "lodash";
 import styled from "styled-components";

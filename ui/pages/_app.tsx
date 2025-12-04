@@ -2,6 +2,9 @@ import "tippy.js/dist/tippy.css";
 import "../styles.css";
 
 import { Analytics } from "@vercel/analytics/react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { CacheProvider, EmotionCache } from "@emotion/react";
+import CssBaseline from "@mui/material/CssBaseline";
 import BucketLimitOver from "components/BucketLimitOver";
 import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
 import Fallback from "components/Fallback";
@@ -19,6 +22,13 @@ import Layout from "../components/Layout";
 import { client } from "../graphql/client";
 import lang, { supportedLangCodes } from "../lang";
 import isRTL from "../utils/isRTL";
+import createEmotionCache from "../lib/createEmotionCache";
+
+// Create a default MUI theme
+const muiTheme = createTheme();
+
+// Client-side cache, shared for the whole session of the user in the browser
+const clientSideEmotionCache = createEmotionCache();
 
 export const CURRENT_USER_QUERY = gql`
   query CurrentUser($roundSlug: String, $groupSlug: String) {
@@ -188,7 +198,14 @@ const GET_SUPER_ADMIN_SESSION = gql`
   }
 `;
 
-const MyApp = ({ Component, pageProps, router }) => {
+interface MyAppProps {
+  Component: any;
+  pageProps: any;
+  router: any;
+  emotionCache?: EmotionCache;
+}
+
+const MyApp = ({ Component, pageProps, router, emotionCache = clientSideEmotionCache }: MyAppProps) => {
   const [{ data, fetching, error }] = useQuery({
     query: TOP_LEVEL_QUERY,
     variables: {
@@ -238,23 +255,21 @@ const MyApp = ({ Component, pageProps, router }) => {
     return c;
   }, [currentUserData, ss]);
 
-  const [locale, setLocale] = useState(
-    (() => {
-      if (typeof window !== "undefined") {
-        const locale = window.navigator.language;
-        const langCode = locale.split("-")[0];
-        if (supportedLangCodes.indexOf(langCode) > -1) {
-          return langCode;
-        }
-      }
-      return "en";
-    })()
-  );
+  // Always initialize with "en" to ensure consistent SSR/client hydration
+  const [locale, setLocale] = useState("en");
 
   useEffect(() => {
-    const locale = Cookies.get("locale");
-    if (locale) {
-      setLocale(locale);
+    // First check for cookie preference
+    const savedLocale = Cookies.get("locale");
+    if (savedLocale && supportedLangCodes.indexOf(savedLocale) > -1) {
+      setLocale(savedLocale);
+    } else {
+      // Fall back to browser language
+      const browserLocale = window.navigator.language;
+      const langCode = browserLocale.split("-")[0];
+      if (supportedLangCodes.indexOf(langCode) > -1) {
+        setLocale(langCode);
+      }
     }
 
     // Upgrade group message
@@ -305,49 +320,54 @@ const MyApp = ({ Component, pageProps, router }) => {
   }
 
   return (
-    <IntlProvider locale={locale} messages={lang[locale]}>
-      <RequiredActionsModal currentUser={currentUser} />
-      <ErrorBoundary
-        FallbackComponent={Fallback}
-        onError={(error) => reportError(error, currentUser)}
-      >
-        <AppContext.Provider value={appContext}>
-          <Layout
-            currentUser={currentUser}
-            fetchingUser={fetchingUser}
-            group={group}
-            round={round}
-            bucket={bucket}
-            dir={isRTL(locale) ? "rtl" : "ltr"}
-            locale={locale}
-            changeLocale={changeLocale}
-            ss={ss}
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <IntlProvider locale={locale} messages={lang[locale]}>
+          <RequiredActionsModal currentUser={currentUser} />
+          <ErrorBoundary
+            FallbackComponent={Fallback}
+            onError={(error) => reportError(error, currentUser)}
           >
-            <Component
-              {...pageProps}
-              currentUser={currentUser}
-              router={router}
-              round={round}
-              currentGroup={group}
-            />
-            <Analytics />
-            <Toaster />
-            {groupToUpdate && (
-              <UpgradeGroupModal
+            <AppContext.Provider value={appContext}>
+              <Layout
+                currentUser={currentUser}
+                fetchingUser={fetchingUser}
                 group={group}
-                hide={() => setGroupToUpdate(undefined)}
-              />
-            )}
-            {limitBucketOver && (
-              <BucketLimitOver
-                isAdmin={limitBucketOver?.isAdmin}
-                hide={() => setLimitBucketOver(undefined)}
-              />
-            )}
-          </Layout>
-        </AppContext.Provider>
-      </ErrorBoundary>
-    </IntlProvider>
+                round={round}
+                bucket={bucket}
+                dir={isRTL(locale) ? "rtl" : "ltr"}
+                locale={locale}
+                changeLocale={changeLocale}
+                ss={ss}
+              >
+                <Component
+                  {...pageProps}
+                  currentUser={currentUser}
+                  router={router}
+                  round={round}
+                  currentGroup={group}
+                />
+                <Analytics />
+                <Toaster />
+                {groupToUpdate && (
+                  <UpgradeGroupModal
+                    group={group}
+                    hide={() => setGroupToUpdate(undefined)}
+                  />
+                )}
+                {limitBucketOver && (
+                  <BucketLimitOver
+                    isAdmin={limitBucketOver?.isAdmin}
+                    hide={() => setLimitBucketOver(undefined)}
+                  />
+                )}
+              </Layout>
+            </AppContext.Provider>
+          </ErrorBoundary>
+        </IntlProvider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 };
 

@@ -41,7 +41,7 @@ const CREATE_ROUND = gql`
 
 export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors }, setValue } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const intl = useIntl();
@@ -60,6 +60,22 @@ export default function NewRoundPage({ currentGroup }) {
     });
   };
 
+  const handleTitleChange = (e) => {
+    const newSlug = slugify(e.target.value);
+    setSlugValue(newSlug);
+    setValue("slug", newSlug);
+  };
+
+  const handleSlugChange = (e) => {
+    setSlugValue(e.target.value);
+  };
+
+  const handleSlugBlur = (e) => {
+    const newSlug = slugify(e.target.value);
+    setSlugValue(newSlug);
+    setValue("slug", newSlug);
+  };
+
   return (
     <>
       {/* <PageHero>
@@ -75,21 +91,20 @@ export default function NewRoundPage({ currentGroup }) {
               data-testid="create-round-form"
             >
               <TextField
-                name="title"
                 label="Title"
                 placeholder="Title"
-                inputRef={register({ required: "Required" })}
+                inputRef={register("title", { required: "Required" }).ref}
                 autoFocus
                 className=""
                 error={errors.title}
                 helperText={errors.title?.message}
                 testid={"round-title"}
                 inputProps={{
-                  onChange: (e) => setSlugValue(slugify(e.target.value)),
+                  ...register("title", { required: "Required" }),
+                  onChange: handleTitleChange,
                 }}
               />
               <TextField
-                name="slug"
                 labelComponent={() => (
                   <div className="items-center flex">
                     Slug
@@ -103,23 +118,22 @@ export default function NewRoundPage({ currentGroup }) {
                   </div>
                 )}
                 placeholder="Slug"
-                inputRef={register({ required: "Required" })}
+                inputRef={register("slug", { required: "Required" }).ref}
                 className=""
                 error={errors.slug}
                 helperText={errors.slug?.message}
                 inputProps={{
+                  ...register("slug", { required: "Required" }),
                   value: slugValue,
-                  onChange: (e) => setSlugValue(e.target.value),
-                  onBlur: (e) => setSlugValue(slugify(e.target.value)),
+                  onChange: handleSlugChange,
+                  onBlur: handleSlugBlur,
                 }}
               />
               <SelectField
-                name="currency"
                 label="Currency"
                 className=""
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("currency", { required: "Required" }).ref}
+                inputProps={register("currency", { required: "Required" })}
               >
                 {currencies.map((currency) => (
                   <option value={currency} key={currency}>
@@ -129,10 +143,10 @@ export default function NewRoundPage({ currentGroup }) {
               </SelectField>
 
               <SelectField
-                name="visibility"
                 label={intl.formatMessage({ defaultMessage: "Visibility" })}
                 defaultValue={currentGroup?.visiblity || PUBLIC}
-                inputRef={register}
+                inputRef={register("visibility").ref}
+                inputProps={register("visibility")}
                 className="my-4"
               >
                 <option value="PUBLIC">
@@ -144,12 +158,10 @@ export default function NewRoundPage({ currentGroup }) {
               </SelectField>
 
               <SelectField
-                name="registrationPolicy"
                 label="Registration policy"
                 className=""
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("registrationPolicy", { required: "Required" }).ref}
+                inputProps={register("registrationPolicy", { required: "Required" })}
               >
                 <option value="OPEN">Open</option>
                 <option value="REQUEST_TO_JOIN">Request to join</option>

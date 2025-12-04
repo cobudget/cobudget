@@ -6,7 +6,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/router";

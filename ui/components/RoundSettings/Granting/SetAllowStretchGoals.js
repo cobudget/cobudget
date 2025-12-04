@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation } from "urql";
 
-import { Box, Button } from "@material-ui/core";
+import { Box, Button } from "@mui/material";
 
 import SelectInput from "components/SelectInput";
 import Card from "components/styled/Card";

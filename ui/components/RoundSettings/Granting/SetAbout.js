@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useMutation, gql } from "urql";
 import Card from "components/styled/Card";
-import { Box, Button, TextField } from "@material-ui/core";
+import { Box, Button, TextField } from "@mui/material";
 import { FormattedMessage, useIntl, FormattedNumber } from "react-intl";
 
 const EDIT_ROUND = gql`

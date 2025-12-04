@@ -12,7 +12,7 @@ import { DeleteIcon, AddIcon } from "components/Icons";
 import styled from "styled-components";
 import UploadAttachment from "./UploadAttachment";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 const FormWrapper = styled.div`
   max-height: calc(100vh - 120px);
@@ -146,7 +146,7 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
     recipientPostalCode: yup.string().required(),
   });
 
-  const { handleSubmit, register, errors, control } = useForm({
+  const { handleSubmit, register, formState: { errors }, control } = useForm({
     resolver: yupResolver(schema),
   });
   const { fields, append, remove } = useFieldArray({
@@ -231,12 +231,10 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
         <FormWrapper>
           <TextField
             className="my-1"
-            name="title"
             size="small"
             placeholder={intl.formatMessage({ defaultMessage: "Title" })}
-            inputRef={register({
-              required: "Required",
-            })}
+            inputRef={register("title", { required: "Required" }).ref}
+            inputProps={register("title", { required: "Required" })}
             error={Boolean(errors.title)}
             helperText={errors.title?.message}
             defaultValue={expenseToEdit?.title}
@@ -253,14 +251,14 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                     <div className="flex-grow">
                       <TextField
                         className="my-1"
-                        name={`receipts[${index}].description`}
                         size="small"
                         placeholder={intl.formatMessage({
                           defaultMessage: "Description",
                         })}
-                        inputRef={register()}
-                        error={Boolean(errors.description)}
-                        helperText={errors.description?.message}
+                        inputRef={register(`receipts.${index}.description`).ref}
+                        inputProps={register(`receipts.${index}.description`)}
+                        error={Boolean(errors.receipts?.[index]?.description)}
+                        helperText={errors.receipts?.[index]?.description?.message}
                         defaultValue={description}
                       />
                     </div>
@@ -272,37 +270,35 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
                   </div>
                   <div className="flex flex-col sm:flex-row mt-2">
                     <UploadAttachment
-                      name={`receipts[${index}].attachment`}
+                      name={`receipts.${index}.attachment`}
                       cloudinaryPreset="organization_logos"
-                      inputRef={register({})}
+                      inputRef={register(`receipts.${index}.attachment`).ref}
                     />
 
                     <div className="mr-2 sm:my-0 flex-1">
                       <TextField
                         className="my-1"
-                        name={`receipts[${index}].date`}
                         size="small"
                         placeholder={intl.formatMessage({
                           defaultMessage: "Date",
                         })}
-                        inputRef={register({})}
-                        inputProps={{ type: "date" }}
-                        error={Boolean(errors.date)}
-                        helperText={errors.date?.message}
+                        inputRef={register(`receipts.${index}.date`).ref}
+                        inputProps={{ ...register(`receipts.${index}.date`), type: "date" }}
+                        error={Boolean(errors.receipts?.[index]?.date)}
+                        helperText={errors.receipts?.[index]?.date?.message}
                       />
                     </div>
                     <div className="mr-2 sm:my-0 flex-1">
                       <TextField
                         className="my-1"
-                        name={`receipts[${index}].amount`}
                         size="small"
                         placeholder={intl.formatMessage({
                           defaultMessage: "Amount",
                         })}
-                        inputRef={register({})}
-                        inputProps={{ type: "number", min: 0 }}
-                        error={Boolean(errors.amount)}
-                        helperText={errors.amount?.message}
+                        inputRef={register(`receipts.${index}.amount`).ref}
+                        inputProps={{ ...register(`receipts.${index}.amount`), type: "number", min: 0 }}
+                        error={Boolean(errors.receipts?.[index]?.amount)}
+                        helperText={errors.receipts?.[index]?.amount?.message}
                         endAdornment={round.currency}
                       />
                     </div>
@@ -332,14 +328,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="recipientName"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "Full name of recipient",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("recipientName", { required: "Required" }).ref}
+                inputProps={register("recipientName", { required: "Required" })}
                 error={Boolean(errors.recipientName)}
                 helperText={errors.recipientName?.message}
                 defaultValue={expenseToEdit?.recipientName}
@@ -348,14 +342,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="recipientEmail"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "Recipient Email",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("recipientEmail", { required: "Required" }).ref}
+                inputProps={register("recipientEmail", { required: "Required" })}
                 error={Boolean(errors.recipientEmail)}
                 helperText={errors.recipientEmail?.message}
                 defaultValue={expenseToEdit?.recipientEmail}
@@ -367,14 +359,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="swiftCode"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "Bank code (BIC/SWIFT)",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("swiftCode", { required: "Required" }).ref}
+                inputProps={register("swiftCode", { required: "Required" })}
                 error={Boolean(errors.swiftCode)}
                 helperText={errors.swiftCode?.message}
                 defaultValue={expenseToEdit?.swiftCode}
@@ -383,14 +373,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="iban"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "IBAN number",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("iban", { required: "Required" }).ref}
+                inputProps={register("iban", { required: "Required" })}
                 error={Boolean(errors.iban)}
                 helperText={errors.iban?.message}
                 defaultValue={expenseToEdit?.iban}
@@ -402,12 +390,10 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="country"
                 size="small"
                 placeholder={intl.formatMessage({ defaultMessage: "Country" })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("country", { required: "Required" }).ref}
+                inputProps={register("country", { required: "Required" })}
                 error={Boolean(errors.country)}
                 helperText={errors.country?.message}
                 defaultValue={expenseToEdit?.country}
@@ -416,12 +402,10 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="city"
                 size="small"
                 placeholder={intl.formatMessage({ defaultMessage: "City" })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("city", { required: "Required" }).ref}
+                inputProps={register("city", { required: "Required" })}
                 error={Boolean(errors.city)}
                 helperText={errors.city?.message}
                 defaultValue={expenseToEdit?.city}
@@ -433,14 +417,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="recipientAddress"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "Recipient Address",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("recipientAddress", { required: "Required" }).ref}
+                inputProps={register("recipientAddress", { required: "Required" })}
                 error={Boolean(errors.recipientAddress)}
                 helperText={errors.recipientAddress?.message}
                 defaultValue={expenseToEdit?.recipientAddress}
@@ -449,14 +431,12 @@ function AddEditExpense({ bucketId, close, round, expenseToEdit = undefined }) {
             <div className="mr-2 sm:my-0 flex-1">
               <TextField
                 className="my-1"
-                name="recipientPostalCode"
                 size="small"
                 placeholder={intl.formatMessage({
                   defaultMessage: "Postal Code",
                 })}
-                inputRef={register({
-                  required: "Required",
-                })}
+                inputRef={register("recipientPostalCode", { required: "Required" }).ref}
+                inputProps={register("recipientPostalCode", { required: "Required" })}
                 error={Boolean(errors.recipientPostalCode)}
                 helperText={errors.recipientPostalCode?.message}
                 defaultValue={expenseToEdit?.recipientPostalCode}

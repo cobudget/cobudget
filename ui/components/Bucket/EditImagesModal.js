@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { FormattedMessage, useIntl } from "react-intl";
 
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 
 import Button from "components/Button";
 

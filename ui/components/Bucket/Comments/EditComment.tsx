@@ -3,7 +3,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers";
+import { yupResolver } from "@hookform/resolvers/yup";
 import Context from "contexts/comment";
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -16,12 +16,12 @@ const EditComment = ({ comment, handleDone }) => {
   const [submitting, setSubmitting] = useState(false);
   const { editComment, bucket } = useContext<any>(Context);
 
-  const { handleSubmit, register, errors, setValue } = useForm({
+  const { handleSubmit, register, formState: { errors }, setValue } = useForm({
     resolver: yupResolver(schema),
   });
 
   useEffect(() => {
-    register({ name: "content" });
+    register("content");
   }, [register]);
 
   return (

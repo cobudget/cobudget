@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
+import { List, ListItem, ListItemText, Divider } from "@mui/material";
 import dayjs from "dayjs";
 import { sortBy } from "lodash";
 import Markdown from "components/Markdown";

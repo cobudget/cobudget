@@ -44,7 +44,7 @@ const EditGroup = ({ group, currentUser }) => {
   const [{ fetching: loading }, createGroup] = useMutation(CREATE_GROUP);
   const [{ fetching: editLoading }, editGroup] = useMutation(EDIT_GROUP);
 
-  const { handleSubmit, register, errors, reset } = useForm();
+  const { handleSubmit, register, formState: { errors }, reset } = useForm();
   const intl = useIntl();
 
   const [slugValue, setSlugValue] = useState(group?.slug ?? "");
@@ -104,20 +104,19 @@ const EditGroup = ({ group, currentUser }) => {
           )}
         </h1>
         <TextField
-          name="name"
           label="Name"
           placeholder={intl.formatMessage(
             { defaultMessage: "{name}'s community" },
             { name: currentUser.name }
           )}
-          inputRef={register({ required: "Required" })}
+          inputRef={register("name", { required: "Required" }).ref}
+          inputProps={register("name", { required: "Required" })}
           defaultValue={group?.name}
           error={errors.name}
           helperText={errors.name?.message}
         />
         {process.env.SINGLE_GROUP_MODE !== "true" && (
           <TextField
-            name="slug"
             label={intl.formatMessage({ defaultMessage: "URL" })}
             placeholder={slugify(
               intl.formatMessage(
@@ -125,9 +124,10 @@ const EditGroup = ({ group, currentUser }) => {
                 { name: currentUser.name }
               )
             )}
-            inputRef={register({ required: "Required" })}
+            inputRef={register("slug", { required: "Required" }).ref}
             error={errors.slug}
             inputProps={{
+              ...register("slug", { required: "Required" }),
               value: slugValue,
               onChange: (e) => {
                 setSlugValue(e.target.value);

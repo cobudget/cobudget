@@ -41,7 +41,7 @@ const CREATE_ROUND = gql`
 
 export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
-  const { handleSubmit, register, errors } = useForm();
+  const { handleSubmit, register, formState: { errors }, setValue } = useForm();
   const [slugValue, setSlugValue] = useState("");
   const [isHidden, setIsHidden] = useState(currentGroup?.visibility === HIDDEN);
   const router = useRouter();
@@ -66,6 +66,22 @@ export default function NewRoundPage({ currentGroup }) {
     }
   }, [currentGroup]);
 
+  const handleTitleChange = (e) => {
+    const newSlug = slugify(e.target.value);
+    setSlugValue(newSlug);
+    setValue("slug", newSlug);
+  };
+
+  const handleSlugChange = (e) => {
+    setSlugValue(e.target.value);
+  };
+
+  const handleSlugBlur = (e) => {
+    const newSlug = slugify(e.target.value);
+    setSlugValue(newSlug);
+    setValue("slug", newSlug);
+  };
+
   return (
     <div className="page">
       <div className="mx-auto bg-white rounded-lg shadow p-6 flex-1 max-w-screen-sm">
@@ -74,20 +90,19 @@ export default function NewRoundPage({ currentGroup }) {
         </h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <TextField
-            name="title"
             label="Title"
             placeholder="Title"
-            inputRef={register({ required: "Required" })}
+            inputRef={register("title", { required: "Required" }).ref}
             autoFocus
             className="mb-2"
             error={errors.title}
             helperText={errors.title?.message}
             inputProps={{
-              onChange: (e) => setSlugValue(slugify(e.target.value)),
+              ...register("title", { required: "Required" }),
+              onChange: handleTitleChange,
             }}
           />
           <TextField
-            name="slug"
             labelComponent={() => (
               <div className="items-center flex">
                 <FormattedMessage defaultMessage="Slug" />
@@ -103,23 +118,22 @@ export default function NewRoundPage({ currentGroup }) {
               </div>
             )}
             placeholder={intl.formatMessage({ defaultMessage: "Slug" })}
-            inputRef={register({ required: "Required" })}
+            inputRef={register("slug", { required: "Required" }).ref}
             className="mb-2"
             error={errors.slug}
             helperText={errors.slug?.message}
             inputProps={{
+              ...register("slug", { required: "Required" }),
               value: slugValue,
-              onChange: (e) => setSlugValue(e.target.value),
-              onBlur: (e) => setSlugValue(slugify(e.target.value)),
+              onChange: handleSlugChange,
+              onBlur: handleSlugBlur,
             }}
           />
           <SelectField
-            name="currency"
             label={intl.formatMessage({ defaultMessage: "Currency" })}
             className="mb-2"
-            inputRef={register({
-              required: "Required",
-            })}
+            inputRef={register("currency", { required: "Required" }).ref}
+            inputProps={register("currency", { required: "Required" })}
           >
             {currencies.map((currency) => (
               <option value={currency} key={currency}>
@@ -128,11 +142,11 @@ export default function NewRoundPage({ currentGroup }) {
             ))}
           </SelectField>
           <SelectField
-            name="visibility"
             label={intl.formatMessage({ defaultMessage: "Visibility" })}
-            inputRef={register}
+            inputRef={register("visibility").ref}
             className="my-4"
             inputProps={{
+              ...register("visibility"),
               onChange: (e) => {
                 setIsHidden(e.target.value === HIDDEN);
               },
@@ -153,12 +167,10 @@ export default function NewRoundPage({ currentGroup }) {
           </SelectField>
 
           <SelectField
-            name="registrationPolicy"
             label="Registration policy"
             className="my-2"
-            inputRef={register({
-              required: "Required",
-            })}
+            inputRef={register("registrationPolicy", { required: "Required" }).ref}
+            inputProps={register("registrationPolicy", { required: "Required" })}
           >
             <option value="OPEN">
               {intl.formatMessage({ defaultMessage: "Open" })}

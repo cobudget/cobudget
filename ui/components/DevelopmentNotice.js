@@ -1,6 +1,6 @@
 import React from "react";
-import CloseIcon from "@material-ui/icons/Close";
-import { Button, Snackbar, IconButton } from "@material-ui/core";
+import CloseIcon from "@mui/icons-material/Close";
+import { Button, Snackbar, IconButton } from "@mui/material";
 import { FormattedMessage, useIntl } from "react-intl";
 
 export default function DevelopmentNotice() {

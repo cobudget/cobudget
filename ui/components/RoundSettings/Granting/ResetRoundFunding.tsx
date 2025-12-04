@@ -1,7 +1,7 @@
 import { useMutation, gql } from "urql";
 import Router from "next/router";
 import { useState } from "react";
-import { Modal } from "@material-ui/core";
+import { Modal } from "@mui/material";
 import toast from "react-hot-toast";
 import TextField from "../../TextField";
 import Button from "../../Button";

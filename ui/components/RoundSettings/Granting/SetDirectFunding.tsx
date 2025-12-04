@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "urql";
-import { Box, Button } from "@material-ui/core";
+import { Box, Button } from "@mui/material";
 import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
 

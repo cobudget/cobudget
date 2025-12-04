@@ -1,4 +1,4 @@
-import { Checkbox, FormControlLabel } from "@material-ui/core";
+import { Checkbox, FormControlLabel } from "@mui/material";
 import Banner from "components/Banner";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
