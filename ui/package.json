@@ -151,7 +151,8 @@
     "@types/react": "18.x",
     "@types/react-dom": "18.x",
     "graphql": "16.9.0",
-    "**/graphql": "16.9.0"
+    "**/graphql": "16.9.0",
+    "next-connect": "0.10.2"
   },
   "prisma": {
     "schema": "server/prisma/schema.prisma"

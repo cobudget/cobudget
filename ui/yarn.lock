@@ -7330,13 +7330,10 @@ negotiator@^0.6.3:
   resolved "https://registry.yarnpkg.com/negotiator/-/negotiator-0.6.4.tgz#777948e2452651c570b712dd01c23e262713fff7"
   integrity sha512-myRT3DiWPHqho5PrJaIRyaMv2kgYf0mUVgBNOYMuCH5Ki1yEiQaf/ZJuQ62nvpc44wL5WDbTX7yGJi1Neevw8w==
 
-next-connect@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/next-connect/-/next-connect-1.0.0.tgz#49361a92b2d22db1cce73f94dfe793cd4b9e0106"
-  integrity sha512-FeLURm9MdvzY1SDUGE74tk66mukSqL6MAzxajW7Gqh6DZKBZLrXmXnGWtHJZXkfvoi+V/DUe9Hhtfkl4+nTlYA==
-  dependencies:
-    "@tsconfig/node16" "^1.0.3"
-    regexparam "^2.0.1"
+next-connect@0.10.2, next-connect@^0.10.2:
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/next-connect/-/next-connect-0.10.2.tgz#76a4f3c0eb1c77245a0c3aa2de5e68e17e568fd3"
+  integrity sha512-1g7PuFEGmmMioBRLJWXgSLN4R3iNTLN1m9M+JuXHRFgZHkzmkHOJwz7e6p6j3V2XB7X5by4dDBaMDqJHviLwLQ==
 
 next-urql@^5.0.2:
   version "5.0.2"
