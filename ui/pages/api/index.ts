@@ -31,36 +31,33 @@ const corsOptions = {
 
 subscribers.initialize(EventHub);
 
-const apolloServer = new ApolloServer({
-  typeDefs: schema,
-  resolvers,
-  context: async ({ req, res }): Promise<GraphQLContext> => {
-    const { user } = req;
-    // 'ss' is SuperAdminSession
-    let ss;
-    try {
-      ss = verify(req.cookies.ss);
-    } catch (err) {
-      ss = null;
-    }
-
-    return {
-      user,
-      prisma,
-      request: req,
-      eventHub: EventHub,
-      response: res,
-      ss,
-    };
-  },
-});
-
-const startServer = apolloServer.start();
-
 export default handler()
   .use(cors(corsOptions))
   .use(cookieParser())
-  .use(async (req, res) => {
-    await startServer;
-    await apolloServer.createHandler({ path: "/api" })(req, res);
-  });
+  .use(
+    new ApolloServer({
+      typeDefs: schema,
+      resolvers,
+      context: async ({ req, res }): Promise<GraphQLContext> => {
+        const { user } = req;
+        // 'ss' is SuperAdminSession
+        let ss;
+        try {
+          ss = verify(req.cookies.ss);
+        } catch (err) {
+          ss = null;
+        }
+
+        return {
+          user,
+          prisma,
+          request: req,
+          eventHub: EventHub,
+          response: res,
+          ss,
+        };
+      },
+    }).createHandler({
+      path: "/api",
+    })
+  );
