@@ -31,6 +31,11 @@ const isGroupSubscriptionActive = async ({
     throw new Error(GROUP_NOT_SUBSCRIBED);
   }
 
+  if (!stripe) {
+    // Stripe not configured - allow in development
+    return;
+  }
+
   const subscription = await stripe.subscriptions.retrieve(
     groupToCheck.stripeSubscriptionId
   );

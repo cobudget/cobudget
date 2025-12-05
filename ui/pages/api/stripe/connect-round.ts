@@ -5,6 +5,7 @@ import prisma from "server/prisma";
 import stripe from "server/stripe";
 
 export default handler().get(async (req, res) => {
+  if (!stripe) throw new Error("Stripe is not configured");
   if (typeof req.query?.roundId !== "string") throw new Error("Bad roundId");
   const roundId = req.query?.roundId;
 

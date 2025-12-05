@@ -5,8 +5,10 @@ if (typeof window !== "undefined")
     "Don't import this file in the browser as it will expose full control over your Stripe account."
   );
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY, {
-  apiVersion: "2020-08-27",
-});
+const stripe = process.env.STRIPE_API_KEY
+  ? new Stripe(process.env.STRIPE_API_KEY, {
+      apiVersion: "2020-08-27",
+    })
+  : null;
 
 export default stripe;

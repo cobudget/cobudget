@@ -11,6 +11,11 @@ export const config = {
 };
 
 export default handler().post(async (req, res) => {
+  if (!stripe) {
+    res.status(503).send("Stripe is not configured");
+    return;
+  }
+
   console.log("Request received");
   const sig = req.headers["stripe-signature"];
 
