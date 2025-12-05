@@ -36,5 +36,8 @@
   },
   "dependencies": {
     "dotenv": "^16.0.3"
+  },
+  "resolutions": {
+    "punycode": "^2.3.1"
   }
 }
