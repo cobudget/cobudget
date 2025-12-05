@@ -741,12 +741,12 @@ const RoundPage = ({ currentUser }) => {
           <FormattedMessage defaultMessage="You have been invited to this round. To accept this invitation, please log in or sign up." />
         </span>
         <span className="flex gap-4">
-          <Link href={`/login?r=${window.location.pathname}`}>
+          <Link href={`/login?r=${router.asPath}`}>
             <span className="px-4 py-2 bg-gray-200 text-gray-800 font-medium rounded-md cursor-pointer hover:bg-gray-100">
               <FormattedMessage defaultMessage="Log in" />
             </span>
           </Link>
-          <Link href={`/signup?r=${window.location.pathname}`}>
+          <Link href={`/signup?r=${router.asPath}`}>
             <span className="px-4 py-2 bg-gray-800 text-white font-medium rounded-md cursor-pointer hover:bg-gray-700">
               <FormattedMessage defaultMessage="Sign up" />
             </span>

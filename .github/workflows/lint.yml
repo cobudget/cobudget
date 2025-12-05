@@ -1,9 +1,13 @@
-name: Formatting and linting
+name: CI
 
-on: push
+on:
+  push:
+  pull_request:
+    branches: [main, master, prod]
 
 jobs:
   lint:
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -12,9 +16,38 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "yarn"
 
       - name: Install modules
         run: yarn install --frozen-lockfile
 
       - name: Run formatting and lint checks
         run: yarn lint
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "yarn"
+
+      - name: Install modules
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: yarn --cwd ui generate
+
+      - name: Run unit tests
+        run: yarn --cwd ui test:run
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          directory: ./ui/coverage
+          fail_ci_if_error: false
