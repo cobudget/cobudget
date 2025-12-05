@@ -443,7 +443,9 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                   </div>
                   <div data-cy="user-is-logged-in" />
                 </>
-              ) : fetchingUser ? (
+              ) : fetchingUser && hasMounted ? (
+                // Only show loading spinner after mount to prevent hydration mismatch
+                // (server has fetchingUser=false due to paused query, client may have true)
                 <span data-testid="fetching-user-icon">
                   <LoaderIcon
                     className="animate-spin"

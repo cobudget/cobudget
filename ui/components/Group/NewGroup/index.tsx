@@ -35,7 +35,8 @@ export default function NewGroup({ currentUser }) {
 
   const [, cancel] = useDebounce(searchGroup, 300, [slug]);
 
-  if (router.query.upgraded === "true") {
+  // Check router.isReady before using router.query to prevent hydration mismatch
+  if (router.isReady && router.query.upgraded === "true") {
     router.push(`/${router.query.group}`);
     return (
       <PageHero>

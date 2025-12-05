@@ -77,7 +77,8 @@ const GroupAndRoundHeader = ({
           </Link>
         </>
       )}
-      {bucket && router.query?.bucket && (
+      {/* Only render bucket breadcrumb when router is ready to prevent hydration mismatch */}
+      {bucket && router.isReady && router.query?.bucket && (
         <>
           <SlashIcon
             className={`w-7 h-7 flex-none text-white opacity-25 hidden sm:block`}

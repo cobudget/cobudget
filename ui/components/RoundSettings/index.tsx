@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
@@ -32,12 +32,22 @@ const RoundSettings = ({
   const router = useRouter();
 
   const { ss } = useContext(AppContext);
+
+  // Track if component has mounted to prevent hydration mismatch
+  const [hasMounted, setHasMounted] = useState(false);
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Only calculate inSession after mount to prevent hydration mismatch
+  // (Date.now() differs between server and client)
   const inSession = useMemo(() => {
+    if (!hasMounted) return false;
     if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
       return true;
     }
     return false;
-  }, [ss]);
+  }, [ss, hasMounted]);
 
   const defaultTabs = useMemo(
     () => [
