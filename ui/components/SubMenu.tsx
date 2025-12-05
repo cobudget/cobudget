@@ -151,20 +151,21 @@ export default function SubMenu({
         <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto">
           {items.map((item) => {
             return (
-              <Link href={item.href} key={item.href} scroll={!bucket}>
-                <a
-                  className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
-                    (
-                      item.startsWithHref
-                        ? router.asPath.startsWith(item.href)
-                        : item.href === router.asPath
-                    )
-                      ? `border-${color} text-${color}`
-                      : "border-transparent text-gray-500"
-                  }`}
-                >
-                  {item.label}
-                </a>
+              <Link
+                href={item.href}
+                key={item.href}
+                scroll={!bucket}
+                className={`block px-2 py-4 border-b-2 font-medium transition-colors ${
+                  (
+                    item.startsWithHref
+                      ? router.asPath.startsWith(item.href)
+                      : item.href === router.asPath
+                  )
+                    ? `border-${color} text-${color}`
+                    : "border-transparent text-gray-500"
+                }`}
+              >
+                {item.label}
               </Link>
             );
           })}

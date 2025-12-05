@@ -28,33 +28,29 @@ const GroupAndRoundHeader = ({
           {currentGroup ? (
             <Link
               href={`/${currentGroup.slug === "c" ? "" : currentGroup.slug}`}
+              className={
+                "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
+              }
             >
-              <a
-                className={
-                  "px-2 py-1 rounded-md flex items-center group space-x-3 text-white truncate"
-                }
-              >
-                {currentGroup.logo && (
-                  <img
-                    className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
-                    src={currentGroup?.logo}
-                  />
-                )}
-                <span className={`text-white font-medium truncate`}>
-                  {capLength(currentGroup.name)}
-                </span>
-              </a>
+              {currentGroup.logo && (
+                <img
+                  className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
+                  src={currentGroup?.logo}
+                />
+              )}
+              <span className={`text-white font-medium truncate`}>
+                {capLength(currentGroup.name)}
+              </span>
             </Link>
           ) : round ? (
-            <Link href={`/c/${round.slug}`}>
-              <a
-                className={
-                  "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
-                }
-                data-testid="navbar-round-title"
-              >
-                {capLength(round.title)}
-              </a>
+            <Link
+              href={`/c/${round.slug}`}
+              className={
+                "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
+              }
+              data-testid="navbar-round-title"
+            >
+              {capLength(round.title)}
             </Link>
           ) : null}
           {currentUser && process.env.SINGLE_GROUP_MODE !== "true" && (
@@ -73,12 +69,11 @@ const GroupAndRoundHeader = ({
         <>
           <SlashIcon className={`w-7 h-7 flex-none text-white opacity-25`} />
 
-          <Link href={`/${currentGroup?.slug ?? "c"}/${round.slug}`}>
-            <a
-              className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
-            >
-              {capLength(round.title)}
-            </a>
+          <Link
+            href={`/${currentGroup?.slug ?? "c"}/${round.slug}`}
+            className={`px-2 py-1 text-white rounded-md mx-0 font-medium truncate`}
+          >
+            {capLength(round.title)}
           </Link>
         </>
       )}

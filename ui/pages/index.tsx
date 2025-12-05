@@ -32,12 +32,10 @@ function replace(node) {
       delete props.class;
     }
     return (
-      <Link href={href}>
-        <a {...props}>
-          {!!node.children &&
-            !!node.children.length &&
-            domToReact(node.children, parseOptions)}
-        </a>
+      <Link href={href} {...props}>
+        {!!node.children &&
+          !!node.children.length &&
+          domToReact(node.children, parseOptions)}
       </Link>
     );
   }

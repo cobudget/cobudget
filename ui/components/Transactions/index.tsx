@@ -91,10 +91,9 @@ const Transactions = ({ round, currentGroup }) => {
                             href={`/${currentGroup?.slug ?? "c"}/${
                               round.slug
                             }/${c.bucket?.id}`}
+                            className="font-semibold hover:underline"
                           >
-                            <a className="font-semibold hover:underline">
-                              {c.bucket?.title}
-                            </a>
+                            {c.bucket?.title}
                           </Link>
                         ),
                         m: intl.formatNumber(c.amount / 100, {

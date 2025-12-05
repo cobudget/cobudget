@@ -14,8 +14,8 @@ const Markdown = ({ source, enableMentions = false, className = "" }) => {
         link: (props: { href: string; children: any }) => {
           if (props.href.startsWith(appLink("/user/")) && enableMentions) {
             return (
-              <Link href={props.href}>
-                <a className="markdownMention">{props.children}</a>
+              <Link href={props.href} className="markdownMention">
+                {props.children}
               </Link>
             );
           } else if (props.href.startsWith("http")) {
@@ -25,11 +25,7 @@ const Markdown = ({ source, enableMentions = false, className = "" }) => {
               </a>
             );
           } else {
-            return (
-              <Link href={props.href}>
-                <a>{props.children}</a>
-              </Link>
-            );
+            return <Link href={props.href}>{props.children}</Link>;
           }
         },
         // eslint-disable-next-line no-unused-vars

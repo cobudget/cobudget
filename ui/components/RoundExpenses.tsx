@@ -393,11 +393,9 @@ function RoundExpenses({ round, currentUser }) {
                               router.query.round
                             }/${bucketsMap[expense.bucketId]?.id}`}
                           >
-                            <a>
-                              <span className="underline cursor-pointer">
-                                {bucketsMap[expense.bucketId]?.title}
-                              </span>
-                            </a>
+                            <span className="underline cursor-pointer">
+                              {bucketsMap[expense.bucketId]?.title}
+                            </span>
                           </Link>
                         ) : isAdmin ? (
                           <i

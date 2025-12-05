@@ -222,23 +222,22 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
             <div className="flex items-center max-w-screen overflow-hidden">
               {process.env.SINGLE_GROUP_MODE !== "true" && (
                 <>
-                  <Link href="/">
-                    <a
-                      className={`p-1 text-white hover:text-white rounded-md font-medium flex space-x-4`}
-                    >
-                      <img
-                        src="/cobudget-logo.png"
-                        className="h-6 max-w-none"
-                      />
-                      {!currentUser &&
-                        !group &&
-                        !round &&
-                        !process.env.LANDING_PAGE_URL && (
-                          <h1 className="leading-normal">
-                            {process.env.PLATFORM_NAME}
-                          </h1>
-                        )}
-                    </a>
+                  <Link
+                    href="/"
+                    className={`p-1 text-white hover:text-white rounded-md font-medium flex space-x-4`}
+                  >
+                    <img
+                      src="/cobudget-logo.png"
+                      className="h-6 max-w-none"
+                    />
+                    {!currentUser &&
+                      !group &&
+                      !round &&
+                      !process.env.LANDING_PAGE_URL && (
+                        <h1 className="leading-normal">
+                          {process.env.PLATFORM_NAME}
+                        </h1>
+                      )}
                   </Link>
 
                   {!currentUser &&
@@ -482,13 +481,11 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                   >
                     <FormattedMessage defaultMessage="Edit profile" />
                   </button>
-                  <Link href={"/settings"}>
-                    <a className={css.mobileProfileItem}>
-                      <FormattedMessage defaultMessage="Email settings" />
-                    </a>
+                  <Link href={"/settings"} className={css.mobileProfileItem}>
+                    <FormattedMessage defaultMessage="Email settings" />
                   </Link>
-                  <Link href={"/starred-buckets"}>
-                    <a className={css.mobileProfileItem}>★ Buckets</a>
+                  <Link href={"/starred-buckets"} className={css.mobileProfileItem}>
+                    ★ Buckets
                   </Link>
                   <a
                     href={"/api/auth/logout"}

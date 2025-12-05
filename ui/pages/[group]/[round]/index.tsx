@@ -326,11 +326,9 @@ const Page = ({
             href={`/${round?.group?.slug ?? "c"}/${round?.slug}/${
               cell.row.original?.id
             }`}
-            passHref
+            className="underline cursor-pointer text-ellipsis focus:outline-none focus:ring rounded"
           >
-            <a className="underline cursor-pointer text-ellipsis focus:outline-none focus:ring rounded">
-              {cell.value.substr(0, 20) + (cell.value.length > 20 ? "..." : "")}
-            </a>
+            {cell.value.substr(0, 20) + (cell.value.length > 20 ? "..." : "")}
           </Link>
         ),
       },
@@ -484,10 +482,9 @@ const Page = ({
             }}
             shallow
             scroll={false}
+            className="flex focus:outline-none focus:ring rounded-lg"
           >
-            <a className="flex focus:outline-none focus:ring rounded-lg">
-              <BucketCard bucket={bucket} round={round} />
-            </a>
+            <BucketCard bucket={bucket} round={round} />
           </Link>
         ))
       ) : !loading ? (

@@ -326,18 +326,12 @@ function RoundBudgetItems({ round, currentUser, currentGroup }) {
                       {item.bucket ? (
                         <Link
                           href={`/${currentGroup.slug}/${round.slug}/${item.bucket.id}`}
-                          passHref // Good, this is already here!
                           shallow
+                          className="underline cursor-pointer text-black focus:outline-none focus:ring rounded"
                         >
-                          {/* Replace <span> with <a> and move the className */}
-                          <a className="underline cursor-pointer text-black focus:outline-none focus:ring rounded">
-                            {" "}
-                            {/* Added focus styles for consistency */}
-                            {item.bucketName}
-                          </a>
+                          {item.bucketName}
                         </Link>
                       ) : (
-                        // This part remains the same if there's no bucket link
                         item.bucketName
                       )}
                     </TableCell>

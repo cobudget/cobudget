@@ -37,8 +37,9 @@ const Tags = ({ bucket, canEdit }) => {
               href={`/${bucket.round.group?.slug ?? "c"}/${
                 bucket.round.slug
               }?tag=${tag.value}`}
+              className="text-gray-500 hover:text-black mr-2"
             >
-              <a className="text-gray-500 hover:text-black mr-2">{tag.value}</a>
+              {tag.value}
             </Link>
             {canEdit && (
               <button

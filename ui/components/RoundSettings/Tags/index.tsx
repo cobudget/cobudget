@@ -56,8 +56,9 @@ const Tags = ({ round, currentGroup }) => {
               href={`/${currentGroup?.slug ?? "c"}/${round.slug}?tag=${
                 tag.value
               }`}
+              className="text-gray-500 hover:text-black"
             >
-              <a className="text-gray-500 hover:text-black">{tag.value}</a>
+              {tag.value}
             </Link>
             <button
               disabled={fetchingDelete}
