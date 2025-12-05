@@ -69,6 +69,7 @@ async function getTaxRates({
 }
 
 export default handler().post(async (req, res) => {
+  if (!stripe) throw new Error("Stripe is not configured");
   if (req.query?.mode === "paidplan") {
     if (!req.user) throw new Error("You need to be logged in");
     if (typeof req.query?.plan !== "string")

@@ -13,6 +13,11 @@ export const config = {
 const secondsToMsDate = (seconds: number) => new Date(seconds * 1000);
 
 export default handler().post(async (req, res) => {
+  if (!stripe) {
+    res.status(503).send("Stripe is not configured");
+    return;
+  }
+
   const sig = req.headers["stripe-signature"];
 
   const rawBody = await getRawBody(req);

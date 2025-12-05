@@ -4,6 +4,7 @@ import stripe from "server/stripe";
 import { getRequestOrigin } from "server/get-request-origin";
 
 export default handler().get(async (req, res) => {
+  if (!stripe) throw new Error("Stripe is not configured");
   if (!req.user) throw new Error("You must be logged in");
 
   const groupId = req.query.groupId;

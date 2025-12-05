@@ -45,6 +45,12 @@ export const subscriptionStatus = async (group) => {
       };
     }
     if (group.stripeSubscriptionId && group.slug !== "c") {
+      if (!stripe) {
+        // Stripe not configured - treat as inactive in development
+        return {
+          isActive: false,
+        };
+      }
       const subscription = await stripe.subscriptions.retrieve(
         group.stripeSubscriptionId
       );
