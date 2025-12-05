@@ -7332,8 +7332,8 @@ negotiator@^0.6.3:
 
 next-connect@0.10.2, next-connect@^0.10.2:
   version "0.10.2"
-  resolved "https://registry.yarnpkg.com/next-connect/-/next-connect-0.10.2.tgz#76a4f3c0eb1c77245a0c3aa2de5e68e17e568fd3"
-  integrity sha512-1g7PuFEGmmMioBRLJWXgSLN4R3iNTLN1m9M+JuXHRFgZHkzmkHOJwz7e6p6j3V2XB7X5by4dDBaMDqJHviLwLQ==
+  resolved "https://registry.npmjs.org/next-connect/-/next-connect-0.10.2.tgz#b361cffe1ce0aae46f7b3c91de2871d0ab40d0f6"
+  integrity sha512-Tp9PA5YSg6aStF9TP+VmaQwvPH0tlO8VxzFP/oizD60aZwyqfK302J12V0VMlWnWJEQW5IPrblynI4bG193zwA==
 
 next-urql@^5.0.2:
   version "5.0.2"
