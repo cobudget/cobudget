@@ -165,6 +165,13 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
   const color = round?.color ?? "anthracit";
   const [superAdminTime, setSuperAdminTime] = useState<HTMLElement>();
   const [inSession, setInSession] = useState(false);
+  // Track if component has mounted to prevent hydration mismatch
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // Set mounted state after initial render to prevent hydration mismatch
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
@@ -175,7 +182,9 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
         const diff = ss?.start + ss?.duration * 60000 - Date.now();
         if (diff < 0 || !ss) {
           clearInterval(interval);
-          window.alert("Session Expired");
+          if (typeof window !== "undefined") {
+            window.alert("Session Expired");
+          }
           setInSession(false);
           return;
         }
@@ -375,7 +384,8 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                       </NavItem>
                     ) : null)}
 
-                  {currentUser.isSuperAdmin &&
+                  {/* Only render super admin controls after mount to prevent hydration mismatch */}
+                  {currentUser.isSuperAdmin && hasMounted &&
                     (inSession ? (
                       <span className="text-white text-sm">
                         <span
