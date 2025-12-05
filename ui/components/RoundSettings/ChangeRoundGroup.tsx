@@ -112,18 +112,16 @@ function ChangeRoundGroup({ round, hide }) {
               })}
             </SelectField>
             {group && (
-              <Link href={`/${group.slug}`}>
-                <a target="_blank">
-                  <div className="my-4 grid grid-cols-3">
-                    <div>
-                      <img src={group.logo} className="w-4/5" />
-                    </div>
-                    <div className="col-span-2">
-                      <p className="font-semibold">{group.name}</p>
-                      <p>{group.slug}</p>
-                    </div>
+              <Link href={`/${group.slug}`} target="_blank">
+                <div className="my-4 grid grid-cols-3">
+                  <div>
+                    <img src={group.logo} className="w-4/5" />
                   </div>
-                </a>
+                  <div className="col-span-2">
+                    <p className="font-semibold">{group.name}</p>
+                    <p>{group.slug}</p>
+                  </div>
+                </div>
               </Link>
             )}
             <div className="my-4">

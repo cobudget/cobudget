@@ -24,15 +24,13 @@ const ImageFeedItem: FC<{
   const imageUrl = image.small || image.large;
   return (
     <Link href={`/${groupSlug}/${roundSlug}/${image.bucketId}`}>
-      <a>
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Bucket image"
-            className="w-full rounded overflow-hidden shadow hover:shadow-lg hover:scale-105 transition-transform"
-          />
-        )}
-      </a>
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt="Bucket image"
+          className="w-full rounded overflow-hidden shadow hover:shadow-lg hover:scale-105 transition-transform"
+        />
+      )}
     </Link>
   );
 };

@@ -15,11 +15,9 @@ function LinkItem(props) {
   );
 
   return (
-    <Link href={href}>
-      <a {...rest} className={linkStyle}>
-        {children}{" "}
-        {selected && <CheckIcon className="h-5 w-5 flex-shrink-0 ml-auto" />}
-      </a>
+    <Link href={href} {...rest} className={linkStyle}>
+      {children}{" "}
+      {selected && <CheckIcon className="h-5 w-5 flex-shrink-0 ml-auto" />}
     </Link>
   );
 }

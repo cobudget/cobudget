@@ -67,17 +67,14 @@ const GroupSettings = ({
             <Link
               key={tab.name}
               href={`/${router.query.group}/settings/${tab.slug}`}
+              className={
+                "text-left p-2 focus:outline-none font-medium " +
+                (settingsTabSlug === tab.slug
+                  ? "text-black"
+                  : "text-gray-500")
+              }
             >
-              <a
-                className={
-                  "text-left p-2 focus:outline-none font-medium " +
-                  (settingsTabSlug === tab.slug
-                    ? "text-black"
-                    : "text-gray-500")
-                }
-              >
-                {tab.name}
-              </a>
+              {tab.name}
             </Link>
           ))}
         </div>

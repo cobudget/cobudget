@@ -178,15 +178,16 @@ export default function NewRoundPage({ currentGroup }) {
               </Button>
             </form>
           </div>
-          <Link href="/new-group">
-            <a className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer ">
-              <span className="text-black">Create a Group</span>{" "}
-              <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
-                PRO
-              </span>{" "}
-              if you would like to manage several Rounds with the same group of
-              people.
-            </a>
+          <Link
+            href="/new-group"
+            className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer "
+          >
+            <span className="text-black">Create a Group</span>{" "}
+            <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
+              PRO
+            </span>{" "}
+            if you would like to manage several Rounds with the same group of
+            people.
           </Link>
         </div>
       </div>

@@ -168,9 +168,7 @@ function StarredBuckets() {
               }`}
               key={bucket.id}
             >
-              <a>
-                <BucketCard bucket={bucket} round={bucket.round} showRound />
-              </a>
+              <BucketCard bucket={bucket} round={bucket.round} showRound />
             </Link>
           ))}
         </div>
