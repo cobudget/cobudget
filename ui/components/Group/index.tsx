@@ -181,7 +181,8 @@ const GroupIndex = ({ currentUser }) => {
     ];
   }, [rounds]);
 
-  if (!fetching && !group && router.query.group) {
+  // Check router.isReady before using router.query to prevent hydration mismatch
+  if (!fetching && !group && router.isReady && router.query.group) {
     return (
       <div className="text-center mt-7">
         <FormattedMessage defaultMessage="This group either doesn't exist or you don't have access to it" />

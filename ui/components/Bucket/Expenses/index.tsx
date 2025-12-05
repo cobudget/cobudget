@@ -43,7 +43,8 @@ function Expenses({ bucket, round, currentUser }) {
                 </Button>
               </div>
             )}
-            {router.query.expense ? (
+            {/* Only check router.query after router is ready to prevent hydration mismatch */}
+            {router.isReady && router.query.expense ? (
               <ExpenseDetails
                 expenseId={router.query.expense}
                 round={round}

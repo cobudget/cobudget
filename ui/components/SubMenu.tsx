@@ -105,6 +105,12 @@ export default function SubMenu({
   const router = useRouter();
   const intl = useIntl();
 
+  // Don't render menu until router is ready to prevent hydration mismatch
+  // (router.query is empty on server but populated on client)
+  if (!router.isReady) {
+    return null;
+  }
+
   const items: {
     label: string;
     href: string;
