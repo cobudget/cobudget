@@ -8,6 +8,7 @@ import handler from "../../server/api-handler";
 import subscribers from "../../server/subscribers";
 import cookieParser from "cookie-parser";
 import { verify } from "server/utils/jwt";
+import { NextApiRequest, NextApiResponse } from "next";
 
 export const config = {
   api: {
@@ -31,33 +32,52 @@ const corsOptions = {
 
 subscribers.initialize(EventHub);
 
-export default handler()
-  .use(cors(corsOptions))
-  .use(cookieParser())
-  .use(
-    new ApolloServer({
-      typeDefs: schema,
-      resolvers,
-      context: async ({ req, res }): Promise<GraphQLContext> => {
-        const { user } = req;
-        // 'ss' is SuperAdminSession
-        let ss;
-        try {
-          ss = verify(req.cookies.ss);
-        } catch (err) {
-          ss = null;
-        }
+const apolloServer = new ApolloServer({
+  typeDefs: schema,
+  resolvers,
+  context: async ({ req, res }): Promise<GraphQLContext> => {
+    const { user } = req;
+    // 'ss' is SuperAdminSession
+    let ss;
+    try {
+      ss = verify(req.cookies.ss);
+    } catch (err) {
+      ss = null;
+    }
 
-        return {
-          user,
-          prisma,
-          request: req,
-          eventHub: EventHub,
-          response: res,
-          ss,
-        };
-      },
-    }).createHandler({
-      path: "/api",
-    })
-  );
+    return {
+      user,
+      prisma,
+      request: req,
+      eventHub: EventHub,
+      response: res,
+      ss,
+    };
+  },
+});
+
+// Apollo Server 3 requires start() to be called before createHandler()
+const serverStartPromise = apolloServer.start();
+
+export default async function apiHandler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  // Create the middleware chain with next-connect
+  const middleware = handler().use(cors(corsOptions)).use(cookieParser());
+
+  // Run the middleware chain first
+  await new Promise<void>((resolve, reject) => {
+    middleware.run(req, res, (err?: Error) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
+  // Ensure Apollo Server has started
+  await serverStartPromise;
+
+  // Create and run the Apollo handler
+  const apolloHandler = apolloServer.createHandler({ path: "/api" });
+  return apolloHandler(req, res);
+}
