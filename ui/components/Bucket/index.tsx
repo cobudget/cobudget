@@ -10,10 +10,12 @@ import toast from "react-hot-toast";
 const Bucket = ({ bucket, currentUser, openImageModal }) => {
   if (!bucket) return null;
 
+  const actionsAreDisabled = bucket.round?.membersLimit.currentCount >= bucket.round?.membersLimit.limit;
   const canEdit =
-    currentUser?.currentCollMember?.isAdmin ||
+    !actionsAreDisabled &&
+    (currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
-    isMemberOfBucket(currentUser, bucket);
+    isMemberOfBucket(currentUser, bucket));
 
   const cocreatorsEditableStatuses = [
     "PENDING_APPROVAL",
@@ -23,12 +25,13 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
   ];
 
   const isEditingAllowed =
-    currentUser?.currentCollMember?.isAdmin ||
+    !actionsAreDisabled &&
+    (currentUser?.currentCollMember?.isAdmin ||
     currentUser?.currentCollMember?.isModerator ||
     (isMemberOfBucket(currentUser, bucket) &&
       (bucket.round.canCocreatorEditOpenBuckets
         ? true
-        : cocreatorsEditableStatuses.indexOf(bucket.status) > -1));
+        : cocreatorsEditableStatuses.indexOf(bucket.status) > -1)));
 
   return (
     <div className="bg-white border-b-default">

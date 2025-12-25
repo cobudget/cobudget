@@ -1,6 +1,14 @@
+import { Box, Typography } from "@material-ui/core";
+import WarningIcon from "@material-ui/icons/Warning";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
+import {
+  StripePriceSelect,
+  useStripeProductPrices,
+} from "components/StripePricing";
+import UpgradeMessage from "components/UpgradeMessage";
 
 const bucketItems = (
   { groupSlug, roundSlug, bucketId, bucket },
@@ -104,6 +112,29 @@ export default function SubMenu({
 }) {
   const router = useRouter();
   const intl = useIntl();
+  const [initialPriceId, setInitialPriceId] = useState<string | null>(null);
+
+  const {
+    prices,
+    loading: loadingPrices,
+    error: priceError,
+  } = useStripeProductPrices();
+
+  useEffect(() => {
+    if (loadingPrices) return;
+
+    if (!prices.length) {
+      setInitialPriceId(null);
+      return;
+    }
+
+    const hasSelection =
+      initialPriceId && prices.some((price) => price.id === initialPriceId);
+
+    if (!hasSelection) {
+      setInitialPriceId((prices.find((p) => p.default) || prices[0]).id);
+    }
+  }, [loadingPrices, prices, initialPriceId]);
 
   // Don't render menu until router is ready to prevent hydration mismatch
   // (router.query is empty on server but populated on client)
@@ -145,8 +176,7 @@ export default function SubMenu({
 
   const showUpgradeMessage =
     router.query.group === "c" &&
-    round?.membersLimit?.consumedPercentage > 75 &&
-    currentUser?.currentCollMember?.isAdmin;
+    round?.membersLimit?.consumedPercentage > 75;
 
   // don't show the menu if the only option is the default page
   if (items.length === 1) return null;
@@ -177,36 +207,7 @@ export default function SubMenu({
           })}
         </div>
       </div>
-      {showUpgradeMessage && (
-        <div className="space-x-2 bg-white border-b border-b-default bg-yellow-100">
-          <div className="max-w-screen-xl mx-auto flex px-2 md:px-4 overflow-x-auto py-4">
-            <span className="text-md font-medium w-full block">
-              {round?.membersLimit.currentCount >= round?.membersLimit.limit ? (
-                <FormattedMessage
-                  defaultMessage="<b>Upgrade your account</b> - Round has reached its members limit. To invite more members, consider upgrading your round."
-                  values={{
-                    b: (msg) => <span className="font-bold">{msg}</span>,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  defaultMessage="<b>Upgrade your account</b> - Round is nearing the {limit} member limit with {count} members."
-                  values={{
-                    b: (msg) => <span className="font-bold">{msg}</span>,
-                    count: round.membersLimit.currentCount,
-                    limit: round.membersLimit.limit,
-                  }}
-                />
-              )}
-              <span className="float-right text-blue-700 font-medium">
-                <Link href={`/new-group?roundId=${round?.id}`}>
-                  Upgrade Now
-                </Link>
-              </span>
-            </span>
-          </div>
-        </div>
-      )}
+      {showUpgradeMessage && <UpgradeMessage round={round} forAdmin={currentUser?.currentCollMember?.isAdmin} />}
     </>
   );
 }
