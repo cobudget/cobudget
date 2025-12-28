@@ -1,5 +1,4 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Dialog, DialogBackdrop, DialogPanel, Transition, TransitionChild } from "@headlessui/react";
 
 import dayjs from "dayjs";
 import FinishSignup from "./FinishSignup";
@@ -39,47 +38,34 @@ export default function RequiredActions({ currentUser }) {
 
   return (
     <>
-      <Transition appear show={show} as={Fragment}>
-        <Dialog
-          as="div"
-          className="fixed inset-0 z-30 overflow-y-auto"
-          onClose={() => {
-            return;
-          }}
-        >
-          <div className="min-h-screen px-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-            >
-              <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50" />
-            </Transition.Child>
-
-            {/* This element is to trick the browser into centering the modal contents. */}
-            <span
-              className="inline-block h-screen align-middle"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <div className="z-50 inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                {show && <Component currentUser={currentUser} />}
-              </div>
-            </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition>
+      <Dialog
+        open={show}
+        as="div"
+        className="fixed inset-0 z-30 overflow-y-auto"
+        onClose={() => {
+          return;
+        }}
+      >
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 data-[closed]:opacity-0"
+        />
+        <div className="min-h-screen px-4 text-center">
+          {/* This element is to trick the browser into centering the modal contents. */}
+          <span
+            className="inline-block h-screen align-middle"
+            aria-hidden="true"
+          >
+            &#8203;
+          </span>
+          <DialogPanel
+            transition
+            className="z-50 inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl duration-300 data-[closed]:opacity-0 data-[closed]:scale-95"
+          >
+            {show && <Component currentUser={currentUser} />}
+          </DialogPanel>
+        </div>
+      </Dialog>
       {currentUser.username && (
         <span className="invisible" data-testid="signup-user-fullname" />
       )}

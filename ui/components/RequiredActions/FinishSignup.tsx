@@ -1,5 +1,5 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { DialogTitle } from "@headlessui/react";
+import { useState } from "react";
 import { useMutation, gql } from "urql";
 import TextField from "../TextField";
 import Button from "../Button";
@@ -43,7 +43,7 @@ export default function FinishSignup({ currentUser }) {
 
   return (
     <>
-      <Dialog.Title
+      <DialogTitle
         as="h3"
         className="text-lg font-medium leading-6 text-gray-900"
       >
@@ -53,7 +53,7 @@ export default function FinishSignup({ currentUser }) {
             bucketName: process.env.PLATFORM_NAME,
           }}
         />
-      </Dialog.Title>
+      </DialogTitle>
       <div className="mt-2">
         <p className="text-sm text-gray-500">
           <FormattedMessage defaultMessage="Please add your name and username." />

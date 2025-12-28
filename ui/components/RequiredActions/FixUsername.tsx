@@ -1,5 +1,5 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { DialogTitle } from "@headlessui/react";
+import { useState } from "react";
 import { useMutation, gql } from "urql";
 import TextField from "../TextField";
 import Button from "../Button";
@@ -24,7 +24,7 @@ export default function FixUsername({ currentUser }) {
 
   return (
     <>
-      <Dialog.Title
+      <DialogTitle
         as="h3"
         className="text-lg font-medium leading-6 text-gray-900"
       >
@@ -34,7 +34,7 @@ export default function FixUsername({ currentUser }) {
             bucketName: process.env.PLATFORM_NAME,
           }}
         />
-      </Dialog.Title>
+      </DialogTitle>
       <p className="text-sm mt-2 text-gray-500">
         <FormattedMessage defaultMessage="We're adding some limitations to usernames and your username is currently not valid" />
       </p>
