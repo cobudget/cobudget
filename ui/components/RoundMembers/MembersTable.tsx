@@ -357,17 +357,19 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin }) => {
           </Tooltip>
         )}
       </TableCell>
-      <TableCell align="right" className="flex space-x-2">
-        {member.isAdmin && (
-          <p>
-            <FormattedMessage defaultMessage="Admin" />
-          </p>
-        )}
-        {member.isModerator && (
-          <p>
-            <FormattedMessage defaultMessage="Moderator" />
-          </p>
-        )}
+      <TableCell align="right">
+        <div className="flex justify-end space-x-2">
+          {member.isAdmin && (
+            <p>
+              <FormattedMessage defaultMessage="Admin" />
+            </p>
+          )}
+          {member.isModerator && (
+            <p>
+              <FormattedMessage defaultMessage="Moderator" />
+            </p>
+          )}
+        </div>
       </TableCell>
       <TableCell align="right">
         {isAdmin ? (

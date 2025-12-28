@@ -133,7 +133,7 @@ function Integrations() {
   });
 
   const handleSync = async () => {
-    if (fetchingExpensesCount) {
+    if (fetchingExpensesCount || !expensesCountQuery?.expensesCount) {
       return toast.error(
         intl.formatMessage({ defaultMessage: "Expense count not available" })
       );

@@ -5,7 +5,7 @@ import {
   IconButton,
 } from "@mui/material";
 import Button from "components/Button";
-import { Edit as EditIcon } from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/Edit";
 import { AddIcon } from "components/Icons";
 import { FormattedMessage } from "react-intl";
 
