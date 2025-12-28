@@ -1,32 +1,29 @@
 import { LoaderIcon } from "components/Icons";
-import { ReactNode, forwardRef } from "react";
+import { ReactNode, forwardRef, ButtonHTMLAttributes } from "react";
+
+interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  className?: string;
+  loading?: boolean;
+}
 
 function IconButton(
   {
     children,
     className,
-    onClick,
-    tabIndex,
     loading,
     type = "button",
-  }: {
-    children: ReactNode;
-    className?: string;
-    onClick?: () => void;
-    tabIndex?: number;
-    loading?: boolean;
-    type?: "button" | "submit" | "reset";
-  },
+    ...rest
+  }: IconButtonProps,
   ref: React.ForwardedRef<HTMLButtonElement>
 ) {
   return (
     <button
       className={`rounded-full p-2 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring ${className}`}
-      onClick={onClick}
-      tabIndex={tabIndex}
       type={type}
       disabled={loading}
       ref={ref}
+      {...rest}
     >
       {loading && (
         <LoaderIcon className="w-6 h-6 absolute animation-spin animation-linear animation-2s" />

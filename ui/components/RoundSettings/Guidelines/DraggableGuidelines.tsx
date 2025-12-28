@@ -1,5 +1,6 @@
 import { useMutation, gql } from "urql";
-import { SortableElement, SortableHandle } from "react-sortable-hoc";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { DraggableIcon } from "components/Icons";
 import Tooltip from "@tippyjs/react";
 import IconButton from "components/IconButton";
@@ -43,88 +44,127 @@ const SET_GUIDELINE_POSITION_MUTATION = gql`
   }
 `;
 
-const DragHandle = SortableHandle(() => (
-  <IconButton className="mx-1 cursor-move">
+const DragHandle = ({
+  listeners,
+  attributes,
+}: {
+  listeners: any;
+  attributes: any;
+}) => (
+  <IconButton className="mx-1 cursor-move" {...listeners} {...attributes}>
     <DraggableIcon className="h-6 w-6" />
   </IconButton>
-));
-
-const SortableItem = SortableElement(
-  ({ item: guideline, setEditingItem: setEditingGuideline, roundId }) => {
-    const [{ fetching: deleting }, deleteGuideline] = useMutation(
-      DELETE_GUIDELINE_MUTATION
-    );
-
-    const intl = useIntl();
-
-    return (
-      <li className="group bg-white p-4 mb-3 rounded shadow list-none">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-lg" data-testid={"guideline-view"}>
-            {guideline.title}
-          </h2>
-          <div>
-            <Tooltip
-              content={intl.formatMessage({ defaultMessage: "Edit" })}
-              placement="bottom"
-              arrow={false}
-            >
-              <span data-testid="edit-guideline">
-                <IconButton
-                  onClick={() => setEditingGuideline(guideline)}
-                  className="mx-1"
-                >
-                  <EditIcon className="h-6 w-6" />
-                </IconButton>
-              </span>
-            </Tooltip>
-
-            <Tooltip content="Delete" placement="bottom" arrow={false}>
-              <IconButton
-                loading={deleting}
-                onClick={() =>
-                  confirm(
-                    intl.formatMessage({
-                      defaultMessage:
-                        "Are you sure you would like to delete this guideline?",
-                    })
-                  ) &&
-                  deleteGuideline({
-                    roundId,
-                    guidelineId: guideline.id,
-                  })
-                }
-              >
-                <DeleteIcon className="h-6 w-6" />
-              </IconButton>
-            </Tooltip>
-
-            <Tooltip
-              content={intl.formatMessage({
-                defaultMessage: "Drag to reorder",
-              })}
-              placement="bottom"
-              arrow={false}
-            >
-              <span>
-                <DragHandle />
-              </span>
-            </Tooltip>
-          </div>
-        </div>
-        <div>
-          <Markdown source={guideline.description} />
-        </div>
-      </li>
-    );
-  }
 );
 
-const DraggableGuidelines = ({ round, items, setEditingItem }) => {
+const SortableGuidelineItem = ({
+  item: guideline,
+  setEditingItem: setEditingGuideline,
+  roundId,
+}: {
+  item: any;
+  setEditingItem: (item: any) => void;
+  roundId: string;
+}) => {
+  const [{ fetching: deleting }, deleteGuideline] = useMutation(
+    DELETE_GUIDELINE_MUTATION
+  );
+
+  const intl = useIntl();
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: guideline.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={style}
+      className="group bg-white p-4 mb-3 rounded shadow list-none"
+    >
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold text-lg" data-testid={"guideline-view"}>
+          {guideline.title}
+        </h2>
+        <div>
+          <Tooltip
+            content={intl.formatMessage({ defaultMessage: "Edit" })}
+            placement="bottom"
+            arrow={false}
+          >
+            <span data-testid="edit-guideline">
+              <IconButton
+                onClick={() => setEditingGuideline(guideline)}
+                className="mx-1"
+              >
+                <EditIcon className="h-6 w-6" />
+              </IconButton>
+            </span>
+          </Tooltip>
+
+          <Tooltip content="Delete" placement="bottom" arrow={false}>
+            <IconButton
+              loading={deleting}
+              onClick={() =>
+                confirm(
+                  intl.formatMessage({
+                    defaultMessage:
+                      "Are you sure you would like to delete this guideline?",
+                  })
+                ) &&
+                deleteGuideline({
+                  roundId,
+                  guidelineId: guideline.id,
+                })
+              }
+            >
+              <DeleteIcon className="h-6 w-6" />
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip
+            content={intl.formatMessage({
+              defaultMessage: "Drag to reorder",
+            })}
+            placement="bottom"
+            arrow={false}
+          >
+            <span>
+              <DragHandle listeners={listeners} attributes={attributes} />
+            </span>
+          </Tooltip>
+        </div>
+      </div>
+      <div>
+        <Markdown source={guideline.description} />
+      </div>
+    </li>
+  );
+};
+
+const DraggableGuidelines = ({
+  round,
+  items,
+  setEditingItem,
+}: {
+  round: any;
+  items: any[];
+  setEditingItem: (item: any) => void;
+}) => {
   const [{ fetching: loading }, setGuidelinePosition] = useMutation(
     SET_GUIDELINE_POSITION_MUTATION
   );
-  const setItemPosition = (guidelineId, newPosition) => {
+  const setItemPosition = (guidelineId: string, newPosition: number) => {
     setGuidelinePosition({
       roundId: round.id,
       guidelineId,
@@ -138,7 +178,7 @@ const DraggableGuidelines = ({ round, items, setEditingItem }) => {
       items={items}
       setItemPosition={setItemPosition}
       setPositionLoading={loading}
-      SortableItem={SortableItem}
+      ItemComponent={SortableGuidelineItem}
       setEditingItem={setEditingItem}
     />
   );
