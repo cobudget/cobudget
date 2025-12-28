@@ -12,23 +12,16 @@ const SelectInput = ({
   onChange,
   disabled = false,
 }: any) => {
-  const inputLabel = React.useRef(null);
-  const [labelWidth, setLabelWidth] = React.useState(0);
-  React.useEffect(() => {
-    setLabelWidth(inputLabel.current.offsetWidth);
-  }, []);
   return (
     <FormControl variant="outlined" fullWidth={fullWidth}>
-      <InputLabel ref={inputLabel} id={`${label}-label`}>
-        {label}
-      </InputLabel>
+      <InputLabel id={`${label}-label`}>{label}</InputLabel>
       <Select
         native
         name={name}
         labelId={`${label}-label`}
         id={label}
         defaultValue={defaultValue}
-        labelWidth={labelWidth}
+        label={label}
         inputRef={inputRef}
         value={value}
         onChange={onChange}
