@@ -57,27 +57,24 @@ const apolloServer = new ApolloServer({
 });
 
 // Apollo Server 3 requires start() to be called before createHandler()
-const serverStartPromise = apolloServer.start();
+let apolloHandler: ReturnType<typeof apolloServer.createHandler> | null = null;
 
-export default async function apiHandler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  // Create the middleware chain with next-connect
-  const middleware = handler().use(cors(corsOptions)).use(cookieParser());
+const startServer = apolloServer.start().then(() => {
+  apolloHandler = apolloServer.createHandler({ path: "/api" });
+});
 
-  // Run the middleware chain first
-  await new Promise<void>((resolve, reject) => {
-    middleware.run(req, res, (err?: Error) => {
-      if (err) reject(err);
-      else resolve();
-    });
+// Use next-connect properly - chain middleware and end with handler
+export default handler()
+  .use(cors(corsOptions))
+  .use(cookieParser())
+  .all(async (req: NextApiRequest, res: NextApiResponse) => {
+    // Wait for Apollo Server to be ready
+    await startServer;
+
+    if (!apolloHandler) {
+      res.status(500).json({ error: "Apollo Server not initialized" });
+      return;
+    }
+
+    return apolloHandler(req, res);
   });
-
-  // Ensure Apollo Server has started
-  await serverStartPromise;
-
-  // Create and run the Apollo handler
-  const apolloHandler = apolloServer.createHandler({ path: "/api" });
-  return apolloHandler(req, res);
-}

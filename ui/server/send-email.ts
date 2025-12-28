@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import { Client, ServerClient } from "postmark";
 import prisma from "./prisma";
 export interface SendEmailInput {
@@ -16,13 +15,8 @@ const broadcastClient = new ServerClient(
   process.env.POSTMARK_BROADCAST_API_TOKEN
 );
 
-const smtpClient =
-  process.env.NODE_ENV === "development" &&
-  nodemailer.createTransport({
-    host: "localhost",
-    port: 1025,
-    secure: false,
-  });
+// Note: mailhog SMTP client removed - we now print emails to console in development
+// to avoid connection timeout delays when mailhog isn't running
 
 const getVerifiedEmails = async (emails: string[]) => {
   return prisma.user.findMany({
@@ -36,22 +30,12 @@ const getVerifiedEmails = async (emails: string[]) => {
 const send = async (mail: SendEmailInput) => {
   console.log("Sending email to", mail.to);
   if (process.env.NODE_ENV === "development") {
-    try {
-      await smtpClient.sendMail({
-        from: process.env.FROM_EMAIL,
-        to: mail.to,
-        subject: mail.subject,
-        text: mail.text,
-        html: mail.html,
-      });
-    } catch {
-      // if mailhog isn't running, print it to the terminal instead
-      console.log(
-        `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
-          mail.text ?? mail.html
-        }\n`
-      );
-    }
+    // Print to console in development (skip SMTP to avoid timeout delays)
+    console.log(
+      `\nTo: ${mail.to}\nSubject: ${mail.subject}\n\n${
+        mail.text ?? mail.html
+      }\n`
+    );
   } else {
     try {
       await client.sendEmail({
