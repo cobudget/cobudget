@@ -10,6 +10,7 @@ const SetCocreatorCanEditOpenBucket = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
   const intl = useIntl();
+  const canCocreatorEditOpenBucketsField = register("canCocreatorEditOpenBuckets");
 
   return (
     <Card>
@@ -41,7 +42,7 @@ const SetCocreatorCanEditOpenBucket = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <SelectInput
-              name="canCocreatorEditOpenBuckets"
+              name={canCocreatorEditOpenBucketsField.name}
               label={intl.formatMessage(
                 {
                   defaultMessage:
@@ -50,7 +51,8 @@ const SetCocreatorCanEditOpenBucket = ({ closeModal, round }) => {
                 { bucketName: process.env.BUCKET_NAME_PLURAL }
               )}
               defaultValue={round.canCocreatorEditOpenBuckets ?? false}
-              inputRef={register}
+              inputRef={canCocreatorEditOpenBucketsField.ref}
+              onChange={canCocreatorEditOpenBucketsField.onChange}
               fullWidth
             >
               <option value={"true"}>

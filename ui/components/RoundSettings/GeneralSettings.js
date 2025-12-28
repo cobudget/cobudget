@@ -57,6 +57,12 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
     formState: { isDirty },
   } = useForm();
 
+  const titleField = register("title");
+  const slugField = register("slug");
+  const visibilityField = register("visibility");
+  const registrationPolicyField = register("registrationPolicy");
+  const archivedField = register("archived");
+
   const startUrl = `${process.env.DEPLOY_URL}/${currentGroup?.slug ?? "c"}/`;
   const isAdmin =
     currentUser.currentGroupMember?.isAdmin ||
@@ -95,24 +101,26 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
         })}
       >
         <TextField
-          name="title"
+          name={titleField.name}
           testid="round-title"
           label={intl.formatMessage({ defaultMessage: "Title" })}
           placeholder={intl.formatMessage({ defaultMessage: "Title" })}
           defaultValue={round.title}
-          inputRef={register}
+          inputRef={titleField.ref}
+          inputProps={{ onChange: titleField.onChange }}
           className="my-4"
         />
 
         <TextField
-          name="slug"
+          name={slugField.name}
           testid="round-slug"
           label={intl.formatMessage({ defaultMessage: "URL" })}
           placeholder={intl.formatMessage({ defaultMessage: "Slug" })}
           defaultValue={round.slug}
-          inputRef={register}
+          inputRef={slugField.ref}
           startAdornment={startUrl}
           inputProps={{
+            onChange: slugField.onChange,
             onBlur: (e) => {
               setValue("slug", slugify(e.target.value));
             },
@@ -121,12 +129,13 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
         />
 
         <SelectField
-          name="visibility"
+          name={visibilityField.name}
           label={intl.formatMessage({ defaultMessage: "Visibility" })}
           defaultValue={round.visibility}
-          inputRef={register}
+          inputRef={visibilityField.ref}
           inputProps={{
             onChange: (e) => {
+              visibilityField.onChange(e);
               setIsHidden(e.target.value === HIDDEN);
             },
           }}
@@ -146,10 +155,11 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
         />
 
         <SelectField
-          name="registrationPolicy"
+          name={registrationPolicyField.name}
           label={intl.formatMessage({ defaultMessage: "Registration policy" })}
           defaultValue={round.registrationPolicy}
-          inputRef={register}
+          inputRef={registrationPolicyField.ref}
+          inputProps={{ onChange: registrationPolicyField.onChange }}
           className="my-4"
         >
           <option value="OPEN">
@@ -167,10 +177,11 @@ export default function GeneralSettings({ round, currentGroup, currentUser }) {
 
         {isAdmin && (
           <SelectField
-            name="archived"
+            name={archivedField.name}
             label={intl.formatMessage({ defaultMessage: "Archive round" })}
             defaultValue={round.archived ? "true" : "false"}
-            inputRef={register}
+            inputRef={archivedField.ref}
+            inputProps={{ onChange: archivedField.onChange }}
             className="my-4"
           >
             <option value="true">

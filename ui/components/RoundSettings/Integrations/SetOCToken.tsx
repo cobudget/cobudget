@@ -79,7 +79,7 @@ const SetOCToken = ({ closeModal, round }) => {
               label={intl.formatMessage({
                 defaultMessage: "Your opencollective token",
               })}
-              inputRef={register}
+              inputRef={register("ocToken").ref}
               fullWidth
               variant="outlined"
             />

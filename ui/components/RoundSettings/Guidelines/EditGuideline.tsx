@@ -104,7 +104,7 @@ export default ({
               name="guideline.title"
               testid="guideline-title"
               defaultValue={guideline.title}
-              inputRef={register}
+              inputRef={register("guideline.title").ref}
               error={errors.guideline?.title}
               helperText={errors.guideline?.title?.message}
               color={round.color}

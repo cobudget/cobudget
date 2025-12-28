@@ -36,6 +36,7 @@ const Discourse = ({ round, currentGroup }) => {
     register,
     formState: { isDirty },
   } = useForm();
+  const discourseCategoryIdField = register("discourseCategoryId");
 
   if (!currentGroup) return null;
 
@@ -65,9 +66,10 @@ const Discourse = ({ round, currentGroup }) => {
       >
         {categories.length > 0 ? (
           <SelectField
-            name="discourseCategoryId"
+            name={discourseCategoryIdField.name}
             defaultValue={round.discourseCategoryId}
-            inputRef={register}
+            inputRef={discourseCategoryIdField.ref}
+            inputProps={{ onChange: discourseCategoryIdField.onChange }}
             className="my-4"
           >
             {categories.map((c) => (

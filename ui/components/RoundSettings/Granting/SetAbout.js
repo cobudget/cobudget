@@ -17,6 +17,7 @@ export default ({ closeModal, round }) => {
   const [, editRound] = useMutation(EDIT_ROUND);
   const { handleSubmit, register } = useForm();
   const intl = useIntl();
+  const aboutField = register("about");
 
   return (
     <Card>
@@ -38,10 +39,12 @@ export default ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="about"
+              name={aboutField.name}
               label={intl.formatMessage({ defaultMessage: "About (markdown)" })}
               defaultValue={round.about}
-              inputRef={register}
+              inputRef={aboutField.ref}
+              onChange={aboutField.onChange}
+              onBlur={aboutField.onBlur}
               fullWidth
               multiline
               variant="outlined"

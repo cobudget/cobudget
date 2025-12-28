@@ -54,7 +54,7 @@ const BucketSummary = ({ summary, canEdit, bucketId, isEditingAllowed }) => {
             multiline
             name="summary"
             placeholder={intl.formatMessage({ defaultMessage: "Summary" })}
-            inputRef={register}
+            inputRef={register("summary").ref}
             inputProps={{
               maxLength: 160,
               value: inputValue,
