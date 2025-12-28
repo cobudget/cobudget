@@ -12,7 +12,6 @@ const BULK_ALLOCATE_MUTATION = gql`
   mutation BulkAllocate($roundId: ID!, $amount: Int!, $type: AllocationType!) {
     bulkAllocate(roundId: $roundId, amount: $amount, type: $type) {
       id
-      balance
     }
   }
 `;

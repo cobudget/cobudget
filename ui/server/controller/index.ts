@@ -96,24 +96,39 @@ export const bulkAllocate = async ({ roundId, amount, type, allocatedBy }) => {
   if (type === "SET" && amount < 0)
     throw new Error("Can't set negative values");
 
+  // Fetch approved members without loading all contributions/allocations
   const members = await prisma.roundMember.findMany({
-    where: { roundId },
+    where: { roundId, isApproved: true },
     include: {
-      contributions: true,
-      allocations: true,
       user: { include: { emailSettings: true } },
     },
   });
 
+  // Use aggregate queries to get totals efficiently (let the database do the work)
+  const [allocationTotals, contributionTotals] = await Promise.all([
+    prisma.allocation.groupBy({
+      by: ["roundMemberId"],
+      where: { roundMemberId: { in: members.map((m) => m.id) } },
+      _sum: { amount: true },
+    }),
+    prisma.contribution.groupBy({
+      by: ["roundMemberId"],
+      where: { roundMemberId: { in: members.map((m) => m.id) } },
+      _sum: { amount: true },
+    }),
+  ]);
+
+  // Create lookup maps for O(1) access
+  const allocationsByMember = new Map(
+    allocationTotals.map((a) => [a.roundMemberId, a._sum.amount || 0])
+  );
+  const contributionsByMember = new Map(
+    contributionTotals.map((c) => [c.roundMemberId, c._sum.amount || 0])
+  );
+
   const membersWithCalculatedData = members.map((member) => {
-    const totalAllocations = member.allocations.reduce(
-      (acc, curr) => acc + curr.amount,
-      0
-    );
-    const totalContributions = member.contributions.reduce(
-      (acc, curr) => acc + curr.amount,
-      0
-    );
+    const totalAllocations = allocationsByMember.get(member.id) || 0;
+    const totalContributions = contributionsByMember.get(member.id) || 0;
     const balance = totalAllocations - totalContributions;
     let adjustedAmount;
     if (type === "ADD") {
