@@ -20,7 +20,7 @@
     "crowdin:upload": "../scripts/crowdin.sh upload"
   },
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   },
   "dependencies": {
     "@apollo/client": "^3.4.11",
