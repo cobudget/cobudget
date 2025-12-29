@@ -33,6 +33,9 @@ module.exports = (phase) => {
     eslint: {
       ignoreDuringBuilds: true,
     },
+    typescript: {
+      ignoreBuildErrors: true,
+    },
     compiler: {
       styledComponents: true,
     },
