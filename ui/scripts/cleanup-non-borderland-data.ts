@@ -1,0 +1,678 @@
+/**
+ * Migration Script: Cleanup Non-Borderland Data
+ *
+ * This script connects to the Cobudget database and removes all data
+ * that is NOT associated with the 'borderland' organization.
+ *
+ * Usage:
+ *   # First, ensure you have the DATABASE_URL environment variable set
+ *   # or create a .env file in the ui directory
+ *
+ *   # Dry run (default) - see what would be deleted without making changes:
+ *   cd ui && npx tsx scripts/cleanup-non-borderland-data.ts
+ *
+ *   # Live run - actually delete the data:
+ *   cd ui && DRY_RUN=false npx tsx scripts/cleanup-non-borderland-data.ts
+ *
+ *   # Use a different organization:
+ *   cd ui && TARGET_ORG_SLUG=myorg DRY_RUN=false npx tsx scripts/cleanup-non-borderland-data.ts
+ *
+ * IMPORTANT: Make sure to backup your database before running this script!
+ *
+ * Environment variables:
+ *   DATABASE_URL    - PostgreSQL connection string (required)
+ *   DRY_RUN         - Set to 'false' to perform actual deletions (default: 'true')
+ *   TARGET_ORG_SLUG - Organization slug to keep (default: 'borderland')
+ */
+
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+// Set to false to actually perform deletions
+const DRY_RUN = process.env.DRY_RUN !== 'false';
+const TARGET_ORG_SLUG = process.env.TARGET_ORG_SLUG || 'borderland';
+
+// PostgreSQL has a limit of 32767 bind variables per query
+// Use a smaller batch size to be safe
+const BATCH_SIZE = 10000;
+
+interface CleanupStats {
+  [key: string]: number;
+}
+
+/**
+ * Helper function to delete records in batches to avoid PostgreSQL bind variable limits
+ */
+async function deleteInBatches<T>(
+  ids: string[],
+  deleteFunc: (batchIds: string[]) => Promise<T>,
+  label: string
+): Promise<void> {
+  if (ids.length === 0) return;
+
+  const totalBatches = Math.ceil(ids.length / BATCH_SIZE);
+
+  for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+    const batch = ids.slice(i, i + BATCH_SIZE);
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+
+    if (totalBatches > 1) {
+      console.log(`  ${label} batch ${batchNum}/${totalBatches} (${batch.length} records)...`);
+    }
+
+    await deleteFunc(batch);
+  }
+}
+
+async function main() {
+  console.log('='.repeat(60));
+  console.log('Cobudget Database Cleanup Script');
+  console.log('='.repeat(60));
+  console.log(`Mode: ${DRY_RUN ? 'DRY RUN (no changes will be made)' : 'LIVE (data will be deleted!)'}`);
+  console.log(`Target Organization: ${TARGET_ORG_SLUG}`);
+  console.log('='.repeat(60));
+
+  const stats: CleanupStats = {};
+
+  try {
+    // Step 1: Find the target organization
+    console.log('\n[1/3] Finding target organization...');
+    const targetGroup = await prisma.group.findUnique({
+      where: { slug: TARGET_ORG_SLUG },
+      include: {
+        rounds: { select: { id: true } },
+        groupMembers: { select: { userId: true } },
+      },
+    });
+
+    if (!targetGroup) {
+      throw new Error(`Organization with slug '${TARGET_ORG_SLUG}' not found!`);
+    }
+
+    console.log(`Found organization: ${targetGroup.name} (ID: ${targetGroup.id})`);
+    console.log(`  - Rounds: ${targetGroup.rounds.length}`);
+    console.log(`  - Group Members: ${targetGroup.groupMembers.length}`);
+
+    // Step 2: Collect IDs to keep
+    console.log('\n[2/3] Collecting data to preserve...');
+
+    const targetGroupId = targetGroup.id;
+    const targetRoundIds = targetGroup.rounds.map(r => r.id);
+
+    // Get all users associated with borderland through any means
+    const groupMemberUserIds = targetGroup.groupMembers.map(gm => gm.userId);
+
+    // Get users who are round members of borderland rounds
+    const roundMemberUsers = await prisma.roundMember.findMany({
+      where: { roundId: { in: targetRoundIds } },
+      select: { userId: true },
+    });
+    const roundMemberUserIds = roundMemberUsers.map(rm => rm.userId);
+
+    // Combine all user IDs to keep (unique)
+    const usersToKeep = [...new Set([...groupMemberUserIds, ...roundMemberUserIds])];
+
+    console.log(`Users to preserve: ${usersToKeep.length}`);
+    console.log(`Rounds to preserve: ${targetRoundIds.length}`);
+
+    // Step 3: Delete data not associated with the target organization
+    console.log('\n[3/3] Cleaning up data...');
+
+    // Get IDs of rounds to delete
+    const roundsToDelete = await prisma.round.findMany({
+      where: { groupId: { not: targetGroupId } },
+      select: { id: true },
+    });
+    const roundIdsToDelete = roundsToDelete.map(r => r.id);
+
+    // Get IDs of groups to delete
+    const groupsToDelete = await prisma.group.findMany({
+      where: { id: { not: targetGroupId } },
+      select: { id: true },
+    });
+    const groupIdsToDelete = groupsToDelete.map(g => g.id);
+
+    // Get RoundMember IDs to delete (members of rounds being deleted)
+    const roundMembersToDelete = await prisma.roundMember.findMany({
+      where: { roundId: { in: roundIdsToDelete } },
+      select: { id: true },
+    });
+    const roundMemberIdsToDelete = roundMembersToDelete.map(rm => rm.id);
+
+    // Get Bucket IDs to delete
+    const bucketsToDelete = await prisma.bucket.findMany({
+      where: { roundId: { in: roundIdsToDelete } },
+      select: { id: true },
+    });
+    const bucketIdsToDelete = bucketsToDelete.map(b => b.id);
+
+    // Get Account IDs to delete (accounts associated with deleted round members and buckets)
+    const accountsFromRoundMembers = await prisma.roundMember.findMany({
+      where: { roundId: { in: roundIdsToDelete } },
+      select: {
+        incomingAccountId: true,
+        outgoingAccountId: true,
+        statusAccountId: true
+      },
+    });
+
+    const accountsFromBuckets = await prisma.bucket.findMany({
+      where: { roundId: { in: roundIdsToDelete } },
+      select: {
+        statusAccountId: true,
+        outgoingAccountId: true
+      },
+    });
+
+    const accountsFromRounds = await prisma.round.findMany({
+      where: { id: { in: roundIdsToDelete } },
+      select: { statusAccountId: true },
+    });
+
+    const accountIdsToDelete = [
+      ...accountsFromRoundMembers.flatMap(rm => [rm.incomingAccountId, rm.outgoingAccountId, rm.statusAccountId]),
+      ...accountsFromBuckets.flatMap(b => [b.statusAccountId, b.outgoingAccountId]),
+      ...accountsFromRounds.map(r => r.statusAccountId),
+    ].filter((id): id is string => id !== null);
+
+    console.log('\nData to be deleted:');
+    console.log(`  - Groups: ${groupIdsToDelete.length}`);
+    console.log(`  - Rounds: ${roundIdsToDelete.length}`);
+    console.log(`  - Round Members: ${roundMemberIdsToDelete.length}`);
+    console.log(`  - Buckets: ${bucketIdsToDelete.length}`);
+    console.log(`  - Accounts: ${accountIdsToDelete.length}`);
+
+    if (DRY_RUN) {
+      console.log('\n--- DRY RUN: Simulating deletions ---\n');
+    } else {
+      console.log('\n--- LIVE RUN: Performing deletions ---\n');
+    }
+
+    // Delete in order of dependencies (leaf tables first)
+
+    // 1. Transactions (depends on Account, Round, User, RoundMember)
+    const transactionCount = await prisma.transaction.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Transaction'] = transactionCount;
+    console.log(`Deleting ${transactionCount} transactions...`);
+    if (!DRY_RUN) {
+      await prisma.transaction.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 2. Contributions (depends on Round, RoundMember, Bucket)
+    const contributionCount = await prisma.contribution.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Contribution'] = contributionCount;
+    console.log(`Deleting ${contributionCount} contributions...`);
+    if (!DRY_RUN) {
+      await prisma.contribution.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 3. Allocations (depends on Round, RoundMember)
+    const allocationCount = await prisma.allocation.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Allocation'] = allocationCount;
+    console.log(`Deleting ${allocationCount} allocations...`);
+    if (!DRY_RUN) {
+      await prisma.allocation.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 4. FavoriteBuckets (depends on RoundMember)
+    const favoriteBucketCount = await prisma.favoriteBucket.count({
+      where: { roundMemberId: { in: roundMemberIdsToDelete } },
+    });
+    stats['FavoriteBucket'] = favoriteBucketCount;
+    console.log(`Deleting ${favoriteBucketCount} favorite buckets...`);
+    if (!DRY_RUN) {
+      await prisma.favoriteBucket.deleteMany({
+        where: { roundMemberId: { in: roundMemberIdsToDelete } },
+      });
+    }
+
+    // 5. Comments (depends on RoundMember, Bucket)
+    const commentCount = await prisma.comment.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['Comment'] = commentCount;
+    console.log(`Deleting ${commentCount} comments...`);
+    if (!DRY_RUN) {
+      await prisma.comment.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 6. Flags (depends on RoundMember, Bucket, Guideline) - handle self-reference first
+    // First, remove self-references
+    const flagsWithResolvingFlag = await prisma.flag.count({
+      where: {
+        bucketId: { in: bucketIdsToDelete },
+        resolvingFlagId: { not: null },
+      },
+    });
+    if (!DRY_RUN && flagsWithResolvingFlag > 0) {
+      await prisma.flag.updateMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+        data: { resolvingFlagId: null },
+      });
+    }
+
+    const flagCount = await prisma.flag.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['Flag'] = flagCount;
+    console.log(`Deleting ${flagCount} flags...`);
+    if (!DRY_RUN) {
+      await prisma.flag.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 7. ExpenseReceipts (depends on Expense)
+    const expenseIdsToDelete = await prisma.expense.findMany({
+      where: { bucketId: { in: bucketIdsToDelete } },
+      select: { id: true },
+    });
+    const expenseReceiptCount = await prisma.expenseReceipt.count({
+      where: { expenseId: { in: expenseIdsToDelete.map(e => e.id) } },
+    });
+    stats['ExpenseReceipt'] = expenseReceiptCount;
+    console.log(`Deleting ${expenseReceiptCount} expense receipts...`);
+    if (!DRY_RUN) {
+      await prisma.expenseReceipt.deleteMany({
+        where: { expenseId: { in: expenseIdsToDelete.map(e => e.id) } },
+      });
+    }
+
+    // 8. Expenses (depends on Bucket)
+    const expenseCount = await prisma.expense.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['Expense'] = expenseCount;
+    console.log(`Deleting ${expenseCount} expenses...`);
+    if (!DRY_RUN) {
+      await prisma.expense.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 9. FieldValues (depends on Field, Bucket)
+    const fieldValueCount = await prisma.fieldValue.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['FieldValue'] = fieldValueCount;
+    console.log(`Deleting ${fieldValueCount} field values...`);
+    if (!DRY_RUN) {
+      await prisma.fieldValue.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 10. BudgetItems (depends on Bucket)
+    const budgetItemCount = await prisma.budgetItem.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['BudgetItem'] = budgetItemCount;
+    console.log(`Deleting ${budgetItemCount} budget items...`);
+    if (!DRY_RUN) {
+      await prisma.budgetItem.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 11. Images (depends on Bucket)
+    const imageCount = await prisma.image.count({
+      where: { bucketId: { in: bucketIdsToDelete } },
+    });
+    stats['Image'] = imageCount;
+    console.log(`Deleting ${imageCount} images...`);
+    if (!DRY_RUN) {
+      await prisma.image.deleteMany({
+        where: { bucketId: { in: bucketIdsToDelete } },
+      });
+    }
+
+    // 12. Clear bucket-tag relations and delete buckets
+    // First, disconnect tags from buckets
+    console.log(`Disconnecting tags from ${bucketIdsToDelete.length} buckets...`);
+    if (!DRY_RUN) {
+      for (const bucketId of bucketIdsToDelete) {
+        await prisma.bucket.update({
+          where: { id: bucketId },
+          data: { tags: { set: [] }, cocreators: { set: [] } },
+        });
+      }
+    }
+
+    // 13. Clear account references from buckets before deleting buckets
+    console.log('Clearing account references from buckets...');
+    if (!DRY_RUN) {
+      await prisma.bucket.updateMany({
+        where: { roundId: { in: roundIdsToDelete } },
+        data: { statusAccountId: null, outgoingAccountId: null },
+      });
+    }
+
+    // 14. Buckets (depends on Round)
+    stats['Bucket'] = bucketIdsToDelete.length;
+    console.log(`Deleting ${bucketIdsToDelete.length} buckets...`);
+    if (!DRY_RUN) {
+      await prisma.bucket.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 15. Guidelines (depends on Round) - flags already deleted
+    const guidelineCount = await prisma.guideline.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Guideline'] = guidelineCount;
+    console.log(`Deleting ${guidelineCount} guidelines...`);
+    if (!DRY_RUN) {
+      await prisma.guideline.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 16. Tags (depends on Round) - bucket relations already cleared
+    const tagCount = await prisma.tag.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Tag'] = tagCount;
+    console.log(`Deleting ${tagCount} tags...`);
+    if (!DRY_RUN) {
+      await prisma.tag.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 17. Fields (depends on Round) - field values already deleted
+    const fieldCount = await prisma.field.count({
+      where: { roundId: { in: roundIdsToDelete } },
+    });
+    stats['Field'] = fieldCount;
+    console.log(`Deleting ${fieldCount} fields...`);
+    if (!DRY_RUN) {
+      await prisma.field.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 18. Clear account references from RoundMembers
+    console.log('Clearing account references from round members...');
+    if (!DRY_RUN) {
+      await prisma.roundMember.updateMany({
+        where: { roundId: { in: roundIdsToDelete } },
+        data: {
+          incomingAccountId: null,
+          outgoingAccountId: null,
+          statusAccountId: null
+        },
+      });
+    }
+
+    // 19. RoundMembers (depends on Round, User)
+    stats['RoundMember'] = roundMemberIdsToDelete.length;
+    console.log(`Deleting ${roundMemberIdsToDelete.length} round members...`);
+    if (!DRY_RUN) {
+      await prisma.roundMember.deleteMany({
+        where: { roundId: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 20. Clear account references from Rounds
+    console.log('Clearing account references from rounds...');
+    if (!DRY_RUN) {
+      await prisma.round.updateMany({
+        where: { id: { in: roundIdsToDelete } },
+        data: { statusAccountId: null },
+      });
+    }
+
+    // 21. Rounds (depends on Group, Account)
+    stats['Round'] = roundIdsToDelete.length;
+    console.log(`Deleting ${roundIdsToDelete.length} rounds...`);
+    if (!DRY_RUN) {
+      await prisma.round.deleteMany({
+        where: { id: { in: roundIdsToDelete } },
+      });
+    }
+
+    // 22. Accounts (now safe to delete) - use batching due to large numbers
+    stats['Account'] = accountIdsToDelete.length;
+    console.log(`Deleting ${accountIdsToDelete.length} accounts...`);
+    if (!DRY_RUN) {
+      await deleteInBatches(
+        accountIdsToDelete,
+        (batchIds) => prisma.account.deleteMany({ where: { id: { in: batchIds } } }),
+        'Accounts'
+      );
+    }
+
+    // 23. DiscourseConfig (depends on Group)
+    const discourseConfigCount = await prisma.discourseConfig.count({
+      where: { groupId: { in: groupIdsToDelete } },
+    });
+    stats['DiscourseConfig'] = discourseConfigCount;
+    console.log(`Deleting ${discourseConfigCount} discourse configs...`);
+    if (!DRY_RUN) {
+      await prisma.discourseConfig.deleteMany({
+        where: { groupId: { in: groupIdsToDelete } },
+      });
+    }
+
+    // 24. GroupMembers (depends on Group, User)
+    const groupMemberCount = await prisma.groupMember.count({
+      where: { groupId: { in: groupIdsToDelete } },
+    });
+    stats['GroupMember'] = groupMemberCount;
+    console.log(`Deleting ${groupMemberCount} group members...`);
+    if (!DRY_RUN) {
+      await prisma.groupMember.deleteMany({
+        where: { groupId: { in: groupIdsToDelete } },
+      });
+    }
+
+    // 25. Groups (finally!)
+    stats['Group'] = groupIdsToDelete.length;
+    console.log(`Deleting ${groupIdsToDelete.length} groups...`);
+    if (!DRY_RUN) {
+      await prisma.group.deleteMany({
+        where: { id: { in: groupIdsToDelete } },
+      });
+    }
+
+    // 26. Now clean up orphaned users (users not in any remaining group or round)
+    console.log('\nFinding orphaned users...');
+
+    // Get all users who have NO group memberships and NO round memberships
+    const allUsers = await prisma.user.findMany({
+      select: { id: true },
+    });
+
+    const usersWithGroupMembership = await prisma.groupMember.findMany({
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+
+    const usersWithRoundMembership = await prisma.roundMember.findMany({
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+
+    const usersWithMembership = new Set([
+      ...usersWithGroupMembership.map(gm => gm.userId),
+      ...usersWithRoundMembership.map(rm => rm.userId),
+    ]);
+
+    const orphanedUserIds = allUsers
+      .map(u => u.id)
+      .filter(id => !usersWithMembership.has(id));
+
+    console.log(`Found ${orphanedUserIds.length} orphaned users`);
+
+    // 27. Clean up user-related data for orphaned users (use batching for large lists)
+    // EmailSettings
+    const emailSettingsCount = await prisma.emailSettings.count({
+      where: { userId: { in: orphanedUserIds } },
+    });
+    stats['EmailSettings'] = emailSettingsCount;
+    console.log(`Deleting ${emailSettingsCount} email settings...`);
+    if (!DRY_RUN) {
+      await deleteInBatches(
+        orphanedUserIds,
+        (batchIds) => prisma.emailSettings.deleteMany({ where: { userId: { in: batchIds } } }),
+        'EmailSettings'
+      );
+    }
+
+    // UserMeta - find orphaned user metas
+    const userMetaCount = await prisma.userMeta.count({
+      where: { userId: { in: orphanedUserIds } },
+    });
+    stats['UserMeta'] = userMetaCount;
+    console.log(`Deleting ${userMetaCount} user meta records...`);
+    if (!DRY_RUN) {
+      await deleteInBatches(
+        orphanedUserIds,
+        (batchIds) => prisma.userMeta.deleteMany({ where: { userId: { in: batchIds } } }),
+        'UserMeta'
+      );
+    }
+
+    // 28. SuperAdminSession - delete sessions for orphaned admins
+    const superAdminSessionCount = await prisma.superAdminSession.count({
+      where: { adminId: { in: orphanedUserIds } },
+    });
+    stats['SuperAdminSession'] = superAdminSessionCount;
+    console.log(`Deleting ${superAdminSessionCount} super admin sessions...`);
+    if (!DRY_RUN) {
+      await deleteInBatches(
+        orphanedUserIds,
+        (batchIds) => prisma.superAdminSession.deleteMany({ where: { adminId: { in: batchIds } } }),
+        'SuperAdminSessions'
+      );
+    }
+
+    // 29. Delete orphaned users
+    stats['User'] = orphanedUserIds.length;
+    console.log(`Deleting ${orphanedUserIds.length} orphaned users...`);
+    if (!DRY_RUN) {
+      await deleteInBatches(
+        orphanedUserIds,
+        (batchIds) => prisma.user.deleteMany({ where: { id: { in: batchIds } } }),
+        'Users'
+      );
+    }
+
+    // 30. Clean up any remaining orphaned data
+    // Orphaned expenses (not linked to any bucket)
+    const orphanedExpenseCount = await prisma.expense.count({
+      where: { bucketId: null },
+    });
+    if (orphanedExpenseCount > 0) {
+      console.log(`Found ${orphanedExpenseCount} orphaned expenses (no bucket)`);
+      // Get their IDs first
+      const orphanedExpenses = await prisma.expense.findMany({
+        where: { bucketId: null },
+        select: { id: true },
+      });
+      // Delete their receipts
+      if (!DRY_RUN) {
+        await prisma.expenseReceipt.deleteMany({
+          where: { expenseId: { in: orphanedExpenses.map(e => e.id) } },
+        });
+        await prisma.expense.deleteMany({
+          where: { bucketId: null },
+        });
+      }
+      stats['OrphanedExpense'] = orphanedExpenseCount;
+    }
+
+    // Orphaned images (not linked to any bucket)
+    const orphanedImageCount = await prisma.image.count({
+      where: { bucketId: null },
+    });
+    if (orphanedImageCount > 0) {
+      console.log(`Found ${orphanedImageCount} orphaned images (no bucket)`);
+      if (!DRY_RUN) {
+        await prisma.image.deleteMany({
+          where: { bucketId: null },
+        });
+      }
+      stats['OrphanedImage'] = orphanedImageCount;
+    }
+
+    // Orphaned budget items (not linked to any bucket)
+    const orphanedBudgetItemCount = await prisma.budgetItem.count({
+      where: { bucketId: null },
+    });
+    if (orphanedBudgetItemCount > 0) {
+      console.log(`Found ${orphanedBudgetItemCount} orphaned budget items (no bucket)`);
+      if (!DRY_RUN) {
+        await prisma.budgetItem.deleteMany({
+          where: { bucketId: null },
+        });
+      }
+      stats['OrphanedBudgetItem'] = orphanedBudgetItemCount;
+    }
+
+    // Print summary
+    console.log('\n' + '='.repeat(60));
+    console.log('CLEANUP SUMMARY');
+    console.log('='.repeat(60));
+    console.log(`Mode: ${DRY_RUN ? 'DRY RUN' : 'LIVE'}`);
+    console.log('\nRecords deleted (or would be deleted):');
+
+    let totalDeleted = 0;
+    for (const [table, count] of Object.entries(stats)) {
+      if (count > 0) {
+        console.log(`  ${table}: ${count}`);
+        totalDeleted += count;
+      }
+    }
+    console.log(`\nTotal: ${totalDeleted} records`);
+
+    // Final verification
+    if (!DRY_RUN) {
+      console.log('\n--- Final Verification ---');
+      const remainingGroups = await prisma.group.count();
+      const remainingRounds = await prisma.round.count();
+      const remainingUsers = await prisma.user.count();
+      const remainingBuckets = await prisma.bucket.count();
+
+      console.log(`Remaining groups: ${remainingGroups}`);
+      console.log(`Remaining rounds: ${remainingRounds}`);
+      console.log(`Remaining users: ${remainingUsers}`);
+      console.log(`Remaining buckets: ${remainingBuckets}`);
+    }
+
+    console.log('\n' + '='.repeat(60));
+    console.log(DRY_RUN
+      ? 'DRY RUN COMPLETE - No changes were made'
+      : 'CLEANUP COMPLETE - Data has been deleted'
+    );
+    console.log('='.repeat(60));
+
+  } catch (error) {
+    console.error('\nERROR:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
