@@ -269,6 +269,18 @@ h5 {
   background-clip: padding-box;
 }
 
+/* Masonry layout for bucket gallery */
+.bucket-gallery-masonry {
+  display: flex;
+  margin-left: -0.75rem;
+  width: auto;
+}
+
+.bucket-gallery-masonry-column {
+  padding-left: 0.75rem;
+  background-clip: padding-box;
+}
+
 
 /* Animation */
 

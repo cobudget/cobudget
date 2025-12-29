@@ -1,13 +1,11 @@
 import { isMemberOfBucket } from "utils/helpers";
 
-import Images from "./Images";
 import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
 import DirectFunding from "./DirectFunding";
-import toast from "react-hot-toast";
 
-const Bucket = ({ bucket, currentUser, openImageModal }) => {
+const Bucket = ({ bucket, currentUser }) => {
   if (!bucket) return null;
 
   const canEdit =
@@ -33,24 +31,8 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
   return (
     <div className="bg-white border-b-default">
       <div className="page relative">
-        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-sidebar gap-6">
           <div className="py-2">
-            <Images
-              images={bucket.images}
-              size={100}
-              canEdit={canEdit}
-              bucketId={bucket.id}
-              openImageModal={() => {
-                if (isEditingAllowed) {
-                  openImageModal();
-                } else {
-                  toast.error(
-                    "Funding has started, and you cannot edit your bucket. Please contact a moderator or admin for help."
-                  );
-                }
-              }}
-            />
-
             {bucket.description && (
               <Description
                 // We no longer use this field for new buckets.

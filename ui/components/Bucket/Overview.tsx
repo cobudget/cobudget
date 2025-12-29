@@ -1,5 +1,6 @@
 import Head from "next/head";
 import Sidebar from "./Sidebar";
+import BucketGallery from "./BucketGallery";
 import HappySpinner from "components/HappySpinner";
 import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
@@ -88,29 +89,19 @@ export default function Overview({
             isEditingAllowed={isEditingAllowed}
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-sidebar gap-10">
-            {bucket.images.length > 0 ? (
-              <img
-                className="h-64 md:h-88 w-full object-cover object-center"
-                src={bucket.images[0].large ?? bucket.images[0].small}
-              />
-            ) : canEdit ? (
-              <button
-                className={`w-full h-64 md:h-88 block text-gray-600 font-semibold rounded-lg border-3 border-dashed focus:outline-none focus:bg-gray-100 hover:bg-gray-100`}
-                onClick={() => {
-                  if (isEditingAllowed) {
-                    openImageModal();
-                  } else {
-                    toast.error(COCREATORS_CANT_EDIT);
-                  }
-                }}
-              >
-                <FormattedMessage defaultMessage="+ Cover image" />
-              </button>
-            ) : (
-              <div className="w-full h-64 md:h-88 block border-3 border-dashed rounded-lg"></div>
-            )}
-            <div className="">
+          <div className="grid grid-cols-1 md:grid-cols-sidebar gap-6 items-start">
+            <BucketGallery
+              images={bucket.images}
+              canEdit={canEdit}
+              openImageModal={() => {
+                if (isEditingAllowed) {
+                  openImageModal();
+                } else {
+                  toast.error(COCREATORS_CANT_EDIT);
+                }
+              }}
+            />
+            <div className="md:sticky md:top-4 md:self-start">
               <Sidebar
                 bucket={bucket}
                 currentUser={currentUser}
