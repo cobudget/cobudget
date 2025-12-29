@@ -284,6 +284,11 @@ const Page = ({
 }) => {
   const { tag, s } = router.query;
 
+  // Filter out HIDE_ALL since it's a frontend-only placeholder, not a valid GraphQL StatusType
+  const graphqlStatusFilter = statusFilter.filter(
+    (status) => status !== "HIDE_ALL"
+  );
+
   const [{ data, fetching, error }] = useQuery({
     query: BUCKETS_QUERY,
     pause,
@@ -292,7 +297,7 @@ const Page = ({
       roundSlug: router.query.round,
       offset: variables.offset,
       limit: variables.limit,
-      status: statusFilter,
+      status: graphqlStatusFilter,
       ...(orderBy && {
         orderBy,
         orderDir: "desc",
@@ -679,12 +684,17 @@ const RoundPage = ({ currentUser }) => {
     }
   }, [router.isReady, router.query.page, router.query.view]);
 
+  // Filter out HIDE_ALL since it's a frontend-only placeholder, not a valid GraphQL StatusType
+  const graphqlStatusFilter = statusFilter.filter(
+    (status) => status !== "HIDE_ALL"
+  );
+
   const [{ data: pinnedData }] = useQuery({
     query: PINNED_BUCKETS_QUERY,
     variables: {
       groupSlug: router.query.group,
       roundSlug: router.query.round,
-      status: statusFilter,
+      status: graphqlStatusFilter,
     },
     pause: !router.isReady || bucketTableView,
   });
