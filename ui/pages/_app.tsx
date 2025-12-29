@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import BucketLimitOver from "components/BucketLimitOver";
 import UpgradeGroupModal from "components/Elements/UpgradeGroupModal";
 import Fallback from "components/Fallback";
+import MaintenancePage from "components/MaintenancePage";
 import RequiredActionsModal from "components/RequiredActions";
 import AppContext from "contexts/AppContext";
 import Cookies from "js-cookie";
@@ -166,6 +167,8 @@ export const TOP_LEVEL_QUERY = gql`
       registrationPolicy
       visibility
       isFree
+      disabled
+      redirectDomain
       subscriptionStatus {
         isActive
       }
@@ -299,9 +302,43 @@ const MyApp = ({ Component, pageProps, router }) => {
     };
   }, [ss]);
 
+  // Check if super admin session is active
+  const inSuperAdminSession = useMemo(() => {
+    if (ss?.start + ss?.duration * 60000 - Date.now() > 0) {
+      return true;
+    }
+    return false;
+  }, [ss]);
+
+  // Handle disabled groups - redirect or show maintenance page
+  // Super admins with active sessions bypass this check
+  useEffect(() => {
+    if (
+      group?.disabled &&
+      group?.redirectDomain &&
+      !inSuperAdminSession &&
+      typeof window !== "undefined"
+    ) {
+      // Redirect to the new domain, preserving the path
+      const currentPath = window.location.pathname + window.location.search;
+      const redirectUrl = group.redirectDomain.replace(/\/$/, "") + currentPath;
+      window.location.href = redirectUrl;
+    }
+  }, [group?.disabled, group?.redirectDomain, inSuperAdminSession]);
+
   if (error) {
     console.error("Top level query failed:", error);
     return error.message;
+  }
+
+  // Show maintenance page if group is disabled and no redirect domain is set
+  // Super admins with active sessions bypass this
+  if (group?.disabled && !group?.redirectDomain && !inSuperAdminSession) {
+    return (
+      <IntlProvider locale={locale} messages={lang[locale]}>
+        <MaintenancePage groupName={group?.name} />
+      </IntlProvider>
+    );
   }
 
   return (

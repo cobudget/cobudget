@@ -230,6 +230,39 @@ export const changeGroupFreeStatus = async (
   });
 };
 
+export const setGroupDisabled = async (
+  _,
+  { groupId, disabled },
+  { ss }
+) => {
+  if (!ss) {
+    throw new Error("Only superadmins can perform this action");
+  }
+  return prisma.group.update({
+    where: { id: groupId },
+    data: {
+      disabled,
+    },
+  });
+};
+
+export const setGroupRedirectDomain = async (
+  _,
+  { groupId, redirectDomain },
+  { ss }
+) => {
+  if (!ss) {
+    throw new Error("Only superadmins can perform this action");
+  }
+  // Allow setting to null/empty to clear the redirect
+  return prisma.group.update({
+    where: { id: groupId },
+    data: {
+      redirectDomain: redirectDomain || null,
+    },
+  });
+};
+
 export const moveRoundToGroup = async (
   _,
   { groupId, roundId },

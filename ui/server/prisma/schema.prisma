@@ -194,6 +194,9 @@ model Group {
   registrationPolicy RegistrationPolicy? @default(OPEN)
   visibility         Visibility?         @default(PUBLIC)
 
+  disabled        Boolean @default(false)
+  redirectDomain  String?
+
   @@map("Organization")
 }
 

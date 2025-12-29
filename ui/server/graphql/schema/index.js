@@ -357,6 +357,8 @@ const schema = gql`
     ): GroupMember
     deleteGroupMember(groupId: ID!, groupMemberId: ID!): GroupMember
     changeGroupFreeStatus(groupId: ID!, freeStatus: Boolean): Group
+    setGroupDisabled(groupId: ID!, disabled: Boolean!): Group
+    setGroupRedirectDomain(groupId: ID!, redirectDomain: String): Group
     moveRoundToGroup(roundId: ID!, groupId: ID!): Round
     updateMember(
       roundId: ID!
@@ -428,6 +430,8 @@ const schema = gql`
     visibility: Visibility
     subscriptionStatus: GroupSubscriptionStatus
     isFree: Boolean
+    disabled: Boolean
+    redirectDomain: String
   }
 
   enum RoundType {
