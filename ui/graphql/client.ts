@@ -401,19 +401,7 @@ export const client = (
                 .inspectFields("Query")
                 .filter((field) => field.fieldName === "bucketsPage")
                 .forEach((field) => {
-                  cache.updateQuery(
-                    {
-                      query: BUCKETS_QUERY,
-                      variables: field.arguments,
-                    },
-                    (data: any) => {
-                      if (!data?.bucketsPage?.buckets) return data;
-                      data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
-                        (bucket) => bucket.id !== bucketId
-                      );
-                      return data;
-                    }
-                  );
+                  cache.invalidate("Query", "bucketsPage", field.arguments);
                 });
             },
             createExpense(result: any, args, cache) {

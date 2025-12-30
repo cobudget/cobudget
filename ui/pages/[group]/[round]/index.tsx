@@ -313,11 +313,11 @@ const Page = ({
   if (!bucketTableView) {
     if (isFirstPage && pinnedBuckets && pinnedBuckets.length > 0) {
       // On page 1, merge all pinned buckets (fetched separately) with unpinned ones from this page.
-      const unpinned = buckets.filter((b) => b.pinnedAt === null);
+      const unpinned = buckets.filter((b) => b && b.pinnedAt === null);
       finalBuckets = [...pinnedBuckets, ...unpinned];
     } else {
       // On subsequent pages, show only unpinned buckets.
-      finalBuckets = buckets.filter((b) => b.pinnedAt === null);
+      finalBuckets = buckets.filter((b) => b && b.pinnedAt === null);
     }
   }
 
@@ -699,7 +699,7 @@ const RoundPage = ({ currentUser }) => {
     pause: !router.isReady || bucketTableView,
   });
   const pinnedBuckets = (pinnedData?.bucketsPage?.buckets ?? [])
-    .filter((b) => b.pinnedAt !== null)
+    .filter((b) => b && b.pinnedAt !== null)
     .sort(
       (a, b) => new Date(a.pinnedAt).getTime() - new Date(b.pinnedAt).getTime()
     );
