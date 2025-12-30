@@ -590,27 +590,45 @@ async function main() {
 
     // 22. Delete any remaining transactions that reference accounts being deleted
     // (These are cross-round transactions from preserved rounds to deleted accounts)
-    const orphanedTransactionCount = await prisma.transaction.count({
-      where: {
-        OR: [
-          { fromAccountId: { in: accountIdsToDelete } },
-          { toAccountId: { in: accountIdsToDelete } },
-        ],
-      },
-    });
-    if (orphanedTransactionCount > 0) {
-      console.log(`Deleting ${orphanedTransactionCount} orphaned transactions (cross-round)...`);
-      stats['OrphanedTransaction'] = orphanedTransactionCount;
-      if (!DRY_RUN) {
-        await prisma.transaction.deleteMany({
+    // Must batch this because OR with two IN clauses doubles the bind variables
+    console.log('Checking for orphaned transactions (cross-round)...');
+    let orphanedTransactionCount = 0;
+    const accountBatchSize = Math.floor(BATCH_SIZE / 2); // Half size since OR doubles bindings
+
+    if (!DRY_RUN) {
+      const progress = new ProgressBar('Orphaned txns', Math.ceil(accountIdsToDelete.length / accountBatchSize));
+      for (let i = 0; i < accountIdsToDelete.length; i += accountBatchSize) {
+        const batch = accountIdsToDelete.slice(i, i + accountBatchSize);
+        const result = await prisma.transaction.deleteMany({
           where: {
             OR: [
-              { fromAccountId: { in: accountIdsToDelete } },
-              { toAccountId: { in: accountIdsToDelete } },
+              { fromAccountId: { in: batch } },
+              { toAccountId: { in: batch } },
+            ],
+          },
+        });
+        orphanedTransactionCount += result.count;
+        progress.increment();
+      }
+      progress.complete();
+    } else {
+      // Dry run: count in batches
+      for (let i = 0; i < accountIdsToDelete.length; i += accountBatchSize) {
+        const batch = accountIdsToDelete.slice(i, i + accountBatchSize);
+        orphanedTransactionCount += await prisma.transaction.count({
+          where: {
+            OR: [
+              { fromAccountId: { in: batch } },
+              { toAccountId: { in: batch } },
             ],
           },
         });
       }
+    }
+
+    if (orphanedTransactionCount > 0) {
+      console.log(`Deleted ${orphanedTransactionCount} orphaned transactions (cross-round)`);
+      stats['OrphanedTransaction'] = orphanedTransactionCount;
     }
 
     // 23. Accounts (now safe to delete) - use batching due to large numbers
