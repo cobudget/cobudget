@@ -1,21 +1,40 @@
 import { useState, useEffect } from "react";
-import { sortableContainer } from "react-sortable-hoc";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { cloneDeep } from "lodash";
-
-const SortableContainer = sortableContainer(({ children }) => {
-  return <ul className="select-none">{children}</ul>;
-});
 
 const DraggableItems = ({
   round,
   items,
   setItemPosition,
   setPositionLoading,
-  SortableItem,
+  ItemComponent,
   setEditingItem,
 }) => {
   // To allow real time dragging changes - we duplicate the list locally
   const [localItems, setLocalItems] = useState(cloneDeep(items));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // This updated the global server items with our local copy
   useEffect(() => {
@@ -27,7 +46,20 @@ const DraggableItems = ({
 
   // Extract the position of the items before and after the new index to calculate the new
   // item position (Based on https://softwareengineering.stackexchange.com/a/195317/54663)
-  const onSortEnd = ({ oldIndex, newIndex }) => {
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = localItems.findIndex((item) => item.id === active.id);
+    const newIndex = localItems.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
     let beforePosition;
     let afterPosition;
     let beforeItem;
@@ -44,7 +76,7 @@ const DraggableItems = ({
       // Last element
       beforePosition = localItems[localItems.length - 1].position + 1;
     }
-    if (newIndex == 0) {
+    if (newIndex === 0) {
       // First element
       afterPosition = localItems[0].position - 1;
       beforePosition = localItems[0].position;
@@ -55,32 +87,40 @@ const DraggableItems = ({
     const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
     const item = localItems[oldIndex];
     item.position = newPosition;
-    setLocalItems(localItems);
+
+    // Create a new array with updated positions for proper React state update
+    const updatedItems = [...localItems];
+    setLocalItems(updatedItems);
 
     setItemPosition(item.id, newPosition);
   };
 
+  const sortedItems = localItems
+    ? [...localItems].sort((a, b) => a.position - b.position)
+    : [];
+
   return (
-    <SortableContainer
-      onSortEnd={onSortEnd}
-      useDragHandle
-      helperClass="draggable-sorting-helper"
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
     >
-      {localItems &&
-        localItems
-          // lol this sort actually mutates localItems, which turns out to be
-          // central to the functioning of this
-          .sort((a, b) => a.position - b.position)
-          .map((item, index) => (
-            <SortableItem
+      <SortableContext
+        items={sortedItems.map((item) => item.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        <ul className="select-none">
+          {sortedItems.map((item) => (
+            <ItemComponent
               key={item.id}
-              index={index}
               item={item}
               setEditingItem={setEditingItem}
               roundId={round.id}
             />
           ))}
-    </SortableContainer>
+        </ul>
+      </SortableContext>
+    </DndContext>
   );
 };
 

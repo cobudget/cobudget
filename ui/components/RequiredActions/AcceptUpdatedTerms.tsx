@@ -1,12 +1,12 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { DialogTitle } from "@headlessui/react";
+import { useState } from "react";
 import { useMutation, gql } from "urql";
 import TextField from "../TextField";
 import Button from "../Button";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
-import { CheckRounded } from "@mui/icons-material";
+import CheckRounded from "@mui/icons-material/CheckRounded";
 
 const ACCEPT_TERMS_MUTATION = gql`
   mutation acceptTerms {
@@ -24,7 +24,7 @@ export default function AcceptUpdatedTerms() {
 
   return (
     <>
-      <Dialog.Title
+      <DialogTitle
         as="h3"
         className="text-lg font-medium leading-6 text-gray-900"
       >
@@ -37,7 +37,7 @@ export default function AcceptUpdatedTerms() {
             date: dayjs(process.env.TERMS_UPDATED_AT).format("YYYY-MM-DD"),
           }}
         />
-      </Dialog.Title>
+      </DialogTitle>
       <div className="mt-2">
         <p className="text-sm text-gray-500">
           <FormattedMessage

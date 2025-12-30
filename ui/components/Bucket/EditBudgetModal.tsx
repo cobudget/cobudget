@@ -34,6 +34,7 @@ const EDIT_BUDGET_MUTATION = gql`
 const schema = yup.object().shape({
   budgetItems: yup.array().of(
     yup.object().shape({
+      id: yup.string().optional(),
       description: yup.string().required(),
       min: yup.number().integer().min(0).required(),
       max: yup
@@ -65,7 +66,14 @@ const EditBudgetModal = ({
 
   const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { budgetItems },
+    // Convert cents to display units for form state (e.g., 30000 cents → 300)
+    defaultValues: {
+      budgetItems: budgetItems.map((item) => ({
+        ...item,
+        min: typeof item.min !== "undefined" ? item.min / 100 : undefined,
+        max: typeof item.max !== "undefined" && item.max !== null ? item.max / 100 : undefined,
+      })),
+    },
   });
 
   const { fields, append, insert, remove } = useFieldArray({
@@ -74,16 +82,25 @@ const EditBudgetModal = ({
     keyName: "fieldId",
   });
 
-  const incomeItems = fields.filter((field) => field.type === "INCOME");
-  const expenseItems = fields.filter((field) => field.type === "EXPENSE");
+  const incomeItems = fields
+    .map((field, originalIndex) => ({ ...field, originalIndex }))
+    .filter((field) => field.type === "INCOME");
+  const expenseItems = fields
+    .map((field, originalIndex) => ({ ...field, originalIndex }))
+    .filter((field) => field.type === "EXPENSE");
 
   const checkErrors = (errors) => {
     if (errors?.budgetItems?.length > 0) {
-      const err = Object.keys(errors.budgetItems[0]);
-      if (err.length === 0) {
+      // Find the first non-undefined error in the array
+      const firstError = errors.budgetItems.find((e) => e !== undefined && e !== null);
+      if (!firstError) {
         return;
       }
-      toast.error(errors.budgetItems[0][err[0]].message);
+      const errKeys = Object.keys(firstError);
+      if (errKeys.length === 0) {
+        return;
+      }
+      toast.error(firstError[errKeys[0]].message);
     }
   };
 
@@ -116,23 +133,22 @@ const EditBudgetModal = ({
               EXPENSE: 0,
               INCOME: 0,
             };
+            const budgetItemsToSend = variables.budgetItems?.map((item, i) => {
+              const preId = getPreId(item.type, budgetTypeCount[item.type]);
+              budgetTypeCount[item.type]++;
+              return {
+                ...item,
+                id: undefined,
+                min: Math.round(item.min * 100),
+                ...(item.max &&
+                  maxAmountOpenInputs[item.id || preId] && {
+                    max: Math.round(item.max * 100),
+                  }),
+              };
+            }) ?? [];
             editBucket({
               bucketId: bucket.id,
-              budgetItems: [
-                ...(variables.budgetItems?.map((item, i) => {
-                  const preId = getPreId(item.type, budgetTypeCount[item.type]);
-                  budgetTypeCount[item.type]++;
-                  return {
-                    ...item,
-                    id: undefined, //remove id
-                    min: Math.round(item.min * 100),
-                    ...(item.max &&
-                      maxAmountOpenInputs[item.id || preId] && {
-                        max: Math.round(item.max * 100),
-                      }),
-                  };
-                }) ?? []),
-              ],
+              budgetItems: budgetItemsToSend,
             })
               .then(() => {
                 handleClose();
@@ -145,8 +161,10 @@ const EditBudgetModal = ({
           </h2>
 
           {expenseItems.map(
-            ({ id, fieldId, description, type, min, max }, i) => {
-              const index = i + incomeItems.length;
+            ({ id, fieldId, description, type, min, max, originalIndex }, i) => {
+              const descField = register(`budgetItems.${originalIndex}.description`);
+              const minField = register(`budgetItems.${originalIndex}.min`);
+              const maxField = register(`budgetItems.${originalIndex}.max`);
               return (
                 <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                   <div className="mr-2 my-2 sm:my-0 flex-1">
@@ -154,20 +172,21 @@ const EditBudgetModal = ({
                       value={id}
                       readOnly
                       className="hidden"
-                      {...register(`budgetItems.${index}.id`)}
+                      {...register(`budgetItems.${originalIndex}.id`)}
                     />
                     <TextField
                       placeholder={intl.formatMessage({
                         defaultMessage: "Description",
                       })}
                       defaultValue={description}
-                      inputRef={register(`budgetItems.${index}.description`).ref}
-                      inputProps={register(`budgetItems.${index}.description`)}
+                      name={descField.name}
+                      inputRef={descField.ref}
+                      inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
                       testid={`bucket-expense-item-description`}
                     />
                     <input
                       value={type}
-                      {...register(`budgetItems.${index}.type`)}
+                      {...register(`budgetItems.${originalIndex}.type`)}
                       readOnly
                       className="hidden"
                     />
@@ -180,10 +199,11 @@ const EditBudgetModal = ({
                           : intl.formatMessage({ defaultMessage: "Amount" })
                       }
                       defaultValue={
-                        typeof min !== "undefined" ? String(min / 100) : null
+                        typeof min !== "undefined" ? String(min) : null
                       }
-                      inputRef={register(`budgetItems.${index}.min`).ref}
-                      inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
+                      name={minField.name}
+                      inputRef={minField.ref}
+                      inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
                       endAdornment={currency}
                       testid={`bucket-expense-item-min-amount`}
                     />
@@ -200,10 +220,11 @@ const EditBudgetModal = ({
                             defaultValue={
                               typeof max === "undefined" || max === null
                                 ? null
-                                : String(max / 100)
+                                : String(max)
                             }
-                            inputRef={register(`budgetItems.${index}.max`).ref}
-                            inputProps={{ ...register(`budgetItems.${index}.max`), type: "number", min: 0 }}
+                            name={maxField.name}
+                            inputRef={maxField.ref}
+                            inputProps={{ onChange: maxField.onChange, onBlur: maxField.onBlur, type: "number", min: 0 }}
                             endAdornment={currency}
                           />
                           <span
@@ -234,7 +255,7 @@ const EditBudgetModal = ({
                     </div>
                   )}
                   <div className="my-2">
-                    <IconButton onClick={() => remove(index)}>
+                    <IconButton onClick={() => remove(originalIndex)}>
                       <DeleteIcon className="h-6 w-6 text-color-red" />
                     </IconButton>
                   </div>
@@ -259,7 +280,9 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Existing funding and resources" />
           </h2>
 
-          {incomeItems.map(({ id, fieldId, description, type, min }, index) => {
+          {incomeItems.map(({ id, fieldId, description, type, min, originalIndex }) => {
+            const descField = register(`budgetItems.${originalIndex}.description`);
+            const minField = register(`budgetItems.${originalIndex}.min`);
             return (
               <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
                 <div className="mr-2 my-2 sm:my-0 flex-grow">
@@ -267,20 +290,21 @@ const EditBudgetModal = ({
                     value={id}
                     readOnly
                     className="hidden"
-                    {...register(`budgetItems.${index}.id`)}
+                    {...register(`budgetItems.${originalIndex}.id`)}
                   />
                   <TextField
                     placeholder={intl.formatMessage({
                       defaultMessage: "Description",
                     })}
-                    inputRef={register(`budgetItems.${index}.description`).ref}
-                    inputProps={register(`budgetItems.${index}.description`)}
+                    name={descField.name}
+                    inputRef={descField.ref}
+                    inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
                     defaultValue={description}
                     testid={`bucket-existing-item-${fieldId}-description`}
                   />
                   <input
                     value={type}
-                    {...register(`budgetItems.${index}.type`)}
+                    {...register(`budgetItems.${originalIndex}.type`)}
                     readOnly
                     className="hidden"
                   />
@@ -292,17 +316,18 @@ const EditBudgetModal = ({
                       defaultMessage: "Amount",
                     })}
                     defaultValue={
-                      typeof min !== "undefined" ? String(min / 100) : null
+                      typeof min !== "undefined" ? String(min) : null
                     }
-                    inputRef={register(`budgetItems.${index}.min`).ref}
-                    inputProps={{ ...register(`budgetItems.${index}.min`), type: "number", min: 0 }}
+                    name={minField.name}
+                    inputRef={minField.ref}
+                    inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
                     endAdornment={currency}
                     testid={`bucket-existing-item-${fieldId}-amount`}
                   />
                 </div>
 
                 <div className="my-2">
-                  <IconButton onClick={() => remove(index)}>
+                  <IconButton onClick={() => remove(originalIndex)}>
                     <DeleteIcon className="h-6 w-6 text-color-red" />
                   </IconButton>
                 </div>

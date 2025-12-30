@@ -22,6 +22,7 @@ const BucketReview = ({ round }) => {
     register,
     formState: { isDirty },
   } = useForm();
+  const bucketReviewIsOpenField = register("bucketReviewIsOpen");
 
   return (
     <div className="px-6">
@@ -54,10 +55,11 @@ const BucketReview = ({ round }) => {
         data-testid="bucket-review-settings-form"
       >
         <SelectField
-          name="bucketReviewIsOpen"
+          name={bucketReviewIsOpenField.name}
           label={intl.formatMessage({ defaultMessage: "Show Review Prompt" })}
           defaultValue={round.bucketReviewIsOpen ? "true" : "false"}
-          inputRef={register}
+          inputRef={bucketReviewIsOpenField.ref}
+          inputProps={{ onChange: bucketReviewIsOpenField.onChange }}
           className="my-4"
         >
           <option value="true">

@@ -15,6 +15,7 @@ const SetCurrency = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const intl = useIntl();
   const { handleSubmit, register } = useForm();
+  const currencyField = register("currency");
 
   return (
     <Card>
@@ -39,10 +40,11 @@ const SetCurrency = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <SelectInput
-              name="currency"
+              name={currencyField.name}
               label={intl.formatMessage({ defaultMessage: "Currency" })}
               defaultValue={round.currency}
-              inputRef={register}
+              inputRef={currencyField.ref}
+              onChange={currencyField.onChange}
               fullWidth
             >
               {currencies.map((currency) => (

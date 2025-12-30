@@ -55,6 +55,8 @@ function ExpenseStatus({ expense, currentUser }) {
       expense.status === OC_STATUS_MAP.APPROVED
     )
       return "bg-app-green";
+    else if (expense.status === EXPENSE_REJECTED) return "bg-red";
+    else return "bg-app-gray"; // Default fallback
   }, [expense]);
 
   const editingAllowed =

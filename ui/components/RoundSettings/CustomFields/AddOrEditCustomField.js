@@ -89,9 +89,14 @@ export default function AddOrEditCustomField({
     editing ? EDIT_CUSTOM_FIELD_MUTATION : ADD_CUSTOM_FIELD_MUTATION
   );
 
-  const { control, handleSubmit, register, errors } = useForm({
+  const { control, handleSubmit, register, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
+
+  const nameField = register("customField.name");
+  const descriptionField = register("customField.description");
+  const typeField = register("customField.type");
+  const limitField = register("customField.limit");
 
   // Requires to manage seperetly due to Material UI Checkbox
   const [isRequired, setIsRequired] = useState(customField.isRequired || false);
@@ -128,9 +133,10 @@ export default function AddOrEditCustomField({
           <div className="grid gap-4">
             <TextField
               placeholder={intl.formatMessage({ defaultMessage: "Name" })}
-              name={"customField.name"}
+              name={nameField.name}
               defaultValue={customField.name}
-              inputRef={register}
+              inputRef={nameField.ref}
+              inputProps={{ onChange: nameField.onChange }}
               error={errors.customField?.name}
               helperText={errors.customField?.name?.message}
               color={round.color}
@@ -140,9 +146,10 @@ export default function AddOrEditCustomField({
               placeholder={intl.formatMessage({
                 defaultMessage: "Description",
               })}
-              name={"customField.description"}
+              name={descriptionField.name}
               defaultValue={customField.description}
-              inputRef={register}
+              inputRef={descriptionField.ref}
+              inputProps={{ onChange: descriptionField.onChange }}
               error={errors.customField?.description}
               helperText={errors.customField?.description?.message}
               color={round.color}
@@ -151,14 +158,17 @@ export default function AddOrEditCustomField({
             <div className="flex">
               <span data-testid="customfield-type-select">
                 <SelectField
-                  name={"customField.type"}
+                  name={typeField.name}
                   defaultValue={customField.type}
-                  inputRef={register}
+                  inputRef={typeField.ref}
                   className="mr-4"
                   color={round.color}
                   inputProps={{
                     value: typeInputValue,
-                    onChange: (e) => setTypeInputValue(e.target.value),
+                    onChange: (e) => {
+                      typeField.onChange(e);
+                      setTypeInputValue(e.target.value);
+                    },
                   }}
                 >
                   <option value="TEXT">
@@ -178,9 +188,9 @@ export default function AddOrEditCustomField({
                   placeholder={intl.formatMessage({
                     defaultMessage: "Character limit",
                   })}
-                  name={"customField.limit"}
+                  name={limitField.name}
                   defaultValue={customField.limit}
-                  inputRef={register}
+                  inputRef={limitField.ref}
                   error={errors.customField?.limit}
                   helperText={errors.customField?.limit?.message}
                   color={round.color}
@@ -188,7 +198,10 @@ export default function AddOrEditCustomField({
                     type: "number",
                     min: "1",
                     value: limit,
-                    onChange: (e) => setLimit(e.target.value),
+                    onChange: (e) => {
+                      limitField.onChange(e);
+                      setLimit(e.target.value);
+                    },
                   }}
                   testid="customfield-limit-input"
                 />
@@ -196,7 +209,10 @@ export default function AddOrEditCustomField({
             </div>
             <div className="flex">
               <Controller
-                as={
+                name={"customField.isRequired"}
+                defaultValue={customField.isRequired}
+                control={control}
+                render={() => (
                   <FormControlLabel
                     label={intl.formatMessage({
                       defaultMessage: "Is Required",
@@ -210,11 +226,7 @@ export default function AddOrEditCustomField({
                       />
                     }
                   />
-                }
-                name={"customField.isRequired"}
-                defaultValue={customField.isRequired}
-                control={control}
-                inputRef={register}
+                )}
               />
             </div>
           </div>

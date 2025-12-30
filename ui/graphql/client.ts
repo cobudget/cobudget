@@ -105,6 +105,14 @@ export const client = (
                   );
                 });
             },
+            bulkAllocate(result: any, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "membersPage")
+                .forEach((field) => {
+                  cache.invalidate("Query", "membersPage", field.arguments);
+                });
+            },
             joinRound(result: any, args, cache) {
               if (result.joinRound) {
                 console.log({ result });
@@ -360,6 +368,7 @@ export const client = (
                       variables: field.arguments,
                     },
                     (data: any) => {
+                      if (!data?.bucket?.tags) return data;
                       data.bucket.tags = data.bucket.tags.filter(
                         (tag) => tag.id !== tagId
                       );
@@ -398,6 +407,7 @@ export const client = (
                       variables: field.arguments,
                     },
                     (data: any) => {
+                      if (!data?.bucketsPage?.buckets) return data;
                       data.bucketsPage.buckets = data.bucketsPage.buckets.filter(
                         (bucket) => bucket.id !== bucketId
                       );

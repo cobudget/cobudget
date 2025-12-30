@@ -9,6 +9,7 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const intl = useIntl();
   const { handleSubmit, register } = useForm();
+  const maxAmountField = register("maxAmountToBucketPerUser");
 
   return (
     <Card>
@@ -39,14 +40,16 @@ const SetMaxAmountToDream = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <TextField
-              name="maxAmountToBucketPerUser"
+              name={maxAmountField.name}
               label={intl.formatMessage(
                 { defaultMessage: `Max. amount to one {bucketName} per user` },
                 { bucketName: process.env.BUCKET_NAME_SINGULAR }
               )}
               defaultValue={round.maxAmountToBucketPerUser / 100}
               fullWidth
-              inputRef={register}
+              inputRef={maxAmountField.ref}
+              onChange={maxAmountField.onChange}
+              onBlur={maxAmountField.onBlur}
               InputProps={{
                 type: "number",
                 min: "1",

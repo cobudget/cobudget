@@ -98,6 +98,21 @@ function handler() {
         next();
       }
     })
+    .use(function (req, res, next) {
+      // Passport 0.6+ requires session.regenerate() and session.save()
+      // which cookie-session doesn't provide. Add shims for compatibility.
+      if (req.session && !req.session.regenerate) {
+        req.session.regenerate = (cb: (err?: Error) => void) => {
+          cb();
+        };
+      }
+      if (req.session && !req.session.save) {
+        req.session.save = (cb: (err?: Error) => void) => {
+          cb();
+        };
+      }
+      next();
+    })
     .use(passport.initialize())
     .use(passport.session());
 }

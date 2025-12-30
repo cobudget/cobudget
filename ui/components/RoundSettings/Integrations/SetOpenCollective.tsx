@@ -146,7 +146,7 @@ const SetOpenCollective = ({ closeModal, round }) => {
                 defaultMessage: "Collective or project URL",
               })}
               defaultValue={openCollectiveURL}
-              inputRef={register}
+              inputRef={register("ocCollectiveURL").ref}
               fullWidth
               variant="outlined"
             />

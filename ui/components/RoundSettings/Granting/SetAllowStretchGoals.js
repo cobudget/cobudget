@@ -13,6 +13,7 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const intl = useIntl();
   const { handleSubmit, register } = useForm();
+  const allowStretchGoalsField = register("allowStretchGoals");
 
   return (
     <Card>
@@ -39,12 +40,13 @@ const SetAllowStretchGoals = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <SelectInput
-              name="allowStretchGoals"
+              name={allowStretchGoalsField.name}
               label={intl.formatMessage({
                 defaultMessage: "Allow stretch goals",
               })}
               defaultValue={round.allowStretchGoals ?? false}
-              inputRef={register}
+              inputRef={allowStretchGoalsField.ref}
+              onChange={allowStretchGoalsField.onChange}
               fullWidth
             >
               <option value={true}>

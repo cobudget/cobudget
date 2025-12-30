@@ -2,40 +2,39 @@ import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import remarkGfm from "remark-gfm";
 import { appLink } from "utils/internalLinks";
-import parseMDSource from "utils/parseMDSource";
 
 const Markdown = ({ source, enableMentions = false, className = "" }) => {
   return (
     <ReactMarkdown
-      source={source}
       className={"markdown " + className}
-      plugins={[remarkGfm as any]}
-      renderers={{
-        link: (props: { href: string; children: any }) => {
-          if (props.href.startsWith(appLink("/user/")) && enableMentions) {
+      remarkPlugins={[remarkGfm]}
+      components={{
+        a: ({ href, children }) => {
+          if (href?.startsWith(appLink("/user/")) && enableMentions) {
             return (
-              <Link href={props.href} className="markdownMention">
-                {props.children}
+              <Link href={href} className="markdownMention">
+                {children}
               </Link>
             );
-          } else if (props.href.startsWith("http")) {
+          } else if (href?.startsWith("http")) {
             return (
-              <a href={props.href} target="_blank" rel="noreferrer">
-                {props.children}
+              <a href={href} target="_blank" rel="noreferrer">
+                {children}
               </a>
             );
           } else {
-            return <Link href={props.href}>{props.children}</Link>;
+            return <Link href={href || "#"}>{children}</Link>;
           }
         },
-        // eslint-disable-next-line no-unused-vars
-        code: ({ node, ...props }) => (
-          <code className="whitespace-pre-wrap" {...props}>
-            {props.value}
+        code: ({ children, className, ...props }) => (
+          <code className={`whitespace-pre-wrap ${className || ""}`} {...props}>
+            {children}
           </code>
         ),
       }}
-    />
+    >
+      {source}
+    </ReactMarkdown>
   );
 };
 

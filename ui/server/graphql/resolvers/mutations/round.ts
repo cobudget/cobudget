@@ -553,12 +553,6 @@ export const allocate = async (
 export const bulkAllocate = combineResolvers(
   isCollOrGroupAdmin,
   async (_, { roundId, amount, type }, { user }) => {
-    const roundMembers = await prisma.roundMember.findMany({
-      where: {
-        roundId: roundId,
-        isApproved: true,
-      },
-    });
     const currentCollMember = await prisma.roundMember.findUnique({
       where: {
         userId_roundId: {
@@ -575,7 +569,9 @@ export const bulkAllocate = combineResolvers(
       allocatedBy: currentCollMember.id,
     });
 
-    return roundMembers;
+    // Return empty array - frontend only checks for errors, not the response data
+    // Returning all members would trigger N+1 queries for each member's balance
+    return [];
   }
 );
 

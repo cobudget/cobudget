@@ -333,7 +333,7 @@ const InviteMembersModal = ({
                 inputRef={
                   roundGroup?.id
                     ? null
-                    : register({
+                    : register("emails", {
                         required: "Required",
                         pattern: {
                           value: /^[\W]*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+[\W]*,{1}[\W]*)*([\w+\-.%]+@[\w\-.]+\.[A-Za-z]+)[\W]*$/,
@@ -342,7 +342,7 @@ const InviteMembersModal = ({
                               "Need to be a comma separated list of emails",
                           }),
                         },
-                      })
+                      }).ref
                 }
                 testid="invite-participants-emails"
                 showWysiwygOptions={false}

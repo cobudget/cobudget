@@ -41,7 +41,7 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
         <TextField
           name="description"
           placeholder="Description"
-          inputRef={register}
+          inputRef={register("description").ref}
           multiline
           rows={10}
           defaultValue={description}

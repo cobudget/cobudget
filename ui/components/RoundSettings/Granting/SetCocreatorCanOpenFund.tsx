@@ -10,6 +10,7 @@ const SetCocreatorCanOpenFund = ({ closeModal, round }) => {
   const [, updateGranting] = useMutation(UPDATE_GRANTING_SETTINGS);
   const { handleSubmit, register } = useForm();
   const intl = useIntl();
+  const canCocreatorStartFundingField = register("canCocreatorStartFunding");
 
   return (
     <Card>
@@ -41,7 +42,7 @@ const SetCocreatorCanOpenFund = ({ closeModal, round }) => {
         >
           <Box m="15px 0">
             <SelectInput
-              name="canCocreatorStartFunding"
+              name={canCocreatorStartFundingField.name}
               label={intl.formatMessage(
                 {
                   defaultMessage:
@@ -50,7 +51,8 @@ const SetCocreatorCanOpenFund = ({ closeModal, round }) => {
                 { bucketName: process.env.BUCKET_NAME_PLURAL }
               )}
               defaultValue={round.canCocreatorStartFunding ?? false}
-              inputRef={register}
+              inputRef={canCocreatorStartFundingField.ref}
+              onChange={canCocreatorStartFundingField.onChange}
               fullWidth
             >
               <option value={"true"}>

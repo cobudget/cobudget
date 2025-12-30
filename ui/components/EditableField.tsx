@@ -58,7 +58,7 @@ const EditableField = ({
   const [editing, setEditing] = useState(false);
 
   useEffect(() => {
-    register({ name });
+    register(name);
   }, [register, name]);
 
   if (editing)
