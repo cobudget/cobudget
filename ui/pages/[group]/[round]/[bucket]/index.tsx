@@ -337,11 +337,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 
         <Tab.Panels>
           <Tab.Panel>
-            <Bucket
-              bucket={bucket}
-              currentUser={currentUser}
-              openImageModal={() => setEditImagesModalOpen(true)}
-            />
+            <Bucket bucket={bucket} currentUser={currentUser} />
           </Tab.Panel>
           <Tab.Panel>
             <Comments

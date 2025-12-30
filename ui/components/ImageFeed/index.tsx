@@ -1,6 +1,15 @@
 import HappySpinner from "components/HappySpinner";
 import Link from "next/link";
+import Masonry from "react-masonry-css";
 import { FC } from "react";
+
+const breakpointColumns = {
+  default: 4,
+  1024: 4,
+  768: 3,
+  640: 2,
+  0: 1,
+};
 
 type ImageFeedProps = {
   images: Array<{
@@ -45,16 +54,21 @@ const ImageFeed: FC<ImageFeedProps> = ({
 }) => {
   return (
     <>
-      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Masonry
+        breakpointCols={breakpointColumns}
+        className="image-feed-masonry p-4"
+        columnClassName="image-feed-masonry-column"
+      >
         {images.map((img) => (
-          <div
-            key={img.id}
-            className="mb-4 animate-fadeIn"
-          >
-            <ImageFeedItem image={img} groupSlug={groupSlug} roundSlug={roundSlug} />
+          <div key={img.id} className="mb-4 animate-fadeIn">
+            <ImageFeedItem
+              image={img}
+              groupSlug={groupSlug}
+              roundSlug={roundSlug}
+            />
           </div>
         ))}
-      </div>
+      </Masonry>
 
       {moreExist && (
         <div className="flex justify-center py-4">
