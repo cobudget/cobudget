@@ -772,6 +772,7 @@ const RoundPage = ({ currentUser }) => {
   const canEdit =
     currentUser?.currentGroupMember?.isAdmin ||
     currentUser?.currentCollMember?.isAdmin;
+  const actionsAreDisabled = round?.membersLimit.currentCount >= round?.membersLimit.limit;
   return (
     <div>
       <SubMenu currentUser={currentUser} round={round} />
@@ -784,7 +785,7 @@ const RoundPage = ({ currentUser }) => {
                 name="info"
                 label="Add message"
                 placeholder={`# Welcome to ${round.title}'s bucket page`}
-                canEdit={canEdit}
+                canEdit={canEdit && !actionsAreDisabled}
                 className="h-10"
                 MUTATION={gql`
                   mutation EditHomepageMessage($roundId: ID!, $info: String) {
@@ -874,6 +875,7 @@ const RoundPage = ({ currentUser }) => {
                       setNewBucketModalOpen(true);
                     }}
                     testid="create-new-bucket-button"
+                    disabled={actionsAreDisabled}
                   >
                     <FormattedMessage defaultMessage="New" />{" "}
                     {process.env.BUCKET_NAME_SINGULAR}

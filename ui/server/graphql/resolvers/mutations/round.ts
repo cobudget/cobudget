@@ -19,7 +19,10 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
-import { inviteRoundMembersHelper } from "../helpers/inviteRoundMemberHelpers";
+import {
+  inviteRoundMembersHelper,
+  limitCheckedRoundMembers
+} from "../helpers/inviteRoundMemberHelpers";
 import {
   allocateToMember,
   bulkAllocate as bulkAllocateController,
@@ -48,6 +51,7 @@ import {
 import isGroupSubscriptionActive from "../helpers/isGroupSubscriptionActive";
 import activityLog from "utils/activity-log";
 import { Prisma } from "@prisma/client";
+import { membersLimit } from '../types/Round';
 
 export const createRound = async (
   parent,
@@ -278,11 +282,18 @@ export const joinInvitationLink = async (parent, { token }, { user }) => {
   if (roundId) {
     const round = await prisma.round.findFirst({
       where: { id: roundId, inviteNonce },
+      include: { group: true },
     });
 
     if (!round) {
       throw new Error("Round link expired");
     }
+
+    await limitCheckedRoundMembers({
+      round,
+      group: round.group,
+      qtyNewAdditions: 1,
+    });
 
     const isApproved = true;
     const roundMember = await prisma.roundMember.upsert({
@@ -670,6 +681,12 @@ export const joinRound = async (parent, { roundId }, { user }) => {
     round.registrationPolicy === "INVITE_ONLY"
   )
     throw new Error("This round is invite only");
+
+  const roundMemberLimits = await membersLimit(round);
+  if (
+    roundMemberLimits.currentCount >= roundMemberLimits.limit
+  )
+    throw new Error("This round has reached the maximum number of members");
 
   const isApproved =
     currentGroupMember?.isAdmin || round.registrationPolicy === "OPEN";

@@ -202,7 +202,8 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
         currentUser?.currentCollMember.isRemoved));
   const isGroupAdmin = currentUser?.currentGroupMember?.isAdmin;
   const allowedToJoinOrRequest =
-    (round && round.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin;
+    round?.membersLimit?.currentCount < round?.membersLimit?.limit
+    && ((round?.registrationPolicy !== "INVITE_ONLY") || isGroupAdmin);
 
   const showJoinRoundButton = round && notAMember && allowedToJoinOrRequest;
 
