@@ -26,8 +26,64 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import * as readline from 'readline';
 
 const prisma = new PrismaClient();
+
+/**
+ * Parse DATABASE_URL to extract database name and host for display
+ */
+function parseDatabaseUrl(): { host: string; database: string; fullInfo: string } {
+  const url = process.env.DATABASE_URL || '';
+  try {
+    // Handle both postgres:// and postgresql:// schemes
+    const parsed = new URL(url.replace(/^postgres:/, 'postgresql:'));
+    const host = parsed.hostname;
+    const database = parsed.pathname.replace(/^\//, '').split('?')[0];
+    const port = parsed.port || '5432';
+    return {
+      host,
+      database,
+      fullInfo: `${host}:${port}/${database}`,
+    };
+  } catch {
+    return {
+      host: 'unknown',
+      database: 'unknown',
+      fullInfo: 'Could not parse DATABASE_URL',
+    };
+  }
+}
+
+/**
+ * Prompt user for confirmation by typing the database name
+ */
+async function confirmDatabaseAction(dbInfo: { host: string; database: string; fullInfo: string }, orgName: string): Promise<boolean> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    console.log('\n' + '⚠️'.repeat(30));
+    console.log('\n🚨 DESTRUCTIVE ACTION WARNING 🚨\n');
+    console.log(`Database: ${dbInfo.fullInfo}`);
+    console.log(`Organization to KEEP: ${orgName}`);
+    console.log(`\nALL OTHER DATA WILL BE PERMANENTLY DELETED!\n`);
+    console.log('⚠️'.repeat(30) + '\n');
+
+    rl.question(`To confirm, type the database name "${dbInfo.database}": `, (answer) => {
+      rl.close();
+      if (answer.trim() === dbInfo.database) {
+        console.log('\n✅ Confirmation accepted. Proceeding with deletion...\n');
+        resolve(true);
+      } else {
+        console.log('\n❌ Confirmation failed. Aborting.\n');
+        resolve(false);
+      }
+    });
+  });
+}
 
 // Set to false to actually perform deletions
 const DRY_RUN = process.env.DRY_RUN !== 'false';
@@ -42,6 +98,78 @@ interface CleanupStats {
 }
 
 /**
+ * Simple progress bar utility for console output
+ */
+class ProgressBar {
+  private total: number;
+  private current: number;
+  private barLength: number;
+  private label: string;
+  private startTime: number;
+
+  constructor(label: string, total: number, barLength: number = 40) {
+    this.label = label;
+    this.total = total;
+    this.current = 0;
+    this.barLength = barLength;
+    this.startTime = Date.now();
+  }
+
+  update(current: number): void {
+    this.current = current;
+    this.render();
+  }
+
+  increment(amount: number = 1): void {
+    this.current += amount;
+    this.render();
+  }
+
+  private render(): void {
+    const percent = this.total > 0 ? this.current / this.total : 0;
+    const filledLength = Math.round(this.barLength * percent);
+    const emptyLength = this.barLength - filledLength;
+
+    const filledBar = '█'.repeat(filledLength);
+    const emptyBar = '░'.repeat(emptyLength);
+
+    const percentStr = (percent * 100).toFixed(1).padStart(5);
+    const currentStr = this.current.toString().padStart(this.total.toString().length);
+
+    // Calculate elapsed time and ETA
+    const elapsed = (Date.now() - this.startTime) / 1000;
+    const rate = this.current / elapsed;
+    const remaining = this.total - this.current;
+    const eta = rate > 0 ? remaining / rate : 0;
+
+    const etaStr = eta > 0 ? ` ETA: ${formatTime(eta)}` : '';
+
+    process.stdout.write(`\r  ${this.label}: [${filledBar}${emptyBar}] ${percentStr}% (${currentStr}/${this.total})${etaStr}   `);
+  }
+
+  complete(): void {
+    this.current = this.total;
+    this.render();
+    const elapsed = (Date.now() - this.startTime) / 1000;
+    process.stdout.write(` Done in ${formatTime(elapsed)}\n`);
+  }
+}
+
+function formatTime(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds.toFixed(0)}s`;
+  } else if (seconds < 3600) {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}m ${secs}s`;
+  } else {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    return `${hours}h ${mins}m`;
+  }
+}
+
+/**
  * Helper function to delete records in batches to avoid PostgreSQL bind variable limits
  */
 async function deleteInBatches<T>(
@@ -52,24 +180,25 @@ async function deleteInBatches<T>(
   if (ids.length === 0) return;
 
   const totalBatches = Math.ceil(ids.length / BATCH_SIZE);
+  const progress = new ProgressBar(label, totalBatches);
 
   for (let i = 0; i < ids.length; i += BATCH_SIZE) {
     const batch = ids.slice(i, i + BATCH_SIZE);
-    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
-
-    if (totalBatches > 1) {
-      console.log(`  ${label} batch ${batchNum}/${totalBatches} (${batch.length} records)...`);
-    }
-
     await deleteFunc(batch);
+    progress.increment();
   }
+
+  progress.complete();
 }
 
 async function main() {
+  const dbInfo = parseDatabaseUrl();
+
   console.log('='.repeat(60));
   console.log('Cobudget Database Cleanup Script');
   console.log('='.repeat(60));
   console.log(`Mode: ${DRY_RUN ? 'DRY RUN (no changes will be made)' : 'LIVE (data will be deleted!)'}`);
+  console.log(`Database: ${dbInfo.fullInfo}`);
   console.log(`Target Organization: ${TARGET_ORG_SLUG}`);
   console.log('='.repeat(60));
 
@@ -93,6 +222,15 @@ async function main() {
     console.log(`Found organization: ${targetGroup.name} (ID: ${targetGroup.id})`);
     console.log(`  - Rounds: ${targetGroup.rounds.length}`);
     console.log(`  - Group Members: ${targetGroup.groupMembers.length}`);
+
+    // Require confirmation for LIVE runs
+    if (!DRY_RUN) {
+      const confirmed = await confirmDatabaseAction(dbInfo, targetGroup.name);
+      if (!confirmed) {
+        await prisma.$disconnect();
+        process.exit(1);
+      }
+    }
 
     // Step 2: Collect IDs to keep
     console.log('\n[2/3] Collecting data to preserve...');
@@ -345,12 +483,15 @@ async function main() {
     // First, disconnect tags from buckets
     console.log(`Disconnecting tags from ${bucketIdsToDelete.length} buckets...`);
     if (!DRY_RUN) {
+      const bucketProgress = new ProgressBar('Buckets', bucketIdsToDelete.length);
       for (const bucketId of bucketIdsToDelete) {
         await prisma.bucket.update({
           where: { id: bucketId },
           data: { tags: { set: [] }, cocreators: { set: [] } },
         });
+        bucketProgress.increment();
       }
+      bucketProgress.complete();
     }
 
     // 13. Clear account references from buckets before deleting buckets
@@ -447,7 +588,32 @@ async function main() {
       });
     }
 
-    // 22. Accounts (now safe to delete) - use batching due to large numbers
+    // 22. Delete any remaining transactions that reference accounts being deleted
+    // (These are cross-round transactions from preserved rounds to deleted accounts)
+    const orphanedTransactionCount = await prisma.transaction.count({
+      where: {
+        OR: [
+          { fromAccountId: { in: accountIdsToDelete } },
+          { toAccountId: { in: accountIdsToDelete } },
+        ],
+      },
+    });
+    if (orphanedTransactionCount > 0) {
+      console.log(`Deleting ${orphanedTransactionCount} orphaned transactions (cross-round)...`);
+      stats['OrphanedTransaction'] = orphanedTransactionCount;
+      if (!DRY_RUN) {
+        await prisma.transaction.deleteMany({
+          where: {
+            OR: [
+              { fromAccountId: { in: accountIdsToDelete } },
+              { toAccountId: { in: accountIdsToDelete } },
+            ],
+          },
+        });
+      }
+    }
+
+    // 23. Accounts (now safe to delete) - use batching due to large numbers
     stats['Account'] = accountIdsToDelete.length;
     console.log(`Deleting ${accountIdsToDelete.length} accounts...`);
     if (!DRY_RUN) {
@@ -458,7 +624,7 @@ async function main() {
       );
     }
 
-    // 23. DiscourseConfig (depends on Group)
+    // 24. DiscourseConfig (depends on Group)
     const discourseConfigCount = await prisma.discourseConfig.count({
       where: { groupId: { in: groupIdsToDelete } },
     });
@@ -470,7 +636,7 @@ async function main() {
       });
     }
 
-    // 24. GroupMembers (depends on Group, User)
+    // 25. GroupMembers (depends on Group, User)
     const groupMemberCount = await prisma.groupMember.count({
       where: { groupId: { in: groupIdsToDelete } },
     });
@@ -482,7 +648,7 @@ async function main() {
       });
     }
 
-    // 25. Groups (finally!)
+    // 26. Groups (finally!)
     stats['Group'] = groupIdsToDelete.length;
     console.log(`Deleting ${groupIdsToDelete.length} groups...`);
     if (!DRY_RUN) {
@@ -491,7 +657,7 @@ async function main() {
       });
     }
 
-    // 26. Now clean up orphaned users (users not in any remaining group or round)
+    // 27. Now clean up orphaned users (users not in any remaining group or round)
     console.log('\nFinding orphaned users...');
 
     // Get all users who have NO group memberships and NO round memberships
@@ -520,7 +686,7 @@ async function main() {
 
     console.log(`Found ${orphanedUserIds.length} orphaned users`);
 
-    // 27. Clean up user-related data for orphaned users (use batching for large lists)
+    // 28. Clean up user-related data for orphaned users (use batching for large lists)
     // EmailSettings
     const emailSettingsCount = await prisma.emailSettings.count({
       where: { userId: { in: orphanedUserIds } },
@@ -549,7 +715,7 @@ async function main() {
       );
     }
 
-    // 28. SuperAdminSession - delete sessions for orphaned admins
+    // 29. SuperAdminSession - delete sessions for orphaned admins
     const superAdminSessionCount = await prisma.superAdminSession.count({
       where: { adminId: { in: orphanedUserIds } },
     });
@@ -563,7 +729,7 @@ async function main() {
       );
     }
 
-    // 29. Delete orphaned users
+    // 30. Delete orphaned users
     stats['User'] = orphanedUserIds.length;
     console.log(`Deleting ${orphanedUserIds.length} orphaned users...`);
     if (!DRY_RUN) {
@@ -574,7 +740,7 @@ async function main() {
       );
     }
 
-    // 30. Clean up any remaining orphaned data
+    // 31. Clean up any remaining orphaned data
     // Orphaned expenses (not linked to any bucket)
     const orphanedExpenseCount = await prisma.expense.count({
       where: { bucketId: null },
