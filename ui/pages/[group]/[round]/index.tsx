@@ -555,10 +555,10 @@ const Page = ({
           //   </div>
           // </div>
         ))}
-      {isLastPage && moreExist && (
+      {isLastPage && (fetching || moreExist) && (
         <div className="absolute bottom-0 justify-center flex w-full">
           <LoadMore
-            moreExist={moreExist}
+            moreExist={moreExist || fetching}
             loading={fetching}
             onClick={() =>
               onLoadMore({
@@ -566,7 +566,7 @@ const Page = ({
                 offset: variables.offset + buckets.length,
               })
             }
-          />{" "}
+          />
         </div>
       )}
     </>
