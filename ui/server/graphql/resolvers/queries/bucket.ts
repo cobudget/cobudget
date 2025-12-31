@@ -12,6 +12,64 @@ import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
 
+// Simple in-memory cache for bucketsPage to avoid re-fetching/re-shuffling
+// Cache entries expire after 30 seconds
+const CACHE_TTL_MS = 30 * 1000;
+const bucketsCache = new Map<
+  string,
+  { data: any[]; timestamp: number }
+>();
+
+function getCacheKey(params: {
+  roundSlug: string;
+  groupSlug: string;
+  status: string[];
+  textSearchTerm?: string;
+  tagValue?: string;
+  orderBy?: string;
+  orderDir?: string;
+  userId?: string;
+  dateSeed: string;
+}): string {
+  return JSON.stringify({
+    roundSlug: params.roundSlug,
+    groupSlug: params.groupSlug,
+    status: params.status?.sort(),
+    textSearchTerm: params.textSearchTerm || "",
+    tagValue: params.tagValue || "",
+    orderBy: params.orderBy || "",
+    orderDir: params.orderDir || "",
+    userId: params.userId || "",
+    dateSeed: params.dateSeed,
+  });
+}
+
+function getFromCache(key: string): any[] | null {
+  const entry = bucketsCache.get(key);
+  if (!entry) return null;
+
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    bucketsCache.delete(key);
+    return null;
+  }
+
+  return entry.data;
+}
+
+function setCache(key: string, data: any[]): void {
+  // Clean up old entries periodically (keep cache from growing unbounded)
+  if (bucketsCache.size > 100) {
+    const now = Date.now();
+    for (const [k, v] of bucketsCache.entries()) {
+      if (now - v.timestamp > CACHE_TTL_MS) {
+        bucketsCache.delete(k);
+      }
+    }
+  }
+
+  bucketsCache.set(key, { data, timestamp: Date.now() });
+}
+
 export const bucket = async (parent, { id }, { user, ss }) => {
   if (!id) return null;
   const bucket = await prisma.bucket.findUnique({ where: { id } });
@@ -60,60 +118,83 @@ export const bucketsPage = async (
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-  const statusFilter = status
-    .map((s) => statusTypeToQuery(s, fundingStatus))
-    .filter((s) => s);
-  // If canceled in not there in the status filter, explicitly unselect canceled buckets
-  const showCanceled = status.indexOf("CANCELED") === -1;
-  const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
-
-  // If a user is not an admin or moderator, then dont return all draft buckets
-  // Instead return the draft buckets which are created by the current user
-  if (showDraft && !isAdminOrGuide) {
-    statusFilter.forEach((filter) => {
-      if (filter.publishedAt === null) {
-        filter.publishedAt = { not: null };
-      }
-    });
-    if (currentMember) {
-      statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
-    }
-  }
-
-  const buckets = await prisma.bucket.findMany({
-    where: {
-      round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
-      deleted: { not: true },
-      OR: statusFilter,
-      ...(showCanceled && { canceledAt: null }),
-      ...(textSearchTerm && {
-        title: { contains: textSearchTerm, mode: "insensitive" },
-      }),
-      ...(tagValue && {
-        tags: { some: { value: tagValue } },
-      }),
-    },
-    ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
-  });
-
   const todaySeed = dayjs().format("YYYY-MM-DD");
 
-  let shuffledBuckets = buckets;
-  if (!orderBy) {
-    SeededShuffle.shuffle(buckets, user ? user.id + todaySeed : todaySeed);
-  } else if (
-    orderBy === "percentageFunded" ||
-    orderBy === "contributionsCount"
-  ) {
-    // Move nulls to last manually. This feature is added to prisma but not pushed to release yet
-    // https://github.com/prisma/prisma-engines/pull/3036
+  // Generate cache key for this query (excluding offset/limit since we cache the full list)
+  const cacheKey = getCacheKey({
+    roundSlug,
+    groupSlug: groupSlug ?? "c",
+    status,
+    textSearchTerm,
+    tagValue,
+    orderBy,
+    orderDir,
+    // Include factors that affect the result set
+    userId: user?.id,
+    dateSeed: todaySeed,
+  });
 
-    const index = shuffledBuckets.findIndex((b) => b[orderBy] !== null);
-    const length = shuffledBuckets.length;
+  // Check cache first
+  let shuffledBuckets = getFromCache(cacheKey);
 
-    shuffledBuckets = shuffledBuckets
-      .splice(index, length - index)
-      .concat(shuffledBuckets);
+  if (!shuffledBuckets) {
+    // Cache miss - fetch and process
+    const statusFilter = status
+      .map((s) => statusTypeToQuery(s, fundingStatus))
+      .filter((s) => s);
+    // If canceled in not there in the status filter, explicitly unselect canceled buckets
+    const showCanceled = status.indexOf("CANCELED") === -1;
+    const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
+
+    // If a user is not an admin or moderator, then dont return all draft buckets
+    // Instead return the draft buckets which are created by the current user
+    if (showDraft && !isAdminOrGuide) {
+      statusFilter.forEach((filter) => {
+        if (filter.publishedAt === null) {
+          filter.publishedAt = { not: null };
+        }
+      });
+      if (currentMember) {
+        statusFilter.push({ cocreators: { some: { id: currentMember?.id } } });
+      }
+    }
+
+    const buckets = await prisma.bucket.findMany({
+      where: {
+        round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+        deleted: { not: true },
+        OR: statusFilter,
+        ...(showCanceled && { canceledAt: null }),
+        ...(textSearchTerm && {
+          title: { contains: textSearchTerm, mode: "insensitive" },
+        }),
+        ...(tagValue && {
+          tags: { some: { value: tagValue } },
+        }),
+      },
+      ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
+    });
+
+    shuffledBuckets = buckets;
+    if (!orderBy) {
+      SeededShuffle.shuffle(buckets, user ? user.id + todaySeed : todaySeed);
+    } else if (
+      orderBy === "percentageFunded" ||
+      orderBy === "contributionsCount"
+    ) {
+      // Move nulls to last manually. This feature is added to prisma but not pushed to release yet
+      // https://github.com/prisma/prisma-engines/pull/3036
+
+      const index = shuffledBuckets.findIndex((b) => b[orderBy] !== null);
+      const length = shuffledBuckets.length;
+
+      shuffledBuckets = shuffledBuckets
+        .splice(index, length - index)
+        .concat(shuffledBuckets);
+    }
+
+    // Cache the shuffled result for subsequent page requests
+    setCache(cacheKey, shuffledBuckets);
   }
 
   return {
