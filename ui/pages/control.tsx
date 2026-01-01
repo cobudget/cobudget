@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { gql, useMutation, useQuery } from "urql";
-import { useRouter } from "next/router";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
 import Spinner from "components/Spinner";
+import TextField from "components/TextField";
 import AppContext from "contexts/AppContext";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -15,6 +15,7 @@ const GET_GROUPS = gql`
       slug
       name
       logo
+      isFree
       rounds {
         id
         slug
@@ -38,13 +39,20 @@ const GET_INSTANCE_SETTINGS = gql`
         name
         logo
       }
+      allowOrganizationCreation
     }
   }
 `;
 
 const UPDATE_INSTANCE_SETTINGS = gql`
-  mutation UpdateInstanceSettings($landingGroupId: String) {
-    updateInstanceSettings(landingGroupId: $landingGroupId) {
+  mutation UpdateInstanceSettings(
+    $landingGroupId: String
+    $allowOrganizationCreation: Boolean
+  ) {
+    updateInstanceSettings(
+      landingGroupId: $landingGroupId
+      allowOrganizationCreation: $allowOrganizationCreation
+    ) {
       id
       landingGroupId
       landingGroup {
@@ -53,21 +61,59 @@ const UPDATE_INSTANCE_SETTINGS = gql`
         name
         logo
       }
+      allowOrganizationCreation
+    }
+  }
+`;
+
+const CREATE_GROUP = gql`
+  mutation CreateGroup(
+    $name: String!
+    $slug: String!
+    $registrationPolicy: RegistrationPolicy!
+  ) {
+    createGroup(name: $name, slug: $slug, registrationPolicy: $registrationPolicy) {
+      id
+      slug
+      name
+    }
+  }
+`;
+
+const CHANGE_FREE_STATUS = gql`
+  mutation ChangeGroupFreeStatus($groupId: ID!, $freeStatus: Boolean) {
+    changeGroupFreeStatus(groupId: $groupId, freeStatus: $freeStatus) {
+      id
+      isFree
+    }
+  }
+`;
+
+const DELETE_GROUP = gql`
+  mutation DeleteGroup($groupId: ID!) {
+    deleteGroup(groupId: $groupId) {
+      id
     }
   }
 `;
 
 function ControlPage({ currentUser }) {
-  const router = useRouter();
   const intl = useIntl();
   const { ss } = useContext(AppContext);
   const [hasMounted, setHasMounted] = useState(false);
 
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [allowOrganizationCreation, setAllowOrganizationCreation] =
+    useState<boolean>(true);
 
-  const [{ data: groupsData, fetching: fetchingGroups }] = useQuery({
-    query: GET_GROUPS,
-  });
+  // New organization form state
+  const [newOrgName, setNewOrgName] = useState("");
+  const [newOrgSlug, setNewOrgSlug] = useState("");
+
+  const [{ data: groupsData, fetching: fetchingGroups }, refetchGroups] =
+    useQuery({
+      query: GET_GROUPS,
+    });
 
   const [{ data: settingsData, fetching: fetchingSettings }] = useQuery({
     query: GET_INSTANCE_SETTINGS,
@@ -76,6 +122,10 @@ function ControlPage({ currentUser }) {
   const [{ fetching: updating }, updateSettings] = useMutation(
     UPDATE_INSTANCE_SETTINGS
   );
+
+  const [{ fetching: creatingGroup }, createGroup] = useMutation(CREATE_GROUP);
+  const [, changeFreeStatus] = useMutation(CHANGE_FREE_STATUS);
+  const [{ fetching: deletingGroup }, deleteGroup] = useMutation(DELETE_GROUP);
 
   // Set mounted state after initial render to prevent hydration mismatch
   useEffect(() => {
@@ -91,10 +141,19 @@ function ControlPage({ currentUser }) {
     return false;
   }, [ss, hasMounted]);
 
-  // Initialize selected group from settings
+  // Initialize settings from data
   useEffect(() => {
-    if (settingsData?.instanceSettings?.landingGroupId !== undefined) {
-      setSelectedGroupId(settingsData.instanceSettings.landingGroupId);
+    if (settingsData?.instanceSettings) {
+      if (settingsData.instanceSettings.landingGroupId !== undefined) {
+        setSelectedGroupId(settingsData.instanceSettings.landingGroupId);
+      }
+      if (
+        settingsData.instanceSettings.allowOrganizationCreation !== undefined
+      ) {
+        setAllowOrganizationCreation(
+          settingsData.instanceSettings.allowOrganizationCreation
+        );
+      }
     }
   }, [settingsData]);
 
@@ -104,6 +163,7 @@ function ControlPage({ currentUser }) {
   const handleSave = async () => {
     const result = await updateSettings({
       landingGroupId: selectedGroupId,
+      allowOrganizationCreation: allowOrganizationCreation,
     });
 
     if (result.error) {
@@ -120,6 +180,101 @@ function ControlPage({ currentUser }) {
           defaultMessage: "Settings updated successfully",
         })
       );
+    }
+  };
+
+  const handleCreateOrganization = async () => {
+    if (!newOrgName.trim() || !newOrgSlug.trim()) {
+      toast.error(
+        intl.formatMessage({
+          defaultMessage: "Name and slug are required",
+        })
+      );
+      return;
+    }
+
+    const result = await createGroup({
+      name: newOrgName.trim(),
+      slug: newOrgSlug.trim(),
+      registrationPolicy: "OPEN",
+    });
+
+    if (result.error) {
+      console.error("Failed to create organization:", result.error);
+      toast.error(
+        result.error.message ||
+          intl.formatMessage({
+            defaultMessage: "Failed to create organization",
+          })
+      );
+    } else {
+      toast.success(
+        intl.formatMessage({
+          defaultMessage: "Organization created successfully",
+        })
+      );
+      setNewOrgName("");
+      setNewOrgSlug("");
+      refetchGroups({ requestPolicy: "network-only" });
+    }
+  };
+
+  const handleToggleFree = async (groupId: string, currentFreeStatus: boolean) => {
+    const result = await changeFreeStatus({
+      groupId,
+      freeStatus: !currentFreeStatus,
+    });
+
+    if (result.error) {
+      console.error("Failed to update free status:", result.error);
+      toast.error(
+        result.error.message ||
+          intl.formatMessage({
+            defaultMessage: "Failed to update free status",
+          })
+      );
+    } else {
+      toast.success(
+        intl.formatMessage({
+          defaultMessage: "Free status updated",
+        })
+      );
+      refetchGroups({ requestPolicy: "network-only" });
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string, groupName: string) => {
+    if (
+      !window.confirm(
+        intl.formatMessage(
+          {
+            defaultMessage:
+              'Are you sure you want to delete "{groupName}"? This action cannot be undone.',
+          },
+          { groupName }
+        )
+      )
+    ) {
+      return;
+    }
+
+    const result = await deleteGroup({ groupId });
+
+    if (result.error) {
+      console.error("Failed to delete organization:", result.error);
+      toast.error(
+        result.error.message ||
+          intl.formatMessage({
+            defaultMessage: "Failed to delete organization",
+          })
+      );
+    } else {
+      toast.success(
+        intl.formatMessage({
+          defaultMessage: "Organization deleted successfully",
+        })
+      );
+      refetchGroups({ requestPolicy: "network-only" });
     }
   };
 
@@ -270,6 +425,39 @@ function ControlPage({ currentUser }) {
                   </div>
                 )}
 
+              </div>
+
+              {/* Organization Creation Settings */}
+              <div className="border-t pt-6">
+                <h2 className="text-lg font-medium mb-2">
+                  <FormattedMessage defaultMessage="Organization Creation" />
+                </h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  <FormattedMessage defaultMessage="Control whether users can create new organizations on this instance." />
+                </p>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allowOrganizationCreation}
+                    onChange={(e) =>
+                      setAllowOrganizationCreation(e.target.checked)
+                    }
+                    className="w-5 h-5 rounded border-gray-300 text-anthracit focus:ring-anthracit"
+                  />
+                  <span className="text-sm">
+                    <FormattedMessage defaultMessage="Allow users to create organizations" />
+                  </span>
+                </label>
+
+                {!allowOrganizationCreation && (
+                  <div className="mt-3 p-3 bg-yellow-50 rounded-lg">
+                    <p className="text-sm text-yellow-800">
+                      <FormattedMessage defaultMessage="When disabled, the 'Create a Group' link will be hidden from the new round page, and the /new-group page will show a message that organization creation is disabled. Super admins can still create organizations from this control panel." />
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   onClick={handleSave}
                   loading={updating}
@@ -288,6 +476,48 @@ function ControlPage({ currentUser }) {
                 <p className="text-sm text-gray-600 mb-4">
                   <FormattedMessage defaultMessage="Overview of all organizations and their rounds on this instance." />
                 </p>
+
+                {/* Create New Organization Form */}
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium mb-3">
+                    <FormattedMessage defaultMessage="Create New Organization" />
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4 mb-3">
+                    <TextField
+                      label={intl.formatMessage({
+                        defaultMessage: "Name",
+                      })}
+                      placeholder={intl.formatMessage({
+                        defaultMessage: "Organization name",
+                      })}
+                      inputProps={{
+                        value: newOrgName,
+                        onChange: (e) => setNewOrgName(e.target.value),
+                      }}
+                    />
+                    <TextField
+                      label={intl.formatMessage({
+                        defaultMessage: "Slug",
+                      })}
+                      placeholder={intl.formatMessage({
+                        defaultMessage: "organization-slug",
+                      })}
+                      startAdornment="/"
+                      inputProps={{
+                        value: newOrgSlug,
+                        onChange: (e) => setNewOrgSlug(e.target.value),
+                      }}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleCreateOrganization}
+                    loading={creatingGroup}
+                    disabled={creatingGroup || !newOrgName.trim() || !newOrgSlug.trim()}
+                    size="small"
+                  >
+                    <FormattedMessage defaultMessage="Create Organization" />
+                  </Button>
+                </div>
 
                 <div className="space-y-4">
                   {groups.length === 0 ? (
@@ -318,6 +548,35 @@ function ControlPage({ currentUser }) {
                             {group.rounds?.length || 0}{" "}
                             <FormattedMessage defaultMessage="rounds" />
                           </span>
+                          <button
+                            onClick={() => handleToggleFree(group.id, group.isFree)}
+                            className={`text-xs px-2 py-1 rounded cursor-pointer transition-colors ${
+                              group.isFree
+                                ? "bg-green-100 text-green-800 hover:bg-green-200"
+                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            }`}
+                            title={intl.formatMessage({
+                              defaultMessage: "Click to toggle free status",
+                            })}
+                          >
+                            {group.isFree ? (
+                              <FormattedMessage defaultMessage="Free" />
+                            ) : (
+                              <FormattedMessage defaultMessage="Paid" />
+                            )}
+                          </button>
+                          {(!group.rounds || group.rounds.length === 0) && (
+                            <button
+                              onClick={() => handleDeleteGroup(group.id, group.name)}
+                              disabled={deletingGroup}
+                              className="text-xs px-2 py-1 rounded cursor-pointer transition-colors bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50"
+                              title={intl.formatMessage({
+                                defaultMessage: "Delete organization",
+                              })}
+                            >
+                              <FormattedMessage defaultMessage="Delete" />
+                            </button>
+                          )}
                         </div>
 
                         {group.rounds && group.rounds.length > 0 && (
