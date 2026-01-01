@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "yarn run generate",
     "dev": "next dev",
-    "prebuild": "yarn run generate",
+    "prebuild": "prisma migrate deploy && yarn run generate",
     "build": "next build",
     "start": "next start",
     "start:ci": "INSECURE_AUTH=true yarn run start",
