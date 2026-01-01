@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, gql } from "urql";
+import { useMutation, useQuery, gql } from "urql";
 import Tooltip from "@tippyjs/react";
 import Router from "next/router";
 import Link from "next/link";
@@ -14,6 +14,14 @@ import { QuestionMarkIcon } from "components/Icons";
 import toast from "react-hot-toast";
 import { useIntl } from "react-intl";
 import { PUBLIC } from "../constants";
+
+const GET_INSTANCE_SETTINGS = gql`
+  query GetInstanceSettings {
+    instanceSettings {
+      allowOrganizationCreation
+    }
+  }
+`;
 
 const CREATE_ROUND = gql`
   mutation CreateRound(
@@ -41,10 +49,14 @@ const CREATE_ROUND = gql`
 
 export default function NewRoundPage({ currentGroup }) {
   const [, createRound] = useMutation(CREATE_ROUND);
+  const [{ data: settingsData }] = useQuery({ query: GET_INSTANCE_SETTINGS });
   const { handleSubmit, register, formState: { errors }, setValue } = useForm();
   const [slugValue, setSlugValue] = useState("");
 
   const intl = useIntl();
+
+  const allowOrganizationCreation =
+    settingsData?.instanceSettings?.allowOrganizationCreation ?? true;
 
   const onSubmit = (variables) => {
     createRound(variables).then(({ data, error }) => {
@@ -178,17 +190,19 @@ export default function NewRoundPage({ currentGroup }) {
               </Button>
             </form>
           </div>
-          <Link
-            href="/new-group"
-            className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer "
-          >
-            <span className="text-black">Create a Group</span>{" "}
-            <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
-              PRO
-            </span>{" "}
-            if you would like to manage several Rounds with the same group of
-            people.
-          </Link>
+          {allowOrganizationCreation && (
+            <Link
+              href="/new-group"
+              className="block mt-10 text-center rounded-lg border-2 border-green-400 px-6 py-4 font-semibold text-sm text-gray-600 bg-white cursor-pointer "
+            >
+              <span className="text-black">Create a Group</span>{" "}
+              <span className="bg-green-400 rounded px-1 mr-0.5 text-white text-xs">
+                PRO
+              </span>{" "}
+              if you would like to manage several Rounds with the same group of
+              people.
+            </Link>
+          )}
         </div>
       </div>
     </>
