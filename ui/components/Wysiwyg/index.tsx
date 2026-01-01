@@ -73,7 +73,7 @@ import { useQuery, gql } from "urql";
 import { namedColorToHsl, namedColorWithAlpha } from "utils/colors";
 import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
-import HappySpinner from "../HappySpinner";
+import Spinner from "../Spinner";
 import { FormattedMessage, useIntl } from "react-intl";
 import AddEditLink from "./AddEditLink";
 
@@ -247,7 +247,7 @@ function MentionComponent({ roundId, groupId }) {
       items={items}
       ZeroItemsComponent={() =>
         fetching ? (
-          <HappySpinner className="m-3" />
+          <Spinner size="sm" className="m-3 text-gray-400" />
         ) : tooShortSearch ? (
           <div className="text-gray-700 m-3">
             <FormattedMessage defaultMessage="Type to search for a user" />

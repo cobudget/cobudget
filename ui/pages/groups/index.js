@@ -1,6 +1,6 @@
 import { useQuery, useMutation, gql } from "urql";
 import GroupsTable from "../../components/Group/GroupsTable";
-import HappySpinner from "../../components/HappySpinner";
+import Spinner from "../../components/Spinner";
 import Router from "next/router";
 
 export const GROUPS_QUERY = gql`
@@ -60,7 +60,7 @@ export default () => {
   if (loading)
     return (
       <div className="flex-grow flex justify-center items-center">
-        <HappySpinner />
+        <Spinner size="lg" className="text-gray-400" />
       </div>
     );
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import dayjs from "dayjs";
 import { FormattedMessage, useIntl } from "react-intl";
 import capitalize from "utils/capitalize";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 
 import SettingsListItem from "./SettingsListItem";
 import SetCurrency from "./SetCurrency";
@@ -141,7 +141,11 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
   }
 
   if (fetching || !round) {
-    return <HappySpinner className="mx-auto" />;
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner size="lg" className="text-gray-400" />
+      </div>
+    );
   }
 
   return (

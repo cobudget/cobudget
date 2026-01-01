@@ -1,5 +1,5 @@
 import Button from "components/Button";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import SelectInput, { SelectField } from "components/SelectInput";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -86,8 +86,8 @@ function ChangeRoundGroup({ round, hide }) {
           </span>
         </p>
         {fetching ? (
-          <div className="flex justify-center items-center">
-            <HappySpinner />
+          <div className="flex justify-center items-center py-4">
+            <Spinner size="md" className="text-gray-400" />
           </div>
         ) : (
           <div>

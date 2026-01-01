@@ -1,4 +1,4 @@
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import Link from "next/link";
 import Masonry from "react-masonry-css";
 import { FC } from "react";
@@ -73,7 +73,7 @@ const ImageFeed: FC<ImageFeedProps> = ({
       {moreExist && (
         <div className="flex justify-center py-4">
           {loading ? (
-            <HappySpinner />
+            <Spinner size="md" className="text-gray-400" />
           ) : (
             <button
               onClick={onLoadMore}

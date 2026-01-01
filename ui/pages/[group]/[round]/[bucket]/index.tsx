@@ -8,7 +8,7 @@ import Funders from "components/Bucket/Funders";
 import Comments from "components/Bucket/Comments";
 
 import classNames from "utils/classNames";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { useRouter } from "next/router";
 import { initUrqlClient } from "next-urql";
 import { client as createClientConfig } from "graphql/client";
@@ -225,7 +225,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
       <>
         <Header head={head} />
         <div className="flex-grow flex justify-center items-center h-64">
-          <HappySpinner />
+          <Spinner size="lg" className="text-gray-400" />
         </div>
       </>
     );

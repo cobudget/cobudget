@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useMutation, gql } from "urql";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 
 const JOIN_ROUND = gql`
   mutation JoinInvitationLink($token: String!) {
@@ -88,7 +88,7 @@ function InviteToken() {
 
   return (
     <div className="flex justify-center mt-10">
-      <HappySpinner />
+      <Spinner size="lg" className="text-gray-400" />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useEffect, useState, forwardRef } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, gql } from "urql";
 import { CheckIcon } from "components/Icons";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import NavItem from "components/Header/NavItem";
 import ProgressBar from "components/ProgressBar";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -113,7 +113,12 @@ const TodoList = ({ currentGroup }) => {
     console.error("Couldn't check todo status", error);
     return null;
   }
-  if (loading) return <HappySpinner />;
+  if (loading)
+    return (
+      <div className="flex justify-center py-4">
+        <Spinner size="md" className="text-gray-400" />
+      </div>
+    );
 
   const todos = rawTodos.map((todo, index) => {
     let done = false;

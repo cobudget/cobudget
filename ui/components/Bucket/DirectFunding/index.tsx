@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import Tooltip from "@tippyjs/react";
 import { FormattedMessage, useIntl } from "react-intl";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
 import Form from "./Form";
@@ -77,7 +77,12 @@ const DirectFunding = ({ canEdit = false, round, isEditingAllowed }) => {
   // we don't show this section at all to people who aren't admins/cocreators. they'll interact through the Fund button instead
   if (!canEdit || !round.directFundingEnabled) return null;
 
-  if (fetchingQuery) return <HappySpinner />;
+  if (fetchingQuery)
+    return (
+      <div className="flex justify-center py-4">
+        <Spinner size="md" className="text-gray-400" />
+      </div>
+    );
 
   if (error) {
     console.error(error);

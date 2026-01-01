@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@mui/material";
 import { gql, useQuery } from "urql";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import LoadMore from "components/LoadMore";
 import dayjs from "dayjs";
 import { toMS } from "utils/date";
@@ -53,7 +53,11 @@ function SS() {
   }, [data?.getSuperAdminSessions.sessions, offset]);
 
   if (fetching && (sessions?.length === 0 || !sessions))
-    return <HappySpinner />;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" className="text-gray-400" />
+      </div>
+    );
 
   return (
     <div className="page">

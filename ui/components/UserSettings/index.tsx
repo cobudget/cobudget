@@ -1,6 +1,6 @@
 import { useQuery, gql, useMutation } from "urql";
 import { Checkbox, FormControlLabel, FormGroup } from "@mui/material";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { FormattedMessage, useIntl } from "react-intl";
 import Link from "next/link";
 
@@ -128,7 +128,12 @@ const SettingsIndex = () => {
     },
   ];
 
-  if (fetching) return <HappySpinner />;
+  if (fetching)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" className="text-gray-400" />
+      </div>
+    );
 
   if (!fetching && data.currentUser === null) {
     return (

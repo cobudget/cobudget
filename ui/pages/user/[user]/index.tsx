@@ -1,6 +1,6 @@
 import { useQuery, gql } from "urql";
 import Avatar from "components/Avatar";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 
 export const USER_QUERY = gql`
   query User($userId: ID!) {
@@ -17,7 +17,12 @@ const UserIndex = ({ router }) => {
     variables: { userId: router.query.user },
   });
 
-  if (fetching) return <HappySpinner />;
+  if (fetching)
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spinner size="lg" className="text-gray-400" />
+      </div>
+    );
   if (error) {
     console.error("User not found:", error);
     return <div className="text-center">User not found</div>;

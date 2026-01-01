@@ -22,7 +22,7 @@ vi.mock("react-intl", () => ({
 }));
 
 // Mock components that have complex dependencies
-vi.mock("components/HappySpinner", () => ({
+vi.mock("components/Spinner", () => ({
   default: () => <div>Loading...</div>,
 }));
 

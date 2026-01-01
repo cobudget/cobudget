@@ -3,7 +3,7 @@ import { gql, useMutation, useQuery } from "urql";
 import { useRouter } from "next/router";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import AppContext from "contexts/AppContext";
 import toast from "react-hot-toast";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -122,7 +122,7 @@ function ControlPage({ currentUser }) {
   if (!hasMounted) {
     return (
       <div className="page flex justify-center items-center min-h-[50vh]">
-        <HappySpinner />
+        <Spinner size="lg" className="text-gray-400" />
       </div>
     );
   }
@@ -174,7 +174,7 @@ function ControlPage({ currentUser }) {
 
           {isLoading ? (
             <div className="flex justify-center items-center py-8">
-              <HappySpinner />
+              <Spinner size="lg" className="text-gray-400" />
             </div>
           ) : (
             <div className="space-y-6">

@@ -1,4 +1,4 @@
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { gql, useQuery } from "urql";
@@ -95,7 +95,7 @@ export default function ImageFeedPage() {
   if (fetching && offset === 0) {
     return (
       <div className="flex justify-center items-center h-64">
-        <HappySpinner />
+        <Spinner size="lg" className="text-gray-400" />
       </div>
     );
   }

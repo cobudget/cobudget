@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useQuery, gql } from "urql";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import EditGroup from "components/Group/EditGroup";
 
 export const GROUP_QUERY = gql`
@@ -34,7 +34,7 @@ export default () => {
     <>
       {loading ? (
         <div className="flex-grow flex justify-center items-center h-64">
-          <HappySpinner />
+          <Spinner size="lg" className="text-gray-400" />
         </div>
       ) : (
         <EditGroup group={group} />

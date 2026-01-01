@@ -9,7 +9,7 @@ import {
   Modal,
 } from "@mui/material";
 import Button from "components/Button";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { CopyIcon, VerifiedIcon } from "components/Icons";
 import { HIDDEN_TEXT, TOKEN_STATUS } from "../../../constants";
 import { useRouter } from "next/router";
@@ -156,8 +156,8 @@ function Integrations() {
 
   if (fetching) {
     return (
-      <div className="flex justify-center items-center">
-        <HappySpinner />
+      <div className="flex justify-center items-center py-8">
+        <Spinner size="lg" className="text-gray-400" />
       </div>
     );
   }

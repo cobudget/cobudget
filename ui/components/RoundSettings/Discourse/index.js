@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery, gql } from "urql";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
-import HappySpinner from "../../HappySpinner";
+import Spinner from "../../Spinner";
 import { FormattedMessage } from "react-intl";
 
 const EDIT_ROUND = gql`
@@ -79,7 +79,9 @@ const Discourse = ({ round, currentGroup }) => {
             ))}
           </SelectField>
         ) : (
-          <HappySpinner />
+          <div className="flex justify-center py-4">
+            <Spinner size="md" className="text-gray-400" />
+          </div>
         )}
 
         <div className="mt-2 flex justify-end">

@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Sidebar from "./Sidebar";
 import BucketGallery from "./BucketGallery";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { isMemberOfBucket } from "utils/helpers";
 import Title from "./Title";
 import Summary from "./Summary";
@@ -42,7 +42,7 @@ export default function Overview({
   if (fetching && !bucket) {
     return (
       <div className="flex-grow flex justify-center items-center h-64">
-        <HappySpinner />
+        <Spinner size="lg" className="text-gray-400" />
       </div>
     );
   }

@@ -20,7 +20,7 @@ import ExpenseStatus from "./Bucket/Expenses/ExpenseStatus";
 import RoundExpensesFilter from "./Bucket/Expenses/RoundExpensesFilter";
 import Button from "./Button";
 import FormattedCurrency from "./FormattedCurrency";
-import HappySpinner from "./HappySpinner";
+import Spinner from "./Spinner";
 import IconButton from "./IconButton";
 import { EditIcon, SortDownIcon, SortIcon, SortUpIcon } from "./Icons";
 import LoadMore from "./LoadMore";
@@ -240,7 +240,7 @@ function RoundExpenses({ round, currentUser }) {
         </div>
         {fetching ? (
           <div className="flex justify-center items-center mt-8">
-            <HappySpinner />
+            <Spinner size="lg" className="text-gray-400" />
           </div>
         ) : (
           <div className="mt-4 bg-white rounded-lg shadow overflow-hidden">
