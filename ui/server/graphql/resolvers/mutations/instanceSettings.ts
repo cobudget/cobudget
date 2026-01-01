@@ -10,10 +10,15 @@ export const updateInstanceSettings = async (
     throw new Error("Super admin session required");
   }
 
-  return prisma.instanceSettings.upsert({
-    where: { id: "singleton" },
-    update: { landingGroupId },
-    create: { id: "singleton", landingGroupId },
-    include: { landingGroup: true },
-  });
+  try {
+    return await prisma.instanceSettings.upsert({
+      where: { id: "singleton" },
+      update: { landingGroupId },
+      create: { id: "singleton", landingGroupId },
+      include: { landingGroup: true },
+    });
+  } catch (error) {
+    console.error("Failed to update instance settings:", error);
+    throw error;
+  }
 };

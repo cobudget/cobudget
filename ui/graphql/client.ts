@@ -32,10 +32,13 @@ export const getUrl = (): string => {
 export const client = (
   ssrExchange: SSRExchange
   //ctx: NextUrqlContext | undefined
-): { url: string; exchanges: Exchange[] } => {
+): { url: string; exchanges: Exchange[]; fetchOptions: RequestInit } => {
   return {
     url: getUrl(),
     // requestPolicy: "cache-and-network",
+    fetchOptions: {
+      credentials: "include" as RequestCredentials,
+    },
     exchanges: [
       // errorExchange({
       //   // onError: (error) => {
@@ -69,6 +72,18 @@ export const client = (
                   cache.invalidate(
                     "Query",
                     "getSuperAdminSession",
+                    field.arguments
+                  );
+                });
+            },
+            updateInstanceSettings(result, args, cache) {
+              cache
+                .inspectFields("Query")
+                .filter((field) => field.fieldName === "instanceSettings")
+                .forEach((field) => {
+                  cache.invalidate(
+                    "Query",
+                    "instanceSettings",
                     field.arguments
                   );
                 });

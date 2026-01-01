@@ -99,10 +99,12 @@ function ControlPage({ currentUser }) {
     });
 
     if (result.error) {
+      console.error("Failed to update settings:", result.error);
       toast.error(
-        intl.formatMessage({
-          defaultMessage: "Failed to update settings",
-        })
+        result.error.message ||
+          intl.formatMessage({
+            defaultMessage: "Failed to update settings",
+          })
       );
     } else {
       toast.success(
