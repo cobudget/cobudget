@@ -237,3 +237,33 @@ export const moveRoundToGroup = async (
 ) => {
   return moveRoundToGroupHelper({ groupId, roundId, user, ss });
 };
+
+export const deleteGroup = async (_, { groupId }, { ss }) => {
+  if (!ss) {
+    throw new Error("Only superadmins can perform this action");
+  }
+
+  // Check if group has any rounds
+  const group = await prisma.group.findUnique({
+    where: { id: groupId },
+    include: { rounds: true },
+  });
+
+  if (!group) {
+    throw new Error("Group not found");
+  }
+
+  if (group.rounds && group.rounds.length > 0) {
+    throw new Error("Cannot delete a group that has rounds. Delete or move the rounds first.");
+  }
+
+  // Delete all group members first
+  await prisma.groupMember.deleteMany({
+    where: { groupId },
+  });
+
+  // Delete the group
+  return prisma.group.delete({
+    where: { id: groupId },
+  });
+};
