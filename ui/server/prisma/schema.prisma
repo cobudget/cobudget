@@ -206,6 +206,7 @@ model Round {
   title       String
   archived    Boolean @default(false)
   deleted     Boolean @default(false)
+  position    Float?
 
   info               String?
   about              String?

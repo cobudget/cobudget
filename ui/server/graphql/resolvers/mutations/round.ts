@@ -1460,3 +1460,14 @@ export const changeBucketLimit = async (
     throw new Error("Only superadmins can perform this action");
   }
 };
+
+export const setRoundPosition = combineResolvers(
+  isCollOrGroupAdmin,
+  async (parent, { roundId, newPosition }) => {
+    const round = await prisma.round.update({
+      where: { id: roundId },
+      data: { position: newPosition },
+    });
+    return round;
+  }
+);

@@ -38,6 +38,7 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
     return prisma.round.findMany({
       where: { group: { slug: groupSlug }, deleted: { not: true } },
       take: limit,
+      orderBy: [{ position: "asc" }, { createdAt: "desc" }],
     });
   }
 
@@ -48,6 +49,7 @@ export const rounds = async (parent, { limit, groupSlug }, { user }) => {
       deleted: { not: true },
     },
     take: limit,
+    orderBy: [{ position: "asc" }, { createdAt: "desc" }],
   });
 
   // filter away colls the current user shouldn't be able to view

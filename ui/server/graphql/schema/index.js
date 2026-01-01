@@ -234,6 +234,7 @@ const schema = gql`
 
     changeRoundSize(roundId: ID!, maxMembers: Int): Round
     changeBucketLimit(roundId: ID!, maxFreeBuckets: Int): Round
+    setRoundPosition(roundId: ID!, newPosition: Float!): Round!
 
     editBucketCustomField(
       bucketId: ID!
@@ -465,6 +466,7 @@ const schema = gql`
     slug: String!
     title: String!
     archived: Boolean
+    position: Float
     group: Group
     info: String
     color: String
@@ -501,6 +503,7 @@ const schema = gql`
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int
+    previewImages: [ImageFeedEntry]
 
     ocCollective: OC_Collective
     ocWebhookUrl: String
