@@ -64,7 +64,7 @@ function ImportRound({ group }) {
     }
   };
 
-  if (fetching) {
+  if (fetching || !data) {
     return null;
   }
 
