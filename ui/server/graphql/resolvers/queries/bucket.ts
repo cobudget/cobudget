@@ -94,7 +94,7 @@ export const bucketsPage = async (
     tag: tagValue,
     offset = 0,
     limit,
-    status,
+    status = [],
     orderBy,
     orderDir,
   },
@@ -141,7 +141,7 @@ export const bucketsPage = async (
     // Cache miss - fetch and process
     const statusFilter = status
       .map((s) => statusTypeToQuery(s, fundingStatus))
-      .filter((s) => s);
+      .filter((s) => s !== false) as Record<string, unknown>[];
     // If canceled in not there in the status filter, explicitly unselect canceled buckets
     const showCanceled = status.indexOf("CANCELED") === -1;
     const showDraft = status.indexOf("PENDING_APPROVAL") !== -1;
@@ -163,7 +163,7 @@ export const bucketsPage = async (
       where: {
         round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
         deleted: { not: true },
-        OR: statusFilter,
+        ...(statusFilter.length > 0 && { OR: statusFilter }),
         ...(showCanceled && { canceledAt: null }),
         ...(textSearchTerm && {
           title: { contains: textSearchTerm, mode: "insensitive" },
