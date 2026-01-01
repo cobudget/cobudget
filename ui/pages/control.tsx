@@ -15,6 +15,14 @@ const GET_GROUPS = gql`
       slug
       name
       logo
+      rounds {
+        id
+        slug
+        title
+        archived
+        currency
+        visibility
+      }
     }
   }
 `;
@@ -213,28 +221,29 @@ function ControlPage({ currentUser }) {
                   ))}
                 </SelectField>
 
-                {selectedGroup && (
-                  <div className="my-4 p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600 mb-2">
-                      <FormattedMessage defaultMessage="Selected group preview:" />
-                    </p>
-                    <div className="flex items-center gap-4">
-                      {selectedGroup.logo && (
-                        <img
-                          src={selectedGroup.logo}
-                          alt={selectedGroup.name}
-                          className="w-12 h-12 object-contain rounded"
-                        />
-                      )}
-                      <div>
-                        <p className="font-semibold">{selectedGroup.name}</p>
-                        <p className="text-sm text-gray-500">
-                          /{selectedGroup.slug}
-                        </p>
+                {selectedGroup &&
+                  selectedGroupId !== currentSettings?.landingGroupId && (
+                    <div className="my-4 p-4 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-600 mb-2">
+                        <FormattedMessage defaultMessage="Change to:" />
+                      </p>
+                      <div className="flex items-center gap-4">
+                        {selectedGroup.logo && (
+                          <img
+                            src={selectedGroup.logo}
+                            alt={selectedGroup.name}
+                            className="w-12 h-12 object-contain rounded"
+                          />
+                        )}
+                        <div>
+                          <p className="font-semibold">{selectedGroup.name}</p>
+                          <p className="text-sm text-gray-500">
+                            /{selectedGroup.slug}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {currentSettings?.landingGroup && (
                   <div className="my-4 p-4 bg-blue-50 rounded-lg">
@@ -269,6 +278,92 @@ function ControlPage({ currentUser }) {
                 >
                   <FormattedMessage defaultMessage="Save Settings" />
                 </Button>
+              </div>
+
+              {/* Organizations & Rounds Section */}
+              <div className="border-t pt-6">
+                <h2 className="text-lg font-medium mb-2">
+                  <FormattedMessage defaultMessage="Organizations & Rounds" />
+                </h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  <FormattedMessage defaultMessage="Overview of all organizations and their rounds on this instance." />
+                </p>
+
+                <div className="space-y-4">
+                  {groups.length === 0 ? (
+                    <p className="text-gray-500 text-sm">
+                      <FormattedMessage defaultMessage="No organizations found." />
+                    </p>
+                  ) : (
+                    groups.map((group) => (
+                      <div
+                        key={group.id}
+                        className="border rounded-lg overflow-hidden"
+                      >
+                        <div className="bg-gray-50 p-4 flex items-center gap-3">
+                          {group.logo && (
+                            <img
+                              src={group.logo}
+                              alt={group.name}
+                              className="w-10 h-10 object-contain rounded"
+                            />
+                          )}
+                          <div className="flex-1">
+                            <p className="font-semibold">{group.name}</p>
+                            <p className="text-sm text-gray-500">
+                              /{group.slug}
+                            </p>
+                          </div>
+                          <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
+                            {group.rounds?.length || 0}{" "}
+                            <FormattedMessage defaultMessage="rounds" />
+                          </span>
+                        </div>
+
+                        {group.rounds && group.rounds.length > 0 && (
+                          <div className="divide-y">
+                            {group.rounds.map((round) => (
+                              <div
+                                key={round.id}
+                                className="p-3 pl-8 flex items-center gap-3 hover:bg-gray-50"
+                              >
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">
+                                    {round.title}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    /{group.slug}/{round.slug}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-500">
+                                    {round.currency}
+                                  </span>
+                                  {round.archived && (
+                                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                                      <FormattedMessage defaultMessage="Archived" />
+                                    </span>
+                                  )}
+                                  {round.visibility === "HIDDEN" && (
+                                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                                      <FormattedMessage defaultMessage="Hidden" />
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {(!group.rounds || group.rounds.length === 0) && (
+                          <div className="p-3 pl-8 text-sm text-gray-400">
+                            <FormattedMessage defaultMessage="No rounds" />
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           )}
