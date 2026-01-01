@@ -11,17 +11,33 @@ import { isBucketFavorite } from "../helpers/bucket";
 export const cocreators = async (bucket) => {
   return prisma.bucket.findUnique({ where: { id: bucket.id } }).cocreators();
 };
+
 export const round = async (bucket) => {
+  // Use pre-included round if available (from bucketsPage optimization)
+  if (bucket.round && typeof bucket.round === "object") {
+    return bucket.round;
+  }
   return prisma.bucket.findUnique({ where: { id: bucket.id } }).round();
 };
+
 export const totalContributions = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.totalContributions !== undefined) {
+    return bucket._computed.totalContributions;
+  }
   return bucketTotalContributions(bucket);
 };
+
 export const totalContributionsFromCurrentMember = async (
   bucket,
   args,
   { user }
 ) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.totalContributionsFromCurrentMember !== undefined) {
+    return bucket._computed.totalContributionsFromCurrentMember;
+  }
+
   if (!user) return null;
   const roundMember = await prisma.roundMember.findUnique({
     where: {
@@ -48,6 +64,11 @@ export const totalContributionsFromCurrentMember = async (
 };
 
 export const noOfComments = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.noOfComments !== undefined) {
+    return bucket._computed.noOfComments;
+  }
+
   // TODO: fix discourse check
   // Only display number of comments for non-Discourse groups
   // if (groupHasDiscourse(currentGroup)) {
@@ -58,6 +79,7 @@ export const noOfComments = async (bucket) => {
     .comments();
   return comments.length;
 };
+
 export const contributions = async (bucket) => {
   return await prisma.contribution.findMany({
     where: { bucketId: bucket.id },
@@ -66,6 +88,7 @@ export const contributions = async (bucket) => {
     },
   });
 };
+
 export const noOfContributions = async (bucket) => {
   return await prisma.contribution.count({
     where: { bucketId: bucket.id },
@@ -92,6 +115,11 @@ export const funders = async (bucket) => {
 };
 
 export const noOfFunders = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.noOfFunders !== undefined) {
+    return bucket._computed.noOfFunders;
+  }
+
   const contributions = await prisma.contribution.findMany({
     where: { bucketId: bucket.id },
   });
@@ -125,6 +153,10 @@ export const raisedFlags = async (bucket) => {
 };
 
 export const flags = async (bucket) => {
+  // Use pre-included flags if available (from bucketsPage optimization)
+  if (Array.isArray(bucket.flags)) {
+    return bucket.flags;
+  }
   return await prisma.bucket.findUnique({ where: { id: bucket.id } }).flags();
 };
 
@@ -147,14 +179,25 @@ export const tags = async (bucket) => {
   });
 };
 
-export const images = async (bucket) =>
-  prisma.bucket.findUnique({ where: { id: bucket.id } }).Images();
+export const images = async (bucket) => {
+  // Use pre-included images if available (from bucketsPage optimization)
+  if (bucket.images) return bucket.images;
+  if (bucket.Images) return bucket.Images;
+  return prisma.bucket.findUnique({ where: { id: bucket.id } }).Images();
+};
 
-export const customFields = async (bucket) =>
-  prisma.bucket.findUnique({ where: { id: bucket.id } }).FieldValues();
+export const customFields = async (bucket) => {
+  // Use pre-included customFields if available (from bucketsPage optimization)
+  if (bucket.customFields) return bucket.customFields;
+  if (bucket.FieldValues) return bucket.FieldValues;
+  return prisma.bucket.findUnique({ where: { id: bucket.id } }).FieldValues();
+};
 
-export const budgetItems = async (bucket) =>
-  prisma.budgetItem.findMany({ where: { bucketId: bucket.id } });
+export const budgetItems = async (bucket) => {
+  // Use pre-included BudgetItems if available (from bucketsPage optimization)
+  if (bucket.BudgetItems) return bucket.BudgetItems;
+  return prisma.budgetItem.findMany({ where: { bucketId: bucket.id } });
+};
 
 export const published = (bucket) => !!bucket.publishedAt;
 export const readyForFunding = (bucket) => !!bucket.readyForFundingAt;
@@ -162,15 +205,31 @@ export const approved = (bucket) => !!bucket.approvedAt;
 export const canceled = (bucket) => !!bucket.canceledAt;
 export const funded = (bucket) => !!bucket.fundedAt;
 export const completed = (bucket) => !!bucket.completedAt;
+
 export const income = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.income !== undefined) {
+    return bucket._computed.income;
+  }
   return bucketIncome(bucket);
 };
+
 export const minGoal = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.minGoal !== undefined) {
+    return bucket._computed.minGoal;
+  }
   return bucketMinGoal(bucket);
 };
+
 export const maxGoal = async (bucket) => {
+  // Use pre-computed value if available (from bucketsPage optimization)
+  if (bucket._computed?.maxGoal !== undefined) {
+    return bucket._computed.maxGoal;
+  }
   return bucketMaxGoal(bucket);
 };
+
 export const status = async (bucket) => {
   // COMPLETED overrides all else
   if (bucket.completedAt) return "COMPLETED";
@@ -181,27 +240,30 @@ export const status = async (bucket) => {
 
   // If approved, we check where we are in the funding timeline
   if (bucket.approvedAt) {
-    const { hasEnded, hasStarted } = await getRoundFundingStatuses({
-      roundId: bucket.roundId,
-    });
+    // Use pre-computed funding status if available (from bucketsPage optimization)
+    const fundingStatus =
+      bucket._computed?.roundFundingStatus ||
+      (await getRoundFundingStatuses({ roundId: bucket.roundId }));
 
-    if (hasEnded) {
-      // Only call it PARTIAL_FUNDING if there’s > 0 total contributions
-      const total = await bucketTotalContributions(bucket);
+    if (fundingStatus.hasEnded) {
+      // Only call it PARTIAL_FUNDING if there's > 0 total contributions
+      const total =
+        bucket._computed?.totalContributions ??
+        (await bucketTotalContributions(bucket));
       return total > 0 ? "PARTIAL_FUNDING" : "IDEA";
     }
 
     // If the round is ongoing, call it OPEN_FOR_FUNDING
-    if (hasStarted) return "OPEN_FOR_FUNDING";
+    if (fundingStatus.hasStarted) return "OPEN_FOR_FUNDING";
 
     // Otherwise, if not started, we consider it an IDEA
     return "IDEA";
   }
 
-  // If not approved yet, but it’s published, call it IDEA
+  // If not approved yet, but it's published, call it IDEA
   if (bucket.publishedAt) return "IDEA";
 
-  // Finally, if it’s neither approved nor published, it’s still PENDING_APPROVAL
+  // Finally, if it's neither approved nor published, it's still PENDING_APPROVAL
   return "PENDING_APPROVAL";
 };
 
@@ -242,18 +304,21 @@ export const isFavorite = async ({ id, roundId }, _: unknown, { user }) => {
 };
 
 export const awardedAmount = async (bucket) => {
-  // 1) Check round status
-  const { hasEnded } = await getRoundFundingStatuses({
-    roundId: bucket.roundId,
-  });
-  if (!hasEnded) {
-    // Round still ongoing, so no final “awarded” amount yet
+  // Use pre-computed funding status if available (from bucketsPage optimization)
+  const fundingStatus =
+    bucket._computed?.roundFundingStatus ||
+    (await getRoundFundingStatuses({ roundId: bucket.roundId }));
+
+  if (!fundingStatus.hasEnded) {
+    // Round still ongoing, so no final "awarded" amount yet
     return null;
   }
 
-  // 2) Get total contributions
-  const total = await bucketTotalContributions(bucket);
+  // Get total contributions (use pre-computed value if available)
+  const total =
+    bucket._computed?.totalContributions ??
+    (await bucketTotalContributions(bucket));
 
-  // 3) If total > 0, return it. Otherwise return null
+  // If total > 0, return it. Otherwise return null
   return total > 0 ? total : null;
 };

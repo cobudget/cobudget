@@ -172,12 +172,120 @@ export const bucketsPage = async (
           tags: { some: { value: tagValue } },
         }),
       },
+      // Include relations to avoid N+1 queries in field resolvers
+      include: {
+        Images: true,
+        flags: true,
+        round: {
+          select: {
+            id: true,
+            canCocreatorStartFunding: true,
+            grantingOpens: true,
+            grantingCloses: true,
+          },
+        },
+        FieldValues: {
+          include: { field: true },
+        },
+        BudgetItems: true,
+      },
       ...(orderBy && { orderBy: { [orderBy]: orderDir } }),
     });
 
-    shuffledBuckets = buckets;
+    // Early return if no buckets found
+    if (buckets.length === 0) {
+      setCache(cacheKey, []);
+      return { moreExist: false, buckets: [] };
+    }
+
+    // Batch fetch aggregates for all buckets to avoid N+1 queries
+    const bucketIds = buckets.map((b) => b.id);
+
+    const [contributionSums, commentCounts, funderGroups, currentMemberContribs] =
+      await Promise.all([
+        // Total contributions per bucket
+        prisma.contribution.groupBy({
+          by: ["bucketId"],
+          where: { bucketId: { in: bucketIds } },
+          _sum: { amount: true },
+        }),
+        // Comment counts per bucket
+        prisma.comment.groupBy({
+          by: ["bucketId"],
+          where: { bucketId: { in: bucketIds } },
+          _count: true,
+        }),
+        // Funders per bucket (distinct roundMemberIds)
+        prisma.contribution.groupBy({
+          by: ["bucketId", "roundMemberId"],
+          where: { bucketId: { in: bucketIds } },
+        }),
+        // Current member's contributions (if logged in)
+        currentMember
+          ? prisma.contribution.groupBy({
+              by: ["bucketId"],
+              where: {
+                bucketId: { in: bucketIds },
+                roundMemberId: currentMember.id,
+              },
+              _sum: { amount: true },
+            })
+          : Promise.resolve([]),
+      ]);
+
+    // Create lookup maps for O(1) access
+    const contributionMap = new Map(
+      contributionSums.map((c) => [c.bucketId, c._sum.amount || 0])
+    );
+    const commentCountMap = new Map(
+      commentCounts.map((c) => [c.bucketId, c._count])
+    );
+    const funderCountMap = new Map<string, number>();
+    funderGroups.forEach((f) => {
+      funderCountMap.set(f.bucketId, (funderCountMap.get(f.bucketId) || 0) + 1);
+    });
+    const currentMemberContribMap = new Map(
+      currentMemberContribs.map((c) => [c.bucketId, c._sum.amount || 0])
+    );
+
+    // Enrich buckets with pre-computed values
+    const enrichedBuckets = buckets.map((bucket) => ({
+      ...bucket,
+      // Map relation names to match GraphQL schema
+      images: bucket.Images,
+      customFields: bucket.FieldValues,
+      // Pre-computed aggregates and values
+      _computed: {
+        totalContributions: contributionMap.get(bucket.id) || 0,
+        noOfComments: commentCountMap.get(bucket.id) || 0,
+        noOfFunders: funderCountMap.get(bucket.id) || 0,
+        totalContributionsFromCurrentMember:
+          currentMemberContribMap.get(bucket.id) || 0,
+        // Compute goals from included BudgetItems
+        minGoal: bucket.BudgetItems.reduce(
+          (acc, item) => acc + (item.type === "EXPENSE" ? item.min : 0),
+          0
+        ),
+        maxGoal: bucket.BudgetItems.reduce(
+          (acc, item) =>
+            acc + (item.type === "EXPENSE" ? item.max ?? item.min : 0),
+          0
+        ),
+        income: bucket.BudgetItems.reduce(
+          (acc, item) => acc + (item.type === "INCOME" ? item.min : 0),
+          0
+        ),
+        // Round funding status (already fetched at start)
+        roundFundingStatus: fundingStatus,
+      },
+    }));
+
+    shuffledBuckets = enrichedBuckets;
     if (!orderBy) {
-      SeededShuffle.shuffle(buckets, user ? user.id + todaySeed : todaySeed);
+      SeededShuffle.shuffle(
+        enrichedBuckets,
+        user ? user.id + todaySeed : todaySeed
+      );
     } else if (
       orderBy === "percentageFunded" ||
       orderBy === "contributionsCount"
@@ -193,7 +301,7 @@ export const bucketsPage = async (
         .concat(shuffledBuckets);
     }
 
-    // Cache the shuffled result for subsequent page requests
+    // Cache the enriched and shuffled result for subsequent page requests
     setCache(cacheKey, shuffledBuckets);
   }
 
