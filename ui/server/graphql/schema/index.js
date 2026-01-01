@@ -56,6 +56,7 @@ const schema = gql`
   type Query {
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
+    instanceSettings: InstanceSettings
     currentUser: User
     user(userId: ID!): User!
     groups: [Group!]
@@ -151,6 +152,8 @@ const schema = gql`
     startSuperAdminSession(duration: Int!): SuperAdminSession
 
     endSuperAdminSession: SuperAdminSession
+
+    updateInstanceSettings(landingGroupId: String): InstanceSettings
 
     createGroup(
       name: String!
@@ -959,6 +962,13 @@ const schema = gql`
     end: Date
     adminId: ID!
     user: User
+  }
+
+  type InstanceSettings {
+    id: ID!
+    landingGroupId: String
+    landingGroup: Group
+    updatedAt: Date
   }
 
   input CustomFieldValueInput {

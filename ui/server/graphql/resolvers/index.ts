@@ -7,6 +7,7 @@ import {
   budgetItemQueries,
   expensesQueries,
   groupQueries,
+  instanceSettingsQueries,
   randomRoundImages,
   roundQueries,
   superAdminQueries,
@@ -36,6 +37,7 @@ import {
 import {
   bucketMutations,
   groupMutations,
+  instanceSettingsMutations,
   roundMutations,
   superAdminMutations,
   userMutations,
@@ -52,6 +54,7 @@ const resolvers = {
     ...budgetItemQueries,
     ...superAdminQueries,
     ...expensesQueries,
+    ...instanceSettingsQueries,
     randomRoundImages,
     languageProgressPage,
   },
@@ -62,6 +65,7 @@ const resolvers = {
     ...roundMutations,
     ...bucketMutations,
     ...superAdminMutations,
+    ...instanceSettingsMutations,
   },
 
   RoundMember,

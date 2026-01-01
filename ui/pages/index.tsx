@@ -5,7 +5,8 @@ import parseHtml, { domToReact } from "html-react-parser";
 import get from "lodash/get";
 
 import GroupPage from "../components/Group";
-import { getWebflowProps, webflowCss } from "utils/webflow";
+import { webflowCss } from "utils/webflow";
+import prisma from "server/prisma";
 
 // Determines if URL is internal or external
 function isUrlInternal(link) {
@@ -71,6 +72,60 @@ const IndexPage = ({ currentUser, landingPage }) => {
   return <GroupPage currentUser={currentUser} />;
 };
 
-export const getStaticProps = getWebflowProps("");
+export const getServerSideProps = async (ctx) => {
+  // Check for landing group setting
+  try {
+    const settings = await prisma.instanceSettings.findUnique({
+      where: { id: "singleton" },
+      include: { landingGroup: true },
+    });
+
+    if (settings?.landingGroup?.slug) {
+      return {
+        redirect: {
+          destination: `/${settings.landingGroup.slug}`,
+          permanent: false,
+        },
+      };
+    }
+  } catch (error) {
+    // If table doesn't exist yet or other error, continue with default behavior
+    console.error("Error checking instance settings:", error);
+  }
+
+  // Fall back to Webflow landing page or GroupPage
+  if (process.env.LANDING_PAGE_URL) {
+    const cheerio = await import(`cheerio`);
+    const axios = (await import(`axios`)).default;
+
+    let url = get(ctx, `params.path`, []);
+    url = url.join(`/`);
+    if (url.charAt(0) !== `/`) {
+      url = `/${url}`;
+    }
+    const fetchUrl = process.env.LANDING_PAGE_URL + url;
+
+    try {
+      const res: any = await axios(fetchUrl);
+      const html = res.data;
+
+      const $ = cheerio.load(html);
+      const bodyContent = $(`body`).html();
+      const headContent = $(`head`).html();
+
+      return {
+        props: {
+          landingPage: { bodyContent, headContent },
+        },
+      };
+    } catch (err) {
+      console.error("Error fetching Webflow page:", err);
+    }
+  }
+
+  return {
+    props: {},
+  };
+};
 
 export default IndexPage;

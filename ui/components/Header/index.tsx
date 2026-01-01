@@ -387,7 +387,7 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                   {/* Only render super admin controls after mount to prevent hydration mismatch */}
                   {currentUser.isSuperAdmin && hasMounted &&
                     (inSession ? (
-                      <span className="text-white text-sm">
+                      <span className="text-white text-sm flex items-center">
                         <span
                           className="cursor-pointer font-bold"
                           onClick={() => {
@@ -403,6 +403,12 @@ const Header = ({ currentUser, fetchingUser, group, round, bucket, ss }) => {
                         >
                           .
                         </span>
+                        <Link
+                          href="/control"
+                          className="ml-4 px-2 py-1 bg-white bg-opacity-20 rounded text-xs hover:bg-opacity-30"
+                        >
+                          Control
+                        </Link>
                       </span>
                     ) : (
                       <>
