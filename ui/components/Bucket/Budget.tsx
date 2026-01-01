@@ -20,10 +20,10 @@ const BucketBudget = ({
 }) => {
   const { budgetItems } = bucket;
   const [editing, setEditing] = useState(false);
-  const incomeItems = budgetItems.filter((item) => item.type === "INCOME");
+  const incomeItems = (budgetItems ?? []).filter((item) => item.type === "INCOME");
   const monetaryIncome = incomeItems.filter((item) => item.min > 0);
   const nonMonetaryIncome = incomeItems.filter((item) => item.min === 0);
-  const expenseItems = budgetItems.filter((item) => item.type === "EXPENSE");
+  const expenseItems = (budgetItems ?? []).filter((item) => item.type === "EXPENSE");
 
   const handleEdit = () => {
     if (isEditingAllowed) {
@@ -53,7 +53,7 @@ const BucketBudget = ({
         />
       )}
 
-      {budgetItems.length > 0 ? (
+      {budgetItems?.length > 0 ? (
         <div className="relative mb-4">
           <div className="flex justify-between mb-2 ">
             <h2 className="text-2xl font-medium">
