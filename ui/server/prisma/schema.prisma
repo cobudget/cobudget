@@ -551,10 +551,11 @@ model SuperAdminSession {
 }
 
 model InstanceSettings {
-  id              String   @id @default("singleton")
-  landingGroupId  String?  @unique @map("landing_group_id")
-  landingGroup    Group?   @relation(fields: [landingGroupId], references: [id])
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  id                        String   @id @default("singleton")
+  landingGroupId            String?  @unique @map("landing_group_id")
+  landingGroup              Group?   @relation(fields: [landingGroupId], references: [id])
+  allowOrganizationCreation Boolean  @default(true) @map("allow_organization_creation")
+  updatedAt                 DateTime @updatedAt @map("updated_at")
 
   @@map("instance_settings")
 }
