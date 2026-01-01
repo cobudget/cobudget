@@ -172,6 +172,7 @@ export const BUCKET_QUERY = gql`
         min
         max
         type
+        position
       }
     }
   }

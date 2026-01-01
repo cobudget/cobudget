@@ -409,6 +409,7 @@ model BudgetItem {
   min         Int
   max         Int?
   type        BudgetItemType
+  position    Int            @default(0)
   Bucket      Bucket?        @relation(fields: [bucketId], references: [id])
   bucketId    String?
 }

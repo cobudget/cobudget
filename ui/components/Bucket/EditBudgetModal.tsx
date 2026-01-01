@@ -2,11 +2,26 @@ import { useMutation, gql } from "urql";
 import { useForm, useFieldArray } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Modal } from "@mui/material";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 import TextField from "components/TextField";
 import Button from "components/Button";
 import IconButton from "components/IconButton";
-import { DeleteIcon, AddIcon } from "components/Icons";
+import { DeleteIcon, AddIcon, DraggableIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import * as yup from "yup";
@@ -26,6 +41,7 @@ const EDIT_BUDGET_MUTATION = gql`
         min
         max
         type
+        position
       }
     }
   }
@@ -52,6 +68,42 @@ const schema = yup.object().shape({
   ),
 });
 
+const SortableBudgetItem = ({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex flex-col sm:flex-row my-2">
+      <div
+        {...listeners}
+        {...attributes}
+        className="cursor-move flex items-center mr-2 text-gray-400 hover:text-gray-600"
+      >
+        <DraggableIcon className="h-5 w-5" />
+      </div>
+      {children}
+    </div>
+  );
+};
+
 const EditBudgetModal = ({
   bucket,
   budgetItems,
@@ -63,6 +115,17 @@ const EditBudgetModal = ({
   const [{ fetching: loading }, editBucket] = useMutation(EDIT_BUDGET_MUTATION);
   const [maxAmountOpenInputs, setMaxAmountOpenInputs] = useState({});
   const intl = useIntl();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const { handleSubmit, register, control } = useForm({
     resolver: yupResolver(schema),
@@ -76,7 +139,7 @@ const EditBudgetModal = ({
     },
   });
 
-  const { fields, append, insert, remove } = useFieldArray({
+  const { fields, append, insert, remove, move } = useFieldArray({
     control,
     name: "budgetItems",
     keyName: "fieldId",
@@ -117,6 +180,34 @@ const EditBudgetModal = ({
     return `${type}-${index}`;
   }, []);
 
+  const handleExpenseDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = expenseItems.findIndex((item) => item.fieldId === active.id);
+    const newIndex = expenseItems.findIndex((item) => item.fieldId === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const fromOriginalIndex = expenseItems[oldIndex].originalIndex;
+      const toOriginalIndex = expenseItems[newIndex].originalIndex;
+      move(fromOriginalIndex, toOriginalIndex);
+    }
+  };
+
+  const handleIncomeDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = incomeItems.findIndex((item) => item.fieldId === active.id);
+    const newIndex = incomeItems.findIndex((item) => item.fieldId === over.id);
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const fromOriginalIndex = incomeItems[oldIndex].originalIndex;
+      const toOriginalIndex = incomeItems[newIndex].originalIndex;
+      move(fromOriginalIndex, toOriginalIndex);
+    }
+  };
+
   return (
     <Modal
       open={open}
@@ -140,6 +231,7 @@ const EditBudgetModal = ({
                 ...item,
                 id: undefined,
                 min: Math.round(item.min * 100),
+                position: i,
                 ...(item.max &&
                   maxAmountOpenInputs[item.id || preId] && {
                     max: Math.round(item.max * 100),
@@ -160,109 +252,120 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Costs" />
           </h2>
 
-          {expenseItems.map(
-            ({ id, fieldId, description, type, min, max, originalIndex }, i) => {
-              const descField = register(`budgetItems.${originalIndex}.description`);
-              const minField = register(`budgetItems.${originalIndex}.min`);
-              const maxField = register(`budgetItems.${originalIndex}.max`);
-              return (
-                <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
-                  <div className="mr-2 my-2 sm:my-0 flex-1">
-                    <input
-                      value={id}
-                      readOnly
-                      className="hidden"
-                      {...register(`budgetItems.${originalIndex}.id`)}
-                    />
-                    <TextField
-                      placeholder={intl.formatMessage({
-                        defaultMessage: "Description",
-                      })}
-                      defaultValue={description}
-                      name={descField.name}
-                      inputRef={descField.ref}
-                      inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
-                      testid={`bucket-expense-item-description`}
-                    />
-                    <input
-                      value={type}
-                      {...register(`budgetItems.${originalIndex}.type`)}
-                      readOnly
-                      className="hidden"
-                    />
-                  </div>
-                  <div className="mr-2 my-2 sm:my-0 flex-1">
-                    <TextField
-                      placeholder={
-                        allowStretchGoals
-                          ? intl.formatMessage({ defaultMessage: "Min amount" })
-                          : intl.formatMessage({ defaultMessage: "Amount" })
-                      }
-                      defaultValue={
-                        typeof min !== "undefined" ? String(min) : null
-                      }
-                      name={minField.name}
-                      inputRef={minField.ref}
-                      inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
-                      endAdornment={currency}
-                      testid={`bucket-expense-item-min-amount`}
-                    />
-                  </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleExpenseDragEnd}
+          >
+            <SortableContext
+              items={expenseItems.map((item) => item.fieldId)}
+              strategy={verticalListSortingStrategy}
+            >
+              {expenseItems.map(
+                ({ id, fieldId, description, type, min, max, originalIndex }, i) => {
+                  const descField = register(`budgetItems.${originalIndex}.description`);
+                  const minField = register(`budgetItems.${originalIndex}.min`);
+                  const maxField = register(`budgetItems.${originalIndex}.max`);
+                  return (
+                    <SortableBudgetItem key={fieldId} id={fieldId}>
+                      <div className="mr-2 my-2 sm:my-0 flex-1">
+                        <input
+                          value={id}
+                          readOnly
+                          className="hidden"
+                          {...register(`budgetItems.${originalIndex}.id`)}
+                        />
+                        <TextField
+                          placeholder={intl.formatMessage({
+                            defaultMessage: "Description",
+                          })}
+                          defaultValue={description}
+                          name={descField.name}
+                          inputRef={descField.ref}
+                          inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
+                          testid={`bucket-expense-item-description`}
+                        />
+                        <input
+                          value={type}
+                          {...register(`budgetItems.${originalIndex}.type`)}
+                          readOnly
+                          className="hidden"
+                        />
+                      </div>
+                      <div className="mr-2 my-2 sm:my-0 flex-1">
+                        <TextField
+                          placeholder={
+                            allowStretchGoals
+                              ? intl.formatMessage({ defaultMessage: "Min amount" })
+                              : intl.formatMessage({ defaultMessage: "Amount" })
+                          }
+                          defaultValue={
+                            typeof min !== "undefined" ? String(min) : null
+                          }
+                          name={minField.name}
+                          inputRef={minField.ref}
+                          inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
+                          endAdornment={currency}
+                          testid={`bucket-expense-item-min-amount`}
+                        />
+                      </div>
 
-                  {allowStretchGoals && (
-                    <div className="mr-2 my-2 sm:my-0 flex-1 relative">
-                      {maxAmountOpenInputs[id || getPreId(type, i)] ? (
-                        <>
-                          <TextField
-                            placeholder={intl.formatMessage({
-                              defaultMessage: "Max amount",
-                            })}
-                            defaultValue={
-                              typeof max === "undefined" || max === null
-                                ? null
-                                : String(max)
-                            }
-                            name={maxField.name}
-                            inputRef={maxField.ref}
-                            inputProps={{ onChange: maxField.onChange, onBlur: maxField.onBlur, type: "number", min: 0 }}
-                            endAdornment={currency}
-                          />
-                          <span
-                            className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
-                            onClick={() => {
-                              setMaxAmountOpenInputs({
-                                ...maxAmountOpenInputs,
-                                [id || getPreId(type, i)]: false,
-                              });
-                            }}
-                          >
-                            ✖
-                          </span>
-                        </>
-                      ) : (
-                        <p
-                          onClick={() => {
-                            setMaxAmountOpenInputs({
-                              ...maxAmountOpenInputs,
-                              [id || getPreId(type, i)]: true,
-                            });
-                          }}
-                          className="underline cursor-pointer mt-4 text-sm text-color-gray"
-                        >
-                          <FormattedMessage defaultMessage="+ Add a range" />
-                        </p>
+                      {allowStretchGoals && (
+                        <div className="mr-2 my-2 sm:my-0 flex-1 relative">
+                          {maxAmountOpenInputs[id || getPreId(type, i)] ? (
+                            <>
+                              <TextField
+                                placeholder={intl.formatMessage({
+                                  defaultMessage: "Max amount",
+                                })}
+                                defaultValue={
+                                  typeof max === "undefined" || max === null
+                                    ? null
+                                    : String(max)
+                                }
+                                name={maxField.name}
+                                inputRef={maxField.ref}
+                                inputProps={{ onChange: maxField.onChange, onBlur: maxField.onBlur, type: "number", min: 0 }}
+                                endAdornment={currency}
+                              />
+                              <span
+                                className="absolute -right-2 -top-2 bg-gray-200 rounded-full flex items-center justify-center h-6 w-6 cursor-pointer"
+                                onClick={() => {
+                                  setMaxAmountOpenInputs({
+                                    ...maxAmountOpenInputs,
+                                    [id || getPreId(type, i)]: false,
+                                  });
+                                }}
+                              >
+                                ✖
+                              </span>
+                            </>
+                          ) : (
+                            <p
+                              onClick={() => {
+                                setMaxAmountOpenInputs({
+                                  ...maxAmountOpenInputs,
+                                  [id || getPreId(type, i)]: true,
+                                });
+                              }}
+                              className="underline cursor-pointer mt-4 text-sm text-color-gray"
+                            >
+                              <FormattedMessage defaultMessage="+ Add a range" />
+                            </p>
+                          )}
+                        </div>
                       )}
-                    </div>
-                  )}
-                  <div className="my-2">
-                    <IconButton onClick={() => remove(originalIndex)}>
-                      <DeleteIcon className="h-6 w-6 text-color-red" />
-                    </IconButton>
-                  </div>
-                </div>
-              );
-            }
-          )}
+                      <div className="my-2">
+                        <IconButton onClick={() => remove(originalIndex)}>
+                          <DeleteIcon className="h-6 w-6 text-color-red" />
+                        </IconButton>
+                      </div>
+                    </SortableBudgetItem>
+                  );
+                }
+              )}
+            </SortableContext>
+          </DndContext>
           <div className="flex mb-4">
             <Button
               variant="secondary"
@@ -280,60 +383,71 @@ const EditBudgetModal = ({
             <FormattedMessage defaultMessage="Existing funding and resources" />
           </h2>
 
-          {incomeItems.map(({ id, fieldId, description, type, min, originalIndex }) => {
-            const descField = register(`budgetItems.${originalIndex}.description`);
-            const minField = register(`budgetItems.${originalIndex}.min`);
-            return (
-              <div className={`flex flex-col sm:flex-row my-2`} key={fieldId}>
-                <div className="mr-2 my-2 sm:my-0 flex-grow">
-                  <input
-                    value={id}
-                    readOnly
-                    className="hidden"
-                    {...register(`budgetItems.${originalIndex}.id`)}
-                  />
-                  <TextField
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Description",
-                    })}
-                    name={descField.name}
-                    inputRef={descField.ref}
-                    inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
-                    defaultValue={description}
-                    testid={`bucket-existing-item-${fieldId}-description`}
-                  />
-                  <input
-                    value={type}
-                    {...register(`budgetItems.${originalIndex}.type`)}
-                    readOnly
-                    className="hidden"
-                  />
-                </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleIncomeDragEnd}
+          >
+            <SortableContext
+              items={incomeItems.map((item) => item.fieldId)}
+              strategy={verticalListSortingStrategy}
+            >
+              {incomeItems.map(({ id, fieldId, description, type, min, originalIndex }) => {
+                const descField = register(`budgetItems.${originalIndex}.description`);
+                const minField = register(`budgetItems.${originalIndex}.min`);
+                return (
+                  <SortableBudgetItem key={fieldId} id={fieldId}>
+                    <div className="mr-2 my-2 sm:my-0 flex-grow">
+                      <input
+                        value={id}
+                        readOnly
+                        className="hidden"
+                        {...register(`budgetItems.${originalIndex}.id`)}
+                      />
+                      <TextField
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Description",
+                        })}
+                        name={descField.name}
+                        inputRef={descField.ref}
+                        inputProps={{ onChange: descField.onChange, onBlur: descField.onBlur }}
+                        defaultValue={description}
+                        testid={`bucket-existing-item-${fieldId}-description`}
+                      />
+                      <input
+                        value={type}
+                        {...register(`budgetItems.${originalIndex}.type`)}
+                        readOnly
+                        className="hidden"
+                      />
+                    </div>
 
-                <div className="mr-2 my-2 sm:my-0">
-                  <TextField
-                    placeholder={intl.formatMessage({
-                      defaultMessage: "Amount",
-                    })}
-                    defaultValue={
-                      typeof min !== "undefined" ? String(min) : null
-                    }
-                    name={minField.name}
-                    inputRef={minField.ref}
-                    inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
-                    endAdornment={currency}
-                    testid={`bucket-existing-item-${fieldId}-amount`}
-                  />
-                </div>
+                    <div className="mr-2 my-2 sm:my-0">
+                      <TextField
+                        placeholder={intl.formatMessage({
+                          defaultMessage: "Amount",
+                        })}
+                        defaultValue={
+                          typeof min !== "undefined" ? String(min) : null
+                        }
+                        name={minField.name}
+                        inputRef={minField.ref}
+                        inputProps={{ onChange: minField.onChange, onBlur: minField.onBlur, type: "number", min: 0 }}
+                        endAdornment={currency}
+                        testid={`bucket-existing-item-${fieldId}-amount`}
+                      />
+                    </div>
 
-                <div className="my-2">
-                  <IconButton onClick={() => remove(originalIndex)}>
-                    <DeleteIcon className="h-6 w-6 text-color-red" />
-                  </IconButton>
-                </div>
-              </div>
-            );
-          })}
+                    <div className="my-2">
+                      <IconButton onClick={() => remove(originalIndex)}>
+                        <DeleteIcon className="h-6 w-6 text-color-red" />
+                      </IconButton>
+                    </div>
+                  </SortableBudgetItem>
+                );
+              })}
+            </SortableContext>
+          </DndContext>
           <div className="flex mb-2">
             <Button
               variant="secondary"

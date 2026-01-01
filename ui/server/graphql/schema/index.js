@@ -850,6 +850,7 @@ const schema = gql`
     min: Int!
     max: Int
     type: BudgetItemType!
+    position: Int!
   }
 
   enum BudgetItemType {
@@ -862,6 +863,7 @@ const schema = gql`
     min: Int!
     max: Int
     type: BudgetItemType!
+    position: Int
   }
 
   interface Transaction {

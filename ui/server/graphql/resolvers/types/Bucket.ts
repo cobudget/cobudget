@@ -195,8 +195,14 @@ export const customFields = async (bucket) => {
 
 export const budgetItems = async (bucket) => {
   // Use pre-included BudgetItems if available (from bucketsPage optimization)
-  if (bucket.BudgetItems) return bucket.BudgetItems;
-  return prisma.budgetItem.findMany({ where: { bucketId: bucket.id } });
+  if (bucket.BudgetItems) {
+    // Sort by position if pre-included
+    return [...bucket.BudgetItems].sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+  }
+  return prisma.budgetItem.findMany({
+    where: { bucketId: bucket.id },
+    orderBy: { position: "asc" },
+  });
 };
 
 export const published = (bucket) => !!bucket.publishedAt;
