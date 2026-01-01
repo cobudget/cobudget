@@ -201,137 +201,119 @@ export const group = async (round, _, { user, ss }) => {
 };
 
 export const bucketStatusCount = async (round, _, { user }) => {
-  const currentMember = await prisma.roundMember.findFirst({
-    where: {
-      userId: user?.id ?? "undefined",
-      roundId: round.id,
-    },
-  });
+  // Fetch member and funding status in parallel
+  const [currentMember, fundingStatus] = await Promise.all([
+    prisma.roundMember.findFirst({
+      where: {
+        userId: user?.id ?? "undefined",
+        roundId: round.id,
+      },
+    }),
+    getRoundFundingStatuses({ roundId: round.id }),
+  ]);
 
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
 
-  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
+  // Helper to build visibility filter for non-admins
+  const getVisibilityFilter = (requireApproved = false) => {
+    if (isAdminOrGuide) return {};
+    if (currentMember) {
+      return {
+        OR: [
+          { publishedAt: { not: null } },
+          { cocreators: { some: { id: currentMember.id } } },
+        ],
+        ...(requireApproved && { AND: { approvedAt: { not: null } } }),
+      };
+    }
+    return { publishedAt: { not: null } };
+  };
 
-  return {
-    PENDING_APPROVAL: await prisma.bucket.count({
+  // Run all 6 counts in parallel
+  const [
+    PENDING_APPROVAL,
+    OPEN_FOR_FUNDING,
+    FUNDED,
+    CANCELED,
+    IDEA,
+    COMPLETED,
+  ] = await Promise.all([
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("PENDING_APPROVAL", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(),
       },
     }),
-    OPEN_FOR_FUNDING: await prisma.bucket.count({
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("OPEN_FOR_FUNDING", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(),
       },
     }),
-    FUNDED: await prisma.bucket.count({
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("FUNDED", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-                AND: { approvedAt: { not: null } },
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(true),
       },
     }),
-    CANCELED: await prisma.bucket.count({
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("CANCELED", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(),
       },
     }),
-    IDEA: await prisma.bucket.count({
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("IDEA", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(),
       },
     }),
-    COMPLETED: await prisma.bucket.count({
+    prisma.bucket.count({
       where: {
         roundId: round.id,
         ...statusTypeToQuery("COMPLETED", fundingStatus),
-        ...(!isAdminOrGuide &&
-          (currentMember
-            ? {
-                OR: [
-                  { publishedAt: { not: null } },
-                  { cocreators: { some: { id: currentMember.id } } },
-                ],
-              }
-            : { publishedAt: { not: null } })),
+        ...getVisibilityFilter(),
       },
     }),
+  ]);
+
+  return {
+    PENDING_APPROVAL,
+    OPEN_FOR_FUNDING,
+    FUNDED,
+    CANCELED,
+    IDEA,
+    COMPLETED,
   };
 };
 
 export const distributedAmount = async (round) => {
-  const buckets = await prisma.bucket.findMany({
+  // Use a single aggregate query instead of fetching all buckets and their contributions
+  const {
+    _sum: { amount },
+  } = await prisma.contribution.aggregate({
     where: { roundId: round.id },
+    _sum: { amount: true },
   });
-  if (buckets.length === 0) return 0;
-  const totalContributionsPromises = buckets.map((bucket) =>
-    bucketTotalContributions(bucket)
-  );
-  const totalContributions = await Promise.all(totalContributionsPromises);
 
-  return totalContributions.reduce((total, current) => total + current, 0);
+  return amount || 0;
 };
 
 // todo: publishedBucketCount should be added to bucketStatusCount
 export const publishedBucketCount = async (round) => {
-  const buckets = await prisma.bucket.findMany({
+  return prisma.bucket.count({
     where: {
       roundId: round.id,
-      NOT: {
-        publishedAt: null,
-      },
+      publishedAt: { not: null },
+      deleted: { not: true },
     },
   });
-  return buckets.length;
 };
 
 export const ocCollective = async (parent) => {
