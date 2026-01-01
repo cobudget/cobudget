@@ -1,5 +1,5 @@
 import { TableCell, TableRow } from "@mui/material";
-import HappySpinner from "components/HappySpinner";
+import Spinner from "components/Spinner";
 import { CheveronDownIcon } from "components/Icons";
 import { FormattedMessage, useIntl } from "react-intl";
 import ReactDOM from "react-dom";
@@ -65,7 +65,7 @@ const LoadMore = ({
     <div className="mt-7">
       {loading ? (
         <div className="flex-grow flex justify-center items-center">
-          <HappySpinner />
+          <Spinner size="md" className="text-gray-400" />
         </div>
       ) : moreExist ? (
         <button
