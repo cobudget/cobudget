@@ -1,19 +1,30 @@
-import { forwardRef, useEffect, useMemo } from "react";
-import { useQuery, gql } from "urql";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useQuery, useMutation, gql } from "urql";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 
-import Button from "../Button";
 import TodoList from "../TodoList";
-import Label from "../Label";
 import SubMenu from "../SubMenu";
 import PageHero from "../PageHero";
 import EditableField from "../EditableField";
-import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
 import advancedDayjsFormatting from "dayjs/plugin/advancedFormat";
-import FormattedCurrency from "components/FormattedCurrency";
 import ImportRound from "./ImportRound";
+import RoundCard, { SortableRoundCard } from "./RoundCard";
 
 dayjs.extend(advancedDayjsFormatting);
 
@@ -26,6 +37,7 @@ export const GROUP_PAGE_QUERY = gql`
       archived
       color
       currency
+      position
       group {
         id
         slug
@@ -36,7 +48,12 @@ export const GROUP_PAGE_QUERY = gql`
       }
       updatedAt
       distributedAmount
-      publishedBucketCount
+      previewImages {
+        id
+        small
+        large
+        bucketId
+      }
     }
     group(groupSlug: $groupSlug) {
       id
@@ -58,83 +75,14 @@ export const GROUP_PAGE_QUERY = gql`
   }
 `;
 
-const LinkCard = forwardRef((props: any, ref) => {
-  const { color, className, children } = props;
-  return (
-    <a
-      {...props}
-      className={
-        `bg-${color} ` +
-        `ring-${color}-dark hover:ring ` +
-        "cursor-pointer group p-4 font-medium rounded-md text-white flex justify-between items-start transitions-shadows duration-75" +
-        " " +
-        (className ? className : "h-32")
-      }
-      ref={ref}
-    >
-      {children}
-    </a>
-  );
-});
-
-function RoundRow({
-  round,
-  index,
-  balance,
-  showDistributedAmount,
-  bucketCountHeading,
-}) {
-  return (
-    <div
-      className={`p-8 border-2 border-gray-400 sm:grid grid-cols-2 ${
-        index === 0 ? "" : " border-t-0"
-      }`}
-      key={round.id}
-    >
-      <div className="flex content-center">
-        <span className="underline-offset-4 underline font-medium text-blue-700">
-          <Link
-            href={`/${round.group?.slug ?? "c"}/${round.slug}`}
-            key={round.slug}
-            passHref
-          >
-            {round.title}
-          </Link>
-        </span>
-        {balance ? (
-          <span>
-            <span className="ml-2 text-gray-800 bg-highlight">
-              <FormattedCurrency value={balance} currency={round.currency} />
-            </span>
-          </span>
-        ) : null}
-      </div>
-      <div className="flex flex-col content-end justify-end">
-        <span className="mt-1 sm:mt-0 sm:self-end font-medium text-gray-800">
-          {showDistributedAmount && (
-            <>
-              <FormattedCurrency
-                currency={round.currency}
-                value={round.distributedAmount}
-              />{" "}
-              <FormattedMessage defaultMessage="distributed" /> •{" "}
-            </>
-          )}
-          {bucketCountHeading}
-        </span>
-        <span className="sm:self-end text-sm text-gray-700">
-          <FormattedMessage defaultMessage="Last Updated" />{" "}
-          <FormattedDate
-            value={round.updatedAt}
-            day="numeric"
-            month="short"
-            year="numeric"
-          />
-        </span>
-      </div>
-    </div>
-  );
-}
+const SET_ROUND_POSITION_MUTATION = gql`
+  mutation SetRoundPosition($roundId: ID!, $newPosition: Float!) {
+    setRoundPosition(roundId: $roundId, newPosition: $newPosition) {
+      id
+      position
+    }
+  }
+`;
 
 const GroupIndex = ({ currentUser }) => {
   const router = useRouter();
@@ -150,13 +98,26 @@ const GroupIndex = ({ currentUser }) => {
         group: null,
         balances: [],
       },
-      error,
       fetching,
     },
   ] = useQuery({
     query: GROUP_PAGE_QUERY,
     variables: { groupSlug: router.query.group ?? "c" },
   });
+
+  const [, setRoundPosition] = useMutation(SET_ROUND_POSITION_MUTATION);
+
+  // Drag-and-drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const balancesMap = useMemo(() => {
     const map = {};
@@ -172,14 +133,77 @@ const GroupIndex = ({ currentUser }) => {
 
   const [activeRounds, archivedRounds] = useMemo(() => {
     if (!rounds) {
-      return [];
+      return [[], []];
     }
 
+    // Sort by position (nulls last), then by createdAt desc
+    const sortByPosition = (a, b) => {
+      if (a.position == null && b.position == null) return 0;
+      if (a.position == null) return 1;
+      if (b.position == null) return -1;
+      return a.position - b.position;
+    };
+
     return [
-      rounds.filter((r) => !r.archived),
-      rounds.filter((r) => r.archived),
+      rounds.filter((r) => !r.archived).sort(sortByPosition),
+      rounds.filter((r) => r.archived).sort(sortByPosition),
     ];
   }, [rounds]);
+
+  // Handle drag end for reordering
+  const handleDragEnd = useCallback(
+    (event, roundsList) => {
+      const { active, over } = event;
+
+      if (!over || active.id === over.id) {
+        return;
+      }
+
+      const oldIndex = roundsList.findIndex((r) => r.id === active.id);
+      const newIndex = roundsList.findIndex((r) => r.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1) {
+        return;
+      }
+
+      // Calculate new position using fractional positioning
+      let beforePosition;
+      let afterPosition;
+      let beforeItem;
+      const afterItem = roundsList[newIndex];
+
+      if (oldIndex > newIndex) {
+        beforeItem = roundsList[newIndex - 1];
+      } else {
+        beforeItem = roundsList[newIndex + 1];
+      }
+
+      if (beforeItem) {
+        beforePosition = beforeItem.position ?? roundsList.length;
+      } else {
+        // Last element
+        beforePosition = (roundsList[roundsList.length - 1].position ?? roundsList.length - 1) + 1;
+      }
+
+      if (newIndex === 0) {
+        // First element
+        afterPosition = (roundsList[0].position ?? 0) - 1;
+        beforePosition = roundsList[0].position ?? 0;
+      } else {
+        afterPosition = afterItem.position ?? newIndex;
+      }
+
+      const newPosition = (beforePosition - afterPosition) / 2.0 + afterPosition;
+
+      setRoundPosition({
+        roundId: active.id,
+        newPosition,
+      });
+    },
+    [setRoundPosition]
+  );
+
+  const isAdmin = currentUser?.currentGroupMember?.isAdmin;
 
   // Check router.isReady before using router.query to prevent hydration mismatch
   if (!fetching && !group && router.isReady && router.query.group) {
@@ -192,43 +216,83 @@ const GroupIndex = ({ currentUser }) => {
 
   if (!group || fetching) return null;
 
-  const showTodos =
-    currentUser?.currentGroupMember?.isAdmin && !group.finishedTodos;
+  const showTodos = isAdmin && !group.finishedTodos;
   return (
     <>
       <PageHero>
-        <div className="grid grid-cols-1 sm:grid-cols-groupheading gap-6">
-          <div className="flex content-center justify-center">
+        {/* Mobile: Centered layout / Desktop: Side-by-side */}
+        <div className="flex flex-col items-center text-center md:flex-row md:items-start md:text-left md:gap-8">
+          {/* Logo */}
+          <div className="flex-shrink-0 mb-5 md:mb-0">
             <img
               src={group.logo}
               alt={`${group.slug}_logo`}
-              className="object-cover h-32 w-32"
+              className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl shadow-lg ring-4 ring-white"
             />
           </div>
-          <div>
-            <EditableField
-              defaultValue={group?.info}
-              name="info"
-              label={intl.formatMessage({ defaultMessage: "Add message" })}
-              placeholder={intl.formatMessage(
-                { defaultMessage: "# Welcome to {groupName}'s page" },
-                { groupName: group?.name }
-              )}
-              canEdit={currentUser?.currentGroupMember?.isAdmin}
-              className="h-10"
-              MUTATION={gql`
-                mutation EditGroupInfo($groupId: ID!, $info: String) {
-                  editGroup(groupId: $groupId, info: $info) {
-                    id
-                    info
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+              {group.name}
+            </h1>
+            <div className="text-gray-600">
+              <EditableField
+                defaultValue={group?.info}
+                name="info"
+                label={intl.formatMessage({ defaultMessage: "Add message" })}
+                placeholder={intl.formatMessage(
+                  { defaultMessage: "# Welcome to {groupName}'s page" },
+                  { groupName: group?.name }
+                )}
+                canEdit={currentUser?.currentGroupMember?.isAdmin}
+                className="h-10"
+                MUTATION={gql`
+                  mutation EditGroupInfo($groupId: ID!, $info: String) {
+                    editGroup(groupId: $groupId, info: $info) {
+                      id
+                      info
+                    }
                   }
-                }
-              `}
-              variables={{ groupId: group?.id }}
-              maxLength={500}
-              required
-            />
+                `}
+                variables={{ groupId: group?.id }}
+                maxLength={500}
+                required
+              />
+            </div>
           </div>
+
+          {/* Start new round button */}
+          {currentUser?.currentGroupMember?.isAdmin && (
+            <div className="mt-5 md:mt-0 flex-shrink-0">
+              {group?.subscriptionStatus?.isActive ? (
+                <Link
+                  href={`/${group.slug}/new-round`}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <FormattedMessage defaultMessage="Start new round" />
+                </Link>
+              ) : (
+                <button
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  onClick={() => {
+                    const event = new CustomEvent("show-upgrade-group-message", {
+                      detail: { groupId: group?.id },
+                    });
+                    window.dispatchEvent(event);
+                  }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <FormattedMessage defaultMessage="Start new round" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </PageHero>
       <SubMenu currentUser={currentUser} />
@@ -241,76 +305,119 @@ const GroupIndex = ({ currentUser }) => {
       </div>
 
       <div className="page">
-        <div className="my-4">
-          <span className="font-medium">
-            <FormattedMessage defaultMessage="Active Rounds" />
-          </span>
-          {currentUser?.currentGroupMember?.isAdmin &&
-            (group?.subscriptionStatus?.isActive ? (
-              <Link href={`/${group.slug}/new-round`}>
-                <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
-                  <FormattedMessage defaultMessage="Start new round" />
-                </span>
-              </Link>
-            ) : (
-              <span
-                className="text-sm text-blue-600 font-medium ml-2 cursor-pointer"
-                onClick={() => {
-                  const event = new CustomEvent("show-upgrade-group-message", {
-                    detail: { groupId: group?.id },
-                  });
-                  window.dispatchEvent(event);
-                  return;
-                }}
-              >
-                <FormattedMessage defaultMessage="Start new round" />
-              </span>
-            ))}
-        </div>
-        {rounds.length === 0 && currentUser?.currentGroupMember?.isAdmin && (
-          <ImportRound group={group} />
-        )}
+        {/* Active Rounds Section */}
+        <div>
+          {(!rounds || rounds.length === 0) && currentUser?.currentGroupMember?.isAdmin && (
+            <ImportRound group={group} />
+          )}
 
-        {activeRounds.map((round, index) => (
-          <RoundRow
-            round={round}
-            index={index}
-            key={index}
-            balance={balancesMap[round.id]}
-            bucketCountHeading={`${round.publishedBucketCount} 
-            ${
-              round.publishedBucketCount === 1
-                ? process.env.BUCKET_NAME_SINGULAR
-                : process.env.BUCKET_NAME_PLURAL
-            }`}
-            showDistributedAmount={false}
-          />
-        ))}
+          {activeRounds.length > 0 && (
+            isAdmin ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={(event) => handleDragEnd(event, activeRounds)}
+              >
+                <SortableContext
+                  items={activeRounds.map((r) => r.id)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {activeRounds.map((round) => (
+                      <SortableRoundCard
+                        key={round.id}
+                        id={round.id}
+                        round={round}
+                        balance={balancesMap[round.id]}
+                        bucketCountHeading={`${round.publishedBucketCount} ${
+                          round.publishedBucketCount === 1
+                            ? process.env.BUCKET_NAME_SINGULAR
+                            : process.env.BUCKET_NAME_PLURAL
+                        }`}
+                        showDistributedAmount={false}
+                        isAdmin={isAdmin}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeRounds.map((round) => (
+                  <RoundCard
+                    key={round.id}
+                    round={round}
+                    balance={balancesMap[round.id]}
+                    bucketCountHeading={`${round.publishedBucketCount} ${
+                      round.publishedBucketCount === 1
+                        ? process.env.BUCKET_NAME_SINGULAR
+                        : process.env.BUCKET_NAME_PLURAL
+                    }`}
+                    showDistributedAmount={false}
+                  />
+                ))}
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Archived Rounds Section */}
         {archivedRounds.length > 0 && (
-          <>
-            <div className="my-4">
-              <span className="font-medium">
-                <FormattedMessage defaultMessage="Archived Rounds" />
-              </span>
-            </div>
-            {archivedRounds.map((round, index) => (
-              <RoundRow
-                round={round}
-                index={index}
-                key={index}
-                balance={balancesMap[round.id]}
-                bucketCountHeading={`${
-                  round.bucketStatusCount.FUNDED
-                } ${intl.formatMessage({ defaultMessage: "funded" })} 
-            ${
-              round.bucketStatusCount.FUNDED === 1
-                ? process.env.BUCKET_NAME_SINGULAR
-                : process.env.BUCKET_NAME_PLURAL
-            }`}
-                showDistributedAmount
-              />
-            ))}
-          </>
+          <div className="mt-12 pt-8 border-t border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              <FormattedMessage defaultMessage="Archived Rounds" />
+            </h2>
+            {isAdmin ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={(event) => handleDragEnd(event, archivedRounds)}
+              >
+                <SortableContext
+                  items={archivedRounds.map((r) => r.id)}
+                  strategy={rectSortingStrategy}
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {archivedRounds.map((round) => (
+                      <SortableRoundCard
+                        key={round.id}
+                        id={round.id}
+                        round={round}
+                        balance={balancesMap[round.id]}
+                        bucketCountHeading={`${round.bucketStatusCount.FUNDED} ${intl.formatMessage({
+                          defaultMessage: "funded",
+                        })} ${
+                          round.bucketStatusCount.FUNDED === 1
+                            ? process.env.BUCKET_NAME_SINGULAR
+                            : process.env.BUCKET_NAME_PLURAL
+                        }`}
+                        showDistributedAmount
+                        isAdmin={isAdmin}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {archivedRounds.map((round) => (
+                  <RoundCard
+                    key={round.id}
+                    round={round}
+                    balance={balancesMap[round.id]}
+                    bucketCountHeading={`${round.bucketStatusCount.FUNDED} ${intl.formatMessage({
+                      defaultMessage: "funded",
+                    })} ${
+                      round.bucketStatusCount.FUNDED === 1
+                        ? process.env.BUCKET_NAME_SINGULAR
+                        : process.env.BUCKET_NAME_PLURAL
+                    }`}
+                    showDistributedAmount
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </>
