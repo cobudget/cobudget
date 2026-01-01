@@ -1,6 +1,6 @@
 import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
-import { isGroupAdmin, isRootAdmin } from "../auth";
+import { isGroupAdmin } from "../auth";
 import { sign } from "server/utils/jwt";
 import { appLink } from "utils/internalLinks";
 import { getGroup } from "server/controller";
@@ -20,9 +20,13 @@ export const group = async (parent, { groupSlug }, { user, ss }) => {
   return null;
 };
 
-export const groups = combineResolvers(isRootAdmin, async (parent, args) => {
+export const groups = async (parent, args, { user, ss }) => {
+  // Allow root admin or active super admin session
+  if (!ss && !(user && user.isRootAdmin)) {
+    throw new Error("You need to be root admin or have an active super admin session");
+  }
   return prisma.group.findMany();
-});
+};
 
 export const adminGroups = async (_1, _2, { user }) => {
   const groupMemberships = await prisma.groupMember.findMany({
