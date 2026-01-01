@@ -316,6 +316,43 @@ export const publishedBucketCount = async (round) => {
   });
 };
 
+export const previewImages = async (round) => {
+  // Fetch up to 5 images from published buckets in this round for preview
+  const bucketsWithImages = await prisma.bucket.findMany({
+    where: {
+      roundId: round.id,
+      deleted: { not: true },
+      publishedAt: { not: null },
+      canceledAt: null,
+      Images: {
+        some: {},
+      },
+    },
+    include: {
+      Images: {
+        take: 1,
+      },
+    },
+    take: 5,
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+
+  const images = bucketsWithImages
+    .flatMap((bucket) =>
+      bucket.Images.map((img) => ({
+        id: img.id,
+        small: img.small,
+        large: img.large,
+        bucketId: bucket.id,
+      }))
+    )
+    .slice(0, 5);
+
+  return images;
+};
+
 export const ocCollective = async (parent) => {
   if (parent.openCollectiveProjectId) {
     return getProject(
