@@ -401,7 +401,11 @@ export const ocTokenStatus = async (parent) => {
 };
 
 export const membersLimit = async (round) => {
-  const group = await prisma.group.findFirst({ where: { id: round.groupId } });
+  // Run queries in parallel
+  const [group, currentCount] = await Promise.all([
+    prisma.group.findFirst({ where: { id: round.groupId } }),
+    prisma.roundMember.count({ where: { roundId: round.id } }),
+  ]);
 
   let isSubscribed = false;
   try {
@@ -424,9 +428,6 @@ export const membersLimit = async (round) => {
     (group?.slug !== "c"
       ? process.env.PAID_ROUND_MEMBERS_LIMIT
       : process.env.FREE_ROUND_MEMBERS_LIMIT);
-  const currentCount = await prisma.roundMember.count({
-    where: { roundId: round.id },
-  });
   return {
     limit,
     currentCount,
@@ -435,10 +436,13 @@ export const membersLimit = async (round) => {
 };
 
 export const bucketsLimit = async (round) => {
-  const group = await prisma.group.findUnique({ where: { id: round.groupId } });
+  // Run independent queries in parallel
+  const [group, fundingStatus] = await Promise.all([
+    prisma.group.findUnique({ where: { id: round.groupId } }),
+    getRoundFundingStatuses({ roundId: round.id }),
+  ]);
   const status = group.slug === "c" ? "free" : "paid";
 
-  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
   const statusFilter = ["FUNDED", "COMPLETED"]
     .map((s) => statusTypeToQuery(s, fundingStatus))
     .filter((s) => s);
