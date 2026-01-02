@@ -52,6 +52,7 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       bucketCreationIsOpen
       allowStretchGoals
       stripeIsConnected
+      stripeIsConfigured
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
@@ -350,10 +351,17 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
                 primary={intl.formatMessage({
                   defaultMessage: "Connect with Stripe",
                 })}
-                secondary={round.stripeIsConnected?.toString() ?? "false"}
+                secondary={
+                  !round.stripeIsConfigured
+                    ? intl.formatMessage({
+                        defaultMessage: "Stripe not configured",
+                      })
+                    : round.stripeIsConnected?.toString() ?? "false"
+                }
                 isSet={round.stripeIsConnected}
                 openModal={() => handleOpen("SET_STRIPE")}
                 canEdit={canEditSettings}
+                disabled={!round.stripeIsConfigured}
                 roundColor={round.color}
               />
 
@@ -363,10 +371,17 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
                 primary={intl.formatMessage({
                   defaultMessage: "Accept direct funding",
                 })}
-                secondary={round.directFundingEnabled?.toString() ?? "false"}
+                secondary={
+                  !round.stripeIsConfigured
+                    ? intl.formatMessage({
+                        defaultMessage: "Stripe not configured",
+                      })
+                    : round.directFundingEnabled?.toString() ?? "false"
+                }
                 isSet={round.directFundingEnabled}
                 openModal={() => handleOpen("SET_DIRECT_FUNDING")}
                 canEdit={canEditSettings}
+                disabled={!round.stripeIsConfigured}
                 roundColor={round.color}
               />
             </>

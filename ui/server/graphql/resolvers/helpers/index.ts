@@ -477,7 +477,7 @@ export async function getRoundMemberBalance(member) {
 
 /** only call this if you've verified the user is at least a round admin */
 export async function stripeIsConnected({ round }) {
-  if (!round.stripeAccountId) {
+  if (!stripe || !round.stripeAccountId) {
     return false;
   }
 

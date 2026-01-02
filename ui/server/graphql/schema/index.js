@@ -488,6 +488,7 @@ const schema = gql`
     about: String
     allowStretchGoals: Boolean
     stripeIsConnected: Boolean
+    stripeIsConfigured: Boolean
     directFundingEnabled: Boolean
     directFundingTerms: String
     canCocreatorStartFunding: Boolean

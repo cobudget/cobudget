@@ -19,7 +19,7 @@ const SettingsListItem = ({
   roundColor,
 }) => {
   return (
-    <ListItem>
+    <ListItem className={disabled ? "opacity-50" : ""}>
       <ListItemText primary={primary} secondary={secondary} />
       {canEdit && (
         <ListItemSecondaryAction>

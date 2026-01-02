@@ -195,6 +195,10 @@ export const stripeIsConnected = combineResolvers(
   }
 );
 
+export const stripeIsConfigured = () => {
+  return !!process.env.STRIPE_API_KEY;
+};
+
 export const group = async (round, _, { user, ss }) => {
   if (round.singleRound) return null;
   return getGroup({ groupId: round.groupId, user, ss });
