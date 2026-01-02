@@ -410,15 +410,19 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
 // }
 
 export async function getServerSideProps(ctx) {
+  // Single query to get bucket with images (optimized from 2 queries to 1)
   const bucket = await prisma.bucket.findUnique({
     where: { id: ctx.params.bucket },
+    include: {
+      Images: {
+        take: 1,
+      },
+    },
   });
-  const images = await prisma.bucket
-    .findUnique({ where: { id: ctx.params.bucket } })
-    .Images();
   if (!bucket) {
     return { props: { head: null } };
   }
+  const images = bucket.Images || [];
   return {
     props: {
       head: {
