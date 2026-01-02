@@ -1,5 +1,6 @@
 import { Modal } from "@mui/material";
 import Tooltip from "@tippyjs/react";
+import Link from "next/link";
 import Router from "next/router";
 import { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -748,31 +749,26 @@ const BucketSidebar = ({
             )}
           </h2>
 
-          <div className="flex items-center flex-wrap">
+          <div className="flex flex-wrap gap-1">
             {bucket.cocreators.map((member) => (
-              // <Tooltip key={member.user.id} title={member.user.name}>
-              <div
+              <Tooltip
                 key={member.user.id}
-                className="flex items-center mr-2 md:mr-3 sm:mb-2 space-x-2"
+                content={
+                  member.user.username
+                    ? `${member.user.name} @${member.user.username}`
+                    : member.user.name
+                }
+                placement="top"
+                arrow={false}
               >
-                <Avatar user={member.user} />{" "}
-                <span
-                  className={
-                    "items-center space-x-1 hidden md:block " +
-                    (isRtl(intl.locale) ? "space-x-reverse" : "")
-                  }
-                >
-                  <span className="font-medium text-gray-900">
-                    {member.user.name}
-                  </span>
-                  {member.user.username && (
-                    <span className="text-gray-600 font-normal">
-                      @{member.user.username}
-                    </span>
-                  )}
-                </span>
-              </div>
-              // </Tooltip>
+                <Link href={`/user/${member.user.id}`}>
+                  <Avatar
+                    user={member.user}
+                    size="small"
+                    className="cursor-pointer hover:ring-2 hover:ring-gray-300 transition-shadow"
+                  />
+                </Link>
+              </Tooltip>
             ))}
             <div className="block md:hidden">
               {canEdit && (
