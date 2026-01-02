@@ -231,12 +231,47 @@ export const membersPage = combineResolvers(
       },
       take: limit + 1,
       skip: offset,
-      ...(search && { include: { user: true } }),
+      include: { user: true }, // Always include user to avoid N+1
     });
+
+    const members = roundMembersWithExtra.slice(0, limit);
+    const memberIds = members.map((m) => m.id);
+
+    // Batch query allocations and contributions for balance calculation
+    const [allocations, contributions] = await Promise.all([
+      prisma.allocation.groupBy({
+        by: ["roundMemberId"],
+        where: { roundMemberId: { in: memberIds } },
+        _sum: { amount: true },
+      }),
+      prisma.contribution.groupBy({
+        by: ["roundMemberId"],
+        where: { roundMemberId: { in: memberIds }, deleted: { not: true } },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    // Build balance map
+    const balanceMap = new Map<string, number>();
+    allocations.forEach((a) => {
+      balanceMap.set(a.roundMemberId, a._sum.amount || 0);
+    });
+    contributions.forEach((c) => {
+      const current = balanceMap.get(c.roundMemberId) || 0;
+      balanceMap.set(c.roundMemberId, current - (c._sum.amount || 0));
+    });
+
+    // Attach pre-computed balance to members
+    const membersWithBalance = members.map((m) => ({
+      ...m,
+      _computed: {
+        balance: balanceMap.get(m.id) || 0,
+      },
+    }));
 
     return {
       moreExist: roundMembersWithExtra.length > limit,
-      members: roundMembersWithExtra.slice(0, limit),
+      members: membersWithBalance,
     };
   }
 );
