@@ -212,11 +212,6 @@ export async function getCurrentGroupAndMember({
 
 /** contributions = donations */
 export async function bucketTotalContributions(bucket) {
-  const contributions = await prisma.contribution.findMany({
-    where: { bucketId: bucket.id },
-  });
-  return contributions.reduce((acc, curr) => acc + curr.amount, 0);
-
   const {
     _sum: { amount },
   } = await prisma.contribution.aggregate({
@@ -225,7 +220,7 @@ export async function bucketTotalContributions(bucket) {
       bucketId: bucket.id,
     },
   });
-  return amount;
+  return amount || 0;
 }
 
 /** income = existing funding */
