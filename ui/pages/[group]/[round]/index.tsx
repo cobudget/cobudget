@@ -4,7 +4,7 @@ import { BucketGridSkeleton } from "components/BucketCardSkeleton";
 import { HeaderSkeleton } from "components/Skeleton";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { FormattedMessage, FormattedNumber } from "react-intl";
 import { gql, useMutation, useQuery } from "urql";
@@ -310,6 +310,39 @@ const Page = ({
 
   const moreExist = data?.bucketsPage.moreExist;
   const buckets = data?.bucketsPage.buckets ?? [];
+
+  // Prefetch: use IntersectionObserver to load next page when user scrolls near bottom
+  const prefetchSentinelRef = useRef<HTMLDivElement>(null);
+  const hasTriggeredPrefetch = useRef(false);
+
+  useEffect(() => {
+    // Reset prefetch trigger when page changes
+    hasTriggeredPrefetch.current = false;
+  }, [variables.offset]);
+
+  useEffect(() => {
+    if (!isLastPage || !moreExist || fetching || hasTriggeredPrefetch.current) return;
+
+    const sentinel = prefetchSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasTriggeredPrefetch.current) {
+          hasTriggeredPrefetch.current = true;
+          onLoadMore({
+            limit: variables.limit,
+            offset: variables.offset + buckets.length,
+          });
+        }
+      },
+      { rootMargin: "200px" } // Trigger 200px before reaching the sentinel
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [isLastPage, moreExist, fetching, buckets.length, variables, onLoadMore]);
+
   let finalBuckets = buckets;
   if (!bucketTableView) {
     if (isFirstPage && pinnedBuckets && pinnedBuckets.length > 0) {
@@ -542,6 +575,10 @@ const Page = ({
         ) : (
           <BucketGridSkeleton count={6} />
         ))}
+      {/* Invisible sentinel for prefetching - triggers load when scrolled into view */}
+      {isLastPage && moreExist && !fetching && (
+        <div ref={prefetchSentinelRef} className="h-1" aria-hidden="true" />
+      )}
       {isLastPage && (fetching || moreExist) && (
         <div className="absolute bottom-0 justify-center flex w-full">
           <LoadMore
@@ -591,7 +628,7 @@ const getStandardFilter = (bucketStatusCount) => {
 };
 
 const RoundPage = ({ currentUser }) => {
-  const limit = 12;
+  const limit = 24;
   const [newBucketModalOpen, setNewBucketModalOpen] = useState(false);
   const [bucketTableView, setBucketTableView] = useState(false);
   const [pageVariables, setPageVariables] = useState([

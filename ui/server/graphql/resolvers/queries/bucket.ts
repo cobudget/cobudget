@@ -13,8 +13,8 @@ import { getStarredBuckets } from "../helpers/bucket";
 const { groupHasDiscourse, generateComment } = subscribers;
 
 // Simple in-memory cache for bucketsPage to avoid re-fetching/re-shuffling
-// Cache entries expire after 30 seconds
-const CACHE_TTL_MS = 30 * 1000;
+// Cache entries expire after 5 minutes (increased from 30s for better performance)
+const CACHE_TTL_MS = 5 * 60 * 1000;
 const bucketsCache = new Map<
   string,
   { data: any[]; timestamp: number }
