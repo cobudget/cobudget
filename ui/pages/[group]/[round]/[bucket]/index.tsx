@@ -363,54 +363,9 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
   );
 };
 
-// export async function getStaticProps(ctx) {
-//   const ssrCache = ssrExchange({
-//     isClient: false,
-//   });
-//   const client = initUrqlClient(createClientConfig(ssrCache), false);
-
-//   // This query is used to populate the cache for the query
-//   // used on this page.
-
-//   await client
-//     .query(TOP_LEVEL_QUERY, {
-//       groupSlug: ctx.params.group,
-//       roundSlug: ctx.params.round,
-//       bucketId: ctx.params.bucket,
-//     })
-//     .toPromise();
-//   await client.query(BUCKET_QUERY, { id: ctx.params.bucket }).toPromise();
-
-//   return {
-//     props: {
-//       // urqlState is a keyword here so withUrqlClient can pick it up.
-//       urqlState: ssrCache.extractData(),
-//     },
-//     revalidate: 60,
-//   };
-// }
-
-// export async function getStaticPaths() {
-//   const buckets = await prisma.bucket.findMany({
-//     where: { publishedAt: { not: null }, round: { visibility: "PUBLIC" } },
-//     include: { round: { include: { group: true } } },
-//   });
-
-//   return {
-//     // paths: buckets.map((bucket) => ({
-//     //   params: {
-//     //     group: bucket.round.group.slug,
-//     //     round: bucket.round.slug,
-//     //     bucket: bucket.id,
-//     //   },
-//     // })),
-//     paths: [],
-//     fallback: true, // false or 'blocking'
-//   };
-// }
-
-export async function getServerSideProps(ctx) {
-  // Single query to get bucket with images (optimized from 2 queries to 1)
+// Use ISR (Incremental Static Regeneration) for dream detail pages
+// This caches pages at the edge and regenerates them every 60 seconds
+export async function getStaticProps(ctx) {
   const bucket = await prisma.bucket.findUnique({
     where: { id: ctx.params.bucket },
     include: {
@@ -419,9 +374,15 @@ export async function getServerSideProps(ctx) {
       },
     },
   });
+
+  // Return 404 for non-existent buckets, retry after 60 seconds
   if (!bucket) {
-    return { props: { head: null } };
+    return {
+      notFound: true,
+      revalidate: 60,
+    };
   }
+
   const images = bucket.Images || [];
   return {
     props: {
@@ -431,6 +392,17 @@ export async function getServerSideProps(ctx) {
         image: images.length > 0 ? images[0].large : process.env.PLATFORM_LOGO,
       },
     },
+    // Regenerate the page every 60 seconds when requested
+    revalidate: 60,
+  };
+}
+
+export async function getStaticPaths() {
+  // Don't pre-generate any paths at build time
+  // Pages are generated on-demand and cached
+  return {
+    paths: [],
+    fallback: "blocking", // Wait for generation on first request
   };
 }
 

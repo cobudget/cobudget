@@ -76,5 +76,16 @@ export default handler()
       return;
     }
 
+    // Enable edge caching for anonymous GraphQL queries
+    // Anonymous users don't have a session cookie, so we can cache their responses
+    const isAnonymous = !req.cookies?.session;
+    if (isAnonymous && req.method === "POST") {
+      // Cache at Vercel Edge for 60 seconds, serve stale for 5 minutes while revalidating
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=60, stale-while-revalidate=300"
+      );
+    }
+
     return apolloHandler(req, res);
   });

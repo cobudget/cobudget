@@ -73,6 +73,8 @@ const IndexPage = ({ currentUser, landingPage }) => {
 };
 
 export const getServerSideProps = async (ctx) => {
+  const { res } = ctx;
+
   // Check for landing group setting
   try {
     const settings = await prisma.instanceSettings.findUnique({
@@ -106,12 +108,18 @@ export const getServerSideProps = async (ctx) => {
     const fetchUrl = process.env.LANDING_PAGE_URL + url;
 
     try {
-      const res: any = await axios(fetchUrl);
-      const html = res.data;
+      const response: any = await axios(fetchUrl);
+      const html = response.data;
 
       const $ = cheerio.load(html);
       const bodyContent = $(`body`).html();
       const headContent = $(`head`).html();
+
+      // Cache landing pages at edge for 5 minutes
+      res.setHeader(
+        "Cache-Control",
+        "public, s-maxage=300, stale-while-revalidate=600"
+      );
 
       return {
         props: {
@@ -122,6 +130,12 @@ export const getServerSideProps = async (ctx) => {
       console.error("Error fetching Webflow page:", err);
     }
   }
+
+  // Enable edge caching for default page (60s cache, 5min stale-while-revalidate)
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=300"
+  );
 
   return {
     props: {},

@@ -39,7 +39,13 @@ const CreateGroupPage = ({
   return <NewGroup currentUser={currentUser} />;
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async ({ res }) => {
+  // Enable edge caching (60s cache, 5min stale-while-revalidate)
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=60, stale-while-revalidate=300"
+  );
+
   try {
     const settings = await prisma.instanceSettings.findUnique({
       where: { id: "singleton" },
