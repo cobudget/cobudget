@@ -60,7 +60,12 @@ export const name = async (member, _, { user, ss }) => {
   });
   return u.name;
 };
-export const group = async (groupMember) =>
-  prisma.group.findUnique({
+export const group = async (groupMember) => {
+  // Use pre-included group if available (from currentUser optimization)
+  if (groupMember.group && typeof groupMember.group === "object") {
+    return groupMember.group;
+  }
+  return prisma.group.findUnique({
     where: { id: groupMember.groupId },
   });
+};

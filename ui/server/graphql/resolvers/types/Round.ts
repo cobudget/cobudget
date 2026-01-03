@@ -112,55 +112,20 @@ export const totalContributionsFunded = async (round) => {
   return totalContributionsFunded;
 };
 export const totalInMembersBalances = async (round) => {
-  // console.time("creditMinusDebit");
+  // Run both aggregates in parallel
+  const [allocationsResult, contributionsResult] = await Promise.all([
+    prisma.allocation.aggregate({
+      where: { roundId: round.id },
+      _sum: { amount: true },
+    }),
+    prisma.contribution.aggregate({
+      where: { roundId: round.id },
+      _sum: { amount: true },
+    }),
+  ]);
 
-  // const {
-  //   _sum: { amount: totalCredit },
-  // } = await prisma.transaction.aggregate({
-  //   where: {
-  //     roundId: round.id,
-  //     type: "ALLOCATION",
-  //   },
-  //   _sum: { amount: true },
-  // });
-
-  // const {
-  //   _sum: { amount: totalDebit },
-  // } = await prisma.transaction.aggregate({
-  //   where: {
-  //     roundId: round.id,
-  //     type: "CONTRIBUTION",
-  //   },
-  //   _sum: { amount: true },
-  // });
-  // console.timeEnd("creditMinusDebit");
-
-  // const balance = totalCredit - totalDebit;
-
-  // console.time("allocationsMinusContributions");
-
-  const {
-    _sum: { amount: totalAllocations },
-  } = await prisma.allocation.aggregate({
-    where: { roundId: round.id },
-    _sum: { amount: true },
-  });
-
-  const {
-    _sum: { amount: totalContributions },
-  } = await prisma.contribution.aggregate({
-    where: { roundId: round.id },
-    _sum: { amount: true },
-  });
-
-  // const allocationsMinusContibutions =
-  //   totalAllocations - totalContributions;
-
-  //console.timeEnd("allocationsMinusContributions");
-
-  // if (balance !== allocationsMinusContibutions) {
-  //   console.error("Total in members balances not adding up");
-  // }
+  const totalAllocations = allocationsResult._sum.amount || 0;
+  const totalContributions = contributionsResult._sum.amount || 0;
 
   return totalAllocations - totalContributions;
 };

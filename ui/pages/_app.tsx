@@ -134,18 +134,6 @@ export const TOP_LEVEL_QUERY = gql`
           slug
         }
       }
-      expenses {
-        id
-        ocMeta {
-          legacyId
-        }
-        title
-        amount
-        ocId
-        bucketId
-        currency
-        status
-      }
       guidelines {
         id
         title

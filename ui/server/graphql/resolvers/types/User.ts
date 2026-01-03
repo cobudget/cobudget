@@ -26,12 +26,23 @@ export const currentCollMember = async (
     },
   });
 };
-export const groupMemberships = async (user) =>
-  prisma.groupMember.findMany({ where: { userId: user.id } });
-export const roundMemberships = async (user) =>
-  prisma.roundMember.findMany({
+export const groupMemberships = async (user) => {
+  // Use pre-included data if available (from currentUser optimization)
+  if (user.groupMemberships && Array.isArray(user.groupMemberships)) {
+    return user.groupMemberships;
+  }
+  return prisma.groupMember.findMany({ where: { userId: user.id } });
+};
+export const roundMemberships = async (user) => {
+  // Use pre-included data if available (from currentUser optimization)
+  // Note: collMemberships is the Prisma field name, roundMemberships is the GraphQL name
+  if (user.collMemberships && Array.isArray(user.collMemberships)) {
+    return user.collMemberships;
+  }
+  return prisma.roundMember.findMany({
     where: { userId: user.id, round: { isNot: { deleted: true } } },
   });
+};
 export const isRootAdmin = () => false; //TODO: add field in prisma
 export const avatar = () => null; //TODO: add avatars
 export const email = (parent, _, { user }) => {
