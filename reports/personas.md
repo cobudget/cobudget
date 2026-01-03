@@ -499,7 +499,7 @@ The platform's success depends on:
 
 > The funding is secondary. The primary function of Dreams is creating reasons for participants to collide, collaborate, and connect.
 
-When 50% of participants engage in the granting process, a camp of 10 people might arrive at the event already knowing about 100+ different projects. The "watering hole" has done its work—the network exists before the first dream is built.
+When 50% of participants engage in the granting process, a camp of 20 people might arrive at the event already knowing about 100+ different projects when their knowledge from the funding rounds is combined. The "watering hole" has done its work—the network exists before the first dream is built.
 
 Each persona's experience contributes to the larger goal: transforming 5,000 strangers into a dense network of collaborators who can find anything, solve anything, and build anything together.
 
