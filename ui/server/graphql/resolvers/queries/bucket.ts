@@ -3,11 +3,7 @@ import SeededShuffle from "seededshuffle";
 import discourse from "../../../lib/discourse";
 import prisma from "../../../prisma";
 import subscribers from "../../../subscribers/discourse.subscriber";
-import {
-  canViewRound,
-  getRoundFundingStatuses,
-  statusTypeToQuery,
-} from "../helpers";
+import { canViewRound, statusTypeToQuery } from "../helpers";
 import { getStarredBuckets } from "../helpers/bucket";
 
 const { groupHasDiscourse, generateComment } = subscribers;
@@ -100,20 +96,45 @@ export const bucketsPage = async (
   },
   { user }
 ) => {
-  const round = await prisma.round.findFirst({
-    where: {
-      slug: roundSlug,
-      group: { slug: groupSlug ?? "c" },
-      deleted: { not: true },
-    },
-  });
-  const fundingStatus = await getRoundFundingStatuses({ roundId: round.id });
-  const currentMember = await prisma.roundMember.findFirst({
-    where: {
-      userId: user?.id ?? "undefined",
-      round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
-    },
-  });
+  // Parallelize initial queries for better performance
+  const [round, currentMember] = await Promise.all([
+    prisma.round.findFirst({
+      where: {
+        slug: roundSlug,
+        group: { slug: groupSlug ?? "c" },
+        deleted: { not: true },
+      },
+      // Include fields needed for funding status calculation
+      select: {
+        id: true,
+        grantingOpens: true,
+        grantingCloses: true,
+      },
+    }),
+    // Only query for currentMember if user is logged in
+    user?.id
+      ? prisma.roundMember.findFirst({
+          where: {
+            userId: user.id,
+            round: { slug: roundSlug, group: { slug: groupSlug ?? "c" } },
+          },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  if (!round) {
+    return { moreExist: false, buckets: [] };
+  }
+
+  // Compute funding status inline (avoids extra DB query)
+  const fundingStatus = {
+    hasStarted: round.grantingOpens
+      ? round.grantingOpens.getTime() < Date.now()
+      : true,
+    hasEnded: round.grantingCloses
+      ? round.grantingCloses.getTime() < Date.now()
+      : false,
+  };
 
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);

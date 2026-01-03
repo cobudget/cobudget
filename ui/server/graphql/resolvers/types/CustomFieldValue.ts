@@ -12,12 +12,15 @@ export const customField = async (fieldValue) => {
       createdAt: new Date(),
     };
   }
+
+  // Use pre-included field if available (from bucketsPage optimization)
+  if (fieldValue.field && typeof fieldValue.field === "object") {
+    return fieldValue.field;
+  }
+
   const field = await prisma.fieldValue
     .findUnique({ where: { id: fieldValue.id } })
     .field();
-  // const field = await prisma.field.findUnique({
-  //   where: { id: fieldValue.fieldId },
-  // });
 
   return field;
 };
