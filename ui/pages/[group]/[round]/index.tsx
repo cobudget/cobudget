@@ -108,7 +108,7 @@ export const PINNED_BUCKETS_QUERY = gql`
       groupSlug: $groupSlug
       roundSlug: $roundSlug
       status: $status
-      limit: 1000
+      pinnedOnly: true
     ) {
       buckets {
         id

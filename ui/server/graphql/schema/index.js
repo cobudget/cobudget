@@ -91,6 +91,7 @@ const schema = gql`
       status: [StatusType!]
       orderBy: String
       orderDir: String
+      pinnedOnly: Boolean
     ): BucketsPage
     starredBuckets(take: Int, skip: Int, roundId: ID): BucketsPage
     languageProgressPage: [LanguageProgress]

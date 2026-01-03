@@ -24,6 +24,7 @@ function getCacheKey(params: {
   tagValue?: string;
   orderBy?: string;
   orderDir?: string;
+  pinnedOnly?: boolean;
   userId?: string;
   dateSeed: string;
 }): string {
@@ -35,6 +36,7 @@ function getCacheKey(params: {
     tagValue: params.tagValue || "",
     orderBy: params.orderBy || "",
     orderDir: params.orderDir || "",
+    pinnedOnly: params.pinnedOnly || false,
     userId: params.userId || "",
     dateSeed: params.dateSeed,
   });
@@ -93,6 +95,7 @@ export const bucketsPage = async (
     status = [],
     orderBy,
     orderDir,
+    pinnedOnly = false,
   },
   { user }
 ) => {
@@ -150,6 +153,7 @@ export const bucketsPage = async (
     tagValue,
     orderBy,
     orderDir,
+    pinnedOnly,
     // Include factors that affect the result set
     userId: user?.id,
     dateSeed: todaySeed,
@@ -186,6 +190,7 @@ export const bucketsPage = async (
         deleted: { not: true },
         ...(statusFilter.length > 0 && { OR: statusFilter }),
         ...(showCanceled && { canceledAt: null }),
+        ...(pinnedOnly && { pinnedAt: { not: null } }),
         ...(textSearchTerm && {
           title: { contains: textSearchTerm, mode: "insensitive" },
         }),
