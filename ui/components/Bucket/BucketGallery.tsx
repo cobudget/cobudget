@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Modal from "@mui/material/Modal";
-import Masonry from "react-masonry-css";
 import Tooltip from "@tippyjs/react";
 import IconButton from "components/IconButton";
 import { EditIcon } from "components/Icons";
@@ -18,16 +17,16 @@ interface BucketGalleryProps {
   openImageModal: () => void;
 }
 
-const masonryBreakpoints = {
-  default: 3,
-  768: 2,
-};
-
 const BucketGallery: React.FC<BucketGalleryProps> = ({
   images,
   canEdit,
   openImageModal,
 }) => {
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const openCarousel = (index: number) => setSelectedIndex(index);
+  const closeCarousel = () => setSelectedIndex(null);
+
   // Empty state
   if (images.length === 0) {
     if (!canEdit) {
@@ -50,22 +49,28 @@ const BucketGallery: React.FC<BucketGalleryProps> = ({
       <EditButton canEdit={canEdit} onClick={openImageModal} />
 
       {/* Fixed-height hero - first image */}
-      <HeroImage image={images[0]} />
+      <HeroImage image={images[0]} onClick={() => openCarousel(0)} />
 
-      {/* Masonry for remaining images */}
+      {/* Square thumbnail grid for remaining images */}
       {remainingImages.length > 0 && (
-        <Masonry
-          breakpointCols={masonryBreakpoints}
-          className="bucket-gallery-masonry mt-3"
-          columnClassName="bucket-gallery-masonry-column"
-        >
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 gap-2 mt-3">
           {remainingImages.map((img, i) => (
-            <div key={img.id || i} className="mb-3">
-              <GalleryImage image={img} />
-            </div>
+            <GalleryThumbnail
+              key={img.id || i}
+              image={img}
+              onClick={() => openCarousel(i + 1)}
+            />
           ))}
-        </Masonry>
+        </div>
       )}
+
+      {/* Shared carousel modal */}
+      <ImageCarouselModal
+        images={images}
+        selectedIndex={selectedIndex}
+        onClose={closeCarousel}
+        onNavigate={setSelectedIndex}
+      />
     </div>
   );
 };
@@ -91,8 +96,10 @@ const EditButton: React.FC<{ canEdit: boolean; onClick: () => void }> = ({
 };
 
 // Hero image with portrait detection for object-fit
-const HeroImage: React.FC<{ image: BucketImage }> = ({ image }) => {
-  const [isOpen, setIsOpen] = useState(false);
+const HeroImage: React.FC<{ image: BucketImage; onClick: () => void }> = ({
+  image,
+  onClick,
+}) => {
   const [isPortrait, setIsPortrait] = useState(false);
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -101,62 +108,170 @@ const HeroImage: React.FC<{ image: BucketImage }> = ({ image }) => {
   };
 
   return (
-    <>
-      <div
-        className={`
-          w-full h-64 md:h-[28rem] lg:h-[32rem] rounded-lg overflow-hidden
-          ${isPortrait ? "bg-gray-100" : ""}
-        `}
-      >
-        <img
-          src={image.large ?? image.small}
-          alt=""
-          onLoad={handleLoad}
-          onClick={() => setIsOpen(true)}
-          className={`
-            w-full h-full cursor-pointer
-            transition-shadow hover:shadow-md
-            ${isPortrait ? "object-contain" : "object-cover"}
-          `}
-        />
-      </div>
-
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 outline-none p-4">
-          <img
-            src={image.large ?? image.small}
-            alt=""
-            className="max-h-[calc(100vh-4rem)] max-w-[calc(100vw-4rem)] rounded-lg"
-          />
-        </div>
-      </Modal>
-    </>
-  );
-};
-
-// Regular gallery image with lightbox
-const GalleryImage: React.FC<{ image: BucketImage }> = ({ image }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <>
+    <div
+      className={`
+        w-full h-64 md:h-[28rem] lg:h-[32rem] rounded-lg overflow-hidden
+        ${isPortrait ? "bg-gray-100" : ""}
+      `}
+    >
       <img
         src={image.large ?? image.small}
         alt=""
-        onClick={() => setIsOpen(true)}
-        className="w-full h-auto rounded-lg cursor-pointer shadow-sm hover:shadow-md transition-shadow"
+        onLoad={handleLoad}
+        onClick={onClick}
+        className={`
+          w-full h-full cursor-pointer
+          transition-shadow hover:shadow-md
+          ${isPortrait ? "object-contain" : "object-cover"}
+        `}
       />
+    </div>
+  );
+};
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)}>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 outline-none p-4">
-          <img
-            src={image.large ?? image.small}
-            alt=""
-            className="max-h-[calc(100vh-4rem)] max-w-[calc(100vw-4rem)] rounded-lg"
-          />
-        </div>
-      </Modal>
-    </>
+// Square thumbnail for gallery grid
+const GalleryThumbnail: React.FC<{
+  image: BucketImage;
+  onClick: () => void;
+}> = ({ image, onClick }) => {
+  return (
+    <div
+      className="aspect-square rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+      onClick={onClick}
+    >
+      <img src={image.small} alt="" className="w-full h-full object-cover" />
+    </div>
+  );
+};
+
+// Carousel modal with navigation
+const ImageCarouselModal: React.FC<{
+  images: BucketImage[];
+  selectedIndex: number | null;
+  onClose: () => void;
+  onNavigate: (index: number) => void;
+}> = ({ images, selectedIndex, onClose, onNavigate }) => {
+  const isOpen = selectedIndex !== null;
+
+  const goToPrev = useCallback(() => {
+    if (selectedIndex !== null && selectedIndex > 0) {
+      onNavigate(selectedIndex - 1);
+    }
+  }, [selectedIndex, onNavigate]);
+
+  const goToNext = useCallback(() => {
+    if (selectedIndex !== null && selectedIndex < images.length - 1) {
+      onNavigate(selectedIndex + 1);
+    }
+  }, [selectedIndex, images.length, onNavigate]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        goToPrev();
+      } else if (e.key === "ArrowRight") {
+        goToNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, goToPrev, goToNext]);
+
+  if (selectedIndex === null) return null;
+
+  const currentImage = images[selectedIndex];
+  const hasPrev = selectedIndex > 0;
+  const hasNext = selectedIndex < images.length - 1;
+
+  return (
+    <Modal open={isOpen} onClose={onClose}>
+      <div className="absolute inset-0 flex items-center justify-center outline-none">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          aria-label="Close"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        {/* Previous button */}
+        {hasPrev && (
+          <button
+            onClick={goToPrev}
+            className="absolute left-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            aria-label="Previous image"
+          >
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+        )}
+
+        {/* Image */}
+        <img
+          src={currentImage.large ?? currentImage.small}
+          alt=""
+          className="max-h-[calc(100vh-4rem)] max-w-[calc(100vw-8rem)] rounded-lg"
+        />
+
+        {/* Next button */}
+        {hasNext && (
+          <button
+            onClick={goToNext}
+            className="absolute right-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+            aria-label="Next image"
+          >
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        )}
+
+        {/* Image counter */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 text-white text-sm">
+            {selectedIndex + 1} / {images.length}
+          </div>
+        )}
+      </div>
+    </Modal>
   );
 };
 
