@@ -337,71 +337,145 @@ export const starredBuckets = async (_, { take, skip, roundId }, { user }) => {
   }
 };
 
+// Simple in-memory cache for commentSet to avoid re-fetching
+// Cache entries expire after 2 minutes
+const COMMENT_CACHE_TTL_MS = 2 * 60 * 1000;
+const commentsCache = new Map<
+  string,
+  { data: { total: number; comments: any[] }; timestamp: number }
+>();
+
+function getCommentCacheKey(bucketId: string): string {
+  return `comments:${bucketId}`;
+}
+
+function getCommentsFromCache(
+  key: string
+): { total: number; comments: any[] } | null {
+  const entry = commentsCache.get(key);
+  if (!entry) return null;
+
+  const now = Date.now();
+  if (now - entry.timestamp > COMMENT_CACHE_TTL_MS) {
+    commentsCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setCommentsCache(
+  key: string,
+  data: { total: number; comments: any[] }
+): void {
+  commentsCache.set(key, { data, timestamp: Date.now() });
+
+  // Cleanup old entries periodically (every 100 sets)
+  if (commentsCache.size > 100 && Math.random() < 0.1) {
+    const now = Date.now();
+    for (const [k, v] of commentsCache.entries()) {
+      if (now - v.timestamp > COMMENT_CACHE_TTL_MS) {
+        commentsCache.delete(k);
+      }
+    }
+  }
+}
+
 export const commentSet = async (
   parent,
   { bucketId, from = 0, limit = 30, order = "desc" }
 ) => {
-  const bucket = await prisma.bucket.findUnique({
-    where: { id: bucketId },
-    include: {
-      comments: true,
-      round: {
-        include: { group: { include: { discourse: true } } },
+  // Check cache first (cache the full comment list, then slice for pagination)
+  const cacheKey = getCommentCacheKey(bucketId);
+  let allComments = getCommentsFromCache(cacheKey);
+
+  if (!allComments) {
+    // First, check if this bucket uses Discourse
+    const bucket = await prisma.bucket.findUnique({
+      where: { id: bucketId },
+      select: {
+        id: true,
+        roundId: true,
+        discourseTopicId: true,
+        round: {
+          select: {
+            group: {
+              select: {
+                id: true,
+                discourse: true,
+              },
+            },
+          },
+        },
       },
-    },
-  });
-  // const bucket = await Bucket.findOne({ _id: bucketId });
+    });
 
-  let comments;
-  const group = bucket.round.group;
+    if (!bucket) {
+      return { total: 0, comments: [] };
+    }
 
-  if (groupHasDiscourse(group)) {
-    const topic = await discourse(group.discourse).posts.get(
-      bucket.discourseTopicId
-    );
+    let comments;
+    const group = bucket.round.group;
 
-    comments = await Promise.all(
-      topic.post_stream.posts
-        .filter((post) => post.post_number > 1)
-        .filter((post) => !post.user_deleted)
-        // filter out empty system comments, e.g. when a thread is moved
-        .filter(
-          (comment) => !(comment.username === "system" && comment.raw === "")
-        )
-        .reverse()
-        .map(async (post) => {
-          const author = await prisma.roundMember.findFirst({
-            where: {
-              roundId: bucket.roundId,
-              user: {
-                groupMemberships: {
-                  some: {
-                    discourseUsername: post.username,
-                    groupId: group.id,
+    if (groupHasDiscourse(group)) {
+      const topic = await discourse(group.discourse).posts.get(
+        bucket.discourseTopicId
+      );
+
+      comments = await Promise.all(
+        topic.post_stream.posts
+          .filter((post) => post.post_number > 1)
+          .filter((post) => !post.user_deleted)
+          // filter out empty system comments, e.g. when a thread is moved
+          .filter(
+            (comment) => !(comment.username === "system" && comment.raw === "")
+          )
+          .reverse()
+          .map(async (post) => {
+            const author = await prisma.roundMember.findFirst({
+              where: {
+                roundId: bucket.roundId,
+                user: {
+                  groupMemberships: {
+                    some: {
+                      discourseUsername: post.username,
+                      groupId: group.id,
+                    },
                   },
                 },
               },
-            },
-          });
+            });
 
-          return generateComment(post, author);
-        })
-    );
-  } else {
-    comments = await prisma.comment.findMany({
-      where: { bucketId: bucketId },
-      orderBy: { createdAt: "desc" },
-    });
+            return generateComment(post, author);
+          })
+      );
+    } else {
+      // Fetch comments with roundMember and user included to avoid N+1 queries
+      comments = await prisma.comment.findMany({
+        where: { bucketId: bucketId },
+        orderBy: { createdAt: "desc" },
+        include: {
+          collMember: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+    }
+
+    allComments = { total: comments.length, comments };
+    setCommentsCache(cacheKey, allComments);
   }
 
-  let shown = comments.slice(0, from + limit);
+  // Apply pagination
+  let shown = allComments.comments.slice(0, from + limit);
 
   if (order === "desc") {
     shown = shown.reverse();
   }
 
   return {
-    total: comments.length,
+    total: allComments.total,
     comments: shown,
   };
 };
