@@ -189,10 +189,16 @@ const ImageCarouselModal: React.FC<{
 
   return (
     <Modal open={isOpen} onClose={onClose}>
-      <div className="absolute inset-0 flex items-center justify-center outline-none">
+      <div
+        className="absolute inset-0 flex items-center justify-center outline-none cursor-pointer"
+        onClick={onClose}
+      >
         {/* Close button */}
         <button
-          onClick={onClose}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
           aria-label="Close"
         >
@@ -214,7 +220,10 @@ const ImageCarouselModal: React.FC<{
         {/* Previous button */}
         {hasPrev && (
           <button
-            onClick={goToPrev}
+            onClick={(e) => {
+              e.stopPropagation();
+              goToPrev();
+            }}
             className="absolute left-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
             aria-label="Previous image"
           >
@@ -238,13 +247,17 @@ const ImageCarouselModal: React.FC<{
         <img
           src={currentImage.large ?? currentImage.small}
           alt=""
-          className="max-h-[calc(100vh-4rem)] max-w-[calc(100vw-8rem)] rounded-lg"
+          onClick={(e) => e.stopPropagation()}
+          className="max-h-[calc(100vh-4rem)] max-w-[calc(100vw-8rem)] rounded-lg cursor-default"
         />
 
         {/* Next button */}
         {hasNext && (
           <button
-            onClick={goToNext}
+            onClick={(e) => {
+              e.stopPropagation();
+              goToNext();
+            }}
             className="absolute right-4 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
             aria-label="Next image"
           >
@@ -266,7 +279,10 @@ const ImageCarouselModal: React.FC<{
 
         {/* Image counter */}
         {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 text-white text-sm">
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/50 text-white text-sm"
+          >
             {selectedIndex + 1} / {images.length}
           </div>
         )}
