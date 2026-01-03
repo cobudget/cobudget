@@ -490,7 +490,7 @@ The platform's success depends on:
 
 - **Enabling "planning in the open"** - Making dreams visible creates collision points
 - **Structured but flexible review** - Guidelines provide framework; interactions build relationships
-- **Participatory funding** - Token limits force network exploration
+- **Participatory funding** - Token limits push network exploration
 - **Strategic reallocation** - FREUD ensures the community's collective choices are honored while maximizing dream viability
 - **Transparent expense management** - Accountability reinforces trust
 - **Community connection** - The platform builds the event before the event
