@@ -592,13 +592,24 @@ export const hasFundingEnded = async ({ roundId }) => {
   }
 };
 
-export const getRoundFundingStatuses = async ({ roundId }) => {
+export const getRoundFundingStatuses = async ({
+  roundId,
+  round: providedRound,
+}: {
+  roundId?: string;
+  round?: { grantingOpens?: Date | null; grantingCloses?: Date | null };
+}) => {
   try {
     const s = {
       hasStarted: true,
       hasEnded: false,
     };
-    const round = await prisma.round.findUnique({ where: { id: roundId } });
+    // Use provided round object if available, otherwise fetch from DB
+    const round =
+      providedRound ||
+      (await prisma.round.findUnique({ where: { id: roundId } }));
+    if (!round) return s;
+
     s.hasStarted = round.grantingOpens
       ? round.grantingOpens.getTime() < Date.now()
       : true;
@@ -608,5 +619,6 @@ export const getRoundFundingStatuses = async ({ roundId }) => {
     return s;
   } catch (err) {
     //log error
+    return { hasStarted: true, hasEnded: false };
   }
 };

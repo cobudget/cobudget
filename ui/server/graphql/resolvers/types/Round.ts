@@ -170,16 +170,23 @@ export const group = async (round, _, { user, ss }) => {
 };
 
 export const bucketStatusCount = async (round, _, { user }) => {
-  // Fetch member and funding status in parallel
-  const [currentMember, fundingStatus] = await Promise.all([
-    prisma.roundMember.findFirst({
-      where: {
-        userId: user?.id ?? "undefined",
-        roundId: round.id,
-      },
-    }),
-    getRoundFundingStatuses({ roundId: round.id }),
-  ]);
+  // Compute funding status directly from round object (no DB query needed)
+  const fundingStatus = {
+    hasStarted: round.grantingOpens
+      ? round.grantingOpens.getTime() < Date.now()
+      : true,
+    hasEnded: round.grantingCloses
+      ? round.grantingCloses.getTime() < Date.now()
+      : false,
+  };
+
+  // Fetch current member
+  const currentMember = await prisma.roundMember.findFirst({
+    where: {
+      userId: user?.id ?? "undefined",
+      roundId: round.id,
+    },
+  });
 
   const isAdminOrGuide =
     currentMember && (currentMember.isAdmin || currentMember.isModerator);
@@ -405,23 +412,31 @@ export const membersLimit = async (round) => {
 };
 
 export const bucketsLimit = async (round) => {
-  // Run independent queries in parallel
-  const [group, fundingStatus] = await Promise.all([
-    prisma.group.findUnique({ where: { id: round.groupId } }),
-    getRoundFundingStatuses({ roundId: round.id }),
-  ]);
-  const status = group.slug === "c" ? "free" : "paid";
+  // Compute funding status directly from round object (no DB query needed)
+  const fundingStatus = {
+    hasStarted: round.grantingOpens
+      ? round.grantingOpens.getTime() < Date.now()
+      : true,
+    hasEnded: round.grantingCloses
+      ? round.grantingCloses.getTime() < Date.now()
+      : false,
+  };
 
   const statusFilter = ["FUNDED", "COMPLETED"]
     .map((s) => statusTypeToQuery(s, fundingStatus))
     .filter((s) => s);
 
-  const currentCount = await prisma.bucket.count({
-    where: {
-      roundId: round.id,
-      OR: statusFilter as Array<Prisma.BucketWhereInput>,
-    },
-  });
+  // Run group fetch and bucket count in parallel
+  const [group, currentCount] = await Promise.all([
+    prisma.group.findUnique({ where: { id: round.groupId } }),
+    prisma.bucket.count({
+      where: {
+        roundId: round.id,
+        OR: statusFilter as Array<Prisma.BucketWhereInput>,
+      },
+    }),
+  ]);
+  const status = group.slug === "c" ? "free" : "paid";
 
   const limit = Math.max(
     parseInt(
