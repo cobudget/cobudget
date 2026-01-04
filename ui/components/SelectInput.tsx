@@ -1,37 +1,44 @@
 import React from "react";
 import { FormControl, InputLabel, Select } from "@mui/material";
 
-const SelectInput = ({
-  label,
-  defaultValue,
-  children,
-  inputRef,
-  name,
-  fullWidth,
-  value,
-  onChange,
-  disabled = false,
-}: any) => {
-  return (
-    <FormControl variant="outlined" fullWidth={fullWidth}>
-      <InputLabel id={`${label}-label`}>{label}</InputLabel>
-      <Select
-        native
-        name={name}
-        labelId={`${label}-label`}
-        id={label}
-        defaultValue={defaultValue}
-        label={label}
-        inputRef={inputRef}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-      >
-        {children}
-      </Select>
-    </FormControl>
-  );
-};
+const SelectInput = React.forwardRef(
+  (
+    {
+      label,
+      defaultValue,
+      children,
+      inputRef,
+      name,
+      fullWidth,
+      value,
+      onChange,
+      disabled = false,
+    }: any,
+    ref
+  ) => {
+    return (
+      <FormControl variant="outlined" fullWidth={fullWidth}>
+        <InputLabel id={`${label}-label`}>{label}</InputLabel>
+        <Select
+          native
+          name={name}
+          labelId={`${label}-label`}
+          id={label}
+          defaultValue={defaultValue}
+          label={label}
+          inputRef={ref || inputRef}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+        >
+          {children}
+        </Select>
+      </FormControl>
+    );
+  }
+);
+
+SelectInput.displayName = "SelectInput";
 
 export default SelectInput;
 
