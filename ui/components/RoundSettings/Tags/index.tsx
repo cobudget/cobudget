@@ -93,6 +93,7 @@ const Tags = ({ round, currentGroup }) => {
           label={intl.formatMessage({ defaultMessage: "Create a new tag" })}
           placeholder={intl.formatMessage({ defaultMessage: "New tag name" })}
           inputRef={register("tagValue").ref}
+          inputProps={register("tagValue")}
           className="my-4"
         />
 
