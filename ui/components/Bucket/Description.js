@@ -29,6 +29,8 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(description ?? "");
 
+  const descriptionRegister = register("description");
+
   if (editing)
     return (
       <form
@@ -41,14 +43,17 @@ const BucketDescription = ({ description, bucketId, canEdit }) => {
         <TextField
           name="description"
           placeholder="Description"
-          inputRef={register("description").ref}
+          inputRef={descriptionRegister.ref}
           multiline
           rows={10}
           defaultValue={description}
           autoFocus
           inputProps={{
-            value: inputValue,
-            onChange: (e) => setInputValue(e.target.value),
+            ...descriptionRegister,
+            onChange: (e) => {
+              descriptionRegister.onChange(e);
+              setInputValue(e.target.value);
+            },
           }}
           className="mb-2"
         />
