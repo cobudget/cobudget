@@ -31,6 +31,8 @@ const BucketSummary = ({ summary, canEdit, bucketId, isEditingAllowed }) => {
   const [editing, setEditing] = useState(false);
   const [inputValue, setInputValue] = useState(summary ?? "");
 
+  const summaryRegister = register("summary");
+
   const handleEdit = () => {
     if (isEditingAllowed) {
       setEditing(true);
@@ -54,11 +56,15 @@ const BucketSummary = ({ summary, canEdit, bucketId, isEditingAllowed }) => {
             multiline
             name="summary"
             placeholder={intl.formatMessage({ defaultMessage: "Summary" })}
-            inputRef={register("summary").ref}
+            defaultValue={summary ?? ""}
+            inputRef={summaryRegister.ref}
             inputProps={{
+              ...summaryRegister,
               maxLength: 160,
-              value: inputValue,
-              onChange: (e) => setInputValue(e.target.value),
+              onChange: (e) => {
+                summaryRegister.onChange(e);
+                setInputValue(e.target.value);
+              },
             }}
             autoFocus
           />
