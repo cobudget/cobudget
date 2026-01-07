@@ -15,38 +15,78 @@ const ComponentItem = {
 };
 import { DeleteIcon, ChainIcon } from "components/Icons";
 
-import { HTMLProps, useEffect, useRef, useState } from "react";
-
-const DelayAutoFocusInput = ({
-  autoFocus,
-  ...rest
-}: HTMLProps<HTMLInputElement>) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!autoFocus) {
-      return;
-    }
-
-    const frame = window.requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [autoFocus]);
-
-  return <input ref={inputRef} {...rest} />;
-};
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export const AddEditLink = () => {
   const active = useActive();
   const activeLink = active.link();
   const [isEditing, setIsEditing] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [inputPosition, setInputPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
   const { empty } = useCurrentSelection();
   const { focus, updateLink, removeLink } = useCommands();
   const currentUrl = (useAttrs().link()?.href as string) ?? "";
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Focus input when editing starts
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus({ preventScroll: true });
+    }
+  }, [isEditing]);
+
+  const handleStartEditing = () => {
+    // Capture the current selection position before anything changes
+    const selection = window.getSelection();
+    console.log("handleStartEditing called", { selection, rangeCount: selection?.rangeCount });
+
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      console.log("Selection rect", rect);
+
+      // Use fixed positioning with viewport coordinates
+      if (rect.width > 0 || rect.height > 0) {
+        setInputPosition({
+          top: rect.bottom + 4,
+          left: rect.left,
+        });
+      } else {
+        // Fallback: position near the click event or center of viewport
+        setInputPosition({
+          top: 200,
+          left: 100,
+        });
+      }
+    } else {
+      // Fallback position if no selection
+      setInputPosition({
+        top: 200,
+        left: 100,
+      });
+    }
+    setLinkUrl(currentUrl);
+    setIsEditing(true);
+  };
+
+  const handleSubmit = () => {
+    if (linkUrl) {
+      updateLink({ href: linkUrl });
+    }
+    setIsEditing(false);
+    setInputPosition(null);
+    focus();
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setInputPosition(null);
+    focus();
+  };
 
   return (
     <>
@@ -74,17 +114,26 @@ export const AddEditLink = () => {
         positioner="emptyBlockStart"
       />
 
+      {/* Link button - always mounted, hidden when editing */}
       <FloatingWrapper
-        positioner="always"
+        positioner="selection"
         placement="top-end"
-        enabled={!isEditing && !empty}
-        renderOutsideEditor
+        enabled={!empty && !isEditing}
         containerClass="shadow rounded overflow-hidden"
       >
         <button
           type="button"
           className="bg-gray-100 p-2"
-          onClick={() => setIsEditing(true)}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Chain button clicked");
+            handleStartEditing();
+          }}
         >
           <ChainIcon className="h-4 w-4" />
         </button>
@@ -92,6 +141,10 @@ export const AddEditLink = () => {
           <button
             type="button"
             className="bg-gray-100 p-2 border-l-2"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
             onClick={() => {
               removeLink();
             }}
@@ -101,35 +154,47 @@ export const AddEditLink = () => {
         )}
       </FloatingWrapper>
 
-      <FloatingWrapper
-        positioner="always"
-        placement="bottom"
-        enabled={isEditing}
-        renderOutsideEditor
-      >
-        <DelayAutoFocusInput
-          style={{ zIndex: 20 }}
-          autoFocus
-          className="block w-full px-2 py-2 text-xs focus:outline-none transition-colors ease-in-out duration-200 bg-gray-100 border-2 rounded"
-          placeholder="Enter link..."
-          onBlur={() => {
-            setIsEditing(false);
-          }}
-          defaultValue={currentUrl}
-          onKeyPress={(event) => {
-            const { code } = event;
-            if (code === "Enter") {
-              updateLink({ href: event.currentTarget.value });
-              setIsEditing(false);
-              focus();
-            }
-            if (code === "Escape") {
-              setIsEditing(false);
-              focus();
-            }
-          }}
-        />
-      </FloatingWrapper>
+      {/* Link input - rendered via portal to avoid clipping */}
+      {isEditing &&
+        inputPosition &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div
+            style={{
+              position: "fixed",
+              top: inputPosition.top,
+              left: inputPosition.left,
+              zIndex: 9999,
+            }}
+            className="shadow-lg rounded overflow-hidden bg-white"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              value={linkUrl}
+              onChange={(e) => setLinkUrl(e.target.value)}
+              className="block w-64 px-2 py-2 text-xs focus:outline-none transition-colors ease-in-out duration-200 bg-gray-100 border-2 rounded"
+              placeholder="Enter link URL..."
+              onBlur={() => {
+                // Small delay to allow click events to fire first
+                setTimeout(() => {
+                  handleCancel();
+                }, 150);
+              }}
+              onKeyDown={(event) => {
+                const { key } = event;
+                if (key === "Enter") {
+                  event.preventDefault();
+                  handleSubmit();
+                }
+                if (key === "Escape") {
+                  handleCancel();
+                }
+              }}
+            />
+          </div>,
+          document.body
+        )}
     </>
   );
 };
