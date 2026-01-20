@@ -23,43 +23,12 @@ export async function inviteRoundMembersHelper({
     throw new Error("You can only invite 10000 people at a time");
   }
 
-  // 3. Fetch existing round members
-  const roundMembers = await prisma.roundMember.findMany({
-    where: { roundId: round.id },
-    include: { user: true },
-  });
-
-  // 4. Handle subscription limits if needed
-  let limit;
-  const isFree = round.group?.slug === "c";
-  const isSubscriptionActive = await getIsGroupSubscriptionActive({
+  // 3 & 4. Fetch existing round members, checking that the round limit allows for new additions.
+  const roundMembers = await limitCheckedRoundMembers({
+    round,
     group: round.group,
+    qtyNewAdditions: emails.length,
   });
-
-  if (!isFree && round.maxMembers && isSubscriptionActive) {
-    limit = Math.max(
-      parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT, 10) || 0,
-      round.maxMembers
-    );
-  } else if (round.maxMembers) {
-    limit = round.maxMembers;
-  } else if (isFree) {
-    limit = parseInt(process.env.FREE_ROUND_MEMBERS_LIMIT, 10) || 100;
-  } else {
-    limit = parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT, 10) || 1000;
-  }
-
-  if (roundMembers.length + emails.length > limit) {
-    throw new Error(
-      `Your round can have ${limit} members. ${
-        isFree
-          ? `Upgrade your round to increase limit to ${
-              process.env.PAID_ROUND_MEMBERS_LIMIT || 1000
-            }`
-          : ""
-      }`
-    );
-  }
 
   // 5. Build a lookup table for existing member emails
   const existingMemberEmails = {};
@@ -154,4 +123,47 @@ export async function inviteRoundMembersHelper({
       userId: { in: membersToInvite.map((u) => u.id) },
     },
   });
+}
+
+export async function limitCheckedRoundMembers({
+  round,
+  group,
+  qtyNewAdditions,
+}) {
+  const roundMembers = await prisma.roundMember.findMany({
+    where: { roundId: round.id },
+    include: { user: true },
+  });
+
+  let limit;
+  const isFree = !group || group?.slug === "c"; // if we can't resolve group, assume it is not subscribed
+  const isSubscriptionActive = await getIsGroupSubscriptionActive({
+    group,
+  });
+
+  if (!isFree && round.maxMembers && isSubscriptionActive) {
+    limit = Math.max(
+      parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT, 10) || 0,
+      round.maxMembers
+    );
+  } else if (round.maxMembers) {
+    limit = round.maxMembers;
+  } else if (isFree) {
+    limit = parseInt(process.env.FREE_ROUND_MEMBERS_LIMIT, 10) || 10;
+  } else {
+    limit = parseInt(process.env.PAID_ROUND_MEMBERS_LIMIT, 10) || 1000;
+  }
+
+  if (roundMembers.length + qtyNewAdditions > limit) {
+    throw new Error(
+      `Your round can have ${limit} members. ${
+        isFree
+          ? `Upgrade your round to increase limit to ${
+              process.env.PAID_ROUND_MEMBERS_LIMIT || 1000
+            }`
+          : ""
+      }`
+    );
+  }
+  return roundMembers;
 }
