@@ -54,3 +54,4 @@ To make stripe checkout work you need their webhooks to reach your machine. Do t
 ## License
 
 Released under AGPL-3.0-or-later, with some additional terms. All of which are included in the file [LICENSE](LICENSE) in the git repository.
+# Staging: Neon DB migration test
