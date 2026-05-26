@@ -1,5 +1,5 @@
 import prisma from "../../../prisma";
-import { roundMemberBalance } from "../helpers";
+import { getSilentAllocationContext, roundMemberBalance } from "../helpers";
 
 export const round = async (member) => {
   return await prisma.round.findUnique({
@@ -12,7 +12,14 @@ export const user = async (member) =>
     where: { id: member.userId },
   });
 
-export const balance = async (member) => {
+export const balance = async (member, _, { user, ss }) => {
+  // Silent allocation (C-06): non-admins may only see their OWN balance.
+  // A member's balance reveals their total spend by inference, so it is
+  // individual data that must be hidden from other participants.
+  const { isSilent, isPrivileged, viewerMemberId } =
+    await getSilentAllocationContext({ roundId: member.roundId, user, ss });
+  if (isSilent && !isPrivileged && viewerMemberId !== member.id) return null;
+
   return roundMemberBalance(member);
 };
 
