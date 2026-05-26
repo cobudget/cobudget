@@ -391,6 +391,10 @@ const Row = ({ member, deleteMember, updateMember, round, isAdmin, disabled }) =
             />
             </Typography>
           </button>
+        ) : member.balance === null ? (
+          // Silent allocation (C-06): other members' balances are hidden from
+          // non-admins (server returns null). Avoid rendering null/100 = £0.00.
+          <span>—</span>
         ) : (
           <span>
             <FormattedNumber
