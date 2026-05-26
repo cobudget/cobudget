@@ -386,6 +386,7 @@ const schema = gql`
       directFundingTerms: String
       canCocreatorStartFunding: Boolean
       canCocreatorEditOpenBuckets: Boolean
+      silentAllocation: Boolean
     ): Round
 
     allocate(
@@ -489,6 +490,7 @@ const schema = gql`
     stripeIsConnected: Boolean
     directFundingEnabled: Boolean
     directFundingTerms: String
+    silentAllocation: Boolean
     canCocreatorStartFunding: Boolean
     canCocreatorEditOpenBuckets: Boolean
     customFields: [CustomField]
