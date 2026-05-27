@@ -75,6 +75,7 @@ export const BUCKET_QUERY = gql`
         color
         currency
         allowStretchGoals
+        silentAllocation
         bucketReviewIsOpen
         directFundingEnabled
         directFundingTerms
@@ -327,8 +328,11 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
                 )
               }
             >
-              <FormattedMessage defaultMessage="Funders" /> (
-              {bucket?.noOfFunders})
+              <FormattedMessage defaultMessage="Funders" />
+              {bucket?.round?.silentAllocation &&
+              !currentUser?.currentCollMember?.isAdmin
+                ? null
+                : ` (${bucket?.noOfFunders})`}
             </Tab>
             {showExpensesTab ? (
               <Tab

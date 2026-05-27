@@ -3,6 +3,25 @@ import { FormattedMessage, FormattedNumber } from "react-intl";
 
 export default function Funders({ bucket, currentUser }) {
   if (!bucket) return null;
+
+  // Silent allocation (C-06): non-admins don't see individual funders. The
+  // server already returns an empty funders list for them, so show an
+  // explanatory notice rather than the generic "No contributions yet".
+  const hideForSilent =
+    bucket.round?.silentAllocation && !currentUser?.currentCollMember?.isAdmin;
+
+  if (hideForSilent) {
+    return (
+      <div className="bg-white border-b-default">
+        <div className="page">
+          <div className="text-xl font-medium text-gray-500 py-10 text-center">
+            <FormattedMessage defaultMessage="Individual contributions are hidden during the allocation phase." />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border-b-default">
       {bucket.funders.length ? (

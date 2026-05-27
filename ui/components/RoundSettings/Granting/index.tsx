@@ -15,6 +15,7 @@ import SetBucketCreationCloses from "./SetBucketCreationCloses";
 import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
+import SetSilentAllocation from "./SetSilentAllocation";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
@@ -44,6 +45,7 @@ const modals = {
   SET_GRANTING_CLOSES: SetGrantingCloses,
   SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
+  SET_SILENT_ALLOCATION: SetSilentAllocation,
   SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
   SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
@@ -65,6 +67,7 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
+      silentAllocation
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
@@ -88,6 +91,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $grantingCloses: Date
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
+    $silentAllocation: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
     $canCocreatorStartFunding: Boolean
@@ -101,6 +105,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       grantingCloses: $grantingCloses
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
+      silentAllocation: $silentAllocation
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
       canCocreatorStartFunding: $canCocreatorStartFunding
@@ -115,6 +120,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses
       bucketCreationIsOpen
       allowStretchGoals
+      silentAllocation
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
@@ -227,6 +233,28 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             canEdit={canEditSettings}
             roundColor={round.color}
           />
+
+          <Divider />
+
+          {/* --- Silent allocation (Give it a Go C-06) --- */}
+          {/* To hide this setting for an instance, comment out this block. */}
+          <SettingsListItem
+            primary={intl.formatMessage({
+              defaultMessage: "Silent allocation",
+            })}
+            secondary={
+              round.silentAllocation ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
+            isSet={typeof round.silentAllocation !== "undefined"}
+            openModal={() => handleOpen("SET_SILENT_ALLOCATION")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
+          {/* --- end Silent allocation --- */}
 
           <Divider />
 

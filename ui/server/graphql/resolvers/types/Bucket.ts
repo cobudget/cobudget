@@ -5,6 +5,7 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   getRoundFundingStatuses,
+  shouldHideIndividualAllocations,
 } from "../helpers";
 import { isBucketFavorite } from "../helpers/bucket";
 
@@ -58,7 +59,13 @@ export const noOfComments = async (bucket) => {
     .comments();
   return comments.length;
 };
-export const contributions = async (bucket) => {
+export const contributions = async (bucket, _, { user, ss }) => {
+  // Silent allocation (C-06): non-admins must not see individual contributions.
+  if (
+    await shouldHideIndividualAllocations({ roundId: bucket.roundId, user, ss })
+  )
+    return [];
+
   return await prisma.contribution.findMany({
     where: { bucketId: bucket.id },
     orderBy: {
@@ -72,7 +79,13 @@ export const noOfContributions = async (bucket) => {
   });
 };
 
-export const funders = async (bucket) => {
+export const funders = async (bucket, _, { user, ss }) => {
+  // Silent allocation (C-06): non-admins must not see who funded a bucket.
+  if (
+    await shouldHideIndividualAllocations({ roundId: bucket.roundId, user, ss })
+  )
+    return [];
+
   const funders = await prisma.contribution.groupBy({
     where: { bucketId: bucket.id },
     by: ["roundMemberId"],
@@ -91,7 +104,13 @@ export const funders = async (bucket) => {
   return contributionsFormat;
 };
 
-export const noOfFunders = async (bucket) => {
+export const noOfFunders = async (bucket, _, { user, ss }) => {
+  // Silent allocation (C-06): hide the funder count from non-admins.
+  if (
+    await shouldHideIndividualAllocations({ roundId: bucket.roundId, user, ss })
+  )
+    return 0;
+
   const contributions = await prisma.contribution.findMany({
     where: { bucketId: bucket.id },
   });

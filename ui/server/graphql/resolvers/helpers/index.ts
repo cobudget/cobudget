@@ -161,6 +161,73 @@ export async function getRoundMember({
   return roundMember;
 }
 
+/**
+ * Silent allocation (C-06): resolves, for a given round and caller, whether
+ * individual contribution/allocation data must be hidden.
+ *
+ * A round is "silent" when `silentAllocation` is on. Admins of the round and
+ * superadmins (ss) always see everything; everyone else (members, logged-out)
+ * has individual data stripped. `viewerMemberId` is returned so resolvers that
+ * allow a participant to see their OWN data (e.g. balance) can compare.
+ */
+export async function getSilentAllocationContext({
+  roundId,
+  user,
+  ss = null,
+}: {
+  roundId: string;
+  user?: { id: string } | null;
+  ss?: any;
+}): Promise<{
+  isSilent: boolean;
+  isPrivileged: boolean;
+  viewerMemberId: string | null;
+}> {
+  const round = await prisma.round.findUnique({
+    where: { id: roundId },
+    select: { silentAllocation: true },
+  });
+  const isSilent = !!round?.silentAllocation;
+
+  // Not silent, or a superadmin: nothing to hide.
+  if (!isSilent || ss)
+    return { isSilent, isPrivileged: true, viewerMemberId: null };
+
+  // Logged-out / no user context: treat as non-privileged.
+  if (!user) return { isSilent, isPrivileged: false, viewerMemberId: null };
+
+  const viewer = await prisma.roundMember.findUnique({
+    where: { userId_roundId: { userId: user.id, roundId } },
+    select: { id: true, isAdmin: true },
+  });
+  return {
+    isSilent,
+    isPrivileged: !!viewer?.isAdmin,
+    viewerMemberId: viewer?.id ?? null,
+  };
+}
+
+/**
+ * Convenience wrapper for the common case: hide individual data when the round
+ * is silent and the caller is not an admin/superadmin (no own-data exception).
+ */
+export async function shouldHideIndividualAllocations({
+  roundId,
+  user,
+  ss = null,
+}: {
+  roundId: string;
+  user?: { id: string } | null;
+  ss?: any;
+}): Promise<boolean> {
+  const { isSilent, isPrivileged } = await getSilentAllocationContext({
+    roundId,
+    user,
+    ss,
+  });
+  return isSilent && !isPrivileged;
+}
+
 export async function getCurrentGroupAndMember({
   groupId,
   roundId,

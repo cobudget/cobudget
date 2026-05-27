@@ -10,6 +10,7 @@ import {
   getExpensesCount,
   isAndGetCollMemberOrGroupAdmin,
   isCollAdmin,
+  shouldHideIndividualAllocations,
 } from "../helpers";
 import { RoundTransaction } from "server/types";
 import cache from "memory-cache";
@@ -194,8 +195,8 @@ export const contributionsPage = combineResolvers(
 
 export const roundTransactions = combineResolvers(
   isCollMember,
-  async (parent, { roundId, offset, limit }) => {
-    const transactions: [RoundTransaction] = await prisma.$queryRaw`
+  async (parent, { roundId, offset, limit }, { user, ss }) => {
+    let transactions: [RoundTransaction] = await prisma.$queryRaw`
         (
           SELECT 
             "id", 
@@ -230,6 +231,16 @@ export const roundTransactions = combineResolvers(
     transactions.forEach(
       (transaction) => (transaction.createdAt = new Date(transaction.createdAt))
     );
+
+    // Silent allocation (C-06): hide individual CONTRIBUTION rows from
+    // non-admins when the round is silent. ALLOCATION rows (admin granting
+    // tokens to the viewer) are kept. Scoped to silent rounds only — other
+    // rounds are unaffected.
+    if (await shouldHideIndividualAllocations({ roundId, user, ss })) {
+      transactions = transactions.filter(
+        (t) => t.transactionType === "ALLOCATION"
+      ) as [RoundTransaction];
+    }
 
     return {
       moreExist: transactions.length > limit,
