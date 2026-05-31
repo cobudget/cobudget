@@ -329,10 +329,7 @@ const BucketIndex = ({ head, currentUser, currentGroup }) => {
               }
             >
               <FormattedMessage defaultMessage="Funders" />
-              {bucket?.round?.silentAllocation &&
-              !currentUser?.currentCollMember?.isAdmin
-                ? null
-                : ` (${bucket?.noOfFunders})`}
+              {` (${bucket?.noOfFunders})`}
             </Tab>
             {showExpensesTab ? (
               <Tab
