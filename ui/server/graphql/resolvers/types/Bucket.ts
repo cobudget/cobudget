@@ -5,6 +5,7 @@ import {
   bucketMinGoal,
   bucketTotalContributions,
   getRoundFundingStatuses,
+  getSilentAllocationContext,
   shouldHideIndividualAllocations,
 } from "../helpers";
 import { isBucketFavorite } from "../helpers/bucket";
@@ -80,20 +81,57 @@ export const noOfContributions = async (bucket) => {
 };
 
 export const funders = async (bucket, _, { user, ss }) => {
-  // Silent allocation (C-06): non-admins must not see who funded a bucket.
-  if (
-    await shouldHideIndividualAllocations({ roundId: bucket.roundId, user, ss })
-  )
-    return [];
+  const { isSilent, isPrivileged, viewerMemberId } =
+    await getSilentAllocationContext({ roundId: bucket.roundId, user, ss });
 
-  const funders = await prisma.contribution.groupBy({
+  const funderGroups = await prisma.contribution.groupBy({
     where: { bucketId: bucket.id },
     by: ["roundMemberId"],
-    _sum: {
-      amount: true,
-    },
+    _sum: { amount: true },
   });
-  const contributionsFormat = funders.map((funder) => ({
+
+  if (isSilent && !isPrivileged) {
+    // Silent allocation (C-06): return anonymised list — amounts visible, identities hidden.
+    // Sort by roundMemberId (UUID alphabetical) so each member always gets the same number
+    // regardless of contribution order (sorting by createdAt would leak who funded first).
+    const sorted = [...funderGroups].sort((a, b) =>
+      a.roundMemberId.localeCompare(b.roundMemberId)
+    );
+    const label = process.env.SILENT_ALLOCATION_FUNDER_LABEL || "Funder";
+
+    return sorted.map((funder, index) => {
+      const baseLabel = `${label} #${index + 1}`;
+      const isMe = viewerMemberId && funder.roundMemberId === viewerMemberId;
+      const displayLabel = isMe ? `${baseLabel} (You)` : baseLabel;
+
+      return {
+        id: `anon_${index + 1}`,
+        roundId: bucket.roundId,
+        roundMemberId: null,        // null signals anon path to Contribution.roundMember
+        bucketId: bucket.id,
+        amount: funder._sum.amount,
+        createdAt: new Date(),
+        // Embedded synthetic data. IDs must be non-null strings because GraphQL
+        // enforces ID! at the schema level and null-propagates the whole response
+        // on violation. The __anon_ prefix can never match a real Prisma cuid.
+        // _isAnon is a plain-object marker read by RoundMember.user to short-circuit
+        // the DB lookup without relying on the id value.
+        roundMember: {
+          id: `__anon_${index + 1}`,
+          userId: `__anon_${index + 1}`,
+          roundId: bucket.roundId,
+          _isAnon: true,
+          user: {
+            id: `__anon_${index + 1}`,
+            name: displayLabel,
+            username: displayLabel,
+          },
+        },
+      };
+    });
+  }
+
+  return funderGroups.map((funder) => ({
     id: funder.roundMemberId,
     roundId: bucket.roundId,
     roundMemberId: funder.roundMemberId,
@@ -101,16 +139,9 @@ export const funders = async (bucket, _, { user, ss }) => {
     amount: funder._sum.amount,
     createdAt: new Date(),
   }));
-  return contributionsFormat;
 };
 
-export const noOfFunders = async (bucket, _, { user, ss }) => {
-  // Silent allocation (C-06): hide the funder count from non-admins.
-  if (
-    await shouldHideIndividualAllocations({ roundId: bucket.roundId, user, ss })
-  )
-    return 0;
-
+export const noOfFunders = async (bucket) => {
   const contributions = await prisma.contribution.findMany({
     where: { bucketId: bucket.id },
   });

@@ -7,10 +7,14 @@ export const round = async (member) => {
   });
 };
 
-export const user = async (member) =>
-  prisma.user.findUnique({
-    where: { id: member.userId },
-  });
+export const user = async (member) => {
+  // _isAnon = synthetic anon round member (C-06 silent allocation).
+  // Return the embedded synthetic user; don't DB-lookup with a fake userId.
+  // (Cannot use !member.id here because IDs must be non-null strings to satisfy
+  // the ID! schema constraint, so anon objects carry a __anon_ prefix id instead.)
+  if (member?._isAnon) return member?.user ?? null;
+  return prisma.user.findUnique({ where: { id: member.userId } });
+};
 
 export const balance = async (member, _, { user, ss }) => {
   // Silent allocation (C-06): non-admins may only see their OWN balance.

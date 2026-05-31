@@ -13,6 +13,9 @@ export const round = async (contribution) => {
 };
 
 export const roundMember = async (contribution) => {
+  // null roundMemberId = anonymous funder (C-06 silent allocation).
+  // Return the synthetic roundMember embedded by the funders resolver.
+  if (!contribution.roundMemberId) return contribution.roundMember ?? null;
   return prisma.roundMember.findUnique({
     where: { id: contribution.roundMemberId },
   });
