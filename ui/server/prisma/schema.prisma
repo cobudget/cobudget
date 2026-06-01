@@ -226,6 +226,7 @@ model Round {
   directFundingTerms          String    @default("")
   silentAllocation            Boolean   @default(false)
   allocationPaused            Boolean   @default(false)
+  withdrawalEnabled           Boolean   @default(false)
   bucketReviewIsOpen          Boolean?
   discourseCategoryId         Int?
   canCocreatorStartFunding    Boolean?  @default(false)

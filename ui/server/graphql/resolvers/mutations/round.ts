@@ -607,6 +607,7 @@ export const updateGrantingSettings = combineResolvers(
       canCocreatorEditOpenBuckets,
       silentAllocation,
       allocationPaused,
+      withdrawalEnabled,
     }
   ) => {
     const round = await prisma.round.findUnique({
@@ -637,6 +638,7 @@ export const updateGrantingSettings = combineResolvers(
         canCocreatorEditOpenBuckets,
         silentAllocation,
         allocationPaused,
+        withdrawalEnabled,
       },
     });
   }
