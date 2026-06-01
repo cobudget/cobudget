@@ -281,7 +281,7 @@ export const joinInvitationLink = async (parent, { token }, { user }) => {
 
   if (roundId) {
     const round = await prisma.round.findFirst({
-      where: { id: roundId, inviteNonce },
+      where: { id: roundId, inviteNonce: BigInt(inviteNonce) },
       include: { group: true },
     });
 
@@ -312,7 +312,7 @@ export const joinInvitationLink = async (parent, { token }, { user }) => {
     return { id: roundMember.id, roundId: roundMember.roundId };
   } else {
     const group = await prisma.group.findFirst({
-      where: { id: groupId, inviteNonce },
+      where: { id: groupId, inviteNonce: BigInt(inviteNonce) },
     });
 
     if (!group) {

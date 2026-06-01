@@ -43,7 +43,7 @@ export const groupInvitationLink = combineResolvers(
     return {
       link:
         group.inviteNonce !== null
-          ? appLink("/invite/" + sign({ nonce: group.inviteNonce, groupId }))
+          ? appLink("/invite/" + sign({ nonce: Number(group.inviteNonce), groupId }))
           : null,
     };
   }
