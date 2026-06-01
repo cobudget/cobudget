@@ -17,6 +17,7 @@ import SetGrantingOpens from "./SetGrantingOpens";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetSilentAllocation from "./SetSilentAllocation";
 import SetAllocationPaused from "./SetAllocationPaused";
+import SetWithdrawalEnabled from "./SetWithdrawalEnabled";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
@@ -48,6 +49,7 @@ const modals = {
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_SILENT_ALLOCATION: SetSilentAllocation,
   SET_ALLOCATION_PAUSED: SetAllocationPaused,
+  SET_WITHDRAWAL_ENABLED: SetWithdrawalEnabled,
   SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
   SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
@@ -71,6 +73,7 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       allowStretchGoals
       silentAllocation
       allocationPaused
+      withdrawalEnabled
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
@@ -96,6 +99,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $allowStretchGoals: Boolean
     $silentAllocation: Boolean
     $allocationPaused: Boolean
+    $withdrawalEnabled: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
     $canCocreatorStartFunding: Boolean
@@ -111,6 +115,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       allowStretchGoals: $allowStretchGoals
       silentAllocation: $silentAllocation
       allocationPaused: $allocationPaused
+      withdrawalEnabled: $withdrawalEnabled
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
       canCocreatorStartFunding: $canCocreatorStartFunding
@@ -127,6 +132,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       allowStretchGoals
       silentAllocation
       allocationPaused
+      withdrawalEnabled
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
@@ -409,6 +415,26 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             roundColor={round.color}
           />
           {/* --- end Pause allocation --- */}
+
+          {/* --- Allow withdrawal (Give it a Go C-08) --- */}
+          {/* To hide this setting for an instance, comment out this block. */}
+          <SettingsListItem
+            primary={intl.formatMessage({
+              defaultMessage: "Allow withdrawal",
+            })}
+            secondary={
+              round.withdrawalEnabled ? (
+                <FormattedMessage defaultMessage="Enabled" />
+              ) : (
+                <FormattedMessage defaultMessage="Disabled" />
+              )
+            }
+            isSet={typeof round.withdrawalEnabled !== "undefined"}
+            openModal={() => handleOpen("SET_WITHDRAWAL_ENABLED")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
+          {/* --- end Allow withdrawal --- */}
 
           {currentGroup?.experimentalFeatures && (
             <>
