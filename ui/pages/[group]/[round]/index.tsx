@@ -15,6 +15,7 @@ import LoadMore from "../../../components/LoadMore";
 import NewBucketModal from "../../../components/NewBucketModal";
 import PageHero from "../../../components/PageHero";
 import SubMenu from "../../../components/SubMenu";
+import QuickActions from "../../../components/QuickActions";
 import Table from "../../../components/Table";
 
 const ACCEPT_INVITATION = gql`
@@ -49,6 +50,8 @@ export const ROUND_PAGE_QUERY = gql`
       color
       bucketCreationIsOpen
       grantingHasClosed
+      allocationPaused
+      withdrawalEnabled
       totalInMembersBalances
       allowStretchGoals
       bucketReviewIsOpen
@@ -856,6 +859,9 @@ const RoundPage = ({ currentUser }) => {
                 </table>
               </div>
             </div>
+            {canEdit && (
+              <QuickActions round={round} />
+            )}
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
