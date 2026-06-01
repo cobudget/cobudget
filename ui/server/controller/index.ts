@@ -226,6 +226,8 @@ export const contribute = async ({
   if (amount <= 0) throw new Error("Value needs to be more than zero");
 
   // Check that granting is open
+  if (round.allocationPaused)
+    throw new Error("Allocation is currently paused");
   const now = dayjs();
   const grantingHasOpened = round.grantingOpens
     ? dayjs(round.grantingOpens).isBefore(now)

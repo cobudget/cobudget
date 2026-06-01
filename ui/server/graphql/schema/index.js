@@ -387,6 +387,7 @@ const schema = gql`
       canCocreatorStartFunding: Boolean
       canCocreatorEditOpenBuckets: Boolean
       silentAllocation: Boolean
+      allocationPaused: Boolean
     ): Round
 
     allocate(
@@ -491,6 +492,7 @@ const schema = gql`
     directFundingEnabled: Boolean
     directFundingTerms: String
     silentAllocation: Boolean
+    allocationPaused: Boolean
     canCocreatorStartFunding: Boolean
     canCocreatorEditOpenBuckets: Boolean
     customFields: [CustomField]
