@@ -252,7 +252,7 @@ model Round {
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce    Int?
+  inviteNonce    BigInt?
   maxMembers     Int?
   maxFreeBuckets Int?
 
