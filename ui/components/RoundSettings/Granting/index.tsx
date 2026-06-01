@@ -16,6 +16,7 @@ import SetGrantingCloses from "./SetGrantingCloses";
 import SetGrantingOpens from "./SetGrantingOpens";
 import SetAllowStretchGoals from "./SetAllowStretchGoals";
 import SetSilentAllocation from "./SetSilentAllocation";
+import SetAllocationPaused from "./SetAllocationPaused";
 import SetAbout from "./SetAbout";
 import SetStripe from "./SetStripe";
 import SetDirectFunding from "./SetDirectFunding";
@@ -46,6 +47,7 @@ const modals = {
   SET_MAX_AMOUNT_TO_BUCKET: SetMaxAmountToBucket,
   SET_ALLOW_STRETCH_GOALS: SetAllowStretchGoals,
   SET_SILENT_ALLOCATION: SetSilentAllocation,
+  SET_ALLOCATION_PAUSED: SetAllocationPaused,
   SET_COCREATOR_CAN_OPEN_FUNDING: SetCocreatorCanOpenFund,
   SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS: SetCocreatorCanEditOpenBucket,
   SET_ABOUT: SetAbout,
@@ -68,6 +70,7 @@ const GET_ROUND_FUNDING_SETTINGS = gql`
       bucketCreationIsOpen
       allowStretchGoals
       silentAllocation
+      allocationPaused
       stripeIsConnected
       directFundingEnabled
       directFundingTerms
@@ -92,6 +95,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
     $bucketCreationCloses: Date
     $allowStretchGoals: Boolean
     $silentAllocation: Boolean
+    $allocationPaused: Boolean
     $directFundingEnabled: Boolean
     $directFundingTerms: String
     $canCocreatorStartFunding: Boolean
@@ -106,6 +110,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationCloses: $bucketCreationCloses
       allowStretchGoals: $allowStretchGoals
       silentAllocation: $silentAllocation
+      allocationPaused: $allocationPaused
       directFundingEnabled: $directFundingEnabled
       directFundingTerms: $directFundingTerms
       canCocreatorStartFunding: $canCocreatorStartFunding
@@ -121,6 +126,7 @@ export const UPDATE_GRANTING_SETTINGS = gql`
       bucketCreationIsOpen
       allowStretchGoals
       silentAllocation
+      allocationPaused
       directFundingEnabled
       directFundingTerms
       canCocreatorStartFunding
@@ -381,6 +387,28 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             canEdit={canEditSettings}
             roundColor={round.color}
           />
+
+          <Divider />
+
+          {/* --- Pause allocation (Give it a Go C-08) --- */}
+          {/* To hide this setting for an instance, comment out this block. */}
+          <SettingsListItem
+            primary={intl.formatMessage({
+              defaultMessage: "Pause allocation",
+            })}
+            secondary={
+              round.allocationPaused ? (
+                <FormattedMessage defaultMessage="Paused" />
+              ) : (
+                <FormattedMessage defaultMessage="Active" />
+              )
+            }
+            isSet={typeof round.allocationPaused !== "undefined"}
+            openModal={() => handleOpen("SET_ALLOCATION_PAUSED")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
+          {/* --- end Pause allocation --- */}
 
           {currentGroup?.experimentalFeatures && (
             <>
