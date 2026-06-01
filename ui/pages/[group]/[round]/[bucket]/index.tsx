@@ -76,6 +76,7 @@ export const BUCKET_QUERY = gql`
         currency
         allowStretchGoals
         silentAllocation
+        withdrawalEnabled
         bucketReviewIsOpen
         directFundingEnabled
         directFundingTerms
