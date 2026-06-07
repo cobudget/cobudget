@@ -79,11 +79,9 @@ const QuickActions = ({ round }) => {
               >
                 {action.label}
               </Button>
-              {active && (
-                <p className="text-xs text-gray-500 mt-0.5 ml-1">
-                  {action.description}
-                </p>
-              )}
+              <p className="text-xs text-gray-500 mt-0.5 ml-1">
+                {action.description}
+              </p>
             </div>
           );
         })}
