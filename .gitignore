@@ -5,8 +5,13 @@ node_modules
 .now
 .vscode
 .vercel
+**/.vercel
 .idea
+ui/.env*.local
+# now used, but previously on the repo (with no sensible values), we'll ignore them just in case
 ui/.env
+ui/.env.development
+ui/.env.production
 
 # ts typecheck caching
 tsconfig.tsbuildinfo
@@ -27,7 +32,6 @@ ui/build
 
 # misc
 .DS_Store
-.env*.local
 
 # debug
 npm-debug.log*
