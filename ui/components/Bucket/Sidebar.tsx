@@ -12,6 +12,7 @@ import IconButton from "../IconButton";
 import { DotsHorizontalIcon, EditIcon, Star } from "../Icons";
 
 import ContributeModal from "./ContributeModal";
+import WithdrawModal from "./WithdrawModal";
 import EditCocreatorsModal from "./EditCocreatorsModal";
 import GrantingStatus from "./GrantingStatus";
 
@@ -268,6 +269,7 @@ const BucketSidebar = ({
   isCocreator,
 }) => {
   const [contributeModalOpen, setContributeModalOpen] = useState(false);
+  const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
   const [cocreatorModalOpen, setCocreatorModalOpen] = useState(false);
   const [actionsDropdownOpen, setActionsDropdownOpen] = useState(false);
   const [confirmCancelBucketOpen, setConfirmCancelBucketOpen] = useState(false);
@@ -323,6 +325,14 @@ const BucketSidebar = ({
     hasNotReachedMaxGoal &&
     bucket.round.grantingIsOpen &&
     currentUser?.currentCollMember;
+
+  const showWithdrawButton =
+    bucket.approved &&
+    !bucket.canceled &&
+    bucket.round.grantingIsOpen &&
+    bucket.round.withdrawalEnabled &&
+    currentUser?.currentCollMember &&
+    bucket.totalContributionsFromCurrentMember > 0;
   const showAcceptFundingButton =
     bucket.approved && !bucket.funded && canEdit && hasReachedMinGoal;
   const showPublishButton = canEdit && !bucket.published;
@@ -528,6 +538,26 @@ const BucketSidebar = ({
                   bucket={bucket}
                   currentUser={currentUser}
                   currentGroup={currentGroup}
+                />
+              )}
+            </>
+          )}
+          {showWithdrawButton && (
+            <>
+              <Button
+                color={bucket.round.color}
+                variant="secondary"
+                fullWidth
+                onClick={() => setWithdrawModalOpen(true)}
+              >
+                <FormattedMessage defaultMessage="Withdraw" />
+              </Button>
+
+              {withdrawModalOpen && (
+                <WithdrawModal
+                  handleClose={() => setWithdrawModalOpen(false)}
+                  bucket={bucket}
+                  currentUser={currentUser}
                 />
               )}
             </>

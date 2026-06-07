@@ -387,6 +387,8 @@ const schema = gql`
       canCocreatorStartFunding: Boolean
       canCocreatorEditOpenBuckets: Boolean
       silentAllocation: Boolean
+      allocationPaused: Boolean
+      withdrawalEnabled: Boolean
     ): Round
 
     allocate(
@@ -491,6 +493,8 @@ const schema = gql`
     directFundingEnabled: Boolean
     directFundingTerms: String
     silentAllocation: Boolean
+    allocationPaused: Boolean
+    withdrawalEnabled: Boolean
     canCocreatorStartFunding: Boolean
     canCocreatorEditOpenBuckets: Boolean
     customFields: [CustomField]
@@ -503,7 +507,7 @@ const schema = gql`
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
-    inviteNonce: Int
+    inviteNonce: BigInt
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int

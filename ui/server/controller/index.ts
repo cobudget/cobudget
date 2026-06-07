@@ -223,9 +223,14 @@ export const contribute = async ({
 
   await isGroupSubscriptionActive({ groupId: round?.groupId });
 
-  if (amount <= 0) throw new Error("Value needs to be more than zero");
+  if (amount === 0) throw new Error("Value needs to be more than zero");
 
   // Check that granting is open
+  if (round.allocationPaused)
+    throw new Error("Allocation is currently paused");
+
+  if (amount < 0 && !round.withdrawalEnabled)
+    throw new Error("Withdrawal is not currently enabled");
   const now = dayjs();
   const grantingHasOpened = round.grantingOpens
     ? dayjs(round.grantingOpens).isBefore(now)
@@ -287,6 +292,11 @@ export const contribute = async ({
     },
     _sum: { amount: true },
   });
+
+  if (amount < 0 && (contributionsFromUserToThisBucket || 0) + amount < 0)
+    throw new Error(
+      "You cannot withdraw more than you have contributed to this bucket"
+    );
 
   if (
     round.maxAmountToBucketPerUser &&

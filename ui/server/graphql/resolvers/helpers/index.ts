@@ -331,6 +331,7 @@ export async function bucketMaxGoal(bucket) {
 }
 
 export function isGrantingOpen(round) {
+  if (round.allocationPaused) return false;
   const now = dayjs();
   const grantingHasOpened = round.grantingOpens
     ? dayjs(round.grantingOpens).isBefore(now)
