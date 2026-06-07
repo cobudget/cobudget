@@ -236,7 +236,10 @@ export const createInvitationLink = async (
     data: { inviteNonce },
   });
   return {
-    link: round.inviteNonce,
+    // inviteNonce is a BigInt (Collection.inviteNonce is BIGINT). The GraphQL
+    // `InvitationLink.link` field is a String and cannot serialize a bigint
+    // ("String cannot represent value: <n>"), so stringify it before returning.
+    link: round.inviteNonce == null ? null : String(round.inviteNonce),
   };
 };
 
