@@ -80,6 +80,7 @@ export default function Selector({
                         <img
                           src={groupMember.group.logo}
                           className="h-6 w-6 rounded flex-shrink-0 mr-2 object-cover"
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
                         />
                       )}
                       <span className="truncate">{groupMember.group.name}</span>

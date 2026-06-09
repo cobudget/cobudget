@@ -191,13 +191,18 @@ const GroupIndex = ({ currentUser }) => {
     <>
       <PageHero>
         <div className="grid grid-cols-1 sm:grid-cols-groupheading gap-6">
-          <div className="flex content-center justify-center">
-            <img
-              src={group.logo}
-              alt={`${group.slug}_logo`}
-              className="object-cover h-32 w-32"
-            />
-          </div>
+          {group.logo && (
+            <div className="flex content-center justify-center">
+              <img
+                src={group.logo}
+                alt={`${group.slug}_logo`}
+                className="object-cover h-32 w-32"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
+          )}
           <div>
             <EditableField
               defaultValue={group?.info}

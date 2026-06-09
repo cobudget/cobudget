@@ -116,7 +116,7 @@ function ChangeRoundGroup({ round, hide }) {
                 <a target="_blank">
                   <div className="my-4 grid grid-cols-3">
                     <div>
-                      <img src={group.logo} className="w-4/5" />
+                      {group.logo && <img src={group.logo} className="w-4/5" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
                     </div>
                     <div className="col-span-2">
                       <p className="font-semibold">{group.name}</p>

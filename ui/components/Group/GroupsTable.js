@@ -102,7 +102,7 @@ export default ({ groups, updateGroup, deleteGroup }) => {
             {groups.map((group) => (
               <TableRow key={group.id}>
                 <TableCell component="th" scope="row">
-                  <img src={group.logo} className="h-7 w-7 rounded" />
+                  {group.logo && <img src={group.logo} className="h-7 w-7 rounded" onError={(e) => { e.currentTarget.style.display = "none"; }} />}
                 </TableCell>
                 <TableCell component="th" scope="row">
                   {group.name}
