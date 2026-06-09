@@ -190,7 +190,7 @@ const GroupIndex = ({ currentUser }) => {
   return (
     <>
       <PageHero>
-        <div className="grid grid-cols-1 sm:grid-cols-groupheading gap-6">
+        <div className={group.logo ? "grid grid-cols-1 sm:grid-cols-groupheading gap-6" : ""}>
           {group.logo && (
             <div className="flex content-center justify-center">
               <img
