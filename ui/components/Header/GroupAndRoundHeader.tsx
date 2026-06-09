@@ -38,6 +38,9 @@ const GroupAndRoundHeader = ({
                   <img
                     className="h-6 w-6 object-cover rounded opacity-75 group-hover:opacity-100 transition-opacity max-w-none"
                     src={currentGroup?.logo}
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
                   />
                 )}
                 <span className={`text-white font-medium truncate`}>
