@@ -364,6 +364,10 @@ model Bucket {
   exchangeMinimumContribution Int               @default(0)
   exchangeVat                 Int?
 
+  priorityArea      String?
+  sourceFunding     String?
+  keyFundCommentary String?
+
   deleted           Boolean        @default(false)
   discourseTopicId  Int?
   flags             Flag[]

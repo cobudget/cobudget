@@ -253,6 +253,9 @@ const schema = gql`
       exchangeDescription: String
       exchangeMinimumContribution: Int
       exchangeVat: Int
+      priorityArea: String
+      sourceFunding: String
+      keyFundCommentary: String
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -782,6 +785,9 @@ const schema = gql`
     exchangeDescription: String
     exchangeMinimumContribution: Int
     exchangeVat: Int
+    priorityArea: String
+    sourceFunding: String
+    keyFundCommentary: String
     percentageFunded: Float
     expenses: [Expense]
     expense(id: String!): Expense

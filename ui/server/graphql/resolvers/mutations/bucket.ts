@@ -150,6 +150,9 @@ export const editBucket = combineResolvers(
       exchangeDescription,
       exchangeMinimumContribution,
       exchangeVat,
+      priorityArea,
+      sourceFunding,
+      keyFundCommentary,
     },
     { user, eventHub }
   ) => {
@@ -188,6 +191,9 @@ export const editBucket = combineResolvers(
         exchangeDescription,
         exchangeMinimumContribution,
         exchangeVat,
+        priorityArea,
+        sourceFunding,
+        keyFundCommentary,
       },
       include: {
         Images: true,
