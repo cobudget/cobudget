@@ -36,11 +36,7 @@ const GroupSettings = ({
         name: intl.formatMessage({ defaultMessage: "General" }),
         component: GeneralSettings,
       },
-      {
-        slug: "billing",
-        name: intl.formatMessage({ defaultMessage: "Billing" }),
-        component: Billing,
-      },
+      // [TEMP: give-it-a-go] Billing hidden
       ...(inSession
         ? [
             {

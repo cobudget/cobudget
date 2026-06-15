@@ -66,10 +66,7 @@ export const roundItems = (
       label: formatMessage({ defaultMessage: "Overview" }),
       href: `/${groupSlug}/${roundSlug}`,
     },
-    {
-      label: formatMessage({ defaultMessage: "Feed" }),
-      href: `/${groupSlug}/${roundSlug}/image-feed`,
-    },
+    // [TEMP: give-it-a-go] Feed, History, Expenses, Budget Items hidden
     {
       label: formatMessage({ defaultMessage: "About" }),
       href: `/${groupSlug}/${roundSlug}/about`,
@@ -78,19 +75,6 @@ export const roundItems = (
       label: formatMessage({ defaultMessage: "Participants" }),
       href: `/${groupSlug}/${roundSlug}/participants`,
       member: true,
-    },
-    {
-      label: formatMessage({ defaultMessage: "History" }),
-      href: `/${groupSlug}/${roundSlug}/history`,
-      admin: true,
-    },
-    {
-      label: formatMessage({ defaultMessage: "Expenses" }),
-      href: `/${groupSlug}/${roundSlug}/expenses`,
-    },
-    {
-      label: formatMessage({ defaultMessage: "Budget Items" }),
-      href: `/${groupSlug}/${roundSlug}/budget-items`,
     },
     {
       label: formatMessage({ defaultMessage: "Settings" }),
