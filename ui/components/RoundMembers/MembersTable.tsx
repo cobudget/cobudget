@@ -442,8 +442,29 @@ const RoundMembersTable = ({
                     <span className="block">
                       <FormattedMessage defaultMessage="Balance" />
                     </span>{" "}
-                    {/* [TEMP: give-it-a-go] Bulk Allocate button hidden */}
+                    {isAdmin && (
+                      <Tooltip
+                        content={intl.formatMessage({
+                          defaultMessage: "Allocate to all members",
+                        })}
+                        placement="bottom"
+                        arrow={false}
+                      >
+                        <IconButton
+                          disabled={actionsAreDisabled}
+                          onClick={() => setBulkAllocateModalOpen(true)}
+                        >
+                          <AddIcon className="h-4 w-4" color={actionsAreDisabled ? "gray" : "currentColor"} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   </div>
+                  {bulkAllocateModalOpen && (
+                    <BulkAllocateModal
+                      round={round}
+                      handleClose={() => setBulkAllocateModalOpen(false)}
+                    />
+                  )}
                 </TableCell>
                 {isAdmin && (
                   <TableCell align="right">
