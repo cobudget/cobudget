@@ -251,32 +251,7 @@ const ActionsDropdown = ({ roundId, updateMember, deleteMember, member }) => {
             <FormattedMessage defaultMessage="Invite Again" />
           </MenuItem>
         )}
-        <MenuItem
-          onClick={() => {
-            activityLog.log({
-              message: TOGGLE_ROUND_MODERATOR,
-              data: {
-                roundId,
-                memberEmail: member?.email,
-                newRole: member.isModerator
-                  ? "Removed moderator"
-                  : "Made moderator",
-              },
-            });
-
-            updateMember({
-              roundId,
-              memberId: member.id,
-              isModerator: !member.isModerator,
-            }).then(() => {
-              handleClose();
-            });
-          }}
-        >
-          {member.isModerator
-            ? intl.formatMessage({ defaultMessage: "Remove moderator" })
-            : intl.formatMessage({ defaultMessage: "Make moderator" })}
-        </MenuItem>
+        {/* [TEMP: give-it-a-go] Make/Remove moderator hidden */}
         <Tooltip
           content={intl.formatMessage({
             defaultMessage:
@@ -467,29 +442,8 @@ const RoundMembersTable = ({
                     <span className="block">
                       <FormattedMessage defaultMessage="Balance" />
                     </span>{" "}
-                    {isAdmin && (
-                      <Tooltip
-                        content={intl.formatMessage({
-                          defaultMessage: "Allocate to all members",
-                        })}
-                        placement="bottom"
-                        arrow={false}
-                      >
-                        <IconButton
-                          disabled={actionsAreDisabled}
-                          onClick={() => setBulkAllocateModalOpen(true)}
-                        >
-                          <AddIcon className="h-4 w-4" color={actionsAreDisabled ? "gray" : "currentColor"} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    {/* [TEMP: give-it-a-go] Bulk Allocate button hidden */}
                   </div>
-                  {bulkAllocateModalOpen && (
-                    <BulkAllocateModal
-                      round={round}
-                      handleClose={() => setBulkAllocateModalOpen(false)}
-                    />
-                  )}
                 </TableCell>
                 {isAdmin && (
                   <TableCell align="right">

@@ -51,26 +51,7 @@ const RoundSettings = ({
         name: intl.formatMessage({ defaultMessage: "Guidelines" }),
         component: Guidelines,
       },
-      {
-        slug: "bucket-review",
-        name: intl.formatMessage(
-          {
-            defaultMessage: "{bucket} Review",
-          },
-          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
-        ),
-        component: BucketReview,
-      },
-      {
-        slug: "bucket-form",
-        name: intl.formatMessage(
-          {
-            defaultMessage: "{bucket} Form",
-          },
-          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
-        ),
-        component: CustomFields,
-      },
+      // [TEMP: give-it-a-go] Bucket Review, Bucket Form, Integrations hidden
       {
         slug: "funding",
         name: intl.formatMessage({ defaultMessage: "Funding" }),
@@ -80,11 +61,6 @@ const RoundSettings = ({
         slug: "tags",
         name: intl.formatMessage({ defaultMessage: "Tags" }),
         component: Tags,
-      },
-      {
-        slug: "integrations",
-        name: intl.formatMessage({ defaultMessage: "Integrations" }),
-        component: Integrations,
       },
       {
         slug: "group",

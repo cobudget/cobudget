@@ -639,47 +639,7 @@ const BucketSidebar = ({
                     <FormattedMessage defaultMessage="Unapprove for funding" />
                   </button>
                 )}
-                {isAdminOrModerator && (
-                  <>
-                    {bucket.pinnedAt ? (
-                      <button
-                        className={`${css.dropdownButton} !text-black`}
-                        onClick={() =>
-                          pinBucket({ bucketId: bucket.id, pin: false }).then(
-                            ({ error }) => {
-                              if (error) {
-                                toast.error(error.message);
-                              } else {
-                                toast.success("Bucket unpinned");
-                                setActionsDropdownOpen(false);
-                              }
-                            }
-                          )
-                        }
-                      >
-                        Unpin
-                      </button>
-                    ) : (
-                      <button
-                        className={`${css.dropdownButton} !text-black`}
-                        onClick={() =>
-                          pinBucket({ bucketId: bucket.id, pin: true }).then(
-                            ({ error }) => {
-                              if (error) {
-                                toast.error(error.message);
-                              } else {
-                                toast.success("Bucket pinned");
-                                setActionsDropdownOpen(false);
-                              }
-                            }
-                          )
-                        }
-                      >
-                        Pin
-                      </button>
-                    )}
-                  </>
-                )}
+                {/* [TEMP: give-it-a-go] Pin/Unpin hidden */}
                 {showDeleteButton && (
                   <button
                     className={css.dropdownButton}

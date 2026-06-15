@@ -229,92 +229,8 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
 
           <Divider />
 
-          <SettingsListItem
-            primary={intl.formatMessage({
-              defaultMessage: "Allow stretch goals",
-            })}
-            secondary={
-              round.allowStretchGoals ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.allowStretchGoals !== "undefined"}
-            openModal={() => handleOpen("SET_ALLOW_STRETCH_GOALS")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
+          {/* [TEMP: give-it-a-go] Allow stretch goals, Silent allocation, Co-creator permissions hidden */}
 
-          <Divider />
-
-          {/* --- Silent allocation (Give it a Go C-06) --- */}
-          {/* To hide this setting for an instance, comment out this block. */}
-          <SettingsListItem
-            primary={intl.formatMessage({
-              defaultMessage: "Silent allocation",
-            })}
-            secondary={
-              round.silentAllocation ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.silentAllocation !== "undefined"}
-            openModal={() => handleOpen("SET_SILENT_ALLOCATION")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
-          {/* --- end Silent allocation --- */}
-
-          <Divider />
-
-          <SettingsListItem
-            primary={intl.formatMessage(
-              {
-                defaultMessage: "Co-creators can open {bucketName} for funding",
-              },
-              {
-                bucketName: process.env.BUCKET_NAME_PLURAL,
-              }
-            )}
-            secondary={
-              round.canCocreatorStartFunding ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.canCocreatorStartFunding !== "undefined"}
-            openModal={() => handleOpen("SET_COCREATOR_CAN_OPEN_FUNDING")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
-          <Divider />
-
-          <SettingsListItem
-            primary={intl.formatMessage(
-              {
-                defaultMessage:
-                  "Co-creators can edit their {bucketName} during funding",
-              },
-              {
-                bucketName: process.env.BUCKET_NAME_SINGULAR,
-              }
-            )}
-            secondary={
-              round.canCocreatorEditOpenBuckets ? (
-                <FormattedMessage defaultMessage="Yes" />
-              ) : (
-                <FormattedMessage defaultMessage="No" />
-              )
-            }
-            isSet={typeof round.canCocreatorEditOpenBuckets !== "undefined"}
-            openModal={() => handleOpen("SET_COCREATOR_CAN_EDIT_OPEN_BUCKETS")}
-            canEdit={canEditSettings}
-            roundColor={round.color}
-          />
           <Divider />
 
           <SettingsListItem
@@ -466,19 +382,7 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
             </>
           )}
 
-          <Divider />
-          <div className="px-3 my-3">
-            <h2 className="text-xl font-semibold mt-8 mb-4">
-              <FormattedMessage defaultMessage="Danger Zone" />
-            </h2>
-            <Button
-              onClick={() => setOpenResetModal(true)}
-              variant="secondary"
-              color="red"
-            >
-              <FormattedMessage defaultMessage="Reset funding" />
-            </Button>
-          </div>
+          {/* [TEMP: give-it-a-go] Reset funding (Danger Zone) hidden */}
         </List>
       </div>
     </div>
