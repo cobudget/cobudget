@@ -229,7 +229,24 @@ const RoundSettingsModalGranting = ({ currentGroup }) => {
 
           <Divider />
 
-          {/* [TEMP: give-it-a-go] Allow stretch goals, Silent allocation, Co-creator permissions hidden */}
+          {/* [TEMP: give-it-a-go] Allow stretch goals, Co-creator permissions hidden */}
+
+          <SettingsListItem
+            primary={intl.formatMessage({
+              defaultMessage: "Silent allocation",
+            })}
+            secondary={
+              round.silentAllocation ? (
+                <FormattedMessage defaultMessage="Yes" />
+              ) : (
+                <FormattedMessage defaultMessage="No" />
+              )
+            }
+            isSet={typeof round.silentAllocation !== "undefined"}
+            openModal={() => handleOpen("SET_SILENT_ALLOCATION")}
+            canEdit={canEditSettings}
+            roundColor={round.color}
+          />
 
           <Divider />
 
