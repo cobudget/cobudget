@@ -57,7 +57,9 @@ export async function createOrGetUser({
 
   if (olderUser?.verifiedEmail !== newerUser.verifiedEmail) {
     // if true then it's a new user
-    await emailService.welcomeEmail({ newUser: newerUser });
+    if (!process.env.DISABLE_WELCOME_EMAIL) {
+      await emailService.welcomeEmail({ newUser: newerUser });
+    }
   }
 
   return newerUser;
