@@ -70,6 +70,7 @@ export const roundItems = (
     {
       label: formatMessage({ defaultMessage: "About" }),
       href: `/${groupSlug}/${roundSlug}/about`,
+      admin: true, // [TEMP: give-it-a-go] About tab hidden from non-admins — not relevant to participants
     },
     {
       label: formatMessage({ defaultMessage: "Participants" }),
