@@ -148,17 +148,7 @@ export default function Selector({
                 );
               })}
           </div>
-          <Menu.Item>
-            {({ active }) => (
-              <LinkItem
-                href={`/new-round`}
-                active={active}
-                className="text-gray-500 hover:text-gray-900"
-              >
-                <FormattedMessage defaultMessage="New Round" />
-              </LinkItem>
-            )}
-          </Menu.Item>
+          {/* [TEMP: give-it-a-go] New Round menu item hidden — round management done externally */}
         </Menu.Items>
       </Transition>
     </Menu>

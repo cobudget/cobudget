@@ -238,27 +238,7 @@ const GroupIndex = ({ currentUser }) => {
           <span className="font-medium">
             <FormattedMessage defaultMessage="Active Rounds" />
           </span>
-          {currentUser?.currentGroupMember?.isAdmin &&
-            (group?.subscriptionStatus?.isActive ? (
-              <Link href={`/${group.slug}/new-round`}>
-                <span className="text-sm text-blue-600 font-medium ml-2 cursor-pointer">
-                  <FormattedMessage defaultMessage="Start new round" />
-                </span>
-              </Link>
-            ) : (
-              <span
-                className="text-sm text-blue-600 font-medium ml-2 cursor-pointer"
-                onClick={() => {
-                  const event = new CustomEvent("show-upgrade-group-message", {
-                    detail: { groupId: group?.id },
-                  });
-                  window.dispatchEvent(event);
-                  return;
-                }}
-              >
-                <FormattedMessage defaultMessage="Start new round" />
-              </span>
-            ))}
+          {/* [TEMP: give-it-a-go] Start new round button hidden — round management done by admins only via direct access */}
         </div>
         {rounds.length === 0 && currentUser?.currentGroupMember?.isAdmin && (
           <ImportRound group={group} />
