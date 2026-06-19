@@ -74,7 +74,7 @@ export const roundItems = (
     {
       label: formatMessage({ defaultMessage: "Participants" }),
       href: `/${groupSlug}/${roundSlug}/participants`,
-      member: true,
+      admin: true, // [TEMP: give-it-a-go] Participants tab hidden from non-admins — participant list not for public view
     },
     {
       label: formatMessage({ defaultMessage: "Settings" }),
