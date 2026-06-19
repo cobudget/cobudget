@@ -73,7 +73,7 @@ const Layout = ({
             defaultMessage="You are using <a1>Cobudget</a1>. Source code available <a2>online</a2>."
             values={{
               a1: (msg) => (
-                <LinkOut href="https://cobudget.com/">{msg}</LinkOut>
+                <LinkOut href="https://giveitago.cobudget.com/">{msg}</LinkOut> // [TEMP: give-it-a-go] Point to this instance instead of cobudget.com
               ),
               a2: (msg) => (
                 <LinkOut href="https://github.com/cobudget/cobudget">
