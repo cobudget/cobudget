@@ -713,7 +713,8 @@ const BucketSidebar = ({
             </span>
           </div>
         </div>
-        <div className="">
+        {/* [TEMP: give-it-a-go] Co-creators section hidden — creator identity not relevant to participants */}
+        {false && <div className="">
           <h2 className="mb-2 font-medium hidden md:block relative">
             <span className="mr-2 font-medium ">
               <FormattedMessage defaultMessage="Co-creators" />
@@ -782,7 +783,7 @@ const BucketSidebar = ({
             bucket={bucket}
             currentUser={currentUser}
           />
-        </div>
+        </div>}
         <Tags bucket={bucket} canEdit={canEdit} />
 
         <Infobox
