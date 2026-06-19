@@ -575,7 +575,7 @@ export default {
           subject: `${bucket.title} was cancelled`,
           html: `The bucket “${escape(
             bucket.title
-          )}” you have contributed to was cancelled in ${escape(
+          )}” you have allocated to was cancelled in ${escape( // [TEMP: give-it-a-go] Contribute → Allocate
             bucket.round.title
           )}. You've been refunded ${amount / 100} ${bucket.round.currency}.
         <br/><br/>
@@ -678,7 +678,7 @@ export default {
       html: `Hooray - your bucket <a href="${bucketLink}">“${escape(
         bucket.title
       )}”</a> just received some funds!<br/>
-      ${escape(contributingUser.name)} contributed ${amount / 100} ${
+      ${escape(contributingUser.name)} allocated ${amount / 100} ${ // [TEMP: give-it-a-go] Contribute → Allocate
         round.currency
       }<br/>
       Your bucket is now ${progressPercent}% funded!<br/>

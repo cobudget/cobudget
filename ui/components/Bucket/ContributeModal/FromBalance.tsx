@@ -119,9 +119,9 @@ const FromBalance = ({ currentUser, bucket, handleClose }) => {
                 toast.error(error.message);
               } else {
                 toast.success(
-                  `You contributed ${amount / 100} ${
+                  `You allocated ${amount / 100} ${
                     bucket.round.currency
-                  } to this ${process.env.BUCKET_NAME_SINGULAR}!`
+                  } to this ${process.env.BUCKET_NAME_SINGULAR}!` // [TEMP: give-it-a-go] Contribute → Allocate
                 );
               }
               handleClose();
