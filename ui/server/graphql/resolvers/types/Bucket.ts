@@ -155,7 +155,7 @@ export const noOfFunders = async (bucket) => {
     }
     return acc;
   }, {});
-  return Object.keys(funders).length;
+  return Object.values(funders).filter((f: any) => f.amount > 0).length;
 };
 
 export const raisedFlags = async (bucket) => {
