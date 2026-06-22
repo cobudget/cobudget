@@ -9,7 +9,7 @@ if (!process.env.MAGIC_LINK_SECRET)
 
 const magicLink = new MagicLoginStrategy({
   secret: process.env.MAGIC_LINK_SECRET,
-  callbackUrl: "/api/auth/magiclink/callback",
+  callbackUrl: "/magiclink-confirm",
   sendMagicLink: async (destination, href, code, req) => {
     const user = await prisma.user.findUnique({
       where: { email: destination },

@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import prisma from "server/prisma";
 
 export default handler()
+  .use((req, res, next) => {
+    if (req.method === "HEAD") return res.status(405).end();
+    next();
+  })
   .use(async (req, res, next) => {
     const { token } = req.query;
     const payload = jwt.verify(token, process.env.MAGIC_LINK_SECRET);
