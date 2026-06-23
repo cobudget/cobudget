@@ -1,2 +1,3 @@
 -- AlterTable
 ALTER TABLE "Field" ADD COLUMN "options" TEXT[] NOT NULL DEFAULT '{}';
+ALTER TABLE "Field" ALTER COLUMN "options" DROP DEFAULT;

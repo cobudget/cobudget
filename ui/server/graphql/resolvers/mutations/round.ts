@@ -101,6 +101,7 @@ export const createRound = async (
           name: "Description",
           description: "Describe your bucket",
           type: "MULTILINE_TEXT",
+          options: [],
           isRequired: false,
           position: 1001,
         },
