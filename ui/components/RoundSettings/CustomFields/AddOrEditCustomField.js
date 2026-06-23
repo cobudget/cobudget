@@ -21,6 +21,7 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         limit
+        options
         isRequired
         position
         createdAt
@@ -47,6 +48,7 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         description
         type
         limit
+        options
         isRequired
         position
         createdAt
@@ -79,6 +81,7 @@ export default function AddOrEditCustomField({
     description: "",
     type: "TEXT",
     limit: null,
+    options: [],
     isRequired: false,
   },
 }) {
@@ -96,6 +99,9 @@ export default function AddOrEditCustomField({
   // Requires to manage seperetly due to Material UI Checkbox
   const [isRequired, setIsRequired] = useState(customField.isRequired || false);
   const [limit, setLimit] = useState(Number(customField.limit) || null);
+  const [optionsInput, setOptionsInput] = useState(
+    (customField.options ?? []).join(", ")
+  );
   const intl = useIntl();
 
   return (
@@ -116,6 +122,10 @@ export default function AddOrEditCustomField({
         <form
           onSubmit={handleSubmit((variables) => {
             variables.customField.isRequired = isRequired;
+            variables.customField.options =
+              typeInputValue === "ENUM"
+                ? optionsInput.split(",").map((s) => s.trim()).filter(Boolean)
+                : [];
             return addOrEditCustomField({
               ...variables,
               roundId: round.id,
@@ -170,6 +180,9 @@ export default function AddOrEditCustomField({
                   <option value="BOOLEAN">
                     {intl.formatMessage({ defaultMessage: "Yes/No" })}
                   </option>
+                  <option value="ENUM">
+                    {intl.formatMessage({ defaultMessage: "Select (dropdown)" })}
+                  </option>
                 </SelectField>
               </span>
               {typeInputValue == "TEXT" ||
@@ -194,6 +207,18 @@ export default function AddOrEditCustomField({
                 />
               ) : null}
             </div>
+            {typeInputValue === "ENUM" && (
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Options (comma-separated)",
+                })}
+                color={round.color}
+                inputProps={{
+                  value: optionsInput,
+                  onChange: (e) => setOptionsInput(e.target.value),
+                }}
+              />
+            )}
             <div className="flex">
               <Controller
                 as={

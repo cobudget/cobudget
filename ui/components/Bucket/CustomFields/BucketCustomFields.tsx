@@ -18,6 +18,7 @@ const CUSTOM_FIELDS_QUERY = gql`
         description
         type
         limit
+        options
         isRequired
         position
       }

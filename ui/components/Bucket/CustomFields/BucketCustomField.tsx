@@ -30,6 +30,7 @@ const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
           name
           type
           limit
+          options
           description
           position
           isRequired
@@ -84,7 +85,10 @@ const BucketCustomField = ({
   );
 
   useEffect(() => {
-    if (defaultCustomField.type !== "BOOLEAN") {
+    if (
+      defaultCustomField.type !== "BOOLEAN" &&
+      defaultCustomField.type !== "ENUM"
+    ) {
       register({
         name: "customField.value",
       });
@@ -150,6 +154,20 @@ const BucketCustomField = ({
                   {intl.formatMessage({ defaultMessage: "No" })}
                 </option>
               </SelectInput>
+            ) : defaultCustomField.type === "ENUM" ? (
+              <SelectInput
+                name="customField.value"
+                defaultValue={defaultValue}
+                inputRef={register}
+                fullWidth
+              >
+                <option value={""}></option>
+                {(defaultCustomField.options ?? []).map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </SelectInput>
             ) : null}
           </div>
         </div>
@@ -208,6 +226,8 @@ const BucketCustomField = ({
           {customField.customField.type == "MULTILINE_TEXT" ||
           customField.customField.type == "TEXT" ? (
             <Markdown source={customField.value} />
+          ) : customField.customField.type == "ENUM" ? (
+            <span>{customField.value}</span>
           ) : (
             <span
               dangerouslySetInnerHTML={{
