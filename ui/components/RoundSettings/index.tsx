@@ -51,7 +51,15 @@ const RoundSettings = ({
         name: intl.formatMessage({ defaultMessage: "Guidelines" }),
         component: Guidelines,
       },
-      // [TEMP: give-it-a-go] Bucket Review, Bucket Form, Integrations hidden
+      // [TEMP: give-it-a-go] Bucket Review and Integrations hidden
+      {
+        slug: "bucket-form",
+        name: intl.formatMessage(
+          { defaultMessage: "{bucket} Form" },
+          { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
+        ),
+        component: CustomFields,
+      },
       {
         slug: "funding",
         name: intl.formatMessage({ defaultMessage: "Funding" }),
