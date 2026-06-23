@@ -291,6 +291,7 @@ model Field {
   description String
   type        FieldType
   limit       Int?
+  options     String[]
   isRequired  Boolean
   position    Float
   createdAt   DateTime     @default(now())

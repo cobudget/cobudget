@@ -727,7 +727,7 @@ export const addCustomField = combineResolvers(
   isCollOrGroupAdmin,
   async (
     parent,
-    { roundId, customField: { name, description, type, limit, isRequired } }
+    { roundId, customField: { name, description, type, limit, options, isRequired } }
   ) => {
     const customFields = await prisma.field.findMany({
       where: { roundId: roundId },
@@ -745,6 +745,7 @@ export const addCustomField = combineResolvers(
         description,
         type,
         limit,
+        options: options ?? [],
         isRequired,
         position,
       },
@@ -782,7 +783,7 @@ export const editCustomField = combineResolvers(
     {
       roundId,
       fieldId,
-      customField: { name, description, type, limit, isRequired },
+      customField: { name, description, type, limit, options, isRequired },
     }
   ) => {
     const round = await prisma.round.findUnique({
@@ -794,7 +795,7 @@ export const editCustomField = combineResolvers(
 
     const field = await prisma.field.update({
       where: { id: fieldId },
-      data: { name, description, type, limit, isRequired },
+      data: { name, description, type, limit, options: options ?? [], isRequired },
       include: { round: true },
     });
 

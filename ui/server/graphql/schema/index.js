@@ -984,6 +984,7 @@ const schema = gql`
     TEXT
     MULTILINE_TEXT
     BOOLEAN
+    ENUM
     FILE
   }
 
@@ -998,6 +999,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     limit: Int
+    options: [String]
     isRequired: Boolean!
     position: Float!
     createdAt: Date!
@@ -1008,6 +1010,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     limit: Int
+    options: [String]
     isRequired: Boolean!
     createdAt: Date
   }
