@@ -53,10 +53,6 @@ export const BUCKET_QUERY = gql`
       exchangeDescription
       exchangeMinimumContribution
       exchangeVat
-      priorityArea
-      sourceFunding
-      keyFundCommentary
-
       expenses {
         id
         ocMeta {
