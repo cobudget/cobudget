@@ -123,7 +123,7 @@ export default function AddOrEditCustomField({
           onSubmit={handleSubmit((variables) => {
             variables.customField.isRequired = isRequired;
             variables.customField.options =
-              typeInputValue === "ENUM"
+              typeInputValue === "ENUM" || typeInputValue === "TEXT"
                 ? optionsInput.split(",").map((s) => s.trim()).filter(Boolean)
                 : [];
             return addOrEditCustomField({
@@ -207,7 +207,7 @@ export default function AddOrEditCustomField({
                 />
               ) : null}
             </div>
-            {typeInputValue === "ENUM" && (
+            {(typeInputValue === "ENUM" || typeInputValue === "TEXT") && (
               <TextField
                 placeholder={intl.formatMessage({
                   defaultMessage: "Options (comma-separated)",
