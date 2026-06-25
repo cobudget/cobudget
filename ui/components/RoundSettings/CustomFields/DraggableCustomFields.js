@@ -73,6 +73,7 @@ const SortableItem = sortableElement(
       TEXT: intl.formatMessage({ defaultMessage: "Short Text" }),
       MULTILINE_TEXT: intl.formatMessage({ defaultMessage: "Long Text" }),
       BOOLEAN: intl.formatMessage({ defaultMessage: "Yes/No" }),
+      ENUM: intl.formatMessage({ defaultMessage: "Select (dropdown)" }),
     };
 
     return (

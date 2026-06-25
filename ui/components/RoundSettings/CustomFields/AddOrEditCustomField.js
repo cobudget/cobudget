@@ -207,10 +207,22 @@ export default function AddOrEditCustomField({
                 />
               ) : null}
             </div>
-            {(typeInputValue === "ENUM" || typeInputValue === "TEXT") && (
+            {typeInputValue === "ENUM" && (
               <TextField
                 placeholder={intl.formatMessage({
                   defaultMessage: "Options (comma-separated)",
+                })}
+                color={round.color}
+                inputProps={{
+                  value: optionsInput,
+                  onChange: (e) => setOptionsInput(e.target.value),
+                }}
+              />
+            )}
+            {typeInputValue === "TEXT" && (
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Autocomplete suggestions (comma-separated)",
                 })}
                 color={round.color}
                 inputProps={{
