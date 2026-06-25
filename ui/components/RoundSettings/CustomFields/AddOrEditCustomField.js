@@ -123,7 +123,7 @@ export default function AddOrEditCustomField({
           onSubmit={handleSubmit((variables) => {
             variables.customField.isRequired = isRequired;
             variables.customField.options =
-              typeInputValue === "ENUM"
+              typeInputValue === "ENUM" || typeInputValue === "TEXT"
                 ? optionsInput.split(",").map((s) => s.trim()).filter(Boolean)
                 : [];
             return addOrEditCustomField({
@@ -211,6 +211,18 @@ export default function AddOrEditCustomField({
               <TextField
                 placeholder={intl.formatMessage({
                   defaultMessage: "Options (comma-separated)",
+                })}
+                color={round.color}
+                inputProps={{
+                  value: optionsInput,
+                  onChange: (e) => setOptionsInput(e.target.value),
+                }}
+              />
+            )}
+            {typeInputValue === "TEXT" && (
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Autocomplete suggestions (comma-separated)",
                 })}
                 color={round.color}
                 inputProps={{

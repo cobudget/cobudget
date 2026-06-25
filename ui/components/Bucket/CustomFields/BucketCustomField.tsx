@@ -123,7 +123,29 @@ const BucketCustomField = ({
             inputRef={register()}
           />
           <div className="my-2">
-            {defaultCustomField.type === "TEXT" ||
+            {defaultCustomField.type === "TEXT" &&
+            (defaultCustomField.options ?? []).length > 0 ? (
+              <>
+                <TextField
+                  placeholder={defaultCustomField.name}
+                  defaultValue={defaultValue}
+                  autoFocus
+                  error={errors.customField?.value}
+                  helperText={errors.customField?.value?.message}
+                  inputProps={{
+                    list: `datalist-${defaultCustomField.id}`,
+                    maxLength: defaultCustomField.limit ?? undefined,
+                    onChange: (e) =>
+                      setValue("customField.value", e.target.value),
+                  }}
+                />
+                <datalist id={`datalist-${defaultCustomField.id}`}>
+                  {(defaultCustomField.options ?? []).map((opt) => (
+                    <option key={opt} value={opt} />
+                  ))}
+                </datalist>
+              </>
+            ) : defaultCustomField.type === "TEXT" ||
             defaultCustomField.type === "MULTILINE_TEXT" ? (
               <TextField
                 placeholder={defaultCustomField.name}
