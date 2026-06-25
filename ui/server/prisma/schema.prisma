@@ -291,6 +291,7 @@ model Field {
   description String
   type        FieldType
   limit       Int?
+  options     String[]
   isRequired  Boolean
   position    Float
   createdAt   DateTime     @default(now())
@@ -363,10 +364,6 @@ model Bucket {
   exchangeDescription         String            @default("")
   exchangeMinimumContribution Int               @default(0)
   exchangeVat                 Int?
-
-  priorityArea      String?
-  sourceFunding     String?
-  keyFundCommentary String?
 
   deleted           Boolean        @default(false)
   discourseTopicId  Int?

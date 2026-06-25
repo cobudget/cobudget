@@ -1,6 +1,16 @@
 version: "3"
 services:
-  postgres:
+  # postgres:
+  #   image: postgres:13
+  #   ports:
+  #     - "35432:5432"
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: cobudget
+  #   tty: true
+  
+  postgres-giag:
     image: postgres:13
     ports:
       - "35432:5432"
@@ -9,3 +19,10 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: cobudget
     tty: true
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres-giag

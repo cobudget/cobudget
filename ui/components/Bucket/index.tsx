@@ -5,8 +5,6 @@ import Budget from "./Budget";
 import Description from "./Description";
 import BucketCustomFields from "./CustomFields/BucketCustomFields";
 import DirectFunding from "./DirectFunding";
-import ExtraFields from "./ExtraFields";
-import KeyFundCommentary from "./KeyFundCommentary";
 import toast from "react-hot-toast";
 
 const Bucket = ({ bucket, currentUser, openImageModal }) => {
@@ -65,10 +63,6 @@ const Bucket = ({ bucket, currentUser, openImageModal }) => {
                 canEdit={canEdit}
               />
             )}
-
-            <KeyFundCommentary bucket={bucket} canEdit={canEdit} />
-
-            <ExtraFields bucket={bucket} canEdit={canEdit} />
 
             <BucketCustomFields
               roundId={bucket.round.id}

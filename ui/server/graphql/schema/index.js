@@ -253,9 +253,6 @@ const schema = gql`
       exchangeDescription: String
       exchangeMinimumContribution: Int
       exchangeVat: Int
-      priorityArea: String
-      sourceFunding: String
-      keyFundCommentary: String
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
@@ -785,9 +782,6 @@ const schema = gql`
     exchangeDescription: String
     exchangeMinimumContribution: Int
     exchangeVat: Int
-    priorityArea: String
-    sourceFunding: String
-    keyFundCommentary: String
     percentageFunded: Float
     expenses: [Expense]
     expense(id: String!): Expense
@@ -984,6 +978,7 @@ const schema = gql`
     TEXT
     MULTILINE_TEXT
     BOOLEAN
+    ENUM
     FILE
   }
 
@@ -998,6 +993,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     limit: Int
+    options: [String]
     isRequired: Boolean!
     position: Float!
     createdAt: Date!
@@ -1008,6 +1004,7 @@ const schema = gql`
     description: String!
     type: CustomFieldType!
     limit: Int
+    options: [String]
     isRequired: Boolean!
     createdAt: Date
   }

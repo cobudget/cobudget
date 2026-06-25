@@ -30,6 +30,7 @@ const EDIT_BUCKET_CUSTOM_FIELD_MUTATION = gql`
           name
           type
           limit
+          options
           description
           position
           isRequired
@@ -84,7 +85,10 @@ const BucketCustomField = ({
   );
 
   useEffect(() => {
-    if (defaultCustomField.type !== "BOOLEAN") {
+    if (
+      defaultCustomField.type !== "BOOLEAN" &&
+      defaultCustomField.type !== "ENUM"
+    ) {
       register({
         name: "customField.value",
       });
@@ -119,7 +123,29 @@ const BucketCustomField = ({
             inputRef={register()}
           />
           <div className="my-2">
-            {defaultCustomField.type === "TEXT" ||
+            {defaultCustomField.type === "TEXT" &&
+            (defaultCustomField.options ?? []).length > 0 ? (
+              <>
+                <TextField
+                  placeholder={defaultCustomField.name}
+                  defaultValue={defaultValue}
+                  autoFocus
+                  error={errors.customField?.value}
+                  helperText={errors.customField?.value?.message}
+                  inputProps={{
+                    list: `datalist-${defaultCustomField.id}`,
+                    maxLength: defaultCustomField.limit ?? undefined,
+                    onChange: (e) =>
+                      setValue("customField.value", e.target.value),
+                  }}
+                />
+                <datalist id={`datalist-${defaultCustomField.id}`}>
+                  {(defaultCustomField.options ?? []).map((opt) => (
+                    <option key={opt} value={opt} />
+                  ))}
+                </datalist>
+              </>
+            ) : defaultCustomField.type === "TEXT" ||
             defaultCustomField.type === "MULTILINE_TEXT" ? (
               <TextField
                 placeholder={defaultCustomField.name}
@@ -149,6 +175,20 @@ const BucketCustomField = ({
                 <option value={"false"}>
                   {intl.formatMessage({ defaultMessage: "No" })}
                 </option>
+              </SelectInput>
+            ) : defaultCustomField.type === "ENUM" ? (
+              <SelectInput
+                name="customField.value"
+                defaultValue={defaultValue}
+                inputRef={register}
+                fullWidth
+              >
+                <option value={""}></option>
+                {(defaultCustomField.options ?? []).map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
               </SelectInput>
             ) : null}
           </div>
@@ -208,6 +248,8 @@ const BucketCustomField = ({
           {customField.customField.type == "MULTILINE_TEXT" ||
           customField.customField.type == "TEXT" ? (
             <Markdown source={customField.value} />
+          ) : customField.customField.type == "ENUM" ? (
+            <span>{customField.value}</span>
           ) : (
             <span
               dangerouslySetInnerHTML={{
