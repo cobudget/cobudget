@@ -222,7 +222,7 @@ export default function AddOrEditCustomField({
             {typeInputValue === "TEXT" && (
               <TextField
                 placeholder={intl.formatMessage({
-                  defaultMessage: "Autocomplete suggestions (comma-separated)",
+                  defaultMessage: "Autocomplete suggestions (optional, comma-separated)",
                 })}
                 color={round.color}
                 inputProps={{
