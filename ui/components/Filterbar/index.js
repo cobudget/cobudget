@@ -189,6 +189,9 @@ const Filterbar = ({
           <option value="createdAt">
             {intl.formatMessage({ defaultMessage: "Newest" })}
           </option>
+          <option value="title">
+            {intl.formatMessage({ defaultMessage: "Name (A–Z)" })}
+          </option>
           <option value="percentageFunded">
             {intl.formatMessage({ defaultMessage: "Most funded" })}
           </option>

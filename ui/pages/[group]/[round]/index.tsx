@@ -298,7 +298,7 @@ const Page = ({
       status: statusFilter,
       ...(orderBy && {
         orderBy,
-        orderDir: "desc",
+        orderDir: orderBy === "title" ? "asc" : "desc",
       }),
       ...(!!s && { textSearchTerm: s }),
       ...(!!tag && { tag }),
@@ -615,7 +615,7 @@ const RoundPage = ({ currentUser }) => {
     { limit: limit, offset: 0 },
   ]);
   const [pause, setPause] = useState(true);
-  const [sortBy, setSortBy] = useState<string>();
+  const [sortBy, setSortBy] = useState<string>("createdAt");
   const router = useRouter();
 
   const [
