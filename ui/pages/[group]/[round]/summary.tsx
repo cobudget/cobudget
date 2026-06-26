@@ -38,6 +38,10 @@ const EXPORT_DATA_QUERY = gql`
         bucket {
           id
           title
+          tags {
+            id
+            value
+          }
         }
       }
     }
@@ -117,7 +121,8 @@ function buildExport1(
   showName: boolean,
   showEmail: boolean,
   showBreakdown: boolean,
-  roundSlug: string
+  roundSlug: string,
+  headerLabelMap: Map<string, string> | null = null
 ) {
   // Sort contributions chronologically so we can replay the balance history
   const contributions = transactions
@@ -167,12 +172,13 @@ function buildExport1(
   const headerCols: string[] = [];
   if (showName) headerCols.push("Name");
   if (showEmail) headerCols.push("Email");
-  for (const [, title] of buckets) {
+  for (const [bid, title] of buckets) {
+    const label = headerLabelMap?.get(bid) ?? title;
     if (showBreakdown) {
-      headerCols.push(escapeCSVField(`${title} (Peak)`));
-      headerCols.push(escapeCSVField(`${title} (Withdrawal)`));
+      headerCols.push(escapeCSVField(`${label} (Peak)`));
+      headerCols.push(escapeCSVField(`${label} (Withdrawal)`));
     }
-    headerCols.push(escapeCSVField(`${title} (Final)`));
+    headerCols.push(escapeCSVField(`${label} (Final)`));
   }
 
   const rows: string[] = [headerCols.join(",")];
@@ -215,15 +221,17 @@ function buildExport2(
   const headerCols: string[] = [];
   if (showName) headerCols.push("Name");
   if (showEmail) headerCols.push("Email");
-  headerCols.push("Proposal", "Amount", "Timestamp");
+  headerCols.push("Proposal", "Tags", "Amount", "Timestamp");
 
   const rows: string[] = [headerCols.join(",")];
   for (const t of contributions) {
     const member = memberMap.get(t.roundMember?.id) ?? { name: "", email: "" };
+    const tags = (t.bucket?.tags ?? []).map((tag: any) => tag.value).join("; ");
     const cols: string[] = [];
     if (showName) cols.push(escapeCSVField(member.name));
     if (showEmail) cols.push(escapeCSVField(member.email));
     cols.push(escapeCSVField(t.bucket?.title ?? ""));
+    cols.push(escapeCSVField(tags));
     cols.push(String(toDisplayAmount(t.amount)));
     cols.push(new Date(t.createdAt).toISOString());
     rows.push(cols.join(","));
@@ -236,6 +244,7 @@ export default function SummaryPage({ currentUser }) {
   const router = useRouter();
   const [exportType, setExportType] = useState<ExportType>(EXPORT_TYPES[0]);
   const [showBreakdown, setShowBreakdown] = useState(true);
+  const [useTagsAsHeaders, setUseTagsAsHeaders] = useState(false);
   const [hideName, setHideName] = useState(false);
   const [hideEmail, setHideEmail] = useState(false);
 
@@ -267,14 +276,28 @@ export default function SummaryPage({ currentUser }) {
       members,
       roundTransactions: { transactions },
     } = exportData;
+
     if (exportType === "Per participant") {
+      let headerLabelMap: Map<string, string> | null = null;
+      if (useTagsAsHeaders) {
+        headerLabelMap = new Map<string, string>();
+        for (const t of transactions) {
+          if (t.bucket?.id && !headerLabelMap.has(t.bucket.id)) {
+            const tags = (t.bucket.tags ?? [])
+              .map((tag: any) => tag.value)
+              .join("; ");
+            headerLabelMap.set(t.bucket.id, tags || t.bucket.title);
+          }
+        }
+      }
       buildExport1(
         members,
         transactions,
         !hideName,
         !hideEmail,
         showBreakdown,
-        round.slug
+        round.slug,
+        headerLabelMap
       );
     } else {
       buildExport2(members, transactions, !hideName, !hideEmail, round.slug);
@@ -317,19 +340,37 @@ export default function SummaryPage({ currentUser }) {
                       </p>
                       {type === "Per participant" &&
                         exportType === "Per participant" && (
-                          <label className="flex items-center gap-2 mt-3 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={showBreakdown}
-                              onChange={(e) =>
-                                setShowBreakdown(e.target.checked)
-                              }
-                              className="flex-shrink-0"
-                            />
-                            <span className="text-sm text-gray-600">
-                              Include peak amount and withdrawal per proposal
-                            </span>
-                          </label>
+                          <div className="mt-3 space-y-2">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={showBreakdown}
+                                onChange={(e) =>
+                                  setShowBreakdown(e.target.checked)
+                                }
+                                className="flex-shrink-0"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Include peak amount and withdrawal per{" "}
+                                {process.env.BUCKET_NAME_SINGULAR ?? "proposal"}
+                              </span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={useTagsAsHeaders}
+                                onChange={(e) =>
+                                  setUseTagsAsHeaders(e.target.checked)
+                                }
+                                className="flex-shrink-0"
+                              />
+                              <span className="text-sm text-gray-600">
+                                Use tags as{" "}
+                                {process.env.BUCKET_NAME_SINGULAR ?? "proposal"}{" "}
+                                column headers
+                              </span>
+                            </label>
+                          </div>
                         )}
                     </div>
                   </label>
