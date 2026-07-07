@@ -53,7 +53,7 @@ export const allocateToMember = async ({
 
     adjustedAmount = amount - balance;
   }
-  if (adjustedAmount === 0) return;
+  if (adjustedAmount === 0) return null;
 
   try {
     await prisma.allocation.create({
@@ -79,12 +79,12 @@ export const allocateToMember = async ({
       },
     });
 
-    await eventHub.publish("allocate-to-member", {
+    return {
       roundMemberId: member.id,
       roundId,
       oldAmount: balance,
       newAmount: balance + adjustedAmount,
-    });
+    };
   } catch (error) {
     throw new Error("Failed to allocate to member: " + error.message);
   }
