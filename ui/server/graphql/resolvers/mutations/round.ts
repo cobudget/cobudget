@@ -19,6 +19,7 @@ import {
 } from "../helpers";
 import { verify } from "server/utils/jwt";
 import emailService from "server/services/EmailService/email.service";
+import eventHub from "server/services/eventHub.service";
 import {
   inviteRoundMembersHelper,
   limitCheckedRoundMembers
