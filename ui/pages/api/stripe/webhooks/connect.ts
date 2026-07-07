@@ -3,6 +3,7 @@ import handler from "server/api-handler";
 import { allocateToMember, contribute } from "server/controller";
 import prisma from "server/prisma";
 import stripe from "server/stripe";
+import eventHub from "server/services/eventHub.service";
 
 export const config = {
   api: {
@@ -56,26 +57,35 @@ export default handler().post(async (req, res) => {
       },
     });
 
-    await prisma.$transaction(async (prisma) => {
-      await allocateToMember({
-        roundId,
-        allocatedBy: roundMemberId,
-        amount: contribution,
-        member: roundMember,
-        type: "ADD",
-        stripeSessionId,
-        prisma,
-      });
+    const eventData = await prisma.$transaction(
+      async (prisma) => {
+        const eventData = await allocateToMember({
+          roundId,
+          allocatedBy: roundMemberId,
+          amount: contribution,
+          member: roundMember,
+          type: "ADD",
+          stripeSessionId,
+          prisma,
+        });
 
-      await contribute({
-        roundId,
-        bucketId,
-        amount: contribution,
-        user: roundMember.user,
-        stripeSessionId,
-        prisma,
-      });
-    });
+        await contribute({
+          roundId,
+          bucketId,
+          amount: contribution,
+          user: roundMember.user,
+          stripeSessionId,
+          prisma,
+        });
+
+        return eventData;
+      },
+      { timeout: 15000 }
+    );
+
+    if (eventData) {
+      await eventHub.publish("allocate-to-member", eventData);
+    }
   } else {
     console.log(`Unhandled event type ${event.type}`);
   }

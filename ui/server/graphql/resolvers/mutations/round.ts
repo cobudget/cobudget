@@ -550,16 +550,23 @@ export const allocate = async (
   if (!currentCollMember?.isAdmin)
     throw new Error("You are not admin for this round");
 
-  await prisma.$transaction(async (prisma) => {
-    await allocateToMember({
-      member: targetRoundMember,
-      roundId: targetRoundMember.roundId,
-      amount,
-      type,
-      allocatedBy: currentCollMember.id,
-      prisma: prisma as any,
-    });
-  });
+  const eventData = await prisma.$transaction(
+    async (prisma) => {
+      return allocateToMember({
+        member: targetRoundMember,
+        roundId: targetRoundMember.roundId,
+        amount,
+        type,
+        allocatedBy: currentCollMember.id,
+        prisma: prisma as any,
+      });
+    },
+    { timeout: 15000 }
+  );
+
+  if (eventData) {
+    await eventHub.publish("allocate-to-member", eventData);
+  }
 
   return targetRoundMember;
 };
