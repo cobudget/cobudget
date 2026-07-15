@@ -81,9 +81,6 @@ export default function NewGroup({ currentUser }) {
         <h1 className="text-4xl text-center font-bold mb-4">
           <FormattedMessage defaultMessage="Create a Group" />
         </h1>
-        <p className="text-center text-gray-600 text-xl mb-10">
-          <FormattedMessage defaultMessage="Manage unlimited rounds and people in a group" />
-        </p>
         <form
           action={`/api/stripe/create-checkout-session?mode=paidplan&priceId=${
             selectedPriceId ?? ""
@@ -144,7 +141,7 @@ export default function NewGroup({ currentUser }) {
             </div>
             <div className="">
               <label className="text-sm font-medium mb-2 block">
-                <FormattedMessage defaultMessage="Subscription plan" />
+                <FormattedMessage defaultMessage="Recurring contribution" />
               </label>
               <div className="mt-4">
                 <StripePriceSelect
@@ -153,18 +150,18 @@ export default function NewGroup({ currentUser }) {
                   onChange={setSelectedPriceId}
                   disabled={loadingPrices || !!priceError}
                   label={intl.formatMessage({
-                    defaultMessage: "Choose a plan",
+                    defaultMessage: "Choose an amount",
                   })}
                 />
               </div>
               {loadingPrices && (
                 <p className="text-sm text-gray-500 mt-2">
-                  <FormattedMessage defaultMessage="Loading subscription options..." />
+                  <FormattedMessage defaultMessage="Loading contribution options..." />
                 </p>
               )}
               {priceError && (
                 <p className="text-sm text-red-500 mt-2">
-                  <FormattedMessage defaultMessage="We were unable to load the available subscription plans. Please try again later." />
+                  <FormattedMessage defaultMessage="We were unable to load the available contribution amounts. Please try again later." />
                 </p>
               )}
             </div>

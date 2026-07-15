@@ -25,7 +25,7 @@ export default function Subscription({ group, currentUser }) {
               window.dispatchEvent(event);
             }}
           >
-            <FormattedMessage defaultMessage="Upgrade Group" />
+            <FormattedMessage defaultMessage="Set Up Contribution" />
           </Button>
         </div>
       )}

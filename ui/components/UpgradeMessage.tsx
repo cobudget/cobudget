@@ -1,5 +1,6 @@
 import { Box, Typography } from "@material-ui/core";
 import WarningIcon from "@material-ui/icons/Warning";
+import Button from "components/Button";
 import {
   StripePriceSelect,
   useStripeProductPrices,
@@ -17,7 +18,7 @@ export default function UpgradeMessage({
 }) {
   const router = useRouter();
   const intl = useIntl();
-  const [initialPriceId, setInitialPriceId] = useState<string | null>(null);
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
 
   const {
     prices,
@@ -29,17 +30,18 @@ export default function UpgradeMessage({
     if (!forAdmin || loadingPrices) return;
 
     if (!prices.length) {
-      setInitialPriceId(null);
+      setSelectedPriceId(null);
       return;
     }
 
     const hasSelection =
-      initialPriceId && prices.some((price) => price.id === initialPriceId);
+      selectedPriceId &&
+      prices.some((price) => price.id === selectedPriceId);
 
     if (!hasSelection) {
-      setInitialPriceId((prices.find((p) => p.default) || prices[0]).id);
+      setSelectedPriceId((prices.find((p) => p.default) || prices[0]).id);
     }
-  }, [loadingPrices, prices, initialPriceId, forAdmin]);
+  }, [loadingPrices, prices, selectedPriceId, forAdmin]);
 
   return (
     <div className="space-x-2 bg-white border-b border-b-default bg-yellow-100">
@@ -87,17 +89,24 @@ export default function UpgradeMessage({
             <Box className="selector mx-10 px-2 md:px-4 overflow-x-auto py-4">
               <StripePriceSelect
                 options={prices}
-                value={initialPriceId}
-                onChange={(selectedPriceId) =>
+                value={selectedPriceId}
+                onChange={setSelectedPriceId}
+                disabled={loadingPrices || !!priceError}
+                label={intl.formatMessage({
+                  defaultMessage: "Choose an amount",
+                })}
+              />
+              <Button
+                className="mt-4"
+                disabled={!selectedPriceId || loadingPrices || !!priceError}
+                onClick={() =>
                   router.push(
                     `/new-group?roundId=${round?.id}&priceId=${selectedPriceId}`
                   )
                 }
-                disabled={loadingPrices || !!priceError}
-                label={intl.formatMessage({
-                  defaultMessage: "Choose a plan",
-                })}
-              />
+              >
+                <FormattedMessage defaultMessage="Continue" />
+              </Button>
             </Box>
             <Box className="learn-more mx-10 px-2 md:px-4 overflow-x-auto">
               <a

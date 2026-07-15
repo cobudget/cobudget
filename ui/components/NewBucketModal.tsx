@@ -109,7 +109,7 @@ const NewBucketModal = ({ round, handleClose, router, bucketsLimit }) => {
               bucketsLimit.status === "free" && (
                 <p className="my-2 text-red-600">
                   <FormattedMessage
-                    defaultMessage="{remainingCount} free {remainingCount, plural, one {bucket} other {buckets}} left which can be funded. Upgrade to increase your funded buckets count."
+                    defaultMessage="{remainingCount} free {remainingCount, plural, one {bucket} other {buckets}} left which can be funded. Increase your contribution to raise your funded buckets count."
                     values={{
                       remainingCount: Math.max(
                         bucketsLimit.limit - bucketsLimit.currentCount,
