@@ -14,20 +14,20 @@ function BucketLimitOver({ isAdmin, hide }) {
           {isAdmin ? (
             <FormattedMessage
               defaultMessage={
-                "Free buckets limit is over. Upgrade this round or move this round to a paid group to continue."
+                "Free buckets limit is over. Increase this round's contribution or move this round to a paid group to continue."
               }
             />
           ) : (
             <FormattedMessage
               defaultMessage={
-                "Free buckets limit is over. Ask the round admin to upgrade this round."
+                "Free buckets limit is over. Ask the round admin to increase this round's contribution."
               }
             />
           )}
         </p>
         <div>
           <span className="cursor-pointer underline" onClick={hide}>
-            <FormattedMessage defaultMessage={"Upgrade Later"} />
+            <FormattedMessage defaultMessage={"Not Now"} />
           </span>
           {isAdmin && (
             <span className="float-right">

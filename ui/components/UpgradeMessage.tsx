@@ -95,7 +95,7 @@ export default function UpgradeMessage({
                 }
                 disabled={loadingPrices || !!priceError}
                 label={intl.formatMessage({
-                  defaultMessage: "Choose a plan",
+                  defaultMessage: "Choose an amount",
                 })}
               />
             </Box>
