@@ -1,22 +1,6 @@
 import prisma from "../../../prisma";
 import { sendEmails } from "../../../send-email";
-import { unified } from "unified";
-import remarkParse from "remark-parse";
-import remarkGfm from "remark-gfm";
-import remarkRehype from "remark-rehype";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
-
-const mdToHtmlConverter = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkRehype)
-  .use(rehypeSanitize)
-  .use(rehypeStringify);
-
-async function mdToHtml(md: string) {
-  return String(await mdToHtmlConverter.process(md));
-}
+import { mdToHtml } from "utils/mdToHtml";
 
 const notImplemented = () => {
   throw new Error("FREUD: Not implemented yet");
@@ -425,6 +409,13 @@ export const clearFreudOverride = async (
 // Batch Emails
 // ═══════════════════════════════════════════
 
+// Matches images inlined as data URIs (e.g. `![](data:image/jpeg;base64,…)`),
+// which usually come from pasting rich content copied from docs or emails.
+// They bloat every copy of the batch, push Postmark requests over its payload
+// limits — and most mail clients refuse to display them anyway.
+const INLINE_DATA_IMAGE_RE = /data:[a-z0-9.+-]+\/[a-z0-9.+-]+;base64,/i;
+const MAX_BATCH_MESSAGE_CHARS = 100_000;
+
 export const sendBatchEmail = async (
   _parent,
   { roundId, subject, summary, message, bucketIds },
@@ -435,6 +426,17 @@ export const sendBatchEmail = async (
     where: { userId_roundId: { userId: user.id, roundId } },
   });
   if (!member) throw new Error("Round member not found");
+
+  if (INLINE_DATA_IMAGE_RE.test(message)) {
+    throw new Error(
+      "The message contains an image embedded as inline data — this usually happens when pasting copied content. Remove the image and re-add it by dragging the image file into the editor so it gets uploaded properly."
+    );
+  }
+  if (message.length > MAX_BATCH_MESSAGE_CHARS) {
+    throw new Error(
+      `The message is too long to send as a batch email (${message.length.toLocaleString()} characters, max ${MAX_BATCH_MESSAGE_CHARS.toLocaleString()}).`
+    );
+  }
 
   // Rate limit: 1 batch per 5 min per round
   const recent = await prisma.batchEmail.findFirst({
@@ -473,6 +475,38 @@ export const sendBatchEmail = async (
 
   const recipientsList = Array.from(recipientMap.values());
 
+  // Send emails via Postmark
+  if (recipientsList.length > 0) {
+    const round = await prisma.round.findUnique({
+      where: { id: roundId },
+      select: { title: true },
+    });
+    const footer = `<p style="color: #888; font-size: 12px; margin-top: 24px; border-top: 1px solid #eee; padding-top: 12px;">This email was sent by the Dream Team of ${round?.title ?? "your round"}.</p>`;
+    const messageHtml = await mdToHtml(message);
+
+    try {
+      await sendEmails(
+        recipientsList.map((r) => ({
+          to: r.email,
+          subject,
+          html: `${messageHtml}${footer}`,
+          text: message,
+        })),
+        true,
+        true // broadcast stream
+      );
+    } catch (err) {
+      console.error("sendBatchEmail: sending failed", err);
+      throw new Error(
+        `Sending failed: ${
+          err?.message ?? err
+        }. The batch was not added to the history — fix the problem and try again.`
+      );
+    }
+  }
+
+  // Recorded only after a successful send, so Email History reflects what was
+  // actually sent and a failed attempt doesn't consume the rate-limit slot.
   const batchEmail = await prisma.batchEmail.create({
     data: {
       roundId,
@@ -486,27 +520,6 @@ export const sendBatchEmail = async (
     },
     include: { sentBy: { include: { user: true } } },
   });
-
-  // Send emails via Postmark
-  if (recipientsList.length > 0) {
-    const round = await prisma.round.findUnique({
-      where: { id: roundId },
-      select: { title: true },
-    });
-    const footer = `<p style="color: #888; font-size: 12px; margin-top: 24px; border-top: 1px solid #eee; padding-top: 12px;">This email was sent by the Dream Team of ${round?.title ?? "your round"}.</p>`;
-    const messageHtml = await mdToHtml(message);
-
-    await sendEmails(
-      recipientsList.map((r) => ({
-        to: r.email,
-        subject,
-        html: `${messageHtml}${footer}`,
-        text: message,
-      })),
-      true,
-      true // broadcast stream
-    );
-  }
 
   return batchEmail;
 };

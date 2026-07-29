@@ -7,9 +7,7 @@ import type { Plugin as UnifiedPlugin } from "unified";
 import { visit } from "unist-util-visit";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-import remarkRehype from "remark-rehype";
-import rehypeSanitize from "rehype-sanitize";
-import rehypeStringify from "rehype-stringify";
+import { mdToHtml } from "utils/mdToHtml";
 
 import { Prisma } from "@prisma/client";
 import prisma from "../../prisma";
@@ -32,17 +30,6 @@ function escape(input: string): string | undefined | null {
   // sometimes e.g. usernames are null atm
   if (input === null || typeof input === "undefined") return input;
   return escapeImport(input);
-}
-
-const mdToHtmlConverter = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkRehype)
-  .use(rehypeSanitize) // sanitization done here
-  .use(rehypeStringify);
-
-async function mdToHtml(md: string) {
-  return String(await mdToHtmlConverter.process(md));
 }
 
 function quotedSection(html: string) {

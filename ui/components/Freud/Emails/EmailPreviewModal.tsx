@@ -1,3 +1,5 @@
+import MarkdownContent from "components/MarkdownContent";
+
 export default function EmailPreviewModal({
   open,
   onClose,
@@ -45,14 +47,14 @@ export default function EmailPreviewModal({
             </div>
           )}
           <div className="border-t pt-3">
-            <div
-              className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{
-                __html:
-                  message ||
-                  '<span class="text-gray-400">(empty message)</span>',
-              }}
-            />
+            {message ? (
+              <MarkdownContent
+                markdown={message}
+                className="prose prose-sm max-w-none"
+              />
+            ) : (
+              <span className="text-gray-400">(empty message)</span>
+            )}
             <div
               style={{
                 color: "#888",

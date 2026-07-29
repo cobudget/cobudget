@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { gql, useQuery, useMutation } from "urql";
 import EmailPreviewModal from "./EmailPreviewModal";
+import MarkdownContent from "components/MarkdownContent";
 import Wysiwyg from "components/Wysiwyg";
 import {
   Table,
@@ -363,11 +364,9 @@ export default function EmailsPage({ round }: { round: any }) {
                                 Preview: {email.summary}
                               </div>
                             )}
-                            <div
+                            <MarkdownContent
+                              markdown={email.message}
                               className="text-sm prose prose-sm max-w-none"
-                              dangerouslySetInnerHTML={{
-                                __html: email.message,
-                              }}
                             />
                           </div>
                         </TableCell>

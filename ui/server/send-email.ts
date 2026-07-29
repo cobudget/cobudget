@@ -1,6 +1,7 @@
 import { Client, ServerClient } from "postmark";
 import { LinkTrackingOptions } from "postmark/dist/client/models";
 import prisma from "./prisma";
+import { chunkEmailsForPostmark } from "./email-batching";
 export interface SendEmailInput {
   to: string;
   subject: string;
@@ -76,6 +77,46 @@ const getVerifiedEmails = async (emails: string[]) => {
   });
 };
 
+// Sends messages through Postmark's batch API in chunks bounded by both
+// Postmark limits (500 messages, ~50MB per request). Sequential on purpose:
+// a mid-way failure leaves a clear log of which chunk failed. Postmark
+// resolves the promise even when individual messages are rejected, so
+// per-message ErrorCodes are checked and logged too.
+const sendPostmarkBatches = async (
+  pmClient: {
+    sendEmailBatch: (
+      messages: unknown[]
+    ) => Promise<{ ErrorCode: number; Message: string; To?: string }[]>;
+  },
+  mails: SendEmailInput[],
+  toMessage: (mail: SendEmailInput) => Record<string, unknown>
+) => {
+  const batches = chunkEmailsForPostmark(mails);
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    try {
+      const results = await pmClient.sendEmailBatch(batch.map(toMessage));
+      const rejected = (results ?? []).filter((r) => r.ErrorCode !== 0);
+      if (rejected.length > 0) {
+        console.error(
+          `Postmark rejected ${rejected.length}/${batch.length} messages in batch ${
+            i + 1
+          }/${batches.length}:`,
+          rejected.slice(0, 3)
+        );
+      }
+    } catch (err) {
+      console.error(
+        `Postmark batch ${i + 1}/${batches.length} failed (${
+          batch.length
+        } messages):`,
+        err
+      );
+      throw err;
+    }
+  }
+};
+
 const send = async (mail: SendEmailInput) => {
   console.log("Sending email to", mail.to);
   if (process.env.NODE_ENV === "development") {
@@ -114,40 +155,19 @@ const sendBatch = async (mails: SendEmailInput[]) => {
       );
     });
   } else {
-    try {
-      // split into batches of 500 because of Postmark limit on emails per batch call
-      const batches = [];
-      for (let i = 0; i < mails.length; i += 500) {
-        batches.push(mails.slice(i, i + 500));
-      }
-
-      await Promise.all(
-        batches.map((batch) =>
-          client.sendEmailBatch(
-            batch.map((mail) => ({
-              From: process.env.FROM_EMAIL,
-              To: mail.to,
-              Subject: mail.subject,
-              TextBody: mail.text,
-              HtmlBody: mail.html ? wrapHtml(mail.html) : undefined,
-              TrackOpens: false,
-              TrackLinks: LinkTrackingOptions.None,
-            }))
-          )
-        )
-      );
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+    await sendPostmarkBatches(client, mails, (mail) => ({
+      From: process.env.FROM_EMAIL,
+      To: mail.to,
+      Subject: mail.subject,
+      TextBody: mail.text,
+      HtmlBody: mail.html ? wrapHtml(mail.html) : undefined,
+      TrackOpens: false,
+      TrackLinks: LinkTrackingOptions.None,
+    }));
   }
 };
 
 const broadcastMail = async (mails: SendEmailInput[]) => {
-  const batches = [];
-  for (let i = 0; i < mails.length; i += 500) {
-    batches.push(mails.slice(i, i + 500));
-  }
   // Print to console in development, "sending broadcast emails to X recipients including ..." and the first 5 recipients and mail contents
   if (process.env.NODE_ENV === "development") {
     console.log(
@@ -163,20 +183,14 @@ const broadcastMail = async (mails: SendEmailInput[]) => {
     );
   } else {
     // Send broadcast emails in production
-    await Promise.all(
-      batches.map((batch) =>
-        broadcastClient.sendEmailBatch(
-          batch.map((mail) => ({
-            From: process.env.FROM_EMAIL,
-            To: mail.to,
-            Subject: mail.subject,
-            TextBody: mail.text,
-            HtmlBody: mail.html ? wrapHtml(mail.html) : undefined,
-            MessageStream: "broadcast",
-          }))
-        )
-      )
-    );
+    await sendPostmarkBatches(broadcastClient, mails, (mail) => ({
+      From: process.env.FROM_EMAIL,
+      To: mail.to,
+      Subject: mail.subject,
+      TextBody: mail.text,
+      HtmlBody: mail.html ? wrapHtml(mail.html) : undefined,
+      MessageStream: "broadcast",
+    }));
   }
 };
 

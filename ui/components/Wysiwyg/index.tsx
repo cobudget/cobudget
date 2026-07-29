@@ -75,7 +75,13 @@ import { appLink } from "utils/internalLinks";
 import uploadImageFiles from "utils/uploadImageFiles";
 import Spinner from "../Spinner";
 import { FormattedMessage, useIntl } from "react-intl";
+import toast from "react-hot-toast";
 import AddEditLink from "./AddEditLink";
+import {
+  dataUriToFile,
+  uploadPastedImage,
+  MAX_PASTED_IMAGE_BYTES,
+} from "utils/pastedImages";
 
 const USER_LINK_START = appLink("/user/");
 
@@ -274,6 +280,82 @@ const ImperativeHandle = forwardRef((props, ref) => {
 
   return <></>;
 });
+
+// Pasted rich content (Google Docs, emails, web pages…) can carry images
+// inlined as base64 data URIs. Those bypass the file-upload path, bloat the
+// stored markdown and can push outgoing emails over Postmark's payload
+// limits, so this watches the document, uploads any data-URI image to
+// Cloudinary like a regular attachment and swaps in the hosted URL.
+const InlineImageUploader = () => {
+  const { view } = useRemirrorContext({ autoUpdate: true });
+  const intl = useIntl();
+  const handled = useRef(new Set<string>());
+
+  useEffect(() => {
+    const sources = new Set<string>();
+    view.state.doc.descendants((node) => {
+      const src = node.type.name === "image" ? node.attrs.src : null;
+      if (
+        typeof src === "string" &&
+        src.startsWith("data:") &&
+        !handled.current.has(src)
+      ) {
+        sources.add(src);
+      }
+      return true;
+    });
+
+    sources.forEach((src) => {
+      handled.current.add(src);
+
+      const replaceSrc = (newSrc: string | null) => {
+        const { tr, doc } = view.state;
+        let changed = false;
+        doc.descendants((node, pos) => {
+          if (node.type.name === "image" && node.attrs.src === src) {
+            const from = tr.mapping.map(pos);
+            if (newSrc) {
+              tr.setNodeMarkup(from, undefined, { ...node.attrs, src: newSrc });
+            } else {
+              tr.delete(from, tr.mapping.map(pos + node.nodeSize));
+            }
+            changed = true;
+          }
+          return true;
+        });
+        if (changed) view.dispatch(tr);
+      };
+
+      const file = dataUriToFile(src);
+      if (!file || file.size > MAX_PASTED_IMAGE_BYTES) {
+        replaceSrc(null);
+        toast.error(
+          intl.formatMessage({
+            defaultMessage:
+              "A pasted image couldn't be embedded (too large or unreadable). Add it by dragging the image file into the editor instead.",
+          })
+        );
+        return;
+      }
+
+      uploadPastedImage(file).then((url) => {
+        if (url) {
+          replaceSrc(url);
+        } else {
+          replaceSrc(null);
+          toast.error(
+            intl.formatMessage({
+              defaultMessage:
+                "A pasted image couldn't be uploaded. Add it by dragging the image file into the editor instead.",
+            })
+          );
+        }
+      });
+    });
+  });
+
+  return null;
+};
 
 type SetProgress = (progress: number) => void;
 
@@ -624,6 +706,7 @@ const Wysiwyg = ({
             }, 250)}
           >
             <ImperativeHandle ref={inputRef} />
+            <InlineImageUploader />
             {showWysiwygOptions && (
               <div className="overflow-auto">
                 <Toolbar
