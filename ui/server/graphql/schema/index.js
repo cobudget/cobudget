@@ -501,7 +501,7 @@ const schema = gql`
     discourseCategoryId: Int
     tags: [Tag!]
     bucketStatusCount: BucketStatusCount
-    inviteNonce: Int
+    inviteNonce: BigInt
     updatedAt: Date
     distributedAmount: Int
     publishedBucketCount: Int

@@ -159,7 +159,9 @@ export const invitationLink = async (parent, { roundId }, { user, ss }) => {
   return {
     link:
       round.inviteNonce !== null
-        ? appLink("/invite/" + sign({ nonce: round.inviteNonce, roundId }))
+        ? appLink(
+            "/invite/" + sign({ nonce: Number(round.inviteNonce), roundId })
+          )
         : null,
   };
 };
