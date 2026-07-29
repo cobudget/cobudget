@@ -236,7 +236,7 @@ export const createInvitationLink = async (
     data: { inviteNonce },
   });
   return {
-    link: round.inviteNonce,
+    link: round.inviteNonce == null ? null : String(round.inviteNonce),
   };
 };
 
@@ -277,7 +277,8 @@ export const joinInvitationLink = async (parent, { token }, { user }) => {
     throw new Error("Invalid invitation link");
   }
 
-  const { roundId, groupId, nonce: inviteNonce } = payload;
+  const { roundId, groupId, nonce } = payload;
+  const inviteNonce = BigInt(nonce);
 
   if (roundId) {
     const round = await prisma.round.findFirst({

@@ -19,7 +19,7 @@ export const createGroupInvitationLink = combineResolvers(
       data: { inviteNonce },
     });
     return {
-      link: round.inviteNonce,
+      link: round.inviteNonce == null ? null : String(round.inviteNonce),
     };
   }
 );

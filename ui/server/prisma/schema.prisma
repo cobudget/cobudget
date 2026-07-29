@@ -178,7 +178,7 @@ model Group {
   groupMembers GroupMember[]
   rounds       Round[]
   discourse    DiscourseConfig?
-  inviteNonce  Int?
+  inviteNonce  BigInt?
 
   finishedTodos        Boolean @default(false)
   experimentalFeatures Boolean @default(false)
@@ -250,7 +250,7 @@ model Round {
   statusAccount   Account? @relation(fields: [statusAccountId], references: [id])
   statusAccountId String?  @unique
 
-  inviteNonce     Int?
+  inviteNonce     BigInt?
   maxMembers      Int?
   maxFreeBuckets  Int?
 
