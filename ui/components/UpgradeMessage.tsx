@@ -81,8 +81,8 @@ export default function UpgradeMessage({
               </Typography>
               <Typography className="py-1" variant="body1">
                 <FormattedMessage
-                  defaultMessage="To keep Cobudget available, we depend on our users to financially contribute within their means. 
-  Please choose a contribution amount below to continue using Cobudget."
+                  defaultMessage="To keep Cobudget available, we depend on our users to financially contribute within their means.
+  Please choose an amount below to support this project."
                 />
               </Typography>
             </Box>
@@ -137,7 +137,7 @@ export default function UpgradeMessage({
                     <FormattedMessage defaultMessage="You’re managing multiple rounds for the same group of people, and want to group them under one payment." />
                   </li>
                   <li>
-                    <FormattedMessage defaultMessage="You have other questions about our self-set pricing model." />
+                    <FormattedMessage defaultMessage="You have other questions about our self set contribution model." />
                   </li>
                 </ul>
               </Typography>
