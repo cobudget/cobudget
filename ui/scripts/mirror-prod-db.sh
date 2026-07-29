@@ -71,11 +71,32 @@ if ! docker info > /dev/null 2>&1; then
     exit 1
 fi
 
-# Find the postgres container name
-CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep -E 'postgres' | head -1)
+# Detect compose command (v2 plugin or standalone v1 binary)
+if docker compose version > /dev/null 2>&1; then
+    COMPOSE="docker compose"
+elif command -v docker-compose > /dev/null 2>&1; then
+    COMPOSE="docker-compose"
+else
+    COMPOSE=""
+fi
+
+# Require the exact compose container — a loose "grep postgres" can match
+# postgres containers belonging to other projects and restore into them.
+CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep -x "$LOCAL_CONTAINER" || true)
+if [ -z "$CONTAINER_NAME" ] && [ -n "$COMPOSE" ]; then
+    echo "Container $LOCAL_CONTAINER is not running — starting it with '$COMPOSE'..."
+    (cd "$UI_DIR" && $COMPOSE up -d postgres)
+    for _ in $(seq 1 15); do
+        CONTAINER_NAME=$(docker ps --format '{{.Names}}' | grep -x "$LOCAL_CONTAINER" || true)
+        if [ -n "$CONTAINER_NAME" ] && docker exec "$LOCAL_CONTAINER" pg_isready -U "$LOCAL_USER" > /dev/null 2>&1; then
+            break
+        fi
+        sleep 2
+    done
+fi
 if [ -z "$CONTAINER_NAME" ]; then
-    echo -e "${RED}Error: PostgreSQL Docker container is not running.${NC}"
-    echo "Please start it with: cd ui && docker-compose up -d"
+    echo -e "${RED}Error: PostgreSQL Docker container '$LOCAL_CONTAINER' is not running.${NC}"
+    echo "Please start it with: cd ui && ${COMPOSE:-docker-compose} up -d postgres"
     exit 1
 fi
 
@@ -84,7 +105,11 @@ echo ""
 
 echo -e "${YELLOW}Warning: This will DESTROY all data in the local database!${NC}"
 echo ""
-read -p "Type 'yes' to continue: " CONFIRM
+if [ "$1" = "--yes" ]; then
+    CONFIRM="yes"
+else
+    read -p "Type 'yes' to continue: " CONFIRM
+fi
 
 if [ "$CONFIRM" != "yes" ]; then
     echo "Aborted."
@@ -95,19 +120,23 @@ echo ""
 echo "[1/4] Dumping Neon production database (using postgres:17 Docker image)..."
 echo "      This may take a few minutes..."
 
-# Use Docker with postgres:17 image to run pg_dump (avoids version mismatch)
+# Use Docker with postgres:17 image to run pg_dump (avoids version mismatch).
+# stderr stays on the terminal — redirecting it into the dump file corrupts
+# the dump with docker pull progress / pg_dump warnings.
 DUMP_FILE="/tmp/prod_dump.sql"
 if docker run --rm \
     postgres:17 \
     pg_dump "$PROD_DATABASE" \
     --no-owner \
     --no-acl \
-    > "$DUMP_FILE" 2>&1; then
+    > "$DUMP_FILE"; then
     DUMP_SIZE=$(du -h "$DUMP_FILE" | cut -f1)
     echo -e "      ${GREEN}Done!${NC} Dump size: $DUMP_SIZE"
+    if ! head -1 "$DUMP_FILE" | grep -q '^--'; then
+        echo -e "${YELLOW}Warning: dump does not start with the pg_dump SQL header — check its contents${NC}"
+    fi
 else
-    echo -e "${RED}Error: Failed to dump production database${NC}"
-    cat "$DUMP_FILE"
+    echo -e "${RED}Error: Failed to dump production database (see output above)${NC}"
     rm -f "$DUMP_FILE"
     exit 1
 fi
