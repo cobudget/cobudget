@@ -81,6 +81,9 @@ export default function NewGroup({ currentUser }) {
         <h1 className="text-4xl text-center font-bold mb-4">
           <FormattedMessage defaultMessage="Create a Group" />
         </h1>
+        <p className="text-center text-gray-600 text-xl mb-10">
+          <FormattedMessage defaultMessage="To continue using Cobudget" />
+        </p>
         <form
           action={`/api/stripe/create-checkout-session?mode=paidplan&priceId=${
             selectedPriceId ?? ""
