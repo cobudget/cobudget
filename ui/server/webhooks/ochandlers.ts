@@ -54,10 +54,21 @@ export const ocExpenseToCobudget = (
 };
 
 // helper
+// OC's `item.amount` is denominated in the item's own currency, which is not
+// necessarily the expense currency: an item entered in EUR on a CZK expense
+// comes back as plain EUR cents. `amountV2.exchangeRate` holds the rate to the
+// expense currency, so apply it to get an amount we can store and sum safely.
+export const ocItemAmountInExpenseCurrency = (item) => {
+  const value = item.amountV2?.value;
+  if (typeof value !== "number") return item.amount;
+  return Math.round(value * (item.amountV2?.exchangeRate?.value ?? 1) * 100);
+};
+
+// helper
 export const ocItemToCobudgetReceipt = (item, expense) => {
   return {
     description: item.description,
-    amount: item.amount,
+    amount: ocItemAmountInExpenseCurrency(item),
     date: item.createdAt,
     attachment: item.file?.url,
     expenseId: expense.id,
@@ -153,14 +164,7 @@ export const handleExpenseChange = async (req, res) => {
 
     await Promise.all(
       (expense.items || []).map(async (item) => {
-        const receiptData = {
-          description: item.description,
-          amount: item.amount,
-          date: item.createdAt,
-          attachment: item.file?.url,
-          expenseId: dbExpense.id as string,
-          ocExpenseReceiptId: item.id,
-        };
+        const receiptData = ocItemToCobudgetReceipt(item, dbExpense);
 
         await prisma.expenseReceipt.upsert({
           where: { ocExpenseReceiptId: item.id },

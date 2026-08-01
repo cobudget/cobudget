@@ -88,6 +88,13 @@ export const GET_EXPENSES = `
         items {
           id
           amount
+          amountV2 {
+            value
+            currency
+            exchangeRate {
+              value
+            }
+          }
           url
           description
           createdAt
@@ -126,6 +133,13 @@ export const GET_EXPENSE = `
       items {
         id
         amount
+        amountV2 {
+          value
+          currency
+          exchangeRate {
+            value
+          }
+        }
         description
         createdAt
         file {
