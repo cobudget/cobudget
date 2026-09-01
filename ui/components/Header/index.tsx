@@ -131,7 +131,7 @@ export const LandingPageLinks = ({ desktop }) => (
     <NavItem href="/support">
       <FormattedMessage id="support" defaultMessage="Support" />
     </NavItem>
-    <NavItem href="https://cobudget.com/#Cost" external>
+    <NavItem href="/#Cost">
       <FormattedMessage id="pricing" defaultMessage="Pricing" />
     </NavItem>
     <NavItem href="/resources">
