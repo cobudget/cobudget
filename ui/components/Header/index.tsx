@@ -131,6 +131,9 @@ export const LandingPageLinks = ({ desktop }) => (
     <NavItem href="/support">
       <FormattedMessage id="support" defaultMessage="Support" />
     </NavItem>
+    <NavItem href="/#Cost">
+      <FormattedMessage id="pricing" defaultMessage="Pricing" />
+    </NavItem>
     <NavItem href="/resources">
       <FormattedMessage id="resources" defaultMessage="Resources" />
     </NavItem>
