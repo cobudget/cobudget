@@ -17,6 +17,13 @@ const GroupAndRoundHeader = ({
   color,
   bucket,
 }) => {
+  const groupSlug =
+    process.env.SINGLE_GROUP_MODE !== "true" &&
+    typeof router.query?.group === "string" &&
+    router.query.group
+      ? router.query.group
+      : "c";
+
   return (
     <>
       {(currentGroup || round || currentUser) && (
@@ -44,7 +51,10 @@ const GroupAndRoundHeader = ({
             </Link>
           ) : round ? (
             <Link
-              href={`/c/${round.slug}`}
+              href={{
+                pathname: "/[group]/[round]",
+                query: { group: groupSlug, round: round.slug },
+              }}
               className={
                 "flex-shrink px-2 py-1 rounded-md flex items-center group space-x-2 text-white font-medium truncate"
               }
