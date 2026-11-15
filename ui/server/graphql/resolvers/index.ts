@@ -34,6 +34,7 @@ import {
 
 // mutations
 import {
+  bucketImportMutations,
   bucketMutations,
   groupMutations,
   roundMutations,
@@ -61,6 +62,7 @@ const resolvers = {
     ...groupMutations,
     ...roundMutations,
     ...bucketMutations,
+    ...bucketImportMutations,
     ...superAdminMutations,
   },
 

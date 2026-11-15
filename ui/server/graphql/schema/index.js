@@ -256,6 +256,12 @@ const schema = gql`
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
 
+    # Admin-only bulk import (all-or-nothing, publishes no events).
+    importBuckets(
+      roundId: ID!
+      buckets: [BucketImportInput!]!
+    ): ImportBucketsResult!
+
     toggleFavoriteBucket(bucketId: ID!): Bucket
 
     createExpense(
@@ -841,6 +847,31 @@ const schema = gql`
     id: ID!
     small: String
     large: String
+  }
+
+  input BucketImportBudgetItemInput {
+    description: String!
+    "Minor units (pence)"
+    amount: Int!
+  }
+
+  input BucketImportFieldValueInput {
+    fieldId: ID!
+    value: JSON
+  }
+
+  input BucketImportInput {
+    title: String!
+    summary: String
+    referenceCode: String!
+    fieldValues: [BucketImportFieldValueInput!]!
+    budgetItems: [BucketImportBudgetItemInput!]!
+    images: [ImageInput!]
+  }
+
+  type ImportBucketsResult {
+    createdCount: Int!
+    buckets: [Bucket!]!
   }
 
   input ImageInput {
