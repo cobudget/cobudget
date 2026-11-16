@@ -113,7 +113,7 @@ async function main() {
 
   await test("BOM + CRLF + quoted multiline/commas parse intact", async () => {
     const t = await parseCsvText(
-      `﻿${H}\r\n"Title, with comma","Line1\r\nLine2 ""quoted""",A1,Green Economy,Beds,100\r\n`
+      `\uFEFF${H}\r\n"Title, with comma","Line1\r\nLine2 ""quoted""",A1,Green Economy,Beds,100\r\n`
     );
     assert.equal(t.headers[0], "proposal_title");
     assert.equal(t.rows.length, 1);
@@ -254,6 +254,60 @@ async function main() {
     assert.equal(summarize(p).blocked, false);
     assert.equal(p.rows[0].totalMinor, 155050);
     assert.equal(baseColumns.length > 10, true);
+  });
+
+  await test("every row sharing a code is flagged, fixing one clears both", async () => {
+    const p = await run(`${H}
+A,S,DUP,Other,B,1
+B,S,dup,Other,B,1
+C,S,OK1,Other,B,1
+`);
+    const flagged = (pp: typeof p, r: number) =>
+      issuesOf(pp, r).some((i) => i.kind === "duplicateCode");
+    assert.ok(flagged(p, 0) && flagged(p, 1) && !flagged(p, 2));
+    assert.equal(summarize(p).duplicateCodeRows, 2);
+    const fixed = await run(`${H}
+A,S,DUP,Other,B,1
+B,S,DUP2,Other,B,1
+`);
+    assert.equal(summarize(fixed).duplicateCodeRows, 0);
+  });
+
+  await test("existing-in-round rows are tagged for the remove action", async () => {
+    const p = await run(
+      `${H}
+A,S,OLD,Other,B,1
+B,S,NEW,Other,B,1
+`,
+      ["old"]
+    );
+    assert.equal(summarize(p).existingCodeRows, 1);
+    assert.ok(issuesOf(p, 0).some((i) => i.kind === "existingCode"));
+  });
+
+  await test("row numbers stay stable when rows are removed", async () => {
+    const t = await parseCsvText(`${H}
+A,S,X,Other,B,1
+B,S,X,Other,B,1
+`);
+    const p = prepare(
+      { headers: t.headers, rows: [t.rows[1]], rowNumbers: [2] },
+      { fields, existingCodes: [] }
+    );
+    assert.equal(p.rows[0].rowNumber, 2);
+    const q = prepare(
+      { headers: t.headers, rows: [t.rows[0], t.rows[1]], rowNumbers: [3, 7] },
+      { fields, existingCodes: [] }
+    );
+    assert.ok(q.rows[0].issues.some((i) => i.message.includes("rows 3, 7")));
+  });
+
+  await test("cells keep what was typed (no trimming) but payload is trimmed", async () => {
+    const p = await run(`${H}
+"  spaced out ",S,A1,Other,B,1
+`);
+    assert.equal(p.rows[0].cells.proposal_title, "  spaced out ");
+    assert.equal(p.rows[0].payload.title, "spaced out");
   });
 
   const real = process.argv[2];

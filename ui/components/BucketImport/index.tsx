@@ -4,6 +4,7 @@ import { gql, useQuery } from "urql";
 import toast from "react-hot-toast";
 import Button from "components/Button";
 import Banner from "components/Banner";
+import FormattedCurrency from "components/FormattedCurrency";
 import {
   buildTemplateCsv,
   parseCsvText,
@@ -12,11 +13,15 @@ import {
 } from "utils/bucketImport/prepareImport";
 import type { Prepared } from "utils/bucketImport/prepareImport";
 import {
+  baseColumns,
+  normalizeName,
   templateBudgetPairs,
   templateFileName,
 } from "utils/bucketImport/config";
+import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
 import PreviewTable from "./PreviewTable";
+import RowEditor from "./RowEditor";
 
 const IMPORT_CONTEXT_QUERY = gql`
   query BucketImportContext($roundId: ID!) {
@@ -36,7 +41,7 @@ const IMPORT_CONTEXT_QUERY = gql`
 `;
 
 const downloadTemplate = () => {
-  const blob = new Blob(["﻿" + buildTemplateCsv(templateBudgetPairs)], {
+  const blob = new Blob(["\uFEFF" + buildTemplateCsv(templateBudgetPairs)], {
     type: "text/csv;charset=utf-8",
   });
   const url = URL.createObjectURL(blob);
@@ -62,6 +67,10 @@ const Count = ({
   </div>
 );
 
+// Editable state: the raw cells are the source of truth. Every edit re-runs
+// prepareImport (pure, a few dozen rows), so counts and messages are live.
+type EditRow = { id: number; cells: string[] };
+
 const BucketImport = ({ round }: { round: any }) => {
   const [{ data, fetching, error }] = useQuery({
     query: IMPORT_CONTEXT_QUERY,
@@ -72,43 +81,109 @@ const BucketImport = ({ round }: { round: any }) => {
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [table, setTable] = useState<Awaited<
-    ReturnType<typeof parseCsvText>
-  > | null>(null);
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [rows, setRows] = useState<EditRow[]>([]);
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [ackWarnings, setAckWarnings] = useState(false);
 
-  // Validation is derived from (file, round context), so it re-runs if the
-  // round context reloads. Read-only for now; editing arrives in the next step.
   const prepared: Prepared | null = useMemo(
     () =>
-      table && ctx
-        ? prepareImport(table, {
-            fields: ctx.fields.map((f) => ({
-              ...f,
-              options: f.options ?? [],
-            })),
-            existingCodes: ctx.existingCodes,
-          })
+      headers.length && ctx
+        ? prepareImport(
+            {
+              headers,
+              rows: rows.map((r) => r.cells),
+              rowNumbers: rows.map((r) => r.id),
+            },
+            {
+              fields: ctx.fields.map((f) => ({
+                ...f,
+                options: f.options ?? [],
+              })),
+              existingCodes: ctx.existingCodes,
+            }
+          )
         : null,
-    [table, ctx]
+    [headers, rows, ctx]
   );
   const summary = prepared ? summarize(prepared) : null;
+
+  const priorityOptions: string[] = useMemo(() => {
+    const col = baseColumns.find((c) => c.column === "priority_area");
+    const f = ctx?.fields.find(
+      (x) => normalizeName(x.name) === normalizeName(col.fieldName)
+    );
+    return f?.options ?? [];
+  }, [ctx]);
+
+  const hasColumn = useCallback((column: string) => headers.includes(column), [
+    headers,
+  ]);
 
   const onFile = useCallback(async (file?: File) => {
     if (!file) return;
     try {
-      const text = await file.text();
-      const parsed = await parseCsvText(text);
+      const parsed = await parseCsvText(await file.text());
       if (parsed.rows.length === 0)
         return toast.error("The CSV file has no data rows.");
+      // image_url is optional in the file but always editable here
+      const hs = parsed.headers.includes("image_url")
+        ? parsed.headers
+        : [...parsed.headers, "image_url"];
       setFileName(file.name);
-      setTable(parsed);
+      setHeaders(hs);
+      setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
+      setSelected(null);
+      setAckWarnings(false);
     } catch (e) {
       toast.error("Could not read this file as CSV: " + (e?.message ?? e));
     }
   }, []);
 
+  const onEdit = useCallback(
+    (id: number, column: string, value: string) => {
+      const c = headers.indexOf(column);
+      if (c < 0) return;
+      setRows((rs) =>
+        rs.map((r) => {
+          if (r.id !== id) return r;
+          const cells = [...r.cells];
+          while (cells.length < headers.length) cells.push("");
+          cells[c] = value;
+          return { ...r, cells };
+        })
+      );
+    },
+    [headers]
+  );
+
+  const onRemove = useCallback((id: number) => {
+    setRows((rs) => rs.filter((r) => r.id !== id));
+    setSelected((s) => (s === id ? null : s));
+  }, []);
+
+  const removeExisting = () => {
+    if (!prepared) return;
+    const ids = new Set(
+      prepared.rows
+        .filter((r) => r.issues.some((i) => i.kind === "existingCode"))
+        .map((r) => r.rowNumber)
+    );
+    setRows((rs) => rs.filter((r) => !ids.has(r.id)));
+    setSelected((s) => (s !== null && ids.has(s) ? null : s));
+  };
+
   const base = `/${round.group?.slug ?? "c"}/${round.slug}`;
+  const selectedRow = prepared?.rows.find((r) => r.rowNumber === selected);
+  const totalAsk = prepared?.rows.reduce((t, r) => t + r.totalMinor, 0) ?? 0;
+  // Gate for the (next step's) confirm button: no errors, rows left, and
+  // warnings acknowledged. Nothing is written from this page yet.
+  const canImport =
+    !!summary &&
+    !summary.blocked &&
+    summary.total > 0 &&
+    (summary.warningRows === 0 || ackWarnings);
 
   return (
     <div className="page">
@@ -141,9 +216,10 @@ const BucketImport = ({ round }: { round: any }) => {
             Download as CSV, or Excel → CSV UTF-8) and upload it here.
           </li>
           <li>
-            You get a preview with errors and warnings per row. Nothing is
-            written until you confirm in a later step; errors block the import,
-            warnings do not.
+            You get a preview with errors and warnings per row. Fix them right
+            in the table (or remove a row); counts update as you type. Nothing
+            is written until you confirm in a later step; errors block the
+            import, warnings must be acknowledged.
           </li>
           <li>
             Imported buckets are published and open for funding immediately,
@@ -184,7 +260,7 @@ const BucketImport = ({ round }: { round: any }) => {
           }}
         />
         <Button disabled={!ctx} onClick={() => fileRef.current?.click()}>
-          {table ? "Choose another file" : "Choose CSV file"}
+          {headers.length ? "Choose another file" : "Choose CSV file"}
         </Button>
         {fileName && (
           <span className="ml-3 text-sm text-gray-700">{fileName}</span>
@@ -207,6 +283,31 @@ const BucketImport = ({ round }: { round: any }) => {
               {i.message}
             </Banner>
           ))}
+
+          {summary.duplicateCodeRows > 0 && (
+            <Banner
+              variant="critical"
+              title={`${summary.duplicateCodeRows} rows share a reference code`}
+              className=""
+            >
+              Every row with a repeated code is highlighted. Edit the codes or
+              remove rows until each code is unique.
+            </Banner>
+          )}
+          {summary.existingCodeRows > 0 && (
+            <Banner
+              variant="critical"
+              title={`${summary.existingCodeRows} rows already exist in this round`}
+              className=""
+            >
+              <div className="flex items-center gap-3 flex-wrap">
+                <span>Their reference codes are already used here.</span>
+                <Button variant="secondary" onClick={removeExisting}>
+                  Remove rows that already exist
+                </Button>
+              </div>
+            </Banner>
+          )}
 
           <div className="flex flex-wrap gap-3 items-stretch">
             <Count label="rows" value={summary.total} className="bg-gray-100" />
@@ -235,17 +336,80 @@ const BucketImport = ({ round }: { round: any }) => {
             </label>
           </div>
 
-          <p className="text-sm text-gray-700">
-            {summary.blocked
-              ? "Fix the errors in your file and upload it again. Importing is blocked while errors exist."
-              : "No errors. (Importing is added in a later step; this is a preview.)"}
-          </p>
-
           <PreviewTable
             prepared={prepared}
             currency={ctx.currency}
+            priorityOptions={priorityOptions}
+            hasColumn={hasColumn}
             onlyNeedsAttention={onlyNeedsAttention}
+            selected={selected}
+            onSelect={setSelected}
+            onEdit={onEdit}
+            onRemove={onRemove}
           />
+
+          {selectedRow && (
+            <div className="border rounded p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">
+                  Row {selectedRow.rowNumber}:{" "}
+                  {selectedRow.cells.proposal_title}
+                </h3>
+                <button
+                  type="button"
+                  className="text-sm text-gray-600"
+                  onClick={() => setSelected(null)}
+                >
+                  Close
+                </button>
+              </div>
+              <div className="grid gap-6 lg:grid-cols-2">
+                <RowEditor
+                  row={selectedRow}
+                  budgetNumbers={prepared.budgetNumbers}
+                  hasColumn={hasColumn}
+                  onEdit={onEdit}
+                />
+                <BucketPreview
+                  row={selectedRow}
+                  round={{ ...round, currency: ctx.currency }}
+                  fields={ctx.fields}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="border-t pt-4 space-y-2 text-sm">
+            {summary.blocked ? (
+              <p className="text-red-700">
+                Importing is blocked while there are errors
+                {summary.errorRows ? ` (${summary.errorRows} rows)` : ""}.
+              </p>
+            ) : summary.total === 0 ? (
+              <p className="text-gray-700">No rows left to import.</p>
+            ) : (
+              <>
+                {summary.warningRows > 0 && (
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={ackWarnings}
+                      onChange={(e) => setAckWarnings(e.target.checked)}
+                    />
+                    I have reviewed the {summary.warningRows} rows with warnings
+                    and want to import them anyway
+                  </label>
+                )}
+                <p className={canImport ? "text-green-800" : "text-gray-700"}>
+                  {canImport ? "Ready: " : "Not ready yet: "}
+                  {summary.total} buckets, total ask{" "}
+                  <FormattedCurrency value={totalAsk} currency={ctx.currency} />
+                  . (The import button arrives in the next step; this page
+                  writes nothing yet.)
+                </p>
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>

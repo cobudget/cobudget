@@ -35,6 +35,8 @@ export type ImportIssue = {
   row: number | null; // 0-based index into the payload, null = whole import
   field: string;
   message: string;
+  /** Machine-readable tag for issues the UI acts on */
+  kind?: "duplicateCode" | "existingCode";
 };
 
 export type ImportValidation = {

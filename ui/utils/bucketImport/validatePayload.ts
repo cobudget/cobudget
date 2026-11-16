@@ -18,12 +18,19 @@ const isBlank = (v: unknown) =>
  */
 export function validateImportPayload(
   rows: ImportBucketRow[],
-  ctx: ImportRoundContext
+  ctx: ImportRoundContext,
+  /** Row numbers to show in messages (stable across row removal). Default: index + 1. */
+  rowLabels?: number[]
 ): ImportValidation {
+  const label = (i: number) => rowLabels?.[i] ?? i + 1;
   const errors: ImportIssue[] = [];
   const warnings: ImportIssue[] = [];
-  const err = (row: number | null, field: string, message: string) =>
-    errors.push({ row, field, message });
+  const err = (
+    row: number | null,
+    field: string,
+    message: string,
+    kind?: ImportIssue["kind"]
+  ) => errors.push({ row, field, message, kind });
   const warn = (row: number | null, field: string, message: string) =>
     warnings.push({ row, field, message });
 
@@ -50,7 +57,13 @@ export function validateImportPayload(
   if (errors.length) return { errors, warnings };
 
   const fieldById = new Map(ctx.fields.map((f) => [f.id, f]));
-  const codeFirstRow = new Map<string, number>();
+  // Every row sharing a code is flagged (not just the later ones).
+  const codeRows = new Map<string, number[]>();
+  rows.forEach((r, i) => {
+    if (isBlank(r.referenceCode)) return;
+    const c = normalizeCode(r.referenceCode);
+    codeRows.set(c, [...(codeRows.get(c) ?? []), i]);
+  });
   const titleFirstRow = new Map<string, number>();
 
   rows.forEach((row, i) => {
@@ -59,7 +72,7 @@ export function validateImportPayload(
     else {
       const t = row.title.trim().toLowerCase();
       if (titleFirstRow.has(t))
-        warn(i, "title", `Same title as row ${titleFirstRow.get(t) + 1}.`);
+        warn(i, "title", `Same title as row ${label(titleFirstRow.get(t))}.`);
       else titleFirstRow.set(t, i);
     }
 
@@ -76,20 +89,22 @@ export function validateImportPayload(
       err(i, "referenceCode", "Reference code is required.");
     else {
       const code = normalizeCode(row.referenceCode);
-      if (codeFirstRow.has(code))
+      const sharing = codeRows.get(code);
+      if (sharing.length > 1)
         err(
           i,
           "referenceCode",
-          `Duplicate reference code "${row.referenceCode.trim()}" (also on row ${
-            codeFirstRow.get(code) + 1
-          }).`
+          `Reference code "${row.referenceCode.trim()}" is used on rows ${sharing
+            .map(label)
+            .join(", ")}.`,
+          "duplicateCode"
         );
-      else codeFirstRow.set(code, i);
       if (ctx.existingCodes.has(code))
         err(
           i,
           "referenceCode",
-          `Reference code "${row.referenceCode.trim()}" already exists in this round.`
+          `Reference code "${row.referenceCode.trim()}" already exists in this round.`,
+          "existingCode"
         );
     }
 

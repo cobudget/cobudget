@@ -17,7 +17,12 @@ import { validateImportPayload } from "./validatePayload";
 // cell-level issues. Shared logic lives in validatePayload.ts; this file only
 // knows about the CSV shape.
 
-export type CsvTable = { headers: string[]; rows: string[][] };
+export type CsvTable = {
+  headers: string[];
+  rows: string[][];
+  /** Stable row numbers (default 1..n); kept when rows are removed */
+  rowNumbers?: number[];
+};
 
 export type Severity = "error" | "warning";
 
@@ -26,6 +31,7 @@ export type PreparedIssue = {
   /** CSV column the message belongs to, or null for the whole row */
   column: string | null;
   message: string;
+  kind?: "duplicateCode" | "existingCode";
 };
 
 export type PreparedRow = {
@@ -52,7 +58,7 @@ export type Prepared = {
   payloadBytes: number;
 };
 
-const BOM = /^﻿/;
+const BOM = /^\uFEFF/;
 
 /** Parse CSV text (BOM, CRLF, quoted multi-line cells, `,` or `;` delimiter). */
 export async function parseCsvText(text: string): Promise<CsvTable> {
@@ -179,7 +185,8 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
 
     const cells: Record<string, string> = {};
     table.headers.forEach((h, c) => {
-      if (h) cells[h] = (r[c] ?? "").replace(/\r\n?/g, "\n").trim();
+      // untrimmed: the editable table must show exactly what was typed
+      if (h) cells[h] = (r[c] ?? "").replace(/\r\n?/g, "\n");
     });
 
     // budget lines
@@ -236,13 +243,20 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
           : [],
     };
 
-    return { rowNumber: i + 1, cells, payload, totalMinor, issues };
+    return {
+      rowNumber: table.rowNumbers?.[i] ?? i + 1,
+      cells,
+      payload,
+      totalMinor,
+      issues,
+    };
   });
 
   // Shared rules (also run authoritatively on the server)
   const validation = validateImportPayload(
     rows.map((r) => r.payload),
-    { fields: ctx.fields, existingCodes: new Set(ctx.existingCodes) }
+    { fields: ctx.fields, existingCodes: new Set(ctx.existingCodes) },
+    rows.map((r) => r.rowNumber)
   );
   const columnForField = (name: string): string | null => {
     if (name === "title") return colFor("title");
@@ -283,6 +297,7 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
       severity: x.severity,
       column: columnForField(x.field),
       message: x.message,
+      kind: x.kind,
     });
   });
 
@@ -307,7 +322,11 @@ export function summarize(prepared: Prepared) {
       !r.issues.some((i) => i.severity === "error") &&
       r.issues.some((i) => i.severity === "warning")
   ).length;
+  const rowsWith = (kind: string) =>
+    prepared.rows.filter((r) => r.issues.some((i) => i.kind === kind)).length;
   return {
+    duplicateCodeRows: rowsWith("duplicateCode"),
+    existingCodeRows: rowsWith("existingCode"),
     total: prepared.rows.length,
     errorRows,
     warningRows,
