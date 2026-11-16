@@ -20,6 +20,11 @@ import {
   summarize,
 } from "../utils/bucketImport/prepareImport";
 import { applyImages } from "../utils/bucketImport/images";
+import {
+  createLimiter,
+  fileStem,
+  matchFiles,
+} from "../utils/bucketImport/matchImages";
 
 const AREAS = [
   "Arts and Culture",
@@ -158,6 +163,81 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
       { small: "https://x.test/c.png", large: "https://x.test/c.png" },
     ]);
     assert.equal(p.rows[0].payload.images?.length, 0); // input not mutated
+  });
+
+  await test("matchFiles: code, then title slug, then order number; never guesses", () => {
+    const rows = [
+      { rowNumber: 1, referenceCode: "GF01", title: "Community Garden" },
+      { rowNumber: 2, referenceCode: "GF02", title: "Café & Bar" },
+      { rowNumber: 3, referenceCode: "GF03", title: "Shared Title" },
+      { rowNumber: 4, referenceCode: "GF04", title: "Shared Title" },
+      { rowNumber: 5, referenceCode: "GF05", title: "Pond Project" },
+      { rowNumber: 7, referenceCode: "", title: "Seven" },
+    ];
+    const f = (name: string) => ({ id: name, name });
+    assert.equal(fileStem("pics/gf01.Final.PNG"), "gf01.final");
+    const r = matchFiles(
+      [
+        f("gf01.png"), // code, case-insensitive
+        f("Café-and-Bar.JPG"), // title slug
+        f("pond project.png"), // title slug, spaces
+        f("7.jpeg"), // order number
+        f("shared-title.png"), // two rows share the title
+        f("nothing.png"), // no match
+        f("gf03.png"), // code match
+        f("GF03.jpg"), // same row claimed twice
+        f("2.png"), // number 2 = same row as the café file: a clash
+      ],
+      rows
+    );
+    const by = (id: string) => r.assigned.find((a) => a.fileId === id);
+    assert.deepEqual(by("gf01.png"), {
+      fileId: "gf01.png",
+      rowNumber: 1,
+      by: "code",
+    });
+    assert.equal(by("Café-and-Bar.JPG"), undefined); // clashes with 2.png
+    assert.equal(by("pond project.png")?.by, "title");
+    assert.equal(by("7.jpeg")?.by, "number");
+    assert.equal(by("2.png"), undefined);
+    const amb = (id: string) => r.ambiguous.find((a) => a.fileId === id);
+    assert.equal(amb("shared-title.png")?.reason, "multiple-rows");
+    assert.deepEqual(amb("shared-title.png")?.candidates, [3, 4]);
+    assert.equal(amb("2.png")?.reason, "multiple-files");
+    assert.equal(amb("Café-and-Bar.JPG")?.by, "title");
+    assert.equal(amb("gf03.png")?.reason, "multiple-files");
+    assert.equal(amb("GF03.jpg")?.reason, "multiple-files");
+    assert.deepEqual(r.unmatched, ["nothing.png"]);
+    // an occupied row is a conflict, not a silent replace
+    const o = matchFiles([f("gf01.png")], rows, new Set([1]));
+    assert.equal(o.assigned.length, 0);
+    assert.equal(o.ambiguous[0].reason, "row-has-image");
+    // blank reference codes never match an empty-ish stem
+    assert.equal(matchFiles([f(".png")], rows).unmatched.length, 1);
+  });
+
+  await test("createLimiter never exceeds its limit and finishes everything", async () => {
+    const run = createLimiter(3);
+    let active = 0;
+    let peak = 0;
+    const out = await Promise.all(
+      Array.from({ length: 10 }, (_, i) =>
+        run(async () => {
+          active++;
+          peak = Math.max(peak, active);
+          await new Promise((res) => setTimeout(res, 5));
+          active--;
+          return i;
+        })
+      )
+    );
+    assert.deepEqual(out, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    assert.equal(peak, 3);
+    await assert.rejects(
+      run(() => Promise.reject(new Error("x"))),
+      /x/
+    );
+    assert.equal(await run(async () => 1), 1); // a failure frees its slot
   });
 
   await test("amounts", () => {

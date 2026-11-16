@@ -21,6 +21,9 @@ import {
 import { applyImages } from "utils/bucketImport/images";
 import type { RowImage, RowImages } from "utils/bucketImport/images";
 import { uploadBucketImage } from "utils/uploadBucketImage";
+import { createLimiter, matchFiles } from "utils/bucketImport/matchImages";
+import BatchImages from "./BatchImages";
+import type { UnassignedFile } from "./BatchImages";
 import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
 import ConfirmModal from "./ConfirmModal";
@@ -114,6 +117,9 @@ const BucketImport = ({ round }: { round: any }) => {
 
   const [images, setImages] = useState<RowImages>({});
   const attemptRef = useRef(0);
+  const limitRef = useRef(createLimiter(3)); // at most 3 uploads in flight
+  const batchIdRef = useRef(0);
+  const [unassigned, setUnassigned] = useState<UnassignedFile[]>([]);
 
   const preparedBase: Prepared | null = useMemo(
     () =>
@@ -167,6 +173,7 @@ const BucketImport = ({ round }: { round: any }) => {
       setHeaders(hs);
       setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
       setImages({}); // row ids restart at 1 for a new file
+      setUnassigned([]);
       setSelected(null);
       setAckWarnings(false);
     } catch (e) {
@@ -201,7 +208,9 @@ const BucketImport = ({ round }: { round: any }) => {
     }));
     let next: RowImage;
     try {
-      const { small, large } = await uploadBucketImage(file);
+      const { small, large } = await limitRef.current(() =>
+        uploadBucketImage(file)
+      );
       next = { status: "done", fileName: file.name, attempt, small, large };
     } catch (e) {
       next = {
@@ -221,6 +230,60 @@ const BucketImport = ({ round }: { round: any }) => {
       return rest;
     });
   }, []);
+
+  const moveImage = useCallback((from: number, to: number) => {
+    setImages((m) => {
+      if (m[from]?.status !== "done" || m[to]) return m;
+      const rest = { ...m };
+      delete rest[from];
+      return { ...rest, [to]: m[from] };
+    });
+  }, []);
+
+  const onBatchFiles = (files: File[]) => {
+    if (!preparedBase || files.length === 0) return;
+    const entries = files.map((file) => ({
+      id: `f${++batchIdRef.current}`,
+      file,
+    }));
+    const result = matchFiles(
+      entries.map((e) => ({ id: e.id, name: e.file.name })),
+      preparedBase.rows.map((r) => ({
+        rowNumber: r.rowNumber,
+        referenceCode: r.payload.referenceCode,
+        title: r.payload.title,
+      })),
+      new Set(
+        Object.keys(images)
+          .map(Number)
+          .filter((n) => images[n].status !== "error")
+      )
+    );
+    const fileOf = (id: string) => entries.find((e) => e.id === id).file;
+    result.assigned.forEach((a) => attachImage(a.rowNumber, fileOf(a.fileId)));
+    setUnassigned((u) => [
+      ...u,
+      ...result.unmatched.map((id) => ({
+        id,
+        file: fileOf(id),
+        reason: "unmatched" as const,
+        candidates: [] as number[],
+      })),
+      ...result.ambiguous.map((a) => ({
+        id: a.fileId,
+        file: fileOf(a.fileId),
+        reason: a.reason,
+        candidates: a.candidates,
+      })),
+    ]);
+  };
+
+  const assignUnassigned = (id: string, rowNumber: number) => {
+    const u = unassigned.find((x) => x.id === id);
+    if (!u) return;
+    setUnassigned((us) => us.filter((x) => x.id !== id));
+    attachImage(rowNumber, u.file);
+  };
 
   const onRemove = useCallback(
     (id: number) => {
@@ -276,6 +339,7 @@ const BucketImport = ({ round }: { round: any }) => {
       setConfirmOpen(false);
       setRows([]);
       setImages({});
+      setUnassigned([]);
       setHeaders([]);
       setSelected(null);
     } catch (e) {
@@ -465,6 +529,23 @@ const BucketImport = ({ round }: { round: any }) => {
             images={images}
             onAttachImage={attachImage}
             onClearImage={clearImage}
+          />
+
+          <BatchImages
+            rows={prepared.rows.map((r) => ({
+              rowNumber: r.rowNumber,
+              title: r.payload.title,
+              referenceCode: r.payload.referenceCode,
+            }))}
+            images={images}
+            unassigned={unassigned}
+            onFiles={onBatchFiles}
+            onAssign={assignUnassigned}
+            onDiscard={(id) =>
+              setUnassigned((us) => us.filter((x) => x.id !== id))
+            }
+            onMove={moveImage}
+            onClear={clearImage}
           />
 
           {selectedRow && (
