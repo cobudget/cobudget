@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { gql, useQuery } from "urql";
+import { gql, useMutation, useQuery } from "urql";
 import toast from "react-hot-toast";
 import Button from "components/Button";
 import Banner from "components/Banner";
@@ -20,6 +20,8 @@ import {
 } from "utils/bucketImport/config";
 import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
+import ConfirmModal from "./ConfirmModal";
+import ImportResult from "./ImportResult";
 import PreviewTable from "./PreviewTable";
 import RowEditor from "./RowEditor";
 
@@ -35,6 +37,18 @@ const IMPORT_CONTEXT_QUERY = gql`
         limit
         options
         isRequired
+      }
+    }
+  }
+`;
+
+const IMPORT_BUCKETS = gql`
+  mutation ImportBuckets($roundId: ID!, $buckets: [BucketImportInput!]!) {
+    importBuckets(roundId: $roundId, buckets: $buckets) {
+      createdCount
+      buckets {
+        id
+        title
       }
     }
   }
@@ -72,7 +86,7 @@ const Count = ({
 type EditRow = { id: number; cells: string[] };
 
 const BucketImport = ({ round }: { round: any }) => {
-  const [{ data, fetching, error }] = useQuery({
+  const [{ data, fetching, error }, reexecuteContext] = useQuery({
     query: IMPORT_CONTEXT_QUERY,
     variables: { roundId: round.id },
     requestPolicy: "network-only",
@@ -86,6 +100,14 @@ const BucketImport = ({ round }: { round: any }) => {
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
   const [ackWarnings, setAckWarnings] = useState(false);
+  const [, importBuckets] = useMutation(IMPORT_BUCKETS);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [created, setCreated] = useState<
+    { id: string; title: string }[] | null
+  >(null);
+  const submittingRef = useRef(false); // synchronous double-click guard
 
   const prepared: Prepared | null = useMemo(
     () =>
@@ -177,13 +199,59 @@ const BucketImport = ({ round }: { round: any }) => {
   const base = `/${round.group?.slug ?? "c"}/${round.slug}`;
   const selectedRow = prepared?.rows.find((r) => r.rowNumber === selected);
   const totalAsk = prepared?.rows.reduce((t, r) => t + r.totalMinor, 0) ?? 0;
-  // Gate for the (next step's) confirm button: no errors, rows left, and
-  // warnings acknowledged. Nothing is written from this page yet.
+  // Gate for the import button: no errors, rows left, warnings acknowledged.
   const canImport =
     !!summary &&
     !summary.blocked &&
     summary.total > 0 &&
     (summary.warningRows === 0 || ackWarnings);
+
+  const submit = async () => {
+    if (!prepared || !canImport || submittingRef.current) return;
+    submittingRef.current = true;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await importBuckets({
+        roundId: round.id,
+        buckets: prepared.rows.map((r) => r.payload),
+      });
+      if (res.error) {
+        // Nothing was written (single all-or-nothing transaction). Refresh the
+        // round's reference codes so the table shows what the server saw.
+        setSubmitError(
+          res.error.graphQLErrors?.[0]?.message ?? res.error.message
+        );
+        reexecuteContext({ requestPolicy: "network-only" });
+        return;
+      }
+      setCreated(res.data.importBuckets.buckets);
+      setConfirmOpen(false);
+      setRows([]);
+      setHeaders([]);
+      setSelected(null);
+    } catch (e) {
+      setSubmitError(e?.message ?? String(e));
+    } finally {
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  };
+
+  const importAnother = () => {
+    setCreated(null);
+    setFileName(null);
+    setAckWarnings(false);
+    reexecuteContext({ requestPolicy: "network-only" });
+  };
+
+  if (created)
+    return (
+      <div className="page">
+        <h1 className="text-2xl font-semibold mb-4">Import buckets from CSV</h1>
+        <ImportResult created={created} base={base} onAnother={importAnother} />
+      </div>
+    );
 
   return (
     <div className="page">
@@ -218,8 +286,8 @@ const BucketImport = ({ round }: { round: any }) => {
           <li>
             You get a preview with errors and warnings per row. Fix them right
             in the table (or remove a row); counts update as you type. Nothing
-            is written until you confirm in a later step; errors block the
-            import, warnings must be acknowledged.
+            is written until you confirm; errors block the import, warnings must
+            be acknowledged.
           </li>
           <li>
             Imported buckets are published and open for funding immediately,
@@ -404,13 +472,36 @@ const BucketImport = ({ round }: { round: any }) => {
                   {canImport ? "Ready: " : "Not ready yet: "}
                   {summary.total} buckets, total ask{" "}
                   <FormattedCurrency value={totalAsk} currency={ctx.currency} />
-                  . (The import button arrives in the next step; this page
-                  writes nothing yet.)
+                  .
                 </p>
               </>
             )}
+            <div>
+              <Button
+                disabled={!canImport || submitting}
+                onClick={() => {
+                  setSubmitError(null);
+                  setConfirmOpen(true);
+                }}
+              >
+                Import {summary.total} bucket{summary.total === 1 ? "" : "s"}
+              </Button>
+            </div>
           </div>
         </div>
+      )}
+
+      {confirmOpen && summary && ctx && (
+        <ConfirmModal
+          total={summary.total}
+          warningRows={summary.warningRows}
+          totalAsk={totalAsk}
+          currency={ctx.currency}
+          submitting={submitting}
+          error={submitError}
+          onConfirm={submit}
+          onCancel={() => setConfirmOpen(false)}
+        />
       )}
     </div>
   );
