@@ -54,6 +54,8 @@ const schema = gql`
   }
 
   type Query {
+    # Admin-only: round fields + used reference codes for the bucket import preview
+    bucketImportContext(roundId: ID!): BucketImportContext!
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
@@ -867,6 +869,13 @@ const schema = gql`
     fieldValues: [BucketImportFieldValueInput!]!
     budgetItems: [BucketImportBudgetItemInput!]!
     images: [ImageInput!]
+  }
+
+  type BucketImportContext {
+    currency: String!
+    fields: [CustomField!]!
+    "Normalised (trimmed, lower-case) reference codes already used in the round"
+    existingCodes: [String!]!
   }
 
   type ImportBucketsResult {

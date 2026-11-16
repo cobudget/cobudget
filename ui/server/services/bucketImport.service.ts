@@ -13,6 +13,7 @@ import {
 } from "../../utils/bucketImport/config";
 import type {
   ImportBucketRow,
+  ImportFieldDef,
   ImportIssue,
 } from "../../utils/bucketImport/types";
 import { validateImportPayload } from "../../utils/bucketImport/validatePayload";
@@ -34,6 +35,49 @@ export class BucketImportValidationError extends Error {
 // Minimal structural type for the Prisma interactive-transaction client.
 type Tx = any;
 
+const toFieldDef = (f): ImportFieldDef => ({
+  id: f.id,
+  name: f.name,
+  type: f.type,
+  limit: f.limit,
+  options: f.options,
+  isRequired: f.isRequired,
+});
+
+/**
+ * Round fields + the reference codes already used in the round
+ * (tags of non-deleted buckets U Reference Code field values, normalised).
+ * Shared by the commit mutation and the admin-only preview query.
+ */
+export async function loadImportContext(db: Tx, roundId: string) {
+  const fields = await db.field.findMany({
+    where: { roundId },
+    orderBy: { position: "asc" },
+  });
+  const refField = fields.find(
+    (f) =>
+      normalizeName(f.name) ===
+      normalizeName(bucketImportConfig.referenceCodeFieldName)
+  );
+  const existingCodes = new Set<string>();
+  const tagRows = await db.tag.findMany({
+    where: { roundId, buckets: { some: { deleted: false } } },
+    select: { value: true },
+  });
+  tagRows.forEach((t) => existingCodes.add(normalizeCode(t.value)));
+  if (refField) {
+    const fvs = await db.fieldValue.findMany({
+      where: { fieldId: refField.id, Bucket: { roundId, deleted: false } },
+      select: { value: true },
+    });
+    fvs.forEach((fv) => {
+      if (typeof fv.value === "string")
+        existingCodes.add(normalizeCode(fv.value));
+    });
+  }
+  return { fields, refField, existingCodes };
+}
+
 export async function importBucketsTx(
   tx: Tx,
   {
@@ -48,40 +92,13 @@ export async function importBucketsTx(
     "bucket-import:" + roundId
   }))`;
 
-  const fields = await tx.field.findMany({ where: { roundId } });
-  const refField = fields.find(
-    (f) =>
-      normalizeName(f.name) ===
-      normalizeName(bucketImportConfig.referenceCodeFieldName)
+  const { fields, refField, existingCodes } = await loadImportContext(
+    tx,
+    roundId
   );
 
-  // Existing codes = tags of non-deleted buckets ∪ Reference Code field values.
-  const existingCodes = new Set<string>();
-  const tagRows = await tx.tag.findMany({
-    where: { roundId, buckets: { some: { deleted: false } } },
-    select: { value: true },
-  });
-  tagRows.forEach((t) => existingCodes.add(normalizeCode(t.value)));
-  if (refField) {
-    const fvs = await tx.fieldValue.findMany({
-      where: { fieldId: refField.id, Bucket: { roundId, deleted: false } },
-      select: { value: true },
-    });
-    fvs.forEach((fv) => {
-      if (typeof fv.value === "string")
-        existingCodes.add(normalizeCode(fv.value));
-    });
-  }
-
   const { errors } = validateImportPayload(rows, {
-    fields: fields.map((f) => ({
-      id: f.id,
-      name: f.name,
-      type: f.type,
-      limit: f.limit,
-      options: f.options,
-      isRequired: f.isRequired,
-    })),
+    fields: fields.map(toFieldDef),
     existingCodes,
   });
   if (errors.length) throw new BucketImportValidationError(errors);

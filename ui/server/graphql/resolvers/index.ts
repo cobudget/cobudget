@@ -3,6 +3,7 @@ import { getLanguageProgress as languageProgressPage } from "./helpers";
 
 // queries
 import {
+  bucketImportQueries,
   bucketQueries,
   budgetItemQueries,
   expensesQueries,
@@ -50,6 +51,7 @@ const resolvers = {
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
+    ...bucketImportQueries,
     ...budgetItemQueries,
     ...superAdminQueries,
     ...expensesQueries,

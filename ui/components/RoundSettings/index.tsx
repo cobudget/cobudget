@@ -10,6 +10,7 @@ import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
 import Tags from "./Tags";
+import ImportBuckets from "./ImportBuckets";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 import Integrations from "./Integrations";
@@ -69,6 +70,11 @@ const RoundSettings = ({
         slug: "tags",
         name: intl.formatMessage({ defaultMessage: "Tags" }),
         component: Tags,
+      },
+      {
+        slug: "import",
+        name: intl.formatMessage({ defaultMessage: "Import buckets" }),
+        component: ImportBuckets,
       },
       {
         slug: "group",
