@@ -1,5 +1,7 @@
 import { baseColumns, budgetColumnPattern } from "utils/bucketImport/config";
 import type { Prepared } from "utils/bucketImport/prepareImport";
+import type { RowImage } from "utils/bucketImport/images";
+import ImageControl from "./ImageControl";
 
 const inputClass =
   "w-full border border-gray-300 rounded px-2 py-1 bg-white text-gray-900";
@@ -11,11 +13,17 @@ const RowEditor = ({
   budgetNumbers,
   hasColumn,
   onEdit,
+  image,
+  onAttachImage,
+  onClearImage,
 }: {
   row: Prepared["rows"][number];
   budgetNumbers: number[];
   hasColumn: (column: string) => boolean;
   onEdit: (rowNumber: number, column: string, value: string) => void;
+  image?: RowImage;
+  onAttachImage: (file: File) => void;
+  onClearImage: () => void;
 }) => {
   const shownInTable = [
     "proposal_title",
@@ -35,6 +43,20 @@ const RowEditor = ({
 
   return (
     <div className="space-y-4">
+      <div>
+        <h4 className="font-medium text-sm">Image</h4>
+        <ImageControl
+          thumb={row.payload.images?.[0]?.small ?? null}
+          image={image}
+          onAttach={onAttachImage}
+          onClear={onClearImage}
+        />
+        {msgs("image_url").map((m) => (
+          <span key={m} className="text-xs block text-yellow-800">
+            {m}
+          </span>
+        ))}
+      </div>
       <div className="grid gap-3 sm:grid-cols-2">
         {fieldColumns.map((c) => (
           <label key={c.column} className="block text-sm">

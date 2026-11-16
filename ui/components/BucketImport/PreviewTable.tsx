@@ -1,5 +1,7 @@
 import FormattedCurrency from "components/FormattedCurrency";
 import type { Prepared, PreparedIssue } from "utils/bucketImport/prepareImport";
+import type { RowImages } from "utils/bucketImport/images";
+import ImageControl from "./ImageControl";
 
 const tone = (issues: PreparedIssue[]) =>
   issues.some((i) => i.severity === "error")
@@ -24,6 +26,7 @@ const EditableCell = ({
   options,
   onEdit,
   className = "",
+  children,
 }: {
   row: Row;
   column: string;
@@ -32,6 +35,7 @@ const EditableCell = ({
   options?: string[];
   onEdit: (rowNumber: number, column: string, value: string) => void;
   className?: string;
+  children?: React.ReactNode;
 }) => {
   const issues = row.issues.filter((i) => i.column === column);
   const value = row.cells[column] ?? "";
@@ -74,6 +78,7 @@ const EditableCell = ({
           onChange={(e) => change(e.target.value)}
         />
       )}
+      {children}
     </td>
   );
 };
@@ -88,6 +93,9 @@ const PreviewTable = ({
   onSelect,
   onEdit,
   onRemove,
+  images,
+  onAttachImage,
+  onClearImage,
 }: {
   prepared: Prepared;
   currency: string;
@@ -98,6 +106,9 @@ const PreviewTable = ({
   onSelect: (rowNumber: number) => void;
   onEdit: (rowNumber: number, column: string, value: string) => void;
   onRemove: (rowNumber: number) => void;
+  images: RowImages;
+  onAttachImage: (rowNumber: number, file: File) => void;
+  onClearImage: (rowNumber: number) => void;
 }) => {
   const rows = prepared.rows.filter(
     (r) => !onlyNeedsAttention || r.issues.length > 0
@@ -115,7 +126,7 @@ const PreviewTable = ({
               "Summary",
               "Ref. code",
               "Priority area",
-              "Image URL",
+              "Image",
               "Total ask",
               "Messages",
               "",
@@ -178,7 +189,19 @@ const PreviewTable = ({
                   editable={hasColumn("image_url")}
                   onEdit={onEdit}
                   className="min-w-40"
-                />
+                >
+                  <ImageControl
+                    thumb={r.payload.images?.[0]?.small ?? null}
+                    image={images[r.rowNumber]}
+                    onAttach={(f) => onAttachImage(r.rowNumber, f)}
+                    onClear={() => onClearImage(r.rowNumber)}
+                  />
+                  {images[r.rowNumber]?.status === "done" && (
+                    <div className="text-xs text-gray-500">
+                      Overrides the URL above.
+                    </div>
+                  )}
+                </EditableCell>
                 <td
                   className={`px-2 py-1 align-top border-b whitespace-nowrap text-right ${tone(
                     r.issues.filter((i) => i.column?.startsWith("budget_"))

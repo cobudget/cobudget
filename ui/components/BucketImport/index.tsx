@@ -18,6 +18,9 @@ import {
   templateBudgetPairs,
   templateFileName,
 } from "utils/bucketImport/config";
+import { applyImages } from "utils/bucketImport/images";
+import type { RowImage, RowImages } from "utils/bucketImport/images";
+import { uploadBucketImage } from "utils/uploadBucketImage";
 import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
 import ConfirmModal from "./ConfirmModal";
@@ -109,7 +112,10 @@ const BucketImport = ({ round }: { round: any }) => {
   >(null);
   const submittingRef = useRef(false); // synchronous double-click guard
 
-  const prepared: Prepared | null = useMemo(
+  const [images, setImages] = useState<RowImages>({});
+  const attemptRef = useRef(0);
+
+  const preparedBase: Prepared | null = useMemo(
     () =>
       headers.length && ctx
         ? prepareImport(
@@ -128,6 +134,10 @@ const BucketImport = ({ round }: { round: any }) => {
           )
         : null,
     [headers, rows, ctx]
+  );
+  const prepared = useMemo(
+    () => (preparedBase ? applyImages(preparedBase, images) : null),
+    [preparedBase, images]
   );
   const summary = prepared ? summarize(prepared) : null;
 
@@ -156,6 +166,7 @@ const BucketImport = ({ round }: { round: any }) => {
       setFileName(file.name);
       setHeaders(hs);
       setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
+      setImages({}); // row ids restart at 1 for a new file
       setSelected(null);
       setAckWarnings(false);
     } catch (e) {
@@ -180,10 +191,45 @@ const BucketImport = ({ round }: { round: any }) => {
     [headers]
   );
 
-  const onRemove = useCallback((id: number) => {
-    setRows((rs) => rs.filter((r) => r.id !== id));
-    setSelected((s) => (s === id ? null : s));
+  // Uploads start immediately. A later attach/clear on the same row replaces
+  // or removes its entry, so a stale upload result is dropped (attempt check).
+  const attachImage = useCallback(async (id: number, file: File) => {
+    const attempt = ++attemptRef.current;
+    setImages((m) => ({
+      ...m,
+      [id]: { status: "uploading", fileName: file.name, attempt },
+    }));
+    let next: RowImage;
+    try {
+      const { small, large } = await uploadBucketImage(file);
+      next = { status: "done", fileName: file.name, attempt, small, large };
+    } catch (e) {
+      next = {
+        status: "error",
+        fileName: file.name,
+        attempt,
+        error: e?.message ?? String(e),
+      };
+    }
+    setImages((m) => (m[id]?.attempt === attempt ? { ...m, [id]: next } : m));
   }, []);
+
+  const clearImage = useCallback((id: number) => {
+    setImages((m) => {
+      const rest = { ...m };
+      delete rest[id];
+      return rest;
+    });
+  }, []);
+
+  const onRemove = useCallback(
+    (id: number) => {
+      clearImage(id);
+      setRows((rs) => rs.filter((r) => r.id !== id));
+      setSelected((s) => (s === id ? null : s));
+    },
+    [clearImage]
+  );
 
   const removeExisting = () => {
     if (!prepared) return;
@@ -192,6 +238,7 @@ const BucketImport = ({ round }: { round: any }) => {
         .filter((r) => r.issues.some((i) => i.kind === "existingCode"))
         .map((r) => r.rowNumber)
     );
+    ids.forEach(clearImage);
     setRows((rs) => rs.filter((r) => !ids.has(r.id)));
     setSelected((s) => (s !== null && ids.has(s) ? null : s));
   };
@@ -228,6 +275,7 @@ const BucketImport = ({ round }: { round: any }) => {
       setCreated(res.data.importBuckets.buckets);
       setConfirmOpen(false);
       setRows([]);
+      setImages({});
       setHeaders([]);
       setSelected(null);
     } catch (e) {
@@ -414,6 +462,9 @@ const BucketImport = ({ round }: { round: any }) => {
             onSelect={setSelected}
             onEdit={onEdit}
             onRemove={onRemove}
+            images={images}
+            onAttachImage={attachImage}
+            onClearImage={clearImage}
           />
 
           {selectedRow && (
@@ -437,6 +488,9 @@ const BucketImport = ({ round }: { round: any }) => {
                   budgetNumbers={prepared.budgetNumbers}
                   hasColumn={hasColumn}
                   onEdit={onEdit}
+                  image={images[selectedRow.rowNumber]}
+                  onAttachImage={(f) => attachImage(selectedRow.rowNumber, f)}
+                  onClearImage={() => clearImage(selectedRow.rowNumber)}
                 />
                 <BucketPreview
                   row={selectedRow}

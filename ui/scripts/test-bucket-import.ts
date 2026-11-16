@@ -19,6 +19,7 @@ import {
   prepareImport as prepare,
   summarize,
 } from "../utils/bucketImport/prepareImport";
+import { applyImages } from "../utils/bucketImport/images";
 
 const AREAS = [
   "Arts and Culture",
@@ -101,6 +102,63 @@ const issuesOf = (p: Awaited<ReturnType<typeof run>>, row: number) =>
 async function main() {
   const H =
     "proposal_title,proposal_summary,reference_code,priority_area,budget_item_1,budget_amount_1";
+
+  await test("applyImages: uploaded image overrides cell, uploading blocks, error keeps CSV", async () => {
+    const p = await run(
+      `${H},image_url
+
+A,s,A1,Green Economy,Beds,100,
+
+B,s,B1,Green Economy,Beds,100,not-a-url
+
+C,s,C1,Green Economy,Beds,100,https://x.test/c.png
+
+`
+    );
+    assert.ok(issuesOf(p, 0).some((i) => i.column === "image_url"));
+    assert.ok(
+      issuesOf(p, 1).some(
+        (i) => i.severity === "error" && i.column === "image_url"
+      )
+    );
+    const a = applyImages(p, {
+      1: {
+        status: "done",
+        fileName: "a.png",
+        attempt: 1,
+        small: "s1",
+        large: "l1",
+      },
+      2: {
+        status: "done",
+        fileName: "b.png",
+        attempt: 2,
+        small: "s2",
+        large: "l2",
+      },
+      3: { status: "uploading", fileName: "c.png", attempt: 3 },
+    });
+    assert.deepEqual(a.rows[0].payload.images, [{ small: "s1", large: "l1" }]);
+    assert.equal(
+      a.rows[0].issues.filter((i) => i.column === "image_url").length,
+      0
+    );
+    assert.equal(
+      a.rows[1].issues.filter((i) => i.column === "image_url").length,
+      0
+    );
+    assert.ok(summarize(a).blocked === true); // row 3 still uploading
+    assert.ok(
+      a.rows[2].issues.some((i) => i.message.includes("still uploading"))
+    );
+    const err = applyImages(p, {
+      3: { status: "error", fileName: "c.png", attempt: 1, error: "nope" },
+    });
+    assert.deepEqual(err.rows[2].payload.images, [
+      { small: "https://x.test/c.png", large: "https://x.test/c.png" },
+    ]);
+    assert.equal(p.rows[0].payload.images?.length, 0); // input not mutated
+  });
 
   await test("amounts", () => {
     assert.equal(parseAmountToMinor("1200"), 120000);
