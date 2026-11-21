@@ -865,7 +865,7 @@ const RoundPage = ({ currentUser }) => {
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
-                <div className="w-full flex">
+                <div className="w-full self-stretch flex">
                   <Button
                     size="large"
                     color={round.color}
@@ -891,8 +891,11 @@ const RoundPage = ({ currentUser }) => {
                   {canEdit && (
                     <Link href={`/${round.group?.slug ?? "c"}/${round.slug}/import`}>
                       <a
-                        className={`flex items-center justify-center px-5 py-3 text-xl font-medium text-white bg-${round.color} hover:bg-${round.color}-dark border-l border-white border-opacity-30 focus:outline-none focus:ring`}
-                        style={{ borderRadius: "0 6px 6px 0" }}
+                        className={`flex items-center justify-center px-5 py-3 text-xl font-medium text-white bg-${round.color} hover:bg-${round.color}-dark focus:outline-none focus:ring`}
+                        style={{
+                          borderRadius: "0 6px 6px 0",
+                          borderLeft: "1px solid rgba(255, 255, 255, 0.6)",
+                        }}
                         data-testid="import-buckets-button"
                       >
                         <FormattedMessage defaultMessage="Import" />

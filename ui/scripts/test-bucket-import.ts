@@ -331,7 +331,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
     assert.equal(p.rows.length, 1);
     assert.equal(summarize(p).blocked, false);
-    assert.equal(p.rows[0].totalMinor, 155050);
+    assert.equal(p.rows[0].totalMinor, 470800); // sample proposal: Venue hire 4708
   });
 
   await test("every row sharing a code is flagged, fixing one clears both", async () => {
@@ -581,6 +581,11 @@ B,S,X,Other,B,1
     const p = await runWith(defs, buildTemplateCsv(defs, templateBudgetPairs));
     assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
     assert.equal(summarize(p).blocked, false);
+    // the template's example row is the sample proposal (GF10 Hydrology)
+    assert.equal(p.rows[0].uniqueValue, "GF10");
+    assert.equal(p.rows[0].payload.title, "Hydrology");
+    assert.equal(p.rows[0].totalMinor, 470800);
+    assert.equal(p.rows[0].payload.fieldValues.length, 11);
   });
 
   const real = process.argv[2];

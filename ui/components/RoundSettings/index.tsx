@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useIntl } from "react-intl";
@@ -9,7 +9,7 @@ import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
 import Tags from "./Tags";
-import BucketFormAndImport from "./BucketFormAndImport";
+import CustomFields from "./CustomFields";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 import Integrations from "./Integrations";
@@ -55,10 +55,10 @@ const RoundSettings = ({
       {
         slug: "bucket-form",
         name: intl.formatMessage(
-          { defaultMessage: "{bucket} Form & Import" },
+          { defaultMessage: "{bucket} Form" },
           { bucket: capitalize(process.env.BUCKET_NAME_SINGULAR) }
         ),
-        component: BucketFormAndImport,
+        component: CustomFields,
       },
       {
         slug: "funding",
@@ -99,15 +99,6 @@ const RoundSettings = ({
         : defaultTabs,
     [currentGroup?.discourseUrl, defaultTabs]
   );
-
-  // The import settings tab was merged into the Bucket Form tab.
-  const redirectToForm = settingsTabSlug === "import";
-  useEffect(() => {
-    if (redirectToForm)
-      router.replace(
-        `/${router.query.group}/${router.query.round}/settings/bucket-form`
-      );
-  }, [redirectToForm, router]);
 
   const currentTab =
     tabs.find((tab) => tab.slug === settingsTabSlug) ?? tabs[0];

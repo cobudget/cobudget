@@ -2,6 +2,7 @@ import csv from "csvtojson";
 import { budgetColumnPattern } from "../fieldKey";
 import { bucketImportConfig } from "./config";
 import { buildColumns, skippedFields } from "./columns";
+import { sampleBuiltIn, sampleByKey } from "./sampleProposal";
 import type {
   ImportBucketRow,
   ImportBudgetItem,
@@ -360,12 +361,21 @@ export function buildTemplateCsv(
     `budget_amount_${i + 1}`,
   ]).flat();
   const headers = [...columns.map((c) => c.column), ...budgetHeaders];
+  // Example row: the sample proposal (see sampleProposal.ts). Fields outside
+  // the Give it a Go preset get a generic example.
+  const [first, ...moreBudget] = sampleBuiltIn.budget;
   const example = [
     ...columns.map((c) =>
       c.target === "title"
-        ? "Community garden"
+        ? sampleBuiltIn.title
         : c.target === "summary"
-        ? "Turn the empty lot on Mill Road into a shared growing space."
+        ? sampleBuiltIn.summary
+        : c.target === "image"
+        ? ""
+        : sampleByKey[c.column] !== undefined &&
+          (!c.field?.options?.length ||
+            c.field.options.includes(sampleByKey[c.column]))
+        ? sampleByKey[c.column]
         : c.unique
         ? "EX01"
         : c.field?.type === "BOOLEAN"
@@ -374,11 +384,10 @@ export function buildTemplateCsv(
         ? c.field.options[0]
         : ""
     ),
-    "Raised beds",
-    "1200",
-    "Tools",
-    "350.50",
-    ...Array(Math.max(0, budgetPairs - 2) * 2).fill(""),
+    first.description,
+    first.amount,
+    ...moreBudget.flatMap((b) => [b.description, b.amount]),
+    ...Array(Math.max(0, budgetPairs - 1 - moreBudget.length) * 2).fill(""),
   ];
   return (
     [headers.map(q).join(","), example.map(q).join(",")].join("\r\n") + "\r\n"
