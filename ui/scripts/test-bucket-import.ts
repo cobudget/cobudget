@@ -13,6 +13,7 @@ import {
 } from "../utils/bucketImport/config";
 import { buildColumns } from "../utils/bucketImport/columns";
 import { generateImportKey, validateImportKey } from "../utils/fieldKey";
+import { roundFieldPresetCreateData } from "../server/services/roundFieldPreset";
 import { validateImportPayload } from "../utils/bucketImport/validatePayload";
 import type { ImportFieldDef } from "../utils/bucketImport/types";
 import {
@@ -562,6 +563,24 @@ B,S,X,Other,B,1
     assert.equal(validateImportKey("Has Space") !== null, true);
     assert.equal(validateImportKey("x".repeat(41)) !== null, true);
     assert.equal(validateImportKey("ok-key_1"), null);
+  });
+
+  await test("default preset: valid unique keys, one unique TEXT field, template round-trips", async () => {
+    const data = roundFieldPresetCreateData();
+    const keys = data.map((f) => f.importKey);
+    assert.equal(new Set(keys).size, keys.length);
+    keys.forEach((k) => assert.equal(validateImportKey(k), null, k));
+    const flagged = data.filter((f) => f.isUniqueIdentifier);
+    assert.equal(flagged.length, 1);
+    assert.equal(flagged[0].type, "TEXT");
+    assert.equal(
+      data.find((f) => f.name === "Priority Area").options.length,
+      9
+    );
+    const defs = data.map((f, i) => ({ ...f, id: "p" + i, limit: null }));
+    const p = await runWith(defs, buildTemplateCsv(defs, templateBudgetPairs));
+    assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
+    assert.equal(summarize(p).blocked, false);
   });
 
   const real = process.argv[2];

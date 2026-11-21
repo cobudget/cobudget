@@ -2,6 +2,7 @@ import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
 import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
+import { roundFieldPresetCreateData } from "server/services/roundFieldPreset";
 import { generateImportKey, validateImportKey } from "utils/fieldKey";
 import {
   getCollective,
@@ -98,17 +99,7 @@ export const createRound = async (
           outgoingAccount: { create: {} },
         },
       },
-      fields: {
-        create: {
-          name: "Description",
-          importKey: "description",
-          description: "Describe your bucket",
-          type: "MULTILINE_TEXT",
-          options: [],
-          isRequired: false,
-          position: 1001,
-        },
-      },
+      fields: { create: roundFieldPresetCreateData() },
     },
   });
 
