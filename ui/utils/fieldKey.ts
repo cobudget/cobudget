@@ -12,8 +12,8 @@ export const MAX_IMPORT_KEY_LENGTH = 40;
 /** Column names the importer owns; a field key can never equal one of them. */
 export const RESERVED_KEYS = ["title", "summary", "image"];
 export const budgetColumnPattern = {
-  item: /^budget_item_(\d+)$/,
-  amount: /^budget_amount_(\d+)$/,
+  item: /^budget-item-(\d+)$/,
+  amount: /^budget-amount-(\d+)$/,
 };
 
 export const isReservedKey = (key: string) =>

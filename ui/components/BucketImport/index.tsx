@@ -161,18 +161,16 @@ const BucketImport = ({ round }: { round: any }) => {
     headers,
   ]);
 
+  const [parsing, setParsing] = useState(false);
   const onFile = useCallback(async (file?: File) => {
     if (!file) return;
+    setParsing(true);
     try {
       const parsed = await parseCsvText(await file.text());
       if (parsed.rows.length === 0)
         return toast.error("The CSV file has no data rows.");
-      // image is optional in the file but always editable here
-      const hs = parsed.headers.includes("image")
-        ? parsed.headers
-        : [...parsed.headers, "image"];
       setFileName(file.name);
-      setHeaders(hs);
+      setHeaders(parsed.headers);
       setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
       setImages({}); // row ids restart at 1 for a new file
       setUnassigned([]);
@@ -180,6 +178,8 @@ const BucketImport = ({ round }: { round: any }) => {
       setAckWarnings(false);
     } catch (e) {
       toast.error("Could not read this file as CSV: " + (e?.message ?? e));
+    } finally {
+      setParsing(false);
     }
   }, []);
 
@@ -406,54 +406,25 @@ const BucketImport = ({ round }: { round: any }) => {
         )}
       </div>
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-lg font-semibold mb-4">How it works</h2>
-        <div className="grid gap-6 md:grid-cols-3 text-sm">
-          <div className="space-y-2">
-            <h3 className="font-semibold">1. Download the template</h3>
-            <p>
-              Download the template and fill it in: one row per bucket. Keep the
-              file as CSV (.csv).
-            </p>
-            <Button
-              variant="secondary"
-              disabled={!ctx}
-              onClick={() => downloadTemplate(ctx.fields)}
-            >
-              Download CSV template
-            </Button>
-            <details>
-              <summary className="cursor-pointer font-medium">
-                Column reference
-              </summary>
-              <div className="mt-3">
-                {fetching ? (
-                  <span className="text-gray-600">Loading round fields…</span>
-                ) : (
-                  <ColumnReference fields={ctx?.fields ?? []} />
-                )}
-              </div>
-            </details>
-          </div>
-          <div className="space-y-2">
-            <h3 className="font-semibold">2. Upload and check interactively</h3>
-            <p>
-              Upload the file and review the preview. Fix errors right in the
-              table, and assign an image to each bucket.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <h3 className="font-semibold">3. Submit</h3>
-            <p>
-              Nothing is written until you confirm. Errors block the import;
-              warnings must be acknowledged.
-            </p>
+      {!(prepared && summary && ctx) && (
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold mb-3">Preview</h2>
+          <div className="border-2 border-dashed rounded-lg p-10 text-center text-gray-500 text-sm">
+            {parsing ? (
+              "Reading your file…"
+            ) : (
+              <>
+                Choose a CSV file above. Your rows appear here, with errors and
+                warnings, so you can fix them and assign an image to each bucket
+                before anything is created.
+              </>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
       {prepared && summary && ctx && (
-        <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
           {prepared.fileIssues.map((i, k) => (
             <Banner
               key={k}
@@ -630,6 +601,54 @@ const BucketImport = ({ round }: { round: any }) => {
           </div>
         </div>
       )}
+
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">How it works</h2>
+        <div className="grid gap-6 md:grid-cols-3 text-sm">
+          <div className="space-y-2">
+            <h3 className="font-semibold">1. Download the template</h3>
+            <p>
+              Download the template and fill it in: one row per bucket. Keep the
+              file as CSV (.csv).
+            </p>
+            <Button
+              variant="secondary"
+              disabled={!ctx}
+              onClick={() => downloadTemplate(ctx.fields)}
+            >
+              Download CSV template
+            </Button>
+            <details>
+              <summary className="cursor-pointer font-medium">
+                Column reference
+              </summary>
+              <div className="mt-3">
+                {fetching ? (
+                  <span className="text-gray-600">Loading round fields…</span>
+                ) : (
+                  <ColumnReference fields={ctx?.fields ?? []} />
+                )}
+              </div>
+            </details>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold">
+              2. Check interactively and assign images
+            </h3>
+            <p>
+              Upload the file and review the preview. Fix errors right in the
+              table, and assign an image to each bucket.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold">3. Submit</h3>
+            <p>
+              Nothing is written until you confirm. Errors block the import;
+              warnings must be acknowledged.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {confirmOpen && summary && ctx && (
         <ConfirmModal

@@ -6,7 +6,8 @@ ALTER TABLE "Field" ADD COLUMN "isUniqueIdentifier" BOOLEAN NOT NULL DEFAULT fal
 -- Backfill importKey for existing fields. Mirrors utils/fieldKey.ts for ASCII names:
 -- lower-case, apostrophes dropped, "&" -> "-and-", every other run of non [a-z0-9]
 -- -> "-", trimmed, capped at 40 chars. Non-latin names with no [a-z0-9] become
--- "field". Reserved built-in column names (title, summary, image) get a
+-- "field". Reserved built-in column names (title, summary, image, budget-item-N,
+-- budget-amount-N) get a
 -- "-field" suffix. Duplicates within a round get -2, -3, ... (loop, so a
 -- generated "-2" can never collide with an existing key).
 DO $$
@@ -27,7 +28,9 @@ BEGIN
     base := left(base, 40);
     base := regexp_replace(base, '-+$', '', 'g');
     IF base = '' THEN base := 'field'; END IF;
-    IF base IN ('title', 'summary', 'image') THEN base := base || '-field'; END IF;
+    IF base IN ('title', 'summary', 'image') OR base ~ '^budget-(item|amount)-[0-9]+$' THEN
+      base := base || '-field';
+    END IF;
 
     candidate := base;
     n := 1;

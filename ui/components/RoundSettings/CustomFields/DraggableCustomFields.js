@@ -151,7 +151,12 @@ const SortableItem = sortableElement(
           </span>
           {customField.isRequired && (
             <span className={css.label}>
-              <FormattedMessage defaultMessage="Is Required" />
+              <FormattedMessage defaultMessage="Required" />
+            </span>
+          )}
+          {customField.isUniqueIdentifier && (
+            <span className={css.label}>
+              <FormattedMessage defaultMessage="Unique" />
             </span>
           )}
         </div>

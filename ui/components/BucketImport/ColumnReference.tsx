@@ -32,9 +32,9 @@ const ColumnReference = ({ fields }: { fields: ImportFieldDef[] }) => {
           ))}
           <tr className="align-top">
             <td className="py-1 pr-4 font-mono">
-              {"budget_item_N"}
+              {"budget-item-N"}
               <br />
-              {"budget_amount_N"}
+              {"budget-amount-N"}
             </td>
             <td className="py-1 pr-4">At least one</td>
             <td className="py-1 pr-4">Budget item (expense)</td>

@@ -146,16 +146,16 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
   budgetNumbers.forEach((n) => {
     if (!itemNs.has(n))
       fileError(
-        `"budget_amount_${n}" has no matching "budget_item_${n}" column.`
+        `"budget-amount-${n}" has no matching "budget-item-${n}" column.`
       );
     if (!amountNs.has(n))
       fileError(
-        `"budget_item_${n}" has no matching "budget_amount_${n}" column.`
+        `"budget-item-${n}" has no matching "budget-amount-${n}" column.`
       );
   });
   if (budgetNumbers.length === 0)
     fileError(
-      'No budget columns found (expected "budget_item_1", "budget_amount_1", ...).'
+      'No budget columns found (expected "budget-item-1", "budget-amount-1", ...).'
     );
 
   // Unknown columns -> warning only (never imported)
@@ -198,8 +198,8 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     const budgetItems: ImportBudgetItem[] = [];
     let totalMinor = 0;
     budgetNumbers.forEach((n) => {
-      const itemCol = `budget_item_${n}`;
-      const amountCol = `budget_amount_${n}`;
+      const itemCol = `budget-item-${n}`;
+      const amountCol = `budget-amount-${n}`;
       const desc = get(r, itemCol);
       const amountRaw = get(r, amountCol);
       if (!desc && !amountRaw) return;
@@ -236,21 +236,16 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
       } else fieldValues.push({ fieldId: def.id, value: v });
     });
 
-    // image
-    const imageUrl = get(r, colFor("image"));
-    if (imageUrl && !/^https?:\/\/\S+$/i.test(imageUrl))
-      add("error", "image", "Image must be a full http(s) URL.");
-    else if (!imageUrl) add("warning", "image", "No image yet.");
+    // images are uploaded in the tool (never taken from a URL in the CSV);
+    // applyImages (images.ts) overlays the uploads and clears this warning
+    add("warning", "image", "No image yet.");
 
     const payload: ImportBucketRow = {
       title: get(r, colFor("title")),
       summary: get(r, colFor("summary")),
       fieldValues,
       budgetItems,
-      images:
-        imageUrl && /^https?:\/\/\S+$/i.test(imageUrl)
-          ? [{ small: imageUrl, large: imageUrl }]
-          : [],
+      images: [],
     };
 
     return {
@@ -296,7 +291,7 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     if (
       x.field === "budgetItems" &&
       x.message.startsWith("No budget items") &&
-      row.issues.some((p) => p.column?.startsWith("budget_"))
+      row.issues.some((p) => p.column?.startsWith("budget-"))
     )
       return;
     row.issues.push({
@@ -357,8 +352,8 @@ export function buildTemplateCsv(
   const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
   const columns = buildColumns(fields);
   const budgetHeaders = Array.from({ length: budgetPairs }, (_, i) => [
-    `budget_item_${i + 1}`,
-    `budget_amount_${i + 1}`,
+    `budget-item-${i + 1}`,
+    `budget-amount-${i + 1}`,
   ]).flat();
   const headers = [...columns.map((c) => c.column), ...budgetHeaders];
   // Example row: the sample proposal (see sampleProposal.ts). Fields outside
@@ -370,8 +365,6 @@ export function buildTemplateCsv(
         ? sampleBuiltIn.title
         : c.target === "summary"
         ? sampleBuiltIn.summary
-        : c.target === "image"
-        ? ""
         : sampleByKey[c.column] !== undefined &&
           (!c.field?.options?.length ||
             c.field.options.includes(sampleByKey[c.column]))

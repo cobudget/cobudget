@@ -10,6 +10,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import { FormattedMessage, useIntl } from "react-intl";
+import Tooltip from "@tippyjs/react";
 import { MAX_IMPORT_KEY_LENGTH, validateImportKey } from "utils/fieldKey";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
@@ -286,28 +287,41 @@ export default function AddOrEditCustomField({
             </div>
             {typeInputValue === "TEXT" && (
               <div>
-                <FormControlLabel
-                  label={intl.formatMessage({
-                    defaultMessage: "Unique identifier (for imports)",
-                  })}
-                  control={
-                    <Checkbox
-                      onChange={(e) => setIsUniqueIdentifier(e.target.checked)}
-                      checked={isUniqueIdentifier}
-                      disabled={Boolean(currentUnique)}
-                      data-testid="customfield-unique-checkbox"
-                    />
-                  }
-                />
-                <p className="text-sm text-gray-600">
-                  {currentUnique ? (
-                    <FormattedMessage
-                      defaultMessage='"{name}" is already the unique identifier of this round. Untick it there first.'
-                      values={{ name: currentUnique.name }}
-                    />
-                  ) : (
-                    <FormattedMessage defaultMessage="Used only by the CSV import: its value must be unique across the file and the round, and becomes a tag. Normal editing is not affected." />
+                {/* A disabled checkbox gets no mouse/touch events, so the
+                    tooltip hangs on the wrapper: hover on desktop, tap on
+                    touch screens. */}
+                <Tooltip
+                  content={intl.formatMessage(
+                    {
+                      defaultMessage:
+                        '"{name}" is already the unique identifier of this round.',
+                    },
+                    { name: currentUnique?.name }
                   )}
+                  placement="bottom-start"
+                  arrow={false}
+                  disabled={!currentUnique}
+                >
+                  <span className="inline-block">
+                    <FormControlLabel
+                      label={intl.formatMessage({
+                        defaultMessage: "Unique identifier (for imports)",
+                      })}
+                      control={
+                        <Checkbox
+                          onChange={(e) =>
+                            setIsUniqueIdentifier(e.target.checked)
+                          }
+                          checked={isUniqueIdentifier}
+                          disabled={Boolean(currentUnique)}
+                          data-testid="customfield-unique-checkbox"
+                        />
+                      }
+                    />
+                  </span>
+                </Tooltip>
+                <p className="text-sm text-gray-600">
+                  <FormattedMessage defaultMessage="Used only by the CSV import: its value must be unique across the file and the round, and becomes a tag. Normal editing is not affected." />
                 </p>
               </div>
             )}

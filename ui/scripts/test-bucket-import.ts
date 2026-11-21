@@ -77,24 +77,19 @@ const issuesOf = (p: Awaited<ReturnType<typeof run>>, row: number) =>
   p.rows[row].issues;
 
 async function main() {
-  const H = "title,summary,ref,area,budget_item_1,budget_amount_1";
+  const H = "title,summary,ref,area,budget-item-1,budget-amount-1";
 
-  await test("applyImages: uploaded image overrides cell, uploading blocks, error keeps CSV", async () => {
-    const p = await run(
-      `${H},image
-
-A,s,A1,Green Economy,Beds,100,
-
-B,s,B1,Green Economy,Beds,100,not-a-url
-
-C,s,C1,Green Economy,Beds,100,https://x.test/c.png
-
-`
-    );
-    assert.ok(issuesOf(p, 0).some((i) => i.column === "image"));
-    assert.ok(
-      issuesOf(p, 1).some((i) => i.severity === "error" && i.column === "image")
-    );
+  await test("applyImages: upload clears the warning, uploading blocks, error keeps the row", async () => {
+    const p = await run(`${H}
+A,s,A1,Green Economy,Beds,100
+B,s,B1,Green Economy,Beds,100
+C,s,C1,Green Economy,Beds,100
+`);
+    // images are never read from the CSV: every row starts with the warning
+    p.rows.forEach((r, i) => {
+      assert.ok(issuesOf(p, i).some((x) => x.column === "image"));
+      assert.deepEqual(r.payload.images, []);
+    });
     const a = applyImages(p, {
       1: {
         status: "done",
@@ -117,10 +112,6 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
       a.rows[0].issues.filter((i) => i.column === "image").length,
       0
     );
-    assert.equal(
-      a.rows[1].issues.filter((i) => i.column === "image").length,
-      0
-    );
     assert.ok(summarize(a).blocked === true); // row 3 still uploading
     assert.ok(
       a.rows[2].issues.some((i) => i.message.includes("still uploading"))
@@ -128,9 +119,8 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     const err = applyImages(p, {
       3: { status: "error", fileName: "c.png", attempt: 1, error: "nope" },
     });
-    assert.deepEqual(err.rows[2].payload.images, [
-      { small: "https://x.test/c.png", large: "https://x.test/c.png" },
-    ]);
+    assert.deepEqual(err.rows[2].payload.images, []);
+    assert.ok(err.rows[2].issues.some((i) => i.column === "image"));
     assert.equal(p.rows[0].payload.images?.length, 0); // input not mutated
   });
 
@@ -245,7 +235,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
   });
 
   await test("clean row has no issues except missing image warning", async () => {
-    const p = await run(`${H},image\nT,S,A1,Green Economy,Beds,100,\n`);
+    const p = await run(`${H}\nT,S,A1,Green Economy,Beds,100\n`);
     // only the note about fields without a column (FILE type, no key)
     assert.equal(p.fileIssues.length, 1);
     assert.ok(p.fileIssues[0].message.includes("Attachment, Legacy"));
@@ -259,7 +249,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
   await test("22+ budget items, non-contiguous numbers, uses real N", async () => {
     const heads = Array.from(
       { length: 25 },
-      (_, i) => `budget_item_${i + 1},budget_amount_${i + 1}`
+      (_, i) => `budget-item-${i + 1},budget-amount-${i + 1}`
     );
     const vals = Array.from({ length: 25 }, (_, i) =>
       i % 2 ? "," : `Item ${i + 1},10`
@@ -292,7 +282,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     assert.ok(at(0, "title", "error"));
     assert.ok(at(1, "summary", "error"));
     assert.ok(at(2, "area", "error"));
-    assert.ok(at(3, "budget_amount_1", "error"));
+    assert.ok(at(3, "budget-amount-1", "error"));
     assert.ok(at(5, "ref", "error"), "dup code flagged on second row");
     assert.ok(at(6, "ref", "error"), "dup vs existing");
     assert.equal(summarize(p).blocked, true);
@@ -313,7 +303,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
   });
 
   await test("missing required column / unknown column / lone budget half", async () => {
-    const p = await run("title,ref,mystery,budget_item_1\nT,A1,x,B\n");
+    const p = await run("title,ref,mystery,budget-item-1\nT,A1,x,B\n");
     const msgs = p.fileIssues.map((i) => `${i.severity}:${i.message}`);
     assert.ok(msgs.some((m) => m.includes('"summary" is missing')));
     assert.ok(
@@ -321,7 +311,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     );
     assert.ok(
       msgs.some((m) =>
-        m.includes('"budget_item_1" has no matching "budget_amount_1"')
+        m.includes('"budget-item-1" has no matching "budget-amount-1"')
       )
     );
   });
@@ -410,11 +400,11 @@ B,S,X,Other,B,1
   await test("columns = built-ins + importable keyed fields (no hardcoded names)", () => {
     assert.deepEqual(
       buildColumns(fields).map((c) => c.column),
-      ["title", "summary", "image", "area", "ref", "notes", "approved"]
+      ["title", "summary", "area", "ref", "notes", "approved"]
     );
     assert.deepEqual(
       buildColumns(other).map((c) => c.column),
-      ["title", "summary", "image", "grant-code", "type", "urgent"]
+      ["title", "summary", "grant-code", "type", "urgent"]
     );
     const ref = buildColumns(fields).find((c) => c.column === "ref");
     assert.equal(ref.required, true); // unique identifier is always required
@@ -423,9 +413,7 @@ B,S,X,Other,B,1
 
   await test("another field set: template round-trips, enum/boolean/required/unique", async () => {
     const tpl = buildTemplateCsv(other, templateBudgetPairs);
-    assert.ok(
-      tpl.startsWith('"title","summary","image","grant-code","type","urgent"')
-    );
+    assert.ok(tpl.startsWith('"title","summary","grant-code","type","urgent"'));
     const p = await runWith(other, tpl);
     assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
     assert.equal(summarize(p).blocked, false);
@@ -438,7 +426,7 @@ B,S,X,Other,B,1
 
     const bad = await runWith(
       other,
-      "title,summary,grant-code,type,urgent,budget_item_1,budget_amount_1\n" +
+      "title,summary,grant-code,type,urgent,budget-item-1,budget-amount-1\n" +
         "A,S,G1,Huge,maybe,B,1\n" +
         "B,S,,Small,no,B,1\n"
     );
@@ -459,7 +447,7 @@ B,S,X,Other,B,1
   await test("required field / unique column missing from the file is one file error", async () => {
     const p = await runWith(
       other,
-      "title,summary,budget_item_1,budget_amount_1\nA,S,B,1\n"
+      "title,summary,budget-item-1,budget-amount-1\nA,S,B,1\n"
     );
     const errs = p.fileIssues
       .filter((i) => i.severity === "error")
@@ -473,7 +461,7 @@ B,S,X,Other,B,1
     const f = other.map((x) => ({ ...x, isUniqueIdentifier: false }));
     const p = await runWith(
       f,
-      "title,summary,grant-code,type,budget_item_1,budget_amount_1\nA,S,SAME,Small,B,1\nB,S,SAME,Large,B,1\n",
+      "title,summary,grant-code,type,budget-item-1,budget-amount-1\nA,S,SAME,Small,B,1\nB,S,SAME,Large,B,1\n",
       ["same"]
     );
     assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
@@ -494,7 +482,7 @@ B,S,X,Other,B,1
   await test("unique check follows the flagged field, whatever its name", async () => {
     const p = await runWith(
       other,
-      "title,summary,grant-code,type,budget_item_1,budget_amount_1\nA,S,Q1,Small,B,1\nB,S,q1,Large,B,1\nC,S,OLD,Small,B,1\n",
+      "title,summary,grant-code,type,budget-item-1,budget-amount-1\nA,S,Q1,Small,B,1\nB,S,q1,Large,B,1\nC,S,OLD,Small,B,1\n",
       ["old"]
     );
     assert.equal(summarize(p).duplicateCodeRows, 2);
@@ -558,7 +546,7 @@ B,S,X,Other,B,1
     assert.ok(k.length <= 40 && !k.endsWith("-"), k);
     const k2 = generateImportKey(long, [k]);
     assert.ok(k2.length <= 40 && k2 !== k && k2.endsWith("-2"), k2);
-    assert.equal(validateImportKey("budget_item_3") !== null, true);
+    assert.equal(validateImportKey("budget-item-3") !== null, true);
     assert.equal(validateImportKey("title") !== null, true);
     assert.equal(validateImportKey("Has Space") !== null, true);
     assert.equal(validateImportKey("x".repeat(41)) !== null, true);

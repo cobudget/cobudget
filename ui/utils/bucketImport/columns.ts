@@ -5,7 +5,7 @@ import type { ImportFieldDef } from "./types";
 // parser, the template, the column reference and the row editor, so none of
 // them can drift apart. Columns = built-ins + one per importable field, named
 // by Field.importKey (see utils/fieldKey.ts). Budget lines
-// (budget_item_N / budget_amount_N) are discovered from the file's headers.
+// (budget-item-N / budget-amount-N) are discovered from the file's headers.
 
 /** Field types the importer can fill from a CSV cell. */
 export const importableTypes = ["TEXT", "MULTILINE_TEXT", "ENUM", "BOOLEAN"];
@@ -13,7 +13,7 @@ export const importableTypes = ["TEXT", "MULTILINE_TEXT", "ENUM", "BOOLEAN"];
 export type ImportColumn = {
   /** CSV header */
   column: string;
-  target: "title" | "summary" | "image" | "field";
+  target: "title" | "summary" | "field";
   /** target === "field" */
   field?: ImportFieldDef;
   required: boolean;
@@ -34,13 +34,6 @@ export const builtInColumns: ImportColumn[] = [
     target: "summary",
     required: true,
     description: `Shown on cards and at the top of the page. Plain text, max ${bucketImportConfig.summaryMaxLength} characters.`,
-  },
-  {
-    column: "image",
-    target: "image",
-    required: false,
-    description:
-      "Image URL (e.g. Cloudinary). Images can also be attached after upload; rows without one get a warning.",
   },
 ];
 

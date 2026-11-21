@@ -80,8 +80,8 @@ const RowEditor = ({
         <h4 className="font-medium text-sm mb-1">Budget lines</h4>
         <div className="grid grid-cols-[1fr_8rem] gap-x-2 gap-y-1 text-sm">
           {budgetNumbers.map((n) => {
-            const item = `budget_item_${n}`;
-            const amount = `budget_amount_${n}`;
+            const item = `budget-item-${n}`;
+            const amount = `budget-amount-${n}`;
             if (!hasColumn(item) || !hasColumn(amount)) return null;
             const bad = msgs(item).concat(msgs(amount));
             return (

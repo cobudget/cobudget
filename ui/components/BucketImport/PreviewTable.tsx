@@ -196,12 +196,10 @@ const PreviewTable = ({
                     className="min-w-40"
                   />
                 ))}
-                <EditableCell
-                  row={r}
-                  column="image"
-                  editable={hasColumn("image")}
-                  onEdit={onEdit}
-                  className="min-w-40"
+                <td
+                  className={`px-2 py-1 align-top border-b min-w-40 ${tone(
+                    r.issues.filter((i) => i.column === "image")
+                  )}`}
                 >
                   <ImageControl
                     thumb={r.payload.images?.[0]?.small ?? null}
@@ -209,15 +207,10 @@ const PreviewTable = ({
                     onAttach={(f) => onAttachImage(r.rowNumber, f)}
                     onClear={() => onClearImage(r.rowNumber)}
                   />
-                  {images[r.rowNumber]?.status === "done" && (
-                    <div className="text-xs text-gray-500">
-                      Overrides the URL above.
-                    </div>
-                  )}
-                </EditableCell>
+                </td>
                 <td
                   className={`px-2 py-1 align-top border-b whitespace-nowrap text-right ${tone(
-                    r.issues.filter((i) => i.column?.startsWith("budget_"))
+                    r.issues.filter((i) => i.column?.startsWith("budget-"))
                   )}`}
                 >
                   <FormattedCurrency value={r.totalMinor} currency={currency} />
