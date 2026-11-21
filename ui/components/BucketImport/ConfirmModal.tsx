@@ -39,10 +39,9 @@ const ConfirmModal = ({
           <FormattedCurrency value={totalAsk} currency={currency} />
         </li>
         <li>
-          Buckets are published and open for funding immediately, and you are
-          listed as cocreator.
+          Buckets are published and open for funding immediately, you are listed
+          as cocreator, and no notification emails are sent.
         </li>
-        <li>No notification emails are sent.</li>
         <li>All or nothing: if anything fails, no buckets are created.</li>
         {warningRows > 0 && (
           <li>{warningRows} rows have warnings that you chose to accept.</li>

@@ -384,49 +384,6 @@ const BucketImport = ({ round }: { round: any }) => {
         </Banner>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6 mb-6 space-y-4">
-        <h2 className="text-lg font-semibold">Before you start</h2>
-        <ol className="list-decimal ml-5 space-y-1 text-sm">
-          <li>
-            The round needs the custom fields below (Round Settings → Bucket
-            Form). The importer never creates or changes them.
-          </li>
-          <li>
-            Download the template, fill in one row per bucket (Google Sheets →
-            Download as CSV, or Excel → CSV UTF-8) and upload it here.
-          </li>
-          <li>
-            You get a preview with errors and warnings per row. Fix them right
-            in the table (or remove a row); counts update as you type. Nothing
-            is written until you confirm; errors block the import, warnings must
-            be acknowledged.
-          </li>
-          <li>
-            Imported buckets are published and open for funding immediately,
-            list you as cocreator, and send no notification emails.
-          </li>
-        </ol>
-        <div>
-          <Button variant="secondary" onClick={downloadTemplate}>
-            Download CSV template
-          </Button>
-        </div>
-        <details>
-          <summary className="cursor-pointer font-medium text-sm">
-            Column reference
-          </summary>
-          <div className="mt-3">
-            {fetching ? (
-              <span className="text-sm text-gray-600">
-                Loading round fields…
-              </span>
-            ) : (
-              <ColumnReference fields={ctx?.fields ?? []} />
-            )}
-          </div>
-        </details>
-      </div>
-
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-lg font-semibold mb-3">Upload CSV</h2>
         <input
@@ -445,6 +402,48 @@ const BucketImport = ({ round }: { round: any }) => {
         {fileName && (
           <span className="ml-3 text-sm text-gray-700">{fileName}</span>
         )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">How it works</h2>
+        <div className="grid gap-6 md:grid-cols-3 text-sm">
+          <div className="space-y-2">
+            <h3 className="font-semibold">1. Download the template</h3>
+            <p>
+              Fill in one row per bucket (Google Sheets: Download as CSV, Excel:
+              CSV UTF-8).
+            </p>
+            <Button variant="secondary" onClick={downloadTemplate}>
+              Download CSV template
+            </Button>
+            <details>
+              <summary className="cursor-pointer font-medium">
+                Column reference
+              </summary>
+              <div className="mt-3">
+                {fetching ? (
+                  <span className="text-gray-600">Loading round fields…</span>
+                ) : (
+                  <ColumnReference fields={ctx?.fields ?? []} />
+                )}
+              </div>
+            </details>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold">2. Upload and check</h3>
+            <p>
+              Upload the file and review the preview. Fix errors right in the
+              table, and assign an image to each bucket.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <h3 className="font-semibold">3. Submit</h3>
+            <p>
+              Nothing is written until you confirm. Errors block the import;
+              warnings must be acknowledged.
+            </p>
+          </div>
+        </div>
       </div>
 
       {prepared && summary && ctx && (
