@@ -165,6 +165,7 @@ model RoundMember {
   statusAccountId   String?  @unique
 
   transactionsCreated Transaction[]
+
   @@unique([userId, roundId])
   @@map("CollectionMember")
 }
@@ -270,6 +271,7 @@ model Tag {
   updatedAt DateTime @updatedAt
 
   buckets Bucket[]
+
   @@unique([roundId, value])
 }
 
@@ -286,19 +288,26 @@ model Guideline {
 }
 
 model Field {
-  id          String       @id @default(cuid())
-  name        String
-  description String
-  type        FieldType
-  limit       Int?
-  options     String[]
-  isRequired  Boolean
-  position    Float
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  round       Round        @relation(fields: [roundId], references: [id])
-  roundId     String       @map("collectionId")
-  fieldValue  FieldValue[]
+  id                 String       @id @default(cuid())
+  name               String
+  description        String
+  type               FieldType
+  limit              Int?
+  options            String[]
+  isRequired         Boolean
+  // Stable CSV column name for the bucket import (slug of the name at creation,
+  // never changed by a rename). Unique per round; see utils/fieldKey.ts.
+  importKey          String?
+  // Import-only: the field whose value must be unique per round (becomes a tag).
+  isUniqueIdentifier Boolean      @default(false)
+  position           Float
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  round              Round        @relation(fields: [roundId], references: [id])
+  roundId            String       @map("collectionId")
+  fieldValue         FieldValue[]
+
+  @@unique([roundId, importKey])
 }
 
 model FieldValue {

@@ -2,14 +2,15 @@ import slugify from "../slugify";
 import { normalizeCode } from "./config";
 
 // Pure filename -> row matching for the batch image upload. Order of
-// strategies: reference code, then title slug, then order number. The first
+// strategies: unique identifier, then title slug, then order number. The first
 // strategy that finds any row decides; it is never overridden by a weaker one.
 // Ambiguity is reported, never guessed.
 
 export type MatchFile = { id: string; name: string };
 export type MatchRow = {
   rowNumber: number; // stable row number, also the "order number"
-  referenceCode: string;
+  /** Value of the round's unique-identifier field ('' when none) */
+  uniqueValue: string;
   title: string;
 };
 
@@ -40,7 +41,7 @@ const candidatesFor = (
 ): { by: MatchBy; rows: number[] } | null => {
   const code = normalizeCode(stem);
   if (code) {
-    const hit = rows.filter((r) => normalizeCode(r.referenceCode) === code);
+    const hit = rows.filter((r) => normalizeCode(r.uniqueValue) === code);
     if (hit.length) return { by: "code", rows: hit.map((r) => r.rowNumber) };
   }
   const slug = slugify(stem);

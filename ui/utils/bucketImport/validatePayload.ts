@@ -1,4 +1,4 @@
-import { bucketImportConfig, normalizeCode, normalizeName } from "./config";
+import { bucketImportConfig, normalizeCode } from "./config";
 import type {
   ImportBucketRow,
   ImportIssue,
@@ -29,22 +29,21 @@ export function validateImportPayload(
     row: number | null,
     field: string,
     message: string,
-    kind?: ImportIssue["kind"]
-  ) => errors.push({ row, field, message, kind });
+    kind?: ImportIssue["kind"],
+    fieldId?: string
+  ) => errors.push({ row, field, message, kind, fieldId });
   const warn = (row: number | null, field: string, message: string) =>
     warnings.push({ row, field, message });
 
   // Round-config problems are reported once, not per row.
-  const refField = ctx.fields.find(
-    (f) =>
-      normalizeName(f.name) ===
-      normalizeName(bucketImportConfig.referenceCodeFieldName)
-  );
-  if (!refField)
+  // The unique-identifier field is optional: without one there is no
+  // uniqueness check (and the importer creates no tag).
+  const uniqueField = ctx.fields.find((f) => f.isUniqueIdentifier);
+  if (uniqueField && uniqueField.type !== "TEXT")
     err(
       null,
       "round",
-      `The round has no "${bucketImportConfig.referenceCodeFieldName}" custom field. Add it in Round Settings → Bucket Form first.`
+      `The unique-identifier field "${uniqueField.name}" must be a single-line text field.`
     );
 
   if (rows.length === 0) err(null, "rows", "There are no buckets to import.");
@@ -58,10 +57,16 @@ export function validateImportPayload(
 
   const fieldById = new Map(ctx.fields.map((f) => [f.id, f]));
   // Every row sharing a code is flagged (not just the later ones).
+  const uniqueValueOf = (r: ImportBucketRow): string => {
+    const v = uniqueField
+      ? r.fieldValues.find((fv) => fv.fieldId === uniqueField.id)?.value
+      : undefined;
+    return typeof v === "string" ? v : "";
+  };
   const codeRows = new Map<string, number[]>();
   rows.forEach((r, i) => {
-    if (isBlank(r.referenceCode)) return;
-    const c = normalizeCode(r.referenceCode);
+    if (isBlank(uniqueValueOf(r))) return;
+    const c = normalizeCode(uniqueValueOf(r));
     codeRows.set(c, [...(codeRows.get(c) ?? []), i]);
   });
   const titleFirstRow = new Map<string, number>();
@@ -84,28 +89,34 @@ export function validateImportPayload(
         `Summary is ${row.summary.length} characters; the limit is ${bucketImportConfig.summaryMaxLength}.`
       );
 
-    // reference code: required + unique in file and vs the round
-    if (isBlank(row.referenceCode))
-      err(i, "referenceCode", "Reference code is required.");
-    else {
-      const code = normalizeCode(row.referenceCode);
-      const sharing = codeRows.get(code);
-      if (sharing.length > 1)
-        err(
-          i,
-          "referenceCode",
-          `Reference code "${row.referenceCode.trim()}" is used on rows ${sharing
-            .map(label)
-            .join(", ")}.`,
-          "duplicateCode"
-        );
-      if (ctx.existingCodes.has(code))
-        err(
-          i,
-          "referenceCode",
-          `Reference code "${row.referenceCode.trim()}" already exists in this round.`,
-          "existingCode"
-        );
+    // unique identifier: required + unique in file and vs the round
+    if (uniqueField) {
+      const raw = uniqueValueOf(row);
+      const un = uniqueField.name;
+      if (isBlank(raw))
+        err(i, un, `"${un}" is required.`, undefined, uniqueField.id);
+      else {
+        const code = normalizeCode(raw);
+        const sharing = codeRows.get(code);
+        if (sharing.length > 1)
+          err(
+            i,
+            un,
+            `${un} "${raw.trim()}" is used on rows ${sharing
+              .map(label)
+              .join(", ")}.`,
+            "duplicateCode",
+            uniqueField.id
+          );
+        if (ctx.existingCodes.has(code))
+          err(
+            i,
+            un,
+            `${un} "${raw.trim()}" already exists in this round.`,
+            "existingCode",
+            uniqueField.id
+          );
+      }
     }
 
     // budget items
@@ -136,12 +147,19 @@ export function validateImportPayload(
     const seen = new Set<string>();
     row.fieldValues.forEach((fv) => {
       const def = fieldById.get(fv.fieldId);
+      const ferr = (m: string) => err(i, def.name, m, undefined, def.id);
       if (!def) {
         err(i, "fieldValues", `Unknown field id ${fv.fieldId} for this round.`);
         return;
       }
       if (seen.has(fv.fieldId)) {
-        err(i, def.name, `Field "${def.name}" is given more than once.`);
+        err(
+          i,
+          def.name,
+          `Field "${def.name}" is given more than once.`,
+          undefined,
+          def.id
+        );
         return;
       }
       seen.add(fv.fieldId);
@@ -152,38 +170,28 @@ export function validateImportPayload(
         def.type === "ENUM"
       ) {
         if (typeof fv.value !== "string") {
-          err(i, def.name, `"${def.name}" must be text.`);
+          ferr(`"${def.name}" must be text.`);
           return;
         }
         if (def.limit && fv.value.length > def.limit)
-          err(
-            i,
-            def.name,
+          ferr(
             `"${def.name}" is ${fv.value.length} characters; the limit is ${def.limit}.`
           );
         if (def.options.length && !def.options.includes(fv.value))
-          err(
-            i,
-            def.name,
-            `"${fv.value}" is not an allowed value for "${def.name}".`
-          );
+          ferr(`"${fv.value}" is not an allowed value for "${def.name}".`);
       } else if (def.type === "BOOLEAN") {
         if (typeof fv.value !== "boolean")
-          err(i, def.name, `"${def.name}" must be true or false.`);
+          ferr(`"${def.name}" must be true or false.`);
       } else {
-        err(
-          i,
-          def.name,
-          `Field "${def.name}" (${def.type}) cannot be imported.`
-        );
+        ferr(`Field "${def.name}" (${def.type}) cannot be imported.`);
       }
     });
     ctx.fields
-      .filter((f) => f.isRequired && f.id !== refField.id) // refField is filled from row.referenceCode
+      .filter((f) => f.isRequired && !f.isUniqueIdentifier) // unique field: checked above
       .forEach((f) => {
         const given = row.fieldValues.find((fv) => fv.fieldId === f.id);
         if (!given || isBlank(given.value))
-          err(i, f.name, `"${f.name}" is required.`);
+          err(i, f.name, `"${f.name}" is required.`, undefined, f.id);
       });
   });
 

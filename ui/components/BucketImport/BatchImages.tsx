@@ -8,7 +8,7 @@ export type UnassignedFile = {
   candidates: number[];
 };
 
-type RowInfo = { rowNumber: number; title: string; referenceCode: string };
+type RowInfo = { rowNumber: number; title: string; uniqueValue: string };
 
 const reasonText = (u: UnassignedFile, label: (n: number) => string) => {
   const c = u.candidates.map(label).join(", ");
@@ -25,7 +25,7 @@ const reasonText = (u: UnassignedFile, label: (n: number) => string) => {
 };
 
 const rowLabel = (r: RowInfo) =>
-  `#${r.rowNumber} ${r.referenceCode ? `[${r.referenceCode}] ` : ""}${
+  `#${r.rowNumber} ${r.uniqueValue ? `[${r.uniqueValue}] ` : ""}${
     r.title || "(no title)"
   }`;
 

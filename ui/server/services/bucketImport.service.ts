@@ -9,7 +9,6 @@ import cuid from "cuid";
 import {
   bucketImportConfig,
   normalizeCode,
-  normalizeName,
 } from "../../utils/bucketImport/config";
 import type {
   ImportBucketRow,
@@ -42,11 +41,14 @@ const toFieldDef = (f): ImportFieldDef => ({
   limit: f.limit,
   options: f.options,
   isRequired: f.isRequired,
+  importKey: f.importKey,
+  isUniqueIdentifier: f.isUniqueIdentifier,
 });
 
 /**
- * Round fields + the reference codes already used in the round
- * (tags of non-deleted buckets U Reference Code field values, normalised).
+ * Round fields + the unique-identifier values already used in the round
+ * (tags of non-deleted buckets U values of the unique-identifier field,
+ * normalised). Empty when the round has no unique-identifier field.
  * Shared by the commit mutation and the admin-only preview query.
  */
 export async function loadImportContext(db: Tx, roundId: string) {
@@ -54,18 +56,14 @@ export async function loadImportContext(db: Tx, roundId: string) {
     where: { roundId },
     orderBy: { position: "asc" },
   });
-  const refField = fields.find(
-    (f) =>
-      normalizeName(f.name) ===
-      normalizeName(bucketImportConfig.referenceCodeFieldName)
-  );
+  const refField = fields.find((f) => f.isUniqueIdentifier) ?? null;
   const existingCodes = new Set<string>();
-  const tagRows = await db.tag.findMany({
-    where: { roundId, buckets: { some: { deleted: false } } },
-    select: { value: true },
-  });
-  tagRows.forEach((t) => existingCodes.add(normalizeCode(t.value)));
   if (refField) {
+    const tagRows = await db.tag.findMany({
+      where: { roundId, buckets: { some: { deleted: false } } },
+      select: { value: true },
+    });
+    tagRows.forEach((t) => existingCodes.add(normalizeCode(t.value)));
     const fvs = await db.fieldValue.findMany({
       where: { fieldId: refField.id, Bucket: { roundId, deleted: false } },
       select: { value: true },
@@ -104,11 +102,18 @@ export async function importBucketsTx(
   if (errors.length) throw new BucketImportValidationError(errors);
 
   const now = new Date();
-  const codes = rows.map((r) => r.referenceCode.trim());
+  // Unique-identifier value per row (validated non-empty above); none when
+  // the round has no such field.
+  const codes = rows.map((r) => {
+    const v = refField
+      ? r.fieldValues.find((fv) => fv.fieldId === refField.id)?.value
+      : "";
+    return typeof v === "string" ? v.trim() : "";
+  });
 
   // Tags: find-or-create (round-scoped), then map code -> tag id.
   const tagIdByCode = new Map<string, string>();
-  if (bucketImportConfig.createTagFromReferenceCode) {
+  if (refField) {
     await tx.tag.createMany({
       data: codes.map((value) => ({ id: cuid(), roundId, value })),
       skipDuplicates: true,
@@ -160,7 +165,7 @@ export async function importBucketsTx(
       if (fv.value !== null && fv.value !== undefined && fv.value !== "")
         byField.set(fv.fieldId, fv.value);
     });
-    byField.set(refField.id, codes[i]);
+    if (refField) byField.set(refField.id, codes[i]);
     return Array.from(byField.entries()).map(([fieldId, value]) => ({
       id: cuid(),
       bucketId: bucketIds[i],
@@ -184,7 +189,7 @@ export async function importBucketsTx(
   // A = Bucket id, B = the other side (verified against the migrated schema).
   await tx.$executeRaw`INSERT INTO "_BucketToRoundMember" ("A", "B")
     SELECT b, ${roundMemberId} FROM unnest(${bucketIds}::text[]) AS b`;
-  if (bucketImportConfig.createTagFromReferenceCode) {
+  if (refField) {
     const tagBucketIds = bucketIds;
     const tagIds = codes.map((c) => tagIdByCode.get(c));
     await tx.$executeRaw`INSERT INTO "_BucketToTag" ("A", "B")

@@ -10,7 +10,6 @@ export type ImportImage = { small?: string | null; large?: string | null };
 export type ImportBucketRow = {
   title: string;
   summary?: string | null;
-  referenceCode: string;
   fieldValues: ImportFieldValue[];
   budgetItems: ImportBudgetItem[];
   images?: ImportImage[] | null;
@@ -23,6 +22,10 @@ export type ImportFieldDef = {
   limit?: number | null;
   options: string[];
   isRequired: boolean;
+  description?: string | null;
+  /** CSV column name (Field.importKey); null = not importable yet */
+  importKey?: string | null;
+  isUniqueIdentifier?: boolean;
 };
 
 export type ImportRoundContext = {
@@ -34,8 +37,10 @@ export type ImportRoundContext = {
 export type ImportIssue = {
   row: number | null; // 0-based index into the payload, null = whole import
   field: string;
+  /** Set for issues about a round field (maps the issue to its CSV column) */
+  fieldId?: string;
   message: string;
-  /** Machine-readable tag for issues the UI acts on */
+  /** Machine-readable tag for issues the UI acts on (values of the unique-identifier field) */
   kind?: "duplicateCode" | "existingCode";
 };
 

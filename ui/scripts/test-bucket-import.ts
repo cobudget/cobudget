@@ -8,10 +8,13 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
-  baseColumns,
   normalizeCode,
   templateBudgetPairs,
 } from "../utils/bucketImport/config";
+import { buildColumns } from "../utils/bucketImport/columns";
+import { generateImportKey, validateImportKey } from "../utils/fieldKey";
+import { validateImportPayload } from "../utils/bucketImport/validatePayload";
+import type { ImportFieldDef } from "../utils/bucketImport/types";
 import {
   buildTemplateCsv,
   parseAmountToMinor,
@@ -26,66 +29,34 @@ import {
   matchFiles,
 } from "../utils/bucketImport/matchImages";
 
-const AREAS = [
-  "Arts and Culture",
-  "Beautiful Built Environment",
-  "Green Economy",
-  "Connected to Nature",
-  "Secure Homes & Lives",
-  "Community",
-  "Education & Opportunities",
-  "Thriving Town Centre",
-  "Other",
+// Arbitrary field set (deliberately NOT the Give it a Go fields): the importer
+// must work for whatever the round's custom fields are.
+const AREAS = ["Green Economy", "Community", "Other"];
+const mk = (
+  id: string,
+  name: string,
+  type: string,
+  importKey: string | null,
+  extra: Partial<ImportFieldDef> = {}
+): ImportFieldDef => ({
+  id,
+  name,
+  type,
+  importKey,
+  options: [],
+  limit: null,
+  isRequired: false,
+  isUniqueIdentifier: false,
+  ...extra,
+});
+const fields: ImportFieldDef[] = [
+  mk("f-area", "Area", "TEXT", "area", { options: AREAS }),
+  mk("f-ref", "Ref", "TEXT", "ref", { isUniqueIdentifier: true }),
+  mk("f-notes", "Notes", "MULTILINE_TEXT", "notes", { limit: 50 }),
+  mk("f-ok", "Approved", "BOOLEAN", "approved"),
+  mk("f-file", "Attachment", "FILE", "attachment"),
+  mk("f-nokey", "Legacy", "TEXT", null),
 ];
-const fields = [
-  { id: "f-area", name: "Priority Area", type: "TEXT", options: AREAS },
-  { id: "f-ref", name: "Reference Code", type: "TEXT", options: [] },
-  { id: "f-date", name: "Report Date", type: "TEXT", options: [] },
-  { id: "f-assessor", name: "Assessor", type: "TEXT", options: [] },
-  {
-    id: "f-kf",
-    name: "Key Fund’s Comments",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-desc",
-    name: "Project Description",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-ach",
-    name: "What are they trying to achieve in the project?",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-who",
-    name: "Who will do what? How long will it take? How do you make sure?",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-safe",
-    name:
-      "How will you make sure that people that engage in the activity are safe?",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-ben",
-    name: "Who is the main group of people that will benefit from the project?",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-  {
-    id: "f-sust",
-    name: "How will the activity continue after the grant has been spent?",
-    type: "MULTILINE_TEXT",
-    options: [],
-  },
-].map((f) => ({ ...f, limit: null, isRequired: false }));
 
 let passed = 0;
 const test = async (name: string, fn: () => Promise<void> | void) => {
@@ -105,12 +76,11 @@ const issuesOf = (p: Awaited<ReturnType<typeof run>>, row: number) =>
   p.rows[row].issues;
 
 async function main() {
-  const H =
-    "proposal_title,proposal_summary,reference_code,priority_area,budget_item_1,budget_amount_1";
+  const H = "title,summary,ref,area,budget_item_1,budget_amount_1";
 
   await test("applyImages: uploaded image overrides cell, uploading blocks, error keeps CSV", async () => {
     const p = await run(
-      `${H},image_url
+      `${H},image
 
 A,s,A1,Green Economy,Beds,100,
 
@@ -120,11 +90,9 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
 
 `
     );
-    assert.ok(issuesOf(p, 0).some((i) => i.column === "image_url"));
+    assert.ok(issuesOf(p, 0).some((i) => i.column === "image"));
     assert.ok(
-      issuesOf(p, 1).some(
-        (i) => i.severity === "error" && i.column === "image_url"
-      )
+      issuesOf(p, 1).some((i) => i.severity === "error" && i.column === "image")
     );
     const a = applyImages(p, {
       1: {
@@ -145,11 +113,11 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     });
     assert.deepEqual(a.rows[0].payload.images, [{ small: "s1", large: "l1" }]);
     assert.equal(
-      a.rows[0].issues.filter((i) => i.column === "image_url").length,
+      a.rows[0].issues.filter((i) => i.column === "image").length,
       0
     );
     assert.equal(
-      a.rows[1].issues.filter((i) => i.column === "image_url").length,
+      a.rows[1].issues.filter((i) => i.column === "image").length,
       0
     );
     assert.ok(summarize(a).blocked === true); // row 3 still uploading
@@ -167,12 +135,12 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
 
   await test("matchFiles: code, then title slug, then order number; never guesses", () => {
     const rows = [
-      { rowNumber: 1, referenceCode: "GF01", title: "Community Garden" },
-      { rowNumber: 2, referenceCode: "GF02", title: "Café & Bar" },
-      { rowNumber: 3, referenceCode: "GF03", title: "Shared Title" },
-      { rowNumber: 4, referenceCode: "GF04", title: "Shared Title" },
-      { rowNumber: 5, referenceCode: "GF05", title: "Pond Project" },
-      { rowNumber: 7, referenceCode: "", title: "Seven" },
+      { rowNumber: 1, uniqueValue: "GF01", title: "Community Garden" },
+      { rowNumber: 2, uniqueValue: "GF02", title: "Café & Bar" },
+      { rowNumber: 3, uniqueValue: "GF03", title: "Shared Title" },
+      { rowNumber: 4, uniqueValue: "GF04", title: "Shared Title" },
+      { rowNumber: 5, uniqueValue: "GF05", title: "Pond Project" },
+      { rowNumber: 7, uniqueValue: "", title: "Seven" },
     ];
     const f = (name: string) => ({ id: name, name });
     assert.equal(fileStem("pics/gf01.Final.PNG"), "gf01.final");
@@ -253,7 +221,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     const t = await parseCsvText(
       `\uFEFF${H}\r\n"Title, with comma","Line1\r\nLine2 ""quoted""",A1,Green Economy,Beds,100\r\n`
     );
-    assert.equal(t.headers[0], "proposal_title");
+    assert.equal(t.headers[0], "title");
     assert.equal(t.rows.length, 1);
     assert.equal(t.rows[0][0], "Title, with comma");
     assert.ok(
@@ -271,13 +239,15 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     const t = await parseCsvText(
       `# a, comment\n# another\n${H}\nT,S,A1,Other,B,5\n`
     );
-    assert.equal(t.headers[0], "proposal_title");
+    assert.equal(t.headers[0], "title");
     assert.equal(t.rows.length, 1);
   });
 
   await test("clean row has no issues except missing image warning", async () => {
-    const p = await run(`${H},image_url\nT,S,A1,Green Economy,Beds,100,\n`);
-    assert.deepEqual(p.fileIssues, []);
+    const p = await run(`${H},image\nT,S,A1,Green Economy,Beds,100,\n`);
+    // only the note about fields without a column (FILE type, no key)
+    assert.equal(p.fileIssues.length, 1);
+    assert.ok(p.fileIssues[0].message.includes("Attachment, Legacy"));
     assert.deepEqual(
       issuesOf(p, 0).map((i) => i.severity),
       ["warning"]
@@ -294,9 +264,7 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
       i % 2 ? "," : `Item ${i + 1},10`
     );
     const p = await run(
-      `proposal_title,proposal_summary,reference_code,${heads.join(
-        ","
-      )}\nT,S,A1,${vals.join(",")}\n`
+      `title,summary,ref,${heads.join(",")}\nT,S,A1,${vals.join(",")}\n`
     );
     assert.equal(p.budgetNumbers.length, 25);
     assert.equal(p.rows[0].payload.budgetItems.length, 13);
@@ -320,15 +288,12 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     );
     const at = (r: number, col: string, sev: string) =>
       issuesOf(p, r).some((i) => i.column === col && i.severity === sev);
-    assert.ok(at(0, "proposal_title", "error"));
-    assert.ok(at(1, "proposal_summary", "error"));
-    assert.ok(at(2, "priority_area", "error"));
+    assert.ok(at(0, "title", "error"));
+    assert.ok(at(1, "summary", "error"));
+    assert.ok(at(2, "area", "error"));
     assert.ok(at(3, "budget_amount_1", "error"));
-    assert.ok(
-      at(5, "reference_code", "error"),
-      "dup code flagged on second row"
-    );
-    assert.ok(at(6, "reference_code", "error"), "dup vs existing");
+    assert.ok(at(5, "ref", "error"), "dup code flagged on second row");
+    assert.ok(at(6, "ref", "error"), "dup vs existing");
     assert.equal(summarize(p).blocked, true);
     assert.equal(
       p.rows[3].issues.filter((i) => i.message.startsWith("No budget")).length,
@@ -340,18 +305,16 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     const p = await run(`${H}\nSame,S,A1,Other,B,1\nSame,S,A2,Other,B,1\n`);
     assert.ok(
       issuesOf(p, 1).some(
-        (i) => i.column === "proposal_title" && i.severity === "warning"
+        (i) => i.column === "title" && i.severity === "warning"
       )
     );
     assert.ok(!issuesOf(p, 1).some((i) => i.severity === "error"));
   });
 
   await test("missing required column / unknown column / lone budget half", async () => {
-    const p = await run(
-      "proposal_title,reference_code,mystery,budget_item_1\nT,A1,x,B\n"
-    );
+    const p = await run("title,ref,mystery,budget_item_1\nT,A1,x,B\n");
     const msgs = p.fileIssues.map((i) => `${i.severity}:${i.message}`);
-    assert.ok(msgs.some((m) => m.includes('"proposal_summary" is missing')));
+    assert.ok(msgs.some((m) => m.includes('"summary" is missing')));
     assert.ok(
       msgs.some((m) => m.startsWith("warning:") && m.includes('"mystery"'))
     );
@@ -362,36 +325,12 @@ C,s,C1,Green Economy,Beds,100,https://x.test/c.png
     );
   });
 
-  await test("round missing a field -> single round-config error, not per-row", async () => {
-    const p = prepare(
-      await parseCsvText(`${H}\nT,S,A1,Other,B,1\nT2,S,A2,Other,B,1\n`),
-      {
-        fields: fields.filter((f) => f.name !== "Priority Area"),
-        existingCodes: [],
-      }
-    );
-    assert.equal(
-      p.fileIssues.filter(
-        (i) => i.severity === "error" && i.message.includes("Priority Area")
-      ).length,
-      1
-    );
-    assert.ok(
-      !p.rows.some((r) =>
-        r.issues.some(
-          (i) => i.column === "priority_area" && i.severity === "error"
-        )
-      )
-    );
-  });
-
   await test("template round-trips with no errors (AC 3)", async () => {
-    const p = await run(buildTemplateCsv(templateBudgetPairs));
+    const p = await run(buildTemplateCsv(fields, templateBudgetPairs));
     assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
     assert.equal(p.rows.length, 1);
     assert.equal(summarize(p).blocked, false);
     assert.equal(p.rows[0].totalMinor, 155050);
-    assert.equal(baseColumns.length > 10, true);
   });
 
   await test("every row sharing a code is flagged, fixing one clears both", async () => {
@@ -444,8 +383,185 @@ B,S,X,Other,B,1
     const p = await run(`${H}
 "  spaced out ",S,A1,Other,B,1
 `);
-    assert.equal(p.rows[0].cells.proposal_title, "  spaced out ");
+    assert.equal(p.rows[0].cells.title, "  spaced out ");
     assert.equal(p.rows[0].payload.title, "spaced out");
+  });
+
+  // ---- field-driven columns ------------------------------------------------
+  const other: ImportFieldDef[] = [
+    mk("g-code", "Grant code", "TEXT", "grant-code", {
+      isUniqueIdentifier: true,
+      isRequired: true,
+    }),
+    mk("g-type", "Type", "ENUM", "type", {
+      options: ["Small", "Large"],
+      isRequired: true,
+    }),
+    mk("g-urgent", "Urgent?", "BOOLEAN", "urgent"),
+  ];
+  const runWith = async (
+    f: ImportFieldDef[],
+    text: string,
+    existing: string[] = []
+  ) =>
+    prepare(await parseCsvText(text), { fields: f, existingCodes: existing });
+
+  await test("columns = built-ins + importable keyed fields (no hardcoded names)", () => {
+    assert.deepEqual(
+      buildColumns(fields).map((c) => c.column),
+      ["title", "summary", "image", "area", "ref", "notes", "approved"]
+    );
+    assert.deepEqual(
+      buildColumns(other).map((c) => c.column),
+      ["title", "summary", "image", "grant-code", "type", "urgent"]
+    );
+    const ref = buildColumns(fields).find((c) => c.column === "ref");
+    assert.equal(ref.required, true); // unique identifier is always required
+    assert.equal(ref.unique, true);
+  });
+
+  await test("another field set: template round-trips, enum/boolean/required/unique", async () => {
+    const tpl = buildTemplateCsv(other, templateBudgetPairs);
+    assert.ok(
+      tpl.startsWith('"title","summary","image","grant-code","type","urgent"')
+    );
+    const p = await runWith(other, tpl);
+    assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
+    assert.equal(summarize(p).blocked, false);
+    assert.deepEqual(p.rows[0].payload.fieldValues, [
+      { fieldId: "g-code", value: "EX01" },
+      { fieldId: "g-type", value: "Small" },
+      { fieldId: "g-urgent", value: true },
+    ]);
+    assert.equal(p.rows[0].uniqueValue, "EX01");
+
+    const bad = await runWith(
+      other,
+      "title,summary,grant-code,type,urgent,budget_item_1,budget_amount_1\n" +
+        "A,S,G1,Huge,maybe,B,1\n" +
+        "B,S,,Small,no,B,1\n"
+    );
+    const at = (r: number, col: string) =>
+      bad.rows[r].issues.some(
+        (i) => i.column === col && i.severity === "error"
+      );
+    assert.ok(at(0, "type"), "enum value");
+    assert.ok(at(0, "urgent"), "boolean parse");
+    assert.ok(at(1, "grant-code"), "unique value is non-empty");
+    assert.equal(
+      bad.rows[1].payload.fieldValues.find((v) => v.fieldId === "g-urgent")
+        .value,
+      false
+    );
+  });
+
+  await test("required field / unique column missing from the file is one file error", async () => {
+    const p = await runWith(
+      other,
+      "title,summary,budget_item_1,budget_amount_1\nA,S,B,1\n"
+    );
+    const errs = p.fileIssues
+      .filter((i) => i.severity === "error")
+      .map((i) => i.message);
+    assert.ok(errs.some((m) => m.includes('"grant-code"')));
+    assert.ok(errs.some((m) => m.includes('"type"')));
+    assert.ok(!errs.some((m) => m.includes('"urgent"'))); // optional
+  });
+
+  await test("no unique field: import allowed, no uniqueness check, a note only", async () => {
+    const f = other.map((x) => ({ ...x, isUniqueIdentifier: false }));
+    const p = await runWith(
+      f,
+      "title,summary,grant-code,type,budget_item_1,budget_amount_1\nA,S,SAME,Small,B,1\nB,S,SAME,Large,B,1\n",
+      ["same"]
+    );
+    assert.equal(p.fileIssues.filter((i) => i.severity === "error").length, 0);
+    assert.ok(
+      p.fileIssues.some(
+        (i) =>
+          i.severity === "warning" && i.message.includes("no unique-identifier")
+      )
+    );
+    assert.equal(
+      summarize(p).duplicateCodeRows + summarize(p).existingCodeRows,
+      0
+    );
+    assert.equal(summarize(p).blocked, false);
+    assert.equal(p.rows[0].uniqueValue, "");
+  });
+
+  await test("unique check follows the flagged field, whatever its name", async () => {
+    const p = await runWith(
+      other,
+      "title,summary,grant-code,type,budget_item_1,budget_amount_1\nA,S,Q1,Small,B,1\nB,S,q1,Large,B,1\nC,S,OLD,Small,B,1\n",
+      ["old"]
+    );
+    assert.equal(summarize(p).duplicateCodeRows, 2);
+    assert.equal(summarize(p).existingCodeRows, 1);
+    assert.ok(
+      p.rows[0].issues.some(
+        (i) => i.kind === "duplicateCode" && i.column === "grant-code"
+      )
+    );
+  });
+
+  await test("server validation: flagged non-TEXT field is a round error; payload uses ids not names", () => {
+    const bad = other.map((x) =>
+      x.id === "g-code" ? { ...x, type: "MULTILINE_TEXT" } : x
+    );
+    const v = validateImportPayload(
+      [{ title: "T", fieldValues: [], budgetItems: [] }],
+      { fields: bad, existingCodes: new Set() }
+    );
+    assert.ok(
+      v.errors.some((e) => e.row === null && e.message.includes("single-line"))
+    );
+    const ok = validateImportPayload(
+      [
+        {
+          title: "T",
+          fieldValues: [
+            { fieldId: "g-code", value: "Z" },
+            { fieldId: "g-type", value: "Small" },
+          ],
+          budgetItems: [{ description: "x", amount: 1 }],
+        },
+      ],
+      { fields: other, existingCodes: new Set() }
+    );
+    assert.deepEqual(ok.errors, []);
+  });
+
+  await test("importKey: slug, hyphens, cap, de-dup, reserved names", () => {
+    assert.equal(generateImportKey("Priority Area", []), "priority-area");
+    assert.equal(
+      generateImportKey("Key Fund’s Comments!", []),
+      "key-funds-comments"
+    );
+    assert.equal(
+      generateImportKey("Reference Code", ["reference-code"]),
+      "reference-code-2"
+    );
+    assert.equal(
+      generateImportKey("Reference Code", [
+        "reference-code",
+        "reference-code-2",
+      ]),
+      "reference-code-3"
+    );
+    assert.equal(generateImportKey("日本語", []), "field");
+    for (const n of ["Title", "Summary", "Image"])
+      assert.equal(generateImportKey(n, []), n.toLowerCase() + "-field");
+    const long = "A very long question that goes on and on and on forever?";
+    const k = generateImportKey(long, []);
+    assert.ok(k.length <= 40 && !k.endsWith("-"), k);
+    const k2 = generateImportKey(long, [k]);
+    assert.ok(k2.length <= 40 && k2 !== k && k2.endsWith("-2"), k2);
+    assert.equal(validateImportKey("budget_item_3") !== null, true);
+    assert.equal(validateImportKey("title") !== null, true);
+    assert.equal(validateImportKey("Has Space") !== null, true);
+    assert.equal(validateImportKey("x".repeat(41)) !== null, true);
+    assert.equal(validateImportKey("ok-key_1"), null);
   });
 
   const real = process.argv[2];

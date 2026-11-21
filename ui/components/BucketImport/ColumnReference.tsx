@@ -1,18 +1,12 @@
-import {
-  baseColumns,
-  budgetColumnPattern,
-  normalizeName,
-} from "utils/bucketImport/config";
+import { budgetColumnPattern } from "utils/fieldKey";
+import { buildColumns, skippedFields } from "utils/bucketImport/columns";
+import type { ImportFieldDef } from "utils/bucketImport/types";
 
-type Field = { name: string; options?: string[] | null; limit?: number | null };
-
-// Column reference: required/optional, limits and allowed values, generated
-// from the same config the parser/validator use (so it cannot drift).
-const ColumnReference = ({ fields }: { fields: Field[] }) => {
-  const fieldFor = (name?: string) =>
-    name
-      ? fields.find((f) => normalizeName(f.name) === normalizeName(name))
-      : null;
+// Column reference: generated from the round's fields (the same model the
+// parser, the template and the validator use, so it cannot drift).
+const ColumnReference = ({ fields }: { fields: ImportFieldDef[] }) => {
+  const columns = buildColumns(fields);
+  const skipped = skippedFields(fields);
 
   return (
     <div className="overflow-x-auto">
@@ -26,35 +20,16 @@ const ColumnReference = ({ fields }: { fields: Field[] }) => {
           </tr>
         </thead>
         <tbody>
-          {baseColumns.map((c) => {
-            const field = fieldFor(c.fieldName);
-            return (
-              <tr key={c.column} className="border-b align-top">
-                <td className="py-1 pr-4 font-mono">{c.column}</td>
-                <td className="py-1 pr-4">{c.required ? "Yes" : "No"}</td>
-                <td className="py-1 pr-4">
-                  {c.target === "field"
-                    ? `Custom field "${c.fieldName}"${
-                        field ? "" : " (missing in this round!)"
-                      }`
-                    : c.target}
-                </td>
-                <td className="py-1">
-                  {c.description}
-                  {field?.options?.length ? (
-                    <div className="text-gray-600">
-                      Allowed values (exact): {field.options.join(" | ")}
-                    </div>
-                  ) : null}
-                  {field?.limit ? (
-                    <div className="text-gray-600">
-                      Max {field.limit} characters.
-                    </div>
-                  ) : null}
-                </td>
-              </tr>
-            );
-          })}
+          {columns.map((c) => (
+            <tr key={c.column} className="border-b align-top">
+              <td className="py-1 pr-4 font-mono">{c.column}</td>
+              <td className="py-1 pr-4">{c.required ? "Yes" : "No"}</td>
+              <td className="py-1 pr-4">
+                {c.field ? `Form item "${c.field.name}"` : c.target}
+              </td>
+              <td className="py-1">{c.description}</td>
+            </tr>
+          ))}
           <tr className="align-top">
             <td className="py-1 pr-4 font-mono">
               {"budget_item_N"}
@@ -74,6 +49,11 @@ const ColumnReference = ({ fields }: { fields: Field[] }) => {
           </tr>
         </tbody>
       </table>
+      {skipped.length > 0 && (
+        <p className="text-xs text-gray-600 mt-2">
+          Not importable (no column): {skipped.map((f) => f.name).join(", ")}.
+        </p>
+      )}
     </div>
   );
 };

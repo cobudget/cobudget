@@ -1,6 +1,7 @@
 import FormattedCurrency from "components/FormattedCurrency";
 import type { Prepared, PreparedIssue } from "utils/bucketImport/prepareImport";
 import type { RowImages } from "utils/bucketImport/images";
+import type { ImportColumn } from "utils/bucketImport/columns";
 import ImageControl from "./ImageControl";
 
 const tone = (issues: PreparedIssue[]) =>
@@ -86,7 +87,7 @@ const EditableCell = ({
 const PreviewTable = ({
   prepared,
   currency,
-  priorityOptions,
+  columns,
   hasColumn,
   onlyNeedsAttention,
   selected,
@@ -99,7 +100,7 @@ const PreviewTable = ({
 }: {
   prepared: Prepared;
   currency: string;
-  priorityOptions: string[];
+  columns: ImportColumn[];
   hasColumn: (column: string) => boolean;
   onlyNeedsAttention: boolean;
   selected: number | null;
@@ -113,6 +114,13 @@ const PreviewTable = ({
   const rows = prepared.rows.filter(
     (r) => !onlyNeedsAttention || r.issues.length > 0
   );
+  // Compact table: the unique identifier and fields with a fixed list of
+  // values (dropdowns). Everything else is edited in the row editor below.
+  const unique = columns.find((c) => c.unique);
+  const choiceCols = columns.filter(
+    (c) => !c.unique && c.field && c.field.options?.length
+  );
+  const label = (c: ImportColumn) => c.field?.name ?? c.column;
 
   return (
     <div className="overflow-auto max-h-screen border rounded">
@@ -124,8 +132,8 @@ const PreviewTable = ({
               "Status",
               "Title",
               "Summary",
-              "Ref. code",
-              "Priority area",
+              ...(unique ? [label(unique)] : []),
+              ...choiceCols.map(label),
               "Image",
               "Total ask",
               "Messages",
@@ -155,38 +163,43 @@ const PreviewTable = ({
                 </td>
                 <EditableCell
                   row={r}
-                  column="proposal_title"
-                  editable={hasColumn("proposal_title")}
+                  column="title"
+                  editable={hasColumn("title")}
                   onEdit={onEdit}
                   className="min-w-48"
                 />
                 <EditableCell
                   row={r}
-                  column="proposal_summary"
-                  editable={hasColumn("proposal_summary")}
+                  column="summary"
+                  editable={hasColumn("summary")}
                   multiline
                   onEdit={onEdit}
                   className="min-w-64"
                 />
+                {unique && (
+                  <EditableCell
+                    row={r}
+                    column={unique.column}
+                    editable={hasColumn(unique.column)}
+                    onEdit={onEdit}
+                    className="min-w-28"
+                  />
+                )}
+                {choiceCols.map((c) => (
+                  <EditableCell
+                    key={c.column}
+                    row={r}
+                    column={c.column}
+                    editable={hasColumn(c.column)}
+                    options={c.field.options}
+                    onEdit={onEdit}
+                    className="min-w-40"
+                  />
+                ))}
                 <EditableCell
                   row={r}
-                  column="reference_code"
-                  editable={hasColumn("reference_code")}
-                  onEdit={onEdit}
-                  className="min-w-28"
-                />
-                <EditableCell
-                  row={r}
-                  column="priority_area"
-                  editable={hasColumn("priority_area")}
-                  options={priorityOptions}
-                  onEdit={onEdit}
-                  className="min-w-40"
-                />
-                <EditableCell
-                  row={r}
-                  column="image_url"
-                  editable={hasColumn("image_url")}
+                  column="image"
+                  editable={hasColumn("image")}
                   onEdit={onEdit}
                   className="min-w-40"
                 >

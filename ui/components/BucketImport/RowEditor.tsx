@@ -1,4 +1,5 @@
-import { baseColumns, budgetColumnPattern } from "utils/bucketImport/config";
+import { budgetColumnPattern } from "utils/fieldKey";
+import type { ImportColumn } from "utils/bucketImport/columns";
 import type { Prepared } from "utils/bucketImport/prepareImport";
 import type { RowImage } from "utils/bucketImport/images";
 import ImageControl from "./ImageControl";
@@ -10,6 +11,7 @@ const inputClass =
 // budget line (any number of pairs). Same edit path as the table cells.
 const RowEditor = ({
   row,
+  columns,
   budgetNumbers,
   hasColumn,
   onEdit,
@@ -18,6 +20,7 @@ const RowEditor = ({
   onClearImage,
 }: {
   row: Prepared["rows"][number];
+  columns: ImportColumn[];
   budgetNumbers: number[];
   hasColumn: (column: string) => boolean;
   onEdit: (rowNumber: number, column: string, value: string) => void;
@@ -25,17 +28,13 @@ const RowEditor = ({
   onAttachImage: (file: File) => void;
   onClearImage: () => void;
 }) => {
-  const shownInTable = [
-    "proposal_title",
-    "proposal_summary",
-    "reference_code",
-    "priority_area",
-    "image_url",
-  ];
-  const fieldColumns = baseColumns.filter(
+  // Same rule as PreviewTable: unique identifier and dropdown fields are
+  // edited in the table; every other field is edited here.
+  const fieldColumns = columns.filter(
     (c) =>
       c.target === "field" &&
-      !shownInTable.includes(c.column) &&
+      !c.unique &&
+      !c.field.options?.length &&
       hasColumn(c.column)
   );
   const msgs = (col: string) =>
@@ -51,7 +50,7 @@ const RowEditor = ({
           onAttach={onAttachImage}
           onClear={onClearImage}
         />
-        {msgs("image_url").map((m) => (
+        {msgs("image").map((m) => (
           <span key={m} className="text-xs block text-yellow-800">
             {m}
           </span>
@@ -60,11 +59,11 @@ const RowEditor = ({
       <div className="grid gap-3 sm:grid-cols-2">
         {fieldColumns.map((c) => (
           <label key={c.column} className="block text-sm">
-            <span className="font-medium">{c.fieldName}</span>{" "}
+            <span className="font-medium">{c.field.name}</span>{" "}
             <span className="font-mono text-xs text-gray-500">{c.column}</span>
             <textarea
               className={inputClass}
-              rows={c.description.includes("Markdown") ? 4 : 1}
+              rows={c.field.type === "MULTILINE_TEXT" ? 4 : 1}
               value={row.cells[c.column] ?? ""}
               onChange={(e) => onEdit(row.rowNumber, c.column, e.target.value)}
             />

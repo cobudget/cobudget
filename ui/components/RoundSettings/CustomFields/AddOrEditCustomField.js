@@ -10,6 +10,7 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import { SelectField } from "components/SelectInput";
 import { FormattedMessage, useIntl } from "react-intl";
+import { MAX_IMPORT_KEY_LENGTH, validateImportKey } from "utils/fieldKey";
 
 const ADD_CUSTOM_FIELD_MUTATION = gql`
   mutation AddCustomField($roundId: ID!, $customField: CustomFieldInput!) {
@@ -23,6 +24,8 @@ const ADD_CUSTOM_FIELD_MUTATION = gql`
         limit
         options
         isRequired
+        importKey
+        isUniqueIdentifier
         position
         createdAt
       }
@@ -50,6 +53,8 @@ const EDIT_CUSTOM_FIELD_MUTATION = gql`
         limit
         options
         isRequired
+        importKey
+        isUniqueIdentifier
         position
         createdAt
       }
@@ -73,6 +78,16 @@ const schema = yup.object().shape({
   }),
 });
 
+// Import key: empty on create = generated from the name by the server.
+const keyError = (key, others) => {
+  const k = (key ?? "").trim();
+  if (!k) return null;
+  const invalid = validateImportKey(k);
+  if (invalid) return invalid;
+  const clash = others.find((f) => f.importKey === k);
+  return clash ? `Already used by the field "${clash.name}".` : null;
+};
+
 export default function AddOrEditCustomField({
   round,
   handleClose,
@@ -83,6 +98,8 @@ export default function AddOrEditCustomField({
     limit: null,
     options: [],
     isRequired: false,
+    importKey: null,
+    isUniqueIdentifier: false,
   },
 }) {
   const editing = Boolean(customField.id);
@@ -102,6 +119,15 @@ export default function AddOrEditCustomField({
   const [optionsInput, setOptionsInput] = useState(
     (customField.options ?? []).join(", ")
   );
+  const [isUniqueIdentifier, setIsUniqueIdentifier] = useState(
+    customField.isUniqueIdentifier || false
+  );
+  const [importKey, setImportKey] = useState(customField.importKey ?? "");
+  const otherFields = (round.customFields ?? []).filter(
+    (f) => f.id !== customField.id
+  );
+  const currentUnique = otherFields.find((f) => f.isUniqueIdentifier);
+  const importKeyError = keyError(importKey, otherFields);
   const intl = useIntl();
 
   return (
@@ -121,7 +147,11 @@ export default function AddOrEditCustomField({
         </h1>
         <form
           onSubmit={handleSubmit((variables) => {
+            if (importKeyError) return;
             variables.customField.isRequired = isRequired;
+            variables.customField.importKey = importKey.trim() || null;
+            variables.customField.isUniqueIdentifier =
+              typeInputValue === "TEXT" && isUniqueIdentifier;
             variables.customField.options =
               typeInputValue === "ENUM" || typeInputValue === "TEXT"
                 ? optionsInput.split(",").map((s) => s.trim()).filter(Boolean)
@@ -252,6 +282,57 @@ export default function AddOrEditCustomField({
                 defaultValue={customField.isRequired}
                 control={control}
                 inputRef={register}
+              />
+            </div>
+            {typeInputValue === "TEXT" && (
+              <div>
+                <FormControlLabel
+                  label={intl.formatMessage({
+                    defaultMessage: "Unique identifier (for imports)",
+                  })}
+                  control={
+                    <Checkbox
+                      onChange={(e) => setIsUniqueIdentifier(e.target.checked)}
+                      checked={isUniqueIdentifier}
+                      disabled={Boolean(currentUnique)}
+                      data-testid="customfield-unique-checkbox"
+                    />
+                  }
+                />
+                <p className="text-sm text-gray-600">
+                  {currentUnique ? (
+                    <FormattedMessage
+                      defaultMessage='"{name}" is already the unique identifier of this round. Untick it there first.'
+                      values={{ name: currentUnique.name }}
+                    />
+                  ) : (
+                    <FormattedMessage defaultMessage="Used only by the CSV import: its value must be unique across the file and the round, and becomes a tag. Normal editing is not affected." />
+                  )}
+                </p>
+              </div>
+            )}
+            <div>
+              <TextField
+                placeholder={intl.formatMessage({
+                  defaultMessage: "Import key (CSV column name)",
+                })}
+                color={round.color}
+                error={Boolean(importKeyError)}
+                helperText={
+                  importKeyError ??
+                  intl.formatMessage(
+                    {
+                      defaultMessage:
+                        "Column name in the import CSV. Empty = generated from the name. Stays the same when you rename the item. Max {max} characters.",
+                    },
+                    { max: MAX_IMPORT_KEY_LENGTH }
+                  )
+                }
+                inputProps={{
+                  value: importKey,
+                  onChange: (e) => setImportKey(e.target.value),
+                }}
+                testid="customfield-importkey-input"
               />
             </div>
           </div>

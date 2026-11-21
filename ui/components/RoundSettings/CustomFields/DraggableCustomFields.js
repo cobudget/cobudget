@@ -18,6 +18,8 @@ const DELETE_CUSTOM_FIELD_MUTATION = gql`
         type
         limit
         isRequired
+        importKey
+        isUniqueIdentifier
         position
         createdAt
       }
@@ -44,6 +46,8 @@ const SET_CUSTOM_FIELD_POSITION_MUTATION = gql`
         type
         limit
         isRequired
+        importKey
+        isUniqueIdentifier
         position
         createdAt
       }

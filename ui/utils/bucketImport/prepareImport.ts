@@ -1,10 +1,7 @@
 import csv from "csvtojson";
-import {
-  baseColumns,
-  budgetColumnPattern,
-  bucketImportConfig,
-  normalizeName,
-} from "./config";
+import { budgetColumnPattern } from "../fieldKey";
+import { bucketImportConfig } from "./config";
+import { buildColumns, skippedFields } from "./columns";
 import type {
   ImportBucketRow,
   ImportBudgetItem,
@@ -37,6 +34,8 @@ export type PreparedIssue = {
 export type PreparedRow = {
   /** 1-based data row number (header excluded) */
   rowNumber: number;
+  /** Trimmed value of the round's unique-identifier column ('' when none) */
+  uniqueValue: string;
   cells: Record<string, string>;
   payload: ImportBucketRow;
   totalMinor: number;
@@ -108,10 +107,28 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     else idx.set(h, i);
   });
 
-  // Required columns
-  baseColumns
+  // Columns come from the round's fields (plus the built-ins)
+  const columns = buildColumns(ctx.fields);
+  const uniqueCol = columns.find((c) => c.unique);
+  const colOf = (target: string) =>
+    columns.find((c) => c.target === target)?.column;
+  const fieldColumns = columns.filter(
+    (c) => c.target === "field" && idx.has(c.column)
+  );
+
+  columns
     .filter((c) => c.required && !idx.has(c.column))
-    .forEach((c) => fileError(`Required column "${c.column}" is missing.`));
+    .forEach((c) =>
+      fileError(
+        c.field
+          ? `Column "${c.column}" (field "${c.field.name}") is required but missing.`
+          : `Required column "${c.column}" is missing.`
+      )
+    );
+  if (!uniqueCol)
+    fileWarn(
+      "This round has no unique-identifier field: duplicates are not checked and no tag is created."
+    );
 
   // Budget columns: discover N from headers (never a fixed count)
   const itemNs = new Set<number>();
@@ -141,7 +158,7 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     );
 
   // Unknown columns -> warning only (never imported)
-  const known = new Set(baseColumns.map((c) => c.column));
+  const known = new Set(columns.map((c) => c.column));
   const unknownColumns = table.headers.filter(
     (h) =>
       h &&
@@ -152,31 +169,18 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
   unknownColumns.forEach((h) =>
     fileWarn(`Column "${h}" is not recognised and will be ignored.`)
   );
-
-  // Round fields must already exist for every field column in the file
-  const fieldByName = new Map(
-    ctx.fields.map((f) => [normalizeName(f.name), f])
-  );
-  const fieldColumns = baseColumns.filter(
-    (c) => c.target === "field" && idx.has(c.column)
-  );
-  const missingFields = fieldColumns.filter(
-    (c) => !fieldByName.has(normalizeName(c.fieldName))
-  );
-  if (missingFields.length)
-    fileError(
-      `This round has no custom field for: ${missingFields
-        .map((c) => `"${c.fieldName}" (column ${c.column})`)
-        .join(
-          ", "
-        )}. Add or rename them in Round Settings → Bucket Form, then upload again.`
+  const skipped = skippedFields(ctx.fields);
+  if (skipped.length)
+    fileWarn(
+      `These round fields cannot be imported and are left empty: ${skipped
+        .map((f) => f.name)
+        .join(", ")}.`
     );
 
   // Rows
   const get = (r: string[], col: string) =>
     idx.has(col) ? (r[idx.get(col)] ?? "").replace(/\r\n?/g, "\n").trim() : "";
-  const colFor = (target: string) =>
-    baseColumns.find((c) => c.target === target)?.column;
+  const colFor = colOf;
 
   const rows: PreparedRow[] = table.rows.map((r, i) => {
     const issues: PreparedIssue[] = [];
@@ -220,21 +224,26 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     // field values
     const fieldValues: ImportFieldValue[] = [];
     fieldColumns.forEach((c) => {
-      const def = fieldByName.get(normalizeName(c.fieldName));
+      const def = c.field;
       const v = get(r, c.column);
-      if (def && v) fieldValues.push({ fieldId: def.id, value: v });
+      if (!v) return;
+      if (def.type === "BOOLEAN") {
+        const b = parseBoolean(v);
+        if (b === null)
+          return add("error", c.column, `"${v}" is not true/false or yes/no.`);
+        fieldValues.push({ fieldId: def.id, value: b });
+      } else fieldValues.push({ fieldId: def.id, value: v });
     });
 
     // image
     const imageUrl = get(r, colFor("image"));
     if (imageUrl && !/^https?:\/\/\S+$/i.test(imageUrl))
-      add("error", "image_url", "Image must be a full http(s) URL.");
-    else if (!imageUrl) add("warning", "image_url", "No image yet.");
+      add("error", "image", "Image must be a full http(s) URL.");
+    else if (!imageUrl) add("warning", "image", "No image yet.");
 
     const payload: ImportBucketRow = {
       title: get(r, colFor("title")),
       summary: get(r, colFor("summary")),
-      referenceCode: get(r, colFor("referenceCode")),
       fieldValues,
       budgetItems,
       images:
@@ -245,6 +254,7 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
 
     return {
       rowNumber: table.rowNumbers?.[i] ?? i + 1,
+      uniqueValue: uniqueCol ? get(r, uniqueCol.column) : "",
       cells,
       payload,
       totalMinor,
@@ -258,17 +268,12 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
     { fields: ctx.fields, existingCodes: new Set(ctx.existingCodes) },
     rows.map((r) => r.rowNumber)
   );
-  const columnForField = (name: string): string | null => {
-    if (name === "title") return colFor("title");
-    if (name === "summary") return colFor("summary");
-    if (name === "referenceCode") return colFor("referenceCode");
-    if (name.startsWith("budgetItems")) return null;
-    const base = baseColumns.find(
-      (c) =>
-        c.target === "field" &&
-        normalizeName(c.fieldName) === normalizeName(name)
-    );
-    return base?.column ?? null;
+  const columnForIssue = (x: { field: string; fieldId?: string }) => {
+    if (x.fieldId)
+      return columns.find((c) => c.field?.id === x.fieldId)?.column ?? null;
+    if (x.field === "title") return colOf("title") ?? null;
+    if (x.field === "summary") return colOf("summary") ?? null;
+    return null;
   };
   const seenFile = new Set(fileIssues.map((f) => f.message));
   [
@@ -295,7 +300,7 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
       return;
     row.issues.push({
       severity: x.severity,
-      column: columnForField(x.field),
+      column: columnForIssue(x),
       message: x.message,
       kind: x.kind,
     });
@@ -335,22 +340,38 @@ export function summarize(prepared: Prepared) {
   };
 }
 
-/** Template CSV: header + one example row, built from the column config. */
-export function buildTemplateCsv(budgetPairs: number): string {
+/** "true"/"yes"/"1" -> true, "false"/"no"/"0" -> false, otherwise null. */
+function parseBoolean(raw: string): boolean | null {
+  const v = raw.trim().toLowerCase();
+  if (["true", "yes", "y", "1"].includes(v)) return true;
+  if (["false", "no", "n", "0"].includes(v)) return false;
+  return null;
+}
+
+/** Template CSV: header + one example row, built from the round's fields. */
+export function buildTemplateCsv(
+  fields: ImportFieldDef[],
+  budgetPairs: number
+): string {
   const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+  const columns = buildColumns(fields);
   const budgetHeaders = Array.from({ length: budgetPairs }, (_, i) => [
     `budget_item_${i + 1}`,
     `budget_amount_${i + 1}`,
   ]).flat();
-  const headers = [...baseColumns.map((c) => c.column), ...budgetHeaders];
+  const headers = [...columns.map((c) => c.column), ...budgetHeaders];
   const example = [
-    ...baseColumns.map((c) =>
+    ...columns.map((c) =>
       c.target === "title"
         ? "Community garden"
         : c.target === "summary"
         ? "Turn the empty lot on Mill Road into a shared growing space."
-        : c.target === "referenceCode"
+        : c.unique
         ? "EX01"
+        : c.field?.type === "BOOLEAN"
+        ? "yes"
+        : c.field?.options?.length
+        ? c.field.options[0]
         : ""
     ),
     "Raised beds",

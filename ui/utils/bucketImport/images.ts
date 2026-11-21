@@ -2,7 +2,7 @@ import type { Prepared } from "./prepareImport";
 
 // Image state lives OUTSIDE the CSV cells, keyed by the stable row number, so
 // it survives cell edits and row removal. An uploaded image overrides the
-// row's image_url cell; clearing it falls back to the cell.
+// row's image cell; clearing it falls back to the cell.
 
 export type RowImage =
   | { status: "uploading"; fileName: string; attempt: number }
@@ -19,11 +19,11 @@ export type RowImages = Record<number, RowImage>;
 
 /**
  * Overlays the image state on a prepared import (pure). Done images replace
- * the payload image and drop the row's image_url issues; a pending upload
+ * the payload image and drop the row's image issues; a pending upload
  * blocks the import; a failed upload leaves the row as the CSV had it.
  */
 export function applyImages(prepared: Prepared, images: RowImages): Prepared {
-  const imageIssue = (i: { column: string | null }) => i.column === "image_url";
+  const imageIssue = (i: { column: string | null }) => i.column === "image";
   return {
     ...prepared,
     rows: prepared.rows.map((r) => {
@@ -44,7 +44,7 @@ export function applyImages(prepared: Prepared, images: RowImages): Prepared {
           ...r.issues.filter((i) => !imageIssue(i)),
           {
             severity: "error" as const,
-            column: "image_url",
+            column: "image",
             message: `Image "${img.fileName}" is still uploading.`,
           },
         ],

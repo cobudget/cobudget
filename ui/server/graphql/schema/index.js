@@ -54,7 +54,7 @@ const schema = gql`
   }
 
   type Query {
-    # Admin-only: round fields + used reference codes for the bucket import preview
+    # Admin-only: round fields + used unique-identifier values for the bucket import preview
     bucketImportContext(roundId: ID!): BucketImportContext!
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
@@ -865,7 +865,6 @@ const schema = gql`
   input BucketImportInput {
     title: String!
     summary: String
-    referenceCode: String!
     fieldValues: [BucketImportFieldValueInput!]!
     budgetItems: [BucketImportBudgetItemInput!]!
     images: [ImageInput!]
@@ -874,7 +873,7 @@ const schema = gql`
   type BucketImportContext {
     currency: String!
     fields: [CustomField!]!
-    "Normalised (trimmed, lower-case) reference codes already used in the round"
+    "Normalised (trimmed, lower-case) values of the unique-identifier field already used in the round"
     existingCodes: [String!]!
   }
 
@@ -1035,6 +1034,10 @@ const schema = gql`
     limit: Int
     options: [String]
     isRequired: Boolean!
+    "CSV column name for the bucket import (stable, unique per round)"
+    importKey: String
+    "Import-only: values must be unique per round and become a tag"
+    isUniqueIdentifier: Boolean!
     position: Float!
     createdAt: Date!
   }
@@ -1046,6 +1049,9 @@ const schema = gql`
     limit: Int
     options: [String]
     isRequired: Boolean!
+    "Optional on create (generated from the name); omit on edit to keep it"
+    importKey: String
+    isUniqueIdentifier: Boolean
     createdAt: Date
   }
 

@@ -13,11 +13,11 @@ import {
 } from "utils/bucketImport/prepareImport";
 import type { Prepared } from "utils/bucketImport/prepareImport";
 import {
-  baseColumns,
-  normalizeName,
   templateBudgetPairs,
   templateFileName,
 } from "utils/bucketImport/config";
+import { buildColumns } from "utils/bucketImport/columns";
+import type { ImportFieldDef } from "utils/bucketImport/types";
 import { applyImages } from "utils/bucketImport/images";
 import type { RowImage, RowImages } from "utils/bucketImport/images";
 import { uploadBucketImage } from "utils/uploadBucketImage";
@@ -39,10 +39,13 @@ const IMPORT_CONTEXT_QUERY = gql`
       fields {
         id
         name
+        description
         type
         limit
         options
         isRequired
+        importKey
+        isUniqueIdentifier
       }
     }
   }
@@ -60,10 +63,13 @@ const IMPORT_BUCKETS = gql`
   }
 `;
 
-const downloadTemplate = () => {
-  const blob = new Blob(["\uFEFF" + buildTemplateCsv(templateBudgetPairs)], {
-    type: "text/csv;charset=utf-8",
-  });
+const downloadTemplate = (fields: ImportFieldDef[]) => {
+  const blob = new Blob(
+    ["\uFEFF" + buildTemplateCsv(fields, templateBudgetPairs)],
+    {
+      type: "text/csv;charset=utf-8",
+    }
+  );
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -147,13 +153,9 @@ const BucketImport = ({ round }: { round: any }) => {
   );
   const summary = prepared ? summarize(prepared) : null;
 
-  const priorityOptions: string[] = useMemo(() => {
-    const col = baseColumns.find((c) => c.column === "priority_area");
-    const f = ctx?.fields.find(
-      (x) => normalizeName(x.name) === normalizeName(col.fieldName)
-    );
-    return f?.options ?? [];
-  }, [ctx]);
+  const uniqueName =
+    ctx?.fields.find((f) => f.isUniqueIdentifier)?.name ?? "identifier";
+  const columns = useMemo(() => buildColumns(ctx?.fields ?? []), [ctx]);
 
   const hasColumn = useCallback((column: string) => headers.includes(column), [
     headers,
@@ -165,10 +167,10 @@ const BucketImport = ({ round }: { round: any }) => {
       const parsed = await parseCsvText(await file.text());
       if (parsed.rows.length === 0)
         return toast.error("The CSV file has no data rows.");
-      // image_url is optional in the file but always editable here
-      const hs = parsed.headers.includes("image_url")
+      // image is optional in the file but always editable here
+      const hs = parsed.headers.includes("image")
         ? parsed.headers
-        : [...parsed.headers, "image_url"];
+        : [...parsed.headers, "image"];
       setFileName(file.name);
       setHeaders(hs);
       setRows(parsed.rows.map((cells, i) => ({ id: i + 1, cells })));
@@ -250,7 +252,7 @@ const BucketImport = ({ round }: { round: any }) => {
       entries.map((e) => ({ id: e.id, name: e.file.name })),
       preparedBase.rows.map((r) => ({
         rowNumber: r.rowNumber,
-        referenceCode: r.payload.referenceCode,
+        uniqueValue: r.uniqueValue,
         title: r.payload.title,
       })),
       new Set(
@@ -328,7 +330,7 @@ const BucketImport = ({ round }: { round: any }) => {
       });
       if (res.error) {
         // Nothing was written (single all-or-nothing transaction). Refresh the
-        // round's reference codes so the table shows what the server saw.
+        // round's unique values so the table shows what the server saw.
         setSubmitError(
           res.error.graphQLErrors?.[0]?.message ?? res.error.message
         );
@@ -413,7 +415,11 @@ const BucketImport = ({ round }: { round: any }) => {
               Fill in one row per bucket (Google Sheets: Download as CSV, Excel:
               CSV UTF-8).
             </p>
-            <Button variant="secondary" onClick={downloadTemplate}>
+            <Button
+              variant="secondary"
+              disabled={!ctx}
+              onClick={() => downloadTemplate(ctx.fields)}
+            >
               Download CSV template
             </Button>
             <details>
@@ -466,11 +472,11 @@ const BucketImport = ({ round }: { round: any }) => {
           {summary.duplicateCodeRows > 0 && (
             <Banner
               variant="critical"
-              title={`${summary.duplicateCodeRows} rows share a reference code`}
+              title={`${summary.duplicateCodeRows} rows share the same ${uniqueName}`}
               className=""
             >
-              Every row with a repeated code is highlighted. Edit the codes or
-              remove rows until each code is unique.
+              Every row with a repeated value is highlighted. Edit the values or
+              remove rows until each one is unique.
             </Banner>
           )}
           {summary.existingCodeRows > 0 && (
@@ -480,7 +486,7 @@ const BucketImport = ({ round }: { round: any }) => {
               className=""
             >
               <div className="flex items-center gap-3 flex-wrap">
-                <span>Their reference codes are already used here.</span>
+                <span>Their {uniqueName} values are already used here.</span>
                 <Button variant="secondary" onClick={removeExisting}>
                   Remove rows that already exist
                 </Button>
@@ -518,7 +524,7 @@ const BucketImport = ({ round }: { round: any }) => {
           <PreviewTable
             prepared={prepared}
             currency={ctx.currency}
-            priorityOptions={priorityOptions}
+            columns={columns}
             hasColumn={hasColumn}
             onlyNeedsAttention={onlyNeedsAttention}
             selected={selected}
@@ -534,7 +540,7 @@ const BucketImport = ({ round }: { round: any }) => {
             rows={prepared.rows.map((r) => ({
               rowNumber: r.rowNumber,
               title: r.payload.title,
-              referenceCode: r.payload.referenceCode,
+              uniqueValue: r.uniqueValue,
             }))}
             images={images}
             unassigned={unassigned}
@@ -551,8 +557,7 @@ const BucketImport = ({ round }: { round: any }) => {
             <div className="border rounded p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">
-                  Row {selectedRow.rowNumber}:{" "}
-                  {selectedRow.cells.proposal_title}
+                  Row {selectedRow.rowNumber}: {selectedRow.payload.title}
                 </h3>
                 <button
                   type="button"
@@ -565,6 +570,7 @@ const BucketImport = ({ round }: { round: any }) => {
               <div className="grid gap-6 lg:grid-cols-2">
                 <RowEditor
                   row={selectedRow}
+                  columns={columns}
                   budgetNumbers={prepared.budgetNumbers}
                   hasColumn={hasColumn}
                   onEdit={onEdit}

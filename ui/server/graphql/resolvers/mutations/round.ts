@@ -2,6 +2,7 @@ import prisma from "../../../prisma";
 import { combineResolvers } from "graphql-resolvers";
 import { isBucketCocreatorOrCollAdminOrMod, isGroupAdmin } from "../auth";
 import slugify from "utils/slugify";
+import { generateImportKey, validateImportKey } from "utils/fieldKey";
 import {
   getCollective,
   getCollectiveOrProject,
@@ -100,6 +101,7 @@ export const createRound = async (
       fields: {
         create: {
           name: "Description",
+          importKey: "description",
           description: "Describe your bucket",
           type: "MULTILINE_TEXT",
           options: [],
@@ -732,11 +734,57 @@ export const joinRound = async (parent, { roundId }, { user }) => {
   return roundMember;
 };
 
+// Import settings of a custom field (bucket CSV import): the stable column key
+// and the unique-identifier flag. Rules: the flag is for single-line TEXT
+// fields only and at most one field per round has it; keys are unique per
+// round and cannot equal a built-in column name.
+const assertUniqueFlag = (
+  others: { name: string; isUniqueIdentifier: boolean }[],
+  type: string,
+  flag: boolean
+) => {
+  if (!flag) return;
+  if (type !== "TEXT")
+    throw new Error(
+      "Only a Short Text field can be the unique identifier for imports."
+    );
+  const other = others.find((f) => f.isUniqueIdentifier);
+  if (other)
+    throw new Error(
+      `"${other.name}" is already the unique identifier of this round. Untick it there first.`
+    );
+};
+
+const assertKeyAvailable = (
+  others: { name: string; importKey: string | null }[],
+  key: string
+) => {
+  const invalid = validateImportKey(key);
+  if (invalid) throw new Error(invalid);
+  const clash = others.find((f) => f.importKey === key);
+  if (clash)
+    throw new Error(
+      `Import key "${key}" is already used by the field "${clash.name}".`
+    );
+};
+
 export const addCustomField = combineResolvers(
   isCollOrGroupAdmin,
   async (
     parent,
-    { roundId, customField: { name, description, type, limit, options, isRequired } }
+    {
+      roundId,
+      customField: {
+        name,
+        description,
+        type,
+        limit,
+        options,
+        isRequired,
+        importKey,
+        isUniqueIdentifier,
+      },
+    }
   ) => {
     const customFields = await prisma.field.findMany({
       where: { roundId: roundId },
@@ -747,20 +795,39 @@ export const addCustomField = combineResolvers(
         .map((g) => g.position)
         .reduce((a, b) => Math.max(a, b), 1000) + 1;
 
-    const customField = await prisma.field.create({
-      data: {
-        roundId: roundId,
-        name,
-        description,
-        type,
-        limit,
-        options: options ?? [],
-        isRequired,
-        position,
-      },
-      include: { round: true },
-    });
-    return customField.round;
+    assertUniqueFlag(customFields, type, !!isUniqueIdentifier);
+    const given = importKey?.trim();
+    if (given) assertKeyAvailable(customFields, given);
+
+    // Generated keys can race with a concurrent add: retry on the unique index.
+    for (let attempt = 0; ; attempt++) {
+      const taken = attempt
+        ? (await prisma.field.findMany({ where: { roundId } })).map(
+            (f) => f.importKey
+          )
+        : customFields.map((f) => f.importKey);
+      try {
+        const customField = await prisma.field.create({
+          data: {
+            roundId: roundId,
+            name,
+            description,
+            type,
+            limit,
+            options: options ?? [],
+            isRequired,
+            importKey: given || generateImportKey(name, taken),
+            isUniqueIdentifier: !!isUniqueIdentifier,
+            position,
+          },
+          include: { round: true },
+        });
+        return customField.round;
+      } catch (e) {
+        if (e?.code === "P2002" && !given && attempt < 3) continue;
+        throw e;
+      }
+    }
   }
 );
 
@@ -792,19 +859,54 @@ export const editCustomField = combineResolvers(
     {
       roundId,
       fieldId,
-      customField: { name, description, type, limit, options, isRequired },
+      customField: {
+        name,
+        description,
+        type,
+        limit,
+        options,
+        isRequired,
+        importKey,
+        isUniqueIdentifier,
+      },
     }
   ) => {
     const round = await prisma.round.findUnique({
       where: { id: roundId },
       include: { fields: true },
     });
-    if (!round.fields.map((g) => g.id).includes(fieldId))
-      throw new Error("This field is not part of this round");
+    const current = round.fields.find((g) => g.id === fieldId);
+    if (!current) throw new Error("This field is not part of this round");
+    const others = round.fields.filter((g) => g.id !== fieldId);
+
+    // The key is stable: a rename never touches it; only an explicit,
+    // different importKey changes it.
+    const given = importKey?.trim();
+    const keyChanged = !!given && given !== current.importKey;
+    if (keyChanged) assertKeyAvailable(others, given);
+    const flag = isUniqueIdentifier ?? current.isUniqueIdentifier;
+    assertUniqueFlag(others, type, flag);
 
     const field = await prisma.field.update({
       where: { id: fieldId },
-      data: { name, description, type, limit, options: options ?? [], isRequired },
+      data: {
+        name,
+        description,
+        type,
+        limit,
+        options: options ?? [],
+        isRequired,
+        isUniqueIdentifier: flag,
+        ...(keyChanged && { importKey: given }),
+        // legacy field without a key: give it one on its next edit
+        ...(!current.importKey &&
+          !given && {
+            importKey: generateImportKey(
+              name,
+              others.map((f) => f.importKey)
+            ),
+          }),
+      },
       include: { round: true },
     });
 
