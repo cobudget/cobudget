@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { gql, useMutation, useQuery } from "urql";
 import toast from "react-hot-toast";
@@ -97,13 +97,32 @@ const Count = ({
 // prepareImport (pure, a few dozen rows), so counts and messages are live.
 type EditRow = { id: number; cells: string[] };
 
-const BucketImport = ({ round }: { round: any }) => {
+// `embedded`: rendered inside the round settings (Bucket Form & Import tab),
+// below the fields editor. Without it, the full-page tool at /[group]/[round]/import.
+const BucketImport = ({
+  round,
+  embedded = false,
+}: {
+  round: any;
+  embedded?: boolean;
+}) => {
   const [{ data, fetching, error }, reexecuteContext] = useQuery({
     query: IMPORT_CONTEXT_QUERY,
     variables: { roundId: round.id },
     requestPolicy: "network-only",
   });
   const ctx = data?.bucketImportContext;
+
+  // Embedded next to the fields editor: when the round's fields change (add,
+  // edit, reorder, flag), reload them so template, column reference and
+  // validation follow immediately.
+  const fieldsSignature = embedded ? JSON.stringify(round.customFields) : "";
+  const firstSignature = useRef(fieldsSignature);
+  useEffect(() => {
+    if (!embedded || firstSignature.current === fieldsSignature) return;
+    firstSignature.current = fieldsSignature;
+    reexecuteContext({ requestPolicy: "network-only" });
+  }, [embedded, fieldsSignature, reexecuteContext]);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -359,21 +378,43 @@ const BucketImport = ({ round }: { round: any }) => {
     reexecuteContext({ requestPolicy: "network-only" });
   };
 
+  const rootClass = embedded ? "px-6 mt-10 pt-8 border-t" : "page";
+  const Title = embedded ? "h2" : "h1";
+
   if (created)
     return (
-      <div className="page">
-        <h1 className="text-2xl font-semibold mb-4">Import buckets from CSV</h1>
+      <div className={rootClass}>
+        <Title className="text-2xl font-semibold mb-4">
+          Import buckets from CSV
+        </Title>
         <ImportResult created={created} base={base} onAnother={importAnother} />
       </div>
     );
 
   return (
-    <div className="page">
+    <div className={rootClass}>
       <div className="mb-4">
-        <Link href={`${base}/settings/import`}>
-          <a className="text-sm text-gray-600">← Round settings</a>
-        </Link>
-        <h1 className="text-2xl font-semibold mt-1">Import buckets from CSV</h1>
+        {embedded ? (
+          <div className="flex items-baseline justify-between gap-4 flex-wrap">
+            <Title className="text-2xl font-semibold">
+              Import buckets from CSV
+            </Title>
+            <Link href={`${base}/import`}>
+              <a className="text-sm text-gray-600 underline">
+                Open the full-page tool →
+              </a>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <Link href={`${base}/settings/bucket-form`}>
+              <a className="text-sm text-gray-600">← Bucket form settings</a>
+            </Link>
+            <Title className="text-2xl font-semibold mt-1">
+              Import buckets from CSV
+            </Title>
+          </>
+        )}
       </div>
 
       {error && (
