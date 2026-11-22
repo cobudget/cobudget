@@ -262,6 +262,22 @@ C,s,C1,Green Economy,Beds,100
     assert.equal(p.rows[0].totalMinor, 13 * 1000);
   });
 
+  await test("budget gap: an empty line before a filled one is a warning on that line", async () => {
+    const p = await run(
+      "title,summary,ref,budget-item-1,budget-amount-1,budget-item-2,budget-amount-2,budget-item-3,budget-amount-3\n" +
+        "T,S,A1,One,10,,,Three,30\n" +
+        "T2,S,A2,One,10,Two,20,,\n"
+    );
+    const gap = p.rows[0].issues.filter((i) => i.column === "budget-item-2");
+    assert.equal(gap.length, 1);
+    assert.equal(gap[0].severity, "warning");
+    assert.equal(p.rows[0].payload.budgetItems.length, 2); // still imported
+    assert.equal(
+      p.rows[1].issues.filter((i) => i.column?.startsWith("budget-")).length,
+      0
+    ); // trailing empty lines are fine
+  });
+
   await test("seeded bad data: each message lands on the right cell/row", async () => {
     const p = await run(
       [

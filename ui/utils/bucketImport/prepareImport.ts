@@ -222,6 +222,19 @@ export function prepareImport(table: CsvTable, ctx: PrepareContext): Prepared {
       totalMinor += minor;
     });
 
+    // A filled line after an empty one may be a line left out by mistake.
+    const isFilled = (n: number) =>
+      !!(get(r, `budget-item-${n}`) || get(r, `budget-amount-${n}`));
+    const lastFilled = Math.max(0, ...budgetNumbers.filter(isFilled));
+    budgetNumbers.forEach((n) => {
+      if (n < lastFilled && !isFilled(n))
+        add(
+          "warning",
+          `budget-item-${n}`,
+          `Budget line ${n} is empty but line ${lastFilled} is filled. Was a line left out?`
+        );
+    });
+
     // field values
     const fieldValues: ImportFieldValue[] = [];
     fieldColumns.forEach((c) => {

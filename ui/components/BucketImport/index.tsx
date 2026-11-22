@@ -368,6 +368,18 @@ const BucketImport = ({ round }: { round: any }) => {
     }
   };
 
+  // Budget lines are columns: a new pair is added for every entry (empty in
+  // the others, where it is ignored). There is no limit but the payload cap.
+  const addBudgetLine = () => {
+    const n = Math.max(0, ...(prepared?.budgetNumbers ?? [])) + 1;
+    setHeaders((h) => [...h, `budget-item-${n}`, `budget-amount-${n}`]);
+    setOnlyIssueFields(false);
+    setFocusReq((f) => ({
+      column: `budget-item-${n}`,
+      nonce: (f?.nonce ?? 0) + 1,
+    }));
+  };
+
   const base = `/${round.group?.slug ?? "c"}/${round.slug}`;
   const selectedRow = prepared?.rows.find((r) => r.rowNumber === selected);
   const totalAsk = prepared?.rows.reduce((t, r) => t + r.totalMinor, 0) ?? 0;
@@ -697,6 +709,7 @@ const BucketImport = ({ round }: { round: any }) => {
                     focus={focusReq}
                     onlyIssues={onlyIssueFields}
                     onToggleOnlyIssues={setOnlyIssueFields}
+                    onAddBudgetLine={addBudgetLine}
                   />
                 ) : (
                   <BucketPreview

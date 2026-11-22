@@ -38,6 +38,7 @@ const RowEditor = ({
   focus,
   onlyIssues,
   onToggleOnlyIssues,
+  onAddBudgetLine,
 }: {
   row: Prepared["rows"][number];
   columns: ImportColumn[];
@@ -51,6 +52,7 @@ const RowEditor = ({
   focus: FocusRequest | null;
   onlyIssues: boolean;
   onToggleOnlyIssues: (v: boolean) => void;
+  onAddBudgetLine: () => void;
 }) => {
   const issuesOf = (col: string) => row.issues.filter((i) => i.column === col);
 
@@ -160,19 +162,6 @@ const RowEditor = ({
         </label>
       )}
       {messages(rowLevel)}
-      <div className="grid gap-3 sm:grid-cols-2">
-        {present.map((c) => (
-          <label
-            key={c.column}
-            className={`block text-sm ${wide(c) ? "sm:col-span-2" : ""}`}
-          >
-            <span className="font-medium">{title(c)}</span>
-            {control(c)}
-            {messages(issuesOf(c.column))}
-          </label>
-        ))}
-      </div>
-
       {(!filtering || issuesOf("image").length > 0) && (
         <div id={fieldId("image")} tabIndex={-1} className="outline-none">
           <h4 className="font-medium text-sm">Image</h4>
@@ -186,56 +175,80 @@ const RowEditor = ({
         </div>
       )}
 
-      {budgetPairs.length > 0 && (
-        <div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {present.map((c) => (
+          <label
+            key={c.column}
+            className={`block text-sm ${wide(c) ? "sm:col-span-2" : ""}`}
+          >
+            <span className="font-medium">{title(c)}</span>
+            {control(c)}
+            {messages(issuesOf(c.column))}
+          </label>
+        ))}
+      </div>
+
+      <div>
+        {budgetPairs.length > 0 && (
           <h4 className="font-medium text-sm mb-1">Budget lines</h4>
-          <div className="grid grid-cols-[1fr_8rem] gap-x-2 gap-y-1 text-sm">
-            {budgetPairs.map((n) => {
-              const item = `budget-item-${n}`;
-              const amount = `budget-amount-${n}`;
-              const itemIssues = issuesOf(item);
-              const amountIssues = issuesOf(amount);
-              return (
-                <div key={n} className="contents">
-                  <div>
-                    <input
-                      id={fieldId(item)}
-                      className={`${inputBase} ${fieldTone(itemIssues)}`}
-                      placeholder={`Item ${n}`}
-                      value={row.cells[item] ?? ""}
-                      onChange={(e) =>
-                        onEdit(row.rowNumber, item, e.target.value)
-                      }
-                    />
-                    {messages(itemIssues)}
+        )}
+        {budgetPairs.length > 0 && (
+          <div>
+            <div className="grid grid-cols-[1fr_8rem] gap-x-2 gap-y-1 text-sm">
+              {budgetPairs.map((n) => {
+                const item = `budget-item-${n}`;
+                const amount = `budget-amount-${n}`;
+                const itemIssues = issuesOf(item);
+                const amountIssues = issuesOf(amount);
+                return (
+                  <div key={n} className="contents">
+                    <div>
+                      <input
+                        id={fieldId(item)}
+                        className={`${inputBase} ${fieldTone(itemIssues)}`}
+                        placeholder={`Item ${n}`}
+                        value={row.cells[item] ?? ""}
+                        onChange={(e) =>
+                          onEdit(row.rowNumber, item, e.target.value)
+                        }
+                      />
+                      {messages(itemIssues)}
+                    </div>
+                    <div>
+                      <input
+                        id={fieldId(amount)}
+                        className={`${inputBase} text-right ${fieldTone(
+                          amountIssues
+                        )}`}
+                        placeholder="Amount"
+                        value={row.cells[amount] ?? ""}
+                        onChange={(e) =>
+                          onEdit(row.rowNumber, amount, e.target.value)
+                        }
+                      />
+                      {messages(amountIssues)}
+                    </div>
                   </div>
-                  <div>
-                    <input
-                      id={fieldId(amount)}
-                      className={`${inputBase} text-right ${fieldTone(
-                        amountIssues
-                      )}`}
-                      placeholder="Amount"
-                      value={row.cells[amount] ?? ""}
-                      onChange={(e) =>
-                        onEdit(row.rowNumber, amount, e.target.value)
-                      }
-                    />
-                    {messages(amountIssues)}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            {!filtering && (
+              <p className="text-xs text-gray-500 mt-1">
+                Columns matching {String(budgetColumnPattern.item.source)} /{" "}
+                {String(budgetColumnPattern.amount.source)}. Blank pairs are
+                ignored.
+              </p>
+            )}
           </div>
-          {!filtering && (
-            <p className="text-xs text-gray-500 mt-1">
-              Columns matching {String(budgetColumnPattern.item.source)} /{" "}
-              {String(budgetColumnPattern.amount.source)}. Blank pairs are
-              ignored.
-            </p>
-          )}
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          className="mt-2 text-sm underline text-gray-700 hover:text-gray-900"
+          onClick={onAddBudgetLine}
+        >
+          + Add budget line
+        </button>
+      </div>
 
       <div className="border-t pt-3">
         <button

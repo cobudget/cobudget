@@ -22,4 +22,5 @@ export const bucketImportConfig = {
 export const normalizeCode = (code: string) => code.trim().toLowerCase();
 
 export const templateFileName = "bucket-import-template.csv";
-export const templateBudgetPairs = 5;
+// Columns in the template; more can be added to a file (budget-item-11, ...).
+export const templateBudgetPairs = 10;
