@@ -30,6 +30,7 @@ import ConfirmModal from "./ConfirmModal";
 import ImportResult from "./ImportResult";
 import PreviewTable from "./PreviewTable";
 import RowEditor from "./RowEditor";
+import type { FocusRequest } from "./RowEditor";
 
 const IMPORT_CONTEXT_QUERY = gql`
   query BucketImportContext($roundId: ID!) {
@@ -111,6 +112,9 @@ const BucketImport = ({ round }: { round: any }) => {
   const [rows, setRows] = useState<EditRow[]>([]);
   const [onlyNeedsAttention, setOnlyNeedsAttention] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [mode, setMode] = useState<"edit" | "preview">("edit");
+  const [showBatch, setShowBatch] = useState(false);
+  const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const [ackWarnings, setAckWarnings] = useState(false);
   const [, importBuckets] = useMutation(IMPORT_BUCKETS);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -482,15 +486,42 @@ const BucketImport = ({ round }: { round: any }) => {
               value={summary.errorRows}
               className="bg-red-100 text-red-900"
             />
-            <label className="flex items-center gap-2 text-sm ml-auto">
-              <input
-                type="checkbox"
-                checked={onlyNeedsAttention}
-                onChange={(e) => setOnlyNeedsAttention(e.target.checked)}
-              />
-              Show only rows that need attention
-            </label>
+            <div className="flex flex-col items-start gap-2 ml-auto">
+              <Button
+                variant="secondary"
+                onClick={() => setShowBatch((v) => !v)}
+              >
+                {showBatch ? "Hide batch image upload" : "Batch image upload"}
+              </Button>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={onlyNeedsAttention}
+                  onChange={(e) => setOnlyNeedsAttention(e.target.checked)}
+                />
+                Show only rows that need attention
+              </label>
+            </div>
           </div>
+
+          {showBatch && (
+            <BatchImages
+              rows={prepared.rows.map((r) => ({
+                rowNumber: r.rowNumber,
+                title: r.payload.title,
+                uniqueValue: r.uniqueValue,
+              }))}
+              images={images}
+              unassigned={unassigned}
+              onFiles={onBatchFiles}
+              onAssign={assignUnassigned}
+              onDiscard={(id) =>
+                setUnassigned((us) => us.filter((x) => x.id !== id))
+              }
+              onMove={moveImage}
+              onClear={clearImage}
+            />
+          )}
 
           <PreviewTable
             prepared={prepared}
@@ -499,64 +530,81 @@ const BucketImport = ({ round }: { round: any }) => {
             hasColumn={hasColumn}
             onlyNeedsAttention={onlyNeedsAttention}
             selected={selected}
-            onSelect={setSelected}
-            onEdit={onEdit}
-            onRemove={onRemove}
+            onEditCell={(rowNumber, column) => {
+              setSelected(rowNumber);
+              setMode("edit");
+              setFocusReq((f) => ({ column, nonce: (f?.nonce ?? 0) + 1 }));
+            }}
             images={images}
             onAttachImage={attachImage}
             onClearImage={clearImage}
           />
 
-          <BatchImages
-            rows={prepared.rows.map((r) => ({
-              rowNumber: r.rowNumber,
-              title: r.payload.title,
-              uniqueValue: r.uniqueValue,
-            }))}
-            images={images}
-            unassigned={unassigned}
-            onFiles={onBatchFiles}
-            onAssign={assignUnassigned}
-            onDiscard={(id) =>
-              setUnassigned((us) => us.filter((x) => x.id !== id))
-            }
-            onMove={moveImage}
-            onClear={clearImage}
-          />
-
-          {selectedRow && (
-            <div className="border rounded p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold">
-                  Row {selectedRow.rowNumber}: {selectedRow.payload.title}
-                </h3>
-                <button
-                  type="button"
-                  className="text-sm text-gray-600"
-                  onClick={() => setSelected(null)}
-                >
-                  Close
-                </button>
-              </div>
-              <div className="grid gap-6 lg:grid-cols-2">
-                <RowEditor
-                  row={selectedRow}
-                  columns={columns}
-                  budgetNumbers={prepared.budgetNumbers}
-                  hasColumn={hasColumn}
-                  onEdit={onEdit}
-                  image={images[selectedRow.rowNumber]}
-                  onAttachImage={(f) => attachImage(selectedRow.rowNumber, f)}
-                  onClearImage={() => clearImage(selectedRow.rowNumber)}
-                />
-                <BucketPreview
-                  row={selectedRow}
-                  round={{ ...round, currency: ctx.currency }}
-                  fields={ctx.fields}
-                />
-              </div>
-            </div>
-          )}
+          <div className="border rounded p-4 space-y-4">
+            {selectedRow ? (
+              <>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <h3 className="font-semibold">
+                    Row {selectedRow.rowNumber}:{" "}
+                    {selectedRow.payload.title || "(no title)"}
+                  </h3>
+                  <div className="flex items-center gap-3">
+                    <div
+                      role="group"
+                      aria-label="Edit or preview"
+                      className="inline-flex rounded overflow-hidden border border-gray-300 text-sm"
+                    >
+                      {(["edit", "preview"] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          aria-pressed={mode === m}
+                          className={`px-3 py-1 ${
+                            mode === m ? "bg-gray-900 text-white" : "bg-white"
+                          }`}
+                          onClick={() => setMode(m)}
+                        >
+                          {m === "edit" ? "Edit" : "Preview"}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      className="text-sm text-gray-600"
+                      onClick={() => setSelected(null)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+                {mode === "edit" ? (
+                  <RowEditor
+                    row={selectedRow}
+                    columns={columns}
+                    budgetNumbers={prepared.budgetNumbers}
+                    hasColumn={hasColumn}
+                    onEdit={onEdit}
+                    image={images[selectedRow.rowNumber]}
+                    onAttachImage={(f) => attachImage(selectedRow.rowNumber, f)}
+                    onClearImage={() => clearImage(selectedRow.rowNumber)}
+                    onRemove={() => onRemove(selectedRow.rowNumber)}
+                    focus={focusReq}
+                  />
+                ) : (
+                  <BucketPreview
+                    row={selectedRow}
+                    round={{ ...round, currency: ctx.currency }}
+                    fields={ctx.fields}
+                  />
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-gray-600">
+                Hover a cell in the table and press its pencil to edit that row
+                here, or switch to Preview to see the bucket as it will appear.
+              </p>
+            )}
+          </div>
 
           <div className="border-t pt-4 space-y-2 text-sm">
             {summary.blocked ? (
@@ -636,8 +684,8 @@ const BucketImport = ({ round }: { round: any }) => {
               2. Check interactively and assign images
             </h3>
             <p>
-              Upload the file and review the preview. Fix errors right in the
-              table, and assign an image to each bucket.
+              Upload the file and review the table. Use a cell&apos;s pencil to
+              fix a row below it, and assign an image to each bucket.
             </p>
           </div>
           <div className="space-y-2">

@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import FormattedCurrency from "components/FormattedCurrency";
 import type { Prepared, PreparedIssue } from "utils/bucketImport/prepareImport";
 import type { RowImages } from "utils/bucketImport/images";
@@ -11,78 +12,39 @@ const tone = (issues: PreparedIssue[]) =>
     ? "bg-yellow-100"
     : "";
 
-const inputClass =
-  "w-full border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-900";
+// Resolved rows stay visible this long (highlighted green), then fade out.
+const RESOLVED_HOLD_MS = 900;
+const FADE_MS = 500;
 
-type Row = Prepared["rows"][number];
+const columnTitle = (c: ImportColumn) =>
+  c.target === "title"
+    ? "Title"
+    : c.target === "summary"
+    ? "Summary"
+    : c.field.name;
 
-// One editable cell: highlighted by its issues, explanation on hover and in
-// the Messages column. Edits revalidate live (the whole import re-runs; it is
-// a few dozen rows).
-const EditableCell = ({
-  row,
-  column,
-  editable,
-  multiline,
-  options,
-  onEdit,
-  className = "",
-  children,
-}: {
-  row: Row;
-  column: string;
-  editable: boolean;
-  multiline?: boolean;
-  options?: string[];
-  onEdit: (rowNumber: number, column: string, value: string) => void;
-  className?: string;
-  children?: React.ReactNode;
-}) => {
-  const issues = row.issues.filter((i) => i.column === column);
-  const value = row.cells[column] ?? "";
-  const change = (v: string) => onEdit(row.rowNumber, column, v);
-  return (
-    <td
-      className={`px-2 py-1 align-top border-b ${tone(issues)} ${className}`}
-      title={issues.map((i) => i.message).join("\n") || undefined}
-    >
-      {!editable ? (
-        <span className="text-gray-500">–</span>
-      ) : options?.length ? (
-        <select
-          className={inputClass}
-          value={value}
-          onChange={(e) => change(e.target.value)}
-        >
-          <option value="" />
-          {/* keep an invalid value visible so it can be seen and replaced */}
-          {value && !options.includes(value) && (
-            <option value={value}>{value}</option>
-          )}
-          {options.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
-          ))}
-        </select>
-      ) : multiline ? (
-        <textarea
-          className={inputClass}
-          rows={2}
-          value={value}
-          onChange={(e) => change(e.target.value)}
-        />
-      ) : (
-        <input
-          className={inputClass}
-          value={value}
-          onChange={(e) => change(e.target.value)}
-        />
-      )}
-      {children}
-    </td>
-  );
-};
+// Hover-only pencil (always visible on touch screens, where there is no
+// hover). It is the only way into the editor: plain clicks and scrolling
+// never interrupt browsing the table.
+const pencilCss = `
+.import-pencil { opacity: 0; }
+.import-row:hover .import-pencil, .import-pencil:focus { opacity: 1; }
+@media (hover: none) { .import-pencil { opacity: 1; } }
+`;
+
+const Pencil = ({ onClick, label }: { onClick: () => void; label: string }) => (
+  <button
+    type="button"
+    aria-label={label}
+    title={label}
+    className="import-pencil absolute right-1 top-1 p-0.5 rounded bg-white border border-gray-300 text-gray-700 hover:bg-gray-100"
+    onClick={onClick}
+  >
+    <svg viewBox="0 0 20 20" width="14" height="14" fill="currentColor">
+      <path d="M13.6 2.4a2 2 0 0 1 2.8 2.8l-9.5 9.5-3.7.9.9-3.7 9.5-9.5z" />
+    </svg>
+  </button>
+);
 
 const PreviewTable = ({
   prepared,
@@ -91,9 +53,7 @@ const PreviewTable = ({
   hasColumn,
   onlyNeedsAttention,
   selected,
-  onSelect,
-  onEdit,
-  onRemove,
+  onEditCell,
   images,
   onAttachImage,
   onClearImage,
@@ -104,100 +64,168 @@ const PreviewTable = ({
   hasColumn: (column: string) => boolean;
   onlyNeedsAttention: boolean;
   selected: number | null;
-  onSelect: (rowNumber: number) => void;
-  onEdit: (rowNumber: number, column: string, value: string) => void;
-  onRemove: (rowNumber: number) => void;
+  onEditCell: (rowNumber: number, column: string) => void;
   images: RowImages;
   onAttachImage: (rowNumber: number, file: File) => void;
   onClearImage: (rowNumber: number) => void;
 }) => {
+  // A row that has just been resolved is held for a moment, then fades out,
+  // so it is clear it was fixed. Never while it is the selected row (it would
+  // vanish under the editor) and never when the filter is first switched on.
+  const [phase, setPhase] = useState<Record<number, "hold" | "fade" | "gone">>(
+    {}
+  );
+  const prevFilter = useRef(onlyNeedsAttention);
+  // Rows that were on screen (so a resolution is worth animating).
+  const wasShown = useRef<Set<number>>(new Set());
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  useEffect(() => {
+    const filterJustChanged = prevFilter.current !== onlyNeedsAttention;
+    prevFilter.current = onlyNeedsAttention;
+    setPhase((p) => {
+      const next = { ...p };
+      let changed = false;
+      for (const r of prepared.rows) {
+        const hide =
+          onlyNeedsAttention && !r.issues.length && selected !== r.rowNumber;
+        if (!hide) {
+          if (next[r.rowNumber]) {
+            delete next[r.rowNumber];
+            changed = true;
+          }
+          continue;
+        }
+        if (next[r.rowNumber]) continue;
+        changed = true;
+        // Rows that are OK when the filter is switched on (or the file is
+        // loaded) are hidden at once; only fresh resolutions animate.
+        const animate = !filterJustChanged && wasShown.current.has(r.rowNumber);
+        if (!animate) {
+          next[r.rowNumber] = "gone";
+          continue;
+        }
+        next[r.rowNumber] = "hold";
+        const n = r.rowNumber;
+        timers.current.push(
+          setTimeout(
+            () =>
+              setPhase((q) => (q[n] === "hold" ? { ...q, [n]: "fade" } : q)),
+            RESOLVED_HOLD_MS
+          ),
+          setTimeout(
+            () =>
+              setPhase((q) => (q[n] === "fade" ? { ...q, [n]: "gone" } : q)),
+            RESOLVED_HOLD_MS + FADE_MS
+          )
+        );
+      }
+      return changed ? next : p;
+    });
+  }, [prepared, onlyNeedsAttention, selected]);
+
+  // (runs after the effect above, so that one sees the previous render)
+  useEffect(() => {
+    wasShown.current = new Set(
+      prepared.rows
+        .filter((r) =>
+          onlyNeedsAttention ? phase[r.rowNumber] !== "gone" : true
+        )
+        .map((r) => r.rowNumber)
+    );
+  });
+
   const rows = prepared.rows.filter(
-    (r) => !onlyNeedsAttention || r.issues.length > 0
+    (r) => !onlyNeedsAttention || phase[r.rowNumber] !== "gone"
   );
-  // Compact table: the unique identifier and fields with a fixed list of
-  // values (dropdowns). Everything else is edited in the row editor below.
-  const unique = columns.find((c) => c.unique);
-  const choiceCols = columns.filter(
-    (c) => !c.unique && c.field && c.field.options?.length
-  );
-  const label = (c: ImportColumn) => c.field?.name ?? c.column;
+  // Rows that are correct and currently hidden (the count follows the fades).
+  const hidden = onlyNeedsAttention
+    ? prepared.rows.filter(
+        (r) => !r.issues.length && phase[r.rowNumber] === "gone"
+      ).length
+    : 0;
+  const shownColumns = columns.filter((c) => hasColumn(c.column));
+  const colCount = shownColumns.length + 4; // # status image budget
+
+  const th =
+    "px-2 py-1.5 border border-gray-300 bg-gray-100 font-medium text-left whitespace-nowrap";
+  const td = "px-2 py-1 border border-gray-300 align-top relative";
 
   return (
-    <div className="overflow-auto max-h-screen border rounded">
-      <table className="min-w-full text-sm">
-        <thead className="sticky top-0 bg-gray-100 text-left z-10">
+    <div className="overflow-auto max-h-screen border border-gray-300 rounded">
+      <style>{pencilCss}</style>
+      <table className="min-w-full text-sm border-collapse">
+        <thead className="sticky top-0 z-10">
           <tr>
-            {[
-              "#",
-              "Status",
-              "Title",
-              "Summary",
-              ...(unique ? [label(unique)] : []),
-              ...choiceCols.map(label),
-              "Image",
-              "Total ask",
-              "Messages",
-              "",
-            ].map((h) => (
-              <th key={h} className="px-2 py-2 border-b font-medium">
-                {h}
+            <th className={`${th} text-center`}>#</th>
+            <th className={th}>Status</th>
+            <th className={th}>Image</th>
+            {shownColumns.map((c) => (
+              <th key={c.column} className={th}>
+                {columnTitle(c)}
               </th>
             ))}
+            <th className={`${th} text-right`}>Budget</th>
           </tr>
         </thead>
         <tbody>
+          {hidden > 0 && (
+            <tr>
+              <td
+                colSpan={colCount}
+                className="px-3 py-1.5 border border-gray-300 bg-green-50 text-green-900 text-sm"
+              >
+                {rows.length === 0
+                  ? `All ${hidden} rows are correct.`
+                  : `${hidden} correct ${
+                      hidden === 1 ? "row" : "rows"
+                    } hidden.`}
+              </td>
+            </tr>
+          )}
           {rows.map((r) => {
             const hasError = r.issues.some((i) => i.severity === "error");
-            const isSelected = selected === r.rowNumber;
+            const state = phase[r.rowNumber];
+            const rowIssues = r.issues
+              .map((i) => `${i.column ? `${i.column}: ` : ""}${i.message}`)
+              .join("\n");
             return (
               <tr
                 key={r.rowNumber}
-                className={isSelected ? "outline-black bg-gray-50" : ""}
-                onClick={() => onSelect(r.rowNumber)}
+                className={`import-row ${
+                  selected === r.rowNumber
+                    ? "bg-blue-50"
+                    : state
+                    ? "bg-green-50"
+                    : "bg-white"
+                }`}
+                style={{
+                  transition: `opacity ${FADE_MS}ms ease-out`,
+                  opacity: state === "fade" ? 0 : 1,
+                }}
               >
-                <td className="px-2 py-1 align-top border-b text-gray-600">
+                <td className={`${td} text-center text-gray-600 bg-gray-50`}>
                   {r.rowNumber}
                 </td>
-                <td className="px-2 py-1 align-top border-b whitespace-nowrap">
-                  {hasError ? "Error" : r.issues.length ? "Warning" : "OK"}
-                </td>
-                <EditableCell
-                  row={r}
-                  column="title"
-                  editable={hasColumn("title")}
-                  onEdit={onEdit}
-                  className="min-w-48"
-                />
-                <EditableCell
-                  row={r}
-                  column="summary"
-                  editable={hasColumn("summary")}
-                  multiline
-                  onEdit={onEdit}
-                  className="min-w-64"
-                />
-                {unique && (
-                  <EditableCell
-                    row={r}
-                    column={unique.column}
-                    editable={hasColumn(unique.column)}
-                    onEdit={onEdit}
-                    className="min-w-28"
-                  />
-                )}
-                {choiceCols.map((c) => (
-                  <EditableCell
-                    key={c.column}
-                    row={r}
-                    column={c.column}
-                    editable={hasColumn(c.column)}
-                    options={c.field.options}
-                    onEdit={onEdit}
-                    className="min-w-40"
-                  />
-                ))}
                 <td
-                  className={`px-2 py-1 align-top border-b min-w-40 ${tone(
+                  className={`${td} whitespace-nowrap font-medium ${
+                    hasError
+                      ? "text-red-700"
+                      : r.issues.length
+                      ? "text-yellow-800"
+                      : "text-green-700"
+                  }`}
+                  title={rowIssues || undefined}
+                >
+                  {hasError
+                    ? "✕ Error"
+                    : r.issues.length
+                    ? "! Warning"
+                    : "✓ OK"}
+                </td>
+                <td
+                  className={`${td} min-w-40 ${tone(
                     r.issues.filter((i) => i.column === "image")
                   )}`}
                 >
@@ -208,45 +236,44 @@ const PreviewTable = ({
                     onClear={() => onClearImage(r.rowNumber)}
                   />
                 </td>
+                {shownColumns.map((c) => {
+                  const issues = r.issues.filter((i) => i.column === c.column);
+                  const value = r.cells[c.column] ?? "";
+                  return (
+                    <td
+                      key={c.column}
+                      className={`${td} pr-8 ${tone(issues)}`}
+                      title={
+                        issues.map((i) => i.message).join("\n") || undefined
+                      }
+                    >
+                      <div className="max-w-xs truncate">{value}</div>
+                      <Pencil
+                        label={`Edit ${columnTitle(c)} of row ${r.rowNumber}`}
+                        onClick={() => onEditCell(r.rowNumber, c.column)}
+                      />
+                    </td>
+                  );
+                })}
                 <td
-                  className={`px-2 py-1 align-top border-b whitespace-nowrap text-right ${tone(
+                  className={`${td} pr-8 whitespace-nowrap text-right ${tone(
                     r.issues.filter((i) => i.column?.startsWith("budget-"))
                   )}`}
+                  title={
+                    r.issues
+                      .filter((i) => i.column?.startsWith("budget-"))
+                      .map((i) => i.message)
+                      .join("\n") || undefined
+                  }
                 >
                   <FormattedCurrency value={r.totalMinor} currency={currency} />
                   <div className="text-xs text-gray-600">
                     {r.payload.budgetItems.length} items
                   </div>
-                </td>
-                <td className="px-2 py-1 align-top border-b min-w-64">
-                  {r.issues.map((i, k) => (
-                    <div
-                      key={k}
-                      className={
-                        i.severity === "error"
-                          ? "text-red-700"
-                          : "text-yellow-800"
-                      }
-                    >
-                      {i.severity === "error" ? "✕" : "!"}{" "}
-                      {i.column ? (
-                        <span className="font-mono">{i.column}: </span>
-                      ) : null}
-                      {i.message}
-                    </div>
-                  ))}
-                </td>
-                <td className="px-2 py-1 align-top border-b">
-                  <button
-                    type="button"
-                    className="text-gray-600 hover:text-red-700 whitespace-nowrap"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onRemove(r.rowNumber);
-                    }}
-                  >
-                    Remove
-                  </button>
+                  <Pencil
+                    label={`Edit budget of row ${r.rowNumber}`}
+                    onClick={() => onEditCell(r.rowNumber, "budget-item-1")}
+                  />
                 </td>
               </tr>
             );

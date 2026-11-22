@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import BucketCard from "components/BucketCard";
 import FormattedCurrency from "components/FormattedCurrency";
 import Markdown from "components/Markdown";
@@ -18,7 +18,6 @@ const BucketPreview = ({
   round: any;
   fields: Field[];
 }) => {
-  const [tab, setTab] = useState<"card" | "page">("card");
   const { payload } = row;
   const image = payload.images?.[0]?.small ?? null;
 
@@ -47,76 +46,66 @@ const BucketPreview = ({
 
   return (
     <div>
-      <div className="flex gap-2 mb-3 text-sm">
-        {(["card", "page"] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={`px-3 py-1 rounded ${
-              tab === t ? "bg-gray-900 text-white" : "bg-gray-100"
-            }`}
-            onClick={() => setTab(t)}
-          >
-            {t === "card" ? "Card" : "Page"}
-          </button>
-        ))}
-      </div>
-
-      {tab === "card" ? (
-        <div className="max-w-sm">
-          <BucketCard
-            bucket={bucket}
-            round={{ ...round, grantingHasClosed: false }}
-          />
-        </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow p-4 space-y-3">
-          {image && (
-            <img
-              src={image}
-              alt=""
-              className="w-full max-h-64 object-cover rounded"
+      <div className="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)] items-start">
+        <div>
+          <h4 className="font-medium text-sm mb-2">Card</h4>
+          <div className="max-w-sm">
+            <BucketCard
+              bucket={bucket}
+              round={{ ...round, grantingHasClosed: false }}
             />
-          )}
-          <h2 className="text-2xl font-semibold">{bucket.title}</h2>
-          {payload.summary && (
-            <p className="text-gray-800">{payload.summary}</p>
-          )}
-          {filled.map((f) => (
-            <div key={f.name}>
-              <h3 className="font-medium text-lg">{f.name}</h3>
-              <Markdown source={f.value as string} />
-            </div>
-          ))}
-          <div>
-            <h3 className="font-medium text-lg">Budget</h3>
-            <table className="text-sm w-full">
-              <tbody>
-                {payload.budgetItems.map((b, i) => (
-                  <tr key={i} className="border-b">
-                    <td className="py-1 pr-2">{b.description}</td>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-medium text-sm mb-2">Page</h4>
+          <div className="bg-white rounded-lg shadow p-4 space-y-3">
+            {image && (
+              <img
+                src={image}
+                alt=""
+                className="w-full max-h-64 object-cover rounded"
+              />
+            )}
+            <h2 className="text-2xl font-semibold">{bucket.title}</h2>
+            {payload.summary && (
+              <p className="text-gray-800">{payload.summary}</p>
+            )}
+            {filled.map((f) => (
+              <div key={f.name}>
+                <h3 className="font-medium text-lg">{f.name}</h3>
+                <Markdown source={f.value as string} />
+              </div>
+            ))}
+            <div>
+              <h3 className="font-medium text-lg">Budget</h3>
+              <table className="text-sm w-full">
+                <tbody>
+                  {payload.budgetItems.map((b, i) => (
+                    <tr key={i} className="border-b">
+                      <td className="py-1 pr-2">{b.description}</td>
+                      <td className="py-1 text-right">
+                        <FormattedCurrency
+                          value={b.amount}
+                          currency={round.currency}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                  <tr className="font-medium">
+                    <td className="py-1">Total ask</td>
                     <td className="py-1 text-right">
                       <FormattedCurrency
-                        value={b.amount}
+                        value={row.totalMinor}
                         currency={round.currency}
                       />
                     </td>
                   </tr>
-                ))}
-                <tr className="font-medium">
-                  <td className="py-1">Total ask</td>
-                  <td className="py-1 text-right">
-                    <FormattedCurrency
-                      value={row.totalMinor}
-                      currency={round.currency}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      )}
+      </div>
       <p className="text-xs text-gray-500 mt-2">
         Preview of the bucket as created: published and open for funding.
       </p>

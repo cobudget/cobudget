@@ -1,14 +1,30 @@
+import { useEffect } from "react";
 import { budgetColumnPattern } from "utils/fieldKey";
 import type { ImportColumn } from "utils/bucketImport/columns";
 import type { Prepared } from "utils/bucketImport/prepareImport";
 import type { RowImage } from "utils/bucketImport/images";
 import ImageControl from "./ImageControl";
 
-const inputClass =
-  "w-full border border-gray-300 rounded px-2 py-1 bg-white text-gray-900";
+export type FocusRequest = { column: string; nonce: number };
 
-// Everything the table does not show: the long-text custom fields and every
-// budget line (any number of pairs). Same edit path as the table cells.
+const inputBase = "w-full border rounded px-2 py-1 text-gray-900";
+
+type Issue = Prepared["rows"][number]["issues"][number];
+
+// Same colours as the table cells.
+const fieldTone = (issues: Issue[]) =>
+  issues.some((i) => i.severity === "error")
+    ? "bg-red-100 border-red-300"
+    : issues.length
+    ? "bg-yellow-100 border-yellow-300"
+    : "bg-white border-gray-300";
+
+const fieldId = (column: string) => `import-field-${column}`;
+
+// The one place a row is edited: every column of the file (built-ins, the
+// round's fields, budget lines), an image, and removing the row. Edits go
+// through the same path as before (raw cells, live revalidation); the table
+// is read-only and only points here.
 const RowEditor = ({
   row,
   columns,
@@ -18,6 +34,8 @@ const RowEditor = ({
   image,
   onAttachImage,
   onClearImage,
+  onRemove,
+  focus,
 }: {
   row: Prepared["rows"][number];
   columns: ImportColumn[];
@@ -27,22 +45,104 @@ const RowEditor = ({
   image?: RowImage;
   onAttachImage: (file: File) => void;
   onClearImage: () => void;
+  onRemove: () => void;
+  focus: FocusRequest | null;
 }) => {
-  // Same rule as PreviewTable: unique identifier and dropdown fields are
-  // edited in the table; every other field is edited here.
-  const fieldColumns = columns.filter(
-    (c) =>
-      c.target === "field" &&
-      !c.unique &&
-      !c.field.options?.length &&
-      hasColumn(c.column)
-  );
-  const msgs = (col: string) =>
-    row.issues.filter((i) => i.column === col).map((i) => i.message);
+  const issuesOf = (col: string) => row.issues.filter((i) => i.column === col);
+
+  // A pencil in the table points at one field: bring it into view and focus.
+  useEffect(() => {
+    if (!focus) return;
+    const el = document.getElementById(fieldId(focus.column));
+    if (!el) return;
+    el.scrollIntoView({ block: "center", behavior: "smooth" });
+    (el as HTMLElement).focus({ preventScroll: true });
+  }, [focus?.nonce, row.rowNumber]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const messages = (issues: Issue[]) =>
+    issues.map((i, k) => (
+      <span
+        key={k}
+        className={`text-xs block ${
+          i.severity === "error" ? "text-red-700" : "text-yellow-800"
+        }`}
+      >
+        {i.message}
+      </span>
+    ));
+
+  const control = (c: ImportColumn) => {
+    const issues = issuesOf(c.column);
+    const value = row.cells[c.column] ?? "";
+    const cls = `${inputBase} ${fieldTone(issues)}`;
+    const change = (v: string) => onEdit(row.rowNumber, c.column, v);
+    const options = c.field?.options;
+    if (options?.length) {
+      return (
+        <select
+          id={fieldId(c.column)}
+          className={cls}
+          value={value}
+          onChange={(e) => change(e.target.value)}
+        >
+          <option value="" />
+          {/* keep an invalid value visible so it can be seen and replaced */}
+          {value && !options.includes(value) && (
+            <option value={value}>{value}</option>
+          )}
+          {options.map((o) => (
+            <option key={o} value={o}>
+              {o}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    const long = c.target === "summary" || c.field?.type === "MULTILINE_TEXT";
+    return long ? (
+      <textarea
+        id={fieldId(c.column)}
+        className={cls}
+        rows={c.target === "summary" ? 3 : 6}
+        value={value}
+        onChange={(e) => change(e.target.value)}
+      />
+    ) : (
+      <input
+        id={fieldId(c.column)}
+        className={cls}
+        value={value}
+        onChange={(e) => change(e.target.value)}
+      />
+    );
+  };
+
+  const present = columns.filter((c) => hasColumn(c.column));
+  const wide = (c: ImportColumn) =>
+    c.target === "summary" || c.field?.type === "MULTILINE_TEXT";
+  const title = (c: ImportColumn) =>
+    c.target === "title"
+      ? "Title"
+      : c.target === "summary"
+      ? "Summary"
+      : c.field.name;
 
   return (
     <div className="space-y-4">
-      <div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {present.map((c) => (
+          <label
+            key={c.column}
+            className={`block text-sm ${wide(c) ? "sm:col-span-2" : ""}`}
+          >
+            <span className="font-medium">{title(c)}</span>
+            {control(c)}
+            {messages(issuesOf(c.column))}
+          </label>
+        ))}
+      </div>
+
+      <div id={fieldId("image")} tabIndex={-1} className="outline-none">
         <h4 className="font-medium text-sm">Image</h4>
         <ImageControl
           thumb={row.payload.images?.[0]?.small ?? null}
@@ -50,30 +150,7 @@ const RowEditor = ({
           onAttach={onAttachImage}
           onClear={onClearImage}
         />
-        {msgs("image").map((m) => (
-          <span key={m} className="text-xs block text-yellow-800">
-            {m}
-          </span>
-        ))}
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {fieldColumns.map((c) => (
-          <label key={c.column} className="block text-sm">
-            <span className="font-medium">{c.field.name}</span>{" "}
-            <span className="font-mono text-xs text-gray-500">{c.column}</span>
-            <textarea
-              className={inputClass}
-              rows={c.field.type === "MULTILINE_TEXT" ? 4 : 1}
-              value={row.cells[c.column] ?? ""}
-              onChange={(e) => onEdit(row.rowNumber, c.column, e.target.value)}
-            />
-            {msgs(c.column).map((m) => (
-              <span key={m} className="text-red-700 text-xs block">
-                {m}
-              </span>
-            ))}
-          </label>
-        ))}
+        {messages(issuesOf("image"))}
       </div>
 
       <div>
@@ -83,27 +160,36 @@ const RowEditor = ({
             const item = `budget-item-${n}`;
             const amount = `budget-amount-${n}`;
             if (!hasColumn(item) || !hasColumn(amount)) return null;
-            const bad = msgs(item).concat(msgs(amount));
+            const itemIssues = issuesOf(item);
+            const amountIssues = issuesOf(amount);
             return (
               <div key={n} className="contents">
-                <input
-                  className={`${inputClass} ${bad.length ? "bg-red-100" : ""}`}
-                  placeholder={`Item ${n}`}
-                  value={row.cells[item] ?? ""}
-                  onChange={(e) => onEdit(row.rowNumber, item, e.target.value)}
-                  title={bad.join("\n") || undefined}
-                />
-                <input
-                  className={`${inputClass} text-right ${
-                    bad.length ? "bg-red-100" : ""
-                  }`}
-                  placeholder="Amount"
-                  value={row.cells[amount] ?? ""}
-                  onChange={(e) =>
-                    onEdit(row.rowNumber, amount, e.target.value)
-                  }
-                  title={bad.join("\n") || undefined}
-                />
+                <div>
+                  <input
+                    id={fieldId(item)}
+                    className={`${inputBase} ${fieldTone(itemIssues)}`}
+                    placeholder={`Item ${n}`}
+                    value={row.cells[item] ?? ""}
+                    onChange={(e) =>
+                      onEdit(row.rowNumber, item, e.target.value)
+                    }
+                  />
+                  {messages(itemIssues)}
+                </div>
+                <div>
+                  <input
+                    id={fieldId(amount)}
+                    className={`${inputBase} text-right ${fieldTone(
+                      amountIssues
+                    )}`}
+                    placeholder="Amount"
+                    value={row.cells[amount] ?? ""}
+                    onChange={(e) =>
+                      onEdit(row.rowNumber, amount, e.target.value)
+                    }
+                  />
+                  {messages(amountIssues)}
+                </div>
               </div>
             );
           })}
@@ -112,6 +198,16 @@ const RowEditor = ({
           Columns matching {String(budgetColumnPattern.item.source)} /{" "}
           {String(budgetColumnPattern.amount.source)}. Blank pairs are ignored.
         </p>
+      </div>
+
+      <div className="border-t pt-3">
+        <button
+          type="button"
+          className="text-sm text-gray-700 underline hover:text-red-700"
+          onClick={onRemove}
+        >
+          Remove this row from the import
+        </button>
       </div>
     </div>
   );
