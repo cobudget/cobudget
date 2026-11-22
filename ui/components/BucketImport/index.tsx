@@ -28,6 +28,7 @@ import BucketPreview from "./BucketPreview";
 import ColumnReference from "./ColumnReference";
 import ConfirmModal from "./ConfirmModal";
 import ImportResult from "./ImportResult";
+import IssuesList from "./IssuesList";
 import PreviewTable from "./PreviewTable";
 import RowEditor from "./RowEditor";
 import type { FocusRequest } from "./RowEditor";
@@ -114,6 +115,7 @@ const BucketImport = ({ round }: { round: any }) => {
   const [selected, setSelected] = useState<number | null>(null);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [showBatch, setShowBatch] = useState(false);
+  const [onlyIssueFields, setOnlyIssueFields] = useState(true);
   const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const [ackWarnings, setAckWarnings] = useState(false);
   const [, importBuckets] = useMutation(IMPORT_BUCKETS);
@@ -312,6 +314,31 @@ const BucketImport = ({ round }: { round: any }) => {
     setSelected((s) => (s !== null && ids.has(s) ? null : s));
   };
 
+  // Open a row in the editor. `column`: the field to bring into view and focus
+  // (the pencil, the issues list); without it the row is only selected (a
+  // plain click on the table must not move the page).
+  const openRow = (rowNumber: number, column: string | null | undefined) => {
+    const row = prepared?.rows.find((r) => r.rowNumber === rowNumber);
+    let target = column ?? null;
+    if (target?.startsWith("budget-")) {
+      // the budget pencil points at the first budget line with an issue
+      target =
+        row?.issues.find((i) => i.column?.startsWith("budget-"))?.column ??
+        target;
+    }
+    setMode("edit");
+    if (selected !== rowNumber) setOnlyIssueFields(true);
+    setSelected(rowNumber);
+    if (column !== undefined) {
+      // a field without an issue is hidden while filtering: show all fields
+      const hasIssue =
+        !!target && !!row?.issues.some((i) => i.column === target);
+      if (!hasIssue) setOnlyIssueFields(false);
+      if (target)
+        setFocusReq((f) => ({ column: target, nonce: (f?.nonce ?? 0) + 1 }));
+    }
+  };
+
   const base = `/${round.group?.slug ?? "c"}/${round.slug}`;
   const selectedRow = prepared?.rows.find((r) => r.rowNumber === selected);
   const totalAsk = prepared?.rows.reduce((t, r) => t + r.totalMinor, 0) ?? 0;
@@ -486,7 +513,7 @@ const BucketImport = ({ round }: { round: any }) => {
               value={summary.errorRows}
               className="bg-red-100 text-red-900"
             />
-            <div className="flex flex-col items-start gap-2 ml-auto">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 ml-auto">
               <Button
                 variant="secondary"
                 onClick={() => setShowBatch((v) => !v)}
@@ -503,6 +530,12 @@ const BucketImport = ({ round }: { round: any }) => {
               </label>
             </div>
           </div>
+
+          <IssuesList
+            prepared={prepared}
+            columns={columns}
+            onOpen={(rowNumber, column) => openRow(rowNumber, column)}
+          />
 
           {showBatch && (
             <BatchImages
@@ -530,11 +563,8 @@ const BucketImport = ({ round }: { round: any }) => {
             hasColumn={hasColumn}
             onlyNeedsAttention={onlyNeedsAttention}
             selected={selected}
-            onEditCell={(rowNumber, column) => {
-              setSelected(rowNumber);
-              setMode("edit");
-              setFocusReq((f) => ({ column, nonce: (f?.nonce ?? 0) + 1 }));
-            }}
+            onEditCell={(rowNumber, column) => openRow(rowNumber, column)}
+            onSelectRow={(rowNumber) => openRow(rowNumber, undefined)}
             images={images}
             onAttachImage={attachImage}
             onClearImage={clearImage}
@@ -589,6 +619,8 @@ const BucketImport = ({ round }: { round: any }) => {
                     onClearImage={() => clearImage(selectedRow.rowNumber)}
                     onRemove={() => onRemove(selectedRow.rowNumber)}
                     focus={focusReq}
+                    onlyIssues={onlyIssueFields}
+                    onToggleOnlyIssues={setOnlyIssueFields}
                   />
                 ) : (
                   <BucketPreview

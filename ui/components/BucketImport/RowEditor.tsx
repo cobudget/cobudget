@@ -36,6 +36,8 @@ const RowEditor = ({
   onClearImage,
   onRemove,
   focus,
+  onlyIssues,
+  onToggleOnlyIssues,
 }: {
   row: Prepared["rows"][number];
   columns: ImportColumn[];
@@ -47,6 +49,8 @@ const RowEditor = ({
   onClearImage: () => void;
   onRemove: () => void;
   focus: FocusRequest | null;
+  onlyIssues: boolean;
+  onToggleOnlyIssues: (v: boolean) => void;
 }) => {
   const issuesOf = (col: string) => row.issues.filter((i) => i.column === col);
 
@@ -117,7 +121,23 @@ const RowEditor = ({
     );
   };
 
-  const present = columns.filter((c) => hasColumn(c.column));
+  // With issues, show just the affected fields (a long form pushes the import
+  // button far down); a toggle brings the rest back.
+  const hasIssues = row.issues.length > 0;
+  const filtering = onlyIssues && hasIssues;
+  const rowLevel = row.issues.filter((i) => !i.column);
+  const present = columns.filter(
+    (c) => hasColumn(c.column) && (!filtering || issuesOf(c.column).length > 0)
+  );
+  const budgetPairs = budgetNumbers.filter((n) => {
+    const item = `budget-item-${n}`;
+    const amount = `budget-amount-${n}`;
+    return (
+      hasColumn(item) &&
+      hasColumn(amount) &&
+      (!filtering || issuesOf(item).length + issuesOf(amount).length > 0)
+    );
+  });
   const wide = (c: ImportColumn) =>
     c.target === "summary" || c.field?.type === "MULTILINE_TEXT";
   const title = (c: ImportColumn) =>
@@ -129,6 +149,17 @@ const RowEditor = ({
 
   return (
     <div className="space-y-4">
+      {hasIssues && (
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={onlyIssues}
+            onChange={(e) => onToggleOnlyIssues(e.target.checked)}
+          />
+          Show only fields that need attention
+        </label>
+      )}
+      {messages(rowLevel)}
       <div className="grid gap-3 sm:grid-cols-2">
         {present.map((c) => (
           <label
@@ -142,63 +173,69 @@ const RowEditor = ({
         ))}
       </div>
 
-      <div id={fieldId("image")} tabIndex={-1} className="outline-none">
-        <h4 className="font-medium text-sm">Image</h4>
-        <ImageControl
-          thumb={row.payload.images?.[0]?.small ?? null}
-          image={image}
-          onAttach={onAttachImage}
-          onClear={onClearImage}
-        />
-        {messages(issuesOf("image"))}
-      </div>
-
-      <div>
-        <h4 className="font-medium text-sm mb-1">Budget lines</h4>
-        <div className="grid grid-cols-[1fr_8rem] gap-x-2 gap-y-1 text-sm">
-          {budgetNumbers.map((n) => {
-            const item = `budget-item-${n}`;
-            const amount = `budget-amount-${n}`;
-            if (!hasColumn(item) || !hasColumn(amount)) return null;
-            const itemIssues = issuesOf(item);
-            const amountIssues = issuesOf(amount);
-            return (
-              <div key={n} className="contents">
-                <div>
-                  <input
-                    id={fieldId(item)}
-                    className={`${inputBase} ${fieldTone(itemIssues)}`}
-                    placeholder={`Item ${n}`}
-                    value={row.cells[item] ?? ""}
-                    onChange={(e) =>
-                      onEdit(row.rowNumber, item, e.target.value)
-                    }
-                  />
-                  {messages(itemIssues)}
-                </div>
-                <div>
-                  <input
-                    id={fieldId(amount)}
-                    className={`${inputBase} text-right ${fieldTone(
-                      amountIssues
-                    )}`}
-                    placeholder="Amount"
-                    value={row.cells[amount] ?? ""}
-                    onChange={(e) =>
-                      onEdit(row.rowNumber, amount, e.target.value)
-                    }
-                  />
-                  {messages(amountIssues)}
-                </div>
-              </div>
-            );
-          })}
+      {(!filtering || issuesOf("image").length > 0) && (
+        <div id={fieldId("image")} tabIndex={-1} className="outline-none">
+          <h4 className="font-medium text-sm">Image</h4>
+          <ImageControl
+            thumb={row.payload.images?.[0]?.small ?? null}
+            image={image}
+            onAttach={onAttachImage}
+            onClear={onClearImage}
+          />
+          {messages(issuesOf("image"))}
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          Columns matching {String(budgetColumnPattern.item.source)} /{" "}
-          {String(budgetColumnPattern.amount.source)}. Blank pairs are ignored.
-        </p>
-      </div>
+      )}
+
+      {budgetPairs.length > 0 && (
+        <div>
+          <h4 className="font-medium text-sm mb-1">Budget lines</h4>
+          <div className="grid grid-cols-[1fr_8rem] gap-x-2 gap-y-1 text-sm">
+            {budgetPairs.map((n) => {
+              const item = `budget-item-${n}`;
+              const amount = `budget-amount-${n}`;
+              const itemIssues = issuesOf(item);
+              const amountIssues = issuesOf(amount);
+              return (
+                <div key={n} className="contents">
+                  <div>
+                    <input
+                      id={fieldId(item)}
+                      className={`${inputBase} ${fieldTone(itemIssues)}`}
+                      placeholder={`Item ${n}`}
+                      value={row.cells[item] ?? ""}
+                      onChange={(e) =>
+                        onEdit(row.rowNumber, item, e.target.value)
+                      }
+                    />
+                    {messages(itemIssues)}
+                  </div>
+                  <div>
+                    <input
+                      id={fieldId(amount)}
+                      className={`${inputBase} text-right ${fieldTone(
+                        amountIssues
+                      )}`}
+                      placeholder="Amount"
+                      value={row.cells[amount] ?? ""}
+                      onChange={(e) =>
+                        onEdit(row.rowNumber, amount, e.target.value)
+                      }
+                    />
+                    {messages(amountIssues)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {!filtering && (
+            <p className="text-xs text-gray-500 mt-1">
+              Columns matching {String(budgetColumnPattern.item.source)} /{" "}
+              {String(budgetColumnPattern.amount.source)}. Blank pairs are
+              ignored.
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="border-t pt-3">
         <button

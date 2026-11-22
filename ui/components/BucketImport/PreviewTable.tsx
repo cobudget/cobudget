@@ -28,11 +28,17 @@ const columnTitle = (c: ImportColumn) =>
 // never interrupt browsing the table.
 const pencilCss = `
 .import-pencil { opacity: 0; }
-.import-row:hover .import-pencil, .import-pencil:focus { opacity: 1; }
+.import-cell:hover .import-pencil, .import-pencil:focus { opacity: 1; }
 @media (hover: none) { .import-pencil { opacity: 1; } }
 `;
 
-const Pencil = ({ onClick, label }: { onClick: () => void; label: string }) => (
+const Pencil = ({
+  onClick,
+  label,
+}: {
+  onClick: (e: React.MouseEvent) => void;
+  label: string;
+}) => (
   <button
     type="button"
     aria-label={label}
@@ -54,6 +60,7 @@ const PreviewTable = ({
   onlyNeedsAttention,
   selected,
   onEditCell,
+  onSelectRow,
   images,
   onAttachImage,
   onClearImage,
@@ -65,6 +72,7 @@ const PreviewTable = ({
   onlyNeedsAttention: boolean;
   selected: number | null;
   onEditCell: (rowNumber: number, column: string) => void;
+  onSelectRow: (rowNumber: number) => void;
   images: RowImages;
   onAttachImage: (rowNumber: number, file: File) => void;
   onClearImage: (rowNumber: number) => void;
@@ -198,8 +206,13 @@ const PreviewTable = ({
                     ? "bg-blue-50"
                     : state
                     ? "bg-green-50"
-                    : "bg-white"
-                }`}
+                    : "bg-white hover:bg-gray-100"
+                } cursor-pointer`}
+                onClick={() => {
+                  // a text selection (copying a cell) is not a click on the row
+                  if (window.getSelection()?.toString()) return;
+                  onSelectRow(r.rowNumber);
+                }}
                 style={{
                   transition: `opacity ${FADE_MS}ms ease-out`,
                   opacity: state === "fade" ? 0 : 1,
@@ -242,7 +255,7 @@ const PreviewTable = ({
                   return (
                     <td
                       key={c.column}
-                      className={`${td} pr-8 ${tone(issues)}`}
+                      className={`${td} import-cell pr-8 ${tone(issues)}`}
                       title={
                         issues.map((i) => i.message).join("\n") || undefined
                       }
@@ -250,13 +263,16 @@ const PreviewTable = ({
                       <div className="max-w-xs truncate">{value}</div>
                       <Pencil
                         label={`Edit ${columnTitle(c)} of row ${r.rowNumber}`}
-                        onClick={() => onEditCell(r.rowNumber, c.column)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditCell(r.rowNumber, c.column);
+                        }}
                       />
                     </td>
                   );
                 })}
                 <td
-                  className={`${td} pr-8 whitespace-nowrap text-right ${tone(
+                  className={`${td} import-cell pr-8 whitespace-nowrap text-right ${tone(
                     r.issues.filter((i) => i.column?.startsWith("budget-"))
                   )}`}
                   title={
@@ -272,7 +288,10 @@ const PreviewTable = ({
                   </div>
                   <Pencil
                     label={`Edit budget of row ${r.rowNumber}`}
-                    onClick={() => onEditCell(r.rowNumber, "budget-item-1")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditCell(r.rowNumber, "budget-item-1");
+                    }}
                   />
                 </td>
               </tr>
