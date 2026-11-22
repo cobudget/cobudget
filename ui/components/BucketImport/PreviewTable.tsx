@@ -185,9 +185,9 @@ const PreviewTable = ({
                 className="px-3 py-1.5 border border-gray-300 bg-green-50 text-green-900 text-sm"
               >
                 {rows.length === 0
-                  ? `All ${hidden} rows are correct.`
+                  ? `All ${hidden} entries are correct.`
                   : `${hidden} correct ${
-                      hidden === 1 ? "row" : "rows"
+                      hidden === 1 ? "entry" : "entries"
                     } hidden.`}
               </td>
             </tr>
@@ -262,7 +262,7 @@ const PreviewTable = ({
                     >
                       <div className="max-w-xs truncate">{value}</div>
                       <Pencil
-                        label={`Edit ${columnTitle(c)} of row ${r.rowNumber}`}
+                        label={`Edit ${columnTitle(c)} of entry ${r.rowNumber}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           onEditCell(r.rowNumber, c.column);
@@ -287,7 +287,7 @@ const PreviewTable = ({
                     {r.payload.budgetItems.length} items
                   </div>
                   <Pencil
-                    label={`Edit budget of row ${r.rowNumber}`}
+                    label={`Edit budget of entry ${r.rowNumber}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onEditCell(r.rowNumber, "budget-item-1");

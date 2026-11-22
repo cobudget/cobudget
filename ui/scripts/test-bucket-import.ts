@@ -403,7 +403,7 @@ B,S,X,Other,B,1
       { headers: t.headers, rows: [t.rows[0], t.rows[1]], rowNumbers: [3, 7] },
       { fields, existingCodes: [] }
     );
-    assert.ok(q.rows[0].issues.some((i) => i.message.includes("rows 3, 7")));
+    assert.ok(q.rows[0].issues.some((i) => i.message.includes("entries 3, 7")));
   });
 
   await test("cells keep what was typed (no trimming) but payload is trimmed", async () => {

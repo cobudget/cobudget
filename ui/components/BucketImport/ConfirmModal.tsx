@@ -66,7 +66,10 @@ const ConfirmModal = ({
             If anything fails, no buckets are created.
           </li>
           {warningRows > 0 && (
-            <li>{warningRows} rows have warnings that you chose to accept.</li>
+            <li>
+              {warningRows} {warningRows === 1 ? "entry has" : "entries have"}{" "}
+              warnings that you chose to accept.
+            </li>
           )}
         </ul>
 

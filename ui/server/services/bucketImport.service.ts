@@ -23,7 +23,7 @@ export class BucketImportValidationError extends Error {
     const shown = issues
       .slice(0, 10)
       .map((i) =>
-        i.row === null ? i.message : `Row ${i.row + 1}: ${i.message}`
+        i.row === null ? i.message : `Entry ${i.row + 1}: ${i.message}`
       );
     const more = issues.length > 10 ? `\n…and ${issues.length - 10} more` : "";
     super(`Import not written:\n${shown.join("\n")}${more}`);

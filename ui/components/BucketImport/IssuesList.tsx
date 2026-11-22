@@ -83,8 +83,8 @@ const IssuesList = ({
       field: "Images",
       message:
         noImageCount === 1
-          ? "1 row has no image yet."
-          : `${noImageCount} rows have no image yet.`,
+          ? "1 entry has no image yet."
+          : `${noImageCount} entries have no image yet.`,
     });
   }
 

@@ -527,7 +527,7 @@ const BucketImport = ({ round }: { round: any }) => {
             ) : (
               <>
                 <p>
-                  Choose a CSV file. Your rows appear here, with errors and
+                  Choose a CSV file. Your entries appear here, with errors and
                   warnings, so you can fix them and assign an image to each
                   bucket before anything is created.
                 </p>
@@ -579,17 +579,21 @@ const BucketImport = ({ round }: { round: any }) => {
           {summary.existingCodeRows > 0 && (
             <div className="flex items-center gap-3 flex-wrap text-sm bg-red-100 border-l-4 border-red-500 text-red-900 rounded-r px-4 py-2">
               <span>
-                {summary.existingCodeRows} rows already exist in this round
+                {summary.existingCodeRows} entries already exist in this round
                 (their {uniqueName} is already used here).
               </span>
               <Button variant="secondary" onClick={removeExisting}>
-                Remove rows that already exist
+                Remove entries that already exist
               </Button>
             </div>
           )}
 
           <div className="flex flex-wrap gap-3 items-stretch">
-            <Count label="rows" value={summary.total} className="bg-gray-100" />
+            <Count
+              label="entries"
+              value={summary.total}
+              className="bg-gray-100"
+            />
             <Count
               label="OK"
               value={summary.okRows}
@@ -652,7 +656,7 @@ const BucketImport = ({ round }: { round: any }) => {
                     checked={onlyNeedsAttention}
                     onChange={(e) => setOnlyNeedsAttention(e.target.checked)}
                   />
-                  Show only rows that need attention
+                  Show only entries that need attention
                 </label>
               )}
             </div>
@@ -784,8 +788,9 @@ const BucketImport = ({ round }: { round: any }) => {
               </>
             ) : (
               <p className="text-sm text-gray-600">
-                Hover a cell in the table and press its pencil to edit that row
-                here, or switch to Preview to see the bucket as it will appear.
+                Hover a cell in the table and press its pencil to edit that
+                entry here, or switch to Preview to see the bucket as it will
+                appear.
               </p>
             )}
           </div>
@@ -797,10 +802,10 @@ const BucketImport = ({ round }: { round: any }) => {
             {summary.blocked ? (
               <p className="text-red-700">
                 Importing is blocked while there are errors
-                {summary.errorRows ? ` (${summary.errorRows} rows)` : ""}.
+                {summary.errorRows ? ` (${summary.errorRows} entries)` : ""}.
               </p>
             ) : summary.total === 0 ? (
-              <p className="text-gray-700">No rows left to import.</p>
+              <p className="text-gray-700">No entries left to import.</p>
             ) : (
               <>
                 {summary.warningRows > 0 && (
@@ -810,8 +815,8 @@ const BucketImport = ({ round }: { round: any }) => {
                       checked={ackWarnings}
                       onChange={(e) => setAckWarnings(e.target.checked)}
                     />
-                    I have reviewed the {summary.warningRows} rows with warnings
-                    and want to import them anyway
+                    I have reviewed the {summary.warningRows} entries with
+                    warnings and want to import them anyway
                   </label>
                 )}
                 <p className={canImport ? "text-green-800" : "text-gray-700"}>
@@ -872,7 +877,7 @@ const BucketImport = ({ round }: { round: any }) => {
             </h3>
             <p>
               Upload the file and review the table. Use a cell&apos;s pencil to
-              fix a row below it, and assign an image to each bucket.
+              fix an entry below it, and assign an image to each bucket.
             </p>
           </div>
           <div className="space-y-2">

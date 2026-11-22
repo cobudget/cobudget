@@ -51,7 +51,7 @@ export function validateImportPayload(
     err(
       null,
       "rows",
-      `Too many rows (${rows.length}); the maximum per import is ${bucketImportConfig.maxRows}.`
+      `Too many entries (${rows.length}); the maximum per import is ${bucketImportConfig.maxRows}.`
     );
   if (errors.length) return { errors, warnings };
 
@@ -77,7 +77,7 @@ export function validateImportPayload(
     else {
       const t = row.title.trim().toLowerCase();
       if (titleFirstRow.has(t))
-        warn(i, "title", `Same title as row ${label(titleFirstRow.get(t))}.`);
+        warn(i, "title", `Same title as entry ${label(titleFirstRow.get(t))}.`);
       else titleFirstRow.set(t, i);
     }
 
@@ -102,7 +102,7 @@ export function validateImportPayload(
           err(
             i,
             un,
-            `${un} "${raw.trim()}" is used on rows ${sharing
+            `${un} "${raw.trim()}" is used on entries ${sharing
               .map(label)
               .join(", ")}.`,
             "duplicateCode",

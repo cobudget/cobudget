@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 
-// A circled question mark that opens a small overlay on click and closes when
-// the pointer leaves it, on a click elsewhere, or on Escape.
+// A circled question mark that opens a small overlay on click. It stays open
+// until the same button is pressed again.
 const HelpPopover = ({
   label,
   children,
@@ -11,30 +11,9 @@ const HelpPopover = ({
   children: ReactNode;
 }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("touchstart", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("touchstart", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
 
   return (
-    <span
-      ref={ref}
-      className="relative inline-flex"
-      onMouseLeave={() => setOpen(false)}
-    >
+    <span className="relative inline-flex">
       <button
         type="button"
         aria-label={label}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { budgetColumnPattern } from "utils/fieldKey";
 import type { ImportColumn } from "utils/bucketImport/columns";
 import type { Prepared } from "utils/bucketImport/prepareImport";
@@ -55,6 +55,20 @@ const RowEditor = ({
   onAddBudgetLine: () => void;
 }) => {
   const issuesOf = (col: string) => row.issues.filter((i) => i.column === col);
+
+  // While "only fields that need attention" is on, a field that stops having
+  // an issue because it is being edited must not vanish under the cursor: the
+  // field with focus stays until focus leaves it (a budget pair counts as one
+  // field). Edits themselves are applied immediately either way.
+  const [active, setActive] = useState<string | null>(null);
+  useEffect(() => setActive(null), [row.rowNumber]);
+  const focusProps = (key: string) => ({
+    onFocus: () => setActive(key),
+    onBlur: (e: React.FocusEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+        setActive((a) => (a === key ? null : a));
+    },
+  });
 
   // A pencil in the table points at one field: bring it into view and focus.
   useEffect(() => {
@@ -129,7 +143,9 @@ const RowEditor = ({
   const filtering = onlyIssues && hasIssues;
   const rowLevel = row.issues.filter((i) => !i.column);
   const present = columns.filter(
-    (c) => hasColumn(c.column) && (!filtering || issuesOf(c.column).length > 0)
+    (c) =>
+      hasColumn(c.column) &&
+      (!filtering || issuesOf(c.column).length > 0 || active === c.column)
   );
   const budgetPairs = budgetNumbers.filter((n) => {
     const item = `budget-item-${n}`;
@@ -137,7 +153,9 @@ const RowEditor = ({
     return (
       hasColumn(item) &&
       hasColumn(amount) &&
-      (!filtering || issuesOf(item).length + issuesOf(amount).length > 0)
+      (!filtering ||
+        issuesOf(item).length + issuesOf(amount).length > 0 ||
+        active === `budget-${n}`)
     );
   });
   const wide = (c: ImportColumn) =>
@@ -180,6 +198,7 @@ const RowEditor = ({
           <label
             key={c.column}
             className={`block text-sm ${wide(c) ? "sm:col-span-2" : ""}`}
+            {...focusProps(c.column)}
           >
             <span className="font-medium">{title(c)}</span>
             {control(c)}
@@ -201,7 +220,11 @@ const RowEditor = ({
                 const itemIssues = issuesOf(item);
                 const amountIssues = issuesOf(amount);
                 return (
-                  <div key={n} className="contents">
+                  <div
+                    key={n}
+                    className="contents"
+                    {...focusProps(`budget-${n}`)}
+                  >
                     <div>
                       <input
                         id={fieldId(item)}
