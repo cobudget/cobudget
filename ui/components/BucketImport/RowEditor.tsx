@@ -60,13 +60,26 @@ const RowEditor = ({
   // an issue because it is being edited must not vanish under the cursor: the
   // field with focus stays until focus leaves it (a budget pair counts as one
   // field). Edits themselves are applied immediately either way.
+  // The same goes for the view itself: if the last issue is fixed while a
+  // field has focus, the checkbox and the field list stay as they were until
+  // focus leaves the field, then it switches.
+  const issuesNow = row.issues.length > 0;
   const [active, setActive] = useState<string | null>(null);
-  useEffect(() => setActive(null), [row.rowNumber]);
+  const [frozenHasIssues, setFrozenHasIssues] = useState<boolean | null>(null);
+  useEffect(() => {
+    setActive(null);
+    setFrozenHasIssues(null);
+  }, [row.rowNumber]);
   const focusProps = (key: string) => ({
-    onFocus: () => setActive(key),
+    onFocus: () => {
+      setActive(key);
+      setFrozenHasIssues((f) => f ?? issuesNow);
+    },
     onBlur: (e: React.FocusEvent) => {
-      if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
         setActive((a) => (a === key ? null : a));
+        setFrozenHasIssues(null);
+      }
     },
   });
 
@@ -139,7 +152,8 @@ const RowEditor = ({
 
   // With issues, show just the affected fields (a long form pushes the import
   // button far down); a toggle brings the rest back.
-  const hasIssues = row.issues.length > 0;
+  const hasIssues =
+    active !== null && frozenHasIssues !== null ? frozenHasIssues : issuesNow;
   const filtering = onlyIssues && hasIssues;
   const rowLevel = row.issues.filter((i) => !i.column);
   const present = columns.filter(
