@@ -1,6 +1,7 @@
-// Default custom fields of every new round: the platform's "Description" plus
-// the Give it a Go set (a preset: admins can edit, reorder or delete any of
-// them). Keys are explicit (short CSV column names, unique within the set and
+// Default custom fields of every new round: the Give it a Go set (it replaces
+// the platform's former single "Description" field; the July import rounds had
+// no such field either). A preset: admins can edit, reorder or delete any of
+// them. Keys are explicit (short CSV column names, unique within the set and
 // clear of the built-in import columns).
 // Reference Code is the unique identifier for the CSV import: its values must
 // be unique per round and become tags. Nothing else about it is enforced.
@@ -27,12 +28,6 @@ export const PRIORITY_AREAS = [
 ];
 
 export const roundFieldPreset: PresetField[] = [
-  {
-    name: "Description",
-    importKey: "description",
-    description: "Describe your bucket",
-    type: "MULTILINE_TEXT",
-  },
   {
     name: "Reference Code",
     importKey: "reference-code",
