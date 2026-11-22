@@ -243,7 +243,7 @@ const RowEditor = ({
           className="text-sm text-gray-700 underline hover:text-red-700"
           onClick={onRemove}
         >
-          Remove this row from the import
+          Remove this entry from the import
         </button>
       </div>
     </div>

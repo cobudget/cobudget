@@ -651,7 +651,7 @@ const BucketImport = ({ round }: { round: any }) => {
               <>
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <h3 className="font-semibold">
-                    Row {selectedRow.rowNumber}:{" "}
+                    Entry {selectedRow.rowNumber}:{" "}
                     {selectedRow.payload.title || "(no title)"}
                   </h3>
                   <div className="flex items-center gap-3">
