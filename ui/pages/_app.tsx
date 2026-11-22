@@ -149,7 +149,10 @@ export const TOP_LEVEL_QUERY = gql`
         description
         type
         limit
+        options
         isRequired
+        importKey
+        isUniqueIdentifier
         position
         createdAt
       }

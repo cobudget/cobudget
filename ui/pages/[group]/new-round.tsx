@@ -5,7 +5,7 @@ import Tooltip from "@tippyjs/react";
 import Router, { useRouter } from "next/router";
 
 import slugify from "utils/slugify";
-import currencies from "utils/currencies";
+import currencies, { defaultCurrency } from "utils/currencies";
 import TextField from "components/TextField";
 import { SelectField } from "components/SelectInput";
 import Button from "components/Button";
@@ -115,6 +115,7 @@ export default function NewRoundPage({ currentGroup }) {
           />
           <SelectField
             name="currency"
+            defaultValue={defaultCurrency}
             label={intl.formatMessage({ defaultMessage: "Currency" })}
             className="mb-2"
             inputRef={register({

@@ -3,6 +3,7 @@ import { getLanguageProgress as languageProgressPage } from "./helpers";
 
 // queries
 import {
+  bucketImportQueries,
   bucketQueries,
   budgetItemQueries,
   expensesQueries,
@@ -34,6 +35,7 @@ import {
 
 // mutations
 import {
+  bucketImportMutations,
   bucketMutations,
   groupMutations,
   roundMutations,
@@ -49,6 +51,7 @@ const resolvers = {
     ...groupQueries,
     ...roundQueries,
     ...bucketQueries,
+    ...bucketImportQueries,
     ...budgetItemQueries,
     ...superAdminQueries,
     ...expensesQueries,
@@ -61,6 +64,7 @@ const resolvers = {
     ...groupMutations,
     ...roundMutations,
     ...bucketMutations,
+    ...bucketImportMutations,
     ...superAdminMutations,
   },
 

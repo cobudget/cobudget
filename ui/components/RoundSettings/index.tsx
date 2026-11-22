@@ -5,11 +5,11 @@ import { useIntl } from "react-intl";
 
 import capitalize from "utils/capitalize";
 
-import CustomFields from "./CustomFields";
 import GeneralSettings from "./GeneralSettings";
 import Guidelines from "./Guidelines";
 import Granting from "./Granting";
 import Tags from "./Tags";
+import CustomFields from "./CustomFields";
 import BucketReview from "./BucketReview";
 import Discourse from "./Discourse";
 import Integrations from "./Integrations";

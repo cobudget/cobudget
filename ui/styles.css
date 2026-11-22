@@ -24,6 +24,16 @@ body {
   @apply overflow-x-hidden relative;
 }
 
+/* overflow-x: hidden on BOTH html and body turns body into a scroll container
+   that never scrolls, which breaks position: sticky everywhere (the import
+   page's submit bar). `clip` hides the overflow the same way without creating
+   a scroll container. */
+@supports (overflow: clip) {
+  body {
+    overflow-x: clip;
+  }
+}
+
 .page {
   @apply py-5 px-2 md:px-4 max-w-screen-xl mx-auto;
 }

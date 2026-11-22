@@ -805,7 +805,7 @@ const RoundPage = ({ currentUser }) => {
               <HeaderSkeleton />
             )}
           </div>
-          <div className={`flex flex-col justify-end items-start`}>
+          <div className={`flex flex-col justify-end items-stretch`}>
             <div className="p-3 mb-5 bg-gray-50 shadow-md rounded-md">
               <p className="font-bold my-0.5">
                 <FormattedMessage defaultMessage="Funds available" />
@@ -865,10 +865,12 @@ const RoundPage = ({ currentUser }) => {
             {round?.bucketCreationIsOpen &&
               currentUser?.currentCollMember?.isApproved &&
               currentUser?.currentCollMember?.hasJoined && (
-                <>
+                <div className="w-full self-stretch flex">
                   <Button
                     size="large"
                     color={round.color}
+                    className="flex-1"
+                    style={canEdit ? { borderRadius: "6px 0 0 6px" } : undefined}
                     onClick={() => {
                       if (round.group?.subscriptionStatus === false) {
                         const event = new CustomEvent(
@@ -886,6 +888,28 @@ const RoundPage = ({ currentUser }) => {
                     <FormattedMessage defaultMessage="New" />{" "}
                     {process.env.BUCKET_NAME_SINGULAR}
                   </Button>
+                  {canEdit && (
+                    <>
+                      {/* inset divider: only the middle of the button height */}
+                      <span
+                        aria-hidden="true"
+                        className={`flex items-center bg-${round.color}`}
+                      >
+                        <span className="block w-px h-7 bg-white opacity-50" />
+                      </span>
+                      <Link
+                        href={`/${round.group?.slug ?? "c"}/${round.slug}/import`}
+                      >
+                        <a
+                          className={`flex items-center justify-center px-5 py-3 text-xl font-medium text-white bg-${round.color} hover:bg-${round.color}-dark focus:outline-none focus:ring`}
+                          style={{ borderRadius: "0 6px 6px 0" }}
+                          data-testid="import-buckets-button"
+                        >
+                          <FormattedMessage defaultMessage="Import" />
+                        </a>
+                      </Link>
+                    </>
+                  )}
                   {newBucketModalOpen && (
                     <NewBucketModal
                       round={round}
@@ -894,7 +918,7 @@ const RoundPage = ({ currentUser }) => {
                       bucketsLimit={round.bucketsLimit}
                     />
                   )}
-                </>
+                </div>
               )}
           </div>
         </div>

@@ -54,6 +54,8 @@ const schema = gql`
   }
 
   type Query {
+    # Admin-only: round fields + used unique-identifier values for the bucket import preview
+    bucketImportContext(roundId: ID!): BucketImportContext!
     getSuperAdminSession: SuperAdminSession
     getSuperAdminSessions(limit: Int!, offset: Int!): superAdminSessionsPage
     currentUser: User
@@ -255,6 +257,12 @@ const schema = gql`
       exchangeVat: Int
     ): Bucket
     deleteBucket(bucketId: ID!): Bucket
+
+    # Admin-only bulk import (all-or-nothing, publishes no events).
+    importBuckets(
+      roundId: ID!
+      buckets: [BucketImportInput!]!
+    ): ImportBucketsResult!
 
     toggleFavoriteBucket(bucketId: ID!): Bucket
 
@@ -843,6 +851,37 @@ const schema = gql`
     large: String
   }
 
+  input BucketImportBudgetItemInput {
+    description: String!
+    "Minor units (pence)"
+    amount: Int!
+  }
+
+  input BucketImportFieldValueInput {
+    fieldId: ID!
+    value: JSON
+  }
+
+  input BucketImportInput {
+    title: String!
+    summary: String
+    fieldValues: [BucketImportFieldValueInput!]!
+    budgetItems: [BucketImportBudgetItemInput!]!
+    images: [ImageInput!]
+  }
+
+  type BucketImportContext {
+    currency: String!
+    fields: [CustomField!]!
+    "Normalised (trimmed, lower-case) values of the unique-identifier field already used in the round"
+    existingCodes: [String!]!
+  }
+
+  type ImportBucketsResult {
+    createdCount: Int!
+    buckets: [Bucket!]!
+  }
+
   input ImageInput {
     small: String
     large: String
@@ -995,6 +1034,10 @@ const schema = gql`
     limit: Int
     options: [String]
     isRequired: Boolean!
+    "CSV column name for the bucket import (stable, unique per round)"
+    importKey: String
+    "Import-only: values must be unique per round and become a tag"
+    isUniqueIdentifier: Boolean!
     position: Float!
     createdAt: Date!
   }
@@ -1006,6 +1049,9 @@ const schema = gql`
     limit: Int
     options: [String]
     isRequired: Boolean!
+    "Optional on create (generated from the name); omit on edit to keep it"
+    importKey: String
+    isUniqueIdentifier: Boolean
     createdAt: Date
   }
 

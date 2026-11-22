@@ -7,6 +7,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Modal } from "@material-ui/core";
 
 import Button from "components/Button";
+import { uploadBucketImage } from "utils/uploadBucketImage";
 
 const Images = styled.div`
   display: flex;
@@ -83,19 +84,12 @@ const EditImagesModal = ({
 
   const uploadFile = async (e) => {
     setUploadingImage(true);
-    const files = e.target.files;
-    const data = new FormData();
-    data.append("file", files[0]);
-    data.append("upload_preset", "dreams");
-
-    const res = await fetch(
-      "https://api.cloudinary.com/v1_1/dreamswtf/image/upload",
-      { method: "POST", body: data }
-    );
-    const file = await res.json();
-    const small = file.eager[1].secure_url;
-    const large = file.eager[0].secure_url;
-    setImages([...images, { small, ...(large && { large }) }]);
+    try {
+      const { small, large } = await uploadBucketImage(e.target.files[0]);
+      setImages([...images, { small, ...(large && { large }) }]);
+    } catch (err) {
+      alert(err.message);
+    }
     setUploadingImage(false);
   };
 

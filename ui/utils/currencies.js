@@ -1,4 +1,4 @@
-export default [
+const currencies = [
   "EUR",
   "USD",
   "SEK",
@@ -35,3 +35,12 @@ export default [
   "MYR",
   "RON",
 ];
+
+export default currencies;
+
+// Pre-selected currency of the "New round" forms: DEFAULT_CURRENCY from the
+// environment (e.g. GBP) when it is one of the supported codes, else EUR.
+const configured = (process.env.DEFAULT_CURRENCY || "").trim().toUpperCase();
+export const defaultCurrency = currencies.includes(configured)
+  ? configured
+  : "EUR";
