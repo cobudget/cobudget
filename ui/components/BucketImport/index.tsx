@@ -35,6 +35,7 @@ import HelpPopover from "./HelpPopover";
 import ImportResult from "./ImportResult";
 import IssuesList from "./IssuesList";
 import PreviewTable from "./PreviewTable";
+import RemoveEntryModal from "./RemoveEntryModal";
 import RowEditor from "./RowEditor";
 import SegmentedToggle from "./SegmentedToggle";
 import type { FocusRequest } from "./RowEditor";
@@ -121,6 +122,7 @@ const BucketImport = ({ round }: { round: any }) => {
   const [selected, setSelected] = useState<number | null>(null);
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [view, setView] = useState<"table" | "list">("table");
+  const [removing, setRemoving] = useState<number | null>(null);
   const [onlyIssueFields, setOnlyIssueFields] = useState(true);
   const [focusReq, setFocusReq] = useState<FocusRequest | null>(null);
   const [ackWarnings, setAckWarnings] = useState(false);
@@ -194,6 +196,10 @@ const BucketImport = ({ round }: { round: any }) => {
     };
   }, [dirty, router]);
 
+  // the instance's own word for a bucket (e.g. "proposal")
+  const bucketTerm = (
+    process.env.BUCKET_NAME_SINGULAR || "bucket"
+  ).toLowerCase();
   const uniqueName =
     ctx?.fields.find((f) => f.isUniqueIdentifier)?.name ?? "identifier";
   const columns = useMemo(() => buildColumns(ctx?.fields ?? []), [ctx]);
@@ -629,23 +635,34 @@ const BucketImport = ({ round }: { round: any }) => {
                   Batch image upload
                 </Button>
                 <HelpPopover label="How the batch image upload works">
-                  <p>Choose many images at once.</p>
-                  <p>
-                    Each image is matched to an entry by its file name, without
-                    the extension: first the {uniqueName} (for example{" "}
-                    <span className="font-mono">GF01.jpg</span>), then the title
-                    (<span className="font-mono">community-garden.png</span>
-                    ), then the entry number (
-                    <span className="font-mono">7.jpg</span>).
+                  <p className="font-medium">
+                    Choose many images at once. Name each file after:
                   </p>
+                  <ul className="space-y-1.5">
+                    <li>
+                      <span className="font-medium">{uniqueName}</span>
+                      <br />
+                      <span className="font-mono text-xs">GF01.jpg</span> → the
+                      entry with {uniqueName} GF01
+                    </li>
+                    <li>
+                      <span className="font-medium">{bucketTerm} title</span>
+                      <br />
+                      <span className="font-mono text-xs">
+                        hydrology-springs.jpg
+                      </span>{" "}
+                      → &quot;Hydrology Springs&quot;
+                    </li>
+                    <li>
+                      <span className="font-medium">Entry order</span>
+                      <br />
+                      <span className="font-mono text-xs">1.jpg</span> → Entry
+                      #1
+                    </li>
+                  </ul>
                   <p>
-                    Images that cannot be matched are placed, in order, on the
-                    entries that still have no image. Any extra images are not
-                    used.
-                  </p>
-                  <p>
-                    Images stay on your computer until you submit the import.
-                    You can change any entry&apos;s image later in its editor.
+                    Other images fill the entries still without one, in order.
+                    Images are uploaded when you submit.
                   </p>
                 </HelpPopover>
               </span>
@@ -713,6 +730,7 @@ const BucketImport = ({ round }: { round: any }) => {
               selected={selected}
               onEditCell={(rowNumber, column) => openRow(rowNumber, column)}
               onSelectRow={(rowNumber) => openRow(rowNumber, undefined)}
+              onRemoveRow={setRemoving}
               images={images}
               onAttachImage={attachImage}
               onClearImage={clearImage}
@@ -772,7 +790,7 @@ const BucketImport = ({ round }: { round: any }) => {
                     image={images[selectedRow.rowNumber]}
                     onAttachImage={(f) => attachImage(selectedRow.rowNumber, f)}
                     onClearImage={() => clearImage(selectedRow.rowNumber)}
-                    onRemove={() => onRemove(selectedRow.rowNumber)}
+                    onRemove={() => setRemoving(selectedRow.rowNumber)}
                     focus={focusReq}
                     onlyIssues={onlyIssueFields}
                     onToggleOnlyIssues={setOnlyIssueFields}
@@ -889,6 +907,21 @@ const BucketImport = ({ round }: { round: any }) => {
           </div>
         </div>
       </div>
+
+      {removing !== null && (
+        <RemoveEntryModal
+          rowNumber={removing}
+          title={
+            prepared?.rows.find((r) => r.rowNumber === removing)?.payload
+              .title ?? ""
+          }
+          onCancel={() => setRemoving(null)}
+          onConfirm={() => {
+            onRemove(removing);
+            setRemoving(null);
+          }}
+        />
+      )}
 
       {confirmOpen && summary && ctx && (
         <ConfirmModal

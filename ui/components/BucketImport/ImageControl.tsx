@@ -18,10 +18,7 @@ const ImageControl = ({
   const ref = useRef<HTMLInputElement>(null);
   const uploading = image?.status === "uploading";
   return (
-    <div
-      className="flex items-center gap-2 mt-1"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <div className="flex items-center gap-2 mt-1" style={{ maxWidth: "13rem" }}>
       {thumb && (
         <img
           src={thumb}
@@ -29,12 +26,13 @@ const ImageControl = ({
           className="h-10 w-10 object-cover rounded flex-none"
         />
       )}
-      <div className="text-xs space-y-0.5">
+      <div className="text-xs space-y-0.5 min-w-0">
         <input
           ref={ref}
           type="file"
           accept="image/*"
           className="hidden"
+          onClick={(e) => e.stopPropagation()}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) onAttach(file);
@@ -46,7 +44,10 @@ const ImageControl = ({
             type="button"
             className="underline text-gray-700 disabled:opacity-50"
             disabled={uploading}
-            onClick={() => ref.current?.click()}
+            onClick={(e) => {
+              e.stopPropagation();
+              ref.current?.click();
+            }}
           >
             {image ? "Replace" : "+ Add image"}
           </button>
@@ -54,7 +55,10 @@ const ImageControl = ({
             <button
               type="button"
               className="underline text-gray-700"
-              onClick={onClear}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
             >
               Clear
             </button>
@@ -63,14 +67,15 @@ const ImageControl = ({
         {uploading && <div className="text-gray-600">Uploading…</div>}
         {image && !uploading && (
           <div
-            className="text-gray-600 truncate max-w-40"
+            className="text-gray-600 truncate"
+            style={{ maxWidth: "9rem" }}
             title={image.fileName}
           >
             {image.fileName}
           </div>
         )}
         {image?.status === "error" && (
-          <div className="text-red-700">
+          <div className="text-red-700 break-words">
             Upload failed: {image.error}. It is retried when you submit.
           </div>
         )}

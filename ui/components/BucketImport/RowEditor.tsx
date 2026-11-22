@@ -278,21 +278,32 @@ const RowEditor = ({
             )}
           </div>
         )}
-        <button
-          type="button"
-          className="mt-2 text-sm underline text-gray-700 hover:text-gray-900"
-          onClick={onAddBudgetLine}
-        >
-          + Add budget line
-        </button>
+        {(!filtering || budgetPairs.length > 0) && (
+          <button
+            type="button"
+            className="mt-2 text-sm underline text-gray-700 hover:text-gray-900"
+            onClick={onAddBudgetLine}
+          >
+            + Add budget line
+          </button>
+        )}
       </div>
 
-      <div className="border-t pt-3">
+      <div className="border-t pt-3 flex justify-end">
         <button
           type="button"
-          className="text-sm text-gray-700 underline hover:text-red-700"
+          className="flex items-center gap-1.5 text-sm font-medium text-red-700 hover:text-red-900 hover:underline focus:outline-none focus:ring rounded"
           onClick={onRemove}
         >
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+          </svg>
           Remove this entry from the import
         </button>
       </div>

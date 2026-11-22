@@ -61,6 +61,7 @@ const PreviewTable = ({
   selected,
   onEditCell,
   onSelectRow,
+  onRemoveRow,
   images,
   onAttachImage,
   onClearImage,
@@ -73,6 +74,7 @@ const PreviewTable = ({
   selected: number | null;
   onEditCell: (rowNumber: number, column: string) => void;
   onSelectRow: (rowNumber: number) => void;
+  onRemoveRow: (rowNumber: number) => void;
   images: RowImages;
   onAttachImage: (rowNumber: number, file: File) => void;
   onClearImage: (rowNumber: number) => void;
@@ -154,7 +156,7 @@ const PreviewTable = ({
       ).length
     : 0;
   const shownColumns = columns.filter((c) => hasColumn(c.column));
-  const colCount = shownColumns.length + 4; // # status image budget
+  const colCount = shownColumns.length + 5; // # trash status image budget
 
   const th =
     "px-2 py-1.5 border border-gray-300 bg-gray-100 font-medium text-left whitespace-nowrap";
@@ -167,6 +169,9 @@ const PreviewTable = ({
         <thead className="sticky top-0 z-10">
           <tr>
             <th className={`${th} text-center`}>#</th>
+            <th className={th}>
+              <span className="sr-only">Remove</span>
+            </th>
             <th className={th}>Status</th>
             <th className={th}>Image</th>
             {shownColumns.map((c) => (
@@ -220,6 +225,28 @@ const PreviewTable = ({
               >
                 <td className={`${td} text-center text-gray-600 bg-gray-50`}>
                   {r.rowNumber}
+                </td>
+                <td className={`${td} text-center`}>
+                  <button
+                    type="button"
+                    aria-label={`Remove entry ${r.rowNumber}`}
+                    title={`Remove entry ${r.rowNumber}`}
+                    className="text-gray-500 hover:text-red-700 focus:outline-none focus:ring rounded"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveRow(r.rowNumber);
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                    </svg>
+                  </button>
                 </td>
                 <td
                   className={`${td} whitespace-nowrap font-medium ${
